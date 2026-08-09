@@ -54,14 +54,29 @@ venv/Scripts/python -m http.server 4321 --directory oreum-site
 
 반영까지 보통 10분 ~ 몇 시간 걸립니다.
 
-### 게임도 같은 도메인으로 (선택)
+## 현재 연결된 주소 (2026-08-10 완료)
 
-한 도메인의 뿌리 주소(`oreumgames.com`)는 저장소 하나만 쓸 수 있습니다.
-게임은 하위 주소로 붙이면 됩니다.
+| 주소 | 무엇 | 저장소 |
+|------|------|--------|
+| `https://oreumgames.com` | 이 홈페이지 | `oreum-site` |
+| `https://www.oreumgames.com` | 같은 홈페이지 | `oreum-site` |
+| `https://play.oreumgames.com` | 루루냥의 제주살이 | `lulu-farm` |
 
-1. DNS에 `CNAME` / 이름 `play` / 값 `cyjcyj27-a11y.github.io.` 추가
-2. `lulu-farm` 저장소의 Settings → Pages → Custom domain 에 `play.oreumgames.com` 입력
-3. 그 뒤 `index.html` 안의 게임 링크 두 곳을 `https://play.oreumgames.com/` 으로 바꾸기
+후이즈 DNS에 들어가 있는 것:
+
+- A 레코드 4개 (호스트명 비움) → `185.199.108~111.153`
+- CNAME `www` → `cyjcyj27-a11y.github.io.`
+- CNAME `play` → `cyjcyj27-a11y.github.io.`
+
+**주의** — 깃허브 Pages 설정의 Custom domain 칸을 비우거나 Remove 하면
+저장소의 `CNAME` 파일이 지워지면서 도메인 연결이 끊깁니다.
+끊겼을 때는 그 칸에 도메인을 다시 넣고 Save 하면 복구됩니다.
+
+## 구글플레이 제출용 주소
+
+- 개인정보처리방침 URL : `https://oreumgames.com/privacy.html`
+- 지원 URL : `https://oreumgames.com/support.html`
+- 웹사이트 : `https://oreumgames.com`
 
 ## 내용 고칠 때
 
