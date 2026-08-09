@@ -160,15 +160,11 @@ h1, h2, h3 { line-height: 1.3; letter-spacing: -.02em; margin: 0; }
   padding: 4px 12px; border-radius: 999px; font-size: 13px; font-weight: 600;
 }
 
-/* 게임 설명 */
-.game-about { margin: 24px 0 0; }
-.game-about > p { margin: 0 0 16px; color: var(--ink-2); }
-.about-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 0; padding: 0; list-style: none; }
-.about-grid li {
-  background: var(--deep); border: 1px solid var(--line);
-  border-radius: 12px; padding: 14px 16px; font-size: 15px; color: var(--ink-2);
+/* 게임 시작 화면 문구 */
+.game-tagline {
+  margin: 24px 0 0; font-size: 17px; line-height: 1.7;
+  color: var(--ink-2); text-align: center;
 }
-.about-grid b { display: block; color: var(--ink); font-size: 15px; margin-bottom: 2px; }
 
 .story {
   margin: 24px 0 0; padding: 22px 26px;
@@ -179,7 +175,8 @@ h1, h2, h3 { line-height: 1.3; letter-spacing: -.02em; margin: 0; }
 .story p:last-child { margin-bottom: 0; }
 .story-punch { font-weight: 700; font-size: 18px; color: var(--green-lit); }
 
-.shots { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin: 26px 0 0; }
+.shots { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin: 22px 0 0; }
+.shots-5 { grid-template-columns: repeat(5, 1fr); }
 .shots figure { margin: 0; }
 .shots img {
   width: 100%; aspect-ratio: 4 / 3; object-fit: cover;
@@ -298,8 +295,7 @@ h1, h2, h3 { line-height: 1.3; letter-spacing: -.02em; margin: 0; }
   .moon { top: 30px; left: auto; right: 7%; margin-left: 0; width: 54px; height: 54px; }
   .studio { grid-template-columns: 1fr; }
   .studio-mark { display: none; }
-  .shots { grid-template-columns: repeat(2, 1fr); }
-  .about-grid { grid-template-columns: 1fr; }
+  .shots, .shots-5 { grid-template-columns: repeat(2, 1fr); }
   .section { padding: 66px 0; }
   .game { padding: 22px; }
   .teaser { padding: 40px 22px; }
