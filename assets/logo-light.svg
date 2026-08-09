@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="20 12 176 128" role="img" aria-label="오름게임즈 로고">
+  <title>오름게임즈</title>
+
+  <!-- 열린 원 -->
+  <path d="M51.5,106.5 A56,56 0 1,1 148.5,106.5"
+        fill="none" stroke="#7fc073" stroke-width="6.5" stroke-linecap="round"/>
+
+  <!-- 해 -->
+  <circle cx="126" cy="52" r="13.5" fill="#f2953b"/>
+
+  <!-- 고양이 -->
+  <g fill="#5f9d55">
+    <path d="M140,59 L158.5,78 L144,87 Z"/>
+    <path d="M182,59 L163.5,78 L178,87 Z"/>
+    <ellipse cx="161" cy="90" rx="21" ry="19"/>
+  </g>
+  <g stroke="#5f9d55" stroke-width="1.8" stroke-linecap="round" fill="none">
+    <path d="M180,86 l12,-4"/>
+    <path d="M180,94 l12,2"/>
+  </g>
+
+  <!-- 오름 -->
+  <path d="M32,126 C44,112 62,86 76,78 L116,78 C130,86 144,110 150,126 Z" fill="#5f9d55"/>
+  <ellipse cx="97" cy="78" rx="19" ry="6" fill="#2f6b3f"/>
+
+  <!-- 아래 잎 -->
+  <path d="M26,121 C70,110 146,107 180,116 C144,132 64,135 26,121 Z" fill="#5f9d55"/>
+
+  <!-- 능선 곡선 -->
+  <path d="M52,113 C76,102 108,99 134,104"
+        fill="none" stroke="#e8f3e4" stroke-width="4" stroke-linecap="round"/>
+</svg>
