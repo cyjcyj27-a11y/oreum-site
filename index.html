@@ -248,16 +248,24 @@
   </div>
 </footer>
 <script>
-// 푸터에 누적 방문자 수 표시 — GoatCounter 설정에서 공개 카운터를 켜야 나타납니다
-fetch('https://oreumgames.goatcounter.com/counter/TOTAL.json')
-  .then(function (r) { return r.ok ? r.json() : null; })
-  .then(function (d) {
-    if (!d) return;
+// 푸터에 오늘·전체 방문자 수 표시 — GoatCounter 설정에서 공개 카운터를 켜야 나타납니다
+(function () {
+  var base = 'https://oreumgames.goatcounter.com/counter/TOTAL.json';
+  function get(u) {
+    return fetch(u).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
+  }
+  var d = new Date();
+  var today = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  Promise.all([get(base), get(base + '?start=' + today)]).then(function (res) {
+    var total = res[0], todays = res[1];
+    if (!total) return;
+    var text = '전체 ' + (total.count_unique || total.count) + '명이 다녀갔습니다';
+    if (todays) text = '오늘 ' + (todays.count_unique || todays.count) + '명 · ' + text;
     var el = document.getElementById('visitCount');
-    el.textContent = '지금까지 ' + (d.count_unique || d.count) + '명이 다녀갔습니다';
+    el.textContent = text;
     el.hidden = false;
-  })
-  .catch(function () {});
+  });
+})();
 </script>
 
 <!-- 방문자 수 집계 — 쿠키 없이 익명으로만 셉니다 (goatcounter.com) -->

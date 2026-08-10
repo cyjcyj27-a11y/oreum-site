@@ -247,16 +247,24 @@
   </div>
 </footer>
 <script>
-// Show total visitor count in the footer — appears once the public counter is enabled in GoatCounter settings
-fetch('https://oreumgames.goatcounter.com/counter/TOTAL.json')
-  .then(function (r) { return r.ok ? r.json() : null; })
-  .then(function (d) {
-    if (!d) return;
+// Show today's and total visitor counts in the footer — appears once the public counter is enabled in GoatCounter settings
+(function () {
+  var base = 'https://oreumgames.goatcounter.com/counter/TOTAL.json';
+  function get(u) {
+    return fetch(u).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
+  }
+  var d = new Date();
+  var today = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  Promise.all([get(base), get(base + '?start=' + today)]).then(function (res) {
+    var total = res[0], todays = res[1];
+    if (!total) return;
+    var text = (total.count_unique || total.count) + ' visitors in total';
+    if (todays) text = (todays.count_unique || todays.count) + ' today · ' + text;
     var el = document.getElementById('visitCount');
-    el.textContent = (d.count_unique || d.count) + ' visitors so far';
+    el.textContent = text;
     el.hidden = false;
-  })
-  .catch(function () {});
+  });
+})();
 </script>
 
 <!-- Anonymous, cookie-free visitor counting (goatcounter.com) -->
