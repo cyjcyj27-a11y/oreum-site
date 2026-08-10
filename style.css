@@ -343,6 +343,8 @@ h1, h2, h3 { line-height: 1.3; letter-spacing: -.02em; margin: 0; }
   .section { padding: 66px 0; }
   .game { padding: 22px; }
   .teaser { padding: 40px 22px; }
+  /* 좁은 폰에서 영문 제목이 두 줄로 쪼개지지 않게 자간을 좁힙니다 */
+  .teaser-en { font-size: 12px; letter-spacing: .16em; text-indent: .16em; }
 }
 
 @media (max-width: 720px) {
