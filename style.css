@@ -222,11 +222,24 @@ h1, h2, h3 { line-height: 1.3; letter-spacing: -.02em; margin: 0; }
   content: ""; position: absolute; inset: -1px -1px auto -1px; height: 2px;
   background: linear-gradient(90deg, transparent, var(--cold), transparent);
 }
-.teaser-tag { margin: 0 0 14px; font-size: 12px; font-weight: 700; letter-spacing: .34em; color: var(--cold-ink); }
-.teaser h3 { font-size: clamp(22px, 3vw, 30px); font-weight: 800; color: var(--ink); }
-.teaser .teaser-sub { margin-top: 8px; font-size: 14px; color: var(--cold-ink); letter-spacing: .02em; }
-.teaser p { margin: 16px auto 0; max-width: 32em; color: var(--ink-2); }
-.teaser .whisper { color: var(--muted); font-size: 15px; }
+/* 차기작만 검은 밤 — 아이보리 섬 이야기와 대비되는 디스토피아 */
+#next.section-alt { background: #07090c; border-block-color: #171d24; }
+.teaser {
+  background:
+    radial-gradient(700px 240px at 50% 0%, rgba(111,183,196,.14), transparent 70%),
+    #10141b;
+  border-color: #232b35;
+  box-shadow: 0 1px 0 rgba(255,255,255,.04) inset, 0 20px 50px rgba(0,0,0,.45);
+}
+.teaser-tag { margin: 0 0 14px; font-size: 12px; font-weight: 700; letter-spacing: .34em; color: #6fb7c4; }
+.teaser h3 { font-size: clamp(22px, 3vw, 30px); font-weight: 800; color: #f3f7fa; }
+.teaser-en {
+  margin: 9px 0 0; font-size: 13px; font-weight: 700;
+  letter-spacing: .3em; color: #6fb7c4; text-indent: .3em;
+}
+.teaser .teaser-sub { margin-top: 6px; font-size: 14px; color: #8fa6b2; letter-spacing: .02em; }
+.teaser p { margin: 16px auto 0; max-width: 32em; color: #b7c4ce; }
+.teaser .whisper { color: #77848f; font-size: 15px; }
 .pulse {
   display: inline-block; width: 8px; height: 8px; border-radius: 50%;
   background: var(--cold); margin-left: 8px; vertical-align: middle;
