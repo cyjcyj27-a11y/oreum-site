@@ -243,9 +243,22 @@
       <a href="privacy.html">개인정보처리방침</a>
       <a href="mailto:cyjcyj27@gmail.com">이메일</a>
     </nav>
+    <p class="copy" id="visitCount" hidden></p>
     <p class="copy">© 2026 오름게임즈. All rights reserved.</p>
   </div>
 </footer>
+<script>
+// 푸터에 누적 방문자 수 표시 — GoatCounter 설정에서 공개 카운터를 켜야 나타납니다
+fetch('https://oreumgames.goatcounter.com/counter/TOTAL.json')
+  .then(function (r) { return r.ok ? r.json() : null; })
+  .then(function (d) {
+    if (!d) return;
+    var el = document.getElementById('visitCount');
+    el.textContent = '지금까지 ' + (d.count_unique || d.count) + '명이 다녀갔습니다';
+    el.hidden = false;
+  })
+  .catch(function () {});
+</script>
 
 <!-- 방문자 수 집계 — 쿠키 없이 익명으로만 셉니다 (goatcounter.com) -->
 <script data-goatcounter="https://oreumgames.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>

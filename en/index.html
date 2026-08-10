@@ -242,9 +242,22 @@
       <a href="privacy.html">Privacy Policy</a>
       <a href="mailto:cyjcyj27@gmail.com">Email</a>
     </nav>
+    <p class="copy" id="visitCount" hidden></p>
     <p class="copy">© 2026 Oreum Games. All rights reserved.</p>
   </div>
 </footer>
+<script>
+// Show total visitor count in the footer — appears once the public counter is enabled in GoatCounter settings
+fetch('https://oreumgames.goatcounter.com/counter/TOTAL.json')
+  .then(function (r) { return r.ok ? r.json() : null; })
+  .then(function (d) {
+    if (!d) return;
+    var el = document.getElementById('visitCount');
+    el.textContent = (d.count_unique || d.count) + ' visitors so far';
+    el.hidden = false;
+  })
+  .catch(function () {});
+</script>
 
 <!-- Anonymous, cookie-free visitor counting (goatcounter.com) -->
 <script data-goatcounter="https://oreumgames.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
