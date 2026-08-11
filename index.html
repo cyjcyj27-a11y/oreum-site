@@ -276,24 +276,26 @@
   </div>
 </footer>
 <script>
-// 푸터에 오늘·전체 방문자 수 표시 — GoatCounter 설정에서 공개 카운터를 켜야 나타납니다
+// 푸터에 오늘·전체 방문자 수 표시 — Abacus 카운터 (실시간, 응답에 현재 값이 바로 옵니다)
+// 같은 브라우저는 하루에 한 번만 세고(localStorage), 그 뒤로는 값만 읽어옵니다.
 (function () {
-  var base = 'https://oreumgames.goatcounter.com/counter/TOTAL.json';
+  var base = 'https://abacus.jasoncameron.dev/';
   function get(u) {
     return fetch(u).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
   }
-  // 이 API는 끝 날짜를 "그날 미포함"으로 셉니다. 그래서 끝을 내일로 줘야 오늘까지 다 잡힙니다.
   function ymd(d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
   var today = ymd(new Date());
-  var tomorrow = ymd(new Date(Date.now() + 86400000));
+  var counted = false;
+  try { counted = localStorage.getItem('oreum_counted') === today; } catch (e) {}
+  var act = counted ? 'get' : 'hit';
   Promise.all([
-    get(base + '?start=2026-01-01&end=' + tomorrow),
-    get(base + '?start=' + today + '&end=' + tomorrow)
+    get(base + act + '/oreumgames/total'),
+    get(base + act + '/oreumgames/day_' + today)
   ]).then(function (res) {
+    if (!counted) { try { localStorage.setItem('oreum_counted', today); } catch (e) {} }
     var total = res[0], todays = res[1];
     if (!total) return;
-    var text = '전체 방문자수 ' + total.count;
-    if (todays) text = '오늘 방문자수 ' + todays.count + ' ' + text;
+    var text = '오늘 방문자수 ' + (todays ? todays.value : 0) + ' 전체 방문자수 ' + total.value;
     var el = document.getElementById('visitCount');
     el.textContent = text;
     el.hidden = false;

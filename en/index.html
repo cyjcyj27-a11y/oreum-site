@@ -275,23 +275,25 @@
 </footer>
 <script>
 // Show today's and total visitor counts in the footer — appears once the public counter is enabled in GoatCounter settings
+// Real-time counter via Abacus — each browser is counted once per day (localStorage), then read-only
 (function () {
-  var base = 'https://oreumgames.goatcounter.com/counter/TOTAL.json';
+  var base = 'https://abacus.jasoncameron.dev/';
   function get(u) {
     return fetch(u).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
   }
-  // The API treats the end date as exclusive, so pass tomorrow to include today
   function ymd(d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
   var today = ymd(new Date());
-  var tomorrow = ymd(new Date(Date.now() + 86400000));
+  var counted = false;
+  try { counted = localStorage.getItem('oreum_counted') === today; } catch (e) {}
+  var act = counted ? 'get' : 'hit';
   Promise.all([
-    get(base + '?start=2026-01-01&end=' + tomorrow),
-    get(base + '?start=' + today + '&end=' + tomorrow)
+    get(base + act + '/oreumgames/total'),
+    get(base + act + '/oreumgames/day_' + today)
   ]).then(function (res) {
+    if (!counted) { try { localStorage.setItem('oreum_counted', today); } catch (e) {} }
     var total = res[0], todays = res[1];
     if (!total) return;
-    var text = total.count + ' visitors in total';
-    if (todays) text = todays.count + ' visitors today · ' + text;
+    var text = (todays ? todays.value : 0) + ' visitors today · ' + total.value + ' in total';
     var el = document.getElementById('visitCount');
     el.textContent = text;
     el.hidden = false;
