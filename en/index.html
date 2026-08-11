@@ -290,8 +290,8 @@
   ]).then(function (res) {
     var total = res[0], todays = res[1];
     if (!total) return;
-    var text = total.count + ' views in total';
-    if (todays) text = todays.count + ' views today · ' + text;
+    var text = total.count + ' visitors in total';
+    if (todays) text = todays.count + ' visitors today · ' + text;
     var el = document.getElementById('visitCount');
     el.textContent = text;
     el.hidden = false;

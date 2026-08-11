@@ -292,8 +292,8 @@
   ]).then(function (res) {
     var total = res[0], todays = res[1];
     if (!total) return;
-    var text = '전체 ' + total.count + '회 조회';
-    if (todays) text = '오늘 ' + todays.count + '회 · ' + text;
+    var text = '전체 방문자수 ' + total.count;
+    if (todays) text = '오늘 방문자수 ' + todays.count + ' ' + text;
     var el = document.getElementById('visitCount');
     el.textContent = text;
     el.hidden = false;
