@@ -80,6 +80,12 @@
   </div>
 
   <div class="card">
+    <h2>🌏 국가별 <span class="em">영문판이 어디서 통하나</span></h2>
+    <div id="countries"><div class="loading">불러오는 중…</div></div>
+    <div class="note">방문자의 시간대로 추정합니다. 대략의 나라 비중을 봅니다.</div>
+  </div>
+
+  <div class="card">
     <h2>④ 체류 · 몰입 <span class="em">시작한 사람 중 얼마나 오래 붙잡혔나</span></h2>
     <div id="dwell"><div class="loading">불러오는 중…</div></div>
     <div class="note">실제로 게임을 시작한 사람 기준입니다. 오래 남을수록 게임이 재밌다는 뜻이에요.</div>
@@ -103,10 +109,17 @@
       .catch(function () { return 0; });
   }
   var today = ymd(new Date());
+  var ccDefs = [['🇰🇷 한국', 'KR'], ['🇺🇸 미국', 'US'], ['🇯🇵 일본', 'JP'], ['🇹🇼 대만', 'TW'],
+                ['🇨🇳 중국', 'CN'], ['🇭🇰 홍콩', 'HK'], ['🇸🇬 싱가포르', 'SG'], ['🇲🇾 말레이시아', 'MY'],
+                ['🇹🇭 태국', 'TH'], ['🇵🇭 필리핀', 'PH'], ['🇻🇳 베트남', 'VN'], ['🇮🇩 인도네시아', 'ID'],
+                ['🇮🇳 인도', 'IN'], ['🇬🇧 영국', 'GB'], ['🇩🇪 독일', 'DE'], ['🇫🇷 프랑스', 'FR'],
+                ['🇪🇸 스페인', 'ES'], ['🇮🇹 이탈리아', 'IT'], ['🇨🇦 캐나다', 'CA'], ['🇦🇺 호주', 'AU'],
+                ['🇲🇽 멕시코', 'MX'], ['🇧🇷 브라질', 'BR'], ['🇪🇺 기타 유럽', 'EU'], ['🌐 기타', 'ETC']];
   var keys = ['total', 'returning', 'game_open', 'day_' + today,
               'src_tiktok', 'src_instagram', 'src_threads', 'src_x', 'src_kakao',
               'src_youtube', 'src_facebook', 'src_search', 'src_direct', 'src_other',
-              'play_1m', 'play_3m', 'play_10m'];
+              'play_1m', 'play_3m', 'play_10m']
+             .concat(ccDefs.map(function (c) { return 'cc_' + c[1]; }));
   // 한꺼번에 많이 부르면 속도 제한에 걸려 실제 값이 0으로 오기도 해서, 3개씩 나눠 부릅니다
   function fetchChunked(list, size) {
     var out = [], i = 0;
@@ -164,6 +177,18 @@
              '<div class="track"><div class="fill" style="width:' + Math.max(pct, n ? 4 : 0) + '%"></div></div>' +
              '<div class="val">' + fmt(n) + '명 · ' + pct + '%</div></div>';
     }).join('');
+
+    // 🌏 국가별 — 방문 있는 나라만 큰 순서로
+    var ccTotal = ccDefs.reduce(function (a, c) { return a + d['cc_' + c[1]]; }, 0) || 1;
+    var ccShown = ccDefs.filter(function (c) { return d['cc_' + c[1]] > 0; }).sort(function (a, b) { return d['cc_' + b[1]] - d['cc_' + a[1]]; });
+    document.getElementById('countries').innerHTML = ccShown.length
+      ? ccShown.map(function (c) {
+          var n = d['cc_' + c[1]], pct = Math.round(n / ccTotal * 100);
+          return '<div class="bar"><div class="name" style="width:112px">' + c[0] + '</div>' +
+                 '<div class="track"><div class="fill" style="width:' + Math.max(pct, n ? 4 : 0) + '%;background:var(--cold)"></div></div>' +
+                 '<div class="val">' + fmt(n) + '명 · ' + pct + '%</div></div>';
+        }).join('')
+      : '<div class="note">아직 국가 기록이 없어요. 방문이 쌓이면 나라별로 나뉩니다.</div>';
 
     // ④ 체류 · 몰입 (게임을 연 사람 기준)
     var denom = d.game_open || 1;

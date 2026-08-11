@@ -325,6 +325,32 @@
   else if (r.indexOf('oreumgames.com') > -1) src = 'direct';
   else src = 'other';
   onceToday('oreum_src', 'src_' + src);
+
+  // ── 국가별 (영문판 지원) — 방문자의 시간대로 나라를 추정합니다. IP 수집 없이 즉시, 하루 1회. ──
+  var tz = ''; try { tz = (Intl.DateTimeFormat().resolvedOptions().timeZone) || ''; } catch (e) {}
+  var tzMap = {
+    'Asia/Seoul': 'KR', 'Asia/Pyongyang': 'KR', 'Asia/Tokyo': 'JP',
+    'Asia/Shanghai': 'CN', 'Asia/Urumqi': 'CN', 'Asia/Chongqing': 'CN', 'Asia/Harbin': 'CN',
+    'Asia/Taipei': 'TW', 'Asia/Hong_Kong': 'HK', 'Asia/Macau': 'HK',
+    'Asia/Singapore': 'SG', 'Asia/Kuala_Lumpur': 'MY', 'Asia/Kuching': 'MY',
+    'Asia/Bangkok': 'TH', 'Asia/Manila': 'PH', 'Asia/Ho_Chi_Minh': 'VN', 'Asia/Saigon': 'VN',
+    'Asia/Jakarta': 'ID', 'Asia/Makassar': 'ID', 'Asia/Pontianak': 'ID', 'Asia/Jayapura': 'ID',
+    'Asia/Kolkata': 'IN', 'Asia/Calcutta': 'IN',
+    'Europe/London': 'GB', 'Europe/Dublin': 'GB', 'Europe/Paris': 'FR',
+    'Europe/Berlin': 'DE', 'Europe/Madrid': 'ES', 'Europe/Rome': 'IT',
+    'Australia/Sydney': 'AU', 'Australia/Melbourne': 'AU', 'Australia/Brisbane': 'AU', 'Australia/Perth': 'AU', 'Australia/Adelaide': 'AU',
+    'America/Toronto': 'CA', 'America/Vancouver': 'CA', 'America/Edmonton': 'CA', 'America/Winnipeg': 'CA', 'America/Halifax': 'CA',
+    'America/Mexico_City': 'MX', 'America/Monterrey': 'MX', 'America/Cancun': 'MX', 'America/Tijuana': 'MX',
+    'America/Sao_Paulo': 'BR', 'America/Bahia': 'BR', 'America/Fortaleza': 'BR'
+  };
+  var cc = tzMap[tz];
+  if (!cc) {
+    if (tz.indexOf('America/') === 0) cc = 'US';        // 나머지 미주는 미국 (우리 관객 기준)
+    else if (tz.indexOf('Europe/') === 0) cc = 'EU';    // 나머지 유럽 묶음
+    else if (tz.indexOf('Australia/') === 0 || tz.indexOf('Pacific/') === 0) cc = 'AU';
+    else cc = 'ETC';
+  }
+  onceToday('oreum_cc', 'cc_' + cc);
 })();
 </script>
 
