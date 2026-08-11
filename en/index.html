@@ -282,7 +282,8 @@
   }
   var d = new Date();
   var today = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
-  Promise.all([get(base), get(base + '?start=' + today)]).then(function (res) {
+  // Ask for an explicit range, otherwise the endpoint only counts a recent window
+  Promise.all([get(base + '?start=2026-01-01'), get(base + '?start=' + today)]).then(function (res) {
     var total = res[0], todays = res[1];
     if (!total) return;
     var text = total.count + ' views in total';
