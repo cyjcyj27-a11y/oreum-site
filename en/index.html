@@ -280,10 +280,14 @@
   function get(u) {
     return fetch(u).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
   }
-  var d = new Date();
-  var today = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
-  // Ask for an explicit range, otherwise the endpoint only counts a recent window
-  Promise.all([get(base + '?start=2026-01-01'), get(base + '?start=' + today)]).then(function (res) {
+  // The API treats the end date as exclusive, so pass tomorrow to include today
+  function ymd(d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+  var today = ymd(new Date());
+  var tomorrow = ymd(new Date(Date.now() + 86400000));
+  Promise.all([
+    get(base + '?start=2026-01-01&end=' + tomorrow),
+    get(base + '?start=' + today + '&end=' + tomorrow)
+  ]).then(function (res) {
     var total = res[0], todays = res[1];
     if (!total) return;
     var text = total.count + ' views in total';

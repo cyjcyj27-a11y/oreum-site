@@ -282,10 +282,14 @@
   function get(u) {
     return fetch(u).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
   }
-  var d = new Date();
-  var today = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
-  // 전체는 기간을 명시해야 진짜 전체가 나옵니다 (기간 없이 부르면 최근 기간만 셉니다)
-  Promise.all([get(base + '?start=2026-01-01'), get(base + '?start=' + today)]).then(function (res) {
+  // 이 API는 끝 날짜를 "그날 미포함"으로 셉니다. 그래서 끝을 내일로 줘야 오늘까지 다 잡힙니다.
+  function ymd(d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+  var today = ymd(new Date());
+  var tomorrow = ymd(new Date(Date.now() + 86400000));
+  Promise.all([
+    get(base + '?start=2026-01-01&end=' + tomorrow),
+    get(base + '?start=' + today + '&end=' + tomorrow)
+  ]).then(function (res) {
     var total = res[0], todays = res[1];
     if (!total) return;
     var text = '전체 ' + total.count + '회 조회';
