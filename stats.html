@@ -104,9 +104,20 @@
   }
   var today = ymd(new Date());
   var keys = ['total', 'returning', 'game_open', 'day_' + today,
-              'src_tiktok', 'src_kakao', 'src_search', 'src_direct', 'src_other',
+              'src_tiktok', 'src_instagram', 'src_threads', 'src_x', 'src_kakao',
+              'src_youtube', 'src_facebook', 'src_search', 'src_direct', 'src_other',
               'play_1m', 'play_3m', 'play_10m'];
-  Promise.all(keys.map(get)).then(function (vals) {
+  // 한꺼번에 많이 부르면 속도 제한에 걸려 실제 값이 0으로 오기도 해서, 3개씩 나눠 부릅니다
+  function fetchChunked(list, size) {
+    var out = [], i = 0;
+    function next() {
+      if (i >= list.length) return Promise.resolve(out);
+      var chunk = list.slice(i, i + size); i += size;
+      return Promise.all(chunk.map(get)).then(function (vs) { out = out.concat(vs); return next(); });
+    }
+    return next();
+  }
+  fetchChunked(keys, 3).then(function (vals) {
     var d = {}; keys.forEach(function (k, i) { d[k] = vals[i]; });
     var fmt = function (n) { return n.toLocaleString('ko-KR'); };
 
@@ -139,10 +150,15 @@
     document.getElementById('start-note').textContent =
       '홈페이지에 온 ' + fmt(d.total) + '명 중 ' + fmt(d.game_open) + '명이 실제로 게임을 열었어요. (게임 링크로 바로 온 사람이 많으면 100%를 넘을 수도 있어요)';
 
-    // ② 유입 경로
-    var srcDefs = [['틱톡', 'src_tiktok'], ['카톡', 'src_kakao'], ['검색', 'src_search'], ['직접', 'src_direct'], ['기타', 'src_other']];
+    // ② 유입 경로 — 값이 0인 채널은 접어두고, 들어온 것만 큰 순서로 보여줍니다
+    var srcDefs = [['틱톡', 'src_tiktok'], ['인스타', 'src_instagram'], ['스레드', 'src_threads'],
+                   ['X', 'src_x'], ['카톡', 'src_kakao'], ['유튜브', 'src_youtube'],
+                   ['페북', 'src_facebook'], ['검색', 'src_search'], ['직접', 'src_direct'], ['기타', 'src_other']];
     var srcTotal = srcDefs.reduce(function (a, s) { return a + d[s[1]]; }, 0) || 1;
-    document.getElementById('sources').innerHTML = srcDefs.map(function (s) {
+    var shown = srcDefs.filter(function (s) { return d[s[1]] > 0; }).sort(function (a, b) { return d[b[1]] - d[a[1]]; });
+    if (!shown.length) shown = [['아직 없음', null]];
+    document.getElementById('sources').innerHTML = shown.map(function (s) {
+      if (!s[1]) return '<div class="note">아직 유입 기록이 없어요. 링크로 사람들이 들어오면 채널별로 쌓입니다.</div>';
       var n = d[s[1]], pct = Math.round(n / srcTotal * 100);
       return '<div class="bar"><div class="name">' + s[0] + '</div>' +
              '<div class="track"><div class="fill" style="width:' + Math.max(pct, n ? 4 : 0) + '%"></div></div>' +

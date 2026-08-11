@@ -314,8 +314,13 @@
   // ② 유입 경로 — 어디서 눌러 들어왔나 (하루 1회)
   var r = (document.referrer || '').toLowerCase(), src;
   if (!r) src = 'direct';
-  else if (/tiktok|musical\.ly|(^|\.)t\.co/.test(r)) src = 'tiktok';
+  else if (/tiktok|musical\.ly/.test(r)) src = 'tiktok';
+  else if (/instagram|(^|\/\/|\.)ig\./.test(r)) src = 'instagram';
+  else if (/threads\.net|threads\.com/.test(r)) src = 'threads';
+  else if (/(^|\.)x\.com|twitter|(^|\.)t\.co/.test(r)) src = 'x';
   else if (/kakao|kko|daum/.test(r)) src = 'kakao';
+  else if (/youtube|youtu\.be/.test(r)) src = 'youtube';
+  else if (/facebook|fb\.com|fb\.me/.test(r)) src = 'facebook';
   else if (/google|naver|bing|search|yahoo|duckduckgo|zum/.test(r)) src = 'search';
   else if (r.indexOf('oreumgames.com') > -1) src = 'direct';
   else src = 'other';
