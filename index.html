@@ -301,6 +301,25 @@
     el.textContent = text;
     el.hidden = false;
   });
+
+  // ── 지표 — 신규/재방문(⑤)과 유입 경로(②). 화면 표시는 없고 대시보드(stats.html)에서 봅니다. ──
+  var local = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+  function hit(k) { if (local) return; try { fetch(base + 'hit/oreumgames/' + k, { mode: 'cors' }).catch(function () {}); } catch (e) {} }
+  function onceToday(flag, k) { try { if (localStorage.getItem(flag) === today) return; localStorage.setItem(flag, today); } catch (e) {} hit(k); }
+  // ⑤ 재방문 — 처음 온 브라우저면 표시만 남기고, 다른 날 다시 온 거면 재방문으로 셉니다.
+  // (신규 수는 대시보드에서 "전체 − 재방문"으로 계산합니다 — 그래야 기존 방문자도 신규로 잡힙니다)
+  var first = null; try { first = localStorage.getItem('oreum_first'); } catch (e) {}
+  if (!first) { try { localStorage.setItem('oreum_first', today); } catch (e) {} }
+  else if (first !== today) { onceToday('oreum_ret', 'returning'); }
+  // ② 유입 경로 — 어디서 눌러 들어왔나 (하루 1회)
+  var r = (document.referrer || '').toLowerCase(), src;
+  if (!r) src = 'direct';
+  else if (/tiktok|musical\.ly|(^|\.)t\.co/.test(r)) src = 'tiktok';
+  else if (/kakao|kko|daum/.test(r)) src = 'kakao';
+  else if (/google|naver|bing|search|yahoo|duckduckgo|zum/.test(r)) src = 'search';
+  else if (r.indexOf('oreumgames.com') > -1) src = 'direct';
+  else src = 'other';
+  onceToday('oreum_src', 'src_' + src);
 })();
 </script>
 
