@@ -63,10 +63,11 @@
   </div>
 
   <div class="card">
-    <h2>👣 페이지뷰 <span class="em">반복 방문까지 — 전체 열어본 횟수</span></h2>
+    <h2>👣 페이지뷰 <span class="em">반복 방문까지 — 카테고리별</span></h2>
     <div class="big" id="pv-total">…</div>
     <div class="note" id="pv-note"></div>
-    <div id="pv-pages" style="margin-top:10px"></div>
+    <div id="pv-cats" style="margin-top:10px"></div>
+    <div id="pv-pages" style="margin-top:4px"></div>
   </div>
 
   <div class="card">
@@ -157,24 +158,34 @@
       return '<div class="' + cls + '">' + (i <= passed ? '✓ ' : '') + fmt(s) + '</div>';
     }).join('');
 
-    // 👣 페이지뷰 — 새로고침·재방문까지 전부 셉니다 (같은 사람이 여러 번 와도 계속 올라갑니다)
-    var pv = d.pageviews;
-    document.getElementById('pv-total').innerHTML = fmt(pv) + '<small>회</small>';
-    var perPerson = d.total ? (pv / d.total) : 0;
-    document.getElementById('pv-note').textContent = pv === 0
-      ? '아직 페이지뷰가 없어요. 페이지를 열 때마다(새로고침·재방문 포함) 여기 숫자가 올라갑니다.'
-      : '방문자 ' + fmt(d.total) + '명이 합쳐서 ' + fmt(pv) + '번 열었어요 — 1인당 평균 ' + perPerson.toFixed(1) + '회. 방문자보다 훨씬 크면 같은 사람이 자주 다시 온다는 뜻이에요.';
-    var pageDefs = [['홈', 'pv_home'], ['MBTI·사주', 'pv_saju'], ['가이드', 'pv_guide'], ['문의', 'pv_support'], ['개인정보', 'pv_privacy']];
-    var pgTotal = pageDefs.reduce(function (a, p) { return a + d[p[1]]; }, 0) || 1;
-    var pgShown = pageDefs.filter(function (p) { return d[p[1]] > 0; }).sort(function (a, b) { return d[b[1]] - d[a[1]]; });
-    document.getElementById('pv-pages').innerHTML = pgShown.length
-      ? pgShown.map(function (p) {
-          var n = d[p[1]], pct = Math.round(n / pgTotal * 100);
-          return '<div class="bar"><div class="name" style="width:96px">' + p[0] + '</div>' +
-                 '<div class="track"><div class="fill" style="width:' + Math.max(pct, n ? 4 : 0) + '%;background:var(--cold)"></div></div>' +
+    // 👣 페이지뷰 — 카테고리별(오름 홈페이지 / 게임 play / MBTI사주). 새로고침·재방문까지 전부 셉니다.
+    // 게임은 매 접속마다 세는 game_session이 곧 게임 페이지뷰라 그걸 씁니다.
+    var pvHome = d.pv_home + d.pv_guide + d.pv_support + d.pv_privacy;
+    var pvGame = d.game_session, pvSaju = d.pv_saju;
+    var pvAll = pvHome + pvGame + pvSaju;
+    document.getElementById('pv-total').innerHTML = fmt(pvAll) + '<small>회</small>';
+    document.getElementById('pv-note').textContent = pvAll === 0
+      ? '아직 페이지뷰가 없어요. 어느 페이지든 열 때마다(새로고침·재방문 포함) 여기 숫자가 올라갑니다.'
+      : '새로고침·재방문까지 합친 전체 열어본 횟수예요. 아래는 어디를 얼마나 봤는지 나눈 것.';
+    var cats = [['🏠 오름 홈페이지', pvHome], ['🎮 게임 (play)', pvGame], ['🔮 MBTI·사주', pvSaju]];
+    var catMax = Math.max(1, pvHome, pvGame, pvSaju);
+    document.getElementById('pv-cats').innerHTML = cats.map(function (c) {
+      var pct = Math.round(c[1] / (pvAll || 1) * 100);
+      return '<div class="bar"><div class="name" style="width:120px">' + c[0] + '</div>' +
+             '<div class="track"><div class="fill" style="width:' + Math.max(Math.round(c[1] / catMax * 100), c[1] ? 4 : 0) + '%;background:var(--cold)"></div></div>' +
+             '<div class="val">' + fmt(c[1]) + '회 · ' + pct + '%</div></div>';
+    }).join('');
+    // 오름 홈페이지 세부 (홈/가이드/문의/개인정보)
+    var subDefs = [['홈', 'pv_home'], ['가이드', 'pv_guide'], ['문의', 'pv_support'], ['개인정보', 'pv_privacy']];
+    var subShown = subDefs.filter(function (s) { return d[s[1]] > 0; }).sort(function (a, b) { return d[b[1]] - d[a[1]]; });
+    document.getElementById('pv-pages').innerHTML = subShown.length
+      ? '<div class="note" style="margin:10px 0 4px">↳ 오름 홈페이지 세부</div>' + subShown.map(function (s) {
+          var n = d[s[1]], pct = Math.round(n / (pvHome || 1) * 100);
+          return '<div class="bar"><div class="name" style="width:96px">' + s[0] + '</div>' +
+                 '<div class="track"><div class="fill" style="width:' + Math.max(pct, n ? 4 : 0) + '%;background:var(--ember)"></div></div>' +
                  '<div class="val">' + fmt(n) + '회 · ' + pct + '%</div></div>';
         }).join('')
-      : '<div class="note">페이지별 기록이 곧 쌓입니다.</div>';
+      : '';
 
     // ⑤ 재방문율 = 게임을 다른 날 다시 켠 플레이어 / 전체 게임 플레이어 (진짜 '게임 생명력' 지표)
     // 홈페이지 재방문이 아니라 게임 재방문을 봅니다 — 게임하러 오는 사람은 게임 주소로 바로 오니까요.
