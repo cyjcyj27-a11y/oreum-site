@@ -282,7 +282,14 @@
   </div>
 </footer>
 
-<!-- 방문자 수 집계 — 쿠키 없이 익명으로만 셉니다 (goatcounter.com) -->
-<script data-goatcounter="https://oreumgames.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
+<!-- 방문 집계 — 쿠키 없이, 페이지뷰(반복 방문 포함)까지 Abacus로 셉니다 -->
+<script>
+(function(){
+  if (/^(localhost|127\.0\.0\.1)$/.test(location.hostname) || location.protocol==='file:') return;
+  var b='https://abacus.jasoncameron.dev/hit/oreumgames/';
+  function h(k){ try{ fetch(b+k,{mode:'cors'}).catch(function(){}); }catch(e){} }
+  h('pageviews'); h('pv_guide');
+})();
+</script>
 </body>
 </html>
