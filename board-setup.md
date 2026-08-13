@@ -12,7 +12,7 @@
 3. **New project** 누르고
    - Name: `oreum-board` (아무거나 괜찮습니다)
    - Database Password: 아무거나 정하고 **어딘가 적어두세요**
-   - Region: **Northeast Asia (Seoul)**
+   - Region: **Northeast Asia (Seoul)** ← 만든 뒤엔 못 바꿔요. 꼭 서울로 고르세요
 4. 만들어지는 데 2분쯤 걸립니다
 
 ---
@@ -101,13 +101,16 @@ create policy "board write" on storage.objects
 
 ## 4. 주소 두 줄 알려주기
 
-왼쪽 메뉴 **Project Settings** → **API** 에서 두 가지를 복사해서 알려주세요.
+왼쪽 맨 아래 톱니바퀴(⚙️) → **Settings** 에서 두 가지를 복사해서 알려주세요.
 
-- **Project URL** (`https://xxxxx.supabase.co` 모양)
-- **anon public** 키 (아주 긴 글자)
+1. **General** 화면의 **Project URL** (`https://xxxxx.supabase.co` 모양)
+2. **API Keys** 화면의 **Publishable key** (`sb_publishable_...` 로 시작)
 
 두 값은 **공개되어도 안전한 값**입니다. 홈페이지 파일에 그대로 들어가고,
 실제 권한은 위에서 만든 규칙이 지킵니다.
+
+> ⚠️ 같은 화면 아래쪽의 **Secret keys** (`sb_secret_...`) 는 관리자 열쇠입니다.
+> 홈페이지에 넣으면 누구든 자료를 통째로 지울 수 있으니 **절대 알려주지 마세요.**
 
 이 두 줄을 받으면 제가 `board.html`에 넣고 올리겠습니다.
 
