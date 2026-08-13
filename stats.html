@@ -100,6 +100,7 @@
   </div>
 
   <div class="foot">
+    <p id="readWarn" style="display:none;color:#a35c10;font-weight:600"></p>
     <a class="reload" onclick="location.reload()">↻ 새로고침</a><br>
     이 페이지는 검색에 안 잡히고 링크로만 봅니다.
   </div>
@@ -110,11 +111,25 @@
   var NS = 'oreumgames';
   var base = 'https://abacus.jasoncameron.dev/get/' + NS + '/';
   function ymd(d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
-  function get(k) {
+  function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+  var failed = 0;
+  // 한 번도 기록된 적 없는 값은 404로 옵니다 — 그건 진짜 0입니다.
+  // 그 밖의 실패(요청이 너무 잦아 잠깐 막히는 경우 등)는 0이 아니라 "못 읽은 것"이라
+  // 잠시 쉬었다 다시 부릅니다. 안 그러면 뒤쪽 항목이 늘 0으로 보입니다.
+  function get(k, tries) {
+    tries = tries || 0;
     return fetch(base + k, { mode: 'cors' })
-      .then(function (r) { return r.ok ? r.json() : null; })
-      .then(function (j) { return j && typeof j.value === 'number' ? j.value : 0; })
-      .catch(function () { return 0; });
+      .then(function (r) {
+        if (r.status === 404) return 0;
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json().then(function (j) {
+          return (j && typeof j.value === 'number') ? j.value : 0;
+        });
+      })
+      .catch(function () {
+        if (tries >= 6) { failed++; return 0; }
+        return sleep(600 * (tries + 1)).then(function () { return get(k, tries + 1); });
+      });
   }
   var today = ymd(new Date());
   var ccDefs = [['🇰🇷 한국', 'KR'], ['🇺🇸 미국', 'US'], ['🇯🇵 일본', 'JP'], ['🇹🇼 대만', 'TW'],
@@ -129,18 +144,27 @@
               'src_youtube', 'src_facebook', 'src_search', 'src_direct', 'src_other',
               'play_1m', 'play_3m', 'play_10m']
              .concat(ccDefs.map(function (c) { return 'cc_' + c[1]; }));
-  // 한꺼번에 많이 부르면 속도 제한에 걸려 실제 값이 0으로 오기도 해서, 3개씩 나눠 부릅니다
+  // 한꺼번에 많이 부르면 속도 제한에 걸리므로, 3개씩 나눠 부르고 사이에 잠깐 쉽니다
   function fetchChunked(list, size) {
     var out = [], i = 0;
     function next() {
       if (i >= list.length) return Promise.resolve(out);
       var chunk = list.slice(i, i + size); i += size;
-      return Promise.all(chunk.map(get)).then(function (vs) { out = out.concat(vs); return next(); });
+      // map이 넘겨주는 순번이 재시도 횟수로 잘못 들어가지 않게 감싸서 부릅니다
+      return Promise.all(chunk.map(function (k) { return get(k); }))
+        .then(function (vs) { out = out.concat(vs); return sleep(260); })
+        .then(next);
     }
     return next();
   }
   fetchChunked(keys, 3).then(function (vals) {
     var d = {}; keys.forEach(function (k, i) { d[k] = vals[i]; });
+    // 끝내 못 읽은 값이 있으면 숫자가 실제보다 적게 보일 수 있으니 알려줍니다
+    if (failed > 0) {
+      var w = document.getElementById('readWarn');
+      w.textContent = '값 ' + failed + '개를 못 읽었어요. 실제보다 적게 보일 수 있으니 새로고침해 주세요.';
+      w.style.display = 'block';
+    }
     var fmt = function (n) { return n.toLocaleString('ko-KR'); };
 
     // ① 방문 수 + 신규/재방문/오늘 (신규 = 전체 − 재방문)
