@@ -272,7 +272,11 @@
   var box = document.getElementById('cast');
   if (!box) return;
   document.querySelectorAll('a[href="#cast"]').forEach(function (a) {
-    a.addEventListener('click', function () { box.open = true; });
+    // 같은 단추로 열고 닫습니다
+    a.addEventListener('click', function (e) {
+      if (box.open) { e.preventDefault(); box.open = false; }
+      else { box.open = true; }
+    });
   });
   // 주소에 #cast를 달고 들어온 경우에도 펼쳐둡니다
   if (location.hash === '#cast') box.open = true;
