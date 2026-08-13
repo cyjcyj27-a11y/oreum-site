@@ -134,7 +134,8 @@
         </div>
 
       <!-- People you meet on the island -->
-      <h3 class="sub-title" id="cast">People You Meet on the Island</h3>
+      <details class="castbox" id="cast">
+      <summary>People You Meet on the Island</summary>
       <ul class="cast">
         <li>
           <div class="cast-art"><img src="../assets/char-lulu.webp" alt="Lulu the cat in a straw hat" loading="lazy" width="322" height="440"></div>
@@ -165,6 +166,7 @@
           Even deep in the Jeju countryside, he wears a suit every single day.</p>
         </li>
       </ul>
+      </details>
       </article>
 
       <article class="game">
@@ -258,6 +260,19 @@
   </section>
 
 </main>
+
+<!-- "캐릭터 소개" 단추를 누르면 접혀 있던 인물 소개가 펼쳐집니다 -->
+<script>
+(function () {
+  var box = document.getElementById('cast');
+  if (!box) return;
+  document.querySelectorAll('a[href="#cast"]').forEach(function (a) {
+    a.addEventListener('click', function () { box.open = true; });
+  });
+  // 주소에 #cast를 달고 들어온 경우에도 펼쳐둡니다
+  if (location.hash === '#cast') box.open = true;
+})();
+</script>
 
 <footer class="site-footer">
   <div class="wrap footer-inner">
