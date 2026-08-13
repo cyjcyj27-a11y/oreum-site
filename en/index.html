@@ -105,7 +105,7 @@
           <img class="game-icon" src="../assets/lulu-icon.png" alt="" width="96" height="96">
           <div>
             <h3>Lulu the Cat's Jeju Life</h3>
-            <p class="game-sub">3D life simulation · Free · Korean</p>
+            <p class="game-sub">3D life simulation · Free · English &amp; Korean</p>
           </div>
         </div>
 
@@ -144,7 +144,7 @@
           so she spent everything she had on an empty house in a remote Jeju village.</p>
         </li>
         <li>
-          <div class="cast-art"><img src="../assets/char-mayor.webp" alt="The village head in a flower-print shirt" loading="lazy" width="291" height="440"></div>
+          <div class="cast-art"><img src="../assets/char-mayor.webp" alt="The mayor in a flower-print shirt" loading="lazy" width="291" height="440"></div>
           <b>The Village Head</b>
           <span class="cast-role">Runs the general store and owns the land</span>
           <p>He buys your tangerines, leases out fields, and sells seeds and furniture.
@@ -275,7 +275,6 @@
   </div>
 </footer>
 <script>
-// Show today's and total visitor counts in the footer — appears once the public counter is enabled in GoatCounter settings
 // Real-time counter via Abacus — each browser is counted once per day (localStorage), then read-only
 (function () {
   var base = 'https://abacus.jasoncameron.dev/';
@@ -299,6 +298,56 @@
     el.textContent = text;
     el.hidden = false;
   });
+
+  // -- Metrics: new vs returning and traffic source. Nothing is shown here; read them on stats.html. --
+  var local = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+  function hit(k) { if (local) return; try { fetch(base + 'hit/oreumgames/' + k, { mode: 'cors' }).catch(function () {}); } catch (e) {} }
+  function onceToday(flag, k) { try { if (localStorage.getItem(flag) === today) return; localStorage.setItem(flag, today); } catch (e) {} hit(k); }
+  // Returning: mark the browser on its first visit, count it as returning when it comes back on another day.
+  // (New visitors are derived on the dashboard as "total minus returning".)
+  var first = null; try { first = localStorage.getItem('oreum_first'); } catch (e) {}
+  if (!first) { try { localStorage.setItem('oreum_first', today); } catch (e) {} }
+  else if (first !== today) { onceToday('oreum_ret', 'returning'); }
+  // Traffic source: where the click came from (once per day)
+  var r = (document.referrer || '').toLowerCase(), src;
+  if (!r) src = 'direct';
+  else if (/tiktok|musical\.ly/.test(r)) src = 'tiktok';
+  else if (/instagram|(^|\/\/|\.)ig\./.test(r)) src = 'instagram';
+  else if (/threads\.net|threads\.com/.test(r)) src = 'threads';
+  else if (/(^|\.)x\.com|twitter|(^|\.)t\.co/.test(r)) src = 'x';
+  else if (/kakao|kko|daum/.test(r)) src = 'kakao';
+  else if (/youtube|youtu\.be/.test(r)) src = 'youtube';
+  else if (/facebook|fb\.com|fb\.me/.test(r)) src = 'facebook';
+  else if (/google|naver|bing|search|yahoo|duckduckgo|zum/.test(r)) src = 'search';
+  else if (r.indexOf('oreumgames.com') > -1) src = 'direct';
+  else src = 'other';
+  onceToday('oreum_src', 'src_' + src);
+
+  // -- Country: estimated from the visitor timezone. No IP collection, once per day. --
+  var tz = ''; try { tz = (Intl.DateTimeFormat().resolvedOptions().timeZone) || ''; } catch (e) {}
+  var tzMap = {
+    'Asia/Seoul': 'KR', 'Asia/Pyongyang': 'KR', 'Asia/Tokyo': 'JP',
+    'Asia/Shanghai': 'CN', 'Asia/Urumqi': 'CN', 'Asia/Chongqing': 'CN', 'Asia/Harbin': 'CN',
+    'Asia/Taipei': 'TW', 'Asia/Hong_Kong': 'HK', 'Asia/Macau': 'HK',
+    'Asia/Singapore': 'SG', 'Asia/Kuala_Lumpur': 'MY', 'Asia/Kuching': 'MY',
+    'Asia/Bangkok': 'TH', 'Asia/Manila': 'PH', 'Asia/Ho_Chi_Minh': 'VN', 'Asia/Saigon': 'VN',
+    'Asia/Jakarta': 'ID', 'Asia/Makassar': 'ID', 'Asia/Pontianak': 'ID', 'Asia/Jayapura': 'ID',
+    'Asia/Kolkata': 'IN', 'Asia/Calcutta': 'IN',
+    'Europe/London': 'GB', 'Europe/Dublin': 'GB', 'Europe/Paris': 'FR',
+    'Europe/Berlin': 'DE', 'Europe/Madrid': 'ES', 'Europe/Rome': 'IT',
+    'Australia/Sydney': 'AU', 'Australia/Melbourne': 'AU', 'Australia/Brisbane': 'AU', 'Australia/Perth': 'AU', 'Australia/Adelaide': 'AU',
+    'America/Toronto': 'CA', 'America/Vancouver': 'CA', 'America/Edmonton': 'CA', 'America/Winnipeg': 'CA', 'America/Halifax': 'CA',
+    'America/Mexico_City': 'MX', 'America/Monterrey': 'MX', 'America/Cancun': 'MX', 'America/Tijuana': 'MX',
+    'America/Sao_Paulo': 'BR', 'America/Bahia': 'BR', 'America/Fortaleza': 'BR'
+  };
+  var cc = tzMap[tz];
+  if (!cc) {
+    if (tz.indexOf('America/') === 0) cc = 'US';        // rest of the Americas -> US
+    else if (tz.indexOf('Europe/') === 0) cc = 'EU';    // rest of Europe
+    else if (tz.indexOf('Australia/') === 0 || tz.indexOf('Pacific/') === 0) cc = 'AU';
+    else cc = 'ETC';
+  }
+  onceToday('oreum_cc', 'cc_' + cc);
 })();
 </script>
 
