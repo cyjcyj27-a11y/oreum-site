@@ -416,8 +416,8 @@ h1, h2, h3 { line-height: 1.3; letter-spacing: -.02em; margin: 0; }
   font-size: 15px; line-height: 1.7; color: var(--ink-2);
   white-space: pre-wrap; word-break: break-word;
 }
-/* 붙여넣은 주소 — 눌리지 않는 그냥 글씨라는 걸 눈으로도 알 수 있게 */
-.deadlink { color: var(--muted); text-decoration: line-through; }
+/* 붙여넣은 주소 — 눌리지 않는 그냥 글씨입니다 (밑줄·취소선 없이 본문과 같게) */
+.deadlink { color: inherit; text-decoration: none; }
 .board .loading { color: var(--muted); font-size: 14px; text-align: center; padding: 26px 0; }
 #moreBtn { display: block; margin: 18px auto 0; }
 
