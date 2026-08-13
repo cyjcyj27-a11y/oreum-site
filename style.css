@@ -353,6 +353,74 @@ h1, h2, h3 { line-height: 1.3; letter-spacing: -.02em; margin: 0; }
 .doc tbody th { text-align: left; color: var(--ink); white-space: nowrap; width: 1%; }
 .doc tbody tr:last-child th, .doc tbody tr:last-child td { border-bottom: 0; }
 
+/* ── 플레이 자랑 게시판 ─────────────── */
+.board .wrap { max-width: 720px; }
+
+.writebox {
+  background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 20px; box-shadow: var(--shadow); margin: 18px 0 26px;
+}
+/* 사진 고르기 — 진짜 파일 상자는 숨기고 라벨을 단추처럼 보이게 합니다 */
+.pickfile {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 11px 20px; border-radius: 999px; cursor: pointer;
+  background: var(--green-soft); color: var(--green-lit);
+  border: 1px solid var(--green-edge); font-weight: 700; font-size: 15px;
+}
+.pickfile:hover { background: #dceccd; }
+.pickfile input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.preview { margin-top: 14px; }
+.preview img {
+  width: 100%; max-height: 320px; object-fit: contain;
+  border-radius: 12px; border: 1px solid var(--line); background: var(--deep);
+}
+.preview .rm {
+  margin-top: 8px; background: none; border: 0; cursor: pointer;
+  color: var(--muted); font-size: 13px; text-decoration: underline; font-family: inherit;
+}
+
+.writebox textarea, .writebox input[type="text"], .writebox input[type="password"] {
+  width: 100%; font-family: inherit; font-size: 15px; color: var(--ink);
+  background: #fff; border: 1px solid var(--line-2); border-radius: 12px;
+  padding: 11px 14px; margin-top: 12px; resize: vertical;
+}
+.writebox textarea:focus, .writebox input:focus { outline: 2px solid var(--green-edge); border-color: var(--green); }
+.writebox .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.writebox .row input[type="text"] { flex: 2 1 150px; }
+.writebox .row input[type="password"] { flex: 1 1 110px; }
+.writebox .count { margin-top: 12px; font-size: 13px; color: var(--muted); white-space: nowrap; }
+.writebox .count b { color: var(--ink-2); }
+.writebox .tip { margin: 12px 0 16px; font-size: 13px; line-height: 1.6; color: var(--muted); }
+.formmsg { margin: 10px 0 0; font-size: 14px; color: var(--green-lit); min-height: 1.2em; }
+.formmsg.bad { color: var(--ember-ink); }
+
+.postlist { display: grid; gap: 14px; }
+.post {
+  background: var(--panel); border: 1px solid var(--line);
+  border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden;
+}
+.post .shot { width: 100%; max-height: 480px; object-fit: cover; display: block; background: var(--deep); }
+.post .meta {
+  display: flex; align-items: center; gap: 8px;
+  padding: 12px 16px 0; font-size: 14px; color: var(--ink-2);
+}
+.post .meta b { font-weight: 700; color: var(--ink); }
+.post .ago { color: var(--muted); font-size: 13px; }
+.post .del {
+  margin-left: auto; background: none; border: 0; cursor: pointer;
+  color: var(--muted); font-size: 13px; font-family: inherit; text-decoration: underline;
+}
+.post .del:hover { color: var(--ember-ink); }
+.post .text {
+  margin: 8px 0 0; padding: 0 16px 16px;
+  font-size: 15px; line-height: 1.7; color: var(--ink-2);
+  white-space: pre-wrap; word-break: break-word;
+}
+/* 붙여넣은 주소 — 눌리지 않는 그냥 글씨라는 걸 눈으로도 알 수 있게 */
+.deadlink { color: var(--muted); text-decoration: line-through; }
+.board .loading { color: var(--muted); font-size: 14px; text-align: center; padding: 26px 0; }
+#moreBtn { display: block; margin: 18px auto 0; }
+
 /* ── 반응형 ───────────────────────────── */
 @media (max-width: 860px) {
   .hero-inner { padding: 76px 0 120px; }

@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>플레이 자랑 — 오름게임즈</title>
+<meta name="description" content="루루냥의 제주살이 플레이 화면을 자랑하는 곳. 회원가입 없이 사진 한 장과 짧은 한마디를 남겨보세요.">
+<link rel="canonical" href="https://oreumgames.com/board.html">
+<meta name="theme-color" content="#f8f5ec">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" href="assets/icon-512.png" type="image/png" sizes="512x512">
+<link rel="apple-touch-icon" href="assets/icon-180.png">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="오름게임즈">
+<meta property="og:title" content="플레이 자랑 — 오름게임즈">
+<meta property="og:description" content="루루냥의 제주살이 플레이 화면을 자랑하는 곳. 회원가입 없이 남길 수 있어요.">
+<meta property="og:url" content="https://oreumgames.com/board.html">
+<meta property="og:image" content="https://oreumgames.com/assets/og-image.png">
+<meta property="og:locale" content="ko_KR">
+
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<a class="skip" href="#main">본문으로 건너뛰기</a>
+
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="./">
+      <img src="assets/logo-full.png" alt="오름게임즈" width="78" height="74">
+    </a>
+    <nav class="nav" aria-label="주요 메뉴">
+      <a href="./#games">RELEASED</a>
+      <a href="guide.html">가이드</a>
+      <a href="support.html">고객지원</a>
+      <a href="en/" lang="en" hreflang="en">EN</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main" class="doc board">
+  <div class="wrap">
+    <a class="back" href="./">← 홈으로</a>
+    <h1>플레이 자랑</h1>
+    <p class="date">루루냥의 제주살이 · 회원가입 없이 남기는 곳</p>
+
+    <!-- 아직 저장소를 안 붙였을 때 보이는 안내 -->
+    <div id="setupNote" class="warn" style="display:none">
+      <b>아직 저장소가 연결되지 않았습니다.</b><br>
+      글이 저장되지 않는 미리보기 상태예요. 화면과 글자수 제한은 그대로 확인해 보실 수 있습니다.
+    </div>
+
+    <!-- ── 글쓰기 ── -->
+    <form id="writeBox" class="writebox">
+      <label class="pickfile" for="photo">
+        <span id="pickLabel">📷 사진 고르기</span>
+        <input type="file" id="photo" accept="image/*">
+      </label>
+      <div id="preview" class="preview" hidden>
+        <img id="previewImg" alt="고른 사진 미리보기">
+        <button type="button" id="removePhoto" class="rm">사진 빼기</button>
+      </div>
+
+      <textarea id="body" maxlength="200" rows="3"
+        placeholder="한마디 남겨주세요 (200자까지)"></textarea>
+      <div class="row">
+        <input type="text" id="nick" maxlength="12" placeholder="이름 (안 써도 됩니다)">
+        <input type="password" id="pw" inputmode="numeric" maxlength="4" placeholder="숫자 4자리">
+        <span class="count"><b id="count">0</b>/200</span>
+      </div>
+      <p class="tip">
+        숫자 4자리는 나중에 내 글을 지울 때 씁니다. 잊으면 지울 수 없어요.<br>
+        붙여넣은 주소는 눌리지 않습니다. 광고 글은 지워집니다.
+      </p>
+      <button type="submit" class="btn btn-primary" id="submitBtn">올리기</button>
+      <p id="formMsg" class="formmsg" role="status"></p>
+    </form>
+
+    <!-- ── 올라온 글 ── -->
+    <div id="list" class="postlist"><p class="loading">불러오는 중…</p></div>
+    <button id="moreBtn" class="btn btn-ghost" style="display:none">더 보기</button>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <div class="footer-brand">
+      <img src="assets/logo-full.png" alt="" width="52" height="50">
+      <span>오름게임즈 <em>Oreum Games</em></span>
+    </div>
+    <nav class="footer-nav" aria-label="푸터 메뉴">
+      <a href="./">홈</a>
+      <a href="guide.html">플레이 가이드</a>
+      <a href="support.html">고객지원</a>
+      <a href="privacy.html">개인정보처리방침</a>
+    </nav>
+    <p class="copy">© 2026 오름게임즈. All rights reserved.</p>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+(function () {
+  // ────────────────────────────────────────────────────────────
+  // 저장소 주소 — Supabase에서 받은 값 두 줄을 여기에 넣으면 게시판이 살아납니다.
+  // 이 두 값은 공개되어도 안전한 값입니다 (읽기·쓰기 권한은 서버 쪽 규칙이 지킵니다).
+  // ────────────────────────────────────────────────────────────
+  var SUPABASE_URL = '';
+  var SUPABASE_KEY = '';
+
+  var PAGE = 12;                 // 한 번에 보여줄 글 수
+  var MAX_MB = 6;                // 고를 수 있는 원본 사진 크기
+  var MAX_SIDE = 1400;           // 올리기 전에 이만큼으로 줄입니다 (저장공간 절약)
+
+  var $ = function (id) { return document.getElementById(id); };
+  var db = null, offset = 0, busy = false, picked = null;
+
+  if (SUPABASE_URL && SUPABASE_KEY && window.supabase) {
+    db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  } else {
+    $('setupNote').style.display = 'block';
+  }
+
+  // ── 글자수 세기 ──
+  $('body').addEventListener('input', function () {
+    $('count').textContent = this.value.length;
+  });
+
+  // ── 사진 고르기 ──
+  $('photo').addEventListener('change', function () {
+    var f = this.files && this.files[0];
+    if (!f) return;
+    if (f.size > MAX_MB * 1024 * 1024) {
+      say('사진이 너무 큽니다 (' + MAX_MB + 'MB까지)', true);
+      this.value = ''; return;
+    }
+    picked = f;
+    $('previewImg').src = URL.createObjectURL(f);
+    $('preview').hidden = false;
+    $('pickLabel').textContent = '📷 다른 사진으로';
+    say('');
+  });
+  $('removePhoto').addEventListener('click', function () {
+    picked = null; $('photo').value = '';
+    $('preview').hidden = true;
+    $('pickLabel').textContent = '📷 사진 고르기';
+  });
+
+  // ── 사진 줄이기 — 큰 사진을 그대로 올리면 저장공간이 금방 찹니다 ──
+  function shrink(file) {
+    return new Promise(function (resolve) {
+      var img = new Image();
+      img.onload = function () {
+        var sc = Math.min(1, MAX_SIDE / Math.max(img.width, img.height));
+        var w = Math.round(img.width * sc), h = Math.round(img.height * sc);
+        var cv = document.createElement('canvas');
+        cv.width = w; cv.height = h;
+        cv.getContext('2d').drawImage(img, 0, 0, w, h);
+        cv.toBlob(function (b) { resolve(b || file); }, 'image/webp', 0.82);
+      };
+      img.onerror = function () { resolve(file); };
+      img.src = URL.createObjectURL(file);
+    });
+  }
+
+  function say(msg, bad) {
+    var el = $('formMsg');
+    el.textContent = msg || '';
+    el.className = 'formmsg' + (bad ? ' bad' : '');
+  }
+
+  // ── 글 올리기 ──
+  $('writeBox').addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (busy) return;
+    var body = $('body').value.trim();
+    var pw = $('pw').value.trim();
+    if (!body && !picked) { say('사진이나 한마디 중 하나는 있어야 해요', true); return; }
+    if (body.length > 200) { say('200자까지만 쓸 수 있어요', true); return; }
+    if (!/^\d{4}$/.test(pw)) { say('지울 때 쓸 숫자 4자리를 넣어주세요', true); return; }
+    if (!db) { say('아직 저장소가 연결되지 않아 올릴 수 없어요', true); return; }
+
+    busy = true; $('submitBtn').disabled = true; say('올리는 중…');
+    var path = null;
+
+    Promise.resolve()
+      .then(function () { return picked ? shrink(picked) : null; })
+      .then(function (blob) {
+        if (!blob) return null;
+        path = Date.now() + '-' + Math.random().toString(36).slice(2, 8) + '.webp';
+        return db.storage.from('board').upload(path, blob, { contentType: 'image/webp' })
+          .then(function (r) { if (r.error) throw r.error; });
+      })
+      .then(function () {
+        return db.rpc('create_post', {
+          p_nick: $('nick').value.trim() || null,
+          p_body: body,
+          p_image: path,
+          p_pw: pw
+        });
+      })
+      .then(function (r) {
+        if (r.error) throw r.error;
+        $('body').value = ''; $('pw').value = ''; $('count').textContent = '0';
+        $('removePhoto').click();
+        say('올렸어요!');
+        offset = 0; $('list').innerHTML = ''; load();
+      })
+      .catch(function (err) {
+        say('올리지 못했어요. 잠시 뒤 다시 해주세요.', true);
+        console.error(err);
+      })
+      .then(function () { busy = false; $('submitBtn').disabled = false; });
+  });
+
+  // ── 화면에 글자를 그대로 박아 넣습니다 (붙여넣은 주소가 눌리지 않게) ──
+  function esc(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+  // 주소처럼 보이는 부분은 눌리지 않는 회색 글씨로 표시합니다
+  var URLISH = /((?:https?:\/\/|www\.)[^\s]+|[\w.-]+\.(?:com|net|org|kr|io|me|co|gg|xyz|shop|store|link|site)(?:\/[^\s]*)?)/gi;
+  function bodyHtml(text) {
+    return esc(text).replace(/\n/g, '<br>')
+      .replace(URLISH, '<span class="deadlink" title="이 게시판에서는 주소가 눌리지 않습니다">$1</span>');
+  }
+  function when(iso) {
+    var t = new Date(iso), m = Math.floor((Date.now() - t) / 60000);
+    if (m < 1) return '방금';
+    if (m < 60) return m + '분 전';
+    if (m < 1440) return Math.floor(m / 60) + '시간 전';
+    return (t.getMonth() + 1) + '월 ' + t.getDate() + '일';
+  }
+
+  function imgUrl(path) {
+    return db.storage.from('board').getPublicUrl(path).data.publicUrl;
+  }
+
+  function render(rows) {
+    var frag = document.createDocumentFragment();
+    rows.forEach(function (p) {
+      var el = document.createElement('article');
+      el.className = 'post';
+      el.innerHTML =
+        (p.image_path ? '<img class="shot" loading="lazy" alt="플레이 화면" src="' + esc(imgUrl(p.image_path)) + '">' : '') +
+        '<div class="meta"><b>' + (p.nick ? esc(p.nick) : '이름 없는 제주도민') + '</b>' +
+        '<span class="ago">' + when(p.created_at) + '</span>' +
+        '<button class="del" type="button">지우기</button></div>' +
+        (p.body ? '<p class="text">' + bodyHtml(p.body) + '</p>' : '');
+      el.querySelector('.del').addEventListener('click', function () { remove(p.id, el); });
+      frag.appendChild(el);
+    });
+    $('list').appendChild(frag);
+  }
+
+  function remove(id, el) {
+    var pw = prompt('글을 올릴 때 넣은 숫자 4자리를 입력하세요');
+    if (pw === null) return;
+    db.rpc('delete_post', { p_id: id, p_pw: String(pw).trim() }).then(function (r) {
+      if (r.error) { alert('지우지 못했어요'); return; }
+      if (r.data === true) { el.remove(); }
+      else { alert('숫자가 맞지 않아요'); }
+    });
+  }
+
+  function load() {
+    if (!db) { $('list').innerHTML = '<p class="loading">저장소를 연결하면 여기에 글이 보입니다.</p>'; return; }
+    db.from('posts').select('id,created_at,nick,body,image_path')
+      .order('created_at', { ascending: false })
+      .range(offset, offset + PAGE - 1)
+      .then(function (r) {
+        var first = offset === 0;
+        if (first) $('list').innerHTML = '';
+        if (r.error) { $('list').innerHTML = '<p class="loading">글을 불러오지 못했어요.</p>'; return; }
+        if (first && (!r.data || !r.data.length)) {
+          $('list').innerHTML = '<p class="loading">아직 글이 없어요. 첫 글을 남겨보세요!</p>';
+          return;
+        }
+        render(r.data || []);
+        offset += (r.data || []).length;
+        $('moreBtn').style.display = (r.data && r.data.length === PAGE) ? 'inline-flex' : 'none';
+      });
+  }
+  $('moreBtn').addEventListener('click', load);
+  load();
+})();
+</script>
+
+<!-- 방문 집계 — 쿠키 없이, 페이지뷰(반복 방문 포함)까지 Abacus로 셉니다 -->
+<script>
+(function(){
+  if (/^(localhost|127\.0\.0\.1)$/.test(location.hostname) || location.protocol==='file:') return;
+  var b='https://abacus.jasoncameron.dev/hit/oreumgames/';
+  function h(k){ try{ fetch(b+k,{mode:'cors'}).catch(function(){}); }catch(e){} }
+  h('pageviews'); h('pv_board');
+})();
+</script>
+</body>
+</html>
