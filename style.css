@@ -330,79 +330,8 @@ h1, h2, h3 { line-height: 1.3; letter-spacing: -.02em; margin: 0; }
 .doc tbody th { text-align: left; color: var(--ink); white-space: nowrap; width: 1%; }
 .doc tbody tr:last-child th, .doc tbody tr:last-child td { border-bottom: 0; }
 
-/* ── 머리띠의 한 줄 소개 ──────────────── */
-.brand-line {
-  margin: 0; margin-right: auto; padding-left: 4px;
-  font-size: 14px; color: var(--muted); white-space: nowrap;
-}
-/* 언어 바꾸는 알약 — 메뉴 오른쪽 끝 */
-.nav-lang {
-  margin-left: 8px; border: 1px solid var(--line-2);
-  background: rgba(255,255,255,.7); letter-spacing: .06em; font-size: 13px !important;
-}
-.nav-lang:hover { border-color: var(--green); }
-
-/* ── 게임 한눈에 보기 (카드 줄) ────────── */
-.lineup-section { padding-top: 74px; padding-bottom: 24px; }
-.lineup {
-  list-style: none; margin: 0; padding: 0;
-  display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px;
-}
-/* 개발 중인 것은 아직 하나뿐입니다 — 나온 카드와 같은 너비로 왼쪽에 둡니다 */
-.lineup-dev { padding-top: 12px; }
-.lineup-one { grid-template-columns: 1fr; max-width: calc((100% - 18px) / 2); }
-.gcard {
-  display: flex; flex-direction: column; height: 100%;
-  background: var(--panel); border: 1px solid var(--line);
-  border-radius: var(--radius); box-shadow: var(--shadow);
-  overflow: hidden; text-decoration: none; color: inherit;
-  transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease;
-}
-.gcard:hover {
-  transform: translateY(-3px); border-color: var(--line-2);
-  box-shadow: 0 2px 4px rgba(60,55,35,.06), 0 20px 40px rgba(60,55,35,.13);
-}
-/* 카드 위쪽 가는 띠로 작품 성격을 구분합니다 (아래 자세한 카드들과 같은 색) */
-.gcard-warm { border-top: 3px solid var(--ember); }
-.gcard-cold { border-top: 3px solid var(--cold); }
-.gcard-dark { border-top: 3px solid #d9b36a; }
-
-.gcard-top { padding: 22px 22px 16px; flex: 1; }
-.gcard-top h3 {
-  font-size: 14px; font-weight: 800; letter-spacing: .1em;
-  color: var(--green-lit); text-transform: uppercase;
-}
-.gcard-top h3 span {
-  display: block; margin-top: 5px;
-  font-size: 20px; letter-spacing: -.02em; text-transform: none; color: var(--ink);
-}
-.gcard-badge {
-  display: inline-block; margin: 12px 0 0; padding: 3px 11px;
-  font-size: 12px; font-weight: 700; border-radius: 999px;
-}
-.gcard-badge.is-out { background: var(--green-soft); color: var(--green-lit); border: 1px solid var(--green-edge); }
-.gcard-badge.is-dev { background: rgba(61,138,151,.09); color: var(--cold-ink); border: 1px solid rgba(61,138,151,.4); }
-.gcard-desc { margin: 12px 0 0; font-size: 14.5px; line-height: 1.6; color: var(--ink-2); }
-
-.gcard-art { margin-top: auto; }
-.gcard-art img { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; }
-/* 사진이 없는 작품은 표식으로 자리를 채웁니다 */
-.gcard-art-sign {
-  aspect-ratio: 16 / 10;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 64px; color: #d9b36a;
-  background: linear-gradient(160deg, #26201a, #171310);
-}
-
 /* ── 반응형 ───────────────────────────── */
-@media (max-width: 1000px) {
-  /* 소개 한 줄은 메뉴와 부딪히기 전에 접어둡니다 */
-  .brand-line { display: none; }
-}
-
 @media (max-width: 860px) {
-  .lineup, .lineup-one { grid-template-columns: 1fr; max-width: none; }
-  .lineup-section { padding-top: 52px; }
   .hero-inner { padding: 76px 0 120px; }
   .moon { top: 30px; left: auto; right: 7%; margin-left: 0; width: 54px; height: 54px; }
   .studio { grid-template-columns: 1fr; }
