@@ -23,7 +23,8 @@
 
 ```sql
 -- 비밀번호를 안전하게 저장하기 위한 준비
-create extension if not exists pgcrypto;
+-- (Supabase는 이 도구를 extensions 라는 칸에 넣어두므로, 아래 함수들이 그 칸도 찾아보게 합니다)
+create extension if not exists pgcrypto with schema extensions;
 
 -- 글 표
 create table if not exists posts (
@@ -45,7 +46,7 @@ create policy "read all" on posts for select using (true);
 
 -- 글쓰기는 이 함수로만 (비밀번호를 알아볼 수 없게 바꿔 저장합니다)
 create or replace function create_post(p_nick text, p_body text, p_image text, p_pw text)
-returns bigint language plpgsql security definer set search_path = public as $$
+returns bigint language plpgsql security definer set search_path = public, extensions as $$
 declare new_id bigint;
 begin
   if p_pw is null or p_pw !~ '^[0-9]{4}$' then
@@ -66,7 +67,7 @@ end $$;
 
 -- 지우기는 비밀번호가 맞을 때만
 create or replace function delete_post(p_id bigint, p_pw text)
-returns boolean language plpgsql security definer set search_path = public as $$
+returns boolean language plpgsql security definer set search_path = public, extensions as $$
 declare hit boolean;
 begin
   delete from posts where id = p_id and pw_hash = crypt(p_pw, pw_hash)
