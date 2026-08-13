@@ -178,6 +178,14 @@ h1, h2, h3 { line-height: 1.3; letter-spacing: -.02em; margin: 0; }
 }
 .shots figcaption { margin-top: 8px; font-size: 13px; color: var(--muted); text-align: center; }
 
+/* 사진 한 장이 카드 가운데를 채우는 경우 (MBTI사주) — 위아래로 넉넉히 띄웁니다 */
+.game-art { margin: 30px auto 4px; max-width: 460px; }
+.game-art img {
+  width: 100%; height: auto; display: block;
+  border-radius: 14px; border: 1px solid var(--line-2);
+  box-shadow: var(--shadow);
+}
+
 .game-cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 26px; }
 
 /* ── 섬에서 만나는 사람들 — 평소엔 접혀 있고 제목을 누르면 펼쳐집니다 ── */
