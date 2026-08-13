@@ -421,6 +421,17 @@ h1, h2, h3 { line-height: 1.3; letter-spacing: -.02em; margin: 0; }
 .board .loading { color: var(--muted); font-size: 14px; text-align: center; padding: 26px 0; }
 #moreBtn { display: block; margin: 18px auto 0; }
 
+
+/* 푸터·본문의 이메일 단추 — 링크처럼 보이게 (주소는 눌러야 나옵니다) */
+.mailbtn {
+  background: none; border: 0; padding: 0; margin: 0;
+  font: inherit; color: var(--green-lit); cursor: pointer;
+  text-decoration: underline; text-underline-offset: 3px;
+}
+.mailbtn:hover { color: var(--ember-ink); }
+.footer-nav .mailbtn { color: var(--ink-2); font-size: 14px; text-decoration: none; }
+.footer-nav .mailbtn:hover { color: var(--green-lit); text-decoration: underline; }
+
 /* ── 반응형 ───────────────────────────── */
 @media (max-width: 860px) {
   .hero-inner { padding: 76px 0 120px; }
