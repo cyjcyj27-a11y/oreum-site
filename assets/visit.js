@@ -102,12 +102,18 @@
   //  - 미리 남기면: 세기 실패한 방문이 그날 영영 사라집니다 (과소 집계)
   //  - 두 카운터가 표시 하나를 같이 쓰면: 한쪽만 실패해도 다음 방문에 성공한 쪽이 또 +1 됩니다 (과대 집계)
   // 그래서 카운터마다 표시를 따로 둡니다.
+  /* 방문자 수를 화면에 그리는 곳은 홈 푸터 한 곳뿐입니다.
+     게임·사주 같은 다른 페이지에서는 숫자를 받아봐야 쓸 데가 없는데도 매번 읽어오고 있었습니다.
+     Abacus 는 10초에 30번까지만 받아서(429), 쓸데없는 요청이 진짜 필요한 요청을 밀어냅니다. */
+  var needNumber = !!document.getElementById('visitCount');
+
   function countOnce(flag, key) {
     var done = store ? store.getItem(flag) === today : true;
     var skip = local || fromUs || done;
     var hitUrl = base + 'hit/oreumgames/' + key;
     var getUrl = base + 'get/oreumgames/' + key;
-    if (skip) return get(getUrl);
+    // 셀 것도 없고 보여줄 곳도 없으면 아무것도 안 부릅니다
+    if (skip) return needNumber ? get(getUrl) : Promise.resolve(null);
     // 표시를 먼저 남기고 요청합니다.
     // 응답을 기다렸다 남기면, 답이 오기 전에 다른 페이지로 넘어간 사람이
     // 다음 페이지에서 또 세어집니다(한 사람이 페이지마다 한 번씩).
@@ -116,7 +122,8 @@
       if (v) return v;
       // 못 셌으면 표시를 지워 다음 방문에 다시 시도합니다
       if (store) { try { store.removeItem(flag); } catch (e) {} }
-      return get(getUrl);   // 세지는 못했지만 화면에 숫자는 보여줍니다
+      // 세지는 못했지만 홈이라면 화면에 숫자는 보여줍니다
+      return needNumber ? get(getUrl) : null;
     });
   }
 
@@ -170,121 +177,16 @@
     else if (first !== today) { onceToday('oreum_ret', 'returning'); }
   }
 
-  // ② 유입 경로 — 어디서 눌러 들어왔나 (하루 1회)
-  var r = (document.referrer || '').toLowerCase(), src;
-  if (!r) src = 'direct';
-  else if (/tiktok|musical\.ly/.test(r)) src = 'tiktok';
-  else if (/instagram|(^|\/\/|\.)ig\./.test(r)) src = 'instagram';
-  else if (/threads\.net|threads\.com/.test(r)) src = 'threads';
-  // r 은 호스트가 아니라 주소 전체("https://x.com/…")입니다. 그래서 //x.com 형태도 잡아야 합니다.
-  // 이게 빠져 있어서 X에서 온 사람이 전부 "기타"로 새고 있었습니다 (트윗 링크는 t.co 로 나갑니다)
-  else if (/(^|\/\/|\.)x\.com|twitter|(^|\/\/|\.)t\.co/.test(r)) src = 'x';
-  else if (/kakao|kko|daum/.test(r)) src = 'kakao';
-  else if (/youtube|youtu\.be/.test(r)) src = 'youtube';
-  else if (/facebook|fb\.com|fb\.me/.test(r)) src = 'facebook';
-  else if (/google|naver|bing|search|yahoo|duckduckgo|zum/.test(r)) src = 'search';
-  else if (r.indexOf('oreumgames.com') > -1) src = 'direct';
-  else src = 'other';
-  onceToday('oreum_src', 'src_' + src);
+  /* 유입 경로(src_*)와 국가(cc_*) 집계는 뺐습니다.
 
-  // ── 국가별 — 실제 접속 지역을 봅니다. 하루 1회.
-  //
-  // 중요: 방문 수 집계(위)는 이미 끝난 뒤에 이걸 합니다.
-  // 나라를 못 알아내도 방문 수는 절대 안 없어집니다. 나라만 "기타"로 갈 뿐입니다.
-  //
-  // 예전에는 브라우저 시간대로 나라를 추측했는데, 그러면 에콰도르가 미국으로 잡히고
-  // 이집트·예멘 같은 나라는 아예 구분이 안 됐습니다. 이제 접속 지역을 직접 확인합니다.
-  // (나라 글자 두 개만 받아옵니다. 주소나 개인정보는 저장하지 않습니다)
+     둘 다 구글 애널리틱스가 이미 더 정확하게 보여줍니다.
+     유입 경로는 특히 못 믿을 상태였습니다. play.oreumgames.com/ 과 /game/en/ 같은
+     리다이렉트 징검다리를 지나면 "어디서 왔나"가 우리 주소로 덮여서 전부 '직접'으로
+     잡혔습니다. 2026-08-14 기준 105명 중 93명(89%)이 '직접'이었습니다.
+     인앱브라우저(인스타·X)는 애초에 출처를 안 넘겨줍니다.
 
-  // 대시보드에서 읽어올 수 있게, 아는 나라만 그대로 쓰고 나머지는 기타로 모읍니다.
-  var KNOWN = ('KR US JP TW CN HK SG MY TH PH VN ID IN PK BD GB IE FR DE ES IT NL PL RO RU TR ' +
-               'SE NO FI CZ HU GR PT UA CA AU NZ MX BR AR CL CO PE EC EG SA AE YE IQ IR MA ' +
-               'DZ TN NG KE ZA').split(' ');
+     국가는 접속 지역을 물어보느라 바깥 서버를 두 곳이나 두드리고 있었습니다.
+     그만큼 페이지가 늦게 뜨는데, 같은 숫자를 구글이 공짜로 줍니다.
 
-  // 목록에 없는 유럽 나라(덴마크·오스트리아·스위스 등)를 그냥 "기타"로 버리면
-  // 유럽에서 온 사람이 어디에도 안 잡힙니다. 유럽이면 "기타 유럽"으로 모읍니다.
-  var EU_ETC = ('AT BE BG CY CZ DK EE FI HR HU IE IS LI LT LU LV MT NL RS SI SK ' +
-                'AL BA MD ME MK UA BY GE AM AZ').split(' ');
-  function countCountry(code) {
-    if (KNOWN.indexOf(code) === -1) code = (EU_ETC.indexOf(code) > -1) ? 'EU' : 'ETC';
-    onceToday('oreum_cc', 'cc_' + code);
-  }
-
-  // 시간대로 알아내는 옛 방식 — 접속 지역 확인이 막혔을 때만 씁니다 (안 하는 것보단 낫습니다)
-  var tz = ''; try { tz = (Intl.DateTimeFormat().resolvedOptions().timeZone) || ''; } catch (e) {}
-  var tzMap = {
-    'Asia/Seoul': 'KR', 'Asia/Pyongyang': 'KR', 'Asia/Tokyo': 'JP',
-    'Asia/Shanghai': 'CN', 'Asia/Urumqi': 'CN', 'Asia/Chongqing': 'CN', 'Asia/Harbin': 'CN',
-    'Asia/Taipei': 'TW', 'Asia/Hong_Kong': 'HK', 'Asia/Macau': 'HK',
-    'Asia/Singapore': 'SG', 'Asia/Kuala_Lumpur': 'MY', 'Asia/Kuching': 'MY',
-    'Asia/Bangkok': 'TH', 'Asia/Manila': 'PH', 'Asia/Ho_Chi_Minh': 'VN', 'Asia/Saigon': 'VN',
-    'Asia/Jakarta': 'ID', 'Asia/Makassar': 'ID', 'Asia/Pontianak': 'ID', 'Asia/Jayapura': 'ID',
-    'Asia/Kolkata': 'IN', 'Asia/Calcutta': 'IN',
-    'Asia/Karachi': 'PK', 'Asia/Dhaka': 'BD',
-    'Africa/Cairo': 'EG', 'Asia/Aden': 'YE', 'Asia/Riyadh': 'SA', 'Asia/Dubai': 'AE',
-    'Asia/Baghdad': 'IQ', 'Asia/Tehran': 'IR', 'Europe/Istanbul': 'TR', 'Asia/Istanbul': 'TR',
-    'Africa/Casablanca': 'MA', 'Africa/Algiers': 'DZ', 'Africa/Tunis': 'TN',
-    'Africa/Lagos': 'NG', 'Africa/Nairobi': 'KE', 'Africa/Johannesburg': 'ZA',
-    'Europe/London': 'GB', 'Europe/Dublin': 'IE', 'Europe/Paris': 'FR',
-    'Europe/Berlin': 'DE', 'Europe/Madrid': 'ES', 'Europe/Rome': 'IT',
-    'Europe/Amsterdam': 'NL', 'Europe/Warsaw': 'PL', 'Europe/Bucharest': 'RO',
-    'Europe/Moscow': 'RU', 'Europe/Kiev': 'UA', 'Europe/Kyiv': 'UA',
-    'Europe/Stockholm': 'SE', 'Europe/Oslo': 'NO', 'Europe/Helsinki': 'FI',
-    'Europe/Prague': 'CZ', 'Europe/Budapest': 'HU', 'Europe/Athens': 'GR', 'Europe/Lisbon': 'PT',
-    'Australia/Sydney': 'AU', 'Australia/Melbourne': 'AU', 'Australia/Brisbane': 'AU', 'Australia/Perth': 'AU', 'Australia/Adelaide': 'AU',
-    'Pacific/Auckland': 'NZ', 'Pacific/Chatham': 'NZ',
-    'America/Toronto': 'CA', 'America/Vancouver': 'CA', 'America/Edmonton': 'CA', 'America/Winnipeg': 'CA', 'America/Halifax': 'CA',
-    'America/Mexico_City': 'MX', 'America/Monterrey': 'MX', 'America/Cancun': 'MX', 'America/Tijuana': 'MX',
-    'America/Sao_Paulo': 'BR', 'America/Bahia': 'BR', 'America/Fortaleza': 'BR',
-    'America/Guayaquil': 'EC', 'America/Bogota': 'CO', 'America/Lima': 'PE',
-    'America/Santiago': 'CL', 'America/Argentina/Buenos_Aires': 'AR'
-  };
-  // 미국 시간대 — 예전에는 "America/로 시작하면 전부 미국"이라 에콰도르·콜롬비아 같은
-  // 중남미 방문자가 몽땅 미국으로 잡혔습니다. 이제 미국은 아래 목록으로만 셉니다.
-  var US_TZ = /^America\/(New_York|Chicago|Denver|Los_Angeles|Phoenix|Anchorage|Detroit|Boise|Juneau|Nome|Sitka|Yakutat|Adak|Menominee|Indiana\/|Kentucky\/|North_Dakota\/)|^Pacific\/(Honolulu|Midway|Guam|Pago_Pago)/;
-  function guessByTimezone() {
-    var cc = tzMap[tz];
-    if (!cc) {
-      if (US_TZ.test(tz)) cc = 'US';
-      else if (tz.indexOf('Europe/') === 0) cc = 'EU';       // 나머지 유럽 묶음
-      else cc = 'ETC';
-    }
-    return cc;
-  }
-
-  // 오늘 이미 셌으면 접속 지역을 물어볼 것도 없습니다 (쓸데없는 요청을 안 보냅니다)
-  var ccDone = false;
-  try { ccDone = !store || fromUs || store.getItem('oreum_cc') === today; } catch (e) { ccDone = true; }
-
-  if (!ccDone && !local) {
-    var settled = false;
-    var settle = function (code) {
-      if (settled) return;
-      settled = true;
-      countCountry(code);
-    };
-    // 어느 쪽이든 못 받으면 옛 방식(시간대)으로라도 반드시 셉니다
-    var giveUp = setTimeout(function () { settle(guessByTimezone()); }, 2500);
-    var done = function (code) { clearTimeout(giveUp); settle(code); };
-
-    fetch('https://www.cloudflare.com/cdn-cgi/trace', { mode: 'cors' })
-      .then(function (r) { return r.ok ? r.text() : Promise.reject(0); })
-      .then(function (t) {
-        var m = t.match(/loc=([A-Z]{2})/);
-        if (!m) throw 0;
-        done(m[1]);
-      })
-      .catch(function () {
-        // 첫 번째가 막히면 다른 곳으로 한 번 더 (광고 차단기가 특정 주소만 막는 경우가 있습니다)
-        return fetch('https://get.geojs.io/v1/ip/country.json', { mode: 'cors' })
-          .then(function (r) { return r.ok ? r.json() : Promise.reject(0); })
-          .then(function (j) {
-            if (!j || !/^[A-Z]{2}$/.test(j.country)) throw 0;
-            done(j.country);
-          })
-          .catch(function () { done(guessByTimezone()); });
-      });
-  } else if (!local) {
-    countCountry(guessByTimezone());   // 이미 센 날이면 onceToday에서 바로 걸러집니다
-  }
+     남은 것은 방문 수(total · day_날짜)와 재방문(returning)뿐입니다. */
 })();

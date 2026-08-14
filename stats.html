@@ -83,20 +83,19 @@
   </div>
 
   <div class="card">
-    <h2>② 유입 경로</h2>
-    <div id="sources"><div class="loading">불러오는 중…</div></div>
-  </div>
-
-  <div class="card">
-    <h2>🌏 국가별 <span class="em">영문판이 어디서 통하나</span></h2>
-    <div id="countries"><div class="loading">불러오는 중…</div></div>
-    <div class="note">실제 접속 지역으로 잡습니다. 더 자세한 건 구글 애널리틱스에서 보세요.</div>
-  </div>
-
-  <div class="card">
     <h2>④ 체류 · 몰입 <span class="em">시작한 사람 중 얼마나 오래 붙잡혔나</span></h2>
     <div id="dwell"><div class="loading">불러오는 중…</div></div>
     <div class="note">게임을 켠 세션(새로고침·다시 접속도 한 세션) 기준입니다. 오래 남을수록 게임이 재밌다는 뜻이에요.</div>
+  </div>
+
+  <div class="card">
+    <h2>⑦ 사주 ↔ 실제 MBTI <span class="em">추정표를 고칠 근거를 모으는 중</span></h2>
+    <div id="pair"><div class="note">칸이 많아 위 지표와 같이 부르면 화면이 늦게 뜹니다. 필요할 때만 눌러 주세요.</div></div>
+    <a class="reload" id="pairBtn">↻ 불러오기</a>
+    <div class="note">MBTI사주에서 <b>본인이 직접 MBTI를 고른 사람</b>만 셉니다. 추정값은 정답이 아니라서 빼고,
+      같은 사주·같은 MBTI는 한 번만 셉니다. 생년월일은 보내지 않고 "십신 다섯 종류 중 하나 + 글자 하나"만 셉니다.
+      각 줄의 반대쪽(I·S·F·P)은 100에서 빼면 됩니다. 표본이 30을 넘어야 눈으로 볼 만합니다.<br>
+      아직 아무도 안 쌓였으면 10초쯤, 쌓였으면 40초쯤 걸립니다.</div>
   </div>
 
   <div class="foot">
@@ -125,7 +124,9 @@
     tries = tries || 0;
     return timed(fetch(base + k, { mode: 'cors' }), 8000)
       .then(function (r) {
-        if (r.status === 404) return 0;
+        // 404 = 아직 한 번도 안 세어진 칸, 400 = 이름이 잘못된 칸. 둘 다 값은 그냥 0입니다.
+        // 400을 실패로 보고 재시도하던 탓에 없는 칸 하나마다 12초씩 붙잡혀 있었습니다.
+        if (r.status === 404 || r.status === 400) return 0;
         if (!r.ok) throw new Error('HTTP ' + r.status);
         return r.json().then(function (j) {
           return (j && typeof j.value === 'number') ? j.value : 0;
@@ -137,34 +138,16 @@
       });
   }
   var today = ymd(new Date());
-  // 나라는 이제 시간대 추측이 아니라 실제 접속 지역으로 잡힙니다 (visit.js)
-  var ccDefs = [['🇰🇷 한국', 'KR'], ['🇺🇸 미국', 'US'], ['🇯🇵 일본', 'JP'], ['🇹🇼 대만', 'TW'],
-                ['🇨🇳 중국', 'CN'], ['🇭🇰 홍콩', 'HK'], ['🇸🇬 싱가포르', 'SG'], ['🇲🇾 말레이시아', 'MY'],
-                ['🇹🇭 태국', 'TH'], ['🇵🇭 필리핀', 'PH'], ['🇻🇳 베트남', 'VN'], ['🇮🇩 인도네시아', 'ID'],
-                ['🇮🇳 인도', 'IN'], ['🇵🇰 파키스탄', 'PK'], ['🇧🇩 방글라데시', 'BD'],
-                ['🇬🇧 영국', 'GB'], ['🇮🇪 아일랜드', 'IE'], ['🇩🇪 독일', 'DE'], ['🇫🇷 프랑스', 'FR'],
-                ['🇪🇸 스페인', 'ES'], ['🇮🇹 이탈리아', 'IT'], ['🇳🇱 네덜란드', 'NL'], ['🇵🇱 폴란드', 'PL'],
-                ['🇷🇴 루마니아', 'RO'], ['🇷🇺 러시아', 'RU'], ['🇹🇷 튀르키예', 'TR'], ['🇺🇦 우크라이나', 'UA'],
-                ['🇸🇪 스웨덴', 'SE'], ['🇳🇴 노르웨이', 'NO'], ['🇫🇮 핀란드', 'FI'],
-                ['🇨🇿 체코', 'CZ'], ['🇭🇺 헝가리', 'HU'], ['🇬🇷 그리스', 'GR'], ['🇵🇹 포르투갈', 'PT'],
-                ['🇨🇦 캐나다', 'CA'], ['🇦🇺 호주', 'AU'], ['🇳🇿 뉴질랜드', 'NZ'],
-                ['🇲🇽 멕시코', 'MX'], ['🇧🇷 브라질', 'BR'], ['🇦🇷 아르헨티나', 'AR'], ['🇨🇱 칠레', 'CL'],
-                ['🇨🇴 콜롬비아', 'CO'], ['🇵🇪 페루', 'PE'], ['🇪🇨 에콰도르', 'EC'],
-                ['🇪🇬 이집트', 'EG'], ['🇸🇦 사우디', 'SA'], ['🇦🇪 UAE', 'AE'], ['🇾🇪 예멘', 'YE'],
-                ['🇮🇶 이라크', 'IQ'], ['🇮🇷 이란', 'IR'], ['🇲🇦 모로코', 'MA'], ['🇩🇿 알제리', 'DZ'],
-                ['🇹🇳 튀니지', 'TN'], ['🇳🇬 나이지리아', 'NG'], ['🇰🇪 케냐', 'KE'], ['🇿🇦 남아공', 'ZA'],
-                ['🇪🇺 기타 유럽', 'EU'], ['🌐 기타', 'ETC']];
+  // 유입 경로(src_*)와 국가(cc_*)는 뺐습니다. 구글 애널리틱스가 더 정확하게 보여줍니다.
   var keys = ['total', 'returning', 'game_open', 'game_session', 'game_players', 'game_returning',
               'pageviews', 'pv_home', 'pv_saju', 'pv_guide', 'pv_support', 'pv_privacy',
               'pv_board', 'pv_board_en', 'pv_privacy_play', 'day_' + today,
-              'src_tiktok', 'src_instagram', 'src_threads', 'src_x', 'src_kakao',
-              'src_youtube', 'src_facebook', 'src_search', 'src_direct', 'src_other',
-              'play_1m', 'play_3m', 'play_10m']
-             .concat(ccDefs.map(function (c) { return 'cc_' + c[1]; }));
+              'play_1m', 'play_3m', 'play_10m'];
   // 한꺼번에 많이 부르면 속도 제한에 걸리므로 나눠 부르고 사이에 잠깐 쉽니다.
   // 3개씩 260ms로는 화면이 뜨기까지 30초가 걸려서 멈춘 것처럼 보였습니다.
   // 막히면 위 get()이 알아서 쉬었다 다시 부르므로, 여기서는 조금 넉넉하게 갑니다.
-  function fetchChunked(list, size) {
+  // Abacus 는 10초에 30번까지만 받습니다(429). 칸이 많으면 쉬는 시간을 늘려 부릅니다.
+  function fetchChunked(list, size, gap) {
     var out = [], i = 0;
     function next() {
       if (i >= list.length) return Promise.resolve(out);
@@ -175,7 +158,7 @@
       w.style.color = '#6b7280'; w.style.display = 'block';
       // map이 넘겨주는 순번이 재시도 횟수로 잘못 들어가지 않게 감싸서 부릅니다
       return Promise.all(chunk.map(function (k) { return get(k); }))
-        .then(function (vs) { out = out.concat(vs); return sleep(150); })
+        .then(function (vs) { out = out.concat(vs); return sleep(gap || 150); })
         .then(next);
     }
     return next().then(function (res) {
@@ -264,33 +247,6 @@
     document.getElementById('start-note').textContent =
       '홈페이지에 온 ' + fmt(d.total) + '명 중 ' + fmt(d.game_open) + '명이 실제로 게임을 열었어요. (게임 링크로 바로 온 사람이 많으면 100%를 넘을 수도 있어요)';
 
-    // ② 유입 경로 — 값이 0인 채널은 접어두고, 들어온 것만 큰 순서로 보여줍니다
-    var srcDefs = [['틱톡', 'src_tiktok'], ['인스타', 'src_instagram'], ['스레드', 'src_threads'],
-                   ['X', 'src_x'], ['카톡', 'src_kakao'], ['유튜브', 'src_youtube'],
-                   ['페북', 'src_facebook'], ['검색', 'src_search'], ['직접', 'src_direct'], ['기타', 'src_other']];
-    var srcTotal = srcDefs.reduce(function (a, s) { return a + d[s[1]]; }, 0) || 1;
-    var shown = srcDefs.filter(function (s) { return d[s[1]] > 0; }).sort(function (a, b) { return d[b[1]] - d[a[1]]; });
-    if (!shown.length) shown = [['아직 없음', null]];
-    document.getElementById('sources').innerHTML = shown.map(function (s) {
-      if (!s[1]) return '<div class="note">아직 유입 기록이 없어요. 링크로 사람들이 들어오면 채널별로 쌓입니다.</div>';
-      var n = d[s[1]], pct = Math.round(n / srcTotal * 100);
-      return '<div class="bar"><div class="name">' + s[0] + '</div>' +
-             '<div class="track"><div class="fill" style="width:' + Math.max(pct, n ? 4 : 0) + '%"></div></div>' +
-             '<div class="val">' + fmt(n) + '명 · ' + pct + '%</div></div>';
-    }).join('');
-
-    // 🌏 국가별 — 방문 있는 나라만 큰 순서로
-    var ccTotal = ccDefs.reduce(function (a, c) { return a + d['cc_' + c[1]]; }, 0) || 1;
-    var ccShown = ccDefs.filter(function (c) { return d['cc_' + c[1]] > 0; }).sort(function (a, b) { return d['cc_' + b[1]] - d['cc_' + a[1]]; });
-    document.getElementById('countries').innerHTML = ccShown.length
-      ? ccShown.map(function (c) {
-          var n = d['cc_' + c[1]], pct = Math.round(n / ccTotal * 100);
-          return '<div class="bar"><div class="name" style="width:112px">' + c[0] + '</div>' +
-                 '<div class="track"><div class="fill" style="width:' + Math.max(pct, n ? 4 : 0) + '%;background:var(--cold)"></div></div>' +
-                 '<div class="val">' + fmt(n) + '명 · ' + pct + '%</div></div>';
-        }).join('')
-      : '<div class="note">아직 국가 기록이 없어요. 방문이 쌓이면 나라별로 나뉩니다.</div>';
-
     // ④ 체류 · 몰입 — 게임 세션(매 접속) 기준. 분모=세션 수, 분자도 세션 단위라 100%를 안 넘습니다.
     var denom = d.game_session || d.game_open || 1;
     var dwellDefs = [['1분+', d.play_1m], ['3분+', d.play_3m], ['10분+', d.play_10m]];
@@ -301,6 +257,71 @@
              '<div class="val">' + fmt(s[1]) + '회 · ' + pct + '%</div></div>';
     }).join('');
   }).catch(function (e) { showReadError(); console.error(e); });
+
+  /* ⑦ 사주 ↔ 실제 MBTI — 누르면 그때 불러옵니다.
+     칸이 90개라 위 지표와 같이 부르면 화면 뜨는 데 1분이 걸립니다. */
+  /* 칸 이름은 영문입니다. Abacus 가 한글이 든 이름을 400으로 거절합니다.
+     [보이는 이름, 칸 이름] 순서이고, 칸 이름은 saju/index.html 의 logMbtiPair 와 똑같아야 합니다. */
+  var GODS = [['비겁', 'bigeop'], ['식상', 'siksang'], ['재성', 'jaeseong'],
+              ['관성', 'gwanseong'], ['인성', 'inseong']];
+  var ELS  = [['목', 'mok'], ['화', 'hwa'], ['토', 'to'], ['금', 'geum'], ['수', 'su']];
+  // 축마다 한쪽만 셉니다. 반대쪽은 분모에서 빼면 나옵니다.
+  var AXES = [['E', 'E / I'], ['N', 'N / S'], ['T', 'T / F'], ['J', 'J / P']];
+
+  document.getElementById('pairBtn').addEventListener('click', function () {
+    var box = document.getElementById('pair');
+    box.innerHTML = '<div class="loading">불러오는 중…</div>';
+
+    /* 분모(십신 5 + 오행 5)부터 봅니다.
+       아직 아무도 안 쌓였으면 여기서 끝내면 되는데, 예전에는 빈 상태에서도 50칸을 전부
+       불러오느라 100초를 기다려야 했습니다. 이제 열 칸만 보고 바로 끝납니다.
+
+       Abacus 는 10초에 30번까지만 받습니다(429). 넘기면 되던 것도 영영 안 뜹니다.
+       그래서 6개씩 2.6초 간격 — 10초에 24번으로 제한 안쪽입니다. */
+    var denomKeys = GODS.map(function (g) { return 'sj_' + g[1]; })
+                        .concat(ELS.map(function (e) { return 'sw_' + e[1]; }));
+
+    fetchChunked(denomKeys, 6, 2600).then(function (dv) {
+      var d = {}; denomKeys.forEach(function (k, i) { d[k] = dv[i]; });
+      var total = GODS.reduce(function (a, g) { return a + d['sj_' + g[1]]; }, 0);
+      if (!total) {
+        box.innerHTML = '<div class="note">아직 한 명도 안 쌓였습니다. MBTI를 직접 고르고 분석한 사람이 생기면 여기에 나옵니다.</div>';
+        return null;
+      }
+      // 쌓인 게 있을 때만 분자를 부릅니다
+      var numKeys = [];
+      GODS.forEach(function (g) { AXES.forEach(function (a) { numKeys.push('sj_' + g[1] + '_' + a[0]); }); });
+      ELS.forEach(function (e) { AXES.forEach(function (a) { numKeys.push('sw_' + e[1] + '_' + a[0]); }); });
+      return fetchChunked(numKeys, 6, 2600).then(function (nv) {
+        numKeys.forEach(function (k, i) { d[k] = nv[i]; });
+        return { d: d, total: total };
+      });
+    }).then(function (r) {
+      if (!r) return;
+      var d = r.d, total = r.total;
+      function 표(제목, 목록, 접두) {
+        var h = ['<div class="note" style="margin:14px 0 6px"><b>' + 제목 + '</b></div>'];
+        목록.forEach(function (x) {
+          var n = d[접두 + x[1]];
+          if (!n) return;
+          var 줄 = AXES.map(function (a) {
+            var pct = Math.round(d[접두 + x[1] + '_' + a[0]] / n * 100);
+            return a[1] + ' ' + pct + ':' + (100 - pct);
+          }).join('  ·  ');
+          h.push('<div class="bar"><div class="name">' + x[0] + '</div>' +
+                 '<div class="track" style="background:transparent;height:auto">' +
+                 '<span style="font-size:12.5px;color:var(--ink2)">' + 줄 + '</span></div>' +
+                 '<div class="val">' + n + '명</div></div>');
+        });
+        return h.join('');
+      }
+      box.innerHTML = '<div class="big">' + total + '<small>명 모임</small></div>' +
+                      표('십신별', GODS, 'sj_') + 표('오행별', ELS, 'sw_');
+    }).catch(function (e) {
+      box.innerHTML = '<div class="note">못 읽었습니다. 잠시 뒤 다시 눌러보세요.</div>';
+      console.error(e);
+    });
+  });
 })();
 </script>
 </body>
