@@ -20,73 +20,73 @@
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://oreumgames.com/board.html</loc>
-    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/board.html"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/board.html"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/board.html"/>
+    <loc>https://oreumgames.com/board/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/board/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/board/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/board/"/>
     <lastmod>2026-08-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://oreumgames.com/en/board.html</loc>
-    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/board.html"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/board.html"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/board.html"/>
+    <loc>https://oreumgames.com/en/board/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/board/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/board/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/board/"/>
     <lastmod>2026-08-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://oreumgames.com/guide.html</loc>
-    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/guide.html"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/guide.html"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/guide.html"/>
+    <loc>https://oreumgames.com/guide/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/guide/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/guide/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/guide/"/>
     <lastmod>2026-08-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://oreumgames.com/en/guide.html</loc>
-    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/guide.html"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/guide.html"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/guide.html"/>
+    <loc>https://oreumgames.com/en/guide/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/guide/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/guide/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/guide/"/>
     <lastmod>2026-08-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://oreumgames.com/support.html</loc>
-    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/support.html"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/support.html"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/support.html"/>
+    <loc>https://oreumgames.com/support/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/support/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/support/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/support/"/>
     <lastmod>2026-08-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://oreumgames.com/en/support.html</loc>
-    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/support.html"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/support.html"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/support.html"/>
+    <loc>https://oreumgames.com/en/support/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/support/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/support/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/support/"/>
     <lastmod>2026-08-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://oreumgames.com/privacy.html</loc>
-    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/privacy.html"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/privacy.html"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/privacy.html"/>
+    <loc>https://oreumgames.com/privacy/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/privacy/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/privacy/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/privacy/"/>
     <lastmod>2026-08-14</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://oreumgames.com/en/privacy.html</loc>
-    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/privacy.html"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/privacy.html"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/privacy.html"/>
+    <loc>https://oreumgames.com/en/privacy/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/privacy/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/privacy/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/privacy/"/>
     <lastmod>2026-08-14</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
