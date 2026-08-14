@@ -1,3 +1,24 @@
+// ─────────────────────────────────────────────────────────────
+// 구글 애널리틱스 (GA4) — 나라·유입 경로·체류를 정확히 봅니다.
+// 숫자는 analytics.google.com 에서 봅니다. 홈페이지 푸터의 방문자 수는
+// 아래 Abacus 카운터가 그리므로, 둘은 각자 맡은 일이 다릅니다.
+//
+// 맨 위에 둡니다. 아래 코드에 무슨 일이 생겨도 이건 먼저 실행되도록.
+// ─────────────────────────────────────────────────────────────
+(function () {
+  var GA_ID = 'G-SSBQ2WTHGG';
+  // 내 컴퓨터에서 열어보는 건 지표에 안 넣습니다
+  if (/^(localhost|127\.0\.0\.1)$/.test(location.hostname) || location.protocol === 'file:') return;
+  var s = document.createElement('script');
+  s.async = true;
+  s.src = 'https://www.googletagmanager.com/gtag/js?id=' + GA_ID;
+  (document.head || document.documentElement).appendChild(s);
+  window.dataLayer = window.dataLayer || [];
+  window.gtag = function () { window.dataLayer.push(arguments); };
+  window.gtag('js', new Date());
+  window.gtag('config', GA_ID);
+})();
+
 // 방문 집계 — 쿠키 없이 Abacus 카운터만 씁니다. IP도 개인정보도 모으지 않습니다.
 // 예전에는 이 코드가 홈에만 있어서, 홍보 링크를 타고 게임이나 커뮤니티로 바로 들어온 사람은
 // 방문 수·유입 경로·국가에서 통째로 빠졌습니다. 이제 두 사이트의 모든 페이지에 함께 넣습니다.
