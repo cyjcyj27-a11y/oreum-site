@@ -15,6 +15,34 @@
   (document.head || document.documentElement).appendChild(s);
   window.dataLayer = window.dataLayer || [];
   window.gtag = function () { window.dataLayer.push(arguments); };
+
+  // ── 동의 모드 (Consent Mode v2) ──
+  // 유럽은 동의를 받기 전에는 쿠키를 심을 수 없습니다. 이 신호를 아예 안 보내면
+  // 구글이 유럽 방문자를 광고 대상에서 통째로 빼버립니다(2024년 3월 구글 정책).
+  // 그래서 유럽만 "아직 동의 안 받음"으로, 나머지 나라는 "허용"으로 미리 알려둡니다.
+  // 나라 판별은 구글이 접속 지역으로 알아서 합니다. 우리가 확인할 필요가 없습니다.
+  //
+  // 이렇게 두면 유럽 방문자도 쿠키 없이 계속 집계되고,
+  // 나중에 광고를 달아 동의 팝업을 켜면 그때부터 광고 기능까지 살아납니다.
+  // ※ config 보다 반드시 먼저 실행돼야 합니다.
+  var EEA = ['AT','BE','BG','HR','CY','CZ','DK','EE','FI','FR','DE','GR','HU','IS','IE',
+             'IT','LV','LI','LT','LU','MT','NL','NO','PL','PT','RO','SK','SI','ES','SE',
+             'GB','CH'];
+  window.gtag('consent', 'default', {
+    ad_storage: 'denied',
+    ad_user_data: 'denied',
+    ad_personalization: 'denied',
+    analytics_storage: 'denied',
+    region: EEA,
+    wait_for_update: 500
+  });
+  window.gtag('consent', 'default', {
+    ad_storage: 'granted',
+    ad_user_data: 'granted',
+    ad_personalization: 'granted',
+    analytics_storage: 'granted'
+  });
+
   window.gtag('js', new Date());
   window.gtag('config', GA_ID);
 })();
