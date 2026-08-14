@@ -120,7 +120,7 @@
 
   var $ = function (id) { return document.getElementById(id); };
   var db = null, busy = false, picked = null, previewUrl = null;
-  var loading = false, cursor = null, seen = {};
+  var loading = false, cursor = null, seen = {}, runId = 0;
 
   if (SUPABASE_URL && SUPABASE_KEY && window.supabase) {
     db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -217,7 +217,7 @@
         $('body').value = ''; $('pw').value = ''; $('count').textContent = '0';
         $('removePhoto').click();
         say('올렸어요!');
-        cursor = null; seen = {}; load();
+        cursor = null; seen = {}; runId++; loading = false; load();
       })
       .catch(function (err) {
         if (err && err.message === 'badimage') {
@@ -290,15 +290,21 @@
     if (loading) return;                       // 두 번 눌러도 한 번만 불러옵니다
     loading = true;
     var first = cursor === null;
+    var myRun = ++runId;              // 이 요청의 순번
     var q = db.from('posts').select('id,created_at,nick,body,image_path')
       .order('created_at', { ascending: false }).limit(PAGE);
     if (cursor) q = q.lt('created_at', cursor);
     q.then(function (r) {
+      // 기다리는 사이에 글을 올려 목록을 새로 그렸다면, 늦게 온 이 응답은 버립니다
+      // (안 버리면 같은 글이 한 번 더 붙고 다음 쪽 기준이 옛 값으로 되돌아갑니다)
+      if (myRun !== runId) return;
       loading = false;
       if (r.error) {
-        // 이미 보고 있던 글은 지우지 않습니다
+        // 이미 보고 있던 글은 지우지 않습니다.
+        // 첫 로딩이 실패하면 「더 보기」가 숨어 있어서 누를 것이 없었습니다 — 눌러서 다시 받게 합니다.
         if (first) $('list').innerHTML = '<p class="loading">글을 불러오지 못했어요.</p>';
-        else $('moreBtn').textContent = '다시 시도';
+        $('moreBtn').textContent = '다시 시도';
+        $('moreBtn').style.display = 'block';
         return;
       }
       $('moreBtn').textContent = '더 보기';
@@ -320,7 +326,7 @@
 })();
 </script>
 
-<script src="/assets/visit.js?v=6" defer></script>
+<script src="/assets/visit.js?v=7" defer></script>
 <!-- 방문 집계 — 쿠키 없이, 페이지뷰(반복 방문 포함)까지 Abacus로 셉니다 -->
 <script>
 (function(){

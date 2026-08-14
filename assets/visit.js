@@ -6,6 +6,7 @@
 // 맨 위에 둡니다. 아래 코드에 무슨 일이 생겨도 이건 먼저 실행되도록.
 // ─────────────────────────────────────────────────────────────
 (function () {
+ try {
   var GA_ID = 'G-SSBQ2WTHGG';
   // 내 컴퓨터에서 열어보는 건 지표에 안 넣습니다
   if (/^(localhost|127\.0\.0\.1)$/.test(location.hostname) || location.protocol === 'file:') return;
@@ -45,6 +46,7 @@
 
   window.gtag('js', new Date());
   window.gtag('config', GA_ID);
+ } catch (e) {}   // 여기서 터져도 아래 방문 집계는 그대로 돌아가야 합니다
 })();
 
 // 방문 집계 — 쿠키 없이 Abacus 카운터만 씁니다. IP도 개인정보도 모으지 않습니다.
@@ -88,31 +90,37 @@
         });
       });
   }
-  // 세는 요청이 실패했더라도 숫자는 보여줘야 합니다. 읽기로 한 번 더 받아옵니다.
-  // 이때 "오늘 셌음" 표시는 남기지 않습니다. 안 그러면 못 센 방문이 영영 사라집니다.
-  var hitOk = true;
-  function getOrRead(u) {
-    return get(u).then(function (v) {
-      if (v) return v;
-      if (u.indexOf('/hit/') > -1) hitOk = false;
-      return get(u.replace('/hit/', '/get/'));
-    });
-  }
   function ymd(d) {
     return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
   }
   var today = ymd(new Date());
   // 내 컴퓨터에서 열어보는 건 방문 수에 넣지 않습니다 (숫자를 직접 부풀리지 않도록)
   var local = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) || location.protocol === 'file:';
-  var counted = local || fromUs || (store ? store.getItem('oreum_counted') === today : true);
-  var act = counted ? 'get' : 'hit';
+
+  // 카운터 하나를 "오늘 한 번만" 세고 값을 받아옵니다.
+  // 표시(flag)는 세는 데 성공했을 때만 남깁니다.
+  //  - 미리 남기면: 세기 실패한 방문이 그날 영영 사라집니다 (과소 집계)
+  //  - 두 카운터가 표시 하나를 같이 쓰면: 한쪽만 실패해도 다음 방문에 성공한 쪽이 또 +1 됩니다 (과대 집계)
+  // 그래서 카운터마다 표시를 따로 둡니다.
+  function countOnce(flag, key) {
+    var done = store ? store.getItem(flag) === today : true;
+    var skip = local || fromUs || done;
+    var hitUrl = base + 'hit/oreumgames/' + key;
+    var getUrl = base + 'get/oreumgames/' + key;
+    if (skip) return get(getUrl);
+    return get(hitUrl).then(function (v) {
+      if (v) {
+        if (store) { try { store.setItem(flag, today); } catch (e) {} }
+        return v;
+      }
+      return get(getUrl);   // 세지는 못했지만 화면에 숫자는 보여줍니다
+    });
+  }
 
   Promise.all([
-    getOrRead(base + act + '/oreumgames/total'),
-    getOrRead(base + act + '/oreumgames/day_' + today)
+    countOnce('oreum_counted', 'total'),
+    countOnce('oreum_day', 'day_' + today)
   ]).then(function (res) {
-    if (!counted && store && hitOk) { try { store.setItem('oreum_counted', today); } catch (e) {} }
-
     var total = res[0], todays = res[1];
     if (!total) return;
     // 방문자 수 표시는 홈 푸터에만 있습니다. 다른 페이지에는 없으니 그냥 넘어갑니다.
@@ -126,11 +134,15 @@
   });
 
   // ── 지표 — 신규/재방문(⑤)과 유입 경로(②). 화면 표시는 없고 대시보드(stats.html)에서 봅니다. ──
-  function hit(k) { if (local) return; try { fetch(base + 'hit/oreumgames/' + k, { mode: 'cors' }).catch(function () {}); } catch (e) {} }
+  // 위와 같은 원칙입니다. 세는 데 성공한 뒤에 표시를 남깁니다.
+  // (먼저 남기면 그날 그 지표를 영영 못 셉니다)
   function onceToday(flag, k) {
-    if (!store || fromUs) return;      // 저장소가 없거나, 우리 사이트에서 넘어온 방문이면 세지 않습니다
-    try { if (store.getItem(flag) === today) return; store.setItem(flag, today); } catch (e) { return; }
-    hit(k);
+    if (!store || fromUs || local) return;   // 저장소가 없거나, 우리 사이트에서 넘어온 방문이면 세지 않습니다
+    try { if (store.getItem(flag) === today) return; } catch (e) { return; }
+    get(base + 'hit/oreumgames/' + k).then(function (v) {
+      if (!v) return;
+      try { store.setItem(flag, today); } catch (e) {}
+    });
   }
 
   // ⑤ 재방문 — 처음 온 브라우저면 표시만 남기고, 다른 날 다시 온 거면 재방문으로 셉니다.
@@ -148,7 +160,9 @@
   else if (/tiktok|musical\.ly/.test(r)) src = 'tiktok';
   else if (/instagram|(^|\/\/|\.)ig\./.test(r)) src = 'instagram';
   else if (/threads\.net|threads\.com/.test(r)) src = 'threads';
-  else if (/(^|\.)x\.com|twitter|(^|\.)t\.co/.test(r)) src = 'x';
+  // r 은 호스트가 아니라 주소 전체("https://x.com/…")입니다. 그래서 //x.com 형태도 잡아야 합니다.
+  // 이게 빠져 있어서 X에서 온 사람이 전부 "기타"로 새고 있었습니다 (트윗 링크는 t.co 로 나갑니다)
+  else if (/(^|\/\/|\.)x\.com|twitter|(^|\/\/|\.)t\.co/.test(r)) src = 'x';
   else if (/kakao|kko|daum/.test(r)) src = 'kakao';
   else if (/youtube|youtu\.be/.test(r)) src = 'youtube';
   else if (/facebook|fb\.com|fb\.me/.test(r)) src = 'facebook';
@@ -171,8 +185,12 @@
                'SE NO FI CZ HU GR PT UA CA AU NZ MX BR AR CL CO PE EC EG SA AE YE IQ IR MA ' +
                'DZ TN NG KE ZA').split(' ');
 
+  // 목록에 없는 유럽 나라(덴마크·오스트리아·스위스 등)를 그냥 "기타"로 버리면
+  // 유럽에서 온 사람이 어디에도 안 잡힙니다. 유럽이면 "기타 유럽"으로 모읍니다.
+  var EU_ETC = ('AT BE BG CY CZ DK EE FI HR HU IE IS LI LT LU LV MT NL RS SI SK ' +
+                'AL BA MD ME MK UA BY GE AM AZ').split(' ');
   function countCountry(code) {
-    if (KNOWN.indexOf(code) === -1) code = 'ETC';
+    if (KNOWN.indexOf(code) === -1) code = (EU_ETC.indexOf(code) > -1) ? 'EU' : 'ETC';
     onceToday('oreum_cc', 'cc_' + code);
   }
 
