@@ -108,13 +108,26 @@
     var hitUrl = base + 'hit/oreumgames/' + key;
     var getUrl = base + 'get/oreumgames/' + key;
     if (skip) return get(getUrl);
+    // 표시를 먼저 남기고 요청합니다.
+    // 응답을 기다렸다 남기면, 답이 오기 전에 다른 페이지로 넘어간 사람이
+    // 다음 페이지에서 또 세어집니다(한 사람이 페이지마다 한 번씩).
+    if (store) { try { store.setItem(flag, today); } catch (e) {} }
     return get(hitUrl).then(function (v) {
-      if (v) {
-        if (store) { try { store.setItem(flag, today); } catch (e) {} }
-        return v;
-      }
+      if (v) return v;
+      // 못 셌으면 표시를 지워 다음 방문에 다시 시도합니다
+      if (store) { try { store.removeItem(flag); } catch (e) {} }
       return get(getUrl);   // 세지는 못했지만 화면에 숫자는 보여줍니다
     });
+  }
+
+  // oreum_day 는 나중에 생긴 표시입니다. 오늘 이미 세어진 브라우저가 새 코드를 처음 받을 때
+  // 표시가 없다는 이유로 하루치를 한 번 더 세지 않도록, 옛 표시를 물려받습니다.
+  if (store) {
+    try {
+      if (store.getItem('oreum_counted') === today && !store.getItem('oreum_day')) {
+        store.setItem('oreum_day', today);
+      }
+    } catch (e) {}
   }
 
   Promise.all([
@@ -138,10 +151,13 @@
   // (먼저 남기면 그날 그 지표를 영영 못 셉니다)
   function onceToday(flag, k) {
     if (!store || fromUs || local) return;   // 저장소가 없거나, 우리 사이트에서 넘어온 방문이면 세지 않습니다
-    try { if (store.getItem(flag) === today) return; } catch (e) { return; }
+    // 표시를 먼저 남기고 요청합니다 (위 countOnce 와 같은 이유).
+    // 특히 나라는 접속 지역 조회를 먼저 하느라 몇 초가 걸려서,
+    // 그 사이에 다른 페이지로 넘어가면 페이지마다 한 번씩 세어졌습니다.
+    try { if (store.getItem(flag) === today) return; store.setItem(flag, today); } catch (e) { return; }
     get(base + 'hit/oreumgames/' + k).then(function (v) {
-      if (!v) return;
-      try { store.setItem(flag, today); } catch (e) {}
+      if (v) return;
+      try { store.removeItem(flag); } catch (e) {}   // 못 셌으면 다음에 다시 시도
     });
   }
 

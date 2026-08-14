@@ -138,8 +138,10 @@
     var f = this.files && this.files[0];
     if (!f) return;
     if (f.size > MAX_MB * 1024 * 1024) {
+      // 먼저 고른 사진이 남아 있으면, 새 사진이 거부된 줄 모르고 옛 사진이 올라갑니다
       say('사진이 너무 큽니다 (' + MAX_MB + 'MB까지)', true);
-      this.value = ''; return;
+      this.value = ''; $('removePhoto').click();
+      return;
     }
     picked = f;
     if (previewUrl) URL.revokeObjectURL(previewUrl);
@@ -326,7 +328,7 @@
 })();
 </script>
 
-<script src="/assets/visit.js?v=7" defer></script>
+<script src="/assets/visit.js?v=8" defer></script>
 <!-- 방문 집계 — 쿠키 없이, 페이지뷰(반복 방문 포함)까지 Abacus로 셉니다 -->
 <script>
 (function(){
