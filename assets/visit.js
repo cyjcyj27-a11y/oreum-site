@@ -8,9 +8,13 @@
 // (이미 넘어오기 전 페이지에서 셌으니, 안 그러면 한 사람이 두 번 잡힙니다)
 (function () {
   var base = 'https://abacus.jasoncameron.dev/';
-  var fromUs = /(^|\.)oreumgames\.com$/.test(
-    (function () { try { return new URL(document.referrer).hostname; } catch (e) { return ''; } })()
-  );
+  // 주의: "같은 도메인 안에서 넘어온 것"까지 빼면 안 됩니다.
+  // 옛 주소(/board.html 등)는 새 주소로 넘겨주는데, 그때 넘어온 곳이 우리 주소로 찍힙니다.
+  // 그걸 빼버리면 이미 홍보에 쓴 옛 링크로 들어온 사람이 통째로 사라집니다.
+  // 같은 도메인 안에서는 아래 localStorage 표시가 이미 중복을 막아주므로,
+  // 여기서는 "다른 쪽 도메인에서 넘어온 경우"만 뺍니다.
+  var refHost = (function () { try { return new URL(document.referrer).hostname; } catch (e) { return ''; } })();
+  var fromUs = /(^|\.)oreumgames\.com$/.test(refHost) && refHost !== location.hostname;
 
   // 저장소를 못 쓰면(시크릿 모드·저장소 차단) "하루 한 번"을 지킬 방법이 없습니다.
   // 그대로 세면 새로고침할 때마다 숫자가 부풀기 때문에, 이럴 땐 세지 않고 읽기만 합니다.
