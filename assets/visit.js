@@ -87,7 +87,26 @@
   else src = 'other';
   onceToday('oreum_src', 'src_' + src);
 
-  // ── 국가별 (영문판 지원) — 방문자의 시간대로 나라를 추정합니다. IP 수집 없이 즉시, 하루 1회. ──
+  // ── 국가별 — 실제 접속 지역을 봅니다. 하루 1회.
+  //
+  // 중요: 방문 수 집계(위)는 이미 끝난 뒤에 이걸 합니다.
+  // 나라를 못 알아내도 방문 수는 절대 안 없어집니다. 나라만 "기타"로 갈 뿐입니다.
+  //
+  // 예전에는 브라우저 시간대로 나라를 추측했는데, 그러면 에콰도르가 미국으로 잡히고
+  // 이집트·예멘 같은 나라는 아예 구분이 안 됐습니다. 이제 접속 지역을 직접 확인합니다.
+  // (나라 글자 두 개만 받아옵니다. 주소나 개인정보는 저장하지 않습니다)
+
+  // 대시보드에서 읽어올 수 있게, 아는 나라만 그대로 쓰고 나머지는 기타로 모읍니다.
+  var KNOWN = ('KR US JP TW CN HK SG MY TH PH VN ID IN PK BD GB IE FR DE ES IT NL PL RO RU TR ' +
+               'SE NO FI CZ HU GR PT UA CA AU NZ MX BR AR CL CO PE EC EG SA AE YE IQ IR MA ' +
+               'DZ TN NG KE ZA').split(' ');
+
+  function countCountry(code) {
+    if (KNOWN.indexOf(code) === -1) code = 'ETC';
+    onceToday('oreum_cc', 'cc_' + code);
+  }
+
+  // 시간대로 알아내는 옛 방식 — 접속 지역 확인이 막혔을 때만 씁니다 (안 하는 것보단 낫습니다)
   var tz = ''; try { tz = (Intl.DateTimeFormat().resolvedOptions().timeZone) || ''; } catch (e) {}
   var tzMap = {
     'Asia/Seoul': 'KR', 'Asia/Pyongyang': 'KR', 'Asia/Tokyo': 'JP',
@@ -97,31 +116,71 @@
     'Asia/Bangkok': 'TH', 'Asia/Manila': 'PH', 'Asia/Ho_Chi_Minh': 'VN', 'Asia/Saigon': 'VN',
     'Asia/Jakarta': 'ID', 'Asia/Makassar': 'ID', 'Asia/Pontianak': 'ID', 'Asia/Jayapura': 'ID',
     'Asia/Kolkata': 'IN', 'Asia/Calcutta': 'IN',
-    'Asia/Karachi': 'PK', 'Asia/Dhaka': 'BD', 'Asia/Kathmandu': 'IN', 'Asia/Colombo': 'IN', 'Asia/Yangon': 'TH',
-    // 중동 — 이집트·예멘·사우디 등에서 실제로 들어옵니다
-    'Africa/Cairo': 'ME', 'Asia/Aden': 'ME', 'Asia/Riyadh': 'ME', 'Asia/Dubai': 'ME',
-    'Asia/Kuwait': 'ME', 'Asia/Qatar': 'ME', 'Asia/Bahrain': 'ME', 'Asia/Muscat': 'ME',
-    'Asia/Baghdad': 'ME', 'Asia/Tehran': 'ME', 'Asia/Amman': 'ME', 'Asia/Beirut': 'ME',
-    'Asia/Damascus': 'ME', 'Asia/Jerusalem': 'ME', 'Europe/Istanbul': 'ME', 'Asia/Istanbul': 'ME',
-    'Europe/London': 'GB', 'Europe/Dublin': 'GB', 'Europe/Paris': 'FR',
+    'Asia/Karachi': 'PK', 'Asia/Dhaka': 'BD',
+    'Africa/Cairo': 'EG', 'Asia/Aden': 'YE', 'Asia/Riyadh': 'SA', 'Asia/Dubai': 'AE',
+    'Asia/Baghdad': 'IQ', 'Asia/Tehran': 'IR', 'Europe/Istanbul': 'TR', 'Asia/Istanbul': 'TR',
+    'Africa/Casablanca': 'MA', 'Africa/Algiers': 'DZ', 'Africa/Tunis': 'TN',
+    'Africa/Lagos': 'NG', 'Africa/Nairobi': 'KE', 'Africa/Johannesburg': 'ZA',
+    'Europe/London': 'GB', 'Europe/Dublin': 'IE', 'Europe/Paris': 'FR',
     'Europe/Berlin': 'DE', 'Europe/Madrid': 'ES', 'Europe/Rome': 'IT',
+    'Europe/Amsterdam': 'NL', 'Europe/Warsaw': 'PL', 'Europe/Bucharest': 'RO',
+    'Europe/Moscow': 'RU', 'Europe/Kiev': 'UA', 'Europe/Kyiv': 'UA',
+    'Europe/Stockholm': 'SE', 'Europe/Oslo': 'NO', 'Europe/Helsinki': 'FI',
+    'Europe/Prague': 'CZ', 'Europe/Budapest': 'HU', 'Europe/Athens': 'GR', 'Europe/Lisbon': 'PT',
     'Australia/Sydney': 'AU', 'Australia/Melbourne': 'AU', 'Australia/Brisbane': 'AU', 'Australia/Perth': 'AU', 'Australia/Adelaide': 'AU',
     'Pacific/Auckland': 'NZ', 'Pacific/Chatham': 'NZ',
     'America/Toronto': 'CA', 'America/Vancouver': 'CA', 'America/Edmonton': 'CA', 'America/Winnipeg': 'CA', 'America/Halifax': 'CA',
     'America/Mexico_City': 'MX', 'America/Monterrey': 'MX', 'America/Cancun': 'MX', 'America/Tijuana': 'MX',
-    'America/Sao_Paulo': 'BR', 'America/Bahia': 'BR', 'America/Fortaleza': 'BR'
+    'America/Sao_Paulo': 'BR', 'America/Bahia': 'BR', 'America/Fortaleza': 'BR',
+    'America/Guayaquil': 'EC', 'America/Bogota': 'CO', 'America/Lima': 'PE',
+    'America/Santiago': 'CL', 'America/Argentina/Buenos_Aires': 'AR'
   };
   // 미국 시간대 — 예전에는 "America/로 시작하면 전부 미국"이라 에콰도르·콜롬비아 같은
   // 중남미 방문자가 몽땅 미국으로 잡혔습니다. 이제 미국은 아래 목록으로만 셉니다.
   var US_TZ = /^America\/(New_York|Chicago|Denver|Los_Angeles|Phoenix|Anchorage|Detroit|Boise|Juneau|Nome|Sitka|Yakutat|Adak|Menominee|Indiana\/|Kentucky\/|North_Dakota\/)|^Pacific\/(Honolulu|Midway|Guam|Pago_Pago)/;
-  var cc = tzMap[tz];
-  if (!cc) {
-    if (US_TZ.test(tz)) cc = 'US';
-    else if (tz.indexOf('America/') === 0) cc = 'LATAM';   // 나머지 미주는 중남미
-    else if (tz.indexOf('Europe/') === 0) cc = 'EU';       // 나머지 유럽 묶음
-    else if (tz.indexOf('Africa/') === 0) cc = 'AF';       // 아프리카 묶음
-    else if (tz.indexOf('Australia/') === 0 || tz.indexOf('Pacific/') === 0) cc = 'AU';
-    else cc = 'ETC';
+  function guessByTimezone() {
+    var cc = tzMap[tz];
+    if (!cc) {
+      if (US_TZ.test(tz)) cc = 'US';
+      else if (tz.indexOf('Europe/') === 0) cc = 'EU';       // 나머지 유럽 묶음
+      else cc = 'ETC';
+    }
+    return cc;
   }
-  onceToday('oreum_cc', 'cc_' + cc);
+
+  // 오늘 이미 셌으면 접속 지역을 물어볼 것도 없습니다 (쓸데없는 요청을 안 보냅니다)
+  var ccDone = false;
+  try { ccDone = !store || fromUs || store.getItem('oreum_cc') === today; } catch (e) { ccDone = true; }
+
+  if (!ccDone && !local) {
+    var settled = false;
+    var settle = function (code) {
+      if (settled) return;
+      settled = true;
+      countCountry(code);
+    };
+    // 어느 쪽이든 못 받으면 옛 방식(시간대)으로라도 반드시 셉니다
+    var giveUp = setTimeout(function () { settle(guessByTimezone()); }, 2500);
+    var done = function (code) { clearTimeout(giveUp); settle(code); };
+
+    fetch('https://www.cloudflare.com/cdn-cgi/trace', { mode: 'cors' })
+      .then(function (r) { return r.ok ? r.text() : Promise.reject(0); })
+      .then(function (t) {
+        var m = t.match(/loc=([A-Z]{2})/);
+        if (!m) throw 0;
+        done(m[1]);
+      })
+      .catch(function () {
+        // 첫 번째가 막히면 다른 곳으로 한 번 더 (광고 차단기가 특정 주소만 막는 경우가 있습니다)
+        return fetch('https://get.geojs.io/v1/ip/country.json', { mode: 'cors' })
+          .then(function (r) { return r.ok ? r.json() : Promise.reject(0); })
+          .then(function (j) {
+            if (!j || !/^[A-Z]{2}$/.test(j.country)) throw 0;
+            done(j.country);
+          })
+          .catch(function () { done(guessByTimezone()); });
+      });
+  } else if (!local) {
+    countCountry(guessByTimezone());   // 이미 센 날이면 onceToday에서 바로 걸러집니다
+  }
 })();
