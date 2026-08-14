@@ -74,8 +74,29 @@
     store = localStorage;
   } catch (e) { store = null; }
 
-  function get(u) {
-    return fetch(u).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
+  // 한 번 실패하면 화면에 숫자가 아예 안 나옵니다. 통신은 가끔 실패하므로 몇 번 더 두드립니다.
+  // 세는 요청(hit)은 중복으로 세면 안 되니 딱 한 번만 보내고, 읽기(get)만 다시 시도합니다.
+  function get(u, tries) {
+    tries = tries || 0;
+    return fetch(u)
+      .then(function (r) { if (!r.ok) throw 0; return r.json(); })
+      .catch(function () {
+        var readOnly = u.indexOf('/get/') > -1;
+        if (!readOnly || tries >= 3) return null;
+        return new Promise(function (done) {
+          setTimeout(function () { done(get(u, tries + 1)); }, 400 * (tries + 1));
+        });
+      });
+  }
+  // 세는 요청이 실패했더라도 숫자는 보여줘야 합니다. 읽기로 한 번 더 받아옵니다.
+  // 이때 "오늘 셌음" 표시는 남기지 않습니다. 안 그러면 못 센 방문이 영영 사라집니다.
+  var hitOk = true;
+  function getOrRead(u) {
+    return get(u).then(function (v) {
+      if (v) return v;
+      if (u.indexOf('/hit/') > -1) hitOk = false;
+      return get(u.replace('/hit/', '/get/'));
+    });
   }
   function ymd(d) {
     return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
@@ -87,10 +108,10 @@
   var act = counted ? 'get' : 'hit';
 
   Promise.all([
-    get(base + act + '/oreumgames/total'),
-    get(base + act + '/oreumgames/day_' + today)
+    getOrRead(base + act + '/oreumgames/total'),
+    getOrRead(base + act + '/oreumgames/day_' + today)
   ]).then(function (res) {
-    if (!counted && store) { try { store.setItem('oreum_counted', today); } catch (e) {} }
+    if (!counted && store && hitOk) { try { store.setItem('oreum_counted', today); } catch (e) {} }
 
     var total = res[0], todays = res[1];
     if (!total) return;
