@@ -48,10 +48,10 @@
     <h1>Community</h1>
     <p class="date">글쓰기</p>
 
-    <!-- 아직 저장소를 안 붙였을 때 보이는 안내 -->
+    <!-- 게시판 연결이 막혔을 때 보이는 안내 -->
     <div id="setupNote" class="warn" style="display:none">
-      <b>아직 저장소가 연결되지 않았습니다.</b><br>
-      글이 저장되지 않는 미리보기 상태예요. 화면과 글자수 제한은 그대로 확인해 보실 수 있습니다.
+      <b>게시판을 불러오지 못했습니다.</b><br>
+      광고 차단 프로그램이나 회사·학교 네트워크가 연결을 막고 있을 수 있어요. 차단을 잠시 끄거나 다른 네트워크에서 다시 열어보세요.
     </div>
 
     <!-- ── 글쓰기 ── -->
@@ -84,7 +84,7 @@
 
     <!-- ── 올라온 글 ── -->
     <div id="list" class="postlist"><p class="loading">불러오는 중…</p></div>
-    <button id="moreBtn" class="btn btn-ghost" style="display:none">더 보기</button>
+    <button id="moreBtn" type="button" class="btn btn-ghost" style="display:none">더 보기</button>
   </div>
 </main>
 
@@ -119,7 +119,8 @@
   var MAX_SIDE = 1400;           // 올리기 전에 이만큼으로 줄입니다 (저장공간 절약)
 
   var $ = function (id) { return document.getElementById(id); };
-  var db = null, offset = 0, busy = false, picked = null;
+  var db = null, busy = false, picked = null, previewUrl = null;
+  var loading = false, cursor = null, seen = {};
 
   if (SUPABASE_URL && SUPABASE_KEY && window.supabase) {
     db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -141,22 +142,27 @@
       this.value = ''; return;
     }
     picked = f;
-    $('previewImg').src = URL.createObjectURL(f);
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    previewUrl = URL.createObjectURL(f);
+    $('previewImg').src = previewUrl;
     $('preview').hidden = false;
     $('pickLabel').textContent = '📷 다른 사진으로';
     say('');
   });
   $('removePhoto').addEventListener('click', function () {
     picked = null; $('photo').value = '';
+    if (previewUrl) { URL.revokeObjectURL(previewUrl); previewUrl = null; }
     $('preview').hidden = true;
     $('pickLabel').textContent = '📷 사진 고르기';
   });
 
   // ── 사진 줄이기 — 큰 사진을 그대로 올리면 저장공간이 금방 찹니다 ──
   function shrink(file) {
-    return new Promise(function (resolve) {
+    return new Promise(function (resolve, reject) {
       var img = new Image();
+      var url = URL.createObjectURL(file);
       img.onload = function () {
+        URL.revokeObjectURL(url);
         var sc = Math.min(1, MAX_SIDE / Math.max(img.width, img.height));
         var w = Math.round(img.width * sc), h = Math.round(img.height * sc);
         var cv = document.createElement('canvas');
@@ -164,8 +170,9 @@
         cv.getContext('2d').drawImage(img, 0, 0, w, h);
         cv.toBlob(function (b) { resolve(b || file); }, 'image/webp', 0.82);
       };
-      img.onerror = function () { resolve(file); };
-      img.src = URL.createObjectURL(file);
+      // 브라우저가 못 여는 형식(아이폰 HEIC 등)을 그대로 올리면 깨진 그림으로 보입니다
+      img.onerror = function () { URL.revokeObjectURL(url); reject(new Error('badimage')); };
+      img.src = url;
     });
   }
 
@@ -184,7 +191,7 @@
     if (!body && !picked) { say('사진이나 한마디 중 하나는 있어야 해요', true); return; }
     if (body.length > 200) { say('200자까지만 쓸 수 있어요', true); return; }
     if (!/^\d{4}$/.test(pw)) { say('지울 때 쓸 숫자 4자리를 넣어주세요', true); return; }
-    if (!db) { say('아직 저장소가 연결되지 않아 올릴 수 없어요', true); return; }
+    if (!db) { say('지금은 글을 올릴 수 없어요. 위 안내를 확인해 주세요.', true); return; }
 
     busy = true; $('submitBtn').disabled = true; say('올리는 중…');
     var path = null;
@@ -210,10 +217,14 @@
         $('body').value = ''; $('pw').value = ''; $('count').textContent = '0';
         $('removePhoto').click();
         say('올렸어요!');
-        offset = 0; $('list').innerHTML = ''; load();
+        cursor = null; seen = {}; load();
       })
       .catch(function (err) {
-        say('올리지 못했어요. 잠시 뒤 다시 해주세요.', true);
+        if (err && err.message === 'badimage') {
+          say('이 사진은 열 수 없는 형식이에요. 다른 사진으로 해주세요.', true);
+        } else {
+          say('올리지 못했어요. 잠시 뒤 다시 해주세요.', true);
+        }
         console.error(err);
       })
       .then(function () { busy = false; $('submitBtn').disabled = false; });
@@ -228,8 +239,10 @@
   // 주소처럼 보이는 부분은 눌리지 않는 회색 글씨로 표시합니다
   var URLISH = /((?:https?:\/\/|www\.)[^\s]+|[\w.-]+\.(?:com|net|org|kr|io|me|co|gg|xyz|shop|store|link|site)(?:\/[^\s]*)?)/gi;
   function bodyHtml(text) {
-    return esc(text).replace(/\n/g, '<br>')
-      .replace(URLISH, '<span class="deadlink" title="이 게시판에서는 주소가 눌리지 않습니다">$1</span>');
+    // 줄바꿈을 <br>로 바꾸기 전에 주소부터 표시해야 다음 줄까지 딸려 들어가지 않습니다
+    return esc(text)
+      .replace(URLISH, '<span class="deadlink" title="이 게시판에서는 주소가 눌리지 않습니다">$1</span>')
+      .replace(/\n/g, '<br>');
   }
   function when(iso) {
     var t = new Date(iso), m = Math.floor((Date.now() - t) / 60000);
@@ -270,29 +283,44 @@
     });
   }
 
+  // 글을 지우거나 새 글이 올라와도 어긋나지 않도록, 몇 번째인지가 아니라
+  // "마지막으로 본 글보다 이전 것"을 기준으로 다음 쪽을 불러옵니다.
   function load() {
-    if (!db) { $('list').innerHTML = '<p class="loading">저장소를 연결하면 여기에 글이 보입니다.</p>'; return; }
-    db.from('posts').select('id,created_at,nick,body,image_path')
-      .order('created_at', { ascending: false })
-      .range(offset, offset + PAGE - 1)
-      .then(function (r) {
-        var first = offset === 0;
-        if (first) $('list').innerHTML = '';
-        if (r.error) { $('list').innerHTML = '<p class="loading">글을 불러오지 못했어요.</p>'; return; }
-        if (first && (!r.data || !r.data.length)) {
-          $('list').innerHTML = '<p class="loading">아직 글이 없어요. 첫 글을 남겨보세요!</p>';
-          return;
-        }
-        render(r.data || []);
-        offset += (r.data || []).length;
-        $('moreBtn').style.display = (r.data && r.data.length === PAGE) ? 'inline-flex' : 'none';
-      });
+    if (!db) { $('list').innerHTML = '<p class="loading">글을 불러오지 못했어요. 위 안내를 확인해 주세요.</p>'; return; }
+    if (loading) return;                       // 두 번 눌러도 한 번만 불러옵니다
+    loading = true;
+    var first = cursor === null;
+    var q = db.from('posts').select('id,created_at,nick,body,image_path')
+      .order('created_at', { ascending: false }).limit(PAGE);
+    if (cursor) q = q.lt('created_at', cursor);
+    q.then(function (r) {
+      loading = false;
+      if (r.error) {
+        // 이미 보고 있던 글은 지우지 않습니다
+        if (first) $('list').innerHTML = '<p class="loading">글을 불러오지 못했어요.</p>';
+        else $('moreBtn').textContent = '다시 시도';
+        return;
+      }
+      $('moreBtn').textContent = '더 보기';
+      var rows = (r.data || []).filter(function (p) { return !seen[p.id]; });
+      rows.forEach(function (p) { seen[p.id] = 1; });
+      if (first) $('list').innerHTML = '';
+      if (first && !rows.length) {
+        $('list').innerHTML = '<p class="loading">아직 글이 없어요. 첫 글을 남겨보세요!</p>';
+        $('moreBtn').style.display = 'none';
+        return;
+      }
+      render(rows);
+      if (r.data && r.data.length) cursor = r.data[r.data.length - 1].created_at;
+      $('moreBtn').style.display = (r.data && r.data.length === PAGE) ? 'block' : 'none';
+    });
   }
   $('moreBtn').addEventListener('click', load);
   load();
 })();
 </script>
 
+<script src="/assets/visit.js" defer></script>
 <!-- 방문 집계 — 쿠키 없이, 페이지뷰(반복 방문 포함)까지 Abacus로 셉니다 -->
 <script>
 (function(){
