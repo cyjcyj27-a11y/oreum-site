@@ -493,3 +493,15 @@ h1, h2, h3 { line-height: 1.3; letter-spacing: -.02em; margin: 0; }
   .pulse { animation: none; }
   .btn:hover { transform: none; }
 }
+
+/* 준비 중인 앱 목록 — APPS 섹션 아래쪽 */
+.soonbox { text-align: left; }
+.soonbox .soon-head { font-size: 15px; font-weight: 800; color: var(--muted); letter-spacing: .04em; }
+.soon { list-style: none; margin: 16px 0 0; padding: 0; display: grid; gap: 12px; }
+.soon li {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px;
+  padding: 14px 18px; border: 1px dashed var(--line-2); border-radius: 12px;
+  background: var(--panel-2); color: var(--ink-2);
+}
+.soon b { font-size: 16px; color: var(--ink); }
+.soon span { font-size: 14.5px; color: var(--muted); }
