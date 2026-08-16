@@ -101,7 +101,13 @@
     <div class="wrap">
       <h2 class="section-title section-en">RELEASED</h2>
 
-      <article class="game game-warm">
+      <div class="gtabs" role="tablist">
+        <button class="gtab" role="tab" id="t-lulu" aria-controls="g-lulu" aria-selected="true">루루냥의 제주살이</button>
+        <button class="gtab" role="tab" id="t-immortality" aria-controls="g-immortality" aria-selected="false">영생의 가격</button>
+      </div>
+
+
+      <article class="game game-warm gpanel" id="g-lulu" role="tabpanel" aria-labelledby="t-lulu">
         <div class="game-head">
           <img class="game-icon" src="/assets/lulu-icon.png" alt="" width="96" height="96">
           <div>
@@ -170,7 +176,7 @@
         </details>
       </article>
 
-      <article class="game game-center">
+      <article class="game game-center gpanel" id="g-immortality" role="tabpanel" aria-labelledby="t-immortality">
         <div class="game-head">
           <div>
             <h3>영생의 가격</h3>
@@ -282,6 +288,28 @@
 
 
 </main>
+
+<!-- RELEASED 탭 — 누르면 그 게임만 보입니다 (자바스크립트가 꺼져 있으면 둘 다 보입니다) -->
+<script>
+(function () {
+  var tabs = Array.prototype.slice.call(document.querySelectorAll('.gtab'));
+  if (!tabs.length) return;
+  function show(id) {
+    tabs.forEach(function (t) {
+      var on = t.getAttribute('aria-controls') === id;
+      t.setAttribute('aria-selected', on ? 'true' : 'false');
+      document.getElementById(t.getAttribute('aria-controls')).hidden = !on;
+    });
+  }
+  tabs.forEach(function (t) {
+    t.addEventListener('click', function () { show(t.getAttribute('aria-controls')); });
+  });
+  // 주소에 #g-immortality 를 달고 들어오면 그 탭을 엽니다
+  var want = location.hash.replace('#', '');
+  show(document.getElementById('g-' + want) ? 'g-' + want : tabs[0].getAttribute('aria-controls'));
+})();
+</script>
+
 
 <!-- "캐릭터 소개" 단추를 누르면 접혀 있던 인물 소개가 펼쳐집니다 -->
 <script>
