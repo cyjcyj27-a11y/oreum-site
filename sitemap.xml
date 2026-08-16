@@ -20,42 +20,6 @@
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://oreumgames.com/games/lulu/</loc>
-    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/games/lulu/"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/games/lulu/"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/games/lulu/"/>
-    <lastmod>2026-08-16</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://oreumgames.com/en/games/lulu/</loc>
-    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/games/lulu/"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/games/lulu/"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/games/lulu/"/>
-    <lastmod>2026-08-16</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://oreumgames.com/games/immortality/</loc>
-    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/games/immortality/"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/games/immortality/"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/games/immortality/"/>
-    <lastmod>2026-08-16</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://oreumgames.com/en/games/immortality/</loc>
-    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/games/immortality/"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/games/immortality/"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/games/immortality/"/>
-    <lastmod>2026-08-16</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
     <loc>https://oreumgames.com/apps/saju/</loc>
     <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/apps/saju/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/apps/saju/"/>
@@ -92,6 +56,42 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://oreumgames.com/games/immortality/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/games/immortality/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/games/immortality/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/games/immortality/"/>
+    <lastmod>2026-08-16</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://oreumgames.com/en/games/immortality/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/games/immortality/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/games/immortality/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/games/immortality/"/>
+    <lastmod>2026-08-16</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://oreumgames.com/games/lulu/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/games/lulu/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/games/lulu/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/games/lulu/"/>
+    <lastmod>2026-08-16</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://oreumgames.com/en/games/lulu/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/games/lulu/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/games/lulu/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/games/lulu/"/>
+    <lastmod>2026-08-16</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://oreumgames.com/guide/</loc>
     <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/guide/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/guide/"/>
@@ -110,24 +110,6 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://oreumgames.com/support/</loc>
-    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/support/"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/support/"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/support/"/>
-    <lastmod>2026-08-16</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.4</priority>
-  </url>
-  <url>
-    <loc>https://oreumgames.com/en/support/</loc>
-    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/support/"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/support/"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/support/"/>
-    <lastmod>2026-08-16</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.4</priority>
-  </url>
-  <url>
     <loc>https://oreumgames.com/privacy/</loc>
     <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/privacy/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/privacy/"/>
@@ -144,5 +126,23 @@
     <lastmod>2026-08-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://oreumgames.com/support/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/support/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/support/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/support/"/>
+    <lastmod>2026-08-16</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.4</priority>
+  </url>
+  <url>
+    <loc>https://oreumgames.com/en/support/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/support/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/support/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/support/"/>
+    <lastmod>2026-08-16</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.4</priority>
   </url>
 </urlset>
