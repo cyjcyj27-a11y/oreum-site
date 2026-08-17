@@ -92,6 +92,7 @@ function ensureAudio() {
 const bgm = new Audio('assets/bgm.mp3');
 bgm.loop = true;
 bgm.volume = 0.35;
+bgm.muted = true;   // 소리는 꺼둔 채로 시작한다 (원하면 🔊 로 켬)
 function startBgm() {
   bgm.play().catch(() => {});
 }
@@ -719,6 +720,9 @@ restartBtn.addEventListener('click', () => {
 });
 
 const muteBtn = document.getElementById('muteBtn');
+// 다른 곳으로 넘어가면 소리를 멈춘다
+document.addEventListener('visibilitychange', () => { if (document.hidden) bgm.pause(); });
+
 function toggleMute() {
   bgm.muted = !bgm.muted;
   if (muteBtn) muteBtn.textContent = bgm.muted ? '🔇' : '🔊';
