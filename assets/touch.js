@@ -64,9 +64,10 @@
     '.ot-btns{position:absolute;right:14px;bottom:14px;display:flex;flex-wrap:wrap-reverse;',
       'justify-content:flex-end;gap:9px;max-width:52vw;pointer-events:none;}',
     // 시점 스틱이 있으면 버튼을 그 위로 올립니다
-    '.ot-layer[data-rstick] .ot-btns{bottom:146px;max-width:46vw;gap:7px;}',
-    '@media (orientation:portrait){.ot-layer[data-lift][data-rstick] .ot-btns{',
-      'bottom:calc(var(--ot-lift) + 130px);}}',
+    '.ot-layer[data-rstick] .ot-btns{max-width:46vw;gap:7px;}',
+    '.ot-layer[data-rstick] .ot-stick-r{bottom:150px;}',
+    '@media (orientation:portrait){.ot-layer[data-lift][data-rstick] .ot-stick-r{',
+      'bottom:calc(var(--ot-lift) + 118px);}}',
     '.ot-btn{pointer-events:auto;min-width:56px;padding:11px 10px;border-radius:12px;',
       'background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.3);',
       'color:#fff;font:600 13px/1 system-ui,sans-serif;text-align:center;',
@@ -76,6 +77,8 @@
     '@media (orientation:portrait){.ot-layer[data-lift] .ot-stick,',
       '.ot-layer[data-lift] .ot-btns{bottom:var(--ot-lift);}}',
     '@media (orientation:portrait){.ot-layer[data-lift] .ot-stick-r{bottom:var(--ot-lift);}}',
+    // 버튼은 오른쪽 맨 아래로 — 그쪽 아래에는 게임 눈금이 없습니다
+    '@media (orientation:portrait){.ot-layer[data-lift][data-rstick] .ot-btns{bottom:14px;}}',
     '@media (min-width:900px) and (pointer:fine){.ot-layer{display:none}}'
   ].join('');
 
