@@ -1,0 +1,611 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>캐릭터 랩 — 소프비 칼잡이</title>
+<style>
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:#0b0a0c;color:#c9c4bd;
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;overflow:hidden}
+  #wrap{position:fixed;inset:0;display:flex}
+  #view{position:relative;flex:1;min-width:0;cursor:grab}
+  #view:active{cursor:grabbing}
+  #gl{position:absolute;inset:0;width:100%;height:100%;display:block}
+  #cap{position:absolute;left:22px;bottom:20px;pointer-events:none}
+  #cap .n{font-size:19px;color:#efe7dc;letter-spacing:.02em}
+  #cap .d{font-size:10.5px;color:#6b6259;margin-top:5px;letter-spacing:.06em;max-width:280px;line-height:1.6}
+  #cap .h{font-size:9px;color:#4a423b;letter-spacing:.24em;text-transform:uppercase;margin-bottom:7px}
+  #panel{width:252px;flex:none;background:#08080a;border-left:1px solid #17161a;
+    padding:15px 13px 30px;overflow-y:auto}
+  h2{font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:#453f3a;
+    margin:0 0 9px;font-weight:500}
+  h2:not(:first-child){margin-top:16px;padding-top:13px;border-top:1px solid #141316}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+  .chip{padding:7px 4px;background:#0e0e11;border:1px solid #1c1b20;border-radius:2px;
+    color:#7a736b;font:inherit;font-size:10px;cursor:pointer;text-align:center}
+  .chip:hover{color:#d8cfc4;border-color:#2c2a31}
+  .chip.on{background:#1a1410;border-color:#6b4a28;color:#f0a03c}
+  .row{display:flex;align-items:center;gap:7px;margin:6px 0;font-size:10.5px}
+  .row label{flex:1;color:#6b6259}
+  .row input[type=range]{flex:1;accent-color:#f0a03c;height:2px}
+  .row .v{width:30px;text-align:right;color:#d8cfc4;font-variant-numeric:tabular-nums}
+  .btn{width:100%;margin-top:10px;padding:7px;background:transparent;color:#6b6259;
+    border:1px solid #1e1d22;border-radius:2px;font:inherit;font-size:10px;letter-spacing:.12em;
+    text-transform:uppercase;cursor:pointer}
+  .btn:hover{color:#f0a03c;border-color:#3a3126}
+  .note{font-size:10px;line-height:1.65;color:#3c3630;margin-top:14px;
+    padding-top:12px;border-top:1px solid #141316}
+  .note em{color:#8a6a3a;font-style:normal}
+  @media(max-width:820px){#panel{width:210px}}
+  /* 폰: 옆에 세우면 캐릭터가 잘린다 — 위아래로 나눈다 */
+  @media(max-width:700px){
+    #wrap{flex-direction:column}
+    #panel{width:100%;height:52%;flex:none;border-left:none;border-top:1px solid #17161a}
+    #view{height:48%;flex:none}
+  }
+</style>
+
+<div id="wrap">
+  <div id="view">
+    <canvas id="gl"></canvas>
+    <div id="cap">
+      <div class="h">소프비 · 1/12 스케일</div>
+      <div class="n" id="capName">사원 A</div>
+      <div class="d" id="capDesc">퇴근길에 칼을 들었다</div>
+    </div>
+  </div>
+  <div id="panel">
+    <h2>직업</h2>
+    <div class="grid" id="jobs"></div>
+
+    <h2>동작</h2>
+    <div class="grid" id="anims"></div>
+
+    <h2>비율</h2>
+    <div class="row"><label>머리</label><input type="range" id="hd" min="60" max="150" value="100"><span class="v" id="v_hd">1.0</span></div>
+    <div class="row"><label>몸통</label><input type="range" id="bw" min="70" max="150" value="100"><span class="v" id="v_bw">1.0</span></div>
+    <div class="row"><label>팔다리</label><input type="range" id="lb" min="55" max="150" value="100"><span class="v" id="v_lb">1.0</span></div>
+    <div class="row"><label>흐물거림</label><input type="range" id="wb" min="0" max="200" value="100"><span class="v" id="v_wb">1.0</span></div>
+
+    <h2>표면</h2>
+    <div class="row"><label>광택</label><input type="range" id="gl_s" min="0" max="120" value="58"><span class="v" id="v_gl_s">58</span></div>
+    <div class="grid" style="margin-top:7px">
+      <button class="chip" id="tJoint">관절 볼</button>
+      <button class="chip" id="tSeam">사출 자국</button>
+      <button class="chip" id="tSpin">턴테이블</button>
+      <button class="chip" id="tGrid">스케일 자</button>
+    </div>
+    <button class="btn" id="shot">정면 · 측면 · 후면</button>
+
+    <div class="note">
+      드래그로 회전, 휠로 확대.<br><br>
+      <em>파티 애니멀즈와 다른 점</em> — 봉제 동물이 아니라 사출 피규어입니다. 관절 볼과 사출 자국이 보이고, 표면은 털이 아니라 비닐 광택입니다. 실루엣도 둥근 짐승이 아니라 각진 어깨의 사람이라 겹치지 않습니다.
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="/assets/touch.js"></script>
+<script>
+(()=>{
+"use strict";
+if(!window.THREE){document.body.innerHTML='<div style="padding:40px;font:12px monospace;color:#888">Three.js 로드 실패 — 네트워크 확인</div>';return;}
+
+const glc=document.getElementById('gl'), view=document.getElementById('view');
+const renderer=new THREE.WebGLRenderer({canvas:glc,antialias:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+const scene=new THREE.Scene();
+
+/* ---------- 배경: 스튜디오 호리존 ---------- */
+(()=>{ const c=document.createElement('canvas'); c.width=8;c.height=256;
+  const g=c.getContext('2d'), grd=g.createLinearGradient(0,0,0,256);
+  grd.addColorStop(0,'#191519'); grd.addColorStop(0.55,'#100e11'); grd.addColorStop(1,'#08070a');
+  g.fillStyle=grd; g.fillRect(0,0,8,256);
+  const t=new THREE.CanvasTexture(c); scene.background=t; })();
+
+const cam=new THREE.PerspectiveCamera(34,1,0.05,60);
+let orbA=0.5, orbP=0.14, orbR=3.5, target=new THREE.Vector3(0,0.62,0);
+
+/* ---------- 조명: 피규어 촬영 세팅 ---------- */
+scene.add(new THREE.HemisphereLight(0x3a3440,0x0d0c10,0.55));
+const key=new THREE.DirectionalLight(0xfff0dc,1.25); key.position.set(-2.4,3.2,2.6); scene.add(key);
+const fill=new THREE.DirectionalLight(0x9fc4ff,0.42); fill.position.set(3.0,1.0,1.6); scene.add(fill);
+const rim=new THREE.DirectionalLight(0xffffff,1.0); rim.position.set(0.6,2.2,-3.4); scene.add(rim);
+const kick=new THREE.PointLight(0xff9a4d,0.7,6,2); kick.position.set(1.6,0.4,1.2); scene.add(kick);
+
+/* ---------- 바닥 + 스포트 풀 ---------- */
+(()=>{ const c=document.createElement('canvas'); c.width=c.height=512;
+  const g=c.getContext('2d');
+  const rg=g.createRadialGradient(256,256,10,256,256,250);
+  rg.addColorStop(0,'#4a4247'); rg.addColorStop(0.5,'#221f24'); rg.addColorStop(1,'#0a090c');
+  g.fillStyle=rg; g.fillRect(0,0,512,512);
+  for(let i=0;i<9000;i++){ g.fillStyle=`rgba(255,255,255,${Math.random()*0.035})`;
+    g.fillRect(Math.random()*512,Math.random()*512,1.4,1.4); }
+  const t=new THREE.CanvasTexture(c);
+  const f=new THREE.Mesh(new THREE.CircleGeometry(3.4,64),
+    new THREE.MeshPhongMaterial({map:t,shininess:14,specular:0x1a1a1e}));
+  f.rotation.x=-Math.PI/2; scene.add(f); })();
+// 접지 그림자
+const shadow=(()=>{ const c=document.createElement('canvas'); c.width=c.height=128;
+  const g=c.getContext('2d'); const rg=g.createRadialGradient(64,64,2,64,64,62);
+  rg.addColorStop(0,'rgba(0,0,0,0.75)'); rg.addColorStop(0.55,'rgba(0,0,0,0.28)');
+  rg.addColorStop(1,'rgba(0,0,0,0)'); g.fillStyle=rg; g.fillRect(0,0,128,128);
+  const m=new THREE.Mesh(new THREE.PlaneGeometry(1.15,1.15),
+    new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(c),transparent:true,depthWrite:false}));
+  m.rotation.x=-Math.PI/2; m.position.y=0.004; scene.add(m); return m; })();
+
+/* ---------- 스케일 자 ---------- */
+const ruler=new THREE.Group(); ruler.visible=false; scene.add(ruler);
+(()=>{ const mat=new THREE.LineBasicMaterial({color:0x3a4a5a});
+  for(let i=0;i<=13;i++){ const y=i*0.1, w=(i%5===0)?0.16:0.07;
+    const g=new THREE.BufferGeometry().setFromPoints([
+      new THREE.Vector3(-0.9,y,-0.55), new THREE.Vector3(-0.9-w,y,-0.55)]);
+    ruler.add(new THREE.Line(g,mat)); }
+  const g2=new THREE.BufferGeometry().setFromPoints([
+    new THREE.Vector3(-0.9,0,-0.55), new THREE.Vector3(-0.9,1.3,-0.55)]);
+  ruler.add(new THREE.Line(g2,mat)); })();
+
+/* ---------- 재질 ---------- */
+function vinyl(hex,shine){ return new THREE.MeshPhongMaterial({
+  color:hex, shininess:shine===undefined?58:shine, specular:0x8a8a90, flatShading:false}); }
+const M={
+  skin:  vinyl(0xf2c9a6),
+  skinD: vinyl(0xd9ab88),
+  joint: vinyl(0xe0b48e,90),
+  dark:  vinyl(0x2b2b33),
+  eye:   new THREE.MeshBasicMaterial({color:0x14121a}),
+  hi:    new THREE.MeshBasicMaterial({color:0xffffff}),
+  blush: new THREE.MeshBasicMaterial({color:0xff9d8f,transparent:true,opacity:0.42}),
+  seam:  new THREE.MeshBasicMaterial({color:0x000000,transparent:true,opacity:0.16}),
+  blade: vinyl(0xdfe6ee,110),
+  grip:  vinyl(0x33333c,40),
+};
+
+/* ---------- 캐릭터 조립 ---------- */
+const HEAD_R=0.30;
+const rig={};
+const root=new THREE.Group(); scene.add(root);
+
+function ball(r,mat,seg){ return new THREE.Mesh(new THREE.SphereGeometry(r,seg||20,seg?Math.round(seg*0.75):16),mat); }
+function seamRing(r,axis){
+  const t=new THREE.Mesh(new THREE.TorusGeometry(r*0.998,r*0.012,4,28),M.seam);
+  if(axis==='y') t.rotation.x=Math.PI/2;
+  return t;
+}
+
+// 몸통
+const bodyPivot=new THREE.Group(); root.add(bodyPivot); rig.bodyPivot=bodyPivot;
+const body=ball(1,M.dark,22); body.scale.set(0.30,0.27,0.255); body.position.y=0.50;
+bodyPivot.add(body); rig.body=body;
+const bodySeam=seamRing(1,'y'); bodySeam.scale.set(0.30,0.255,0.27); bodySeam.position.y=0.50;
+bodyPivot.add(bodySeam); rig.bodySeam=bodySeam;
+// 엉덩이 살짝
+const hips=ball(1,M.dark,18); hips.scale.set(0.255,0.16,0.225); hips.position.y=0.30;
+bodyPivot.add(hips); rig.hips=hips;
+
+// 머리
+const neck=new THREE.Group(); neck.position.y=0.71; bodyPivot.add(neck); rig.neck=neck;
+const head=ball(HEAD_R,M.skin,26); head.scale.set(1.04,0.98,1.0); head.position.y=HEAD_R*0.86;
+neck.add(head); rig.head=head;
+const headSeam=seamRing(HEAD_R,'y'); headSeam.position.y=HEAD_R*0.86;
+headSeam.scale.set(1.04,1.0,0.98); neck.add(headSeam); rig.headSeam=headSeam;
+const faceG=new THREE.Group(); faceG.position.y=HEAD_R*0.86; neck.add(faceG); rig.faceG=faceG;
+// 눈
+function makeEye(sx){
+  const g=new THREE.Group(); g.position.set(sx*0.115,0.028,-HEAD_R*0.955);
+  const e=ball(0.052,M.eye,16); e.scale.set(0.82,1.06,0.42); g.add(e); g.userData.e=e;
+  const h=ball(0.016,M.hi,10); h.position.set(-sx*0.016,0.020,-0.020); g.add(h);
+  const x=new THREE.Group();
+  for(let i=0;i<2;i++){ const b=new THREE.Mesh(new THREE.BoxGeometry(0.09,0.014,0.012),M.eye);
+    b.rotation.z=i?-0.75:0.75; x.add(b); }
+  x.position.z=-0.012; x.visible=false; g.add(x); g.userData.x=x;
+  return g;
+}
+const eyeL=makeEye(1), eyeR=makeEye(-1); faceG.add(eyeL,eyeR); rig.eyes=[eyeL,eyeR];
+// 눈썹
+function brow(sx){ const b=new THREE.Mesh(new THREE.BoxGeometry(0.085,0.016,0.013),M.dark);
+  b.position.set(sx*0.118,0.098,-HEAD_R*0.945); return b; }
+const browL=brow(1), browR=brow(-1); faceG.add(browL,browR); rig.brows=[browL,browR];
+// 입
+const mouth=new THREE.Mesh(new THREE.BoxGeometry(0.055,0.018,0.012),M.eye);
+mouth.position.set(0,-0.075,-HEAD_R*0.95); faceG.add(mouth); rig.mouth=mouth;
+// 볼터치
+[1,-1].forEach(s=>{ const b=ball(0.05,M.blush,12); b.scale.set(1,0.62,0.3);
+  b.position.set(s*0.175,-0.035,-HEAD_R*0.83); faceG.add(b); });
+// 머리 액세서리 슬롯
+const hatG=new THREE.Group(); hatG.position.y=HEAD_R*0.86; neck.add(hatG); rig.hatG=hatG;
+const hairG=new THREE.Group(); hairG.position.y=HEAD_R*0.86; neck.add(hairG); rig.hairG=hairG;
+
+// 팔
+function makeArm(side){
+  const sh=new THREE.Group(); sh.position.set(side*0.285,0.615,0); bodyPivot.add(sh);
+  const jb=ball(0.075,M.joint,16); sh.add(jb); jb.name='joint';
+  const upper=new THREE.Mesh(new THREE.CylinderGeometry(0.058,0.052,0.24,14),M.skin);
+  upper.position.y=-0.14; sh.add(upper);
+  const elb=new THREE.Group(); elb.position.y=-0.26; sh.add(elb);
+  const jb2=ball(0.056,M.joint,14); elb.add(jb2); jb2.name='joint';
+  const fore=new THREE.Mesh(new THREE.CylinderGeometry(0.05,0.048,0.19,14),M.skin);
+  fore.position.y=-0.105; elb.add(fore);
+  const hand=ball(0.083,M.skin,16); hand.scale.set(1,0.92,0.86);
+  hand.position.y=-0.225; elb.add(hand);
+  return {sh,elb,hand,upper,fore};
+}
+const armR=makeArm(1), armL=makeArm(-1); rig.armR=armR; rig.armL=armL;
+
+// 칼 (장난감 사출 느낌 — 끝이 둥글다)
+const knife=new THREE.Group();
+(()=>{ const grip=new THREE.Mesh(new THREE.CylinderGeometry(0.028,0.032,0.11,12),M.grip);
+  grip.position.y=0.035; knife.add(grip);
+  const guard=new THREE.Mesh(new THREE.BoxGeometry(0.10,0.018,0.035),M.grip);
+  guard.position.y=-0.028; knife.add(guard);
+  const blade=new THREE.Mesh(new THREE.BoxGeometry(0.028,0.30,0.055),M.blade);
+  blade.position.y=-0.185; knife.add(blade); knife.userData.blade=blade;
+  const tip=ball(0.028,M.blade,12); tip.scale.set(1,1.5,1.9); tip.position.y=-0.335; knife.add(tip);
+  knife.rotation.x=-Math.PI/2; knife.position.y=-0.235; })();
+armR.elb.add(knife); rig.knife=knife;
+
+// 다리
+function makeLeg(side){
+  const hip=new THREE.Group(); hip.position.set(side*0.125,0.29,0); bodyPivot.add(hip);
+  const jb=ball(0.072,M.joint,16); hip.add(jb); jb.name='joint';
+  const thigh=new THREE.Mesh(new THREE.CylinderGeometry(0.068,0.062,0.17,14),M.dark);
+  thigh.position.y=-0.10; hip.add(thigh);
+  const knee=new THREE.Group(); knee.position.y=-0.19; hip.add(knee);
+  const jb2=ball(0.058,M.joint,14); knee.add(jb2); jb2.name='joint';
+  const shin=new THREE.Mesh(new THREE.CylinderGeometry(0.056,0.054,0.11,14),M.dark);
+  shin.position.y=-0.06; knee.add(shin);
+  const foot=ball(0.095,M.dark,16); foot.scale.set(0.95,0.62,1.35);
+  foot.position.set(0,-0.115,-0.028); knee.add(foot);
+  return {hip,knee,foot,thigh,shin};
+}
+const legR=makeLeg(1), legL=makeLeg(-1); rig.legR=legR; rig.legL=legL;
+
+// 의상 슬롯
+const outfitG=new THREE.Group(); bodyPivot.add(outfitG); rig.outfitG=outfitG;
+
+/* ---------- 직업 프리셋 ---------- */
+function box(w,h,d,m){ return new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m); }
+const JOBS={
+  '사원':{ desc:'퇴근길에 칼을 들었다', body:0x39424e, leg:0x272c34, hair:0x241f1e,
+    build(){ // 넥타이 + 사원증
+      const tie=box(0.055,0.20,0.02,vinyl(0xb03a3a)); tie.position.set(0,0.60,-0.245);
+      tie.rotation.x=-0.13; outfitG.add(tie);
+      const kn=box(0.06,0.045,0.03,vinyl(0x8f2f2f)); kn.position.set(0,0.695,-0.245); outfitG.add(kn);
+      const col=box(0.20,0.05,0.02,vinyl(0xe8e6e2)); col.position.set(0,0.705,-0.235); outfitG.add(col);
+      const badge=box(0.055,0.075,0.012,vinyl(0xdedbd4)); badge.position.set(0.13,0.52,-0.235); outfitG.add(badge);
+    }},
+  '알바':{ desc:'교대 시간은 지났다', body:0x2f5a4a, leg:0x2a2f38, hair:0x2b2320,
+    build(){
+      const cap=new THREE.Mesh(new THREE.SphereGeometry(HEAD_R*1.03,20,12,0,Math.PI*2,0,Math.PI*0.5),vinyl(0x2f5a4a));
+      cap.position.y=0.02; hatG.add(cap);
+      const brim=box(0.30,0.022,0.15,vinyl(0x24463b)); brim.position.set(0,0.015,-0.20); hatG.add(brim);
+      const ap=box(0.34,0.30,0.02,vinyl(0xd8d2c4)); ap.position.set(0,0.47,-0.255); outfitG.add(ap);
+      const st=box(0.30,0.02,0.02,vinyl(0xd8d2c4)); st.position.set(0,0.63,-0.25); outfitG.add(st);
+    }},
+  '셰프':{ desc:'주방에서 쓰던 손이다', body:0xe6e2d8, leg:0x33363c, hair:0x1f1b1a,
+    build(){
+      const h=new THREE.Mesh(new THREE.CylinderGeometry(0.20,0.17,0.26,18),vinyl(0xf2efe8));
+      h.position.y=0.30; hatG.add(h);
+      const puff=ball(0.20,vinyl(0xf2efe8),18); puff.scale.set(1,0.7,1); puff.position.y=0.42; hatG.add(puff);
+      const band=new THREE.Mesh(new THREE.CylinderGeometry(0.205,0.205,0.06,18),vinyl(0xe4e0d6));
+      band.position.y=0.19; hatG.add(band);
+      const sc=box(0.22,0.06,0.02,vinyl(0xc0392b)); sc.position.set(0,0.685,-0.245); outfitG.add(sc);
+    }},
+  '노무자':{ desc:'현장에선 뭐든 연장이다', body:0xd6a72f, leg:0x3d4552, hair:0x2a2320,
+    build(){
+      const hel=new THREE.Mesh(new THREE.SphereGeometry(HEAD_R*1.06,20,12,0,Math.PI*2,0,Math.PI*0.52),vinyl(0xf0b429,95));
+      hel.position.y=0.02; hatG.add(hel);
+      const br=new THREE.Mesh(new THREE.CylinderGeometry(HEAD_R*1.24,HEAD_R*1.24,0.022,20),vinyl(0xdca41f,95));
+      br.position.y=0.03; hatG.add(br);
+      const rd=box(0.03,0.02,0.34,vinyl(0xdca41f)); rd.position.y=0.20; hatG.add(rd);
+      const v1=box(0.30,0.03,0.02,vinyl(0xe8e2c0)); v1.position.set(0,0.55,-0.25); outfitG.add(v1);
+      const v2=v1.clone(); v2.position.y=0.47; outfitG.add(v2);
+      const v3=v1.clone(); v3.position.z=0.25; outfitG.add(v3);
+    }},
+  '배달':{ desc:'3분 남았다', body:0x2c3f6b, leg:0x232830, hair:0x1e1a19,
+    build(){
+      const hel=new THREE.Mesh(new THREE.SphereGeometry(HEAD_R*1.12,22,14,0,Math.PI*2,0,Math.PI*0.62),vinyl(0xe8ecef,100));
+      hel.position.y=0.0; hatG.add(hel);
+      const vis=new THREE.Mesh(new THREE.SphereGeometry(HEAD_R*1.09,20,12,Math.PI*0.62,Math.PI*0.76,Math.PI*0.30,Math.PI*0.30),
+        new THREE.MeshPhongMaterial({color:0x1a2a3a,shininess:120,specular:0xffffff,side:THREE.DoubleSide}));
+      hatG.add(vis);
+      const bag=box(0.34,0.34,0.22,vinyl(0x2f7a5a)); bag.position.set(0,0.58,0.30); outfitG.add(bag);
+      const bl=box(0.05,0.34,0.02,vinyl(0x246047)); bl.position.set(0,0.58,0.415); outfitG.add(bl);
+    }},
+  '경비':{ desc:'교대 근무 27년차', body:0x2b3138, leg:0x22262c, hair:0x4a4442,
+    build(){
+      const cap=new THREE.Mesh(new THREE.CylinderGeometry(0.215,0.20,0.11,20),vinyl(0x22272e));
+      cap.position.y=0.20; hatG.add(cap);
+      const top=new THREE.Mesh(new THREE.CylinderGeometry(0.225,0.215,0.02,20),vinyl(0x1b1f25));
+      top.position.y=0.26; hatG.add(top);
+      const brim=box(0.34,0.02,0.17,vinyl(0x15181d)); brim.position.set(0,0.145,-0.20); hatG.add(brim);
+      const em=box(0.07,0.05,0.012,vinyl(0xd4af37)); em.position.set(0,0.215,-0.205); hatG.add(em);
+      const ep=box(0.11,0.03,0.09,vinyl(0xd4af37)); ep.position.set(0.235,0.665,0); outfitG.add(ep);
+      const ep2=ep.clone(); ep2.position.x=-0.235; outfitG.add(ep2);
+    }},
+};
+function hairDefault(col){
+  const h=new THREE.Mesh(new THREE.SphereGeometry(HEAD_R*1.035,22,14,0,Math.PI*2,0,Math.PI*0.60),vinyl(col,26));
+  h.position.y=0.012; hairG.add(h);
+  const fr=ball(HEAD_R*0.44,vinyl(col,26),14); fr.scale.set(1.25,0.5,0.7);
+  fr.position.set(0,HEAD_R*0.44,-HEAD_R*0.72); hairG.add(fr);
+}
+let jobName='사원';
+function setJob(name){
+  jobName=name;
+  [hatG,hairG,outfitG].forEach(g=>{ while(g.children.length) g.remove(g.children[0]); });
+  const j=JOBS[name];
+  M_body(j.body); M_leg(j.leg);
+  hairDefault(j.hair);
+  j.build();
+  document.getElementById('capName').textContent=name;
+  document.getElementById('capDesc').textContent=j.desc;
+  applySurface();
+}
+function M_body(c){ body.material=vinyl(c); hips.material=body.material;
+  armR.upper.material=armL.upper.material=body.material; }
+function M_leg(c){ const m=vinyl(c);
+  [legR,legL].forEach(l=>{ l.thigh.material=m; l.shin.material=m; l.foot.material=vinyl(0x1c1f24); }); }
+
+/* ---------- 비율 ---------- */
+const PROP={hd:1,bw:1,lb:1,wb:1};
+function applyProps(){
+  neck.scale.setScalar(PROP.hd);
+  neck.position.y=0.71-(PROP.hd-1)*0.02;
+  body.scale.set(0.30*PROP.bw,0.27,0.255*PROP.bw);
+  bodySeam.scale.set(0.30*PROP.bw,0.255*PROP.bw,0.27);
+  hips.scale.set(0.255*PROP.bw,0.16,0.225*PROP.bw);
+  armR.sh.position.x=0.285*PROP.bw; armL.sh.position.x=-0.285*PROP.bw;
+  legR.hip.position.x=0.125*PROP.bw; legL.hip.position.x=-0.125*PROP.bw;
+  [armR,armL].forEach(a=>{ a.upper.scale.y=PROP.lb; a.upper.position.y=-0.14*PROP.lb;
+    a.elb.position.y=-0.26*PROP.lb; a.fore.scale.y=PROP.lb; a.fore.position.y=-0.105*PROP.lb;
+    a.hand.position.y=-0.225*PROP.lb; });
+  [legR,legL].forEach(l=>{ l.thigh.scale.y=PROP.lb; l.thigh.position.y=-0.10*PROP.lb;
+    l.knee.position.y=-0.19*PROP.lb; l.shin.scale.y=PROP.lb; l.shin.position.y=-0.06*PROP.lb;
+    l.foot.position.y=-0.115*PROP.lb; });
+  const drop=(1-PROP.lb)*0.30;
+  root.position.y=Math.max(0,drop);
+  const s=0.60+0.30*PROP.bw+0.16*PROP.hd;
+  shadow.scale.setScalar(s);
+}
+/* ---------- 표면 옵션 ---------- */
+let optJoint=true, optSeam=true, optSpin=true, optGrid=false, shine=58;
+function applySurface(){
+  root.traverse(o=>{ if(o.name==='joint') o.visible=optJoint; });
+  rig.bodySeam.visible=rig.headSeam.visible=optSeam;
+  ruler.visible=optGrid;
+  root.traverse(o=>{ if(o.material&&o.material.isMeshPhongMaterial&&o.material!==M.blush){
+    o.material.shininess=shine; } });
+}
+
+/* ---------- 애니메이션 ---------- */
+const FD={ stab:{st:6,ac:3,rc:12}, slash:{st:12,ac:6,rc:26} };
+const ANIMS=['대기','걷기','찌르기','베기','백스텝','피격'];
+let anim='대기', af=0, t=0;
+function lerp(a,b,k){return a+(b-a)*k;}
+let headLag=0, headLagV=0, prevYaw=0, squash=1;
+
+function pose(){
+  t+=1/60; af++;
+  const W=PROP.wb;
+  // 초기화
+  bodyPivot.position.set(0,0,0); bodyPivot.rotation.set(0,0,0);
+  bodyPivot.scale.set(1,1,1);
+  neck.rotation.set(0,0,0);
+  armR.sh.rotation.set(0,0,0); armR.elb.rotation.set(0,0,0);
+  armL.sh.rotation.set(0,0,0); armL.elb.rotation.set(0,0,0);
+  legR.hip.rotation.set(0,0,0); legL.hip.rotation.set(0,0,0);
+  legR.knee.rotation.set(0,0,0); legL.knee.rotation.set(0,0,0);
+  rig.eyes.forEach(e=>{e.userData.x.visible=false; e.userData.e.visible=true; e.userData.e.scale.y=1.06;});
+  rig.brows.forEach((b,i)=>{ b.rotation.z=(i?1:-1)*0.10; b.position.y=0.098; });
+  mouth.scale.set(1,1,1); mouth.position.y=-0.075;
+  knife.rotation.set(-Math.PI/2,0,0);
+  root.rotation.z=0;
+
+  const breathe=Math.sin(t*2.1)*0.012*W;
+  let targetYaw=0;
+
+  if(anim==='대기'){
+    bodyPivot.position.y=Math.sin(t*2.1)*0.018*W;
+    bodyPivot.rotation.y=Math.sin(t*0.9)*0.10*W;
+    bodyPivot.scale.y=1+breathe; bodyPivot.scale.x=bodyPivot.scale.z=1-breathe*0.5;
+    armR.sh.rotation.x=0.10+Math.sin(t*2.1+0.4)*0.09*W;
+    armL.sh.rotation.x=0.10+Math.sin(t*2.1+0.7)*0.11*W;
+    armR.sh.rotation.z=-0.16; armL.sh.rotation.z=0.16;
+    armR.elb.rotation.x=-0.55; armL.elb.rotation.x=-0.20;
+    targetYaw=bodyPivot.rotation.y;
+  }
+  else if(anim==='걷기'){
+    const p=t*7.4, sw=Math.sin(p);
+    bodyPivot.position.y=Math.abs(Math.sin(p))*0.035*W;
+    bodyPivot.rotation.z=Math.sin(p)*0.07*W;
+    bodyPivot.rotation.y=Math.sin(p)*0.13*W;
+    legR.hip.rotation.x=sw*0.72; legL.hip.rotation.x=-sw*0.72;
+    legR.knee.rotation.x=Math.max(0,-sw)*0.7; legL.knee.rotation.x=Math.max(0,sw)*0.7;
+    armL.sh.rotation.x=sw*0.55; armL.sh.rotation.z=0.18;
+    armR.sh.rotation.x=-sw*0.22+0.15; armR.sh.rotation.z=-0.25; armR.elb.rotation.x=-0.7;
+    const land=Math.max(0,-Math.cos(p*2));
+    bodyPivot.scale.y=1-land*0.05*W; bodyPivot.scale.x=bodyPivot.scale.z=1+land*0.03*W;
+    targetYaw=bodyPivot.rotation.y;
+  }
+  else if(anim==='찌르기'||anim==='베기'){
+    const k=anim==='찌르기'?'stab':'slash', d=FD[k], TOT=d.st+d.ac+d.rc+18;
+    const f=af%TOT;
+    let ph = f<d.st?'st' : f<d.st+d.ac?'ac' : f<d.st+d.ac+d.rc?'rc':'idle';
+    if(k==='stab'){
+      if(ph==='st'){ const u=f/d.st;
+        armR.sh.rotation.x=lerp(0.1,-0.55,u); armR.elb.rotation.x=lerp(-0.5,-1.5,u);
+        bodyPivot.rotation.y=lerp(0,0.34,u); bodyPivot.position.z=lerp(0,0.05,u);
+        bodyPivot.scale.y=1+u*0.05; bodyPivot.scale.x=bodyPivot.scale.z=1-u*0.04;
+        legR.hip.rotation.x=u*0.2; }
+      else if(ph==='ac'){ const u=(f-d.st)/d.ac;
+        armR.sh.rotation.x=lerp(-0.55,0.62,u); armR.elb.rotation.x=lerp(-1.5,-0.05,u);
+        bodyPivot.rotation.y=lerp(0.34,-0.30,u); bodyPivot.position.z=lerp(0.05,-0.16,u);
+        bodyPivot.scale.z=1+u*0.10; bodyPivot.scale.x=1-u*0.07;
+        legL.hip.rotation.x=-u*0.5; legL.knee.rotation.x=u*0.4; }
+      else if(ph==='rc'){ const u=(f-d.st-d.ac)/d.rc, e=1-Math.pow(1-u,2);
+        armR.sh.rotation.x=lerp(0.62,0.1,e); armR.elb.rotation.x=lerp(-0.05,-0.5,e);
+        bodyPivot.rotation.y=lerp(-0.30,0,e); bodyPivot.position.z=lerp(-0.16,0,e);
+        bodyPivot.rotation.x=Math.sin(u*Math.PI)*0.10;
+        rig.brows.forEach((b,i)=>{b.position.y=0.078;}); }
+      armR.sh.rotation.z=-0.22; armL.sh.rotation.z=0.30; armL.sh.rotation.x=-0.25;
+      targetYaw=bodyPivot.rotation.y;
+    } else {
+      if(ph==='st'){ const u=f/d.st;
+        armR.sh.rotation.z=lerp(-0.2,-1.5,u); armR.sh.rotation.x=lerp(0.1,-0.5,u);
+        armR.elb.rotation.x=lerp(-0.5,-1.0,u);
+        bodyPivot.rotation.y=lerp(0,0.66,u);
+        bodyPivot.scale.y=1+u*0.07; bodyPivot.scale.x=bodyPivot.scale.z=1-u*0.05;
+        legR.hip.rotation.x=u*0.28; }
+      else if(ph==='ac'){ const u=(f-d.st)/d.ac;
+        armR.sh.rotation.z=lerp(-1.5,1.15,u); armR.sh.rotation.x=lerp(-0.5,0.25,u);
+        armR.elb.rotation.x=lerp(-1.0,-0.15,u);
+        bodyPivot.rotation.y=lerp(0.66,-0.70,u);
+        bodyPivot.rotation.z=Math.sin(u*Math.PI)*0.16;
+        bodyPivot.scale.x=1+u*0.09; bodyPivot.scale.y=1-u*0.06; }
+      else if(ph==='rc'){ const u=(f-d.st-d.ac)/d.rc, e=1-Math.pow(1-u,2.2);
+        armR.sh.rotation.z=lerp(1.15,-0.2,e); armR.sh.rotation.x=lerp(0.25,0.1,e);
+        armR.elb.rotation.x=lerp(-0.15,-0.5,e);
+        bodyPivot.rotation.y=lerp(-0.70,0,e);
+        bodyPivot.rotation.x=Math.sin(u*Math.PI)*0.14;
+        legL.hip.rotation.x=-Math.sin(u*Math.PI)*0.3;
+        rig.brows.forEach(b=>{b.position.y=0.078;});
+        mouth.scale.x=1.35; }
+      armL.sh.rotation.z=0.42; armL.sh.rotation.x=-0.30;
+      targetYaw=bodyPivot.rotation.y;
+    }
+  }
+  else if(anim==='백스텝'){
+    const TOT=8+15+22, f=af%TOT;
+    if(f<8){ const u=f/8;
+      bodyPivot.position.z=u*0.30; bodyPivot.rotation.x=-u*0.38;
+      bodyPivot.position.y=Math.sin(u*Math.PI)*0.09;
+      legR.hip.rotation.x=-u*0.9; legL.hip.rotation.x=-u*0.55;
+      legR.knee.rotation.x=u*1.0; legL.knee.rotation.x=u*0.6;
+      armR.sh.rotation.x=-u*0.5; armL.sh.rotation.x=-u*0.7; armL.sh.rotation.z=0.5;
+      bodyPivot.scale.y=1+u*0.06; }
+    else if(f<8+15){ const u=(f-8)/15, e=1-Math.pow(1-u,2);
+      bodyPivot.position.z=lerp(0.30,0,e); bodyPivot.rotation.x=lerp(-0.38,0.10,e);
+      bodyPivot.scale.y=lerp(1.06,0.93,Math.min(1,e*1.6));
+      bodyPivot.scale.x=bodyPivot.scale.z=lerp(1,1.05,Math.min(1,e*1.6));
+      legR.hip.rotation.x=lerp(-0.9,0,e); legL.hip.rotation.x=lerp(-0.55,0,e);
+      legR.knee.rotation.x=lerp(1.0,0,e); legL.knee.rotation.x=lerp(0.6,0,e);
+      armR.sh.rotation.x=lerp(-0.5,0.1,e); armL.sh.rotation.x=lerp(-0.7,0.1,e); }
+    else { const u=(f-23)/22;
+      bodyPivot.scale.y=lerp(0.93,1,u); bodyPivot.scale.x=bodyPivot.scale.z=lerp(1.05,1,u);
+      bodyPivot.rotation.x=lerp(0.10,0,u); armR.sh.rotation.x=0.1; armL.sh.rotation.x=0.1; }
+    targetYaw=0;
+  }
+  else if(anim==='피격'){
+    const TOT=90, f=af%TOT;
+    if(f<4){ // 히트스톱
+      bodyPivot.scale.set(1.14,0.88,1.14);
+      rig.eyes.forEach(e=>{e.userData.e.visible=false;e.userData.x.visible=true;});
+      mouth.scale.set(1.6,1.9,1); mouth.position.y=-0.088;
+    } else if(f<48){ const u=(f-4)/44, e=1-Math.pow(1-u,2);
+      root.rotation.z=lerp(0,Math.PI*0.52,e);
+      bodyPivot.position.y=Math.sin(u*Math.PI)*0.22;
+      bodyPivot.position.z=e*0.34;
+      bodyPivot.rotation.x=-e*0.5;
+      legR.hip.rotation.x=-e*1.1; legL.hip.rotation.x=-e*0.75;
+      legR.knee.rotation.x=e*0.9;
+      armR.sh.rotation.x=-e*1.5; armL.sh.rotation.x=-e*1.8; armL.sh.rotation.z=0.9;
+      bodyPivot.scale.set(lerp(1.14,1,e),lerp(0.88,1,e),lerp(1.14,1,e));
+      rig.eyes.forEach(ey=>{ey.userData.e.visible=false;ey.userData.x.visible=true;});
+      mouth.scale.set(1.4,1.6,1);
+    } else { const u=(f-48)/42;
+      root.rotation.z=Math.PI*0.52+Math.sin(u*Math.PI*3)*0.03*(1-u);
+      bodyPivot.position.z=0.34; bodyPivot.rotation.x=-0.5;
+      legR.hip.rotation.x=-1.1; legL.hip.rotation.x=-0.75; legR.knee.rotation.x=0.9;
+      armR.sh.rotation.x=-1.5; armL.sh.rotation.x=-1.8; armL.sh.rotation.z=0.9;
+      rig.eyes.forEach(ey=>{ey.userData.e.visible=false;ey.userData.x.visible=true;});
+      mouth.scale.set(1.4,1.6,1);
+    }
+    targetYaw=0;
+  }
+
+  // 머리 지연 (통통한 캐릭터의 생명)
+  const dy=targetYaw-prevYaw; prevYaw=targetYaw;
+  headLagV += (-headLag*0.30 - headLagV*0.30) + (-dy*1.9);
+  headLagV*=0.86; headLag+=headLagV;
+  headLag=Math.max(-0.5,Math.min(0.5,headLag));
+  neck.rotation.y+=headLag*PROP.wb;
+  neck.rotation.z+=-headLag*0.35*PROP.wb;
+  neck.rotation.x+=Math.sin(t*2.1+1.2)*0.02*PROP.wb;
+
+  // 칼날 하이라이트
+  const isActive = (anim==='찌르기'||anim==='베기') && (()=>{
+    const k=anim==='찌르기'?FD.stab:FD.slash, TOT=k.st+k.ac+k.rc+18, f=af%TOT;
+    return f>=k.st&&f<k.st+k.ac; })();
+  knife.userData.blade.material = isActive ? M.hi : M.blade;
+
+  shadow.position.set(bodyPivot.position.x*0.6, 0.004, bodyPivot.position.z*0.6);
+  shadow.material.opacity = 0.55+bodyPivot.position.y*-0.6;
+}
+
+/* ---------- 카메라 조작 ---------- */
+let drag=false, lx=0, ly=0;
+view.addEventListener('mousedown',e=>{drag=true;lx=e.clientX;ly=e.clientY;optSpin=false;syncChips();});
+addEventListener('mouseup',()=>drag=false);
+addEventListener('mousemove',e=>{ if(!drag)return;
+  orbA-=(e.clientX-lx)*0.008; orbP=Math.max(-0.5,Math.min(1.1,orbP+(e.clientY-ly)*0.006));
+  lx=e.clientX;ly=e.clientY; });
+view.addEventListener('wheel',e=>{e.preventDefault();
+  orbR=Math.max(1.3,Math.min(7,orbR+e.deltaY*0.0022));},{passive:false});
+view.addEventListener('touchstart',e=>{drag=true;lx=e.touches[0].clientX;ly=e.touches[0].clientY;optSpin=false;},{passive:true});
+view.addEventListener('touchmove',e=>{ if(!drag)return;
+  orbA-=(e.touches[0].clientX-lx)*0.01; orbP=Math.max(-0.5,Math.min(1.1,orbP+(e.touches[0].clientY-ly)*0.008));
+  lx=e.touches[0].clientX;ly=e.touches[0].clientY;},{passive:true});
+addEventListener('touchend',()=>drag=false);
+
+/* ---------- UI ---------- */
+const jobsEl=document.getElementById('jobs'), animsEl=document.getElementById('anims');
+Object.keys(JOBS).forEach(n=>{ const b=document.createElement('button');
+  b.className='chip'+(n===jobName?' on':''); b.textContent=n; b.dataset.job=n;
+  b.onclick=()=>{ setJob(n); [...jobsEl.children].forEach(c=>c.classList.toggle('on',c.dataset.job===n)); };
+  jobsEl.appendChild(b); });
+ANIMS.forEach(n=>{ const b=document.createElement('button');
+  b.className='chip'+(n===anim?' on':''); b.textContent=n; b.dataset.anim=n;
+  b.onclick=()=>{ anim=n; af=0; headLag=0; headLagV=0;
+    [...animsEl.children].forEach(c=>c.classList.toggle('on',c.dataset.anim===n)); };
+  animsEl.appendChild(b); });
+
+function bindProp(id,key){ const el=document.getElementById(id), v=document.getElementById('v_'+id);
+  const set=()=>{ PROP[key]=+el.value/100; v.textContent=PROP[key].toFixed(1); applyProps(); };
+  el.addEventListener('input',set); set(); }
+bindProp('hd','hd'); bindProp('bw','bw'); bindProp('lb','lb'); bindProp('wb','wb');
+const glS=document.getElementById('gl_s');
+glS.addEventListener('input',()=>{ shine=+glS.value;
+  document.getElementById('v_gl_s').textContent=shine; applySurface(); });
+
+const chips={tJoint:'optJoint',tSeam:'optSeam',tSpin:'optSpin',tGrid:'optGrid'};
+function syncChips(){ document.getElementById('tJoint').classList.toggle('on',optJoint);
+  document.getElementById('tSeam').classList.toggle('on',optSeam);
+  document.getElementById('tSpin').classList.toggle('on',optSpin);
+  document.getElementById('tGrid').classList.toggle('on',optGrid); }
+document.getElementById('tJoint').onclick=()=>{optJoint=!optJoint;applySurface();syncChips();};
+document.getElementById('tSeam').onclick=()=>{optSeam=!optSeam;applySurface();syncChips();};
+document.getElementById('tSpin').onclick=()=>{optSpin=!optSpin;syncChips();};
+document.getElementById('tGrid').onclick=()=>{optGrid=!optGrid;applySurface();syncChips();};
+let shotIdx=0;
+document.getElementById('shot').onclick=()=>{ optSpin=false; syncChips();
+  orbA=[0,Math.PI/2,Math.PI][shotIdx%3]; orbP=0.12; orbR=3.2; shotIdx++; };
+
+/* ---------- 루프 ---------- */
+function resize(){ const r=view.getBoundingClientRect();
+  renderer.setSize(r.width,r.height,false);
+  cam.aspect=r.width/r.height; cam.updateProjectionMatrix(); }
+addEventListener('resize',resize);
+
+let last=performance.now(), acc=0;
+function loop(now){ requestAnimationFrame(loop);
+  acc+=Math.min(now-last,100); last=now;
+  while(acc>=1000/60){ pose(); if(optSpin&&!drag) orbA+=0.0045; acc-=1000/60; }
+  cam.position.set(target.x+Math.sin(orbA)*Math.cos(orbP)*orbR,
+                   target.y+Math.sin(orbP)*orbR,
+                   target.z+Math.cos(orbA)*Math.cos(orbP)*orbR);
+  cam.lookAt(target);
+  renderer.render(scene,cam); }
+
+setJob('사원'); applyProps(); applySurface(); syncChips(); resize();
+requestAnimationFrame(loop);
+})();
+</script>
