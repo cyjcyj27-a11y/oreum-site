@@ -194,6 +194,7 @@
     </select>
   </label>
   <button id="newGameBtn">새 게임 시작</button>
+  <button id="sfxBtn" title="소리 켜기/끄기" aria-label="소리 켜기/끄기">🔊</button>
 </div>
 
 <div class="panel">
@@ -232,6 +233,57 @@ const EMPTY = 0, BLACK = 1, WHITE = 2;
 const DIRS = [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]];
 
 let board, current, boardEl, statusEl;
+
+/* ── 소리 ── 돌이 판에 닿는 "바득". 파일 없이 그 자리에서 만듭니다 ── */
+let AC = null, sfxOn = true;
+function audio() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return null; } }
+  if (AC.state === 'suspended') AC.resume();
+  return AC;
+}
+// pitch 를 낮추면 더 묵직하게 들립니다 (봇 돌을 사람 돌과 구분하는 데 씁니다)
+function clack(pitch, vol) {
+  const a = audio(); if (!a || !sfxOn) return;
+  pitch = pitch || 1; vol = vol || 1;
+  const t = a.currentTime;
+
+  // 닿는 순간의 딱 소리 — 짧게 사그라드는 잡음
+  const len = Math.floor(a.sampleRate * 0.03);
+  const buf = a.createBuffer(1, len, a.sampleRate);
+  const d = buf.getChannelData(0);
+  for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3);
+  const src = a.createBufferSource(); src.buffer = buf;
+  const bp = a.createBiquadFilter(); bp.type = 'bandpass';
+  bp.frequency.value = 2600 * pitch; bp.Q.value = 1.1;
+  const ng = a.createGain(); ng.gain.value = 0.45 * vol;
+  src.connect(bp); bp.connect(ng); ng.connect(a.destination);
+  src.start(t);
+
+  // 판이 잠깐 울리는 소리
+  const o = a.createOscillator(); o.type = 'sine';
+  o.frequency.setValueAtTime(230 * pitch, t);
+  o.frequency.exponentialRampToValueAtTime(125 * pitch, t + 0.06);
+  const g = a.createGain();
+  g.gain.setValueAtTime(0.30 * vol, t);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + 0.09);
+  o.connect(g); g.connect(a.destination);
+  o.start(t); o.stop(t + 0.1);
+}
+// 판 밖으로 밀려 떨어지는 돌
+function drop() {
+  const a = audio(); if (!a || !sfxOn) return;
+  const t = a.currentTime;
+  const o = a.createOscillator(); o.type = 'triangle';
+  o.frequency.setValueAtTime(180, t);
+  o.frequency.exponentialRampToValueAtTime(52, t + 0.20);
+  const g = a.createGain();
+  g.gain.setValueAtTime(0.24, t);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + 0.24);
+  o.connect(g); g.connect(a.destination);
+  o.start(t); o.stop(t + 0.25);
+}
+function total(bd) { const { black, white } = countStones(bd); return black + white; }
+
 let vsBot = true, humanColor = BLACK, botColor = WHITE, botDepth = 3;
 let thinking = false, gameOver = false;
 let moveCount = 0;
@@ -414,7 +466,10 @@ function onCellClick(r, c) {
   const dirs = validDirections(board, r, c, current);
   if (board[r][c] !== EMPTY || dirs.length === 0) return;
 
+  const before = total(board);
   placeStone(board, r, c, current);
+  clack(1, 1);
+  if (total(board) < before) setTimeout(drop, 70);
   afterMove();
 }
 
@@ -463,7 +518,10 @@ function maybeBotMove() {
   setTimeout(() => {
     const move = getBotMove();
     if (move) {
+      const before = total(board);
       placeStone(board, move[0], move[1], botColor);
+      clack(0.84, 0.9);
+      if (total(board) < before) setTimeout(drop, 70);
     }
     thinking = false;
     afterMove();
@@ -513,6 +571,12 @@ function updateSettingsVisibility() {
 window.addEventListener('DOMContentLoaded', () => {
   boardEl = document.getElementById('board');
   statusEl = document.getElementById('status');
+  const sfxBtn = document.getElementById('sfxBtn');
+  if (sfxBtn) sfxBtn.addEventListener('click', () => {
+    sfxOn = !sfxOn;
+    sfxBtn.textContent = sfxOn ? '🔊' : '🔇';
+    if (sfxOn) clack(1, 0.7);   // 켰다는 걸 소리로 알립니다
+  });
   document.getElementById('newGameBtn').addEventListener('click', newGame);
   document.getElementById('restartBtn').addEventListener('click', newGame);
   document.getElementById('overlayRestart').addEventListener('click', newGame);
