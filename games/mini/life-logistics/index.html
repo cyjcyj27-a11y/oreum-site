@@ -1346,7 +1346,7 @@ function drawPrompt(){
 if(window.OREUM_TOUCH){
   const otLayer = OreumTouch.mount({
     stick:{up:'KeyW',down:'KeyS',left:'KeyA',right:'KeyD'},
-    look:true, lookScale:1.0, lookStick:true, lookStickSpeed:11, liftPortrait:88,
+    look:true, lookScale:2.4, liftPortrait:88,
     // 손가락 두 개를 벌리면 시야를 좁혀 멀리 있는 것을 당겨 봅니다
     onPinch:(k)=>{ G.fov = Math.max(38, Math.min(88, G.fov / k)); resize(); },
     // 화면 배치 — 위: 집기 · 포장 / 아래: 내려놓기 · 달리기

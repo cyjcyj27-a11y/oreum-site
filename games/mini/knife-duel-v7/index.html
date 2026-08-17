@@ -1471,12 +1471,13 @@ if(window.OREUM_TOUCH){
   locked=true; startEl.style.display='none';
   OreumTouch.mount({
     onFirstTouch:()=>{ try{ac();}catch(e){} },
-    stick:{up:'KeyW',down:'KeyS',left:'KeyA',right:'KeyD'},
+    // 아래로 내리면 앉습니다. 뒤로 빠지는 것은 백스텝 버튼입니다
+    stick:{up:'KeyW',down:'ControlLeft',left:'KeyA',right:'KeyD'},
     look:true, lookScale:1.1, liftPortrait:96,
     buttons:[
       {label:'무기',key:'KeyQ'},
       {label:'백스텝',key:'Space'},
-      {label:'앉기',key:'ControlLeft',hold:true},
+      {label:'방어',key:'ControlLeft',hold:true},
       {label:'찌르기',mouse:2},
       {label:'공격',mouse:0}
     ]
