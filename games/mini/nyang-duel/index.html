@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>냥냥 검객 대전</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="wrap">
+    <h1>🐱 냥냥 검객 대전 🗡️</h1>
+    <div id="stage">
+      <canvas id="game" width="900" height="500"></canvas>
+      <div id="uiButtons">
+        <button type="button" id="muteBtn" title="배경음악 켜기/끄기">🔊</button>
+        <button type="button" id="fullscreenBtn" title="전체화면">⛶</button>
+      </div>
+      <div id="touchControls">
+        <div class="padCluster">
+          <button type="button" class="padBtn padUp" data-key="ArrowUp">▲</button>
+          <button type="button" class="padBtn padLeft" data-key="ArrowLeft">◀</button>
+          <button type="button" class="padBtn padRight" data-key="ArrowRight">▶</button>
+          <button type="button" class="padBtn padDown" data-key="ArrowDown">▼</button>
+        </div>
+        <div class="atkCluster">
+          <button type="button" class="atkBtn atkW" data-key="KeyW">약손</button>
+          <button type="button" class="atkBtn atkA" data-key="KeyA">강손</button>
+          <button type="button" class="atkBtn atkS" data-key="KeyS">약발</button>
+          <button type="button" class="atkBtn atkD" data-key="KeyD">강발</button>
+        </div>
+      </div>
+      <button type="button" id="restartBtn">🔄 다시하기</button>
+      <div id="overlay">
+        <div id="overlayCard">
+          <div id="kakaoWarning">
+            📱 카카오톡 브라우저에서는 가로모드/전체화면이 제한돼요.<br>
+            <button type="button" id="openExternalBtn">다른 브라우저로 열기</button>
+          </div>
+          <img id="overlayPortrait" src="assets/cat_idle.png" alt="냥냥 검객 루루">
+          <div id="overlayTitle">냥냥 검객 대전</div>
+          <div class="charPick">
+            <span>내 캐릭터:</span>
+            <button type="button" class="charBtn" data-player="1" data-char="cat">🐱 고양이</button>
+            <button type="button" class="charBtn" data-player="1" data-char="dog">🐶 강아지</button>
+          </div>
+          <div class="charPick">
+            <span>CPU 캐릭터:</span>
+            <button type="button" class="charBtn" data-player="2" data-char="cat">🐱 고양이</button>
+            <button type="button" class="charBtn" data-player="2" data-char="dog">🐶 강아지</button>
+          </div>
+          <div class="controls">
+            <div><b>이동</b> ← / → · <b>점프</b> ↑ · <b>앉기</b> ↓</div>
+            <div><b>W</b> 약손 · <b>A</b> 강손 · <b>S</b> 약발 · <b>D</b> 강발</div>
+            <div><b>W+A 동시</b>(약손+강손)로 검 휘두르기</div>
+            <div>타격 성공 시 아래 보라색 게이지가 차오르고, 가득 차면 <b>A+D 동시</b>(강손+강발)로 필살기</div>
+            <div>상대는 CPU가 자동으로 조작합니다</div>
+            <div><b>M</b> 키(모바일은 화면 우측 상단 🔊 버튼)로 배경음악 켜기/끄기</div>
+          </div>
+          <button id="startBtn" disabled>이미지 불러오는 중...</button>
+        </div>
+      </div>
+    </div>
+    <div id="loading">이미지 불러오는 중...</div>
+  </div>
+<script src="game.js"></script>
+</body>
+</html>

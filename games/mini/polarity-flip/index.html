@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>극성 반전 (Polarity Flip)</title>
+<style>
+  :root {
+    --board-bg: #1a6b3c;
+    --board-line: #0f4225;
+    --black: #1a1a1a;
+    --white: #f5f5f5;
+    --highlight: rgba(255, 215, 0, 0.55);
+    --bg: #10151a;
+    --panel: #1c242c;
+    --text: #e8ecef;
+    --muted: #8a97a3;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, "Segoe UI", "Malgun Gothic", sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 12px 60px;
+  }
+  h1 { font-size: 1.4rem; margin: 4px 0 2px; letter-spacing: 0.5px; }
+  .subtitle { color: var(--muted); font-size: 0.85rem; margin-bottom: 18px; text-align: center; }
+  .panel {
+    background: var(--panel);
+    border-radius: 12px;
+    padding: 14px 20px;
+    display: flex;
+    gap: 24px;
+    align-items: center;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .score {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    font-size: 1.05rem;
+  }
+  .dot {
+    width: 20px; height: 20px; border-radius: 50%;
+    display: inline-block;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+  }
+  .dot.black { background: radial-gradient(circle at 35% 30%, #555, var(--black)); }
+  .dot.white { background: radial-gradient(circle at 35% 30%, #fff, var(--white)); }
+  .turn-indicator.active { color: #ffd54f; }
+  .setting {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 0.78rem;
+    color: var(--muted);
+  }
+  .setting select {
+    background: #2a3540;
+    color: var(--text);
+    border: 1px solid #3d4a56;
+    border-radius: 6px;
+    padding: 6px 8px;
+    font-size: 0.85rem;
+  }
+  #settingsPanel button {
+    align-self: flex-end;
+  }
+  .cell.disabled { cursor: default; }
+  #status {
+    min-height: 1.4em;
+    font-size: 0.95rem;
+    color: var(--muted);
+    margin-bottom: 10px;
+    text-align: center;
+  }
+  #board {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    grid-template-rows: repeat(8, 1fr);
+    width: min(88vw, 512px);
+    height: min(88vw, 512px);
+    background: var(--board-bg);
+    border: 4px solid var(--board-line);
+    border-radius: 6px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  }
+  .cell {
+    position: relative;
+    border: 1px solid var(--board-line);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+  .cell.valid::after {
+    content: "";
+    position: absolute;
+    width: 22%;
+    height: 22%;
+    border-radius: 50%;
+    background: var(--highlight);
+  }
+  .cell.valid:hover { background: rgba(255,255,255,0.08); }
+  .stone {
+    width: 78%;
+    height: 78%;
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    transition: transform 0.18s ease;
+  }
+  .stone.black { background: radial-gradient(circle at 35% 30%, #666, #0a0a0a); }
+  .stone.white { background: radial-gradient(circle at 35% 30%, #ffffff, #cfcfcf); }
+  .stone.pushed { transform: scale(1.08); }
+  #controls {
+    margin-top: 18px;
+    display: flex;
+    gap: 10px;
+  }
+  button {
+    background: #2a3540;
+    color: var(--text);
+    border: 1px solid #3d4a56;
+    border-radius: 8px;
+    padding: 9px 18px;
+    font-size: 0.9rem;
+    cursor: pointer;
+  }
+  button:hover { background: #35414d; }
+  #rules {
+    margin-top: 26px;
+    max-width: 520px;
+    font-size: 0.82rem;
+    color: var(--muted);
+    line-height: 1.6;
+    background: var(--panel);
+    padding: 14px 18px;
+    border-radius: 10px;
+  }
+  #rules b { color: var(--text); }
+  .overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.65);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+  }
+  .overlay.show { display: flex; }
+  .overlay-box {
+    background: var(--panel);
+    padding: 32px 40px;
+    border-radius: 14px;
+    text-align: center;
+  }
+  .overlay-box h2 { margin-top: 0; }
+</style>
+</head>
+<body>
+
+<h1>극성 반전 <span style="color:var(--muted); font-weight:400;">Polarity Flip</span></h1>
+<div class="subtitle">오셀로 규칙을 비틀었습니다 — 뒤집는 대신 밀어냅니다.</div>
+
+<div class="panel" id="settingsPanel">
+  <label class="setting">
+    상대
+    <select id="modeSelect">
+      <option value="bot" selected>봇과 대결</option>
+      <option value="human">2인 대전 (한 화면)</option>
+    </select>
+  </label>
+  <label class="setting" id="colorSetting">
+    내 돌
+    <select id="colorSelect">
+      <option value="1" selected>흑 (선공)</option>
+      <option value="2">백 (후공)</option>
+    </select>
+  </label>
+  <label class="setting" id="difficultySetting">
+    난이도
+    <select id="difficultySelect">
+      <option value="1">쉬움</option>
+      <option value="3" selected>보통</option>
+      <option value="5">어려움</option>
+    </select>
+  </label>
+  <button id="newGameBtn">새 게임 시작</button>
+</div>
+
+<div class="panel">
+  <div class="score turn-indicator" id="scoreBlack"><span class="dot black"></span><span id="countBlack">2</span></div>
+  <div class="score turn-indicator" id="scoreWhite"><span class="dot white"></span><span id="countWhite">2</span></div>
+  <div class="score" id="turnCounter" style="color: var(--muted); font-weight: 400; font-size: 0.85rem;">턴 0/<span id="maxMoves"></span></div>
+</div>
+
+<div id="status">흑 차례입니다</div>
+<div id="board"></div>
+
+<div id="controls">
+  <button id="restartBtn">다시 시작</button>
+</div>
+
+<div id="rules">
+  <b>규칙</b><br>
+  1. 돌을 놓으면 8방향으로 인접한 <b>상대 돌</b>을 한 칸씩 밀어냅니다.<br>
+  2. 밀려나는 자리에 이미 다른 돌이 있으면 도미노처럼 연쇄로 밀립니다 (색 무관).<br>
+  3. 밀린 돌이 보드 밖으로 나가면 <b>제거</b>됩니다.<br>
+  4. 최소 한 개 이상의 상대 돌을 밀어낼 수 있는 칸에만 둘 수 있습니다. 둘 곳이 없으면 자동으로 패스됩니다.<br>
+  5. 양쪽 다 둘 곳이 없으면 게임 종료 — 보드에 남은 돌이 많은 쪽이 승리합니다.
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="overlay-box">
+    <h2 id="overlayTitle">게임 종료</h2>
+    <p id="overlayText"></p>
+    <button id="overlayRestart">다시 시작</button>
+  </div>
+</div>
+
+<script>
+const SIZE = 8;
+const EMPTY = 0, BLACK = 1, WHITE = 2;
+const DIRS = [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]];
+
+let board, current, boardEl, statusEl;
+let vsBot = true, humanColor = BLACK, botColor = WHITE, botDepth = 3;
+let thinking = false, gameOver = false;
+let moveCount = 0;
+const MAX_MOVES = 60;
+
+function initBoard() {
+  board = Array.from({length: SIZE}, () => Array(SIZE).fill(EMPTY));
+  const m = SIZE / 2;
+  board[m-1][m-1] = WHITE;
+  board[m-1][m]   = BLACK;
+  board[m][m-1]   = BLACK;
+  board[m][m]     = WHITE;
+  current = BLACK;
+  gameOver = false;
+  thinking = false;
+  moveCount = 0;
+}
+
+function inBounds(r, c) { return r >= 0 && r < SIZE && c >= 0 && c < SIZE; }
+function opponent(p) { return p === BLACK ? WHITE : BLACK; }
+
+function validDirections(bd, r, c, p) {
+  const dirs = [];
+  for (const [dr, dc] of DIRS) {
+    const nr = r + dr, nc = c + dc;
+    if (inBounds(nr, nc) && bd[nr][nc] === opponent(p)) {
+      dirs.push([dr, dc]);
+    }
+  }
+  return dirs;
+}
+
+function getValidMoves(bd, p) {
+  const moves = [];
+  for (let r = 0; r < SIZE; r++) {
+    for (let c = 0; c < SIZE; c++) {
+      if (bd[r][c] === EMPTY && validDirections(bd, r, c, p).length > 0) {
+        moves.push([r, c]);
+      }
+    }
+  }
+  return moves;
+}
+
+// Apply push in one direction starting from (r+dr, c+dc)
+function pushChain(bd, r, c, dr, dc) {
+  let chain = [];
+  let cr = r + dr, cc = c + dc;
+  while (inBounds(cr, cc) && bd[cr][cc] !== EMPTY) {
+    chain.push([cr, cc]);
+    cr += dr; cc += dc;
+  }
+  for (let i = chain.length - 1; i >= 0; i--) {
+    const [fr, fc] = chain[i];
+    const tr = fr + dr, tc = fc + dc;
+    if (inBounds(tr, tc)) {
+      bd[tr][tc] = bd[fr][fc];
+    }
+  }
+  bd[r + dr][c + dc] = EMPTY;
+}
+
+function placeStone(bd, r, c, p) {
+  const dirs = validDirections(bd, r, c, p);
+  bd[r][c] = p;
+  for (const [dr, dc] of dirs) {
+    pushChain(bd, r, c, dr, dc);
+  }
+}
+
+function countStones(bd) {
+  let black = 0, white = 0;
+  for (let r = 0; r < SIZE; r++)
+    for (let c = 0; c < SIZE; c++) {
+      if (bd[r][c] === BLACK) black++;
+      else if (bd[r][c] === WHITE) white++;
+    }
+  return { black, white };
+}
+
+function cloneBoard(bd) { return bd.map(row => row.slice()); }
+
+function simulateMove(bd, r, c, p) {
+  const nb = cloneBoard(bd);
+  placeStone(nb, r, c, p);
+  return nb;
+}
+
+// --- Bot AI (minimax + alpha-beta) ---
+
+function evaluate(bd, forColor) {
+  const { black, white } = countStones(bd);
+  const my = forColor === BLACK ? black : white;
+  const opp = forColor === BLACK ? white : black;
+  const myMoves = getValidMoves(bd, forColor).length;
+  const oppMoves = getValidMoves(bd, opponent(forColor)).length;
+  return (my - opp) * 2 + (myMoves - oppMoves);
+}
+
+function minimax(bd, player, depth, alpha, beta, botColorForEval) {
+  const moves = getValidMoves(bd, player);
+
+  if (moves.length === 0) {
+    const oppMoves = getValidMoves(bd, opponent(player));
+    if (oppMoves.length === 0) {
+      const { black, white } = countStones(bd);
+      const my = botColorForEval === BLACK ? black : white;
+      const opp = botColorForEval === BLACK ? white : black;
+      return { score: (my - opp) * 1000 };
+    }
+    if (depth === 0) return { score: evaluate(bd, botColorForEval) };
+    return minimax(bd, opponent(player), depth - 1, alpha, beta, botColorForEval);
+  }
+
+  if (depth === 0) {
+    return { score: evaluate(bd, botColorForEval) };
+  }
+
+  const maximizing = player === botColorForEval;
+  let best = maximizing ? -Infinity : Infinity;
+  let bestMove = moves[0];
+
+  for (const [r, c] of moves) {
+    const nb = simulateMove(bd, r, c, player);
+    const result = minimax(nb, opponent(player), depth - 1, alpha, beta, botColorForEval);
+    if (maximizing) {
+      if (result.score > best) { best = result.score; bestMove = [r, c]; }
+      alpha = Math.max(alpha, best);
+    } else {
+      if (result.score < best) { best = result.score; bestMove = [r, c]; }
+      beta = Math.min(beta, best);
+    }
+    if (beta <= alpha) break;
+  }
+  return { score: best, move: bestMove };
+}
+
+function getBotMove() {
+  const result = minimax(board, botColor, botDepth, -Infinity, Infinity, botColor);
+  return result.move;
+}
+
+// --- Rendering & flow ---
+
+function render() {
+  boardEl.innerHTML = '';
+  const validMoves = gameOver ? [] : getValidMoves(board, current);
+  const validSet = new Set(validMoves.map(([r,c]) => r + '-' + c));
+  const interactive = !gameOver && !thinking && (!vsBot || current === humanColor);
+
+  for (let r = 0; r < SIZE; r++) {
+    for (let c = 0; c < SIZE; c++) {
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      if (interactive && board[r][c] === EMPTY && validSet.has(r + '-' + c)) {
+        cell.classList.add('valid');
+      }
+      if (board[r][c] !== EMPTY) {
+        const stone = document.createElement('div');
+        stone.className = 'stone ' + (board[r][c] === BLACK ? 'black' : 'white');
+        cell.appendChild(stone);
+      }
+      cell.addEventListener('click', () => onCellClick(r, c));
+      boardEl.appendChild(cell);
+    }
+  }
+
+  const { black, white } = countStones(board);
+  document.getElementById('countBlack').textContent = black;
+  document.getElementById('countWhite').textContent = white;
+  document.getElementById('scoreBlack').classList.toggle('active', current === BLACK);
+  document.getElementById('scoreWhite').classList.toggle('active', current === WHITE);
+  document.getElementById('turnCounter').firstChild.textContent = '턴 ' + moveCount + '/';
+  document.getElementById('maxMoves').textContent = MAX_MOVES;
+}
+
+function onCellClick(r, c) {
+  if (gameOver || thinking) return;
+  if (vsBot && current !== humanColor) return;
+  const dirs = validDirections(board, r, c, current);
+  if (board[r][c] !== EMPTY || dirs.length === 0) return;
+
+  placeStone(board, r, c, current);
+  afterMove();
+}
+
+function afterMove() {
+  moveCount++;
+
+  const { black, white } = countStones(board);
+  if (black === 0 || white === 0) {
+    render();
+    endGame(black === 0 ? '백이 흑을 전멸시켰습니다!' : '흑이 백을 전멸시켰습니다!');
+    return;
+  }
+  if (moveCount >= MAX_MOVES) {
+    render();
+    endGame('턴 제한(' + MAX_MOVES + '턴) 도달');
+    return;
+  }
+
+  const mover = current;
+  const next = opponent(mover);
+  const nextMoves = getValidMoves(board, next);
+
+  if (nextMoves.length > 0) {
+    current = next;
+    statusEl.textContent = (current === BLACK ? '흑' : '백') + ' 차례입니다';
+    render();
+    maybeBotMove();
+  } else {
+    const stillMoves = getValidMoves(board, mover);
+    if (stillMoves.length > 0) {
+      statusEl.textContent = (next === BLACK ? '흑' : '백') + '은(는) 둘 곳이 없어 패스합니다. ' + (mover === BLACK ? '흑' : '백') + ' 차례가 계속됩니다.';
+      render();
+      maybeBotMove();
+    } else {
+      render();
+      endGame();
+    }
+  }
+}
+
+function maybeBotMove() {
+  if (gameOver || !vsBot || current !== botColor) return;
+  thinking = true;
+  statusEl.textContent = '봇이 생각 중...';
+  render();
+  setTimeout(() => {
+    const move = getBotMove();
+    if (move) {
+      placeStone(board, move[0], move[1], botColor);
+    }
+    thinking = false;
+    afterMove();
+  }, 350);
+}
+
+function endGame(reason) {
+  gameOver = true;
+  const { black, white } = countStones(board);
+  let title, text;
+  if (black === white) {
+    title = '무승부';
+  } else {
+    const winner = black > white ? '흑' : '백';
+    title = winner + ' 승리!';
+  }
+  text = `흑 ${black} : 백 ${white}` + (reason ? `  (${reason})` : '');
+  document.getElementById('overlayTitle').textContent = title;
+  document.getElementById('overlayText').textContent = text;
+  document.getElementById('overlay').classList.add('show');
+  statusEl.textContent = '게임 종료 — ' + title;
+}
+
+function newGame() {
+  const modeSelect = document.getElementById('modeSelect');
+  const colorSelect = document.getElementById('colorSelect');
+  const difficultySelect = document.getElementById('difficultySelect');
+
+  vsBot = modeSelect.value === 'bot';
+  humanColor = parseInt(colorSelect.value, 10);
+  botColor = opponent(humanColor);
+  botDepth = parseInt(difficultySelect.value, 10);
+
+  document.getElementById('overlay').classList.remove('show');
+  initBoard();
+  statusEl.textContent = '흑 차례입니다';
+  render();
+  maybeBotMove();
+}
+
+function updateSettingsVisibility() {
+  const isBot = document.getElementById('modeSelect').value === 'bot';
+  document.getElementById('colorSetting').style.display = isBot ? '' : 'none';
+  document.getElementById('difficultySetting').style.display = isBot ? '' : 'none';
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  boardEl = document.getElementById('board');
+  statusEl = document.getElementById('status');
+  document.getElementById('newGameBtn').addEventListener('click', newGame);
+  document.getElementById('restartBtn').addEventListener('click', newGame);
+  document.getElementById('overlayRestart').addEventListener('click', newGame);
+  document.getElementById('modeSelect').addEventListener('change', updateSettingsVisibility);
+  updateSettingsVisibility();
+  newGame();
+});
+</script>
+
+</body>
+</html>
