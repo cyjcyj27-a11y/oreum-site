@@ -12,6 +12,54 @@
   var MAX = 200;        // 소감 글자수
   var SHOW = 20;        // 한 번에 보여줄 소감 수
 
+  // 영문판(/en/)에서도 같은 표를 쓰되 말만 바꿉니다
+  var EN = (document.documentElement.lang || '').toLowerCase().indexOf('en') === 0;
+  var T = EN ? {
+    lead:   'Tell me how it played — I read every one, and it shapes what I fix next.',
+    ph:     'How did it play? (up to ' + MAX + ' characters)',
+    nick:   'Name (optional)',
+    pw:     '4 digits',
+    send:   'Post',
+    loading:'Loading…',
+    empty:  'No notes yet. Be the first.',
+    failed: 'Could not load the notes.',
+    anon:   'Anonymous',
+    del:    'delete',
+    askPw:  'Enter the 4 digits you used when posting',
+    noDel:  'Could not delete',
+    badPw:  'Those digits do not match',
+    needBody:'Write a line first',
+    tooLong: MAX + ' characters at most',
+    badDigits:'Use 4 digits (or leave it blank)',
+    offline:'Cannot post right now. Try again in a moment.',
+    posting:'Posting…',
+    thanks: 'Posted. Thank you!',
+    failPost:'Could not post. Try again in a moment.',
+    ago:    ['just now', 'm ago', 'h ago']
+  } : {
+    lead:   '소감 한마디 남겨주시면 게임에 반영하겠습니다.',
+    ph:     '플레이해본 소감 한마디 (' + MAX + '자까지)',
+    nick:   '이름 (안 써도 됩니다)',
+    pw:     '숫자 4자리',
+    send:   '남기기',
+    loading:'불러오는 중…',
+    empty:  '아직 소감이 없습니다. 첫 한마디를 남겨주세요.',
+    failed: '소감을 불러오지 못했습니다.',
+    anon:   '이름 없음',
+    del:    '지우기',
+    askPw:  '소감을 남길 때 넣은 숫자 4자리를 입력하세요',
+    noDel:  '지우지 못했습니다',
+    badPw:  '숫자가 맞지 않습니다',
+    needBody:'한마디를 적어주세요',
+    tooLong: MAX + '자까지만 쓸 수 있습니다',
+    badDigits:'숫자 4자리로 넣어주세요 (비워둬도 됩니다)',
+    offline:'지금은 남길 수 없습니다. 잠시 뒤 다시 해주세요.',
+    posting:'올리는 중…',
+    thanks: '남겼습니다. 고맙습니다!',
+    failPost:'올리지 못했습니다. 잠시 뒤 다시 해주세요.',
+    ago:    ['방금', '분 전', '시간 전']
+  };
+
   var db = null;
   if (window.supabase) db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
@@ -34,10 +82,11 @@
 
   function when(iso) {
     var t = new Date(iso), m = Math.floor((Date.now() - t) / 60000);
-    if (m < 1) return '방금';
-    if (m < 60) return m + '분 전';
-    if (m < 1440) return Math.floor(m / 60) + '시간 전';
-    return (t.getMonth() + 1) + '월 ' + t.getDate() + '일';
+    if (m < 1) return T.ago[0];
+    if (m < 60) return m + T.ago[1];
+    if (m < 1440) return Math.floor(m / 60) + T.ago[2];
+    return EN ? (t.getMonth() + 1) + '/' + t.getDate()
+              : (t.getMonth() + 1) + '월 ' + t.getDate() + '일';
   }
 
   function mount(host) {
@@ -45,16 +94,17 @@
     var busy = false;
 
     host.innerHTML =
-      '<div class="talk-list"><p class="talk-empty">불러오는 중…</p></div>' +
+      '<p class="talk-lead">' + T.lead + '</p>' +
+      '<div class="talk-list"><p class="talk-empty">' + T.loading + '</p></div>' +
       '<form class="talk-form">' +
         '<textarea class="talk-body" rows="2" maxlength="' + MAX + '" ' +
-          'placeholder="플레이해본 소감 한마디 (' + MAX + '자까지)"></textarea>' +
+          'placeholder="' + T.ph + '"></textarea>' +
         '<div class="talk-row">' +
-          '<input class="talk-nick" type="text" maxlength="12" placeholder="이름 (안 써도 됩니다)">' +
+          '<input class="talk-nick" type="text" maxlength="12" placeholder="' + T.nick + '">' +
           '<input class="talk-pw" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="4" ' +
-            'placeholder="숫자 4자리">' +
+            'placeholder="' + T.pw + '">' +
           '<span class="talk-count">0/' + MAX + '</span>' +
-          '<button class="btn btn-primary talk-send" type="submit">남기기</button>' +
+          '<button class="btn btn-primary talk-send" type="submit">' + T.send + '</button>' +
         '</div>' +
         '<p class="talk-msg" role="status"></p>' +
       '</form>';
@@ -85,7 +135,7 @@
     function render(rows) {
       if (summary) summary.textContent = summaryBase + (rows.length ? ' (' + rows.length + ')' : '');
       if (!rows.length) {
-        list.innerHTML = '<p class="talk-empty">아직 소감이 없습니다. 첫 한마디를 남겨주세요.</p>';
+        list.innerHTML = '<p class="talk-empty">' + T.empty + '</p>';
         return;
       }
       list.innerHTML = '';
@@ -93,14 +143,14 @@
         var el = document.createElement('article');
         el.className = 'talk-item';
         el.innerHTML =
-          '<div class="talk-meta"><b>' + (c.nick ? esc(c.nick) : '이름 없음') + '</b>' +
+          '<div class="talk-meta"><b>' + (c.nick ? esc(c.nick) : T.anon) + '</b>' +
           '<span class="talk-ago">' + when(c.created_at) + '</span></div>' +
           '<p class="talk-text">' + bodyHtml(c.body) + '</p>';
         if (c.has_pw) {
           var del = document.createElement('button');
           del.type = 'button';
           del.className = 'talk-del';
-          del.textContent = '지우기';
+          del.textContent = T.del;
           del.addEventListener('click', function () { remove(c.id, el); });
           el.querySelector('.talk-meta').appendChild(del);
         }
@@ -110,7 +160,7 @@
 
     function load() {
       if (!db) {
-        list.innerHTML = '<p class="talk-empty">소감을 불러오지 못했습니다.</p>';
+        list.innerHTML = '<p class="talk-empty">' + T.failed + '</p>';
         return;
       }
       db.from('labs_comments')
@@ -123,19 +173,19 @@
           render(r.data || []);
         })
         .catch(function (err) {
-          list.innerHTML = '<p class="talk-empty">소감을 불러오지 못했습니다.</p>';
+          list.innerHTML = '<p class="talk-empty">' + T.failed + '</p>';
           console.error(err);
         });
     }
 
     function remove(id, el) {
-      var key = prompt('소감을 남길 때 넣은 숫자 4자리를 입력하세요');
+      var key = prompt(T.askPw);
       if (key === null) return;
       db.rpc('delete_labs_comment', { p_id: id, p_pw: String(key).trim() })
         .then(function (r) {
-          if (r.error) { alert('지우지 못했습니다'); return; }
+          if (r.error) { alert(T.noDel); return; }
           if (r.data === true) el.remove();
-          else alert('숫자가 맞지 않습니다');
+          else alert(T.badPw);
         });
     }
 
@@ -145,13 +195,13 @@
 
       var text = body.value.trim();
       var key = pw.value.trim();
-      if (!text) { say('한마디를 적어주세요', true); return; }
-      if (text.length > MAX) { say(MAX + '자까지만 쓸 수 있습니다', true); return; }
+      if (!text) { say(T.needBody, true); return; }
+      if (text.length > MAX) { say(T.tooLong, true); return; }
       // 숫자 4자리는 안 넣어도 됩니다. 넣으면 나중에 본인이 지울 수 있습니다.
-      if (key && !/^\d{4}$/.test(key)) { say('숫자 4자리로 넣어주세요 (비워둬도 됩니다)', true); return; }
-      if (!db) { say('지금은 남길 수 없습니다. 잠시 뒤 다시 해주세요.', true); return; }
+      if (key && !/^\d{4}$/.test(key)) { say(T.badDigits, true); return; }
+      if (!db) { say(T.offline, true); return; }
 
-      busy = true; send.disabled = true; say('올리는 중…');
+      busy = true; send.disabled = true; say(T.posting);
       db.rpc('create_labs_comment', {
         p_slug: slug,
         p_nick: nick.value.trim() || null,
@@ -161,11 +211,11 @@
         .then(function (r) {
           if (r.error) throw r.error;
           body.value = ''; pw.value = ''; count.textContent = '0/' + MAX;
-          say('남겼습니다. 고맙습니다!');
+          say(T.thanks);
           load();
         })
         .catch(function (err) {
-          say('올리지 못했습니다. 잠시 뒤 다시 해주세요.', true);
+          say(T.failPost, true);
           console.error(err);
         })
         .then(function () { busy = false; send.disabled = false; });

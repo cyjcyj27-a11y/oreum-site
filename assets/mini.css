@@ -48,6 +48,11 @@
 .talk[open] > summary::after { content: " ▴"; }
 .talk > summary:hover { color: var(--ember-ink); }
 
+.talk-lead {
+  margin: 12px 0 0; font-size: 13.5px; line-height: 1.6; color: var(--ink-2);
+  background: var(--green-soft); border: 1px solid var(--green-edge);
+  border-radius: 9px; padding: 9px 12px;
+}
 .talk-list { margin-top: 12px; display: grid; gap: 10px; }
 .talk-empty { margin: 0; color: var(--muted); font-size: 13.5px; }
 
