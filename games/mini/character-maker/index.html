@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>캐릭터 조립대 · 로우폴리 캐릭터 메이커</title>
+<style>
+  :root{
+    --ink:#0D1117;
+    --panel:#161C26;
+    --panel-2:#1D2531;
+    --rule:#2B3545;
+    --text:#D6DFEA;
+    --text-dim:#7C8AA0;
+    --blue:#4DA3FF;
+    --amber:#F2C14E;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+    --sans: "Pretendard", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo",
+            "Segoe UI", "Malgun Gothic", sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0}
+  body{
+    background:var(--ink); color:var(--text);
+    font-family:var(--sans); font-size:14px;
+    display:grid; grid-template-columns: 300px 1fr;
+    overflow:hidden;
+  }
+
+  /* ---------- 좌측 조립 패널 ---------- */
+  aside{
+    background:var(--panel);
+    border-right:1px solid var(--rule);
+    overflow-y:auto; padding:18px 16px 60px;
+  }
+  aside::-webkit-scrollbar{width:8px}
+  aside::-webkit-scrollbar-thumb{background:var(--rule);border-radius:4px}
+
+  .brand{ margin-bottom:22px }
+  .brand h1{
+    font-family:var(--mono); font-size:13px; font-weight:600;
+    letter-spacing:.18em; text-transform:uppercase;
+    margin:0 0 4px; color:var(--text);
+  }
+  .brand p{ margin:0; font-size:11px; color:var(--text-dim); line-height:1.5 }
+
+  .grp{ margin-bottom:24px }
+  .grp > h2{
+    font-family:var(--mono); font-size:10px; font-weight:600;
+    letter-spacing:.16em; text-transform:uppercase;
+    color:var(--blue); margin:0 0 10px;
+    padding-bottom:6px; border-bottom:1px solid var(--rule);
+    display:flex; justify-content:space-between; align-items:baseline;
+  }
+  .grp > h2 span{ color:var(--text-dim); font-weight:400; letter-spacing:.04em }
+
+  .row{ margin-bottom:11px }
+  .row label{
+    display:flex; justify-content:space-between; align-items:baseline;
+    font-size:12px; margin-bottom:5px; color:var(--text-dim);
+  }
+  .row label b{ font-family:var(--mono); font-size:11px; color:var(--text); font-weight:500 }
+
+  input[type=range]{
+    -webkit-appearance:none; appearance:none; width:100%; height:3px;
+    background:var(--rule); border-radius:2px; outline:none; cursor:pointer;
+  }
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none; width:13px; height:13px; border-radius:50%;
+    background:var(--text); border:2px solid var(--panel); cursor:pointer;
+    box-shadow:0 0 0 1px var(--rule);
+  }
+  input[type=range]::-moz-range-thumb{
+    width:11px;height:11px;border-radius:50%;background:var(--text);
+    border:2px solid var(--panel); cursor:pointer;
+  }
+  input[type=range]:focus-visible::-webkit-slider-thumb{ box-shadow:0 0 0 2px var(--blue) }
+
+  .swatches{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px }
+  .sw{ display:flex; flex-direction:column; gap:4px }
+  .sw span{ font-size:10px; color:var(--text-dim) }
+  .sw input[type=color]{
+    -webkit-appearance:none; appearance:none; border:none; padding:0;
+    width:100%; height:26px; border-radius:3px; background:none; cursor:pointer;
+  }
+  .sw input[type=color]::-webkit-color-swatch-wrapper{padding:0}
+  .sw input[type=color]::-webkit-color-swatch{border:1px solid var(--rule);border-radius:3px}
+
+  .chips{ display:flex; flex-wrap:wrap; gap:6px }
+  .chip{
+    font-family:var(--mono); font-size:11px; letter-spacing:.02em;
+    padding:6px 10px; border-radius:3px; cursor:pointer;
+    background:var(--panel-2); color:var(--text-dim);
+    border:1px solid var(--rule); transition:.12s;
+  }
+  .chip:hover{ color:var(--text); border-color:var(--text-dim) }
+  .chip[aria-pressed="true"]{
+    background:var(--blue); color:var(--ink); border-color:var(--blue); font-weight:600;
+  }
+  .chip:focus-visible{ outline:2px solid var(--amber); outline-offset:1px }
+
+  /* ---------- 뷰포트 ---------- */
+  main{ position:relative; overflow:hidden; background:
+      radial-gradient(120% 90% at 50% 0%, #1B2330 0%, #0D1117 70%); }
+  canvas{ display:block; width:100%; height:100% }
+
+  .hud{
+    position:absolute; pointer-events:none;
+    font-family:var(--mono); font-size:11px; letter-spacing:.04em;
+  }
+  #spec{
+    top:16px; left:18px; color:var(--text-dim); line-height:1.7;
+  }
+  #spec b{ color:var(--amber); font-weight:600; font-size:15px }
+  #spec em{ font-style:normal; color:var(--text) }
+
+  #bar{
+    position:absolute; left:0; right:0; bottom:0;
+    display:flex; gap:6px; flex-wrap:wrap; align-items:center;
+    padding:12px 18px; background:linear-gradient(transparent, rgba(13,17,23,.92) 40%);
+  }
+  #bar .sep{ flex:1 }
+  .btn{
+    font-family:var(--mono); font-size:11px; letter-spacing:.04em;
+    padding:7px 12px; border-radius:3px; cursor:pointer; transition:.12s;
+    background:rgba(29,37,49,.9); color:var(--text-dim);
+    border:1px solid var(--rule); backdrop-filter:blur(4px);
+  }
+  .btn:hover{ color:var(--text); border-color:var(--text-dim) }
+  .btn[aria-pressed="true"]{ background:var(--blue); color:var(--ink); border-color:var(--blue); font-weight:600 }
+  .btn.go{ background:var(--amber); color:var(--ink); border-color:var(--amber); font-weight:600 }
+  .btn.go:hover{ filter:brightness(1.1); color:var(--ink) }
+  .btn:focus-visible{ outline:2px solid var(--amber); outline-offset:1px }
+
+  #toast{
+    position:absolute; top:16px; right:18px;
+    font-family:var(--mono); font-size:11px; padding:8px 12px; border-radius:3px;
+    background:var(--amber); color:var(--ink); font-weight:600;
+    opacity:0; transform:translateY(-6px); transition:.2s; pointer-events:none;
+  }
+  #toast.on{ opacity:1; transform:none }
+
+  #err{
+    position:absolute; inset:0; display:none; place-content:center; text-align:center;
+    font-family:var(--mono); font-size:12px; color:var(--text-dim); padding:40px; line-height:1.8;
+  }
+
+  @media (max-width:860px){
+    body{ grid-template-columns:1fr; grid-template-rows: 46vh 54vh }
+    aside{ order:2; border-right:none; border-top:1px solid var(--rule); padding-bottom:24px }
+    main{ order:1 }
+  }
+  @media (prefers-reduced-motion:reduce){ *{ transition:none !important } }
+</style>
+</head>
+<body>
+
+<aside>
+  <div class="brand">
+    <h1>캐릭터 조립대</h1>
+    <p>비율을 맞추고 GLB로 내보내면<br>Three.js에 바로 들어갑니다.</p>
+  </div>
+
+  <div class="grp">
+    <h2>골격 <span>proportion</span></h2>
+    <div id="sliders"></div>
+  </div>
+
+  <div class="grp">
+    <h2>색 <span>material</span></h2>
+    <div class="swatches" id="colors"></div>
+  </div>
+
+  <div class="grp">
+    <h2>형태 <span>shape</span></h2>
+    <div class="chips" id="shapes"></div>
+  </div>
+
+  <div class="grp">
+    <h2>장비 <span>attachments</span></h2>
+    <div class="chips" id="gear"></div>
+  </div>
+
+  <div class="grp">
+    <h2>기본형 <span>presets</span></h2>
+    <div class="chips" id="presets"></div>
+  </div>
+</aside>
+
+<main>
+  <div class="hud" id="spec"></div>
+  <div id="err"></div>
+  <div id="bar">
+    <button class="btn" data-anim="rest" aria-pressed="true">정지</button>
+    <button class="btn" data-anim="walk" aria-pressed="false">걷기</button>
+    <button class="btn" data-anim="run" aria-pressed="false">달리기</button>
+    <button class="btn" data-anim="wave" aria-pressed="false">인사</button>
+    <button class="btn" id="spin" aria-pressed="true">자동 회전</button>
+    <button class="btn" id="ruler" aria-pressed="true">치수</button>
+    <span class="sep"></span>
+    <button class="btn" id="rand">무작위</button>
+    <button class="btn" id="png">PNG 저장</button>
+    <button class="btn go" id="glb">GLB 내보내기</button>
+  </div>
+  <div id="toast"></div>
+</main>
+
+<script type="module">
+import * as THREE from 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.module.js';
+
+const errBox = document.getElementById('err');
+if(!THREE){ errBox.style.display='grid'; errBox.textContent='3D 엔진을 불러오지 못했습니다. 네트워크를 확인하고 새로고침하세요.'; }
+
+/* ══════════ 상태 ══════════ */
+const P = {
+  height:1.75, head:1.00, shoulder:1.00, torso:1.00,
+  arm:1.00, leg:1.00, limb:1.00, belly:1.00,
+  shape:'box',
+  hair:true, hat:false, pack:false, visor:false,
+  col:{ skin:'#e0a878', hair:'#2e2620', top:'#3f7d8c', bottom:'#2f3a4a', shoes:'#1b1f26', gear:'#d8622e' }
+};
+
+const SLIDERS = [
+  ['height','키',        1.00, 2.40, 0.01, v=>v.toFixed(2)+' m'],
+  ['head',  '머리 크기',  0.55, 1.90, 0.01, pct],
+  ['shoulder','어깨 너비',0.55, 1.70, 0.01, pct],
+  ['torso', '몸통 두께',  0.55, 1.70, 0.01, pct],
+  ['belly', '배',        0.70, 1.80, 0.01, pct],
+  ['arm',   '팔 길이',    0.60, 1.45, 0.01, pct],
+  ['leg',   '다리 길이',  0.60, 1.45, 0.01, pct],
+  ['limb',  '팔다리 굵기',0.55, 1.90, 0.01, pct],
+];
+function pct(v){ return Math.round(v*100)+'%' }
+
+const COLORS = [['skin','피부'],['hair','머리'],['top','상의'],['bottom','하의'],['shoes','신발'],['gear','장비']];
+const SHAPES = [['box','각진'],['round','둥근']];
+const GEAR   = [['hair','머리카락'],['hat','모자'],['pack','배낭'],['visor','고글']];
+
+const PRESETS = {
+  '등반가': {height:1.74,head:1.0,shoulder:1.12,torso:1.05,belly:1.0,arm:1.0,leg:1.02,limb:1.05,shape:'box',
+            hair:true,hat:true,pack:true,visor:false,
+            col:{skin:'#d99b6c',hair:'#241d18',top:'#c4552f',bottom:'#39434f',shoes:'#15181d',gear:'#e0a020'}},
+  '꼬마':   {height:1.15,head:1.55,shoulder:0.78,torso:0.95,belly:1.15,arm:0.85,leg:0.82,limb:1.1,shape:'round',
+            hair:true,hat:false,pack:true,visor:false,
+            col:{skin:'#f0c39a',hair:'#3a2a1c',top:'#e8c93f',bottom:'#4a6fa8',shoes:'#c0392b',gear:'#7bc47f'}},
+  '거인':   {height:2.35,head:0.82,shoulder:1.62,torso:1.55,belly:1.35,arm:1.2,leg:0.95,limb:1.6,shape:'box',
+            hair:false,hat:false,pack:false,visor:false,
+            col:{skin:'#8fa07a',hair:'#2a2a2a',top:'#5c4433',bottom:'#3a3128',shoes:'#20211c',gear:'#8b5a2b'}},
+  '로봇':   {height:1.85,head:1.15,shoulder:1.35,torso:1.2,belly:0.85,arm:1.05,leg:1.0,limb:1.25,shape:'box',
+            hair:false,hat:false,pack:true,visor:true,
+            col:{skin:'#9aa5b1',hair:'#5a6672',top:'#4a555f',bottom:'#39424b',shoes:'#22282e',gear:'#4dd0e1'}},
+  '해녀':   {height:1.58,head:1.02,shoulder:0.95,torso:0.95,belly:1.0,arm:0.98,leg:0.96,limb:0.95,shape:'round',
+            hair:false,hat:true,pack:true,visor:true,
+            col:{skin:'#d9a077',hair:'#1a1a1a',top:'#16181c',bottom:'#16181c',shoes:'#2a3f4a',gear:'#e2762f'}},
+  '좀비':   {height:1.72,head:1.08,shoulder:0.9,torso:0.85,belly:0.8,arm:1.15,leg:1.05,limb:0.75,shape:'round',
+            hair:true,hat:false,pack:false,visor:false,
+            col:{skin:'#8fae7a',hair:'#3d3a30',top:'#6b6250',bottom:'#4a4238',shoes:'#2e2a24',gear:'#7a2f2f'}},
+};
+
+/* ══════════ 씬 ══════════ */
+const main = document.querySelector('main');
+const renderer = new THREE.WebGLRenderer({antialias:true, alpha:true, preserveDrawingBuffer:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+main.insertBefore(renderer.domElement, main.firstChild);
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(38, 1, 0.05, 100);
+
+scene.add(new THREE.HemisphereLight(0x9fc4ff, 0x2a2118, 0.75));
+const key = new THREE.DirectionalLight(0xfff2dd, 1.25);
+key.position.set(2.6, 4.2, 2.4);
+key.castShadow = true;
+key.shadow.mapSize.set(1024,1024);
+const s = key.shadow.camera;
+s.left=-2.2; s.right=2.2; s.top=3.6; s.bottom=-0.4; s.near=0.5; s.far=12;
+scene.add(key);
+const rim = new THREE.DirectionalLight(0x4da3ff, 0.5);
+rim.position.set(-3,1.6,-2.4);
+scene.add(rim);
+
+// 바닥
+const floor = new THREE.Mesh(
+  new THREE.CircleGeometry(3.2, 48),
+  new THREE.MeshStandardMaterial({color:0x1a212c, roughness:1})
+);
+floor.rotation.x = -Math.PI/2; floor.receiveShadow = true; floor.position.y = -0.001;
+scene.add(floor);
+const grid = new THREE.GridHelper(6.4, 32, 0x2b3545, 0x212a37);
+grid.material.transparent = true; grid.material.opacity = 0.7;
+scene.add(grid);
+
+const turntable = new THREE.Group();
+scene.add(turntable);
+const charRoot = new THREE.Group();
+charRoot.name = 'Character';
+turntable.add(charRoot);
+
+// 3D 치수자
+const rulerGrp = new THREE.Group();
+turntable.add(rulerGrp);
+const rulerMat = new THREE.LineBasicMaterial({color:0x4da3ff, transparent:true, opacity:0.55});
+
+/* ══════════ 캐릭터 조립 ══════════ */
+const joints = {};      // 애니메이션용 관절
+const matCache = new Map();
+function mat(hex){
+  if(!matCache.has(hex)) matCache.set(hex, new THREE.MeshStandardMaterial({color:new THREE.Color(hex), roughness:0.92, metalness:0.02, flatShading:true}));
+  return matCache.get(hex);
+}
+function disposeTree(o){
+  o.traverse(c=>{ if(c.geometry) c.geometry.dispose(); });
+  while(o.children.length) o.remove(o.children[0]);
+}
+
+/** 피벗이 윗면 중앙인 파츠. round=true면 원기둥/구 */
+function part(w,h,d,hex,{round=false, sphere=false, pivot='top'}={}){
+  let g;
+  if(sphere)      g = new THREE.SphereGeometry(0.5, 14, 10).scale(w,h,d);
+  else if(round)  g = new THREE.CylinderGeometry(0.5,0.5,1,12).scale(w,h,d);
+  else            g = new THREE.BoxGeometry(w,h,d);
+  if(pivot==='top') g.translate(0,-h/2,0);
+  else if(pivot==='bottom') g.translate(0, h/2,0);
+  const m = new THREE.Mesh(g, mat(hex));
+  m.castShadow = true; m.receiveShadow = true;
+  return m;
+}
+
+let MEASURED = 0;
+
+function build(){
+  disposeTree(charRoot);
+  for(const k in joints) delete joints[k];
+
+  const H = P.height, R = P.shape==='round', C = P.col;
+
+  const headH  = 0.132*H*P.head;
+  const headW  = headH*0.86;
+  const neckH  = 0.035*H;
+  const torsoH = 0.300*H;
+  const legL   = 0.455*H*P.leg;
+  const thighL = legL*0.52, shinL = legL*0.48;
+  const footH  = 0.032*H;
+  const armL   = 0.400*H*P.arm;
+  const upArmL = armL*0.52, loArmL = armL*0.48;
+
+  const shW    = 0.250*H*P.shoulder;
+  const torsoD = 0.135*H*P.torso;
+  const hipW   = shW*0.78*P.belly;
+  const armT   = 0.052*H*P.limb;
+  const legT   = 0.072*H*P.limb;
+
+  const hipY = footH + legL;
+
+  // 허리
+  const hips = new THREE.Group();
+  hips.name='hips'; hips.position.y = hipY;
+  charRoot.add(hips);
+
+  // 몸통 (아래는 골반폭, 위는 어깨폭 — 두 조각으로 실루엣을 냄)
+  const pelvis = part(hipW, torsoH*0.42, torsoD*P.belly, C.bottom, {round:R, pivot:'bottom'});
+  pelvis.name='pelvis'; hips.add(pelvis);
+  const chestMesh = part(shW*0.86, torsoH*0.62, torsoD, C.top, {round:R, pivot:'bottom'});
+  chestMesh.name='chest'; chestMesh.position.y = torsoH*0.38; hips.add(chestMesh);
+
+  const chest = new THREE.Group();
+  chest.name='chestJoint'; chest.position.y = torsoH; hips.add(chest);
+  joints.chest = chest;
+
+  // 머리
+  const neck = part(headW*0.4, neckH+0.01, headW*0.4, C.skin, {round:R, pivot:'bottom'});
+  chest.add(neck);
+  const headJ = new THREE.Group(); headJ.name='head'; headJ.position.y = neckH; chest.add(headJ);
+  joints.head = headJ;
+
+  const skull = part(headW, headH, headW*0.92, C.skin, {round:R, sphere:R, pivot:'bottom'});
+  skull.name='skull';
+  if(R) skull.position.y = headH/2;   // 구는 중심 피벗이라 보정
+  headJ.add(skull);
+
+  // 눈
+  const eyeS = headW*0.13;
+  for(const sx of [-1,1]){
+    const e = part(eyeS, eyeS, eyeS*0.5, P.visor? C.gear : '#15171c', {pivot:'center'});
+    e.position.set(sx*headW*0.22, headH*0.58, headW*0.46);
+    headJ.add(e);
+  }
+  if(P.visor){
+    const v = part(headW*1.02, headH*0.26, headW*0.98, C.gear, {round:R, pivot:'center'});
+    v.position.set(0, headH*0.58, headW*0.06);
+    headJ.add(v);
+  }
+  if(P.hair){
+    const hr = part(headW*1.06, headH*0.34, headW*0.99, C.hair, {round:R, pivot:'top'});
+    hr.position.y = headH*1.02; headJ.add(hr);
+    const back = part(headW*1.04, headH*0.5, headW*0.3, C.hair, {pivot:'top'});
+    back.position.set(0, headH*0.98, -headW*0.4); headJ.add(back);
+  }
+  if(P.hat){
+    const crown = part(headW*0.94, headH*0.42, headW*0.9, C.gear, {round:R, pivot:'bottom'});
+    crown.position.y = headH*0.98; headJ.add(crown);
+    const brim = part(headW*1.5, headH*0.08, headW*1.5, C.gear, {round:R, pivot:'bottom'});
+    brim.position.y = headH*0.96; headJ.add(brim);
+  }
+
+  // 팔
+  for(const [side,sx] of [['L',-1],['R',1]]){
+    const sh = new THREE.Group(); sh.name='shoulder'+side;
+    sh.position.set(sx*(shW*0.5 - armT*0.35), -0.028*H, 0);
+    chest.add(sh); joints['arm'+side] = sh;
+
+    const up = part(armT, upArmL, armT, C.top, {round:R}); up.name='upperArm'+side; sh.add(up);
+    const el = new THREE.Group(); el.name='elbow'+side; el.position.y = -upArmL; sh.add(el);
+    joints['elbow'+side] = el;
+    const lo = part(armT*0.92, loArmL, armT*0.92, C.skin, {round:R}); lo.name='foreArm'+side; el.add(lo);
+    const hand = part(armT*1.25, armT*1.25, armT*1.25, C.skin, {round:R, sphere:R, pivot:'top'});
+    hand.position.y = -loArmL; el.add(hand);
+  }
+
+  // 다리
+  for(const [side,sx] of [['L',-1],['R',1]]){
+    const hp = new THREE.Group(); hp.name='hip'+side;
+    hp.position.set(sx*hipW*0.26, 0, 0);
+    hips.add(hp); joints['leg'+side] = hp;
+
+    const th = part(legT, thighL, legT, C.bottom, {round:R}); th.name='thigh'+side; hp.add(th);
+    const kn = new THREE.Group(); kn.name='knee'+side; kn.position.y = -thighL; hp.add(kn);
+    joints['knee'+side] = kn;
+    const sn = part(legT*0.9, shinL, legT*0.9, C.bottom, {round:R}); sn.name='shin'+side; kn.add(sn);
+
+    const ft = new THREE.Group(); ft.position.y = -shinL; kn.add(ft);
+    const foot = part(legT*1.15, footH, legT*2.3, C.shoes, {pivot:'top'});
+    foot.position.z = legT*0.6; ft.add(foot);
+  }
+
+  if(P.pack){
+    const pk = part(shW*0.66, torsoH*0.62, torsoD*0.5, C.gear, {round:R, pivot:'top'});
+    pk.position.set(0, torsoH*0.94, -(torsoD*0.5 + torsoD*0.24));
+    hips.add(pk);
+  }
+
+  // 실측
+  charRoot.updateMatrixWorld(true);
+  const box = new THREE.Box3().setFromObject(charRoot);
+  MEASURED = box.max.y - box.min.y;
+  buildRuler(MEASURED, shW);
+  updateSpec();
+  frameCamera();
+}
+
+function buildRuler(h, shW){
+  disposeTree(rulerGrp);
+  const x = -Math.max(shW*0.5 + 0.28, 0.45);
+  const pts = [];
+  pts.push(x,0,0, x,h,0);                       // 세로축
+  for(let y=0; y<=h+1e-6; y+=0.1){
+    const major = Math.abs(y - Math.round(y)) < 1e-6;
+    const len = major ? 0.09 : 0.045;
+    pts.push(x,y,0, x+len,y,0);
+  }
+  pts.push(x-0.05,h,0, x+0.16,h,0);             // 정수리 캡
+  pts.push(x-0.05,0,0, x+0.16,0,0);
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(pts,3));
+  rulerGrp.add(new THREE.LineSegments(g, rulerMat));
+}
+
+function updateSpec(){
+  const cm = (MEASURED*100).toFixed(1);
+  const heads = MEASURED / (0.132*P.height*P.head) ;
+  document.getElementById('spec').innerHTML =
+    `<b>${MEASURED.toFixed(3)}</b> units<br>` +
+    `<em>${cm} cm</em> · ${heads.toFixed(1)}등신<br>` +
+    `${countTris()} tris · ${P.shape==='box'?'각진':'둥근'}`;
+}
+function countTris(){
+  let n=0;
+  charRoot.traverse(o=>{ if(o.isMesh){ const g=o.geometry; n += g.index? g.index.count/3 : g.attributes.position.count/3; }});
+  return n;
+}
+
+/* ══════════ 카메라 ══════════ */
+const cam = {az: 0.55, el: 0.18, dist: 4, tgt: new THREE.Vector3(0,0.9,0)};
+function frameCamera(){
+  cam.tgt.y = MEASURED*0.52;
+  cam.dist = MEASURED*2.25 + 0.6;
+}
+function applyCamera(){
+  const {az,el,dist,tgt} = cam;
+  camera.position.set(
+    tgt.x + dist*Math.cos(el)*Math.sin(az),
+    tgt.y + dist*Math.sin(el),
+    tgt.z + dist*Math.cos(el)*Math.cos(az)
+  );
+  camera.lookAt(tgt);
+}
+
+let drag=null;
+renderer.domElement.addEventListener('pointerdown', e=>{
+  drag={x:e.clientX,y:e.clientY}; renderer.domElement.setPointerCapture(e.pointerId);
+  UI.spin=false; syncBar();
+});
+renderer.domElement.addEventListener('pointermove', e=>{
+  if(!drag) return;
+  cam.az -= (e.clientX-drag.x)*0.008;
+  cam.el = Math.max(-0.5, Math.min(1.25, cam.el + (e.clientY-drag.y)*0.006));
+  drag={x:e.clientX,y:e.clientY};
+});
+addEventListener('pointerup', ()=> drag=null);
+renderer.domElement.addEventListener('wheel', e=>{
+  e.preventDefault();
+  cam.dist = Math.max(0.8, Math.min(14, cam.dist * (1 + Math.sign(e.deltaY)*0.09)));
+},{passive:false});
+
+/* ══════════ 포즈 ══════════ */
+const UI = {anim:'rest', spin:true, ruler:true};
+
+function pose(t){
+  const J=joints; if(!J.armL) return;
+  const zero = o => o && o.rotation.set(0,0,0);
+  ['armL','armR','elbowL','elbowR','legL','legR','kneeL','kneeR','chest','head'].forEach(k=>zero(J[k]));
+  charRoot.position.y = 0; charRoot.rotation.z = 0;
+
+  if(UI.anim==='rest'){
+    J.armL.rotation.z =  0.09; J.armR.rotation.z = -0.09;
+    J.elbowL.rotation.x = -0.12; J.elbowR.rotation.x = -0.12;
+    const b = Math.sin(t*1.6)*0.012;
+    charRoot.position.y = b;
+    J.chest.rotation.x = b*0.6;
+    J.head.rotation.y = Math.sin(t*0.5)*0.12;
+    return;
+  }
+  if(UI.anim==='wave'){
+    J.armL.rotation.z = 0.09; J.elbowL.rotation.x = -0.15;
+    J.armR.rotation.z = -2.35;
+    J.elbowR.rotation.z = -0.5 + Math.sin(t*7)*0.45;
+    charRoot.position.y = Math.sin(t*1.6)*0.012;
+    J.head.rotation.x = -0.08;
+    return;
+  }
+  const fast = UI.anim==='run';
+  const sp = fast ? 9.5 : 5.6, amp = fast ? 1.05 : 0.55;
+  const w = Math.sin(t*sp), w2 = Math.cos(t*sp*2);
+
+  J.legL.rotation.x =  w*amp;      J.legR.rotation.x = -w*amp;
+  J.kneeL.rotation.x = -Math.max(0, -w)*amp*1.5 - (fast?0.35:0.1);
+  J.kneeR.rotation.x = -Math.max(0,  w)*amp*1.5 - (fast?0.35:0.1);
+  J.armL.rotation.x = -w*amp*0.85; J.armR.rotation.x =  w*amp*0.85;
+  J.armL.rotation.z = 0.1; J.armR.rotation.z = -0.1;
+  J.elbowL.rotation.x = -(fast?0.9:0.3); J.elbowR.rotation.x = -(fast?0.9:0.3);
+  charRoot.position.y = Math.abs(w2)*(fast?0.05:0.018)*P.height;
+  charRoot.rotation.z = Math.sin(t*sp)*(fast?0.05:0.02);
+  J.chest.rotation.y = -w*0.16;
+  J.chest.rotation.x = fast ? 0.28 : 0.06;
+}
+
+/* ══════════ 루프 ══════════ */
+let last = performance.now(), tt = 0;
+function loop(now){
+  requestAnimationFrame(loop);
+  const dt = Math.min((now-last)/1000, 0.05); last = now; tt += dt;
+  if(UI.spin) turntable.rotation.y += dt*0.35;
+  pose(tt);
+  rulerGrp.visible = UI.ruler;
+  applyCamera();
+  renderer.render(scene, camera);
+}
+function resize(){
+  const w = main.clientWidth, h = main.clientHeight;
+  renderer.setSize(w,h,false);
+  camera.aspect = w/h; camera.updateProjectionMatrix();
+}
+addEventListener('resize', resize);
+
+/* ══════════ GLB 내보내기 (직접 작성) ══════════ */
+function exportGLB(root){
+  const json = {
+    asset:{version:'2.0', generator:'캐릭터 조립대'},
+    scene:0, scenes:[{nodes:[0]}],
+    nodes:[], meshes:[], materials:[], accessors:[], bufferViews:[], buffers:[]
+  };
+  const bin = []; let binLen = 0;
+  const matMap = new Map();
+
+  const align = () => { const r = binLen % 4; if(r){ const p = 4-r; bin.push(new Uint8Array(p)); binLen += p; } };
+  function addView(ta){
+    align();
+    const bytes = new Uint8Array(ta.buffer.slice(ta.byteOffset, ta.byteOffset + ta.byteLength));
+    json.bufferViews.push({buffer:0, byteOffset:binLen, byteLength:bytes.length});
+    bin.push(bytes); binLen += bytes.length;
+    return json.bufferViews.length - 1;
+  }
+  function addAccessor(ta, type, componentType, count, mm){
+    const acc = {bufferView:addView(ta), componentType, count, type};
+    if(mm){ acc.min = mm[0]; acc.max = mm[1]; }
+    json.accessors.push(acc);
+    return json.accessors.length - 1;
+  }
+  function addMaterial(color){
+    const hex = color.getHexString();
+    if(matMap.has(hex)) return matMap.get(hex);
+    const lin = color.clone().convertSRGBToLinear();
+    json.materials.push({
+      name:'mat_'+hex, doubleSided:false,
+      pbrMetallicRoughness:{ baseColorFactor:[lin.r, lin.g, lin.b, 1], metallicFactor:0, roughnessFactor:0.9 }
+    });
+    const i = json.materials.length - 1; matMap.set(hex, i); return i;
+  }
+  function addMesh(mesh){
+    const g = mesh.geometry;
+    const pos = g.attributes.position.array;
+    const mn = [Infinity,Infinity,Infinity], mx = [-Infinity,-Infinity,-Infinity];
+    for(let i=0;i<pos.length;i+=3) for(let k=0;k<3;k++){
+      const v = pos[i+k]; if(v<mn[k]) mn[k]=v; if(v>mx[k]) mx[k]=v;
+    }
+    const attributes = { POSITION: addAccessor(new Float32Array(pos),'VEC3',5126,pos.length/3,[mn,mx]) };
+    if(g.attributes.normal){
+      const n = g.attributes.normal.array;
+      attributes.NORMAL = addAccessor(new Float32Array(n),'VEC3',5126,n.length/3);
+    }
+    const prim = { attributes, material: addMaterial(mesh.material.color) };
+    if(g.index){
+      const big = pos.length/3 > 65534;
+      const arr = big ? new Uint32Array(g.index.array) : new Uint16Array(g.index.array);
+      prim.indices = addAccessor(arr,'SCALAR', big?5125:5123, arr.length);
+    }
+    json.meshes.push({name: mesh.name || 'mesh', primitives:[prim]});
+    return json.meshes.length - 1;
+  }
+  function addNode(o){
+    const n = {};
+    if(o.name) n.name = o.name;
+    const p = o.position, q = o.quaternion, sc = o.scale;
+    if(p.x||p.y||p.z) n.translation = [p.x,p.y,p.z];
+    if(q.x||q.y||q.z||q.w!==1) n.rotation = [q.x,q.y,q.z,q.w];
+    if(sc.x!==1||sc.y!==1||sc.z!==1) n.scale = [sc.x,sc.y,sc.z];
+    if(o.isMesh) n.mesh = addMesh(o);
+    json.nodes.push(n);
+    const idx = json.nodes.length - 1;
+    const kids = [];
+    for(const c of o.children) if(c.visible !== false) kids.push(addNode(c));
+    if(kids.length) json.nodes[idx].children = kids;
+    return idx;
+  }
+
+  addNode(root);
+  json.buffers.push({byteLength:binLen});
+
+  const jsonBytes = new TextEncoder().encode(JSON.stringify(json));
+  const jPad = (4 - (jsonBytes.length % 4)) % 4;
+  const bPad = (4 - (binLen % 4)) % 4;
+  const total = 12 + 8 + jsonBytes.length + jPad + 8 + binLen + bPad;
+
+  const out = new Uint8Array(total);
+  const dv = new DataView(out.buffer);
+  let o = 0;
+  dv.setUint32(o,0x46546C67,true); o+=4;   // glTF
+  dv.setUint32(o,2,true); o+=4;
+  dv.setUint32(o,total,true); o+=4;
+  dv.setUint32(o,jsonBytes.length + jPad,true); o+=4;
+  dv.setUint32(o,0x4E4F534A,true); o+=4;   // JSON
+  out.set(jsonBytes,o); o += jsonBytes.length;
+  for(let i=0;i<jPad;i++) out[o++] = 0x20;
+  dv.setUint32(o,binLen + bPad,true); o+=4;
+  dv.setUint32(o,0x004E4942,true); o+=4;   // BIN
+  for(const chunk of bin){ out.set(chunk,o); o += chunk.length; }
+  return out;
+}
+
+function download(blob, name){
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = name; a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 2000);
+}
+let toastT;
+function toast(msg){
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('on');
+  clearTimeout(toastT); toastT = setTimeout(()=>el.classList.remove('on'), 1800);
+}
+
+/* ══════════ UI 구성 ══════════ */
+const $ = id => document.getElementById(id);
+
+$('sliders').innerHTML = SLIDERS.map(([k,label,mn,mx,st])=>`
+  <div class="row">
+    <label for="s_${k}">${label}<b id="v_${k}"></b></label>
+    <input type="range" id="s_${k}" min="${mn}" max="${mx}" step="${st}" value="${P[k]}">
+  </div>`).join('');
+SLIDERS.forEach(([k,,,,,fmt])=>{
+  const el = $('s_'+k), out = $('v_'+k);
+  const show = ()=> out.textContent = fmt(parseFloat(el.value));
+  show();
+  el.addEventListener('input', ()=>{ P[k] = parseFloat(el.value); show(); build(); });
+});
+
+$('colors').innerHTML = COLORS.map(([k,label])=>`
+  <div class="sw"><span>${label}</span><input type="color" id="c_${k}" value="${P.col[k]}" aria-label="${label} 색"></div>`).join('');
+COLORS.forEach(([k])=>{
+  $('c_'+k).addEventListener('input', e=>{ P.col[k] = e.target.value; build(); });
+});
+
+$('shapes').innerHTML = SHAPES.map(([k,label])=>
+  `<button class="chip" data-shape="${k}" aria-pressed="${P.shape===k}">${label}</button>`).join('');
+$('gear').innerHTML = GEAR.map(([k,label])=>
+  `<button class="chip" data-gear="${k}" aria-pressed="${P[k]}">${label}</button>`).join('');
+$('presets').innerHTML = Object.keys(PRESETS).map(n=>
+  `<button class="chip" data-preset="${n}">${n}</button>`).join('');
+
+document.addEventListener('click', e=>{
+  const b = e.target.closest('button'); if(!b) return;
+  if(b.dataset.shape){
+    P.shape = b.dataset.shape;
+    document.querySelectorAll('[data-shape]').forEach(x=>x.setAttribute('aria-pressed', x.dataset.shape===P.shape));
+    build();
+  }
+  if(b.dataset.gear){
+    const k = b.dataset.gear; P[k] = !P[k];
+    b.setAttribute('aria-pressed', P[k]); build();
+  }
+  if(b.dataset.preset){ applyPreset(PRESETS[b.dataset.preset]); }
+  if(b.dataset.anim){ UI.anim = b.dataset.anim; syncBar(); }
+  if(b.id==='spin'){ UI.spin = !UI.spin; syncBar(); }
+  if(b.id==='ruler'){ UI.ruler = !UI.ruler; syncBar(); }
+  if(b.id==='rand'){ randomize(); }
+  if(b.id==='png'){
+    renderer.domElement.toBlob(bl=>{ download(bl,'character.png'); toast('PNG 저장됨'); });
+  }
+  if(b.id==='glb'){
+    const keep = UI.anim; UI.anim = 'rest'; pose(0);
+    charRoot.position.y = 0; charRoot.rotation.set(0,0,0);
+    ['armL','armR','elbowL','elbowR','legL','legR','kneeL','kneeR','chest','head']
+      .forEach(k=> joints[k] && joints[k].rotation.set(0,0,0));
+    const data = exportGLB(charRoot);
+    UI.anim = keep;
+    download(new Blob([data],{type:'model/gltf-binary'}), 'character.glb');
+    toast(`GLB 저장됨 · ${(data.length/1024).toFixed(0)} KB`);
+  }
+});
+
+function syncBar(){
+  document.querySelectorAll('[data-anim]').forEach(x=> x.setAttribute('aria-pressed', x.dataset.anim===UI.anim));
+  $('spin').setAttribute('aria-pressed', UI.spin);
+  $('ruler').setAttribute('aria-pressed', UI.ruler);
+}
+
+function applyPreset(pre){
+  Object.assign(P, JSON.parse(JSON.stringify(pre)));
+  refreshInputs(); build();
+}
+function refreshInputs(){
+  SLIDERS.forEach(([k,,,,,fmt])=>{ $('s_'+k).value = P[k]; $('v_'+k).textContent = fmt(P[k]); });
+  COLORS.forEach(([k])=> $('c_'+k).value = P.col[k]);
+  document.querySelectorAll('[data-shape]').forEach(x=> x.setAttribute('aria-pressed', x.dataset.shape===P.shape));
+  document.querySelectorAll('[data-gear]').forEach(x=> x.setAttribute('aria-pressed', P[x.dataset.gear]));
+}
+function randomize(){
+  const r = (a,b)=> a + Math.random()*(b-a);
+  P.height = r(1.1,2.2); P.head = r(0.7,1.7); P.shoulder = r(0.7,1.5);
+  P.torso = r(0.7,1.4); P.belly = r(0.8,1.5); P.arm = r(0.75,1.3);
+  P.leg = r(0.75,1.3); P.limb = r(0.65,1.6);
+  P.shape = Math.random()<0.5 ? 'box' : 'round';
+  P.hair = Math.random()<0.7; P.hat = Math.random()<0.35;
+  P.pack = Math.random()<0.4; P.visor = Math.random()<0.25;
+  const hue = ()=> '#' + new THREE.Color().setHSL(Math.random(), r(0.25,0.7), r(0.28,0.62)).getHexString();
+  P.col = {skin: '#' + new THREE.Color().setHSL(r(0.02,0.11), r(0.2,0.55), r(0.4,0.75)).getHexString(),
+           hair: hue(), top: hue(), bottom: hue(), shoes: hue(), gear: hue()};
+  refreshInputs(); build();
+}
+
+/* ══════════ 시작 ══════════ */
+resize();
+applyPreset(PRESETS['등반가']);
+syncBar();
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
