@@ -100,7 +100,15 @@
       var lookPad = document.createElement('div');
       lookPad.className = 'ot-look';
       var lid = null, lx = 0, ly = 0, scale = opts.lookScale || 1.4;
+      // 손가락 두 개 — 벌리고 오므리는 만큼 게임에 전달합니다
+      var pinch = null;
       lookPad.addEventListener('touchstart', function (e) {
+        if (opts.onPinch && e.touches.length === 2) {
+          lid = null;
+          pinch = Math.hypot(e.touches[0].clientX - e.touches[1].clientX,
+                             e.touches[0].clientY - e.touches[1].clientY);
+          e.preventDefault(); return;
+        }
         if (lid !== null) return;
         var t = e.changedTouches[0];
         lid = t.identifier; lx = t.clientX; ly = t.clientY;
@@ -110,6 +118,12 @@
         e.preventDefault();
       }, { passive: false });
       lookPad.addEventListener('touchmove', function (e) {
+        if (opts.onPinch && e.touches.length === 2 && pinch !== null) {
+          var d2 = Math.hypot(e.touches[0].clientX - e.touches[1].clientX,
+                              e.touches[0].clientY - e.touches[1].clientY);
+          if (d2 > 0) { opts.onPinch(d2 / pinch); pinch = d2; }
+          e.preventDefault(); return;
+        }
         for (var i = 0; i < e.changedTouches.length; i++) {
           var t = e.changedTouches[i];
           if (t.identifier !== lid) continue;
@@ -120,6 +134,7 @@
         e.preventDefault();
       }, { passive: false });
       function endLook(e) {
+        if (e.touches.length < 2) pinch = null;
         for (var i = 0; i < e.changedTouches.length; i++)
           if (e.changedTouches[i].identifier === lid) lid = null;
       }
