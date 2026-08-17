@@ -1172,7 +1172,7 @@ function gameOver(reason){
       <div><div class="k">배상 ${G.fined}건</div><div class="v">-${fmtMin(G.finedMin)}</div></div>
     </div>
     <div id="rank">배치 등급 · ${rank}</div>
-    <button id="go">다음 교대 (R)</button>`;
+    <button id="go">다음 교대${window.OREUM_TOUCH ? '' : ' (R)'}</button>`;
   ovEl.classList.remove('hide');
   ovEl.onclick = null;
   $('go').onclick = startGame;
@@ -1327,6 +1327,14 @@ function drawPrompt(){
       else if(orderComplete())                  msg = `<kbd>F</kbd> 포장 마감`;
       else                                      msg = `주문 품목을 선반에서 가져오세요`;
     }
+  }
+  // 폰에는 키보드가 없으니 눌러야 할 화면 버튼 이름으로 바꿔 말한다
+  if(window.OREUM_TOUCH){
+    msg = msg
+      .replace('<kbd>F</kbd> 포장 마감', '<kbd>포장 마감</kbd> 버튼')
+      .replace('<kbd>E</kbd> ', '<kbd>집기 · 담기</kbd> 버튼 — ')
+      .replace('<kbd>Q</kbd> ', '<kbd>내려놓기</kbd> 버튼 — ')
+      .replace('<kbd>R</kbd> ', '<kbd>다시하기</kbd> 버튼 — ');
   }
   pEl.innerHTML = msg;
   pEl.style.opacity = msg ? 1 : 0;
