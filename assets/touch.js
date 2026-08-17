@@ -7,8 +7,10 @@
  * 쓰는 법:
  *   OreumTouch.mount({
  *     stick:  { up:'KeyW', down:'KeyS', left:'KeyA', right:'KeyD' },
- *     look:   true,                                  // 오른쪽 절반을 문지르면 시점
+ *     look:   true,                                  // 화면을 문질러도 시점이 돌아감
  *     lookScale: 1.4,
+ *     lookStick: true,                               // 오른쪽에 시점 스틱을 세움
+ *     lookStickSpeed: 11,                            // 미는 동안 한 프레임에 도는 양
  *     buttons:[ {label:'공격', mouse:0},
  *               {label:'앉기', key:'ControlLeft', hold:true} ]
  *   });
@@ -51,15 +53,21 @@
     '.ot-layer{position:fixed;inset:0;z-index:9999;pointer-events:none;',
       'touch-action:none;-webkit-user-select:none;user-select:none;}',
     '.ot-look{position:absolute;inset:0;pointer-events:auto;}',
-    '.ot-stick{position:absolute;left:16px;bottom:16px;width:132px;height:132px;',
+    '.ot-stick{position:absolute;left:14px;bottom:16px;width:116px;height:116px;',
       'border-radius:50%;background:rgba(255,255,255,.09);',
       'border:1px solid rgba(255,255,255,.22);pointer-events:auto;}',
-    '.ot-knob{position:absolute;left:50%;top:50%;width:54px;height:54px;margin:-27px 0 0 -27px;',
+    '.ot-knob{position:absolute;left:50%;top:50%;width:48px;height:48px;margin:-24px 0 0 -24px;',
       'border-radius:50%;background:rgba(255,255,255,.34);',
       'border:1px solid rgba(255,255,255,.5);transition:background .1s;}',
+    // 오른쪽 시점 스틱 — 왼쪽 것과 같은 모양, 자리만 반대
+    '.ot-stick-r{left:auto;right:14px;}',
     '.ot-btns{position:absolute;right:14px;bottom:14px;display:flex;flex-wrap:wrap-reverse;',
       'justify-content:flex-end;gap:9px;max-width:52vw;pointer-events:none;}',
-    '.ot-btn{pointer-events:auto;min-width:62px;padding:14px 12px;border-radius:14px;',
+    // 시점 스틱이 있으면 버튼을 그 위로 올립니다
+    '.ot-layer[data-rstick] .ot-btns{bottom:146px;max-width:46vw;gap:7px;}',
+    '@media (orientation:portrait){.ot-layer[data-lift][data-rstick] .ot-btns{',
+      'bottom:calc(var(--ot-lift) + 130px);}}',
+    '.ot-btn{pointer-events:auto;min-width:56px;padding:11px 10px;border-radius:12px;',
       'background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.3);',
       'color:#fff;font:600 13px/1 system-ui,sans-serif;text-align:center;',
       'text-shadow:0 1px 3px rgba(0,0,0,.6);}',
@@ -67,6 +75,7 @@
     // 세로로 들면 게임 눈금이 화면 아래에 깔리므로 그만큼 띄웁니다
     '@media (orientation:portrait){.ot-layer[data-lift] .ot-stick,',
       '.ot-layer[data-lift] .ot-btns{bottom:var(--ot-lift);}}',
+    '@media (orientation:portrait){.ot-layer[data-lift] .ot-stick-r{bottom:var(--ot-lift);}}',
     '@media (min-width:900px) and (pointer:fine){.ot-layer{display:none}}'
   ].join('');
 
@@ -138,7 +147,7 @@
         else if (!want && held[code]) { held[code] = 0; key(code, false); }
       }
       function apply(dx, dy) {
-        var r = 46, d = Math.hypot(dx, dy);
+        var r = 40, d = Math.hypot(dx, dy);
         if (d > r) { dx = dx / d * r; dy = dy / d * r; }
         knob.style.transform = 'translate(' + dx + 'px,' + dy + 'px)';
         var dead = 12;
@@ -170,6 +179,56 @@
       pad.addEventListener('touchend', release);
       pad.addEventListener('touchcancel', release);
       layer.appendChild(pad);
+    }
+
+    // ── 시점 스틱 — 오른쪽. 미는 동안 계속 조금씩 돌아갑니다 ──
+    if (opts.lookStick) {
+      layer.setAttribute('data-rstick', '');
+      var rpad = document.createElement('div');
+      rpad.className = 'ot-stick ot-stick-r';
+      var rknob = document.createElement('div');
+      rknob.className = 'ot-knob';
+      rpad.appendChild(rknob);
+
+      var rid = null, rcx = 0, rcy = 0, nx = 0, ny = 0, raf = null;
+      var lspeed = opts.lookStickSpeed || 12;
+
+      function spin() {
+        if (rid === null) { raf = null; return; }
+        if (nx || ny) look(nx * lspeed, ny * lspeed);
+        raf = requestAnimationFrame(spin);
+      }
+      function rapply(dx, dy) {
+        var r = 40, d = Math.hypot(dx, dy);
+        if (d > r) { dx = dx / d * r; dy = dy / d * r; }
+        rknob.style.transform = 'translate(' + dx + 'px,' + dy + 'px)';
+        var dead = 8;
+        nx = Math.abs(dx) > dead ? dx / r : 0;
+        ny = Math.abs(dy) > dead ? dy / r : 0;
+      }
+      function rrelease() {
+        rid = null; nx = ny = 0; rknob.style.transform = '';
+        if (raf) { cancelAnimationFrame(raf); raf = null; }
+      }
+      rpad.addEventListener('touchstart', function (e) {
+        var t = e.changedTouches[0], b = rpad.getBoundingClientRect();
+        rid = t.identifier; rcx = b.left + b.width / 2; rcy = b.top + b.height / 2;
+        if (opts.onFirstTouch) { opts.onFirstTouch(); opts.onFirstTouch = null; }
+        rapply(t.clientX - rcx, t.clientY - rcy);
+        if (!raf) raf = requestAnimationFrame(spin);
+        e.preventDefault(); e.stopPropagation();
+      }, { passive: false });
+      rpad.addEventListener('touchmove', function (e) {
+        for (var i = 0; i < e.changedTouches.length; i++) {
+          var t = e.changedTouches[i];
+          if (t.identifier !== rid) continue;
+          rapply(t.clientX - rcx, t.clientY - rcy);
+        }
+        e.preventDefault(); e.stopPropagation();
+      }, { passive: false });
+      rpad.addEventListener('touchend', rrelease);
+      rpad.addEventListener('touchcancel', rrelease);
+      layer.appendChild(rpad);
     }
 
     // ── 동작 버튼 ─────────────────────────────────────
