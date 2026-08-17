@@ -51,6 +51,7 @@
   #start .t{font-size:15px;letter-spacing:.32em;color:#e6edf5}
   #start .s{font-size:11px;color:#5b6572;letter-spacing:.05em}
   @media(max-width:820px){#panel{width:216px}}
+  @media(max-width:860px) and (pointer:coarse){#panel{display:none}}
 </style>
 
 <div id="wrap">
@@ -128,6 +129,7 @@
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="/assets/touch.js"></script>
 <script>
 (()=>{
 "use strict";
@@ -1464,6 +1466,23 @@ function loop(now){ requestAnimationFrame(loop);
   acc+=Math.min(now-last,120); last=now;
   while(acc>=1000/60){ update(); acc-=1000/60; }
   render(); }
+/* ---- 폰 조작 ---- */
+if(window.OREUM_TOUCH){
+  locked=true; startEl.style.display='none';
+  OreumTouch.mount({
+    onFirstTouch:()=>{ try{ac();}catch(e){} },
+    stick:{up:'KeyW',down:'KeyS',left:'KeyA',right:'KeyD'},
+    look:true, lookScale:1.1, liftPortrait:96,
+    buttons:[
+      {label:'무기',key:'KeyQ'},
+      {label:'백스텝',key:'Space'},
+      {label:'앉기',key:'ControlLeft',hold:true},
+      {label:'찌르기',mouse:2},
+      {label:'공격',mouse:0}
+    ]
+  });
+}
+
 requestAnimationFrame(loop);
 })();
 </script>

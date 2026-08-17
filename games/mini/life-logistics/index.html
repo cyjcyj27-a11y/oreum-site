@@ -1,4 +1,5 @@
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>LIFE LOGISTICS · 하부지구 물류터미널 — 소분 작업</title>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
@@ -135,6 +136,7 @@
 
 <div id="ov"><div class="panel" id="panel"></div></div>
 
+<script src="/assets/touch.js"></script>
 <script>
 "use strict";
 /* ==========================================================================
@@ -1067,7 +1069,7 @@ document.addEventListener('keydown', e => {
 });
 document.addEventListener('keyup', e => { keys[e.code] = false; });
 document.addEventListener('mousemove', e => {
-  if(document.pointerLockElement !== cv) return;
+  if(!window.OREUM_TOUCH && document.pointerLockElement !== cv) return;
   const s = 0.0022;
   player.yaw   -= e.movementX * s;
   player.pitch -= e.movementY * s;
@@ -1075,12 +1077,14 @@ document.addEventListener('mousemove', e => {
   player.pitch = Math.max(-lim, Math.min(lim, player.pitch));
 });
 document.addEventListener('pointerlockchange', () => {
+  if(window.OREUM_TOUCH) return;
   if(document.pointerLockElement !== cv && G.mode === 'play'){ G.mode = 'pause'; showPause(); }
 });
 
 const ovEl = $('ov'), panelEl = $('panel'), monEl = $('mon');
 // 마우스 잠금(1인칭 시야). 브라우저가 거부해도 게임이 멈추지 않게 감싼다.
 function lockMouse(){
+  if(window.OREUM_TOUCH) return;
   try{ const p = cv.requestPointerLock(); if(p && p.catch) p.catch(()=>{}); }catch(e){}
 }
 function showMenu(){
@@ -1315,6 +1319,35 @@ function drawPrompt(){
   pEl.innerHTML = msg;
   pEl.style.opacity = msg ? 1 : 0;
   cEl.classList.toggle('hot', !!msg);
+}
+
+/* ---- 폰 조작 ---- */
+if(window.OREUM_TOUCH){
+  const otLayer = OreumTouch.mount({
+    stick:{up:'KeyW',down:'KeyS',left:'KeyA',right:'KeyD'},
+    look:true, lookScale:1.0, liftPortrait:120,
+    buttons:[
+      {label:'달리기',key:'ShiftLeft',hold:true},
+      {label:'내려놓기',key:'KeyQ'},
+      {label:'포장 마감',key:'KeyF'},
+      {label:'집기 · 담기',key:'KeyE'}
+    ]
+  });
+  // 조작판은 일하는 동안에만 — 안내문 위를 덮지 않게
+  (function tick(){
+    otLayer.style.display = (G.mode === 'play') ? '' : 'none';
+    if(G.mode !== 'play' && panelEl && !panelEl.querySelector('.ot-note')){
+      const n = document.createElement('div');
+      n.className = 'ot-note';
+      n.style.cssText = 'margin:10px 0 0;padding:9px 12px;border-radius:8px;'
+        + 'background:rgba(126,240,192,.10);border:1px solid rgba(126,240,192,.35);'
+        + 'color:#7ef0c0;font-size:13px;line-height:1.6';
+      n.textContent = '폰에서는 왼쪽 아래 동그라미로 걷고, 화면을 문질러 둘러보고, '
+        + '오른쪽 아래 버튼으로 집고 담습니다.';
+      panelEl.insertBefore(n, panelEl.firstChild);
+    }
+    requestAnimationFrame(tick);
+  })();
 }
 
 /* 시작 */
