@@ -568,11 +568,11 @@ h1, h2, h3 { line-height: 1.3; letter-spacing: -.02em; margin: 0; }
 .subhead .more:hover { color: var(--ember-ink); text-decoration: underline; }
 .subhead-note { margin: 0 0 18px; color: var(--muted); font-size: 14.5px; }
 
-/* 미니게임 — 완성작보다 한 단 작은 카드 */
-.mini-cards { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+/* 미니게임 — 완성작 카드의 딱 절반 크기 (완성작이 2줄일 때 여기는 4줄) */
+.mini-cards { list-style: none; margin: 0; padding: 0; display: grid; gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(238px, 1fr)); }
 .mini-card > a {
-  display: flex; align-items: center; gap: 14px; padding: 12px;
+  display: block; overflow: hidden;
   background: var(--panel); border: 1px solid var(--line); border-radius: 12px;
   text-decoration: none; color: inherit;
   transition: transform .15s ease, border-color .15s ease, box-shadow .15s ease;
@@ -580,11 +580,19 @@ h1, h2, h3 { line-height: 1.3; letter-spacing: -.02em; margin: 0; }
 .mini-card > a:hover {
   transform: translateY(-2px); border-color: var(--green); box-shadow: var(--shadow);
 }
-.mini-card img { width: 104px; height: 65px; flex: none; border-radius: 8px;
-  object-fit: cover; background: var(--panel-2); }
-.mini-card .mini-t { display: block; font-size: 16px; font-weight: 800; color: var(--ink); }
-.mini-card .mini-s { display: block; margin-top: 3px; font-size: 13px; color: var(--muted); }
-@media (max-width: 560px) { .mini-cards { grid-template-columns: 1fr; } }
+.mini-card img { display: block; width: 100%; height: auto;
+  aspect-ratio: 16 / 10; object-fit: cover; background: var(--panel-2); }
+.mini-body { display: block; padding: 12px 14px 14px; }
+.mini-card .mini-t { display: block; font-size: 15.5px; font-weight: 800; color: var(--ink);
+  line-height: 1.4; }
+.mini-card .mini-s { display: block; margin-top: 4px; font-size: 12.5px; color: var(--muted); }
+/* 폰에서도 두 개씩 — 한 줄에 하나면 완성작만큼 커져서 '절반'이 아니게 됩니다 */
+@media (max-width: 560px) {
+  .mini-cards { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .mini-body { padding: 10px 11px 12px; }
+  .mini-card .mini-t { font-size: 14px; }
+  .mini-card .mini-s { font-size: 11.5px; }
+}
 
 /* 작품 상세 페이지의 예고 영상 */
 .teaser-video { margin: 26px auto 0; max-width: 680px; }

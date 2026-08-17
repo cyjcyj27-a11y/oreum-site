@@ -28,6 +28,10 @@
 }
 .state-wip { background: #fdf1e0; color: var(--ember-ink); border-color: #f0d6ae; }
 
+/* 홈에서 눌러 들어왔을 때 — 그 카드가 붙어 있는 머리말에 가리지 않게, 잠깐 표시 */
+.arc-cards .card { scroll-margin-top: 110px; }
+.arc-cards .card:target { border-color: var(--green); box-shadow: 0 0 0 4px var(--green-soft), var(--shadow); }
+
 /* 이 페이지의 카드는 사진 위주라 조금 넓게 */
 .cards.arc-cards { grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); }
 @media (max-width: 560px) { .cards.arc-cards { grid-template-columns: 1fr; } }
