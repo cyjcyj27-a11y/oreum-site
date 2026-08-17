@@ -1,0 +1,84 @@
+/* 미니게임 아카이브 — 공통 style.css 위에 얹는 것만 */
+
+/* 아카이브 머리말 */
+.arc-head { padding: 70px 0 0; }
+.arc-head .section-title { margin-bottom: 18px; }
+.arc-note {
+  margin: 26px 0 0; padding: 18px 22px;
+  background: var(--panel); border: 1px solid var(--line);
+  border-left: 3px solid var(--green); border-radius: 10px;
+  font-size: 15px; color: var(--ink-2); max-width: 46em;
+}
+
+/* 카드 안 사양표 — 제작기간 · 사용기술 · 상태 · 마지막 업데이트 */
+.spec {
+  display: grid; grid-template-columns: auto 1fr;
+  gap: 5px 16px; margin: 16px 0 0;
+  padding: 15px 0 0; border-top: 1px solid var(--line);
+  font-size: 13.5px; line-height: 1.6;
+}
+.spec dt { color: var(--muted); font-weight: 600; white-space: nowrap; }
+.spec dd { margin: 0; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+
+.state {
+  display: inline-block; padding: 1px 10px; border-radius: 999px;
+  font-size: 12.5px; font-weight: 700; line-height: 1.7;
+  background: var(--green-soft); color: var(--green-lit);
+  border: 1px solid var(--green-edge);
+}
+.state-wip { background: #fdf1e0; color: var(--ember-ink); border-color: #f0d6ae; }
+
+/* 이 페이지의 카드는 사진 위주라 조금 넓게 */
+.cards.arc-cards { grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); }
+@media (max-width: 560px) { .cards.arc-cards { grid-template-columns: 1fr; } }
+
+/* ── 소감 한마디 — 미니게임에만 답니다 ────────────── */
+.talk { margin-top: 18px; border-top: 1px solid var(--line); padding-top: 14px; }
+.talk > summary {
+  cursor: pointer; list-style: none; font-size: 14px; font-weight: 700;
+  color: var(--green-lit); padding: 4px 0;
+}
+.talk > summary::-webkit-details-marker { display: none; }
+.talk > summary::before { content: "💬 "; }
+.talk > summary::after { content: " ▾"; color: var(--muted); font-weight: 400; }
+.talk[open] > summary::after { content: " ▴"; }
+.talk > summary:hover { color: var(--ember-ink); }
+
+.talk-list { margin-top: 12px; display: grid; gap: 10px; }
+.talk-empty { margin: 0; color: var(--muted); font-size: 13.5px; }
+
+.talk-item {
+  background: var(--panel-2); border: 1px solid var(--line);
+  border-radius: 10px; padding: 10px 13px;
+}
+.talk-meta { display: flex; align-items: baseline; gap: 8px; font-size: 12.5px; }
+.talk-meta b { color: var(--ink); font-weight: 700; }
+.talk-ago { color: var(--muted); }
+.talk-del {
+  margin-left: auto; background: none; border: 0; padding: 0;
+  color: var(--muted); font: inherit; font-size: 12px; cursor: pointer;
+  text-decoration: underline; text-underline-offset: 2px;
+}
+.talk-del:hover { color: var(--ember-ink); }
+.talk-text { margin: 5px 0 0; font-size: 14px; line-height: 1.6; color: var(--ink-2); }
+.deadlink { color: var(--muted); }
+
+.talk-form { margin-top: 14px; }
+.talk-form textarea, .talk-form input {
+  width: 100%; font: inherit; font-size: 14px; color: var(--ink);
+  background: var(--panel); border: 1px solid var(--line-2);
+  border-radius: 9px; padding: 9px 11px;
+}
+.talk-form textarea { resize: vertical; min-height: 60px; line-height: 1.6; }
+.talk-form textarea:focus, .talk-form input:focus {
+  outline: none; border-color: var(--green); box-shadow: 0 0 0 3px var(--green-soft);
+}
+.talk-row {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 8px;
+}
+.talk-nick { flex: 1 1 130px; width: auto; }
+.talk-pw { flex: 0 0 108px; width: auto; text-align: center; }
+.talk-count { color: var(--muted); font-size: 12.5px; font-variant-numeric: tabular-nums; }
+.talk-send { margin-left: auto; padding: 9px 20px; font-size: 14px; }
+.talk-msg { margin: 8px 0 0; min-height: 1.2em; font-size: 13px; color: var(--green-lit); }
+.talk-msg.bad { color: #a8524a; }
