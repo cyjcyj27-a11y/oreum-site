@@ -141,7 +141,7 @@
   // 유입 경로(src_*)와 국가(cc_*)는 뺐습니다. 구글 애널리틱스가 더 정확하게 보여줍니다.
   var keys = ['total', 'returning', 'game_open', 'game_session', 'game_players', 'game_returning',
               'pageviews', 'pv_home', 'pv_saju', 'pv_guide', 'pv_support', 'pv_privacy',
-              'pv_board', 'pv_board_en', 'pv_privacy_play', 'day_' + today,
+              'pv_board', 'pv_board_en', 'pv_privacy_play', 'pv_immortality', 'day_' + today,
               'play_1m', 'play_3m', 'play_10m'];
   // 한꺼번에 많이 부르면 속도 제한에 걸리므로 나눠 부르고 사이에 잠깐 쉽니다.
   // 3개씩 260ms로는 화면이 뜨기까지 30초가 걸려서 멈춘 것처럼 보였습니다.
@@ -203,14 +203,16 @@
     var pvHome = d.pv_home + d.pv_guide + d.pv_support + d.pv_privacy;
     var pvBoard = d.pv_board + d.pv_board_en;
     var pvGame = d.game_session + d.pv_privacy_play, pvSaju = d.pv_saju;
-    var pvAll = pvHome + pvBoard + pvGame + pvSaju;
+    var pvImmo = d.pv_immortality;   // 영생의 가격 (2026-08-13 공개)
+    var pvAll = pvHome + pvBoard + pvGame + pvSaju + pvImmo;
     document.getElementById('pv-total').innerHTML = fmt(pvAll) + '<small>회</small>';
     document.getElementById('pv-note').textContent = pvAll === 0
       ? '아직 페이지뷰가 없어요. 어느 페이지든 열 때마다(새로고침·재방문 포함) 여기 숫자가 올라갑니다.'
       : '새로고침·재방문까지 합친 전체 열어본 횟수예요. 아래는 어디를 얼마나 봤는지 나눈 것.';
     var cats = [['🏠 오름 홈페이지', pvHome], ['🎮 게임 (play)', pvGame],
+                ['⏳ 영생의 가격', pvImmo],
                 ['🔮 MBTI·사주', pvSaju], ['💬 커뮤니티', pvBoard]];
-    var catMax = Math.max(1, pvHome, pvGame, pvSaju, pvBoard);
+    var catMax = Math.max(1, pvHome, pvGame, pvSaju, pvBoard, pvImmo);
     document.getElementById('pv-cats').innerHTML = cats.map(function (c) {
       var pct = Math.round(c[1] / (pvAll || 1) * 100);
       return '<div class="bar"><div class="name" style="width:120px">' + c[0] + '</div>' +
