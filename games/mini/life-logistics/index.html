@@ -553,7 +553,7 @@ function makeCarton(item){
     g.fillStyle='#15202b';                                   // 바코드
     for(let i=0,x=74;i<26;i++){ const w=1+((rnd()*3)|0); g.fillRect(x,186,w,16); x+=w+2+((rnd()*2)|0); }
     g.fillStyle='rgba(255,255,255,0.92)'; g.font='bold 15px sans-serif';
-    g.fillText('LIFE LOGISTICS  ·  배급 물자', 128, 232);
+    g.fillText('LIFE LOGISTICS  ·  소분 물자', 128, 232);
   }));
 }
 // 선반 간판 (가로로 긴 판: 일러스트 + 큰 글씨)
@@ -1103,7 +1103,7 @@ function showMenu(){
   G.mode = 'menu';
   panelEl.innerHTML = `
     <h1>LIFE LOGISTICS <span>물류터미널</span></h1>
-    <div class="lead">소분 · 배급 작업조 배치. 인간에게 남은 거의 유일한 일자리입니다.<br>
+    <div class="lead">소분 작업조 배치. 인간에게 남은 거의 유일한 일자리입니다.<br>
       임금은 <b style="color:#7ef0c0">수명</b>으로 적립되고, 배상도 <b style="color:#ff7b7b">수명</b>에서 나갑니다.</div>
     <div class="steps" style="margin-bottom:4px">
       <div><b>⚠</b><span>오배송 1건 = <b style="color:#ff7b7b">배상 8시간</b> 즉시 차감 (LIFE PAY · 이의신청 불가)</span></div>
