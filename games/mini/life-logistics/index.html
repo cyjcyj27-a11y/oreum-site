@@ -85,7 +85,11 @@
 
   /* ── 오버레이 (시작 / 일시정지 / 종료) ── */
   #ov { position:fixed; inset:0; background:rgba(5,8,14,.90); display:flex;
-    align-items:center; justify-content:center; pointer-events:auto; }
+    align-items:center; justify-content:center; pointer-events:auto;
+    overflow-y:auto; overscroll-behavior:contain;
+    -webkit-overflow-scrolling:touch; padding:14px 0; }
+  /* 화면이 짧으면 가운데 맞춤이 위아래를 잘라먹는다 */
+  @media (max-height:820px) { #ov { align-items:flex-start; } }
   #ov.hide { display:none; }
   .panel { width:min(620px,92vw); background:#0e1622; border:1px solid rgba(255,255,255,.16);
     border-radius:16px; padding:26px 30px; box-shadow:0 30px 80px rgba(0,0,0,.6); }
@@ -105,6 +109,14 @@
     border:0; border-radius:11px; background:#7ef0c0; color:#08111a; cursor:pointer;
     font-family:inherit; }
   #go:hover { background:#9df7d3; }
+  @media (max-width:560px) {
+    .panel { width:94vw; padding:18px 16px; border-radius:13px; }
+    .panel h1 { font-size:21px; }
+    .panel .lead { font-size:13px; margin-bottom:14px; }
+    .steps { font-size:13px; }
+    .keys { grid-template-columns:1fr; }
+    #go { margin-top:16px; padding:15px; }
+  }
   #res { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin:14px 0 4px; }
   #res div { background:rgba(255,255,255,.06); border-radius:10px; padding:11px 14px; }
   #res .k { font-size:11px; color:#8fa3bd; letter-spacing:1px; }
@@ -1345,6 +1357,12 @@ if(window.OREUM_TOUCH){
       n.textContent = '폰에서는 왼쪽 아래 동그라미로 걷고, 화면을 문질러 둘러보고, '
         + '오른쪽 아래 버튼으로 집고 담습니다.';
       panelEl.insertBefore(n, panelEl.firstChild);
+      // 키보드 조작표는 폰에서 읽을 이유가 없고, 그만큼 시작 버튼이 멀어진다
+      panelEl.querySelectorAll('.keys').forEach(k => {
+        k.style.display = 'none';
+        const h = k.previousElementSibling;
+        if (h && h.tagName === 'H2') h.style.display = 'none';
+      });
     }
     requestAnimationFrame(tick);
   })();
