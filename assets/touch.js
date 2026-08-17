@@ -90,13 +90,16 @@
         var t = e.changedTouches[0];
         lid = t.identifier; lx = t.clientX; ly = t.clientY;
         if (opts.onFirstTouch) { opts.onFirstTouch(); opts.onFirstTouch = null; }
+        // 화면의 한 점을 그대로 겨누는 게임에는 좌표를 넘겨줍니다
+        if (opts.onAimAt) opts.onAimAt(t.clientX, t.clientY);
         e.preventDefault();
       }, { passive: false });
       lookPad.addEventListener('touchmove', function (e) {
         for (var i = 0; i < e.changedTouches.length; i++) {
           var t = e.changedTouches[i];
           if (t.identifier !== lid) continue;
-          look((t.clientX - lx) * scale, (t.clientY - ly) * scale);
+          if (opts.onAimAt) opts.onAimAt(t.clientX, t.clientY);
+          else look((t.clientX - lx) * scale, (t.clientY - ly) * scale);
           lx = t.clientX; ly = t.clientY;
         }
         e.preventDefault();
@@ -180,6 +183,8 @@
           el.classList.add('on');
           if (b.key) key(b.key, true);
           if (b.mouse !== undefined) mouse('mousedown', b.mouse);
+          // 게임이 화면 안쪽 요소에서만 마우스를 듣는 경우엔 직접 부릅니다
+          if (b.run) b.run();
           if (!b.hold) up2();
         }
         function up2() {

@@ -108,6 +108,14 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://oreumgames.com/games/mini/knife-duel-prototype/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/games/mini/knife-duel-prototype/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/games/mini/knife-duel-prototype/"/>
+    <lastmod>2026-08-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://oreumgames.com/games/mini/knife-duel-v7/</loc>
     <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/games/mini/knife-duel-v7/"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/games/mini/knife-duel-v7/"/>
