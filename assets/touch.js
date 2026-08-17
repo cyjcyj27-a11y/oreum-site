@@ -14,8 +14,11 @@
  *   });
  */
 (function () {
+  // 기기 판별은 한 가지만 믿지 않습니다 — 브라우저마다 답하는 게 다릅니다
   var COARSE = (window.matchMedia && matchMedia('(pointer: coarse)').matches) ||
-               navigator.maxTouchPoints > 0;
+               navigator.maxTouchPoints > 0 ||
+               'ontouchstart' in window ||
+               (navigator.msMaxTouchPoints > 0);
   window.OREUM_TOUCH = COARSE;
 
   window.OreumTouch = { mount: COARSE ? mount : function () {} };
