@@ -103,8 +103,8 @@ h1, h2, h3 { line-height: 1.3; letter-spacing: -.02em; margin: 0; }
   margin: 0 0 18px; font-size: 12px; font-weight: 700;
   letter-spacing: .3em; color: var(--green-lit); text-transform: uppercase;
 }
-.hero h1 { font-size: clamp(34px, 6.4vw, 62px); font-weight: 800; color: #16281c; }
-.hero h1 .dim { color: var(--green); }
+.hero h1 { font-size: clamp(42px, 8vw, 78px); font-weight: 800; color: #16281c; }
+.hero h1 .dim { color: var(--green); font-size: 50%; letter-spacing: .06em; }
 .lede { margin: 24px 0 0; max-width: 30em; font-size: 17px; color: var(--ink-2); }
 .cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 34px; }
 
