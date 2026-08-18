@@ -52,8 +52,8 @@
   var CSS = [
     '.ot-layer{position:fixed;inset:0;z-index:9999;pointer-events:none;',
       'touch-action:none;-webkit-user-select:none;user-select:none;}',
-    '.ot-look{position:absolute;left:50%;right:0;top:0;bottom:0;pointer-events:auto;}',
-    '.ot-look.ot-look-full{left:0;}',
+    '.ot-look{position:absolute;left:0;right:0;bottom:0;',
+      'top:var(--ot-look-top,0px);pointer-events:auto;}',
     '.ot-stick{position:absolute;left:14px;bottom:16px;width:116px;height:116px;',
       'border-radius:50%;background:rgba(255,255,255,.09);',
       'border:1px solid rgba(255,255,255,.22);pointer-events:auto;}',
@@ -104,7 +104,9 @@
     // ── 시점: 조이스틱·버튼이 없는 곳을 문지르면 돌아갑니다 ──
     if (opts.look) {
       var lookPad = document.createElement('div');
-      lookPad.className = 'ot-look' + (opts.lookFull ? ' ot-look-full' : '');
+      lookPad.className = 'ot-look';
+      // 위쪽 눈금판 위를 문질러도 시점이 돌지 않게 시작 높이를 내립니다
+      if (opts.lookTop) layer.style.setProperty('--ot-look-top', opts.lookTop + 'px');
       var lid = null, lx = 0, ly = 0;
       var scale = opts.lookScale || 1.4;
       var scaleY = opts.lookScaleY || scale;
