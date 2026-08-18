@@ -853,6 +853,7 @@ const G = {
   mode:'menu',            // menu | play | pause | over
   fov:72,                 // 시야각 — 폰에서 손가락 두 개로 벌리면 좁아진다(당겨보기)
   shift:1,                // 몇 번째 교대인가 — 넘길수록 시계가 빨라진다
+  totalScore:0,           // 교대를 이어오며 쌓인 수명 (해고되면 0으로)
   clock:1,                // 시계가 흐르는 속도 (교대마다 올라감)
   wasFired:false,         // 직전 교대가 해고로 끝났나
   time:150, score:0, done:0, streak:0, bestStreak:0,
@@ -903,7 +904,7 @@ function drawOrderUI(){
   const o = G.order;
   if(!o){ $('oList').innerHTML=''; return; }
   $('oNo').textContent = '#' + o.no;
-  $('oShift').textContent = G.shift + '교대';
+  $('oShift').textContent = G.shift + '/' + SHIFTS + '교대';
   let html = '', mon = '';
   for(const k in o.need){
     const it = ITEM_BY_ID[k], have = o.sealed ? o.need[k] : (o.have[k]||0), ok = have >= o.need[k];
@@ -1087,7 +1088,7 @@ document.addEventListener('keydown', e => {
   }
   if(e.code === 'KeyF' && G.mode === 'play') sealBox();
   if(e.code === 'KeyQ' && G.mode === 'play') dropHand();
-  if(e.code === 'KeyR' && G.mode === 'over') startGame(!G.wasFired);
+  if(e.code === 'KeyR' && G.mode === 'over') startGame(!G.wasFired && G.shift < SHIFTS);
   if(['KeyW','KeyA','KeyS','KeyD','Space','ShiftLeft'].includes(e.code)) e.preventDefault();
 });
 document.addEventListener('keyup', e => { keys[e.code] = false; });
@@ -1158,6 +1159,7 @@ function startGame(next){
   // next 가 참이면 다음 교대로 이어갑니다. 해고 뒤 재배치는 1교대부터 다시.
   G.shift = next ? G.shift + 1 : 1;
   G.clock = Math.min(2.2, 1 + (G.shift - 1) * 0.15);
+  G.totalScore = next ? G.totalScore : 0;
   G.wasFired = false;
   G.mode='play'; G.time=150; G.score=0; G.done=0; G.streak=0; G.bestStreak=0;
   G.hand=null; G.parcelOnTable=null; G.orderNo=0; G.wrongDrops=0; G.picked=0;
@@ -1168,30 +1170,45 @@ function startGame(next){
   lockMouse();
   beep(880, 0.1, 'triangle', 0.05);
 }
+const SHIFTS = 3;   // 세 교대를 마치면 배송직으로 넘어갑니다
 function gameOver(reason){
   if(G.mode === 'over') return;
   G.mode='over'; sfx.over();
   if(document.pointerLockElement === cv) document.exitPointerLock();
   const fired = (reason === 'fired');
   G.wasFired = fired;
+  if(!fired) G.totalScore += G.score;
+  const cleared = !fired && G.shift >= SHIFTS;
   const rank = G.score >= 2200 ? '작업반장 👑' : G.score >= 1500 ? '숙련 작업조 🏅'
              : G.score >= 900  ? '정규 작업조 📦' : G.score >= 400 ? '수습 작업조 🧢' : '첫 배치 🐣';
-  panelEl.innerHTML = `
-    <h1>${fired ? '해고 <span>경고 3회 누적</span>' : '교대 종료 <span>정산합니다</span>'}</h1>
+
+  panelEl.innerHTML = cleared ? `
+    <h1>배송직 전환 <span>3교대 완주</span></h1>
+    <div class="lead">축하합니다. 세 번의 교대를 끝까지 마쳤습니다.<br>
+      적립한 수명으로 <b>트럭을 구입</b>했습니다. 이제부터 배송 업무를 담당하게 됩니다.</div>
+    <div id="res">
+      <div><div class="k">누적 수명</div><div class="v">${fmtMin(G.totalScore)}</div></div>
+      <div><div class="k">마지막 교대</div><div class="v">${fmtMin(G.score)}</div></div>
+      <div><div class="k">출고</div><div class="v">${G.done} 건</div></div>
+      <div><div class="k">배상 ${G.fined}건</div><div class="v">-${fmtMin(G.finedMin)}</div></div>
+    </div>
+    <div id="rank">배치 등급 · ${rank}</div>
+    <button id="go">처음부터${window.OREUM_TOUCH ? '' : ' (R)'}</button>` : `
+    <h1>${fired ? '해고 <span>경고 3회 누적</span>' : `교대 종료 <span>${G.shift}/${SHIFTS} 정산합니다</span>`}</h1>
     <div class="lead">${fired
       ? '재배치 대기 명단으로 이관되었습니다. 대기 기간 동안 수명은 적립되지 않습니다.'
       : '오늘 몫의 수명이 LIFE PAY 계정으로 적립되었습니다.'}</div>
     <div id="res">
       <div><div class="k">적립한 수명</div><div class="v">${fmtMin(G.score)}</div></div>
+      <div><div class="k">누적 수명</div><div class="v">${fmtMin(G.totalScore)}</div></div>
       <div><div class="k">출고</div><div class="v">${G.done} 건</div></div>
-      <div><div class="k">최고 연속</div><div class="v">${G.bestStreak}</div></div>
       <div><div class="k">배상 ${G.fined}건</div><div class="v">-${fmtMin(G.finedMin)}</div></div>
     </div>
     <div id="rank">배치 등급 · ${rank}</div>
     <button id="go">${fired ? '재배치 신청 (1교대부터)' : `${G.shift + 1}교대로`}${window.OREUM_TOUCH ? '' : ' (R)'}</button>`;
   ovEl.classList.remove('hide');
   ovEl.onclick = null;
-  $('go').onclick = () => startGame(!fired);
+  $('go').onclick = () => startGame(!fired && !cleared);
 }
 
 /* ───────────────────── 6. 메인 루프 ───────────────────── */
