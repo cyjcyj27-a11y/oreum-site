@@ -10,7 +10,7 @@
 
 ## 할 일 — SQL 한 번 돌리기
 
-1. <https://supabase.com> 로그인 → 프로젝트 **Lulu's farm** 열기 (게시판도 이 프로젝트를 씁니다)
+1. <https://supabase.com> 로그인 → 프로젝트 **Oreumgames** 열기 (게시판도 이 프로젝트를 씁니다)
 2. 왼쪽 메뉴 **SQL Editor** → **New query**
 3. 아래를 통째로 붙여넣고 **Run**
 
