@@ -52,7 +52,7 @@
   var CSS = [
     '.ot-layer{position:fixed;inset:0;z-index:9999;pointer-events:none;',
       'touch-action:none;-webkit-user-select:none;user-select:none;}',
-    '.ot-look{position:absolute;inset:0;pointer-events:auto;}',
+    '.ot-look{position:absolute;left:50%;right:0;top:0;bottom:0;pointer-events:auto;}',
     '.ot-stick{position:absolute;left:14px;bottom:16px;width:116px;height:116px;',
       'border-radius:50%;background:rgba(255,255,255,.09);',
       'border:1px solid rgba(255,255,255,.22);pointer-events:auto;}',
@@ -104,7 +104,9 @@
     if (opts.look) {
       var lookPad = document.createElement('div');
       lookPad.className = 'ot-look';
-      var lid = null, lx = 0, ly = 0, scale = opts.lookScale || 1.4;
+      var lid = null, lx = 0, ly = 0;
+      var scale = opts.lookScale || 1.4;
+      var scaleY = opts.lookScaleY || scale;
       // 손가락 두 개 — 벌리고 오므리는 만큼 게임에 전달합니다
       var pinch = null;
       lookPad.addEventListener('touchstart', function (e) {
@@ -133,7 +135,7 @@
           var t = e.changedTouches[i];
           if (t.identifier !== lid) continue;
           if (opts.onAimAt) opts.onAimAt(t.clientX, t.clientY);
-          else look((t.clientX - lx) * scale, (t.clientY - ly) * scale);
+          else look((t.clientX - lx) * scale, (t.clientY - ly) * scaleY);
           lx = t.clientX; ly = t.clientY;
         }
         e.preventDefault();
