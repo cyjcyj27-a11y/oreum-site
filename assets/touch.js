@@ -173,6 +173,8 @@
         setKey(s.right, dx >  dead);
         setKey(s.up,    dy < -dead);
         setKey(s.down,  dy >  dead);
+        // 끝까지 밀면 달립니다 — 버튼 하나를 줄이려고 스틱에 얹었습니다
+        if (s.run) setKey(s.run, Math.hypot(dx, dy) > r * 0.82);
       }
       function release() {
         sid = null;

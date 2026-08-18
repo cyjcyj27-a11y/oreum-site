@@ -1074,7 +1074,13 @@ function dropHand(){
 /* ───────────────────── 5. 입력 / 화면 전환 ───────────────────── */
 document.addEventListener('keydown', e => {
   keys[e.code] = true;
-  if(e.code === 'KeyE' && G.mode === 'play') interact();
+  if(e.code === 'KeyE' && G.mode === 'play'){
+    // 폰에는 버튼이 둘뿐이라, 마감할 때가 되면 같은 버튼이 마감까지 합니다
+    const t = lookTarget();
+    if(window.OREUM_TOUCH && t && t.kind === 'table'
+       && !G.hand && !G.parcelOnTable && orderComplete()) sealBox();
+    else interact();
+  }
   if(e.code === 'KeyF' && G.mode === 'play') sealBox();
   if(e.code === 'KeyQ' && G.mode === 'play') dropHand();
   if(e.code === 'KeyR' && G.mode === 'over') startGame();
@@ -1332,7 +1338,7 @@ function drawPrompt(){
   // 폰에는 키보드가 없으니 눌러야 할 화면 버튼 이름으로 바꿔 말한다
   if(window.OREUM_TOUCH){
     msg = msg
-      .replace('<kbd>F</kbd> 포장 마감', '<kbd>포장 마감</kbd> 버튼')
+      .replace('<kbd>F</kbd> 포장 마감', '<kbd>집기 · 담기</kbd> 버튼 — 포장 마감')
       .replace('<kbd>E</kbd> ', '<kbd>집기 · 담기</kbd> 버튼 — ')
       .replace('<kbd>Q</kbd> ', '<kbd>내려놓기</kbd> 버튼 — ')
       .replace('<kbd>R</kbd> ', '<kbd>다시하기</kbd> 버튼 — ');
@@ -1345,7 +1351,8 @@ function drawPrompt(){
 /* ---- 폰 조작 ---- */
 if(window.OREUM_TOUCH){
   const otLayer = OreumTouch.mount({
-    stick:{up:'KeyW',down:'KeyS',left:'KeyA',right:'KeyD'},
+    // 끝까지 밀면 달립니다 (달리기 버튼을 없앤 대신)
+    stick:{up:'KeyW',down:'KeyS',left:'KeyA',right:'KeyD',run:'ShiftLeft'},
     look:true, lookScale:2.4, liftPortrait:88,
     // 손가락 두 개를 벌리면 시야를 좁혀 멀리 있는 것을 당겨 봅니다
     onPinch:(k)=>{ G.fov = Math.max(38, Math.min(88, G.fov / k)); resize(); },
@@ -1353,9 +1360,7 @@ if(window.OREUM_TOUCH){
     // (아래 줄이 먼저, 각 줄은 왼쪽부터)
     buttons:[
       {label:'내려놓기',key:'KeyQ'},
-      {label:'달리기',key:'ShiftLeft',hold:true},
-      {label:'집기 · 담기',key:'KeyE'},
-      {label:'포장 마감',key:'KeyF'}
+      {label:'집기 · 담기',key:'KeyE'}
     ]
   });
   // 조작판은 일하는 동안에만 — 안내문 위를 덮지 않게
@@ -1367,8 +1372,9 @@ if(window.OREUM_TOUCH){
       n.style.cssText = 'margin:10px 0 0;padding:9px 12px;border-radius:8px;'
         + 'background:rgba(126,240,192,.10);border:1px solid rgba(126,240,192,.35);'
         + 'color:#7ef0c0;font-size:13px;line-height:1.6';
-      n.textContent = '폰에서는 왼쪽 아래 동그라미로 걷고, 화면을 문질러 둘러보고, '
-        + '오른쪽 아래 버튼으로 집고 담습니다.';
+      n.textContent = '폰에서는 왼쪽 아래 동그라미로 걷고(끝까지 밀면 달리기), '
+        + '화면을 문질러 둘러보고, 두 손가락으로 벌리면 당겨 봅니다. '
+        + '오른쪽 아래 버튼으로 집고 담고 마감합니다.';
       panelEl.insertBefore(n, panelEl.firstChild);
       // 키보드 조작표는 폰에서 읽을 이유가 없고, 그만큼 시작 버튼이 멀어진다
       panelEl.querySelectorAll('.keys').forEach(k => {
