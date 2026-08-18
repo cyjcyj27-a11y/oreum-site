@@ -369,7 +369,9 @@
     [/^오행의 색이 (.+?)(?:이라|라) (.+)$/, (m, tr) => `Its five-element color is ${m[1]}, ${tr(m[2])}`],
     [/^(.+?)[을를] 오래 안고 가는 감정입니다\.$/, (m, tr) => `an emotion that holds ${tr(m[1])} for a long time.`],
     [/^(.{1,24}?)[은는] (.+?)[과와] (.+?)에 붙습니다\. (.+)$/, (m, tr) => `${tr(m[1])} maps to ${m[2]} and ${m[3]}. ${tr(m[4])}`],
-    [/^일주는 (.+?)\((.+?)\)이고 십이운성으로는 (.+?)입니다\.$/, (m, tr) => `Your day pillar is ${m[1]} (${m[2]}), and in the twelve life stages it sits at ${UNSEONG_EN[m[3]] || tr(m[3])}.`],
+    // 십이운성 이름은 한글 1~3자로 못박습니다 — 뒤에 문장이 더 붙어도 통째로 삼키지 않게(양→Sheep 오역의 원인이었음)
+    [/^일주는 (.+?)\((.+?)\)이고 십이운성으로는 ([가-힣]{1,3})입니다\.(?:\s+(.+))?$/, (m, tr) =>
+      `Your day pillar is ${m[1]} (${m[2]}), and in the twelve life stages it sits at ${UNSEONG_EN[m[3]] || tr(m[3])}.` + (m[4] ? ' ' + tr(m[4]) : '')],
     [/^들으면 기운이 나는 말은 ["“](.+?)["”] 같은 표현입니다\.$/, (m, tr) => `Words that put strength in you sound like "${tr(m[1])}".`],
     [/^(.+?)\((.+?)\)[이가] 일간인 당신의 천을귀인 글자는 (.+?)\((.+?)\)[와과] (.+?)\((.+?)\)입니다\.$/, (m) => `With ${m[1]} (${m[2]}) as your day master, your Cheoneul benefactor signs are ${m[3]} (${m[4]}) and ${m[5]} (${m[6]}).`],
     [/^([A-Z]{4}) — (.+?) \(다시 누르면 선택 해제\)$/, (m, tr) => `${m[1]} — ${tr(m[2])} (tap again to unselect)`],
@@ -504,6 +506,8 @@
   }
   function T(s) {
     if (window.SAJU_LANG !== 'en' || typeof s !== 'string' || !/[가-힣]/.test(s)) return s;
+    // '(巳·뱀)' 꼴의 한 글자 띠 동물 — 낱말 청소는 한 글자를 안 건드리므로 여기서 먼저 바꾼다
+    s = s.replace(/·(쥐|소|호랑이|토끼|용|뱀|말|양|원숭이|닭|개|돼지)\)/g, (mm, a) => '·' + (ZODIAC_EN[a] || a) + ')');
     const whole = lookup(s) !== undefined ? lookup(s) : lookup(s.trim());
     if (whole !== undefined) return whole;
     return s.split('\n').map((l) => trLine(l, 0)).join('\n');
