@@ -183,6 +183,10 @@ const LANG = (() => {
   return (navigator.language || '').toLowerCase().startsWith('ko') ? 'ko' : 'en';
 })();
 if (LANG === "en") document.querySelector('meta[name="description"]').setAttribute("content", "A first-person 3D packing game in a world where time is money. Fill orders, ship parcels, earn lifespan.");
+/* 안내문에 끼워 넣는 터치 버튼 그림 (잡기=주먹, 내려놓기=편 손) */
+const ICO_S = 'style="width:1.15em;height:1.15em;vertical-align:-0.2em;display:inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"';
+const ICO_GRAB = `<svg ${ICO_S}><path d="M7 13V10a1.6 1.6 0 0 1 3.2 0v2.6"/><path d="M10.2 12.6V9.6a1.6 1.6 0 0 1 3.2 0v3"/><path d="M13.4 12.6v-2.4a1.6 1.6 0 0 1 3.2 0V12"/><path d="M16 12v-1.6a1.6 1.6 0 0 1 3.2 0V14c0 4-3.2 7.2-7.2 7.2h-1.1c-2.1 0-3.6-.9-4.8-2.5L3.4 14.6a1.7 1.7 0 0 1 2.5-2.2L7 13.6"/><path d="M7.6 16.2h6"/></svg>`;
+const ICO_DROP = `<svg ${ICO_S}><path d="M7 13V6.2a1.6 1.6 0 0 1 3.2 0V12"/><path d="M10.2 12V4.6a1.6 1.6 0 0 1 3.2 0V12"/><path d="M13.4 12V5.8a1.6 1.6 0 0 1 3.2 0V12"/><path d="M16 12v-1.6a1.6 1.6 0 0 1 3.2 0V14c0 4-3.2 7.2-7.2 7.2h-1.1c-2.1 0-3.6-.9-4.8-2.5L3.4 14.6a1.7 1.7 0 0 1 2.5-2.2L7 13.6"/></svg>`;
 const STR = {
   ko: {
     title:'LIFE LOGISTICS · 물류터미널',
@@ -249,6 +253,28 @@ const STR = {
       <span><b>ESC</b>일시정지</span><span><b>R</b>다시하기(종료 후)</span>
     </div>
     <button id="go">작업 시작 (클릭)</button>`,
+    menuTouchHtml:`
+    <div style="text-align:center">
+    <h1 style="justify-content:center">LIFE LOGISTICS</h1>
+    <div style="font-size:16px;font-weight:700;letter-spacing:4px;margin:2px 0 10px">물류터미널</div>
+    <h2 style="justify-content:center;margin-top:0">소분 작업</h2>
+    <div class="lead" style="margin-bottom:12px">인간에게 남은 거의 유일한 일자리입니다.<br>
+      임금은 <b style="color:#7ef0c0">수명</b>으로 적립되고, 배상도 <b style="color:#ff7b7b">수명</b>에서 나갑니다.</div>
+    <div style="font-size:13.5px;line-height:1.9;margin-bottom:12px">
+      △ 오배송 1건 = <b style="color:#ff7b7b">배상 8시간</b> 즉시 차감 (LIFE PAY · 이의신청 불가)<br>
+      △ 경고 <b style="color:#ff7b7b">3회</b>면 해고. 그날 작업은 거기서 끝납니다
+    </div>
+    <h2 style="justify-content:center">일하는 순서</h2>
+    <div style="font-size:13.5px;line-height:2.05;margin-bottom:6px">
+      1 왼쪽 위 <b style="color:#fff">주문서</b>를 봅니다. 예: 사과 2, 감귤 1<br>
+      2 뒤쪽 <b style="color:#fff">선반</b>으로 가서 해당 품목을 조준하고 ${ICO_GRAB}<br>
+      3 가운데 <b style="color:#fff">포장대</b>의 상자를 조준하고 ${ICO_GRAB}<br>
+      4 목록을 다 채우면 ${ICO_GRAB} → 소포를 ${ICO_GRAB}으로 집기<br>
+      5 주문서의 배송처(A/B/C동) <b style="color:#fff">출고 슈트</b>에 ${ICO_GRAB}로 투입<br>
+      6 잘못 잡았을 경우 ${ICO_DROP}로 내려놓기
+    </div>
+    <button id="go">작업 시작</button>
+    </div>`,
     pauseHtml:`
     <h1>일시정지</h1>
     <div class="lead">화면을 클릭하면 이어서 작업합니다.</div>
@@ -348,6 +374,28 @@ const STR = {
       <span><b>ESC</b>pause</span><span><b>R</b>restart (after a shift)</span>
     </div>
     <button id="go">Start work (click)</button>`,
+    menuTouchHtml:`
+    <div style="text-align:center">
+    <h1 style="justify-content:center">LIFE LOGISTICS</h1>
+    <div style="font-size:16px;font-weight:700;letter-spacing:4px;margin:2px 0 10px">LOGISTICS TERMINAL</div>
+    <h2 style="justify-content:center;margin-top:0">Split-pack duty</h2>
+    <div class="lead" style="margin-bottom:12px">One of the last jobs left for humans.<br>
+      Wages accrue as <b style="color:#7ef0c0">lifespan</b> — damages come out of <b style="color:#ff7b7b">lifespan</b> too.</div>
+    <div style="font-size:13.5px;line-height:1.9;margin-bottom:12px">
+      △ 1 misdelivery = <b style="color:#ff7b7b">8 hours</b> deducted on the spot (LIFE PAY · no appeal)<br>
+      △ <b style="color:#ff7b7b">3</b> warnings and you are fired. Your day ends right there
+    </div>
+    <h2 style="justify-content:center">How the job works</h2>
+    <div style="font-size:13.5px;line-height:2.05;margin-bottom:6px">
+      1 Check the <b style="color:#fff">order sheet</b> top-left. e.g. Apple 2, Tangerine 1<br>
+      2 Go to the <b style="color:#fff">racks</b> in the back, aim at the item, tap ${ICO_GRAB}<br>
+      3 Aim at the box on the <b style="color:#fff">packing table</b>, tap ${ICO_GRAB}<br>
+      4 When the list is full ${ICO_GRAB} → pick the parcel up with ${ICO_GRAB}<br>
+      5 Drop it into the destination (Wing A/B/C) <b style="color:#fff">chute</b> with ${ICO_GRAB}<br>
+      6 Grabbed the wrong thing? Put it down with ${ICO_DROP}
+    </div>
+    <button id="go">Start work</button>
+    </div>`,
     pauseHtml:`
     <h1>Paused</h1>
     <div class="lead">Click the screen to get back to work.</div>
@@ -1354,7 +1402,7 @@ function lockMouse(){
 }
 function showMenu(){
   G.mode = 'menu';
-  panelEl.innerHTML = STR.menuHtml;
+  panelEl.innerHTML = (window.OREUM_TOUCH && STR.menuTouchHtml) ? STR.menuTouchHtml : STR.menuHtml;
   ovEl.classList.remove('hide');
   ovEl.onclick = null;
   $('go').onclick = () => startGame(false);   // 첫 배치는 언제나 1교대
