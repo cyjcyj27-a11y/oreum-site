@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>캐릭터 조립대 · 로우폴리 캐릭터 메이커</title>
+<title>캐릭터 조립대 · Character Bench</title>
 <style>
   :root{
     --ink:#0D1117;
@@ -159,32 +159,32 @@
 
 <aside>
   <div class="brand">
-    <h1>캐릭터 조립대</h1>
-    <p>비율을 맞추고 GLB로 내보내면<br>Three.js에 바로 들어갑니다.</p>
+    <h1 id="tTitle"></h1>
+    <p id="tLead"></p>
   </div>
 
   <div class="grp">
-    <h2>골격 <span>proportion</span></h2>
+    <h2><span id="tHead1"></span> <span>proportion</span></h2>
     <div id="sliders"></div>
   </div>
 
   <div class="grp">
-    <h2>색 <span>material</span></h2>
+    <h2><span id="tHead2"></span> <span>material</span></h2>
     <div class="swatches" id="colors"></div>
   </div>
 
   <div class="grp">
-    <h2>형태 <span>shape</span></h2>
+    <h2><span id="tHead3"></span> <span>shape</span></h2>
     <div class="chips" id="shapes"></div>
   </div>
 
   <div class="grp">
-    <h2>장비 <span>attachments</span></h2>
+    <h2><span id="tHead4"></span> <span>attachments</span></h2>
     <div class="chips" id="gear"></div>
   </div>
 
   <div class="grp">
-    <h2>기본형 <span>presets</span></h2>
+    <h2><span id="tHead5"></span> <span>presets</span></h2>
     <div class="chips" id="presets"></div>
   </div>
 </aside>
@@ -193,16 +193,16 @@
   <div class="hud" id="spec"></div>
   <div id="err"></div>
   <div id="bar">
-    <button class="btn" data-anim="rest" aria-pressed="true">정지</button>
-    <button class="btn" data-anim="walk" aria-pressed="false">걷기</button>
-    <button class="btn" data-anim="run" aria-pressed="false">달리기</button>
-    <button class="btn" data-anim="wave" aria-pressed="false">인사</button>
-    <button class="btn" id="spin" aria-pressed="true">자동 회전</button>
-    <button class="btn" id="ruler" aria-pressed="true">치수</button>
+    <button class="btn" data-anim="rest" aria-pressed="true" id="bRest"></button>
+    <button class="btn" data-anim="walk" aria-pressed="false" id="bWalk"></button>
+    <button class="btn" data-anim="run" aria-pressed="false" id="bRun"></button>
+    <button class="btn" data-anim="wave" aria-pressed="false" id="bWave"></button>
+    <button class="btn" id="spin" aria-pressed="true"></button>
+    <button class="btn" id="ruler" aria-pressed="true"></button>
     <span class="sep"></span>
-    <button class="btn" id="rand">무작위</button>
-    <button class="btn" id="png">PNG 저장</button>
-    <button class="btn go" id="glb">GLB 내보내기</button>
+    <button class="btn" id="rand"></button>
+    <button class="btn" id="png"></button>
+    <button class="btn go" id="glb"></button>
   </div>
   <div id="toast"></div>
 </main>
@@ -211,7 +211,7 @@
 import * as THREE from 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.module.js';
 
 const errBox = document.getElementById('err');
-if(!THREE){ errBox.style.display='grid'; errBox.textContent='3D 엔진을 불러오지 못했습니다. 네트워크를 확인하고 새로고침하세요.'; }
+if(!THREE){ errBox.style.display='grid'; errBox.textContent=STR.noEngine; }
 
 /* ══════════ 상태 ══════════ */
 const P = {
@@ -222,21 +222,59 @@ const P = {
   col:{ skin:'#e0a878', hair:'#2e2620', top:'#3f7d8c', bottom:'#2f3a4a', shoes:'#1b1f26', gear:'#d8622e' }
 };
 
+
+/* ── 말 두 벌 ── ?lang=en 이면 영어, 없으면 브라우저 언어를 따릅니다 ── */
+const LANG = (() => {
+  const q = new URLSearchParams(location.search).get('lang');
+  if (q === 'en' || q === 'ko') return q;
+  return (navigator.language || '').toLowerCase().startsWith('ko') ? 'ko' : 'en';
+})();
+const STR = {
+  ko: {
+    title:'캐릭터 조립대', nameSub:'Character Bench',
+    lead:'비율을 맞추고 GLB로 내보내면<br>Three.js에 바로 들어갑니다.',
+    h:['골격','색','형태','장비','기본형'],
+    anim:['정지','걷기','달리기','인사'],
+    spin:'자동 회전', ruler:'치수', rand:'무작위', png:'PNG 저장', glb:'GLB 내보내기',
+    sliders:['키','머리 크기','어깨 너비','몸통 두께','배','팔 길이','다리 길이','팔다리 굵기'],
+    colors:['피부','머리','상의','하의','신발','장비'], colorOf:(l)=>l+' 색',
+    shapes:['각진','둥근'], gear:['머리카락','모자','배낭','고글'],
+    presets:{'등반가':'등반가','꼬마':'꼬마','거인':'거인','로봇':'로봇','해녀':'해녀','좀비':'좀비'},
+    heads:(n)=>n+'등신', pngSaved:'PNG 저장됨', glbSaved:(kb)=>'GLB 저장됨 · '+kb+' KB',
+    noEngine:'3D 엔진을 불러오지 못했습니다. 네트워크를 확인하고 새로고침하세요.'
+  },
+  en: {
+    title:'Character Bench', nameSub:'캐릭터 조립대',
+    lead:'Set the proportions, export a GLB,<br>and it drops straight into Three.js.',
+    h:['Frame','Colour','Shape','Gear','Presets'],
+    anim:['Idle','Walk','Run','Wave'],
+    spin:'Auto-spin', ruler:'Measure', rand:'Random', png:'Save PNG', glb:'Export GLB',
+    sliders:['Height','Head size','Shoulders','Torso','Belly','Arm length','Leg length','Limb thickness'],
+    colors:['Skin','Hair','Top','Bottom','Shoes','Gear'], colorOf:(l)=>l+' colour',
+    shapes:['Angular','Round'], gear:['Hair','Hat','Backpack','Visor'],
+    presets:{'등반가':'Climber','꼬마':'Kid','거인':'Giant','로봇':'Robot','해녀':'Haenyeo diver','좀비':'Zombie'},
+    heads:(n)=>n+' heads tall', pngSaved:'PNG saved', glbSaved:(kb)=>'GLB saved · '+kb+' KB',
+    noEngine:'The 3D engine did not load. Check your connection and reload.'
+  }
+}[LANG];
+document.documentElement.lang = LANG;
+document.title = STR.title + ' · ' + STR.nameSub;
+
 const SLIDERS = [
-  ['height','키',        1.00, 2.40, 0.01, v=>v.toFixed(2)+' m'],
-  ['head',  '머리 크기',  0.55, 1.90, 0.01, pct],
-  ['shoulder','어깨 너비',0.55, 1.70, 0.01, pct],
-  ['torso', '몸통 두께',  0.55, 1.70, 0.01, pct],
-  ['belly', '배',        0.70, 1.80, 0.01, pct],
-  ['arm',   '팔 길이',    0.60, 1.45, 0.01, pct],
-  ['leg',   '다리 길이',  0.60, 1.45, 0.01, pct],
-  ['limb',  '팔다리 굵기',0.55, 1.90, 0.01, pct],
+  ['height',  STR.sliders[0], 1.00, 2.40, 0.01, v=>v.toFixed(2)+' m'],
+  ['head',    STR.sliders[1], 0.55, 1.90, 0.01, pct],
+  ['shoulder',STR.sliders[2], 0.55, 1.70, 0.01, pct],
+  ['torso',   STR.sliders[3], 0.55, 1.70, 0.01, pct],
+  ['belly',   STR.sliders[4], 0.70, 1.80, 0.01, pct],
+  ['arm',     STR.sliders[5], 0.60, 1.45, 0.01, pct],
+  ['leg',     STR.sliders[6], 0.60, 1.45, 0.01, pct],
+  ['limb',    STR.sliders[7], 0.55, 1.90, 0.01, pct],
 ];
 function pct(v){ return Math.round(v*100)+'%' }
 
-const COLORS = [['skin','피부'],['hair','머리'],['top','상의'],['bottom','하의'],['shoes','신발'],['gear','장비']];
-const SHAPES = [['box','각진'],['round','둥근']];
-const GEAR   = [['hair','머리카락'],['hat','모자'],['pack','배낭'],['visor','고글']];
+const COLORS = ['skin','hair','top','bottom','shoes','gear'].map((k,i)=>[k, STR.colors[i]]);
+const SHAPES = ['box','round'].map((k,i)=>[k, STR.shapes[i]]);
+const GEAR   = ['hair','hat','pack','visor'].map((k,i)=>[k, STR.gear[i]]);
 
 const PRESETS = {
   '등반가': {height:1.74,head:1.0,shoulder:1.12,torso:1.05,belly:1.0,arm:1.0,leg:1.02,limb:1.05,shape:'box',
@@ -473,8 +511,8 @@ function updateSpec(){
   const heads = MEASURED / (0.132*P.height*P.head) ;
   document.getElementById('spec').innerHTML =
     `<b>${MEASURED.toFixed(3)}</b> units<br>` +
-    `<em>${cm} cm</em> · ${heads.toFixed(1)}등신<br>` +
-    `${countTris()} tris · ${P.shape==='box'?'각진':'둥근'}`;
+    `<em>${cm} cm</em> · ${STR.heads(heads.toFixed(1))}<br>` +
+    `${countTris()} tris · ${P.shape==='box'?STR.shapes[0]:STR.shapes[1]}`;
 }
 function countTris(){
   let n=0;
@@ -596,7 +634,7 @@ addEventListener('resize', resize);
 /* ══════════ GLB 내보내기 (직접 작성) ══════════ */
 function exportGLB(root){
   const json = {
-    asset:{version:'2.0', generator:'캐릭터 조립대'},
+    asset:{version:'2.0', generator:'Oreum Character Bench'},
     scene:0, scenes:[{nodes:[0]}],
     nodes:[], meshes:[], materials:[], accessors:[], bufferViews:[], buffers:[]
   };
@@ -703,6 +741,15 @@ function toast(msg){
 /* ══════════ UI 구성 ══════════ */
 const $ = id => document.getElementById(id);
 
+(function fillText(){
+  const put=(id,v,html)=>{const e=$(id); if(!e)return; if(html) e.innerHTML=v; else e.textContent=v;};
+  put('tTitle', STR.title); put('tLead', STR.lead, true);
+  STR.h.forEach((t,i)=>put('tHead'+(i+1), t));
+  ['bRest','bWalk','bRun','bWave'].forEach((id,i)=>put(id, STR.anim[i]));
+  put('spin', STR.spin); put('ruler', STR.ruler);
+  put('rand', STR.rand); put('png', STR.png); put('glb', STR.glb);
+})();
+
 $('sliders').innerHTML = SLIDERS.map(([k,label,mn,mx,st])=>`
   <div class="row">
     <label for="s_${k}">${label}<b id="v_${k}"></b></label>
@@ -716,7 +763,7 @@ SLIDERS.forEach(([k,,,,,fmt])=>{
 });
 
 $('colors').innerHTML = COLORS.map(([k,label])=>`
-  <div class="sw"><span>${label}</span><input type="color" id="c_${k}" value="${P.col[k]}" aria-label="${label} 색"></div>`).join('');
+  <div class="sw"><span>${label}</span><input type="color" id="c_${k}" value="${P.col[k]}" aria-label="${STR.colorOf(label)}"></div>`).join('');
 COLORS.forEach(([k])=>{
   $('c_'+k).addEventListener('input', e=>{ P.col[k] = e.target.value; build(); });
 });
@@ -726,7 +773,7 @@ $('shapes').innerHTML = SHAPES.map(([k,label])=>
 $('gear').innerHTML = GEAR.map(([k,label])=>
   `<button class="chip" data-gear="${k}" aria-pressed="${P[k]}">${label}</button>`).join('');
 $('presets').innerHTML = Object.keys(PRESETS).map(n=>
-  `<button class="chip" data-preset="${n}">${n}</button>`).join('');
+  `<button class="chip" data-preset="${n}">${STR.presets[n] || n}</button>`).join('');
 
 document.addEventListener('click', e=>{
   const b = e.target.closest('button'); if(!b) return;
@@ -745,7 +792,7 @@ document.addEventListener('click', e=>{
   if(b.id==='ruler'){ UI.ruler = !UI.ruler; syncBar(); }
   if(b.id==='rand'){ randomize(); }
   if(b.id==='png'){
-    renderer.domElement.toBlob(bl=>{ download(bl,'character.png'); toast('PNG 저장됨'); });
+    renderer.domElement.toBlob(bl=>{ download(bl,'character.png'); toast(STR.pngSaved); });
   }
   if(b.id==='glb'){
     const keep = UI.anim; UI.anim = 'rest'; pose(0);
@@ -755,7 +802,7 @@ document.addEventListener('click', e=>{
     const data = exportGLB(charRoot);
     UI.anim = keep;
     download(new Blob([data],{type:'model/gltf-binary'}), 'character.glb');
-    toast(`GLB 저장됨 · ${(data.length/1024).toFixed(0)} KB`);
+    toast(STR.glbSaved((data.length/1024).toFixed(0)));
   }
 });
 
