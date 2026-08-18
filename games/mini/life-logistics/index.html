@@ -57,6 +57,22 @@
   #combo .big { font-size:30px; font-weight:800; color:#ffd479; line-height:1; }
   #combo .sm { font-size:11px; color:#8fa3bd; letter-spacing:1px; }
 
+  /* ── 폰: 상단이 좁아 셋이 겹친다 — 카드 한 줄, 주문서·콤보는 그 아래로 ── */
+  @media (max-width:700px) {
+    #top { top:8px; left:8px; right:8px; transform:none;
+      justify-content:space-between; gap:6px; }
+    .card { padding:5px 7px; border-radius:8px; flex:1; }
+    .card .k { font-size:9px; letter-spacing:1px; }
+    .card .v { font-size:15px; }
+    #outCard .v { letter-spacing:1px; }
+    #order { top:62px; left:8px; width:198px; }
+    #order h3 { font-size:11px; padding:6px 10px; }
+    .row { padding:5px 10px; font-size:12.5px; }
+    #dest { padding:6px 10px; font-size:12px; }
+    #combo { top:66px; right:10px; }
+    #combo .big { font-size:22px; }
+  }
+
   /* ── 하단: 손에 든 것 / 안내 ── */
   #hand { position:absolute; bottom:16px; left:16px; display:flex; align-items:center;
     gap:9px; background:rgba(12,18,28,.78); border:1px solid rgba(255,255,255,.14);
