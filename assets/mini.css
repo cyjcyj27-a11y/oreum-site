@@ -57,7 +57,7 @@
 .talk-empty { margin: 0; color: var(--muted); font-size: 13.5px; }
 
 .talk-item {
-  background: var(--panel-2); border: 1px solid var(--line);
+  background: var(--panel); border: 1px solid var(--line);
   border-radius: 10px; padding: 10px 13px;
 }
 .talk-meta { display: flex; align-items: baseline; gap: 8px; font-size: 12.5px; }
@@ -75,7 +75,7 @@
 .talk-form { margin-top: 14px; }
 .talk-form textarea, .talk-form input {
   width: 100%; font: inherit; font-size: 14px; color: var(--ink);
-  background: var(--panel); border: 1px solid var(--line-2);
+  background: var(--panel-2); border: 1px solid var(--line-2);
   border-radius: 9px; padding: 9px 11px;
 }
 .talk-form textarea { resize: vertical; min-height: 60px; line-height: 1.6; }
