@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>극성 반전 (Polarity Flip)</title>
+<title>극성 반전 · Polarity Flip</title>
 <style>
   :root {
     --board-bg: #1a6b3c;
@@ -167,34 +167,34 @@
 </head>
 <body>
 
-<h1>극성 반전 <span style="color:var(--muted); font-weight:400;">Polarity Flip</span></h1>
-<div class="subtitle">뒤집는 게 아니라 밀어냅니다 — 판 밖으로 나간 돌은 사라집니다.</div>
+<h1><span id="tName"></span> <span id="tNameSub" style="color:var(--muted); font-weight:400;"></span></h1>
+<div class="subtitle" id="tSub"></div>
 
 <div class="panel" id="settingsPanel">
   <label class="setting">
-    상대
+    <span id="tOpp"></span>
     <select id="modeSelect">
-      <option value="bot" selected>봇과 대결</option>
-      <option value="human">2인 대전 (한 화면)</option>
+      <option value="bot" selected id="tOppBot"></option>
+      <option value="human" id="tOppTwo"></option>
     </select>
   </label>
   <label class="setting" id="colorSetting">
-    내 돌
+    <span id="tMine"></span>
     <select id="colorSelect">
-      <option value="1" selected>흑 (선공)</option>
-      <option value="2">백 (후공)</option>
+      <option value="1" selected id="tMineB"></option>
+      <option value="2" id="tMineW"></option>
     </select>
   </label>
   <label class="setting" id="difficultySetting">
-    난이도
+    <span id="tDiff"></span>
     <select id="difficultySelect">
-      <option value="1">쉬움</option>
-      <option value="3" selected>보통</option>
-      <option value="5">어려움</option>
+      <option value="1" id="tDiffE"></option>
+      <option value="3" selected id="tDiffM"></option>
+      <option value="5" id="tDiffH"></option>
     </select>
   </label>
-  <button id="newGameBtn">새 게임 시작</button>
-  <button id="sfxBtn" title="소리 켜기/끄기" aria-label="소리 켜기/끄기">🔊</button>
+  <button id="newGameBtn"></button>
+  <button id="sfxBtn">🔊</button>
 </div>
 
 <div class="panel">
@@ -203,33 +203,101 @@
   <div class="score" id="turnCounter" style="color: var(--muted); font-weight: 400; font-size: 0.85rem;">턴 0/<span id="maxMoves"></span></div>
 </div>
 
-<div id="status">흑 차례입니다</div>
+<div id="status"></div>
 <div id="board"></div>
 
 <div id="controls">
-  <button id="restartBtn">다시 시작</button>
+  <button id="restartBtn"></button>
 </div>
 
-<div id="rules">
-  <b>규칙</b><br>
-  1. 돌을 놓으면 8방향으로 인접한 <b>상대 돌</b>을 한 칸씩 밀어냅니다.<br>
-  2. 밀려나는 자리에 이미 다른 돌이 있으면 도미노처럼 연쇄로 밀립니다 (색 무관).<br>
-  3. 밀린 돌이 보드 밖으로 나가면 <b>제거</b>됩니다.<br>
-  4. 최소 한 개 이상의 상대 돌을 밀어낼 수 있는 칸에만 둘 수 있습니다. 둘 곳이 없으면 자동으로 패스됩니다.<br>
-  5. 양쪽 다 둘 곳이 없으면 게임 종료 — 보드에 남은 돌이 많은 쪽이 승리합니다.
-</div>
+<div id="rules"></div>
 
 <div class="overlay" id="overlay">
   <div class="overlay-box">
-    <h2 id="overlayTitle">게임 종료</h2>
+    <h2 id="overlayTitle"></h2>
     <p id="overlayText"></p>
-    <button id="overlayRestart">다시 시작</button>
+    <button id="overlayRestart"></button>
   </div>
 </div>
 
 <script>
 const SIZE = 8;
 const EMPTY = 0, BLACK = 1, WHITE = 2;
+
+/* ── 말 두 벌 ──────────────────────────────────────────────
+   주소에 ?lang=en 을 붙이면 영어로 뜹니다. 아무것도 안 붙이면
+   브라우저 언어를 보고 한국어/영어를 고릅니다.
+   파일을 두 벌로 복사하지 않는 이유: 한쪽만 고쳐져 어긋나는 걸 막으려고. */
+const LANG = (() => {
+  const q = new URLSearchParams(location.search).get('lang');
+  if (q === 'en' || q === 'ko') return q;
+  return (navigator.language || '').toLowerCase().startsWith('ko') ? 'ko' : 'en';
+})();
+const STR = {
+  ko: {
+    name:'극성 반전', nameSub:'Polarity Flip',
+    sub:'뒤집는 게 아니라 밀어냅니다 — 판 밖으로 나간 돌은 사라집니다.',
+    opp:'상대', oppBot:'봇과 대결', oppTwo:'2인 대전 (한 화면)',
+    mine:'내 돌', mineB:'흑 (선공)', mineW:'백 (후공)',
+    diff:'난이도', diffE:'쉬움', diffM:'보통', diffH:'어려움',
+    newGame:'새 게임 시작', restart:'다시 시작', sfx:'소리 켜기/끄기',
+    turn:'턴 ', black:'흑', white:'백',
+    toMove:(c)=>c+' 차례입니다',
+    pass:(p,m)=>p+'은(는) 둘 곳이 없어 패스합니다. '+m+' 차례가 계속됩니다.',
+    thinking:'봇이 생각 중...',
+    wipe:(w,l)=>w+'이(가) '+l+'을(를) 전멸시켰습니다!',
+    limit:(n)=>'턴 제한('+n+'턴) 도달',
+    draw:'무승부', wins:(w)=>w+' 승리!',
+    score:(b,w)=>'흑 '+b+' : 백 '+w,
+    over:'게임 종료',
+    rules:'<b>규칙</b><br>'
+      +'1. 돌을 놓으면 8방향으로 인접한 <b>상대 돌</b>을 한 칸씩 밀어냅니다.<br>'
+      +'2. 밀려나는 자리에 이미 다른 돌이 있으면 도미노처럼 연쇄로 밀립니다 (색 무관).<br>'
+      +'3. 밀린 돌이 보드 밖으로 나가면 <b>제거</b>됩니다.<br>'
+      +'4. 최소 한 개 이상의 상대 돌을 밀어낼 수 있는 칸에만 둘 수 있습니다. 둘 곳이 없으면 자동으로 패스됩니다.<br>'
+      +'5. 양쪽 다 둘 곳이 없으면 게임 종료 — 보드에 남은 돌이 많은 쪽이 승리합니다.'
+  },
+  en: {
+    name:'Polarity Flip', nameSub:'극성 반전',
+    sub:'Nothing flips — stones get pushed, and whatever leaves the board is gone.',
+    opp:'Opponent', oppBot:'Play the bot', oppTwo:'Two players (one screen)',
+    mine:'My stones', mineB:'Black (first)', mineW:'White (second)',
+    diff:'Difficulty', diffE:'Easy', diffM:'Normal', diffH:'Hard',
+    newGame:'New game', restart:'Restart', sfx:'Sound on/off',
+    turn:'Turn ', black:'Black', white:'White',
+    toMove:(c)=>c+' to move',
+    pass:(p,m)=>p+' has no legal move and passes. '+m+' continues.',
+    thinking:'Bot is thinking…',
+    wipe:(w,l)=>w+' wiped out '+l+'!',
+    limit:(n)=>'Turn limit ('+n+') reached',
+    draw:'Draw', wins:(w)=>w+' wins!',
+    score:(b,w)=>'Black '+b+' : White '+w,
+    over:'Game over',
+    rules:'<b>Rules</b><br>'
+      +'1. Placing a stone shoves every adjacent <b>enemy stone</b> one square outward, in all eight directions.<br>'
+      +'2. If something already sits where a stone is shoved, the whole line slides on like dominoes — colour does not matter.<br>'
+      +'3. Any stone pushed off the board is <b>removed</b>.<br>'
+      +'4. You may only play where at least one enemy stone gets pushed. With no such square, your turn passes automatically.<br>'
+      +'5. When neither side can play, the game ends — whoever has more stones left on the board wins.'
+  }
+}[LANG];
+
+document.documentElement.lang = LANG;
+(function fillText(){
+  const put = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+  put('tName', STR.name); put('tNameSub', STR.nameSub); put('tSub', STR.sub);
+  put('tOpp', STR.opp); put('tOppBot', STR.oppBot); put('tOppTwo', STR.oppTwo);
+  put('tMine', STR.mine); put('tMineB', STR.mineB); put('tMineW', STR.mineW);
+  put('tDiff', STR.diff); put('tDiffE', STR.diffE); put('tDiffM', STR.diffM); put('tDiffH', STR.diffH);
+  put('newGameBtn', STR.newGame); put('restartBtn', STR.restart); put('overlayRestart', STR.restart);
+  put('overlayTitle', STR.over);
+  const sfx = document.getElementById('sfxBtn');
+  if (sfx) { sfx.title = STR.sfx; sfx.setAttribute('aria-label', STR.sfx); }
+  document.getElementById('rules').innerHTML = STR.rules;
+  document.title = STR.name + ' · ' + STR.nameSub;
+})();
+const SIDE = (c) => c === BLACK ? STR.black : STR.white;
+
 const DIRS = [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]];
 
 let board, current, boardEl, statusEl;
@@ -456,7 +524,7 @@ function render() {
   document.getElementById('countWhite').textContent = white;
   document.getElementById('scoreBlack').classList.toggle('active', current === BLACK);
   document.getElementById('scoreWhite').classList.toggle('active', current === WHITE);
-  document.getElementById('turnCounter').firstChild.textContent = '턴 ' + moveCount + '/';
+  document.getElementById('turnCounter').firstChild.textContent = STR.turn + moveCount + '/';
   document.getElementById('maxMoves').textContent = MAX_MOVES;
 }
 
@@ -479,12 +547,12 @@ function afterMove() {
   const { black, white } = countStones(board);
   if (black === 0 || white === 0) {
     render();
-    endGame(black === 0 ? '백이 흑을 전멸시켰습니다!' : '흑이 백을 전멸시켰습니다!');
+    endGame(black === 0 ? STR.wipe(STR.white, STR.black) : STR.wipe(STR.black, STR.white));
     return;
   }
   if (moveCount >= MAX_MOVES) {
     render();
-    endGame('턴 제한(' + MAX_MOVES + '턴) 도달');
+    endGame(STR.limit(MAX_MOVES));
     return;
   }
 
@@ -494,13 +562,13 @@ function afterMove() {
 
   if (nextMoves.length > 0) {
     current = next;
-    statusEl.textContent = (current === BLACK ? '흑' : '백') + ' 차례입니다';
+    statusEl.textContent = STR.toMove(SIDE(current));
     render();
     maybeBotMove();
   } else {
     const stillMoves = getValidMoves(board, mover);
     if (stillMoves.length > 0) {
-      statusEl.textContent = (next === BLACK ? '흑' : '백') + '은(는) 둘 곳이 없어 패스합니다. ' + (mover === BLACK ? '흑' : '백') + ' 차례가 계속됩니다.';
+      statusEl.textContent = STR.pass(SIDE(next), SIDE(mover));
       render();
       maybeBotMove();
     } else {
@@ -513,7 +581,7 @@ function afterMove() {
 function maybeBotMove() {
   if (gameOver || !vsBot || current !== botColor) return;
   thinking = true;
-  statusEl.textContent = '봇이 생각 중...';
+  statusEl.textContent = STR.thinking;
   render();
   setTimeout(() => {
     const move = getBotMove();
@@ -533,16 +601,15 @@ function endGame(reason) {
   const { black, white } = countStones(board);
   let title, text;
   if (black === white) {
-    title = '무승부';
+    title = STR.draw;
   } else {
-    const winner = black > white ? '흑' : '백';
-    title = winner + ' 승리!';
+    title = STR.wins(black > white ? STR.black : STR.white);
   }
-  text = `흑 ${black} : 백 ${white}` + (reason ? `  (${reason})` : '');
+  text = STR.score(black, white) + (reason ? '  (' + reason + ')' : '');
   document.getElementById('overlayTitle').textContent = title;
   document.getElementById('overlayText').textContent = text;
   document.getElementById('overlay').classList.add('show');
-  statusEl.textContent = '게임 종료 — ' + title;
+  statusEl.textContent = STR.over + ' — ' + title;
 }
 
 function newGame() {
@@ -557,7 +624,7 @@ function newGame() {
 
   document.getElementById('overlay').classList.remove('show');
   initBoard();
-  statusEl.textContent = '흑 차례입니다';
+  statusEl.textContent = STR.toMove(STR.black);
   render();
   maybeBotMove();
 }
