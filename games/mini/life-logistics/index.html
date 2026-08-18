@@ -1,6 +1,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>LIFE LOGISTICS · 물류터미널</title>
+<meta name="description" content="시간이 화폐인 세계의 1인칭 3D 소분 포장 게임. 주문을 채우고 출고하며 수명을 적립합니다. 영생의 가격 세계관.">
+<link rel="canonical" href="https://oreumgames.com/games/mini/life-logistics/">
+<link rel="alternate" hreflang="ko" href="https://oreumgames.com/games/mini/life-logistics/">
+<link rel="alternate" hreflang="en" href="https://oreumgames.com/games/mini/life-logistics/?lang=en">
+<link rel="alternate" hreflang="x-default" href="https://oreumgames.com/games/mini/life-logistics/">
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
   html,body { width:100%; height:100%; overflow:hidden; background:#0b0f16;
@@ -160,6 +165,7 @@ const LANG = (() => {
   if (q === 'en' || q === 'ko') return q;
   return (navigator.language || '').toLowerCase().startsWith('ko') ? 'ko' : 'en';
 })();
+if (LANG === "en") document.querySelector('meta[name="description"]').setAttribute("content", "A first-person 3D packing game in a world where time is money. Fill orders, ship parcels, earn lifespan.");
 const STR = {
   ko: {
     title:'LIFE LOGISTICS · 물류터미널',
