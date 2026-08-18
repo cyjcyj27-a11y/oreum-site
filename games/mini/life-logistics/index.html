@@ -1540,6 +1540,8 @@ function drawPrompt(){
 
 /* ---- 폰 조작 ---- */
 if(window.OREUM_TOUCH){
+  // 폰에서는 잡기·내려놓기 버튼이 화면 아래를 차지하므로 안내창을 그 위로 올린다
+  document.getElementById('prompt').style.bottom = '250px';
   const otLayer = OreumTouch.mount({
     // 끝까지 밀면 달립니다 (달리기 버튼을 없앤 대신)
     stick:{up:'KeyW',down:'KeyS',left:'KeyA',right:'KeyD',run:'ShiftLeft'},
