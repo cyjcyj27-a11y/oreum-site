@@ -9,7 +9,7 @@ const POSE_KEYS = ['idle', 'move', 'hit', 'sleep', 'ultimate', 'swordswing', 'lp
 
 const CHARACTERS = {
   cat: {
-    label: '고양이 루루',
+    label: STR.catLabel,
     sources: {
       idle:      { src: 'assets/cat_idle.png' },
       move:      { src: 'assets/cat_move.png' },
@@ -25,7 +25,7 @@ const CHARACTERS = {
     baseFacing: { lp: -1, hp: -1, lk: -1, hk: 1, jump: 1, crouch: 1 },
   },
   dog: {
-    label: '강아지',
+    label: STR.dogLabel,
     sources: {
       idle:      { src: 'assets/dog_idle.png' },
       move:      { src: 'assets/dog_move.png' },
@@ -66,11 +66,11 @@ function checkAllLoaded() {
   if (loadedCount >= totalImageCount) {
     document.getElementById('loading').style.display = 'none';
     btn.disabled = false;
-    btn.textContent = '게임 시작';
+    btn.textContent = STR.start;
   } else {
     const pct = Math.round((loadedCount / totalImageCount) * 100);
-    document.getElementById('loading').textContent = `이미지 불러오는 중... ${pct}% (${loadedCount}/${totalImageCount})`;
-    btn.textContent = `불러오는 중... ${pct}%`;
+    document.getElementById('loading').textContent = STR.loadingPct(pct, loadedCount, totalImageCount);
+    btn.textContent = STR.loadingBtn(pct);
   }
 }
 checkAllLoaded();
@@ -728,7 +728,7 @@ function drawUI() {
     ctx.fillStyle = 'rgba(255,255,255,0.9)';
     ctx.strokeStyle = '#6b4a2f';
     ctx.lineWidth = 6;
-    const txt = countdownVal > 0 ? String(countdownVal) : '파이트!';
+    const txt = countdownVal > 0 ? String(countdownVal) : STR.fight;
     ctx.strokeText(txt, W / 2, H / 2);
     ctx.fillText(txt, W / 2, H / 2);
     ctx.restore();

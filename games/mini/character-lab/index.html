@@ -87,7 +87,55 @@
 <script>
 (()=>{
 "use strict";
-if(!window.THREE){document.body.innerHTML='<div style="padding:40px;font:12px monospace;color:#888">Three.js 로드 실패 — 네트워크 확인</div>';return;}
+
+/* ── 말 두 벌 ── ?lang=en 이면 영어, 없으면 브라우저 언어를 따릅니다.
+   주의: 직업·동작 이름은 코드 안에서 키로도 쓰이므로 키는 한국어 그대로 두고,
+   화면에 보이는 글자만 STR로 바꾼다. ── */
+const LANG = (() => {
+  const q = new URLSearchParams(location.search).get('lang');
+  if (q === 'en' || q === 'ko') return q;
+  return (navigator.language || '').toLowerCase().startsWith('ko') ? 'ko' : 'en';
+})();
+const STR = {
+  ko: {
+    title:'캐릭터 랩 — 소프비 칼잡이',
+    capH:'소프비 · 1/12 스케일',
+    h:['직업','동작','비율','표면'],
+    sliders:['머리','몸통','팔다리','흐물거림','광택'],
+    chips:{tJoint:'관절 볼',tSeam:'사출 자국',tSpin:'턴테이블',tGrid:'스케일 자'},
+    shot:'정면 · 측면 · 후면',
+    note:'드래그로 회전, 휠로 확대.<br><br><em>이 몸의 규칙</em> — 봉제 인형이 아니라 사출 피규어입니다. 관절 볼과 사출 자국이 보이고, 표면은 털이 아니라 비닐 광택입니다. 실루엣은 둥근 짐승이 아니라 각진 어깨의 사람입니다.',
+    jobs:{'사원':'사원','알바':'알바','셰프':'셰프','노무자':'노무자','배달':'배달','경비':'경비'},
+    descs:{'사원':'퇴근길에 칼을 들었다','알바':'교대 시간은 지났다','셰프':'주방에서 쓰던 손이다',
+           '노무자':'현장에선 뭐든 연장이다','배달':'3분 남았다','경비':'교대 근무 27년차'},
+    anims:{'대기':'대기','걷기':'걷기','찌르기':'찌르기','베기':'베기','백스텝':'백스텝','피격':'피격'},
+    noEngine:'Three.js 로드 실패 — 네트워크 확인'
+  },
+  en: {
+    title:'Character Lab — Vinyl Swordsman',
+    capH:'Soft vinyl · 1/12 scale',
+    h:['Job','Motion','Proportions','Surface'],
+    sliders:['Head','Torso','Limbs','Wobble','Gloss'],
+    chips:{tJoint:'Joint balls',tSeam:'Mold seams',tSpin:'Turntable',tGrid:'Scale ruler'},
+    shot:'Front · Side · Back',
+    note:'Drag to rotate, scroll to zoom.<br><br><em>Rules of this body</em> — This is a molded figure, not a plush toy. The joint balls and mold seams show, and the surface is vinyl gloss, not fur. The silhouette is a square-shouldered person, not a round beast.',
+    jobs:{'사원':'Office worker','알바':'Part-timer','셰프':'Chef','노무자':'Laborer','배달':'Courier','경비':'Guard'},
+    descs:{'사원':'Picked up a sword on the way home','알바':'The shift ended a while ago','셰프':'These hands ran a kitchen',
+           '노무자':'On site, anything is a tool','배달':'3 minutes left','경비':'Year 27 of shift duty'},
+    anims:{'대기':'Idle','걷기':'Walk','찌르기':'Stab','베기':'Slash','백스텝':'Backstep','피격':'Hit'},
+    noEngine:'Failed to load Three.js — check your connection'
+  }
+}[LANG];
+document.documentElement.lang = LANG;
+document.title = STR.title;
+document.querySelector('#cap .h').textContent = STR.capH;
+document.querySelectorAll('#panel h2').forEach((el,i)=>{ el.textContent = STR.h[i]; });
+document.querySelectorAll('#panel .row > label').forEach((el,i)=>{ el.textContent = STR.sliders[i]; });
+Object.keys(STR.chips).forEach(id=>{ document.getElementById(id).textContent = STR.chips[id]; });
+document.getElementById('shot').textContent = STR.shot;
+document.querySelector('.note').innerHTML = STR.note;
+
+if(!window.THREE){document.body.innerHTML='<div style="padding:40px;font:12px monospace;color:#888">'+STR.noEngine+'</div>';return;}
 
 const glc=document.getElementById('gl'), view=document.getElementById('view');
 const renderer=new THREE.WebGLRenderer({canvas:glc,antialias:true});
@@ -336,8 +384,8 @@ function setJob(name){
   M_body(j.body); M_leg(j.leg);
   hairDefault(j.hair);
   j.build();
-  document.getElementById('capName').textContent=name;
-  document.getElementById('capDesc').textContent=j.desc;
+  document.getElementById('capName').textContent=STR.jobs[name];
+  document.getElementById('capDesc').textContent=STR.descs[name];
   applySurface();
 }
 function M_body(c){ body.material=vinyl(c); hips.material=body.material;
@@ -559,11 +607,11 @@ addEventListener('touchend',()=>drag=false);
 /* ---------- UI ---------- */
 const jobsEl=document.getElementById('jobs'), animsEl=document.getElementById('anims');
 Object.keys(JOBS).forEach(n=>{ const b=document.createElement('button');
-  b.className='chip'+(n===jobName?' on':''); b.textContent=n; b.dataset.job=n;
+  b.className='chip'+(n===jobName?' on':''); b.textContent=STR.jobs[n]; b.dataset.job=n;
   b.onclick=()=>{ setJob(n); [...jobsEl.children].forEach(c=>c.classList.toggle('on',c.dataset.job===n)); };
   jobsEl.appendChild(b); });
 ANIMS.forEach(n=>{ const b=document.createElement('button');
-  b.className='chip'+(n===anim?' on':''); b.textContent=n; b.dataset.anim=n;
+  b.className='chip'+(n===anim?' on':''); b.textContent=STR.anims[n]; b.dataset.anim=n;
   b.onclick=()=>{ anim=n; af=0; headLag=0; headLagV=0;
     [...animsEl.children].forEach(c=>c.classList.toggle('on',c.dataset.anim===n)); };
   animsEl.appendChild(b); });

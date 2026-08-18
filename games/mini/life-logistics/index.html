@@ -151,6 +151,224 @@
 <script src="/assets/touch.js"></script>
 <script>
 "use strict";
+
+/* ── 말 두 벌 ── ?lang=en 이면 영어, 없으면 브라우저 언어를 따릅니다.
+   품목·배송처는 id('apple','A'…)가 코드 키이고 name은 표시용이라 name만 번역한다.
+   캔버스에 그리는 포스터·간판은 영어가 길어서 글자 크기도 여기서 같이 정한다. ── */
+const LANG = (() => {
+  const q = new URLSearchParams(location.search).get('lang');
+  if (q === 'en' || q === 'ko') return q;
+  return (navigator.language || '').toLowerCase().startsWith('ko') ? 'ko' : 'en';
+})();
+const STR = {
+  ko: {
+    title:'LIFE LOGISTICS · 물류터미널',
+    noGL:'이 브라우저에서 WebGL을 쓸 수 없습니다. 크롬이나 엣지로 열어주세요.',
+    items:{apple:'사과',water:'생수',veg:'채소',banana:'바나나',grape:'포도',citrus:'감귤'},
+    dests:{A:'A동',B:'B동',C:'C동'},
+    cards:['근무시간','적립 수명','출고','경고'],
+    shiftInit:'1교대', orderWord:'주문', destWord:'배송처', streakWord:'연속', empty:'빈손',
+    cartonNameSize:40, cartonSub:'LIFE LOGISTICS  ·  소분 물자', cartonSubSize:15,
+    p1a:'파손 1건', p1aSize:34, p1b:'배상 8시간', p1bSize:40,
+    p1c:'LIFE PAY 즉시 차감 · 이의신청 불가', p1cSize:15,
+    p2h:'작업 규정', p2hSize:30, p2a:'경고 3회 = 해고', p2aSize:34,
+    p2b:'재배치 대기 · 수명 적립 중단', p2bSize:15,
+    bannerSub:'물류터미널 · 소분 작업', bannerSubSize:20,
+    lRack:(n)=>'[E] ' + n + ' 집기', lTable:'포장대', lChute:(n)=>n + ' 출고', lDrop:'[E] 투입',
+    fmtMin:(h,r,m)=> h ? (r ? h + '시간 ' + r + '분' : h + '시간') : m + '분',
+    tWarn:(o,mx,why)=>`경고 ${o}/${mx} — ${why}`,
+    shiftFmt:(a,b)=>a + '/' + b + '교대',
+    monSealed:(n)=>`마감 완료 → ${n} 운반`, monSealNow:'[F] 포장 마감!', monFill:'품목을 담으세요',
+    handParcel:(n)=>`소포 → ${n}`,
+    tHandFull:'손이 이미 찼습니다 (Q: 내려놓기)',
+    tSealedAlready:'이미 마감한 주문입니다 — 소포를 운반하세요',
+    tListDone:'목록 완료 — [F] 포장 마감',
+    tMisSort:'오분류 — 근무시간 -5초', oWrongItem:'주문에 없는 물자',
+    tCarry:(n)=>n + ' 슈트로 운반', tPutChute:'출고 슈트에 넣으세요',
+    tFetch:'선반에서 품목을 가져오세요', tNoParcel:'마감된 소포가 없습니다',
+    tPay:(pay,n)=>`수명 +${pay}  (${n} 정상출고)`,
+    tMisdeliver:(fine,cut)=>`오배송 — 배상 ${fine}` + (cut ? ` (잔액 부족, ${cut} 차감)` : ' 차감'),
+    oWrongDest:'배송처 오류',
+    tSealFar:'포장대 앞에서 마감하세요', tMoveFirst:'테이블의 소포를 먼저 운반하세요',
+    tNotEnough:'아직 품목이 부족합니다',
+    tSealed:(n)=>`포장 마감 → ${n} (상자를 [E]로 집기)`,
+    pRack:(n)=>`<kbd>E</kbd> ${n} 1개 집기`, pChute:(n)=>`<kbd>E</kbd> ${n} 슈트에 투입`,
+    pParcel:`<kbd>E</kbd> 마감된 소포 집기`, pCarryMsg:(n)=>`${n} 출고 슈트로 운반하세요`,
+    pPut:(n)=>`<kbd>E</kbd> ${n} 상자에 담기`, sealWord:'포장 마감',
+    pFetch:'주문 품목을 선반에서 가져오세요',
+    btnGrab:'잡기', btnDrop:'내려놓기', btnAgain:'다시하기', btnWord:' 버튼 — ',
+    touchNote:'폰에서는 왼쪽 아래 동그라미로 걷고(끝까지 밀면 달리기), '
+      + '화면을 문질러 둘러보고, 두 손가락으로 벌리면 당겨 봅니다. '
+      + '오른쪽 아래 그림 버튼으로 잡고 담고 마감합니다.',
+    rankOf:(s)=> s >= 2200 ? '작업반장 👑' : s >= 1500 ? '숙련 작업조 🏅'
+               : s >= 900  ? '정규 작업조 📦' : s >= 400 ? '수습 작업조 🧢' : '첫 배치 🐣',
+    menuHtml:`
+    <h1>LIFE LOGISTICS <span>물류터미널</span></h1>
+    <div class="lead">소분 작업조 배치. 인간에게 남은 거의 유일한 일자리입니다.<br>
+      임금은 <b style="color:#7ef0c0">수명</b>으로 적립되고, 배상도 <b style="color:#ff7b7b">수명</b>에서 나갑니다.</div>
+    <div class="steps" style="margin-bottom:4px">
+      <div><b>⚠</b><span>오배송 1건 = <b style="color:#ff7b7b">배상 8시간</b> 즉시 차감 (LIFE PAY · 이의신청 불가)</span></div>
+      <div><b>⚠</b><span>경고 <b style="color:#ff7b7b">3회</b>면 해고. 그날 작업은 거기서 끝납니다</span></div>
+    </div>
+    <h2>일하는 순서</h2>
+    <div class="steps">
+      <div><b>1</b><span>왼쪽 위 <b style="color:#fff">주문서</b>를 봅니다. 예: 사과 2, 감귤 1</span></div>
+      <div><b>2</b><span>뒤쪽 <b style="color:#fff">선반</b>으로 가서 해당 품목을 조준하고 <b style="color:#fff">E</b> — 한 번에 1개씩</span></div>
+      <div><b>3</b><span>가운데 <b style="color:#fff">포장대</b>의 상자를 조준하고 <b style="color:#fff">E</b> 로 담기</span></div>
+      <div><b>4</b><span>목록을 다 채우면 <b style="color:#fff">F</b> 로 포장 마감 → 소포를 <b style="color:#fff">E</b> 로 집기</span></div>
+      <div><b>5</b><span>주문서의 배송처(A/B/C동) <b style="color:#fff">출고 슈트</b>에 <b style="color:#fff">E</b> 로 투입</span></div>
+    </div>
+    <h2>조작</h2>
+    <div class="keys">
+      <span><b>W A S D</b>이동</span><span><b>마우스</b>둘러보기</span>
+      <span><b>Shift</b>달리기</span><span><b>E</b>집기 / 담기 / 투입</span>
+      <span><b>F</b>포장 마감</span><span><b>Q</b>손에 든 것 내려놓기</span>
+      <span><b>ESC</b>일시정지</span><span><b>R</b>다시하기(종료 후)</span>
+    </div>
+    <button id="go">작업 시작 (클릭)</button>`,
+    pauseHtml:`
+    <h1>일시정지</h1>
+    <div class="lead">화면을 클릭하면 이어서 작업합니다.</div>
+    <div class="keys">
+      <span><b>W A S D</b>이동</span><span><b>E</b>집기 / 담기 / 투입</span>
+      <span><b>F</b>포장 마감</span><span><b>Q</b>내려놓기</span>
+    </div>
+    <button id="go">이어하기</button>`,
+    overCleared:(rank)=>`
+    <h1>배송직 전환 <span>3교대 완주</span></h1>
+    <div class="lead">축하합니다. 세 번의 교대를 끝까지 마쳤습니다.<br>
+      적립한 수명으로 <b>트럭을 구입</b>했습니다. 이제부터 배송 업무를 담당하게 됩니다.</div>
+    <div id="res">
+      <div><div class="k">누적 수명</div><div class="v">${fmtMin(G.totalScore)}</div></div>
+      <div><div class="k">마지막 교대</div><div class="v">${fmtMin(G.score)}</div></div>
+      <div><div class="k">출고</div><div class="v">${G.done} 건</div></div>
+      <div><div class="k">배상 ${G.fined}건</div><div class="v">-${fmtMin(G.finedMin)}</div></div>
+    </div>
+    <div id="rank">배치 등급 · ${rank}</div>
+    <button id="go">처음부터${window.OREUM_TOUCH ? '' : ' (R)'}</button>`,
+    overShift:(fired,rank)=>`
+    <h1>${fired ? '해고 <span>경고 3회 누적</span>' : `교대 종료 <span>${G.shift}/${SHIFTS} 정산합니다</span>`}</h1>
+    <div class="lead">${fired
+      ? '재배치 대기 명단으로 이관되었습니다. 대기 기간 동안 수명은 적립되지 않습니다.'
+      : '오늘 몫의 수명이 LIFE PAY 계정으로 적립되었습니다.'}</div>
+    <div id="res">
+      <div><div class="k">적립한 수명</div><div class="v">${fmtMin(G.score)}</div></div>
+      <div><div class="k">누적 수명</div><div class="v">${fmtMin(G.totalScore)}</div></div>
+      <div><div class="k">출고</div><div class="v">${G.done} 건</div></div>
+      <div><div class="k">배상 ${G.fined}건</div><div class="v">-${fmtMin(G.finedMin)}</div></div>
+    </div>
+    <div id="rank">배치 등급 · ${rank}</div>
+    <button id="go">${fired ? '재배치 신청 (1교대부터)' : `${G.shift + 1}교대로`}${window.OREUM_TOUCH ? '' : ' (R)'}</button>`
+  },
+  en: {
+    title:'LIFE LOGISTICS · Logistics Terminal',
+    noGL:'This browser cannot run WebGL. Please open it in Chrome or Edge.',
+    items:{apple:'Apple',water:'Water',veg:'Greens',banana:'Banana',grape:'Grapes',citrus:'Citrus'},
+    dests:{A:'Wing A',B:'Wing B',C:'Wing C'},
+    cards:['Shift time','Life earned','Shipped','Warnings'],
+    shiftInit:'Shift 1', orderWord:'Order', destWord:'Deliver to', streakWord:'streak', empty:'Empty hands',
+    cartonNameSize:30, cartonSub:'LIFE LOGISTICS  ·  SPLIT-PACK', cartonSubSize:13,
+    p1a:'1 ITEM BROKEN', p1aSize:26, p1b:'PAY 8 HOURS', p1bSize:34,
+    p1c:'LIFE PAY · instant · no appeal', p1cSize:13,
+    p2h:'WORK RULES', p2hSize:28, p2a:'3 WARNINGS = FIRED', p2aSize:22,
+    p2b:'Reassignment queue · accrual paused', p2bSize:12,
+    bannerSub:'Logistics terminal · split-pack line', bannerSubSize:16,
+    lRack:(n)=>'[E] Pick ' + n, lTable:'Packing table', lChute:(n)=>n + ' outbound', lDrop:'[E] Drop in',
+    fmtMin:(h,r,m)=> h ? (r ? h + 'h ' + r + 'm' : h + 'h') : m + 'm',
+    tWarn:(o,mx,why)=>`Warning ${o}/${mx} — ${why}`,
+    shiftFmt:(a,b)=>'Shift ' + a + '/' + b,
+    monSealed:(n)=>`Sealed → carry to ${n}`, monSealNow:'[F] Seal the box!', monFill:'Pack the items',
+    handParcel:(n)=>`Parcel → ${n}`,
+    tHandFull:'Your hands are full (Q: put down)',
+    tSealedAlready:'Order already sealed — carry the parcel',
+    tListDone:'List complete — [F] seal the box',
+    tMisSort:'Mis-sort — shift time -5s', oWrongItem:'item not on the order',
+    tCarry:(n)=>'Carry to the ' + n + ' chute', tPutChute:'Drop it into an outbound chute',
+    tFetch:'Fetch items from the racks', tNoParcel:'No sealed parcel in hand',
+    tPay:(pay,n)=>`Lifespan +${pay}  (${n} shipped OK)`,
+    tMisdeliver:(fine,cut)=>`Misdelivery — damages ${fine}` + (cut ? ` (low balance, ${cut} deducted)` : ' deducted'),
+    oWrongDest:'wrong destination',
+    tSealFar:'Seal at the packing table', tMoveFirst:'Carry the parcel on the table first',
+    tNotEnough:'The list is not filled yet',
+    tSealed:(n)=>`Sealed → ${n} (pick the box up with [E])`,
+    pRack:(n)=>`<kbd>E</kbd> Pick 1 ${n}`, pChute:(n)=>`<kbd>E</kbd> Drop into the ${n} chute`,
+    pParcel:`<kbd>E</kbd> Pick up the sealed parcel`, pCarryMsg:(n)=>`Carry it to the ${n} outbound chute`,
+    pPut:(n)=>`<kbd>E</kbd> Pack the ${n} into the box`, sealWord:'Seal the box',
+    pFetch:'Fetch the ordered items from the racks',
+    btnGrab:'Grab', btnDrop:'Drop', btnAgain:'Restart', btnWord:' button — ',
+    touchNote:'On a phone: walk with the bottom-left circle (push it all the way to run), '
+      + 'rub the screen to look around, and spread two fingers to zoom in. '
+      + 'The picture buttons at bottom right grab, pack and seal.',
+    rankOf:(s)=> s >= 2200 ? 'Crew chief 👑' : s >= 1500 ? 'Skilled crew 🏅'
+               : s >= 900  ? 'Regular crew 📦' : s >= 400 ? 'Trainee crew 🧢' : 'First assignment 🐣',
+    menuHtml:`
+    <h1>LIFE LOGISTICS <span>Logistics Terminal</span></h1>
+    <div class="lead">Assigned to the split-pack crew. One of the last jobs left for humans.<br>
+      Wages accrue as <b style="color:#7ef0c0">lifespan</b> — and damages come out of <b style="color:#ff7b7b">lifespan</b> too.</div>
+    <div class="steps" style="margin-bottom:4px">
+      <div><b>⚠</b><span>1 misdelivery = <b style="color:#ff7b7b">8 hours</b> deducted on the spot (LIFE PAY · no appeal)</span></div>
+      <div><b>⚠</b><span><b style="color:#ff7b7b">3</b> warnings and you are fired. Your day ends right there</span></div>
+    </div>
+    <h2>How the job works</h2>
+    <div class="steps">
+      <div><b>1</b><span>Check the <b style="color:#fff">order sheet</b> top-left. e.g. Apple 2, Citrus 1</span></div>
+      <div><b>2</b><span>Go to the <b style="color:#fff">racks</b> in the back, aim at the item and press <b style="color:#fff">E</b> — one at a time</span></div>
+      <div><b>3</b><span>Aim at the box on the central <b style="color:#fff">packing table</b> and press <b style="color:#fff">E</b> to pack</span></div>
+      <div><b>4</b><span>When the list is full, press <b style="color:#fff">F</b> to seal → pick the parcel up with <b style="color:#fff">E</b></span></div>
+      <div><b>5</b><span>Drop it into the order's destination (Wing A/B/C) <b style="color:#fff">outbound chute</b> with <b style="color:#fff">E</b></span></div>
+    </div>
+    <h2>Controls</h2>
+    <div class="keys">
+      <span><b>W A S D</b>move</span><span><b>Mouse</b>look around</span>
+      <span><b>Shift</b>run</span><span><b>E</b>pick / pack / drop in</span>
+      <span><b>F</b>seal the box</span><span><b>Q</b>put down</span>
+      <span><b>ESC</b>pause</span><span><b>R</b>restart (after a shift)</span>
+    </div>
+    <button id="go">Start work (click)</button>`,
+    pauseHtml:`
+    <h1>Paused</h1>
+    <div class="lead">Click the screen to get back to work.</div>
+    <div class="keys">
+      <span><b>W A S D</b>move</span><span><b>E</b>pick / pack / drop in</span>
+      <span><b>F</b>seal the box</span><span><b>Q</b>put down</span>
+    </div>
+    <button id="go">Resume</button>`,
+    overCleared:(rank)=>`
+    <h1>Promoted to Delivery <span>3 shifts complete</span></h1>
+    <div class="lead">Congratulations. You worked all three shifts to the very end.<br>
+      With the lifespan you earned, you <b>bought a truck</b>. From now on, deliveries are your job.</div>
+    <div id="res">
+      <div><div class="k">Total lifespan</div><div class="v">${fmtMin(G.totalScore)}</div></div>
+      <div><div class="k">Last shift</div><div class="v">${fmtMin(G.score)}</div></div>
+      <div><div class="k">Shipped</div><div class="v">${G.done}</div></div>
+      <div><div class="k">Damages ×${G.fined}</div><div class="v">-${fmtMin(G.finedMin)}</div></div>
+    </div>
+    <div id="rank">Crew grade · ${rank}</div>
+    <button id="go">From the start${window.OREUM_TOUCH ? '' : ' (R)'}</button>`,
+    overShift:(fired,rank)=>`
+    <h1>${fired ? 'Fired <span>3 warnings</span>' : `Shift over <span>${G.shift}/${SHIFTS} — settling up</span>`}</h1>
+    <div class="lead">${fired
+      ? 'You have been moved to the reassignment waiting list. While you wait, no lifespan accrues.'
+      : "Today's share of lifespan has been credited to your LIFE PAY account."}</div>
+    <div id="res">
+      <div><div class="k">Lifespan earned</div><div class="v">${fmtMin(G.score)}</div></div>
+      <div><div class="k">Total lifespan</div><div class="v">${fmtMin(G.totalScore)}</div></div>
+      <div><div class="k">Shipped</div><div class="v">${G.done}</div></div>
+      <div><div class="k">Damages ×${G.fined}</div><div class="v">-${fmtMin(G.finedMin)}</div></div>
+    </div>
+    <div id="rank">Crew grade · ${rank}</div>
+    <button id="go">${fired ? 'Apply for reassignment (from shift 1)' : `To shift ${G.shift + 1}`}${window.OREUM_TOUCH ? '' : ' (R)'}</button>`
+  }
+}[LANG];
+document.documentElement.lang = LANG;
+document.title = STR.title;
+document.querySelectorAll('#top .card .k').forEach((el,i)=>{ el.textContent = STR.cards[i]; });
+document.querySelector('#order h3').innerHTML =
+  `<b id="oShift">${STR.shiftInit}</b> · ${STR.orderWord} <b id="oNo">#1</b>`;
+document.querySelector('#dest span:last-child').innerHTML = STR.destWord + ' <b id="dName">-</b>';
+document.querySelector('#combo .sm').innerHTML = STR.streakWord + ' <span id="vStreak">0</span>';
+document.getElementById('hName').textContent = STR.empty;
+
 /* ==========================================================================
    루루 물류센터 — 1인칭 3D 소분 포장 게임
    외부 라이브러리 없음. 순수 WebGL + 캔버스 하나로 전부 그린다.
@@ -200,7 +418,7 @@ function mulMV(m,v){ // 행렬 x 벡터4
 const cv = document.getElementById('cv');
 const gl = cv.getContext('webgl', {antialias:true, preserveDrawingBuffer:true})
         || cv.getContext('experimental-webgl');
-if(!gl){ document.body.innerHTML = '<div style="padding:40px;font-size:18px">이 브라우저에서 WebGL을 쓸 수 없습니다. 크롬이나 엣지로 열어주세요.</div>'; }
+if(!gl){ document.body.innerHTML = '<div style="padding:40px;font-size:18px">' + STR.noGL + '</div>'; }
 
 const VS = `
 attribute vec3 aPos;
@@ -548,12 +766,12 @@ function makeCarton(item){
     g.strokeStyle='rgba(0,0,0,0.35)'; g.lineWidth=2; g.strokeRect(30,34,S-60,S-92);
     DRAWER[item.id](g, 128, 108, 46);                        // 일러스트
     g.fillStyle='#15202b'; g.textAlign='center';
-    g.font='bold 40px "Malgun Gothic","맑은 고딕",sans-serif';
+    g.font='bold '+STR.cartonNameSize+'px "Malgun Gothic","맑은 고딕",sans-serif';
     g.fillText(item.name, 128, 178);
     g.fillStyle='#15202b';                                   // 바코드
     for(let i=0,x=74;i<26;i++){ const w=1+((rnd()*3)|0); g.fillRect(x,186,w,16); x+=w+2+((rnd()*2)|0); }
-    g.fillStyle='rgba(255,255,255,0.92)'; g.font='bold 15px sans-serif';
-    g.fillText('LIFE LOGISTICS  ·  소분 물자', 128, 232);
+    g.fillStyle='rgba(255,255,255,0.92)'; g.font='bold '+STR.cartonSubSize+'px sans-serif';
+    g.fillText(STR.cartonSub, 128, 232);
   }));
 }
 // 선반 간판 (가로로 긴 판: 일러스트 + 큰 글씨)
@@ -607,29 +825,29 @@ TEX.posterSafe = upload(paint(256,256,(g,S)=>{
   g.strokeStyle='#20242c'; g.lineWidth=5; g.stroke();
   g.fillStyle='#20242c'; g.fillRect(123,66,10,38); g.fillRect(123,110,10,10);
   g.textAlign='center'; g.fillStyle='#c8202a';
-  g.font='bold 34px "Malgun Gothic","맑은 고딕",sans-serif';
-  g.fillText('파손 1건', 128, 172);
-  g.fillStyle='#20242c'; g.font='bold 40px "Malgun Gothic","맑은 고딕",sans-serif';
-  g.fillText('배상 8시간', 128, 212);
-  g.fillStyle='#666'; g.font='bold 15px "Malgun Gothic",sans-serif';
-  g.fillText('LIFE PAY 즉시 차감 · 이의신청 불가', 128, 236);
+  g.font='bold '+STR.p1aSize+'px "Malgun Gothic","맑은 고딕",sans-serif';
+  g.fillText(STR.p1a, 128, 172);
+  g.fillStyle='#20242c'; g.font='bold '+STR.p1bSize+'px "Malgun Gothic","맑은 고딕",sans-serif';
+  g.fillText(STR.p1b, 128, 212);
+  g.fillStyle='#666'; g.font='bold '+STR.p1cSize+'px "Malgun Gothic",sans-serif';
+  g.fillText(STR.p1c, 128, 236);
 }));
 // 벽 포스터: 3아웃 고지
 TEX.posterOut = upload(paint(256,256,(g,S)=>{
   g.fillStyle='#101720'; g.fillRect(0,0,S,S);
   g.fillStyle='#5ad1c8'; g.fillRect(0,0,S,10); g.fillRect(0,S-10,S,10);
   g.textAlign='center'; g.fillStyle='#e8eef5';
-  g.font='bold 30px "Malgun Gothic","맑은 고딕",sans-serif';
-  g.fillText('작업 규정', 128, 56);
+  g.font='bold '+STR.p2hSize+'px "Malgun Gothic","맑은 고딕",sans-serif';
+  g.fillText(STR.p2h, 128, 56);
   for(let i=0;i<3;i++){                                        // ● ● ●
     g.beginPath(); g.arc(58+i*56, 118, 22, 0, 6.29);
     g.fillStyle = '#c8202a'; g.fill();
     g.fillStyle='#fff'; g.font='bold 26px sans-serif'; g.fillText('!', 58+i*56, 128);
   }
-  g.fillStyle='#e8eef5'; g.font='bold 34px "Malgun Gothic","맑은 고딕",sans-serif';
-  g.fillText('경고 3회 = 해고', 128, 184);
-  g.fillStyle='#8fa3bd'; g.font='bold 15px "Malgun Gothic",sans-serif';
-  g.fillText('재배치 대기 · 수명 적립 중단', 128, 214);
+  g.fillStyle='#e8eef5'; g.font='bold '+STR.p2aSize+'px "Malgun Gothic","맑은 고딕",sans-serif';
+  g.fillText(STR.p2a, 128, 184);
+  g.fillStyle='#8fa3bd'; g.font='bold '+STR.p2bSize+'px "Malgun Gothic",sans-serif';
+  g.fillText(STR.p2b, 128, 214);
 }));
 // 벽 배너: LIFE LOGISTICS
 TEX.banner = upload(paint(512,128,(g,W2,H2)=>{      // 벽 패널과 같은 4:1 비율
@@ -639,24 +857,24 @@ TEX.banner = upload(paint(512,128,(g,W2,H2)=>{      // 벽 패널과 같은 4:1 
   g.fillStyle='#ffffff'; g.textAlign='left';
   g.font='bold 42px "Malgun Gothic",sans-serif';
   g.fillText('LIFE LOGISTICS', 116, 62);
-  g.fillStyle='#5ad1c8'; g.font='bold 20px "Malgun Gothic","맑은 고딕",sans-serif';
-  g.fillText('물류터미널 · 소분 작업', 118, 94);
+  g.fillStyle='#5ad1c8'; g.font='bold '+STR.bannerSubSize+'px "Malgun Gothic","맑은 고딕",sans-serif';
+  g.fillText(STR.bannerSub, 118, 94);
 }));
 
 /* ───────────────────── 3. 창고(레벨) 만들기 ───────────────────── */
 const ITEMS = [
-  {id:'apple',  name:'사과',   col:[0.86,0.20,0.22]},
-  {id:'water',  name:'생수',   col:[0.22,0.48,0.88]},
-  {id:'veg',    name:'채소',   col:[0.24,0.68,0.36]},
-  {id:'banana', name:'바나나', col:[0.93,0.79,0.22]},
-  {id:'grape',  name:'포도',   col:[0.56,0.36,0.80]},
-  {id:'citrus', name:'감귤',   col:[0.96,0.55,0.16]},
+  {id:'apple',  name:STR.items.apple,  col:[0.86,0.20,0.22]},
+  {id:'water',  name:STR.items.water,  col:[0.22,0.48,0.88]},
+  {id:'veg',    name:STR.items.veg,    col:[0.24,0.68,0.36]},
+  {id:'banana', name:STR.items.banana, col:[0.93,0.79,0.22]},
+  {id:'grape',  name:STR.items.grape,  col:[0.56,0.36,0.80]},
+  {id:'citrus', name:STR.items.citrus, col:[0.96,0.55,0.16]},
 ];
 const ITEM_BY_ID = {}; ITEMS.forEach(i => ITEM_BY_ID[i.id] = i);
 const DESTS = [
-  {id:'A', name:'A동', col:[0.18,0.82,0.76]},
-  {id:'B', name:'B동', col:[0.92,0.36,0.70]},
-  {id:'C', name:'C동', col:[0.88,0.88,0.92]},
+  {id:'A', name:STR.dests.A, col:[0.18,0.82,0.76]},
+  {id:'B', name:STR.dests.B, col:[0.92,0.36,0.70]},
+  {id:'C', name:STR.dests.C, col:[0.88,0.88,0.92]},
 ];
 // 품목마다 상자 겉면 그림과 선반 간판을 지금 그려둔다
 ITEMS.forEach((it, i) => { it.tex = makeCarton(it); it.sign = makeShelfSign(it, i); });
@@ -752,7 +970,7 @@ ITEMS.forEach((it, i) => {
       S(x-1.06+c2*1.06, yy, z-0.02, 0.94, 0.66, 0.94, WHITE,
         {tex:it.tex, mode:1, rot:(rnd()-0.5)*0.07, emis:0.10});
   });
-  addLabel(x, 3.90, z, '[E] ' + it.name + ' 집기', '#cfe0f5', true);
+  addLabel(x, 3.90, z, STR.lRack(it.name), '#cfe0f5', true);
 });
 
 /* ── 포장대 ── */
@@ -771,7 +989,7 @@ S(BOXC.x, BOXC.y+0.28, BOXC.z+0.52, 1.25, 0.55, 0.06, C.carton, mat('card'));
 S(BOXC.x-0.62, BOXC.y+0.28, BOXC.z, 0.06, 0.55, 1.05, C.carton, mat('card'));
 S(BOXC.x+0.62, BOXC.y+0.28, BOXC.z, 0.06, 0.55, 1.05, C.carton, mat('card'));
 const TABLE_AIM = [BOXC.x-0.85, BOXC.z-0.85, BOXC.x+0.85, BOXC.z+0.85];   // 조준 영역
-addLabel(TABLE.x, 2.45, TABLE.z, '포장대', '#ffd479');
+addLabel(TABLE.x, 2.45, TABLE.z, STR.lTable, '#ffd479');
 // 모니터 지지대
 S(TABLE.x+1.35, 1.35, TABLE.z-0.6, 0.08, 0.7, 0.08, C.dark, {spec:0.3});
 // 작업대 옆 소품: 테이프 디스펜서 · 빈 상자 더미
@@ -795,8 +1013,8 @@ DESTS.forEach((d, i) => {
   S(x, 2.62, z+0.40, 2.4, 1.2, 0.10, WHITE, {tex:d.tex, mode:1, emis:0.45});         // 그림 간판
   S(x, 2.62, z+0.47, 2.55, 1.32, 0.08, C.dark);
   for(const dx of [-1.15, 1.15]) S(x+dx, 2.05, z+0.42, 0.10, 1.0, 0.10, C.steel, mat('steel'));
-  addLabel(x, 3.42, z+0.4, d.name + ' 출고', rgb(d.col));
-  addLabel(x, 1.78, z-0.85, '[E] 투입', '#cfe0f5', true);
+  addLabel(x, 3.42, z+0.4, STR.lChute(d.name), rgb(d.col));
+  addLabel(x, 1.78, z-0.85, STR.lDrop, '#cfe0f5', true);
 });
 // 출고구 앞 위험구역 사선 바닥 + 컨베이어 롤러
 for(const c2 of chutes){
@@ -866,11 +1084,11 @@ const G = {
 function fmtMin(m){
   m = Math.max(0, Math.round(m));
   const h = Math.floor(m/60), r = m%60;
-  return h ? (r ? h + '시간 ' + r + '분' : h + '시간') : m + '분';
+  return STR.fmtMin(h, r, m);
 }
 function addOut(why){
   G.outs++; G.streak = 0;
-  toast(`경고 ${G.outs}/${MAX_OUT} — ${why}`, 'bad');
+  toast(STR.tWarn(G.outs, MAX_OUT, why), 'bad');
   updateHUD();
   if(G.outs >= MAX_OUT) gameOver('fired');
 }
@@ -904,7 +1122,7 @@ function drawOrderUI(){
   const o = G.order;
   if(!o){ $('oList').innerHTML=''; return; }
   $('oNo').textContent = '#' + o.no;
-  $('oShift').textContent = G.shift + '/' + SHIFTS + '교대';
+  $('oShift').textContent = STR.shiftFmt(G.shift, SHIFTS);
   let html = '', mon = '';
   for(const k in o.need){
     const it = ITEM_BY_ID[k], have = o.sealed ? o.need[k] : (o.have[k]||0), ok = have >= o.need[k];
@@ -917,9 +1135,9 @@ function drawOrderUI(){
   $('dChip').style.background = rgb(o.dest.col);
   $('dName').textContent = o.dest.name;
   monEl.querySelector('.l').innerHTML = mon +
-    (o.sealed      ? `<span style="color:${rgb(o.dest.col)}">마감 완료 → ${o.dest.name} 운반</span>`
-    : orderComplete() ? '<span style="color:#7ef0c0">[F] 포장 마감!</span>'
-                      : '<span style="color:#8fa3bd">품목을 담으세요</span>');
+    (o.sealed      ? `<span style="color:${rgb(o.dest.col)}">${STR.monSealed(o.dest.name)}</span>`
+    : orderComplete() ? `<span style="color:#7ef0c0">${STR.monSealNow}</span>`
+                      : `<span style="color:#8fa3bd">${STR.monFill}</span>`);
 }
 function updateHUD(){
   $('vTime').textContent = Math.max(0, Math.ceil(G.time)) + 's';
@@ -932,7 +1150,7 @@ function updateHUD(){
   $('vStreak').textContent = G.streak;
   const h = G.hand;
   $('hChip').style.background = h ? rgb(h.kind==='item' ? h.item.col : h.dest.col) : '#33404f';
-  $('hName').textContent = h ? (h.kind==='item' ? h.item.name : `소포 → ${h.dest.name}`) : '빈손';
+  $('hName').textContent = h ? (h.kind==='item' ? h.item.name : STR.handParcel(h.dest.name)) : STR.empty;
 }
 function comboMul(){ return Math.min(2.0, 1 + G.streak*0.1); }
 
@@ -999,7 +1217,7 @@ function interact(){
   if(!t) return;
 
   if(t.kind === 'rack'){
-    if(G.hand){ toast('손이 이미 찼습니다 (Q: 내려놓기)','bad'); sfx.err(); return; }
+    if(G.hand){ toast(STR.tHandFull,'bad'); sfx.err(); return; }
     G.hand = {kind:'item', item:t.ref.item};
     G.picked++; sfx.pick();
     return;
@@ -1009,34 +1227,34 @@ function interact(){
     // 손에 품목이 있으면 담기
     if(G.hand && G.hand.kind === 'item'){
       const o = G.order, id = G.hand.item.id;
-      if(o.sealed){ toast('이미 마감한 주문입니다 — 소포를 운반하세요','info'); return; }
+      if(o.sealed){ toast(STR.tSealedAlready,'info'); return; }
       const wanted = o.need[id] || 0, have = o.have[id] || 0;
       if(have < wanted){
         o.have[id] = have + 1;
         G.hand = null; sfx.put();
         drawOrderUI();
-        if(orderComplete()) toast('목록 완료 — [F] 포장 마감','good');
+        if(orderComplete()) toast(STR.tListDone,'good');
       } else {
         G.time -= 5; G.wrongDrops++;
         G.hand = null; sfx.err();
-        toast('오분류 — 근무시간 -5초', 'bad');
-        addOut('주문에 없는 물자');
+        toast(STR.tMisSort, 'bad');
+        addOut(STR.oWrongItem);
       }
       return;
     }
     // 마감된 소포를 집어들기
     if(!G.hand && G.parcelOnTable){
       G.hand = G.parcelOnTable; G.parcelOnTable = null; sfx.pick();
-      toast(G.hand.dest.name + ' 슈트로 운반', 'info');
+      toast(STR.tCarry(G.hand.dest.name), 'info');
       return;
     }
-    if(G.hand && G.hand.kind === 'parcel'){ toast('출고 슈트에 넣으세요','info'); return; }
-    toast('선반에서 품목을 가져오세요','info');
+    if(G.hand && G.hand.kind === 'parcel'){ toast(STR.tPutChute,'info'); return; }
+    toast(STR.tFetch,'info');
     return;
   }
 
   if(t.kind === 'chute'){
-    if(!G.hand || G.hand.kind !== 'parcel'){ toast('마감된 소포가 없습니다','bad'); sfx.err(); return; }
+    if(!G.hand || G.hand.kind !== 'parcel'){ toast(STR.tNoParcel,'bad'); sfx.err(); return; }
     const p = G.hand, right = (p.dest.id === t.ref.dest.id);
     G.hand = null; G.done++;
     if(right){
@@ -1044,16 +1262,16 @@ function interact(){
       const pay = Math.round((60 + p.items*40) * comboMul());   // 적립 수명(분)
       G.score += pay;
       G.time = Math.min(180, G.time + 6);
-      sfx.ship(); toast(`수명 +${fmtMin(pay)}  (${p.dest.name} 정상출고)`, 'good');
+      sfx.ship(); toast(STR.tPay(fmtMin(pay), p.dest.name), 'good');
       newOrder();
     } else {
       const cut = Math.min(G.score, FINE);            // 잔액이 모자라면 있는 만큼
       G.score -= cut; G.fined++; G.finedMin += cut;
       G.time -= 4;
       sfx.err();
-      toast(`오배송 — 배상 ${fmtMin(FINE)}` + (cut < FINE ? ` (잔액 부족, ${fmtMin(cut)} 차감)` : ' 차감'), 'bad');
+      toast(STR.tMisdeliver(fmtMin(FINE), cut < FINE ? fmtMin(cut) : null), 'bad');
       newOrder();
-      addOut('배송처 오류');
+      addOut(STR.oWrongDest);
     }
     return;
   }
@@ -1061,13 +1279,13 @@ function interact(){
 function sealBox(){
   if(G.mode !== 'play') return;
   const d = Math.hypot(player.x-TABLE.x, player.z-TABLE.z);
-  if(d > 3.0){ toast('포장대 앞에서 마감하세요','info'); return; }
-  if(G.parcelOnTable){ toast('테이블의 소포를 먼저 운반하세요','info'); return; }
-  if(!orderComplete()){ toast('아직 품목이 부족합니다','bad'); sfx.err(); return; }
+  if(d > 3.0){ toast(STR.tSealFar,'info'); return; }
+  if(G.parcelOnTable){ toast(STR.tMoveFirst,'info'); return; }
+  if(!orderComplete()){ toast(STR.tNotEnough,'bad'); sfx.err(); return; }
   G.parcelOnTable = {kind:'parcel', dest:G.order.dest, items:G.order.total};
   G.order.have = {}; G.order.sealed = true;
   sfx.seal();
-  toast(`포장 마감 → ${G.parcelOnTable.dest.name} (상자를 [E]로 집기)`, 'good');
+  toast(STR.tSealed(G.parcelOnTable.dest.name), 'good');
   drawOrderUI();
 }
 function dropHand(){
@@ -1113,43 +1331,13 @@ function lockMouse(){
 }
 function showMenu(){
   G.mode = 'menu';
-  panelEl.innerHTML = `
-    <h1>LIFE LOGISTICS <span>물류터미널</span></h1>
-    <div class="lead">소분 작업조 배치. 인간에게 남은 거의 유일한 일자리입니다.<br>
-      임금은 <b style="color:#7ef0c0">수명</b>으로 적립되고, 배상도 <b style="color:#ff7b7b">수명</b>에서 나갑니다.</div>
-    <div class="steps" style="margin-bottom:4px">
-      <div><b>⚠</b><span>오배송 1건 = <b style="color:#ff7b7b">배상 8시간</b> 즉시 차감 (LIFE PAY · 이의신청 불가)</span></div>
-      <div><b>⚠</b><span>경고 <b style="color:#ff7b7b">3회</b>면 해고. 그날 작업은 거기서 끝납니다</span></div>
-    </div>
-    <h2>일하는 순서</h2>
-    <div class="steps">
-      <div><b>1</b><span>왼쪽 위 <b style="color:#fff">주문서</b>를 봅니다. 예: 사과 2, 감귤 1</span></div>
-      <div><b>2</b><span>뒤쪽 <b style="color:#fff">선반</b>으로 가서 해당 품목을 조준하고 <b style="color:#fff">E</b> — 한 번에 1개씩</span></div>
-      <div><b>3</b><span>가운데 <b style="color:#fff">포장대</b>의 상자를 조준하고 <b style="color:#fff">E</b> 로 담기</span></div>
-      <div><b>4</b><span>목록을 다 채우면 <b style="color:#fff">F</b> 로 포장 마감 → 소포를 <b style="color:#fff">E</b> 로 집기</span></div>
-      <div><b>5</b><span>주문서의 배송처(A/B/C동) <b style="color:#fff">출고 슈트</b>에 <b style="color:#fff">E</b> 로 투입</span></div>
-    </div>
-    <h2>조작</h2>
-    <div class="keys">
-      <span><b>W A S D</b>이동</span><span><b>마우스</b>둘러보기</span>
-      <span><b>Shift</b>달리기</span><span><b>E</b>집기 / 담기 / 투입</span>
-      <span><b>F</b>포장 마감</span><span><b>Q</b>손에 든 것 내려놓기</span>
-      <span><b>ESC</b>일시정지</span><span><b>R</b>다시하기(종료 후)</span>
-    </div>
-    <button id="go">작업 시작 (클릭)</button>`;
+  panelEl.innerHTML = STR.menuHtml;
   ovEl.classList.remove('hide');
   ovEl.onclick = null;
   $('go').onclick = () => startGame(false);   // 첫 배치는 언제나 1교대
 }
 function showPause(){
-  panelEl.innerHTML = `
-    <h1>일시정지</h1>
-    <div class="lead">화면을 클릭하면 이어서 작업합니다.</div>
-    <div class="keys">
-      <span><b>W A S D</b>이동</span><span><b>E</b>집기 / 담기 / 투입</span>
-      <span><b>F</b>포장 마감</span><span><b>Q</b>내려놓기</span>
-    </div>
-    <button id="go">이어하기</button>`;
+  panelEl.innerHTML = STR.pauseHtml;
   ovEl.classList.remove('hide');
   const resume = () => { ovEl.classList.add('hide'); ovEl.onclick = null; G.mode='play'; lockMouse(); };
   $('go').onclick = resume;
@@ -1179,33 +1367,9 @@ function gameOver(reason){
   G.wasFired = fired;
   if(!fired) G.totalScore += G.score;
   const cleared = !fired && G.shift >= SHIFTS;
-  const rank = G.score >= 2200 ? '작업반장 👑' : G.score >= 1500 ? '숙련 작업조 🏅'
-             : G.score >= 900  ? '정규 작업조 📦' : G.score >= 400 ? '수습 작업조 🧢' : '첫 배치 🐣';
+  const rank = STR.rankOf(G.score);
 
-  panelEl.innerHTML = cleared ? `
-    <h1>배송직 전환 <span>3교대 완주</span></h1>
-    <div class="lead">축하합니다. 세 번의 교대를 끝까지 마쳤습니다.<br>
-      적립한 수명으로 <b>트럭을 구입</b>했습니다. 이제부터 배송 업무를 담당하게 됩니다.</div>
-    <div id="res">
-      <div><div class="k">누적 수명</div><div class="v">${fmtMin(G.totalScore)}</div></div>
-      <div><div class="k">마지막 교대</div><div class="v">${fmtMin(G.score)}</div></div>
-      <div><div class="k">출고</div><div class="v">${G.done} 건</div></div>
-      <div><div class="k">배상 ${G.fined}건</div><div class="v">-${fmtMin(G.finedMin)}</div></div>
-    </div>
-    <div id="rank">배치 등급 · ${rank}</div>
-    <button id="go">처음부터${window.OREUM_TOUCH ? '' : ' (R)'}</button>` : `
-    <h1>${fired ? '해고 <span>경고 3회 누적</span>' : `교대 종료 <span>${G.shift}/${SHIFTS} 정산합니다</span>`}</h1>
-    <div class="lead">${fired
-      ? '재배치 대기 명단으로 이관되었습니다. 대기 기간 동안 수명은 적립되지 않습니다.'
-      : '오늘 몫의 수명이 LIFE PAY 계정으로 적립되었습니다.'}</div>
-    <div id="res">
-      <div><div class="k">적립한 수명</div><div class="v">${fmtMin(G.score)}</div></div>
-      <div><div class="k">누적 수명</div><div class="v">${fmtMin(G.totalScore)}</div></div>
-      <div><div class="k">출고</div><div class="v">${G.done} 건</div></div>
-      <div><div class="k">배상 ${G.fined}건</div><div class="v">-${fmtMin(G.finedMin)}</div></div>
-    </div>
-    <div id="rank">배치 등급 · ${rank}</div>
-    <button id="go">${fired ? '재배치 신청 (1교대부터)' : `${G.shift + 1}교대로`}${window.OREUM_TOUCH ? '' : ' (R)'}</button>`;
+  panelEl.innerHTML = cleared ? STR.overCleared(rank) : STR.overShift(fired, rank);
   ovEl.classList.remove('hide');
   ovEl.onclick = null;
   $('go').onclick = () => startGame(!fired && !cleared);
@@ -1349,25 +1513,25 @@ function drawPrompt(){
   const t = lookTarget();
   let msg = '';
   if(t){
-    if(t.kind === 'rack')  msg = `<kbd>E</kbd> ${t.ref.item.name} 1개 집기`;
-    if(t.kind === 'chute') msg = `<kbd>E</kbd> ${t.ref.dest.name} 슈트에 투입`;
+    if(t.kind === 'rack')  msg = STR.pRack(t.ref.item.name);
+    if(t.kind === 'chute') msg = STR.pChute(t.ref.dest.name);
     if(t.kind === 'table'){
       const sealed = G.order && G.order.sealed;
-      if(G.parcelOnTable)                       msg = `<kbd>E</kbd> 마감된 소포 집기`;
-      else if(G.hand && G.hand.kind==='parcel') msg = `${G.hand.dest.name} 출고 슈트로 운반하세요`;
-      else if(sealed)                           msg = `${G.order.dest.name} 출고 슈트로 운반하세요`;
-      else if(G.hand && G.hand.kind === 'item') msg = `<kbd>E</kbd> ${G.hand.item.name} 상자에 담기`;
-      else if(orderComplete())                  msg = `<kbd>F</kbd> 포장 마감`;
-      else                                      msg = `주문 품목을 선반에서 가져오세요`;
+      if(G.parcelOnTable)                       msg = STR.pParcel;
+      else if(G.hand && G.hand.kind==='parcel') msg = STR.pCarryMsg(G.hand.dest.name);
+      else if(sealed)                           msg = STR.pCarryMsg(G.order.dest.name);
+      else if(G.hand && G.hand.kind === 'item') msg = STR.pPut(G.hand.item.name);
+      else if(orderComplete())                  msg = '<kbd>F</kbd> ' + STR.sealWord;
+      else                                      msg = STR.pFetch;
     }
   }
   // 폰에는 키보드가 없으니 눌러야 할 화면 버튼 이름으로 바꿔 말한다
   if(window.OREUM_TOUCH){
     msg = msg
-      .replace('<kbd>F</kbd> 포장 마감', '<kbd>잡기</kbd> 버튼 — 포장 마감')
-      .replace('<kbd>E</kbd> ', '<kbd>잡기</kbd> 버튼 — ')
-      .replace('<kbd>Q</kbd> ', '<kbd>내려놓기</kbd> 버튼 — ')
-      .replace('<kbd>R</kbd> ', '<kbd>다시하기</kbd> 버튼 — ');
+      .replace('<kbd>F</kbd> ' + STR.sealWord, '<kbd>' + STR.btnGrab + '</kbd>' + STR.btnWord + STR.sealWord)
+      .replace('<kbd>E</kbd> ', '<kbd>' + STR.btnGrab + '</kbd>' + STR.btnWord)
+      .replace('<kbd>Q</kbd> ', '<kbd>' + STR.btnDrop + '</kbd>' + STR.btnWord)
+      .replace('<kbd>R</kbd> ', '<kbd>' + STR.btnAgain + '</kbd>' + STR.btnWord);
   }
   pEl.innerHTML = msg;
   pEl.style.opacity = msg ? 1 : 0;
@@ -1388,8 +1552,8 @@ if(window.OREUM_TOUCH){
     // 왼쪽이 잡기, 오른쪽이 내려놓기. 글씨 대신 그림으로 — 화면을 덜 가립니다
     // 왼쪽이 잡기(주먹), 오른쪽이 내려놓기(편 손). 손 모양이 곧 동작입니다
     buttons:[
-      {label:'잡기',    key:'KeyE', icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 13V10a1.6 1.6 0 0 1 3.2 0v2.6"/><path d="M10.2 12.6V9.6a1.6 1.6 0 0 1 3.2 0v3"/><path d="M13.4 12.6v-2.4a1.6 1.6 0 0 1 3.2 0V12"/><path d="M16 12v-1.6a1.6 1.6 0 0 1 3.2 0V14c0 4-3.2 7.2-7.2 7.2h-1.1c-2.1 0-3.6-.9-4.8-2.5L3.4 14.6a1.7 1.7 0 0 1 2.5-2.2L7 13.6"/><path d="M7.6 16.2h6"/></svg>'},
-      {label:'내려놓기', key:'KeyQ', icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 13V6.2a1.6 1.6 0 0 1 3.2 0V12"/><path d="M10.2 12V4.6a1.6 1.6 0 0 1 3.2 0V12"/><path d="M13.4 12V5.8a1.6 1.6 0 0 1 3.2 0V12"/><path d="M16 12v-1.6a1.6 1.6 0 0 1 3.2 0V14c0 4-3.2 7.2-7.2 7.2h-1.1c-2.1 0-3.6-.9-4.8-2.5L3.4 14.6a1.7 1.7 0 0 1 2.5-2.2L7 13.6"/></svg>'}
+      {label:STR.btnGrab, key:'KeyE', icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 13V10a1.6 1.6 0 0 1 3.2 0v2.6"/><path d="M10.2 12.6V9.6a1.6 1.6 0 0 1 3.2 0v3"/><path d="M13.4 12.6v-2.4a1.6 1.6 0 0 1 3.2 0V12"/><path d="M16 12v-1.6a1.6 1.6 0 0 1 3.2 0V14c0 4-3.2 7.2-7.2 7.2h-1.1c-2.1 0-3.6-.9-4.8-2.5L3.4 14.6a1.7 1.7 0 0 1 2.5-2.2L7 13.6"/><path d="M7.6 16.2h6"/></svg>'},
+      {label:STR.btnDrop, key:'KeyQ', icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 13V6.2a1.6 1.6 0 0 1 3.2 0V12"/><path d="M10.2 12V4.6a1.6 1.6 0 0 1 3.2 0V12"/><path d="M13.4 12V5.8a1.6 1.6 0 0 1 3.2 0V12"/><path d="M16 12v-1.6a1.6 1.6 0 0 1 3.2 0V14c0 4-3.2 7.2-7.2 7.2h-1.1c-2.1 0-3.6-.9-4.8-2.5L3.4 14.6a1.7 1.7 0 0 1 2.5-2.2L7 13.6"/></svg>'}
     ]
   });
   // 조작판은 일하는 동안에만 — 안내문 위를 덮지 않게
@@ -1401,9 +1565,7 @@ if(window.OREUM_TOUCH){
       n.style.cssText = 'margin:10px 0 0;padding:9px 12px;border-radius:8px;'
         + 'background:rgba(126,240,192,.10);border:1px solid rgba(126,240,192,.35);'
         + 'color:#7ef0c0;font-size:13px;line-height:1.6';
-      n.textContent = '폰에서는 왼쪽 아래 동그라미로 걷고(끝까지 밀면 달리기), '
-        + '화면을 문질러 둘러보고, 두 손가락으로 벌리면 당겨 봅니다. '
-        + '오른쪽 아래 그림 버튼으로 잡고 담고 마감합니다.';
+      n.textContent = STR.touchNote;
       panelEl.insertBefore(n, panelEl.firstChild);
       // 키보드 조작표는 폰에서 읽을 이유가 없고, 그만큼 시작 버튼이 멀어진다
       panelEl.querySelectorAll('.keys').forEach(k => {

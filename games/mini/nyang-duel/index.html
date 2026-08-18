@@ -62,6 +62,76 @@
     </div>
     <div id="loading">이미지 불러오는 중...</div>
   </div>
-<script src="game.js?v=3"></script>
+<script>
+/* ── 말 두 벌 ── ?lang=en 이면 영어, 없으면 브라우저 언어를 따릅니다.
+   game.js 도 window.STR 에서 자기 몫의 글자를 읽어 갑니다. ── */
+const LANG = (() => {
+  const q = new URLSearchParams(location.search).get('lang');
+  if (q === 'en' || q === 'ko') return q;
+  return (navigator.language || '').toLowerCase().startsWith('ko') ? 'ko' : 'en';
+})();
+const STR = {
+  ko: {
+    title:'냥냥 검객 대전', h1:'🐱 냥냥 검객 대전 🗡️',
+    muteTitle:'배경음악 켜기/끄기', fsTitle:'전체화면',
+    atk:{KeyW:'약손',KeyA:'강손',KeyS:'약발',KeyD:'강발'},
+    restart:'🔄 다시하기',
+    kakao:'📱 카카오톡 브라우저에서는 가로모드/전체화면이 제한돼요.<br><button type="button" id="openExternalBtn">다른 브라우저로 열기</button>',
+    portraitAlt:'냥냥 검객 루루', overlayTitle:'냥냥 검객 대전',
+    pickMe:'내 캐릭터:', pickCpu:'CPU 캐릭터:', cat:'🐱 고양이', dog:'🐶 강아지',
+    controls:[
+      '<b>이동</b> ← / → · <b>점프</b> ↑ · <b>앉기</b> ↓',
+      '<b>W</b> 약손 · <b>A</b> 강손 · <b>S</b> 약발 · <b>D</b> 강발',
+      '<b>W+A 동시</b>(약손+강손)로 검 휘두르기',
+      '타격 성공 시 아래 보라색 게이지가 차오르고, 가득 차면 <b>A+D 동시</b>(강손+강발)로 필살기',
+      '상대는 CPU가 자동으로 조작합니다',
+      '<b>M</b> 키(모바일은 화면 우측 상단 🔊 버튼)로 배경음악 켜기/끄기'
+    ],
+    loading:'이미지 불러오는 중...',
+    loadingPct:(pct,a,b)=>`이미지 불러오는 중... ${pct}% (${a}/${b})`,
+    loadingBtn:(pct)=>`불러오는 중... ${pct}%`,
+    start:'게임 시작', fight:'파이트!',
+    catLabel:'고양이 루루', dogLabel:'강아지'
+  },
+  en: {
+    title:'Cat & Dog Swordfight', h1:'🐱 Cat & Dog Swordfight 🗡️',
+    muteTitle:'Toggle music', fsTitle:'Fullscreen',
+    atk:{KeyW:'LP',KeyA:'HP',KeyS:'LK',KeyD:'HK'},
+    restart:'🔄 Restart',
+    kakao:'📱 The KakaoTalk in-app browser limits landscape/fullscreen mode.<br><button type="button" id="openExternalBtn">Open in another browser</button>',
+    portraitAlt:'Lulu the sword cat', overlayTitle:'Cat & Dog Swordfight',
+    pickMe:'Your fighter:', pickCpu:'CPU fighter:', cat:'🐱 Cat', dog:'🐶 Dog',
+    controls:[
+      '<b>Move</b> ← / → · <b>Jump</b> ↑ · <b>Crouch</b> ↓',
+      '<b>W</b> light paw (LP) · <b>A</b> heavy paw (HP) · <b>S</b> light kick (LK) · <b>D</b> heavy kick (HK)',
+      '<b>W+A together</b> (LP+HP) swings the sword',
+      'Landing hits fills the purple gauge below — when it is full, press <b>A+D together</b> (HP+HK) for the special move',
+      'Your opponent is controlled by the CPU',
+      'The <b>M</b> key (on mobile, the 🔊 button at top right) toggles the music'
+    ],
+    loading:'Loading images...',
+    loadingPct:(pct,a,b)=>`Loading images... ${pct}% (${a}/${b})`,
+    loadingBtn:(pct)=>`Loading... ${pct}%`,
+    start:'Start game', fight:'FIGHT!',
+    catLabel:'Lulu the Cat', dogLabel:'Dog'
+  }
+}[LANG];
+document.documentElement.lang = LANG;
+document.title = STR.title;
+document.querySelector('h1').textContent = STR.h1;
+document.getElementById('muteBtn').title = STR.muteTitle;
+document.getElementById('fullscreenBtn').title = STR.fsTitle;
+document.querySelectorAll('.atkBtn').forEach(b=>{ b.textContent = STR.atk[b.dataset.key]; });
+document.getElementById('restartBtn').textContent = STR.restart;
+document.getElementById('kakaoWarning').innerHTML = STR.kakao;
+document.getElementById('overlayPortrait').alt = STR.portraitAlt;
+document.getElementById('overlayTitle').textContent = STR.overlayTitle;
+document.querySelectorAll('.charPick > span').forEach((el,i)=>{ el.textContent = i===0 ? STR.pickMe : STR.pickCpu; });
+document.querySelectorAll('.charBtn').forEach(b=>{ b.textContent = b.dataset.char==='cat' ? STR.cat : STR.dog; });
+document.querySelectorAll('.controls > div').forEach((el,i)=>{ el.innerHTML = STR.controls[i]; });
+document.getElementById('startBtn').textContent = STR.loading;
+document.getElementById('loading').textContent = STR.loading;
+</script>
+<script src="game.js?v=4"></script>
 </body>
 </html>

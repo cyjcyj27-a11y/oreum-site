@@ -137,7 +137,109 @@
 <script>
 (()=>{
 "use strict";
-if(!window.THREE){document.getElementById('start').innerHTML='<div class="s">Three.js 로드 실패</div>';return;}
+
+/* ── 말 두 벌 ── ?lang=en 이면 영어, 없으면 브라우저 언어를 따릅니다.
+   주의: 무기·직업 이름은 코드 안에서 키로도 쓰이므로 키는 한국어 그대로 두고,
+   화면에 보이는 글자만 STR.weps / STR.jobs 를 거친다. ── */
+const LANG = (() => {
+  const q = new URLSearchParams(location.search).get('lang');
+  if (q === 'en' || q === 'ko') return q;
+  return (navigator.language || '').toLowerCase().startsWith('ko') ? 'ko' : 'en';
+})();
+const STR = {
+  ko: {
+    title:'칼전 v7 — 무빙 · 앉기 · 급소',
+    startT:'칼 전', startS:'클릭해서 시작 · Esc로 마우스 해제', startResume:'클릭해서 계속',
+    noEngine:'Three.js 로드 실패',
+    h:['무기 · Q로 교체','직업','급소','연출','규칙','무빙','카메라','조작'],
+    tri:'<b>좌클릭</b>은 우클릭 선딜을 끊고<br>\n      <b>방어</b>는 좌클릭 밑을 파고<br>\n      <b>우클릭</b>은 앉은 놈을 찍는다',
+    noteGuard:'방어를 잡고 있으면 맞아도 <em>절반</em>만 깎입니다. 다만 맞는 순간 자세가 풀리고,\n      <em>급소는 그대로 뚫립니다.</em>',
+    noteCrit:'<em>급소는 화면에 표시되지 않습니다.</em> 상대 오른쪽 목 아래에 있고, 그 면이 나를 향해 있을 때만 열립니다. 우클릭으로만 들어갑니다. 익히려면 연습 표시를 켜세요.',
+    sliders:['판정 반경','노출 각도','즉사 아닐 때 배율','피 양','리플레이 배속','체력','제한시간','선승',
+             '이동속도','좌우 배율','앉기 속도','선회속도','백스텝 수','봇 반응','넉백 배율','조준 감도',
+             '거리','높이','어깨','시야각'],
+    chips:{tCK:'급소 즉사',tShowCrit:'급소 표시 · 연습',tBotCrit:'봇도 급소',tRep:'사망 리플레이',
+           tTrail:'궤적',tGauge:'간격 눈금',tRing:'상태 링',tLock:'락온',tDecal:'바닥 자국'},
+    reset:'초기화 · 매치 리셋',
+    keys:'<b>W / S</b>파고들기 / 빼기<br>\n      <b>A / D</b>좌우 무빙<br>\n      <b>Ctrl(누름)</b>방어 · 앉기<br>\n      <b>좌클릭</b>빠른 공격 · 연타<br>\n      <b>우클릭</b>강한 찌르기<br>\n      <b>Space</b>백스텝<br>\n      <b>Q / Shift+Q</b>무기 교체<br>\n      <b>1~0</b>무기 직접선택<br>\n      <b>마우스</b>조준점<br>\n      <b>Tab</b>디버그<br><b>R</b>재시작',
+    weps:{'단검':'단검','식칼':'식칼','베트남칼':'베트남칼','가위':'가위','프라이팬':'프라이팬',
+          '집게':'집게','야구방망이':'야구방망이','너클':'너클','슬리퍼':'슬리퍼','파리채':'파리채'},
+    notes:{'단검':'기준점. 연타도 되고 한방도 된다.','식칼':'단검보다 조금씩 느리고 그만큼 아프다.',
+           '베트남칼':'사거리·화력 상위권. 후딜 34가 값이다.','가위':'제일 짧고 제일 빠르다. 붙어서 계속 긁는다.',
+           '프라이팬':'넓고 무겁다. 좌클릭만으로도 밀어 떨어뜨린다.','집게':'제일 긴 리치. 안 아프지만 계속 찔러댄다.',
+           '야구방망이':'한 방이 제일 크고 헛치면 제일 오래 굳는다.','너클':'사거리가 몸통 바로 앞. 파고들어야 산다.',
+           '슬리퍼':'안 아픈데 경직이 길다. 계속 굳혀서 이긴다.','파리채':'거의 안 아프다. 대신 제일 넓고 빠르다.'},
+    jobs:{'사원':'사원','알바':'알바','셰프':'셰프','노무자':'노무자','배달':'배달','경비':'경비'},
+    card:{light:'좌 · 빠른',heavy:'우 · 강한',arc:'부채꼴',kb:'넉백 · 경직',kill:'확정킬',
+          killVal:(l,h)=>`좌 ${l}방 · 우 ${h}방`},
+    draw:'무승부', critPrefix:'급소 · ', timeUp:'시간 종료',
+    hpLead:(w)=>w==='p'?'체력 우세 · YOU':'체력 우세 · BOT',
+    repCrit:'급소 적중', repFall:'추락',
+    repSpeed:(v)=>`리플레이 · ${v}% 속도`, repSkip:'아무 키나 눌러 건너뛰기',
+    firstTo:(n)=>`${n}선승`,
+    crouched:'앉음', backstep:'백스텝', foeCrouched:'상대 앉음', qSwap:'Q 무기교체',
+    carotid:'경동맥',
+    stHeavy:'강한 찌르기', stLight:'빠른 공격', stSwap:'무기 교체', stStun:'경직',
+    stCrouch:'앉기 — 높은 공격 회피',
+    dbgCrit:(d,r,e)=>`급소 d=${d}/${r} 노출 ${e}`,
+    win:'승', lose:'패', restartHint:'R 키로 재시작',
+    again:'다시하기',
+    touch:{wep:'무기',bs:'백스텝',guard:'방어',stab:'찌르기',atk:'공격'}
+  },
+  en: {
+    title:'Knife Duel v7 — Footwork · Crouch · Vitals',
+    startT:'KNIFE DUEL', startS:'Click to start · Esc releases the mouse', startResume:'Click to continue',
+    noEngine:'Failed to load Three.js',
+    h:['Weapons · Q to swap','Job','Vital point','Presentation','Rules','Footwork','Camera','Controls'],
+    tri:'<b>Left click</b> cuts off a heavy wind-up,<br>\n      <b>guard</b> ducks under left clicks,<br>\n      <b>right click</b> stabs down at crouchers',
+    noteGuard:'While holding guard you take only <em>half</em> damage. But getting hit breaks your stance,\n      and <em>the vital point gets pierced anyway.</em>',
+    noteCrit:'<em>The vital point is never shown on screen.</em> It sits below the right side of the opponent\u2019s neck, and only opens when that side faces you. Only a right click reaches it. Turn on the practice display to learn it.',
+    sliders:['Hit radius','Exposure angle','Non-lethal multiplier','Blood amount','Replay speed','Health','Time limit','Wins needed',
+             'Move speed','Strafe multiplier','Crouch speed','Turn speed','Backsteps','Bot reaction','Knockback','Aim sensitivity',
+             'Distance','Height','Shoulder','FOV'],
+    chips:{tCK:'Vital = instant kill',tShowCrit:'Show vital · practice',tBotCrit:'Bot uses vitals',tRep:'Death replay',
+           tTrail:'Trails',tGauge:'Range gauge',tRing:'Status ring',tLock:'Lock-on',tDecal:'Floor decals'},
+    reset:'Defaults · reset match',
+    keys:'<b>W / S</b>close in / pull out<br>\n      <b>A / D</b>strafe<br>\n      <b>Ctrl (hold)</b>guard · crouch<br>\n      <b>Left click</b>fast attack · spam<br>\n      <b>Right click</b>heavy stab<br>\n      <b>Space</b>backstep<br>\n      <b>Q / Shift+Q</b>swap weapon<br>\n      <b>1~0</b>pick weapon<br>\n      <b>Mouse</b>aim<br>\n      <b>Tab</b>debug<br><b>R</b>restart',
+    weps:{'단검':'Dagger','식칼':'Kitchen knife','베트남칼':'Machete','가위':'Scissors','프라이팬':'Frying pan',
+          '집게':'Tongs','야구방망이':'Baseball bat','너클':'Knuckles','슬리퍼':'Slipper','파리채':'Fly swatter'},
+    notes:{'단검':'The baseline. Works for spam and for one big hit.','식칼':'A touch slower than the dagger, and hurts that much more.',
+           '베트남칼':'Top-tier range and damage. 34f of recovery is the price.','가위':'Shortest and fastest. Stay glued and keep scratching.',
+           '프라이팬':'Wide and heavy. Left clicks alone can shove them off the edge.','집게':'Longest reach. Barely hurts, but never stops poking.',
+           '야구방망이':'Biggest single hit — and the longest freeze when you whiff.','너클':'Range ends right at their chest. Dive in or die.',
+           '슬리퍼':'Weak, but the stun is long. Win by keeping them frozen.','파리채':'Almost no damage. In exchange, widest and fastest.'},
+    jobs:{'사원':'Office worker','알바':'Part-timer','셰프':'Chef','노무자':'Laborer','배달':'Courier','경비':'Guard'},
+    card:{light:'L · fast',heavy:'R · heavy',arc:'Arc',kb:'KB · stun',kill:'Kill count',
+          killVal:(l,h)=>`L ×${l} · R ×${h}`},
+    draw:'DRAW', critPrefix:'VITAL · ', timeUp:'TIME UP',
+    hpLead:(w)=>w==='p'?'HP lead · YOU':'HP lead · BOT',
+    repCrit:'VITAL HIT', repFall:'FALL',
+    repSpeed:(v)=>`Replay · ${v}% speed`, repSkip:'Press any key to skip',
+    firstTo:(n)=>`First to ${n}`,
+    crouched:'CROUCHED', backstep:'Backstep', foeCrouched:'Foe crouched', qSwap:'Q swap weapon',
+    carotid:'CAROTID',
+    stHeavy:'Heavy stab', stLight:'Fast attack', stSwap:'Weapon swap', stStun:'Stunned',
+    stCrouch:'Crouch — dodges high attacks',
+    dbgCrit:(d,r,e)=>`vital d=${d}/${r} exposed ${e}`,
+    win:'WIN', lose:'LOSE', restartHint:'press R to restart',
+    again:'Restart',
+    touch:{wep:'Weapon',bs:'Backstep',guard:'Guard',stab:'Stab',atk:'Attack'}
+  }
+}[LANG];
+document.documentElement.lang = LANG;
+document.title = STR.title;
+document.querySelector('#start .t').textContent = STR.startT;
+document.querySelector('#start .s').textContent = STR.startS;
+document.querySelectorAll('#panel h2').forEach((el,i)=>{ el.textContent = STR.h[i]; });
+document.querySelector('#panel .tri').innerHTML = STR.tri;
+const noteEls = document.querySelectorAll('#panel .note');
+noteEls[0].innerHTML = STR.noteGuard; noteEls[1].innerHTML = STR.noteCrit;
+document.querySelectorAll('#panel .row > label').forEach((el,i)=>{ el.textContent = STR.sliders[i]; });
+Object.keys(STR.chips).forEach(id=>{ document.getElementById(id).textContent = STR.chips[id]; });
+document.getElementById('reset').textContent = STR.reset;
+document.querySelector('#panel .keys').innerHTML = STR.keys;
+
+if(!window.THREE){document.getElementById('start').innerHTML='<div class="s">'+STR.noEngine+'</div>';return;}
 
 const T={ hp:100,tl:180,win:3,hm:3.2,ms:6.2,sm:1.12,cs:0.42,tr:8.2,bs:3,br:10,kb:1.0,as:4.5,
           cr:0.14,ce:72,bl:1.0,rs:0.28,cd:3.2,ch:1.68,co:0.40,fov:50 };
@@ -979,7 +1081,7 @@ const startEl=document.getElementById('start');
 view.addEventListener('click',()=>{ ac(); if(!locked) glc.requestPointerLock(); });
 document.addEventListener('pointerlockchange',()=>{ locked=(document.pointerLockElement===glc);
   startEl.style.display=locked?'none':'flex';
-  if(!locked){startEl.querySelector('.s').textContent='클릭해서 계속'; mouseL=false;} });
+  if(!locked){startEl.querySelector('.s').textContent=STR.startResume; mouseL=false;} });
 document.addEventListener('mousemove',e=>{ if(!locked||phase==='replay')return;
   retX+=e.movementX*T.as*0.10; retY+=e.movementY*T.as*0.10;
   retX=Math.max(-200,Math.min(200,retX)); retY=Math.max(-130,Math.min(115,retY)); });
@@ -1089,8 +1191,8 @@ function kill(f,reason){ if(f.dead)return; f.dead=1;f.reason=reason;f.st='dead';
 let pendingReplay=false;
 function endRound(w,kind){
   phase='over'; phaseT=(kind==='crit')?92:76;
-  msg = w==='draw'?'무승부':(w==='p'?'YOU WIN':'BOT WIN');
-  msg2 = (kind==='crit'?'급소 · ':'')+`${P.score} — ${B.score}`;
+  msg = w==='draw'?STR.draw:(w==='p'?'YOU WIN':'BOT WIN');
+  msg2 = (kind==='crit'?STR.critPrefix:'')+`${P.score} — ${B.score}`;
   repKind=kind; pendingReplay=optRep; }
 function startReplay(){
   repList=rec.slice(Math.max(0,rec.length-95));
@@ -1130,8 +1232,8 @@ function update(){
   const sec=Math.ceil(matchTime);
   if(sec<=5&&sec!==lastTickSec&&sec>0){lastTickSec=sec;tickSnd();}
   if(matchTime<=0){ matchTime=0; const w=judgeByHP();
-    phase='over'; phaseT=100; pendingReplay=false; msg='시간 종료';
-    msg2=w==='draw'?`무승부 · ${P.score} — ${B.score}`:(w==='p'?'체력 우세 · YOU':'체력 우세 · BOT');
+    phase='over'; phaseT=100; pendingReplay=false; msg=STR.timeUp;
+    msg2=w==='draw'?`${STR.draw} · ${P.score} — ${B.score}`:STR.hpLead(w);
     return; }
 
   P.crouchHold=!!keys.crouch;
@@ -1262,11 +1364,11 @@ function drawHUD(){
     hx.fillStyle='#04060a'; hx.fillRect(0,0,W,bh); hx.fillRect(0,H-bh,W,bh);
     hx.textAlign='left'; hx.font='600 13px ui-monospace,monospace';
     hx.fillStyle=repKind==='crit'?'#ff4a3a':'#d8e0e9';
-    hx.fillText(repKind==='crit'?'급소 적중':(repKind==='fall'?'추락':'K.O.'),26,bh+22);
+    hx.fillText(repKind==='crit'?STR.repCrit:(repKind==='fall'?STR.repFall:'K.O.'),26,bh+22);
     hx.font='500 10px ui-monospace,monospace'; hx.fillStyle='#5d6873';
-    hx.fillText(`리플레이 · ${(T.rs*100).toFixed(0)}% 속도`,26,bh+40);
+    hx.fillText(STR.repSpeed((T.rs*100).toFixed(0)),26,bh+40);
     hx.textAlign='right'; hx.fillStyle='#3d4550';
-    hx.fillText('아무 키나 눌러 건너뛰기',W-26,bh+40);
+    hx.fillText(STR.repSkip,W-26,bh+40);
     const pw=W-52,pg=(repIdx/Math.max(1,repList.length))*pw;
     hx.fillStyle='rgba(255,255,255,0.08)'; hx.fillRect(26,H-bh-14,pw,2);
     hx.fillStyle=repKind==='crit'?'#ff4a3a':'#8b96a3'; hx.fillRect(26,H-bh-14,pg,2);
@@ -1278,7 +1380,7 @@ function drawHUD(){
   hx.fillStyle=low?(Math.floor(tick/8)%2?'#ff6a52':'#8a3a30'):'#d8e0e9';
   hx.fillText(fmtTime(matchTime),W/2,34);
   hx.font='500 9px ui-monospace,monospace'; hx.fillStyle='#3d4550';
-  hx.fillText(`${T.win}선승`,W/2,54);
+  hx.fillText(STR.firstTo(T.win),W/2,54);
   const pipRow=(x,n,c,r)=>{ for(let i=0;i<T.win;i++){ const px=r?x-i*14:x+i*14;
     hx.beginPath(); hx.arc(px,34,5,0,7);
     if(i<n){hx.fillStyle=c;hx.fill();}else{hx.strokeStyle='#252c35';hx.lineWidth=1.2;hx.stroke();} } };
@@ -1319,8 +1421,8 @@ function drawHUD(){
     hx.fillText(label,right?x0+wdt:x0,BY-13);
     hx.textAlign=right?'left':'right'; hx.fillStyle=lowHp?'#ff8a6a':'#565f6b';
     hx.fillText(Math.ceil(Math.max(0,f.hp)),right?x0:x0+wdt,BY-13); }
-  bar(M,halfW,P,'#f0a03c',true,`${myJob} · ${P.weapon}`);
-  bar(M+halfW+GAPC,halfW,B,'#4fd1d9',false,`${B.weapon} · ${charB.job}`);
+  bar(M,halfW,P,'#f0a03c',true,`${STR.jobs[myJob]} · ${STR.weps[P.weapon]}`);
+  bar(M+halfW+GAPC,halfW,B,'#4fd1d9',false,`${STR.weps[B.weapon]} · ${STR.jobs[charB.job]}`);
 
   const bsY=BY+BAR_H+11;
   for(let i=0;i<T.bs;i++){hx.beginPath();hx.arc(M+4+i*12,bsY,3.4,0,7);
@@ -1329,9 +1431,9 @@ function drawHUD(){
     if(i<B.bs){hx.fillStyle='#4fd1d9';hx.fill();}else{hx.strokeStyle='#2a3039';hx.lineWidth=1;hx.stroke();}}
   hx.font='500 9px ui-monospace,monospace';
   hx.textAlign='left'; hx.fillStyle=P.crouch>0.5?'#6ad89a':'#333c46';
-  hx.fillText(P.crouch>0.5?'앉음':'백스텝',M+4+T.bs*12+6,bsY);
+  hx.fillText(P.crouch>0.5?STR.crouched:STR.backstep,M+4+T.bs*12+6,bsY);
   hx.textAlign='right'; hx.fillStyle=B.crouch>0.5?'#6ad89a':'#333c46';
-  hx.fillText(B.crouch>0.5?'상대 앉음':'Q 무기교체',W-M,bsY);
+  hx.fillText(B.crouch>0.5?STR.foeCrouched:STR.qSwap,W-M,bsY);
 
   if(optGauge){
     const gw=260,gx=W/2-gw/2,gy=BY-26,MAXD=4.2;
@@ -1358,23 +1460,23 @@ function drawHUD(){
     hx.fillStyle=d.crit?'#ff3a24':(d.att?(d.heavy?'#ffb44a':'#ffd48a'):'#a8e6ea');
     hx.fillText(d.val,p.x,p.y);
     if(d.crit){ hx.font='600 11px ui-monospace,monospace';
-      hx.strokeText('경동맥',p.x,p.y-21); hx.fillText('경동맥',p.x,p.y-21); }
+      hx.strokeText(STR.carotid,p.x,p.y-21); hx.fillText(STR.carotid,p.x,p.y-21); }
     hx.globalAlpha=1; });
 
   hx.textAlign='left'; hx.font='500 10px ui-monospace,monospace';
   let line='';
-  if(P.st==='atk')line=`${P.kind==='heavy'?'강한 찌르기':'빠른 공격'}  ${ph.toUpperCase()}  f${P.f}/${P.total()}`;
-  else if(P.st==='bs')line=`백스텝  ${P.f<BS_FRAMES?'MOVE':'RECOVERY'}`;
-  else if(P.st==='swap')line=`무기 교체  f${P.f}/${SWAP_F}`;
-  else if(P.st==='hurt')line=`경직  f${P.f}/${P.stun}`;
+  if(P.st==='atk')line=`${P.kind==='heavy'?STR.stHeavy:STR.stLight}  ${ph.toUpperCase()}  f${P.f}/${P.total()}`;
+  else if(P.st==='bs')line=`${STR.backstep}  ${P.f<BS_FRAMES?'MOVE':'RECOVERY'}`;
+  else if(P.st==='swap')line=`${STR.stSwap}  f${P.f}/${SWAP_F}`;
+  else if(P.st==='hurt')line=`${STR.stStun}  f${P.f}/${P.stun}`;
   else if(P.dead)line='DOWN';
-  else line=P.crouch>0.5?'앉기 — 높은 공격 회피':'';
+  else line=P.crouch>0.5?STR.stCrouch:'';
   hx.fillStyle=ph==='active'?'#fff':ph==='recovery'?'#c96f3a':P.st==='hurt'?'#ff6a52':
     P.st==='swap'?'#9a7ad8':(P.crouch>0.5?'#6ad89a':'#3d4550');
   hx.fillText(line,M,BY-42);
   if(showDbg){ hx.textAlign='right'; hx.fillStyle='#3d4550';
-    hx.fillText(`BOT ${B.st} ${B.kind||''} ${B.phase()||'-'} · ${B.weapon}`,W-M,BY-42);
-    hx.fillText(`급소 d=${critInfo.d>900?'-':critInfo.d.toFixed(0)}/${(critInfo.radPx||0).toFixed(0)} 노출 ${critInfo.exposed?'O':'X'}`,W-M,BY-56); }
+    hx.fillText(`BOT ${B.st} ${B.kind||''} ${B.phase()||'-'} · ${STR.weps[B.weapon]}`,W-M,BY-42);
+    hx.fillText(STR.dbgCrit(critInfo.d>900?'-':critInfo.d.toFixed(0),(critInfo.radPx||0).toFixed(0),critInfo.exposed?'O':'X'),W-M,BY-56); }
 
   const edge=Math.hypot(P.x,P.z);
   if(edge>ARENA-1.2&&!P.dead){ const a=Math.min(1,(edge-(ARENA-1.2))/1.0)*(0.30+Math.sin(tick*0.3)*0.12);
@@ -1387,22 +1489,22 @@ function drawHUD(){
     hx.font='600 20px ui-monospace,monospace'; hx.fillStyle='#e6edf5';
     hx.fillText(phaseT>26?'ROUND '+(P.score+B.score+1):'FIGHT',W/2,H*0.24);
     if(phaseT>26){ hx.font='500 11px ui-monospace,monospace'; hx.fillStyle='#5d6873';
-      hx.fillText(`${P.weapon}   VS   ${B.weapon}`,W/2,H*0.24+24); }
+      hx.fillText(`${STR.weps[P.weapon]}   VS   ${STR.weps[B.weapon]}`,W/2,H*0.24+24); }
     hx.globalAlpha=1; }
   else if(phase==='over'){ hx.font='600 22px ui-monospace,monospace';
     hx.fillStyle=msg.startsWith('YOU')?'#f0a03c':msg.startsWith('BOT')?'#4fd1d9':'#8b96a3';
     hx.fillText(msg,W/2,H*0.24);
     hx.font='500 11px ui-monospace,monospace';
-    hx.fillStyle=msg2.startsWith('급소')?'#ff4a3a':'#5d6873';
+    hx.fillStyle=msg2.startsWith(STR.critPrefix)?'#ff4a3a':'#5d6873';
     hx.fillText(msg2,W/2,H*0.24+24); }
   else if(phase==='match'){ hx.fillStyle='rgba(4,6,10,0.87)'; hx.fillRect(0,0,W,H);
     hx.font='600 30px ui-monospace,monospace';
     const win=P.score>B.score;
     hx.fillStyle=P.score===B.score?'#8b96a3':(win?'#f0a03c':'#4fd1d9');
-    hx.fillText(P.score===B.score?'무승부':(win?'승':'패'),W/2,H/2-16);
+    hx.fillText(P.score===B.score?STR.draw:(win?STR.win:STR.lose),W/2,H/2-16);
     hx.font='500 11px ui-monospace,monospace'; hx.fillStyle='#4a535e';
     hx.fillText(window.OREUM_TOUCH ? `${P.score} — ${B.score}`
-                                   : `${P.score} — ${B.score}   ·   R 키로 재시작`, W/2, H/2+18); }
+                                   : `${P.score} — ${B.score}   ·   ${STR.restartHint}`, W/2, H/2+18); }
   if(flash>0){ hx.fillStyle=flashCol?`rgba(255,150,130,${flash*0.26})`:`rgba(255,255,255,${flash*0.22})`;
     hx.fillRect(0,0,W,H); if(flash<0.05)flashCol=0; }
   if(againBtn) againBtn.style.display = (phase==='match') ? 'block' : 'none';
@@ -1411,24 +1513,24 @@ function drawHUD(){
 /* ---- UI ---- */
 const wepsEl=document.getElementById('weps'),cardEl=document.getElementById('card');
 function renderCard(){ const w=WEAPONS[myWep];
-  cardEl.innerHTML=`<div class="t">${myWep}</div><table>
-    <tr><td>좌 · 빠른</td><td>${w.light.st}/${w.light.ac}/${w.light.rc}f · ${w.light.rg}m · ${w.light.dmg}</td></tr>
-    <tr><td>우 · 강한</td><td>${w.heavy.st}/${w.heavy.ac}/${w.heavy.rc}f · ${w.heavy.rg}m · ${w.heavy.dmg}</td></tr>
-    <tr><td>부채꼴</td><td>${w.light.arc*2}° / ${w.heavy.arc*2}°</td></tr>
-    <tr><td>넉백 · 경직</td><td>${w.heavy.kb} · ${w.heavy.stun}f</td></tr>
-    <tr><td>확정킬</td><td>좌 ${Math.ceil(T.hp/w.light.dmg)}방 · 우 ${Math.ceil(T.hp/w.heavy.dmg)}방</td></tr>
-    </table><div class="q">${w.note}</div>`; }
+  cardEl.innerHTML=`<div class="t">${STR.weps[myWep]}</div><table>
+    <tr><td>${STR.card.light}</td><td>${w.light.st}/${w.light.ac}/${w.light.rc}f · ${w.light.rg}m · ${w.light.dmg}</td></tr>
+    <tr><td>${STR.card.heavy}</td><td>${w.heavy.st}/${w.heavy.ac}/${w.heavy.rc}f · ${w.heavy.rg}m · ${w.heavy.dmg}</td></tr>
+    <tr><td>${STR.card.arc}</td><td>${w.light.arc*2}° / ${w.heavy.arc*2}°</td></tr>
+    <tr><td>${STR.card.kb}</td><td>${w.heavy.kb} · ${w.heavy.stun}f</td></tr>
+    <tr><td>${STR.card.kill}</td><td>${STR.card.killVal(Math.ceil(T.hp/w.light.dmg),Math.ceil(T.hp/w.heavy.dmg))}</td></tr>
+    </table><div class="q">${STR.notes[myWep]}</div>`; }
 function syncWepChips(){ [...wepsEl.children].forEach(c=>c.classList.toggle('on',c.dataset.w===myWep));
   renderCard(); }
 WEPNAMES.forEach((n,i)=>{ const b=document.createElement('button');
   b.className='chip'+(n===myWep?' on':''); b.dataset.w=n;
-  b.innerHTML=`${n}<span class="n">${(i+1)%10}</span>`;
+  b.innerHTML=`${STR.weps[n]}<span class="n">${(i+1)%10}</span>`;
   b.onclick=()=>{ myWep=n; if(P.st==='idle')P.swapTo(n); else{P.weapon=n;setWep(charP,n);} syncWepChips(); };
   wepsEl.appendChild(b); });
 renderCard();
 const jobsEl=document.getElementById('jobs');
 JOBNAMES.forEach(n=>{ const b=document.createElement('button');
-  b.className='chip'+(n===myJob?' on':''); b.textContent=n; b.dataset.job=n;
+  b.className='chip'+(n===myJob?' on':''); b.textContent=STR.jobs[n]; b.dataset.job=n;
   b.onclick=()=>{ myJob=n; setJob(charP,n);
     [...jobsEl.children].forEach(c=>c.classList.toggle('on',c.dataset.job===n)); };
   jobsEl.appendChild(b); });
@@ -1480,7 +1582,7 @@ function loop(now){ requestAnimationFrame(loop);
 if(window.OREUM_TOUCH){
   // 폰에는 R 키가 없습니다. 승부가 끝나면 다시하기 단추를 띄웁니다
   const again=document.createElement('button');
-  again.textContent='다시하기';
+  again.textContent=STR.again;
   again.style.cssText='position:fixed;left:50%;top:56%;transform:translateX(-50%);z-index:10000;'
     +'padding:15px 30px;border-radius:14px;border:1px solid rgba(255,255,255,.38);'
     +'background:rgba(255,255,255,.17);color:#fff;font:700 16px/1 system-ui,sans-serif;'
@@ -1496,11 +1598,11 @@ if(window.OREUM_TOUCH){
     stick:{up:'KeyW',down:'ControlLeft',left:'KeyA',right:'KeyD'},
     look:true, lookScale:1.1, lookTop:90, liftPortrait:96,
     buttons:[
-      {label:'무기',key:'KeyQ'},
-      {label:'백스텝',key:'Space'},
-      {label:'방어',key:'ControlLeft',hold:true},
-      {label:'찌르기',mouse:2},
-      {label:'공격',mouse:0}
+      {label:STR.touch.wep,key:'KeyQ'},
+      {label:STR.touch.bs,key:'Space'},
+      {label:STR.touch.guard,key:'ControlLeft',hold:true},
+      {label:STR.touch.stab,mouse:2},
+      {label:STR.touch.atk,mouse:0}
     ]
   });
 }
