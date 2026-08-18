@@ -65,8 +65,12 @@
     <div id="card"></div>
     <div class="tri">
       <b>좌클릭</b>은 우클릭 선딜을 끊고<br>
-      <b>앉기</b>는 좌클릭 밑을 파고<br>
+      <b>방어</b>는 좌클릭 밑을 파고<br>
       <b>우클릭</b>은 앉은 놈을 찍는다
+    </div>
+    <div class="note" style="margin-top:9px;padding-top:0;border:0">
+      방어를 잡고 있으면 맞아도 <em>절반</em>만 깎입니다. 다만 맞는 순간 자세가 풀리고,
+      <em>급소는 그대로 뚫립니다.</em>
     </div>
     <h2>직업</h2>
     <div class="grid" id="jobs"></div>
@@ -113,7 +117,7 @@
     <div class="keys">
       <b>W / S</b>파고들기 / 빼기<br>
       <b>A / D</b>좌우 무빙<br>
-      <b>Ctrl(누름)</b>앉기<br>
+      <b>Ctrl(누름)</b>방어 · 앉기<br>
       <b>좌클릭</b>빠른 공격 · 연타<br>
       <b>우클릭</b>강한 찌르기<br>
       <b>Space</b>백스텝<br>
@@ -1043,7 +1047,10 @@ function botThink(){
 /* ---- 타격 ---- */
 function applyHit(att,def,defRig,crit){
   const d=att.data(),Wn=att.weapon,heavy=att.kind==='heavy';
-  const dmg = crit ? (optCK?99999:Math.round(d.dmg*T.hm)) : d.dmg;
+  let dmg = crit ? (optCK?99999:Math.round(d.dmg*T.hm)) : d.dmg;
+  // 방어(앉기)를 잡고 있으면 절반만 받는다. 급소 즉사는 그대로 뚫린다.
+  const guarding = def.crouchHold && def.crouch > 0.5;
+  if(guarding && !(crit&&optCK)) dmg = Math.max(1, Math.round(dmg*0.5));
   const power=Math.min(1.9,(crit?d.dmg*1.5:d.dmg)/20);
   def.hp=Math.max(0,def.hp-dmg);
   def.st='hurt'; def.f=0; def.stun=Math.round(d.stun*(crit?1.5:1));
