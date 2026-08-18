@@ -169,9 +169,52 @@ function noiseSwoosh(dur, vol, delay) {
     noise.start(); noise.stop(actx.currentTime + dur);
   }, delay || 0);
 }
+// 검 휘두르기 소리. 칼날이 지나가는 「쉬익」과 그 뒤에 남는 쇳소리를 겹칩니다.
+// 잡음을 한 방향으로만 쓸어내리면 바람 소리에 그쳐서, 올렸다 내리는 쪽이 칼처럼 들립니다.
 function swordSwing() {
-  noiseSwoosh(0.22, 0.28, 0);
-  tone(1800, 0.07, 'triangle', 0.14, 110, 900);
+  if (!actx) return;
+  const t = actx.currentTime;
+
+  // 1) 칼날이 공기를 가르는 소리 — 좁은 대역을 빠르게 올렸다가 흘려보냅니다
+  const dur = 0.26;
+  const buf = actx.createBuffer(1, Math.floor(actx.sampleRate * dur), actx.sampleRate);
+  const d = buf.getChannelData(0);
+  for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+  const noise = actx.createBufferSource(); noise.buffer = buf;
+  const bp = actx.createBiquadFilter();
+  bp.type = 'bandpass'; bp.Q.value = 5.5;
+  bp.frequency.setValueAtTime(620, t);
+  bp.frequency.exponentialRampToValueAtTime(3400, t + 0.085);   // 휘두르는 순간
+  bp.frequency.exponentialRampToValueAtTime(780, t + dur);      // 지나간 뒤
+  const ng = actx.createGain();
+  ng.gain.setValueAtTime(0.0001, t);
+  ng.gain.exponentialRampToValueAtTime(0.34, t + 0.05);
+  ng.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  noise.connect(bp); bp.connect(ng); ng.connect(actx.destination);
+  noise.start(t); noise.stop(t + dur);
+
+  // 2) 남는 쇳소리 — 배음이 어긋난 높은 음 셋이라야 쇠처럼 들립니다
+  [[3140, 0.055, 0.34], [4720, 0.038, 0.28], [6180, 0.022, 0.2]].forEach(([f, v, len]) => {
+    const o = actx.createOscillator(); o.type = 'sine';
+    o.frequency.setValueAtTime(f, t + 0.045);
+    o.frequency.exponentialRampToValueAtTime(f * 0.94, t + 0.045 + len);
+    const g = actx.createGain();
+    g.gain.setValueAtTime(0.0001, t + 0.045);
+    g.gain.exponentialRampToValueAtTime(v, t + 0.065);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.045 + len);
+    o.connect(g); g.connect(actx.destination);
+    o.start(t + 0.045); o.stop(t + 0.045 + len);
+  });
+
+  // 3) 휘두르는 몸의 무게 — 아주 짧은 저음
+  const lo = actx.createOscillator(); lo.type = 'triangle';
+  lo.frequency.setValueAtTime(190, t);
+  lo.frequency.exponentialRampToValueAtTime(95, t + 0.1);
+  const lg = actx.createGain();
+  lg.gain.setValueAtTime(0.1, t);
+  lg.gain.exponentialRampToValueAtTime(0.0001, t + 0.11);
+  lo.connect(lg); lg.connect(actx.destination);
+  lo.start(t); lo.stop(t + 0.12);
 }
 const sfx = {
   hit: () => {},
