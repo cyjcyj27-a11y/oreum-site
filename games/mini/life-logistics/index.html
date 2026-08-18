@@ -263,7 +263,7 @@ const STR = {
   en: {
     title:'LIFE LOGISTICS · Logistics Terminal',
     noGL:'This browser cannot run WebGL. Please open it in Chrome or Edge.',
-    items:{apple:'Apple',water:'Water',veg:'Greens',banana:'Banana',grape:'Grapes',citrus:'Citrus'},
+    items:{apple:'Apple',water:'Water',veg:'Greens',banana:'Banana',grape:'Grapes',citrus:'Tangerine'},
     dests:{A:'Wing A',B:'Wing B',C:'Wing C'},
     cards:['Shift time','Life earned','Shipped','Warnings'],
     shiftInit:'Shift 1', orderWord:'Order', destWord:'Deliver to', streakWord:'streak', empty:'Empty hands',
@@ -311,7 +311,7 @@ const STR = {
     </div>
     <h2>How the job works</h2>
     <div class="steps">
-      <div><b>1</b><span>Check the <b style="color:#fff">order sheet</b> top-left. e.g. Apple 2, Citrus 1</span></div>
+      <div><b>1</b><span>Check the <b style="color:#fff">order sheet</b> top-left. e.g. Apple 2, Tangerine 1</span></div>
       <div><b>2</b><span>Go to the <b style="color:#fff">racks</b> in the back, aim at the item and press <b style="color:#fff">E</b> — one at a time</span></div>
       <div><b>3</b><span>Aim at the box on the central <b style="color:#fff">packing table</b> and press <b style="color:#fff">E</b> to pack</span></div>
       <div><b>4</b><span>When the list is full, press <b style="color:#fff">F</b> to seal → pick the parcel up with <b style="color:#fff">E</b></span></div>
@@ -767,7 +767,7 @@ function makeCarton(item){
     DRAWER[item.id](g, 128, 108, 46);                        // 일러스트
     g.fillStyle='#15202b'; g.textAlign='center';
     g.font='bold '+STR.cartonNameSize+'px "Malgun Gothic","맑은 고딕",sans-serif';
-    g.fillText(item.name, 128, 178);
+    g.fillText(item.name, 128, 178, 190);
     g.fillStyle='#15202b';                                   // 바코드
     for(let i=0,x=74;i<26;i++){ const w=1+((rnd()*3)|0); g.fillRect(x,186,w,16); x+=w+2+((rnd()*2)|0); }
     g.fillStyle='rgba(255,255,255,0.92)'; g.font='bold '+STR.cartonSubSize+'px sans-serif';
@@ -785,7 +785,7 @@ function makeShelfSign(item, idx){
     DRAWER[item.id](g, 34, 32, 19); g.restore();
     g.fillStyle='#12181f'; g.textAlign='left';
     g.font='bold 34px "Malgun Gothic","맑은 고딕",sans-serif';
-    g.fillText(item.name, 70, 44);
+    g.fillText(item.name, 70, 44, 112);
     g.fillStyle='rgba(0,0,0,0.55)'; g.font='bold 18px sans-serif';
     g.fillText('ZONE ' + (idx+1), 190, 42);
   }));
