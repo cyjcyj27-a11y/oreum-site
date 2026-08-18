@@ -372,8 +372,7 @@ document.getElementById('startBtn').addEventListener('click', () => {
   document.getElementById('overlay').classList.add('hidden');
   P1.char = selectedChar[1];
   P2.char = selectedChar[2];
-  // 전체화면을 먼저 켭니다. 안드로이드 안내 알림이 카운트다운 동안 지나가도록.
-  enterFullscreenLandscape();
+  enterFullscreenLandscape(false);   // 알림 없이 가로로만
   startRound();
 });
 
@@ -755,9 +754,13 @@ function reconcileLandscapeState() {
   }
 }
 
-function enterFullscreenLandscape() {
+// useApi=false 로 부르면 진짜 전체화면은 건너뜁니다.
+// 안드로이드가 전체화면마다 「상단에서 드래그해 종료」 알림을 몇 초씩 띄우는데,
+// 그게 판이 시작된 화면 아래를 가려버립니다. 가로로 돌리는 것만으로 충분하므로
+// 판을 시작할 때는 CSS 회전만 쓰고, 진짜 전체화면은 ⛶ 를 누른 사람에게만 줍니다.
+function enterFullscreenLandscape(useApi = true) {
   landscapeWanted = true;
-  const req = fsEl.requestFullscreen || fsEl.webkitRequestFullscreen;
+  const req = useApi && (fsEl.requestFullscreen || fsEl.webkitRequestFullscreen);
   const afterFullscreen = () => {
     if (screen.orientation && screen.orientation.lock) {
       Promise.resolve(screen.orientation.lock('landscape')).catch(() => {}).then(reconcileLandscapeState);
@@ -794,7 +797,7 @@ window.addEventListener('orientationchange', reconcileLandscapeState);
 if (fullscreenBtn) {
   fullscreenBtn.addEventListener('click', () => {
     const isActive = document.fullscreenElement || document.webkitFullscreenElement || fsEl.classList.contains('forceLandscape');
-    if (!isActive) enterFullscreenLandscape(); else exitFullscreenLandscape();
+    if (!isActive) enterFullscreenLandscape(true); else exitFullscreenLandscape();
   });
 }
 

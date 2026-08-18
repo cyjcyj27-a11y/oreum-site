@@ -179,16 +179,16 @@ html:has(#wrap.forceLandscape), body:has(#wrap.forceLandscape) {
   left: 2.5%;
   grid-template-columns: repeat(3, 1fr);
   grid-template-rows: repeat(2, 1fr);
-  width: 40vw;
-  max-width: 216px;
+  width: 24%;
+  max-width: 210px;
   aspect-ratio: 3 / 2;
 }
 .atkCluster {
   right: 2.5%;
   grid-template-columns: repeat(2, 1fr);
   grid-template-rows: repeat(2, 1fr);
-  width: 32vw;
-  max-width: 184px;
+  width: 20%;
+  max-width: 176px;
   aspect-ratio: 1 / 1;
 }
 
@@ -198,7 +198,7 @@ html:has(#wrap.forceLandscape), body:has(#wrap.forceLandscape) {
   border: 2px solid rgba(255,255,255,0.6);
   background: rgba(60, 40, 20, 0.35);
   color: #fff;
-  font-size: 17px;
+  font-size: 15px;
   font-weight: 700;
   border-radius: 14px;
   display: flex;
@@ -212,7 +212,7 @@ html:has(#wrap.forceLandscape), body:has(#wrap.forceLandscape) {
 .padRight { grid-column: 3; grid-row: 2; }
 .padDown  { grid-column: 2; grid-row: 2; }
 
-.atkBtn { font-size: 15px; }
+.atkBtn { font-size: 13px; }
 .atkW { grid-column: 1; grid-row: 1; }
 .atkA { grid-column: 2; grid-row: 1; }
 .atkS { grid-column: 1; grid-row: 2; }
