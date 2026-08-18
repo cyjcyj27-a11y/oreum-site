@@ -1359,9 +1359,10 @@ if(window.OREUM_TOUCH){
     // 화면 배치 — 위: 집기 · 포장 / 아래: 내려놓기 · 달리기
     // (아래 줄이 먼저, 각 줄은 왼쪽부터)
     // 왼쪽이 잡기, 오른쪽이 내려놓기. 글씨 대신 그림으로 — 화면을 덜 가립니다
+    // 왼쪽이 잡기(주먹), 오른쪽이 내려놓기(편 손). 손 모양이 곧 동작입니다
     buttons:[
-      {label:'잡기',    key:'KeyE', icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4"/><path d="M8 8l4-4 4 4"/><path d="M4 19h16"/><path d="M4 19v-3"/><path d="M20 19v-3"/></svg>'},
-      {label:'내려놓기', key:'KeyQ', icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11"/><path d="M8 11l4 4 4-4"/><path d="M4 19h16"/><path d="M4 19v-3"/><path d="M20 19v-3"/></svg>'}
+      {label:'잡기',    key:'KeyE', icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 13V10a1.6 1.6 0 0 1 3.2 0v2.6"/><path d="M10.2 12.6V9.6a1.6 1.6 0 0 1 3.2 0v3"/><path d="M13.4 12.6v-2.4a1.6 1.6 0 0 1 3.2 0V12"/><path d="M16 12v-1.6a1.6 1.6 0 0 1 3.2 0V14c0 4-3.2 7.2-7.2 7.2h-1.1c-2.1 0-3.6-.9-4.8-2.5L3.4 14.6a1.7 1.7 0 0 1 2.5-2.2L7 13.6"/><path d="M7.6 16.2h6"/></svg>'},
+      {label:'내려놓기', key:'KeyQ', icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 13V6.2a1.6 1.6 0 0 1 3.2 0V12"/><path d="M10.2 12V4.6a1.6 1.6 0 0 1 3.2 0V12"/><path d="M13.4 12V5.8a1.6 1.6 0 0 1 3.2 0V12"/><path d="M16 12v-1.6a1.6 1.6 0 0 1 3.2 0V14c0 4-3.2 7.2-7.2 7.2h-1.1c-2.1 0-3.6-.9-4.8-2.5L3.4 14.6a1.7 1.7 0 0 1 2.5-2.2L7 13.6"/></svg>'}
     ]
   });
   // 조작판은 일하는 동안에만 — 안내문 위를 덮지 않게
