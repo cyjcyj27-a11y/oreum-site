@@ -402,6 +402,36 @@
     }],
   ];
 
+  // ── 복사본 전용 조립 규칙 (2026-08-19 전수조사 후 추가) ──
+  // 복사 텍스트는 '제목 : 본문' / '천간의 합 — 문장' / 'Name(꼬리표) : 문장' 꼴로 조립되어
+  // 화면과 다른 열쇠가 됩니다. 양쪽을 따로 번역해 다시 잇습니다.
+  RULES.push(
+    [/^\[?(.+?)의 행동 패턴 분석\]$/, (m, tr) => {
+      const who = m[1] === '나' ? 'My' : (m[1].replace(/님$/, '') + "'s");
+      return `[${who} behavior pattern analysis]`;
+    }],
+    [/^천간의 합 — (.+)$/, (m, tr) => `Union of heavenly stems — ${tr(m[1])}`],
+    [/^타고난 기질은 (.+)$/, (m, tr) => `Your inborn temperament is ${tr(m[1])}`],
+    [/^(.{2,40}?) : (.+)$/, (m, tr) => {
+      const a = tr(m[1]), b = tr(m[2]);
+      return (a !== m[1] || b !== m[2]) ? `${a} : ${b}` : null;
+    }],
+    [/^(.+?\((?:合|沖)\)) — (.+)$/, (m, tr) => {
+      const a = tr(m[1]), b = tr(m[2]);
+      return (a !== m[1] || b !== m[2]) ? `${a} — ${b}` : null;
+    }],
+    // 신살 복사줄의 '이름(꼬리표)' — 꼬리표가 여러 낱말이라 낱말 청소로는 못 잡습니다
+    [/^(.+?)\(([가-힣][가-힣 ·]{2,20})\)$/, (m, tr) => {
+      const head = tr(m[1]), inner = tr(m[2]);
+      return (head !== m[1] || inner !== m[2]) ? `${head}(${inner})` : null;
+    }],
+    // 마지막 안전망: 'A — B' 조립줄은 양쪽을 따로 번역 (둘 다 그대로면 손대지 않음)
+    [/^(.+?) — (.+)$/, (m, tr) => {
+      const a = tr(m[1]), b = tr(m[2]);
+      return (a !== m[1] || b !== m[2]) ? `${a} — ${b}` : null;
+    }]
+  );
+
   // 해설 본문 사전 — 분량이 커서 i18n_content.js에 따로 담습니다 (없으면 빈 사전)
   function lookup(key) {
     if (DICT[key] !== undefined) return DICT[key];
@@ -445,7 +475,7 @@
       if (baseHit !== undefined) return line.replace(t, /[.!?]$/.test(baseHit) ? baseHit : baseHit + '.');
     }
     // 따옴표·글머리표에 싸인 문장 — 속을 찾고 껍데기를 도로 씌웁니다
-    const deco = t.match(/^(["“·•\-—–]\s*)(.+?)(["”]?)$/);
+    const deco = t.match(/^(["“·•■\-—–]\s*)(.+?)(["”]?)$/);
     if (deco && deco[2] !== t) {
       const inner = trLine(deco[2].trim(), depth + 1);
       if (inner !== deco[2].trim()) return line.replace(t, deco[1] + inner + deco[3]);
