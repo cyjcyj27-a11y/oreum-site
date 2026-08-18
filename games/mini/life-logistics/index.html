@@ -1338,8 +1338,8 @@ function drawPrompt(){
   // 폰에는 키보드가 없으니 눌러야 할 화면 버튼 이름으로 바꿔 말한다
   if(window.OREUM_TOUCH){
     msg = msg
-      .replace('<kbd>F</kbd> 포장 마감', '<kbd>집기 · 담기</kbd> 버튼 — 포장 마감')
-      .replace('<kbd>E</kbd> ', '<kbd>집기 · 담기</kbd> 버튼 — ')
+      .replace('<kbd>F</kbd> 포장 마감', '<kbd>잡기</kbd> 버튼 — 포장 마감')
+      .replace('<kbd>E</kbd> ', '<kbd>잡기</kbd> 버튼 — ')
       .replace('<kbd>Q</kbd> ', '<kbd>내려놓기</kbd> 버튼 — ')
       .replace('<kbd>R</kbd> ', '<kbd>다시하기</kbd> 버튼 — ');
   }
@@ -1358,9 +1358,10 @@ if(window.OREUM_TOUCH){
     onPinch:(k)=>{ G.fov = Math.max(38, Math.min(88, G.fov / k)); resize(); },
     // 화면 배치 — 위: 집기 · 포장 / 아래: 내려놓기 · 달리기
     // (아래 줄이 먼저, 각 줄은 왼쪽부터)
+    // 왼쪽이 잡기, 오른쪽이 내려놓기. 글씨 대신 그림으로 — 화면을 덜 가립니다
     buttons:[
-      {label:'내려놓기',key:'KeyQ'},
-      {label:'집기 · 담기',key:'KeyE'}
+      {label:'잡기',    key:'KeyE', icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4"/><path d="M8 8l4-4 4 4"/><path d="M4 19h16"/><path d="M4 19v-3"/><path d="M20 19v-3"/></svg>'},
+      {label:'내려놓기', key:'KeyQ', icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11"/><path d="M8 11l4 4 4-4"/><path d="M4 19h16"/><path d="M4 19v-3"/><path d="M20 19v-3"/></svg>'}
     ]
   });
   // 조작판은 일하는 동안에만 — 안내문 위를 덮지 않게
@@ -1374,7 +1375,7 @@ if(window.OREUM_TOUCH){
         + 'color:#7ef0c0;font-size:13px;line-height:1.6';
       n.textContent = '폰에서는 왼쪽 아래 동그라미로 걷고(끝까지 밀면 달리기), '
         + '화면을 문질러 둘러보고, 두 손가락으로 벌리면 당겨 봅니다. '
-        + '오른쪽 아래 버튼으로 집고 담고 마감합니다.';
+        + '오른쪽 아래 그림 버튼으로 잡고 담고 마감합니다.';
       panelEl.insertBefore(n, panelEl.firstChild);
       // 키보드 조작표는 폰에서 읽을 이유가 없고, 그만큼 시작 버튼이 멀어진다
       panelEl.querySelectorAll('.keys').forEach(k => {

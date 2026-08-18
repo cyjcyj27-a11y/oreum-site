@@ -73,6 +73,11 @@
       'color:#fff;font:600 13px/1 system-ui,sans-serif;text-align:center;',
       'text-shadow:0 1px 3px rgba(0,0,0,.6);}',
     '.ot-btn:active,.ot-btn.on{background:rgba(255,255,255,.42);}',
+    // 글씨 대신 그림을 넣는 버튼 — 정사각형으로 크게
+    '.ot-btn.ot-icon{min-width:0;width:62px;height:62px;border-radius:16px;',
+      'display:flex;align-items:center;justify-content:center;padding:0;}',
+    '.ot-btn.ot-icon svg{display:block;width:30px;height:30px;',
+      'filter:drop-shadow(0 1px 3px rgba(0,0,0,.6));}',
     // 세로로 들면 게임 눈금이 화면 아래에 깔리므로 그만큼 띄웁니다
     '@media (orientation:portrait){.ot-layer[data-lift] .ot-stick,',
       '.ot-layer[data-lift] .ot-btns{bottom:var(--ot-lift);}}',
@@ -257,8 +262,10 @@
       box.className = 'ot-btns';
       opts.buttons.forEach(function (b) {
         var el = document.createElement('div');
-        el.className = 'ot-btn';
-        el.textContent = b.label;
+        el.className = 'ot-btn' + (b.icon ? ' ot-icon' : '');
+        // 그림 버튼도 무슨 버튼인지 읽어줄 수 있게 이름은 남깁니다
+        if (b.icon) { el.innerHTML = b.icon; el.setAttribute('aria-label', b.label); el.title = b.label; }
+        else el.textContent = b.label;
         function down(e) {
           e.preventDefault(); e.stopPropagation();
           if (opts.onFirstTouch) { opts.onFirstTouch(); opts.onFirstTouch = null; }
