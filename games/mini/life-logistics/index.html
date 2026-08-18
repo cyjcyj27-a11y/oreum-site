@@ -136,7 +136,7 @@
     <div class="card" id="outCard"><div class="k">경고</div><div class="v" id="vOut">○○○</div></div>
   </div>
   <div id="order">
-    <h3>주문 <b id="oNo">#1</b> · 소분 목록</h3>
+    <h3><b id="oShift">1교대</b> · 주문 <b id="oNo">#1</b></h3>
     <div id="oList"></div>
     <div id="dest"><span class="chip" id="dChip"></span><span>배송처 <b id="dName">-</b></span></div>
   </div>
@@ -852,6 +852,9 @@ const MAX_OUT = 3;        // 경고 3회 = 해고
 const G = {
   mode:'menu',            // menu | play | pause | over
   fov:72,                 // 시야각 — 폰에서 손가락 두 개로 벌리면 좁아진다(당겨보기)
+  shift:1,                // 몇 번째 교대인가 — 넘길수록 시계가 빨라진다
+  clock:1,                // 시계가 흐르는 속도 (교대마다 올라감)
+  wasFired:false,         // 직전 교대가 해고로 끝났나
   time:150, score:0, done:0, streak:0, bestStreak:0,
   order:null, orderNo:0,
   hand:null,              // {kind:'item', item} 또는 {kind:'parcel', dest, order}
@@ -900,6 +903,7 @@ function drawOrderUI(){
   const o = G.order;
   if(!o){ $('oList').innerHTML=''; return; }
   $('oNo').textContent = '#' + o.no;
+  $('oShift').textContent = G.shift + '교대';
   let html = '', mon = '';
   for(const k in o.need){
     const it = ITEM_BY_ID[k], have = o.sealed ? o.need[k] : (o.have[k]||0), ok = have >= o.need[k];
@@ -1083,7 +1087,7 @@ document.addEventListener('keydown', e => {
   }
   if(e.code === 'KeyF' && G.mode === 'play') sealBox();
   if(e.code === 'KeyQ' && G.mode === 'play') dropHand();
-  if(e.code === 'KeyR' && G.mode === 'over') startGame();
+  if(e.code === 'KeyR' && G.mode === 'over') startGame(!G.wasFired);
   if(['KeyW','KeyA','KeyS','KeyD','Space','ShiftLeft'].includes(e.code)) e.preventDefault();
 });
 document.addEventListener('keyup', e => { keys[e.code] = false; });
@@ -1134,7 +1138,7 @@ function showMenu(){
     <button id="go">작업 시작 (클릭)</button>`;
   ovEl.classList.remove('hide');
   ovEl.onclick = null;
-  $('go').onclick = startGame;
+  $('go').onclick = () => startGame(false);   // 첫 배치는 언제나 1교대
 }
 function showPause(){
   panelEl.innerHTML = `
@@ -1150,7 +1154,11 @@ function showPause(){
   $('go').onclick = resume;
   ovEl.onclick = resume;          // 어디를 클릭해도 이어하기
 }
-function startGame(){
+function startGame(next){
+  // next 가 참이면 다음 교대로 이어갑니다. 해고 뒤 재배치는 1교대부터 다시.
+  G.shift = next ? G.shift + 1 : 1;
+  G.clock = Math.min(2.2, 1 + (G.shift - 1) * 0.15);
+  G.wasFired = false;
   G.mode='play'; G.time=150; G.score=0; G.done=0; G.streak=0; G.bestStreak=0;
   G.hand=null; G.parcelOnTable=null; G.orderNo=0; G.wrongDrops=0; G.picked=0;
   G.outs=0; G.fined=0; G.finedMin=0;
@@ -1165,6 +1173,7 @@ function gameOver(reason){
   G.mode='over'; sfx.over();
   if(document.pointerLockElement === cv) document.exitPointerLock();
   const fired = (reason === 'fired');
+  G.wasFired = fired;
   const rank = G.score >= 2200 ? '작업반장 👑' : G.score >= 1500 ? '숙련 작업조 🏅'
              : G.score >= 900  ? '정규 작업조 📦' : G.score >= 400 ? '수습 작업조 🧢' : '첫 배치 🐣';
   panelEl.innerHTML = `
@@ -1179,10 +1188,10 @@ function gameOver(reason){
       <div><div class="k">배상 ${G.fined}건</div><div class="v">-${fmtMin(G.finedMin)}</div></div>
     </div>
     <div id="rank">배치 등급 · ${rank}</div>
-    <button id="go">${fired ? '재배치 신청' : '다음 교대'}${window.OREUM_TOUCH ? '' : ' (R)'}</button>`;
+    <button id="go">${fired ? '재배치 신청 (1교대부터)' : `${G.shift + 1}교대로`}${window.OREUM_TOUCH ? '' : ' (R)'}</button>`;
   ovEl.classList.remove('hide');
   ovEl.onclick = null;
-  $('go').onclick = startGame;
+  $('go').onclick = () => startGame(!fired);
 }
 
 /* ───────────────────── 6. 메인 루프 ───────────────────── */
@@ -1217,7 +1226,7 @@ function update(dt){
   } else player.bob += dt*1.2;
 
   // 시간
-  G.time -= dt;
+  G.time -= dt * G.clock;   // 교대가 올라갈수록 같은 1초가 더 빨리 닳는다
   if(G.time <= 0){ G.time = 0; updateHUD(); gameOver('shift'); return; }
   updateHUD();
 }
