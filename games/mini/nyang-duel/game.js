@@ -372,8 +372,9 @@ document.getElementById('startBtn').addEventListener('click', () => {
   document.getElementById('overlay').classList.add('hidden');
   P1.char = selectedChar[1];
   P2.char = selectedChar[2];
-  startRound();
+  // 전체화면을 먼저 켭니다. 안드로이드 안내 알림이 카운트다운 동안 지나가도록.
   enterFullscreenLandscape();
+  startRound();
 });
 
 // ---------- Update ----------

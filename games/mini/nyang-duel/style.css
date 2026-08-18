@@ -170,24 +170,25 @@ html:has(#wrap.forceLandscape), body:has(#wrap.forceLandscape) {
 
 .padCluster, .atkCluster {
   position: absolute;
-  bottom: 4%;
+  /* 화면 맨 아래는 안드로이드 전체화면 알림이 지나가는 자리라 그만큼 띄웁니다 */
+  bottom: 10%;
   display: grid;
-  gap: 6px;
+  gap: 8px;
 }
 .padCluster {
-  left: 3%;
+  left: 2.5%;
   grid-template-columns: repeat(3, 1fr);
   grid-template-rows: repeat(2, 1fr);
-  width: 25.2vw;
-  max-width: 114px;
+  width: 40vw;
+  max-width: 216px;
   aspect-ratio: 3 / 2;
 }
 .atkCluster {
-  right: 3%;
+  right: 2.5%;
   grid-template-columns: repeat(2, 1fr);
   grid-template-rows: repeat(2, 1fr);
-  width: 20.4vw;
-  max-width: 96px;
+  width: 32vw;
+  max-width: 184px;
   aspect-ratio: 1 / 1;
 }
 
@@ -197,9 +198,9 @@ html:has(#wrap.forceLandscape), body:has(#wrap.forceLandscape) {
   border: 2px solid rgba(255,255,255,0.6);
   background: rgba(60, 40, 20, 0.35);
   color: #fff;
-  font-size: 10.8px;
+  font-size: 17px;
   font-weight: 700;
-  border-radius: 12px;
+  border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -211,7 +212,7 @@ html:has(#wrap.forceLandscape), body:has(#wrap.forceLandscape) {
 .padRight { grid-column: 3; grid-row: 2; }
 .padDown  { grid-column: 2; grid-row: 2; }
 
-.atkBtn { font-size: 7.8px; }
+.atkBtn { font-size: 15px; }
 .atkW { grid-column: 1; grid-row: 1; }
 .atkA { grid-column: 2; grid-row: 1; }
 .atkS { grid-column: 1; grid-row: 2; }
