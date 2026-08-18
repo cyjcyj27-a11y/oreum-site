@@ -35,12 +35,15 @@ def priority_of(path):
     return "0.5"
 
 def find_pages(root="."):
-    """index.html 이 있는 폴더를 주소로 바꿔 모읍니다"""
+    """index.html 이 있는 폴더를 주소로 바꿔 모읍니다 (noindex 페이지는 뺍니다)"""
     out = []
     for dirpath, dirnames, files in os.walk(root):
         dirnames[:] = [d for d in dirnames if d not in SKIP_DIRS and not d.startswith(".")]
         if "index.html" not in files:
             continue
+        html = io.open(os.path.join(dirpath, "index.html"), encoding="utf-8").read()
+        if re.search(r'name="robots"[^>]*noindex', html):
+            continue  # 검색 노출을 막아둔 페이지는 사이트맵에서도 뺀다
         rel = os.path.relpath(dirpath, root).replace("\\", "/")
         path = "/" if rel == "." else "/" + rel + "/"
         out.append(path)
