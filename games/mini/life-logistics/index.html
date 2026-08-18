@@ -1632,21 +1632,7 @@ if(window.OREUM_TOUCH){
   // 조작판은 일하는 동안에만 — 안내문 위를 덮지 않게
   (function tick(){
     otLayer.style.display = (G.mode === 'play') ? '' : 'none';
-    if(G.mode !== 'play' && panelEl && !panelEl.querySelector('.ot-note')){
-      const n = document.createElement('div');
-      n.className = 'ot-note';
-      n.style.cssText = 'margin:10px 0 0;padding:9px 12px;border-radius:8px;'
-        + 'background:rgba(126,240,192,.10);border:1px solid rgba(126,240,192,.35);'
-        + 'color:#7ef0c0;font-size:13px;line-height:1.6';
-      n.textContent = STR.touchNote;
-      panelEl.insertBefore(n, panelEl.firstChild);
-      // 키보드 조작표는 폰에서 읽을 이유가 없고, 그만큼 시작 버튼이 멀어진다
-      panelEl.querySelectorAll('.keys').forEach(k => {
-        k.style.display = 'none';
-        const h = k.previousElementSibling;
-        if (h && h.tagName === 'H2') h.style.display = 'none';
-      });
-    }
+    // 안내 상자·키보드표 숨김 처리는 폰 전용 안내문(menuTouchHtml)으로 대체됐다 (2026-08-18)
     requestAnimationFrame(tick);
   })();
 }
