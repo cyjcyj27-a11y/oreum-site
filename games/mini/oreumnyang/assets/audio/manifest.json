@@ -1,8 +1,17 @@
 {
   "sfx": {
+    "pop": "pop.mp3",
+    "combo": "combo.mp3",
+    "rocket": "rocket.mp3",
+    "bomb": "bomb.mp3",
+    "rainbow": "rainbow.mp3",
+    "swap": "swap.mp3",
+    "invalid": "invalid.mp3",
+    "goal": "goal.mp3",
     "star": "star.mp3",
     "win": "win.mp3",
-    "lose": "lose.mp3"
+    "lose": "lose.mp3",
+    "click": "click.mp3"
   },
   "bgm": {}
 }
