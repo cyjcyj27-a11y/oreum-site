@@ -251,3 +251,6 @@ body{
 @media (prefers-reduced-motion: reduce){
   *{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important}
 }
+
+/* 왼쪽 위 오름게임즈 배지 자리 — 상단바를 그만큼 내립니다 (assets/game-home.js) */
+.topbar { padding-top: 42px; }
