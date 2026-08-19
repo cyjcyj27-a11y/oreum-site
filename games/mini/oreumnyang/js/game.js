@@ -23,6 +23,14 @@
   var SCORE_MAKE  = 200;   // 특수 고양이 탄생
   var SCORE_BLAST = 150;   // 특수 고양이 발동
 
+  /* 연쇄가 이어질 때 소리를 점점 높이는데, 아무 비율로 올리면 음이 어긋나
+     "따로 노는" 느낌이 난다. D 펜타토닉 음계(D E F# A B)의 계단만 밟게 한다. */
+  var SCALE_STEPS = [0, 3, 5, 7, 10, 12, 15, 17, 19];
+  function scaleRate(step) {
+    var i = Math.max(0, Math.min(step, SCALE_STEPS.length - 1));
+    return Math.pow(2, SCALE_STEPS[i] / 12);
+  }
+
   var uid = 0;
 
   function key(r, c) { return r + ',' + c; }
@@ -448,10 +456,11 @@
     this.score += removedCount * SCORE_CAT * this.cascade + blasts * SCORE_BLAST;
 
     if (removedCount) {
-      var rate = Math.min(1.9, 0.85 + this.cascade * 0.12);
-      Sound.play(this.cascade > 1 ? 'combo' : 'pop', { rate: rate });
+      Sound.play(this.cascade > 1 ? 'combo' : 'pop', { rate: scaleRate(this.cascade - 1) });
     }
-    if (this.jellyLeft < jellyBefore) Sound.play('goal', { rate: 1 + (jellyBefore - this.jellyLeft) * 0.03 });
+    if (this.jellyLeft < jellyBefore) {
+      Sound.play('goal', { rate: scaleRate(Math.min(3, jellyBefore - this.jellyLeft - 1)) });
+    }
 
     return removedCount;
   };
@@ -653,7 +662,7 @@
         }
       }
     }
-    if (got) { Sound.play('goal', { rate: 1.2 }); this._toast('우유 배달 완료!'); }
+    if (got) { Sound.play('goal', { rate: scaleRate(3) }); this._toast('감귤 수확!'); }
     return got;
   };
 
