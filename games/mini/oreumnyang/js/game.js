@@ -24,11 +24,16 @@
   var SCORE_BLAST = 150;   // 특수 고양이 발동
 
   /* 연쇄가 이어질 때 소리를 점점 높이는데, 아무 비율로 올리면 음이 어긋나
-     "따로 노는" 느낌이 난다. D 펜타토닉 음계(D E F# A B)의 계단만 밟게 한다. */
-  var SCALE_STEPS = [0, 3, 5, 7, 10, 12, 15, 17, 19];
-  function scaleRate(step) {
-    var i = Math.max(0, Math.min(step, SCALE_STEPS.length - 1));
-    return Math.pow(2, SCALE_STEPS[i] / 12);
+     "따로 노는" 느낌이 난다. 쓰는 음은 D E F# A B 다섯 개뿐(D 펜타토닉).
+
+     같은 다섯 음이라도 어느 음에서 출발하느냐에 따라 계단 간격이 다르다.
+       D 에서 출발: 0 2 4 7 9 ...  (팡·연쇄)
+       B 에서 출발: 0 3 5 7 10 ... (목표 달성음)  */
+  var STEPS_FROM_D = [0, 2, 4, 7, 9, 12, 14, 16, 19];
+  var STEPS_FROM_B = [0, 3, 5, 7, 10, 12, 15, 17, 19];
+  function stepRate(steps, i) {
+    var k = Math.max(0, Math.min(i, steps.length - 1));
+    return Math.pow(2, steps[k] / 12);
   }
 
   var uid = 0;
@@ -456,10 +461,10 @@
     this.score += removedCount * SCORE_CAT * this.cascade + blasts * SCORE_BLAST;
 
     if (removedCount) {
-      Sound.play(this.cascade > 1 ? 'combo' : 'pop', { rate: scaleRate(this.cascade - 1) });
+      Sound.play(this.cascade > 1 ? 'combo' : 'pop', { rate: stepRate(STEPS_FROM_D, this.cascade - 1) });
     }
     if (this.jellyLeft < jellyBefore) {
-      Sound.play('goal', { rate: scaleRate(Math.min(3, jellyBefore - this.jellyLeft - 1)) });
+      Sound.play('goal', { rate: stepRate(STEPS_FROM_B, Math.min(3, jellyBefore - this.jellyLeft - 1)) });
     }
 
     return removedCount;
@@ -662,7 +667,7 @@
         }
       }
     }
-    if (got) { Sound.play('goal', { rate: scaleRate(3) }); this._toast('감귤 수확!'); }
+    if (got) { Sound.play('goal', { rate: stepRate(STEPS_FROM_B, 3) }); this._toast('감귤 수확!'); }
     return got;
   };
 
