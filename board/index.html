@@ -24,7 +24,7 @@
 <meta property="og:image" content="https://oreumgames.com/assets/og-image.png">
 <meta property="og:locale" content="ko_KR">
 
-<link rel="stylesheet" href="/style.css?v=8">
+<link rel="stylesheet" href="/style.css?v=9">
 </head>
 <body>
 
@@ -277,6 +277,10 @@
       frag.appendChild(el);
     });
     $('list').appendChild(frag);
+    // 댓글 수는 창을 열기 전에도 보여야 한다 — 이 묶음 것만 한 번에 조회
+    if (window.BoardExtra && BoardExtra.prime) {
+      BoardExtra.prime(rows.map(function (p) { return p.id; }));
+    }
   }
 
   function remove(id, el) {
@@ -342,7 +346,7 @@
   h('pageviews'); h('pv_board');
 })();
 </script>
-<script src="/assets/board-extra.js?v=1" defer></script>
+<script src="/assets/board-extra.js?v=2" defer></script>
 <script src="/assets/mail.js" defer></script>
 </body>
 </html>

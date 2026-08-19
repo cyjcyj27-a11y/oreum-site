@@ -32,7 +32,7 @@
     badPw:   'Those digits do not match',
     needBody:'Write a line first',
     tooLong: MAX + ' characters at most',
-    badDigits:'Use 4 digits (or leave it blank)',
+    badDigits:'Enter 4 digits — you will need them to delete this comment',
     failPost:'Could not post. Try again in a moment.',
     close:   'Close',
     justNow: 'just now', mAgo: 'm ago', hAgo: 'h ago'
@@ -54,7 +54,7 @@
     badPw:   '숫자가 맞지 않아요',
     needBody:'댓글을 적어주세요',
     tooLong: MAX + '자까지만 쓸 수 있어요',
-    badDigits:'숫자 4자리로 넣어주세요 (안 쓰셔도 돼요)',
+    badDigits:'지울 때 쓸 숫자 4자리를 넣어주세요',
     failPost:'올리지 못했어요. 잠시 뒤 다시 시도해 주세요.',
     close:   '닫기',
     justNow: '방금', mAgo: '분 전', hAgo: '시간 전'
@@ -110,6 +110,9 @@
   /* ══════════ 댓글 ══════════ */
   function db() { return window.OREUM_DB || null; }
 
+  // 글마다 만들어둔 "개수 표시 함수"를 모아둔다 — prime() 이 한 번에 채워넣기 위해
+  var counters = {};
+
   function commentRow(c, onGone) {
     var el = document.createElement('div');
     el.className = 'cmt';
@@ -149,7 +152,7 @@
           '<textarea rows="2" maxlength="' + MAX + '" placeholder="' + esc(T.ph) + '"></textarea>' +
           '<div class="cmt-line">' +
             '<input class="cmt-nick" type="text" maxlength="12" placeholder="' + esc(T.nick) + '">' +
-            '<input class="cmt-pw" type="text" inputmode="numeric" maxlength="4" placeholder="' + esc(T.pw) + '">' +
+            '<input class="cmt-pw" type="password" inputmode="numeric" maxlength="4" placeholder="' + esc(T.pw) + '">' +
             '<button type="submit" class="btn btn-primary cmt-send">' + esc(T.send) + '</button>' +
           '</div>' +
           '<p class="cmt-msg"></p>' +
@@ -165,7 +168,12 @@
     var count  = toggle.querySelector('i');
     var loaded = false, n = 0;
 
-    function setCount(v) { n = v; count.textContent = v > 0 ? v : '·'; }
+    function setCount(v) {
+      n = v;
+      count.textContent = v > 0 ? v : '·';
+      toggle.classList.toggle('has', v > 0);
+    }
+    counters[postId] = setCount;
 
     function note(text) { list.innerHTML = '<p class="cmt-note">' + esc(text) + '</p>'; }
 
@@ -205,21 +213,21 @@
       function bad(t) { msg.textContent = t; msg.className = 'cmt-msg bad'; }
       if (!body) return bad(T.needBody);
       if (body.length > MAX) return bad(T.tooLong);
-      if (pw && !/^[0-9]{4}$/.test(pw)) return bad(T.badDigits);
+      if (!/^[0-9]{4}$/.test(pw)) return bad(T.badDigits);
       if (!db()) return bad(T.notReady);
 
       var send = form.querySelector('.cmt-send');
       send.disabled = true; msg.textContent = T.sending;
 
       db().rpc('create_post_comment', {
-        p_post: postId, p_nick: nick || null, p_body: body, p_pw: pw || null
+        p_post: postId, p_nick: nick || null, p_body: body, p_pw: pw
       }).then(function (r) {
         send.disabled = false;
         if (r.error) { bad(T.failPost); return; }
         msg.textContent = '';
         ta.value = ''; form.querySelector('.cmt-pw').value = '';
         var fresh = { id: r.data, created_at: new Date().toISOString(),
-                      nick: nick, body: body, has_pw: !!pw };
+                      nick: nick, body: body, has_pw: true };
         if (list.querySelector('.cmt-note')) list.innerHTML = '';
         list.appendChild(commentRow(fresh, function () { setCount(Math.max(0, n - 1)); }));
         setCount(n + 1);
@@ -227,5 +235,25 @@
     });
   }
 
-  window.BoardExtra = { attach: attach };
+  /* 목록에 뜬 글들의 댓글 수를 한 번의 조회로 미리 채운다.
+     이게 없으면 댓글창을 눌러서 열기 전까지 개수가 '·' 로만 남아,
+     댓글 1개 있는 글과 없는 글이 똑같아 보인다. */
+  function prime(ids) {
+    if (!db() || !ids || !ids.length) return;
+    db().from('post_comments')
+      .select('post_id')
+      .in('post_id', ids)
+      .limit(2000)
+      .then(function (r) {
+        if (r.error || !r.data) return;      // 표가 아직 없으면 조용히 넘어간다
+        var tally = {};
+        r.data.forEach(function (c) { tally[c.post_id] = (tally[c.post_id] || 0) + 1; });
+        ids.forEach(function (id) {
+          var f = counters[id];
+          if (f) f(tally[id] || 0);
+        });
+      });
+  }
+
+  window.BoardExtra = { attach: attach, prime: prime };
 })();
