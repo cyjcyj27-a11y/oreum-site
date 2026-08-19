@@ -14,7 +14,7 @@
     "click": "click.mp3"
   },
   "bgm": {
-    "bgm_map": "bgm_map.mp3",
-    "bgm_play": "bgm_play.mp3"
+    "bgm_map": "bgm_main.mp3",
+    "bgm_play": "bgm_main.mp3"
   }
 }

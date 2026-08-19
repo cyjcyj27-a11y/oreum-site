@@ -55,6 +55,9 @@
     lose:    1.00
   };
 
+  /* 화면별 배경음악 크기. 게임 중에는 효과음이 묻히지 않게 조금 낮춘다 */
+  var BGM_VOL = { bgm_map: 1.00, bgm_play: 0.70 };
+
   /* 같은 소리가 이 시간 안에 또 나면 건너뛴다 (연쇄 때 소리가 겹쳐 뭉개지는 것 방지) */
   var MIN_GAP_MS = 55;
   var lastAt = {};
@@ -138,12 +141,19 @@
         if (ctx) ctx.decodeAudioData(buf, function (d) { buffers[n] = d; }, function () {});
       }).catch(function () {});
     });
+    var byFile = {};
     Object.keys(bgm).forEach(function (n) {
-      var el = new Audio(DIR + bgm[n]);
-      // 배경음악은 파일이 크다. 켜기 전에는 받아오지 않는다(폰 데이터 아끼려고)
-      el.loop = true; el.volume = state.bgmVol; el.preload = 'none';
-      bgmEls[n] = el;
-      if (state.curBgm === n && !state.muted) el.play().catch(function () {});
+      var file = bgm[n];
+      // 두 화면이 같은 곡이면 하나만 만들어 같이 쓴다.
+      // 그래야 화면을 넘어가도 노래가 처음부터 다시 시작되지 않는다.
+      if (!byFile[file]) {
+        var el = new Audio(DIR + file);
+        // 배경음악은 파일이 크다. 켜기 전에는 받아오지 않는다(폰 데이터 아끼려고)
+        el.loop = true; el.volume = state.bgmVol; el.preload = 'none';
+        byFile[file] = el;
+      }
+      bgmEls[n] = byFile[file];
+      if (state.curBgm === n && !state.muted) bgmEls[n].play().catch(function () {});
     });
   }
 
@@ -288,15 +298,15 @@
 
   function bgm(name) {
     state.curBgm = name;
+    var want = bgmEls[name];
     Object.keys(bgmEls).forEach(function (k) {
       var el = bgmEls[k];
-      if (k === name) {
-        el.volume = state.bgmVol;
-        if (!state.muted) el.play().catch(function () {});
-      } else {
-        el.pause();
-      }
+      if (el === want) return;              // 같은 곡이면 끊지 않는다
+      el.pause();
     });
+    if (!want) return;
+    want.volume = state.bgmVol * (BGM_VOL[name] == null ? 1 : BGM_VOL[name]);
+    if (!state.muted) want.play().catch(function () {});
   }
 
   function stopBgm() {
