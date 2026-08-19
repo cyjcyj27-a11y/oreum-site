@@ -219,7 +219,6 @@
       }
       $('ovr-note').textContent = note;
       $('ovr-next').style.display = win && curStage < Stages.TOTAL ? '' : 'none';
-      if (win) setTimeout(function () { Sound.play('star'); }, 260);
       overlay('ov-result', true);
     }, 620);
   }

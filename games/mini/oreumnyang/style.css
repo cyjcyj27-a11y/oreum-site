@@ -221,7 +221,8 @@ body{
 @keyframes starPop{from{transform:scale(0) rotate(-40deg)}to{transform:none}}
 .howto p{font-size:14px;line-height:1.75;color:rgba(255,248,240,.88);margin:0 0 10px}
 .howto b{color:var(--accent)}
-#howto-close{display:block;margin:18px auto 0}
+.credit{margin:16px 0 0;text-align:center;font-size:11.5px;color:rgba(255,248,240,.45)}
+#howto-close{display:block;margin:14px auto 0}
 
 /* 움직임을 줄이는 설정을 켠 사람에게는 애니메이션을 끈다 */
 @media (prefers-reduced-motion: reduce){

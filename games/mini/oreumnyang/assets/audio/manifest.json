@@ -1,4 +1,8 @@
 {
-  "sfx": {},
+  "sfx": {
+    "star": "star.mp3",
+    "win": "win.mp3",
+    "lose": "lose.mp3"
+  },
   "bgm": {}
 }
