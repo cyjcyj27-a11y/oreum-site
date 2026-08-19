@@ -1,0 +1,298 @@
+/* =========================================================
+   오름냥 - 소리 담당
+   ---------------------------------------------------------
+   assets/audio/ 폴더에 아래 이름으로 파일을 넣으면 자동으로 씁니다.
+   파일이 없으면 코드로 만든 임시 소리(삐용~)가 대신 납니다.
+
+     pop.mp3      : 고양이 팡! 터지는 기본 소리
+     combo.mp3    : 연쇄로 또 터질 때
+     rocket.mp3   : 로켓냥 발사
+     bomb.mp3     : 폭탄냥 폭발
+     rainbow.mp3  : 무지개냥
+     swap.mp3     : 고양이 자리 바꿈
+     invalid.mp3  : 안 되는 자리 (뿌우)
+     goal.mp3     : 목표 하나 채움
+     star.mp3     : 별 획득
+     win.mp3      : 판 클리어
+     lose.mp3     : 실패
+     click.mp3    : 버튼 누름
+     bgm_map.mp3  : 지도 화면 배경음악
+     bgm_play.mp3 : 게임 중 배경음악
+
+   확장자는 mp3 / ogg / wav / m4a 다 됩니다. (자동으로 찾아봄)
+
+   파일을 넣은 뒤 `python 소리목록.py` 를 한 번 돌리면
+   assets/audio/manifest.json 이 갱신되어, 없는 파일을 헛되이 부르지 않습니다.
+   (manifest.json 이 없으면 예전처럼 하나씩 찾아봅니다)
+   ========================================================= */
+(function (global) {
+  'use strict';
+
+  var DIR = 'assets/audio/';
+  var EXTS = ['mp3', 'ogg', 'wav', 'm4a'];
+
+  var SFX_NAMES = ['pop', 'combo', 'rocket', 'bomb', 'rainbow', 'swap',
+                   'invalid', 'goal', 'star', 'win', 'lose', 'click'];
+  var BGM_NAMES = ['bgm_map', 'bgm_play'];
+
+  var buffers = {};     // 이름 -> AudioBuffer (파일이 있을 때)
+  var bgmEls = {};      // 이름 -> HTMLAudioElement
+  var ctx = null;
+  var masterGain = null;
+  var ready = false;
+
+  var state = {
+    muted: false,
+    sfxVol: 0.85,
+    bgmVol: 0.35,
+    curBgm: null
+  };
+
+  /* ---------- 초기화 ---------- */
+  function ensureCtx() {
+    if (ctx) return ctx;
+    var AC = global.AudioContext || global.webkitAudioContext;
+    if (!AC) return null;
+    ctx = new AC();
+    masterGain = ctx.createGain();
+    masterGain.gain.value = state.sfxVol;
+    masterGain.connect(ctx.destination);
+    return ctx;
+  }
+
+  function unlock() {
+    ensureCtx();
+    if (ctx && ctx.state === 'suspended') ctx.resume();
+    if (state.curBgm && bgmEls[state.curBgm]) {
+      var el = bgmEls[state.curBgm];
+      if (el.paused) el.play().catch(function () {});
+    }
+  }
+
+  /* 파일 하나를 확장자 후보로 돌려가며 찾아본다 */
+  function fetchFirst(base, i, cb) {
+    if (i >= EXTS.length) { cb(null); return; }
+    var url = DIR + base + '.' + EXTS[i];
+    fetch(url).then(function (res) {
+      if (!res.ok) throw 0;
+      return res.arrayBuffer();
+    }).then(function (buf) {
+      ensureCtx();
+      if (!ctx) throw 0;
+      ctx.decodeAudioData(buf,
+        function (decoded) { cb(decoded); },
+        function () { fetchFirst(base, i + 1, cb); });
+    }).catch(function () {
+      fetchFirst(base, i + 1, cb);
+    });
+  }
+
+  function probeBgm(base, i) {
+    if (i >= EXTS.length) return;
+    var url = DIR + base + '.' + EXTS[i];
+    fetch(url, { method: 'HEAD' }).then(function (res) {
+      if (!res.ok) throw 0;
+      var el = new Audio(url);
+      el.loop = true;
+      el.volume = state.bgmVol;
+      el.preload = 'auto';
+      bgmEls[base] = el;
+      if (state.curBgm === base && !state.muted) el.play().catch(function () {});
+    }).catch(function () { probeBgm(base, i + 1); });
+  }
+
+  /* 어떤 소리 파일이 있는지 목록(manifest.json)이 있으면 그것만 읽고,
+     없으면 확장자를 하나씩 넣어보며 직접 찾는다.
+     목록이 있으면 없는 파일을 헛되이 부르지 않아 배포본이 깔끔하다. */
+  function loadFromManifest(man) {
+    var sfx = man.sfx || {}, bgm = man.bgm || {};
+    Object.keys(sfx).forEach(function (n) {
+      fetch(DIR + sfx[n]).then(function (r) {
+        if (!r.ok) throw 0; return r.arrayBuffer();
+      }).then(function (buf) {
+        ensureCtx();
+        if (ctx) ctx.decodeAudioData(buf, function (d) { buffers[n] = d; }, function () {});
+      }).catch(function () {});
+    });
+    Object.keys(bgm).forEach(function (n) {
+      var el = new Audio(DIR + bgm[n]);
+      el.loop = true; el.volume = state.bgmVol; el.preload = 'auto';
+      bgmEls[n] = el;
+      if (state.curBgm === n && !state.muted) el.play().catch(function () {});
+    });
+  }
+
+  function probeEverything() {
+    SFX_NAMES.forEach(function (n) {
+      fetchFirst(n, 0, function (buf) { if (buf) buffers[n] = buf; });
+    });
+    BGM_NAMES.forEach(function (n) { probeBgm(n, 0); });
+  }
+
+  function init() {
+    if (ready) return;
+    ready = true;
+    ensureCtx();
+
+    fetch(DIR + 'manifest.json').then(function (r) {
+      if (!r.ok) throw 0;
+      return r.json();
+    }).then(function (man) {
+      loadFromManifest(man || {});
+    }).catch(function () {
+      probeEverything();
+    });
+
+    ['pointerdown', 'keydown', 'touchstart'].forEach(function (ev) {
+      global.addEventListener(ev, unlock, { passive: true });
+    });
+  }
+
+  /* ---------- 파일 재생 ---------- */
+  function playBuffer(name, rate, vol) {
+    var buf = buffers[name];
+    if (!buf || !ctx) return false;
+    var src = ctx.createBufferSource();
+    src.buffer = buf;
+    src.playbackRate.value = rate || 1;
+    var g = ctx.createGain();
+    g.gain.value = (vol == null ? 1 : vol);
+    src.connect(g); g.connect(masterGain);
+    src.start(0);
+    return true;
+  }
+
+  /* ---------- 임시 합성음 (파일 없을 때) ---------- */
+  function tone(freq, dur, type, vol, slideTo, delay) {
+    if (!ctx) return;
+    var t0 = ctx.currentTime + (delay || 0);
+    var osc = ctx.createOscillator();
+    var g = ctx.createGain();
+    osc.type = type || 'sine';
+    osc.frequency.setValueAtTime(freq, t0);
+    if (slideTo) osc.frequency.exponentialRampToValueAtTime(Math.max(30, slideTo), t0 + dur);
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.exponentialRampToValueAtTime(vol == null ? 0.3 : vol, t0 + 0.012);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    osc.connect(g); g.connect(masterGain);
+    osc.start(t0); osc.stop(t0 + dur + 0.02);
+  }
+
+  function noise(dur, vol, filtFreq, delay) {
+    if (!ctx) return;
+    var t0 = ctx.currentTime + (delay || 0);
+    var len = Math.floor(ctx.sampleRate * dur);
+    var buf = ctx.createBuffer(1, len, ctx.sampleRate);
+    var d = buf.getChannelData(0);
+    for (var i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / len);
+    var src = ctx.createBufferSource(); src.buffer = buf;
+    var flt = ctx.createBiquadFilter();
+    flt.type = 'lowpass'; flt.frequency.value = filtFreq || 2000;
+    var g = ctx.createGain(); g.gain.value = vol == null ? 0.25 : vol;
+    src.connect(flt); flt.connect(g); g.connect(masterGain);
+    src.start(t0);
+  }
+
+  var synth = {
+    pop: function (r) {
+      var f = 620 * (r || 1);
+      tone(f, 0.10, 'sine', 0.30, f * 2.1);
+      noise(0.06, 0.10, 3200);
+    },
+    combo: function (r) {
+      var f = 700 * (r || 1);
+      tone(f, 0.09, 'triangle', 0.26, f * 1.6);
+      tone(f * 1.5, 0.10, 'sine', 0.18, f * 2.6, 0.04);
+    },
+    rocket: function () {
+      tone(300, 0.30, 'sawtooth', 0.20, 1900);
+      noise(0.28, 0.16, 5000);
+    },
+    bomb: function () {
+      tone(150, 0.38, 'sine', 0.34, 42);
+      noise(0.34, 0.32, 1000);
+    },
+    rainbow: function () {
+      [0, 1, 2, 3, 4, 5].forEach(function (i) {
+        tone(520 * Math.pow(1.16, i), 0.16, 'sine', 0.20, null, i * 0.045);
+      });
+      noise(0.4, 0.10, 6000);
+    },
+    swap: function () { tone(430, 0.06, 'sine', 0.14, 560); },
+    invalid: function () { tone(190, 0.14, 'square', 0.13, 130); },
+    goal: function () { tone(880, 0.10, 'sine', 0.22, 1180); },
+    star: function () {
+      tone(900, 0.13, 'sine', 0.24, 1400);
+      tone(1350, 0.16, 'sine', 0.16, 1800, 0.07);
+    },
+    win: function () {
+      [523, 659, 784, 1047].forEach(function (f, i) {
+        tone(f, 0.26, 'triangle', 0.26, null, i * 0.11);
+      });
+    },
+    lose: function () {
+      [420, 350, 280, 200].forEach(function (f, i) {
+        tone(f, 0.24, 'sine', 0.22, null, i * 0.13);
+      });
+    },
+    click: function () { tone(680, 0.04, 'square', 0.10); }
+  };
+
+  /* ---------- 공개 API ---------- */
+  function play(name, opts) {
+    if (state.muted) return;
+    ensureCtx();
+    if (!ctx) return;
+    if (ctx.state === 'suspended') ctx.resume();
+    opts = opts || {};
+    var rate = opts.rate || 1;
+    if (playBuffer(name, rate, opts.vol)) return;
+    var fn = synth[name];
+    if (fn) fn(rate);
+  }
+
+  function bgm(name) {
+    state.curBgm = name;
+    Object.keys(bgmEls).forEach(function (k) {
+      var el = bgmEls[k];
+      if (k === name) {
+        el.volume = state.bgmVol;
+        if (!state.muted) el.play().catch(function () {});
+      } else {
+        el.pause();
+      }
+    });
+  }
+
+  function stopBgm() {
+    state.curBgm = null;
+    Object.keys(bgmEls).forEach(function (k) { bgmEls[k].pause(); });
+  }
+
+  function setMuted(m) {
+    state.muted = !!m;
+    if (masterGain) masterGain.gain.value = state.muted ? 0 : state.sfxVol;
+    Object.keys(bgmEls).forEach(function (k) {
+      var el = bgmEls[k];
+      if (state.muted) el.pause();
+      else if (k === state.curBgm) el.play().catch(function () {});
+    });
+    try { localStorage.setItem('oreumnyang.muted', state.muted ? '1' : '0'); } catch (e) {}
+    return state.muted;
+  }
+
+  function toggleMute() { return setMuted(!state.muted); }
+  function isMuted() { return state.muted; }
+
+  try { state.muted = localStorage.getItem('oreumnyang.muted') === '1'; } catch (e) {}
+
+  global.Sound = {
+    init: init,
+    play: play,
+    bgm: bgm,
+    stopBgm: stopBgm,
+    toggleMute: toggleMute,
+    setMuted: setMuted,
+    isMuted: isMuted
+  };
+})(window);
