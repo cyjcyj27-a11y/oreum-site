@@ -3,6 +3,8 @@
 게시판 화면(`board.html`)은 다 만들어져 있습니다.
 아래 순서대로 하면 글과 사진이 실제로 저장됩니다. 10분이면 끝납니다.
 
+
+> **댓글 기능**은 표를 하나 더 만들어야 합니다 → [board-comments-setup.md](board-comments-setup.md)
 ---
 
 ## 1. Supabase 가입 (직접 하셔야 하는 부분)
