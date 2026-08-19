@@ -203,10 +203,17 @@ body{
   box-shadow:0 18px 44px rgba(0,0,0,.45), inset 0 0 0 2px rgba(255,255,255,.09);
   animation:cardIn .26s cubic-bezier(.2,1.4,.5,1);
 }
-.card-wide{max-width:400px;text-align:left}
+/* 놀이 방법처럼 글이 긴 창은 화면을 넘지 않게 하고, 넘치면 안에서 굴립니다 */
+.card-wide{
+  max-width:400px;text-align:left;padding:20px 18px 18px;
+  max-height:calc(100dvh - 40px);overflow-y:auto;
+  overscroll-behavior:contain;-webkit-overflow-scrolling:touch;
+}
+.card-wide::-webkit-scrollbar{width:6px}
+.card-wide::-webkit-scrollbar-thumb{background:rgba(255,255,255,.22);border-radius:3px}
 @keyframes cardIn{from{transform:scale(.8) translateY(20px)}to{transform:none}}
 .card h2{margin:6px 0 14px;font-size:24px}
-.card-wide h2{text-align:center}
+.card-wide h2{text-align:center;margin:2px 0 12px;font-size:21px}
 .card-badge{
   display:inline-block;background:var(--accent);color:#4a2c00;font-weight:900;
   padding:5px 15px;border-radius:999px;font-size:13px;
@@ -235,10 +242,10 @@ body{
 .stars i:nth-child(2).on::after{animation-delay:.14s}
 .stars i:nth-child(3).on::after{animation-delay:.28s}
 @keyframes starPop{from{transform:scale(0) rotate(-40deg)}to{transform:none}}
-.howto p{font-size:14px;line-height:1.75;color:rgba(255,248,240,.88);margin:0 0 10px}
+.howto p{font-size:13px;line-height:1.6;color:rgba(255,248,240,.88);margin:0 0 8px}
 .howto b{color:var(--accent)}
 .credit{margin:16px 0 0;text-align:center;font-size:11.5px;color:rgba(255,248,240,.45)}
-#howto-close{display:block;margin:14px auto 0}
+#howto-close{display:block;margin:14px auto 4px}
 
 /* 움직임을 줄이는 설정을 켠 사람에게는 애니메이션을 끈다 */
 @media (prefers-reduced-motion: reduce){
