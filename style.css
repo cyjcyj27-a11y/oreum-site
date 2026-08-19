@@ -676,3 +676,6 @@ h1, h2, h3 { line-height: 1.3; letter-spacing: -.02em; margin: 0; }
   .cmt-pw { flex: 0 0 92px; }
   .cmt-send { flex: 1 1 100%; }
 }
+
+/* 하단 태그 띠 */
+.tags-strip { margin-bottom: 56px; }
