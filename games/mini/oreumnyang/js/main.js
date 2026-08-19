@@ -293,11 +293,22 @@
     $('btn-shuffle').addEventListener('click', function () { if (game) game.useShuffle(); });
     $('btn-hint').addEventListener('click', function () { if (game) game.useHint(); });
 
-    $('btn-sound').textContent = Sound.isMuted() ? '🔇' : '🔊';
-    $('btn-sound').addEventListener('click', function () {
-      var m = Sound.toggleMute();
-      $('btn-sound').textContent = m ? '🔇' : '🔊';
+    /* 음악 버튼과 효과음 버튼은 따로 논다. 화면마다 한 벌씩 있어서 모두 묶어준다. */
+    function paintSoundButtons() {
+      document.querySelectorAll('[data-snd]').forEach(function (b) {
+        var off = b.dataset.snd === 'bgm' ? Sound.isBgmMuted() : Sound.isSfxMuted();
+        b.classList.toggle('off', off);
+        b.setAttribute('aria-pressed', off ? 'false' : 'true');
+      });
+    }
+    document.querySelectorAll('[data-snd]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        if (b.dataset.snd === 'bgm') Sound.toggleBgm();
+        else { Sound.toggleSfx(); Sound.play('click'); }
+        paintSoundButtons();
+      });
     });
+    paintSoundButtons();
 
     global.addEventListener('resize', function () { if (game) game.resize(); });
     global.addEventListener('orientationchange', function () {

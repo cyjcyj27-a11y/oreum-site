@@ -69,7 +69,8 @@
   var ready = false;
 
   var state = {
-    muted: false,
+    mutedSfx: false,      // 효과음 끔
+    mutedBgm: false,      // 배경음악 끔
     sfxVol: 0.85,
     bgmVol: 0.35,
     curBgm: null
@@ -92,8 +93,8 @@
      음소거 상태에서는 깨우면 안 된다. (끄는 그 터치가 다시 켜버린다) */
   function unlock() {
     ensureCtx();
-    if (state.muted) return;
     if (ctx && ctx.state === 'suspended') ctx.resume();
+    if (state.mutedBgm) return;
     if (state.curBgm && bgmEls[state.curBgm]) {
       var el = bgmEls[state.curBgm];
       if (el.paused) el.play().catch(function () {});
@@ -128,7 +129,7 @@
       el.volume = state.bgmVol;
       el.preload = 'auto';
       bgmEls[base] = el;
-      if (state.curBgm === base && !state.muted) el.play().catch(function () {});
+      if (state.curBgm === base && !state.mutedBgm) el.play().catch(function () {});
     }).catch(function () { probeBgm(base, i + 1); });
   }
 
@@ -157,7 +158,7 @@
         byFile[file] = el;
       }
       bgmEls[n] = byFile[file];
-      if (state.curBgm === n && !state.muted) bgmEls[n].play().catch(function () {});
+      if (state.curBgm === n && !state.mutedBgm) bgmEls[n].play().catch(function () {});
     });
 
     // 배경음악은 파일이 커서, 트는 순간에 받기 시작하면 한참 기다린다.
@@ -293,7 +294,7 @@
 
   /* ---------- 공개 API ---------- */
   function play(name, opts) {
-    if (state.muted) return;
+    if (state.mutedSfx) return;
     ensureCtx();
     if (!ctx) return;
     if (ctx.state === 'suspended') ctx.resume();
@@ -320,7 +321,7 @@
     });
     if (!want) return;
     var target = state.bgmVol * (BGM_VOL[name] == null ? 1 : BGM_VOL[name]);
-    if (state.muted) return;
+    if (state.mutedBgm) return;
     // 갑자기 툭 튀어나오지 않게 0.6초 동안 서서히 키운다
     var from = want.paused ? 0 : want.volume;
     want.volume = from;
@@ -340,32 +341,46 @@
     Object.keys(bgmEls).forEach(function (k) { bgmEls[k].pause(); });
   }
 
-  function setMuted(m) {
-    state.muted = !!m;
-    if (masterGain) masterGain.gain.value = state.muted ? 0 : state.sfxVol;
+  /* ---------- 효과음 / 배경음악을 따로 끄고 켠다 ---------- */
+  function setSfxMuted(m) {
+    state.mutedSfx = !!m;
+    if (masterGain) masterGain.gain.value = state.mutedSfx ? 0 : state.sfxVol;
+    save('sfx', state.mutedSfx);
+    return state.mutedSfx;
+  }
+
+  function setBgmMuted(m) {
+    state.mutedBgm = !!m;
     Object.keys(bgmEls).forEach(function (k) {
       var el = bgmEls[k];
-      if (state.muted) el.pause();
-      else if (k === state.curBgm) el.play().catch(function () {});
+      if (state.mutedBgm) el.pause();
     });
-    try { localStorage.setItem('oreumnyang.muted', state.muted ? '1' : '0'); } catch (e) {}
-    return state.muted;
+    if (!state.mutedBgm && state.curBgm) bgm(state.curBgm);
+    save('bgm', state.mutedBgm);
+    return state.mutedBgm;
   }
 
-  function toggleMute() {
-    var m = setMuted(!state.muted);
-    if (!m) unlock();          // 다시 켤 때는 소리를 깨워준다
-    return m;
+  function save(which, v) {
+    try { localStorage.setItem('oreumnyang.muted.' + which, v ? '1' : '0'); } catch (e) {}
   }
-  function isMuted() { return state.muted; }
 
-  try { state.muted = localStorage.getItem('oreumnyang.muted') === '1'; } catch (e) {}
+  function toggleSfx() { return setSfxMuted(!state.mutedSfx); }
+  function toggleBgm() { return setBgmMuted(!state.mutedBgm); }
+  function isSfxMuted() { return state.mutedSfx; }
+  function isBgmMuted() { return state.mutedBgm; }
+
+  try {
+    var old = localStorage.getItem('oreumnyang.muted');          // 예전 설정 물려받기
+    state.mutedSfx = localStorage.getItem('oreumnyang.muted.sfx') === '1' || old === '1';
+    state.mutedBgm = localStorage.getItem('oreumnyang.muted.bgm') === '1' || old === '1';
+  } catch (e) {}
 
   /* 지금 소리가 어떤 상태인지 (확인·문제 찾기용) */
   function status() {
     var el = state.curBgm ? bgmEls[state.curBgm] : null;
     return {
-      muted: state.muted,
+      mutedSfx: state.mutedSfx,
+      mutedBgm: state.mutedBgm,
       bgm: state.curBgm,
       playing: !!(el && !el.paused),
       volume: el ? Math.round(el.volume * 100) / 100 : null,
@@ -380,8 +395,9 @@
     play: play,
     bgm: bgm,
     stopBgm: stopBgm,
-    toggleMute: toggleMute,
-    setMuted: setMuted,
-    isMuted: isMuted
+    toggleSfx: toggleSfx,
+    toggleBgm: toggleBgm,
+    isSfxMuted: isSfxMuted,
+    isBgmMuted: isBgmMuted
   };
 })(window);
