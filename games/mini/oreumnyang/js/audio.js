@@ -370,9 +370,12 @@
   function isBgmMuted() { return state.mutedBgm; }
 
   try {
-    var old = localStorage.getItem('oreumnyang.muted');          // 예전 설정 물려받기
-    state.mutedSfx = localStorage.getItem('oreumnyang.muted.sfx') === '1' || old === '1';
-    state.mutedBgm = localStorage.getItem('oreumnyang.muted.bgm') === '1' || old === '1';
+    // 버튼을 둘로 나누기 전에 쓰던 설정이 남아 있으면 지웁니다.
+    // 이걸 계속 참고하면, 소리를 켜도 새로고침할 때마다 다시 꺼집니다.
+    // (그 시절 끄기 버튼은 고장나 있었으니 값 자체도 믿을 게 못 됩니다)
+    localStorage.removeItem('oreumnyang.muted');
+    state.mutedSfx = localStorage.getItem('oreumnyang.muted.sfx') === '1';
+    state.mutedBgm = localStorage.getItem('oreumnyang.muted.bgm') === '1';
   } catch (e) {}
 
   /* 지금 소리가 어떤 상태인지 (확인·문제 찾기용) */
