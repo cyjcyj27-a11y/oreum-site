@@ -343,6 +343,7 @@
     bgmOn = localStorage.getItem('luluDodgeBgm') !== '0';
   } catch (e) {}
 
+  var AUDIO_V = '2';        // 음원을 갈아 끼울 때마다 올립니다(브라우저 캐시 우회)
   var SFX_FILES = { start: 0.60, clear: 0.75, land: 0.32, die: 0.85, fanfare: 1.0 };
   var buffers = {};
   var MIN_GAP = 60;          // 같은 소리가 이 시간 안에 또 나면 건너뜁니다
@@ -361,7 +362,7 @@
   // 풀어 놓는(decode) 일만 첫 손길 때 합니다.
   var raw = {}, loaded = false, waiting = null;
   Object.keys(SFX_FILES).forEach(function (name) {
-    fetch('audio/' + name + '.mp3')
+    fetch('audio/' + name + '.mp3?v=' + AUDIO_V)
       .then(function (r) { return r.arrayBuffer(); })
       .then(function (b) { raw[name] = b; if (loaded) decodeOne(name); })
       .catch(function () {});           // 한 개쯤 못 받아도 게임은 그대로
@@ -416,7 +417,7 @@
   var bgm = null;
   function bgmEl() {
     if (!bgm) {
-      bgm = new Audio('audio/bgm.mp3');
+      bgm = new Audio('audio/bgm.mp3?v=' + AUDIO_V);
       bgm.loop = true;
       bgm.volume = 0.32;                 // 효과음이 묻히지 않게 낮춰 둡니다
       bgm.preload = 'none';
