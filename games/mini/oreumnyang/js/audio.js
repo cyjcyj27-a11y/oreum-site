@@ -140,7 +140,8 @@
     });
     Object.keys(bgm).forEach(function (n) {
       var el = new Audio(DIR + bgm[n]);
-      el.loop = true; el.volume = state.bgmVol; el.preload = 'auto';
+      // 배경음악은 파일이 크다. 켜기 전에는 받아오지 않는다(폰 데이터 아끼려고)
+      el.loop = true; el.volume = state.bgmVol; el.preload = 'none';
       bgmEls[n] = el;
       if (state.curBgm === n && !state.muted) el.play().catch(function () {});
     });

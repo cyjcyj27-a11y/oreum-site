@@ -13,5 +13,8 @@
     "lose": "lose.mp3",
     "click": "click.mp3"
   },
-  "bgm": {}
+  "bgm": {
+    "bgm_map": "bgm_map.mp3",
+    "bgm_play": "bgm_play.mp3"
+  }
 }
