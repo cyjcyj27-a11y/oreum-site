@@ -35,6 +35,30 @@
                    'invalid', 'goal', 'star', 'win', 'lose', 'click'];
   var BGM_NAMES = ['bgm_map', 'bgm_play'];
 
+  /* -------------------------------------------------------
+     소리별 크기 (0 = 무음, 1 = 원래 크기)
+     자주 나는 소리를 작게 해야 가끔 나는 소리가 묻히지 않는다.
+     귀에 거슬리면 이 숫자만 고치면 된다. 파일은 안 건드려도 됨.
+     ------------------------------------------------------- */
+  var VOL = {
+    pop:     0.38,   // 고양이 터짐 - 제일 자주 난다
+    combo:   0.44,   // 연쇄
+    swap:    0.26,   // 자리 바꿈 - 매번 난다
+    click:   0.40,   // 버튼
+    invalid: 0.45,   // 안 되는 자리
+    goal:    0.34,   // 오름 오름 / 감귤 배달
+    rocket:  0.95,   // 로켓냥 - 가끔이니 크게
+    bomb:    1.00,   // 폭탄냥
+    rainbow: 1.00,   // 무지개냥
+    star:    0.70,   // 특수냥 탄생
+    win:     1.00,
+    lose:    1.00
+  };
+
+  /* 같은 소리가 이 시간 안에 또 나면 건너뛴다 (연쇄 때 소리가 겹쳐 뭉개지는 것 방지) */
+  var MIN_GAP_MS = 55;
+  var lastAt = {};
+
   var buffers = {};     // 이름 -> AudioBuffer (파일이 있을 때)
   var bgmEls = {};      // 이름 -> HTMLAudioElement
   var ctx = null;
@@ -156,15 +180,18 @@
     src.buffer = buf;
     src.playbackRate.value = rate || 1;
     var g = ctx.createGain();
-    g.gain.value = (vol == null ? 1 : vol);
+    g.gain.value = (vol == null ? (VOL[name] == null ? 1 : VOL[name]) : vol);
     src.connect(g); g.connect(masterGain);
     src.start(0);
     return true;
   }
 
   /* ---------- 임시 합성음 (파일 없을 때) ---------- */
+  var synthName = null;   // 지금 합성 중인 소리 이름 (크기표 적용용)
+
   function tone(freq, dur, type, vol, slideTo, delay) {
     if (!ctx) return;
+    if (synthName && VOL[synthName] != null) vol = (vol == null ? 0.3 : vol) * VOL[synthName];
     var t0 = ctx.currentTime + (delay || 0);
     var osc = ctx.createOscillator();
     var g = ctx.createGain();
@@ -180,6 +207,7 @@
 
   function noise(dur, vol, filtFreq, delay) {
     if (!ctx) return;
+    if (synthName && VOL[synthName] != null) vol = (vol == null ? 0.25 : vol) * VOL[synthName];
     var t0 = ctx.currentTime + (delay || 0);
     var len = Math.floor(ctx.sampleRate * dur);
     var buf = ctx.createBuffer(1, len, ctx.sampleRate);
@@ -244,11 +272,17 @@
     ensureCtx();
     if (!ctx) return;
     if (ctx.state === 'suspended') ctx.resume();
+
+    // 같은 소리가 너무 촘촘히 겹치면 건너뛴다
+    var now = ctx.currentTime * 1000;
+    if (lastAt[name] != null && now - lastAt[name] < MIN_GAP_MS) return;
+    lastAt[name] = now;
+
     opts = opts || {};
     var rate = opts.rate || 1;
     if (playBuffer(name, rate, opts.vol)) return;
     var fn = synth[name];
-    if (fn) fn(rate);
+    if (fn) { synthName = name; fn(rate); synthName = null; }
   }
 
   function bgm(name) {
