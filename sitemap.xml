@@ -91,23 +91,7 @@
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
-  <url>
-    <loc>https://oreumgames.com/games/mini/character-lab/</loc>
-    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/games/mini/character-lab/"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/games/mini/character-lab/"/>
-    <lastmod>2026-08-19</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://oreumgames.com/games/mini/character-maker/</loc>
-    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/games/mini/character-maker/"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/games/mini/character-maker/"/>
-    <lastmod>2026-08-19</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
+      <url>
     <loc>https://oreumgames.com/games/mini/knife-duel-v7/</loc>
     <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/games/mini/knife-duel-v7/"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/games/mini/knife-duel-v7/"/>
@@ -148,9 +132,9 @@
     <priority>0.9</priority>
   </url>
 <url>
-    <loc>https://oreumgames.com/games/mini/lulu-dodge/</loc>
-    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/games/mini/lulu-dodge/"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/games/mini/lulu-dodge/"/>
+    <loc>https://oreumgames.com/games/mini/slip-cat/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/games/mini/slip-cat/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/games/mini/slip-cat/"/>
     <lastmod>2026-08-20</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
