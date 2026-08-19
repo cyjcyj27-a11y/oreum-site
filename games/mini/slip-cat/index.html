@@ -89,6 +89,13 @@
     padding: 4px 2px;                /* 글자가 작아도 손가락 닿는 면적은 넉넉하게 */
   }
   .home:active { color: var(--caramel-lit); }
+  /* 처음부터 하기 — 이어하기 아래 작게 */
+  .restart {
+    display: inline-block; margin: 11px 0 0; font-size: 13px; color: var(--muted);
+    text-decoration: none; border-bottom: 1px dashed var(--line); padding: 3px 2px;
+  }
+  .restart[hidden] { display: none; }
+  .restart:active { color: var(--caramel-lit); }
   .oreum {
     display: inline-flex; align-items: center; gap: 6px;
     color: var(--caramel-lit); border-bottom-color: #f0dcbc; font-weight: 600;
@@ -213,10 +220,11 @@
   <!-- 시작 화면 -->
   <div class="layer" id="titleLayer">
     <div class="card">
-      <h1 id="tTitle">SLIP CAT<span class="sub">감귤상자 피하기</span></h1>
+      <h1 id="tTitle">SLIP CAT</h1>
       <p class="lede" id="tLede"></p>
       <p class="keys" id="tKeys"></p>
       <button class="btn" id="btnStart">시작하기</button>
+      <a class="restart" id="tTop" href="#" hidden>처음부터 하기</a>
       <div class="links">
         <a class="home" id="tHome" href="/games/mini/">← 미니게임 목록</a>
         <a class="home oreum" id="tOreum" href="/" target="_blank" rel="noopener">
@@ -235,6 +243,7 @@
       <p class="best" id="oBest"></p>
       <p><span class="newrec" id="oNew" hidden>최고 기록!</span></p>
       <button class="btn" id="btnRetry">다시 하기</button>
+      <a class="restart" id="oTop" href="#">처음부터 하기</a>
       <div class="links">
         <a class="home" id="oHome" href="/games/mini/">← 미니게임 목록</a>
         <a class="home oreum" id="oOreum" href="/" target="_blank" rel="noopener">
@@ -264,11 +273,13 @@
 
   var T = {
     ko: {
-      title: 'SLIP CAT', sub: '감귤상자 피하기',
+      title: 'SLIP CAT', sub: '',
       lede: '하늘에서 감귤상자가 떨어집니다.<br>루루냥을 좌우로 옮겨 피하세요.<br>' +
             '판이 오를수록 당근·월동무·망사리도 쏟아집니다.',
       keys: '화면을 손가락으로 끌어 이동 · 키보드는 ← →',
       start: '시작하기', retry: '다시 하기', home: '← 미니게임 목록',
+      resume: function (k) { return 'STAGE ' + k + ' 부터'; },
+      fromTop: '처음부터 하기',
       capOver: '버틴 판', capWin: '모두 넘었습니다',
       best: '최고 기록', newrec: '최고 기록!',
       stage: function (n) { return 'STAGE ' + n; },
@@ -283,11 +294,13 @@
       other: 'EN', otherHref: '?lang=en', homeHref: '/games/mini/'
     },
     en: {
-      title: 'SLIP CAT', sub: 'Tangerine Dodge',
+      title: 'SLIP CAT', sub: '',
       lede: 'Tangerine crates fall from the sky.<br>Slide Lulu left and right to dodge them.<br>' +
             'Carrots, radishes and net bags join in as the stages climb.',
       keys: 'Drag anywhere to move · Arrow keys on desktop',
       start: 'Start', retry: 'Play again', home: '← Mini games',
+      resume: function (k) { return 'Resume STAGE ' + k; },
+      fromTop: 'Start from stage 1',
       capOver: 'Stage reached', capWin: 'All clear',
       best: 'Best', newrec: 'New best!',
       stage: function (n) { return 'STAGE ' + n; },
@@ -493,13 +506,21 @@
   var celebrate = false;
   var skyT = 0;               // 구름이 흘러가는 시간 (게임 중이 아니어도 흐릅니다)
   var bestStage = 0, bestGam = 0;
+  var resumeStage = 1;          // 죽은 판. 다시 하면 여기서 이어 갑니다
   try {
     bestStage = parseInt(localStorage.getItem('luluDodgeStage') || '0', 10) || 0;
     bestGam   = parseInt(localStorage.getItem('luluDodgeGam')   || '0', 10) || 0;
+    resumeStage = parseInt(localStorage.getItem('slipCatResume') || '1', 10) || 1;
   } catch (e) {}
+  if (resumeStage < 1 || resumeStage > LAST_STAGE) resumeStage = 1;
 
-  function reset() {
-    t = 0; stage = 1; stageT = 0; gam = 0; items = []; puffs = [];
+  function saveResume(k) {
+    resumeStage = k;
+    try { localStorage.setItem('slipCatResume', String(k)); } catch (e) {}
+  }
+
+  function reset(from) {
+    t = 0; stage = from || 1; stageT = 0; gam = 0; items = []; puffs = [];
     lulu.x = W / 2; lulu.vx = 0; lulu.dir = 1; lulu.anim = 0;
     targetX = null; spawnTimer = 0.7; celebrate = false;
   }
@@ -932,9 +953,9 @@
   }
 
   // ── 흐름 ────────────────────────────────────────────────
-  function start() {
-    reset(); state = STATE.PLAY;
-    $('hudStage').textContent = T.stage(1);
+  function start(from) {
+    reset(from); state = STATE.PLAY;
+    $('hudStage').textContent = T.stage(stage);
     $('hudGam').textContent = '0';
     $('barFill').style.width = '0%';
     $('titleLayer').hidden = true; $('overLayer').hidden = true; $('brkLayer').hidden = true;
@@ -999,12 +1020,17 @@
       localStorage.setItem('luluDodgeStage', String(bestStage));
       localStorage.setItem('luluDodgeGam', String(bestGam));
     } catch (e) {}
+    // 죽은 판에서 이어 가도록 기억해 둡니다. 다 깼으면 처음으로 되돌립니다.
+    saveResume(won ? 1 : stage);
     celebrate = isNew || won;
     $('oCap').textContent = won ? T.capWin : T.capOver;
     $('oScore').textContent = won ? T.winTitle : T.stage(stage);
     $('oTime').textContent = T.gamTotal(gam);
     $('oBest').textContent = T.best + ' ' + T.stage(bestStage) + ' · ' + T.gamTotal(bestGam);
     $('oNew').hidden = !isNew; $('oNew').textContent = T.newrec;
+    $('btnRetry').textContent = won ? T.retry : T.resume(stage);
+    $('oTop').textContent = T.fromTop;
+    $('oTop').hidden = won;
     $('hud').hidden = true; $('bar').hidden = true;
     $('brkLayer').hidden = true; $('overLayer').hidden = false; $('langBtn').hidden = false;
     bgmStop();
@@ -1031,7 +1057,7 @@
     if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') keyR = true;
     if (e.key === 'm' || e.key === 'M') { setSfx(!sfxOn); setBgm(sfxOn); }
     if (e.key === ' ' || e.key === 'Enter') {
-      if (state === STATE.TITLE || state === STATE.OVER || state === STATE.WIN) start();
+      if (state === STATE.TITLE || state === STATE.OVER || state === STATE.WIN) start(resumeStage);
     }
   });
   window.addEventListener('keyup', function (e) {
@@ -1044,8 +1070,19 @@
     e.stopPropagation(); loadSfx(); setSfx(!sfxOn); if (sfxOn) SFX.start();
   });
   $('bgmBtn').addEventListener('click', function (e) { e.stopPropagation(); setBgm(!bgmOn); });
-  $('btnStart').addEventListener('click', start);
-  $('btnRetry').addEventListener('click', start);
+  // 시작 화면: 이어할 판이 있으면 그 판부터
+  function refreshStartBtn() {
+    var r = resumeStage > 1;
+    $('btnStart').textContent = r ? T.resume(resumeStage) : T.start;
+    $('tTop').hidden = !r;
+    $('tTop').textContent = T.fromTop;
+  }
+  refreshStartBtn();
+
+  $('btnStart').addEventListener('click', function () { start(resumeStage); });
+  $('btnRetry').addEventListener('click', function () { start(resumeStage); });
+  $('tTop').addEventListener('click', function (e) { e.preventDefault(); saveResume(1); start(1); });
+  $('oTop').addEventListener('click', function (e) { e.preventDefault(); saveResume(1); start(1); });
   window.addEventListener('resize', resize);
   window.addEventListener('orientationchange', function () { setTimeout(resize, 120); });
 
