@@ -46,10 +46,11 @@
   function chapterOf(n) {
     for (var i = 0; i < CHAPTERS.length; i++) {
       if (n >= CHAPTERS[i].from && n <= CHAPTERS[i].to) {
-        return { index: i, name: CHAPTERS[i].name, from: CHAPTERS[i].from, to: CHAPTERS[i].to };
+        return { index: i, name: (global.T ? global.T('ch.' + i) : CHAPTERS[i].name),
+                 from: CHAPTERS[i].from, to: CHAPTERS[i].to };
       }
     }
-    return { index: 0, name: CHAPTERS[0].name, from: 1, to: 20 };
+    return { index: 0, name: (global.T ? global.T('ch.0') : CHAPTERS[0].name), from: 1, to: 20 };
   }
 
   /* 위에서부터 파낸 깊이 배열 = 변형 보드 모양 */
@@ -337,23 +338,25 @@
 
   /* 목표를 사람 말로 */
   function goalText(g) {
-    if (g.type === 'score')   return g.count.toLocaleString() + '점 모으기';
-    if (g.type === 'collect') return (global.Cats ? Cats.PALETTE[g.color].name : '고양이') + ' ' + g.count + '마리 모으기';
-    if (g.type === 'jelly')   return '오름 ' + g.count + '곳 모두 오르기';
-    if (g.type === 'drop')    return '감귤 ' + g.count + '개 아래로 내려 수확하기';
+    var T = global.T;
+    if (g.type === 'score')   return T('goal.score',   { n: g.count.toLocaleString() });
+    if (g.type === 'collect') return T('goal.collect', { n: g.count, cat: Cats.nameOf(g.color) });
+    if (g.type === 'jelly')   return T('goal.jelly',   { n: g.count });
+    if (g.type === 'drop')    return T('goal.drop',    { n: g.count });
     return '';
   }
 
   function stageNote(cfg) {
     var bits = [];
-    if (cfg.boss) bits.push('보스 판! 조금 더 어려워요');
-    if (cfg.n === 13) bits.push('새 장애물: 오름 - 그 칸 위에서 고양이를 터뜨리면 한 겹씩 올라가요');
-    if (cfg.n === 26) bits.push('새 장애물: 돌담 - 바로 옆에서 터뜨리면 무너져요');
-    if (cfg.n === 46) bits.push('새 장애물: 당근밭 - 고양이가 파묻혀 못 움직여요. 옆에서 터뜨려 꺼내주세요');
-    if (cfg.n === 61) bits.push('새 목표: 감귤 - 맨 아래까지 내려보내면 수확이에요');
-    if (cfg.n === 91) bits.push('오름이 두 겹이 되었어요. 두 번 올라야 해요');
-    if (cfg.n === 101) bits.push('보드 모양이 달라집니다');
-    if (cfg.n === 13 || cfg.n === 46 || cfg.n === 181) bits.push('고양이 종류가 늘어났어요');
+    var T = global.T;
+    if (cfg.boss) bits.push(T('note.boss'));
+    if (cfg.n === 13) bits.push(T('note.oreum'));
+    if (cfg.n === 26) bits.push(T('note.wall'));
+    if (cfg.n === 46) bits.push(T('note.carrot'));
+    if (cfg.n === 61) bits.push(T('note.fruit'));
+    if (cfg.n === 91) bits.push(T('note.oreum2'));
+    if (cfg.n === 101) bits.push(T('note.shape'));
+    if (cfg.n === 13 || cfg.n === 46 || cfg.n === 181) bits.push(T('note.colors'));
     return bits.join('\n');
   }
 

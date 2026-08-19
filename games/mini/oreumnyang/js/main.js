@@ -50,8 +50,8 @@
       sec.className = 'chapter';
       var head = document.createElement('div');
       head.className = 'chapter-head';
-      head.innerHTML = '<span class="cnum">' + (ci + 1) + '장</span> ' + ch.name +
-        ' <small style="font-weight:700;opacity:.6">' + ch.from + '~' + ch.to + '</small>';
+      head.innerHTML = '<span class="cnum">' + T('chapter.n', { n: ci + 1 }) + '</span> ' +
+        T('ch.' + ci) + ' <small style="font-weight:700;opacity:.6">' + ch.from + '~' + ch.to + '</small>';
       sec.appendChild(head);
       var grid = document.createElement('div');
       grid.className = 'nodes';
@@ -88,7 +88,7 @@
   function openStage(n) {
     curStage = n;
     var cfg = Stages.get(n);
-    $('ovs-stage').textContent = n + '판' + (cfg.boss ? ' · 보스' : '');
+    $('ovs-stage').textContent = T(cfg.boss ? 'stage.boss' : 'stage.n', { n: n });
     $('ovs-title').textContent = cfg.chapterName;
     var list = $('ovs-goals');
     list.innerHTML = '';
@@ -103,11 +103,19 @@
     });
     var mv = document.createElement('div');
     mv.className = 'goal-row';
-    mv.innerHTML = '<span class="gi">👣</span><span>움직일 수 있는 횟수 ' + cfg.moves + '번</span>';
+    mv.innerHTML = '<span class="gi">👣</span><span>' + T('card.moves', { n: cfg.moves }) + '</span>';
     list.appendChild(mv);
 
     $('ovs-note').textContent = Stages.stageNote(cfg);
     overlay('ov-start', true);
+  }
+
+  /* 실패 화면에서 '무엇이 몇 개 모자란지'만 짧게 보여줍니다 */
+  function goalShort(g) {
+    if (g.type === 'collect') return Cats.nameOf(g.color);
+    if (g.type === 'jelly')   return T('ch.2');            // 오름
+    if (g.type === 'drop')    return isEn() ? 'tangerines' : '감귤';
+    return isEn() ? 'points' : '점';
   }
 
   function goalIcon(g, px) {
@@ -124,7 +132,7 @@
   function startStage(n) {
     var cfg = Stages.get(n);
     curStage = n;
-    $('hud-stage').textContent = n + '판' + (cfg.boss ? ' 👑' : '');
+    $('hud-stage').textContent = T('stage.n', { n: n }) + (cfg.boss ? ' 👑' : '');
     $('hud-chapter').textContent = cfg.chapterName;
     show('screen-game');
     if (!game) {
@@ -168,7 +176,7 @@
     prog.forEach(function (p, i) {
       var d = box.children[i];
       d.classList.toggle('done', p.done);
-      d.querySelector('.gn').textContent = p.done ? '완료' : (p.goal.count - p.cur);
+      d.querySelector('.gn').textContent = p.done ? T('goal.done') : (p.goal.count - p.cur);
     });
 
     $('shuffle-badge').textContent = gm.shufflesLeft;
@@ -201,21 +209,20 @@
       var box = $('ovr-stars').children;
       for (var i = 0; i < 3; i++) box[i].classList.toggle('on', i < stars);
       $('ovr-title').textContent = win
-        ? (curStage === Stages.TOTAL ? '200판 전부 클리어!' : '클리어!')
-        : '아쉬워요';
-      $('ovr-score').textContent = gm.score.toLocaleString() + '점';
+        ? T(curStage === Stages.TOTAL ? 'end.all' : 'end.clear')
+        : T('end.fail');
+      $('ovr-score').textContent = T('end.score', { n: gm.score.toLocaleString() });
 
       var note = '';
       if (win) {
         var s = gm.cfg.star;
-        if (stars < 3) note = '★★★까지 ' + Math.max(0, (stars < 2 ? s.s2 : s.s3) - gm.score).toLocaleString() + '점 남았어요';
-        else note = '완벽해요!';
+        if (stars < 3) note = T('end.toStar', { n: Math.max(0, (stars < 2 ? s.s2 : s.s3) - gm.score).toLocaleString() });
+        else note = T('end.perfect');
       } else {
         var left = gm.goalProgress().filter(function (p) { return !p.done; });
-        note = '남은 목표: ' + left.map(function (p) {
-          return Stages.goalText(p.goal).replace(/ ?모으기| ?전부 없애기| ?아래로 내리기/, '') +
-            ' ' + (p.goal.count - p.cur) + ' 더';
-        }).join(', ');
+        note = T('end.remain', { list: left.map(function (p) {
+          return T('goal.left', { name: goalShort(p.goal), n: p.goal.count - p.cur });
+        }).join(', ') });
       }
       $('ovr-note').textContent = note;
       $('ovr-next').style.display = win && curStage < Stages.TOTAL ? '' : 'none';
@@ -253,6 +260,7 @@
 
   /* ---------------- 시작 ---------------- */
   function init() {
+    if (window.applyStatic) applyStatic();
     load();
     Sound.init();
     Cats.tryLoadImages(function () { drawTitleArt(); });
@@ -260,8 +268,14 @@
 
     var done = Object.keys(progress.stars).length;
     $('title-progress').textContent = done
-      ? done + '판 클리어 · 별 ' + totalStars() + '개'
-      : '고양이를 세 마리씩 맞춰서 팡!';
+      ? T('tip.progress', { n: done, s: totalStars() })
+      : T('tip.first');
+
+    var lb = $('btn-lang');
+    if (lb) {
+      lb.textContent = isEn() ? '한국어' : 'English';
+      lb.addEventListener('click', function () { setLang(isEn() ? 'ko' : 'en'); });
+    }
 
     $('btn-play').addEventListener('click', function () {
       Sound.play('click'); buildMap(); show('screen-map'); Sound.bgm('bgm_map');

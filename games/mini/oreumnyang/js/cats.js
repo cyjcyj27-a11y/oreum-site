@@ -480,8 +480,12 @@
     return cv;
   }
 
+  /* 고양이 이름은 말 담당(i18n)에서 꺼냅니다 */
+  function nameOf(i) { return global.T ? global.T('cat.' + i) : PALETTE[i].name; }
+
   global.Cats = {
     PALETTE: PALETTE,
+    nameOf: nameOf,
     COUNT: PALETTE.length,
     draw: draw,
     drawSpecial: drawSpecial,

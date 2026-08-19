@@ -667,7 +667,7 @@
         }
       }
     }
-    if (got) { Sound.play('goal', { rate: stepRate(STEPS_FROM_B, 3) }); this._toast('감귤 수확!'); }
+    if (got) { Sound.play('goal', { rate: stepRate(STEPS_FROM_B, 3) }); this._toast(global.T('fx.harvest')); }
     return got;
   };
 
@@ -730,7 +730,7 @@
       A.special = null; B.special = null;
       this.fx.push({ type: 'rainbow', r: r2, c: c2, t: 0 });
       Sound.play('rainbow');
-      this._toast('무지개 대폭발!');
+      this._toast(global.T('fx.rainbowBig'));
       return { seeds: out, color: null };
     }
     if (sa === 'rainbow' || sb === 'rainbow') {
@@ -751,12 +751,12 @@
       out.push(rbPos);
       this.fx.push({ type: 'rainbow', r: rbPos[0], c: rbPos[1], t: 0 });
       Sound.play('rainbow');
-      this._toast(conv ? '무지개 합체!' : '무지개냥!');
+      this._toast(global.T(conv ? 'fx.rainbowMix' : 'fx.rainbow'));
       return { seeds: out, color: target };
     }
     if (isStripe(sa) && isStripe(sb)) {
       A.special = 'row'; B.special = 'col';
-      this._toast('십자 폭발!');
+      this._toast(global.T('fx.cross'));
       return { seeds: [[r1, c1], [r2, c2]], color: null };
     }
     if ((isStripe(sa) && sb === 'bomb') || (sa === 'bomb' && isStripe(sb))) {
@@ -769,7 +769,7 @@
       this.fx.push({ type: 'row', r: r2, c: c2, t: 0 });
       this.fx.push({ type: 'col', r: r2, c: c2, t: 0 });
       Sound.play('rocket'); Sound.play('bomb');
-      this._toast('대폭발!');
+      this._toast(global.T('fx.big'));
       return { seeds: out, color: null };
     }
     if (sa === 'bomb' && sb === 'bomb') {
@@ -777,7 +777,7 @@
       for (var dr = -2; dr <= 2; dr++) for (var dc = -2; dc <= 2; dc++) out.push([r2 + dr, c2 + dc]);
       this.fx.push({ type: 'bomb', r: r2, c: c2, t: 0, big: true });
       Sound.play('bomb');
-      this._toast('초대형 폭탄!');
+      this._toast(global.T('fx.mega'));
       return { seeds: out, color: null };
     }
     return null;
@@ -850,8 +850,8 @@
       self.parts.push({ x: b.c, y: b.r, vx: 0, vy: -0.6, life: 1, col: '#fff', size: 0.5, kind: 'ring' });
     });
     if (births.length) {
-      var names = { row: '로켓냥!', col: '로켓냥!', bomb: '폭탄냥!', rainbow: '무지개냥!' };
-      this._toast(names[births[0].special]);
+      var names = { row: 'fx.rocket', col: 'fx.rocket', bomb: 'fx.bomb', rainbow: 'fx.rainbow' };
+      this._toast(global.T(names[births[0].special]));
       Sound.play('star');
     }
 
@@ -920,8 +920,8 @@
         var groups = this._groups();
         if (groups.length) {
           this.cascade++;
-          if (this.cascade === 3) this._toast('연쇄 3콤보!');
-          if (this.cascade >= 5) this._toast(this.cascade + '연쇄!!');
+          if (this.cascade === 3) this._toast(global.T('fx.combo3'));
+          if (this.cascade >= 5) this._toast(global.T('fx.comboN', { n: this.cascade }));
           this._resolveGroups(groups, null);
           this._hud();
         } else {
@@ -931,7 +931,7 @@
           this._hud();
           this._checkEnd();
           if (!this.ended && !this._hasMove()) {
-            this._toast('움직일 곳이 없어요. 섞습니다!');
+            this._toast(global.T('fx.noMove'));
             this._shuffle(false);
           }
         }
@@ -1014,7 +1014,7 @@
     if (this.phase !== 'idle' || this.ended || this.shufflesLeft <= 0) return false;
     this.shufflesLeft--;
     this._shuffle(false);
-    this._toast('섞었어요!');
+    this._toast(global.T('fx.shuffled'));
     this._hud();
     return true;
   };

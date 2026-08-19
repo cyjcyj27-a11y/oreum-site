@@ -74,6 +74,13 @@ body{
 .logo-sub{margin:2px 0 22px;color:var(--ink-dim);font-weight:700;letter-spacing:1px;font-size:12.5px}
 .title-btns{display:flex;flex-direction:column;gap:12px;align-items:center}
 .title-progress{margin-top:18px;color:var(--ink-dim);font-size:13px;font-weight:700}
+.btn-lang{
+  margin-top:14px;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.18);
+  color:var(--ink-dim);font-family:inherit;font-weight:700;font-size:12.5px;
+  padding:7px 16px;border-radius:999px;cursor:pointer;letter-spacing:.5px;
+}
+.btn-lang:hover{color:var(--ink);border-color:rgba(255,255,255,.4)}
+.btn-lang:active{transform:scale(.95)}
 
 /* ---- 상단바 ---- */
 .topbar{
