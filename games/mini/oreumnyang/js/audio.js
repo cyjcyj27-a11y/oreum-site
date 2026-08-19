@@ -87,8 +87,12 @@
     return ctx;
   }
 
+  /* 브라우저는 사용자가 화면을 한 번 건드리기 전에는 소리를 못 내게 막는다.
+     그래서 아무 데나 눌렀을 때 소리를 깨우는데,
+     음소거 상태에서는 깨우면 안 된다. (끄는 그 터치가 다시 켜버린다) */
   function unlock() {
     ensureCtx();
+    if (state.muted) return;
     if (ctx && ctx.state === 'suspended') ctx.resume();
     if (state.curBgm && bgmEls[state.curBgm]) {
       var el = bgmEls[state.curBgm];
@@ -155,6 +159,16 @@
       bgmEls[n] = byFile[file];
       if (state.curBgm === n && !state.muted) bgmEls[n].play().catch(function () {});
     });
+
+    // 배경음악은 파일이 커서, 트는 순간에 받기 시작하면 한참 기다린다.
+    // 게임에 필요한 것들이 먼저 다 뜬 뒤에 조용히 미리 받아둔다.
+    setTimeout(function () {
+      Object.keys(byFile).forEach(function (f) {
+        var el = byFile[f];
+        el.preload = 'auto';
+        try { el.load(); } catch (e) {}
+      });
+    }, 1200);
   }
 
   function probeEverything() {
@@ -305,8 +319,20 @@
       el.pause();
     });
     if (!want) return;
-    want.volume = state.bgmVol * (BGM_VOL[name] == null ? 1 : BGM_VOL[name]);
-    if (!state.muted) want.play().catch(function () {});
+    var target = state.bgmVol * (BGM_VOL[name] == null ? 1 : BGM_VOL[name]);
+    if (state.muted) return;
+    // 갑자기 툭 튀어나오지 않게 0.6초 동안 서서히 키운다
+    var from = want.paused ? 0 : want.volume;
+    want.volume = from;
+    want.play().catch(function () {});
+    var t0 = null;
+    function ramp(now) {
+      if (t0 === null) t0 = now;
+      var k = Math.min(1, (now - t0) / 600);
+      want.volume = from + (target - from) * k;
+      if (k < 1 && state.curBgm === name) global.requestAnimationFrame(ramp);
+    }
+    global.requestAnimationFrame(ramp);
   }
 
   function stopBgm() {
@@ -326,12 +352,30 @@
     return state.muted;
   }
 
-  function toggleMute() { return setMuted(!state.muted); }
+  function toggleMute() {
+    var m = setMuted(!state.muted);
+    if (!m) unlock();          // 다시 켤 때는 소리를 깨워준다
+    return m;
+  }
   function isMuted() { return state.muted; }
 
   try { state.muted = localStorage.getItem('oreumnyang.muted') === '1'; } catch (e) {}
 
+  /* 지금 소리가 어떤 상태인지 (확인·문제 찾기용) */
+  function status() {
+    var el = state.curBgm ? bgmEls[state.curBgm] : null;
+    return {
+      muted: state.muted,
+      bgm: state.curBgm,
+      playing: !!(el && !el.paused),
+      volume: el ? Math.round(el.volume * 100) / 100 : null,
+      buffered: el && el.buffered.length ? Math.round(el.buffered.end(0)) : 0,
+      duration: el && el.duration ? Math.round(el.duration) : 0
+    };
+  }
+
   global.Sound = {
+    status: status,
     init: init,
     play: play,
     bgm: bgm,
