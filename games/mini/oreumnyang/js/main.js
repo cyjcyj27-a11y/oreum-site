@@ -268,7 +268,7 @@
 
     var done = Object.keys(progress.stars).length;
     $('title-progress').textContent = done
-      ? T('tip.progress', { n: done, s: totalStars() })
+      ? T('tip.progress', { n: done, stars: totalStars() })
       : T('tip.first');
 
     var lb = $('btn-lang');

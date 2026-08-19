@@ -49,7 +49,7 @@
     'aria.sfx':     '효과음 켜기 끄기',
     'aria.lang':    '언어 바꾸기',
     'tip.first':    '고양이를 세 마리씩 맞춰서 팡!',
-    'tip.progress': '{n}판 클리어 · 별 {s}개',
+    'tip.progress': '{n}판 클리어 · 별 {stars}개',
     'credit':       '소리 · Kenney (kenney.nl) · Pixabay · OpenGameArt',
 
     'howto.title':  '놀이 방법',
@@ -135,7 +135,7 @@
     'aria.sfx':     'Sound effects on or off',
     'aria.lang':    'Change language',
     'tip.first':    'Match three cats and pop!',
-    'tip.progress': '{n} stages cleared · {s} stars',
+    'tip.progress': '{n} stages cleared · {stars} stars',
     'credit':       'Sound · Kenney (kenney.nl) · Pixabay · OpenGameArt',
 
     'howto.title':  'How to play',
