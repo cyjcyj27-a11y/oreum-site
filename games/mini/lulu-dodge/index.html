@@ -149,7 +149,15 @@
   /* 판과 판 사이 — 게임이 비쳐 보이게 옅게 덮습니다 */
   .layer.brk { background: rgba(255, 246, 234, .58); }
   .card.mini { max-width: 15em; padding: 20px 24px; }
-  .brk-n { margin: 0; font-size: 23px; font-weight: 800; color: var(--caramel-lit); }
+  .brk-n {                          /* CLEAR — 크게, 살짝 벌려서 */
+    margin: 0; font-size: 30px; font-weight: 800; letter-spacing: .10em;
+    color: var(--caramel-lit); line-height: 1.1;
+  }
+  .brk-stage {                      /* 이어질 판 */
+    margin: 8px 0 0; font-size: 17px; font-weight: 800; letter-spacing: .05em;
+    color: var(--ink);
+  }
+  .brk-stage[hidden] { display: none; }
   .brk-r { margin: 9px 0 0; font-size: 15.5px; font-weight: 700; color: var(--ink-2); }
   .brk-new { margin: 11px 0 0; font-size: 13.5px; font-weight: 700; color: #4e8f4a;
              word-break: keep-all; }
@@ -187,7 +195,7 @@
 
   <div id="hud" hidden>
     <div class="hud-left">
-      <span class="stg" id="hudStage">1판</span>
+      <span class="stg" id="hudStage">STAGE 1</span>
       <span class="gam"><i></i><b id="hudGam">0</b></span>
     </div>
   </div>
@@ -195,7 +203,8 @@
   <!-- 판과 판 사이 -->
   <div class="layer brk" id="brkLayer" hidden>
     <div class="card mini">
-      <p class="brk-n" id="bStage">1판 완료</p>
+      <p class="brk-n" id="bClear">CLEAR</p>
+      <p class="brk-stage" id="bNext">STAGE 2</p>
       <p class="brk-r" id="bReward">감귤 +1</p>
       <p class="brk-new" id="bNew" hidden></p>
     </div>
@@ -262,13 +271,13 @@
       start: '시작하기', retry: '다시 하기', home: '← 미니게임 목록',
       capOver: '버틴 판', capWin: '모두 넘었습니다',
       best: '최고 기록', newrec: '최고 기록!',
-      stage: function (n) { return n + '판'; },
+      stage: function (n) { return 'STAGE ' + n; },
       sec: '초', winTitle: '99판 완주!',
       newThing: { box: '감귤상자', carrot: '당근', radish: '월동무', net: '망사리', tewak: '테왁' },
       appears: '등장',
-      cleared: function (k) { return k + '판 완료'; },
+      clearWord: 'CLEAR',
       reward: function (k) { return '감귤 +' + k; },
-      nextNew: function (name) { return '다음 판부터 ' + name + ' 등장'; },
+      nextNew: function (name) { return name + ' 등장'; },
       gamTotal: function (k) { return '감귤 ' + k + '개'; },
       oreum: '오름게임즈', oreumHref: '/',
       other: 'EN', otherHref: '?lang=en', homeHref: '/games/mini/'
@@ -281,14 +290,14 @@
       start: 'Start', retry: 'Play again', home: '← Mini games',
       capOver: 'Stage reached', capWin: 'All clear',
       best: 'Best', newrec: 'New best!',
-      stage: function (n) { return 'Stage ' + n; },
+      stage: function (n) { return 'STAGE ' + n; },
       sec: 's', winTitle: 'All 99 stages cleared!',
       newThing: { box: 'Tangerine crate', carrot: 'Carrot', radish: 'Radish',
                   net: 'Net bag', tewak: 'Tewak float' },
       appears: 'joins in',
-      cleared: function (k) { return 'Stage ' + k + ' cleared'; },
+      clearWord: 'CLEAR',
       reward: function (k) { return 'Tangerines +' + k; },
-      nextNew: function (name) { return name + ' joins next stage'; },
+      nextNew: function (name) { return name + ' joins'; },
       gamTotal: function (k) { return k + ' tangerines'; },
       oreum: 'Oreum Games', oreumHref: '/en/',
       other: '한국어', otherHref: '?lang=ko', homeHref: '/en/games/mini/'
@@ -941,7 +950,13 @@
     gam += got;
     $('hudGam').textContent = String(gam);
     $('barFill').style.width = '100%';
-    $('bStage').textContent = T.cleared(stage);
+    $('bClear').textContent = T.clearWord;
+    if (stage < LAST_STAGE) {                       // 마지막 판 뒤에는 다음이 없습니다
+      $('bNext').textContent = T.stage(stage + 1);
+      $('bNext').hidden = false;
+    } else {
+      $('bNext').hidden = true;
+    }
     $('bReward').textContent = T.reward(got);
 
     // 다음 판에 새로 나오는 게 있으면 미리 알려 줍니다
