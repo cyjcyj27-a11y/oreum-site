@@ -335,3 +335,15 @@ html:has(#wrap.forceLandscape), body:has(#wrap.forceLandscape) {
   color: #7a5a3a;
   font-size: 13px;
 }
+
+/* 가로 흉내(#wrap.forceLandscape) 중에는 배지가 #stage 안으로 들어와
+   화면과 같이 돌아간다. body 에 붙어 있을 때 쓰던 fixed/top/left 를 덮어써야 한다.
+   (game-home.js 가 넣는 규칙에는 !important 가 없어서 이쪽이 이긴다) */
+#oreumHome.inStage {
+  position: absolute !important;
+  top: 6px !important;
+  left: 50% !important;
+  right: auto !important;
+  transform: translateX(-50%);
+  z-index: 30;
+}

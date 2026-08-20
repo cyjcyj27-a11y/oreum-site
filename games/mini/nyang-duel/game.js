@@ -788,6 +788,7 @@ function reconcileLandscapeState() {
   // able to apply on its own regardless of whether requestFullscreen succeeded.
   if (!landscapeWanted) {
     fsEl.classList.remove('forceLandscape');
+    placeHomeBadge();
     return;
   }
   if (window.innerHeight > window.innerWidth) {
@@ -795,6 +796,26 @@ function reconcileLandscapeState() {
   } else {
     fsEl.classList.remove('forceLandscape');
   }
+  placeHomeBadge();
+}
+
+// '오름게임즈' 배지(/assets/game-home.js 가 body 에 fixed 로 붙인다)는 #wrap 의
+// 90도 회전을 안 따라온다 — 폰을 눕히면 배지 글씨만 옆으로 누워 있게 된다.
+// 그래서 가로 흉내를 내는 동안에는 배지를 #stage 안으로 옮겨 심는다.
+// 그러면 화면과 같이 돌아가고, 자리도 무대 기준이 된다.
+// 자리는 무대 위쪽 한가운데 — 체력바 두 개(캔버스 x 30~290, 610~870) 사이가 비어 있다.
+function placeHomeBadge() {
+  const a = document.getElementById('oreumHome');
+  if (!a) return;                       // 배지 스크립트가 아직 안 붙었으면 다음 기회에
+  const stage = document.getElementById('stage');
+  // 진짜 전체화면일 때도 옮겨야 한다 — 전체화면에서는 #wrap 바깥의 요소가
+  // 아예 그려지지 않아서, body 에 둔 배지가 화면에서 통째로 사라진다.
+  const inGame = fsEl.classList.contains('forceLandscape')
+              || document.fullscreenElement === fsEl
+              || document.webkitFullscreenElement === fsEl;
+  const target = (inGame && stage) ? stage : document.body;
+  if (a.parentElement !== target) target.appendChild(a);
+  a.classList.toggle('inStage', inGame && !!stage);
 }
 
 // useApi=false 로 부르면 진짜 전체화면은 건너뜁니다.
@@ -823,6 +844,7 @@ function enterFullscreenLandscape(useApi = true) {
 function exitFullscreenLandscape() {
   landscapeWanted = false;
   fsEl.classList.remove('forceLandscape');
+  placeHomeBadge();          // 무대 안에 심어둔 배지를 body 로 돌려놓는다
   if (screen.orientation && screen.orientation.unlock) {
     try { screen.orientation.unlock(); } catch (e) {}
   }
@@ -831,6 +853,9 @@ function exitFullscreenLandscape() {
     Promise.resolve(exit.call(document)).catch(() => {});
   }
 }
+
+// 배지 스크립트는 defer 라 이 파일보다 늦게 붙을 수 있다 — 붙고 나서 한 번 더 맞춘다
+window.addEventListener('load', placeHomeBadge);
 
 document.addEventListener('fullscreenchange', reconcileLandscapeState);
 document.addEventListener('webkitfullscreenchange', reconcileLandscapeState);

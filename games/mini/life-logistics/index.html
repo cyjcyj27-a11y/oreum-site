@@ -51,8 +51,8 @@
   #outCard .v { letter-spacing:2px; color:#8fa3bd; }
   #outCard.hit .v { color:#ff6b6b; }
 
-  /* ── 좌상단: 주문서 ── */
-  #order { position:absolute; top:14px; left:14px; width:238px;
+  /* ── 좌상단: 주문서 (왼쪽 위 '오름게임즈' 배지 아래에서 시작한다) ── */
+  #order { position:absolute; top:44px; left:14px; width:238px;
     background:rgba(12,18,28,.80); border:1px solid rgba(255,255,255,.14);
     border-radius:10px; overflow:hidden; }
   #order h3 { font-size:12px; letter-spacing:1px; padding:8px 12px;
@@ -73,19 +73,21 @@
   #combo .big { font-size:30px; font-weight:800; color:#ffd479; line-height:1; }
   #combo .sm { font-size:11px; color:#8fa3bd; letter-spacing:1px; }
 
-  /* ── 폰: 상단이 좁아 셋이 겹친다 — 카드 한 줄, 주문서·콤보는 그 아래로 ── */
+  /* ── 폰: 상단이 좁아 셋이 겹친다 — 카드 한 줄, 주문서·콤보는 그 아래로 ──
+     왼쪽 위 '오름게임즈' 배지(top 8px + 높이 약 24px)가 첫 카드를 덮어서
+     HUD 전체를 배지 아래로 내렸다. 배지와 같은 방식으로 노치 여백도 더한다. */
   @media (max-width:700px) {
-    #top { top:8px; left:8px; right:8px; transform:none;
+    #top { top:calc(36px + env(safe-area-inset-top)); left:8px; right:8px; transform:none;
       justify-content:space-between; gap:6px; }
     .card { padding:5px 7px; border-radius:8px; flex:1; }
     .card .k { font-size:9px; letter-spacing:1px; }
     .card .v { font-size:15px; }
     #outCard .v { letter-spacing:1px; }
-    #order { top:62px; left:8px; width:198px; }
+    #order { top:calc(90px + env(safe-area-inset-top)); left:8px; width:198px; }
     #order h3 { font-size:11px; padding:6px 10px; }
     .row { padding:5px 10px; font-size:12.5px; }
     #dest { padding:6px 10px; font-size:12px; }
-    #combo { top:66px; right:10px; }
+    #combo { top:calc(94px + env(safe-area-inset-top)); right:10px; }
     #combo .big { font-size:22px; }
   }
 
