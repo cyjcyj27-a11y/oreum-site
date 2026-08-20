@@ -66,9 +66,11 @@
         'background:rgba(255,253,247,.92);box-shadow:0 2px 8px rgba(0,0,0,.16);' +
         'font:700 11.5px/1 -apple-system,BlinkMacSystemFont,"Pretendard",' +
         '"Apple SD Gothic Neo","Malgun Gothic",sans-serif;' +
-        'color:#2e6b39;white-space:nowrap;cursor:pointer;' +
+        'color:#2e6b39;white-space:nowrap;cursor:pointer;opacity:.72;' +
+        'transition:opacity .15s;' +
         '-webkit-tap-highlight-color:transparent;touch-action:manipulation;' +
       '}' +
+      '#oreumFs:hover,#oreumFs:focus-visible{opacity:1}' +
       '#oreumFs svg{width:13px;height:13px;display:block;fill:none;' +
         'stroke:#4e8f4a;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}' +
       '#oreumFs:active{background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.18)}';

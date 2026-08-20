@@ -103,7 +103,8 @@ body{
 .stage-chapter{display:block;font-size:11px;color:var(--ink-dim);font-weight:700;letter-spacing:1px}
 
 /* ---- 지도 ---- */
-.map-scroll{flex:1;overflow-y:auto;padding:4px 16px 40px;scrollbar-width:thin}
+/* 아래 84px: 왼쪽 아래 전체화면 단추에 판이 가려도 스크롤로 올릴 수 있게 */
+.map-scroll{flex:1;overflow-y:auto;padding:4px 16px 84px;scrollbar-width:thin}
 .chapter{margin-bottom:26px}
 .chapter-head{
   display:flex;align-items:center;gap:10px;margin:0 0 12px;
