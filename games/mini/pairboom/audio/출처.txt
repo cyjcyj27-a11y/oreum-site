@@ -1,0 +1,64 @@
+효과음 출처 — Pixabay (https://pixabay.com/sound-effects/)
+라이선스: 무료 · 상업적 이용 가능 · 출처 표기 불필요 · 수정 가능
+(금지되는 것은 소리 파일 자체를 그대로 재판매·배포하는 것뿐입니다)
+
+받은 날짜: 2026-08-20
+원본 주소 (다시 받을 때 씁니다):
+  pop     https://pixabay.com/sound-effects/... (dragon-studio-large-underwater-explosion-454253)
+          ↑ 사용자가 2026-08-21에 직접 골라 내려받은 폭발음.
+            원본은 6초짜리라 앞의 터지는 부분 0.8초만 잘라 씁니다.
+            (그 전에는 비눗방울 터지는 소리 bubble-pop-406640 을 썼습니다)
+  whoosh  https://pixabay.com/sound-effects/film-special-effects-simple-whoosh-382724/
+  click   https://pixabay.com/sound-effects/film-special-effects-mouse-click-290204/
+  wrong   freesound_community-error-2-36058 (Pixabay)
+          ↑ 사용자가 2026-08-21에 직접 골라 내려받은 '틀렸을 때' 소리.
+            0.72초짜리라 앞 무음만 떼고 0.66초로 다듬었습니다.
+            (그 전에는 film-special-effects-wrong-answer-129254 를 썼습니다)
+  win     freesound_community-crowd-cheer-ii-6263 (Pixabay)
+          ↑ 사용자가 2026-08-21에 직접 골라 내려받은 '한 판 깼을 때' 환호성.
+            원본은 20초짜리 계속 이어지는 함성이라, 함성이 차오르는 앞 3.4초만
+            잘라 쓰고 끝 1.2초는 잦아들게 했습니다.
+            (그 전에는 팡파르 musical-level-up-fanfare-151765 를 썼습니다)
+  shuffle https://pixabay.com/sound-effects/film-special-effects-card-shuffle-94662/
+
+원본은 게임에 쓰기엔 너무 길어서 ffmpeg으로 앞 무음을 떼고 잘라 냈습니다.
+이 폴더의 mp3가 다듬은 결과물이고, sfx-data.js는 그것을 글자로 바꿔 담은 것입니다.
+게임은 sfx-data.js만 읽습니다 (파일을 그냥 열어도 소리가 나게 하려는 겁니다).
+
+
+■ 배경음악 bgm.mp3
+   곡 : "Roblox Minecraft Fortnite Video Game Music" — MaksymMalko
+   주소 : https://pixabay.com/music/video-games-roblox-minecraft-fortnite-video-game-music-358426/
+   라이선스 : Pixabay Content License (무료·상업적 사용 가능·출처 표기 불필요)
+
+   ★ 파일 이름을 반드시 이대로 두세요 (bgm.mp3)
+     픽사베이 원래 파일 이름에 Roblox / Minecraft / Fortnite 라는
+     남의 상표가 들어 있습니다. 곡 자체는 MaksymMalko 가 새로 만든 것이고
+     그 게임들의 음악이 아닙니다. 올린 사람이 검색에 걸리라고 붙인 이름일 뿐입니다.
+     다만 그 이름 그대로 사이트에 올리면 주소창에 상표가 드러나
+     오름게임즈가 그 게임들과 관계있는 것처럼 보입니다.
+     (오름 홈페이지에 다른 게임 이름을 쓰지 않기로 한 규칙과도 어긋납니다)
+     그래서 bgm.mp3 로 바꿔 두었습니다.
+     손대기 전 원본(7.4MB)은 2026-08-21 에 지웠습니다.
+     다시 받으려면 위 픽사베이 주소로 가면 됩니다.
+
+   ★ 유튜브에 올릴 때만 주의
+     이 곡은 'Content ID 등록' 표시가 붙어 있습니다.
+     게임을 웹에 올리는 데는 아무 상관이 없지만,
+     이 음악이 깔린 영상을 유튜브에 올리면 저작권 신고가 붙을 수 있습니다.
+     그때는 신고에 이의를 걸면서 위 픽사베이 주소를 근거로 대면 됩니다.
+
+   손본 것 : 앞뒤 무음만 떼고 112kbps 로 줄였습니다. 3분 59초 / 3.3MB.
+
+   ※ 한때 '꼬리 4초를 머리에 겹쳐 녹이는' 방법을 썼다가 되돌렸습니다.
+     이어붙는 자리는 매끄러워지지만, 그 대신 곡을 처음 틀 때
+     '곡의 끝'과 '곡의 시작'이 포개진 소리가 나서 다른 음악이 섞인 것처럼 들립니다.
+     이 곡은 원래 앞뒤가 조용히 사그라들게 만들어져 있어서,
+     그냥 이어붙여도 4분에 한 번 숨 고르는 정도로만 들립니다. 그게 낫습니다.
+
+   예전에 쓰던 곡(instant rave, 49초)은 2026-08-21 에 지웠습니다.
+   다시 필요하면 https://pixabay.com/sound-effects/ 에서 'instant rave' 로 찾으면 됩니다.
+
+   효과음과 달리 이 파일은 글자로 바꿔 담지 않고 파일째 씁니다.
+   (음악은 파일이 커서 글자로 담으면 게임이 무거워집니다.
+    <audio> 는 파일을 그냥 열어도 재생이 되므로 문제없습니다)
