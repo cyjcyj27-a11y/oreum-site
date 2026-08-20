@@ -333,10 +333,10 @@
     g.save();
     roundRect(g, x - h, y - h, h * 2, h * 2, size * 0.13);
     var grd = g.createLinearGradient(x - h, y - h, x + h, y + h);
-    grd.addColorStop(0, hp >= 2 ? '#6E6A66' : '#8B8781');
-    grd.addColorStop(1, hp >= 2 ? '#3B3936' : '#57534E');
+    grd.addColorStop(0, hp >= 2 ? '#A9A49C' : '#C4BEB4');
+    grd.addColorStop(1, hp >= 2 ? '#736E67' : '#948E85');
     g.fillStyle = grd; g.fill();
-    g.strokeStyle = 'rgba(20,18,16,.6)'; g.lineWidth = size * 0.045; g.stroke();
+    g.strokeStyle = 'rgba(90,80,68,.45)'; g.lineWidth = size * 0.045; g.stroke();
 
     // 돌 쌓인 결 + 현무암 구멍
     g.save();
@@ -349,18 +349,18 @@
         g.ellipse(x + cx * h, y + row[0] * h, h * 0.36, h * 0.27, 0, 0, Math.PI * 2);
         g.fillStyle = hp >= 2 ? 'rgba(255,255,255,.10)' : 'rgba(255,255,255,.14)';
         g.fill();
-        g.strokeStyle = 'rgba(0,0,0,.35)'; g.lineWidth = size * 0.02; g.stroke();
+        g.strokeStyle = 'rgba(90,80,68,.30)'; g.lineWidth = size * 0.02; g.stroke();
       });
     });
     // 숭숭 뚫린 구멍
-    g.fillStyle = 'rgba(0,0,0,.32)';
+    g.fillStyle = 'rgba(80,70,60,.26)';
     [[-0.42, -0.44], [0.3, -0.28], [-0.2, 0.18], [0.46, 0.42], [-0.5, 0.5]].forEach(function (q) {
       g.beginPath(); g.arc(x + q[0] * h, y + q[1] * h, size * 0.028, 0, Math.PI * 2); g.fill();
     });
     g.restore();
 
     if (hp >= 2) {
-      g.fillStyle = 'rgba(255,255,255,.92)';
+      g.fillStyle = 'rgba(60,52,44,.92)';
       g.font = '900 ' + (size * 0.28) + 'px sans-serif';
       g.textAlign = 'center'; g.textBaseline = 'middle';
       g.fillText('2', x, y);

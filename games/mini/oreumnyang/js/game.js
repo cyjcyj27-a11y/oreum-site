@@ -1057,7 +1057,7 @@
     for (r = 0; r < this.H; r++) for (c = 0; c < this.W; c++) {
       if (this.wall[r][c]) continue;
       var even = (r + c) % 2 === 0;
-      g.fillStyle = even ? 'rgba(255,255,255,.13)' : 'rgba(255,255,255,.07)';
+      g.fillStyle = even ? 'rgba(255,255,255,.92)' : 'rgba(255,255,255,.58)';
       Cats.roundRect(g, c * T + 2, r * T + 2, T - 4, T - 4, T * 0.22);
       g.fill();
     }
@@ -1069,7 +1069,7 @@
 
     // 선택 표시
     if (this.sel) {
-      g.strokeStyle = 'rgba(255,207,92,.95)';
+      g.strokeStyle = 'rgba(255,122,31,.95)';
       g.lineWidth = Math.max(3, T * 0.06);
       Cats.roundRect(g, this.sel[1] * T + 3, this.sel[0] * T + 3, T - 6, T - 6, T * 0.22);
       g.stroke();
@@ -1077,7 +1077,7 @@
     // 힌트
     if (this.hint) {
       var pulse = 0.5 + 0.5 * Math.sin(now * 0.006);
-      g.strokeStyle = 'rgba(120,255,200,' + (0.4 + pulse * 0.5) + ')';
+      g.strokeStyle = 'rgba(20,170,130,' + (0.45 + pulse * 0.5) + ')';
       g.lineWidth = Math.max(3, T * 0.055);
       this.hint.forEach(function (rc) {
         Cats.roundRect(g, rc[1] * T + 3, rc[0] * T + 3, T - 6, T - 6, T * 0.22);
