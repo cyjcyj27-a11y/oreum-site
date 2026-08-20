@@ -366,6 +366,17 @@
     .stat span{ font-size:.54rem; letter-spacing:0; }
 
     .foot{ display:none; }                           /* 폰에는 자판이 없습니다 */
+
+    /* 알림판(규칙·결과 창)은 폰에서 글이 너무 커서 화면을 넘쳤습니다.
+       글을 줄이고, 그래도 길면 창 안에서 굴러가게 합니다 */
+    .veil{ padding:10px; }
+    .card{ padding:18px 16px; border-radius:20px; max-height:86vh; overflow-y:auto; }
+    .card h2{ font-size:1.3rem; }
+    .card p{ font-size:.84rem; line-height:1.5; margin:5px 0; }
+    .card .big{ font-size:2rem; }
+    .card .row{ margin-top:14px; gap:6px; }
+    .card .row button{ font-size:.95rem; padding:11px 16px; }
+    .rules{ font-size:.8rem; line-height:1.62; margin:8px 0 0; }
   }
 </style>
 <!-- Pixabay 효과음 꾸러미 (출처·라이선스는 audio/출처.txt) -->
@@ -391,7 +402,8 @@
 </header>
 
 <div class="bar">
-  <button class="primary ico-only" id="btnNew" title="새 판 (N)" aria-label="새 판"><svg class="btn-ico" viewBox="0 0 24 24" aria-hidden="true" fill="#fff"><path d="M17.65 6.35A7.96 7.96 0 0 0 12 4c-4.42 0-7.99 3.58-8 8s3.58 8 8 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg></button>
+  <button id="btnReset" class="ico-only" title="처음부터 다시하기" aria-label="처음부터 다시하기"><svg class="btn-ico" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="50" fill="#ff8a3d"/><g fill="#fff"><rect x="30" y="32" width="9" height="36" rx="3"/><path d="M70 32 44 50l26 18z"/></g></svg></button>
+  <button class="primary ico-only" id="btnNew" title="현재 단계 다시하기 (N)" aria-label="현재 단계 다시하기"><svg class="btn-ico" viewBox="0 0 24 24" aria-hidden="true" fill="#fff"><path d="M17.65 6.35A7.96 7.96 0 0 0 12 4c-4.42 0-7.99 3.58-8 8s3.58 8 8 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg></button>
   <button id="btnHint" class="ico-only" title="힌트" aria-label="힌트"><img class="btn-ico" src="icons/hint.png" alt=""><span class="badge" id="hintN">5</span></button>
   <button id="btnShuffle" class="ico-only" title="섞기" aria-label="섞기"><svg class="btn-ico" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="50" fill="#8b5cf6"/><g transform="translate(26,26) scale(2)" fill="#fff"><path d="M10.59 9.17 5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z"/></g></svg><span class="badge" id="shufN">3</span></button>
   <button id="btnPause" class="ico-only" title="멈춤 (스페이스)" aria-label="멈춤"><img class="btn-ico" src="icons/pause.png" alt=""></button>
@@ -464,6 +476,19 @@
     <p>이 판은 깬 것으로 치지 않습니다. 다시 해보세요.</p>
     <div class="row">
       <button class="primary" id="btnRetry">다시 하기</button>
+    </div>
+  </div>
+</div>
+
+<!-- 처음부터 다시할지 한 번 묻습니다. 되돌릴 수 없으니까요 -->
+<div class="veil" id="veilReset">
+  <div class="card">
+    <h2>처음부터 다시 할까요?</h2>
+    <p><b id="resetNow">1</b>단계까지 오셨습니다. 누르면 <b>1단계</b>로 돌아갑니다.</p>
+    <p>최고 단계 기록은 그대로 남습니다.</p>
+    <div class="row">
+      <button class="primary" id="btnResetYes">1단계로 가기</button>
+      <button id="btnResetNo">그만두기</button>
     </div>
   </div>
 </div>
@@ -1132,9 +1157,14 @@ function bgmApply(){
   if (!a) return;
   a.volume = BGM_VOL;
   if (bgmWanted && !paused){
-    if (a.readyState === 0) a.load();          // 아직 안 읽었으면 지금 읽기 시작
+    // 이미 받고 있는 중이면 그냥 둡니다.
+    // 여기서 load() 를 또 부르면 받던 것을 통째로 버리고 처음부터 다시 받습니다.
+    // 음악이 켜도 켜도 늦게 나오던 진짜 까닭이 이것이었습니다.
+    if (a.networkState !== 2 /* NETWORK_LOADING */ && a.readyState === 0) a.load();
     const p = a.play();
     if (p && p.catch) p.catch(() => {});      // 막히면 조용히 넘어갑니다
+    // 아직 덜 받았으면 잠자코 기다리게 두지 말고 알려 줍니다
+    if (a.readyState < 3) toast('음악을 받는 중…', 1500);
   } else {
     a.pause();
   }
@@ -1562,13 +1592,21 @@ $('btnMusic').title = musicOn ? '배경음악 끄기' : '배경음악 켜기';
     bgmApply();
   }, { once:true }));
 
-/* 음악 단추를 눌렀을 때 몇 초씩 기다리는 일이 없도록,
-   판이 다 뜨고 한숨 돌린 뒤에 조용히 미리 받아 둡니다.
-   글꼴 받는 것과 겹치지 않게 늦춥니다. */
+/* 음악 단추를 눌렀을 때 기다리는 일이 없도록, 안내판을 보는 동안 미리 받아 둡니다.
+   0.75MB 라 미리 받아도 부담이 없습니다. */
 setTimeout(() => {
   const a = bgmEl();
   if (a && a.preload !== 'auto'){ a.preload = 'auto'; a.load(); }
-}, musicOn ? 300 : 4000);
+}, 800);
+
+/* 다른 앱으로 넘어가면 음악을 멈춥니다.
+   보고 있지도 않은 게임의 음악이 계속 흘러나오면 안 되고, 데이터도 샙니다. */
+document.addEventListener('visibilitychange', () => {
+  const a = bgmEl();
+  if (!a) return;
+  if (document.hidden) a.pause();
+  else bgmApply();
+});
 
 /* ── 안내판 ── */
 $('titleNote').innerHTML = bestStage > 1
@@ -1588,6 +1626,21 @@ $('btnStart').addEventListener('click', () => {
   }
 });
 $('btnHowto').addEventListener('click', () => $('veilHelp').classList.add('on'));
+
+/* ── 처음부터 다시하기 ── */
+$('btnReset').addEventListener('click', () => {
+  $('resetNow').textContent = stage;
+  $('veilReset').classList.add('on');
+});
+$('btnResetNo').addEventListener('click', () => $('veilReset').classList.remove('on'));
+$('btnResetYes').addEventListener('click', () => {
+  $('veilReset').classList.remove('on');
+  stage = 1;
+  try{ localStorage.setItem('pairboom_stage', '1'); }catch(e){}   // 최고 단계는 건드리지 않습니다
+  $('veilWin').classList.remove('on');
+  $('veilLose').classList.remove('on');
+  newGame();
+});
 
 newGame();                           // 안내판 뒤에서 미리 만들어 둡니다
 
