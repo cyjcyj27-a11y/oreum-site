@@ -53,6 +53,10 @@
      assets/cats/manifest.json 이 있으면 거기 적힌 것만 읽는다.
      (없는 파일을 헛되이 부르지 않게. 목록은 에셋목록.py 가 만들어 준다)
      목록 파일이 없으면 예전처럼 8장을 하나씩 찾아본다. */
+  /* 고양이 그림을 바꾸면 이 날짜를 올린다.
+     안 올리면 예전에 왔던 사람 브라우저가 옛 그림을 계속 쓴다. */
+  var CAT_VER = '20260820b';
+
   var IMG_KEYS = ['0', '1', '2', '3', '4', '5', '6', 'rainbow'];
   var IMG_FILES = ['cat0', 'cat1', 'cat2', 'cat3', 'cat4', 'cat5', 'cat6', 'cat_rainbow'];
 
@@ -60,7 +64,7 @@
     var img = new Image();
     img.onload = function () { IMGS[key] = img; done(); };
     img.onerror = done;
-    img.src = 'assets/cats/' + file + '.png';
+    img.src = 'assets/cats/' + file + '.png?v=' + CAT_VER;
   }
 
   function tryLoadImages(onDone) {
