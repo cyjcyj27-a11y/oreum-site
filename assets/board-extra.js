@@ -256,4 +256,8 @@
   }
 
   window.BoardExtra = { attach: attach, prime: prime };
+
+  // 게시판 본체는 이 파일보다 먼저 글을 그릴 수 있다. 그때 못 붙인 것을
+  // 뒤늦게라도 붙일 수 있게, 준비가 끝났다고 알린다.
+  try { window.dispatchEvent(new Event('boardextra')); } catch (e) {}
 })();

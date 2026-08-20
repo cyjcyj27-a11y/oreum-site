@@ -273,15 +273,44 @@
         '<button class="del" type="button">지우기</button></div>' +
         (p.body ? '<p class="text">' + bodyHtml(p.body) + '</p>' : '');
       el.querySelector('.del').addEventListener('click', function () { remove(p.id, el); });
-      if (window.BoardExtra) BoardExtra.attach(el, p.id);   // 사진 확대 + 댓글
+      addExtra(el, p.id);                                   // 사진 확대 + 댓글
       frag.appendChild(el);
     });
     $('list').appendChild(frag);
     // 댓글 수는 창을 열기 전에도 보여야 한다 — 이 묶음 것만 한 번에 조회
-    if (window.BoardExtra && BoardExtra.prime) {
-      BoardExtra.prime(rows.map(function (p) { return p.id; }));
-    }
+    primeExtra(rows.map(function (p) { return p.id; }));
   }
+
+  /* 사진 확대와 댓글은 board-extra.js 가 맡는데, 그 파일은 defer 라 이 스크립트보다
+     늦게 실행된다. 반면 글 목록은 여기서 바로 불러오기 시작한다.
+     그래서 글이 먼저 도착하면 window.BoardExtra 가 아직 없어서, 예전에는 그냥
+     건너뛰고 댓글 단추가 통째로 빠진 채 그려졌다 — 그날 통신 속도에 따라
+     되기도 하고 안 되기도 했다.
+     이제는 없으면 버리지 않고 모아뒀다가, 준비되는 대로 붙인다. */
+  var extraQueue = [];
+
+  function addExtra(el, id) {
+    if (window.BoardExtra) { BoardExtra.attach(el, id); return; }
+    extraQueue.push([el, id]);
+  }
+
+  function primeExtra(ids) {
+    // 아직 준비 전이면 flushExtra 가 붙인 뒤 그때 한꺼번에 센다
+    if (window.BoardExtra && BoardExtra.prime) BoardExtra.prime(ids);
+  }
+
+  function flushExtra() {
+    if (!window.BoardExtra || !extraQueue.length) return;
+    var q = extraQueue; extraQueue = [];          // 두 번 붙지 않게 먼저 비운다
+    q.forEach(function (t) { BoardExtra.attach(t[0], t[1]); });
+    if (BoardExtra.prime) BoardExtra.prime(q.map(function (t) { return t[1]; }));
+  }
+
+  // board-extra.js 가 준비되면 스스로 알려준다 — 언제 도착하든 이걸로 붙는다.
+  window.addEventListener('boardextra', flushExtra);
+  // 알림을 놓쳤을 때를 위한 예비. defer 스크립트는 DOMContentLoaded 직전에 실행된다.
+  document.addEventListener('DOMContentLoaded', flushExtra);
+  window.addEventListener('load', flushExtra);
 
   function remove(id, el) {
     var pw = prompt('글을 올릴 때 넣은 숫자 4자리를 입력하세요');
@@ -346,7 +375,7 @@
   h('pageviews'); h('pv_board');
 })();
 </script>
-<script src="/assets/board-extra.js?v=2" defer></script>
+<script src="/assets/board-extra.js?v=3" defer></script>
 <script src="/assets/mail.js" defer></script>
 </body>
 </html>
