@@ -29,8 +29,8 @@
 
   /* ---------------- 문구 ---------------- */
   var KO = {
-    'app.title':    '오름냥 - 제주 고양이 퍼즐 200판',
-    'app.sub':      '오름냥 · 제주 고양이 퍼즐 200판',
+    'app.title':    '오름냥 - 고양이 3매치 퍼즐게임 200판',
+    'app.sub':      '오름냥 · 고양이 3매치 퍼즐게임 200판',
     'btn.play':     '시작하기',
     'btn.howto':    '놀이 방법',
     'btn.gotit':    '알겠어요',
@@ -58,7 +58,7 @@
     'howto.3':      '4마리를 맞추면 <b>로켓냥</b>(줄 하나 통째로), ㄱ자·ㅜ자로 맞추면 <b>폭탄냥</b>(주변 9칸), 5마리를 한 줄로 맞추면 <b>무지개냥</b>(같은 색 전부)이 태어나요.',
     'howto.4':      '특수 고양이끼리 바꾸면 더 크게 터집니다.',
     'howto.5':      '정해진 <b>횟수 안</b>에 위쪽 목표를 다 채우면 클리어예요.',
-    'howto.obs':    '제주 방해꾼들',
+    'howto.obs':    '방해꾼들',
     'howto.oreum':  '<b>오름</b> 고양이 밑에 깔린 층. 그 칸 위에서 터뜨리면 한 겹씩 올라갑니다.',
     'howto.wall':   '<b>돌담</b> 움직이지 않는 현무암 담. 바로 옆에서 터뜨리면 무너져요.',
     'howto.carrot': '<b>당근</b> 고양이가 당근밭에 파묻혀 못 움직여요. 옆에서 터뜨려 꺼내주세요.',
@@ -116,7 +116,7 @@
 
   var EN = {
     'app.title':    'Oreumnyang - Jeju cat puzzle, 200 stages',
-    'app.sub':      'Oreumnyang · Jeju cat puzzle · 200 stages',
+    'app.sub':      'Oreumnyang · cat match-3 puzzle · 200 stages',
     'btn.play':     'Play',
     'btn.howto':    'How to play',
     'btn.gotit':    'Got it',
