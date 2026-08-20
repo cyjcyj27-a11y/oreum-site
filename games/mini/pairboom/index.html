@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PAIRBOOM!! - 짝 잇기 퍼즐게임 22단계 | 오름게임즈</title>
-<meta name="description" content="PAIRBOOM!! - 같은 그림 두 개를 이으면 BOOM! 설치도 회원가입도 없이 브라우저에서 바로 하는 짝 잇기 퍼즐게임. 22단계, 한 판 2분 50초.">
+<title>PAIRBOOM!! - 짝 잇기 퍼즐게임 37단계 | 오름게임즈</title>
+<meta name="description" content="PAIRBOOM!! - 같은 그림 두 개를 이으면 BOOM! 설치도 회원가입도 없이 브라우저에서 바로 하는 짝 잇기 퍼즐게임. 37단계, 한 판 2분 50초부터.">
 <meta name="keywords" content="웹게임, 브라우저게임, 프리게임, 퍼즐게임, 무료게임, 짝맞추기, 설치없는게임, 회원가입없는게임, 인디게임, 오름게임즈, webgame, browsergame, freegame, puzzlegame, oreumgames">
 <link rel="canonical" href="https://oreumgames.com/games/mini/pairboom/">
-<meta property="og:title" content="PAIRBOOM!! - 짝 잇기 퍼즐게임 22단계">
-<meta property="og:description" content="PAIRBOOM!! - 같은 그림 두 개를 이으면 BOOM! 설치도 회원가입도 없이 브라우저에서 바로 하는 짝 잇기 퍼즐게임. 22단계, 한 판 2분 50초.">
+<meta property="og:title" content="PAIRBOOM!! - 짝 잇기 퍼즐게임 37단계">
+<meta property="og:description" content="PAIRBOOM!! - 같은 그림 두 개를 이으면 BOOM! 설치도 회원가입도 없이 브라우저에서 바로 하는 짝 잇기 퍼즐게임. 37단계, 한 판 2분 50초부터.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://oreumgames.com/games/mini/pairboom/">
 <meta property="og:image" content="https://oreumgames.com/assets/pairboom-shot.webp?v=1">
@@ -18,8 +18,8 @@
 <meta property="og:site_name" content="오름게임즈">
 <meta property="og:locale" content="ko_KR">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="PAIRBOOM!! - 짝 잇기 퍼즐게임 22단계">
-<meta name="twitter:description" content="PAIRBOOM!! - 같은 그림 두 개를 이으면 BOOM! 설치도 회원가입도 없이 브라우저에서 바로 하는 짝 잇기 퍼즐게임. 22단계, 한 판 2분 50초.">
+<meta name="twitter:title" content="PAIRBOOM!! - 짝 잇기 퍼즐게임 37단계">
+<meta name="twitter:description" content="PAIRBOOM!! - 같은 그림 두 개를 이으면 BOOM! 설치도 회원가입도 없이 브라우저에서 바로 하는 짝 잇기 퍼즐게임. 37단계, 한 판 2분 50초부터.">
 <meta name="twitter:image" content="https://oreumgames.com/assets/pairboom-shot.webp?v=1">
 <script src="/assets/visit.js?v=9" defer></script>
 <!-- 글꼴은 1.5MB 라 이걸 기다리면 화면이 늦게 뜹니다.
@@ -504,7 +504,7 @@
       <b>3.</b> 길은 <b>판 바깥으로 돌아가도</b> 됩니다. 가장자리 그림이 잘 지워지는 이유입니다.</p>
       <p>더 이상 지울 짝이 없으면 남은 그림을 <b>알아서 섞어</b> 드립니다. 이때는 섞기 횟수가 줄지 않습니다.</p>
       <p>모든 판은 <b>끝까지 지울 수 있게</b> 만들어 내놓습니다.</p>
-      <p><b>1단계부터 22단계까지</b> 한 줄로 이어집니다. 깰 때마다
+      <p><b>1단계부터 37단계까지</b> 한 줄로 이어집니다. 깰 때마다
       <b>그림 종류가 한 종씩 늘어</b> 같은 그림이 귀해집니다. 그래서 짝 찾기가 조금씩 어려워집니다.
       한 판에서 더 못 늘리면 <b>판이 커지고</b>, 그림 수는 그대로 이어서 갑니다.</p>
       <p>한 판에 <b>2분 50초</b>입니다. 다 쓰면 그 단계는 실패이고, 다시 하면 됩니다.
@@ -555,36 +555,66 @@ const ICONS = [
 /* 도형마다 고정된 제 색. 137.5도씩 돌려 배정해 이웃한 도형끼리 색이 겹치지 않게 합니다 */
 const hueOf = i => Math.round((i * 137.5) % 360);
 
-/* ── 단계표 ──
-   규칙은 하나입니다. '그림 종류'는 한 번 오르면 절대 안 내려갑니다.
-   한 판에서 더 못 올리면(한 그림당 4장이 한계) 판을 키우고, 그림 수는 이어서 갑니다.
-   그래서 단계 수 = 가진 도형 수(24) − 첫 그림 수(3) + 1 = 22단계입니다.
+/* ── 단계표 (2026-08-21 개편) ──
+   난이도가 앞구간에 몰아치던 것을 폈습니다. 22판 -> 37판.
 
-   한 그림당 몇 장인지가 곧 빡빡함입니다.
-   재보니 8장이면 둘 곳이 20개 넘게 열리고, 4장이면 9~11개로 좁아집니다. */
+   재보니 어려워지는 폭의 3/4 이 1~9판에 몰려 있었습니다.
+   범인은 '판 두께'(가로세로 중 짧은 쪽)였습니다.
+   같은 그림 짝 가운데 실제로 이어지는 비율을 재보니
+       4겹 19~22%%   5겹 14~18%%   6겹 10~13%%   7겹 8~11%%   8겹 7~10%%
+   인데, 옛 표는 4겹(10x4)에서 6겹(8x6)으로 건너뛰었습니다. 한 판 만에 반토막입니다.
+
+   고친 것 셋:
+     1) 4겹과 6겹 사이에 5겹(8x5)을, 6겹과 8겹 사이에 7겹(10x7·12x7)을 끼웠습니다.
+     2) 판이 커지는 판에서는 그림 수를 한 판 쉬어갑니다.
+        원래 정하신 규칙 — '전 단계의 최대 그림 수가 현 단계의 시작 숫자' — 그대로입니다.
+     3) 앞에 4x4·5x4 를 넣어 시작을 더 눕혔습니다.
+
+   ★ 칸 수를 고를 때 주의할 것 ★
+   폰에서는 pickShape 이 칸 수만 보고 모양을 다시 고릅니다. 그래서 '내가 적은 가로세로'가
+   아니라 '칸 수'가 두께를 결정합니다. 예를 들어 36칸은 폰에서 6x6(6겹)이 되어
+   32칸(4x8, 4겹) 바로 뒤에 두면 난이도가 튑니다. 그래서 36칸은 뺐습니다.
+   폰 기준 두께:  16·20·24·28·32=4겹  40=5겹  42·48·54·60·66=6겹  70·84=7겹  88·96·104=8겹
+
+   그림은 24개 그대로 씁니다. 새로 그린 것 없습니다. */
 const STAGES = [
-  { w: 6, h: 4, kinds: 3 },   /*  1 ·  24칸 · 12짝 · 8.0장 */
-  { w: 6, h: 4, kinds: 4 },   /*  2 ·           · 6.0장 */
-  { w: 6, h: 4, kinds: 5 },   /*  3 ·           · 4.8장 */
-  { w: 6, h: 4, kinds: 6 },   /*  4 ·           · 4.0장  ← 6x4 의 한계 */
-  { w: 8, h: 4, kinds: 7 },   /*  5 ·  32칸 · 16짝 · 4.6장 */
-  { w: 8, h: 4, kinds: 8 },   /*  6 ·           · 4.0장 */
-  { w:10, h: 4, kinds: 9 },   /*  7 ·  40칸 · 20짝 · 4.4장 */
-  { w:10, h: 4, kinds:10 },   /*  8 ·           · 4.0장 */
-  { w: 8, h: 6, kinds:11 },   /*  9 ·  48칸 · 24짝 · 4.4장 */
-  { w: 8, h: 6, kinds:12 },   /* 10 ·           · 4.0장 */
-  { w:10, h: 6, kinds:13 },   /* 11 ·  60칸 · 30짝 · 4.6장 */
-  { w:10, h: 6, kinds:14 },   /* 12 ·           · 4.3장 */
-  { w:10, h: 6, kinds:15 },   /* 13 ·           · 4.0장 */
-  { w:12, h: 6, kinds:16 },   /* 14 ·  72칸 · 36짝 · 4.5장 */
-  { w:12, h: 6, kinds:17 },   /* 15 ·           · 4.2장 */
-  { w:12, h: 6, kinds:18 },   /* 16 ·           · 4.0장 */
-  { w:11, h: 8, kinds:19 },   /* 17 ·  88칸 · 44짝 · 4.6장 */
-  { w:11, h: 8, kinds:20 },   /* 18 ·           · 4.4장 */
-  { w:11, h: 8, kinds:21 },   /* 19 ·           · 4.2장 */
-  { w:11, h: 8, kinds:22 },   /* 20 ·           · 4.0장 */
-  { w:13, h: 8, kinds:23 },   /* 21 · 104칸 · 52짝 · 4.5장 */
-  { w:13, h: 8, kinds:24 }    /* 22 ·           · 4.3장  ← 마지막 */
+  { w: 4, h:4, kinds: 3 },   /*  1판 ·  16칸 ·  8짝 */
+  { w: 4, h:4, kinds: 4 },   /*  2판 ·  16칸 ·  8짝 */
+  { w: 4, h:4, kinds: 5 },   /*  3판 ·  16칸 ·  8짝 */
+  { w: 5, h:4, kinds: 5 },   /* 판 커짐 */
+  { w: 5, h:4, kinds: 6 },   /*  5판 ·  20칸 · 10짝 */
+  { w: 5, h:4, kinds: 7 },   /*  6판 ·  20칸 · 10짝 */
+  { w: 6, h:4, kinds: 7 },   /* 판 커짐 */
+  { w: 6, h:4, kinds: 8 },   /*  8판 ·  24칸 · 12짝 */
+  { w: 6, h:4, kinds: 9 },   /*  9판 ·  24칸 · 12짝 */
+  { w: 7, h:4, kinds: 9 },   /* 판 커짐 */
+  { w: 7, h:4, kinds:10 },   /* 11판 ·  28칸 · 14짝 */
+  { w: 7, h:4, kinds:11 },   /* 12판 ·  28칸 · 14짝 */
+  { w: 8, h:4, kinds:11 },   /* 판 커짐 */
+  { w: 8, h:4, kinds:12 },   /* 14판 ·  32칸 · 16짝 */
+  { w: 8, h:4, kinds:13 },   /* 15판 ·  32칸 · 16짝 */
+  { w: 8, h:5, kinds:13 },   /* 판 커짐 · 5겹 */
+  { w: 8, h:5, kinds:14 },   /* 17판 ·  40칸 · 20짝 */
+  { w: 8, h:5, kinds:15 },   /* 18판 ·  40칸 · 20짝 */
+  { w: 7, h:6, kinds:15 },   /* 판 커짐 · 6겹 */
+  { w: 7, h:6, kinds:16 },   /* 20판 ·  42칸 · 21짝 */
+  { w: 8, h:6, kinds:16 },   /* 판 커짐 */
+  { w: 8, h:6, kinds:17 },   /* 22판 ·  48칸 · 24짝 */
+  { w: 9, h:6, kinds:17 },   /* 판 커짐 */
+  { w: 9, h:6, kinds:18 },   /* 24판 ·  54칸 · 27짝 */
+  { w:10, h:6, kinds:18 },   /* 판 커짐 */
+  { w:10, h:6, kinds:19 },   /* 26판 ·  60칸 · 30짝 */
+  { w:11, h:6, kinds:19 },   /* 판 커짐 */
+  { w:11, h:6, kinds:20 },   /* 28판 ·  66칸 · 33짝 */
+  { w:10, h:7, kinds:20 },   /* 판 커짐 · 7겹 */
+  { w:10, h:7, kinds:21 },   /* 30판 ·  70칸 · 35짝 */
+  { w:12, h:7, kinds:21 },   /* 판 커짐 */
+  { w:12, h:7, kinds:22 },   /* 32판 ·  84칸 · 42짝 */
+  { w:11, h:8, kinds:22 },   /* 판 커짐 · 8겹 */
+  { w:11, h:8, kinds:23 },   /* 34판 ·  88칸 · 44짝 */
+  { w:12, h:8, kinds:23 },   /* 판 커짐 */
+  { w:12, h:8, kinds:24 },   /* 36판 ·  96칸 · 48짝 */
+  { w:13, h:8, kinds:24 },   /* 판 커짐 */
 ];
 const LAST = STAGES.length;
 
@@ -594,7 +624,10 @@ const TIME_BASE = 170;                        // 2분 50초
 const TIME_WARN = 30;                         // 남은 시간이 이보다 적으면 빨갛게
 const stageAt   = n => STAGES[Math.min(Math.max(n,1), LAST) - 1];
 const pairsAt   = n => stageAt(n).w * stageAt(n).h / 2;
-const timeAt    = n => Math.max(TIME_BASE, Math.round(pairsAt(n) * 3.6));
+/* 짝 하나에 주는 시간. 3.6 이던 것을 4.5 로 올렸습니다 (2026-08-21).
+   전에는 뒷판으로 갈수록 짝당 3.6초까지 쪼그라들어, 판이 커지는 것만으로
+   빡빡해졌습니다. 이제 4.5초 아래로는 안 내려갑니다. */
+const timeAt    = n => Math.max(TIME_BASE, Math.round(pairsAt(n) * 4.5));
 
 /* ── 얼마나 왔는지 ── */
 /* 왼쪽 아래 전체화면 단추가 판 귀퉁이를 가리지 않게 그만큼 비워 둡니다 */
@@ -1611,7 +1644,7 @@ document.addEventListener('visibilitychange', () => {
 /* ── 안내판 ── */
 $('titleNote').innerHTML = bestStage > 1
   ? '지금까지 <b>' + bestStage + '단계</b>까지 오셨습니다 · 이어서 ' + stage + '단계부터'
-  : '모두 <b>22단계</b>입니다 · 한 판에 2분 50초';
+  : '모두 <b>37단계</b>입니다 · 한 판에 2분 50초부터';
 
 $('btnStart').addEventListener('click', () => {
   atTitle = false;
