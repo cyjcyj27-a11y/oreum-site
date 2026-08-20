@@ -530,9 +530,11 @@
   function rewardFor(st) { return 1 + (st % 10 === 0 ? 5 : 0); }
 
   // ── 판이 오를수록 어려워지는 정도 ───────────────────────
-  function spawnGap()  { return Math.max(0.48, 1.00 - stage * 0.010); }
-  function fallSpeed() { return H * (0.40 + stage * 0.0058); }
-  function burstCount(){ return Math.min(3, 1 + Math.floor(stage / 22)); }
+  // 1판부터 손이 바쁘도록 처음부터 촘촘하게 시작합니다.
+  // 6판에서 둘씩, 12판에서 셋씩 쏟아지고, 그 뒤로는 떨어지는 속도가 조입니다.
+  function spawnGap()  { return Math.max(0.36, 0.60 - stage * 0.005); }
+  function fallSpeed() { return H * (0.54 + stage * 0.0070); }
+  function burstCount(){ return Math.min(3, 1 + Math.floor(stage / 6)); }
 
   function unlocked() {
     var out = [];
@@ -542,13 +544,28 @@
 
   function spawn() {
     var pool = unlocked(), n = burstCount();
+
+    // 한 번에 여럿이 쏟아질 때, 루루냥이 빠져나갈 틈을 한 군데는 비워 둡니다.
+    // 안 그러면 화면이 통째로 막혀 손쓸 도리 없이 죽는 판이 나옵니다.
+    var laneW = CHAR_W * 1.6;
+    var laneX = Math.random() * Math.max(1, W - laneW);
+
     for (var i = 0; i < n; i++) {
       var k = pool[Math.floor(Math.random() * pool.length)];
       var base = H * 0.058 * (0.85 + Math.random() * 0.45);
       var iw = base * k.w, ih = base * k.h;
+
+      var bx = Math.random() * (W - iw);
+      if (n > 1) {                                  // 하나만 떨어질 때는 굳이 비켜 갈 것 없습니다
+        for (var tries = 0; tries < 10; tries++) {
+          if (bx + iw < laneX || bx > laneX + laneW) break;   // 틈을 안 건드리면 통과
+          bx = Math.random() * (W - iw);
+        }
+      }
+
       items.push({
         kind: k.key,
-        bx: Math.random() * (W - iw), x: 0, y: -ih - Math.random() * H * 0.3,
+        bx: bx, x: 0, y: -ih - Math.random() * H * 0.3,
         iw: iw, ih: ih,
         vy: fallSpeed() * k.spd * (0.92 + Math.random() * 0.22),
         sway: k.sway * W * 0.05,
