@@ -11,7 +11,27 @@
       if (saved === 'en' || saved === 'ko') lang = saved;
     }
   } catch (e) {}
-  if (!lang) lang = ((navigator.language || 'ko').toLowerCase().indexOf('ko') === 0) ? 'ko' : 'en';
+  /* 어느 나라 말로 보여줄지 정합니다.
+
+     navigator.language 하나만 보면 안 됩니다. 카카오톡·인스타처럼 앱 안에서 링크를 열면
+     그 값이 'en-US' 로 나오는 경우가 많아, 한국 사람인데 영어판이 뜹니다.
+     그래서 브라우저가 주는 언어 목록 전체와 시간대까지 같이 봅니다.
+     (한국에 사는 외국인은 한국어가 뜰 수 있지만, 오른쪽 위 English 단추로 바꾸면 기억합니다) */
+  function detectLang() {
+    try {
+      const list = [];
+      if (navigator.languages && navigator.languages.length) list.push(...navigator.languages);
+      if (navigator.language) list.push(navigator.language);
+      if (navigator.userLanguage) list.push(navigator.userLanguage);
+      for (const v of list) {
+        if (String(v).toLowerCase().indexOf('ko') === 0) return 'ko';
+      }
+      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+      if (tz === 'Asia/Seoul') return 'ko';
+    } catch (e) {}
+    return 'en';
+  }
+  if (!lang) lang = detectLang();
   window.SAJU_LANG = lang;
   document.documentElement.lang = lang;
 

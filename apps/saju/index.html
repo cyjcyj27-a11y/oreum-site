@@ -798,7 +798,7 @@ select { appearance: none; background-image: none; }
 </div>
 
 <script src="i18n_content.js?v=16"></script>
-<script src="i18n.js?v=29"></script>
+<script src="i18n.js?v=30"></script>
 <script>
 /* =========================================================
    data-core.js
@@ -5691,11 +5691,21 @@ function buildResult(input) {
     return h;
   }
   function vpick(x, site) { return Array.isArray(x) ? x[vhash(site) % x.length] : x; }
-  /* 영어 모드에서는 번역이 준비된 기본(첫) 변형만 쓴다.
-     2026-08-13에 추가한 루프·성장조언 변형은 아직 영문 사전에 없기 때문. */
+  /* 영어 모드에서도 변형을 그대로 쓴다. 단, 그 변형의 영어 번역이 없으면 1번으로 되돌린다.
+
+     예전에는 영어면 무조건 1번 변형만 썼다. 변형들이 아직 영문 사전에 없던 때의 안전장치였는데,
+     그 뒤로 번역이 거의 다 채워졌는데도 안전장치가 남아 있었다. 그 바람에 영어 화면을 본 사람은
+     29곳에서 전부 똑같은 문장을 받았다. (카톡·인스타 안에서 링크를 열면 한국 사람도 영어판이 뜬다) */
+  function hasEn(s) {
+    return typeof s === 'string' && typeof window !== 'undefined' &&
+      window.SAJU_EN_CONTENT &&
+      Object.prototype.hasOwnProperty.call(window.SAJU_EN_CONTENT, s);
+  }
   function vpickKo(x, site) {
+    if (!Array.isArray(x)) return x;
     if (typeof window !== 'undefined' && window.SAJU_LANG === 'en') {
-      return Array.isArray(x) ? x[0] : x;
+      var v = vpick(x, site);
+      return hasEn(v) ? v : x[0];
     }
     return vpick(x, site);
   }
