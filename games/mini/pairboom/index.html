@@ -287,6 +287,31 @@
   }
 
   /* ── 덮개 ── */
+  /* ── 시작 화면 ──
+     게임이 대뜸 시작되지 않게, 처음엔 이 화면부터 보여 줍니다.
+     판은 뒤에서 미리 만들어 두므로 '시작하기' 를 누르면 곧바로 뜹니다. */
+  #veilTitle{
+    position:fixed; inset:0; z-index:45;
+    display:none; flex-direction:column; align-items:center; justify-content:center;
+    gap:0; padding:24px 18px; text-align:center;
+    background:
+      repeating-linear-gradient(114deg,
+        rgba(255,255,255,.13) 0 64px, rgba(255,255,255,0) 64px 158px),
+      linear-gradient(180deg, var(--sky-2) 0%, var(--sky) 46%, var(--sky-3) 100%);
+  }
+  #veilTitle.on{ display:flex; }
+  /* 안내판에서는 제목을 크게. 좁은 화면 규칙보다 이 쪽이 셉니다 */
+  #veilTitle h1{ margin:0; font-size:clamp(2.2rem, 11.5vw, 3.7rem); letter-spacing:2px;
+    text-shadow:0 4px 0 #0e3b46, 0 7px 0 #0e3b46, 0 12px 22px rgba(0,50,60,.32); }
+  #veilTitle .tagline{ margin:8px 0 0; font-size:clamp(.88rem, 3.9vw, 1.12rem); }
+  .title-btns{ display:flex; flex-direction:column; gap:12px; margin-top:34px; width:min(300px,84vw); }
+  .title-btns button{ width:100%; font-size:1.25rem; padding:16px 20px; border-radius:20px; }
+  .title-btns .ghost{
+    background:rgba(255,255,255,.94); color:var(--ink);
+    box-shadow:0 5px 0 var(--lip), 0 8px 18px rgba(0,55,65,.16);
+  }
+  .title-note{ margin:22px 0 0; color:#08454f; opacity:.8; font-size:.9rem; font-weight:400; }
+
   .veil{
     position:fixed; inset:0; z-index:50;
     background:rgba(8,58,68,.55); backdrop-filter:blur(4px);
@@ -345,9 +370,20 @@
 </style>
 <!-- Pixabay 효과음 꾸러미 (출처·라이선스는 audio/출처.txt) -->
 <script src="audio/sfx-data.js"></script>
-<script src="/assets/game-home.js" data-top="8" data-left="10" defer></script>
+<script src="/assets/game-home.js?v=2" data-top="8" data-left="10" data-fullscreen="1" defer></script>
 </head>
 <body>
+
+<!-- 처음 열었을 때 보이는 안내판. 뒤에서 판을 만드는 동안 여기 머무릅니다 -->
+<div id="veilTitle" class="on">
+  <h1>PAIRBOOM<em>!!</em></h1>
+  <p class="tagline">같은 그림 두 개를 이으면 <b>BOOM!!!</b></p>
+  <div class="title-btns">
+    <button class="primary" id="btnStart">시작하기</button>
+    <button class="ghost" id="btnHowto">놀이 방법</button>
+  </div>
+  <p class="title-note" id="titleNote">&nbsp;</p>
+</div>
 
 <header>
   <h1>PAIRBOOM<em>!!</em></h1>
@@ -536,6 +572,9 @@ const pairsAt   = n => stageAt(n).w * stageAt(n).h / 2;
 const timeAt    = n => Math.max(TIME_BASE, Math.round(pairsAt(n) * 3.6));
 
 /* ── 얼마나 왔는지 ── */
+/* 왼쪽 아래 전체화면 단추가 판 귀퉁이를 가리지 않게 그만큼 비워 둡니다 */
+const FOOT_ROOM = 44;
+let atTitle = true;          // 안내판을 보고 있는 동안은 시계가 가지 않습니다
 let stage = 1;                                // 지금 몇 단계
 let bestStage = 1;                            // 여태 가장 멀리 간 단계
 function loadProgress(){
@@ -785,7 +824,7 @@ function fit(){
     // 안 그러면 조금 전에 자기가 준 여백을 다시 재서 판이 점점 작아집니다.
     const head = st.offsetTop - (parseFloat(getComputedStyle(st).marginTop) || 0);
     // 판 위아래로 각각 0.62칸씩 여백이 붙으므로 H + 1.32 칸이 들어갈 자리가 필요합니다
-    cw = Math.floor(Math.min(availW / (W + sideRoom), (vh - head - 10) / (H + 1.32), 104));
+    cw = Math.floor(Math.min(availW / (W + sideRoom), (vh - head - FOOT_ROOM) / (H + 1.32), 104));
     if (!isFinite(cw) || cw < 20) cw = Math.max(20, Math.floor(availW / (W + sideRoom)));
     document.documentElement.style.setProperty('--cw', cw + 'px');
     // 그래도 남는 자리가 있으면 판을 내려 화면 가운데로 옮깁니다
@@ -1212,7 +1251,7 @@ function pickShape(w, h){
   // 지금 붙어 있는 여백을 빼야 머리말 높이가 제대로 나옵니다
   const head = st ? st.offsetTop - (parseFloat(getComputedStyle(st).marginTop) || 0) : 190;
   const availW = vw - 8;
-  const availH = vh - head - 10;
+  const availH = vh - head - FOOT_ROOM;
   const cells = w * h;
   // 후보를 다 재 보고 칸이 제일 커지는 것을 고릅니다.
   // 다만 칸 크기가 엇비슷하면(1할 안쪽) 가로를 더 채우는 쪽이 보기 좋습니다.
@@ -1236,7 +1275,7 @@ function newGame(){
   const shape = pickShape(L.w, L.h);
   W = shape[0]; H = shape[1];
 
-  toast('판을 만드는 중…', 900);
+  if (!atTitle) toast('판을 만드는 중…', 900);
   // 판 만드는 동안 화면이 굳지 않도록 한 박자 쉬어 갑니다
   setTimeout(() => {
     board = generate();
@@ -1245,14 +1284,14 @@ function newGame(){
     left = board.length / 2;
     score = 0; combo = 0; lastMatchAt = 0;
     hints = 5; shuffles = 3;
-    elapsed = 0; running = true; paused = false;
+    elapsed = 0; running = !atTitle; paused = false;
     buildDom();
     showBest();
     updateStats();
-    startTimer();
+    if (!atTitle) startTimer();       // 안내판을 보는 동안은 시간이 줄지 않습니다
     linkEl.classList.remove('show');
     $('veilLose').classList.remove('on');
-    toast(stage + '단계 · ' + W + '×' + H + ' · 짝 ' + (W*H/2) + '개 · 그림 ' + L.kinds + '종', 1800);
+    if (!atTitle) toast(stage + '단계 · ' + W + '×' + H + ' · 짝 ' + (W*H/2) + '개 · 그림 ' + L.kinds + '종', 1800);
   }, 30);
 }
 
@@ -1531,7 +1570,26 @@ setTimeout(() => {
   if (a && a.preload !== 'auto'){ a.preload = 'auto'; a.load(); }
 }, musicOn ? 300 : 4000);
 
-newGame();
+/* ── 안내판 ── */
+$('titleNote').innerHTML = bestStage > 1
+  ? '지금까지 <b>' + bestStage + '단계</b>까지 오셨습니다 · 이어서 ' + stage + '단계부터'
+  : '모두 <b>22단계</b>입니다 · 한 판에 2분 50초';
+
+$('btnStart').addEventListener('click', () => {
+  atTitle = false;
+  $('veilTitle').classList.remove('on');
+  if (board && board.length){        // 판이 이미 만들어져 있으면 바로 시작합니다
+    running = true;
+    startTimer();
+    toast(stage + '단계 · ' + W + '×' + H + ' · 짝 ' + (W*H/2) + '개 · 그림 ' +
+          stageAt(stage).kinds + '종', 1800);
+  } else {
+    newGame();                       // 아직이면 지금 만듭니다
+  }
+});
+$('btnHowto').addEventListener('click', () => $('veilHelp').classList.add('on'));
+
+newGame();                           // 안내판 뒤에서 미리 만들어 둡니다
 
 })();
 </script>
