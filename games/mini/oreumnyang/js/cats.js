@@ -1,15 +1,14 @@
 /* =========================================================
    오름냥 - 고양이 그림 담당
    ---------------------------------------------------------
-   기본은 코드로 그린 고양이입니다.
-   assets/cats/ 폴더에 cat0.png ~ cat6.png (그리고 cat_rainbow.png)
-   를 넣어두면 자동으로 그 그림으로 바뀝니다. (정사각형 투명 png 권장)
+   고양이는 assets/cats/ 의 png 그림을 그대로 씍니다.
+   (cat0.png ~ cat6.png, cat_rainbow.png / 정사각형 배경 투명)
+   예전에는 그림이 없을 때 코드로 고양이를 그렸는데,
+   그림을 다 읽기 전 잠깐 그게 먼저 보여서 지웠습니다.
    ========================================================= */
 (function (global) {
   'use strict';
 
-  var S = 128;            // 내부 렌더 해상도
-  var CACHE = {};         // 캐시된 고양이 캔버스
   var IMGS = {};          // 사용자가 넣은 이미지
 
   var PALETTE = [
@@ -22,141 +21,7 @@
     { name: '구름냥',  body: '#E2E8F3', dark: '#A9B4C8', light: '#FFFFFF', ear: '#FFCBD8', mark: '#8F9BB3' }
   ];
 
-  /* ---------------- 부품 그리기 ---------------- */
-
-  function ears(g, p, style) {
-    var pairs = [-1, 1];
-    for (var i = 0; i < 2; i++) {
-      var s = pairs[i];
-      g.save();
-      g.translate(64 + s * 30, 34);
-      g.scale(s, 1);
-      g.beginPath();
-      if (style === 0) {              // 둥근 귀
-        g.moveTo(-15, 14); g.quadraticCurveTo(-9, -18, 15, -6); g.quadraticCurveTo(18, 8, 10, 16);
-      } else if (style === 1) {       // 뾰족 귀
-        g.moveTo(-16, 16); g.lineTo(2, -22); g.lineTo(18, 12);
-      } else if (style === 2) {       // 크고 긴 귀
-        g.moveTo(-14, 18); g.lineTo(6, -28); g.lineTo(19, 10);
-      } else if (style === 3) {       // 접힌 귀
-        g.moveTo(-16, 12); g.quadraticCurveTo(-4, -12, 16, -2); g.quadraticCurveTo(6, 14, -6, 16);
-      } else {                        // 표준 세모
-        g.moveTo(-15, 15); g.lineTo(1, -19); g.lineTo(17, 11);
-      }
-      g.closePath();
-      g.fillStyle = p.body; g.fill();
-      g.strokeStyle = 'rgba(0,0,0,.10)'; g.lineWidth = 2; g.stroke();
-      // 귀 안쪽
-      g.beginPath();
-      g.moveTo(-7, 10); g.lineTo(2, -9); g.lineTo(10, 7); g.closePath();
-      g.fillStyle = p.ear; g.fill();
-      g.restore();
-    }
-  }
-
-  function head(g, p) {
-    var grd = g.createRadialGradient(52, 46, 6, 64, 66, 50);
-    grd.addColorStop(0, p.light);
-    grd.addColorStop(0.55, p.body);
-    grd.addColorStop(1, p.dark);
-    g.beginPath();
-    g.ellipse(64, 68, 45, 41, 0, 0, Math.PI * 2);
-    g.fillStyle = grd; g.fill();
-    g.strokeStyle = 'rgba(0,0,0,.12)'; g.lineWidth = 2.5; g.stroke();
-  }
-
-  function eyes(g, p, kind) {
-    var xs = [46, 82], y = 66;
-    for (var i = 0; i < 2; i++) {
-      var x = xs[i];
-      if (kind === 'happy') {                       // ^ ^ 웃는 눈
-        g.beginPath();
-        g.moveTo(x - 9, y + 3);
-        g.quadraticCurveTo(x, y - 10, x + 9, y + 3);
-        g.lineWidth = 4; g.strokeStyle = '#3A2B22'; g.lineCap = 'round'; g.stroke();
-        continue;
-      }
-      g.beginPath();
-      g.ellipse(x, y, 8.5, 10.5, 0, 0, Math.PI * 2);
-      g.fillStyle = '#FFFFFF'; g.fill();
-      g.beginPath();
-      g.ellipse(x + (i ? -1 : 1), y + 1, 5.4, 7.4, 0, 0, Math.PI * 2);
-      g.fillStyle = '#33261F'; g.fill();
-      g.beginPath();
-      g.arc(x - 2, y - 3, 2.4, 0, Math.PI * 2);
-      g.fillStyle = 'rgba(255,255,255,.95)'; g.fill();
-    }
-  }
-
-  function face(g, p) {
-    // 볼터치
-    g.fillStyle = 'rgba(255,120,150,.30)';
-    g.beginPath(); g.ellipse(38, 82, 8, 5.5, 0, 0, Math.PI * 2); g.fill();
-    g.beginPath(); g.ellipse(90, 82, 8, 5.5, 0, 0, Math.PI * 2); g.fill();
-    // 코
-    g.beginPath();
-    g.moveTo(58, 80); g.lineTo(70, 80); g.lineTo(64, 87); g.closePath();
-    g.fillStyle = '#FF7E9B'; g.fill();
-    // 입 (ω)
-    g.strokeStyle = '#4A3529'; g.lineWidth = 2.6; g.lineCap = 'round';
-    g.beginPath();
-    g.moveTo(64, 87);
-    g.quadraticCurveTo(58, 96, 52, 89);
-    g.moveTo(64, 87);
-    g.quadraticCurveTo(70, 96, 76, 89);
-    g.stroke();
-    // 수염
-    g.strokeStyle = 'rgba(70,50,40,.42)'; g.lineWidth = 2;
-    [-4, 3].forEach(function (dy) {
-      g.beginPath(); g.moveTo(33, 78 + dy * 2); g.lineTo(19, 75 + dy * 3); g.stroke();
-      g.beginPath(); g.moveTo(95, 78 + dy * 2); g.lineTo(109, 75 + dy * 3); g.stroke();
-    });
-  }
-
-  function mark(g, p, idx) {
-    g.save();
-    g.strokeStyle = p.mark; g.fillStyle = p.mark;
-    g.lineWidth = 3.4; g.lineCap = 'round'; g.lineJoin = 'round';
-    if (idx === 0) {                       // M 줄무늬
-      g.beginPath();
-      g.moveTo(52, 46); g.lineTo(58, 38); g.lineTo(64, 46); g.lineTo(70, 38); g.lineTo(76, 46);
-      g.stroke();
-    } else if (idx === 1) {                // 하트
-      g.beginPath();
-      g.moveTo(64, 50);
-      g.bezierCurveTo(58, 40, 46, 43, 50, 52);
-      g.bezierCurveTo(53, 58, 60, 60, 64, 64);
-      g.bezierCurveTo(68, 60, 75, 58, 78, 52);
-      g.bezierCurveTo(82, 43, 70, 40, 64, 50);
-      g.fill();
-    } else if (idx === 2) {                // 별
-      star(g, 64, 47, 5, 12, 5.4); g.fill();
-    } else if (idx === 3) {                // 점 세 개
-      [[54, 44], [64, 40], [74, 44]].forEach(function (q) {
-        g.beginPath(); g.arc(q[0], q[1], 4, 0, Math.PI * 2); g.fill();
-      });
-    } else if (idx === 4) {                // 초승달
-      g.beginPath();
-      g.arc(64, 46, 12, Math.PI * 0.72, Math.PI * 1.9);
-      g.arc(69, 44, 11, Math.PI * 1.9, Math.PI * 0.72, true);
-      g.closePath(); g.fill();
-    } else if (idx === 5) {                // 반창고 X
-      g.beginPath();
-      g.moveTo(54, 38); g.lineTo(74, 52);
-      g.moveTo(74, 38); g.lineTo(54, 52);
-      g.stroke();
-    } else {                               // 눈꽃
-      for (var a = 0; a < 3; a++) {
-        var ang = a * Math.PI / 3;
-        g.beginPath();
-        g.moveTo(64 - Math.cos(ang) * 11, 45 - Math.sin(ang) * 11);
-        g.lineTo(64 + Math.cos(ang) * 11, 45 + Math.sin(ang) * 11);
-        g.stroke();
-      }
-    }
-    g.restore();
-  }
-
+  /* 별 모양 (밖에서 쓸 수 있게 남겨둔 것) */
   function star(g, cx, cy, spikes, outer, inner) {
     var rot = -Math.PI / 2, step = Math.PI / spikes;
     g.beginPath();
@@ -168,49 +33,20 @@
     g.closePath();
   }
 
-  /* ---------------- 캐시 만들기 ---------------- */
-
-  var EAR_STYLE = [0, 1, 2, 3, 4, 0, 4];
-  var EYE_STYLE = ['normal', 'normal', 'normal', 'happy', 'normal', 'happy', 'normal'];
-
-  function build(idx) {
-    var cv = document.createElement('canvas');
-    cv.width = cv.height = S;
-    var g = cv.getContext('2d');
-    if (idx === 'rainbow') return buildRainbow(cv, g);
-    var p = PALETTE[idx];
-    ears(g, p, EAR_STYLE[idx]);
-    head(g, p);
-    mark(g, p, idx);
-    eyes(g, p, EYE_STYLE[idx]);
-    face(g, p);
-    return cv;
-  }
-
-  function buildRainbow(cv, g) {
-    var p = { body: '#fff', dark: '#ddd', light: '#fff', ear: '#FFD0DE', mark: '#fff' };
-    ears(g, p, 4);
-    // 무지개 머리
-    var grd = g.createLinearGradient(20, 26, 108, 108);
-    ['#FF6B6B', '#FFB84D', '#FFE666', '#6FE0B8', '#66C5F5', '#B49BFF', '#FF93B6']
-      .forEach(function (c, i, a) { grd.addColorStop(i / (a.length - 1), c); });
-    g.beginPath(); g.ellipse(64, 68, 45, 41, 0, 0, Math.PI * 2);
-    g.fillStyle = grd; g.fill();
-    g.strokeStyle = 'rgba(255,255,255,.75)'; g.lineWidth = 3; g.stroke();
-    // 반짝임
-    g.fillStyle = 'rgba(255,255,255,.85)';
-    star(g, 40, 44, 4, 9, 3); g.fill();
-    star(g, 92, 52, 4, 6, 2); g.fill();
-    eyes(g, p, 'normal');
-    face(g, p);
-    return cv;
-  }
-
   function sheet(idx) {
-    var key = String(idx);
-    if (IMGS[key]) return IMGS[key];
-    if (!CACHE[key]) CACHE[key] = build(idx);
-    return CACHE[key];
+    return IMGS[String(idx)] || null;
+  }
+
+  /* 그림 파일을 아직 못 읽었을 때만 잠깐 놓는 민무늬 사탕.
+     예전에 코드로 그리던 고양이는 지웠다 — 새 그림이 뜨기 전에 그게 먼저 보였기 때문. */
+  function placeholder(g, x, y, size, colorIdx, special) {
+    var p = PALETTE[colorIdx] || PALETTE[0];
+    var h = size / 2 - size * 0.06;
+    var grd = g.createLinearGradient(x - h, y - h, x + h, y + h);
+    grd.addColorStop(0, special === 'rainbow' ? '#ffffff' : p.light);
+    grd.addColorStop(1, special === 'rainbow' ? '#cfcfcf' : p.dark);
+    roundRect(g, x - h, y - h, h * 2, h * 2, size * 0.28);
+    g.fillStyle = grd; g.fill();
   }
 
   /* ---------------- 사용자 이미지 불러오기 ----------------
@@ -253,7 +89,8 @@
   function draw(g, x, y, size, colorIdx, special, t) {
     var img = sheet(special === 'rainbow' ? 'rainbow' : colorIdx);
     var h = size / 2;
-    g.drawImage(img, x - h, y - h, size, size);
+    if (img) g.drawImage(img, x - h, y - h, size, size);
+    else placeholder(g, x, y, size, colorIdx, special);
     if (special && special !== 'rainbow') drawSpecial(g, x, y, size, special, t || 0);
   }
 

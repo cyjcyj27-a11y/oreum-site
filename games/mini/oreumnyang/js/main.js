@@ -263,8 +263,9 @@
     if (window.applyStatic) applyStatic();
     load();
     Sound.init();
+    // 그림을 다 읽은 뒤에만 그린다.
+    // 먼저 한 번 그리면 잠깐 빈 칸이 보이는 게 아니라 없어진 예 그림이 보였다.
     Cats.tryLoadImages(function () { drawTitleArt(); });
-    drawTitleArt();
 
     var done = Object.keys(progress.stars).length;
     $('title-progress').textContent = done
