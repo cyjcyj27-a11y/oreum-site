@@ -760,6 +760,18 @@ function fit(){
   let cw = Math.floor(Math.min(availW / (W + sideRoom), availH / (H + 0.7), 104));
   if (!isFinite(cw) || cw < 24) cw = Math.max(24, Math.floor(availW / (W + sideRoom)));
   document.documentElement.style.setProperty('--cw', cw + 'px');
+
+  // 폰에서는 판이 가로에 묶여 아래가 휑하게 남습니다. 남는 만큼 판을 내려 가운데로 옮깁니다.
+  // (지금 붙어 있는 여백을 빼고 머리말 높이를 재야 값이 튀지 않습니다)
+  const st = $('stage');
+  if (narrow){
+    const gap  = Math.round(cw * 0.62);
+    const head = st.offsetTop - (parseFloat(getComputedStyle(st).marginTop) || 0);
+    const spare = vh - head - (H * cw + gap * 2);
+    st.style.marginTop = (gap + Math.max(0, Math.round(spare * 0.40))) + 'px';
+  } else {
+    st.style.marginTop = '';
+  }
   linkEl.setAttribute('width',  (W+2) * cw);
   linkEl.setAttribute('height', (H+2) * cw);
   linkEl.setAttribute('viewBox', '0 0 ' + ((W+2)*cw) + ' ' + ((H+2)*cw));
