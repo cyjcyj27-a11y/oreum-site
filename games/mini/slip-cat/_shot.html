@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow">
+<title>slip-cat 카드 사진 찍기</title>
+<style>
+  html, body { margin: 0; background: #fff; overflow: hidden; }
+  #box { overflow: hidden; }
+  iframe { border: 0; display: block; }
+</style>
+</head>
+<body>
+<div id="box"><iframe id="f" src="about:blank"></iframe></div>
+<script>
+/* 카드에 쓸 사진을 찍기 위한 임시 페이지입니다. 게임 자체와는 상관없습니다.
+
+   화면 찍는 프로그램은 시간을 제대로 안 흘려보내서, 가만 두면 아무것도 안 떨어진 채 찍힙니다.
+   그래서 '다음 화면 그리기' 요청을 가로채 원하는 장면 수만큼 직접 돌린 뒤 찍습니다.
+
+   주소 뒤에 붙일 것:
+     ?stage=12    어느 판에서 찍을지 (4판부터 당근, 9판부터 월동무, 15판부터 망사리)
+     ?frames=195  몇 장면 돌린 뒤 찍을지 (60장면 = 1초쯤)
+     ?seed=7      떨어지는 자리를 고정하는 씨앗. 같은 값이면 같은 사진이 나옵니다
+     ?w=480&h=300 게임 화면 크기. 루루냥은 화면 높이의 17%(최소 76px)라
+                  화면을 낮게 잡을수록 루루냥이 크게 나옵니다
+     ?lang=en     영어 화면
+*/
+var qs = new URLSearchParams(location.search);
+var STAGE = qs.get('stage') || '12';
+var FRAMES = parseInt(qs.get('frames') || '195', 10);
+var SEED = parseInt(qs.get('seed') || '7', 10);
+var LANG = qs.get('lang') || 'ko';
+var VW = parseInt(qs.get('w') || '480', 10);
+var VH = parseInt(qs.get('h') || '300', 10);
+
+// 게임은 뜨는 순간 저장된 판 번호를 읽는다. 그러니 게임을 만들기 '전에' 넣어야 한다.
+try { localStorage.setItem('slipCatResume', STAGE); } catch (e) {}
+
+var box = document.getElementById('box'), f = document.getElementById('f');
+box.style.width = VW + 'px'; box.style.height = VH + 'px';
+f.style.width = VW + 'px'; f.style.height = VH + 'px';
+
+var PATCH = [
+  '<script>(function(){',
+  ' var t=0,q=[];',
+  ' window.requestAnimationFrame=function(cb){q.push(cb);return q.length;};',
+  ' window.__step=function(n){for(var i=0;i<n;i++){t+=16.7;var cur=q;q=[];',
+  '   for(var j=0;j<cur.length;j++){try{cur[j](t);}catch(e){}}}};',
+  // 무엇이 어디로 떨어질지 매번 달라지면 같은 사진을 다시 못 찍는다. 씨앗을 고정한다.
+  ' var s=' + SEED + '||1;',
+  ' Math.random=function(){s=(s*1103515245+12345)%2147483648;return s/2147483648;};',
+  '})();<\/scr' + 'ipt>'
+].join('');
+
+fetch('./?lang=' + LANG).then(function (r) { return r.text(); }).then(function (html) {
+  var d = f.contentDocument;
+  d.open();
+  d.write(html.replace('<head>', '<head>\n<base href="./">\n' + PATCH));
+  d.close();
+
+  var w = f.contentWindow, tries = 0;
+  (function waitForButton() {
+    tries++;
+    var btn = null, all = d.querySelectorAll('button, a');
+    for (var i = 0; i < all.length; i++) {
+      if (/STAGE\s*\d+/i.test(all[i].textContent || '')) { btn = all[i]; break; }
+    }
+    if (!btn && tries < 60) { setTimeout(waitForButton, 50); return; }
+    if (!btn) { document.title = 'NO BUTTON'; return; }
+
+    // 자리를 다 잡은 뒤에 눌러야 한다. 급히 누르면 게임이 화면 크기를 0으로 재고 아무것도 안 그린다.
+    setTimeout(function () {
+      try { w.dispatchEvent(new Event('resize')); } catch (e) {}
+      btn.click();
+      if (w.__step) w.__step(FRAMES);
+      var got = (d.getElementById('hudStage') || {}).textContent || '';
+      var cv = d.querySelector('canvas');
+      document.title = 'OK ' + got + ' / ' + FRAMES + 'f / canvas ' +
+        (cv ? cv.clientWidth + 'x' + cv.clientHeight : 'none');
+    }, 500);
+  })();
+});
+</script>
+</body>
+</html>
