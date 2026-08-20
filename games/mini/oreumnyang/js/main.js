@@ -263,9 +263,9 @@
     if (window.applyStatic) applyStatic();
     load();
     Sound.init();
-    // 그림을 다 읽은 뒤에만 그린다.
-    // 먼저 한 번 그리면 잠깐 빈 칸이 보이는 게 아니라 없어진 예 그림이 보였다.
-    Cats.tryLoadImages(function () { drawTitleArt(); });
+    // 그림이 한 장 올 때마다 다시 그린다. 8장을 다 기다리면 시작화면이 한참 빈다.
+    // (예전엔 다 읽은 뒤에만 그렸는데, 그림이 무거워지면서 늦게 뜨는 게 티가 났다)
+    Cats.tryLoadImages(drawTitleArt, drawTitleArt);
 
     var done = Object.keys(progress.stars).length;
     $('title-progress').textContent = done

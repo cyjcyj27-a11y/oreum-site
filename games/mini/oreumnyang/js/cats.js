@@ -55,19 +55,29 @@
      목록 파일이 없으면 예전처럼 8장을 하나씩 찾아본다. */
   /* 고양이 그림을 바꾸면 이 날짜를 올린다.
      안 올리면 예전에 왔던 사람 브라우저가 옛 그림을 계속 쓴다. */
-  var CAT_VER = '20260820b';
+  var CAT_VER = '20260820c';
+  /* webp 로 바꿨다. 같은 그림이 png 698KB -> webp 116KB.
+     시작화면에 고양이가 늦게 뜨던 게 이 무게 탓이 컸다. */
+  var CAT_EXT = '.webp';
 
   var IMG_KEYS = ['0', '1', '2', '3', '4', '5', '6', 'rainbow'];
   var IMG_FILES = ['cat0', 'cat1', 'cat2', 'cat3', 'cat4', 'cat5', 'cat6', 'cat_rainbow'];
 
-  function loadOne(key, file, done) {
+  function loadOne(key, file, done, each) {
     var img = new Image();
-    img.onload = function () { IMGS[key] = img; done(); };
+    img.onload = function () {
+      IMGS[key] = img;
+      if (each) each(key);      // 한 장 올 때마다 알려준다 (8장 다 기다리지 않게)
+      done();
+    };
     img.onerror = done;
-    img.src = 'assets/cats/' + file + '.png?v=' + CAT_VER;
+    img.src = 'assets/cats/' + file + CAT_EXT + '?v=' + CAT_VER;
   }
 
-  function tryLoadImages(onDone) {
+  /* onDone  : 8장이 다 왔을 때 한 번
+     onEach  : 한 장 올 때마다. 시작화면은 이걸로 그때그때 다시 그린다.
+               예전엔 다 올 때까지 기다려서, 그림이 무거워지자 한참 빈 화면이었다. */
+  function tryLoadImages(onDone, onEach) {
     function finish() { if (onDone) onDone(); }
     fetch('assets/cats/manifest.json').then(function (r) {
       if (!r.ok) throw 0;
@@ -77,12 +87,13 @@
       if (!keys.length) { finish(); return; }
       var left = keys.length;
       keys.forEach(function (k) {
-        loadOne(k, IMG_FILES[IMG_KEYS.indexOf(k)], function () { if (--left === 0) finish(); });
+        loadOne(k, IMG_FILES[IMG_KEYS.indexOf(k)],
+                function () { if (--left === 0) finish(); }, onEach);
       });
     }).catch(function () {
       var left = IMG_KEYS.length;
       IMG_KEYS.forEach(function (k, i) {
-        loadOne(k, IMG_FILES[i], function () { if (--left === 0) finish(); });
+        loadOne(k, IMG_FILES[i], function () { if (--left === 0) finish(); }, onEach);
       });
     });
   }
