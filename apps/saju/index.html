@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>MBTI사주</title>
-<meta name="keywords" content="웹게임, 브라우저게임, 프리게임, 퍼즐게임, 무료게임, 설치없는게임, 회원가입없는게임, 인디게임, 오름게임즈, webgame, browsergame, freegame, puzzlegame, oreumgames">
+<meta name="keywords" content="MBTI사주, 사주, 사주팔자, 무료사주, 사주풀이, MBTI, 성향분석, 성격유형, 일간, 십신, 오행, 신살, 궁합, 무료 성격테스트, 설치없는, 회원가입없는, 오름게임즈, saju, four pillars, korean astrology, mbti, personality test, free, oreumgames">
 <meta name="theme-color" content="#171310">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="오름게임즈">
@@ -7751,11 +7751,12 @@ function copyRelResult() {
 </script>
 
 <!-- 아래 두 덩어리는 배포용입니다. 원본 폴더에서 단독으로 열면 visit.js 는 404가 납니다.
-     ../assets/visit.js 가 lulu-farm 저장소 안에만 있는 경로이기 때문입니다. 그래도 껍데기에
-     두는 이유는, 빌드 결과를 그대로 복사하면 배포가 끝나게 하기 위해서입니다.
-     빼두면 복사할 때마다 손으로 다시 붙여야 하고, 그러다 언젠가 빠뜨립니다.
+     두 사이트 모두 루트에 /assets/visit.js 가 있으므로 절대경로로 씁니다.
+     (예전에 ../assets/ 로 돼 있었는데, play 쪽은 /saju/ 라 맞았지만
+      oreumgames 쪽은 /apps/saju/ 라 /apps/assets/ 를 찾아 404 였습니다.
+      그래서 oreumgames 에서는 방문 수가 안 세지고 있었습니다. 2026-08-20 수정)
      방문 수만 셉니다 — 유입 경로와 국가는 2026-08-14 에 뺐습니다(구글 애널리틱스와 겹쳐서). -->
-<script src="../assets/visit.js?v=9" defer></script>
+<script src="/assets/visit.js?v=9" defer></script>
 <!-- 페이지뷰 — 새로고침·재방문까지 전부 셉니다 -->
 <script>
 (function(){
