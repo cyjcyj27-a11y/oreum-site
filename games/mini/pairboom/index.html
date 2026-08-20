@@ -1175,6 +1175,11 @@ function stopTimer(){ if (tick){ clearInterval(tick); tick = null; } }
 function newGame(){
   const L = stageAt(stage);
   W = L.w; H = L.h;
+  // 폰은 세로로 깁니다. 가로로 긴 판을 그대로 넣으면 칸이 손톱만해집니다.
+  // 칸 수는 그대로 두고 판만 세워서 넣습니다 (13x8 -> 8x13). 규칙은 아무것도 안 바뀝니다.
+  if (Math.max(window.innerWidth || 0, document.documentElement.clientWidth || 0, 320) <= 560 && W > H){
+    const t = W; W = H; H = t;
+  }
 
   toast('판을 만드는 중…', 900);
   // 판 만드는 동안 화면이 굳지 않도록 한 박자 쉬어 갑니다
