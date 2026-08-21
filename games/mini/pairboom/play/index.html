@@ -1555,10 +1555,10 @@ function sndHint(){
 function sndPop(combo){
   const step = Math.min(combo - 1, 7);
   const rate = Math.pow(2, step/12);
-  if (play('pop', rate, 0.85)){
+  if (play('pop', rate, 0.6)){
     // 폭발음은 그 자체로 두툼해서, 아주 높은 연속일 때만 낮은 소리를 살짝 겹칩니다.
     // 너무 낮추면 길게 늘어져 다음 소리와 뭉갭니다.
-    if (combo >= 4) play('pop', rate * 0.72, 0.3);
+    if (combo >= 4) play('pop', rate * 0.72, 0.21);
   } else {
     noisePop(0.22, 0.22);
     beep(660 * rate, 0.09, 'sine', 0.12);
