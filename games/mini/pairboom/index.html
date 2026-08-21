@@ -418,7 +418,6 @@
   <button id="btnReset" class="ico-only" title="처음부터 다시하기" aria-label="처음부터 다시하기"><svg class="btn-ico" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="50" fill="#ff8a3d"/><g fill="#fff"><rect x="30" y="32" width="9" height="36" rx="3"/><path d="M70 32 44 50l26 18z"/></g></svg></button>
   <button class="primary ico-only" id="btnNew" title="현재 단계 다시하기 (N)" aria-label="현재 단계 다시하기"><svg class="btn-ico" viewBox="0 0 24 24" aria-hidden="true" fill="#fff"><path d="M17.65 6.35A7.96 7.96 0 0 0 12 4c-4.42 0-7.99 3.58-8 8s3.58 8 8 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg></button>
   <button id="btnHint" class="ico-only" title="힌트" aria-label="힌트"><img class="btn-ico" src="icons/hint.png" alt=""><span class="badge" id="hintN">3</span></button>
-  <button id="btnShuffle" class="ico-only" title="섞기" aria-label="섞기"><svg class="btn-ico" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="50" fill="#8b5cf6"/><g transform="translate(26,26) scale(2)" fill="#fff"><path d="M10.59 9.17 5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z"/></g></svg><span class="badge" id="shufN">2</span></button>
   <button id="btnPause" class="ico-only" title="멈춤 (스페이스)" aria-label="멈춤"><img class="btn-ico" src="icons/pause.png" alt=""></button>
   <button id="btnSound" class="ico-only" title="효과음 끄기" aria-label="효과음"><svg class="btn-ico" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="50" fill="#2a9db0"/><g transform="translate(26,26) scale(2)" fill="#fff"><path d="M3 9v6h4l5 5V4L7 9H3z"/><path class="wave" d="M16.5 12A4.5 4.5 0 0 0 14 7.97v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/><path class="wave" d="M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></g><path class="slash-cut" d="M26 26 74 74" stroke="#2a9db0" stroke-width="22" stroke-linecap="round"/><path class="slash" d="M26 26 74 74" stroke="#fff" stroke-width="10" stroke-linecap="round"/></svg></button>
   <button id="btnMusic" class="off ico-only" title="배경음악 켜기" aria-label="배경음악"><img class="btn-ico" src="icons/music.png" alt=""></button>
@@ -455,7 +454,7 @@
 </audio>
 
 <p class="foot">
-  <kbd>N</kbd> 판 다시 · <kbd>H</kbd> 힌트 · <kbd>S</kbd> 섞기 · <kbd>스페이스</kbd> 멈춤
+  <kbd>N</kbd> 판 다시 · <kbd>H</kbd> 힌트 · <kbd>스페이스</kbd> 멈춤
 </p>
 
 <!-- 멈춤 -->
@@ -515,7 +514,7 @@
       <p><b>1.</b> 두 그림을 잇는 길이 <b>빈 칸</b>으로만 뚫려 있어야 합니다.<br>
       <b>2.</b> 그 길은 <b>꺾임이 2번까지</b>(선 세 개까지)만 허용됩니다.<br>
       <b>3.</b> 길은 <b>판 바깥으로 돌아가도</b> 됩니다. 가장자리 그림이 잘 지워지는 이유입니다.</p>
-      <p>더 이상 지울 짝이 없으면 남은 그림을 <b>알아서 섞어</b> 드립니다. 이때는 섞기 횟수가 줄지 않습니다.</p>
+      <p>더 이상 지울 짝이 없으면 남은 그림을 <b>알아서 섞어</b> 드립니다. 그러니 막혀서 못 깨는 일은 없습니다.</p>
       <p>모든 판은 <b>끝까지 지울 수 있게</b> 만들어 내놓습니다.</p>
       <p>뒷단계에는 <b>회색 돌</b>이 섞여 있습니다. 돌은 지울 수 없고 <b>길을 막습니다</b>.
       돌이 놓인 자리에 따라 판이 십자·마름모·고리 모양이 되기도 합니다.</p>
@@ -785,7 +784,7 @@ let board = [];             // 길이 W*H. null 이거나 그림 문자
 let sel = -1;               // 지금 고른 칸 번호, 없으면 -1
 let left = 0;               // 남은 짝 수
 let score = 0, combo = 0, lastMatchAt = 0;
-let hints = 3, shuffles = 2;
+let hints = 3;
 let elapsed = 0, tick = null, running = false, paused = false;
 let soundOn = true;
 let musicOn = false;         // 처음 여는 사람이 놀라지 않게 꺼두고 시작합니다
@@ -1410,6 +1409,13 @@ function sndPop(combo){
     setTimeout(() => beep(990 * rate, 0.14, 'sine', 0.10), 60);
   }
 }
+/* 시간이 다 됐을 때 — 아쉬워하는 함성.
+   못 받았으면 낮은 소리 두 번으로 대신합니다 */
+function sndLose(){
+  if (!play('lose', 1, 0.8)){
+    [0, 260].forEach((d, k) => setTimeout(() => beep([300, 220][k], 0.34, 'sawtooth', 0.09), d));
+  }
+}
 function sndWin(){
   if (!play('win', 1, 0.85)){
     [0,120,240,420].forEach((d,k) => setTimeout(() => beep([523,659,784,1047][k], 0.28, 'sine', 0.13), d));
@@ -1448,9 +1454,7 @@ function updateStats(){
   $('timeBox').classList.toggle('warn', running && remain <= TIME_WARN);
   $('sScore').textContent = score;
   $('hintN').textContent  = hints;
-  $('shufN').textContent  = shuffles;
   $('btnHint').disabled    = hints <= 0 || !running;
-  $('btnShuffle').disabled = shuffles <= 0 || !running;
   $('comboBox').style.display = combo >= 2 ? '' : 'none';
   $('sCombo').textContent = '×' + combo;
 }
@@ -1512,7 +1516,7 @@ function newGame(){
     for (let i = 0; i < board.length; i++) if (board[i] !== null && board[i] !== ROCK) left++;
     left /= 2;
     score = 0; combo = 0; lastMatchAt = 0;
-    hints = 3; shuffles = 2;
+    hints = 3;
     elapsed = 0; running = !atTitle; paused = false;
     buildDom();
     showBest();
@@ -1628,18 +1632,17 @@ function afterMove(){
   if (left === 0){ win(); return; }
   if (!findAnyMove(null)){
     toast('지울 짝이 없어 알아서 섞습니다', 2200);
-    setTimeout(() => doShuffle(true), 400);
+    setTimeout(doShuffle, 400);
   }
 }
 
-function doShuffle(auto){
-  // 알아서 섞는 경우는 멈춤 중이라도 해 둡니다. 안 그러면 풀 수 없는 판으로 돌아오게 됩니다
-  if (!running || (paused && !auto)) return;
-  if (!auto){
-    if (shuffles <= 0) return;
-    shuffles--;
-    score = Math.max(0, score - 50);
-  }
+/* 판이 막혔을 때만 부릅니다 (afterMove 에서).
+   손으로 누르는 섞기 단추는 2026-08-21 에 뺐습니다.
+   힌트가 같은 일을 더 잘 하고(짝을 직접 짚어 줍니다), 무작위로 뒤엎으면
+   오히려 짝이 줄어들 수도 있어서 쓸모가 없었습니다.
+   멈춤 중이라도 해 둡니다. 안 그러면 풀 수 없는 판으로 돌아오게 됩니다. */
+function doShuffle(){
+  if (!running) return;
   const spots = [], syms = [];
   for (let i = 0; i < board.length; i++){
     if (board[i] !== null && board[i] !== ROCK){ spots.push(i); syms.push(board[i]); }
@@ -1655,7 +1658,6 @@ function doShuffle(auto){
   paintAll();
   updateStats();
   sndShuffle();
-  if (!auto) toast('섞었습니다 (점수 50 차감)');
 }
 
 function doHint(){
@@ -1681,7 +1683,8 @@ function lose(){
   stopTimer();
   sel = -1;
   paintAll();
-  sndBad();
+  sndLose();
+  bgmDuck(3200);        // 함성이 3초라 그동안 음악을 낮춰 둡니다
   shakeStage();
   $('loseLine').textContent = stage + '단계 · ' + left + '짝을 남기고 시간이 다 됐습니다';
   $('veilLose').classList.add('on');
@@ -1748,7 +1751,6 @@ function togglePause(){
 boardEl.addEventListener('click', onCellClick);
 $('btnNew').addEventListener('click', newGame);
 $('btnHint').addEventListener('click', doHint);
-$('btnShuffle').addEventListener('click', () => doShuffle(false));
 $('btnPause').addEventListener('click', togglePause);
 $('btnResume').addEventListener('click', togglePause);
 $('btnAgain').addEventListener('click', () => { $('veilWin').classList.remove('on'); newGame(); });
@@ -1773,7 +1775,7 @@ document.addEventListener('keydown', e => {
   const k = e.key.toLowerCase();
   if (k === 'n'){ newGame(); }
   else if (k === 'h'){ doHint(); }
-  else if (k === 's'){ doShuffle(false); }
+  // s 는 섞기였습니다. 단추를 뺐으니 자판도 뺍니다 (판이 막히면 알아서 섞입니다)
   else if (e.code === 'Space'){ e.preventDefault(); togglePause(); }
   else if (k === 'escape'){
     if ($('veilHelp').classList.contains('on')) $('veilHelp').classList.remove('on');

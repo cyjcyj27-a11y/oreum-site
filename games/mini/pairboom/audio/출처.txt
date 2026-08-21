@@ -35,7 +35,12 @@
               표본 튐 / 최대 진폭    0.48 -> 0.49   (딸깍 없음)
               찌그러진 표본 0개
             (그 전에는 팡파르 musical-level-up-fanfare-151765 를 썼습니다)
+  lose    universfield-crowd-disappointment-reaction-352718 (Pixabay)
+          ↑ 사용자가 2026-08-21에 직접 골라 내려받은 '시간이 다 됐을 때' 소리.
+            3.12초짜리인데 앞 0.15초가 무음이라 그것만 떼고 2.97초로 썼습니다.
+            잦아드는 끝은 원본 그대로 뒀습니다 (억지로 자르면 뚝 끊깁니다).
   shuffle https://pixabay.com/sound-effects/film-special-effects-card-shuffle-94662/
+          ↑ 섞기 단추는 2026-08-21에 뺐지만, 판이 막혀 알아서 섞을 때 이 소리를 씁니다.
 
 원본은 게임에 쓰기엔 너무 길어서 ffmpeg으로 앞 무음을 떼고 잘라 냈습니다.
 이 폴더의 mp3가 다듬은 결과물이고, sfx-data.js는 그것을 글자로 바꿔 담은 것입니다.
