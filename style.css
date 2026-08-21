@@ -735,6 +735,30 @@ h1,h2,h3,h4,b,strong,.btn,button{ font-weight:400; }
 .game, .doc .wrap, .studio, .tablewrap, .talk{ max-width:980px; margin-inline:auto; }
 .lede, .card-line, .game-tagline{ max-width:820px; }
 
+/* ── 소감 한마디 — 미니게임에만 답니다 ────────────── */
+.talk { margin-top: 18px; border-top: 1px solid var(--line); padding-top: 14px; }
+.talk > summary {
+  cursor: pointer; list-style: none; font-size: 14px; font-weight: 700;
+  color: var(--green-lit); padding: 4px 0;
+}
+.talk > summary::-webkit-details-marker { display: none; }
+.talk > summary::before { content: "💬 "; }
+.talk > summary::after { content: " ▾"; color: var(--muted); font-weight: 400; }
+.talk[open] > summary::after { content: " ▴"; }
+.talk > summary:hover { color: var(--ember-ink); }
+
+/* 소감은 커뮤니티에서 받습니다 — 접는 칸 안의 바로가기 */
+.talk-go { margin: 12px 0 0; }
+.talk-go a {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 9px 16px; border-radius: 999px;
+  background: var(--green-soft); border: 1px solid var(--green-edge);
+  color: var(--green-lit); font-size: 14px; font-weight: 700; text-decoration: none;
+  transition: background .15s ease, color .15s ease, border-color .15s ease;
+}
+.talk-go a:hover { background: var(--green-lit); border-color: var(--green-lit); color: #fff; }
+
+
 a{ color:var(--ink); }
 a:hover{ color:var(--ink); }
 

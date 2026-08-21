@@ -36,17 +36,8 @@
 .cards.arc-cards { grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); }
 @media (max-width: 560px) { .cards.arc-cards { grid-template-columns: 1fr; } }
 
-/* ── 소감 한마디 — 미니게임에만 답니다 ────────────── */
-.talk { margin-top: 18px; border-top: 1px solid var(--line); padding-top: 14px; }
-.talk > summary {
-  cursor: pointer; list-style: none; font-size: 14px; font-weight: 700;
-  color: var(--green-lit); padding: 4px 0;
-}
-.talk > summary::-webkit-details-marker { display: none; }
-.talk > summary::before { content: "💬 "; }
-.talk > summary::after { content: " ▾"; color: var(--muted); font-weight: 400; }
-.talk[open] > summary::after { content: " ▴"; }
-.talk > summary:hover { color: var(--ember-ink); }
+/* ── 소감 한마디 ── 접는칸 머리·바로가기 모양은 style.css 로 옮겼습니다
+   (개별 미니게임 쪽은 mini.css 를 안 불러서 모양이 안 먹었습니다) */
 
 .talk-lead {
   margin: 12px 0 0; font-size: 13.5px; line-height: 1.6; color: var(--ink-2);
