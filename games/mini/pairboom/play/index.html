@@ -1501,7 +1501,7 @@ const wobble = () => 1 + (Math.random() * 0.12 - 0.06);   // 같은 소리가 �
 /* ── 배경음악 ──
    브라우저는 사람이 한 번 건드리기 전에는 소리를 못 내게 막습니다.
    그래서 켜달라는 요청이 있어도 곧바로 못 틀 수 있고, 그럴 땐 첫 클릭 때 다시 시도합니다. */
-const BGM_VOL = 0.3;
+const BGM_VOL = 0.4;
 let bgmWanted = false;                       // 틀고 싶은 상태인지
 function bgmEl(){ return $('bgm'); }
 function bgmApply(){
@@ -1555,10 +1555,10 @@ function sndHint(){
 function sndPop(combo){
   const step = Math.min(combo - 1, 7);
   const rate = Math.pow(2, step/12);
-  if (play('pop', rate, 0.43)){
+  if (play('pop', rate, 0.3)){
     // 폭발음은 그 자체로 두툼해서, 아주 높은 연속일 때만 낮은 소리를 살짝 겹칩니다.
     // 너무 낮추면 길게 늘어져 다음 소리와 뭉갭니다.
-    if (combo >= 4) play('pop', rate * 0.72, 0.15);
+    if (combo >= 4) play('pop', rate * 0.72, 0.11);
   } else {
     noisePop(0.22, 0.22);
     beep(660 * rate, 0.09, 'sine', 0.12);
