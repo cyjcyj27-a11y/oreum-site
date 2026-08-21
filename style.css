@@ -737,15 +737,13 @@ h1,h2,h3,h4,b,strong,.btn,button{ font-weight:400; }
 
 /* ── 소감 한마디 — 미니게임에만 답니다 ────────────── */
 .talk { margin-top: 18px; border-top: 1px solid var(--line); padding-top: 14px; }
-.talk > summary {
-  cursor: pointer; list-style: none; font-size: 14px; font-weight: 700;
+.talk-title {
+  margin: 0; font-size: 14px; font-weight: 700;
   color: var(--green-lit); padding: 4px 0;
 }
-.talk > summary::-webkit-details-marker { display: none; }
-.talk > summary::before { content: "💬 "; }
-.talk > summary::after { content: " ▾"; color: var(--muted); font-weight: 400; }
-.talk[open] > summary::after { content: " ▴"; }
-.talk > summary:hover { color: var(--ember-ink); }
+.talk-title::before { content: "💬 "; }
+/* 화살표는 접는 표시가 아니라, 바로 밑의 바로가기를 가리키는 손짓입니다 */
+.talk-title::after { content: " ▾"; color: var(--muted); font-weight: 400; }
 
 /* 소감은 커뮤니티에서 받습니다 — 접는 칸 안의 바로가기 */
 .talk-go { margin: 12px 0 0; }
