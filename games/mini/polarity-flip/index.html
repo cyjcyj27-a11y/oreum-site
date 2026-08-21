@@ -1,680 +1,103 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>극성 반전 · Polarity Flip</title>
-<meta property="og:type" content="website">
-<meta property="og:site_name" content="오름게임즈">
-<meta property="og:title" content="극성 반전 · 오름게임즈">
-<meta property="og:description" content="뒤집는 게 아니라 밀어내는 자석 보드게임. 판 밖으로 나간 돌은 사라집니다. 봇 대결과 한 화면 2인 대전을 지원하는 퍼즐게임.">
-<meta property="og:url" content="https://oreumgames.com/games/mini/polarity-flip/">
-<meta property="og:image" content="https://oreumgames.com/assets/polarity-flip-shot.webp">
-<meta property="og:image:width" content="800">
-<meta property="og:image:height" content="500">
-<meta property="og:image:alt" content="초록 판 위에 흑백 돌 네 개가 놓여 있고 둘 수 있는 자리에 노란 점이 찍혀 있다">
-<meta property="og:locale" content="ko_KR">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="극성 반전 · 오름게임즈">
-<meta name="twitter:description" content="뒤집는 게 아니라 밀어내는 자석 보드게임. 판 밖으로 나간 돌은 사라집니다. 봇 대결과 한 화면 2인 대전을 지원하는 퍼즐게임.">
-<meta name="twitter:image" content="https://oreumgames.com/assets/polarity-flip-shot.webp">
-<script src="/assets/visit.js?v=9" defer></script>
-<meta name="description" content="뒤집는 게 아니라 밀어내는 자석 보드게임. 판 밖으로 나간 돌은 사라집니다. 봇 대결과 한 화면 2인 대전을 지원하는 퍼즐게임.">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>극성 반전 — 무료 보드게임 웹게임</title>
+<meta name="description" content="설치 없이 브라우저에서 바로 하는 무료 보드게임.">
 <meta name="keywords" content="웹게임, 브라우저게임, 프리게임, 퍼즐게임, 무료게임, 설치없는게임, 회원가입없는게임, 인디게임, 오름게임즈, webgame, browsergame, freegame, puzzlegame, oreumgames">
 <link rel="canonical" href="https://oreumgames.com/games/mini/polarity-flip/">
-<link rel="alternate" hreflang="ko" href="https://oreumgames.com/games/mini/polarity-flip/?lang=ko">
-<link rel="alternate" hreflang="en" href="https://oreumgames.com/games/mini/polarity-flip/?lang=en">
-<link rel="alternate" hreflang="x-default" href="https://oreumgames.com/games/mini/polarity-flip/">
-<style>
-  :root {
-    --board-bg: #1a6b3c;
-    --board-line: #0f4225;
-    --black: #1a1a1a;
-    --white: #f5f5f5;
-    --highlight: rgba(255, 215, 0, 0.55);
-    --bg: #10151a;
-    --panel: #1c242c;
-    --text: #e8ecef;
-    --muted: #8a97a3;
-  }
-  * { box-sizing: border-box; }
-  body {
-    margin: 0;
-    min-height: 100vh;
-    background: var(--bg);
-    color: var(--text);
-    font-family: -apple-system, "Segoe UI", "Malgun Gothic", sans-serif;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 24px 12px 60px;
-  }
-  h1 { font-size: 1.4rem; margin: 4px 0 2px; letter-spacing: 0.5px; }
-  .subtitle { color: var(--muted); font-size: 0.85rem; margin-bottom: 18px; text-align: center; }
-  .panel {
-    background: var(--panel);
-    border-radius: 12px;
-    padding: 14px 20px;
-    display: flex;
-    gap: 24px;
-    align-items: center;
-    margin-bottom: 16px;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-  .score {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-weight: 600;
-    font-size: 1.05rem;
-  }
-  .dot {
-    width: 20px; height: 20px; border-radius: 50%;
-    display: inline-block;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.4);
-  }
-  .dot.black { background: radial-gradient(circle at 35% 30%, #555, var(--black)); }
-  .dot.white { background: radial-gradient(circle at 35% 30%, #fff, var(--white)); }
-  .turn-indicator.active { color: #ffd54f; }
-  .setting {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    font-size: 0.78rem;
-    color: var(--muted);
-  }
-  .setting select {
-    background: #2a3540;
-    color: var(--text);
-    border: 1px solid #3d4a56;
-    border-radius: 6px;
-    padding: 6px 8px;
-    font-size: 0.85rem;
-  }
-  #settingsPanel button {
-    align-self: flex-end;
-  }
-  .cell.disabled { cursor: default; }
-  #status {
-    min-height: 1.4em;
-    font-size: 0.95rem;
-    color: var(--muted);
-    margin-bottom: 10px;
-    text-align: center;
-  }
-  #board {
-    display: grid;
-    grid-template-columns: repeat(8, 1fr);
-    grid-template-rows: repeat(8, 1fr);
-    width: min(88vw, 512px);
-    height: min(88vw, 512px);
-    background: var(--board-bg);
-    border: 4px solid var(--board-line);
-    border-radius: 6px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
-  }
-  .cell {
-    position: relative;
-    border: 1px solid var(--board-line);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-  }
-  .cell.valid::after {
-    content: "";
-    position: absolute;
-    width: 22%;
-    height: 22%;
-    border-radius: 50%;
-    background: var(--highlight);
-  }
-  .cell.valid:hover { background: rgba(255,255,255,0.08); }
-  .stone {
-    width: 78%;
-    height: 78%;
-    border-radius: 50%;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.5);
-    transition: transform 0.18s ease;
-  }
-  .stone.black { background: radial-gradient(circle at 35% 30%, #666, #0a0a0a); }
-  .stone.white { background: radial-gradient(circle at 35% 30%, #ffffff, #cfcfcf); }
-  .stone.pushed { transform: scale(1.08); }
-  #controls {
-    margin-top: 18px;
-    display: flex;
-    gap: 10px;
-  }
-  button {
-    background: #2a3540;
-    color: var(--text);
-    border: 1px solid #3d4a56;
-    border-radius: 8px;
-    padding: 9px 18px;
-    font-size: 0.9rem;
-    cursor: pointer;
-  }
-  button:hover { background: #35414d; }
-  #rules {
-    margin-top: 26px;
-    max-width: 520px;
-    font-size: 0.82rem;
-    color: var(--muted);
-    line-height: 1.6;
-    background: var(--panel);
-    padding: 14px 18px;
-    border-radius: 10px;
-  }
-  #rules b { color: var(--text); }
-  .overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.65);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    z-index: 10;
-  }
-  .overlay.show { display: flex; }
-  .overlay-box {
-    background: var(--panel);
-    padding: 32px 40px;
-    border-radius: 14px;
-    text-align: center;
-  }
-  .overlay-box h2 { margin-top: 0; }
-</style>
+<!-- 검색엔진 사이트 소유 확인 -->
+<meta name="naver-site-verification" content="4ecba4003fbcbe564918ffd2c33d606f1eaae11a" />
+<meta name="google-site-verification" content="BG736F-J65BHS-viz8rkCjKJ53pxgIhSlPpzVnpGlt4" />
+<meta name="theme-color" content="#f8f5ec">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" href="/assets/icon-512.png" type="image/png" sizes="512x512">
+<link rel="apple-touch-icon" href="/assets/icon-180.png">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="오름게임즈">
+<meta property="og:title" content="극성 반전 — 무료 보드게임 웹게임">
+<meta property="og:description" content="설치 없이 브라우저에서 바로 하는 무료 보드게임.">
+<meta property="og:url" content="https://oreumgames.com/games/mini/polarity-flip/">
+<meta property="og:image" content="https://oreumgames.com/assets/polarity-flip-shot.webp">
+<meta property="og:locale" content="ko_KR">
+<meta name="twitter:card" content="summary_large_image">
+
+<link rel="stylesheet" href="/style.css?v=11">
+
 </head>
 <body>
 
-<h1><span id="tName"></span> <span id="tNameSub" style="color:var(--muted); font-weight:400;"></span></h1>
-<div class="subtitle" id="tSub"></div>
-
-<div class="panel" id="settingsPanel">
-  <label class="setting">
-    <span id="tOpp"></span>
-    <select id="modeSelect">
-      <option value="bot" selected id="tOppBot"></option>
-      <option value="human" id="tOppTwo"></option>
-    </select>
-  </label>
-  <label class="setting" id="colorSetting">
-    <span id="tMine"></span>
-    <select id="colorSelect">
-      <option value="1" selected id="tMineB"></option>
-      <option value="2" id="tMineW"></option>
-    </select>
-  </label>
-  <label class="setting" id="difficultySetting">
-    <span id="tDiff"></span>
-    <select id="difficultySelect">
-      <option value="1" id="tDiffE"></option>
-      <option value="3" selected id="tDiffM"></option>
-      <option value="5" id="tDiffH"></option>
-    </select>
-  </label>
-  <button id="newGameBtn"></button>
-  <button id="sfxBtn">🔊</button>
-</div>
-
-<div class="panel">
-  <div class="score turn-indicator" id="scoreBlack"><span class="dot black"></span><span id="countBlack">2</span></div>
-  <div class="score turn-indicator" id="scoreWhite"><span class="dot white"></span><span id="countWhite">2</span></div>
-  <div class="score" id="turnCounter" style="color: var(--muted); font-weight: 400; font-size: 0.85rem;">턴 0/<span id="maxMoves"></span></div>
-</div>
-
-<div id="status"></div>
-<div id="board"></div>
-
-<div id="controls">
-  <button id="restartBtn"></button>
-</div>
-
-<div id="rules"></div>
-
-<div class="overlay" id="overlay">
-  <div class="overlay-box">
-    <h2 id="overlayTitle"></h2>
-    <p id="overlayText"></p>
-    <button id="overlayRestart"></button>
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="/">
+      <img src="/assets/logo-full.png" alt="오름게임즈" width="78" height="74">
+    </a>
+    <div class="brand-copy">
+      <p class="slog">JUST PLAY IT!</p>
+      <p class="factory">인디게임팩토리</p>
+    </div>
+    <ul class="values">
+      <li><span>설치 없이</span> 링크 하나로 바로 시작</li>
+      <li><span>회원가입 없이</span> 기록은 브라우저에 저장</li>
+    </ul>
+    <nav class="nav" aria-label="주요 메뉴">
+      <a href="/games/">GAMES</a>
+      <a href="/apps/">APPS</a>
+      <a href="/board/">COMMUNITY</a>
+      <a href="/en/" lang="en" hreflang="en">EN</a>
+    </nav>
   </div>
-</div>
+</header>
 
+<main id="main">
+  <section class="showcase">
+    <div class="wrap game-page">
+      <a class="backlink" href="/games/mini/">← 미니게임 목록</a>
+      <div class="gp-shot"><img src="/assets/polarity-flip-shot.webp" alt="초록 판 위에 흑백 돌 네 개가 놓여 있고 둘 수 있는 자리에 노란 점이 찍혀 있다" width="800" height="500"></div>
+      <h1>극성 반전</h1>
+      <p class="gp-line">돌을 놓으면 옆에 붙은 상대 돌이 한 칸씩 밀려납니다.
+              뒤집는 게 아니라 미는 것이라, 판 밖으로 나간 돌은 그대로 사라집니다.</p>
+      <p class="gp-cta"><a class="btn btn-primary" href="play/">🎮 바로 플레이</a></p>
+      <dl class="spec"><dt>분류</dt><dd>퍼즐게임 · 웹게임</dd>
+              <dt>제작기간</dt><dd>1일</dd>
+              <dt>사용기술</dt><dd>HTML / JavaScript</dd>
+              <dt>플레이 환경</dt><dd>PC · 마우스 / 모바일 · 손가락</dd>
+              <dt>상태</dt><dd><span class="state">실험작</span></dd>
+              <dt>마지막 업데이트</dt><dd>2026-07-25</dd></dl>
+      <details class="talk"><summary>플레이해본 소감 한마디</summary><div data-comments="polarity-flip"></div></details>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <div class="footer-brand">
+      <img src="/assets/logo-full.png" alt="" width="52" height="50">
+      <span>오름게임즈 <em>Oreum Games</em></span>
+    </div>
+    <p class="footer-motto">오름게임즈는 오릅니다</p>
+    <nav class="footer-nav" aria-label="푸터 메뉴">
+      <a href="/support/">고객지원</a>
+      <a href="/privacy/">개인정보처리방침</a>
+      <button type="button" class="js-mail mailbtn" data-u="cyjcyj27" data-d="gmail.com" data-go="gmail">이메일 보내기</button>
+    </nav>
+    <p class="copy" id="visitCount" hidden></p>
+    <p class="copy">oreumgames.com · © 2026 오름게임즈. All rights reserved.</p>
+  </div>
+</footer>
+<script src="/assets/visit.js?v=9" defer></script>
+
+<!-- 방문 집계 — 쿠키 없이, 페이지뷰(반복 방문 포함)까지 Abacus로 셉니다 -->
 <script>
-const SIZE = 8;
-const EMPTY = 0, BLACK = 1, WHITE = 2;
-
-/* ── 말 두 벌 ──────────────────────────────────────────────
-   주소에 ?lang=en 을 붙이면 영어로 뜹니다. 아무것도 안 붙이면
-   브라우저 언어를 보고 한국어/영어를 고릅니다.
-   파일을 두 벌로 복사하지 않는 이유: 한쪽만 고쳐져 어긋나는 걸 막으려고. */
-const LANG = (() => {
-  const q = new URLSearchParams(location.search).get('lang');
-  if (q === 'en' || q === 'ko') return q;
-  return (navigator.language || '').toLowerCase().startsWith('ko') ? 'ko' : 'en';
+(function(){
+  if (/^(localhost|127\.0\.0\.1)$/.test(location.hostname) || location.protocol==='file:') return;
+  var b='https://abacus.jasoncameron.dev/hit/oreumgames/';
+  function h(k){ try{ fetch(b+k,{mode:'cors'}).catch(function(){}); }catch(e){} }
+  h('pageviews'); h('pv_home');
 })();
-if (LANG === "en") document.querySelector('meta[name="description"]').setAttribute("content", "A magnet board game where you push, not flip — stones shoved off the board are gone. Play the bot or a friend on one screen.");
-const STR = {
-  ko: {
-    name:'극성 반전', nameSub:'Polarity Flip',
-    sub:'뒤집는 게 아니라 밀어냅니다 — 판 밖으로 나간 돌은 사라집니다.',
-    opp:'상대', oppBot:'봇과 대결', oppTwo:'2인 대전 (한 화면)',
-    mine:'내 돌', mineB:'흑 (선공)', mineW:'백 (후공)',
-    diff:'난이도', diffE:'쉬움', diffM:'보통', diffH:'어려움',
-    newGame:'새 게임 시작', restart:'다시 시작', sfx:'소리 켜기/끄기',
-    turn:'턴 ', black:'흑', white:'백',
-    toMove:(c)=>c+' 차례입니다',
-    pass:(p,m)=>p+'은(는) 둘 곳이 없어 패스합니다. '+m+' 차례가 계속됩니다.',
-    thinking:'봇이 생각 중...',
-    wipe:(w,l)=>w+'이(가) '+l+'을(를) 전멸시켰습니다!',
-    limit:(n)=>'턴 제한('+n+'턴) 도달',
-    draw:'무승부', wins:(w)=>w+' 승리!',
-    score:(b,w)=>'흑 '+b+' : 백 '+w,
-    over:'게임 종료',
-    rules:'<b>규칙</b><br>'
-      +'1. 돌을 놓으면 8방향으로 인접한 <b>상대 돌</b>을 한 칸씩 밀어냅니다.<br>'
-      +'2. 밀려나는 자리에 이미 다른 돌이 있으면 도미노처럼 연쇄로 밀립니다 (색 무관).<br>'
-      +'3. 밀린 돌이 보드 밖으로 나가면 <b>제거</b>됩니다.<br>'
-      +'4. 최소 한 개 이상의 상대 돌을 밀어낼 수 있는 칸에만 둘 수 있습니다. 둘 곳이 없으면 자동으로 패스됩니다.<br>'
-      +'5. 양쪽 다 둘 곳이 없으면 게임 종료 — 보드에 남은 돌이 많은 쪽이 승리합니다.'
-  },
-  en: {
-    name:'Polarity Flip', nameSub:'극성 반전',
-    sub:'Nothing flips — stones get pushed, and whatever leaves the board is gone.',
-    opp:'Opponent', oppBot:'Play the bot', oppTwo:'Two players (one screen)',
-    mine:'My stones', mineB:'Black (first)', mineW:'White (second)',
-    diff:'Difficulty', diffE:'Easy', diffM:'Normal', diffH:'Hard',
-    newGame:'New game', restart:'Restart', sfx:'Sound on/off',
-    turn:'Turn ', black:'Black', white:'White',
-    toMove:(c)=>c+' to move',
-    pass:(p,m)=>p+' has no legal move and passes. '+m+' continues.',
-    thinking:'Bot is thinking…',
-    wipe:(w,l)=>w+' wiped out '+l+'!',
-    limit:(n)=>'Turn limit ('+n+') reached',
-    draw:'Draw', wins:(w)=>w+' wins!',
-    score:(b,w)=>'Black '+b+' : White '+w,
-    over:'Game over',
-    rules:'<b>Rules</b><br>'
-      +'1. Placing a stone shoves every adjacent <b>enemy stone</b> one square outward, in all eight directions.<br>'
-      +'2. If something already sits where a stone is shoved, the whole line slides on like dominoes — colour does not matter.<br>'
-      +'3. Any stone pushed off the board is <b>removed</b>.<br>'
-      +'4. You may only play where at least one enemy stone gets pushed. With no such square, your turn passes automatically.<br>'
-      +'5. When neither side can play, the game ends — whoever has more stones left on the board wins.'
-  }
-}[LANG];
-
-document.documentElement.lang = LANG;
-(function fillText(){
-  const put = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
-  put('tName', STR.name); put('tNameSub', STR.nameSub); put('tSub', STR.sub);
-  put('tOpp', STR.opp); put('tOppBot', STR.oppBot); put('tOppTwo', STR.oppTwo);
-  put('tMine', STR.mine); put('tMineB', STR.mineB); put('tMineW', STR.mineW);
-  put('tDiff', STR.diff); put('tDiffE', STR.diffE); put('tDiffM', STR.diffM); put('tDiffH', STR.diffH);
-  put('newGameBtn', STR.newGame); put('restartBtn', STR.restart); put('overlayRestart', STR.restart);
-  put('overlayTitle', STR.over);
-  const sfx = document.getElementById('sfxBtn');
-  if (sfx) { sfx.title = STR.sfx; sfx.setAttribute('aria-label', STR.sfx); }
-  document.getElementById('rules').innerHTML = STR.rules;
-  document.title = STR.name + ' · ' + STR.nameSub;
-})();
-const SIDE = (c) => c === BLACK ? STR.black : STR.white;
-
-const DIRS = [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]];
-
-let board, current, boardEl, statusEl;
-
-/* ── 소리 ── 돌이 판에 닿는 "바득". 파일 없이 그 자리에서 만듭니다 ── */
-let AC = null, sfxOn = true;
-function audio() {
-  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return null; } }
-  if (AC.state === 'suspended') AC.resume();
-  return AC;
-}
-// pitch 를 낮추면 더 묵직하게 들립니다 (봇 돌을 사람 돌과 구분하는 데 씁니다)
-function clack(pitch, vol) {
-  const a = audio(); if (!a || !sfxOn) return;
-  pitch = pitch || 1; vol = vol || 1;
-  const t = a.currentTime;
-
-  // 닿는 순간의 딱 소리 — 짧게 사그라드는 잡음
-  const len = Math.floor(a.sampleRate * 0.03);
-  const buf = a.createBuffer(1, len, a.sampleRate);
-  const d = buf.getChannelData(0);
-  for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3);
-  const src = a.createBufferSource(); src.buffer = buf;
-  const bp = a.createBiquadFilter(); bp.type = 'bandpass';
-  bp.frequency.value = 2600 * pitch; bp.Q.value = 1.1;
-  const ng = a.createGain(); ng.gain.value = 0.45 * vol;
-  src.connect(bp); bp.connect(ng); ng.connect(a.destination);
-  src.start(t);
-
-  // 판이 잠깐 울리는 소리
-  const o = a.createOscillator(); o.type = 'sine';
-  o.frequency.setValueAtTime(230 * pitch, t);
-  o.frequency.exponentialRampToValueAtTime(125 * pitch, t + 0.06);
-  const g = a.createGain();
-  g.gain.setValueAtTime(0.30 * vol, t);
-  g.gain.exponentialRampToValueAtTime(0.0001, t + 0.09);
-  o.connect(g); g.connect(a.destination);
-  o.start(t); o.stop(t + 0.1);
-}
-// 판 밖으로 밀려 떨어지는 돌
-function drop() {
-  const a = audio(); if (!a || !sfxOn) return;
-  const t = a.currentTime;
-  const o = a.createOscillator(); o.type = 'triangle';
-  o.frequency.setValueAtTime(180, t);
-  o.frequency.exponentialRampToValueAtTime(52, t + 0.20);
-  const g = a.createGain();
-  g.gain.setValueAtTime(0.24, t);
-  g.gain.exponentialRampToValueAtTime(0.0001, t + 0.24);
-  o.connect(g); g.connect(a.destination);
-  o.start(t); o.stop(t + 0.25);
-}
-function total(bd) { const { black, white } = countStones(bd); return black + white; }
-
-let vsBot = true, humanColor = BLACK, botColor = WHITE, botDepth = 3;
-let thinking = false, gameOver = false;
-let moveCount = 0;
-const MAX_MOVES = 60;
-
-function initBoard() {
-  board = Array.from({length: SIZE}, () => Array(SIZE).fill(EMPTY));
-  const m = SIZE / 2;
-  board[m-1][m-1] = WHITE;
-  board[m-1][m]   = BLACK;
-  board[m][m-1]   = BLACK;
-  board[m][m]     = WHITE;
-  current = BLACK;
-  gameOver = false;
-  thinking = false;
-  moveCount = 0;
-}
-
-function inBounds(r, c) { return r >= 0 && r < SIZE && c >= 0 && c < SIZE; }
-function opponent(p) { return p === BLACK ? WHITE : BLACK; }
-
-function validDirections(bd, r, c, p) {
-  const dirs = [];
-  for (const [dr, dc] of DIRS) {
-    const nr = r + dr, nc = c + dc;
-    if (inBounds(nr, nc) && bd[nr][nc] === opponent(p)) {
-      dirs.push([dr, dc]);
-    }
-  }
-  return dirs;
-}
-
-function getValidMoves(bd, p) {
-  const moves = [];
-  for (let r = 0; r < SIZE; r++) {
-    for (let c = 0; c < SIZE; c++) {
-      if (bd[r][c] === EMPTY && validDirections(bd, r, c, p).length > 0) {
-        moves.push([r, c]);
-      }
-    }
-  }
-  return moves;
-}
-
-// Apply push in one direction starting from (r+dr, c+dc)
-function pushChain(bd, r, c, dr, dc) {
-  let chain = [];
-  let cr = r + dr, cc = c + dc;
-  while (inBounds(cr, cc) && bd[cr][cc] !== EMPTY) {
-    chain.push([cr, cc]);
-    cr += dr; cc += dc;
-  }
-  for (let i = chain.length - 1; i >= 0; i--) {
-    const [fr, fc] = chain[i];
-    const tr = fr + dr, tc = fc + dc;
-    if (inBounds(tr, tc)) {
-      bd[tr][tc] = bd[fr][fc];
-    }
-  }
-  bd[r + dr][c + dc] = EMPTY;
-}
-
-function placeStone(bd, r, c, p) {
-  const dirs = validDirections(bd, r, c, p);
-  bd[r][c] = p;
-  for (const [dr, dc] of dirs) {
-    pushChain(bd, r, c, dr, dc);
-  }
-}
-
-function countStones(bd) {
-  let black = 0, white = 0;
-  for (let r = 0; r < SIZE; r++)
-    for (let c = 0; c < SIZE; c++) {
-      if (bd[r][c] === BLACK) black++;
-      else if (bd[r][c] === WHITE) white++;
-    }
-  return { black, white };
-}
-
-function cloneBoard(bd) { return bd.map(row => row.slice()); }
-
-function simulateMove(bd, r, c, p) {
-  const nb = cloneBoard(bd);
-  placeStone(nb, r, c, p);
-  return nb;
-}
-
-// --- Bot AI (minimax + alpha-beta) ---
-
-function evaluate(bd, forColor) {
-  const { black, white } = countStones(bd);
-  const my = forColor === BLACK ? black : white;
-  const opp = forColor === BLACK ? white : black;
-  const myMoves = getValidMoves(bd, forColor).length;
-  const oppMoves = getValidMoves(bd, opponent(forColor)).length;
-  return (my - opp) * 2 + (myMoves - oppMoves);
-}
-
-function minimax(bd, player, depth, alpha, beta, botColorForEval) {
-  const moves = getValidMoves(bd, player);
-
-  if (moves.length === 0) {
-    const oppMoves = getValidMoves(bd, opponent(player));
-    if (oppMoves.length === 0) {
-      const { black, white } = countStones(bd);
-      const my = botColorForEval === BLACK ? black : white;
-      const opp = botColorForEval === BLACK ? white : black;
-      return { score: (my - opp) * 1000 };
-    }
-    if (depth === 0) return { score: evaluate(bd, botColorForEval) };
-    return minimax(bd, opponent(player), depth - 1, alpha, beta, botColorForEval);
-  }
-
-  if (depth === 0) {
-    return { score: evaluate(bd, botColorForEval) };
-  }
-
-  const maximizing = player === botColorForEval;
-  let best = maximizing ? -Infinity : Infinity;
-  let bestMove = moves[0];
-
-  for (const [r, c] of moves) {
-    const nb = simulateMove(bd, r, c, player);
-    const result = minimax(nb, opponent(player), depth - 1, alpha, beta, botColorForEval);
-    if (maximizing) {
-      if (result.score > best) { best = result.score; bestMove = [r, c]; }
-      alpha = Math.max(alpha, best);
-    } else {
-      if (result.score < best) { best = result.score; bestMove = [r, c]; }
-      beta = Math.min(beta, best);
-    }
-    if (beta <= alpha) break;
-  }
-  return { score: best, move: bestMove };
-}
-
-function getBotMove() {
-  const result = minimax(board, botColor, botDepth, -Infinity, Infinity, botColor);
-  return result.move;
-}
-
-// --- Rendering & flow ---
-
-function render() {
-  boardEl.innerHTML = '';
-  const validMoves = gameOver ? [] : getValidMoves(board, current);
-  const validSet = new Set(validMoves.map(([r,c]) => r + '-' + c));
-  const interactive = !gameOver && !thinking && (!vsBot || current === humanColor);
-
-  for (let r = 0; r < SIZE; r++) {
-    for (let c = 0; c < SIZE; c++) {
-      const cell = document.createElement('div');
-      cell.className = 'cell';
-      if (interactive && board[r][c] === EMPTY && validSet.has(r + '-' + c)) {
-        cell.classList.add('valid');
-      }
-      if (board[r][c] !== EMPTY) {
-        const stone = document.createElement('div');
-        stone.className = 'stone ' + (board[r][c] === BLACK ? 'black' : 'white');
-        cell.appendChild(stone);
-      }
-      cell.addEventListener('click', () => onCellClick(r, c));
-      boardEl.appendChild(cell);
-    }
-  }
-
-  const { black, white } = countStones(board);
-  document.getElementById('countBlack').textContent = black;
-  document.getElementById('countWhite').textContent = white;
-  document.getElementById('scoreBlack').classList.toggle('active', current === BLACK);
-  document.getElementById('scoreWhite').classList.toggle('active', current === WHITE);
-  document.getElementById('turnCounter').firstChild.textContent = STR.turn + moveCount + '/';
-  document.getElementById('maxMoves').textContent = MAX_MOVES;
-}
-
-function onCellClick(r, c) {
-  if (gameOver || thinking) return;
-  if (vsBot && current !== humanColor) return;
-  const dirs = validDirections(board, r, c, current);
-  if (board[r][c] !== EMPTY || dirs.length === 0) return;
-
-  const before = total(board);
-  placeStone(board, r, c, current);
-  clack(1, 1);
-  if (total(board) < before) setTimeout(drop, 70);
-  afterMove();
-}
-
-function afterMove() {
-  moveCount++;
-
-  const { black, white } = countStones(board);
-  if (black === 0 || white === 0) {
-    render();
-    endGame(black === 0 ? STR.wipe(STR.white, STR.black) : STR.wipe(STR.black, STR.white));
-    return;
-  }
-  if (moveCount >= MAX_MOVES) {
-    render();
-    endGame(STR.limit(MAX_MOVES));
-    return;
-  }
-
-  const mover = current;
-  const next = opponent(mover);
-  const nextMoves = getValidMoves(board, next);
-
-  if (nextMoves.length > 0) {
-    current = next;
-    statusEl.textContent = STR.toMove(SIDE(current));
-    render();
-    maybeBotMove();
-  } else {
-    const stillMoves = getValidMoves(board, mover);
-    if (stillMoves.length > 0) {
-      statusEl.textContent = STR.pass(SIDE(next), SIDE(mover));
-      render();
-      maybeBotMove();
-    } else {
-      render();
-      endGame();
-    }
-  }
-}
-
-function maybeBotMove() {
-  if (gameOver || !vsBot || current !== botColor) return;
-  thinking = true;
-  statusEl.textContent = STR.thinking;
-  render();
-  setTimeout(() => {
-    const move = getBotMove();
-    if (move) {
-      const before = total(board);
-      placeStone(board, move[0], move[1], botColor);
-      clack(0.84, 0.9);
-      if (total(board) < before) setTimeout(drop, 70);
-    }
-    thinking = false;
-    afterMove();
-  }, 350);
-}
-
-function endGame(reason) {
-  gameOver = true;
-  const { black, white } = countStones(board);
-  let title, text;
-  if (black === white) {
-    title = STR.draw;
-  } else {
-    title = STR.wins(black > white ? STR.black : STR.white);
-  }
-  text = STR.score(black, white) + (reason ? '  (' + reason + ')' : '');
-  document.getElementById('overlayTitle').textContent = title;
-  document.getElementById('overlayText').textContent = text;
-  document.getElementById('overlay').classList.add('show');
-  statusEl.textContent = STR.over + ' — ' + title;
-}
-
-function newGame() {
-  const modeSelect = document.getElementById('modeSelect');
-  const colorSelect = document.getElementById('colorSelect');
-  const difficultySelect = document.getElementById('difficultySelect');
-
-  vsBot = modeSelect.value === 'bot';
-  humanColor = parseInt(colorSelect.value, 10);
-  botColor = opponent(humanColor);
-  botDepth = parseInt(difficultySelect.value, 10);
-
-  document.getElementById('overlay').classList.remove('show');
-  initBoard();
-  statusEl.textContent = STR.toMove(STR.black);
-  render();
-  maybeBotMove();
-}
-
-function updateSettingsVisibility() {
-  const isBot = document.getElementById('modeSelect').value === 'bot';
-  document.getElementById('colorSetting').style.display = isBot ? '' : 'none';
-  document.getElementById('difficultySetting').style.display = isBot ? '' : 'none';
-}
-
-window.addEventListener('DOMContentLoaded', () => {
-  boardEl = document.getElementById('board');
-  statusEl = document.getElementById('status');
-  const sfxBtn = document.getElementById('sfxBtn');
-  if (sfxBtn) sfxBtn.addEventListener('click', () => {
-    sfxOn = !sfxOn;
-    sfxBtn.textContent = sfxOn ? '🔊' : '🔇';
-    if (sfxOn) clack(1, 0.7);   // 켰다는 걸 소리로 알립니다
-  });
-  document.getElementById('newGameBtn').addEventListener('click', newGame);
-  document.getElementById('restartBtn').addEventListener('click', newGame);
-  document.getElementById('overlayRestart').addEventListener('click', newGame);
-  document.getElementById('modeSelect').addEventListener('change', updateSettingsVisibility);
-  updateSettingsVisibility();
-  newGame();
-});
 </script>
-
-<script src="/assets/game-home.js" defer></script>
+<script src="/assets/mail.js" defer></script>
 </body>
 </html>

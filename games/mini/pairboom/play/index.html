@@ -1,0 +1,2041 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>PAIRBOOM!! - 짝 잇기 퍼즐게임 100단계 | 오름게임즈</title>
+<meta name="robots" content="noindex">
+<meta name="description" content="PAIRBOOM!! - 같은 그림 두 개를 이으면 BOOM! 설치도 회원가입도 없이 브라우저에서 바로 하는 짝 잇기 퍼즐게임. 100단계, 한 판 2분 50초부터.">
+<meta name="keywords" content="웹게임, 브라우저게임, 프리게임, 퍼즐게임, 무료게임, 짝맞추기, 설치없는게임, 회원가입없는게임, 인디게임, 오름게임즈, webgame, browsergame, freegame, puzzlegame, oreumgames">
+<link rel="alternate" hreflang="ko" href="https://oreumgames.com/games/mini/pairboom/">
+<link rel="alternate" hreflang="en" href="https://oreumgames.com/en/games/mini/pairboom/">
+<link rel="canonical" href="https://oreumgames.com/games/mini/pairboom/">
+<meta property="og:title" content="PAIRBOOM!! - 짝 잇기 퍼즐게임 100단계">
+<meta property="og:description" content="PAIRBOOM!! - 같은 그림 두 개를 이으면 BOOM! 설치도 회원가입도 없이 브라우저에서 바로 하는 짝 잇기 퍼즐게임. 100단계, 한 판 2분 50초부터.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://oreumgames.com/games/mini/pairboom/">
+<meta property="og:image" content="https://oreumgames.com/assets/pairboom-shot.webp?v=1">
+<meta property="og:image:width" content="800">
+<meta property="og:image:height" content="500">
+<meta property="og:image:alt" content="민트빛 판 위에 알록달록한 동그란 타일이 격자로 깔려 있고, 타일마다 별·세모·하트 같은 단순한 도형이 하나씩 그려져 있다">
+<meta property="og:site_name" content="오름게임즈">
+<meta property="og:locale" content="ko_KR">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="PAIRBOOM!! - 짝 잇기 퍼즐게임 100단계">
+<meta name="twitter:description" content="PAIRBOOM!! - 같은 그림 두 개를 이으면 BOOM! 설치도 회원가입도 없이 브라우저에서 바로 하는 짝 잇기 퍼즐게임. 100단계, 한 판 2분 50초부터.">
+<meta name="twitter:image" content="https://oreumgames.com/assets/pairboom-shot.webp?v=1">
+<script src="/assets/visit.js?v=9" defer></script>
+<!-- 글꼴은 쓰는 글자만 남겨 109KB 입니다 (2026-08-21 이전엔 1.5MB 였습니다).
+     그래도 기다리지 않게, 먼저 맑은 고딕으로 그려 놓고 다 받아지면 조용히 갈아 끼웁니다 -->
+<link rel="stylesheet" href="font/game-fonts.css?v=2" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="font/game-fonts.css?v=2"></noscript>
+<style>
+  :root{
+    --cw: 56px;
+    /* 하늘 — 밝은 민트빛 시안 */
+    --sky:   #46dbe2;
+    --sky-2: #86efe9;
+    --sky-3: #21c3d2;
+    /* 글씨 */
+    --ink:   #0e3b46;
+    --ink-2: #4c828d;
+    /* 쨍한 색들 */
+    --card:   #ffffff;
+    --pink:   #ff2e86;
+    --yellow: #ffd23f;
+    --lime:   #35cf6e;
+    --purple: #8b5cf6;
+    --orange: #ff8a3d;
+    /* 카드 밑에 깔리는 두툼한 턱 */
+    --lip:    #a9d3da;
+    --lip-2:  #bfe3e8;
+  }
+  *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body{ height:100%; overflow-x:hidden; }   /* 잇는 선이 판 밖으로 나가도 가로로 밀리지 않게 */
+  body{
+    margin:0;
+    /* 비스듬한 흰 띠를 깔아 밋밋하지 않게 합니다 */
+    background:
+      repeating-linear-gradient(114deg,
+        rgba(255,255,255,.13) 0 64px, rgba(255,255,255,0) 64px 158px),
+      linear-gradient(158deg, var(--sky-2) 0%, var(--sky) 52%, var(--sky-3) 100%);
+    background-attachment:fixed;
+    color:var(--ink);
+    font-family:'Supermagic',"Malgun Gothic","Apple SD Gothic Neo",-apple-system,"Segoe UI",sans-serif;
+    font-weight:400;
+    display:flex; flex-direction:column; align-items:center;
+    padding:10px 10px 20px;
+    user-select:none; -webkit-user-select:none;
+    overflow-x:hidden;
+  }
+
+  /* ── 머리말 ── */
+  header{ width:100%; max-width:1000px; text-align:center; margin-bottom:6px; }
+  h1{
+    font-family:'WaterDrop','Supermagic',sans-serif;
+    /* 창 너비를 따라가되 너무 작아지거나 커지지 않게 가둬 둡니다 */
+    font-size:clamp(2.8rem, 5.2vw, 4.1rem);
+    margin:0; font-weight:400; font-style:italic;
+    letter-spacing:2px; color:#fff;
+    text-shadow:0 4px 0 #0e3b46, 0 7px 0 #0e3b46, 0 14px 26px rgba(0,50,60,.32);
+  }
+  h1 em{ font-style:italic; color:var(--yellow); }
+  .tagline{ color:#08454f; opacity:.85; font-size:1rem; font-weight:400; margin:4px 0 0; }
+  /* 굵기가 하나뿐인 글꼴이라, 굵게 대신 색과 크기로 도드라지게 합니다 */
+  .tagline b{ font-weight:400; color:var(--pink); font-size:1.35em; letter-spacing:1px;
+              text-shadow:0 2px 0 rgba(255,255,255,.55); }
+
+  /* ── 조작줄 ── */
+  .bar{
+    width:100%; max-width:1060px;
+    display:flex; flex-wrap:wrap; gap:8px; justify-content:center; align-items:center;
+    margin-bottom:7px;
+  }
+  /* 두툼한 아래턱을 달아 눌리는 맛이 나게 합니다 */
+  button, select{
+    font-family:inherit; font-size:1rem; font-weight:400;
+    color:var(--ink); background:var(--card);
+    border:none; border-radius:15px;
+    padding:11px 17px; cursor:pointer;
+    box-shadow:0 4px 0 var(--lip), 0 6px 14px rgba(0,55,65,.16);
+    transition:transform .06s, box-shadow .06s, background .12s;
+  }
+  button:hover{ background:#f3fcfd; }
+  button:active{ transform:translateY(4px); box-shadow:0 0 0 var(--lip), 0 2px 6px rgba(0,55,65,.16); }
+  button:disabled{ opacity:.5; box-shadow:0 4px 0 var(--lip-2); cursor:default; transform:none; }
+  button.primary{ background:var(--lime); color:#fff; box-shadow:0 4px 0 #22a353, 0 6px 14px rgba(0,55,65,.2); }
+  button.primary:hover{ background:#48db81; }
+  button.primary:active{ box-shadow:0 0 0 #22a353; }
+  select{ padding:11px 12px; }
+  /* 단추 속 아이콘 — 글씨 크기를 따라갑니다 */
+  .btn-ico{ width:1.45em; height:1.45em; vertical-align:-.35em; margin-right:.3em;
+            image-rendering:auto; transition:filter .15s, opacity .15s; }
+  #btnMusic.off .btn-ico,
+  #btnSound.off .btn-ico{ filter:grayscale(1); opacity:.45; }
+  /* 효과음 아이콘은 켜짐/꺼짐 두 모습을 한 그림에 담아 두고 갈아 끼웁니다 */
+  #btnSound .slash, #btnSound .slash-cut{ display:none; }
+  #btnSound.off .slash, #btnSound.off .slash-cut{ display:inline; }
+  #btnSound.off .wave{ display:none; }
+
+  /* 글씨 없이 아이콘만 두는 단추 */
+  button.ico-only{ position:relative; padding:10px 13px; line-height:0; }
+  button.ico-only .btn-ico{ margin-right:0; width:1.7em; height:1.7em; vertical-align:-.45em; }
+  /* 남은 횟수는 오른쪽 위에 작은 딱지로 */
+  .badge{
+    position:absolute; top:-5px; right:-5px;
+    min-width:23px; height:23px; line-height:23px; padding:0 6px;
+    border-radius:999px; background:var(--pink); color:#fff;
+    font-size:.8rem; text-align:center;
+    box-shadow:0 2px 0 #c81f68, 0 3px 6px rgba(0,55,65,.3);
+  }
+  button.ico-only:disabled .badge{ background:#9fb4bb; box-shadow:0 2px 0 #7f959c; }
+
+  /* ── 계기판 ── */
+  .stats{
+    width:100%; max-width:1060px;
+    display:flex; gap:9px; justify-content:center; flex-wrap:wrap;
+    margin-bottom:6px;
+  }
+  .stat{
+    background:var(--card); border:none; border-radius:15px;
+    padding:8px 17px; min-width:94px; text-align:center;
+    box-shadow:0 4px 0 var(--lip), 0 6px 14px rgba(0,55,65,.14);
+  }
+  .stat b{ display:block; font-size:1.4rem; line-height:1.15; font-weight:400; color:var(--ink); font-variant-numeric:tabular-nums; }
+  .stat span{ font-size:.74rem; color:var(--ink-2); font-weight:400; letter-spacing:.3px; }
+  .stat.warn b{ color:var(--pink); }
+  /* 남은 시간이 30초 아래로 떨어지면 눈에 띄게 */
+  #timeBox.warn{ animation:timeWarn .8s ease-in-out infinite; }
+  #timeBox.warn b{ color:var(--pink); }
+  @keyframes timeWarn{
+    0%,100%{ box-shadow:0 4px 0 var(--lip), 0 6px 14px rgba(0,55,65,.14); }
+    50%    { box-shadow:0 4px 0 #c81f68, 0 0 0 4px var(--pink), 0 6px 16px rgba(0,55,65,.24); }
+  }
+
+  /* ── 판 ── */
+  /* 위아래에 반 칸 남짓 비워 둡니다. 판 바깥으로 도는 선이
+     계기판이나 아래 글씨를 덮지 않게 하려는 겁니다.
+     fit() 은 이 여백까지 세어서 칸 크기를 정합니다 */
+  #stage{ position:relative; margin:calc(var(--cw) * .62) 0; }
+  /* 판 뒤에 널판을 깝니다. 자리를 차지하지 않게 띄워 두었습니다 */
+  #stage::before{
+    content:""; position:absolute; inset:-16px; z-index:0;
+    border-radius:28px; background:rgba(4,72,84,.12);
+  }
+  #board{
+    position:relative; z-index:1;
+    display:grid;
+    grid-template-columns: repeat(var(--cols), var(--cw));
+    grid-auto-rows: var(--cw);
+    padding:0;
+  }
+  .cell{
+    width:var(--cw); height:var(--cw);
+    display:flex; align-items:center; justify-content:center;
+    position:relative;
+  }
+  .cell.has{ cursor:pointer; }
+
+  /* 지울 수 없는 돌. 길을 막습니다. 색은 --h 를 안 쓰고 돌빛으로 고정합니다 */
+  .cell.rock .face{
+    background:linear-gradient(#c2ced2 0%, #8d9fa5 100%);
+    box-shadow:0 5px 0 #5d7178, 0 7px 13px rgba(0,50,60,.26), inset 0 -5px 0 rgba(0,0,0,.13);
+    cursor:default;
+  }
+  .cell.rock .face::before{
+    background:linear-gradient(180deg, rgba(255,255,255,.40) 0%, rgba(255,255,255,.12) 34%, rgba(255,255,255,0) 52%);
+  }
+  .cell.rock .face path{ fill:#4a5f66; }
+  .cell.rock .face svg{ width:56%; height:56%; }
+  .cell.rock:hover .face{ transform:none; }
+
+  /* 타일 한 장. 색은 그림마다 정해진 --h 에서 뽑아 씁니다 */
+  .face{
+    position:absolute; inset:2px;
+    border-radius:16px;
+    background:linear-gradient(hsl(var(--h,190) 95% 82%) 0%, hsl(var(--h,190) 90% 63%) 100%);
+    border:none;
+    box-shadow:
+      0 5px 0 hsl(var(--h,190) 62% 42%),
+      0 7px 14px rgba(0,50,60,.28),
+      inset 0 -5px 0 rgba(0,0,0,.10);
+    display:flex; align-items:center; justify-content:center;
+    transition:transform .1s, box-shadow .1s, opacity .22s, filter .1s;
+  }
+  /* 광택 — 위쪽에 빛이 고인 것처럼. 그림 아래에 깔아 그림이 흐려지지 않게 합니다 */
+  .face::before{
+    content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.72) 0%, rgba(255,255,255,.26) 34%, rgba(255,255,255,0) 52%),
+      radial-gradient(135% 52% at 50% -10%, rgba(255,255,255,.6), rgba(255,255,255,0) 64%);
+  }
+  .face svg{ position:relative; width:62%; height:62%; display:block; overflow:visible; }
+  /* 그림은 제 색의 아주 진한 쪽으로 — 어떤 색 위에서도 또렷하게 보입니다 */
+  .face path{ fill:hsl(var(--h,190) 92% 20%); }
+
+  .cell.has:hover .face{
+    transform:translateY(-4px);
+    box-shadow:0 9px 0 hsl(var(--h,190) 62% 42%), 0 12px 20px rgba(0,50,60,.32), inset 0 -5px 0 rgba(0,0,0,.10);
+  }
+  /* 고른 칸은 한눈에 들어와야 합니다.
+     크기를 키우고, 흰 테+진한 테를 두르고, 숨쉬듯 들썩이게 합니다.
+     테 색을 분홍이 아니라 진한 먹색으로 둔 이유: 분홍 타일 위에서는 분홍 테가 묻힙니다 */
+  .cell.sel{ z-index:5; }                    /* 커진 칸이 옆 칸에 가리지 않게 */
+  .cell.sel .face{
+    filter:saturate(1.5) brightness(1.14);
+    box-shadow:
+      0 10px 0 hsl(var(--h,190) 62% 34%),
+      0 0 0 4px #fff,
+      0 0 0 10px var(--ink),
+      0 18px 28px rgba(0,50,60,.45);
+    animation:selPulse .34s ease-in-out infinite;
+  }
+  @keyframes selPulse{
+    0%,100%{ transform:translateY(-7px) scale(1.13); }
+    50%    { transform:translateY(-10px) scale(1.19); }
+  }
+  .cell.hint .face{ animation:hintPulse .5s ease-in-out 3; }
+  @keyframes hintPulse{
+    0%,100%{ box-shadow:0 5px 0 hsl(var(--h,190) 62% 42%), 0 0 0 0 rgba(255,255,255,0); }
+    50%{ box-shadow:0 5px 0 hsl(var(--h,190) 62% 42%), 0 0 0 4px #fff, 0 0 0 9px var(--lime); }
+  }
+  .cell.bad .face{ animation:shake .28s; box-shadow:0 5px 0 #c23a4a, 0 0 0 4px #fff, 0 0 0 9px #ff3b5c; }
+  @keyframes shake{
+    0%,100%{ transform:translateX(0); }
+    25%{ transform:translateX(-5px); }
+    75%{ transform:translateX(5px); }
+  }
+  .cell.vanish .face{ opacity:0; transform:scale(.45) rotate(12deg); }
+
+  /* ── 잇는 선 ── */
+  #link{
+    position:absolute; pointer-events:none; z-index:2;
+    left:calc(var(--cw) * -1); top:calc(var(--cw) * -1);
+    overflow:visible; opacity:0; transition:opacity .18s;
+  }
+  #link.show{ opacity:1; }
+  #link polyline{ fill:none; stroke-linecap:round; stroke-linejoin:round; }
+  #link .glow{ stroke:rgba(255,46,134,.34); stroke-width:calc(var(--cw)*.38); filter:blur(2px); }
+  #link .core{ stroke:var(--pink); stroke-width:calc(var(--cw)*.14); }
+  /* 선 끝을 달려가는 불똥.
+     따로 만든 점이 아니라 "선에 찍힌 아주 짧은 점선 한 칸"입니다.
+     선과 같은 길·같은 눈금을 쓰기 때문에 절대 어긋날 수 없습니다. */
+  #link .head{
+    stroke:#ffffff; stroke-width:calc(var(--cw)*.34); stroke-linecap:round;
+    filter:drop-shadow(0 0 10px rgba(255,46,134,1));
+  }
+
+  /* 판 전체가 한 번 흔들립니다 — 연속으로 맞힐 때만 */
+  @keyframes stageShake{
+    0%,100%{ transform:translate(0,0); }
+    22%{ transform:translate(-5px,3px); }
+    48%{ transform:translate(5px,-4px); }
+    74%{ transform:translate(-3px,-2px); }
+  }
+  #stage.shake{ animation:stageShake .24s ease-in-out; }
+
+  /* ── 터지는 효과 ── */
+  /* 덮개(z-index 50)보다 위에 둡니다. 다 깼을 때 축포가 덮개 위로 터지게 하려는 겁니다 */
+  #fx{ position:fixed; inset:0; pointer-events:none; z-index:55; overflow:hidden; }
+  #fx > *{ position:absolute; will-change:transform,opacity; }
+  #fx .pt{ border-radius:50%; }
+  #fx .sq{ border-radius:3px; }
+  /* 별 조각 — 다섯 갈래로 오려 냅니다 */
+  #fx .star{
+    border-radius:0;
+    clip-path:polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%);
+  }
+  /* 반짝이 — 네 갈래 */
+  #fx .twinkle{
+    border-radius:0; background:#fff;
+    clip-path:polygon(50% 0%,58% 42%,100% 50%,58% 58%,50% 100%,42% 58%,0% 50%,42% 42%);
+  }
+  #fx .ring{ border-radius:50%; border:5px solid var(--pink); box-sizing:border-box; }
+  #fx .ring2{ border-width:3px; border-color:#fff; }
+  /* 사방으로 뻗는 빛줄기 */
+  #fx .ray{ height:5px; border-radius:3px; transform-origin:0 50%; }
+  /* 한가운데 터지는 섬광 */
+  #fx .flash{ border-radius:50%; background:radial-gradient(rgba(255,255,255,.98) 0%, rgba(255,255,255,.5) 45%, rgba(255,255,255,0) 72%); }
+  #fx .pop{
+    font-weight:400; color:#fff;
+    text-shadow:0 3px 0 var(--pink), 0 5px 0 var(--pink), 0 11px 20px rgba(0,50,60,.4);
+    white-space:nowrap;
+  }
+
+  /* ── 덮개 ── */
+  /* ── 시작 화면 ──
+     게임이 대뜸 시작되지 않게, 처음엔 이 화면부터 보여 줍니다.
+     판은 뒤에서 미리 만들어 두므로 '시작하기' 를 누르면 곧바로 뜹니다. */
+  #veilTitle{
+    position:fixed; inset:0; z-index:45;
+    display:none; flex-direction:column; align-items:center; justify-content:center;
+    gap:0; padding:24px 18px; text-align:center;
+    background:
+      repeating-linear-gradient(114deg,
+        rgba(255,255,255,.13) 0 64px, rgba(255,255,255,0) 64px 158px),
+      linear-gradient(180deg, var(--sky-2) 0%, var(--sky) 46%, var(--sky-3) 100%);
+  }
+  #veilTitle.on{ display:flex; }
+  /* 안내판에서는 제목을 크게. 좁은 화면 규칙보다 이 쪽이 셉니다 */
+  #veilTitle h1{ margin:0; font-size:clamp(2.2rem, 11.5vw, 3.7rem); letter-spacing:2px;
+    text-shadow:0 4px 0 #0e3b46, 0 7px 0 #0e3b46, 0 12px 22px rgba(0,50,60,.32); }
+  #veilTitle .tagline{ margin:8px 0 0; font-size:clamp(.88rem, 3.9vw, 1.12rem); }
+  .title-btns{ display:flex; flex-direction:column; gap:12px; margin-top:34px; width:min(300px,84vw); }
+  .title-btns button{ width:100%; font-size:1.25rem; padding:16px 20px; border-radius:20px; }
+  .title-btns .ghost{
+    background:rgba(255,255,255,.94); color:var(--ink);
+    box-shadow:0 5px 0 var(--lip), 0 8px 18px rgba(0,55,65,.16);
+  }
+  .title-note{ margin:22px 0 0; color:#08454f; opacity:.8; font-size:.9rem; font-weight:400; }
+
+  .veil{
+    position:fixed; inset:0; z-index:50;
+    background:rgba(8,58,68,.55); backdrop-filter:blur(4px);
+    display:none; align-items:center; justify-content:center; padding:20px;
+  }
+  .veil.on{ display:flex; }
+  .card{
+    background:var(--card); border:none; border-radius:28px;
+    padding:30px 32px; text-align:center; max-width:440px; width:100%;
+    box-shadow:0 10px 0 rgba(0,60,70,.14), 0 26px 60px rgba(0,40,50,.4);
+  }
+  .card h2{ margin:0 0 6px; font-size:1.75rem; font-weight:400; color:var(--ink); }
+  .card p{ margin:7px 0; color:var(--ink-2); font-size:.97rem; line-height:1.6; font-weight:400; }
+  .card .big{ font-size:2.6rem; color:var(--pink); font-weight:400; margin:10px 0 2px; font-variant-numeric:tabular-nums; }
+  .card .row{ display:flex; gap:8px; justify-content:center; margin-top:20px; flex-wrap:wrap; }
+  .rules{ text-align:left; font-size:.95rem; line-height:1.8; color:var(--ink); margin:10px 0 0; font-weight:400; }
+
+  /* ── 시간이 다 됐을 때 ──
+     흰 카드에 글자만 있던 것을, 모래시계와 큰 글씨로 바꿨습니다.
+     'TIME UP' 은 제목에 쓰는 물방울체입니다 (영문·숫자만 들어 있는 글꼴이라 한글은 못 씁니다) */
+  .card.card-lose{
+    padding:0 0 26px; overflow:hidden; max-width:380px;
+    animation:losePop .34s cubic-bezier(.2,1.5,.5,1) both;
+  }
+  @keyframes losePop{ from{ transform:scale(.84) translateY(14px); opacity:0; } }
+
+  .lose-top{
+    padding:22px 24px 18px; margin-bottom:16px;
+    background:linear-gradient(180deg, #ff5fa2 0%, #ff2e86 60%, #ec1f74 100%);
+    box-shadow:inset 0 -6px 0 rgba(0,0,0,.10);
+  }
+  .hg{ width:74px; height:98px; margin:0 auto 6px; display:block; overflow:visible;
+       filter:drop-shadow(0 6px 10px rgba(120,0,50,.28)); }
+  .hg-body{ transform-origin:45px 60px; animation:hgTilt 3.2s ease-in-out infinite; }
+  @keyframes hgTilt{
+    0%,44%   { transform:rotate(0deg); }
+    50%,94%  { transform:rotate(-7deg); }
+    100%     { transform:rotate(0deg); }
+  }
+  .sand-top{ transform-origin:45px 19px; animation:sandDown 3.2s ease-in-out infinite; }
+  @keyframes sandDown{ 0%{ transform:scaleY(1); } 46%,100%{ transform:scaleY(.18); } }
+  .sand-bot{ transform-origin:45px 101px; animation:sandUp 3.2s ease-in-out infinite; }
+  @keyframes sandUp{ 0%{ transform:scaleY(.25); } 46%,100%{ transform:scaleY(1); } }
+  .grain{ animation:grainFall .5s linear infinite; }
+  @keyframes grainFall{ from{ transform:translateY(-6px); opacity:0; } 40%{ opacity:1; } to{ transform:translateY(12px); opacity:0; } }
+
+  .lose-big{
+    font-family:'WaterDrop','Supermagic',sans-serif;
+    font-size:2.9rem; font-style:italic; letter-spacing:2px; color:#fff; margin:0;
+    text-shadow:0 3px 0 #a3134f, 0 6px 0 #a3134f, 0 11px 18px rgba(120,0,50,.35);
+  }
+  .lose-stat{
+    display:inline-block; margin:0 24px; padding:7px 16px; border-radius:999px;
+    background:var(--panel-2, #eef7f8); background:#eaf6f8;
+    font-size:.95rem; color:var(--ink);
+  }
+  .lose-stat b{ color:var(--pink); font-size:1.15em; }
+  .card-lose .row{ margin:20px 24px 0; }
+  button.retry{ font-size:1.15rem; padding:15px 40px; border-radius:18px; }
+
+  @media (max-width:560px){
+    .card.card-lose{ padding:0 0 18px; }
+    .lose-top{ padding:16px 18px 14px; margin-bottom:12px; }
+    .hg{ width:58px; height:76px; }
+    .lose-big{ font-size:2.2rem; }
+    .lose-stat{ font-size:.86rem; padding:6px 13px; margin:0 16px; }
+    .card-lose .row{ margin:14px 16px 0; }
+    button.retry{ font-size:1rem; padding:13px 30px; }
+  }
+  .rules b{ color:var(--pink); }
+
+  /* ── 알림쪽지 ── */
+  #toast{
+    position:fixed; left:50%; bottom:26px; transform:translateX(-50%) translateY(20px);
+    background:#fff; border:none; color:var(--ink);
+    padding:12px 22px; border-radius:999px; font-size:.95rem; font-weight:400;
+    opacity:0; pointer-events:none; transition:opacity .2s, transform .2s; z-index:60;
+    box-shadow:0 4px 0 var(--lip), 0 12px 26px rgba(0,50,60,.28);
+  }
+  #toast.on{ opacity:1; transform:translateX(-50%) translateY(0); }
+
+  .foot{ margin-top:8px; color:#08454f; opacity:.75; font-size:.82rem; text-align:center; line-height:2; font-weight:400; }
+  /* 말 바꾸기 단추 — 다른 단추와 같은 옷을 입되 글자만 들어갑니다 */
+  .lang-btn{ display:inline-flex; align-items:center; justify-content:center;
+             min-width:2.6em; font-size:.9rem; letter-spacing:.06em; color:var(--ink);
+             text-decoration:none; }
+  kbd{ background:#fff; color:var(--ink); border:none; box-shadow:0 2px 0 var(--lip); border-radius:7px; padding:3px 8px; font-size:.78rem; font-family:inherit; font-weight:400; }
+  /* ── 좁은 화면(폰) ──
+     머리말이 자리를 다 먹으면 판이 밑으로 눌립니다.
+     제목·단추·계기판을 줄여 한 줄씩에 담고, 자판 안내는 아예 감춥니다(폰엔 자판이 없습니다). */
+  @media (max-width:560px){
+    body{ padding:4px 3px 6px; }
+    header{ padding-top:24px; margin-bottom:0; }     /* 배지가 제목을 가리지 않게 */
+    h1{ font-size:1.62rem; letter-spacing:.5px;
+        text-shadow:0 2px 0 #0e3b46, 0 4px 0 #0e3b46, 0 7px 12px rgba(0,50,60,.3); }
+    .tagline{ font-size:.68rem; margin-top:0; }
+    .tagline b{ font-size:1.2em; }
+
+    .bar{ gap:4px; margin-bottom:3px; }
+    button.ico-only{ padding:5px 6px; border-radius:12px; box-shadow:0 3px 0 var(--lip), 0 4px 8px rgba(0,55,65,.14); }
+    button.ico-only:active{ transform:translateY(2px); box-shadow:0 1px 0 var(--lip); }
+    .btn-ico{ width:1.12em; height:1.12em; }
+    .badge{ min-width:15px; height:15px; line-height:15px; font-size:.58rem; top:-3px; right:-3px; }
+
+    .stats{ gap:4px; margin-bottom:0; }
+    .stat{ padding:2px 6px; min-width:0; border-radius:10px;
+           box-shadow:0 3px 0 var(--lip), 0 4px 8px rgba(0,55,65,.12); }
+    .stat b{ font-size:.95rem; line-height:1.1; }
+    .stat span{ font-size:.54rem; letter-spacing:0; }
+
+    .foot{ display:none; }                           /* 폰에는 자판이 없습니다 */
+
+    /* 알림판(규칙·결과 창)은 폰에서 글이 너무 커서 화면을 넘쳤습니다.
+       글을 줄이고, 그래도 길면 창 안에서 굴러가게 합니다 */
+    .veil{ padding:10px; }
+    .card{ padding:18px 16px; border-radius:20px; max-height:86vh; overflow-y:auto; }
+    .card h2{ font-size:1.3rem; }
+    .card p{ font-size:.84rem; line-height:1.5; margin:5px 0; }
+    .card .big{ font-size:2rem; }
+    .card .row{ margin-top:14px; gap:6px; }
+    .card .row button{ font-size:.95rem; padding:11px 16px; }
+    .rules{ font-size:.8rem; line-height:1.62; margin:8px 0 0; }
+  }
+</style>
+<!-- Pixabay 효과음 꾸러미 (출처·라이선스는 audio/출처.txt) -->
+<script src="audio/sfx-data.js"></script>
+<script src="/assets/game-home.js?v=2" data-top="8" data-left="10" data-fullscreen="1" defer></script>
+</head>
+<body>
+
+<!-- 처음 열었을 때 보이는 안내판. 뒤에서 판을 만드는 동안 여기 머무릅니다 -->
+<div id="veilTitle" class="on">
+  <h1>PAIRBOOM<em>!!</em></h1>
+  <p class="tagline">같은 그림 두 개를 이으면 <b>BOOM!!!</b></p>
+  <div class="title-btns">
+    <button class="primary" id="btnStart">시작하기</button>
+    <button class="ghost" id="btnHowto">놀이 방법</button>
+  </div>
+  <p class="title-note" id="titleNote">&nbsp;</p>
+</div>
+
+<header>
+  <h1>PAIRBOOM<em>!!</em></h1>
+  <p class="tagline">같은 그림 두 개를 이으면 <b>BOOM!!!</b></p>
+</header>
+
+<div class="bar">
+  <button id="btnReset" class="ico-only" title="처음부터 다시하기" aria-label="처음부터 다시하기"><svg class="btn-ico" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="50" fill="#ff8a3d"/><g fill="#fff"><rect x="30" y="32" width="9" height="36" rx="3"/><path d="M70 32 44 50l26 18z"/></g></svg></button>
+  <button class="primary ico-only" id="btnNew" title="현재 단계 다시하기 (N)" aria-label="현재 단계 다시하기"><svg class="btn-ico" viewBox="0 0 24 24" aria-hidden="true" fill="#fff"><path d="M17.65 6.35A7.96 7.96 0 0 0 12 4c-4.42 0-7.99 3.58-8 8s3.58 8 8 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg></button>
+  <button id="btnHint" class="ico-only" title="힌트" aria-label="힌트"><img class="btn-ico" src="icons/hint.png" alt=""><span class="badge" id="hintN">3</span></button>
+  <button id="btnPause" class="ico-only" title="멈춤 (스페이스)" aria-label="멈춤"><img class="btn-ico" src="icons/pause.png" alt=""></button>
+  <button id="btnSound" class="ico-only" title="효과음 끄기" aria-label="효과음"><svg class="btn-ico" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="50" fill="#2a9db0"/><g transform="translate(26,26) scale(2)" fill="#fff"><path d="M3 9v6h4l5 5V4L7 9H3z"/><path class="wave" d="M16.5 12A4.5 4.5 0 0 0 14 7.97v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/><path class="wave" d="M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></g><path class="slash-cut" d="M26 26 74 74" stroke="#2a9db0" stroke-width="22" stroke-linecap="round"/><path class="slash" d="M26 26 74 74" stroke="#fff" stroke-width="10" stroke-linecap="round"/></svg></button>
+  <button id="btnMusic" class="off ico-only" title="배경음악 켜기" aria-label="배경음악"><img class="btn-ico" src="icons/music.png" alt=""></button>
+  <button id="btnHelp" class="ico-only" title="규칙" aria-label="규칙"><img class="btn-ico" src="icons/rules.png" alt=""></button>
+  <a id="btnLang" class="ico-only lang-btn" href="?lang=en">EN</a>
+</div>
+
+<div class="stats">
+  <div class="stat"><b id="sStage">1 / 22</b><span>단계</span></div>
+  <div class="stat"><b id="sLeft">0</b><span>남은 짝</span></div>
+  <div class="stat" id="timeBox"><b id="sTime">2:50</b><span>남은 시간</span></div>
+  <div class="stat"><b id="sScore">0</b><span>점수</span></div>
+  <div class="stat" id="comboBox" style="display:none"><b id="sCombo">×1</b><span>연속</span></div>
+  <div class="stat"><b id="sBest">1</b><span>최고 단계</span></div>
+</div>
+
+<div id="stage">
+  <div id="board"></div>
+  <svg id="link">
+    <polyline class="glow"></polyline>
+    <polyline class="core"></polyline>
+    <polyline class="head"></polyline>
+  </svg>
+</div>
+
+<div id="fx"></div>
+
+<!-- 배경음악. 이 곡은 13.25초마다 같은 가락이 돌아오므로,
+     그 마디에 딱 맞는 66.2초(다섯 번치)만 떼어 두었습니다. 3.2MB -> 0.75MB.
+     ogg 를 먼저 두는 까닭은 되풀이할 때 mp3 처럼 틈이 생기지 않기 때문입니다.
+     preload=metadata : 열자마자 통째로 받으면 게임이 늦게 뜹니다 -->
+<audio id="bgm" loop preload="metadata">
+  <source src="audio/bgm.ogg?v=2" type="audio/ogg">
+  <source src="audio/bgm.mp3?v=2" type="audio/mpeg">
+</audio>
+
+<p class="foot">
+  <kbd>N</kbd> 판 다시 · <kbd>H</kbd> 힌트 · <kbd>스페이스</kbd> 멈춤
+</p>
+
+<!-- 멈춤 -->
+<div class="veil" id="veilPause">
+  <div class="card">
+    <h2>잠깐 멈춤</h2>
+    <p>판은 그대로 두었습니다. 시간도 멈춰 있어요.</p>
+    <div class="row"><button class="primary" id="btnResume">이어서 하기</button></div>
+  </div>
+</div>
+
+<!-- 다 깼을 때 -->
+<div class="veil" id="veilWin">
+  <div class="card">
+    <h2 id="winTitle">다 지웠습니다!</h2>
+    <div class="big" id="winScore">0</div>
+    <p id="winLine">—</p>
+    <p id="winBest"></p>
+    <div class="row">
+      <button class="primary" id="btnNext" style="display:none">다음 단계</button>
+      <button id="btnAgain">한 판 더</button>
+    </div>
+  </div>
+</div>
+
+<!-- 시간이 다 됐을 때 -->
+<div class="veil" id="veilLose">
+  <div class="card card-lose">
+    <div class="lose-top">
+      <svg class="hg" viewBox="0 0 90 120" aria-hidden="true">
+        <g class="hg-body">
+          <rect x="13" y="3" width="64" height="12" rx="6" fill="#0e3b46"/>
+          <rect x="13" y="105" width="64" height="12" rx="6" fill="#0e3b46"/>
+          <path d="M23 15h44v9L48 58v4l19 34v9H23v-9l19-34v-4L23 24Z" fill="#ffffff" opacity=".55"/>
+          <path class="sand-top" d="M27 19h36L47 54h-4Z" fill="#ffd23f"/>
+          <path class="sand-bot" d="M28 101h34L45 80Z" fill="#ff8a3d"/>
+          <rect class="grain" x="43" y="56" width="4" height="18" rx="2" fill="#ffc44d"/>
+        </g>
+      </svg>
+      <h2 class="lose-big">TIME UP</h2>
+    </div>
+    <p class="lose-stat"><b id="loseStage">1</b>단계 · <b id="loseLeft">0</b>짝 남기고</p>
+    <div class="row">
+      <button class="primary retry" id="btnRetry">다시 하기</button>
+    </div>
+  </div>
+</div>
+
+<!-- 처음부터 다시할지 한 번 묻습니다. 되돌릴 수 없으니까요 -->
+<div class="veil" id="veilReset">
+  <div class="card">
+    <h2>처음부터 다시 할까요?</h2>
+    <p><b id="resetNow">1</b>단계까지 오셨습니다. 누르면 <b>1단계</b>로 돌아갑니다.</p>
+    <p>최고 단계 기록은 그대로 남습니다.</p>
+    <div class="row">
+      <button class="primary" id="btnResetYes">1단계로 가기</button>
+      <button id="btnResetNo">그만두기</button>
+    </div>
+  </div>
+</div>
+
+<!-- 규칙 -->
+<div class="veil" id="veilHelp">
+  <div class="card">
+    <h2>어떻게 하나요</h2>
+    <div class="rules">
+      <p>같은 그림 두 개를 눌러서 지우는 게임입니다. 다만 아무 때나 지워지진 않습니다.</p>
+      <p><b>1.</b> 두 그림을 잇는 길이 <b>빈 칸</b>으로만 뚫려 있어야 합니다.<br>
+      <b>2.</b> 그 길은 <b>꺾임이 2번까지</b>(선 세 개까지)만 허용됩니다.<br>
+      <b>3.</b> 길은 <b>판 바깥으로 돌아가도</b> 됩니다. 가장자리 그림이 잘 지워지는 이유입니다.</p>
+      <p>더 이상 지울 짝이 없으면 남은 그림을 <b>알아서 섞어</b> 드립니다. 그러니 막혀서 못 깨는 일은 없습니다.</p>
+      <p>모든 판은 <b>끝까지 지울 수 있게</b> 만들어 내놓습니다.</p>
+      <p>뒷단계에는 <b>회색 돌</b>이 섞여 있습니다. 돌은 지울 수 없고 <b>길을 막습니다</b>.
+      돌이 놓인 자리에 따라 판이 십자·마름모·고리 모양이 되기도 합니다.</p>
+      <p><b>1단계부터 100단계까지</b> 한 줄로 이어집니다. 깰 때마다
+      <b>그림 종류가 한 종씩 늘어</b> 같은 그림이 귀해집니다. 그래서 짝 찾기가 조금씩 어려워집니다.
+      한 판에서 더 못 늘리면 <b>판이 커지고</b>, 그림 수는 그대로 이어서 갑니다.</p>
+      <p>한 판에 <b>2분 50초</b>입니다. 다 쓰면 그 단계는 실패이고, 다시 하면 됩니다.
+      짝이 아주 많은 뒷단계는 시간을 더 줍니다.</p>
+    </div>
+    <div class="row"><button class="primary" id="btnCloseHelp">알겠습니다</button></div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+(function(){
+'use strict';
+
+/* ═══════════════════════════════════════════
+   그림패 목록 — 서로 헷갈리지 않는 것들로만
+   ═══════════════════════════════════════════ */
+/* 그림패 — 죄다 코드로 그린 단순 도형입니다. 100x100 칸 안에 채워 그립니다.
+   이모지는 기기마다 모양이 달라지고 자잘한 무늬가 많아 한눈에 안 들어옵니다. */
+const ICONS = [
+  'M50 10a40 40 0 1 0 0 80 40 40 0 1 0 0-80z',                                             /* 동그라미 */
+  'M26 16h48a10 10 0 0 1 10 10v48a10 10 0 0 1-10 10H26a10 10 0 0 1-10-10V26a10 10 0 0 1 10-10z', /* 네모 */
+  'M50 12 90 82H10z',                                                                      /* 세모 */
+  'M10 18h80L50 88z',                                                                      /* 거꾸로 세모 */
+  'M50 8 92 50 50 92 8 50z',                                                               /* 마름모 */
+  'M50 6 62 38l34 2-26 22 8 33-28-19-28 19 8-33-26-22 34-2z',                              /* 별 */
+  'M50 6c5 24 15 34 39 39-24 5-34 15-39 39-5-24-15-34-39-39 24-5 34-15 39-39z',            /* 네갈래 별 */
+  'M50 88S12 62 12 38a20 20 0 0 1 38-11 20 20 0 0 1 38 11c0 24-38 50-38 50z',              /* 하트 */
+  'M50 8 88 29v42L50 92 12 71V29z',                                                        /* 육각형 */
+  'M50 8 92 39 76 90H24L8 39z',                                                            /* 오각형 */
+  'M14 10h72L58 50l28 40H14l28-40z',                                                       /* 모래시계 */
+  'M50 6c19 24 32 36 32 51a32 32 0 1 1-64 0c0-15 13-27 32-51z',                            /* 물방울 */
+  'M38 10h24v28h28v24H62v28H38V62H10V38h28z',                                              /* 십자 */
+  'M27 10 50 33 73 10l17 17-23 23 23 23-17 17-23-23-23 23-17-17 23-23-23-23z',             /* 가위표 */
+  'M50 8a42 42 0 1 0 0 84 42 42 0 1 0 0-84zm0 26a16 16 0 1 1 0 32 16 16 0 0 1 0-32z',      /* 도넛 */
+  'M50 8a42 42 0 1 0 0 84 42 42 0 1 0 0-84z M72 14a36 36 0 1 0 0 72 36 36 0 1 0 0-72z',    /* 초승달 */
+  'M58 4 20 56h22l-6 40 38-54H50z',                                                        /* 번개 */
+  'M50 6 88 46H68v42H32V46H12z',                                                           /* 화살표 */
+  'M8 62a42 42 0 0 1 84 0z',                                                               /* 반원 */
+  'M30 22h40a28 28 0 0 1 0 56H30a28 28 0 0 1 0-56z',                                       /* 알약 */
+  'M10 82 18 26l17 16L50 10l15 32 17-16 8 56z',                                            /* 왕관 */
+  'M50 6 88 20v30c0 24-17 37-38 44-21-7-38-20-38-44V20z',                                  /* 방패 */
+  'M8 82a42 42 0 0 1 84 0H70a20 20 0 0 0-40 0z',                                           /* 무지개 */
+  'M50 50 92 29a42 42 0 1 0 0 42z'                                                         /* 한입 베어문 원 */
+];
+
+/* 도형마다 고정된 제 색. 137.5도씩 돌려 배정해 이웃한 도형끼리 색이 겹치지 않게 합니다 */
+const hueOf = i => Math.round((i * 137.5) % 360);
+
+/* ── 막힌 칸(돌) ──
+   board[i] 는 도형 번호(0 이상)이거나, 비었으면 null 입니다.
+   돌은 -1 로 둡니다. 지울 수 없고, passableIdx 가 null 이 아닌 것을 막으므로
+   길도 알아서 막힙니다. */
+const ROCK = -1;
+const ROCK_PATH =
+  'M50 13 C65 13 78 20 86 33 C92 44 89 60 80 71 C71 83 56 89 44 87 ' +
+  'C30 84 18 74 12 60 C7 47 13 31 26 21 C33 16 41 13 50 13 Z ' +
+  'M36 33 C45 29 54 32 56 39 C58 46 49 51 41 48 C33 46 30 37 36 33 Z';
+
+/* 돌 놓을 자리. 폰에서는 판 모양이 바뀌므로 가로세로를 -1~1 로 환산해서 정합니다.
+   그래야 6x10 이든 10x6 이든 같은 모양이 나옵니다. */
+function rockSpots(w, h, n, shape){
+  if (n <= 0) return [];
+  const cx = (w-1)/2, cy = (h-1)/2;
+  const list = [];
+  for (let y = 0; y < h; y++){
+    for (let x = 0; x < w; x++){
+      const nx = (x-cx)/Math.max(cx, .5), ny = (y-cy)/Math.max(cy, .5);
+      let v;
+      switch (shape){
+        case 'cross':   v = Math.min(Math.abs(nx), Math.abs(ny)); break;
+        case 'diamond': v = Math.abs(Math.abs(nx) + Math.abs(ny) - .66); break;
+        case 'ring':    v = Math.abs(Math.sqrt(nx*nx + ny*ny) - .68); break;
+        case 'frame':   v = Math.abs(Math.max(Math.abs(nx), Math.abs(ny)) - .78); break;
+        case 'core':    v = Math.sqrt(nx*nx + ny*ny); break;          /* 한가운데 뭉치 */
+        default:        v = Math.random(); break;                     /* 흩뿌리기 */
+      }
+      list.push([v + Math.random()*0.03, y*w + x]);   /* 같은 값이면 자리를 조금 섞습니다 */
+    }
+  }
+  list.sort((a, b) => a[0] - b[0]);
+  const out = [];
+  for (let k = 0; k < list.length && out.length < n; k++) out.push(list[k][1]);
+  return out;
+}
+/* 돌 수는 반드시 짝수여야 합니다 (남는 칸이 홀수면 짝이 하나 뜹니다) */
+const rocksAt = n => {
+  const st = stageAt(n);
+  const r = Math.min(st.rocks || 0, Math.floor(st.w*st.h/3));
+  return r - (r % 2);
+};
+
+/* ── 단계표 (2026-08-21 개편) ──
+   난이도가 앞구간에 몰아치던 것을 폈습니다. 22판 -> 37판.
+
+   재보니 어려워지는 폭의 3/4 이 1~9판에 몰려 있었습니다.
+   범인은 '판 두께'(가로세로 중 짧은 쪽)였습니다.
+   같은 그림 짝 가운데 실제로 이어지는 비율을 재보니
+       4겹 19~22%%   5겹 14~18%%   6겹 10~13%%   7겹 8~11%%   8겹 7~10%%
+   인데, 옛 표는 4겹(10x4)에서 6겹(8x6)으로 건너뛰었습니다. 한 판 만에 반토막입니다.
+
+   고친 것 셋:
+     1) 4겹과 6겹 사이에 5겹(8x5)을, 6겹과 8겹 사이에 7겹(10x7·12x7)을 끼웠습니다.
+     2) 판이 커지는 판에서는 그림 수를 한 판 쉬어갑니다.
+        원래 정하신 규칙 — '전 단계의 최대 그림 수가 현 단계의 시작 숫자' — 그대로입니다.
+     3) 앞에 4x4·5x4 를 넣어 시작을 더 눕혔습니다.
+
+   ★ 칸 수를 고를 때 주의할 것 ★
+   폰에서는 pickShape 이 칸 수만 보고 모양을 다시 고릅니다. 그래서 '내가 적은 가로세로'가
+   아니라 '칸 수'가 두께를 결정합니다. 예를 들어 36칸은 폰에서 6x6(6겹)이 되어
+   32칸(4x8, 4겹) 바로 뒤에 두면 난이도가 튑니다. 그래서 36칸은 뺐습니다.
+   폰 기준 두께:  16·20·24·28·32=4겹  40=5겹  42·48·54·60·66=6겹  70·84=7겹  88·96·104=8겹
+
+   그림은 24개 그대로 씁니다. 새로 그린 것 없습니다. */
+const STAGES = [
+  { w: 4, h:4, kinds: 3 },   /*  1판 ·  16칸 ·  8짝 */
+  { w: 4, h:4, kinds: 4 },   /*  2판 ·  16칸 ·  8짝 */
+  { w: 4, h:4, kinds: 5 },   /*  3판 ·  16칸 ·  8짝 */
+  { w: 5, h:4, kinds: 5 },   /* 판 커짐 */
+  { w: 5, h:4, kinds: 6 },   /*  5판 ·  20칸 · 10짝 */
+  { w: 5, h:4, kinds: 7 },   /*  6판 ·  20칸 · 10짝 */
+  { w: 6, h:4, kinds: 7 },   /* 판 커짐 */
+  { w: 6, h:4, kinds: 8 },   /*  8판 ·  24칸 · 12짝 */
+  { w: 6, h:4, kinds: 9 },   /*  9판 ·  24칸 · 12짝 */
+  { w: 7, h:4, kinds: 9 },   /* 판 커짐 */
+  { w: 7, h:4, kinds:10 },   /* 11판 ·  28칸 · 14짝 */
+  { w: 7, h:4, kinds:11 },   /* 12판 ·  28칸 · 14짝 */
+  { w: 8, h:4, kinds:11 },   /* 판 커짐 */
+  { w: 8, h:4, kinds:12 },   /* 14판 ·  32칸 · 16짝 */
+  { w: 8, h:4, kinds:13 },   /* 15판 ·  32칸 · 16짝 */
+  { w: 8, h:5, kinds:13 },   /* 판 커짐 · 5겹 */
+  { w: 8, h:5, kinds:14 },   /* 17판 ·  40칸 · 20짝 */
+  { w: 8, h:5, kinds:15 },   /* 18판 ·  40칸 · 20짝 */
+  { w: 7, h:6, kinds:15 },   /* 판 커짐 · 6겹 */
+  { w: 7, h:6, kinds:16 },   /* 20판 ·  42칸 · 21짝 */
+  { w: 8, h:6, kinds:16 },   /* 판 커짐 */
+  { w: 8, h:6, kinds:17 },   /* 22판 ·  48칸 · 24짝 */
+  { w: 9, h:6, kinds:17 },   /* 판 커짐 */
+  { w: 9, h:6, kinds:18 },   /* 24판 ·  54칸 · 27짝 */
+  { w:10, h:6, kinds:18 },   /* 판 커짐 */
+  { w:10, h:6, kinds:19 },   /* 26판 ·  60칸 · 30짝 */
+  { w:11, h:6, kinds:19 },   /* 판 커짐 */
+  { w:11, h:6, kinds:20 },   /* 28판 ·  66칸 · 33짝 */
+  { w:10, h:7, kinds:20 },   /* 판 커짐 · 7겹 */
+  { w:10, h:7, kinds:21 },   /* 30판 ·  70칸 · 35짝 */
+  { w:12, h:7, kinds:21 },   /* 판 커짐 */
+  { w:12, h:7, kinds:22 },   /* 32판 ·  84칸 · 42짝 */
+  { w:11, h:8, kinds:22 },   /* 판 커짐 · 8겹 */
+  { w:11, h:8, kinds:23 },   /* 34판 ·  88칸 · 44짝 */
+  { w:12, h:8, kinds:23 },   /* 판 커짐 */
+  { w:12, h:8, kinds:24 },   /* 36판 ·  96칸 · 48짝 */
+  { w:13, h:8, kinds:24 },   /* 판 커짐 */
+
+  /* ── 38판부터: 모양 판 ──
+     여기서부터 그림은 24종으로 고정입니다(더 늘릴 그림이 없습니다).
+     대신 지울 수 없는 <b>돌</b>이 들어갑니다. 돌은 길을 막아 난이도를 올리고,
+     놓인 자리에 따라 판이 십자·액자·마름모 모양이 됩니다.
+     돌 수를 재봤더니 칸수의 13%%를 넘기면 풀 수 있는 판이 잘 안 나옵니다.
+     그래서 104칸이라도 12개까지만 놓습니다.
+     (ring 모양은 가운데를 통째로 막아 잘 안 풀려서 뺐습니다) */
+  { w: 9, h:6, kinds:24, rocks: 2, shape:'scatter' },   /*  38판 */
+  { w:10, h:6, kinds:24, rocks: 2, shape:'cross' },   /*  39판 */
+  { w:11, h:6, kinds:24, rocks: 2, shape:'frame' },   /*  40판 */
+  { w:10, h:7, kinds:24, rocks: 2, shape:'diamond' },   /*  41판 */
+  { w:12, h:7, kinds:24, rocks: 2, shape:'scatter' },   /*  42판 */
+  { w:11, h:8, kinds:24, rocks: 2, shape:'cross' },   /*  43판 */
+  { w:12, h:8, kinds:24, rocks: 2, shape:'frame' },   /*  44판 */
+  { w:13, h:8, kinds:24, rocks: 2, shape:'diamond' },   /*  45판 */
+  { w:11, h:6, kinds:24, rocks: 2, shape:'cross' },   /*  46판 */
+  { w:10, h:7, kinds:24, rocks: 2, shape:'frame' },   /*  47판 */
+  { w:12, h:7, kinds:24, rocks: 2, shape:'diamond' },   /*  48판 */
+  { w:11, h:8, kinds:24, rocks: 2, shape:'scatter' },   /*  49판 */
+  { w:12, h:8, kinds:24, rocks: 2, shape:'cross' },   /*  50판 */
+  { w:13, h:8, kinds:24, rocks: 2, shape:'frame' },   /*  51판 */
+  { w: 9, h:6, kinds:24, rocks: 4, shape:'frame' },   /*  52판 */
+  { w:10, h:6, kinds:24, rocks: 4, shape:'diamond' },   /*  53판 */
+  { w:11, h:6, kinds:24, rocks: 4, shape:'scatter' },   /*  54판 */
+  { w:10, h:7, kinds:24, rocks: 4, shape:'cross' },   /*  55판 */
+  { w:12, h:7, kinds:24, rocks: 4, shape:'frame' },   /*  56판 */
+  { w:11, h:8, kinds:24, rocks: 4, shape:'diamond' },   /*  57판 */
+  { w:12, h:8, kinds:24, rocks: 4, shape:'scatter' },   /*  58판 */
+  { w:13, h:8, kinds:24, rocks: 4, shape:'cross' },   /*  59판 */
+  { w:11, h:6, kinds:24, rocks: 4, shape:'diamond' },   /*  60판 */
+  { w:10, h:7, kinds:24, rocks: 4, shape:'scatter' },   /*  61판 */
+  { w:12, h:7, kinds:24, rocks: 4, shape:'cross' },   /*  62판 */
+  { w:11, h:8, kinds:24, rocks: 4, shape:'frame' },   /*  63판 */
+  { w:12, h:8, kinds:24, rocks: 4, shape:'diamond' },   /*  64판 */
+  { w:13, h:8, kinds:24, rocks: 4, shape:'scatter' },   /*  65판 */
+  { w: 9, h:6, kinds:24, rocks: 6, shape:'scatter' },   /*  66판 */
+  { w:10, h:6, kinds:24, rocks: 6, shape:'cross' },   /*  67판 */
+  { w:11, h:6, kinds:24, rocks: 6, shape:'frame' },   /*  68판 */
+  { w:10, h:7, kinds:24, rocks: 6, shape:'diamond' },   /*  69판 */
+  { w:12, h:7, kinds:24, rocks: 6, shape:'scatter' },   /*  70판 */
+  { w:11, h:8, kinds:24, rocks: 6, shape:'cross' },   /*  71판 */
+  { w:12, h:8, kinds:24, rocks: 6, shape:'frame' },   /*  72판 */
+  { w:13, h:8, kinds:24, rocks: 6, shape:'diamond' },   /*  73판 */
+  { w:11, h:6, kinds:24, rocks: 6, shape:'cross' },   /*  74판 */
+  { w:10, h:7, kinds:24, rocks: 6, shape:'frame' },   /*  75판 */
+  { w:12, h:7, kinds:24, rocks: 6, shape:'diamond' },   /*  76판 */
+  { w:11, h:8, kinds:24, rocks: 6, shape:'scatter' },   /*  77판 */
+  { w:12, h:8, kinds:24, rocks: 6, shape:'cross' },   /*  78판 */
+  { w:13, h:8, kinds:24, rocks: 6, shape:'frame' },   /*  79판 */
+  { w:11, h:6, kinds:24, rocks: 8, shape:'frame' },   /*  80판 */
+  { w:10, h:7, kinds:24, rocks: 8, shape:'frame' },   /*  81판 */
+  { w:12, h:7, kinds:24, rocks: 8, shape:'scatter' },   /*  82판 */
+  { w:11, h:8, kinds:24, rocks: 8, shape:'cross' },   /*  83판 */
+  { w:12, h:8, kinds:24, rocks: 8, shape:'frame' },   /*  84판 */
+  { w:13, h:8, kinds:24, rocks: 8, shape:'frame' },   /*  85판 */
+  { w:11, h:6, kinds:24, rocks: 8, shape:'cross' },   /*  86판 */
+  { w:10, h:7, kinds:24, rocks: 8, shape:'frame' },   /*  87판 */
+  { w:12, h:7, kinds:24, rocks: 8, shape:'frame' },   /*  88판 */
+  { w:11, h:8, kinds:24, rocks: 8, shape:'scatter' },   /*  89판 */
+  { w:12, h:8, kinds:24, rocks: 8, shape:'cross' },   /*  90판 */
+  { w:13, h:8, kinds:24, rocks: 8, shape:'frame' },   /*  91판 */
+  { w:12, h:7, kinds:24, rocks:10, shape:'frame' },   /*  92판 */
+  { w:11, h:8, kinds:24, rocks:10, shape:'cross' },   /*  93판 */
+  { w:12, h:8, kinds:24, rocks:10, shape:'scatter' },   /*  94판 */
+  { w:13, h:8, kinds:24, rocks:10, shape:'cross' },   /*  95판 */
+  { w:12, h:7, kinds:24, rocks:10, shape:'cross' },   /*  96판 */
+  { w:11, h:8, kinds:24, rocks:10, shape:'scatter' },   /*  97판 */
+  { w:12, h:8, kinds:24, rocks:10, shape:'cross' },   /*  98판 */
+  { w:13, h:8, kinds:24, rocks:10, shape:'frame' },   /*  99판 */
+  { w:13, h:8, kinds:24, rocks:12, shape:'frame' },   /* 100판 — 마지막. 제일 큰 판에 돌 12개 */
+];
+const LAST = STAGES.length;
+
+/* 판마다 주는 시간. 기본 2분 50초를 주되, 짝이 아주 많은 뒷단계는 그만큼 더 줍니다.
+   (짝 하나에 3.6초는 있어야 사람이 손을 놀릴 수 있습니다) */
+const TIME_BASE = 170;                        // 2분 50초
+const TIME_WARN = 30;                         // 남은 시간이 이보다 적으면 빨갛게
+const stageAt   = n => STAGES[Math.min(Math.max(n,1), LAST) - 1];
+const pairsAt   = n => (stageAt(n).w * stageAt(n).h - rocksAt(n)) / 2;
+/* 짝 하나에 주는 시간. 3.6 이던 것을 4.5 로 올렸습니다 (2026-08-21).
+   전에는 뒷판으로 갈수록 짝당 3.6초까지 쪼그라들어, 판이 커지는 것만으로
+   빡빡해졌습니다. 이제 4.5초 아래로는 안 내려갑니다. */
+const timeAt    = n => Math.max(TIME_BASE, Math.round(pairsAt(n) * 4.5));
+
+/* ── 얼마나 왔는지 ── */
+/* 왼쪽 아래 전체화면 단추가 판 귀퉁이를 가리지 않게 그만큼 비워 둡니다 */
+const FOOT_ROOM = 44;
+let atTitle = true;          // 안내판을 보고 있는 동안은 시계가 가지 않습니다
+let stage = 1;                                // 지금 몇 단계
+let bestStage = 1;                            // 여태 가장 멀리 간 단계
+function loadProgress(){
+  try{
+    stage     = Math.min(LAST, Math.max(1, +localStorage.getItem('pairboom_stage')     || 1));
+    bestStage = Math.min(LAST, Math.max(1, +localStorage.getItem('pairboom_beststage') || 1));
+  }catch(e){ stage = 1; bestStage = 1; }
+}
+function saveProgress(){
+  try{
+    localStorage.setItem('pairboom_stage', stage);
+    localStorage.setItem('pairboom_beststage', bestStage);
+  }catch(e){}
+}
+
+const DIRS = [[0,-1],[1,0],[0,1],[-1,0]];
+
+/* ── 상태 ── */
+let W=10, H=7;              // 판 크기 (칸)
+let board = [];             // 길이 W*H. null 이거나 그림 문자
+let sel = -1;               // 지금 고른 칸 번호, 없으면 -1
+let left = 0;               // 남은 짝 수
+let score = 0, combo = 0, lastMatchAt = 0;
+let hints = 3;
+let elapsed = 0, tick = null, running = false, paused = false;
+let soundOn = true;
+let musicOn = false;         // 처음 여는 사람이 놀라지 않게 꺼두고 시작합니다
+let gen = 0;                // 판 갈이 횟수. 새 판을 깔면 이전 판의 예약된 뒷정리를 무시합니다
+
+/* ── 화면 조각 ── */
+const $ = id => document.getElementById(id);
+
+/* ══ 영어 ══
+   한국어가 원본입니다. 주소에 ?lang=en 이 붙으면 화면 글만 갈아 끼웁니다.
+   고른 말은 이 브라우저에 기억해 둡니다. */
+const LANG = (function(){
+  try{
+    const q = new URLSearchParams(location.search).get('lang');
+    if (q === 'en' || q === 'ko'){ localStorage.setItem('pairboom_lang', q); return q; }
+    return localStorage.getItem('pairboom_lang') || 'ko';
+  }catch(e){ return 'ko'; }
+})();
+const EN = (LANG === 'en');
+/* 글월 하나를 고르는 도우미. L('한국어', 'English') */
+const L = (ko, en) => EN ? en : ko;
+
+function applyLang(){
+  if (!EN) return;
+  document.documentElement.lang = 'en';
+  document.title = 'PAIRBOOM!! - free match-and-clear puzzle, 100 stages | Oreum Games';
+  const $$ = s => document.querySelector(s);
+  const html = (s, v) => { const e = $$(s); if (e) e.innerHTML = v; };
+  const btn  = (id, t, a) => { const e = $(id); if (e){ e.title = t; e.setAttribute('aria-label', a || t); } };
+
+  document.querySelectorAll('.tagline').forEach(e => {
+    e.innerHTML = 'Match two of the same and <b>BOOM!!!</b>';
+  });
+  html('#btnStart', 'Start');
+  html('#btnHowto', 'How to play');
+
+  btn('btnReset', 'Start over from stage 1');
+  btn('btnNew',   'Restart this stage (N)', 'Restart this stage');
+  btn('btnHint',  'Hint');
+  btn('btnPause', 'Pause (Space)', 'Pause');
+  btn('btnSound', 'Sound off', 'Sound');
+  btn('btnMusic', 'Music on', 'Music');
+  btn('btnHelp',  'Rules');
+
+  const labels = ['Stage', 'Pairs left', 'Time left', 'Score', 'Combo', 'Best'];
+  document.querySelectorAll('.stats .stat span').forEach((e, i) => { if (labels[i]) e.textContent = labels[i]; });
+
+  html('.foot', '<kbd>N</kbd> Restart · <kbd>H</kbd> Hint · <kbd>Space</kbd> Pause');
+
+  html('#veilPause .card',
+    '<h2>Paused</h2>' +
+    '<p>The board is untouched. The clock is stopped too.</p>' +
+    '<div class="row"><button class="primary" id="btnResume">Resume</button></div>');
+
+  html('#winTitle', 'All cleared!');
+  html('#btnNext', 'Next stage');
+  html('#btnAgain', 'One more');
+
+  html('#veilLose .lose-stat',
+    'Stage <b id="loseStage">1</b> · <b id="loseLeft">0</b> pairs left');
+  html('#btnRetry', 'Try again');
+
+  html('#veilReset .card',
+    '<h2>Start over?</h2>' +
+    '<p>You have reached stage <b id="resetNow">1</b>. This takes you back to <b>stage 1</b>.</p>' +
+    '<p>Your best stage stays.</p>' +
+    '<div class="row">' +
+      '<button class="primary" id="btnResetYes">Go to stage 1</button>' +
+      '<button id="btnResetNo">Cancel</button>' +
+    '</div>');
+
+  html('#veilHelp .card',
+    '<h2>How it works</h2>' +
+    '<div class="rules">' +
+      '<p>Tap two of the same picture to clear them. They do not always clear, though.</p>' +
+      '<p><b>1.</b> The path between them must run through <b>empty cells</b> only.<br>' +
+      '<b>2.</b> That path may turn <b>at most twice</b> (three straight lines).<br>' +
+      '<b>3.</b> The path may go <b>around the outside</b> of the board. That is why edge pieces clear easily.</p>' +
+      '<p>When no pair can be cleared, the rest are <b>shuffled for you</b>. So you can never get stuck.</p>' +
+      '<p>Every board is built so it <b>can be cleared to the end</b>.</p>' +
+      '<p>Later stages mix in <b>grey stones</b>. Stones never clear and they <b>block the path</b>. ' +
+      'Depending on where they sit, the board takes the shape of a cross, a diamond or a frame.</p>' +
+      '<p><b>Stage 1 through 100</b> run in one line. Each clear adds <b>one more kind of picture</b>, ' +
+      'so matches get scarcer and the hunt gets a little harder. When a stage cannot take another kind, ' +
+      '<b>the board grows</b> and the picture count carries over.</p>' +
+      '<p>Each stage gives you <b>2:50</b>. Run out and the stage is a fail — just try again. ' +
+      'Stages with many pairs get more time.</p>' +
+    '</div>' +
+    '<div class="row"><button class="primary" id="btnCloseHelp">Got it</button></div>');
+}
+
+const boardEl = $('board'), linkEl = $('link');
+const glowEl = linkEl.querySelector('.glow'), coreEl = linkEl.querySelector('.core');
+let cells = [];             // DOM 칸들
+let glyphs = [];            // 각 칸 안의 도형
+const SVGNS = 'http://www.w3.org/2000/svg';
+
+/* ═══════════════════════════════════════════
+   길 찾기 — 이 게임의 심장
+   판 둘레에 빈 테두리 한 줄을 덧대어 계산합니다.
+   그래서 바깥으로 돌아가는 길도 자연스럽게 나옵니다.
+   좌표계: 넓힌 판 기준 x는 0..W+1, y는 0..H+1
+   ═══════════════════════════════════════════ */
+function passableIdx(idx, EW){
+  const x = idx % EW, y = (idx / EW) | 0;
+  if (x === 0 || y === 0 || x === W+1 || y === H+1) return true;   // 테두리는 늘 빈 곳
+  return board[(y-1)*W + (x-1)] === null;
+}
+
+// 두 칸을 이을 수 있으면 꺾이는 지점들의 배열, 못 이으면 null
+function findPath(ai, bi){
+  const EW = W+2, EH = H+2, N = EW*EH;
+  const ax = (ai % W) + 1, ay = ((ai / W) | 0) + 1;
+  const bx = (bi % W) + 1, by = ((bi / W) | 0) + 1;
+  const A = ay*EW + ax, B = by*EW + bx;
+
+  const best = new Int8Array(N).fill(9);
+  const from = new Int32Array(N).fill(-1);
+  const dir  = new Int8Array(N).fill(-1);
+  best[A] = 0;
+
+  let frontier = [A];
+  for (let seg = 1; seg <= 3; seg++){
+    const next = [];
+    for (let f = 0; f < frontier.length; f++){
+      const c = frontier[f];
+      const cx = c % EW, cy = (c / EW) | 0;
+      for (let d = 0; d < 4; d++){
+        // 왔던 축으로 다시 뻗는 건 헛일 (이미 그 줄 끝까지 훑었음)
+        if (seg > 1 && dir[c] >= 0 && (d & 1) === (dir[c] & 1)) continue;
+        let x = cx, y = cy;
+        for(;;){
+          x += DIRS[d][0]; y += DIRS[d][1];
+          if (x < 0 || y < 0 || x >= EW || y >= EH) break;
+          const idx = y*EW + x;
+          if (idx === B){                       // 도착
+            from[B] = c;
+            return buildPath(A, B, from, EW);
+          }
+          if (!passableIdx(idx, EW)) break;     // 그림이 막고 있음
+          if (best[idx] <= seg) continue;       // 더 짧게 이미 닿았음 — 지나쳐 계속
+          best[idx] = seg; from[idx] = c; dir[idx] = d;
+          next.push(idx);
+        }
+      }
+    }
+    frontier = next;
+  }
+  return null;
+}
+
+function buildPath(A, B, from, EW){
+  const pts = [];
+  let cur = B;
+  while (cur !== -1){
+    pts.push([cur % EW, (cur / EW) | 0]);
+    if (cur === A) break;
+    cur = from[cur];
+  }
+  return pts.reverse();
+}
+
+/* ═══════════════════════════════════════════
+   판 만들기
+   무작위로 깔고, 끝까지 풀리는지 직접 풀어 봅니다.
+   시간이 오래 걸리면 그중 가장 나은 판으로 내놓습니다.
+   ═══════════════════════════════════════════ */
+function shuffleArr(a){
+  for (let i = a.length - 1; i > 0; i--){
+    const j = (Math.random() * (i+1)) | 0;
+    const t = a[i]; a[i] = a[j]; a[j] = t;
+  }
+  return a;
+}
+
+function makeTileList(slots){
+  const pairs = slots / 2;
+  const kinds = Math.min(ICONS.length, stageAt(stage).kinds);
+  const list = [];
+  for (let p = 0; p < pairs; p++){
+    const sym = p % kinds;                  // 패는 도형 번호로 다룹니다 (0번도 있으니 null 과만 비교합니다)
+    list.push(sym, sym);
+  }
+  return list;
+}
+
+// 지금 판에서 지울 수 있는 짝 하나를 찾아 돌려줍니다 (없으면 null)
+function findAnyMove(bd){
+  const prev = board;
+  if (bd) board = bd;
+  const bySym = new Map();
+  for (let i = 0; i < board.length; i++){
+    const s = board[i];
+    if (s === null || s === ROCK) continue;
+    if (!bySym.has(s)) bySym.set(s, []);
+    bySym.get(s).push(i);
+  }
+  const groups = shuffleArr([...bySym.values()]);
+  for (const g of groups){
+    for (let i = 0; i < g.length; i++){
+      for (let j = i+1; j < g.length; j++){
+        if (findPath(g[i], g[j])){
+          const out = [g[i], g[j]];
+          board = prev;
+          return out;
+        }
+      }
+    }
+  }
+  board = prev;
+  return null;
+}
+
+// 한 판을 무작위로 끝까지 풀어 봅니다. 다 지우면 true
+function trySolve(layout){
+  const prev = board;
+  board = layout.slice();
+  let remain = 0;
+  for (let i = 0; i < board.length; i++) if (board[i] !== null && board[i] !== ROCK) remain++;
+  while (remain > 0){
+    const mv = findAnyMove(null);
+    if (!mv){ board = prev; return false; }
+    board[mv[0]] = null; board[mv[1]] = null;
+    remain -= 2;
+  }
+  board = prev;
+  return true;
+}
+
+function generate(){
+  const st = stageAt(stage);
+  let nRock = rocksAt(stage), shape = st.shape;
+  let tiles = makeTileList(W*H - nRock);
+  let spots = rockSpots(W, H, nRock, shape);
+  let deadline = performance.now() + 2500;   // 시계는 안전장치로만 씁니다
+  let eased = false;                          // 돌을 덜어 낸 적이 있는가
+  let last = null;
+
+  // 판을 깔아 보고 '실제로 끝까지 풀리는지' 확인한 뒤에야 내놓습니다.
+  // 횟수로 돌리는 게 중요합니다 — 시간만 보고 돌면, 컴퓨터가 잠깐 바쁠 때
+  // 한 번도 못 돌아보고 검증 안 된 판을 내놓게 됩니다.
+  for (let n = 0; n < 400; n++){
+    if (n > 0 && n % 40 === 0){
+      // 돌 자리가 나빠서 안 풀릴 수 있습니다. 먼저 자리를 다시 잡아 보고,
+      // 그래도 안 되면 돌을 두 개씩 덜어 냅니다.
+      // 못 깨는 판을 내놓느니 돌이 적은 판이 낫습니다.
+      if (n >= 120 && nRock > 0){
+        nRock -= 2;
+        shape = 'scatter';                    // 흩뿌리기가 제일 잘 풀립니다
+        tiles = makeTileList(W*H - nRock);
+      }
+      spots = rockSpots(W, H, nRock, shape);
+    }
+    const isRock = new Uint8Array(W*H);
+    for (let k = 0; k < spots.length; k++) isRock[spots[k]] = 1;
+    const bag = shuffleArr(tiles.slice());
+    const layout = new Array(W*H);
+    for (let i = 0, k = 0; i < W*H; i++) layout[i] = isRock[i] ? ROCK : bag[k++];
+    last = layout;
+    // 무작위로 풀다 보면 운이 나빠 막힐 수 있어 몇 번 다시 풀어 봅니다
+    for (let t = 0; t < 6; t++){
+      if (trySolve(layout)) return layout;
+    }
+    if (n >= 8 && performance.now() > deadline){
+      // 시간이 다 됐는데 아직 돌이 남아 있으면, 돌을 다 빼고 한 번 더 기회를 줍니다.
+      // 여기서 그냥 나가면 '못 깨는 판'을 내놓게 됩니다.
+      if (nRock > 0 && !eased){
+        eased = true; nRock = 0; shape = 'scatter';
+        tiles = makeTileList(W*H); spots = [];
+        deadline = performance.now() + 1500;
+        continue;
+      }
+      break;
+    }
+  }
+  return last;        // 여기까지 오는 일은 사실상 없습니다 (보통 두세 번이면 끝납니다)
+}
+
+/* ═══════════════════════════════════════════
+   판 그리기
+   ═══════════════════════════════════════════ */
+function buildDom(){
+  boardEl.style.setProperty('--cols', W);
+  boardEl.innerHTML = '';
+  cells = []; glyphs = [];
+  const frag = document.createDocumentFragment();
+  for (let i = 0; i < W*H; i++){
+    const c = document.createElement('div');
+    c.className = 'cell';
+    c.dataset.i = i;
+    const f = document.createElement('div');
+    f.className = 'face';
+    const svg = document.createElementNS(SVGNS, 'svg');
+    svg.setAttribute('viewBox', '0 0 100 100');
+    const path = document.createElementNS(SVGNS, 'path');
+    path.setAttribute('fill-rule', 'evenodd');   /* 도넛에 구멍이 뚫리게 */
+    svg.appendChild(path);
+    f.appendChild(svg);
+    c.appendChild(f);
+    frag.appendChild(c);
+    cells.push(c);
+    glyphs.push(path);
+  }
+  boardEl.appendChild(frag);
+  paintAll();
+  fit();
+}
+
+function paintCell(i){
+  const c = cells[i], s = board[i];
+  c.classList.remove('sel','hint','bad','vanish','rock');
+  if (s === null){
+    c.classList.remove('has');
+    c.firstChild.style.display = 'none';
+  } else if (s === ROCK){
+    c.classList.remove('has');
+    c.classList.add('rock');
+    c.firstChild.style.display = '';
+    glyphs[i].setAttribute('d', ROCK_PATH);
+  } else {
+    c.classList.add('has');
+    c.style.setProperty('--h', hueOf(s));
+    c.firstChild.style.display = '';
+    glyphs[i].setAttribute('d', ICONS[s]);
+  }
+}
+function paintAll(){ for (let i = 0; i < board.length; i++) paintCell(i); }
+
+function fit(){
+  // 창 크기를 못 읽는 자리(미리보기 틀 안 등)에서도 판이 뭉개지지 않게 넉넉히 받쳐 둡니다
+  const vw = Math.max(window.innerWidth || 0, document.documentElement.clientWidth || 0, 320);
+  const vh = Math.max(window.innerHeight || 0, document.documentElement.clientHeight || 0, 520);
+  const st = $('stage');
+  const narrow = vw <= 560;
+  // 판 둘레에 여백을 둡니다. 바깥으로 도는 잇는 선이 잘리지 않게 하려는 겁니다
+  const sideRoom = narrow ? 0.5 : 1.2;
+  const availW = Math.min(vw, 1240) - (narrow ? 8 : 18);
+  let cw;
+
+  if (narrow){
+    // 머리말 높이는 '지금 붙어 있는 여백을 뺀' 값으로 재야 합니다.
+    // 안 그러면 조금 전에 자기가 준 여백을 다시 재서 판이 점점 작아집니다.
+    const head = st.offsetTop - (parseFloat(getComputedStyle(st).marginTop) || 0);
+    // 판 위아래로 각각 0.62칸씩 여백이 붙으므로 H + 1.32 칸이 들어갈 자리가 필요합니다
+    cw = Math.floor(Math.min(availW / (W + sideRoom), (vh - head - FOOT_ROOM) / (H + 1.32), 104));
+    if (!isFinite(cw) || cw < 20) cw = Math.max(20, Math.floor(availW / (W + sideRoom)));
+    document.documentElement.style.setProperty('--cw', cw + 'px');
+    // 그래도 남는 자리가 있으면 판을 내려 화면 가운데로 옮깁니다
+    const gap = Math.round(cw * 0.62);
+    const spare = vh - head - (H * cw + gap * 2);
+    st.style.marginTop = (gap + Math.max(0, Math.round(spare * 0.40))) + 'px';
+  } else {
+    const top = st.offsetTop || 190;                // 두루마리와 무관한 값이라 안전합니다
+    const availH = vh - top - 50;
+    cw = Math.floor(Math.min(availW / (W + sideRoom), availH / (H + 0.7), 104));
+    if (!isFinite(cw) || cw < 24) cw = Math.max(24, Math.floor(availW / (W + sideRoom)));
+    document.documentElement.style.setProperty('--cw', cw + 'px');
+    st.style.marginTop = '';
+  }
+  linkEl.setAttribute('width',  (W+2) * cw);
+  linkEl.setAttribute('height', (H+2) * cw);
+  linkEl.setAttribute('viewBox', '0 0 ' + ((W+2)*cw) + ' ' + ((H+2)*cw));
+}
+
+// 선이 뻗는 데 걸리는 시간. 짧게 붙은 짝은 탁 붙고, 멀리 돌아가는 길은 그만큼 오래 달립니다
+function drawMsFor(len){ return Math.max(115, Math.min(330, 85 + len * 0.34)); }
+
+// 선을 그냥 띄우지 않고, 불똥이 달려가며 그어 나가게 합니다. 걸린 시간을 돌려줍니다.
+//
+// 선·불똥·터지는 조각을 모두 같은 방식(웹 애니메이션)으로 굴립니다.
+// 화면 갱신을 한 칸씩 붙잡아 그리면 창이 가려졌을 때 멈춰 버리기 때문입니다.
+let linkAnims = [];
+function drawLink(pts){
+  const cw = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--cw'));
+  const xy = pts.map(p => [p[0]*cw + cw/2, p[1]*cw + cw/2]);
+  const s = xy.map(p => p[0] + ',' + p[1]).join(' ');
+  const headEl = linkEl.querySelector('.head');
+  glowEl.setAttribute('points', s);
+  coreEl.setAttribute('points', s);
+  headEl.setAttribute('points', s);
+  linkEl.classList.add('show');
+
+  // 길이는 꺾인 자리를 따라 잰 실제 거리입니다 (선분이 모두 가로/세로라 이렇게 더하면 맞습니다)
+  let len = 0;
+  for (let i = 1; i < xy.length; i++){
+    len += Math.abs(xy[i][0]-xy[i-1][0]) + Math.abs(xy[i][1]-xy[i-1][1]);
+  }
+  const ms = drawMsFor(len);
+
+  linkAnims.forEach(a => a.cancel());                   // 앞의 것이 남아 겹치지 않게
+  linkAnims = [];
+  if (len <= 0) return ms;
+
+  // 선: 통째로 가려 두었다가 한쪽 끝에서부터 드러냅니다.
+  // 애니메이션이 끝난 뒤 그대로 남도록, 평소 값을 '다 그려진 상태'로 둡니다.
+  [[coreEl,'linear'], [glowEl,'ease-in']].forEach(([el, ease]) => {
+    el.style.strokeDasharray  = len + ' ' + len;
+    el.style.strokeDashoffset = 0;
+    linkAnims.push(el.animate(
+      [{ strokeDashoffset: len }, { strokeDashoffset: 0 }],
+      { duration: ms, easing: ease }
+    ));
+  });
+
+  // 불똥: 길이가 거의 0인 점선 한 칸. 눈금을 뒤로 밀면 그 점이 선 위를 달립니다.
+  // 선과 같은 눈금(strokeDashoffset)을 쓰므로 선 끝과 어긋날 수가 없습니다.
+  headEl.style.strokeDasharray  = '0.01 ' + (len + 10);
+  headEl.style.strokeDashoffset = -len;                 // 끝나면 도착한 칸 위에 남습니다
+  linkAnims.push(headEl.animate(
+    [{ strokeDashoffset: 0 }, { strokeDashoffset: -len }],
+    { duration: ms, easing: 'linear' }
+  ));
+
+  clearTimeout(drawLink._t);
+  drawLink._t = setTimeout(() => linkEl.classList.remove('show'), ms + 260);
+  return ms;
+}
+
+/* ═══════════════════════════════════════════
+   터지는 효과
+   ═══════════════════════════════════════════ */
+const SPARK_COLORS = ['#ff3d8b','#ffd23f','#8b5cf6','#35cf6e','#ff8a3d','#ffffff','#3ec9ff','#ff7bd5'];
+
+function centerOf(el){
+  const r = el.getBoundingClientRect();
+  return [r.left + r.width/2, r.top + r.height/2];
+}
+
+// 조각 하나를 띄우고 애니메이션이 끝나면 치웁니다.
+// onfinish 가 안 오는 경우(창을 가려 두는 등)를 대비해 시간 재기로 한 번 더 받칩니다.
+function fxPlay(el, frames, opt){
+  const a = el.animate(frames, opt);
+  a.onfinish = () => el.remove();
+  setTimeout(() => el.remove(), opt.duration + 400);
+}
+
+// power 1 = 보통, 연속으로 맞힐수록 커집니다. hue 는 방금 지운 타일의 색.
+function burst(x, y, power, hue){
+  const fx = $('fx');
+  const tint  = 'hsl(' + hue + ' 92% 60%)';
+  const tint2 = 'hsl(' + ((hue + 40) % 360) + ' 95% 66%)';
+
+  function put(cls, css, frames, dur, ease){
+    const el = document.createElement('div');
+    el.className = cls;
+    el.style.cssText = css;
+    fx.appendChild(el);
+    fxPlay(el, frames, { duration: Math.round(dur), easing: ease || 'cubic-bezier(.12,.72,.3,1)' });
+    return el;
+  }
+  const at = (w, h) => 'left:' + (x - w/2) + 'px;top:' + (y - h/2) + 'px;width:' + w + 'px;height:' + h + 'px;';
+
+  // 1) 한가운데 하얀 섬광 — 터지는 순간을 때려 줍니다
+  const F = 96 * power;
+  put('flash', at(F, F),
+    [{ transform:'scale(.25)', opacity:1 }, { transform:'scale(1.45)', opacity:0 }],
+    240, 'cubic-bezier(.1,.85,.3,1)');
+
+  // 2) 고리 두 겹 — 얇은 흰 고리가 먼저 튀어나가고 색 고리가 뒤따릅니다
+  const R1 = 44 * power, R2 = 34 * power;
+  put('ring ring2', at(R1*2, R1*2),
+    [{ transform:'scale(.2)', opacity:.95 }, { transform:'scale(1.8)', opacity:0 }],
+    380, 'cubic-bezier(.1,.85,.3,1)');
+  put('ring', at(R2*2, R2*2) + 'border-color:' + tint + ';',
+    [{ transform:'scale(.3)', opacity:.9, borderWidth:'7px' },
+     { transform:'scale(1.65)', opacity:0, borderWidth:'1px' }],
+    480, 'cubic-bezier(.15,.85,.3,1)');
+
+  // 3) 사방으로 뻗는 빛줄기
+  const rays = Math.round(9 * power);
+  for (let i = 0; i < rays; i++){
+    const ang = (360 / rays) * i + Math.random() * 12;
+    const len = (40 + Math.random() * 34) * power;
+    put('ray',
+      'left:' + x + 'px;top:' + y + 'px;width:' + len + 'px;' +
+      'background:linear-gradient(90deg,' + tint + ',rgba(255,255,255,0));',
+      [{ transform:'translateY(-50%) rotate(' + ang + 'deg) scaleX(.08)', opacity:.95 },
+       { transform:'translateY(-50%) rotate(' + ang + 'deg) scaleX(1)',   opacity:0 }],
+      300 + Math.random() * 170, 'cubic-bezier(.08,.85,.3,1)');
+  }
+
+  // 4) 흩어지는 조각 — 동그라미·네모·별을 섞습니다. 절반쯤은 그 타일의 색으로
+  const n = Math.round(24 * power);
+  for (let i = 0; i < n; i++){
+    const r = Math.random();
+    const cls = 'pt' + (r < 0.26 ? ' sq' : r < 0.46 ? ' star' : '');
+    const sz  = 5 + Math.random() * 11 * power;
+    const col = Math.random() < 0.42
+      ? (Math.random() < 0.5 ? tint : tint2)
+      : SPARK_COLORS[(Math.random() * SPARK_COLORS.length) | 0];
+    const ang  = Math.random() * Math.PI * 2;
+    const dist = (34 + Math.random() * 86) * power;
+    const dx = Math.cos(ang) * dist, dy = Math.sin(ang) * dist;
+    const spin = (Math.random() * 700 - 350) | 0;
+    put(cls, at(sz, sz) + 'background:' + col + ';',
+      [{ transform:'translate(0,0) rotate(0deg) scale(1)', opacity:1 },
+       { transform:'translate(' + (dx*.72) + 'px,' + (dy*.72 - 16) + 'px) rotate(' + (spin*.6) + 'deg) scale(1.05)', opacity:1, offset:.45 },
+       { transform:'translate(' + dx + 'px,' + (dy + 62) + 'px) rotate(' + spin + 'deg) scale(.12)', opacity:0 }],
+      460 + Math.random() * 400);
+  }
+
+  // 5) 반짝이 — 커졌다 작아지며 깜빡입니다
+  const tw = Math.round(4 * power);
+  for (let i = 0; i < tw; i++){
+    const sz = 16 + Math.random() * 18 * power;
+    const ox = (Math.random() - .5) * 92 * power;
+    const oy = (Math.random() - .5) * 92 * power;
+    const el = document.createElement('div');
+    el.className = 'twinkle';
+    el.style.cssText = 'left:' + (x + ox - sz/2) + 'px;top:' + (y + oy - sz/2) + 'px;width:' + sz + 'px;height:' + sz + 'px;';
+    fx.appendChild(el);
+    fxPlay(el,
+      [{ transform:'scale(0) rotate(0deg)',    opacity:0 },
+       { transform:'scale(1) rotate(45deg)',   opacity:1, offset:.35 },
+       { transform:'scale(0) rotate(110deg)',  opacity:0 }],
+      { duration: Math.round(380 + Math.random() * 260), easing:'ease-out', delay: Math.round(Math.random() * 130) });
+  }
+}
+
+// 떠오르는 점수 글씨
+function popText(x, y, text, power){
+  const el = document.createElement('div');
+  el.className = 'pop';
+  el.textContent = text;
+  el.style.left = x + 'px';
+  el.style.top  = y + 'px';
+  el.style.fontSize = (15 + 7 * power) + 'px';
+  $('fx').appendChild(el);
+  fxPlay(el, [
+    { transform:'translate(-50%,-50%) scale(.4)', opacity:0 },
+    { transform:'translate(-50%,-50%) translateY(-16px) scale(1.15)', opacity:1, offset:.22 },
+    { transform:'translate(-50%,-50%) translateY(-58px) scale(1)', opacity:0 }
+  ], { duration:900, easing:'cubic-bezier(.2,.9,.3,1)' });
+}
+
+function shakeStage(){
+  const st = $('stage');
+  st.classList.remove('shake');
+  void st.offsetWidth;                                   // 다시 처음부터 흔들리게
+  st.classList.add('shake');
+  setTimeout(() => st.classList.remove('shake'), 260);
+}
+
+/* ═══════════════════════════════════════════
+   소리 — 파일 없이 그때그때 만들어 냅니다
+   ═══════════════════════════════════════════ */
+let actx = null;
+function ensureCtx(){
+  if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)();
+  if (actx.state === 'suspended') actx.resume();
+  return actx;
+}
+function beep(freq, dur, type, vol){
+  if (!soundOn) return;
+  try{
+    ensureCtx();
+    const o = actx.createOscillator(), g = actx.createGain();
+    o.type = type || 'sine';
+    o.frequency.value = freq;
+    g.gain.setValueAtTime(0.0001, actx.currentTime);
+    g.gain.exponentialRampToValueAtTime(vol || 0.14, actx.currentTime + 0.012);
+    g.gain.exponentialRampToValueAtTime(0.0001, actx.currentTime + dur);
+    o.connect(g); g.connect(actx.destination);
+    o.start(); o.stop(actx.currentTime + dur + 0.02);
+  }catch(e){}
+}
+// 선이 달려갈 때 나는 "쓩" — 낮은 데서 높은 데로 훑고 올라갑니다
+function swoosh(ms, top){
+  if (!soundOn) return;
+  try{
+    ensureCtx();
+    const t = actx.currentTime, d = ms/1000;
+    const o = actx.createOscillator(), g = actx.createGain();
+    o.type = 'triangle';
+    o.frequency.setValueAtTime(380, t);
+    o.frequency.exponentialRampToValueAtTime(top || 1250, t + d);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(0.07, t + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + d);
+    o.connect(g); g.connect(actx.destination);
+    o.start(); o.stop(t + d + 0.02);
+  }catch(e){}
+}
+
+// "펑" — 잡음을 한 번 터뜨리고 금방 눌러 줍니다
+function noisePop(vol, dur){
+  if (!soundOn) return;
+  try{
+    ensureCtx();
+    const t = actx.currentTime;
+    const len = Math.max(1, Math.floor(actx.sampleRate * dur));
+    const buf = actx.createBuffer(1, len, actx.sampleRate);
+    const ch = buf.getChannelData(0);
+    for (let i = 0; i < len; i++) ch[i] = (Math.random()*2 - 1) * Math.pow(1 - i/len, 2.6);
+    const src = actx.createBufferSource(); src.buffer = buf;
+    const f = actx.createBiquadFilter();
+    f.type = 'lowpass';
+    f.frequency.setValueAtTime(2600, t);
+    f.frequency.exponentialRampToValueAtTime(300, t + dur);
+    const g = actx.createGain(); g.gain.value = vol;
+    src.connect(f); f.connect(g); g.connect(actx.destination);
+    src.start();
+  }catch(e){}
+}
+
+/* ── Pixabay 효과음 ──
+   audio/sfx-data.js 에 담긴 소리를 미리 풀어 두었다가 그때그때 틀어 줍니다.
+   파일을 못 읽는 상황이면 위의 합성음으로 알아서 넘어갑니다. 소리 때문에 게임이 멈추면 안 되니까요. */
+const SFX = {};
+function loadSfx(){
+  if (!window.SFX_B64) return;
+  try{ ensureCtx(); }catch(e){ return; }
+  Object.keys(window.SFX_B64).forEach(name => {
+    try{
+      const bin = atob(window.SFX_B64[name]);
+      const arr = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+      actx.decodeAudioData(arr.buffer, buf => { SFX[name] = buf; }, () => {});
+    }catch(e){}
+  });
+}
+
+// 소리를 틀고, 틀었으면 true. 준비가 안 됐으면 false 를 주어 합성음으로 넘어가게 합니다
+function play(name, rate, vol){
+  if (!soundOn) return false;
+  try{
+    ensureCtx();
+    const buf = SFX[name];
+    if (!buf) return false;
+    const src = actx.createBufferSource();
+    src.buffer = buf;
+    src.playbackRate.value = rate || 1;
+    const g = actx.createGain();
+    g.gain.value = (vol == null) ? 1 : vol;
+    src.connect(g); g.connect(actx.destination);
+    src.start();
+    return true;
+  }catch(e){ return false; }
+}
+const wobble = () => 1 + (Math.random() * 0.12 - 0.06);   // 같은 소리가 반복돼도 물리지 않게
+
+/* ── 배경음악 ──
+   브라우저는 사람이 한 번 건드리기 전에는 소리를 못 내게 막습니다.
+   그래서 켜달라는 요청이 있어도 곧바로 못 틀 수 있고, 그럴 땐 첫 클릭 때 다시 시도합니다. */
+const BGM_VOL = 0.3;
+let bgmWanted = false;                       // 틀고 싶은 상태인지
+function bgmEl(){ return $('bgm'); }
+function bgmApply(){
+  const a = bgmEl();
+  if (!a) return;
+  a.volume = BGM_VOL;
+  if (bgmWanted && !paused){
+    // 이미 받고 있는 중이면 그냥 둡니다.
+    // 여기서 load() 를 또 부르면 받던 것을 통째로 버리고 처음부터 다시 받습니다.
+    // 음악이 켜도 켜도 늦게 나오던 진짜 까닭이 이것이었습니다.
+    if (a.networkState !== 2 /* NETWORK_LOADING */ && a.readyState === 0) a.load();
+    const p = a.play();
+    if (p && p.catch) p.catch(() => {});      // 막히면 조용히 넘어갑니다
+    // 아직 덜 받았으면 잠자코 기다리게 두지 말고 알려 줍니다
+    if (a.readyState < 3) toast(L('음악을 받는 중…', 'Loading music…'), 1500);
+  } else {
+    a.pause();
+  }
+}
+function setMusic(on){
+  musicOn = on;
+  bgmWanted = on;
+  try{ localStorage.setItem('pairboom_bgm', on ? '1' : '0'); }catch(e){}
+  $('btnMusic').classList.toggle('off', !on);      // 꺼져 있으면 아이콘도 흐리게
+  $('btnMusic').title = on ? L('배경음악 끄기','Music off') : L('배경음악 켜기','Music on');
+  bgmApply();
+}
+// 다 깼을 때 팡파르가 묻히지 않게 음악을 잠깐 낮춥니다
+function bgmDuck(ms){
+  const a = bgmEl();
+  if (!a || !bgmWanted) return;
+  a.volume = BGM_VOL * 0.35;
+  clearTimeout(bgmDuck._t);
+  bgmDuck._t = setTimeout(() => { a.volume = BGM_VOL; }, ms);
+}
+
+function sndPick(){
+  if (!play('click', wobble(), 0.9)) beep(660, 0.07, 'triangle', 0.10);
+}
+function sndBad(){
+  if (!play('wrong', 1, 0.55)) beep(180, 0.14, 'sawtooth', 0.07);
+}
+function sndShuffle(){
+  if (!play('shuffle', wobble(), 0.7)) beep(420, 0.12, 'triangle', 0.09);
+}
+function sndHint(){
+  if (!play('click', 1.45, 0.8)) beep(880, 0.09, 'triangle', 0.10);
+}
+
+// 연속으로 맞힐수록 소리도 한 칸씩 올라갑니다
+function sndPop(combo){
+  const step = Math.min(combo - 1, 7);
+  const rate = Math.pow(2, step/12);
+  if (play('pop', rate, 0.85)){
+    // 폭발음은 그 자체로 두툼해서, 아주 높은 연속일 때만 낮은 소리를 살짝 겹칩니다.
+    // 너무 낮추면 길게 늘어져 다음 소리와 뭉갭니다.
+    if (combo >= 4) play('pop', rate * 0.72, 0.3);
+  } else {
+    noisePop(0.22, 0.22);
+    beep(660 * rate, 0.09, 'sine', 0.12);
+    setTimeout(() => beep(990 * rate, 0.14, 'sine', 0.10), 60);
+  }
+}
+/* 시간이 다 됐을 때 — 아쉬워하는 함성.
+   못 받았으면 낮은 소리 두 번으로 대신합니다 */
+function sndLose(){
+  if (!play('lose', 1, 0.8)){
+    [0, 260].forEach((d, k) => setTimeout(() => beep([300, 220][k], 0.34, 'sawtooth', 0.09), d));
+  }
+}
+function sndWin(){
+  if (!play('win', 1, 0.85)){
+    [0,120,240,420].forEach((d,k) => setTimeout(() => beep([523,659,784,1047][k], 0.28, 'sine', 0.13), d));
+  }
+}
+
+// 선이 달려가는 소리. 짧게 잇는 길은 높고 빠르게, 멀리 도는 길은 낮고 느긋하게
+function sndSwoosh(ms, combo){
+  const rate = Math.max(0.9, Math.min(1.9, 1.8 - (ms - 115) / 215 * 0.8));
+  if (!play('whoosh', rate, 0.45)) swoosh(ms, 900 + combo * 90);
+}
+
+/* ═══════════════════════════════════════════
+   놀이 흐름
+   ═══════════════════════════════════════════ */
+function toast(msg, ms){
+  const t = $('toast');
+  t.textContent = msg;
+  t.classList.add('on');
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => t.classList.remove('on'), ms || 1800);
+}
+
+function fmtTime(s){
+  const m = (s / 60) | 0;
+  return m + ':' + String(s % 60).padStart(2, '0');
+}
+
+function showBest(){ $('sBest').textContent = bestStage; }
+
+function updateStats(){
+  $('sStage').textContent = stage + ' / ' + LAST;
+  $('sLeft').textContent  = left;
+  const remain = Math.max(0, timeAt(stage) - elapsed);
+  $('sTime').textContent  = fmtTime(remain);
+  $('timeBox').classList.toggle('warn', running && remain <= TIME_WARN);
+  $('sScore').textContent = score;
+  $('hintN').textContent  = hints;
+  $('btnHint').disabled    = hints <= 0 || !running;
+  $('comboBox').style.display = combo >= 2 ? '' : 'none';
+  $('sCombo').textContent = '×' + combo;
+}
+
+function startTimer(){
+  stopTimer();
+  tick = setInterval(() => {
+    if (paused || !running) return;
+    elapsed++;
+    updateStats();
+    if (elapsed >= timeAt(stage)) lose();
+  }, 1000);
+}
+function stopTimer(){ if (tick){ clearInterval(tick); tick = null; } }
+
+/* ── 폰에서 판이 화면에 꽉 차게 ──
+   폰은 세로로 깁니다. 가로로 긴 판을 그대로 넣으면 칸이 손톱만해집니다.
+   칸 수와 그림 수는 그대로 두고 판의 가로세로만 바꿔, 칸이 제일 커지는 모양을 고릅니다.
+   40칸이면 10x4 · 8x5 · 5x8 · 4x10 중에서 고르는 식입니다. 규칙은 아무것도 안 바뀝니다. */
+function pickShape(w, h){
+  const vw = Math.max(window.innerWidth || 0, document.documentElement.clientWidth || 0, 320);
+  if (vw > 560) return [w, h];                      // PC 는 만든 그대로
+  const vh = Math.max(window.innerHeight || 0, document.documentElement.clientHeight || 0, 520);
+  const st = $('stage');
+  // 지금 붙어 있는 여백을 빼야 머리말 높이가 제대로 나옵니다
+  const head = st ? st.offsetTop - (parseFloat(getComputedStyle(st).marginTop) || 0) : 190;
+  const availW = vw - 8;
+  const availH = vh - head - FOOT_ROOM;
+  const cells = w * h;
+  // 후보를 다 재 보고 칸이 제일 커지는 것을 고릅니다.
+  // 다만 칸 크기가 엇비슷하면(1할 안쪽) 가로를 더 채우는 쪽이 보기 좋습니다.
+  let cand = [];
+  for (let a = 4; a <= cells / 4; a++){             // 너무 가늘고 긴 판은 빼고
+    if (cells % a) continue;
+    const b = cells / a;
+    const cw = Math.min(availW / (a + 0.5), availH / (b + 1.32));
+    cand.push({ w:a, h:b, cw:cw, fill:a * cw / availW });
+  }
+  if (!cand.length) return [w, h];
+  const top = Math.max.apply(null, cand.map(c => c.cw));
+  const ok = cand.filter(c => c.cw >= top * 0.98);
+  const bal = c => Math.min(c.fill, c.h * c.cw / availH);   // 가로세로 중 덜 채운 쪽
+  ok.sort((p, q) => bal(q) - bal(p));
+  return [ok[0].w, ok[0].h];
+}
+
+
+/* '3단계 · 6×4 · 짝 12개 · 그림 5종 · 돌 2개' 같은 한 줄 */
+function boardLine(st, w, h, pairs, kinds, rocks){
+  if (EN){
+    return 'Stage ' + st + ' · ' + w + '×' + h + ' · ' + pairs + ' pairs · ' + kinds + ' shapes' +
+           (rocks ? ' · ' + rocks + ' stones' : '');
+  }
+  return st + '단계 · ' + w + '×' + h + ' · 짝 ' + pairs + '개 · 그림 ' + kinds + '종' +
+         (rocks ? ' · 돌 ' + rocks + '개' : '');
+}
+
+function newGame(){
+  const L = stageAt(stage);
+  const shape = pickShape(L.w, L.h);
+  W = shape[0]; H = shape[1];
+
+  if (!atTitle) toast(L('판을 만드는 중…', 'Building the board…'), 900);
+  // 판 만드는 동안 화면이 굳지 않도록 한 박자 쉬어 갑니다
+  setTimeout(() => {
+    board = generate();
+    sel = -1; gen++;
+    $('fx').innerHTML = '';                 // 앞 판에서 날리던 조각들을 치웁니다
+    left = 0;
+    for (let i = 0; i < board.length; i++) if (board[i] !== null && board[i] !== ROCK) left++;
+    left /= 2;
+    score = 0; combo = 0; lastMatchAt = 0;
+    hints = 3;
+    elapsed = 0; running = !atTitle; paused = false;
+    buildDom();
+    showBest();
+    updateStats();
+    if (!atTitle) startTimer();       // 안내판을 보는 동안은 시간이 줄지 않습니다
+    linkEl.classList.remove('show');
+    $('veilLose').classList.remove('on');
+    // 돌 개수는 실제로 깔린 판에서 셉니다 (안 풀려서 덜어 냈을 수도 있습니다)
+    let nR = 0;
+    for (let i = 0; i < board.length; i++) if (board[i] === ROCK) nR++;
+    if (!atTitle) toast(boardLine(stage, W, H, left, L.kinds, nR), 1800);
+  }, 30);
+}
+
+function onCellClick(e){
+  if (!running || paused) return;
+  const c = e.target.closest('.cell');
+  if (!c) return;
+  const i = +c.dataset.i;
+  if (board[i] === null || board[i] === ROCK) return;
+
+  if (sel === i){                      // 같은 걸 또 누르면 고르기 취소
+    cells[i].classList.remove('sel');
+    sel = -1;
+    return;
+  }
+  if (sel === -1){
+    sel = i;
+    cells[i].classList.add('sel');
+    sndPick();
+    return;
+  }
+
+  const a = sel, b = i;
+  if (board[a] !== board[b]){          // 그림이 다름
+    missShake(a, b);
+    return;
+  }
+  const path = findPath(a, b);
+  if (!path){                          // 그림은 같은데 길이 막힘
+    missShake(a, b);
+    toast(L('길이 막혔습니다 · 꺾임 2번까지만', 'Path blocked · at most two turns'));
+    return;
+  }
+  removePair(a, b, path);
+}
+
+function missShake(a, b){
+  cells[a].classList.remove('sel');
+  sel = -1;
+  combo = 0;
+  sndBad();
+  [a, b].forEach(k => {
+    const el = cells[k];
+    el.classList.add('bad');
+    setTimeout(() => el.classList.remove('bad'), 300);
+  });
+  updateStats();
+}
+
+function removePair(a, b, path){
+  const now = performance.now();
+  combo = (now - lastMatchAt < 3000) ? combo + 1 : 1;
+  lastMatchAt = now;
+
+  board[a] = null; board[b] = null;
+  sel = -1; left--;
+  const gain = 100 + (combo - 1) * 25;
+  score += gain;
+
+  const power = Math.min(1.9, 1 + (combo - 1) * 0.16);   // 연속으로 맞힐수록 크게 터집니다
+  const hue = hueOf(board[a] === null ? 0 : board[a]);   // 아직 지우기 전이라 그 타일의 색을 알 수 있습니다
+  const myGen = gen;
+  const ea = cells[a], eb = cells[b];
+  eb.classList.add('sel');        // 두 번째 칸도 같이 커집니다. 무엇과 무엇이 이어지는지 보이게
+
+  // 1단계 — 선이 뻗어 나갑니다. 길이 길수록 오래 달립니다
+  const drawMs = drawLink(path);
+  sndSwoosh(drawMs, combo);
+
+  // 2단계 — 선이 닿는 순간 양쪽이 펑
+  setTimeout(() => {
+    if (myGen !== gen) return;
+    const ca = centerOf(ea), cb = centerOf(eb);
+    ea.classList.remove('sel');   // 터지기 직전에 커진 것을 풀고
+    eb.classList.remove('sel');
+    ea.classList.add('vanish');
+    eb.classList.add('vanish');
+    [ea, eb].forEach(el => el.firstChild.animate([
+      { transform:'scale(1)', opacity:1 },
+      { transform:'scale(1.35)', opacity:1, offset:.3 },
+      { transform:'scale(.1) rotate(28deg)', opacity:0 }
+    ], { duration:300, easing:'cubic-bezier(.3,1.3,.5,1)' }));
+    burst(ca[0], ca[1], power, hue);
+    burst(cb[0], cb[1], power, hue);
+    popText((ca[0]+cb[0])/2, (ca[1]+cb[1])/2, '+' + gain + (combo >= 2 ? '  ×' + combo : ''), power);
+    sndPop(combo);
+    if (combo >= 3) shakeStage();
+  }, drawMs);
+
+  // 3단계 — 자리를 비우고 다음을 살핍니다
+  setTimeout(() => {
+    if (myGen !== gen) return;
+    paintCell(a); paintCell(b);
+    afterMove();
+  }, drawMs + 320);
+
+  updateStats();
+}
+
+function afterMove(){
+  if (left === 0){ win(); return; }
+  if (!findAnyMove(null)){
+    toast(L('지울 짝이 없어 알아서 섞습니다', 'No moves left — shuffling for you'), 2200);
+    setTimeout(doShuffle, 400);
+  }
+}
+
+/* 판이 막혔을 때만 부릅니다 (afterMove 에서).
+   손으로 누르는 섞기 단추는 2026-08-21 에 뺐습니다.
+   힌트가 같은 일을 더 잘 하고(짝을 직접 짚어 줍니다), 무작위로 뒤엎으면
+   오히려 짝이 줄어들 수도 있어서 쓸모가 없었습니다.
+   멈춤 중이라도 해 둡니다. 안 그러면 풀 수 없는 판으로 돌아오게 됩니다. */
+function doShuffle(){
+  if (!running) return;
+  const spots = [], syms = [];
+  for (let i = 0; i < board.length; i++){
+    if (board[i] !== null && board[i] !== ROCK){ spots.push(i); syms.push(board[i]); }
+  }
+  let ok = false;
+  for (let t = 0; t < 300; t++){
+    shuffleArr(syms);
+    for (let k = 0; k < spots.length; k++) board[spots[k]] = syms[k];
+    if (findAnyMove(null)){ ok = true; break; }
+  }
+  if (!ok) toast(L('섞을 방법을 못 찾았습니다', 'Could not find a shuffle'));
+  sel = -1;
+  paintAll();
+  updateStats();
+  sndShuffle();
+}
+
+function doHint(){
+  if (!running || paused || hints <= 0) return;
+  const mv = findAnyMove(null);
+  if (!mv){ toast(L('지울 짝이 없습니다', 'No pair to clear')); return; }
+  hints--;
+  score = Math.max(0, score - 30);
+  combo = 0;
+  sndHint();
+  mv.forEach(k => {
+    const el = cells[k];                 // 번호 말고 칸 자체를 붙잡아 둡니다.
+    el.classList.add('hint');            // 그 사이 새 판이 깔려도 탈이 없습니다
+    setTimeout(() => el.classList.remove('hint'), 1600);
+  });
+  updateStats();
+}
+
+/* 시간이 다 됐을 때. 이 판은 깬 것으로 세지 않습니다 */
+function lose(){
+  if (!running) return;
+  running = false;
+  stopTimer();
+  sel = -1;
+  paintAll();
+  sndLose();
+  bgmDuck(3200);        // 함성이 3초라 그동안 음악을 낮춰 둡니다
+  shakeStage();
+  $('loseStage').textContent = stage;
+  $('loseLeft').textContent  = left;
+  $('veilLose').classList.add('on');
+  updateStats();
+}
+
+function win(){
+  if (!running) return;      // 마지막 짝을 겹쳐 맞히면 여기 두 번 들어옵니다
+  running = false;
+  stopTimer();
+  const bonus = Math.max(0, timeAt(stage) - elapsed) * 10;   // 남은 1초에 10점
+  score += bonus;
+  bgmDuck(7000);        // 환호성이 6.8초라 그동안 음악을 낮춰 둡니다
+  sndWin();
+
+  // 축포 — 판 자리에서 연달아 터집니다
+  const r = boardEl.getBoundingClientRect();
+  for (let k = 0; k < 10; k++){
+    setTimeout(() => {
+      burst(r.left + Math.random()*r.width, r.top + Math.random()*r.height*0.85, 1.5 + Math.random()*0.7, Math.round(Math.random()*360));
+      if (!play('pop', 0.5 + Math.random()*0.5, 0.55)) noisePop(0.16, 0.26);
+    }, k * 130);
+  }
+
+  const done = stage;
+  const allDone = (stage >= LAST);
+  if (!allDone) stage += 1;
+  if (stage > bestStage) bestStage = stage;
+  saveProgress();
+  showBest();
+
+  $('winScore').textContent = score.toLocaleString();
+  const spare = fmtTime(Math.max(0, timeAt(done) - elapsed));
+  $('winLine').textContent  = EN
+    ? ('Stage ' + done + ' · ' + (W*H/2) + ' pairs · took ' + fmtTime(elapsed) +
+       ' · ' + spare + ' left, bonus ' + bonus.toLocaleString())
+    : (done + '단계 · ' + (W*H/2) + '짝 · 걸린 시간 ' + fmtTime(elapsed) +
+       ' · 남은 시간 ' + spare + ' 로 보너스 ' + bonus.toLocaleString() + '점');
+
+  const nextBtn = $('btnNext');
+  if (allDone){
+    $('winTitle').textContent = L('모든 단계를 깼습니다!', 'You beat every stage!');
+    $('winBest').textContent  = EN
+      ? ('You cleared all ' + LAST + ' stages. Impressive.')
+      : ('마지막 ' + LAST + '단계까지 전부 지웠습니다. 대단합니다.');
+    nextBtn.style.display = 'none';
+  } else {
+    const ns = stageAt(stage);
+    $('winTitle').textContent = EN ? ('Stage ' + done + ' clear!') : (done + '단계 통과!');
+    $('winBest').textContent  = EN
+      ? ('Next: ' + boardLine(stage, ns.w, ns.h, ns.w*ns.h/2, ns.kinds, rocksAt(stage)))
+      : ('다음은 ' + boardLine(stage, ns.w, ns.h, ns.w*ns.h/2, ns.kinds, rocksAt(stage)));
+    nextBtn.textContent = EN ? ('To stage ' + stage) : (stage + '단계로');
+    nextBtn.style.display = '';
+  }
+
+  $('veilWin').classList.add('on');
+  updateStats();
+}
+
+function togglePause(){
+  if (!running) return;
+  paused = !paused;
+  $('veilPause').classList.toggle('on', paused);
+  $('btnPause').title = paused ? '이어서 하기 (스페이스)' : '멈춤 (스페이스)';
+  bgmApply();                                  // 멈추면 음악도 멈춥니다
+}
+
+/* ── 단추와 손가락 ── */
+boardEl.addEventListener('click', onCellClick);
+$('btnNew').addEventListener('click', newGame);
+$('btnHint').addEventListener('click', doHint);
+$('btnPause').addEventListener('click', togglePause);
+$('btnResume').addEventListener('click', togglePause);
+$('btnAgain').addEventListener('click', () => { $('veilWin').classList.remove('on'); newGame(); });
+$('btnRetry').addEventListener('click', () => { $('veilLose').classList.remove('on'); newGame(); });
+$('btnNext').addEventListener('click', () => { $('veilWin').classList.remove('on'); newGame(); });
+$('btnHelp').addEventListener('click', () => $('veilHelp').classList.add('on'));
+$('btnCloseHelp').addEventListener('click', () => $('veilHelp').classList.remove('on'));
+
+$('btnMusic').addEventListener('click', () => setMusic(!musicOn));
+$('btnSound').addEventListener('click', () => {
+  soundOn = !soundOn;
+  $('btnSound').classList.toggle('off', !soundOn);
+  $('btnSound').title = soundOn ? L('효과음 끄기','Sound off') : L('효과음 켜기','Sound on');
+  if (soundOn) beep(700, 0.08, 'sine', 0.1);
+});
+
+window.addEventListener('resize', fit);
+window.addEventListener('orientationchange', () => setTimeout(fit, 200));
+
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'SELECT') return;
+  const k = e.key.toLowerCase();
+  if (k === 'n'){ newGame(); }
+  else if (k === 'h'){ doHint(); }
+  // s 는 섞기였습니다. 단추를 뺐으니 자판도 뺍니다 (판이 막히면 알아서 섞입니다)
+  else if (e.code === 'Space'){ e.preventDefault(); togglePause(); }
+  else if (k === 'escape'){
+    if ($('veilHelp').classList.contains('on')) $('veilHelp').classList.remove('on');
+    else togglePause();
+  }
+});
+
+applyLang();          // 영어면 화면 글을 갈아 끼웁니다
+/* 말 바꾸기 단추 — 지금 말의 반대쪽으로 갑니다 */
+(function(){
+  const b = $('btnLang');
+  if (!b) return;
+  b.href = EN ? '?lang=ko' : '?lang=en';
+  b.textContent = EN ? '한' : 'EN';
+  b.title = EN ? '한국어로 보기' : 'View in English';
+  b.setAttribute('aria-label', b.title);
+})();
+loadProgress();
+loadSfx();
+
+// 지난번에 음악을 켜두셨으면 이어서 틉니다.
+// 브라우저가 첫 손길 전에는 소리를 막으므로, 처음 누르는 순간 한 번 더 시도합니다.
+try{ if (localStorage.getItem('pairboom_bgm') === '1') musicOn = bgmWanted = true; }catch(e){}
+$('btnMusic').classList.toggle('off', !musicOn);
+$('btnMusic').title = musicOn ? L('배경음악 끄기','Music off') : L('배경음악 켜기','Music on');
+['pointerdown','keydown'].forEach(ev =>
+  document.addEventListener(ev, function once(){
+    document.removeEventListener(ev, once);
+    bgmApply();
+  }, { once:true }));
+
+/* 음악 단추를 눌렀을 때 기다리는 일이 없도록, 안내판을 보는 동안 미리 받아 둡니다.
+   0.75MB 라 미리 받아도 부담이 없습니다. */
+setTimeout(() => {
+  const a = bgmEl();
+  if (a && a.preload !== 'auto'){ a.preload = 'auto'; a.load(); }
+}, 800);
+
+/* 다른 앱으로 넘어가면 음악을 멈춥니다.
+   보고 있지도 않은 게임의 음악이 계속 흘러나오면 안 되고, 데이터도 샙니다. */
+document.addEventListener('visibilitychange', () => {
+  const a = bgmEl();
+  if (!a) return;
+  if (document.hidden) a.pause();
+  else bgmApply();
+});
+
+/* ── 안내판 ── */
+$('titleNote').innerHTML = EN
+  ? (bestStage > 1
+      ? ('Best <b>stage ' + bestStage + '</b> so far · resuming at stage ' + stage)
+      : ('<b>' + LAST + ' stages</b> in all · 2:50 per stage and up'))
+  : (bestStage > 1
+      ? ('지금까지 <b>' + bestStage + '단계</b>까지 오셨습니다 · 이어서 ' + stage + '단계부터')
+      : ('모두 <b>' + LAST + '단계</b>입니다 · 한 판에 2분 50초부터'));
+
+$('btnStart').addEventListener('click', () => {
+  atTitle = false;
+  $('veilTitle').classList.remove('on');
+  if (board && board.length){        // 판이 이미 만들어져 있으면 바로 시작합니다
+    running = true;
+    startTimer();
+    toast(boardLine(stage, W, H, left, stageAt(stage).kinds, rocksAt(stage)), 1800);
+  } else {
+    newGame();                       // 아직이면 지금 만듭니다
+  }
+});
+$('btnHowto').addEventListener('click', () => $('veilHelp').classList.add('on'));
+
+/* ── 처음부터 다시하기 ── */
+$('btnReset').addEventListener('click', () => {
+  $('resetNow').textContent = stage;
+  $('veilReset').classList.add('on');
+});
+$('btnResetNo').addEventListener('click', () => $('veilReset').classList.remove('on'));
+$('btnResetYes').addEventListener('click', () => {
+  $('veilReset').classList.remove('on');
+  stage = 1;
+  try{ localStorage.setItem('pairboom_stage', '1'); }catch(e){}   // 최고 단계는 건드리지 않습니다
+  $('veilWin').classList.remove('on');
+  $('veilLose').classList.remove('on');
+  newGame();
+});
+
+newGame();                           // 안내판 뒤에서 미리 만들어 둡니다
+
+})();
+</script>
+</body>
+</html>

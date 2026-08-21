@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>냥냥 검객 대전</title>
+<meta name="robots" content="noindex">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="오름게임즈">
+<meta property="og:title" content="냥냥 검객 대전 · 오름게임즈">
+<meta property="og:description" content="고양이와 강아지가 검을 들고 맞붙는 2D 격투 대전게임. 약손·강손·약발·강발과 필살기 게이지. 폰에서도 되는 브라우저게임.">
+<meta property="og:url" content="https://oreumgames.com/games/mini/nyang-duel/">
+<meta property="og:image" content="https://oreumgames.com/assets/nyang-duel-shot.webp">
+<meta property="og:image:width" content="800">
+<meta property="og:image:height" content="500">
+<meta property="og:image:alt" content="풀밭 무대에서 칼을 든 고양이와 강아지가 마주 서 있고 가운데 숫자 3이 떠 있다">
+<meta property="og:locale" content="ko_KR">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="냥냥 검객 대전 · 오름게임즈">
+<meta name="twitter:description" content="고양이와 강아지가 검을 들고 맞붙는 2D 격투 대전게임. 약손·강손·약발·강발과 필살기 게이지. 폰에서도 되는 브라우저게임.">
+<meta name="twitter:image" content="https://oreumgames.com/assets/nyang-duel-shot.webp">
+<script src="/assets/visit.js?v=9" defer></script>
+<meta name="description" content="고양이와 강아지가 검을 들고 맞붙는 2D 격투 대전게임. 약손·강손·약발·강발과 필살기 게이지. 폰에서도 되는 브라우저게임.">
+<meta name="keywords" content="웹게임, 브라우저게임, 프리게임, 퍼즐게임, 무료게임, 설치없는게임, 회원가입없는게임, 인디게임, 오름게임즈, webgame, browsergame, freegame, puzzlegame, oreumgames">
+<link rel="canonical" href="https://oreumgames.com/games/mini/nyang-duel/">
+<link rel="alternate" hreflang="ko" href="https://oreumgames.com/games/mini/nyang-duel/?lang=ko">
+<link rel="alternate" hreflang="en" href="https://oreumgames.com/games/mini/nyang-duel/?lang=en">
+<link rel="alternate" hreflang="x-default" href="https://oreumgames.com/games/mini/nyang-duel/">
+<link rel="stylesheet" href="style.css?v=3">
+</head>
+<body>
+  <div id="wrap">
+    <h1>🐱 냥냥 검객 대전 🗡️</h1>
+    <div id="stage">
+      <canvas id="game" width="900" height="500"></canvas>
+      <div id="uiButtons">
+        <button type="button" id="muteBtn" title="배경음악 켜기/끄기">🔇</button>
+        <button type="button" id="fullscreenBtn" title="전체화면">⛶</button>
+      </div>
+      <div id="touchControls">
+        <div class="padCluster">
+          <button type="button" class="padBtn padUp" data-key="ArrowUp">▲</button>
+          <button type="button" class="padBtn padLeft" data-key="ArrowLeft">◀</button>
+          <button type="button" class="padBtn padRight" data-key="ArrowRight">▶</button>
+          <button type="button" class="padBtn padDown" data-key="ArrowDown">▼</button>
+        </div>
+        <div class="atkCluster">
+          <button type="button" class="atkBtn atkW" data-key="KeyW">약손</button>
+          <button type="button" class="atkBtn atkA" data-key="KeyA">강손</button>
+          <button type="button" class="atkBtn atkS" data-key="KeyS">약발</button>
+          <button type="button" class="atkBtn atkD" data-key="KeyD">강발</button>
+        </div>
+      </div>
+      <button type="button" id="restartBtn">🔄 다시하기</button>
+      <div id="overlay">
+        <div id="overlayCard">
+          <div id="kakaoWarning">
+            📱 카카오톡 브라우저에서는 가로모드/전체화면이 제한돼요.<br>
+            <button type="button" id="openExternalBtn">다른 브라우저로 열기</button>
+          </div>
+          <img id="overlayPortrait" src="assets/cat_idle.png" alt="냥냥 검객 루루">
+          <div id="overlayTitle">냥냥 검객 대전</div>
+          <div class="charPick">
+            <span>내 캐릭터:</span>
+            <button type="button" class="charBtn" data-player="1" data-char="cat">🐱 고양이</button>
+            <button type="button" class="charBtn" data-player="1" data-char="dog">🐶 강아지</button>
+          </div>
+          <div class="charPick">
+            <span>CPU 캐릭터:</span>
+            <button type="button" class="charBtn" data-player="2" data-char="cat">🐱 고양이</button>
+            <button type="button" class="charBtn" data-player="2" data-char="dog">🐶 강아지</button>
+          </div>
+          <div class="controls">
+            <div><b>이동</b> ← / → · <b>점프</b> ↑ · <b>앉기</b> ↓</div>
+            <div><b>W</b> 약손 · <b>A</b> 강손 · <b>S</b> 약발 · <b>D</b> 강발</div>
+            <div><b>W+A 동시</b>(약손+강손)로 검 휘두르기</div>
+            <div>타격 성공 시 아래 보라색 게이지가 차오르고, 가득 차면 <b>A+D 동시</b>(강손+강발)로 필살기</div>
+            <div>상대는 CPU가 자동으로 조작합니다</div>
+            <div><b>M</b> 키(모바일은 화면 우측 상단 🔊 버튼)로 배경음악 켜기/끄기</div>
+          </div>
+          <button id="startBtn" disabled>이미지 불러오는 중...</button>
+        </div>
+      </div>
+    </div>
+    <div id="loading">이미지 불러오는 중...</div>
+  </div>
+<script>
+/* ── 말 두 벌 ── ?lang=en 이면 영어, 없으면 브라우저 언어를 따릅니다.
+   game.js 도 window.STR 에서 자기 몫의 글자를 읽어 갑니다. ── */
+const LANG = (() => {
+  const q = new URLSearchParams(location.search).get('lang');
+  if (q === 'en' || q === 'ko') return q;
+  return (navigator.language || '').toLowerCase().startsWith('ko') ? 'ko' : 'en';
+})();
+if (LANG === "en") document.querySelector('meta[name="description"]').setAttribute("content", "A cat-versus-dog sword-fighting duel with light and heavy attacks and a special-move gauge.");
+const STR = {
+  ko: {
+    title:'냥냥 검객 대전', h1:'🐱 냥냥 검객 대전 🗡️',
+    muteTitle:'배경음악 켜기/끄기', fsTitle:'전체화면',
+    atk:{KeyW:'약손',KeyA:'강손',KeyS:'약발',KeyD:'강발'},
+    restart:'🔄 다시하기',
+    kakao:'📱 카카오톡 브라우저에서는 가로모드/전체화면이 제한돼요.<br><button type="button" id="openExternalBtn">다른 브라우저로 열기</button>',
+    portraitAlt:'냥냥 검객 루루', overlayTitle:'냥냥 검객 대전',
+    pickMe:'내 캐릭터:', pickCpu:'CPU 캐릭터:', cat:'🐱 고양이', dog:'🐶 강아지',
+    controls:[
+      '<b>이동</b> ← / → · <b>점프</b> ↑ · <b>앉기</b> ↓',
+      '<b>W</b> 약손 · <b>A</b> 강손 · <b>S</b> 약발 · <b>D</b> 강발',
+      '<b>W+A 동시</b>(약손+강손)로 검 휘두르기',
+      '타격 성공 시 아래 보라색 게이지가 차오르고, 가득 차면 <b>A+D 동시</b>(강손+강발)로 필살기',
+      '상대는 CPU가 자동으로 조작합니다',
+      '<b>M</b> 키(모바일은 화면 우측 상단 🔊 버튼)로 배경음악 켜기/끄기'
+    ],
+    loading:'이미지 불러오는 중...',
+    loadingPct:(pct,a,b)=>`이미지 불러오는 중... ${pct}% (${a}/${b})`,
+    loadingBtn:(pct)=>`불러오는 중... ${pct}%`,
+    start:'게임 시작', fight:'파이트!',
+    catLabel:'고양이 루루', dogLabel:'강아지'
+  },
+  en: {
+    title:'Cat & Dog Swordfight', h1:'🐱 Cat & Dog Swordfight 🗡️',
+    muteTitle:'Toggle music', fsTitle:'Fullscreen',
+    atk:{KeyW:'LP',KeyA:'HP',KeyS:'LK',KeyD:'HK'},
+    restart:'🔄 Restart',
+    kakao:'📱 The KakaoTalk in-app browser limits landscape/fullscreen mode.<br><button type="button" id="openExternalBtn">Open in another browser</button>',
+    portraitAlt:'Lulu the sword cat', overlayTitle:'Cat & Dog Swordfight',
+    pickMe:'Your fighter:', pickCpu:'CPU fighter:', cat:'🐱 Cat', dog:'🐶 Dog',
+    controls:[
+      '<b>Move</b> ← / → · <b>Jump</b> ↑ · <b>Crouch</b> ↓',
+      '<b>W</b> light paw (LP) · <b>A</b> heavy paw (HP) · <b>S</b> light kick (LK) · <b>D</b> heavy kick (HK)',
+      '<b>W+A together</b> (LP+HP) swings the sword',
+      'Landing hits fills the purple gauge below — when it is full, press <b>A+D together</b> (HP+HK) for the special move',
+      'Your opponent is controlled by the CPU',
+      'The <b>M</b> key (on mobile, the 🔊 button at top right) toggles the music'
+    ],
+    loading:'Loading images...',
+    loadingPct:(pct,a,b)=>`Loading images... ${pct}% (${a}/${b})`,
+    loadingBtn:(pct)=>`Loading... ${pct}%`,
+    start:'Start game', fight:'FIGHT!',
+    catLabel:'Lulu the Cat', dogLabel:'Dog'
+  }
+}[LANG];
+document.documentElement.lang = LANG;
+document.title = STR.title;
+document.querySelector('h1').textContent = STR.h1;
+document.getElementById('muteBtn').title = STR.muteTitle;
+document.getElementById('fullscreenBtn').title = STR.fsTitle;
+document.querySelectorAll('.atkBtn').forEach(b=>{ b.textContent = STR.atk[b.dataset.key]; });
+document.getElementById('restartBtn').textContent = STR.restart;
+document.getElementById('kakaoWarning').innerHTML = STR.kakao;
+document.getElementById('overlayPortrait').alt = STR.portraitAlt;
+document.getElementById('overlayTitle').textContent = STR.overlayTitle;
+document.querySelectorAll('.charPick > span').forEach((el,i)=>{ el.textContent = i===0 ? STR.pickMe : STR.pickCpu; });
+document.querySelectorAll('.charBtn').forEach(b=>{ b.textContent = b.dataset.char==='cat' ? STR.cat : STR.dog; });
+document.querySelectorAll('.controls > div').forEach((el,i)=>{ el.innerHTML = STR.controls[i]; });
+document.getElementById('startBtn').textContent = STR.loading;
+document.getElementById('loading').textContent = STR.loading;
+</script>
+<script src="game.js?v=5"></script>
+<script src="/assets/game-home.js" data-push="40" defer></script>
+</body>
+</html>
