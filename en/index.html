@@ -24,7 +24,7 @@
 <meta property="og:locale" content="en_US">
 <meta name="twitter:card" content="summary_large_image">
 
-<link rel="stylesheet" href="/style.css?v=9">
+<link rel="stylesheet" href="/style.css?v=10">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -75,7 +75,7 @@
 <main id="main">
 
   <!-- Hero: morning oreum -->
-  <section class="hero">
+  <section class="hero hero-slim">
     <div class="hero-sky" aria-hidden="true">
       <span class="stars"></span>
       <span class="moon"></span>
@@ -97,111 +97,112 @@
     </div>
   </section>
 
-  <!-- Games -->
-  <section id="games" class="section">
+    <!-- First screen showcase — two featured games, mini games, apps -->
+  <section id="games" class="showcase">
     <div class="wrap">
-      <h2 class="section-title section-en">GAMES</h2>
-
-      <ul class="cards">
-    <li class="card">
-      <a class="card-shot" href="/en/games/lulu/">
-        <img src="/assets/lulu-shot.webp?v=2" alt="Lulu standing in a Jeju field at dusk, the sea and stone houses beyond" loading="lazy">
-      </a>
-      <div class="card-body">
-        <h3><a href="/en/games/lulu/">Lulu the Cat's Jeju Life</a></h3>
-        <p class="card-sub">3D life simulation · Korean &amp; English</p>
-        <p class="card-line">A cat priced out of Seoul moves to Jeju and starts a second life in a run-down empty house</p>
-        <div class="card-cta">
-          <a class="btn btn-primary" href="https://play.oreumgames.com/game/en/">Play Now</a>
-          <a class="btn btn-ghost" href="/en/games/lulu/">Details</a>
-        </div>
+      <div class="showcase-head">
+        <h2>GAMES</h2>
+        <p>No install — press and play</p>
       </div>
-    </li>
-    <li class="card">
-      <a class="card-shot" href="/en/games/immortality/">
-        <img src="/assets/teaser-immortality.webp?v=3" alt="Seoul in 2300, two people with twenty-year-old faces" loading="lazy">
-      </a>
-      <div class="card-body">
-        <h3><a href="/en/games/immortality/">The Price of Immortality</a></h3>
-      <p class="card-badge">Part 1 prologue out now</p>
-        <p class="card-sub">Narrative survival adventure · Korean &amp; English</p>
-        <p class="card-line">A world where lifespan became currency. The moment the number on your wrist hits zero, your life ends</p>
-        <div class="card-cta">
-          <a class="btn btn-primary" href="https://play.oreumgames.com/immortality/?lang=en">Watch the Part 1 prologue</a>
-          <a class="btn btn-ghost" href="/en/games/immortality/">Details</a>
-        </div>
+
+      <div class="showcase-grid">
+
+        <article class="feat">
+          <a class="feat-shot" href="/en/games/lulu/">
+            <img src="/assets/lulu-shot.webp?v=2" alt="Lulu standing in a Jeju field at dusk, the sea and stone houses beyond" width="800" height="500">
+          </a>
+          <div class="feat-body">
+            <h3><a href="/en/games/lulu/">Lulu the Cat's Jeju Life</a></h3>
+            <p class="feat-sub">3D life simulation · Korean &amp; English</p>
+            <p class="feat-line">A cat priced out of Seoul moves to Jeju and starts a second life in a run-down empty house</p>
+            <div class="feat-cta">
+              <a class="btn btn-primary" href="https://play.oreumgames.com/game/en/">Play Now</a>
+              <a class="btn btn-ghost" href="/en/games/lulu/">Details</a>
+            </div>
+          </div>
+        </article>
+
+        <article class="feat">
+          <a class="feat-shot" href="/en/games/immortality/">
+            <img src="/assets/teaser-immortality.webp?v=3" alt="Seoul in 2300, two people with twenty-year-old faces" width="800" height="500">
+          </a>
+          <div class="feat-body">
+            <p class="feat-tag">Part 1 prologue out now</p>
+            <h3><a href="/en/games/immortality/">The Price of Immortality</a></h3>
+            <p class="feat-sub">Narrative survival adventure · Korean &amp; English</p>
+            <p class="feat-line">A world where lifespan became currency. The moment the number on your wrist hits zero, your life ends</p>
+            <div class="feat-cta">
+              <a class="btn btn-primary" href="https://play.oreumgames.com/immortality/?lang=en">Watch the prologue</a>
+              <a class="btn btn-ghost" href="/en/games/immortality/">Details</a>
+            </div>
+          </div>
+        </article>
+
+        <aside class="rail rail-mini">
+          <div class="rail-head">
+            <h2>Mini games</h2>
+            <p class="rail-note">Experiments</p>
+          </div>
+          <ul class="rail-list">
+            <li>
+              <a href="/games/mini/oreumnyang/?lang=en">
+                <img src="/assets/oreumnyang-shot.webp?v=5" alt="" loading="lazy" width="132" height="88">
+                <span>
+                  <span class="rail-t">Oreumnyang</span>
+                  <span class="rail-s">Match-3 puzzle · 200 stages</span>
+                </span>
+              </a>
+            </li>
+            <li>
+              <a href="/games/mini/slip-cat/?lang=en">
+                <img src="/assets/slip-cat-shot-en.webp?v=3" alt="" loading="lazy" width="132" height="88">
+                <span>
+                  <span class="rail-t">SLIP CAT</span>
+                  <span class="rail-s">Dodge the falling things</span>
+                </span>
+              </a>
+            </li>
+            <li>
+              <a href="/games/mini/life-logistics/?lang=en">
+                <img src="/assets/life-logistics-shot-en.webp" alt="" loading="lazy" width="132" height="88">
+                <span>
+                  <span class="rail-t">LIFE LOGISTICS</span>
+                  <span class="rail-s">Warehouse picking</span>
+                </span>
+              </a>
+            </li>
+            <li>
+              <a href="/games/mini/knife-duel-v7/?lang=en">
+                <img src="/assets/knife-duel-shot-en.webp" alt="" loading="lazy" width="132" height="88">
+                <span>
+                  <span class="rail-t">Knife Duel v7</span>
+                  <span class="rail-s">3D melee duel</span>
+                </span>
+              </a>
+            </li>
+          </ul>
+          <a class="rail-more" href="/en/games/mini/">See all</a>
+        </aside>
+
+        <aside class="rail rail-app">
+          <div class="rail-head">
+            <h2>APPS</h2>
+            <p class="rail-note">Available now</p>
+          </div>
+          <a class="app-card" href="/en/apps/saju/">
+            <span class="app-shot">
+              <img src="/assets/saju-cover.webp" alt="A golden disc overlaying constellations and saju" loading="lazy" width="600" height="750">
+            </span>
+            <h3>MBTI Fortune</h3>
+            <p class="app-sub">Saju × MBTI personality reading · Web</p>
+            <p class="app-line">MBTI speaks of personality; saju speaks of the current you were born into</p>
+          </a>
+          <a class="rail-more" href="https://play.oreumgames.com/saju/?lang=en">Try It Now</a>
+        </aside>
+
       </div>
-    </li>
-      </ul>
-
-      <!-- Mini games — the small ones from the workshop -->
-      <div class="subhead">
-        <h3>Mini games</h3>
-        <a class="more" href="/en/games/mini/">See all →</a>
-      </div>
-      <p class="subhead-note">Experiments. No install — press and play.</p>
-
-      <ul class="mini-cards">
-        <li class="mini-card">
-          <a href="/en/games/mini/#oreumnyang">
-            <img src="/assets/oreumnyang-shot.webp?v=5" alt="" loading="lazy" width="104" height="65">
-            <span class="mini-body">
-              <span class="mini-t">Oreumnyang</span>
-              <span class="mini-s">Jeju match-3 puzzle · PC·phone</span>
-            </span>
-          </a>
-        </li>
-        <li class="mini-card">
-          <a href="/en/games/mini/#life-logistics">
-            <img src="/assets/life-logistics-shot.webp" alt="" loading="lazy" width="104" height="65">
-            <span class="mini-body">
-              <span class="mini-t">LIFE LOGISTICS</span>
-              <span class="mini-s">Warehouse picking · PC·phone</span>
-            </span>
-          </a>
-        </li>
-        <li class="mini-card">
-          <a href="/en/games/mini/#slip-cat">
-            <img src="/assets/slip-cat-shot-en.webp?v=3" alt="" loading="lazy" width="104" height="65">
-            <span class="mini-body">
-              <span class="mini-t">SLIP CAT</span>
-              <span class="mini-s">Dodging game · PC·mobile</span>
-            </span>
-          </a>
-        </li>
-        <li class="mini-card">
-          <a href="/en/games/mini/#knife-duel-v7">
-            <img src="/assets/knife-duel-shot.webp" alt="" loading="lazy" width="104" height="65">
-            <span class="mini-body">
-              <span class="mini-t">Knife Duel v7</span>
-              <span class="mini-s">3D melee duel · PC·phone</span>
-            </span>
-          </a>
-        </li>
-        <li class="mini-card">
-          <a href="/en/games/mini/#nyang-duel">
-            <img src="/assets/nyang-duel-shot.webp" alt="" loading="lazy" width="104" height="65">
-            <span class="mini-body">
-              <span class="mini-t">Cat &amp; Dog Swordfight</span>
-              <span class="mini-s">2D fighter · PC·phone</span>
-            </span>
-          </a>
-        </li>
-        <li class="mini-card">
-          <a href="/en/games/mini/#polarity-flip">
-            <img src="/assets/polarity-flip-shot.webp" alt="" loading="lazy" width="104" height="65">
-            <span class="mini-body">
-              <span class="mini-t">Polarity Flip</span>
-              <span class="mini-s">Board game · PC·phone</span>
-            </span>
-          </a>
-        </li>
-        <li class="mini-card">
-      </ul>
-
     </div>
   </section>
-
 
 
   <!-- Apps — the things that aren't games -->
