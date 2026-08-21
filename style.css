@@ -831,6 +831,12 @@ body{ font-size:19px; }
    로고 옆에 글 두 줄 + 안내 두 줄. 그 아래 바로 카드 여덟 칸. */
 .header-inner{ display:flex; align-items:center; gap:26px; flex-wrap:wrap; }
 .brand-copy{ line-height:1.25; text-align:center; }
+/* 회사 이름 — JUST PLAY IT! 위에 작게. 검색이 브랜드를 알아보는 자리입니다 */
+.brand-copy .brandname{
+  margin:0 0 3px; font-size:13px; font-weight:700; letter-spacing:.10em;
+  color:var(--muted);
+}
+@media (max-width: 700px){ .brand-copy .brandname{ font-size:12px; } }
 .brand-copy .slog{ margin:0; font-size:22px; letter-spacing:.18em; color:var(--ink); }
 .brand-copy .factory{ margin:2px 0 0; font-size:14px; letter-spacing:.12em; color:var(--muted); }
 .header-inner .values{ list-style:none; margin:0; padding:0; display:grid; gap:2px; }
