@@ -1669,8 +1669,10 @@ function boardLine(st, w, h, pairs, kinds, rocks){
 }
 
 function newGame(){
-  const L = stageAt(stage);
-  const shape = pickShape(L.w, L.h);
+  // 이 이름을 L 로 두면 바로 아래 toast 의 L('한국어','English') 와 부딪칩니다.
+  // (그 탓에 판을 새로 짤 때마다 'L is not a function' 으로 멈춰 섰습니다)
+  const lv = stageAt(stage);
+  const shape = pickShape(lv.w, lv.h);
   W = shape[0]; H = shape[1];
 
   if (!atTitle) toast(L('판을 만드는 중…', 'Building the board…'), 900);
@@ -1685,6 +1687,10 @@ function newGame(){
     score = 0; combo = 0; lastMatchAt = 0;
     hints = 3;
     elapsed = 0; running = !atTitle; paused = false;
+    // 멈춤 상태에서 N 을 눌러 새 판을 시작했을 수 있습니다.
+    // 그때 멈춤 덮개와 꺼둔 음악을 같이 되돌려 놓지 않으면 음악이 안 돌아옵니다.
+    $('veilPause').classList.remove('on');
+    bgmApply();
     buildDom();
     showBest();
     updateStats();
@@ -1694,7 +1700,7 @@ function newGame(){
     // 돌 개수는 실제로 깔린 판에서 셉니다 (안 풀려서 덜어 냈을 수도 있습니다)
     let nR = 0;
     for (let i = 0; i < board.length; i++) if (board[i] === ROCK) nR++;
-    if (!atTitle) toast(boardLine(stage, W, H, left, L.kinds, nR), 1800);
+    if (!atTitle) toast(boardLine(stage, W, H, left, lv.kinds, nR), 1800);
   }, 30);
 }
 
@@ -1988,8 +1994,16 @@ $('btnMusic').title = musicOn ? L('배경음악 끄기','Music off') : L('배경
    0.75MB 라 미리 받아도 부담이 없습니다. */
 setTimeout(() => {
   const a = bgmEl();
-  if (a && a.preload !== 'auto'){ a.preload = 'auto'; a.load(); }
+  if (!a || a.preload === 'auto') return;
+  a.preload = 'auto';
+  // load() 는 받던 것을 통째로 버리고 재생을 처음으로 되돌립니다.
+  // 이미 음악이 흐르고 있는데 이걸 부르면 소리가 나오다 뚝 끊깁니다.
+  // 그래서 아직 한 번도 틀지 않았을 때만 부릅니다.
+  if (a.paused && !a.currentTime) a.load();
 }, 800);
+
+// 무슨 까닭으로든 음악이 처음으로 되감겼는데 아직 틀고 싶은 상태라면 다시 잇습니다
+bgmEl().addEventListener('emptied', () => { if (bgmWanted) bgmApply(); });
 
 /* 다른 앱으로 넘어가면 음악을 멈춥니다.
    보고 있지도 않은 게임의 음악이 계속 흘러나오면 안 되고, 데이터도 샙니다. */
