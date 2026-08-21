@@ -453,7 +453,7 @@
   }
 </style>
 <!-- Pixabay 효과음 꾸러미 (출처·라이선스는 audio/출처.txt) -->
-<script src="audio/sfx-data.js?v=2"></script>
+<script src="audio/sfx-data.js?v=3"></script>
 <script src="/assets/game-home.js?v=2" data-top="8" data-left="10" data-fullscreen="1" defer></script>
 </head>
 <body>
@@ -1555,10 +1555,10 @@ function sndHint(){
 function sndPop(combo){
   const step = Math.min(combo - 1, 7);
   const rate = Math.pow(2, step/12);
-  if (play('pop', rate, 0.95)){
+  if (play('pop', rate, 0.43)){
     // 폭발음은 그 자체로 두툼해서, 아주 높은 연속일 때만 낮은 소리를 살짝 겹칩니다.
     // 너무 낮추면 길게 늘어져 다음 소리와 뭉갭니다.
-    if (combo >= 4) play('pop', rate * 0.72, 0.33);
+    if (combo >= 4) play('pop', rate * 0.72, 0.15);
   } else {
     noisePop(0.22, 0.22);
     beep(660 * rate, 0.09, 'sine', 0.12);

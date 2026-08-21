@@ -4,13 +4,10 @@
 
 받은 날짜: 2026-08-20
 원본 주소 (다시 받을 때 씁니다):
-  pop     freesound_gamestudio-material-buy-success-394517 (Freesound)
-          ↑ 사용자가 2026-08-21에 직접 골라 내려받은 '조각 맞췄을 때' 소리.
-            원본은 2.09초인데 1.26초 뒤는 무음이라 1.3초로 자르고 끝을 0.1초 페이드.
-            홀소리(모노)·44.1kHz·96kbps 로 다듬고, 몸통이 얇아서
-            +16dB 올린 뒤 리미터로 눌러 담았습니다 (평균 -11.7dB / 최대 0dB).
-            (그 전에는 폭발음 dragon-studio-large-underwater-explosion-454253 을
-             0.8초로 잘라 썼습니다. 그 전에는 비눗방울 bubble-pop-406640)
+  pop     https://pixabay.com/sound-effects/... (dragon-studio-large-underwater-explosion-454253)
+          ↑ 사용자가 2026-08-21에 직접 골라 내려받은 폭발음.
+            원본은 6초짜리라 앞의 터지는 부분 0.8초만 잘라 씁니다.
+            (그 전에는 비눗방울 터지는 소리 bubble-pop-406640 을 썼습니다)
   whoosh  https://pixabay.com/sound-effects/film-special-effects-simple-whoosh-382724/
   click   https://pixabay.com/sound-effects/film-special-effects-mouse-click-290204/
   wrong   freesound_community-error-2-36058 (Pixabay)
