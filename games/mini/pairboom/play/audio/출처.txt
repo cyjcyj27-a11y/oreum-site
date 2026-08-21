@@ -4,10 +4,21 @@
 
 받은 날짜: 2026-08-20
 원본 주소 (다시 받을 때 씁니다):
-  pop     https://pixabay.com/sound-effects/... (dragon-studio-large-underwater-explosion-454253)
-          ↑ 사용자가 2026-08-21에 직접 골라 내려받은 폭발음.
-            원본은 6초짜리라 앞의 터지는 부분 0.8초만 잘라 씁니다.
-            (그 전에는 비눗방울 터지는 소리 bubble-pop-406640 을 썼습니다)
+  pop     freesound_community-magic-mallet-6262 (Pixabay)
+          ↑ '마법 망치'. 2026-08-21에 후보 열두 개를 들어보고 사용자가 고른 소리입니다.
+            폭발음을 쓰다가 바꿨습니다 — 전쟁을 겪는 곳의 사람에게 그 소리가
+            어떻게 들릴지 때문입니다.
+
+            다듬은 방법 : 원본 4.8초에서 앞 무음을 떼고 0.8초로 자른 뒤
+            끝 0.06초를 잦아들게 하고, +5dB 올려 리미터로 눌렀습니다.
+            홀소리 44.1kHz 96kbps, 10,389바이트.
+
+            음이 있는 소리를 고른 까닭 : 게임이 연속으로 맞출 때마다 소리를
+            반음씩 올리게(rate = 2^(step/12)) 되어 있습니다. 폭발음은 그래봐야
+            삑삑거리지만, 음이 있는 소리는 연속으로 맞추면 가락이 됩니다.
+
+            (그 전 : 폭발음 dragon-studio-large-underwater-explosion-454253 을 0.8초로,
+             그 전 : 비눗방울 bubble-pop-406640)
   whoosh  https://pixabay.com/sound-effects/film-special-effects-simple-whoosh-382724/
   click   https://pixabay.com/sound-effects/film-special-effects-mouse-click-290204/
   wrong   freesound_community-error-2-36058 (Pixabay)
