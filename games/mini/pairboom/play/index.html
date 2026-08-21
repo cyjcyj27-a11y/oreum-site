@@ -1930,7 +1930,11 @@ $('btnAgain').addEventListener('click', () => { $('veilWin').classList.remove('o
 $('btnRetry').addEventListener('click', () => { $('veilLose').classList.remove('on'); newGame(); });
 $('btnNext').addEventListener('click', () => { $('veilWin').classList.remove('on'); newGame(); });
 $('btnHelp').addEventListener('click', () => $('veilHelp').classList.add('on'));
-$('btnCloseHelp').addEventListener('click', () => $('veilHelp').classList.remove('on'));
+// '알겠습니다' 단추는 영어로 갈아 끼울 때 통째로 새로 만들어집니다.
+// 그래서 단추가 아니라 덮개에 귀를 달아 둡니다 — 새 단추여도 눌립니다.
+$('veilHelp').addEventListener('click', e => {
+  if (e.target.closest('#btnCloseHelp')) $('veilHelp').classList.remove('on');
+});
 
 $('btnMusic').addEventListener('click', () => setMusic(!musicOn));
 $('btnSound').addEventListener('click', () => {
