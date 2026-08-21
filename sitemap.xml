@@ -20,14 +20,6 @@
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://oreumgames.com/_new/</loc>
-    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/_new/"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/_new/"/>
-    <lastmod>2026-08-21</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
     <loc>https://oreumgames.com/apps/</loc>
     <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/apps/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/apps/"/>

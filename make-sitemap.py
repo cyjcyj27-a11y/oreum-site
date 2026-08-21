@@ -14,7 +14,7 @@ import os, io, re, datetime
 BASE = "https://oreumgames.com"
 
 # 이 폴더들은 사이트맵에 넣지 않습니다
-SKIP_DIRS = {".git", "assets", "board-setup"}
+SKIP_DIRS = {".git", "assets", "board-setup", "_new"}
 
 # 주소별 중요도 — 앞부분이 맞으면 그 값을 씁니다 (위에서부터 먼저 맞는 것)
 PRIORITY = [
