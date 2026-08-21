@@ -27,7 +27,7 @@
 <meta property="og:locale" content="ko_KR">
 <meta name="twitter:card" content="summary_large_image">
 
-<link rel="stylesheet" href="/style.css?v=10">
+<link rel="stylesheet" href="/style.css?v=9">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -78,7 +78,7 @@
 <main id="main">
 
   <!-- 히어로 — 아침의 오름 -->
-  <section class="hero hero-slim">
+  <section class="hero">
     <div class="hero-sky" aria-hidden="true">
       <span class="stars"></span>
       <span class="moon"></span>
@@ -98,116 +98,119 @@
     </div>
   </section>
 
-  <!-- 첫 화면 진열대 — 큰 게임 둘 · 미니게임 · 앱 -->
-  <section id="games" class="showcase">
+  <!-- 게임 -->
+  <section id="games" class="section">
     <div class="wrap">
-      <div class="showcase-head">
-        <h2>GAMES</h2>
-        <p>설치 없이 눌러서 바로 합니다</p>
+      <h2 class="section-title section-en">GAMES</h2>
+
+      <ul class="cards">
+    <li class="card">
+      <a class="card-shot" href="/games/lulu/">
+        <img src="/assets/lulu-shot.webp?v=2" alt="노을 지는 제주 밭에 선 루루, 멀리 바다와 돌담집" loading="lazy">
+      </a>
+      <div class="card-body">
+        <h3><a href="/games/lulu/">루루냥의 제주살이</a></h3>
+        <p class="card-sub">3D 생활 시뮬레이션 · 한국어·영어</p>
+        <p class="card-line">서울 집값에 밀려 제주로 온 고양이, 낡은 빈집에서 시작하는 두 번째 인생</p>
+        <div class="card-cta">
+          <a class="btn btn-primary" href="https://play.oreumgames.com/game/?lang=ko">바로 플레이</a>
+          <a class="btn btn-ghost" href="/games/lulu/">자세히</a>
+        </div>
       </div>
+    </li>
+    <li class="card">
+      <a class="card-shot" href="/games/immortality/">
+        <img src="/assets/teaser-immortality.webp?v=3" alt="2300년 서울, 스무 살 얼굴의 두 사람" loading="lazy">
+      </a>
+      <div class="card-body">
+        <h3><a href="/games/immortality/">영생의 가격</a></h3>
+      <p class="card-badge">1부 프롤로그 공개</p>
+        <p class="card-sub">내러티브 생존 어드벤처 · 한국어·영어</p>
+        <p class="card-line">수명이 화폐가 된 세계. 손목의 숫자가 0이 되는 순간, 생은 끝난다</p>
+        <div class="card-cta">
+          <a class="btn btn-primary" href="https://play.oreumgames.com/immortality/?lang=ko">1부 프롤로그 보기</a>
+          <a class="btn btn-ghost" href="/games/immortality/">자세히</a>
+        </div>
+      </div>
+    </li>
+      </ul>
 
-      <div class="showcase-grid">
+      <!-- 미니게임 — 오름 랩스에서 가져온 작은 것들 -->
+      <div class="subhead">
+        <h3>미니게임</h3>
+        <a class="more" href="/games/mini/">전체 보기 →</a>
+      </div>
+      <p class="subhead-note">실험작. 설치 없이 눌러서 바로 합니다.</p>
 
-        <!-- 큰 게임 ① -->
-        <article class="feat">
-          <a class="feat-shot" href="/games/lulu/">
-            <img src="/assets/lulu-shot.webp?v=2" alt="노을 지는 제주 밭에 선 루루, 멀리 바다와 돌담집" width="800" height="500">
-          </a>
-          <div class="feat-body">
-            <h3><a href="/games/lulu/">루루냥의 제주살이</a></h3>
-            <p class="feat-sub">3D 생활 시뮬레이션 · 한국어·영어</p>
-            <p class="feat-line">서울 집값에 밀려 제주로 온 고양이, 낡은 빈집에서 시작하는 두 번째 인생</p>
-            <div class="feat-cta">
-              <a class="btn btn-primary" href="https://play.oreumgames.com/game/?lang=ko">바로 플레이</a>
-              <a class="btn btn-ghost" href="/games/lulu/">자세히</a>
-            </div>
-          </div>
-        </article>
-
-        <!-- 큰 게임 ② -->
-        <article class="feat">
-          <a class="feat-shot" href="/games/immortality/">
-            <img src="/assets/teaser-immortality.webp?v=3" alt="2300년 서울, 스무 살 얼굴의 두 사람" width="800" height="500">
-          </a>
-          <div class="feat-body">
-            <p class="feat-tag">1부 프롤로그 공개</p>
-            <h3><a href="/games/immortality/">영생의 가격</a></h3>
-            <p class="feat-sub">내러티브 생존 어드벤처 · 한국어·영어</p>
-            <p class="feat-line">수명이 화폐가 된 세계. 손목의 숫자가 0이 되는 순간, 생은 끝난다</p>
-            <div class="feat-cta">
-              <a class="btn btn-primary" href="https://play.oreumgames.com/immortality/?lang=ko">1부 프롤로그 보기</a>
-              <a class="btn btn-ghost" href="/games/immortality/">자세히</a>
-            </div>
-          </div>
-        </article>
-
-        <!-- 미니게임 줄 -->
-        <aside class="rail rail-mini">
-          <div class="rail-head">
-            <h2>미니게임</h2>
-            <p class="rail-note">실험작</p>
-          </div>
-          <ul class="rail-list">
-            <li>
-              <a href="/games/mini/pairboom/">
-                <img src="/assets/pairboom-shot.webp?v=1" alt="" loading="lazy" width="132" height="88">
-                <span>
-                  <span class="rail-t">PAIRBOOM!!</span>
-                  <span class="rail-s">짝 잇기 퍼즐 · 100단계</span>
-                </span>
-              </a>
-            </li>
-            <li>
-              <a href="/games/mini/oreumnyang/">
-                <img src="/assets/oreumnyang-shot.webp?v=5" alt="" loading="lazy" width="132" height="88">
-                <span>
-                  <span class="rail-t">오름냥</span>
-                  <span class="rail-s">고양이 3매치 · 200판</span>
-                </span>
-              </a>
-            </li>
-            <li>
-              <a href="/games/mini/slip-cat/">
-                <img src="/assets/slip-cat-shot.webp?v=3" alt="" loading="lazy" width="132" height="88">
-                <span>
-                  <span class="rail-t">SLIP CAT</span>
-                  <span class="rail-s">낙하하는 물건 피하기</span>
-                </span>
-              </a>
-            </li>
-            <li>
-              <a href="/games/mini/life-logistics/">
-                <img src="/assets/life-logistics-shot.webp" alt="" loading="lazy" width="132" height="88">
-                <span>
-                  <span class="rail-t">LIFE LOGISTICS</span>
-                  <span class="rail-s">1인칭 창고 작업</span>
-                </span>
-              </a>
-            </li>
-          </ul>
-          <a class="rail-more" href="/games/mini/">전체 보기</a>
-        </aside>
-
-        <!-- 맨 오른쪽 — 앱 -->
-        <aside class="rail rail-app">
-          <div class="rail-head">
-            <h2>APPS</h2>
-            <p class="rail-note">이용 가능</p>
-          </div>
-          <a class="app-card" href="/apps/saju/">
-            <span class="app-shot">
-              <img src="/assets/saju-cover.webp" alt="별자리와 사주를 겹쳐 그린 금빛 원반" loading="lazy" width="600" height="750">
+      <ul class="mini-cards">
+        <li class="mini-card">
+          <a href="/games/mini/#pairboom">
+            <img src="/assets/pairboom-shot.webp?v=1" alt="" loading="lazy" width="104" height="65">
+            <span class="mini-body">
+              <span class="mini-t">PAIRBOOM!!</span>
+              <span class="mini-s">짝 잇기 퍼즐 · PC·모바일</span>
             </span>
-            <h3>MBTI사주</h3>
-            <p class="app-sub">사주 × MBTI 성향 분석 · 웹</p>
-            <p class="app-line">MBTI는 성격을 말하고 사주는 타고난 흐름을 말한다</p>
           </a>
-          <a class="rail-more" href="https://play.oreumgames.com/saju/?lang=ko">바로 해보기</a>
-        </aside>
+        </li>
+        <li class="mini-card">
+          <a href="/games/mini/#oreumnyang">
+            <img src="/assets/oreumnyang-shot.webp?v=5" alt="" loading="lazy" width="104" height="65">
+            <span class="mini-body">
+              <span class="mini-t">오름냥</span>
+              <span class="mini-s">퍼즐게임 · PC·모바일</span>
+            </span>
+          </a>
+        </li>
+        <li class="mini-card">
+          <a href="/games/mini/#life-logistics">
+            <img src="/assets/life-logistics-shot.webp" alt="" loading="lazy" width="104" height="65">
+            <span class="mini-body">
+              <span class="mini-t">LIFE LOGISTICS</span>
+              <span class="mini-s">1인칭 창고 작업 · PC·모바일</span>
+            </span>
+          </a>
+        </li>
+        <li class="mini-card">
+          <a href="/games/mini/#slip-cat">
+            <img src="/assets/slip-cat-shot.webp?v=3" alt="" loading="lazy" width="104" height="65">
+            <span class="mini-body">
+              <span class="mini-t">SLIP CAT</span>
+              <span class="mini-s">낙하하는 물건 피하기 · PC·모바일</span>
+            </span>
+          </a>
+        </li>
+        <li class="mini-card">
+          <a href="/games/mini/#knife-duel-v7">
+            <img src="/assets/knife-duel-shot.webp" alt="" loading="lazy" width="104" height="65">
+            <span class="mini-body">
+              <span class="mini-t">칼전 v7</span>
+              <span class="mini-s">3D 근접 대전 · PC·모바일</span>
+            </span>
+          </a>
+        </li>
+        <li class="mini-card">
+          <a href="/games/mini/#nyang-duel">
+            <img src="/assets/nyang-duel-shot.webp" alt="" loading="lazy" width="104" height="65">
+            <span class="mini-body">
+              <span class="mini-t">냥냥 검객 대전</span>
+              <span class="mini-s">2D 격투 · PC·모바일</span>
+            </span>
+          </a>
+        </li>
+        <li class="mini-card">
+          <a href="/games/mini/#polarity-flip">
+            <img src="/assets/polarity-flip-shot.webp" alt="" loading="lazy" width="104" height="65">
+            <span class="mini-body">
+              <span class="mini-t">극성 반전</span>
+              <span class="mini-s">보드게임 · PC·모바일</span>
+            </span>
+          </a>
+        </li>
+      </ul>
 
-      </div>
     </div>
   </section>
+
 
 
   <!-- 앱 — 게임이 아닌 것들 -->
