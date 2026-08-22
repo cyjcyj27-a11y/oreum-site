@@ -1,0 +1,1480 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>OREUMKIL — 오름길</title>
+<style>
+html,body{margin:0;height:100%;background:#000;display:grid;place-items:center;overflow:hidden;touch-action:none}
+canvas{width:min(100vw,1280px);height:auto;display:block}
+video{display:none}
+#hint{position:fixed;bottom:14px;left:0;right:0;text-align:center;z-index:2;pointer-events:none;
+ font:500 17px/1.7 system-ui,'Malgun Gothic',sans-serif;letter-spacing:.05em;
+ color:rgba(240,236,224,.42);transition:opacity 1.2s}
+#hint.gone{opacity:0}
+#snd{position:fixed;top:12px;right:14px;z-index:2;
+ font:600 16px/1 system-ui,'Malgun Gothic',sans-serif;letter-spacing:.02em;
+ background:rgba(16,18,22,.72);border:1px solid rgba(232,228,216,.55);border-radius:999px;
+ color:#f0ece0;padding:9px 14px;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.5)}
+#snd:hover{background:rgba(40,44,50,.9)}
+#snd.off{color:#9a958a;border-color:rgba(232,228,216,.22)}
+#skip{position:fixed;bottom:14px;right:16px;z-index:2;pointer-events:none;
+ font:500 16px/1 system-ui,'Malgun Gothic',sans-serif;letter-spacing:.06em;
+ color:rgba(240,236,224,.42);opacity:0;transition:opacity .6s}
+#skip.on{opacity:1}
+</style></head><body>
+<canvas id="c" width="1280" height="720"></canvas>
+<div id="hint">← → 걷기 · ↑ 뛰기 · ↓ 앉기 · E 잡기 / 놓기 · R 되돌리기 · O 오프닝 다시</div>
+<button id="snd" type="button">♪ 음악 켜짐</button>
+<div id="skip">S · ENTER · SPACE — 오프닝 건너뛰기</div>
+<video id="v1" src="video/walk1.mp4"     muted playsinline preload="metadata"></video>
+<video id="v2" src="video/attack.mp4"     muted playsinline preload="metadata"></video>
+<video id="v3" src="video/walk2.mp4" muted playsinline preload="metadata"></video>
+<audio id="bgm" preload="auto"></audio>
+<script src="lib/matter.min.js"></script>
+<script>
+const c=document.getElementById('c'),W=1280,H=720;
+let x=c.getContext('2d');
+const rnd=s=>{let v=Math.sin(s*127.1)*43758.5453;return v-Math.floor(v)};
+const lerp=(a,b,k)=>a+(b-a)*(k<0?0:k>1?1:k);
+const ease=k=>{k=k<0?0:k>1?1:k; return k*k*(3-2*k);};
+const clamp=(v,a,b)=>v<a?a:v>b?b:v;
+const OC=document.createElement('canvas'); OC.width=W; OC.height=H;
+const OX=OC.getContext('2d');
+let cam=0, shake=0, NOW=0;
+let zoom=1, zx=W*.44, zy=560;      // 눈뜨는 장면에서만 화면을 당긴다
+
+/*═══════════════════════════════════════════════════════════════════════
+  PHYSICS LAYER — Matter.js 위에 얇게 얹은 층.
+  여기서는 몸체·충돌·관절·힘만 다룬다. 게임 규칙은 한 줄도 넣지 않는다.
+═══════════════════════════════════════════════════════════════════════*/
+const {Engine,Composite,Bodies,Body,Constraint,Query,Vector,Events,Sleeping}=Matter;
+
+const DT=1000/60, DT2=DT*DT;              // 한 걸음 = 16.7ms
+const engine=Engine.create();
+engine.gravity.y=2.232;                    // 0.62 px/걸음² — 손으로 만들던 그 무게
+engine.positionIterations=8;
+engine.velocityIterations=6;                // 마찰 impulse가 반복마다 쌓인다 — 많이 돌리면 끈적해진다
+engine.constraintIterations=4;
+const world=engine.world;
+
+/* 부딪히는 편 가르기 */
+const CAT={TERRAIN:0x0001, PLAYER:0x0002, PROP:0x0004, ROPE:0x0008, GHOST:0x0010};
+
+/* 재질 — 밀도가 곧 무게다. 데이터로만 바꾼다 */
+/* ⚠ Matter의 마찰은 힘이 아니라 속도에서 깎아내는 impulse이고, 그걸 velocityIterations
+   횟수만큼 반복한다. 그래서 현실의 마찰계수(0.6 같은)를 그대로 넣으면 물체가 붙박이가 된다.
+   여기 값은 전부 실제로 재 보고 맞춘 것이다 */
+/* 무게 비율이 곧 체감이다. 사람 70을 기준으로 잡았다 —
+   나무 상자 13, 큰 상자 17, 현무암 85~145, 널판 15.
+   ⚠ 사람과 물체 무게가 비슷하면 Matter의 접촉 해결기가 둘을 반씩 나눠 세워 버려서
+   가벼운 상자조차 기어가듯 밀린다. 비율을 벌려야 밀리는 맛이 산다 */
+const MAT={
+  stone :{density:.030, friction:.08, frictionStatic:.11, restitution:.02, frictionAir:.010, mu:.30},
+  wood  :{density:.006, friction:.06, frictionStatic:.09, restitution:.08, frictionAir:.008, mu:.28},
+  plank :{density:.004, friction:.07, frictionStatic:.10, restitution:.04, frictionAir:.008, mu:.30},
+  rope  :{density:.030, friction:.06, frictionStatic:.09, restitution:.00, frictionAir:.020, mu:.20},
+  land  :{friction:.30, frictionStatic:.42, restitution:0},
+  person:{density:.042, friction:.006, frictionStatic:0, restitution:0, frictionAir:0}
+};
+const G=0.62;                        // 중력 가속(px/걸음²)
+/* Matter가 아니라 우리가 직접 재우는 마찰·완력.
+   ⚠ Matter의 마찰은 무게와 무관한 '속도 깎기'라서, 그대로 두면 100kg 바위가
+   10kg 상자만큼 쉽게 밀린다. 그래서 쿨롱 마찰(F=μmg)을 손으로 얹는다 */
+function mu(b){ return b.plugin&&b.plugin.mu||.3; }
+function coulomb(){
+  for(const e of ENTS){
+    if(!has(e,'weigh')) continue;
+    for(const b of e.bodies){
+      if(b.isStatic) continue;
+      if(!rayDown({x:b.position.x,y:b.bounds.max.y-2},7,b)) continue;   // 땅에 닿아 있을 때만
+      const a=mu(b)*G, v=b.velocity.x;
+      if(!v) continue;
+      accel(b,-Math.sign(v)*Math.min(Math.abs(v),a));
+    }
+  }
+}
+/* ⚠ Matter는 isStatic 을 켤 때 friction을 1, restitution을 0으로 되돌린다.
+   그래서 고정 물체는 만든 뒤에 재질을 다시 입혀야 한다 */
+function mat(b,m){ for(const k in m) if(k!=='density'&&k!=='mu') b[k]=m[k]; return b; }
+function tag(b,m){ b.plugin.mu=m.mu; return b; }
+
+/* px/걸음² 단위로 가속시킨다 — Matter의 힘 단위를 매번 계산하지 않으려고 */
+function accel(b,ax,ay){ b.force.x+=ax*b.mass/DT2; if(ay) b.force.y+=ay*b.mass/DT2; }
+/* 힘에 한계를 두고 목표 속도로 밀어붙인다. 한계가 있어야 무거운 걸 못 민다 */
+function driveX(b,targetVx,gain,maxAccel){
+  const a=clamp((targetVx-b.velocity.x)*gain,-maxAccel,maxAccel);
+  accel(b,a);
+  return Math.abs(a)>=maxAccel-1e-6;       // 한계까지 썼다 = 버겁다
+}
+function addBody(b){ Composite.add(world,b); return b; }
+function addJoint(j){ Composite.add(world,j); return j; }
+function dropJoint(j){ if(j) Composite.remove(world,j); }
+function jointLen(j){
+  const a=j.bodyA?Vector.add(j.bodyA.position,j.pointA||{x:0,y:0}):j.pointA;
+  const b=j.bodyB?Vector.add(j.bodyB.position,j.pointB||{x:0,y:0}):j.pointB;
+  return Vector.magnitude(Vector.sub(a,b));
+}
+/* 발밑에 무엇이 있는지 — 짧은 광선 셋 */
+function rayDown(from,len,skip){
+  const hits=Query.ray(Composite.allBodies(world),from,{x:from.x,y:from.y+len},2);
+  for(const h of hits){ const b=h.body;
+    if(b===skip||b.isSensor||b.plugin.noStand) continue;
+    return b; }
+  return null;
+}
+/* 위에 올라타 있는 것들의 무게 합 — 발판·저울이 쓴다 */
+function loadOn(body,pad){
+  let m=0; const seen=new Set();
+  for(const p of engine.pairs.list){
+    if(!p.isActive) continue;
+    const other = p.bodyA===body?p.bodyB : p.bodyB===body?p.bodyA : null;
+    if(!other||other.isStatic||seen.has(other.id)) continue;
+    if(other.position.y > body.position.y) continue;      // 위에 있는 것만
+    seen.add(other.id); m+=other.mass;
+  }
+  return m;
+}
+
+/*═══════════════════════════════════════════════════════════════════════
+  GAMEPLAY LAYER — 물체는 전부 데이터로 정의한다.
+  새 물체를 넣을 때 아래 FACTORY 에 한 종류를 더할 뿐, 나머지는 손대지 않는다.
+═══════════════════════════════════════════════════════════════════════*/
+const ENTS=[];                       // 살아 있는 모든 물체
+const BYID={};
+let SEQ=0;
+
+function ent(o){ o.id=o.id||('e'+(++SEQ)); ENTS.push(o); BYID[o.id]=o;
+  o.home=o.bodies.map(b=>({x:b.position.x,y:b.position.y}));   // 빠뜨렸을 때 돌아올 자리
+  return o; }
+function has(e,tag){ return e.tags&&e.tags.indexOf(tag)>=0; }
+
+const FACTORY={
+  /* 땅 — 움직이지 않는다 */
+  land(d){
+    const b=mat(addBody(Bodies.rectangle(d.x+d.w/2, d.y+d.h/2, d.w, d.h,
+      {isStatic:true, collisionFilter:{category:CAT.TERRAIN}})), MAT.land);
+    return ent({type:'land', tags:[], bodies:[b], box:d, draw:drawLand});
+  },
+  /* 나무 상자 — 가볍다. 밀리고, 끌리고, 쌓인다 */
+  crate(d){
+    const s=d.s||46;
+    const b=addBody(Bodies.rectangle(d.x,d.y,s,s,Object.assign({
+      collisionFilter:{category:CAT.PROP,mask:0xffff}, chamfer:{radius:3}},MAT.wood)));
+    tag(b,MAT.wood);
+    return ent({type:'crate', tags:['grab','weigh','link'], bodies:[b], s:s, draw:drawCrate});
+  },
+  /* 현무암 — 무겁다. 밀리긴 하는데 힘들다 */
+  boulder(d){
+    const r=d.r||30;
+    const b=addBody(Bodies.polygon(d.x,d.y,9,r,Object.assign({
+      collisionFilter:{category:CAT.PROP,mask:0xffff}},MAT.stone)));
+    Body.setInertia(b,Infinity);                   // 울퉁불퉁한 바위는 구르지 않는다
+    tag(b,MAT.stone);
+    return ent({type:'boulder', tags:['grab','weigh','link'], bodies:[b], r:r, seed:d.x, draw:drawBoulder});
+  },
+  /* 널판 — 다리도 되고 지렛대도 된다 */
+  plank(d){
+    const b=addBody(Bodies.rectangle(d.x,d.y,d.w||240,d.h||16,Object.assign({
+      collisionFilter:{category:CAT.PROP,mask:0xffff}},MAT.plank)));
+    tag(b,MAT.plank); b.plugin.carry=true;          // 긴 널판은 수평으로 든다
+    const e=ent({type:'plank', tags:['grab','weigh','link'], bodies:[b], w:d.w||240, h:d.h||16, draw:drawPlank});
+    if(d.pivot){                                     // 가운데를 박아 두면 시소가 된다
+      e.joints=[addJoint(Constraint.create({
+        pointA:{x:d.x,y:d.y}, bodyB:b, pointB:{x:0,y:0}, length:0, stiffness:1, damping:.06}))];
+      e.pivot={x:d.x,y:d.y};
+    }
+    return e;
+  },
+  /* 밧줄 — 마디를 이어 붙인다. 매달리면 실제로 흔들린다 */
+  rope(d){
+    const n=d.links||14, seg=d.seg||18, bodies=[], joints=[];
+    for(let i=0;i<n;i++){
+      const b=addBody(Bodies.rectangle(d.x, d.y+i*seg, 6, seg-3, Object.assign({
+        collisionFilter:{category:CAT.ROPE, mask:CAT.PLAYER|CAT.PROP},
+        slop:.02},MAT.rope)));
+      b.plugin.noStand=true;
+      bodies.push(b);
+      joints.push(addJoint(Constraint.create(
+        i===0 ? {pointA:{x:d.x,y:d.y-seg/2}, bodyB:b, pointB:{x:0,y:-seg/2}, length:0, stiffness:1, damping:.1}
+              : {bodyA:bodies[i-1], pointA:{x:0,y:seg/2}, bodyB:b, pointB:{x:0,y:-seg/2}, length:0, stiffness:.98, damping:.08})));
+    }
+    return ent({type:'rope', tags:['hang','ropeEnd'], bodies:bodies, joints:joints,
+                anchor:{x:d.x,y:d.y-seg/2}, seg:seg, draw:drawRope});
+  },
+  /* 줄에 매달린 널판 — 올라타면 무게로 기울고 흔들린다 */
+  swing(d){
+    const w=d.w||210;
+    const p=addBody(Bodies.rectangle(d.x,d.y,w,14,Object.assign({
+      collisionFilter:{category:CAT.PROP,mask:0xffff}},MAT.plank)));
+    const j=[];
+    for(const s of[-1,1]) j.push(addJoint(Constraint.create({
+      pointA:{x:d.x+s*(w/2-10), y:d.y-(d.len||150)}, bodyB:p, pointB:{x:s*(w/2-10),y:0},
+      length:d.len||150, stiffness:.9, damping:.04})));
+    return ent({type:'swing', tags:['weigh'], bodies:[p], joints:j, w:w, len:d.len||150, draw:drawSwing});
+  },
+  /* 무게판 — 위에 올라온 것들의 무게를 잰다. 사람이 올라서도 눌린다 */
+  plate(d){
+    const b=mat(addBody(Bodies.rectangle(d.x,d.y,d.w||96,10,{
+      isStatic:true, collisionFilter:{category:CAT.TERRAIN}})), MAT.land);
+    return ent({type:'plate', tags:[], bodies:[b], need:d.need||8, w:d.w||96,
+                home:{x:d.x,y:d.y}, sink:0, load:0, on:false, sig:d.sig,
+                update:updPlate, draw:drawPlate});
+  },
+  /* 돌문 — 신호를 받으면 올라간다. 올라가며 물체를 밀어 올린다 */
+  gate(d){
+    const b=mat(addBody(Bodies.rectangle(d.x,d.y,d.w||44,d.h||150,{
+      isStatic:true, collisionFilter:{category:CAT.TERRAIN}})), MAT.land);
+    return ent({type:'gate', tags:[], bodies:[b], w:d.w||44, h:d.h||150,
+                home:{x:d.x,y:d.y}, lift:d.lift||150, open:0, by:d.by,
+                update:updGate, draw:drawGate});
+  }
+};
+function spawn(d){ return FACTORY[d.t](d); }
+
+/* ── 신호: 무게판이 눌리면 문이 열린다. 관계는 문자열로만 이어 둔다 ── */
+const SIG={};
+function updPlate(e,dt){
+  const b=e.bodies[0];
+  e.load=loadOn(b);
+  const want=clamp(e.load/e.need,0,1)*9;              // 무거울수록 더 내려앉는다
+  e.sink=lerp(e.sink,want,.18);
+  Body.setPosition(b,{x:e.home.x, y:e.home.y+e.sink});
+  e.on = e.load>=e.need;
+  if(e.sig) SIG[e.sig]=e.on;
+}
+function updGate(e,dt){
+  const want=(e.by&&SIG[e.by])?1:0;
+  e.open=lerp(e.open,want,.055);
+  const b=e.bodies[0];
+  Body.setPosition(b,{x:e.home.x, y:e.home.y-e.lift*e.open});
+}
+
+/*═══════════════════════════════════════════════════════════════════════
+  주인공 — 강체다. 몸으로 밀고, 손으로 잡는다.
+═══════════════════════════════════════════════════════════════════════*/
+const P={body:null, grounded:null, coyote:0, buf:0, face:1, ph:0, st:'idle',
+         hold:null, holdJoint:null, hang:null, hangJoint:null, dead:0, spawn:{x:0,y:0}};
+/* JUMP 8.3 = 55px 뜬다. 키 108px 를 170cm 로 치면 87cm — 사람이 뛸 수 있는 높이다.
+   (예전 11.6 은 103px = 163cm 였다. 자기 키만큼 뛰었으니 공처럼 보일 수밖에)
+   ⚠ 이 높이로는 상자(83px) 위에 못 올라간다. 손으로 기어오르는 tryLedge 가 그 몫을 한다 */
+const SPEED=2.95, JUMP=8.3;
+const GRAV=.62;                      // engine.gravity.y=2.232 를 px/걸음² 로 환산한 값
+/* 인물 크기 — LIMBO 10.4% · INSIDE 9.6% · 예전 오름길 20.4%(화면 높이 대비).
+   작아야 같은 움직임이 차분해 보인다. 1.5로 낮추니 12.6%가 되고,
+   덤으로 그린 발끝이 물리 몸체 바닥과 맞아떨어진다(2.1일 땐 13px 파묻혔다) */
+const FIG=1.5, FEET=23*FIG;
+const PUSH_MAX=1.55;                 // 제 몸을 움직이는 힘의 한계(px/걸음²)
+/* ⚠ Matter의 접촉 해결기는 밀어 옮기는 힘을 잘 전달하지 못한다(반복 횟수를 아무리 올려도
+   0.5px/걸음에서 막힌다). 그래서 닿아 있는 물체에는 사람의 완력을 직접 실어 준다.
+   힘이지 속도가 아니므로 무거운 물체일수록 느리게 움직인다 — 원하던 그대로다 */
+const STRENGTH=0.55;                 // 제 몸무게의 55%까지 밀 수 있다. 그 이상은 안 밀린다
+const REACH=104;
+
+function makePlayer(px,py){
+  P.body=addBody(Bodies.rectangle(px,py,24,70,Object.assign({
+    chamfer:{radius:9}, collisionFilter:{category:CAT.PLAYER,mask:0xffff}},MAT.person)));
+  Body.setInertia(P.body,Infinity);                   // 넘어지지는 않는다
+  P.spawn={x:px,y:py};
+}
+function handPoint(){
+  const b=P.body;
+  return {x:b.position.x+P.face*17, y:b.position.y+(P.crouch?22:-4)};   // 앉으면 손이 내려간다
+}
+function grabbables(){
+  const out=[];
+  for(const e of ENTS) if(has(e,'grab')) for(const b of e.bodies) out.push({e:e,b:b});
+  return out;
+}
+function nearestGrab(){
+  const h=handPoint(); let best=null,bd=REACH;
+  for(const g of grabbables()){
+    const d=Vector.magnitude(Vector.sub(g.b.position,h));
+    if(d<bd){bd=d;best=g;}
+  }
+  return best;
+}
+function grab(){
+  const g=nearestGrab(); if(!g) return;
+  const b=g.b, h=handPoint();
+  /* 긴 널판은 한쪽 끝을 잡으면 대롱대롱 돌아 다리로 못 놓는다.
+     가운데 근처를 잡되 몸 쪽으로 조금 치우쳐 잡아 널판이 앞으로 뻗게 한다
+     (정가운데를 잡으면 널판이 몸을 관통해 보인다) */
+  const local = b.plugin.carry
+    ? {x:-P.face*(g.e.w||220)*0.30, y:0}
+    : Vector.rotate(Vector.sub(h,b.position), -b.angle);
+  /* 손과 물체를 용수철로 잇는다. 순간이동시키지 않는다.
+     같은 뻣뻣함이라도 무거운 물체는 덜 끌려온다 — 그게 무게의 체감이다 */
+  P.holdJoint=addJoint(Constraint.create({
+    bodyA:P.body, pointA:{x:P.face*13,y:P.crouch?10:-20},   // 앉았으면 낮게 잡는다
+    bodyB:b, pointB:local,
+    length: b.plugin.carry?26:12,
+    stiffness: b.plugin.carry?.06:.035, damping:.10}));
+  P.hold=g.e; P.holdBody=b;
+}
+function letGo(){ dropJoint(P.holdJoint); P.holdJoint=null; P.hold=null; P.holdBody=null; }
+function hangOn(){
+  let best=null,bd=REACH*.8; const h={x:P.body.position.x,y:P.body.position.y-30};
+  for(const e of ENTS) if(has(e,'hang')) for(const b of e.bodies){
+    const d=Vector.magnitude(Vector.sub(b.position,h));
+    if(d<bd){bd=d;best=b;}
+  }
+  if(!best) return false;
+  P.hangJoint=addJoint(Constraint.create({
+    bodyA:P.body, pointA:{x:0,y:-32}, bodyB:best, pointB:{x:0,y:0},
+    length:6, stiffness:.85, damping:.12}));
+  P.hang=best; return true;
+}
+function letGoRope(){ dropJoint(P.hangJoint); P.hangJoint=null; P.hang=null; }
+
+/* 줄 끝을 물체에 묶는다 — 물체끼리의 관계를 손으로 만든다 */
+let TIE=null;
+function tryTie(){
+  if(TIE){ dropJoint(TIE); TIE=null; return; }
+  let rope=null,link=null;
+  for(const e of ENTS) if(e.type==='rope') rope=rope||e;
+  if(!rope) return;
+  const end=rope.bodies[rope.bodies.length-1];
+  for(const e of ENTS) if(has(e,'link')) for(const b of e.bodies){
+    if(Vector.magnitude(Vector.sub(b.position,end.position))<70){ link=b; break; }
+  }
+  if(!link) return;
+  TIE=addJoint(Constraint.create({bodyA:end,pointA:{x:0,y:8},bodyB:link,pointB:{x:0,y:0},
+    length:14, stiffness:.9, damping:.1}));
+}
+
+const DEAD=980;
+function respawn(){
+  Body.setPosition(P.body,P.spawn); Body.setVelocity(P.body,{x:0,y:0});
+  letGo(); letGoRope(); P.ledge=null; P.climb=0; P.dead=0;
+}
+function playerStep(){
+  const b=P.body;
+  if(P.dead){ P.dead++; if(P.dead>34) respawn(); return; }
+
+  const dir=(RIGHT()?1:0)-(LEFT()?1:0);
+  /* 무언가를 잡고 있으면 그걸 계속 마주 본다.
+     손으로 잡은 채 등을 돌리면 팔이 물건에서 떨어져 보인다 — 사람은 그렇게 안 든다.
+     멀어지는 쪽으로 가면 마주 본 채 뒷걸음질로 끌고 온다.
+     (널판처럼 앞으로 안고 가는 물건은 예외 — 그건 몸을 돌려야 방향을 바꾼다) */
+  const dragging = P.holdJoint&&P.holdBody&&!P.holdBody.plugin.carry;
+  if(dragging){
+    const dx=P.holdBody.position.x-b.position.x;
+    if(Math.abs(dx)>6) P.face = dx>0?1:-1;          // 바로 옆에서 떨릴 땐 그대로 둔다
+    P.turn=0;
+  }
+  else if(dir&&dir!==P.face){ P.turn=(P.turn||0)+1; if(P.turn>3){ P.face=dir; P.turn=0; } }
+  else P.turn=0;
+
+  /* 밧줄에 매달렸을 때 — 발은 땅에 없고, 좌우로 힘을 주면 그네가 된다 */
+  if(P.hangJoint){
+    P.grounded=null;
+    if(dir) accel(b,dir*.42);                  // 몸을 흔들어 그네를 키운다
+    if(UP()&&P.buf===0){ letGoRope(); Body.setVelocity(b,{x:b.velocity.x,y:-JUMP*.78}); P.buf=12; }
+    if(P.buf>0)P.buf--;
+    P.st='hang';
+    if(b.position.y>DEAD) die();
+    return;
+  }
+
+  /* 모서리에 매달렸을 때 */
+  if(P.ledge){
+    const L=P.ledge;
+    if(L.body){                                      // 상자에 매달렸다 — 오르는 동안 상자를 붙잡아 둔다
+      Body.setVelocity(L.body,{x:0,y:0}); Body.setAngularVelocity(L.body,0);
+      L.x = L.side>0 ? L.body.bounds.min.x : L.body.bounds.max.x;
+      L.y = L.body.bounds.min.y;
+    }
+    Body.setVelocity(b,{x:0,y:0}); Body.setAngle(b,0);
+    if(P.climb>0){
+      P.climb+=1/LEDGE_UP;
+      const k=Math.min(1,P.climb), c=ease(clamp((k-.30)/.70,0,1));
+      Body.setPosition(b,{ x:lerp(L.x-L.side*14, L.x+L.side*22, c),
+                           y:lerp(L.y+34, L.y-35, c) });
+      if(k>=1){ P.ledge=null; P.climb=0; }
+    } else {
+      Body.setPosition(b,{x:L.x-L.side*14, y:L.y+34});
+      if(UP()) P.climb=.001;
+      else if(DOWN()){ P.ledge=null; Body.setVelocity(b,{x:0,y:1.5}); }
+    }
+    P.grounded=null; P.st='ledge';
+    return;
+  }
+
+  P.grounded=rayDown({x:b.position.x, y:b.bounds.max.y-3}, 8, b)
+          || rayDown({x:b.position.x-8, y:b.bounds.max.y-3}, 8, b)
+          || rayDown({x:b.position.x+8, y:b.bounds.max.y-3}, 8, b);
+
+  /* 걷기 — 목표 속도로 밀어붙이되 완력에 한계가 있다.
+     무거운 걸 밀고 있으면 그 한계에 먼저 걸려서 느려진다 */
+  /* 미는 힘을 먼저 셈한다 — 버거운 만큼 내 걸음도 느려져야 하니까 */
+  const pushedMass=bodyPush(dir);
+  coulomb();
+  const carry=P.holdBody?P.holdBody.mass:0;
+  const load=clamp(P.strain,0,1.5);
+  const want = P.strain>=1 ? 0                          // 꿈쩍도 안 하는 걸 밀 때는 제자리
+             : dir*SPEED*(1-load*.9)*(carry>40?.62:1);
+  const gain=P.grounded?.20:.10;                        // 천천히 붙고
+  const cap =P.grounded?PUSH_MAX:PUSH_MAX*.34;
+  const strained=driveX(b,want,gain,cap);
+  if(!dir&&P.grounded) driveX(b,0,.10,.28);             // 미끄러지듯 선다
+
+  /* 뛰기 — 코요테 시간과 선입력은 그대로.
+     ⚠ 예전엔 ↑ 를 누르고만 있어도 딛는 즉시 다시 떴다. 공처럼 통통 튀었다.
+       사람은 착지를 한 번 받아내고 다시 뛴다 — 새로 누른 순간에만 받고, 딛고 나서 잠깐 못 뛴다 */
+  const upNow=UP()?1:0;
+  if(upNow&&!P.upWas) P.buf=8; else if(P.buf>0) P.buf--;
+  P.upWas=upNow;
+  if(P.grounded) P.coyote=7; else if(P.coyote>0) P.coyote--;
+  // landT 는 처음엔 없다 — (P.landT||0) 으로 읽어야 첫 점프가 막히지 않는다
+  if(P.buf>0&&P.coyote>0&&(P.landT||0)<5){ Body.setVelocity(b,{x:b.velocity.x,y:-JUMP}); P.buf=0; P.coyote=0; P.grounded=null; }
+  if(!upNow&&b.velocity.y<-4) accel(b,0,.55);           // 짧게 누르면 낮게 뛴다
+
+  /* 오를 때보다 내릴 때가 무겁다. 정점 높이는 그대로라 오르던 지형은 그대로 오른다 */
+  if(!P.grounded&&b.velocity.y>0){
+    accel(b,0,GRAV*.5);
+    if(b.velocity.y>20) Body.setVelocity(b,{x:b.velocity.x,y:20});   // 얇은 널판을 뚫지 않게
+  }
+
+  /* 널판을 들고 있으면 수평으로 잡아 준다 — 놓으면 그대로 눕는다 */
+  if(P.holdBody&&P.holdBody.plugin.carry){
+    const q=P.holdBody;
+    let ang=((q.angle+Math.PI)%(2*Math.PI)+2*Math.PI)%(2*Math.PI)-Math.PI;
+    q.torque += (-ang*.035 - q.angularVelocity*.22)*q.inertia/DT2;
+  }
+
+  if(!P.grounded) tryLedge();
+
+  /* 잡고 있던 게 너무 멀어지면 놓친다 */
+  if(P.holdJoint&&jointLen(P.holdJoint)>128) letGo();
+
+  Body.setAngle(b,0); Body.setAngularVelocity(b,0);
+
+  /* 구덩이에 빠뜨린 물건은 제자리로 돌려놓는다.
+     널판을 빠뜨리면 길이 영영 막혀 버린다 */
+  for(const e of ENTS){
+    if(e.type==='land'||e.type==='rope'||e.type==='swing'||e.type==='gate'||e.type==='plate') continue;
+    for(let i=0;i<e.bodies.length;i++){
+      const q=e.bodies[i];
+      if(q.isStatic||q.position.y<=DEAD+240) continue;
+      if(P.holdBody===q) letGo();
+      Body.setPosition(q, e.home[i]); Body.setAngle(q,0);
+      Body.setVelocity(q,{x:0,y:0}); Body.setAngularVelocity(q,0);
+    }
+  }
+
+  P.ph+=Math.abs(b.velocity.x)*.034;                   // 두 걸음에 1초 — 성큼성큼 걷는다
+  P.sp=lerp(P.sp||0, Math.min(1,Math.abs(b.velocity.x)/3.2), .10);
+  if(P.grounded&&P.wasAir>4){ P.landT=11; }        // 공중에 있다 방금 디뎠다
+  P.wasAir = P.grounded ? 0 : (P.wasAir||0)+1;
+  if(P.landT>0) P.landT--;
+
+  P.crouch = (DOWN()&&P.grounded&&!P.hangJoint&&!P.ledge) ? 1 : 0;
+  P.st = P.crouch&&Math.abs(b.velocity.x)<1.2 ? 'crouch'
+       : P.landT>0&&P.grounded ? 'land'
+       : !P.grounded ? (b.velocity.y<0?'jump':'fall')
+       : P.strain>.35||(P.holdJoint&&strained) ? 'push'
+       : Math.abs(b.velocity.x)>(P.st==='walk'?.18:.5) ? 'walk' : 'idle';
+  if(b.position.y>DEAD) die();
+}
+function die(){ P.dead=1; shake=14; }
+
+/* 턱 모서리를 손으로 잡는다.
+   떨어지는 중에 손끝이 모서리 높이에 걸리면 붙잡고, 위를 누르면 팔로 몸을 끌어올린다 */
+const LEDGE_UP=26;                                   // 오르는 데 걸리는 칸 수
+/* 오를 수 있는 모서리를 모은다.
+   땅뿐 아니라 상자 위도 손으로 잡고 오른다 — 사람은 1m 짜리 궤짝을 뛰어서 올라가지 않는다.
+   상자는 굴러다니므로 똑바로 놓여 있고 잠잠할 때만 잡힌다 */
+function edges(){
+  const out=[];
+  for(const e of ENTS){
+    if(e.type==='land'){ const g=e.box; out.push({L:g.x, R:g.x+g.w, top:g.y, body:null}); }
+    else if(e.type==='crate'){
+      for(const q of e.bodies){
+        if(Math.abs(q.angle)>.3) continue;                       // 기울어진 건 못 잡는다
+        if(Math.abs(q.velocity.x)+Math.abs(q.velocity.y)>1.5) continue;   // 구르는 중엔 못 잡는다
+        out.push({L:q.bounds.min.x, R:q.bounds.max.x, top:q.bounds.min.y, body:q});
+      }
+    }
+  }
+  return out;
+}
+function tryLedge(){
+  if(P.ledge||P.hangJoint||P.grounded||P.holdJoint) return;
+  const b=P.body;
+  if(b.velocity.y<-1.2) return;                      // 솟아오르는 중엔 안 잡힌다
+  const hx=b.position.x+P.face*15, hy=b.bounds.min.y+5;
+  for(const g of edges()){
+    const ex = P.face>0 ? g.L : g.R;
+    if(Math.abs(hx-ex)>24) continue;
+    if(hy<g.top-34||hy>g.top+22) continue;
+    if(solidAt2(ex+P.face*20, g.top-40)) continue;    // 위가 막혔으면 못 오른다
+    P.ledge={x:ex, y:g.top, side:P.face, body:g.body}; P.climb=0;
+    Body.setVelocity(b,{x:0,y:0});
+    return;
+  }
+}
+function solidAt2(px,py){
+  for(const g of edges())
+    if(px>g.L&&px<g.R&&py>g.top&&py<g.top+460) return true;
+  return false;
+}
+/* 매달린 자세 → 손을 턱에 얹고 → 몸이 올라온다 */
+function ledgePose(k){
+  const po={};
+  if(k<=0){ po.ar1=2.66; po.ar2=2.74; po.el1=.16; po.el2=.12;
+            po.th1=.16; po.th2=-.14; po.kn1=-.58; po.kn2=-.32; po.rot=-.06; po.hd=2; return po; }
+  const a=ease(clamp(k/.42,0,1));                    // 손이 턱을 넘어간다
+  const c=ease(clamp((k-.30)/.70,0,1));              // 몸이 따라 올라온다
+  po.ar1=lerp(2.66,1.05,a);  po.el1=lerp(.16,.55,a);
+  po.ar2=lerp(2.74,2.05,a*.5+c*.5); po.el2=lerp(.12,.32,c);
+  po.th1=lerp(.16,.95,c);    po.kn1=-lerp(.58,1.25,Math.sin(c*Math.PI))-c*.05;
+  po.th2=lerp(-.14,-.30,c);  po.kn2=-lerp(.32,.95,c);
+  po.rot=lerp(-.06,0,c);     po.hd=lerp(2,1,c);
+  return po;
+}
+
+/* 몸으로 미는 힘.
+   낼 수 있는 힘은 정해져 있고(제 몸무게의 STRENGTH 배), 빨리 걸을수록 줄어든다.
+   그 힘에서 물체의 마찰(μmg)을 뺀 나머지가 물체를 움직인다.
+   → 가벼운 건 걷는 속도까지 밀리고, 무거운 건 기어가듯 밀리고, 더 무거우면 꿈쩍도 안 한다 */
+function bodyPush(dir){
+  P.strain=0;
+  if(!dir||!P.grounded) return 0;
+  const v=P.body.velocity.x*dir;
+  const budget=STRENGTH*P.body.mass*G*clamp(1-v/SPEED,0,1);
+  let heaviest=0;
+  for(const pr of engine.pairs.list){
+    if(!pr.isActive) continue;
+    const o = pr.bodyA===P.body?pr.bodyB : pr.bodyB===P.body?pr.bodyA : null;
+    if(!o||o.isStatic||o.plugin.noStand) continue;
+    if(Math.abs(o.position.y-P.body.position.y)>46) continue;      // 밟고 선 게 아니라 옆에 닿은 것
+    if(Math.sign(o.position.x-P.body.position.x)!==dir) continue;
+    heaviest=Math.max(heaviest,o.mass);
+    const need=mu(o)*o.mass*G;
+    P.strain=Math.max(P.strain,clamp(need/(STRENGTH*P.body.mass*G),0,1.4));
+    const net=budget-need;
+    if(net<=0) continue;                                            // 꿈쩍도 안 한다
+    accel(o,dir*net/o.mass);
+    accel(P.body,-dir*net/P.body.mass*.5);                          // 반작용
+  }
+  return heaviest;
+}
+
+/*═══════════════════════════════════════════════════════════════════════
+  판 — 데이터 한 줄이 물체 하나다
+═══════════════════════════════════════════════════════════════════════*/
+const LEVEL=[
+  /* ── 1막 · 벌판 ── 시작하자마자 만질 것들을 깔아 둔다 ── */
+  {t:'land', x:-400, y:600, w:900, h:460},           // -400 ~ 500
+  {t:'crate',   x:250, y:540},                       // 밀어 보는 첫 상자
+  {t:'crate',   x:314, y:540},
+  {t:'crate',   x:282, y:487},                       // 위에 하나 얹어 뒀다 — 무너뜨려도 된다
+  {t:'boulder', x:430, y:548, r:24},                 // 50 — 느릿하게 밀린다
+
+  {t:'land', x:500, y:600, w:520, h:460},            // 500 ~ 1020
+  {t:'plank',   x:700, y:575, w:290, h:16},          // ★ 이 널판을 잡아 구덩이에 걸친다
+  {t:'crate',   x:880, y:540},
+  {t:'boulder', x:960, y:548, r:30},                 // 78
+
+  /* 1020 ~ 1250 구덩이(230) — 뛰어서 반대편 모서리를 잡아도 못 닿는다.
+     널판(290)을 끌어와 걸쳐야 건넌다 */
+
+  {t:'land', x:1250, y:600, w:550, h:460},           // 1250 ~ 1800
+  {t:'crate',   x:1320, y:540},
+  {t:'crate',   x:1384, y:540},
+  {t:'boulder', x:1560, y:548, r:26},
+
+  {t:'land', x:1800, y:450, w:420, h:610},           // ★ 150 위 — 손을 뻗어 잡고 오른다
+  {t:'crate',   x:1900, y:390},
+  {t:'boulder', x:2080, y:398, r:30},                // 밀어 떨어뜨려 무게판까지 굴린다
+
+  {t:'land', x:2220, y:600, w:700, h:460},           // 2220 ~ 2920
+  {t:'plate', x:2500, y:596, need:55, sig:'문1'},    // 상자로는 모자라고 현무암은 된다
+  {t:'gate',  x:2680, y:520, w:44, h:160, lift:158, by:'문1'},
+  {t:'crate',   x:2360, y:540},
+  {t:'land', x:2920, y:600, w:200, h:460},           // 2920 ~ 3120
+
+  /* ── 2막 · 곶자왈 ── */
+  /* 3120 ~ 3520 넓은 구덩이 — 밧줄을 잡고 건너거나, 널판을 걸쳐 건넌다.
+     널판 길이 520 : 들면 손에서 앞으로 0.8×520 = 416 뻗는다.
+     구덩이 끝(3120)에 서서 놓으면 3553 에 닿아 건너편(3520)에 30 넘게 걸친다.
+     구덩이 앞 발판(2920~3120)에 눕혀 뒀다 — 문(2680)에는 안 걸린다 */
+  {t:'plank', x:3020, y:582, w:520, h:18},
+  {t:'rope', x:3300, y:170, links:17, seg:20},
+  {t:'land', x:3520, y:600, w:760, h:460},           // 3520 ~ 4280
+  {t:'crate',   x:3660, y:540},
+  {t:'boulder', x:3820, y:548, r:26},                // 시소에 올려 보라고 둔 돌
+  {t:'plank',   x:4000, y:545, w:300, h:18, pivot:true},
+  {t:'land', x:4280, y:600, w:520, h:460},           // 4280 ~ 4800
+  {t:'crate',   x:4420, y:540},
+  {t:'crate',   x:4484, y:540},
+  {t:'plank',   x:4650, y:575, w:210, h:16},         // 여기도 널판 하나
+
+  /* ── 3막 · 한라산 ── */
+  /* 4800 ~ 5220 구덩이 — 매달린 널판을 타고 건넌다 */
+  {t:'swing', x:5010, y:520, w:230, len:190},
+  {t:'land', x:5220, y:600, w:1100, h:460},          // 5220 ~ 6320
+  {t:'boulder', x:5460, y:543, r:44},                // 168 — 꿈쩍도 안 한다
+  {t:'crate',   x:5680, y:540},
+  {t:'crate',   x:5744, y:540},
+  {t:'boulder', x:5980, y:548, r:30}
+];
+LEVEL.forEach(spawn);
+makePlayer(135,540);
+
+/*═══════════════════════════════════════════════════════════════════════
+  조작
+═══════════════════════════════════════════════════════════════════════*/
+const K={};
+addEventListener('keydown',e=>{
+  if(SC.now==='title'){ toPlay(); K[e.key]=1; return; }     // 제목 화면에서 아무 키나
+  if(!K[e.key]){
+    if(e.key==='e'||e.key==='E'){ if(P.holdJoint) letGo(); else if(P.hangJoint) letGoRope();
+                                  else if(!hangOn()) grab(); }
+    if(e.key==='f'||e.key==='F') tryTie();
+    if(e.key==='r'||e.key==='R') reset();
+    if(e.key==='Enter'||e.key==='Escape'||e.key===' '||e.key==='s'||e.key==='S') SKIP=1;   // 오프닝 건너뛰기
+    if(e.key==='o'||e.key==='O') replayOpening();           // 오프닝 다시 보기(녹화용)
+    if(e.key==='m'||e.key==='M') bgmMute();
+    if((e.key==='n'||e.key==='N')&&!mute) bgmNext();
+  }
+  K[e.key]=1;
+  if(e.key.indexOf('Arrow')===0||e.key===' ')e.preventDefault();
+});
+addEventListener('keyup',e=>K[e.key]=0);
+let tX=0,tJ=0,tE=0,tD=0;
+const tread=e=>{const r=c.getBoundingClientRect();tX=0;tJ=0;tD=0;
+  for(const p of e.touches){const u=(p.clientX-r.left)/r.width,v=(p.clientY-r.top)/r.height;
+    if(v<.32) tE=1; else if(v<.55) tJ=1;
+    else if(u>.38&&u<.62) tD=1;                 // 가운데 아래를 누르면 앉는다
+    else tX+=u<.5?-1:1;}};
+c.addEventListener('pointerdown',()=>{ if(SC.now==='title') toPlay(); });
+c.addEventListener('touchstart',e=>{const was=tE;tread(e);
+  if(tE&&!was){ if(P.holdJoint)letGo(); else if(P.hangJoint)letGoRope(); else if(!hangOn())grab(); }
+  e.preventDefault()});
+c.addEventListener('touchmove',tread);
+c.addEventListener('touchend',e=>{tread(e);tE=0});
+const LEFT =()=>K.ArrowLeft ||K.a||K.A||tX<0;
+const RIGHT=()=>K.ArrowRight||K.d||K.D||tX>0;
+const UP   =()=>K.ArrowUp   ||K.w||K.W||tJ;
+/* ⚠ 예전엔 DOWN 이 아예 없었다. 모서리에 매달려 위를 안 누르면 그때 터졌다 */
+const DOWN =()=>K.ArrowDown ||K.x||K.X||tD;
+
+/* 물리 퍼즐은 되돌릴 수 있어야 한다 — 물체를 엉뚱한 데 빠뜨렸을 때 */
+function reset(){
+  for(const e of ENTS){ if(e.joints) e.joints.forEach(dropJoint); e.bodies.forEach(b=>Composite.remove(world,b)); }
+  ENTS.length=0; for(const k in BYID) delete BYID[k];
+  dropJoint(TIE); TIE=null; letGo(); letGoRope();
+  Composite.remove(world,P.body);
+  LEVEL.forEach(spawn); makePlayer(P.spawn.x,P.spawn.y);
+}
+
+/* ═══════════ 사람 그리기 ═══════════ */
+function segl(x0,y0,a,l,w){const x1=x0+Math.sin(a)*l,y1=y0+Math.cos(a)*l;
+  x.lineWidth=w;x.beginPath();x.moveTo(x0,y0);x.lineTo(x1,y1);x.stroke();return[x1,y1];}
+function figure(sx,hipY,sc,face,po,t){
+  x.save(); x.translate(sx,hipY); x.scale(sc*face,sc); x.rotate(po.rot||0);
+  x.fillStyle='#000'; x.strokeStyle='#000'; x.lineCap='round';
+  /* 골반이 (0,0) 이다. 어깨는 그 위 27, 머리 중심은 42 */
+  const hy=-13, SH=-27, HC=-42;
+  /* 웅크리면 등이 말려 상체가 짧아지고(curl), 그래도 얼굴은 앞을 본다(neck) */
+  const sq=1-(po.curl||0)*.18, nk=po.neck||0;
+  const th1=po.th1||0,th2=po.th2||0,kn1=po.kn1||0,kn2=po.kn2||0;
+  const ar1=po.ar1||0,ar2=po.ar2||0,el1=po.el1||0,el2=po.el2||0;
+  const HEAD=f=>{ x.save(); x.translate(0,HC*sq); x.rotate(-nk); x.translate(0,-HC); f(); x.restore(); };
+
+  x.globalAlpha*=.8;
+  let r=segl(0,hy+13,th2,10.5,5.4); segl(r[0],r[1],th2+kn2,10.5,4.4);
+  r=segl(-1.5,SH*sq,ar2,9.5,4.6); segl(r[0],r[1],ar2+el2,8.5,3.8);
+  x.globalAlpha/=.8;
+
+  if(!po.bald) HEAD(()=>{
+    /* 머리카락 — 예전엔 머리의 두 배라 실루엣을 통째로 잡아먹었다. 좁게 붙인다 */
+    const df=(po.hd||0)*.7+Math.sin(t*.0013)*1.2;
+    x.beginPath(); x.moveTo(-1,hy-37.5);
+    x.quadraticCurveTo(-9.6,hy-35,-10.2-df*.35,hy-22);
+    x.quadraticCurveTo(-11.2-df*.8,hy-10,-7.6-df*1.2,hy-1);
+    x.quadraticCurveTo(-5.4-df*.8,hy-7,-5.8,hy-19);
+    x.quadraticCurveTo(-7,hy-28,-1,hy-31.5); x.closePath(); x.fill();
+  });
+  x.save(); x.scale(1,sq);                       // 상체만 줄인다 — 다리 길이는 그대로
+  if(po.pack){ x.beginPath(); x.ellipse(-9.5,hy-9,7.6,11.5,-.12,0,7); x.fill(); }
+  const bw=po.bald?1.25:1;
+  x.beginPath(); x.moveTo(-3*bw,hy-24); x.lineTo(-7.6*bw,hy-16);
+  x.quadraticCurveTo(-4.9*bw,hy-1,-6.9*bw,hy+14); x.lineTo(6.9*bw,hy+14);
+  x.quadraticCurveTo(4.9*bw,hy-1,7.6*bw,hy-16); x.lineTo(3*bw,hy-24);
+  x.closePath(); x.fill();
+  x.restore();
+
+  r=segl(0,hy+13,th1,10.5,5.6); segl(r[0],r[1],th1+kn1,10.5,4.6);
+  r=segl(1.5,SH*sq,ar1,9.5,4.8); const h1=segl(r[0],r[1],ar1+el1,8.5,4);
+
+  HEAD(()=>{
+    x.beginPath(); x.arc(0,hy-29,po.bald?9.8:9.2,0,7); x.fill();
+    if(!po.bald){ x.beginPath(); x.moveTo(-3,hy-38.4);
+      x.quadraticCurveTo(7,hy-37,9.4,hy-30.5);
+      x.quadraticCurveTo(6,hy-33,-3,hy-33.5); x.closePath(); x.fill(); }
+  });
+  if(po.club){ x.lineWidth=4.6; x.beginPath(); x.moveTo(h1[0],h1[1]);
+    x.lineTo(h1[0]+Math.sin(ar1+el1+po.club)*26, h1[1]+Math.cos(ar1+el1+po.club)*26); x.stroke(); }
+  x.restore();
+}
+
+/* ═══════════ 제주 사물 ═══════════ */
+function basalt(bx,by,w,h,seed){          // 현무암 덩이
+  x.fillStyle='#000'; x.beginPath();
+  const n=13;
+  for(let a=0;a<n;a++){ const th=a/n*6.283, j=.74+rnd(seed+a*2.7)*.5;
+    const qx=bx+w/2+Math.cos(th)*w/2*j, qy=by+h/2+Math.sin(th)*h/2*j;
+    a?x.lineTo(qx,qy):x.moveTo(qx,qy); }
+  x.closePath(); x.fill();
+  x.fillStyle='#1a1a17';
+  for(let k=0;k<5;k++){ x.beginPath();
+    x.arc(bx+w*(.2+rnd(seed+k*5)*.6), by+h*(.2+rnd(seed+k*9)*.6), 1.6+rnd(seed+k)*2.6,0,7); x.fill(); }
+}
+function choga(bx,by,w,h,fill,rope){       // 초가 — 지붕을 집줄로 묶는다
+  x.fillStyle=fill;
+  x.beginPath(); x.moveTo(bx,by);
+  x.quadraticCurveTo(bx+w*.06,by-h*.86,bx+w*.5,by-h);
+  x.quadraticCurveTo(bx+w*.94,by-h*.86,bx+w,by);
+  x.closePath(); x.fill();
+  x.fillRect(bx+w*.10,by,w*.80,h*.44);
+  if(rope){ x.strokeStyle=rope; x.lineWidth=1.5;
+    for(let i=1;i<6;i++){ const u=i/6;
+      x.beginPath(); x.moveTo(bx+w*u*.9+w*.05, by);
+      x.quadraticCurveTo(bx+w*.5, by-h*(1-Math.abs(u-.5)*.5)*.92, bx+w*u*.9+w*.05, by); x.stroke(); }
+    for(let i=1;i<4;i++){ const v=i/4;
+      x.beginPath(); x.ellipse(bx+w*.5, by-h*v*.82, w*.5*(1-v*.72), h*.09*(1-v*.4), 0, Math.PI, 0); x.stroke(); } }
+}
+function harbang(bx,by,s,fill){            // 돌하르방
+  x.fillStyle=fill; x.save(); x.translate(bx,by); x.scale(s,s);
+  x.beginPath(); x.moveTo(-19,0);
+  x.quadraticCurveTo(-16,-20,-14,-33); x.lineTo(14,-33);
+  x.quadraticCurveTo(16,-20,19,0); x.closePath(); x.fill();
+  x.beginPath(); x.ellipse(0,-45,14.5,15,0,0,7); x.fill();
+  x.beginPath(); x.moveTo(-17,-54);
+  x.quadraticCurveTo(-15,-74,0,-76); x.quadraticCurveTo(15,-74,17,-54);
+  x.quadraticCurveTo(0,-60,-17,-54); x.closePath(); x.fill();
+  x.restore();
+}
+function jeongnang(bx,by,s,fill){          // 정낭 — 대문 대신 걸친 나무 막대 셋
+  x.fillStyle=fill; x.save(); x.translate(bx,by); x.scale(s,s);
+  x.fillRect(-42,-46,7,46); x.fillRect(35,-46,7,46);
+  for(let i=0;i<3;i++){ const y=-12-i*13;
+    x.beginPath(); x.moveTo(-40,y); x.quadraticCurveTo(0,y-2.5,40,y);
+    x.lineTo(40,y+4); x.quadraticCurveTo(0,y+1.5,-40,y+4); x.closePath(); x.fill(); }
+  x.restore();
+}
+function sandam(bx,by,s,fill){             // 산담 — 무덤을 두른 낮은 돌담
+  x.fillStyle=fill; x.save(); x.translate(bx,by); x.scale(s,s);
+  x.beginPath(); x.ellipse(0,0,46,17,0,Math.PI,0); x.fill();       // 봉분
+  x.fillRect(-62,-3,124,7);
+  x.fillRect(-64,-16,8,16); x.fillRect(56,-16,8,16);
+  x.restore();
+}
+
+/* ═══════════ 풀·나무 ═══════════ */
+function blade(sx,by,h,lean,seed,t,dark,light,lw){       // 억새
+  const wd=Math.sin(t*.0013+seed)*.55+Math.sin(t*.0034+seed*1.7)*.2;
+  const tx=sx+lean+wd*h*.3, ty=by-h;
+  x.lineCap='round'; x.strokeStyle=dark; x.lineWidth=lw;
+  x.beginPath(); x.moveTo(sx,by);
+  x.quadraticCurveTo(sx+lean*.25+wd*h*.09,by-h*.6,tx,ty); x.stroke();
+  const ang=Math.atan2(tx-sx,-h)+wd*.1, L=h*.44;
+  x.strokeStyle=light; x.lineWidth=lw*.5;
+  for(let k=0;k<13;k++){ const sp=(k/12-.5)*.34, ll=L*(.72+rnd(seed+k*1.7)*.45);
+    x.beginPath(); x.moveTo(tx,ty);
+    x.quadraticCurveTo(tx+Math.sin(ang+sp*.35)*ll*.45,ty-Math.cos(ang)*ll*.55,
+                       tx+Math.sin(ang+sp)*ll*1.02,ty-Math.cos(ang+sp*.25)*ll*.8); x.stroke(); }
+}
+function gfield(t,rate,by,gap,hmin,hmax,dark,light,lw,spread){
+  const off=cam*rate, i0=Math.floor((off-160)/gap), i1=Math.ceil((off+W+160)/gap);
+  for(let i=i0;i<=i1;i++){ const r=rnd(i*1.7), r2=rnd(i*3.3);
+    blade(i*gap+r*gap-off, by+r2*(spread||12), hmin+r2*(hmax-hmin), (r-.5)*26, i*2.3, t, dark, light, lw); }
+}
+function fern(bx,by,h,ph,t,fill){          // 고사리 — 잎이 부챗살로 퍼진다
+  const wd=Math.sin(t*.0016+ph)*.4;
+  x.fillStyle=fill;
+  for(let k=0;k<7;k++){
+    const a=(k-3)*.34+wd*.3, L=h*(.6+rnd(ph+k)*.55);
+    const tx=bx+Math.sin(a)*L, ty=by-Math.cos(a)*L;
+    x.beginPath(); x.moveTo(bx-1.4,by);
+    x.quadraticCurveTo(bx+Math.sin(a)*L*.4-2.2, by-Math.cos(a)*L*.55, tx,ty);
+    x.quadraticCurveTo(bx+Math.sin(a)*L*.4+2.2, by-Math.cos(a)*L*.55, bx+1.4,by);
+    x.closePath(); x.fill(); }
+}
+function bamboo(bx,by,h,ph,t,fill){        // 조릿대 — 넓고 뾰족한 잎
+  const wd=Math.sin(t*.0016+ph)*.45;
+  x.fillStyle=fill;
+  for(let k=0;k<5;k++){
+    const a=(k-2)*.42+wd*.3, L=h*(.65+rnd(ph+k)*.5);
+    const tx=bx+Math.sin(a)*L, ty=by-Math.cos(a)*L;
+    x.beginPath(); x.moveTo(bx-1.6,by);
+    x.quadraticCurveTo(bx+Math.sin(a)*L*.4-2.6, by-Math.cos(a)*L*.55, tx,ty);
+    x.quadraticCurveTo(bx+Math.sin(a)*L*.4+2.6, by-Math.cos(a)*L*.55, bx+1.6,by);
+    x.closePath(); x.fill(); }
+}
+function lowRow(fn,t,rate,by,gap,hmin,hmax,fill,spread){
+  const off=cam*rate, i0=Math.floor((off-120)/gap), i1=Math.ceil((off+W+120)/gap);
+  for(let i=i0;i<=i1;i++){ const r=rnd(i*1.7), r2=rnd(i*3.3);
+    fn(i*gap+r*gap-off, by+r2*(spread||10), hmin+r2*(hmax-hmin), r*90, t, fill); }
+}
+function fir(bx,by,h,fill,seed,t,lw){      // 구상나무 고사목 — 곧은 줄기, 앙상한 가지
+  const sway=Math.sin(t*.0009+seed)*.5;
+  x.strokeStyle=fill; x.lineCap='round';
+  x.lineWidth=lw; x.beginPath(); x.moveTo(bx,by);
+  x.quadraticCurveTo(bx+sway*h*.03, by-h*.5, bx+sway*h*.06, by-h); x.stroke();
+  const n=Math.floor(7+rnd(seed)*5);
+  for(let i=0;i<n;i++){
+    const f=.16+i/n*.78, y=by-h*f, tw=lw*(1-f*.75);
+    const len=h*(.30-f*.23)*(.6+rnd(seed+i)*.8);
+    for(const d of[-1,1]){
+      if(rnd(seed+i*3+(d>0?1:0))<.16) continue;
+      x.lineWidth=Math.max(.6,tw); x.beginPath();
+      x.moveTo(bx+sway*h*.06*f, y);
+      x.quadraticCurveTo(bx+d*len*.6, y-len*.10, bx+d*len, y-len*(.22+rnd(seed+i)*.3));
+      x.stroke();
+    }
+  }
+}
+function tree(bx,by,h,fill,seed,t,lw){     // 곶자왈 — 낮게 뒤틀리며 갈라지는 활엽수
+  const sway=Math.sin(t*.0008+seed)*.6;
+  x.strokeStyle=fill; x.lineCap='round';
+  const limb=(px,py,ang,len,w,d)=>{
+    const ex=px+Math.sin(ang)*len, ey=py-Math.cos(ang)*len;
+    x.lineWidth=Math.max(.7,w); x.beginPath(); x.moveTo(px,py);
+    x.quadraticCurveTo(px+Math.sin(ang+.3)*len*.5, py-Math.cos(ang)*len*.55, ex,ey); x.stroke();
+    if(d<=0) return;
+    const s=rnd(seed+d*7+len);
+    limb(ex,ey,ang-.42-s*.3+sway*.05,len*(.62+s*.16),w*.62,d-1);
+    limb(ex,ey,ang+.40+rnd(seed+d*3)*.3+sway*.05,len*(.58+s*.2),w*.6,d-1);
+    if(d===3&&s>.55) limb(ex,ey,ang+(s-.5)*.5,len*.5,w*.5,d-1);
+  };
+  limb(bx,by,sway*.06,h*.44,lw,3);
+}
+function treeRow(fn,t,rate,by,gap,hmin,hmax,fill,lw,spread){
+  const off=cam*rate, i0=Math.floor((off-260)/gap), i1=Math.ceil((off+W+260)/gap);
+  for(let i=i0;i<=i1;i++){ const r=rnd(i*1.7), r2=rnd(i*3.3);
+    fn(i*gap+r*gap-off, by+r2*(spread||14), hmin+r2*(hmax-hmin), fill, i*1.3, t, lw); }
+}
+function crow(cx,cy,s,t,ph,perch){
+  x.save(); x.translate(cx,cy); x.scale(s,s); x.fillStyle='#000';
+  if(perch){
+    x.beginPath(); x.ellipse(0,0,8.5,5.4,-.18,0,7); x.fill();
+    x.beginPath(); x.arc(7,-5.6,3.6,0,7); x.fill();
+    x.beginPath(); x.moveTo(9.6,-6.2); x.lineTo(15,-5.2); x.lineTo(9.6,-4); x.fill();
+    x.beginPath(); x.moveTo(-6,1); x.quadraticCurveTo(-15,3,-18,7);
+    x.quadraticCurveTo(-11,3.5,-5,3.4); x.fill();
+  }else{ const f=Math.sin(t*.009+ph);
+    x.beginPath(); x.ellipse(0,0,7.5,3,0,0,7); x.fill();
+    for(const d of[-1,1]){ x.beginPath(); x.moveTo(d,-1);
+      x.quadraticCurveTo(d*12,-6-f*10,d*21,2-f*6.5); x.quadraticCurveTo(d*11,1,d,3); x.fill(); } }
+  x.restore();
+}
+function stonewall(rate,y,sc,fill){        // 밭담
+  const off=cam*rate; x.fillStyle=fill;
+  for(let row=0;row<3;row++){ const ry=y-row*13*sc, g=17*sc;
+    const i0=Math.floor((off-70)/g), i1=Math.ceil((off+W+70)/g);
+    for(let i=i0;i<=i1;i++){ const sd=i*7+row*31;
+      const sx=i*g-off+(rnd(sd)-.5)*9*sc, rw=(9+rnd(sd+1)*7)*sc, rh=(7+rnd(sd+2)*5)*sc;
+      x.beginPath();
+      for(let a=0;a<9;a++){ const th=a/9*6.283, j=.72+rnd(sd+a*3)*.5;
+        const qx=sx+Math.cos(th)*rw*j, qy=ry+Math.sin(th)*rh*j; a?x.lineTo(qx,qy):x.moveTo(qx,qy); }
+      x.closePath(); x.fill(); } }
+}
+function ridge(rate,P2,h,base,fill,crater){
+  x.beginPath(); x.moveTo(-60,H);
+  for(let s=-60;s<=W+60;s+=5){ const wx=s+cam*rate, i=Math.floor(wx/P2), u=(wx/P2-i)*2-1;
+    let y=base-h*(.6+rnd(i*1.7)*.8)*Math.exp(-u*u*6);
+    if(crater&&Math.abs(u)<.28&&rnd(i*3.1)>.45) y+=48*Math.pow(Math.cos(u/.28*Math.PI/2),2);
+    x.lineTo(s,y); }
+  x.lineTo(W+60,H); x.closePath(); x.fillStyle=fill; x.fill();
+}
+function halla(rate,anchor,fill){          // 한라산 — 세계 저 끝에 서 있다
+  const cx=anchor-cam*rate;
+  x.beginPath(); x.moveTo(-60,H);
+  for(let px=-60;px<=W+60;px+=4){
+    const u=(px-cx)/640;
+    let y=452-262*Math.exp(-u*u*1.05)+Math.sin(px*.009)*4;
+    if(Math.abs(u)<.17) y+=32*Math.pow(Math.cos(u/.17*Math.PI/2),2);   // 백록담
+    x.lineTo(px,y); }
+  x.lineTo(W+60,H); x.closePath(); x.fillStyle=fill; x.fill();
+}
+function fog(y,h,a){const g=x.createLinearGradient(0,y-h,0,y+h);
+  g.addColorStop(0,'rgba(252,252,250,0)');g.addColorStop(.5,'rgba(252,252,250,'+a+')');
+  g.addColorStop(1,'rgba(252,252,250,0)');x.fillStyle=g;x.fillRect(0,y-h,W,h*2);}
+function sky(a,b,cc,gx,gy,gr){
+  const sk=x.createLinearGradient(0,0,0,H*.8);
+  sk.addColorStop(0,a);sk.addColorStop(.75,b);sk.addColorStop(1,cc);
+  x.fillStyle=sk;x.fillRect(0,0,W,H);
+  if(gr){ const gl=x.createRadialGradient(gx,gy,20,gx,gy,gr);
+    gl.addColorStop(0,'rgba(255,255,255,.9)');gl.addColorStop(1,'rgba(255,255,255,0)');
+    x.fillStyle=gl;x.fillRect(0,0,W,H); }
+}
+
+/* ═══════════ 배경 세 곳 ═══════════ */
+function bgField(t){                       // 1막 · 벌판
+  sky('#c9c9c5','#f4f4f1','#fbfbf8',900,330,420);
+  ridge(.05,1700,150,432,'#cbcbc7');            fog(426,44,.6);
+  ridge(.11,1150,190,482,'#9d9d99',1);          fog(478,34,.48);
+  ridge(.20,2100,92,536,'#6c6c68');             fog(530,26,.32);
+  choga(700-cam*.32,560,240,132,'#5c5c56','#7f7f77');
+  choga(2100-cam*.32,560,180,100,'#5c5c56','#7f7f77');
+  choga(3600-cam*.32,560,210,118,'#5c5c56','#7f7f77');
+  gfield(t,.42,584,26,20,40,'#6d6d64','#c9c9c0',0.9,10);
+  x.fillStyle='#43433b'; x.fillRect(0,592,W,H);
+  gfield(t,.60,616,22,26,58,'#3b3b33','#ddddd3',1.1,12);
+  stonewall(.74,632,1.05,'#1e1e19');
+  harbang(1380-cam,450,1.5,'#000');
+  jeongnang(700-cam,576,1.0,'#000');
+  harbang(2260-cam,470,1.2,'#000');
+  sandam(3300-cam,560,1.0,'#000');
+}
+function fgField(t){
+  gfield(t,1.0,668,26,30,62,'#131310','#ededdf',1.2,10);
+  gfield(t,1.35,742,34,54,116,'#000','#fbfbf2',1.7,10);
+}
+function bgWood(t){                        // 2막 · 곶자왈
+  sky('#b9b9b6','#e9e9e5','#f2f2ee',760,300,380);
+  ridge(.06,1900,120,448,'#c2c2be');            fog(444,46,.66);
+  treeRow(tree,t,.16,506,150,120,190,'#a9a9a5',3.0,10);   fog(500,40,.6);
+  treeRow(tree,t,.30,548,180,150,240,'#8b8b87',4.2,12);   fog(542,32,.46);
+  x.fillStyle='#3d3d38'; x.fillRect(0,566,W,H);           // 이끼 낀 바닥
+  lowRow(fern,t,.50,584,30,18,34,'#5e5e57',10);
+  treeRow(tree,t,.62,606,230,190,300,'#4a4a45',5.4,14);
+  lowRow(fern,t,.78,624,26,26,48,'#2b2b26',12);
+  stonewall(.86,640,1.0,'#191915');                        // 무너진 돌담
+}
+function fgWood(t){
+  lowRow(fern,t,1.0,672,28,34,64,'#101010',10);
+  treeRow(tree,t,1.18,742,340,300,430,'#000',8.5,10);
+  lowRow(fern,t,1.35,748,34,54,104,'#000',10);
+}
+function bgHalla(t){                       // 3막 · 한라산
+  sky('#c2c2bf','#eeeeeb','#dededa',640,300,400);
+  halla(.09,1560,'#c6c6c3');                    fog(408,72,.8);
+  treeRow(fir,t,.15,486,120,60,130,'#b0b0ad',2.2,14);      fog(478,42,.7);
+  treeRow(fir,t,.28,552,190,110,230,'#7c7c78',3.4,18);
+  lowRow(bamboo,t,.44,564,26,16,32,'#6a6a64',10);          fog(556,30,.4);
+  x.fillStyle='#4a4a44'; x.fillRect(0,572,W,H);
+  lowRow(bamboo,t,.66,614,24,24,48,'#2c2c27',12);
+  treeRow(fir,t,.80,648,300,200,340,'#0d0d0b',6.0,16);
+  for(let i=0;i<3;i++){                       // 까마귀 — 능선 위를 맴돈다
+    const gp=1500, off=cam*.5, i0=Math.floor((off-200)/gp);
+    for(let k=i0;k<=i0+2;k++){
+      const sx=k*gp+rnd(k*2.3+i)*gp-off;
+      if(sx<-40||sx>W+40) continue;
+      crow(sx, 210+rnd(k*1.7+i)*130+Math.sin(t*.0011+k+i)*18, .8+rnd(k+i)*.5, t, k*1.3+i*2.1); } }
+}
+function fgHalla(t){
+  lowRow(bamboo,t,1.0,668,28,34,66,'#0d0d0b',10);
+  treeRow(fir,t,1.2,720,420,260,400,'#000',7.5,10);
+  lowRow(bamboo,t,1.35,742,34,44,92,'#000',10);
+}
+const ZONES=[{bg:bgField,fg:fgField},{bg:bgWood,fg:fgWood},{bg:bgHalla,fg:fgHalla}];
+
+/*═══════════════════════════════════════════════════════════════════════
+  물체 그리기 — 전부 검은 실루엣. 몸체가 도는 대로 같이 돈다
+═══════════════════════════════════════════════════════════════════════*/
+function onBody(b,fn){ x.save(); x.translate(b.position.x-cam,b.position.y); x.rotate(b.angle); fn(); x.restore(); }
+function drawLand(e){
+  const g=e.box;
+  if(g.x-cam>W+60||g.x+g.w-cam<-60) return;
+  x.fillStyle='#000'; x.fillRect(g.x-cam,g.y,g.w,g.h);
+  const st=13, i0=Math.floor(g.x/st), i1=Math.ceil((g.x+g.w)/st);
+  for(let i=i0;i<i1;i++){
+    const sx=i*st+rnd(i*2.1)*st-cam;
+    if(sx<-40||sx>W+40) continue;
+    const rw=4+rnd(i*1.7)*7, rh=3+rnd(i*3.3)*5;
+    x.beginPath();
+    for(let a=0;a<8;a++){ const th=a/8*6.283, j=.7+rnd(i+a*2.3)*.55;
+      const qx=sx+Math.cos(th)*rw*j, qy=g.y+1+Math.sin(th)*rh*j;
+      a?x.lineTo(qx,qy):x.moveTo(qx,qy); }
+    x.closePath(); x.fill();
+  }
+}
+function drawCrate(e){ const b=e.bodies[0], s=e.s;
+  onBody(b,()=>{ x.fillStyle='#000'; x.fillRect(-s/2,-s/2,s,s);
+    x.strokeStyle='#20201c'; x.lineWidth=2;
+    x.beginPath(); x.moveTo(-s/2+3,-s/2+3); x.lineTo(s/2-3,s/2-3);
+    x.moveTo(s/2-3,-s/2+3); x.lineTo(-s/2+3,s/2-3); x.stroke(); }); }
+function drawBoulder(e){ const b=e.bodies[0], r=e.r;
+  onBody(b,()=>{ x.fillStyle='#000'; x.beginPath();
+    for(let a=0;a<13;a++){ const th=a/13*6.283, j=.78+rnd(e.seed+a*2.7)*.42;
+      const qx=Math.cos(th)*r*j, qy=Math.sin(th)*r*j; a?x.lineTo(qx,qy):x.moveTo(qx,qy); }
+    x.closePath(); x.fill();
+    x.fillStyle='#1a1a17';
+    for(let k=0;k<5;k++){ x.beginPath();
+      x.arc((rnd(e.seed+k*5)-.5)*r*1.1,(rnd(e.seed+k*9)-.5)*r*1.1,1.6+rnd(e.seed+k)*2.4,0,7); x.fill(); } }); }
+function drawPlank(e){ const b=e.bodies[0];
+  onBody(b,()=>{ x.fillStyle='#000'; x.fillRect(-e.w/2,-e.h/2,e.w,e.h);
+    x.fillStyle='#17170f';
+    for(let i=1;i<6;i++) x.fillRect(-e.w/2+e.w*i/6,-e.h/2+2,1.5,e.h-4); });
+  if(e.pivot){ x.fillStyle='#000'; x.beginPath();
+    x.moveTo(e.pivot.x-cam-16,e.pivot.y+26); x.lineTo(e.pivot.x-cam,e.pivot.y-2);
+    x.lineTo(e.pivot.x-cam+16,e.pivot.y+26); x.closePath(); x.fill(); } }
+function drawRope(e){
+  x.strokeStyle='#000'; x.lineWidth=4.2; x.lineCap='round';
+  x.beginPath(); x.moveTo(e.anchor.x-cam,e.anchor.y);
+  for(const b of e.bodies) x.lineTo(b.position.x-cam,b.position.y);
+  x.stroke();
+  const t=e.bodies[e.bodies.length-1];
+  x.fillStyle='#000'; x.beginPath(); x.arc(t.position.x-cam,t.position.y+7,5,0,7); x.fill(); }
+function drawSwing(e){ const b=e.bodies[0];
+  x.strokeStyle='#000'; x.lineWidth=3;
+  for(const j of e.joints){
+    const a=j.pointA, p=Vector.add(b.position,Vector.rotate(j.pointB,b.angle));
+    x.beginPath(); x.moveTo(a.x-cam,a.y); x.lineTo(p.x-cam,p.y); x.stroke(); }
+  onBody(b,()=>{ x.fillStyle='#000'; x.fillRect(-e.w/2,-7,e.w,14); }); }
+function drawPlate(e){ const b=e.bodies[0];
+  x.fillStyle='#000';
+  x.fillRect(b.position.x-cam-e.w/2, b.position.y-5, e.w, 10);
+  x.fillRect(b.position.x-cam-e.w/2-4, e.home.y+9, 6, 26);
+  x.fillRect(b.position.x-cam+e.w/2-2, e.home.y+9, 6, 26); }
+function drawGate(e){ const b=e.bodies[0];
+  x.fillStyle='#000'; x.fillRect(b.position.x-cam-e.w/2, b.position.y-e.h/2, e.w, e.h);
+  x.fillStyle='#1a1a17';
+  for(let i=1;i<5;i++) x.fillRect(b.position.x-cam-e.w/2+3, b.position.y-e.h/2+e.h*i/5, e.w-6, 2);
+  x.fillStyle='#000'; x.fillRect(e.home.x-cam-e.w/2-7, e.home.y-e.h/2-6, e.w+14, 12); }
+
+/* 잡을 수 있는 게 손 닿는 데 있으면 옅게 둘러 준다 — 글자 대신 */
+function drawReach(){
+  if(P.holdJoint||P.hangJoint) return;
+  const g=nearestGrab(); if(!g) return;
+  const b=g.b, r=(b.bounds.max.x-b.bounds.min.x+b.bounds.max.y-b.bounds.min.y)/3.4;
+  x.strokeStyle='rgba(236,232,220,.30)'; x.lineWidth=1.4;
+  x.setLineDash([4,7]); x.beginPath();
+  x.arc(b.position.x-cam,b.position.y,r+10,0,7); x.stroke(); x.setLineDash([]);
+}
+/* 예전엔 허리에서 물체까지 선을 그었다. 그 선이 다리 높이에 가로로 남았다.
+   이제 팔이 실제로 물체를 향해 뻗으므로 선이 필요 없다 */
+function holdTarget(){
+  if(!P.holdJoint||!P.holdBody) return null;
+  const b=P.holdBody;
+  return Vector.add(b.position, Vector.rotate(P.holdJoint.pointB, b.angle));
+}
+function drawTie(){
+  if(!TIE) return;
+  const a=Vector.add(TIE.bodyA.position,Vector.rotate(TIE.pointA,TIE.bodyA.angle));
+  const b=Vector.add(TIE.bodyB.position,Vector.rotate(TIE.pointB,TIE.bodyB.angle));
+  x.strokeStyle='#000'; x.lineWidth=3.4;
+  x.beginPath(); x.moveTo(a.x-cam,a.y); x.lineTo(b.x-cam,b.y); x.stroke();
+}
+
+/* 주인공 — 물리 몸체의 상태를 그림 자세로 옮긴다 */
+/* 자세를 매 칸 바로 갈아끼우면 팔다리가 툭툭 튄다.
+   지금 자세에서 목표 자세로 이어 붙인다 — 걷다 서고, 뛰고 내리는 사이가 이어진다 */
+const POSE={};
+const LIMBS=['rot','th1','th2','kn1','kn2','ar1','ar2','el1','el2','hd','neck','curl'];
+function easePose(target,k){
+  for(const q of LIMBS){ const v=target[q]||0;
+    POSE[q] = POSE[q]===undefined ? v : POSE[q]+(v-POSE[q])*k; }
+  POSE.pack=target.pack; POSE.bald=target.bald; POSE.club=target.club;
+  return POSE;
+}
+/* ⚠⚠ 관절은 한 방향으로만 접힌다. 이걸 뒤집으면 새 다리처럼 꺾여서 사람으로 안 보인다.
+      무릎 : 정강이는 넓적다리보다 **뒤로만** 간다  →  kn ≤ 0
+      팔꿈치: 아래팔은 위팔보다 **앞으로만** 간다  →  el ≥ 0
+   (2026-08-22, 사용자가 "이게 사람 움직임이냐" 하고 지적. 전부 부호가 반대였다)
+   ⚠ rot 은 **양수가 앞으로 숙임**, 음수면 뒤로 자빠진다. 그리고 골반이 회전축이라
+      rot 을 바꾸면 다리까지 같이 돌아간다 — 발을 땅에 붙여 두려면 th1·th2 에서 바뀐 만큼 빼라 */
+function drawPlayer(t){
+  const b=P.body, p=P.ph, st=P.st, spd=P.sp||0;
+  const po={};
+  if(st==='ledge'){ Object.assign(po, ledgePose(P.climb)); }
+  else if(st==='hang'){
+    /* LIMBO 를 보면 매달린 몸이 줄 방향으로 통째로 눕고,
+       다리는 흔들리는 반대쪽으로 끌려간다. 뻣뻣하게 매달려 있지 않다 */
+    let lean=0;
+    if(P.hang){ const dx=b.position.x-P.hang.position.x, dy=Math.max(8,b.position.y-P.hang.position.y);
+      lean=clamp(-P.face*Math.atan2(dx,dy),-1.0,1.0); }
+    const sw=clamp(b.velocity.x*P.face*.11,-.85,.85);          // 흔들리는 세기
+    po.rot=lean;
+    po.th1=.10-sw;            po.th2=-.16-sw*.75;
+    po.kn1=-(.45+Math.abs(sw)*.55); po.kn2=-(.28+Math.abs(sw)*.45);
+    po.ar1=2.70; po.ar2=2.78; po.el1=.10; po.el2=.07;
+    po.hd=3+Math.abs(sw)*5; }
+  else if(st==='jump'){                       /* 솟는다 — 앞무릎을 끌어올리고 팔을 앞으로 뻗는다 */
+    po.th1=.85; po.kn1=-1.30; po.th2=-.70; po.kn2=-.95;
+    /* 팔은 앞으로. 위로 올리면 경박해 보인다.
+       두 팔을 반걸음 어긋나게 둬야 겹쳐 보이지 않고 깊이가 산다 */
+    po.ar1=1.12; po.el1=.24;  po.ar2=.60; po.el2=.40;
+    po.rot=.10; po.hd=4; }
+  else if(st==='fall'){                       /* 내린다 — 다리를 뻗어 땅을 찾고 팔이 벌어진다 */
+    po.th1=.46; po.kn1=-.30; po.th2=-.34; po.kn2=-.62;
+    po.ar1=-.26; po.el1=.62;  po.ar2=-.18; po.el2=.56;   // 팔은 내린 채
+    po.rot=.05; po.hd=5; }
+  else if(st==='land'){                       /* 디딘다 — 무릎이 한 번 꺾인다 */
+    po.th1=.22; po.kn1=-.88; po.th2=-.40; po.kn2=-.72;
+    po.ar1=-.50; po.el1=.62; po.ar2=-.38; po.el2=.55;
+    po.rot=.06; po.hd=2; }
+  else if(st==='push'){                       /* 민다 — 몸을 기울이고 두 팔을 앞으로 뻗는다 */
+    po.rot=.17; po.th1=.08; po.kn1=-.22; po.th2=-.80; po.kn2=-.40;
+    po.ar1=.96; po.el1=.18; po.ar2=.84; po.el2=.16; po.hd=1; }
+  else if(st==='walk'){
+    const sn=Math.sin(p), cs=Math.cos(p);
+    po.th1=sn*.86*spd; po.th2=-po.th1;                        // 넓적다리가 앞뒤로
+    // 무릎은 뒤로만 접힌다. 다리를 들어 옮길 때 많이 접고, 딛을 땐 곧게 편다
+    po.kn1=-(.10+Math.max(0,-cs)*1.05)*spd;
+    po.kn2=-(.10+Math.max(0, cs)*1.05)*spd;
+    po.ar1=-sn*.55*spd; po.ar2=-po.ar1;                       // 팔은 다리와 엇갈리게
+    po.el1=(.22+Math.max(0, sn)*.35)*spd+.10;                 // 팔꿈치는 앞으로만
+    po.el2=(.22+Math.max(0,-sn)*.35)*spd+.10;
+    po.th1-=.10*spd; po.th2-=.10*spd;                        // 몸을 기울인 만큼 다리를 되돌려 발을 땅에 붙인다
+    po.rot=.05*spd; po.hd=spd*6; }
+  else if(st==='crouch'){                     /* 쪼그려 앉는다 — 사람 뼈대대로 */
+    /* rot 은 골반을 축으로 몸 전체를 돌린다. 다리 각도는 숙인 만큼 미리 빼 두었다.
+       발은 골반보다 앞(11.5)·아래(8.5)에 놓여 정강이와 몸통 사이가 벌어진다 */
+    po.rot=.30;                                // 앞으로 숙인다 (음수면 뒤로 자빠진다)
+    po.curl=1; po.neck=.34;                    // 등이 말리고, 얼굴은 앞을 본다
+    po.th1=1.46; po.kn1=-1.64;                 // 앞다리 — 무릎이 골반보다 높이 올라온다
+    po.th2=1.31; po.kn2=-2.16;                 // 뒷다리는 반걸음 뒤
+    po.ar1=.28; po.el1=.62; po.ar2=.06; po.el2=.54; po.hd=1; }   // 손을 앞으로 — 집으러 간다
+  else { po.kn1=po.kn2=-.07; po.ar1=po.ar2=-.06; po.el1=po.el2=.20; po.hd=1; }
+  /* 잡은 손이 물체에 닿게 — 어깨·팔꿈치 각도를 거꾸로 풀어 준다.
+     닿지 않는 거리면 그쪽으로 쭉 뻗은 채로 둔다 */
+  const tgt=holdTarget();
+  if(tgt){
+    const sx0=b.position.x-cam, hip0=b.position.y+35-FEET+(P.bob||0);
+    const lx=((tgt.x-cam)-sx0)/(FIG*P.face), ly=(tgt.y-hip0)/FIG;
+    /* 어깨 높이는 웅크린 만큼 내려온다 — figure() 의 SH*sq 와 같은 값을 써야 손이 안 뜬다 */
+    const shy=27*(1-(po.curl||0)*.18);
+    const vx=lx-1.5, vy=ly+shy;                                  // 어깨(1.5,-shy) 기준
+    const L1=9.5, L2=8.5;
+    let d=Math.hypot(vx,vy); d=clamp(d, Math.abs(L1-L2)+.4, L1+L2-.15);
+    const th=Math.atan2(vx,vy);
+    const a1=Math.acos(clamp((L1*L1+d*d-L2*L2)/(2*L1*d),-1,1));
+    const b1=Math.acos(clamp((L1*L1+L2*L2-d*d)/(2*L1*L2),-1,1));
+    po.ar1=th-a1; po.el1=Math.PI-b1;
+  }
+  if(st==='jump'||st==='fall'){                                  // 공중에선 다리가 뒤로 끌린다
+    const drag=clamp(b.velocity.x*P.face*.055,-.45,.45);
+    po.th1-=drag; po.th2-=drag*.7; }
+  const vlean=b.velocity.x*P.face*.010;                          // 속도만큼 몸이 앞으로 기운다
+  po.rot=(po.rot||0)+vlean; po.th1=(po.th1||0)-vlean; po.th2=(po.th2||0)-vlean;
+  const sm=easePose(po, st==='walk'?.26:st==='ledge'?.45:st==='land'?.55:.24);
+  const bob = -Math.abs(Math.sin(p))*3.0*spd + Math.sin(t*.0016)*.32*(1-spd)
+            + (st==='land'?(P.landT/11)*3.2:0) + (P.sit||0)*18.8;      // 앉은 자세의 발높이(골반 아래 8.5)에 맞춘 값
+  P.sit=lerp(P.sit||0, st==='crouch'?1:0, .22);
+  P.bob=lerp(P.bob||0,bob,.35);
+  figure(b.position.x-cam, b.position.y+35-FEET+P.bob, FIG, P.face, sm, t);
+}
+
+/*═══════════════════════════════════════════════════════════════════════
+  화면
+═══════════════════════════════════════════════════════════════════════*/
+const ZB=[3120,4800], BAND=760;
+function zoneMix(wx){
+  const w=[0,0,0];
+  for(let i=0;i<2;i++){
+    if(wx>=ZB[i]+BAND/2){ w[i]=0; w[i+1]=1; continue; }
+    if(wx> ZB[i]-BAND/2){ const k=ease((wx-(ZB[i]-BAND/2))/BAND); w[i]=1-k; w[i+1]=k;
+      for(let j=0;j<i;j++) w[j]=0; return w; }
+    if(i===0) w[0]=1;
+    return w;
+  }
+  return w;
+}
+function blend(pick,t){
+  const ws=zoneMix(cam+W*.42);
+  let base=-1,over=-1,k=0;
+  for(let i=0;i<3;i++){ if(ws[i]<=.002) continue;
+    if(base<0) base=i; else { over=i; k=ws[i]; } }
+  ZONES[base][pick](t);
+  if(over>=0){ const M=x; OX.setTransform(1,0,0,1,0,0); OX.clearRect(0,0,W,H);
+    x=OX; ZONES[over][pick](t); x=M;
+    x.globalAlpha=k; x.drawImage(OC,0,0); x.globalAlpha=1; }
+}
+function vignette(a){
+  const v=x.createRadialGradient(W/2,H*.44,H*.32,W/2,H*.5,H);
+  v.addColorStop(0,'rgba(0,0,0,0)');v.addColorStop(1,'rgba(0,0,0,'+a+')');
+  x.fillStyle=v;x.fillRect(0,0,W,H);
+}
+function draw(t){
+  x.save();
+  if(zoom!==1){ x.translate(zx,zy); x.scale(zoom,zoom); x.translate(-zx,-zy); }
+  if(shake>0){ x.translate((Math.random()-.5)*shake,(Math.random()-.5)*shake); shake*=.86; if(shake<.4)shake=0; }
+  blend('bg',t);
+  for(const e of ENTS) if(e.type==='land') e.draw(e,t);
+  drawTie();
+  for(const e of ENTS) if(e.type!=='land') e.draw(e,t);
+  if(SC.now==='wake'){ if(SC.her) figure(SC.her.x-cam,SC.her.hip,FIG,SC.her.face,SC.her.po,t); }
+  else { drawReach(); if(!P.dead) drawPlayer(t); }
+  x.restore();
+  blend('fg',t);
+  if(dark>0){ x.fillStyle='rgba(0,0,0,'+dark+')'; x.fillRect(0,0,W,H); }
+  if(lid>0){ const e=lid*H*.52; x.fillStyle='#000'; x.fillRect(0,0,W,e); x.fillRect(0,H-e,W,e); }
+  if(P.dead){ x.fillStyle='rgba(0,0,0,'+Math.min(.85,P.dead/14)+')'; x.fillRect(0,0,W,H); }
+  vignette(.5);
+}
+
+/*═══════════════════════════════════════════════════════════════════════
+  한 바퀴 — 물리는 고정 간격으로, 그림은 화면 속도로
+═══════════════════════════════════════════════════════════════════════*/
+/* ═══════════ 오프닝 ═══════════
+   ① 여자 혼자 걷는다 → ② 계속 걷는다 → ③ 뒤에서 가격당한다 → ④ 암전
+   → ⑤ 눈을 뜬다, 둘러보니 아무도 없다 → 그대로 게임 시작
+   맞는 순간(hit)은 화면이 살아 있는 채로 하얗게 먹혔다가 검게 가라앉는다 */
+const V1=document.getElementById('v1'),V2=document.getElementById('v2'),V3=document.getElementById('v3');
+const SK=document.getElementById('skip');
+let SKIP=0;
+const SC={now:'v1',f:0,her:null};
+function go(s){ SC.now=s; SC.f=0; vlast=-1; vstill=0; }
+
+const blur=document.createElement('canvas'); blur.width=30; blur.height=40;
+const bx2=blur.getContext('2d');
+/* ③ 다시 걷기 — 영상 속 돌담이 군데군데 끊겨 허공을 딛는 것처럼 보인다.
+   걷는 선 아래를 캔버스로 덮어 바닥을 만들어 준다. 영상이 옆으로 흘러가는
+   속도(재서 맞춘 값)에 맞춰 같이 흘러야 붙어 있는 것처럼 보인다 */
+function floorV3(t){
+  const X0=(W-540)/2, gy=526;
+  const u=Math.max(0,(V3.currentTime||0)-0.3), off=27.6*u+4.76*u*u;
+  x.save(); x.beginPath(); x.rect(X0,0,540,H); x.clip();
+  x.fillStyle='#000'; x.fillRect(X0,gy,540,H-gy);
+  const st=13, i0=Math.floor((off-30)/st), i1=Math.ceil((off+570)/st);
+  for(let i=i0;i<=i1;i++){                       // 윗면에 걸터앉은 돌들
+    const sx=X0+i*st+rnd(i*2.1)*st-off;
+    const rw=4+rnd(i*1.7)*7, rh=3+rnd(i*3.3)*5;
+    x.beginPath();
+    for(let a=0;a<8;a++){ const th=a/8*6.283, j=.7+rnd(i+a*2.3)*.55;
+      const qx=sx+Math.cos(th)*rw*j, qy=gy+1+Math.sin(th)*rh*j;
+      a?x.lineTo(qx,qy):x.moveTo(qx,qy); }
+    x.closePath(); x.fill(); }
+  const row=(rate,by,gp,hmin,hmax,dk,lt,lw)=>{
+    const o=off*rate, j0=Math.floor((o-40)/gp), j1=Math.ceil((o+580)/gp);
+    for(let j=j0;j<=j1;j++){ const r=rnd(j*1.7), r2=rnd(j*3.3);
+      blade(X0+j*gp+r*gp-o, by+r2*10, hmin+r2*(hmax-hmin), (r-.5)*22, j*2.3, t, dk, lt, lw); } };
+  row(1.00, gy+22, 20, 16, 34, '#131310', '#ededdf', 0.95);
+  row(1.26, gy+84, 26, 44, 92, '#0a0a09', '#f2f2e6', 1.5);
+  row(1.60, gy+168, 34, 66, 140,'#000',    '#fbfbf2', 2.0);
+  x.restore();
+}
+function drawShot(vid,dark){
+  x.fillStyle='#0a0a09'; x.fillRect(0,0,W,H);
+  if(vid.readyState>=2){
+    try{ bx2.drawImage(vid,0,0,30,40); }catch(e){}
+    x.globalAlpha=.5; x.imageSmoothingEnabled=true;
+    x.drawImage(blur,0,0,30,40,-60,-60,W+120,H+120);            // 뿌연 배경
+    x.globalAlpha=1;
+    x.fillStyle='rgba(6,6,6,.32)'; x.fillRect(0,0,W,H);
+    /* 영상마다 잘린 높이가 조금씩 다르다 — 제 크기 그대로 읽어 높이에 맞춘다 */
+    const vw=vid.videoWidth||810, vh=vid.videoHeight||1080;
+    const dw=Math.round(720*vw/vh);
+    x.drawImage(vid,0,0,vw,vh,Math.round((W-dw)/2),0,dw,720);    // 본 화면
+    if(vid===V3) floorV3(NOW);
+  }
+  vignette(.55);
+  if(dark>0){ x.fillStyle='rgba(0,0,0,'+dark+')'; x.fillRect(0,0,W,H); }
+}
+function shotFade(vid,inF,hold){
+  let a=0;
+  if(SC.f<inF) a=1-SC.f/inF;
+  if(!hold&&vid.duration&&vid.duration-vid.currentTime<.55)
+    a=Math.max(a,1-(vid.duration-vid.currentTime)/.55);
+  return a;
+}
+function playSafe(v,next){
+  const p=v.play();
+  if(p&&p.catch) p.catch(()=>{});
+  v.onerror=()=>go(next);
+  setTimeout(()=>{ if(v.readyState<2&&SC.now!=='play') go(next); },4000);
+}
+/* 브라우저가 자동재생을 막으면 영상이 첫 칸에서 멈춘다.
+   두 번 더 틀어 보고, 그래도 안 움직이면 다음 장면으로 넘긴다 */
+let vlast=-1, vstill=0;
+function stalled(v){
+  if(v.currentTime!==vlast){ vlast=v.currentTime; vstill=0; return false; }
+  vstill++;
+  if(vstill===90||vstill===240){ const p=v.play(); if(p&&p.catch) p.catch(()=>{}); }
+  return vstill>420;
+}
+
+/* ── 눈을 뜨는 장면 (그림) — 이미 서 있다. 누웠다 일어서는 동작은 뺐다 ── */
+const GY0=600, HIP_ST=GY0-FEET;      // 인물이 작아진 만큼 골반 높이도 맞춘다
+const STND={rot:0,th1:0,kn1:-.07,th2:0,kn2:-.07,ar1:-.06,el1:.20,ar2:-.06,el2:.20,hd:1};
+let dark=0, lid=0;
+function wake(){
+  const f=SC.f, herX=148, po=Object.assign({},STND); let face=1;
+  if(f<40)       { lid=lerp(1,.52,f/40);        dark=lerp(1,.25,f/40); }   // 실눈이 뜨인다
+  else if(f<55)  { lid=lerp(.52,.88,(f-40)/15); }                          // 한 번 다시 감긴다
+  else if(f<115) { lid=lerp(.88,0,(f-55)/60);   dark=lerp(.25,0,(f-55)/60); }
+  else           { lid=0; dark=0; }
+  if(f>=150&&f<234){                                                       // 둘러본다 — 아무도 없다
+    face=(f<174||f>=214)?1:-1;
+    po.hd=lerp(1,6,Math.sin((f%24)/24*Math.PI));
+    po.rot=Math.sin((f-150)*.09)*.05; }
+  zoom = f<234 ? 2.9 : lerp(2.9,1,ease((f-234)/60));   // 인물이 작아져 더 당긴다
+  zx=herX-cam; zy=HIP_ST-14;
+  SC.her={x:herX,hip:HIP_ST,po:po,face:face};
+  if(f>=300) go('title');       // 오프닝이 끝나면 제목이 뜬다
+}
+let flash=0;
+function opening(){
+  SC.f++;
+  if(SC.f%30===0) tryMusic();                       // 막혔으면 계속 다시 시도한다
+  if(SKIP){ SKIP=0; if(SC.now!=='play'&&SC.now!=='title'){ go('title'); return; } }
+  switch(SC.now){
+    case 'v1':
+      if(SC.f===1) playSafe(V1,'v3');
+      if(V1.ended||(V1.duration&&V1.currentTime>=V1.duration-.03)||stalled(V1)) go('v3');
+      break;
+    case 'v3':
+      if(SC.f===1) playSafe(V3,'v2');
+      if(V3.ended||(V3.duration&&V3.currentTime>=V3.duration-.03)||stalled(V3)) go('v2');
+      break;
+    case 'v2':
+      if(SC.f===1) playSafe(V2,'blackout');
+      if(V2.ended||(V2.duration&&V2.currentTime>=V2.duration-.03)||stalled(V2)){ flash=1; go('hit'); }
+      break;
+    case 'hit': {                      /* 맞았다 — 번쩍 · 한 박자 · 완전히 먹힌다 */
+      const f=SC.f;
+      flash = f<5 ? 1 : f<9 ? 0 : 1;
+      if(f>=36) flash=1-(f-36)*.28;    // 흰빛이 툭 꺼지면 그 밑은 이미 캄캄하다
+      if(f>=42){ flash=0; go('blackout'); }
+      break; }
+    case 'blackout':                                   // 맞았다 — 섬광, 그리고 캄캄해진다
+      flash=Math.max(0,flash-.075); dark=1;
+      if(SC.f>=110){ lid=1; go('wake'); }   // 얼마쯤 시간이 흘렀다
+      break;
+    case 'wake': wake(); break;
+    case 'title':                 // 아무 키나 누를 때까지 기다린다
+      if(SC.f%30===0) tryMusic();
+      break;
+  }
+}
+function toPlay(){
+  V1.pause(); V2.pause(); V3.pause();
+  zoom=1; dark=0; lid=0; flash=0;
+  P.spawn={x:135,y:GY0-35};
+  Body.setPosition(P.body,P.spawn); Body.setVelocity(P.body,{x:0,y:0});
+  SK.classList.remove('on');
+  HINT.classList.remove('gone'); setTimeout(()=>HINT.classList.add('gone'),9000);
+  go('play');
+}
+
+/* ═══════════ 소리 ═══════════
+   배경음악 출처: Pixabay (Pixabay Content License — 무료·상업적 이용 가능·출처 표기 불필요) */
+const BGM=document.getElementById('bgm'), SND=document.getElementById('snd');
+/* 지금은 숲(30초·474KB) 하나만 돌린다. 다음 씬을 만들면 나머지 둘을 쓴다 */
+const TRACKS=['audio/bgm1.mp3','audio/bgm2.mp3','audio/bgm3.mp3'];
+const ORDER=[0];
+let ti=0, mute=localStorage.getItem('oreumkil_mute')==='1', fade=null;
+BGM.loop=true;                               // 끝나면 다시 처음으로
+BGM.src=TRACKS[ORDER[0]]; BGM.load();        // 문 열자마자 받기 시작한다
+function sndFace(){ SND.textContent=mute?'♪ 음악 꺼짐':'♪ 음악 켜짐';
+  SND.classList.toggle('off',mute); SND.title='음악 끄기(M) · 다음 곡(N)'; }
+function bgmGo(){ if(mute) return;
+  if(!BGM.src) BGM.src=TRACKS[ORDER[ti]];
+  BGM.play().then(()=>{ clearInterval(fade); let v=BGM.volume;
+    fade=setInterval(()=>{ v=Math.min(1,v+.05); BGM.volume=v; if(v>=1)clearInterval(fade); },60);
+  }).catch(()=>{});
+}
+function bgmNext(){ ti=(ti+1)%ORDER.length; BGM.volume=0; BGM.src=TRACKS[ORDER[ti]]; bgmGo(); }
+function bgmMute(){ mute=!mute; localStorage.setItem('oreumkil_mute',mute?'1':'0'); sndFace();
+  if(!mute) BGM.muted=false;
+  if(mute){ BGM.pause(); clearInterval(fade); BGM.volume=0; } else bgmGo(); }
+BGM.volume=0; sndFace();
+/* 브라우저가 자동재생을 막으면 오프닝을 시작하지 않고 기다린다 —
+   그래야 음악과 첫 장면이 같이 나간다. 커뮤에 올릴 영상도 이래야 맞다 */
+/* 자동재생이 되는 브라우저면 음악만 먼저 켜지고 영상은 나중에 시작해서 어긋난다.
+   그래서 첫 화면은 항상 거친다 — 키를 누르는 그 한 순간에 둘 다 나간다 */
+/* 오프닝은 문 열자마자 시작한다. 음악도 같이 틀어 보고,
+   브라우저가 막으면 아무 조작에나 다시 시도한다.
+   ⚠ 덜 받아진 채로 틀면 처음 몇 초를 버벅이니 다 받아진 뒤에만 튼다 */
+/* ⚠ 브라우저는 사람이 한 번 건드리기 전엔 소리를 못 내게 막는다. 코드로 못 뚫는다.
+   대신 **소리를 죽인 채로 t=0부터 틀어 둔다**(무음 재생은 막지 않는다).
+   그러면 나중에 클릭했을 때 처음부터 다시 시작하는 게 아니라
+   지금 장면에 맞는 자리에서 소리만 켜진다 — 화면과 음악이 어긋나지 않는다 */
+BGM.muted=true;
+function tryMusic(){
+  if(mute||!BGM.paused) return;
+  if(BGM.readyState<4){ BGM.addEventListener('canplaythrough',tryMusic,{once:true}); return; }
+  BGM.volume=1;
+  const pr=BGM.play(); if(pr&&pr.catch) pr.catch(()=>{});
+}
+function unlockSound(){
+  if(mute) return;
+  BGM.muted=false; BGM.volume=1; tryMusic();
+}
+tryMusic();
+['keydown','pointerdown','touchstart'].forEach(ev=>addEventListener(ev,unlockSound,{passive:true}));
+/* 오프닝을 처음부터 다시 — 녹화할 때 쓴다 (O) */
+function replayOpening(){
+  V1.pause(); V2.pause(); V3.pause();
+  try{ V1.currentTime=0; V2.currentTime=0; V3.currentTime=0; }catch(e){}
+  zoom=1; lid=0; dark=0; flash=0;
+  if(!mute){ BGM.muted=false; try{ BGM.currentTime=0; }catch(e){} tryMusic(); }
+  HINT.classList.add('gone');
+  go('v1');
+}
+BGM.addEventListener('ended',bgmNext);
+BGM.addEventListener('error',()=>{ if(BGM.src) bgmNext(); });
+SND.addEventListener('click',e=>{e.stopPropagation();bgmMute()});
+
+
+document.addEventListener('visibilitychange',()=>{ if(document.hidden) BGM.pause(); else bgmGo(); });
+
+/* ═══════════ 한 바퀴 ═══════════ */
+
+/* 첫 화면 — 음악을 켤 수 있을 때까지 여기서 기다린다 */
+function titleCard(t,withName){
+  x.fillStyle='#07070a'; x.fillRect(0,0,W,H);
+  if(withName){
+    const g=x.createRadialGradient(W/2,H*.42,20,W/2,H*.42,560);
+    g.addColorStop(0,'rgba(62,62,58,.58)'); g.addColorStop(1,'rgba(0,0,0,0)');
+    x.fillStyle=g; x.fillRect(0,0,W,H);
+  }
+  x.textAlign='center';
+  if(withName){
+    try{ x.letterSpacing='0.30em'; }catch(e){}
+    x.fillStyle='rgba(240,236,224,.94)';
+    x.font='300 84px system-ui,Helvetica,Arial,sans-serif';
+    x.fillText('OREUMKIL', W/2+18, H*.45);
+  }
+  try{ x.letterSpacing='0.12em'; }catch(e){}
+  x.fillStyle='rgba(240,236,224,'+(.52+Math.sin(t*.0024)*.20)+')';
+  x.font='400 22px "Malgun Gothic",system-ui,sans-serif';
+  x.fillText('아무 키나 누르세요', W/2, withName?H*.45+62:H*.5);
+  x.textAlign='left'; try{ x.letterSpacing='0px'; }catch(e){}
+  vignette(.55);
+}
+const HINT=document.getElementById('hint');
+HINT.classList.add('gone');
+let acc=0,last=0;
+function loop(t){
+  NOW=t;
+  const dt=Math.min(50,t-last)||16; last=t; acc+=dt;
+  let n=0;
+
+  if(SC.now==='title'){                         // 오프닝이 끝났다 — 제목을 띄우고 기다린다
+    acc=0; SC.f++; if(SC.f%30===0) tryMusic();
+    HINT.classList.add('gone'); SK.classList.remove('on');
+    titleCard(t,true); requestAnimationFrame(loop); return;
+  }
+  while(acc>=DT&&n<5){
+    if(SC.now==='play') playerStep(); else opening();
+    for(const e of ENTS) if(e.update) e.update(e,DT);
+    Engine.update(engine,DT);
+    acc-=DT; n++;
+  }
+  if(acc>DT*5) acc=0;
+
+  if(SC.now==='v1'||SC.now==='v2'||SC.now==='v3'||SC.now==='hit'){
+    const vid=SC.now==='v1'?V1:SC.now==='v3'?V3:V2;
+    drawShot(vid, SC.now==='hit'
+      ? clamp((SC.f-9)/12,0,1)
+      : shotFade(vid,SC.now==='v1'?45:20,SC.now==='v2'));
+    if(flash>0){ x.fillStyle='rgba(255,255,255,'+Math.min(1,flash)+')'; x.fillRect(0,0,W,H); }
+    SK.classList.add('on');
+  } else if(SC.now==='blackout'){
+    x.fillStyle='#000'; x.fillRect(0,0,W,H);
+    if(flash>0){ x.fillStyle='rgba(255,255,255,'+Math.min(1,flash)+')'; x.fillRect(0,0,W,H); }
+    SK.classList.add('on');
+  } else {
+    const tx = SC.now==='wake' ? 148 : P.body.position.x;
+    cam += ((tx-W*.42)-cam)*.065;
+    draw(t);
+    if(SC.now==='wake') SK.classList.add('on'); else SK.classList.remove('on');
+  }
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+</script></body></html>

@@ -905,3 +905,6 @@ body{ font-size:19px; }
 .gp-line{ margin:12px 0 0; font-size:18px; line-height:1.75; color:var(--ink-2); }
 .gp-cta{ margin:22px 0 0; }
 .game-page .spec{ margin-top:26px; }
+
+/* 작품 제목 밑에 붙는 부제 (오름길 '고장난 물리엔진' 처럼) */
+.gp-sub{ display:block; margin-top:6px; font-size:15px; font-weight:700; color:var(--muted); letter-spacing:.02em; }
