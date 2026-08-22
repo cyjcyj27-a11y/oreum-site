@@ -101,7 +101,8 @@
           '<path d="M20,121 C62,110 124,108 160,116 C126,131 58,134 20,121 Z"/>' +
         '</g>' +
       '</svg>' +
-      '<span>' + (ko ? '오름게임즈' : 'Oreum Games') + '</span>';
+      /* 글자는 언어와 상관없이 영문 브랜드로 고정한다 — 게임마다 달라 보이지 않게(2026-08-23 사용자) */
+      '<span>OREUM GAMES</span>';
     document.body.appendChild(a);
 
     if (sc && sc.getAttribute('data-fullscreen') === '1') addFullscreen(ko);
