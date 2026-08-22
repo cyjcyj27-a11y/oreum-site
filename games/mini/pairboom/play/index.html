@@ -176,18 +176,6 @@
   }
   .cell.has{ cursor:pointer; }
 
-  /* 지울 수 없는 돌. 길을 막습니다. 색은 --h 를 안 쓰고 돌빛으로 고정합니다 */
-  .cell.rock .face{
-    background:linear-gradient(#c2ced2 0%, #8d9fa5 100%);
-    box-shadow:0 5px 0 #5d7178, 0 7px 13px rgba(0,50,60,.26), inset 0 -5px 0 rgba(0,0,0,.13);
-    cursor:default;
-  }
-  .cell.rock .face::before{
-    background:linear-gradient(180deg, rgba(255,255,255,.40) 0%, rgba(255,255,255,.12) 34%, rgba(255,255,255,0) 52%);
-  }
-  .cell.rock .face path{ fill:#4a5f66; }
-  .cell.rock .face svg{ width:56%; height:56%; }
-  .cell.rock:hover .face{ transform:none; }
 
   /* 타일 한 장. 색은 그림마다 정해진 --h 에서 뽑아 씁니다 */
   .face{
@@ -586,13 +574,13 @@
       <p><b>1.</b> 두 그림을 잇는 길이 <b>빈 칸</b>으로만 뚫려 있어야 합니다.<br>
       <b>2.</b> 그 길은 <b>꺾임이 2번까지</b>(선 세 개까지)만 허용됩니다.<br>
       <b>3.</b> 길은 <b>판 바깥으로 돌아가도</b> 됩니다. 가장자리 그림이 잘 지워지는 이유입니다.</p>
-      <p>더 이상 지울 짝이 없으면 남은 그림을 <b>알아서 섞어</b> 드립니다. 그러니 막혀서 못 깨는 일은 없습니다.</p>
-      <p>모든 판은 <b>끝까지 지울 수 있게</b> 만들어 내놓습니다.</p>
-      <p>뒷단계에는 <b>회색 돌</b>이 섞여 있습니다. 돌은 지울 수 없고 <b>길을 막습니다</b>.
-      돌이 놓인 자리에 따라 판이 십자·마름모·고리 모양이 되기도 합니다.</p>
+      <p>더 이상 지울 짝이 없으면 남은 그림을 <b>알아서 섞어</b> 드립니다. 그러니 못 깨고 멈추는 일은 없습니다.</p>
       <p><b>1단계부터 100단계까지</b> 한 줄로 이어집니다. 깰 때마다
-      <b>그림 종류가 한 종씩 늘어</b> 같은 그림이 귀해집니다. 그래서 짝 찾기가 조금씩 어려워집니다.
-      한 판에서 더 못 늘리면 <b>판이 커지고</b>, 그림 수는 그대로 이어서 갑니다.</p>
+      <b>그림 종류가 늘어</b> 같은 그림이 귀해집니다. 그래서 짝 찾기가 조금씩 어려워집니다.
+      그림은 <b>모두 48가지</b>이고, 100단계에서는 <b>48가지가 저마다 딱 한 짝씩</b> 깔립니다.</p>
+      <p>판은 커지기만 하지 않습니다. <b>판이 좁아지는 단계</b>도 있습니다.
+      그건 그림이 늘어난 단계입니다. 판이 좁을수록 같은 그림이 더 귀해서
+      <b>오히려 더 어려워집니다</b>.</p>
       <p>한 판에 <b>2분 50초</b>입니다. 다 쓰면 그 단계는 실패이고, 다시 하면 됩니다.
       짝이 아주 많은 뒷단계는 시간을 더 줍니다.</p>
     </div>
@@ -607,227 +595,209 @@
 'use strict';
 
 /* ═══════════════════════════════════════════
-   그림패 목록 — 서로 헷갈리지 않는 것들로만
+   그림패 목록 — 서로 헷갈리지 않는 것들로만 48종
    ═══════════════════════════════════════════ */
 /* 그림패 — 죄다 코드로 그린 단순 도형입니다. 100x100 칸 안에 채워 그립니다.
-   이모지는 기기마다 모양이 달라지고 자잘한 무늬가 많아 한눈에 안 들어옵니다. */
+   이모지는 기기마다 모양이 달라지고 자잘한 무늬가 많아 한눈에 안 들어옵니다.
+   순서가 곧 난이도입니다 — 앞단계는 앞쪽 것만 씁니다. 그래서 쉬운 도형을 앞에 두었습니다.
+   또 색이 번호에서 나오므로(hueOf), 비슷하게 생긴 것끼리 색까지 겹치지 않도록
+   자리를 골라 놓았습니다. 함부로 순서를 바꾸면 그 배려가 깨집니다. */
 const ICONS = [
-  'M50 10a40 40 0 1 0 0 80 40 40 0 1 0 0-80z',                                             /* 동그라미 */
-  'M26 16h48a10 10 0 0 1 10 10v48a10 10 0 0 1-10 10H26a10 10 0 0 1-10-10V26a10 10 0 0 1 10-10z', /* 네모 */
-  'M50 12 90 82H10z',                                                                      /* 세모 */
-  'M10 18h80L50 88z',                                                                      /* 거꾸로 세모 */
-  'M50 8 92 50 50 92 8 50z',                                                               /* 마름모 */
-  'M50 6 62 38l34 2-26 22 8 33-28-19-28 19 8-33-26-22 34-2z',                              /* 별 */
-  'M50 6c5 24 15 34 39 39-24 5-34 15-39 39-5-24-15-34-39-39 24-5 34-15 39-39z',            /* 네갈래 별 */
-  'M50 88S12 62 12 38a20 20 0 0 1 38-11 20 20 0 0 1 38 11c0 24-38 50-38 50z',              /* 하트 */
-  'M50 8 88 29v42L50 92 12 71V29z',                                                        /* 육각형 */
-  'M50 8 92 39 76 90H24L8 39z',                                                            /* 오각형 */
-  'M14 10h72L58 50l28 40H14l28-40z',                                                       /* 모래시계 */
-  'M50 6c19 24 32 36 32 51a32 32 0 1 1-64 0c0-15 13-27 32-51z',                            /* 물방울 */
-  'M38 10h24v28h28v24H62v28H38V62H10V38h28z',                                              /* 십자 */
-  'M27 10 50 33 73 10l17 17-23 23 23 23-17 17-23-23-23 23-17-17 23-23-23-23z',             /* 가위표 */
-  'M50 8a42 42 0 1 0 0 84 42 42 0 1 0 0-84zm0 26a16 16 0 1 1 0 32 16 16 0 0 1 0-32z',      /* 도넛 */
-  'M50 8a42 42 0 1 0 0 84 42 42 0 1 0 0-84z M72 14a36 36 0 1 0 0 72 36 36 0 1 0 0-72z',    /* 초승달 */
-  'M58 4 20 56h22l-6 40 38-54H50z',                                                        /* 번개 */
-  'M50 6 88 46H68v42H32V46H12z',                                                           /* 화살표 */
-  'M8 62a42 42 0 0 1 84 0z',                                                               /* 반원 */
-  'M30 22h40a28 28 0 0 1 0 56H30a28 28 0 0 1 0-56z',                                       /* 알약 */
-  'M10 82 18 26l17 16L50 10l15 32 17-16 8 56z',                                            /* 왕관 */
-  'M50 6 88 20v30c0 24-17 37-38 44-21-7-38-20-38-44V20z',                                  /* 방패 */
-  'M8 82a42 42 0 0 1 84 0H70a20 20 0 0 0-40 0z',                                           /* 무지개 */
-  'M50 50 92 29a42 42 0 1 0 0 42z'                                                         /* 한입 베어문 원 */
+  'M50 10a40 40 0 1 0 0 80 40 40 0 1 0 0-80z',                                                                                                                                                       /* 동그라미 */
+  'M26 16h48a10 10 0 0 1 10 10v48a10 10 0 0 1-10 10H26a10 10 0 0 1-10-10V26a10 10 0 0 1 10-10z',                                                                                                     /* 네모 */
+  'M50 12 90 82H10z',                                                                                                                                                                                /* 세모 */
+  'M10 18h80L50 88z',                                                                                                                                                                                /* 거꾸로 세모 */
+  'M50 8 92 50 50 92 8 50z',                                                                                                                                                                         /* 마름모 */
+  'M50 6 62 38l34 2-26 22 8 33-28-19-28 19 8-33-26-22 34-2z',                                                                                                                                        /* 별 */
+  'M50 6c5 24 15 34 39 39-24 5-34 15-39 39-5-24-15-34-39-39 24-5 34-15 39-39z',                                                                                                                      /* 네갈래 별 */
+  'M50 88S12 62 12 38a20 20 0 0 1 38-11 20 20 0 0 1 38 11c0 24-38 50-38 50z',                                                                                                                        /* 하트 */
+  'M50 8 88 29v42L50 92 12 71V29z',                                                                                                                                                                  /* 육각형 */
+  'M50 8 92 39 76 90H24L8 39z',                                                                                                                                                                      /* 오각형 */
+  'M14 10h72L58 50l28 40H14l28-40z',                                                                                                                                                                 /* 모래시계 */
+  'M50 6c19 24 32 36 32 51a32 32 0 1 1-64 0c0-15 13-27 32-51z',                                                                                                                                      /* 물방울 */
+  'M38 10h24v28h28v24H62v28H38V62H10V38h28z',                                                                                                                                                        /* 십자 */
+  'M27 10 50 33 73 10l17 17-23 23 23 23-17 17-23-23-23 23-17-17 23-23-23-23z',                                                                                                                       /* 가위표 */
+  'M50 8a42 42 0 1 0 0 84 42 42 0 1 0 0-84zm0 26a16 16 0 1 1 0 32 16 16 0 0 1 0-32z',                                                                                                                /* 도넛 */
+  'M50 8a42 42 0 1 0 0 84 42 42 0 1 0 0-84z M72 14a36 36 0 1 0 0 72 36 36 0 1 0 0-72z',                                                                                                              /* 초승달 */
+  'M58 4 20 56h22l-6 40 38-54H50z',                                                                                                                                                                  /* 번개 */
+  'M50 6 88 46H68v42H32V46H12z',                                                                                                                                                                     /* 화살표 */
+  'M8 62a42 42 0 0 1 84 0z',                                                                                                                                                                         /* 반원 */
+  'M30 22h40a28 28 0 0 1 0 56H30a28 28 0 0 1 0-56z',                                                                                                                                                 /* 알약 */
+  'M10 82 18 26l17 16L50 10l15 32 17-16 8 56z',                                                                                                                                                      /* 왕관 */
+  'M50 6 88 20v30c0 24-17 37-38 44-21-7-38-20-38-44V20z',                                                                                                                                            /* 방패 */
+  'M8 82a42 42 0 0 1 84 0H70a20 20 0 0 0-40 0z',                                                                                                                                                     /* 무지개 */
+  'M50 50 92 29a42 42 0 1 0 0 42z',                                                                                                                                                                  /* 한입 베어문 원 */
+  'M16 12h68a10 10 0 0 1 10 10v40a10 10 0 0 1-10 10H46L24 94V72h-8A10 10 0 0 1 6 62V22A10 10 0 0 1 16 12Z',                                                                                          /* 말풍선 */
+  'M50 8C28 8 10 26 8 46h84C90 26 72 8 50 8Z M45 46h10v32a14 14 0 0 1-28 0h10a4 4 0 0 0 8 0Z',                                                                                                       /* 우산 */
+  'M6 86L32 32L46 58L64 22L94 86Z',                                                                                                                                                                  /* 산 */
+  'M78 6 40 16v50a16 16 0 1 0 10 14V32l28-8Z',                                                                                                                                                       /* 음표 */
+  'M50 38c-9-12-24-19-44-17 14 9 21 21 23 35 8-8 15-12 21-12s13 4 21 12c2-14 9-26 23-35-20-2-35 5-44 17Z',                                                                                           /* 갈매기 */
+  'M50 4L63 27L90 27L76 50L90 73L63 73L50 96L37 73L10 73L24 50L10 27L37 27Z',                                                                                                                        /* 육각별 */
+  'M37 18L40 4L60 4L63 18L75 10L90 25L82 37L96 40L96 60L82 63L90 75L75 90L63 82L60 96L40 96L37 82L25 90L10 75L18 63L4 60L4 40L18 37L10 25L25 10Z M50 37a13 13 0 1 0 0 26 13 13 0 0 0 0-26Z',         /* 톱니바퀴 */
+  'M50 4a26 26 0 1 0-8 50.7V74H30v12h12v10h16V54.7A26 26 0 0 0 50 4Z M50 20a10 10 0 1 0 0 20 10 10 0 0 0 0-20Z',                                                                                     /* 열쇠 */
+  'M50 6C36 24 12 40 12 58a16 16 0 0 0 32 4l-7 26h26l-7-26a16 16 0 0 0 32-4c0-18-24-34-38-52Z',                                                                                                      /* 스페이드 */
+  'M94 6L6 44L40 58Z M94 6L40 58L48 92Z',                                                                                                                                                            /* 종이비행기 */
+  'M26 80a20 20 0 0 1 0-40 24 24 0 0 1 44-10 18 18 0 0 1 8 50Z',                                                                                                                                     /* 구름 */
+  'M50 6a9 9 0 0 0-5 17v7H33v11h12v39c-10-3-17-11-19-21l-11 3c3 18 18 31 36 33 18-2 33-15 36-33l-11-3c-2 10-9 18-19 21V41h12V30H55v-7a9 9 0 0 0-5-17Z',                                              /* 닻 */
+  'M40 33C28 -6 72 -6 60 33C87 3 109 41 70 50C109 59 87 97 60 67C72 106 28 106 40 67C13 97 -9 59 30 50C-9 41 13 3 40 33Z',                                                                           /* 꽃 */
+  'M92 50c-8-13-22-22-38-22-14 0-27 6-36 15L8 24v52l10-17c9 9 22 15 36 15 16 0 30-9 38-22Z',                                                                                                         /* 물고기 */
+  'M14 20h52v56a12 12 0 0 1-12 12H26a12 12 0 0 1-12-12Z M70 32h6a16 16 0 0 1 0 32h-6v-12h6a4 4 0 0 0 0-8h-6Z',                                                                                       /* 컵 */
+  'M10 90V62h24V38h24V14h32v76Z',                                                                                                                                                                    /* 계단 */
+  'M50 6L70 32H60L78 56H64L84 78H56V92H44V78H16L36 56H22L40 32H30Z',                                                                                                                                 /* 나무 */
+  'M50 6a22 22 0 0 0-22 22v12h13V28a9 9 0 0 1 18 0v12h13V28A22 22 0 0 0 50 6Z M16 44h68v50H16Z',                                                                                                     /* 자물쇠 */
+  'M50 6 96 46H84v46H16V46H4Z M40 62h20v30H40Z',                                                                                                                                                     /* 집 */
+  'M8 26h20v48H8Z M28 42h44v16H28Z M72 26h20v48H72Z',                                                                                                                                                /* 아령 */
+  'M28 28m-16 0a16 16 0 1 0 32 0a16 16 0 1 0-32 0Z M72 28m-16 0a16 16 0 1 0 32 0a16 16 0 1 0-32 0Z M28 72m-16 0a16 16 0 1 0 32 0a16 16 0 1 0-32 0Z M72 72m-16 0a16 16 0 1 0 32 0a16 16 0 1 0-32 0Z', /* 네 점 */
+  'M50 8c-4 0-7 3-7 7-12 4-19 15-19 28 0 18-4 26-10 33h72c-6-7-10-15-10-33 0-13-7-24-19-28 0-4-3-7-7-7Z M37 82a13 13 0 0 0 26 0Z',                                                                   /* 종 */
+  'M14 86C14 40 42 14 86 14C86 58 58 86 14 86Z',                                                                                                                                                     /* 나뭇잎 */
+  'M16 6h11v88H16Z M31 10h57L72 32l16 22H31Z',                                                                                                                                                       /* 깃발 */
 ];
 
 /* 도형마다 고정된 제 색. 137.5도씩 돌려 배정해 이웃한 도형끼리 색이 겹치지 않게 합니다 */
 const hueOf = i => Math.round((i * 137.5) % 360);
 
-/* ── 막힌 칸(돌) ──
-   board[i] 는 도형 번호(0 이상)이거나, 비었으면 null 입니다.
-   돌은 -1 로 둡니다. 지울 수 없고, passableIdx 가 null 이 아닌 것을 막으므로
-   길도 알아서 막힙니다. */
-const ROCK = -1;
-const ROCK_PATH =
-  'M50 13 C65 13 78 20 86 33 C92 44 89 60 80 71 C71 83 56 89 44 87 ' +
-  'C30 84 18 74 12 60 C7 47 13 31 26 21 C33 16 41 13 50 13 Z ' +
-  'M36 33 C45 29 54 32 56 39 C58 46 49 51 41 48 C33 46 30 37 36 33 Z';
+/* ── 단계표 (2026-08-22 다시 짬) ──
+   지난 표는 38판부터 돌을 끼워 100판을 채웠습니다. 재보니 돌은 난이도를 거의 안 올렸습니다.
+   그래서 그림을 24종에서 48종으로 늘리고, 100판을 처음부터 다시 짰습니다.
 
-/* 돌 놓을 자리. 폰에서는 판 모양이 바뀌므로 가로세로를 -1~1 로 환산해서 정합니다.
-   그래야 6x10 이든 10x6 이든 같은 모양이 나옵니다. */
-function rockSpots(w, h, n, shape){
-  if (n <= 0) return [];
-  const cx = (w-1)/2, cy = (h-1)/2;
-  const list = [];
-  for (let y = 0; y < h; y++){
-    for (let x = 0; x < w; x++){
-      const nx = (x-cx)/Math.max(cx, .5), ny = (y-cy)/Math.max(cy, .5);
-      let v;
-      switch (shape){
-        case 'cross':   v = Math.min(Math.abs(nx), Math.abs(ny)); break;
-        case 'diamond': v = Math.abs(Math.abs(nx) + Math.abs(ny) - .66); break;
-        case 'ring':    v = Math.abs(Math.sqrt(nx*nx + ny*ny) - .68); break;
-        case 'frame':   v = Math.abs(Math.max(Math.abs(nx), Math.abs(ny)) - .78); break;
-        case 'core':    v = Math.sqrt(nx*nx + ny*ny); break;          /* 한가운데 뭉치 */
-        default:        v = Math.random(); break;                     /* 흩뿌리기 */
-      }
-      list.push([v + Math.random()*0.03, y*w + x]);   /* 같은 값이면 자리를 조금 섞습니다 */
-    }
-  }
-  list.sort((a, b) => a[0] - b[0]);
-  const out = [];
-  for (let k = 0; k < list.length && out.length < n; k++) out.push(list[k][1]);
-  return out;
-}
-/* 돌 수는 반드시 짝수여야 합니다 (남는 칸이 홀수면 짝이 하나 뜹니다) */
-const rocksAt = n => {
-  const st = stageAt(n);
-  const r = Math.min(st.rocks || 0, Math.floor(st.w*st.h/3));
-  return r - (r % 2);
-};
+   ★ 재서 알아낸 것 ★
+   난이도를 올리는 건 사실상 '그림 수' 하나뿐입니다.
+   판이 커지면 같은 그림이 여러 장 깔려 짝이 널리므로 **오히려 쉬워집니다**.
+       그림 3종 : 4x4 판 3.3 · 5x4 판 3.1 · 6x4 판 2.9 · 7x4 판 2.7   (클수록 어려움)
+   (예전 메모에 '판 두께가 난이도를 정한다'고 적혀 있었는데, 다시 재보니 두께는 거의
+    상관없었습니다. 그때 본 것은 두께가 아니라 판이 커진 효과였습니다.
+    60칸에서 4겹·5겹·6겹 차이는 잡음 수준입니다.)
 
-/* ── 단계표 (2026-08-21 개편) ──
-   난이도가 앞구간에 몰아치던 것을 폈습니다. 22판 -> 37판.
+   힘듦 = 칸수 / 그 판에서 지금 이을 수 있는 짝 수.
+   '짝 하나 찾으려면 얼마나 훑어야 하는가'라는 뜻입니다.
+   1판 3.3 에서 100판 48.6 까지, 한 판도 뒤로 가지 않고 오릅니다.
 
-   재보니 어려워지는 폭의 3/4 이 1~9판에 몰려 있었습니다.
-   범인은 '판 두께'(가로세로 중 짧은 쪽)였습니다.
-   같은 그림 짝 가운데 실제로 이어지는 비율을 재보니
-       4겹 19~22%%   5겹 14~18%%   6겹 10~13%%   7겹 8~11%%   8겹 7~10%%
-   인데, 옛 표는 4겹(10x4)에서 6겹(8x6)으로 건너뛰었습니다. 한 판 만에 반토막입니다.
+   ★ 표의 생김새 ★
+   1~12판   판도 그림도 커지기만 하는 도입부 (예전 1~18판과 같은 세기입니다).
+   13~100판 판이 크게 열렸다가 서너 판에 걸쳐 좁아지며 그림이 늡니다. 그리고 다시 열립니다.
+            좁아지는 판이 더 어렵습니다 — 같은 그림이 더 귀해지기 때문입니다.
+            물결의 바닥과 꼭대기는 뒤로 갈수록 함께 올라갑니다.
+   100판    12x8 · 48종 — 그림 마흔여덟 가지가 딱 한 짝씩. 이 게임이 갈 수 있는 끝입니다.
 
-   고친 것 셋:
-     1) 4겹과 6겹 사이에 5겹(8x5)을, 6겹과 8겹 사이에 7겹(10x7·12x7)을 끼웠습니다.
-     2) 판이 커지는 판에서는 그림 수를 한 판 쉬어갑니다.
-        원래 정하신 규칙 — '전 단계의 최대 그림 수가 현 단계의 시작 숫자' — 그대로입니다.
-     3) 앞에 4x4·5x4 를 넣어 시작을 더 눕혔습니다.
-
-   ★ 칸 수를 고를 때 주의할 것 ★
-   폰에서는 pickShape 이 칸 수만 보고 모양을 다시 고릅니다. 그래서 '내가 적은 가로세로'가
-   아니라 '칸 수'가 두께를 결정합니다. 예를 들어 36칸은 폰에서 6x6(6겹)이 되어
-   32칸(4x8, 4겹) 바로 뒤에 두면 난이도가 튑니다. 그래서 36칸은 뺐습니다.
-   폰 기준 두께:  16·20·24·28·32=4겹  40=5겹  42·48·54·60·66=6겹  70·84=7겹  88·96·104=8겹
-
-   그림은 24개 그대로 씁니다. 새로 그린 것 없습니다. */
+   ★ 고칠 때 주의 ★
+   · 그림 수는 절대 줄지 않아야 합니다. 줄면 사람이 '뒤로 갔다'고 느낍니다.
+   · 그림 수는 ICONS.length(48)도, 그 판의 짝 수도 넘을 수 없습니다.
+   · 폰에서는 pickShape 이 칸 수만 보고 모양을 다시 고릅니다. 여기 적은 가로세로는 PC 것입니다.
+     칸 수를 바꾸면 폰에서 칸이 얼마나 작아지는지 꼭 확인하십시오 (104칸이 43px, 여기가 한계). */
 const STAGES = [
-  { w: 4, h:4, kinds: 3 },   /*  1판 ·  16칸 ·  8짝 */
-  { w: 4, h:4, kinds: 4 },   /*  2판 ·  16칸 ·  8짝 */
-  { w: 4, h:4, kinds: 5 },   /*  3판 ·  16칸 ·  8짝 */
-  { w: 5, h:4, kinds: 5 },   /* 판 커짐 */
-  { w: 5, h:4, kinds: 6 },   /*  5판 ·  20칸 · 10짝 */
-  { w: 5, h:4, kinds: 7 },   /*  6판 ·  20칸 · 10짝 */
-  { w: 6, h:4, kinds: 7 },   /* 판 커짐 */
-  { w: 6, h:4, kinds: 8 },   /*  8판 ·  24칸 · 12짝 */
-  { w: 6, h:4, kinds: 9 },   /*  9판 ·  24칸 · 12짝 */
-  { w: 7, h:4, kinds: 9 },   /* 판 커짐 */
-  { w: 7, h:4, kinds:10 },   /* 11판 ·  28칸 · 14짝 */
-  { w: 7, h:4, kinds:11 },   /* 12판 ·  28칸 · 14짝 */
-  { w: 8, h:4, kinds:11 },   /* 판 커짐 */
-  { w: 8, h:4, kinds:12 },   /* 14판 ·  32칸 · 16짝 */
-  { w: 8, h:4, kinds:13 },   /* 15판 ·  32칸 · 16짝 */
-  { w: 8, h:5, kinds:13 },   /* 판 커짐 · 5겹 */
-  { w: 8, h:5, kinds:14 },   /* 17판 ·  40칸 · 20짝 */
-  { w: 8, h:5, kinds:15 },   /* 18판 ·  40칸 · 20짝 */
-  { w: 7, h:6, kinds:15 },   /* 판 커짐 · 6겹 */
-  { w: 7, h:6, kinds:16 },   /* 20판 ·  42칸 · 21짝 */
-  { w: 8, h:6, kinds:16 },   /* 판 커짐 */
-  { w: 8, h:6, kinds:17 },   /* 22판 ·  48칸 · 24짝 */
-  { w: 9, h:6, kinds:17 },   /* 판 커짐 */
-  { w: 9, h:6, kinds:18 },   /* 24판 ·  54칸 · 27짝 */
-  { w:10, h:6, kinds:18 },   /* 판 커짐 */
-  { w:10, h:6, kinds:19 },   /* 26판 ·  60칸 · 30짝 */
-  { w:11, h:6, kinds:19 },   /* 판 커짐 */
-  { w:11, h:6, kinds:20 },   /* 28판 ·  66칸 · 33짝 */
-  { w:10, h:7, kinds:20 },   /* 판 커짐 · 7겹 */
-  { w:10, h:7, kinds:21 },   /* 30판 ·  70칸 · 35짝 */
-  { w:12, h:7, kinds:21 },   /* 판 커짐 */
-  { w:12, h:7, kinds:22 },   /* 32판 ·  84칸 · 42짝 */
-  { w:11, h:8, kinds:22 },   /* 판 커짐 · 8겹 */
-  { w:11, h:8, kinds:23 },   /* 34판 ·  88칸 · 44짝 */
-  { w:12, h:8, kinds:23 },   /* 판 커짐 */
-  { w:12, h:8, kinds:24 },   /* 36판 ·  96칸 · 48짝 */
-  { w:13, h:8, kinds:24 },   /* 판 커짐 */
-
-  /* ── 38판부터: 모양 판 ──
-     여기서부터 그림은 24종으로 고정입니다(더 늘릴 그림이 없습니다).
-     대신 지울 수 없는 <b>돌</b>이 들어갑니다. 돌은 길을 막아 난이도를 올리고,
-     놓인 자리에 따라 판이 십자·액자·마름모 모양이 됩니다.
-     돌 수를 재봤더니 칸수의 13%%를 넘기면 풀 수 있는 판이 잘 안 나옵니다.
-     그래서 104칸이라도 12개까지만 놓습니다.
-     (ring 모양은 가운데를 통째로 막아 잘 안 풀려서 뺐습니다) */
-  { w: 9, h:6, kinds:24, rocks: 2, shape:'scatter' },   /*  38판 */
-  { w:10, h:6, kinds:24, rocks: 2, shape:'cross' },   /*  39판 */
-  { w:11, h:6, kinds:24, rocks: 2, shape:'frame' },   /*  40판 */
-  { w:10, h:7, kinds:24, rocks: 2, shape:'diamond' },   /*  41판 */
-  { w:12, h:7, kinds:24, rocks: 2, shape:'scatter' },   /*  42판 */
-  { w:11, h:8, kinds:24, rocks: 2, shape:'cross' },   /*  43판 */
-  { w:12, h:8, kinds:24, rocks: 2, shape:'frame' },   /*  44판 */
-  { w:13, h:8, kinds:24, rocks: 2, shape:'diamond' },   /*  45판 */
-  { w:11, h:6, kinds:24, rocks: 2, shape:'cross' },   /*  46판 */
-  { w:10, h:7, kinds:24, rocks: 2, shape:'frame' },   /*  47판 */
-  { w:12, h:7, kinds:24, rocks: 2, shape:'diamond' },   /*  48판 */
-  { w:11, h:8, kinds:24, rocks: 2, shape:'scatter' },   /*  49판 */
-  { w:12, h:8, kinds:24, rocks: 2, shape:'cross' },   /*  50판 */
-  { w:13, h:8, kinds:24, rocks: 2, shape:'frame' },   /*  51판 */
-  { w: 9, h:6, kinds:24, rocks: 4, shape:'frame' },   /*  52판 */
-  { w:10, h:6, kinds:24, rocks: 4, shape:'diamond' },   /*  53판 */
-  { w:11, h:6, kinds:24, rocks: 4, shape:'scatter' },   /*  54판 */
-  { w:10, h:7, kinds:24, rocks: 4, shape:'cross' },   /*  55판 */
-  { w:12, h:7, kinds:24, rocks: 4, shape:'frame' },   /*  56판 */
-  { w:11, h:8, kinds:24, rocks: 4, shape:'diamond' },   /*  57판 */
-  { w:12, h:8, kinds:24, rocks: 4, shape:'scatter' },   /*  58판 */
-  { w:13, h:8, kinds:24, rocks: 4, shape:'cross' },   /*  59판 */
-  { w:11, h:6, kinds:24, rocks: 4, shape:'diamond' },   /*  60판 */
-  { w:10, h:7, kinds:24, rocks: 4, shape:'scatter' },   /*  61판 */
-  { w:12, h:7, kinds:24, rocks: 4, shape:'cross' },   /*  62판 */
-  { w:11, h:8, kinds:24, rocks: 4, shape:'frame' },   /*  63판 */
-  { w:12, h:8, kinds:24, rocks: 4, shape:'diamond' },   /*  64판 */
-  { w:13, h:8, kinds:24, rocks: 4, shape:'scatter' },   /*  65판 */
-  { w: 9, h:6, kinds:24, rocks: 6, shape:'scatter' },   /*  66판 */
-  { w:10, h:6, kinds:24, rocks: 6, shape:'cross' },   /*  67판 */
-  { w:11, h:6, kinds:24, rocks: 6, shape:'frame' },   /*  68판 */
-  { w:10, h:7, kinds:24, rocks: 6, shape:'diamond' },   /*  69판 */
-  { w:12, h:7, kinds:24, rocks: 6, shape:'scatter' },   /*  70판 */
-  { w:11, h:8, kinds:24, rocks: 6, shape:'cross' },   /*  71판 */
-  { w:12, h:8, kinds:24, rocks: 6, shape:'frame' },   /*  72판 */
-  { w:13, h:8, kinds:24, rocks: 6, shape:'diamond' },   /*  73판 */
-  { w:11, h:6, kinds:24, rocks: 6, shape:'cross' },   /*  74판 */
-  { w:10, h:7, kinds:24, rocks: 6, shape:'frame' },   /*  75판 */
-  { w:12, h:7, kinds:24, rocks: 6, shape:'diamond' },   /*  76판 */
-  { w:11, h:8, kinds:24, rocks: 6, shape:'scatter' },   /*  77판 */
-  { w:12, h:8, kinds:24, rocks: 6, shape:'cross' },   /*  78판 */
-  { w:13, h:8, kinds:24, rocks: 6, shape:'frame' },   /*  79판 */
-  { w:11, h:6, kinds:24, rocks: 8, shape:'frame' },   /*  80판 */
-  { w:10, h:7, kinds:24, rocks: 8, shape:'frame' },   /*  81판 */
-  { w:12, h:7, kinds:24, rocks: 8, shape:'scatter' },   /*  82판 */
-  { w:11, h:8, kinds:24, rocks: 8, shape:'cross' },   /*  83판 */
-  { w:12, h:8, kinds:24, rocks: 8, shape:'frame' },   /*  84판 */
-  { w:13, h:8, kinds:24, rocks: 8, shape:'frame' },   /*  85판 */
-  { w:11, h:6, kinds:24, rocks: 8, shape:'cross' },   /*  86판 */
-  { w:10, h:7, kinds:24, rocks: 8, shape:'frame' },   /*  87판 */
-  { w:12, h:7, kinds:24, rocks: 8, shape:'frame' },   /*  88판 */
-  { w:11, h:8, kinds:24, rocks: 8, shape:'scatter' },   /*  89판 */
-  { w:12, h:8, kinds:24, rocks: 8, shape:'cross' },   /*  90판 */
-  { w:13, h:8, kinds:24, rocks: 8, shape:'frame' },   /*  91판 */
-  { w:12, h:7, kinds:24, rocks:10, shape:'frame' },   /*  92판 */
-  { w:11, h:8, kinds:24, rocks:10, shape:'cross' },   /*  93판 */
-  { w:12, h:8, kinds:24, rocks:10, shape:'scatter' },   /*  94판 */
-  { w:13, h:8, kinds:24, rocks:10, shape:'cross' },   /*  95판 */
-  { w:12, h:7, kinds:24, rocks:10, shape:'cross' },   /*  96판 */
-  { w:11, h:8, kinds:24, rocks:10, shape:'scatter' },   /*  97판 */
-  { w:12, h:8, kinds:24, rocks:10, shape:'cross' },   /*  98판 */
-  { w:13, h:8, kinds:24, rocks:10, shape:'frame' },   /*  99판 */
-  { w:13, h:8, kinds:24, rocks:12, shape:'frame' },   /* 100판 — 마지막. 제일 큰 판에 돌 12개 */
+  { w: 4, h:4, kinds: 3 },   /*   1판 ·  16칸 · 짝  8 · 시작 */
+  { w: 4, h:4, kinds: 4 },   /*   2판 ·  16칸 · 짝  8 ·  */
+  { w: 4, h:4, kinds: 5 },   /*   3판 ·  16칸 · 짝  8 ·  */
+  { w: 5, h:4, kinds: 6 },   /*   4판 ·  20칸 · 짝 10 · 판 커짐 */
+  { w: 6, h:4, kinds: 7 },   /*   5판 ·  24칸 · 짝 12 · 판 커짐 */
+  { w: 6, h:4, kinds: 8 },   /*   6판 ·  24칸 · 짝 12 ·  */
+  { w: 7, h:4, kinds: 9 },   /*   7판 ·  28칸 · 짝 14 · 판 커짐 */
+  { w: 7, h:4, kinds:10 },   /*   8판 ·  28칸 · 짝 14 ·  */
+  { w: 8, h:4, kinds:11 },   /*   9판 ·  32칸 · 짝 16 · 판 커짐 */
+  { w: 8, h:4, kinds:12 },   /*  10판 ·  32칸 · 짝 16 ·  */
+  { w: 8, h:5, kinds:13 },   /*  11판 ·  40칸 · 짝 20 · 판 커짐 */
+  { w: 8, h:5, kinds:14 },   /*  12판 ·  40칸 · 짝 20 ·  */
+  { w:11, h:4, kinds:14 },   /*  13판 ·  44칸 · 짝 22 · 판 커짐 */
+  { w: 8, h:6, kinds:15 },   /*  14판 ·  48칸 · 짝 24 · 판 커짐 */
+  { w:10, h:5, kinds:15 },   /*  15판 ·  50칸 · 짝 25 · 판 커짐 */
+  { w: 8, h:7, kinds:16 },   /*  16판 ·  56칸 · 짝 28 · 판 커짐 */
+  { w:10, h:6, kinds:16 },   /*  17판 ·  60칸 · 짝 30 · 판 커짐 */
+  { w: 9, h:6, kinds:16 },   /*  18판 ·  54칸 · 짝 27 · 판 좁아짐 */
+  { w: 8, h:6, kinds:16 },   /*  19판 ·  48칸 · 짝 24 · 판 좁아짐 */
+  { w: 7, h:6, kinds:16 },   /*  20판 ·  42칸 · 짝 21 · 판 좁아짐 */
+  { w: 8, h:5, kinds:16 },   /*  21판 ·  40칸 · 짝 20 · 판 좁아짐 */
+  { w:11, h:4, kinds:16 },   /*  22판 ·  44칸 · 짝 22 · 판 커짐 */
+  { w: 8, h:6, kinds:17 },   /*  23판 ·  48칸 · 짝 24 · 판 커짐 */
+  { w:10, h:5, kinds:17 },   /*  24판 ·  50칸 · 짝 25 · 판 커짐 */
+  { w: 8, h:7, kinds:18 },   /*  25판 ·  56칸 · 짝 28 · 판 커짐 */
+  { w:10, h:6, kinds:18 },   /*  26판 ·  60칸 · 짝 30 · 판 커짐 */
+  { w: 8, h:8, kinds:19 },   /*  27판 ·  64칸 · 짝 32 · 판 커짐 */
+  { w:12, h:6, kinds:19 },   /*  28판 ·  72칸 · 짝 36 · 판 커짐 */
+  { w:11, h:6, kinds:19 },   /*  29판 ·  66칸 · 짝 33 · 판 좁아짐 */
+  { w:10, h:6, kinds:19 },   /*  30판 ·  60칸 · 짝 30 · 판 좁아짐 */
+  { w: 9, h:6, kinds:19 },   /*  31판 ·  54칸 · 짝 27 · 판 좁아짐 */
+  { w: 8, h:6, kinds:19 },   /*  32판 ·  48칸 · 짝 24 · 판 좁아짐 */
+  { w: 8, h:7, kinds:20 },   /*  33판 ·  56칸 · 짝 28 · 판 커짐 */
+  { w:10, h:6, kinds:20 },   /*  34판 ·  60칸 · 짝 30 · 판 커짐 */
+  { w: 8, h:8, kinds:21 },   /*  35판 ·  64칸 · 짝 32 · 판 커짐 */
+  { w:12, h:6, kinds:21 },   /*  36판 ·  72칸 · 짝 36 · 판 커짐 */
+  { w:11, h:6, kinds:21 },   /*  37판 ·  66칸 · 짝 33 · 판 좁아짐 */
+  { w:10, h:6, kinds:21 },   /*  38판 ·  60칸 · 짝 30 · 판 좁아짐 */
+  { w: 9, h:6, kinds:21 },   /*  39판 ·  54칸 · 짝 27 · 판 좁아짐 */
+  { w: 8, h:6, kinds:21 },   /*  40판 ·  48칸 · 짝 24 · 판 좁아짐 */
+  { w:10, h:5, kinds:21 },   /*  41판 ·  50칸 · 짝 25 · 판 커짐 */
+  { w: 9, h:6, kinds:22 },   /*  42판 ·  54칸 · 짝 27 · 판 커짐 */
+  { w: 8, h:7, kinds:23 },   /*  43판 ·  56칸 · 짝 28 · 판 커짐 */
+  { w:10, h:6, kinds:23 },   /*  44판 ·  60칸 · 짝 30 · 판 커짐 */
+  { w: 8, h:8, kinds:24 },   /*  45판 ·  64칸 · 짝 32 · 판 커짐 */
+  { w:11, h:6, kinds:24 },   /*  46판 ·  66칸 · 짝 33 · 판 커짐 */
+  { w:13, h:6, kinds:25 },   /*  47판 ·  78칸 · 짝 39 · 판 커짐 */
+  { w:10, h:8, kinds:26 },   /*  48판 ·  80칸 · 짝 40 · 판 커짐 */
+  { w:12, h:7, kinds:26 },   /*  49판 ·  84칸 · 짝 42 · 판 커짐 */
+  { w:13, h:6, kinds:26 },   /*  50판 ·  78칸 · 짝 39 · 판 좁아짐 */
+  { w:10, h:7, kinds:26 },   /*  51판 ·  70칸 · 짝 35 · 판 좁아짐 */
+  { w: 8, h:8, kinds:26 },   /*  52판 ·  64칸 · 짝 32 · 판 좁아짐 */
+  { w:11, h:6, kinds:26 },   /*  53판 ·  66칸 · 짝 33 · 판 커짐 */
+  { w:10, h:7, kinds:27 },   /*  54판 ·  70칸 · 짝 35 · 판 커짐 */
+  { w:12, h:6, kinds:27 },   /*  55판 ·  72칸 · 짝 36 · 판 커짐 */
+  { w:13, h:6, kinds:28 },   /*  56판 ·  78칸 · 짝 39 · 판 커짐 */
+  { w:10, h:7, kinds:28 },   /*  57판 ·  70칸 · 짝 35 · 판 좁아짐 */
+  { w: 8, h:8, kinds:28 },   /*  58판 ·  64칸 · 짝 32 · 판 좁아짐 */
+  { w:11, h:6, kinds:28 },   /*  59판 ·  66칸 · 짝 33 · 판 커짐 */
+  { w:10, h:7, kinds:29 },   /*  60판 ·  70칸 · 짝 35 · 판 커짐 */
+  { w:12, h:6, kinds:29 },   /*  61판 ·  72칸 · 짝 36 · 판 커짐 */
+  { w:13, h:6, kinds:30 },   /*  62판 ·  78칸 · 짝 39 · 판 커짐 */
+  { w:10, h:7, kinds:30 },   /*  63판 ·  70칸 · 짝 35 · 판 좁아짐 */
+  { w: 8, h:8, kinds:30 },   /*  64판 ·  64칸 · 짝 32 · 판 좁아짐 */
+  { w:11, h:6, kinds:30 },   /*  65판 ·  66칸 · 짝 33 · 판 커짐 */
+  { w:10, h:7, kinds:31 },   /*  66판 ·  70칸 · 짝 35 · 판 커짐 */
+  { w:12, h:6, kinds:31 },   /*  67판 ·  72칸 · 짝 36 · 판 커짐 */
+  { w:13, h:6, kinds:32 },   /*  68판 ·  78칸 · 짝 39 · 판 커짐 */
+  { w:10, h:7, kinds:32 },   /*  69판 ·  70칸 · 짝 35 · 판 좁아짐 */
+  { w: 8, h:8, kinds:32 },   /*  70판 ·  64칸 · 짝 32 · 판 좁아짐 */
+  { w:11, h:6, kinds:32 },   /*  71판 ·  66칸 · 짝 33 · 판 커짐 */
+  { w:10, h:7, kinds:33 },   /*  72판 ·  70칸 · 짝 35 · 판 커짐 */
+  { w:12, h:6, kinds:33 },   /*  73판 ·  72칸 · 짝 36 · 판 커짐 */
+  { w:13, h:6, kinds:34 },   /*  74판 ·  78칸 · 짝 39 · 판 커짐 */
+  { w:10, h:7, kinds:34 },   /*  75판 ·  70칸 · 짝 35 · 판 좁아짐 */
+  { w:12, h:6, kinds:34 },   /*  76판 ·  72칸 · 짝 36 · 판 커짐 */
+  { w:13, h:6, kinds:35 },   /*  77판 ·  78칸 · 짝 39 · 판 커짐 */
+  { w:10, h:7, kinds:35 },   /*  78판 ·  70칸 · 짝 35 · 판 좁아짐 */
+  { w:12, h:6, kinds:35 },   /*  79판 ·  72칸 · 짝 36 · 판 커짐 */
+  { w:10, h:8, kinds:37 },   /*  80판 ·  80칸 · 짝 40 · 판 커짐 */
+  { w:12, h:7, kinds:37 },   /*  81판 ·  84칸 · 짝 42 · 판 커짐 */
+  { w:11, h:8, kinds:38 },   /*  82판 ·  88칸 · 짝 44 · 판 커짐 */
+  { w:12, h:8, kinds:39 },   /*  83판 ·  96칸 · 짝 48 · 판 커짐 */
+  { w:11, h:8, kinds:39 },   /*  84판 ·  88칸 · 짝 44 · 판 좁아짐 */
+  { w:10, h:8, kinds:39 },   /*  85판 ·  80칸 · 짝 40 · 판 좁아짐 */
+  { w:12, h:7, kinds:39 },   /*  86판 ·  84칸 · 짝 42 · 판 커짐 */
+  { w:11, h:8, kinds:40 },   /*  87판 ·  88칸 · 짝 44 · 판 커짐 */
+  { w:10, h:8, kinds:40 },   /*  88판 ·  80칸 · 짝 40 · 판 좁아짐 */
+  { w:12, h:7, kinds:40 },   /*  89판 ·  84칸 · 짝 42 · 판 커짐 */
+  { w:11, h:8, kinds:41 },   /*  90판 ·  88칸 · 짝 44 · 판 커짐 */
+  { w:11, h:8, kinds:42 },   /*  91판 ·  88칸 · 짝 44 ·  */
+  { w:12, h:8, kinds:43 },   /*  92판 ·  96칸 · 짝 48 · 판 커짐 */
+  { w:13, h:8, kinds:44 },   /*  93판 · 104칸 · 짝 52 · 판 커짐 */
+  { w:12, h:8, kinds:44 },   /*  94판 ·  96칸 · 짝 48 · 판 좁아짐 */
+  { w:11, h:8, kinds:44 },   /*  95판 ·  88칸 · 짝 44 · 판 좁아짐 */
+  { w:12, h:8, kinds:45 },   /*  96판 ·  96칸 · 짝 48 · 판 커짐 */
+  { w:13, h:8, kinds:46 },   /*  97판 · 104칸 · 짝 52 · 판 커짐 */
+  { w:13, h:8, kinds:47 },   /*  98판 · 104칸 · 짝 52 ·  */
+  { w:13, h:8, kinds:48 },   /*  99판 · 104칸 · 짝 52 ·  */
+  { w:12, h:8, kinds:48 },   /* 100판 ·  96칸 · 짝 48 · 마지막 — 모든 그림이 딱 한 짝씩 */
 ];
 const LAST = STAGES.length;
 
-/* 판마다 주는 시간. 기본 2분 50초를 주되, 짝이 아주 많은 뒷단계는 그만큼 더 줍니다.
-   (짝 하나에 3.6초는 있어야 사람이 손을 놀릴 수 있습니다) */
+/* 판마다 주는 시간. 기본 2분 50초를 주되, 짝이 많고 어려운 뒷단계는 그만큼 더 줍니다. */
 const TIME_BASE = 170;                        // 2분 50초
 const TIME_WARN = 30;                         // 남은 시간이 이보다 적으면 빨갛게
 const stageAt   = n => STAGES[Math.min(Math.max(n,1), LAST) - 1];
-const pairsAt   = n => (stageAt(n).w * stageAt(n).h - rocksAt(n)) / 2;
-/* 짝 하나에 주는 시간. 3.6 이던 것을 4.5 로 올렸습니다 (2026-08-21).
-   전에는 뒷판으로 갈수록 짝당 3.6초까지 쪼그라들어, 판이 커지는 것만으로
-   빡빡해졌습니다. 이제 4.5초 아래로는 안 내려갑니다. */
-const timeAt    = n => Math.max(TIME_BASE, Math.round(pairsAt(n) * 4.5));
+const pairsAt   = n => stageAt(n).w * stageAt(n).h / 2;
+/* 짝 하나에 주는 시간. 앞은 4.5초, 뒤로 갈수록 6.5초까지 늘립니다 (2026-08-22).
+   뒷단계는 그림이 많아 짝 하나 찾는 데 훨씬 오래 걸립니다. 4.5초로 묶어 두면
+   난이도가 아니라 시계가 사람을 떨어뜨리게 됩니다. */
+const secPerPair = n => 4.5 + 2.0 * (Math.min(Math.max(n,1), LAST) - 1) / (LAST - 1);
+const timeAt    = n => Math.max(TIME_BASE, Math.round(pairsAt(n) * secPerPair(n)));
 
 /* ── 얼마나 왔는지 ── */
 /* 왼쪽 아래 전체화면 단추가 판 귀퉁이를 가리지 않게 그만큼 비워 둡니다 */
@@ -936,12 +906,12 @@ function applyLang(){
       '<b>2.</b> That path may turn <b>at most twice</b> (three straight lines).<br>' +
       '<b>3.</b> The path may go <b>around the outside</b> of the board. That is why edge pieces clear easily.</p>' +
       '<p>When no pair can be cleared, the rest are <b>shuffled for you</b>. So you can never get stuck.</p>' +
-      '<p>Every board is built so it <b>can be cleared to the end</b>.</p>' +
-      '<p>Later stages mix in <b>grey stones</b>. Stones never clear and they <b>block the path</b>. ' +
-      'Depending on where they sit, the board takes the shape of a cross, a diamond or a frame.</p>' +
-      '<p><b>Stage 1 through 100</b> run in one line. Each clear adds <b>one more kind of picture</b>, ' +
-      'so matches get scarcer and the hunt gets a little harder. When a stage cannot take another kind, ' +
-      '<b>the board grows</b> and the picture count carries over.</p>' +
+      '<p><b>Stage 1 through 100</b> run in one line. Each clear brings <b>more kinds of picture</b>, ' +
+      'so any one picture gets scarcer and the hunt gets a little harder. There are ' +
+      '<b>48 pictures in all</b>, and at stage 100 <b>each of the 48 appears exactly once as a pair</b>.</p>' +
+      '<p>The board does not only grow. Some stages <b>narrow the board</b> \u2014 those are the ones ' +
+      'that gained a picture. A narrower board makes each picture scarcer still, so it is ' +
+      '<b>harder, not easier</b>.</p>' +
       '<p>Each stage gives you <b>2:50</b>. Run out and the stage is a fail — just try again. ' +
       'Stages with many pairs get more time.</p>' +
     '</div>' +
@@ -1050,7 +1020,7 @@ function findAnyMove(bd){
   const bySym = new Map();
   for (let i = 0; i < board.length; i++){
     const s = board[i];
-    if (s === null || s === ROCK) continue;
+    if (s === null) continue;
     if (!bySym.has(s)) bySym.set(s, []);
     bySym.get(s).push(i);
   }
@@ -1075,7 +1045,7 @@ function trySolve(layout){
   const prev = board;
   board = layout.slice();
   let remain = 0;
-  for (let i = 0; i < board.length; i++) if (board[i] !== null && board[i] !== ROCK) remain++;
+  for (let i = 0; i < board.length; i++) if (board[i] !== null) remain++;
   while (remain > 0){
     const mv = findAnyMove(null);
     if (!mv){ board = prev; return false; }
@@ -1087,52 +1057,14 @@ function trySolve(layout){
 }
 
 function generate(){
-  const st = stageAt(stage);
-  let nRock = rocksAt(stage), shape = st.shape;
-  let tiles = makeTileList(W*H - nRock);
-  let spots = rockSpots(W, H, nRock, shape);
-  let deadline = performance.now() + 2500;   // 시계는 안전장치로만 씁니다
-  let eased = false;                          // 돌을 덜어 낸 적이 있는가
-  let last = null;
-
-  // 판을 깔아 보고 '실제로 끝까지 풀리는지' 확인한 뒤에야 내놓습니다.
-  // 횟수로 돌리는 게 중요합니다 — 시간만 보고 돌면, 컴퓨터가 잠깐 바쁠 때
-  // 한 번도 못 돌아보고 검증 안 된 판을 내놓게 됩니다.
-  for (let n = 0; n < 400; n++){
-    if (n > 0 && n % 40 === 0){
-      // 돌 자리가 나빠서 안 풀릴 수 있습니다. 먼저 자리를 다시 잡아 보고,
-      // 그래도 안 되면 돌을 두 개씩 덜어 냅니다.
-      // 못 깨는 판을 내놓느니 돌이 적은 판이 낫습니다.
-      if (n >= 120 && nRock > 0){
-        nRock -= 2;
-        shape = 'scatter';                    // 흩뿌리기가 제일 잘 풀립니다
-        tiles = makeTileList(W*H - nRock);
-      }
-      spots = rockSpots(W, H, nRock, shape);
-    }
-    const isRock = new Uint8Array(W*H);
-    for (let k = 0; k < spots.length; k++) isRock[spots[k]] = 1;
-    const bag = shuffleArr(tiles.slice());
-    const layout = new Array(W*H);
-    for (let i = 0, k = 0; i < W*H; i++) layout[i] = isRock[i] ? ROCK : bag[k++];
-    last = layout;
-    // 무작위로 풀다 보면 운이 나빠 막힐 수 있어 몇 번 다시 풀어 봅니다
-    for (let t = 0; t < 6; t++){
-      if (trySolve(layout)) return layout;
-    }
-    if (n >= 8 && performance.now() > deadline){
-      // 시간이 다 됐는데 아직 돌이 남아 있으면, 돌을 다 빼고 한 번 더 기회를 줍니다.
-      // 여기서 그냥 나가면 '못 깨는 판'을 내놓게 됩니다.
-      if (nRock > 0 && !eased){
-        eased = true; nRock = 0; shape = 'scatter';
-        tiles = makeTileList(W*H); spots = [];
-        deadline = performance.now() + 1500;
-        continue;
-      }
-      break;
-    }
-  }
-  return last;        // 여기까지 오는 일은 사실상 없습니다 (보통 두세 번이면 끝납니다)
+  // 그냥 무작위로 깝니다. 예전에는 '되는대로 풀어 봐서 끝나는 판'만 골라 내놓았는데,
+  // 그게 두 가지를 망쳤습니다.
+  //   1) 뒷단계는 그런 판이 아주 드물어 판 하나 짜는 데 2초까지 걸렸습니다 (폰에서는 더).
+  //   2) 더 나쁜 것 — '되는대로 풀려서 끝나는 판'은 곧 **쉬운 판**입니다.
+  //      골라내는 순간 뒷단계가 되레 물러졌습니다. 재보니 55~65판이 그 탓에 도로 쉬워져 있었습니다.
+  // 막히는 걱정은 안 해도 됩니다. 지울 짝이 없어지면 doShuffle 이 알아서 섞습니다.
+  // 스스로 100판을 끝까지 지워 보게 해서, 한 판도 못 깨는 일이 없음을 확인했습니다.
+  return shuffleArr(makeTileList(W*H));
 }
 
 /* ═══════════════════════════════════════════
@@ -1171,11 +1103,6 @@ function paintCell(i){
   if (s === null){
     c.classList.remove('has');
     c.firstChild.style.display = 'none';
-  } else if (s === ROCK){
-    c.classList.remove('has');
-    c.classList.add('rock');
-    c.firstChild.style.display = '';
-    glyphs[i].setAttribute('d', ROCK_PATH);
   } else {
     c.classList.add('has');
     c.style.setProperty('--h', hueOf(s));
@@ -1666,14 +1593,12 @@ function pickShape(w, h){
 }
 
 
-/* '3단계 · 6×4 · 짝 12개 · 그림 5종 · 돌 2개' 같은 한 줄 */
-function boardLine(st, w, h, pairs, kinds, rocks){
+/* '3단계 · 6×4 · 짝 12개 · 그림 5종' 같은 한 줄 */
+function boardLine(st, w, h, pairs, kinds){
   if (EN){
-    return 'Stage ' + st + ' · ' + w + '×' + h + ' · ' + pairs + ' pairs · ' + kinds + ' shapes' +
-           (rocks ? ' · ' + rocks + ' stones' : '');
+    return 'Stage ' + st + ' · ' + w + '×' + h + ' · ' + pairs + ' pairs · ' + kinds + ' shapes';
   }
-  return st + '단계 · ' + w + '×' + h + ' · 짝 ' + pairs + '개 · 그림 ' + kinds + '종' +
-         (rocks ? ' · 돌 ' + rocks + '개' : '');
+  return st + '단계 · ' + w + '×' + h + ' · 짝 ' + pairs + '개 · 그림 ' + kinds + '종';
 }
 
 function newGame(){
@@ -1690,7 +1615,7 @@ function newGame(){
     sel = -1; gen++;
     $('fx').innerHTML = '';                 // 앞 판에서 날리던 조각들을 치웁니다
     left = 0;
-    for (let i = 0; i < board.length; i++) if (board[i] !== null && board[i] !== ROCK) left++;
+    for (let i = 0; i < board.length; i++) if (board[i] !== null) left++;
     left /= 2;
     score = 0; combo = 0; lastMatchAt = 0;
     hints = 3;
@@ -1705,10 +1630,7 @@ function newGame(){
     if (!atTitle) startTimer();       // 안내판을 보는 동안은 시간이 줄지 않습니다
     linkEl.classList.remove('show');
     $('veilLose').classList.remove('on');
-    // 돌 개수는 실제로 깔린 판에서 셉니다 (안 풀려서 덜어 냈을 수도 있습니다)
-    let nR = 0;
-    for (let i = 0; i < board.length; i++) if (board[i] === ROCK) nR++;
-    if (!atTitle) toast(boardLine(stage, W, H, left, lv.kinds, nR), 1800);
+    if (!atTitle) toast(boardLine(stage, W, H, left, lv.kinds), 1800);
   }, 30);
 }
 
@@ -1717,7 +1639,7 @@ function onCellClick(e){
   const c = e.target.closest('.cell');
   if (!c) return;
   const i = +c.dataset.i;
-  if (board[i] === null || board[i] === ROCK) return;
+  if (board[i] === null) return;
 
   if (sel === i){                      // 같은 걸 또 누르면 고르기 취소
     cells[i].classList.remove('sel');
@@ -1825,7 +1747,7 @@ function doShuffle(){
   if (!running) return;
   const spots = [], syms = [];
   for (let i = 0; i < board.length; i++){
-    if (board[i] !== null && board[i] !== ROCK){ spots.push(i); syms.push(board[i]); }
+    if (board[i] !== null){ spots.push(i); syms.push(board[i]); }
   }
   let ok = false;
   for (let t = 0; t < 300; t++){
@@ -1916,8 +1838,8 @@ function win(){
     const ns = stageAt(stage);
     $('winTitle').textContent = EN ? ('Stage ' + done + ' clear!') : (done + '단계 통과!');
     $('winBest').textContent  = EN
-      ? ('Next: ' + boardLine(stage, ns.w, ns.h, ns.w*ns.h/2, ns.kinds, rocksAt(stage)))
-      : ('다음은 ' + boardLine(stage, ns.w, ns.h, ns.w*ns.h/2, ns.kinds, rocksAt(stage)));
+      ? ('Next: ' + boardLine(stage, ns.w, ns.h, ns.w*ns.h/2, ns.kinds))
+      : ('다음은 ' + boardLine(stage, ns.w, ns.h, ns.w*ns.h/2, ns.kinds));
     nextBtn.textContent = EN ? ('To stage ' + stage) : (stage + '단계로');
     nextBtn.style.display = '';
   }
@@ -2043,7 +1965,7 @@ $('btnStart').addEventListener('click', () => {
   if (board && board.length){        // 판이 이미 만들어져 있으면 바로 시작합니다
     running = true;
     startTimer();
-    toast(boardLine(stage, W, H, left, stageAt(stage).kinds, rocksAt(stage)), 1800);
+    toast(boardLine(stage, W, H, left, stageAt(stage).kinds), 1800);
   } else {
     newGame();                       // 아직이면 지금 만듭니다
   }
