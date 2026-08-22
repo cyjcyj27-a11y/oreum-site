@@ -1509,17 +1509,25 @@ function bgmApply(){
   if (!a) return;
   a.volume = BGM_VOL;
   if (bgmWanted && !paused){
-    // 이미 받고 있는 중이면 그냥 둡니다.
-    // 여기서 load() 를 또 부르면 받던 것을 통째로 버리고 처음부터 다시 받습니다.
-    // 음악이 켜도 켜도 늦게 나오던 진짜 까닭이 이것이었습니다.
-    if (a.networkState !== 2 /* NETWORK_LOADING */ && a.readyState === 0) a.load();
+    // ⚠ 여기서 load() 를 부르면 안 됩니다.
+    //   load() 는 emptied 를 일으키고, emptied 처리기가 다시 이 함수를 부르고,
+    //   그러면 또 load() … 끝없이 돕니다. 그동안 "음악을 받는 중" 안내가
+    //   지워지자마자 다시 떠서 무한 로딩처럼 보입니다.
+    //   (2026-08-22, 게임 중에 영문판으로 바꾸면 여기 걸렸습니다)
+    //   play() 만 불러도 아직 안 받았으면 브라우저가 알아서 받기 시작합니다.
     const p = a.play();
     if (p && p.catch) p.catch(() => {});      // 막히면 조용히 넘어갑니다
-    // 아직 덜 받았으면 잠자코 기다리게 두지 말고 알려 줍니다
-    if (a.readyState < 3) toast(L('음악을 받는 중…', 'Loading music…'), 1500);
+    if (a.readyState < 3) bgmTell();          // 아직 덜 받았으면 한 번만 알려 줍니다
   } else {
     a.pause();
   }
+}
+/* 같은 안내를 몇 번이고 다시 띄우면 안 끝나는 것처럼 보입니다. 8초에 한 번만 */
+function bgmTell(){
+  const now = Date.now();
+  if (bgmTell._at && now - bgmTell._at < 8000) return;
+  bgmTell._at = now;
+  toast(L('음악을 받는 중…', 'Loading music…'), 1500);
 }
 function setMusic(on){
   musicOn = on;
@@ -2003,7 +2011,13 @@ setTimeout(() => {
 }, 800);
 
 // 무슨 까닭으로든 음악이 처음으로 되감겼는데 아직 틀고 싶은 상태라면 다시 잇습니다
-bgmEl().addEventListener('emptied', () => { if (bgmWanted) bgmApply(); });
+bgmEl().addEventListener('emptied', () => {
+  // ⚠ 여기서 bgmApply() 를 부르면 load() → emptied → load() 로 끝없이 돕니다.
+  //   이어 붙이기만 하면 되니 play() 만 부릅니다.
+  if (!bgmWanted || paused) return;
+  const p = bgmEl().play();
+  if (p && p.catch) p.catch(() => {});
+});
 
 /* 다른 앱으로 넘어가면 음악을 멈춥니다.
    보고 있지도 않은 게임의 음악이 계속 흘러나오면 안 되고, 데이터도 샙니다. */
