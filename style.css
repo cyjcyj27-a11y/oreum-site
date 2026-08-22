@@ -866,6 +866,16 @@ body{ font-size:19px; }
 .mbody{ display:block; padding:13px 15px 15px; }
 .mbody b{ display:block; font-size:19px; line-height:1.3; color:var(--ink); }
 .mbody i{ display:block; font-style:normal; font-size:15px; margin-top:3px; color:var(--muted); }
+/* 모바일에서는 '전체 보기' 카드가 맨 끝이라 한참 내려야 보인다.
+   미니게임이 시작되는 자리에 한 줄짜리 링크를 하나 더 둔다(넓은 화면에서는 감춘다) */
+.mini-jump{ display:none; }
+@media (max-width:760px){
+  .mini-jump{ display:flex; align-items:center; justify-content:space-between;
+    padding:13px 16px; border-radius:14px; text-decoration:none;
+    background:var(--deep); border:1px dashed var(--line);
+    font-weight:800; font-size:15px; color:var(--ink); }
+  .mini-jump:active{ transform:translateY(1px); }
+}
 .more-card{ align-items:center; justify-content:center; text-align:center; border-style:dashed; background:var(--deep); }
 .more-card .mc{ display:block; padding:26px; }
 .more-card .mc b{ display:block; font-size:21px; line-height:1.4; color:var(--ink); }
