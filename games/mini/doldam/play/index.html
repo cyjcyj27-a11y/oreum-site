@@ -35,7 +35,9 @@
     --lip:#d9ab74; --lip2:#c98f4e; --card:#fffdf8;
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
-  html,body{margin:0; height:100%}
+  /* ⚠ height:100% 로 두면 모바일에서 주소창이 뜬 만큼 화면 아래가 보이는 영역 밖으로 나간다.
+     왼쪽 아래 '전체화면' 단추가 안 보이던 원인. dvh 는 실제로 보이는 높이다 */
+  html,body{margin:0; height:100%; height:100dvh}
   body{
     font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
     color:var(--ink); background:var(--butter);
@@ -83,9 +85,11 @@
     header.bar{padding-left:134px; gap:4px}
     .bar a, .bar button{font-size:11px; padding:7px 9px}
   }
-  @media (max-width:400px){
-    header.bar{padding-left:138px; gap:4px}
+  @media (max-width:430px){
+    header.bar{padding-left:134px; gap:4px}
     .bar a, .bar button{font-size:10.5px; padding:6px 7px}
+    #backLink{font-size:0}                       /* '← 목록' 은 화살표만 */
+    #backLink::before{content:'←'; font-size:14px}
   }
   /* 왼쪽 아래 전체화면 단추가 조작 패드를 가리지 않게 (단추는 fixed 라 자리를 안 차지한다) */
   .shell{padding-bottom:calc(46px + env(safe-area-inset-bottom))}
