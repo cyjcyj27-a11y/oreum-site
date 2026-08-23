@@ -175,24 +175,30 @@
   .ov .mini:active{transform:translateY(2px)}
 
   /* 도움말 */
-  .help{position:fixed; inset:0; z-index:9; display:none; background:rgba(74,44,23,.9); overflow:auto; padding:22px 14px}
-  .help.on{display:block}
-  .help .in{max-width:520px; margin:0 auto; background:var(--cream); border:0;
-    border-radius:22px; padding:22px 20px 24px; box-shadow:0 24px 60px -20px rgba(0,0,0,.6)}
-  .help h3{margin:0 0 6px; font-size:21px; color:var(--cocoa)}
-  .help h4{margin:18px 0 7px; font-size:12.5px; letter-spacing:.12em; color:var(--caramel2); text-transform:uppercase}
-  .help p, .help li{font-size:13.5px; line-height:1.75; color:var(--ink); margin:0}
-  .help ul{margin:0; padding-left:18px}
-  .help li{margin:2px 0}
-  .help .lede{color:var(--ink2); font-size:13px; margin-bottom:2px}
-  .help .ladder{font-size:13px; line-height:1.6; color:var(--ink)}
+  /* ⚠ 안내판은 화면 '가운데' 에 온다. 예전엔 display:block 이라 위에 붙어 시작했고,
+     왼쪽 위 브랜드 알약이 제목을 덮었다. flex + margin:auto 로 가운데 두면
+     내용이 화면보다 길어져도 잘리지 않고 그대로 굴러간다(그냥 place-items 로는 위가 잘린다).
+     글자와 줄간격도 줄였다 — 폰에서 판이 쓸데없이 길었다(2026-08-23 사용자) */
+  .help{position:fixed; inset:0; z-index:9; display:none; background:rgba(74,44,23,.9); overflow:auto; padding:14px 12px}
+  .help.on{display:flex}
+  /* ⚠ min-width:0 이 없으면 flex 항목이 '내용의 최소 너비' 아래로 못 줄어든다 —
+     안에 줄바꿈 안 되는 글이 하나라도 있으면 판이 화면 밖으로 삐져나간다 */
+  .help .in{max-width:400px; width:100%; min-width:0; margin:auto; background:var(--cream); border:0;
+    border-radius:20px; padding:16px 16px 18px; box-shadow:0 24px 60px -20px rgba(0,0,0,.6)}
+  .help h3{margin:0 0 4px; font-size:17px; color:var(--cocoa)}
+  .help h4{margin:12px 0 4px; font-size:11px; letter-spacing:.12em; color:var(--caramel2); text-transform:uppercase}
+  .help p, .help li{font-size:12.5px; line-height:1.5; color:var(--ink); margin:0}
+  .help ul{margin:0; padding-left:16px}
+  .help li{margin:1px 0}
+  .help .lede{color:var(--ink2); font-size:12px; margin-bottom:2px}
+  .help .ladder{font-size:12px; line-height:1.5; color:var(--ink)}
   .help .ladder b{color:var(--caramel2)}
   .help .ladder span{white-space:nowrap}
-  .help .sp{display:flex; gap:10px; align-items:flex-start; margin:8px 0; font-size:13.5px; color:var(--ink)}
+  .help .sp{display:flex; gap:8px; align-items:center; margin:4px 0; font-size:12.5px; line-height:1.35; color:var(--ink)}
   .help .sp b{color:var(--cocoa); font-weight:800}
-  .help .ico{font-size:20px; width:26px; flex:0 0 auto; text-align:center}
-  .help .close{display:block; width:100%; margin-top:20px; font:inherit; font-weight:800; font-size:15px;
-    padding:13px; border-radius:999px; border:0; background:var(--gold); color:#3d2409; cursor:pointer;
+  .help .ico{font-size:16px; width:20px; flex:0 0 auto; text-align:center}
+  .help .close{display:block; width:100%; margin-top:14px; font:inherit; font-weight:800; font-size:14px;
+    padding:11px; border-radius:999px; border:0; background:var(--gold); color:#3d2409; cursor:pointer;
     box-shadow:0 8px 18px -8px rgba(138,86,38,.7)}
 
   /* 알림 배너 */
@@ -226,6 +232,12 @@
      마지막 '목록' 이 화면 밖으로 잘려 나간다(2026-08-23 신고).
      단추 줄은 어차피 오른쪽에 붙으니(.sp flex:1) 폭만 줄이면 알약과 안 부딪힌다.
      아주 좁은 폰(340px 아래)에서는 공용 스크립트가 알아서 브랜드 글자를 접는다 */
+  /* ⚠ 전체화면에 들어가면 안드로이드가 화면 아래에 "나가려면 위에서 드래그" 안내를 띄운다.
+     그게 조작 단추를 덮었다(2026-08-23 신고). 전체화면일 때만 아래를 더 비워 단추를 올린다.
+     :fullscreen 과 :-webkit-full-screen 은 한 줄에 묶으면 통째로 무시되니 따로 쓴다 */
+  html:fullscreen .shell{padding-bottom:calc(112px + env(safe-area-inset-bottom))}
+  html:-webkit-full-screen .shell{padding-bottom:calc(112px + env(safe-area-inset-bottom))}
+
   @media (max-width:430px){
     header.bar{padding-left:0; gap:4px}
     .bar a, .bar button{font-size:11px; padding:6px 8px}
