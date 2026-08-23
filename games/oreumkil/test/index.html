@@ -14,12 +14,17 @@ video{display:none}
  font:500 17px/1.7 system-ui,'Malgun Gothic',sans-serif;letter-spacing:.05em;
  color:rgba(240,236,224,.42);transition:opacity 1.2s}
 #hint.gone{opacity:0}
-#snd{position:fixed;top:12px;right:14px;z-index:2;
- font:600 16px/1 system-ui,'Malgun Gothic',sans-serif;letter-spacing:.02em;
- background:rgba(16,18,22,.72);border:1px solid rgba(232,228,216,.55);border-radius:999px;
- color:#f0ece0;padding:9px 14px;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.5)}
-#snd:hover{background:rgba(40,44,50,.9)}
-#snd.off{color:#9a958a;border-color:rgba(232,228,216,.22)}
+/* 이 게임은 흑백 화면이다. 알약·색깔이 있으면 그림 위에서 튄다(2026-08-23 사용자).
+   바탕을 없애고 흰 기호만 남긴다. 하늘이 하얗게 밝은 구간에서도 읽히도록
+   글자·그림에 어두운 그림자를 깔아 준다 */
+#snd{position:fixed;top:calc(10px + env(safe-area-inset-top));right:calc(12px + env(safe-area-inset-right));
+ z-index:2;display:flex;align-items:center;justify-content:center;
+ width:40px;height:40px;padding:0;margin:0;border:0;background:none;
+ font:600 21px/1 system-ui,'Malgun Gothic',sans-serif;
+ color:rgba(255,255,255,.92);cursor:pointer;
+ text-shadow:0 1px 3px rgba(0,0,0,.9), 0 0 10px rgba(0,0,0,.55);
+ -webkit-tap-highlight-color:transparent;touch-action:manipulation}
+#snd.off{color:rgba(255,255,255,.42);text-decoration:line-through;text-decoration-thickness:2px}
 #skip{position:fixed;bottom:14px;right:16px;z-index:2;pointer-events:none;
  margin:0;padding:0;background:none;border:0;-webkit-appearance:none;appearance:none;
  font:500 16px/1 system-ui,'Malgun Gothic',sans-serif;letter-spacing:.06em;
@@ -76,6 +81,21 @@ video{display:none}
   #fist:active{background:rgba(255,255,255,.26);transform:scale(.94)}
 }
 
+/* ══════ 공용 알약을 이 게임 화면에 맞춘다 ══════
+   game-home.js 가 붙이는 흰 알약 + 초록 글씨는 밝은 게임에서는 어울리지만
+   여기(흑백)에서는 초록이 튄다(2026-08-23 사용자). 바탕을 지우고 흰색으로 바꾼다.
+   ⚠ 공용 스크립트의 style 은 이 문서의 style 보다 나중에 붙으므로 !important 가 필요하다 */
+#oreumHome, #oreumFs{
+  background:none !important; border-color:transparent !important; box-shadow:none !important;
+  opacity:1 !important; color:rgba(255,255,255,.92) !important;
+  text-shadow:0 1px 3px rgba(0,0,0,.9), 0 0 10px rgba(0,0,0,.55) !important}
+#oreumHome svg{fill:rgba(255,255,255,.92) !important;
+  filter:drop-shadow(0 1px 2px rgba(0,0,0,.9))}
+#oreumFs svg{stroke:rgba(255,255,255,.92) !important; width:19px !important; height:19px !important;
+  filter:drop-shadow(0 1px 2px rgba(0,0,0,.9))}
+#oreumFs span{display:none !important}          /* 전체화면도 기호 하나만 */
+#oreumFs{padding:8px !important}
+
 /* 세로로 들고 있으면 16:9 가 손톱만 해진다 — 돌려 달라고 하고 그동안은 가린다 */
 @media (hover:none) and (pointer:coarse) and (orientation:portrait){
   #rotate{display:grid;place-items:center;position:fixed;inset:0;z-index:9;
@@ -92,7 +112,7 @@ video{display:none}
 </style></head><body>
 <canvas id="c" width="1280" height="720"></canvas>
 <div id="hint">← → 걷기 · ↑ 뛰기 · ↓ 앉기 · E 잡기 / 놓기 · R 되돌리기 · O 오프닝 다시</div>
-<button id="snd" type="button">♪ 음악 켜짐</button>
+<button id="snd" type="button" aria-label="음악 켜짐">♪</button>
 <button id="skip" type="button"><span class="key">S · ENTER · SPACE — 오프닝 건너뛰기</span><span class="tap">▶ 건너뛰기</span></button>
 <div id="pad"><span id="ring"></span><span id="knob"></span></div>
 <button id="fist" type="button" aria-label="잡기 / 놓기"><svg viewBox="0 0 24 24" aria-hidden="true">
@@ -1511,8 +1531,11 @@ let ti=0, mute=false, fade=null;
 BGM.loop=true;                               // 끝나면 다시 처음으로
 /* src는 HTML <audio> 태그에 직접 박아 뒀다 — 문서를 읽는 첫 줄부터 받기 시작한다.
    여기서 다시 넣거나 load()를 부르면 받던 걸 버리고 처음부터 다시 받는다. 부르지 말 것 */
-function sndFace(){ SND.textContent=mute?'♪ 음악 꺼짐':'♪ 음악 켜짐';
-  SND.classList.toggle('off',mute); SND.title='음악 끄기(M) · 다음 곡(N)'; }
+/* 기호 하나만 남긴다(2026-08-23 사용자). 꺼진 것은 빗금과 흐린 색으로 알린다 */
+function sndFace(){ SND.textContent='♪';
+  SND.classList.toggle('off',mute);
+  SND.title=(mute?'음악 켜기':'음악 끄기')+'(M) · 다음 곡(N)';
+  SND.setAttribute('aria-label', mute?'음악 꺼짐':'음악 켜짐'); }
 function bgmGo(){ if(mute) return;
   if(!BGM.src) BGM.src=TRACKS[ORDER[ti]];
   BGM.play().then(()=>{ clearInterval(fade); let v=BGM.volume;
