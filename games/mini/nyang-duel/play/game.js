@@ -44,9 +44,16 @@ const imageCache = {};
 function getImage(src) {
   if (!imageCache[src]) {
     const im = new Image();
-    im.loaded = false;
-    im.onload = () => { im.loaded = true; checkAllLoaded(); };
-    im.onerror = () => { im.loaded = true; checkAllLoaded(); }; // don't let one bad file hang the loader forever
+    im.loaded = false;   // 받아 보기를 끝냈나 (성공이든 실패든) — 로딩 막대가 쓴다
+    im.ok = false;       // 실제로 그릴 수 있나 — 그리기가 쓴다
+    im.tries = 0;
+    im.onload = () => { im.loaded = true; im.ok = true; checkAllLoaded(); };
+    im.onerror = () => {
+      // 통신이 한 번 끊긴 것일 수 있으니 한 번만 다시 받아 본다
+      if (im.tries < 1) { im.tries += 1; setTimeout(() => { im.src = src + '?retry=' + im.tries; }, 400); return; }
+      im.loaded = true; im.ok = false; checkAllLoaded();
+      console.warn('[nyang-duel] 그림을 못 받았습니다:', src);
+    };
     im.src = src;
     imageCache[src] = im;
   }
@@ -77,10 +84,21 @@ checkAllLoaded();
 
 function spriteSource(p) {
   const charDef = CHARACTERS[p.char];
-  const def = charDef.sources[p.state] || charDef.sources.idle;
-  const img = getImage(def.src);
+  let def = charDef.sources[p.state] || charDef.sources.idle;
+  let img = getImage(def.src);
+  /* 이 자세 그림을 끝내 못 받았으면 기본 자세로 대신 그린다.
+     캐릭터가 통째로 사라지는 것보다 자세 하나가 어색한 편이 낫다 */
+  if (img.loaded && !img.ok && def !== charDef.sources.idle) {
+    def = charDef.sources.idle;
+    img = getImage(def.src);
+  }
   const cell = (def.x !== undefined) ? def : { x: 0, y: 0, w: img.naturalWidth || 512, h: img.naturalHeight || 320 };
-  return { img, ready: img.loaded, cell };
+  /* ⚠ ready 는 loaded 가 아니라 ok 여야 한다.
+     받기에 실패한 <img> 를 drawImage 에 넘기면 그냥 안 그려지는 게 아니라
+     InvalidStateError('broken' state)를 던진다. 그 예외가 render() 를 중간에 끊고,
+     아래 loop() 의 requestAnimationFrame 까지 못 가서 게임이 영영 멈췄다.
+     (2026-08-23 신고: "강아지가 사라지고 게임이 멈춤" — 체력바까지 안 그려진 게 단서였다) */
+  return { img, ready: img.ok, cell };
 }
 
 // ---------- Audio ----------
@@ -884,8 +902,14 @@ function render() {
 }
 
 function loop(now) {
-  update(now);
-  render();
+  /* 한 프레임에서 무슨 일이 나도 다음 프레임은 반드시 예약한다.
+     예전엔 예외 하나에 requestAnimationFrame 을 못 불러서 게임이 통째로 굳었다 */
+  try {
+    update(now);
+    render();
+  } catch (e) {
+    console.error('[nyang-duel] 한 프레임에서 오류가 났지만 계속 돌립니다:', e);
+  }
   requestAnimationFrame(loop);
 }
 requestAnimationFrame(loop);
