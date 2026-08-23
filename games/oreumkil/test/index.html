@@ -71,6 +71,10 @@ video{display:none}
    border:2px solid rgba(232,228,216,.34)}
   #knob{width:58px;height:58px;background:rgba(232,228,216,.6);
    box-shadow:0 2px 12px rgba(0,0,0,.55)}
+  /* 처음부터 눈에 보인다(2026-08-23 사용자). 안 만지는 동안엔 옅게 떠 있고,
+     손을 대면 그 자리로 옮겨 오면서 진해진다. 떼면 다시 제자리로 */
+  #pad.use #ring{opacity:.5}
+  #pad.use #knob{opacity:.45}
   #pad.live #ring,#pad.live #knob{opacity:1}
 
   /* 오른쪽 — 잡기 / 놓기 하나. 엄지가 닿는 자리라 68px 은 남긴다(권고 44px 이상).
@@ -774,7 +778,17 @@ function padAim(x,y){
   tJ = dy<-STICK_DEAD*1.5 ? 1 : 0;
   tD = dy> STICK_DEAD*1.5 ? 1 : 0;
 }
-function padOff(){ padId=null; tX=0; tJ=0; tD=0; PAD.classList.remove('live'); }
+/* 조이스틱의 '제자리' — 왼손 엄지가 자연히 닿는 왼쪽 아래께.
+   손을 떼면 여기로 돌아와 계속 보인다 */
+function padHome(){
+  const r=PAD.getBoundingClientRect();
+  if(!r.width) return;                       // 데스크톱에서는 숨어 있으니 할 일 없다
+  padX=Math.round(r.width*.28); padY=Math.round(r.height*.72);
+  padDraw(RING,padX,padY); padDraw(KNOB,padX,padY);
+}
+function padOff(){ padId=null; tX=0; tJ=0; tD=0; PAD.classList.remove('live'); padHome(); }
+addEventListener('resize',padHome);
+addEventListener('orientationchange',()=>setTimeout(padHome,120));
 PAD.addEventListener('pointerdown',e=>{
   if(padId!==null) return;
   padId=e.pointerId; const p=padPos(e); padX=p[0]; padY=p[1];
@@ -804,7 +818,7 @@ document.addEventListener('fullscreenchange',()=>{
 function touchUI(){
   const on = (SC.now==='play');
   PAD.classList.toggle('use',on); FIST.classList.toggle('use',on);
-  if(!on) padOff();
+  padOff();                       // 꺼낼 때도 제자리에 그려 둔다 — 처음부터 보이게
 }
 
 /* 시작 화면·제목 화면은 화면 아무 데나 눌러도 넘어간다 (단추 위는 뺀다) */
