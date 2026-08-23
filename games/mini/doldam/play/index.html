@@ -85,14 +85,26 @@
     header.bar{padding-left:134px; gap:4px}
     .bar a, .bar button{font-size:11px; padding:7px 9px}
   }
+  /* ⚠ 단추 여섯 개 + 왼쪽 위 브랜드 자리(134px)를 합치면 391px 이 든다.
+     폰 화면은 대개 360~393px 이라 마지막 '목록' 단추가 화면 밖으로 잘려 나갔다.
+     글자와 여백을 줄여 350px 안에 넣는다 */
   @media (max-width:430px){
-    header.bar{padding-left:134px; gap:4px}
-    .bar a, .bar button{font-size:10.5px; padding:6px 7px}
+    header.bar{padding-left:134px; gap:3px}
+    .bar a, .bar button{font-size:10px; padding:6px 6px}
     #backLink{font-size:0}                       /* '← 목록' 은 화살표만 */
     #backLink::before{content:'←'; font-size:14px}
   }
-  /* 왼쪽 아래 전체화면 단추가 조작 패드를 가리지 않게 (단추는 fixed 라 자리를 안 차지한다) */
-  .shell{padding-bottom:calc(46px + env(safe-area-inset-bottom))}
+  /* 그래도 모자란다. 브랜드 알약이 130px 을 먹는데 단추가 여섯이라 375px 폰에서도 넘친다.
+     폰에서는 브랜드의 '글자'를 접고 오름 표시만 남긴다 — 표시는 그대로라 브랜드는 안 사라진다.
+     (공용 스크립트도 340px 아래에서 똑같이 접는다. 여기선 그 문턱만 폰 전체로 넓힌 것)
+     공용 스크립트가 나중에 style 을 붙이므로 body 를 앞에 붙여 우선권을 가져온다 */
+  @media (max-width:400px){
+    body #oreumHome span{display:none}
+    body #oreumHome{padding:6px 8px}
+    header.bar{padding-left:52px}
+  }
+  /* 예전엔 왼쪽 아래에 떠 있던 전체화면 알약 자리로 46px 을 비워 뒀다.
+     그 단추가 패드 안으로 들어왔으니 비울 이유가 없다 — 그만큼 판이 높아진다 */
 
   header.bar{display:flex; align-items:center; gap:8px; flex:0 0 auto}
   .logo{font-weight:900; letter-spacing:.10em; font-size:clamp(26px,5vw,36px); color:#fff; line-height:1;
@@ -144,10 +156,13 @@
 
   /* 모바일 조작 버튼 */
   .pad{flex:0 0 auto; display:none; gap:8px}
-  .pad button{flex:1; font-size:21px; padding:14px 0; border-radius:16px; border:0; cursor:pointer;
+  .pad button{flex:1; font-size:19px; padding:13px 0; border-radius:16px; border:0; cursor:pointer;
+    min-width:0;
     background:var(--card); color:var(--toffee); transition:transform .06s, box-shadow .06s;
     box-shadow:0 5px 0 var(--lip), 0 8px 16px rgba(74,44,23,.18)}
   .pad button:active{transform:translateY(5px); box-shadow:0 0 0 var(--lip), 0 2px 6px rgba(74,44,23,.2)}
+  /* 전체화면·멈춤은 판을 도는 동안 쓰는 게 아니다. 조금 작고 조금 옅게 */
+  .pad button[data-a="full"], .pad button[data-a="pause"]{flex:.72; font-size:15px; opacity:.82}
 
   /* 오버레이 */
   .ov{position:absolute; inset:0; margin:auto; aspect-ratio:1/2; width:auto; height:auto;
@@ -263,12 +278,15 @@
     </aside>
   </div>
 
+  <!-- 왼쪽은 왼손(회전·내리기), 오른쪽 끝은 오른손(이동).
+       가운데 두 개는 판을 도는 동안 잘 안 누르는 것들이라 손이 먼 자리에 둔다 -->
   <div class="pad">
     <button type="button" data-a="rot">↻</button>
+    <button type="button" data-a="soft">▼</button>
+    <button type="button" data-a="full" id="padFull">⛶</button>
+    <button type="button" data-a="pause">❚❚</button>
     <button type="button" data-a="left">◀</button>
     <button type="button" data-a="right">▶</button>
-    <button type="button" data-a="soft">▼</button>
-    <button type="button" data-a="pause">❚❚</button>
   </div>
 </div>
 
@@ -1473,6 +1491,31 @@ function act(a){
   else if (a === 'rot') tryRotate(1);
   else if (a === 'soft') softDrop();
 }
+/* ── 전체화면 ──
+   아이폰 사파리는 영상 말고는 전체화면을 못 한다. 그럴 땐 단추를 아예 지운다 —
+   있는데 눌러도 아무 일이 없는 것이 제일 나쁘다 */
+var padFull = document.getElementById('padFull');
+(function(){
+  var root = document.documentElement;
+  var ask  = root.requestFullscreen || root.webkitRequestFullscreen;
+  var quit = document.exitFullscreen || document.webkitExitFullscreen;
+  if (!ask || !quit || !(document.fullscreenEnabled || document.webkitFullscreenEnabled)){
+    padFull.remove(); padFull = null;
+  }
+})();
+function fullOn(){ return !!(document.fullscreenElement || document.webkitFullscreenElement); }
+function toggleFull(){
+  var root = document.documentElement;
+  try {
+    var p = fullOn() ? (document.exitFullscreen || document.webkitExitFullscreen).call(document)
+                     : (root.requestFullscreen || root.webkitRequestFullscreen).call(root);
+    if (p && p.catch) p.catch(function(){});          // 막히면 조용히 넘어간다
+  } catch (e) {}
+}
+['fullscreenchange','webkitfullscreenchange'].forEach(function(ev){
+  document.addEventListener(ev, function(){ if (padFull) padFull.textContent = fullOn() ? '\u2921' : '\u26f6'; });
+});
+
 var padBtns = document.querySelectorAll('.pad button');
 for (var pi=0; pi<padBtns.length; pi++){
   (function(b){
@@ -1480,6 +1523,7 @@ for (var pi=0; pi<padBtns.length; pi++){
     function start(e){
       e.preventDefault();
       if (a === 'pause'){ togglePause(); return; }     // 패드의 ❚❚ 는 멈춤
+      if (a === 'full'){ toggleFull(); return; }        // 패드의 ⛶ 는 전체화면
       if (a === 'soft') softHold = true;
       act(a);
       if (a === 'left' || a === 'right' || a === 'soft'){
@@ -1589,7 +1633,10 @@ window.DOLDAM = {
   h('pageviews'); h('pv_doldam');
 })();
 </script>
-<!-- 왼쪽 위 '오름게임즈' 링크 + 왼쪽 아래 '전체화면' 단추 (페어붐과 같은 공용 스크립트) -->
-<script src="/assets/game-home.js?v=3" data-top="8" data-left="10" data-fullscreen="1" defer></script>
+<!-- 왼쪽 위 '오름게임즈' 링크 (페어붐과 같은 공용 스크립트).
+     ⚠ 왼쪽 아래에 떠 있던 전체화면 알약(data-fullscreen)은 껐다 —
+     폰에서 주소창·시스템 막대에 가려 안 보인다는 말이 나왔다(2026-08-23).
+     지금은 아래 조작 패드 안에 ⛶ 로 들어가 있어 항상 보인다 -->
+<script src="/assets/game-home.js?v=3" data-top="8" data-left="10" defer></script>
 </body>
 </html>
