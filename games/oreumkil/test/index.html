@@ -135,6 +135,8 @@ video{display:none}
 <div id="rotate"><p><b>↻</b>화면을 가로로 돌려주세요<i>왼쪽 아래 ‘전체화면’ 을 누르면 가로로 고정됩니다</i></p></div>
 <!-- 음악은 영상보다 먼저 줄을 세운다. src를 여기 박아야 문서 첫 줄부터 받기 시작한다 -->
 <audio id="bgm" src="audio/bgm1.mp3" preload="auto"></audio>
+<!-- 맵 끝까지 갔을 때 나는 환호 — 페어붐에서 한 판 깼을 때 쓰는 그 소리다 -->
+<audio id="cheer" src="audio/cheer.mp3" preload="auto"></audio>
 <video id="v1" src="video/walk1.mp4"     muted playsinline preload="metadata"></video>
 <video id="v2" src="video/attack.mp4"     muted playsinline preload="metadata"></video>
 <video id="v3" src="video/walk2.mp4" muted playsinline preload="metadata"></video>
@@ -252,7 +254,12 @@ const BYID={};
 let SEQ=0;
 
 function ent(o){ o.id=o.id||('e'+(++SEQ)); ENTS.push(o); BYID[o.id]=o;
-  o.home=o.bodies.map(b=>({x:b.position.x,y:b.position.y}));   // 빠뜨렸을 때 돌아올 자리
+  /* 빠뜨렸을 때 돌아올 자리. 몸체마다 하나씩이라 배열이다.
+     ⚠ 무게판·돌문은 제 자리를 {x,y} 로 직접 들고 온다(눌리고 올라가는 기준점이다).
+        예전엔 여기서 그걸 배열로 덮어써 버렸다 — e.home.x 가 undefined 가 되고
+        Body.setPosition 이 NaN 을 받아, 무게판도 돌문도 좌표가 NaN 이 됐다.
+        둘 다 화면에 안 그려지고 아무것과도 부딪히지 않았다(=2막 퍼즐이 통째로 없었다) */
+  if(!o.home) o.home=o.bodies.map(b=>({x:b.position.x,y:b.position.y}));
   return o; }
 function has(e,tag){ return e.tags&&e.tags.indexOf(tag)>=0; }
 
@@ -451,6 +458,9 @@ function tryTie(){
 }
 
 const DEAD=980;
+/* 되돌려 줄 물건을 얼마나 위에서 떨어뜨릴지. 화면은 세로 720 이라
+   제자리보다 780 위면 화면 밖에서 들어와 눈앞에서 떨어진다(보이는 낙하 0.7초쯤) */
+const SKY=780;
 function respawn(){
   Body.setPosition(P.body,P.spawn); Body.setVelocity(P.body,{x:0,y:0});
   letGo(); letGoRope(); P.ledge=null; P.climb=0; P.dead=0;
@@ -557,15 +567,20 @@ function playerStep(){
 
   Body.setAngle(b,0); Body.setAngularVelocity(b,0);
 
-  /* 구덩이에 빠뜨린 물건은 제자리로 돌려놓는다.
-     널판을 빠뜨리면 길이 영영 막혀 버린다 */
+  /* 구덩이에 빠뜨린 물건은 하늘에서 새로 떨어진다.
+     예전엔 제자리에 소리 없이 갖다 놓았다 — 그러면 밀어 넣은 사람은
+     물건이 없어진 줄 알고 구덩이만 들여다본다. 떨어지는 걸 보여 줘야 안다.
+     널판도 같이 돌려준다 — 빠뜨리면 길이 영영 막혀 버린다.
+     ⚠ 시소 널판은 축에 매여 있어 하늘로 올리면 축이 딸려 간다. 그건 제자리로 */
   for(const e of ENTS){
     if(e.type==='land'||e.type==='rope'||e.type==='swing'||e.type==='gate'||e.type==='plate') continue;
     for(let i=0;i<e.bodies.length;i++){
       const q=e.bodies[i];
       if(q.isStatic||q.position.y<=DEAD+240) continue;
       if(P.holdBody===q) letGo();
-      Body.setPosition(q, e.home[i]); Body.setAngle(q,0);
+      const h=e.home[i];
+      Body.setPosition(q, e.pivot ? h : {x:h.x, y:h.y-SKY});
+      Body.setAngle(q,0);
       Body.setVelocity(q,{x:0,y:0}); Body.setAngularVelocity(q,0);
     }
   }
@@ -583,8 +598,50 @@ function playerStep(){
        : P.strain>.35||(P.holdJoint&&strained) ? 'push'
        : Math.abs(b.velocity.x)>(P.st==='walk'?.18:.5) ? 'walk' : 'idle';
   if(b.position.y>DEAD) die();
+  if(cleared) clearT++;
+  else if(!P.dead && b.position.x>=GOAL) clearNow();
 }
 function die(){ P.dead=1; shake=14; }
+
+/* ═══════════ 맵 끝 — 클리어 ═══════════
+   마지막 땅은 5220~6320 이다. 낭떠러지에서 80 앞을 결승선으로 잡았다 —
+   끝에 딱 붙여 두면 떨어지면서 지나가는 바람에 클리어가 뜬다.
+   환호 소리는 페어붐이 한 판 깼을 때 쓰는 것과 같은 파일이다(Pixabay, 6.8초) */
+const GOAL=6240;
+let cleared=0, clearT=0;
+function clearNow(){
+  if(cleared) return;
+  cleared=1; clearT=0;
+  if(mute) return;
+  BGM.volume=.3;                       // 환호가 음악에 묻히지 않게 잠깐 낮춘다
+  try{ CHEER.currentTime=0; }catch(e){}
+  CHEER.volume=1;
+  const pr=CHEER.play(); if(pr&&pr.catch) pr.catch(()=>{});
+}
+function clearOff(){                   // R 로 되돌릴 때
+  cleared=0; clearT=0;
+  try{ CHEER.pause(); CHEER.currentTime=0; }catch(e){}
+  if(!mute) BGM.volume=1;
+}
+function drawClear(){
+  const k=ease(clearT/28);             // 0.5초에 걸쳐 떠오른다
+  x.save();
+  x.fillStyle='rgba(0,0,0,'+(k*.42)+')'; x.fillRect(0,0,W,H);
+  x.textAlign='center';
+  const cy=H*.44+(1-k)*20;
+  try{ x.letterSpacing='0.22em'; }catch(e){}
+  x.shadowColor='rgba(255,208,110,.6)'; x.shadowBlur=30;
+  x.fillStyle='rgba(255,248,226,'+k+')';
+  x.font='300 96px system-ui,Helvetica,Arial,sans-serif';
+  x.fillText('CLEAR!!!', W/2+14, cy);
+  x.shadowBlur=0;
+  try{ x.letterSpacing='0.12em'; }catch(e){}
+  x.fillStyle='rgba(240,236,224,'+(k*.6)+')';
+  x.font='400 22px "Malgun Gothic",system-ui,sans-serif';
+  x.fillText('R — 다시 하기', W/2, cy+58);
+  x.textAlign='left'; try{ x.letterSpacing='0px'; }catch(e){}
+  x.restore();
+}
 
 /* 턱 모서리를 손으로 잡는다.
    떨어지는 중에 손끝이 모서리 높이에 걸리면 붙잡고, 위를 누르면 팔로 몸을 끌어올린다 */
@@ -738,9 +795,9 @@ addEventListener('keydown',e=>{
   if(SC.now==='ready'){ beginOpening(); K[e.key]=1; return; }  // 시작 화면 — 여기서 음악이 함께 나간다
   if(SC.now==='title'){ toPlay(); K[e.key]=1; return; }     // 제목 화면에서 아무 키나
   if(!K[e.key]){
-    if(e.key==='e'||e.key==='E'){ if(P.holdJoint) letGo(); else if(P.hangJoint) letGoRope();
+    if((e.key==='e'||e.key==='E')&&!cleared){ if(P.holdJoint) letGo(); else if(P.hangJoint) letGoRope();
                                   else if(!hangOn()) grab(); }
-    if(e.key==='f'||e.key==='F') tryTie();
+    if((e.key==='f'||e.key==='F')&&!cleared) tryTie();
     if(e.key==='r'||e.key==='R') reset();
     if(e.key==='Enter'||e.key==='Escape'||e.key===' '||e.key==='s'||e.key==='S') SKIP=1;   // 오프닝 건너뛰기
     if(e.key==='o'||e.key==='O') replayOpening();           // 오프닝 다시 보기(녹화용)
@@ -808,6 +865,7 @@ PAD.addEventListener('pointermove',e=>{ if(e.pointerId===padId){ const p=padPos(
 /* 주먹 = 키보드 E. 누르는 순간 반응해야 손맛이 난다 */
 FIST.addEventListener('pointerdown',e=>{
   e.preventDefault();
+  if(cleared) return;                       // 끝난 뒤엔 안 받는다
   if(P.holdJoint) letGo(); else if(P.hangJoint) letGoRope(); else if(!hangOn()) grab();
 });
 
@@ -831,11 +889,13 @@ addEventListener('pointerdown',e=>{
   if(e.target.closest&&e.target.closest('button,a')) return;
   if(SC.now==='ready') beginOpening(); else if(SC.now==='title') toPlay();
 });
-const LEFT =()=>K.ArrowLeft ||K.a||K.A||tX<0;
-const RIGHT=()=>K.ArrowRight||K.d||K.D||tX>0;
-const UP   =()=>K.ArrowUp   ||K.w||K.W||tJ;
+/* 클리어한 뒤엔 걷지도 뛰지도 않는다 — 그냥 서 있는다.
+   (안 막으면 결승선을 지나 그대로 낭떠러지로 걸어가 죽는다) */
+const LEFT =()=>!cleared&&(K.ArrowLeft ||K.a||K.A||tX<0);
+const RIGHT=()=>!cleared&&(K.ArrowRight||K.d||K.D||tX>0);
+const UP   =()=>!cleared&&(K.ArrowUp   ||K.w||K.W||tJ);
 /* ⚠ 예전엔 DOWN 이 아예 없었다. 모서리에 매달려 위를 안 누르면 그때 터졌다 */
-const DOWN =()=>K.ArrowDown ||K.x||K.X||tD;
+const DOWN =()=>!cleared&&(K.ArrowDown ||K.x||K.X||tD);
 
 /* 물리 퍼즐은 되돌릴 수 있어야 한다 — 물체를 엉뚱한 데 빠뜨렸을 때 */
 function reset(){
@@ -844,6 +904,7 @@ function reset(){
   dropJoint(TIE); TIE=null; letGo(); letGoRope();
   Composite.remove(world,P.body);
   LEVEL.forEach(spawn); makePlayer(P.spawn.x,P.spawn.y);
+  clearOff();
 }
 
 /* ═══════════ 사람 그리기 ═══════════ */
@@ -1383,6 +1444,7 @@ function draw(t){
   if(lid>0){ const e=lid*H*.52; x.fillStyle='#000'; x.fillRect(0,0,W,e); x.fillRect(0,H-e,W,e); }
   if(P.dead){ x.fillStyle='rgba(0,0,0,'+Math.min(.85,P.dead/14)+')'; x.fillRect(0,0,W,H); }
   vignette(.5);
+  if(cleared) drawClear();
 }
 
 /*═══════════════════════════════════════════════════════════════════════
@@ -1545,6 +1607,9 @@ function toPlay(){
 /* ═══════════ 소리 ═══════════
    배경음악 출처: Pixabay (Pixabay Content License — 무료·상업적 이용 가능·출처 표기 불필요) */
 const BGM=document.getElementById('bgm'), SND=document.getElementById('snd');
+const CHEER=document.getElementById('cheer');
+/* 환호가 끝나면 음악을 원래 크기로 되돌린다 (클리어할 때 잠깐 낮춰 뒀다) */
+CHEER.addEventListener('ended',()=>{ if(!mute) BGM.volume=1; });
 /* 지금은 숲(30초·474KB) 하나만 돌린다. 다음 씬을 만들면 나머지 둘을 쓴다 */
 const TRACKS=['audio/bgm1.mp3','audio/bgm2.mp3','audio/bgm3.mp3'];
 const ORDER=[0];
