@@ -205,9 +205,21 @@
     if (busy) return;
     var body = $('body').value.trim();
     var pw = $('pw').value.trim();
-    if (!body && !picked) { say('Add a photo or a line of text', true); return; }
+    if (!body && !picked) {
+      /* 한국어판과 같은 이유 — 단추 아래 안내글은 폰에서 안 보인다 */
+      alert('Add a photo or a few words');
+      say('Add a photo or a line of text', true);
+      try { $('body').focus(); } catch (e) {}
+      return;
+    }
     if (body.length > 200) { say('200 characters maximum', true); return; }
-    if (!/^\d{4}$/.test(pw)) { say('Enter 4 digits so you can delete this later', true); return; }
+    if (!/^\d{4}$/.test(pw)) {
+      /* 한국어판과 같은 이유 — 단추 아래 안내글은 폰에서 안 보인다 */
+      alert('Please enter a password');
+      say('Enter 4 digits so you can delete this later', true);
+      try { $('pw').focus(); } catch (e) {}
+      return;
+    }
     if (!db) { say('Posting is unavailable right now. Please see the notice above.', true); return; }
 
     busy = true; $('submitBtn').disabled = true; say('Posting…');
