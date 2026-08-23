@@ -2,7 +2,10 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
 <title>OREUMKIL — 오름길</title>
 <style>
-html,body{margin:0;height:100%;background:#000;display:grid;place-items:center;overflow:hidden;touch-action:none}
+/* ⚠ 게임 화면에서 단추를 꾹 누르면 안드로이드가 그 글자를 '선택'해서
+   복사·공유·번역 메뉴를 띄운다(2026-08-23 신고). 게임에서는 글자를 잡을 일이 없다 */
+html,body{margin:0;height:100%;background:#000;display:grid;place-items:center;overflow:hidden;touch-action:none;
+ -webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 /* 폰을 가로로 눕히면 폭보다 높이가 먼저 모자란다. 16:9 를 높이에도 맞춰 잘리지 않게 한다 */
 canvas{width:min(100vw, calc(100vh * 16 / 9), 1280px);height:auto;display:block}
 @supports (height:100svh){ canvas{width:min(100vw, calc(100svh * 16 / 9), 1280px)} }
@@ -41,22 +44,12 @@ video{display:none}
 
 /* ══════ 손으로 하는 조작 ══════
    기본은 전부 숨긴다. 손대는 화면에서만 꺼낸다 */
-#pad,#fist,#fs,#rotate{display:none}
+#pad,#fist,#rotate{display:none}
 #pad,#fist{opacity:0;pointer-events:none;transition:opacity .25s}
 #pad.use,#fist.use{opacity:1;pointer-events:auto}
 
 @media (hover:none) and (pointer:coarse){
   #hint{display:none}                      /* 키 안내는 폰에서 쓸모가 없다 */
-
-  /* 왼쪽 맨 아래 — 전체화면. 조이스틱보다 위에 얹어서(z-index 4 > 3)
-     이 단추를 누른 손가락이 조이스틱으로 새지 않는다 */
-  #fs{display:flex;align-items:center;justify-content:center;position:fixed;z-index:4;
-   left:calc(12px + env(safe-area-inset-left));bottom:calc(12px + env(safe-area-inset-bottom));
-   width:46px;height:46px;padding:0;margin:0;border-radius:50%;
-   font:400 20px/1 system-ui,sans-serif;color:#f0ece0;
-   background:rgba(16,18,22,.6);border:1px solid rgba(232,228,216,.4);
-   opacity:.85;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
-  #fs:active{background:rgba(40,44,50,.9)}
 
   /* 왼쪽 절반이 조이스틱 자리다. 정해진 한 점이 아니라 손가락을 대는 그 자리에 생긴다 —
      엄지를 어디에 두든 맞고, 화면 크기가 달라도 따로 맞출 게 없다 */
@@ -70,15 +63,17 @@ video{display:none}
    box-shadow:0 2px 12px rgba(0,0,0,.55)}
   #pad.live #ring,#pad.live #knob{opacity:1}
 
-  /* 오른쪽 — 잡기 / 놓기 하나. 엄지가 닿는 자리라 넉넉하게 88px */
+  /* 오른쪽 — 잡기 / 놓기 하나. 엄지가 닿는 자리라 68px 은 남긴다(권고 44px 이상).
+     ⚠ 이모지(✊)는 노란색이고 크기를 못 줄인다 — 흰 그림으로 그려 넣는다 */
   #fist{display:flex;align-items:center;justify-content:center;position:fixed;z-index:3;
    right:calc(20px + env(safe-area-inset-right));bottom:calc(26px + env(safe-area-inset-bottom));
-   width:88px;height:88px;padding:0;margin:0;border-radius:50%;
-   font:400 40px/1 system-ui,'Apple Color Emoji','Segoe UI Emoji',sans-serif;
-   background:rgba(16,18,22,.5);border:2px solid rgba(232,228,216,.42);
-   box-shadow:0 2px 14px rgba(0,0,0,.5);
+   width:68px;height:68px;padding:0;margin:0;border-radius:50%;
+   color:rgba(255,255,255,.9);
+   background:rgba(16,18,22,.42);border:1.5px solid rgba(255,255,255,.34);
+   box-shadow:0 2px 12px rgba(0,0,0,.45);
    -webkit-tap-highlight-color:transparent;touch-action:manipulation}
-  #fist:active{background:rgba(232,228,216,.3);transform:scale(.94)}
+  #fist svg{width:28px;height:28px;display:block;fill:currentColor;pointer-events:none}
+  #fist:active{background:rgba(255,255,255,.26);transform:scale(.94)}
 }
 
 /* 세로로 들고 있으면 16:9 가 손톱만 해진다 — 돌려 달라고 하고 그동안은 가린다 */
@@ -91,10 +86,8 @@ video{display:none}
   #rotate i{display:block;margin-top:10px;font-size:15px;font-style:normal;
    color:rgba(240,236,224,.55);letter-spacing:.02em}
   #pad,#fist,#skip{display:none}
-  /* 전체화면 단추만은 남긴다 — 안드로이드에선 이걸 누르면 가로로 잠기니
-     폰을 안 돌려도 한 번에 해결된다. 안내문 위로 올린다 */
-  #fs{z-index:10;left:50%;transform:translateX(-50%);
-   bottom:calc(46px + env(safe-area-inset-bottom));width:52px;height:52px;opacity:1}
+  /* 전체화면 알약은 그대로 둔다(z-index 가 훨씬 커서 안내문 위로 뜬다) —
+     안드로이드에선 이걸 누르면 가로로 잠기니 폰을 안 돌려도 한 번에 해결된다 */
 }
 </style></head><body>
 <canvas id="c" width="1280" height="720"></canvas>
@@ -102,9 +95,15 @@ video{display:none}
 <button id="snd" type="button">♪ 음악 켜짐</button>
 <button id="skip" type="button"><span class="key">S · ENTER · SPACE — 오프닝 건너뛰기</span><span class="tap">▶ 건너뛰기</span></button>
 <div id="pad"><span id="ring"></span><span id="knob"></span></div>
-<button id="fist" type="button" aria-label="잡기 / 놓기">✊</button>
-<button id="fs" type="button" aria-label="전체화면">⛶</button>
-<div id="rotate"><p><b>↻</b>화면을 가로로 돌려주세요<i>⛶ 를 누르면 가로로 고정됩니다</i></p></div>
+<button id="fist" type="button" aria-label="잡기 / 놓기"><svg viewBox="0 0 24 24" aria-hidden="true">
+ <rect x="4.9" y="8.2" width="13.6" height="11" rx="3.9"/>
+ <rect x="6.5" y="6.4" width="3" height="4.4" rx="1.5"/>
+ <rect x="9.7" y="5.7" width="3" height="5" rx="1.5"/>
+ <rect x="12.9" y="5.9" width="3" height="4.9" rx="1.5"/>
+ <rect x="16.1" y="6.9" width="2.8" height="4.2" rx="1.4"/>
+ <rect x="2.6" y="11.1" width="5" height="3.2" rx="1.6"/>
+</svg></button>
+<div id="rotate"><p><b>↻</b>화면을 가로로 돌려주세요<i>왼쪽 아래 ‘전체화면’ 을 누르면 가로로 고정됩니다</i></p></div>
 <!-- 음악은 영상보다 먼저 줄을 세운다. src를 여기 박아야 문서 첫 줄부터 받기 시작한다 -->
 <audio id="bgm" src="audio/bgm1.mp3" preload="auto"></audio>
 <video id="v1" src="video/walk1.mp4"     muted playsinline preload="metadata"></video>
@@ -732,10 +731,10 @@ const TOUCH=matchMedia('(hover:none) and (pointer:coarse)').matches;
 
     왼쪽 절반   조이스틱 — 손가락 댄 자리에 생긴다. 좌우=걷기, 위=뛰기, 아래=앉기
     오른쪽      주먹 단추 하나 — 잡기 / 놓기 (키보드 E 와 같다)
-    왼쪽 맨아래 전체화면                                                       */
+    왼쪽 위    오름게임즈 링크 · 왼쪽 아래 전체화면
+               — 둘 다 공용 스크립트(game-home.js)가 붙인다. 페어붐·오름냥과 같은 모양이다 */
 const PAD=document.getElementById('pad'), RING=document.getElementById('ring'),
-      KNOB=document.getElementById('knob'), FIST=document.getElementById('fist'),
-      FS=document.getElementById('fs');
+      KNOB=document.getElementById('knob'), FIST=document.getElementById('fist');
 const STICK_R=54;    // 손가락이 이만큼 벗어나면 끝까지 민 것으로 본다
 const STICK_DEAD=13;       // 이 안쪽은 안 민 것으로 본다 — 엄지 떨림을 무시한다
 
@@ -768,23 +767,13 @@ FIST.addEventListener('pointerdown',e=>{
   if(P.holdJoint) letGo(); else if(P.hangJoint) letGoRope(); else if(!hangOn()) grab();
 });
 
-/* 전체화면 — 폰에서만 뜬다. 들어간 김에 화면을 가로로 잠근다(안드로이드만 먹는다) */
-const fsNow=()=>document.fullscreenElement||document.webkitFullscreenElement;
-function fsFace(){ FS.textContent = fsNow()?'⤡':'⛶'; }
-FS.addEventListener('click',()=>{
-  try{
-    if(fsNow()){ (document.exitFullscreen||document.webkitExitFullscreen).call(document); }
-    else{
-      const el=document.documentElement;
-      const req=el.requestFullscreen||el.webkitRequestFullscreen;
-      const p=req.call(el,{navigationUI:'hide'});
-      if(p&&p.then) p.then(function(){ try{ screen.orientation.lock('landscape').catch(function(){}); }catch(err){} });
-    }
-  }catch(err){}
+/* 전체화면 알약 자체는 공용 스크립트가 만든다(페어붐과 같은 것).
+   다만 이 게임은 가로로 눕혀야 제대로 보이니, 전체화면에 들어가는 순간
+   화면을 가로로 잠가 준다 — 안드로이드에서만 먹고 아이폰은 조용히 무시한다 */
+document.addEventListener('fullscreenchange',()=>{
+  if(!document.fullscreenElement) return;
+  try{ screen.orientation.lock('landscape').catch(()=>{}); }catch(err){}
 });
-document.addEventListener('fullscreenchange',fsFace);
-if(!(document.documentElement.requestFullscreen||document.documentElement.webkitRequestFullscreen))
-  FS.style.display='none';                   // 아이폰 사파리엔 전체화면이 없다 — 안 보여준다
 
 /* 조이스틱과 주먹은 실제로 노는 동안에만 꺼낸다 */
 function touchUI(){
@@ -795,7 +784,7 @@ function touchUI(){
 
 /* 시작 화면·제목 화면은 화면 아무 데나 눌러도 넘어간다 (단추 위는 뺀다) */
 addEventListener('pointerdown',e=>{
-  if(e.target.closest&&e.target.closest('button')) return;
+  if(e.target.closest&&e.target.closest('button,a')) return;
   if(SC.now==='ready') beginOpening(); else if(SC.now==='title') toPlay();
 });
 const LEFT =()=>K.ArrowLeft ||K.a||K.A||tX<0;
@@ -1515,7 +1504,10 @@ const BGM=document.getElementById('bgm'), SND=document.getElementById('snd');
 /* 지금은 숲(30초·474KB) 하나만 돌린다. 다음 씬을 만들면 나머지 둘을 쓴다 */
 const TRACKS=['audio/bgm1.mp3','audio/bgm2.mp3','audio/bgm3.mp3'];
 const ORDER=[0];
-let ti=0, mute=localStorage.getItem('oreumkil_mute')==='1', fade=null;
+/* 2026-08-23 사용자 지시 — 문을 열면 언제나 음악이 켜진 채로 시작한다.
+   M · ♪ 로 끄는 것은 그 판 동안만이고, 다음에 열면 다시 켜져 있다
+   (예전엔 localStorage 'oreumkil_mute' 를 읽어 지난번 선택을 이어받았다) */
+let ti=0, mute=false, fade=null;
 BGM.loop=true;                               // 끝나면 다시 처음으로
 /* src는 HTML <audio> 태그에 직접 박아 뒀다 — 문서를 읽는 첫 줄부터 받기 시작한다.
    여기서 다시 넣거나 load()를 부르면 받던 걸 버리고 처음부터 다시 받는다. 부르지 말 것 */
@@ -1528,7 +1520,7 @@ function bgmGo(){ if(mute) return;
   }).catch(()=>{});
 }
 function bgmNext(){ ti=(ti+1)%ORDER.length; BGM.volume=0; BGM.src=TRACKS[ORDER[ti]]; bgmGo(); }
-function bgmMute(){ mute=!mute; localStorage.setItem('oreumkil_mute',mute?'1':'0'); sndFace();
+function bgmMute(){ mute=!mute; sndFace();
   if(!mute) BGM.muted=false;
   if(mute){ BGM.pause(); clearInterval(fade); BGM.volume=0; } else bgmGo(); }
 BGM.volume=0; sndFace();
@@ -1650,4 +1642,9 @@ function loop(t){
   requestAnimationFrame(loop);
 }
 requestAnimationFrame(loop);
-</script></body></html>
+</script>
+<!-- 왼쪽 위 '오름게임즈' 링크 + 왼쪽 아래 '전체화면' 알약.
+     ⚠ 오름게임즈의 모든 게임이 이 한 줄을 그대로 쓴다(페어붐·오름냥·돌담과 같은 모양·같은 자리).
+     새 게임을 만들면 이 줄을 반드시 넣을 것 -->
+<script src="/assets/game-home.js?v=3" data-top="8" data-left="10" data-fullscreen="1" defer></script>
+</body></html>
