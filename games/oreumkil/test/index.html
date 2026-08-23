@@ -778,12 +778,13 @@ function padAim(x,y){
   tJ = dy<-STICK_DEAD*1.5 ? 1 : 0;
   tD = dy> STICK_DEAD*1.5 ? 1 : 0;
 }
-/* 조이스틱의 '제자리' — 왼손 엄지가 자연히 닿는 왼쪽 아래께.
+/* 조이스틱의 '제자리' — 왼쪽 자리의 한가운데 높이(2026-08-23 사용자 "가운데로 더 위로").
+   위아래 72px 씩 물러난 자리의 절반이니 화면 높이의 한가운데다.
    손을 떼면 여기로 돌아와 계속 보인다 */
 function padHome(){
   const r=PAD.getBoundingClientRect();
   if(!r.width) return;                       // 데스크톱에서는 숨어 있으니 할 일 없다
-  padX=Math.round(r.width*.28); padY=Math.round(r.height*.72);
+  padX=Math.round(r.width*.28); padY=Math.round(r.height*.5);
   padDraw(RING,padX,padY); padDraw(KNOB,padX,padY);
 }
 function padOff(){ padId=null; tX=0; tJ=0; tD=0; PAD.classList.remove('live'); padHome(); }
