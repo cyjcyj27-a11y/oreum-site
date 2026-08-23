@@ -58,9 +58,12 @@ video{display:none}
 
   /* 왼쪽 절반이 조이스틱 자리다. 정해진 한 점이 아니라 손가락을 대는 그 자리에 생긴다 —
      엄지를 어디에 두든 맞고, 화면 크기가 달라도 따로 맞출 게 없다 */
-  /* ⚠ 아래 72px 은 조이스틱이 생기지 않는 자리다(2026-08-23 사용자 "더 위로 올려").
-     맨 아래에 손을 대면 링이 화면 밖으로 반쯤 나가고 왼쪽 아래 전체화면 표시와 겹쳤다 */
-  #pad{display:block;position:fixed;left:0;bottom:72px;width:50%;height:64%;z-index:3;
+  /* ⚠ 가장자리 72px 은 조이스틱이 생기지 않는 자리다(2026-08-23 사용자).
+     링 반지름이 66px 이라, 화면 맨 끝에 손을 대면 링이 밖으로 반쯤 잘려 나갔다.
+     아래쪽은 왼쪽 아래 전체화면 표시와도 겹쳤다. 왼쪽·아래를 그만큼 안으로 들인다 */
+  #pad{display:block;position:fixed;z-index:3;
+   left:calc(72px + env(safe-area-inset-left));bottom:calc(72px + env(safe-area-inset-bottom));
+   width:calc(50% - 72px);height:60%;   /* 위쪽도 링 반지름만큼 물러나 있어야 안 잘린다 */
    touch-action:none;-webkit-tap-highlight-color:transparent}
   #ring,#knob{position:absolute;border-radius:50%;pointer-events:none;
    transform:translate(-50%,-50%);opacity:0;transition:opacity .12s}
