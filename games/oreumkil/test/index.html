@@ -56,8 +56,8 @@ video{display:none}
 @media (hover:none) and (pointer:coarse){
   #hint{display:none}                      /* 키 안내는 폰에서 쓸모가 없다 */
 
-  /* 왼쪽 절반이 조이스틱 자리다. 정해진 한 점이 아니라 손가락을 대는 그 자리에 생긴다 —
-     엄지를 어디에 두든 맞고, 화면 크기가 달라도 따로 맞출 게 없다 */
+  /* 왼쪽이 조이스틱 자리다. 링은 한가운데 높이에 고정돼 있고, 이 넓은 자리 안이면
+     어디를 짚어도 그 방향으로 민 것으로 친다 — 엄지가 빗나가도 먹힌다 */
   /* ⚠ 가장자리 72px 은 조이스틱이 생기지 않는 자리다(2026-08-23 사용자).
      링 반지름이 66px 이라, 화면 맨 끝에 손을 대면 링이 밖으로 반쯤 잘려 나갔다.
      아래쪽은 왼쪽 아래 전체화면 표시와도 겹쳤다. 왼쪽·아래를 그만큼 안으로 들인다 */
@@ -758,7 +758,7 @@ const TOUCH=matchMedia('(hover:none) and (pointer:coarse)').matches;
   예전엔 화면을 구역으로 나눠서 "위쪽을 누르면 잡기, 가운데를 누르면 점프"였다.
   어디를 눌러야 하는지 눈에 보이지 않아 손이 헤맸다. 지금은 보이는 물건 두 개다.
 
-    왼쪽 절반   조이스틱 — 손가락 댄 자리에 생긴다. 좌우=걷기, 위=뛰기, 아래=앉기
+    왼쪽        조이스틱 — 제자리에 고정. 좌우=걷기, 위=뛰기, 아래=앉기
     오른쪽      주먹 단추 하나 — 잡기 / 놓기 (키보드 E 와 같다)
     왼쪽 위    오름게임즈 링크 · 왼쪽 아래 전체화면
                — 둘 다 공용 스크립트(game-home.js)가 붙인다. 페어붐·오름냥과 같은 모양이다 */
@@ -790,10 +790,14 @@ function padHome(){
 function padOff(){ padId=null; tX=0; tJ=0; tD=0; PAD.classList.remove('live'); padHome(); }
 addEventListener('resize',padHome);
 addEventListener('orientationchange',()=>setTimeout(padHome,120));
+/* ⚠ 링은 제자리에 못 박혀 있다. 예전엔 손 댄 자리로 옮겨 다녔는데,
+   "누르기 전엔 가운데 있다가 누르면 밑으로 간다"고 했다(2026-08-23).
+   지금은 링은 그대로 있고 손잡이만 손을 따라간다 — 민 방향이 곧 가는 방향이다 */
 PAD.addEventListener('pointerdown',e=>{
   if(padId!==null) return;
-  padId=e.pointerId; const p=padPos(e); padX=p[0]; padY=p[1];
-  padDraw(RING,padX,padY); PAD.classList.add('live'); padAim(padX,padY);
+  padId=e.pointerId;
+  PAD.classList.add('live');
+  const p=padPos(e); padAim(p[0],p[1]);
   try{ PAD.setPointerCapture(e.pointerId); }catch(err){}
   e.preventDefault();
 });
