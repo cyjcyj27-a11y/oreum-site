@@ -120,6 +120,8 @@
     box-shadow:0 0 0 7px var(--card), 0 7px 0 0 var(--lip2), 0 18px 34px rgba(74,44,23,.34)}
 
   aside.hud{width:154px; flex:0 0 auto; display:flex; flex-direction:column; gap:9px; min-height:0}
+  /* 옛날엔 이 크기가 HTML 에 인라인으로 박혀 있어 폰 규칙을 이겼다 */
+  #riseTxt{font-size:14px}
   .box{background:var(--card); border:0; border-radius:16px; padding:11px 13px;
     box-shadow:0 4px 0 var(--lip), 0 7px 16px rgba(74,44,23,.16)}
   .box .k{font-size:10px; letter-spacing:.16em; color:var(--ink2); font-weight:800; text-transform:uppercase}
@@ -238,6 +240,52 @@
   html:fullscreen .shell{padding-bottom:calc(112px + env(safe-area-inset-bottom))}
   html:-webkit-full-screen .shell{padding-bottom:calc(112px + env(safe-area-inset-bottom))}
 
+  /* ── 폰 세로 — 상태줄을 얇게 눕혀 판 위에 올린다 ──
+     2026-08-23 사용자 지적 두 번.
+       ① "상태창이 위로 올라가고 블럭판이 꽉차는게 맞을듯"
+       ② "오른쪽 상태창이 저렇게 큰 공간을 차지할 이유가 없어 간소화해서 블럭판 위로"
+     재 보니 판은 세로가 아니라 **가로에 막혀** 있었다 —
+     400x860 에서 판이 남긴 가로 여백 0 · 세로 여백 152. 오른쪽 154px 칸이 범인이었다.
+     그래서 칸들을 카드 모양 없이 글자만 남겨 한 줄로 눕히고 판 위에 올린다.
+     ⚠ 칸을 flex:1 로 늘리면 '다음 돌' 그림이 칸을 세로로 부풀려 판을 도로 깎는다.
+        내용 크기(flex:0 0 auto)로 두고 남는 자리는 space-between 이 벌린다.
+     ⚠ 가로로 눕힌 화면에서는 옆에 두는 편이 나으니 portrait 에만 건다 */
+  @media (max-width:720px) and (orientation:portrait){
+    .stage{flex-direction:column; gap:6px; align-items:stretch}
+    aside.hud{order:-1; width:100%; flex:0 0 auto; flex-direction:row; flex-wrap:nowrap;
+      gap:14px; align-items:center; justify-content:flex-start; min-height:0;
+      background:var(--card); border-radius:14px; padding:5px 12px;
+      box-shadow:0 3px 0 var(--lip), 0 5px 12px rgba(74,44,23,.12)}
+    /* 세 칸이 자리를 똑같이 나눠 갖는다.
+       예전엔 점수 칸만 늘어나서 남는 자리가 전부 가운데로 몰렸다 */
+    aside.hud .box{flex:1 1 0; min-width:0; background:none; box-shadow:none;
+      padding:0; border-radius:0; display:flex; align-items:center; gap:7px}
+    /* ⚠ 칸을 똑같은 크기로 나눠 놓으면, 글은 짧은데 칸만 넓어서
+       BEST~NEXT · NEXT~RISE 사이에 커다란 빈 자리가 생긴다(2026-08-23 신고).
+       그래서 글자 칸은 내용 크기대로 붙여 두고, 남는 폭은 RISE 막대가 늘어나 먹는다.
+       막대는 '몇 개 뒤에 줄이 올라오나' 를 보여 주니 자리값을 한다 */
+    aside.hud .box:nth-child(1),
+    aside.hud .box:nth-child(2){flex:0 0 auto}
+    /* RISE 는 원래 '이름 / 숫자 / 막대' 가 다 보이는 칸이었다(2026-08-23 사용자).
+       한 줄로 뭉개지 말고 그 정보량을 지킨다 — 이름·숫자는 한 줄에, 막대는 그 아래 칸 폭 전체로.
+       (막대에 flex-basis 100% 를 줘서 줄바꿈을 강제한다) */
+    aside.hud .box:nth-child(3){flex:1 1 auto; justify-content:flex-start;
+      flex-wrap:wrap; align-content:center; row-gap:3px; column-gap:7px}
+    aside.hud .box .k{font-size:9px; letter-spacing:.12em}
+    aside.hud .box .v{font-size:18px}
+    aside.hud #riseTxt{font-size:18px}      /* RISE 도 점수와 같은 크기로 */
+    aside.hud .box .nx{font-size:9px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+    aside.hud .box .v{letter-spacing:-.03em}          /* 숫자를 조금 좁혀 막대에 자리를 넘긴다 */
+    aside.hud .box canvas#nextC{height:24px; width:auto}
+    aside.hud .box.keys{display:none}      /* 폰에서는 키 설명이 필요 없다 — 화면 단추로 논다 */
+    /* RISE 는 '몇 개 뒤에 줄이 올라오나' 라 이 줄에서 가장 중요한 정보다(2026-08-23 사용자).
+       그래서 남는 폭을 전부 이 막대에 주고, 두께도 7 → 10px 로 키운다.
+       세로 10px 는 글자(18px)보다 작아 줄 높이 39px 를 건드리지 않는다 */
+    aside.hud .risebar{display:block; flex:1 0 100%; min-width:0; height:8px;
+      margin:0; background:rgba(201,129,61,.28)}
+    .boardwrap{flex:1 1 auto; min-height:0; min-width:0; width:100%}
+  }
+
   @media (max-width:430px){
     header.bar{padding-left:0; gap:4px}
     .bar a, .bar button{font-size:11px; padding:6px 8px}
@@ -284,7 +332,7 @@
       <div class="box"><div class="k" id="lblScore">점수</div><div class="v"><span id="score">0</span></div>
         <div class="nx" id="scoreBest"></div></div>
       <div class="box"><div class="k" id="lblNext">다음 돌</div><canvas id="nextC" width="120" height="80"></canvas></div>
-      <div class="box"><div class="k" id="lblRise">밭에서 올라옴</div><div class="v" style="font-size:14px" id="riseTxt">—</div><div class="risebar"><i id="riseBar"></i></div></div>
+      <div class="box"><div class="k" id="lblRise">밭에서 올라옴</div><div class="v" id="riseTxt">—</div><div class="risebar"><i id="riseBar"></i></div></div>
       <div class="box keys">
         <div id="keyHelp"></div>
       </div>
@@ -296,8 +344,8 @@
        왼쪽은 왼손(회전·내리기), 오른쪽 끝은 오른손(이동) -->
   <div class="pad">
     <button type="button" data-a="rot">↻</button>
-    <button type="button" data-a="soft">▼</button>
     <button type="button" data-a="pause">❚❚</button>
+    <button type="button" data-a="soft">▼</button>
     <button type="button" data-a="left">◀</button>
     <button type="button" data-a="right">▶</button>
   </div>
@@ -321,7 +369,7 @@ var T = {
        "밭에서 돌이 올라옵니다" 같은 구구절절한 설명체는 촌스러워서 전부 걷어냈다 */
     sub:'', len:'담 길이', best:'BEST', score:'SCORE', bestScore:'BEST', next:'NEXT', rise:'RISE',
     back:'← 목록', riseOff:'—',
-    keys:'<b>← →</b> 이동<br><b>↑ / X</b> 회전<br><b>Z</b> 역회전<br><b>↓</b> 빠르게<br><b>SPACE</b> 일시정지',
+    keys:'<b>← →</b> 이동<br><b>↑ / X</b> 회전<br><b>↓</b> 빠르게<br><b>SPACE</b> 일시정지',
     musicOff:'음악 끄기', musicOn:'음악 켜기', sfxOff:'효과음 끄기', sfxOn:'효과음 켜기',
     over:'GAME OVER', overSub:'', again:'RETRY', howto:'규칙',
     paused:'PAUSE', pausedSub:'', resume:'RESUME',
@@ -355,7 +403,7 @@ var T = {
   en:{
     sub:'', len:'WALL', best:'BEST', score:'SCORE', bestScore:'BEST', next:'NEXT', rise:'RISING SOON',
     back:'← Back', riseOff:'—',
-    keys:'<b>← →</b> move<br><b>↑ / X</b> rotate<br><b>Z</b> counter<br><b>↓</b> soft drop<br><b>SPACE</b> pause',
+    keys:'<b>← →</b> move<br><b>↑ / X</b> rotate<br><b>↓</b> soft drop<br><b>SPACE</b> pause',
     musicOff:'Music off', musicOn:'Music on', sfxOff:'Sound off', sfxOn:'Sound on',
     over:'GAME OVER', overSub:'', again:'RETRY', howto:'RULES',
     paused:'PAUSE', pausedSub:'', resume:'RESUME',
@@ -1490,7 +1538,8 @@ document.addEventListener('keydown', function(e){
   else if (k === 'ArrowRight') move(1);
   else if (k === 'ArrowDown'){ softHold = true; softDrop(); }
   else if (k === 'ArrowUp' || k === 'x' || k === 'X') tryRotate(1);
-  else if (k === 'z' || k === 'Z') tryRotate(-1);
+  /* Z 역회전은 뺐다(2026-08-23 사용자 지시) — 폰에는 애초에 단추가 없었고,
+     회전 하나로 충분하다. 되살리려면 tryRotate(-1) 을 다시 걸면 된다 */
 });
 /* ↓ 를 누르고 있는 동안은 쭉 빨리 내려간다 — 즉시 낙하가 없어졌으니 이게 유일한 재촉 수단이다 */
 var softHold = false;
