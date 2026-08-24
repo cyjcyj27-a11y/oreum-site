@@ -41,6 +41,17 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;touch-
 .prog b{color:var(--accent);font-size:17px}
 .bar{width:150px;height:5px;border-radius:99px;background:var(--panel);overflow:hidden;margin-top:5px}
 .bar i{display:block;height:100%;background:var(--accent);border-radius:99px;transition:width .3s}
+/* 고르는 화면 오른쪽 위 소리 단추 — 게임 화면 것과 같은 모양 */
+.sel-snd{display:flex;gap:7px;align-items:center;margin-left:14px}
+.sel-snd .b{padding:5px 9px}
+.sel-snd .b img{width:20px;height:20px;display:block}
+.sel-snd .b:not(.on) img{filter:grayscale(1) brightness(1.9);opacity:.5}
+/* 좁은 화면: 첫 줄은 PIXL + 소리 단추, 둘째 줄에 진행률 */
+@media(max-width:560px){
+  .sel-snd{order:2;margin-left:auto}
+  .prog{order:3;width:100%;margin-left:0;text-align:right}
+  .prog .bar{margin-left:auto}
+}
 
 .levs{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0 4px}
 .lev{flex:1 1 0;min-width:76px;padding:9px 6px;border-radius:11px;border:1px solid var(--line);
@@ -203,6 +214,10 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;touch-
         <span id="progTxt"></span>
         <div class="bar"><i id="progBar" style="width:0"></i></div>
       </div>
+      <div class="sel-snd">
+        <button class="b ic js-sfx" type="button" title="SOUND EFFECTS" aria-label="SOUND EFFECTS"><img src="icons/sfx.png" alt="" width="20" height="20"></button>
+        <button class="b ic js-bgm" type="button" title="MUSIC" aria-label="MUSIC"><img src="icons/bgm.png" alt="" width="20" height="20"></button>
+      </div>
     </div>
     <div class="tabs" role="tablist">
       <button class="tab" id="tabPic" type="button" role="tab" aria-selected="true"></button>
@@ -254,8 +269,8 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;touch-
       <button class="b" id="bHint" type="button">HINT</button>
       <button class="b" id="bEdge" type="button">EDGES</button>
       <button class="b ic" id="bShuf" type="button" title="SHUFFLE">⇄</button>
-      <button class="b ic" id="bSfx" type="button" title="SOUND EFFECTS" aria-label="SOUND EFFECTS"><img src="icons/sfx.png" alt="" width="20" height="20"></button>
-      <button class="b ic" id="bBgm" type="button" title="MUSIC" aria-label="MUSIC"><img src="icons/bgm.png" alt="" width="20" height="20"></button>
+      <button class="b ic js-sfx" id="bSfx" type="button" title="SOUND EFFECTS" aria-label="SOUND EFFECTS"><img src="icons/sfx.png" alt="" width="20" height="20"></button>
+      <button class="b ic js-bgm" id="bBgm" type="button" title="MUSIC" aria-label="MUSIC"><img src="icons/bgm.png" alt="" width="20" height="20"></button>
       <button class="b" id="bMenu" type="button">MENU</button>
     </div>
   </div>
@@ -629,10 +644,11 @@ function paintSel(){
   $('#selFoot').textContent=T.foot(PICS.length,total);
   paintAch();
   paintTabs(done,total);
+  paintSnd();
 }
 
 /* ── 맨 위 탭 ── */
-var view='ach';
+var view='pic';
 function paintTabs(done,total){
   $('#tabPic').innerHTML=T.tabPic;
   $('#tabAch').innerHTML=T.tabAch+' <em>'+done+' / '+total+'</em>';
@@ -1065,8 +1081,13 @@ function paintHud(){
   $('#vPcs').textContent=G.placed+'/'+G.pieces.length;
   $('#bHint').classList.toggle('on',!!save.opt.hint);
   $('#bEdge').classList.toggle('on',edgeOnly);
-  $('#bSfx').classList.toggle('on',!!save.opt.sfx);
-  $('#bBgm').classList.toggle('on',!!save.opt.bgm);
+  paintSnd();
+}
+/* 소리 단추는 고르는 화면·게임 화면 두 곳에 있다. 한꺼번에 칠한다 */
+function paintSnd(){
+  var f=!!save.opt.sfx, m=!!save.opt.bgm;
+  document.querySelectorAll('.js-sfx').forEach(function(b){ b.classList.toggle('on',f); });
+  document.querySelectorAll('.js-bgm').forEach(function(b){ b.classList.toggle('on',m); });
 }
 function tick(){
   if(G&&G.running){
@@ -1083,8 +1104,12 @@ document.addEventListener('visibilitychange',function(){
 $('#bHint').onclick=function(){ save.opt.hint=!save.opt.hint; store(); sfx.tap(); paintHud(); draw(); };
 $('#bEdge').onclick=function(){ edgeOnly=!edgeOnly; G.page=0; clampPage(); sfx.tap(); paintHud(); draw(); };
 $('#bShuf').onclick=function(){ shuffle(G.rack); G.page=0; sfx.tap(); draw(); };
-$('#bSfx').onclick=function(){ save.opt.sfx=!save.opt.sfx; store(); if(save.opt.sfx) sfx.tap(); paintHud(); };
-$('#bBgm').onclick=function(){ save.opt.bgm=!save.opt.bgm; store(); bgmWant(); paintHud(); };
+document.querySelectorAll('.js-sfx').forEach(function(b){
+  b.onclick=function(){ save.opt.sfx=!save.opt.sfx; store(); if(save.opt.sfx) sfx.tap(); paintSnd(); };
+});
+document.querySelectorAll('.js-bgm').forEach(function(b){
+  b.onclick=function(){ save.opt.bgm=!save.opt.bgm; store(); bgmWant(); paintSnd(); };
+});
 $('#bMenu').onclick=function(){ toMenu(); };
 $('#dMenu').onclick=function(){ toMenu(); };
 $('#dNext').onclick=function(){
