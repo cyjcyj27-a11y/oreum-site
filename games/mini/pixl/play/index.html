@@ -147,7 +147,8 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;touch-
 /* ── 게임 화면 ── */
 #game{position:absolute;inset:0;display:flex;flex-direction:column}
 #hud{flex:0 0 auto;position:relative;z-index:5;
-  display:flex;align-items:center;gap:8px;padding:7px 10px 7px 104px;
+  display:flex;align-items:center;gap:8px;
+  padding:calc(7px + env(safe-area-inset-top)) 10px 7px calc(104px + env(safe-area-inset-left));
   background:var(--bg2);border-bottom:1px solid var(--line);
   flex-wrap:wrap;row-gap:6px}
 .hstats{display:flex;align-items:center;min-width:0;flex:1 1 auto;overflow:hidden}
@@ -164,8 +165,8 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;touch-
 #hud .b.ic:has(img){padding:5px 9px}
 #hud .b.ic:not(.on) img{filter:grayscale(1) brightness(1.9);opacity:.5}
 @media(max-width:620px){
-  #hud{display:block;padding:3px 8px 6px}
-  .hstats{padding-left:100px;height:24px;gap:0}
+  #hud{display:block;padding:calc(3px + env(safe-area-inset-top)) 8px 6px 8px}
+  .hstats{padding-left:calc(100px + env(safe-area-inset-left));min-height:26px;gap:0}
   .stat{flex-direction:row;align-items:baseline;gap:5px;padding-right:12px}
   .stat b{font-size:9px}
   .stat span{font-size:13px}
@@ -768,9 +769,20 @@ function shuffle(a){ for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random
 
 /* ── 자리 잡기 ── */
 var L={};
+/* 폰 아래쪽 안전영역(홈 바) 높이 재기 — 전체화면 알약이 그만큼 올라오므로 자리를 더 비운다 */
+var safeEl=null;
+function safeBottom(){
+  if(!safeEl){
+    safeEl=document.createElement('div');
+    safeEl.style.cssText='position:fixed;left:0;bottom:0;width:0;height:env(safe-area-inset-bottom);'+
+                         'visibility:hidden;pointer-events:none';
+    document.body.appendChild(safeEl);
+  }
+  return Math.min(60, safeEl.offsetHeight||0);
+}
 function layout(){
   if(!G) return;
-  var fsPad=38;                                   /* 왼쪽 아래 전체화면 단추 자리 */
+  var fsPad=38+safeBottom();                      /* 왼쪽 아래 전체화면 단추 자리 */
   /* 판을 폭에 맞추고도 세로가 많이 남으면(폰처럼 길쭉한 화면) 아래 칸을 두 줄로 넓게 쓴다 */
   var free=CH-fsPad-20-(CW-28);
   var rackH=Math.round(Math.min(176,Math.max(66, free>110 ? free-40 : CH*0.17)));
