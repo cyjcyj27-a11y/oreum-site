@@ -403,7 +403,7 @@ var T = KO ? {
   ach:'완성작', tabPic:'그림 고르기', tabAch:'완성작', achPage:function(a,b){ return a+' / '+b+'쪽'; },
   achTip:function(n,c,t){ return n+' · '+c+'조각'+(t?' · '+t:''); },
   pieces2:function(n){ return n+'조각'; },
-  resume:'이어하기', dropRun:'버리기',
+  resume:'이어하기', dropRun:'새로하기',
   runLine:function(a,b,t){ return a+' / '+b+'조각 맞춤 · '+t; },
   picsDone:function(a,b){ return '그림 '+a+' / '+b; },
   bestLb:'최고기록', noRec:'아직 기록 없음',
@@ -419,7 +419,7 @@ var T = KO ? {
   ach:'COMPLETED', tabPic:'PICTURES', tabAch:'COMPLETED', achPage:function(a,b){ return a+' / '+b; },
   achTip:function(n,c,t){ return n+' · '+c+' pcs'+(t?' · '+t:''); },
   pieces2:function(n){ return n+' pcs'; },
-  resume:'RESUME', dropRun:'DISCARD',
+  resume:'RESUME', dropRun:'RESTART',
   runLine:function(a,b,t){ return a+' / '+b+' placed · '+t; },
   picsDone:function(a,b){ return a+' / '+b+' pictures'; },
   bestLb:'BEST', noRec:'No record yet',
@@ -685,7 +685,8 @@ function paintResume(){
   if(r) for(var i=0;i<PICS.length;i++) if(PICS[i].id===r.pic) pic=PICS[i];
   if(!r||!pic||!LEVELS[r.lev]){ el.hidden=true; return; }
   var n=LEVELS[r.lev].cols*LEVELS[r.lev].cols, done=(r.placed||[]).length;
-  if(done>=n){ el.hidden=true; return; }
+  /* 다 맞췄거나, 아직 한 조각도 안 건드린 판은 띠를 안 띄운다 */
+  if(done>=n || (done===0 && !(r.loose||[]).length)){ el.hidden=true; return; }
   $('#rsImg').src='img/t'+pic.id+'.webp';
   $('#rsName').textContent=KO?pic.ko:pic.en;
   $('#rsSub').textContent=T.runLine(done,n,fmt(r.t||0));
@@ -698,7 +699,13 @@ $('#rsGo').onclick=function(){
   sfx.tap(); lev=r.lev; save.lev=r.lev; store();
   start(r.pic,r.lev,r);
 };
-$('#rsDrop').onclick=function(){ sfx.tap(); clearRun(); paintSel(); };
+$('#rsDrop').onclick=function(){
+  var r=save.run; if(!r) return;
+  var pic=r.pic, lv=r.lev;
+  sfx.tap(); clearRun();
+  lev=lv; save.lev=lv; store();
+  start(pic,lv);                      /* 이어받을 것 없이 → 처음부터 */
+};
 
 /* ── 맨 위 탭 ── */
 var view='pic';
