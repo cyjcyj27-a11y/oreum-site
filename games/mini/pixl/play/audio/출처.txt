@@ -1,0 +1,116 @@
+소리 출처 — Pixabay (https://pixabay.com/)
+라이선스: 무료 · 상업적 이용 가능 · 출처 표기 불필요 · 수정 가능
+(금지되는 것은 소리 파일 자체를 그대로 재판매·배포하는 것뿐입니다)
+
+받은 날짜: 2026-08-25
+
+─────────────────────────────────────────────────────────────
+효과음
+─────────────────────────────────────────────────────────────
+snap.mp3   조각이 제자리에 붙을 때 나는 "탁"
+           원본: https://pixabay.com/sound-effects/film-special-effects-clack-334399/
+                 (pebblespengu1 — clack)
+           다듬은 방법: 1.08초 원본에서 0.40초 지점부터 앞 무음을 떼고 0.24초로 자름.
+                        끝 0.06초 잦아들게, 봉우리를 -1dB 로 맞춤. 홀소리 44.1kHz 96kbps.
+           고른 까닭: 나무 부딪는 단발음이라 시작이 9ms 만에 터진다.
+                      "근처 가면 탁 하고 맞는 재미"를 내려면 이 앞머리가 빨라야 한다.
+           게임에서: 소리 크기 0.85, 음높이를 ±5% 흔들어 연속으로 맞춰도 기계처럼 안 들리게.
+
+pick.mp3   아래 칸에서 조각을 집어 올릴 때
+           원본: https://pixabay.com/sound-effects/film-special-effects-short-swoosh-whoosh-sound-561933/
+                 (biww — short swoosh whoosh)
+           0.12초부터 0.22초. +4.0dB 보정. 게임에서 크기 0.34 (아주 작게).
+
+drop.mp3   제자리가 아닌 곳에 그냥 내려놓을 때
+           원본: https://pixabay.com/sound-effects/film-special-effects-soft-impact-67875/
+                 (freesound_community — soft impact)
+           원본은 41초짜리에 타점이 아홉 번 들어 있다. 0.80초의 첫 타점만 0.28초로 떼어 씀.
+
+tap.mp3    단추 · 쪽 넘기기
+           원본: https://pixabay.com/sound-effects/clean-minimal-pop-467466/
+                 (dragon-studio — clean minimal pop)
+           0.10초부터 0.18초. 게임에서 크기 0.30.
+
+win.mp3    한 판을 다 맞췄을 때 — **박수 소리**
+           원본: https://pixabay.com/sound-effects/film-special-effects-applause-sound-effect-521104/
+                 (PWLPL — Applause)
+           2026-08-25에 사용자가 "판 완성했을 때 박수소리"라고 해서 팡파레에서 바꿨습니다.
+           후보 다섯 개를 파형으로 견줘 이걸 골랐습니다 — 나머지는 박수가 성기거나(6695·43613),
+           끝이 없이 계속 이어지거나(383901), 낱개 박수가 튀었습니다(97257).
+           이건 5초 안에 차올랐다 저절로 잦아들어서 "다 맞췄다" 순간에 맞습니다.
+           다듬은 방법: 0.10초부터 앞 무음을 떼고 3.6초로 자른 뒤 끝 0.9초를 잦아들게,
+                        봉우리를 -1dB 로(+1.5dB). 홀소리 44.1kHz 112kbps, 51KB.
+           게임에서 크기 0.7.
+           (그 전 팡파레: https://pixabay.com/sound-effects/musical-victory-bell-success-fanfare-576275/)
+
+─────────────────────────────────────────────────────────────
+배경음악 — 클래식 일곱 곡 (music/ 폴더)
+─────────────────────────────────────────────────────────────
+2026-08-25에 사용자가 "클래식 무료음원 7곡"을 요청해서 바꿨습니다.
+그 전에는 잔잔한 피아노 90초 한 곡(bgm.mp3)을 되풀이했는데, 지웠습니다.
+    되돌리려면: https://pixabay.com/music/small-drama-background-piano-loop-589657/
+
+곡은 모두 Pixabay 에서 받았습니다. 악보 자체는 저작권이 끝난 옛 곡이고,
+연주 녹음은 Pixabay 라이선스(무료·상업 이용 가능)로 올라온 것입니다.
+
+  01-chopin-nocturne.mp3        쇼팽 · 녹턴 Op.9 No.2                     3:44
+      https://pixabay.com/music/classical-piano-chopin-nocturne-in-e-flat-major-op-9-no-2-162789/
+  02-beethoven-moonlight.mp3    베토벤 · 월광 소나타 1악장                 5:05
+      https://pixabay.com/music/classical-piano-beethoven-moonlight-sonata-op-27-nr-2-concert-grand-version-227468/
+  03-debussy-clair-de-lune.mp3  드뷔시 · 달빛                             4:14
+      https://pixabay.com/music/classical-piano-debussy-clair-de-lune-l-75-179688/
+  04-satie-gymnopedie-1.mp3     사티 · 짐노페디 1번                       3:07
+      https://pixabay.com/music/modern-classical-gymnopedie-1-413903/
+  05-pachelbel-canon.mp3        파헬벨 · 캐논                             4:09
+      https://pixabay.com/music/classical-piano-pachelbel-canon-in-d-p-37-arranged-for-piano-227465/
+  06-vivaldi-spring.mp3         비발디 · 사계「봄」1악장                   2:45
+      https://pixabay.com/music/classical-string-quartet-vivaldi-spring-allegro-185007/
+  07-bach-violin-concerto.mp3   바흐 · 바이올린 협주곡 가단조 3악장         4:06
+      https://pixabay.com/music/classical-string-quartet-bach-violin-concerto-in-a-minor-3-movement-bwv-1041-183738/
+
+  합계 27분 10초 · 16MB. 피아노 다섯 곡 + 현악 두 곡으로 결을 섞었습니다.
+
+  다듬은 방법: 원본은 다 256kbps 라 너무 무겁습니다. 앞 무음을 떼고,
+               봉우리를 -1dB 로 맞추고(최대 +6dB 까지만), 처음 1.2초를 서서히 키운 뒤
+               두소리 44.1kHz 80kbps 로 다시 구웠습니다. 곡은 자르지 않고 통째로 씁니다.
+
+  게임에서: BGM 을 켜면 일곱 곡을 섞어서 이어 듣습니다. 한 곡이 끝나면 다음 곡으로 넘어가고,
+            한 바퀴 다 돌면 다시 섞습니다. 곡이 바뀔 때마다 판 위에 곡 이름이 4초쯤 떴다 사라집니다.
+            **한 번에 한 곡씩만 받습니다.** BGM 을 안 켜면 16MB 는 아예 안 받습니다.
+            한 곡을 못 읽으면 조용히 다음 곡으로 넘어갑니다.
+
+  곡을 바꾸거나 더 넣으려면 play/index.html 의 `TRACKS` 배열에 줄을 더하고
+  같은 이름의 mp3 를 music/ 에 넣으면 됩니다. 개수는 몇 곡이든 상관없습니다.
+
+─────────────────────────────────────────────────────────────
+단추 그림 (icons/ 폴더)
+─────────────────────────────────────────────────────────────
+  bgm.png   미니게임\pairboom\icons\music.png 를 128px 로 줄인 것.
+  sfx.png   같은 폴더의 원본	hedigitalartist-icon-1728569_1920.jpg (스피커).
+            원래 **소리 끔 빗금**이 그어져 있어서, 빗금 띠를 양옆 그림으로 가로질러
+            메워 지웠습니다. 그 뒤 흰 바탕을 투명하게 하고, 바깥 원을 빼고
+            스피커만 잘라 128px 로 맞췄습니다. (2026-08-25, 사용자가 이 그림으로 정함)
+
+─────────────────────────────────────────────────────────────
+다시 만들 때
+─────────────────────────────────────────────────────────────
+ffmpeg 경로는 C:\Users\cyjcy\Downloads\ffmpeg-8.1.2-essentials_build\...\bin\ffmpeg.exe
+
+효과음 (앞 무음 떼고 → 자르고 → 끝 페이드 → 봉우리 -1dB):
+  ffmpeg -ss <시작> -i <원본> -af "silenceremove=start_periods=1:start_threshold=-42dB:
+    start_silence=0.005:detection=peak,atrim=0:<길이>,asetpts=N/SR/TB,
+    afade=t=out:st=<길이-0.06>:d=0.06" -ac 1 -ar 44100 -b:a 96k <출력>
+  (그 뒤 volumedetect 로 max_volume 을 재서 volume=<-1-그값>dB 로 한 번 더)
+
+음악 (이음매 없는 되풀이):
+  ffmpeg -ss 8 -t 90 -i <원본> -ss 5 -t 3 -i <원본> \
+    -filter_complex "[0:a][1:a]acrossfade=d=3:c1=tri:c2=tri[a]" -map "[a]" \
+    -ac 2 -ar 44100 -b:a 80k bgm.mp3
+
+바꿔 볼 만한 다른 후보 (2026-08-25에 같이 받아 파형까지 봐 둔 것):
+  음악  https://pixabay.com/music/ambient-calm-piano-586711/            (leberch, 112초)
+        https://pixabay.com/music/modern-classical-calm-piano-background-539083/ (vibehorn, 60초)
+        https://pixabay.com/music/beats-calm-lofi-587574/                (the_mountain, 160초, 로파이)
+        https://pixabay.com/music/meditationspiritual-relaxing-background-music-calm-loop-487908/
+  탁    https://pixabay.com/sound-effects/technology-wood-allert-notification-switch-onoff-478077/
+  완성  https://pixabay.com/sound-effects/technology-ui-success-chime-513565/  (더 짧고 담백한 쪽)
