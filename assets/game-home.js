@@ -1,5 +1,7 @@
 /* 오름게임즈 — 미니게임 왼쪽 위에 붙는 홈 링크.
  *
+ * 알약 폭 110px. (2026-08-24 사용자 지시로 오름 로고를 뺐다 — 130px 라 칸이 길었다)
+ *
  * 쓰는 법: 게임 페이지 <head> 나 <body> 끝에 아래 한 줄을 넣습니다.
  *   <script src="/assets/game-home.js" defer></script>
  *
@@ -42,8 +44,8 @@
         'position:fixed;z-index:2147483000;' +
         'top:calc(' + top + 'px + env(safe-area-inset-top));' +
         'left:calc(' + left + 'px + env(safe-area-inset-left));' +
-        'display:inline-flex;align-items:center;gap:5px;' +
-        'padding:5px 11px 5px 9px;border-radius:999px;text-decoration:none;' +
+        'display:inline-flex;align-items:center;' +
+        'padding:5px 11px;border-radius:999px;text-decoration:none;' +
         /* 밝은 배경에도, 어두운 배경에도 읽히도록 하얀 알약에 테두리를 둡니다 */
         'background:rgba(255,253,247,.92);border:1px solid rgba(120,84,44,.24);' +
         'box-shadow:0 2px 8px rgba(0,0,0,.16);' +
@@ -52,10 +54,7 @@
         'color:#2e6b39;white-space:nowrap;' +
         '-webkit-tap-highlight-color:transparent;touch-action:manipulation;' +
       '}' +
-      '#oreumHome svg{width:17px;height:8px;display:block;fill:#4e8f4a}' +
       '#oreumHome:active{background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.18)}' +
-      /* 화면이 아주 좁으면 글자는 빼고 오름 표시만 남깁니다 */
-      '@media (max-width:340px){#oreumHome span{display:none}#oreumHome{padding:6px 8px}}' +
       /* 왼쪽 아래 전체화면 단추 — 홈 배지와 같은 옷을 입힙니다 */
       '#oreumFs{' +
         'position:fixed;z-index:2147483000;' +
@@ -88,21 +87,8 @@
     a.target = '_blank';
     a.rel = 'noopener';
     a.setAttribute('aria-label', ko ? '오름게임즈 홈페이지' : 'Oreum Games home');
-    a.innerHTML =
-      '<svg viewBox="14 68 154 74" aria-hidden="true">' +
-        '<mask id="oreumHomeCut">' +
-          '<rect x="0" y="0" width="220" height="200" fill="#fff"/>' +
-          '<ellipse cx="96" cy="77" rx="13" ry="4" fill="#000"/>' +
-          '<path d="M32,117 C66,104 112,101 150,108" fill="none" stroke="#000"' +
-                ' stroke-width="4.5" stroke-linecap="round"/>' +
-        '</mask>' +
-        '<g mask="url(#oreumHomeCut)">' +
-          '<path d="M32,126 C44,112 62,86 76,78 L116,78 C130,86 144,110 150,126 Z"/>' +
-          '<path d="M20,121 C62,110 124,108 160,116 C126,131 58,134 20,121 Z"/>' +
-        '</g>' +
-      '</svg>' +
-      /* 글자는 언어와 상관없이 영문 브랜드로 고정한다 — 게임마다 달라 보이지 않게(2026-08-23 사용자) */
-      '<span>OREUM GAMES</span>';
+    /* 글자는 언어와 상관없이 영문 브랜드로 고정한다 — 게임마다 달라 보이지 않게(2026-08-23 사용자) */
+    a.innerHTML = '<span>OREUM GAMES</span>';
     document.body.appendChild(a);
 
     if (sc && sc.getAttribute('data-fullscreen') === '1') addFullscreen(ko);
