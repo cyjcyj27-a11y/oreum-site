@@ -53,6 +53,17 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;touch-
   .prog .bar{margin-left:auto}
 }
 
+/* ── 맞추다 만 판 이어하기 ── */
+#resume{display:flex;align-items:center;gap:12px;margin:16px 0 0;padding:10px 12px;
+  background:var(--bg2);border:1px solid var(--accent);border-radius:13px;flex-wrap:wrap}
+#resume img{width:52px;height:52px;border-radius:9px;object-fit:cover;display:block;flex:0 0 auto}
+.rs-body{display:flex;flex-direction:column;min-width:0;flex:1 1 140px}
+.rs-body b{font-size:14.5px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rs-body span{font-size:12.5px;color:var(--ink2);font-variant-numeric:tabular-nums}
+.rs-btns{display:flex;gap:7px;margin-left:auto;flex:0 0 auto}
+#resume .b{padding:9px 15px}
+@media(max-width:420px){ #resume{gap:9px;padding:9px} #resume .b{padding:8px 12px;font-size:12px} }
+
 .levs{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0 4px}
 .lev{flex:1 1 0;min-width:76px;padding:9px 6px;border-radius:11px;border:1px solid var(--line);
   background:var(--bg2);text-align:center;transition:.14s}
@@ -226,6 +237,14 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;touch-
     </div>
 
     <div id="panePic">
+      <div id="resume" hidden>
+        <img id="rsImg" alt="" width="288" height="288">
+        <div class="rs-body"><b id="rsName"></b><span id="rsSub"></span></div>
+        <div class="rs-btns">
+          <button class="b solid" id="rsGo"></button>
+          <button class="b" id="rsDrop"></button>
+        </div>
+      </div>
       <div class="levs" id="levs"></div>
       <ul class="grid" id="grid"></ul>
       <p class="sel-foot" id="selFoot"></p>
@@ -384,6 +403,8 @@ var T = KO ? {
   ach:'완성작', tabPic:'그림 고르기', tabAch:'완성작', achPage:function(a,b){ return a+' / '+b+'쪽'; },
   achTip:function(n,c,t){ return n+' · '+c+'조각'+(t?' · '+t:''); },
   pieces2:function(n){ return n+'조각'; },
+  resume:'이어하기', dropRun:'버리기',
+  runLine:function(a,b,t){ return a+' / '+b+'조각 맞춤 · '+t; },
   picsDone:function(a,b){ return '그림 '+a+' / '+b; },
   bestLb:'최고기록', noRec:'아직 기록 없음',
   retry:'재도전하기', tryIt:'도전하기', close:'닫기',
@@ -398,6 +419,8 @@ var T = KO ? {
   ach:'COMPLETED', tabPic:'PICTURES', tabAch:'COMPLETED', achPage:function(a,b){ return a+' / '+b; },
   achTip:function(n,c,t){ return n+' · '+c+' pcs'+(t?' · '+t:''); },
   pieces2:function(n){ return n+' pcs'; },
+  resume:'RESUME', dropRun:'DISCARD',
+  runLine:function(a,b,t){ return a+' / '+b+' placed · '+t; },
   picsDone:function(a,b){ return a+' / '+b+' pictures'; },
   bestLb:'BEST', noRec:'No record yet',
   retry:'TRY AGAIN', tryIt:'PLAY', close:'CLOSE',
@@ -414,7 +437,8 @@ try{ var raw=localStorage.getItem(KEY); if(raw){ var o=JSON.parse(raw);
          if(typeof o.opt.snd==='boolean'){ save.opt.sfx=o.opt.snd; save.opt.bgm=o.opt.snd; }
          if(typeof o.opt.sfx==='boolean') save.opt.sfx=o.opt.sfx;
          if(typeof o.opt.bgm==='boolean') save.opt.bgm=o.opt.bgm; }
-       if(typeof o.lev==='number') save.lev=o.lev; } } }catch(e){}
+       if(typeof o.lev==='number') save.lev=o.lev;
+       if(o.run&&o.run.pic) save.run=o.run; } } }catch(e){}
 function store(){ try{ localStorage.setItem(KEY,JSON.stringify(save)); }catch(e){} }
 function bkey(pic,lev){ return pic+'-'+LEVELS[lev].cols; }
 function fmt(s){ s=Math.max(0,Math.round(s)); return Math.floor(s/60)+':'+('0'+(s%60)).slice(-2); }
@@ -562,10 +586,14 @@ function edge(p,x0,y0,x1,y1,s){
   p.bezierCurveTo(d1[0],d1[1],d2[0],d2[1],d3[0],d3[1]);
   p.lineTo(x1,y1);
 }
-function rnd(){ return Math.random()<.5 ? -1 : 1; }
+/* 조각 맞물림은 '씨앗' 에서 뽑는다 — 같은 씨앗이면 같은 모양이라, 이어서 할 때 판이 그대로다 */
+var _seed=1;
+function srand(n){ _seed=(n>>>0)||1; }
+function rnd(){ _seed=(_seed*1664525+1013904223)>>>0; return (_seed>>>16)&1 ? 1 : -1; }
 
 var SRC=1024;
-function buildPieces(img,cols){
+function buildPieces(img,cols,seed){
+  srand(seed);
   var cell=SRC/cols, pad=Math.round(cell*.34), S=Math.ceil(cell+pad*2), r,c;
 
   /* 원본 둘레에 여백을 둔 그림 — 가장자리 조각을 잘라낼 때 밖을 집지 않게 */
@@ -647,7 +675,30 @@ function paintSel(){
   paintAch();
   paintTabs(done,total);
   paintSnd();
+  paintResume();
 }
+
+/* ── 맞추다 만 판이 있으면 맨 위에 띠로 보여준다 ── */
+function paintResume(){
+  var el=$('#resume'), r=save.run;
+  var pic=null;
+  if(r) for(var i=0;i<PICS.length;i++) if(PICS[i].id===r.pic) pic=PICS[i];
+  if(!r||!pic||!LEVELS[r.lev]){ el.hidden=true; return; }
+  var n=LEVELS[r.lev].cols*LEVELS[r.lev].cols, done=(r.placed||[]).length;
+  if(done>=n){ el.hidden=true; return; }
+  $('#rsImg').src='img/t'+pic.id+'.webp';
+  $('#rsName').textContent=KO?pic.ko:pic.en;
+  $('#rsSub').textContent=T.runLine(done,n,fmt(r.t||0));
+  $('#rsGo').textContent=T.resume;
+  $('#rsDrop').textContent=T.dropRun;
+  el.hidden=false;
+}
+$('#rsGo').onclick=function(){
+  var r=save.run; if(!r) return;
+  sfx.tap(); lev=r.lev; save.lev=r.lev; store();
+  start(r.pic,r.lev,r);
+};
+$('#rsDrop').onclick=function(){ sfx.tap(); clearRun(); paintSel(); };
 
 /* ── 맨 위 탭 ── */
 var view='pic';
@@ -738,7 +789,7 @@ $('#achNext').onclick=function(){
 };
 
 /* ── 판 시작 ── */
-function start(picId,levIdx){
+function start(picId,levIdx,run){
   var pic=null; for(var i=0;i<PICS.length;i++) if(PICS[i].id===picId) pic=PICS[i];
   if(!pic) return;
   selEl.hidden=true; gameEl.hidden=false; $('#done').hidden=true; pushGameState();
@@ -750,21 +801,53 @@ function start(picId,levIdx){
   var img=new Image();
   img.decoding='async';
   img.onload=function(){
-    var built=buildPieces(img,LEVELS[levIdx].cols);
-    G={ pic:pic, lev:levIdx, cols:LEVELS[levIdx].cols, img:img,
+    var seed=(run&&run.seed)||((Math.random()*2147483647)|0)||1;
+    var built=buildPieces(img,LEVELS[levIdx].cols,seed);
+    G={ pic:pic, lev:levIdx, cols:LEVELS[levIdx].cols, img:img, seed:seed,
         cell:built.cell, pad:built.pad, S:built.S,
-        pieces:built.list.map(function(p,i){ p.i=i; p.where='rack'; p.x=0; p.y=0; return p; }),
+        pieces:built.list.map(function(p,i){ p.i=i; p.where='rack'; p.x=0; p.y=0; p.popT=0; return p; }),
         rack:[], loose:[], placed:0, page:0,
         t0:now(), acc:0, running:true, drag:null, hover:-1, sparkle:[] };
-    var order=G.pieces.map(function(p){ return p.i; });
-    shuffle(order); G.rack=order;
     $('#load').hidden=true;
-    layout(); paintHud(); draw();
+    layout();
+    if(run) restoreRun(run);
+    else { var order=G.pieces.map(function(p){ return p.i; }); shuffle(order); G.rack=order; }
+    paintHud(); draw(); saveRun();
   };
   img.onerror=function(){ $('#load').textContent='!'; };
   img.src='img/'+picId+'.webp';
 }
 function now(){ return (window.performance&&performance.now)?performance.now():+new Date(); }
+
+/* ── 맞추던 판 저장 ──
+   나갔다 와도 이어서 할 수 있게 한다. 조각 자리는 판 크기에 대한 비율로 적어 둬서
+   화면 크기가 달라져도(폰↔PC) 그대로 살아난다. */
+function saveRun(){
+  if(!G||!G.running) return;
+  var loose=G.loose.map(function(i){
+    return [i, +(((G.pieces[i].x-L.bx)/L.bs).toFixed(4)), +(((G.pieces[i].y-L.by)/L.bs).toFixed(4))];
+  });
+  save.run={ pic:G.pic.id, lev:G.lev, seed:G.seed,
+             t:Math.round((G.acc+(now()-G.t0))/100)/10,
+             placed:G.pieces.filter(function(p){ return p.where==='placed'; }).map(function(p){ return p.i; }),
+             loose:loose, rack:G.rack.slice() };
+  store();
+}
+function clearRun(){ if(save.run){ delete save.run; store(); } }
+function restoreRun(run){
+  var i;
+  (run.placed||[]).forEach(function(i){ var p=G.pieces[i]; if(p){ p.where='placed'; G.placed++; } });
+  (run.loose||[]).forEach(function(a){
+    var p=G.pieces[a[0]]; if(!p) return;
+    p.where='loose'; p.x=L.bx+a[1]*L.bs; p.y=L.by+a[2]*L.bs; G.loose.push(a[0]);
+  });
+  var seen={};
+  G.pieces.forEach(function(p){ if(p.where!=='rack') seen[p.i]=1; });
+  (run.rack||[]).forEach(function(i){ if(G.pieces[i]&&!seen[i]){ G.rack.push(i); seen[i]=1; } });
+  G.pieces.forEach(function(p){ if(!seen[p.i]){ G.rack.push(p.i); seen[p.i]=1; } });   /* 빠진 조각 줍기 */
+  G.acc=(run.t||0)*1000; G.t0=now();
+  clampPage();
+}
 function shuffle(a){ for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i];a[i]=a[j];a[j]=t; } }
 
 /* ── 자리 잡기 ── */
@@ -1067,7 +1150,7 @@ function release(){
 
   /* 아래 칸에 도로 놓기 */
   if(d.y+G.cell*L.scale/2 > L.rackY){
-    p.where='rack'; G.rack.push(d.i); clampPage(); sfx.drop(); draw(); return;
+    p.where='rack'; G.rack.push(d.i); clampPage(); sfx.drop(); draw(); saveRun(); return;
   }
   /* 제자리 근처면 딱 붙는다 */
   var hx=homeX(p), hy=homeY(p), tol=snapTol();
@@ -1076,13 +1159,13 @@ function release(){
     p.where='placed'; p.popT=now(); G.placed++;
     G.sparkle.push({x:hx,y:hy,w:L.cellD,h:L.cellD,t:now()});
     sfx.snap(); paintHud();
-    if(G.placed>=G.pieces.length) finish();
+    if(G.placed>=G.pieces.length) finish(); else saveRun();
     draw(); return;
   }
   /* 아니면 그 자리에 그냥 둔다 */
   p.where='loose'; p.x=clamp(d.x,-G.cell*L.scale*.4,CW-G.cell*L.scale*.6);
   p.y=clamp(d.y,4,L.rackY-G.cell*L.scale*.5);
-  G.loose.push(d.i); sfx.drop(); draw();
+  G.loose.push(d.i); sfx.drop(); draw(); saveRun();
 }
 function clamp(v,a,b){ return v<a?a:(v>b?b:v); }
 cv.addEventListener('pointerup',release);
@@ -1108,9 +1191,12 @@ function tick(){
   }
 }
 setInterval(tick,250);
+setInterval(saveRun,5000);          /* 시간도 같이 남기려고 이따금 저장 */
+window.addEventListener('pagehide',saveRun);
+window.addEventListener('beforeunload',saveRun);
 document.addEventListener('visibilitychange',function(){
   if(!G||!G.running) return;
-  if(document.hidden){ G.acc+=now()-G.t0; G.paused=true; }
+  if(document.hidden){ G.acc+=now()-G.t0; G.paused=true; saveRun(); }
   else if(G.paused){ G.t0=now(); G.paused=false; }
 });
 
@@ -1130,6 +1216,7 @@ $('#dNext').onclick=function(){
   start(PICS[(i+1)%PICS.length].id,G.lev);
 };
 function toMenu(back){
+  saveRun();
   G=null; gameEl.hidden=true; selEl.hidden=false; $('#done').hidden=true; paintSel();
   /* 판을 열 때 밀어 넣은 기록을 도로 뺀다 (뒤로가기로 돌아온 경우는 이미 빠져 있다) */
   if(!back && inGameState){ inGameState=false; try{ history.back(); }catch(e){} }
@@ -1151,7 +1238,8 @@ function finish(){
   G.running=false;
   var secs=(G.acc+(now()-G.t0))/1000;
   var k=bkey(G.pic.id,G.lev), old=save.best[k], isNew=(old==null)||secs<old;
-  if(isNew){ save.best[k]=Math.round(secs); store(); }
+  if(isNew){ save.best[k]=Math.round(secs); }
+  clearRun();  store();
   for(var pi=0;pi<PICS.length;pi++) if(PICS[pi].id===G.pic.id) lastDone=pi*LEVELS.length+G.lev;
   $('#dTitle').textContent=T.complete;
   $('#dName').textContent=(KO?G.pic.ko:G.pic.en)+' · '+G.pieces.length;
