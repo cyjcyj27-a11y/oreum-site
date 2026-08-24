@@ -1,6 +1,6 @@
 /* 오름게임즈 — 미니게임 왼쪽 위에 붙는 홈 링크.
  *
- * 알약 폭 110px. (2026-08-24 사용자 지시로 오름 로고를 뺐다 — 130px 라 칸이 길었다)
+ * 알약 폭 약 93px, 왼쪽 위 구석에 바짝. (2026-08-24 로고를 빼고 글자도 줄였다 — 게임 제목을 가려서)
  *
  * 쓰는 법: 게임 페이지 <head> 나 <body> 끝에 아래 한 줄을 넣습니다.
  *   <script src="/assets/game-home.js" defer></script>
@@ -26,8 +26,8 @@
     if (document.getElementById('oreumHome')) return;      // 두 번 붙지 않게
 
     var sc = document.querySelector('script[src*="game-home"]');
-    var top  = (sc && sc.getAttribute('data-top'))  || '8';
-    var left = (sc && sc.getAttribute('data-left')) || '10';
+    var top  = (sc && sc.getAttribute('data-top'))  || '4';
+    var left = (sc && sc.getAttribute('data-left')) || '4';
     var push = sc && sc.getAttribute('data-push');   // 본문을 그만큼 아래로 밀어 줍니다
 
     // 말은 문서 언어를 따르되, 주소에 ?lang= 이 있으면 그쪽이 우선입니다
@@ -45,11 +45,11 @@
         'top:calc(' + top + 'px + env(safe-area-inset-top));' +
         'left:calc(' + left + 'px + env(safe-area-inset-left));' +
         'display:inline-flex;align-items:center;' +
-        'padding:5px 11px;border-radius:999px;text-decoration:none;' +
+        'padding:3px 8px;border-radius:999px;text-decoration:none;' +
         /* 밝은 배경에도, 어두운 배경에도 읽히도록 하얀 알약에 테두리를 둡니다 */
         'background:rgba(255,253,247,.92);border:1px solid rgba(120,84,44,.24);' +
         'box-shadow:0 2px 8px rgba(0,0,0,.16);' +
-        'font:700 11.5px/1 -apple-system,BlinkMacSystemFont,"Pretendard",' +
+        'font:700 10px/1 -apple-system,BlinkMacSystemFont,"Pretendard",' +
         '"Apple SD Gothic Neo","Malgun Gothic",sans-serif;' +
         'color:#2e6b39;white-space:nowrap;' +
         '-webkit-tap-highlight-color:transparent;touch-action:manipulation;' +
