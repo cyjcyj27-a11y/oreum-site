@@ -46,8 +46,17 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;touch-
 .lev{flex:1 1 0;min-width:76px;padding:9px 6px;border-radius:11px;border:1px solid var(--line);
   background:var(--bg2);text-align:center;transition:.14s}
 .lev b{display:block;font-size:12px;letter-spacing:.08em;color:var(--ink2);font-weight:800}
-.lev span{display:block;font-size:19px;font-weight:800;color:var(--ink);margin-top:1px;font-variant-numeric:tabular-nums}
-.lev em{display:block;font-style:normal;font-size:10.5px;color:var(--muted);letter-spacing:.06em}
+.lev span{display:block;font-size:17px;font-weight:800;color:var(--ink);margin-top:1px;
+  font-variant-numeric:tabular-nums;white-space:nowrap}
+.lev em{display:block;font-style:normal;font-size:10.5px;color:var(--muted);letter-spacing:.06em;
+  white-space:nowrap}
+/* 좁은 폰에서 네 칸이 한 줄에 들어가게 */
+@media(max-width:430px){
+  .lev{padding:8px 3px;min-width:0}
+  .lev b{font-size:11px;letter-spacing:.04em}
+  .lev span{font-size:14.5px}
+  .lev em{font-size:9.5px;letter-spacing:0}
+}
 .lev[aria-pressed=true]{background:var(--accent);border-color:var(--accent)}
 .lev[aria-pressed=true] b,.lev[aria-pressed=true] span,.lev[aria-pressed=true] em{color:#221a0d}
 .lev[aria-pressed=true] em{opacity:.72}
@@ -87,8 +96,9 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;touch-
 .slot{position:relative;aspect-ratio:1;border-radius:8px;overflow:hidden;padding:0;
   border:1px solid var(--line);background:#191612;line-height:0;transition:.14s}
 .slot img{width:100%;height:100%;object-fit:cover;display:block}
-.slot .lv{position:absolute;left:0;right:0;bottom:0;padding:7px 0 3px;
-  font-weight:800;font-size:11px;line-height:1.4;color:var(--muted);text-align:center;letter-spacing:.02em}
+.slot .lv{position:absolute;left:0;right:0;bottom:0;padding:7px 2px 3px;
+  font-weight:800;font-size:10.5px;line-height:1.4;color:var(--muted);text-align:center;
+  letter-spacing:0;white-space:nowrap}
 .slot.done{border-color:var(--green-edge,#3f6a42)}
 .slot.done .lv{color:#fff;background:linear-gradient(to top,rgba(8,7,5,.9),rgba(8,7,5,0))}
 .slot.done::after{content:"";position:absolute;inset:0;border-radius:7px;
@@ -355,6 +365,7 @@ var T = KO ? {
   ach:'완성작', tabPic:'그림 고르기', tabAch:'완성작', achPage:function(a,b){ return a+' / '+b+'쪽'; },
   achTip:function(n,c,t){ return n+' · '+c+'조각'+(t?' · '+t:''); },
   pieces2:function(n){ return n+'조각'; },
+  picsDone:function(a,b){ return '그림 '+a+' / '+b; },
   bestLb:'최고기록', noRec:'아직 기록 없음',
   retry:'재도전하기', tryIt:'도전하기', close:'닫기',
   cut:function(s,o){ return '이전 기록 '+o+' → '+s+'초 단축'; },
@@ -367,7 +378,8 @@ var T = KO ? {
   complete:'COMPLETE', best:'BEST', newbest:'NEW BEST',
   ach:'COMPLETED', tabPic:'PICTURES', tabAch:'COMPLETED', achPage:function(a,b){ return a+' / '+b; },
   achTip:function(n,c,t){ return n+' · '+c+' pcs'+(t?' · '+t:''); },
-  pieces2:function(n){ return n+' pieces'; },
+  pieces2:function(n){ return n+' pcs'; },
+  picsDone:function(a,b){ return a+' / '+b+' pictures'; },
   bestLb:'BEST', noRec:'No record yet',
   retry:'TRY AGAIN', tryIt:'PLAY', close:'CLOSE',
   cut:function(s,o){ return s+'s faster than '+o; },
@@ -588,7 +600,7 @@ function paintSel(){
     var b=document.createElement('button');
     b.type='button'; b.className='lev'; b.setAttribute('aria-pressed', i===lev?'true':'false');
     var done=PICS.filter(function(p){ return save.best[bkey(p.id,i)]!=null; }).length;
-    b.innerHTML='<b>'+L.tag+'</b><span>'+(L.cols*L.cols)+'</span><em>'+done+' / '+PICS.length+'</em>';
+    b.innerHTML='<b>'+L.tag+'</b><span>'+T.pieces2(L.cols*L.cols)+'</span><em>'+T.picsDone(done,PICS.length)+'</em>';
     b.onclick=function(){ lev=i; save.lev=i; store(); sfx.tap(); paintSel(); };
     levs.appendChild(b);
   });
@@ -660,7 +672,7 @@ function paintAch(){
     b.type='button'; b.className='slot'+(got?' done':'');
     b.title=T.achTip(KO?pic.ko:pic.en, n, got?fmt(best):'');
     b.innerHTML=(got?'<img src="img/t'+pic.id+'.webp" alt="" loading="lazy" width="288" height="288">':'')
-      +'<span class="lv">'+n+'</span>';
+      +'<span class="lv">'+T.pieces2(n)+'</span>';
     b.onclick=function(){ sfx.tap(); openSlot(sl.p,sl.l); };
     g.appendChild(b);
   });
