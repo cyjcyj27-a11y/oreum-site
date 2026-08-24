@@ -17,7 +17,7 @@
   --accent:#e8b361; --accent2:#f2d097; --good:#7fc47f;
 }
 *{box-sizing:border-box}
-html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--ink);
+html,body{margin:0;height:100%;height:100dvh;overflow:hidden;background:var(--bg);color:var(--ink);
   font:400 15px/1.5 -apple-system,BlinkMacSystemFont,"Pretendard","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
   -webkit-tap-highlight-color:transparent;-webkit-text-size-adjust:100%}
 button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;touch-action:manipulation}
@@ -135,10 +135,13 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;touch-
 
 /* ── 게임 화면 ── */
 #game{position:absolute;inset:0;display:flex;flex-direction:column}
-#hud{display:flex;align-items:center;gap:8px;padding:7px 10px 7px 104px;
-  background:var(--bg2);border-bottom:1px solid var(--line);overflow:hidden}
-.hstats{display:flex;align-items:center;min-width:0}
-.hbtns{display:flex;align-items:center;gap:7px;margin-left:auto}
+#hud{flex:0 0 auto;position:relative;z-index:5;
+  display:flex;align-items:center;gap:8px;padding:7px 10px 7px 104px;
+  background:var(--bg2);border-bottom:1px solid var(--line);
+  flex-wrap:wrap;row-gap:6px}
+.hstats{display:flex;align-items:center;min-width:0;flex:1 1 auto;overflow:hidden}
+.hbtns{display:flex;align-items:center;gap:7px;margin-left:auto;flex:0 0 auto;flex-wrap:wrap;
+  justify-content:flex-end;row-gap:6px}
 .stat{display:flex;flex-direction:column;line-height:1.15;padding:0 14px 0 0;min-width:0}
 .stat b{font-weight:800;font-size:9.5px;line-height:1.4;letter-spacing:.14em;color:var(--muted)}
 .stat span{font-weight:800;font-size:15px;line-height:1.2;color:var(--ink);font-variant-numeric:tabular-nums;
@@ -629,7 +632,7 @@ function paintSel(){
 }
 
 /* ── 맨 위 탭 ── */
-var view='pic';
+var view='ach';
 function paintTabs(done,total){
   $('#tabPic').innerHTML=T.tabPic;
   $('#tabAch').innerHTML=T.tabAch+' <em>'+done+' / '+total+'</em>';
@@ -720,7 +723,7 @@ $('#achNext').onclick=function(){
 function start(picId,levIdx){
   var pic=null; for(var i=0;i<PICS.length;i++) if(PICS[i].id===picId) pic=PICS[i];
   if(!pic) return;
-  selEl.hidden=true; gameEl.hidden=false; $('#done').hidden=true;
+  selEl.hidden=true; gameEl.hidden=false; $('#done').hidden=true; pushGameState();
   $('#load').hidden=false; $('#load').textContent=T.loading;
   $('#lbName').textContent=T.picture;
   $('#vName').textContent=KO?pic.ko:pic.en;
@@ -806,6 +809,18 @@ function resize(){
 }
 window.addEventListener('resize',resize);
 window.addEventListener('orientationchange',function(){ setTimeout(resize,220); });
+/* 창 크기 바뀜만 보면 전체화면·화면분할·주소창 여닫힘을 놓칠 때가 있다.
+   캔버스 칸 자체가 바뀌는 것을 보면 빠짐이 없다. */
+if(window.ResizeObserver){
+  var ro=new ResizeObserver(function(){
+    var r=cv.getBoundingClientRect();
+    if(Math.round(r.width)!==CW || Math.round(r.height)!==CH) resize();
+  });
+  ro.observe(cv);
+}
+['fullscreenchange','webkitfullscreenchange'].forEach(function(ev){
+  document.addEventListener(ev,function(){ setTimeout(resize,60); setTimeout(resize,300); });
+});
 
 /* ── 그리기 ── */
 function draw(){
@@ -1076,7 +1091,22 @@ $('#dNext').onclick=function(){
   var i=0; for(var k=0;k<PICS.length;k++) if(PICS[k].id===G.pic.id) i=k;
   start(PICS[(i+1)%PICS.length].id,G.lev);
 };
-function toMenu(){ G=null; gameEl.hidden=true; selEl.hidden=false; $('#done').hidden=true; paintSel(); }
+function toMenu(back){
+  G=null; gameEl.hidden=true; selEl.hidden=false; $('#done').hidden=true; paintSel();
+  /* 판을 열 때 밀어 넣은 기록을 도로 뺀다 (뒤로가기로 돌아온 경우는 이미 빠져 있다) */
+  if(!back && inGameState){ inGameState=false; try{ history.back(); }catch(e){} }
+}
+/* 판을 열면 기록을 하나 밀어 넣어, 뒤로가기가 사이트 밖이 아니라 고르는 화면으로 가게 한다 */
+var inGameState=false;
+function pushGameState(){
+  if(inGameState) return;
+  try{ history.pushState({pixl:'game'},''); inGameState=true; }catch(e){}
+}
+window.addEventListener('popstate',function(){
+  inGameState=false;
+  if(!gameEl.hidden){ toMenu(true); return; }        /* 판 → 고르는 화면 */
+  if(!$('#slotDlg').hidden){ closeSlot(); }
+});
 
 /* ── 완성 ── */
 function finish(){
