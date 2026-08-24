@@ -46,17 +46,16 @@ tap.mp3    단추 · 쪽 넘기기 — **책장 넘기는 소리**
                두툼한 책장  https://pixabay.com/sound-effects/film-special-effects-page-turn-503579/
            (더 전: clean minimal pop 467466, light switch 382712)
 
-win.mp3    한 판을 다 맞췄을 때 — **박수 소리**
-           원본: https://pixabay.com/sound-effects/film-special-effects-applause-sound-effect-521104/
-                 (PWLPL — Applause)
-           2026-08-25에 사용자가 "판 완성했을 때 박수소리"라고 해서 팡파레에서 바꿨습니다.
-           후보 다섯 개를 파형으로 견줘 이걸 골랐습니다 — 나머지는 박수가 성기거나(6695·43613),
-           끝이 없이 계속 이어지거나(383901), 낱개 박수가 튀었습니다(97257).
-           이건 5초 안에 차올랐다 저절로 잦아들어서 "다 맞췄다" 순간에 맞습니다.
-           다듬은 방법: 0.10초부터 앞 무음을 떼고 3.6초로 자른 뒤 끝 0.9초를 잦아들게,
-                        봉우리를 -1dB 로(+1.5dB). 홀소리 44.1kHz 112kbps, 51KB.
+win.mp3    한 판을 다 맞췄을 때
+           원본: https://pixabay.com/sound-effects/musical-level-win-6416/
+                 (freesound_community — Level win)
+           2026-08-25에 사용자가 직접 골라 지정했습니다. 그 전엔 박수였습니다.
+           다듬은 방법: 앞 무음을 떼고 2.9초로 자른 뒤 끝 0.45초를 잦아들게,
+                        봉우리를 -1dB 로(+5.3dB — 원본이 꽤 작습니다).
+                        홀소리 44.1kHz 112kbps, 41KB.
            게임에서 크기 0.7.
-           (그 전 팡파레: https://pixabay.com/sound-effects/musical-victory-bell-success-fanfare-576275/)
+           (그 전: 박수 https://pixabay.com/sound-effects/film-special-effects-applause-sound-effect-521104/
+            더 전: 팡파레 https://pixabay.com/sound-effects/musical-victory-bell-success-fanfare-576275/)
 
 ─────────────────────────────────────────────────────────────
 배경음악 — 클래식 일곱 곡 (music/ 폴더)
