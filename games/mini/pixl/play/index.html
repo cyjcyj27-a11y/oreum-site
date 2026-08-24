@@ -479,7 +479,8 @@ var sfx={
   snap :function(){ if(!play('snap',.85,.05)){
                       tone(1500,.035,'square',.07); tone(210,.11,'sine',.17); tone(880,.06,'triangle',.09,.012); } },
   win  :function(){ if(!play('win',.7)) [523,659,784,1047].forEach(function(f,i){ tone(f,.34,'triangle',.12,i*.11); }); },
-  tap  :function(){ if(!play('tap',.3,.07)) tone(600,.04,'square',.04); }
+  /* 책장 넘기는 소리 — 종이라 음높이는 거의 안 흔든다 */
+  tap  :function(){ if(!play('tap',.42,.035)) tone(600,.04,'square',.04); }
 };
 
 /* ── 배경음악 ── 클래식 일곱 곡을 섞어서 이어 듣는다.
