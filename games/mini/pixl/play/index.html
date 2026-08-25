@@ -731,10 +731,12 @@ $('#tabAch').onclick=function(){ setView('ach'); };
 /* ── 업적판 ──
    한 칸 = 판 하나(그림 × 난이도). 그림 차례대로 늘어놓고 한 쪽에 25칸(5×5)씩 넘긴다.
    맞춘 칸은 그림이 뜨고, 안 맞춘 칸은 조각 수만 흐리게 보인다. 눌러서 바로 그 판으로 갈 수 있다. */
-var PER_PAGE=25, achPage=0, lastDone=-1;
+/* 한 쪽에 그림 수만큼 = 한 쪽이 난이도 하나. 그림을 더 넣어도 저절로 맞는다 */
+var PER_PAGE=PICS.length, achPage=0, lastDone=-1;
 function slotList(){
   var out=[];
-  for(var i=0;i<PICS.length;i++) for(var j=0;j<LEVELS.length;j++) out.push({p:i,l:j});
+  /* 조각 수 차례로 늘어놓는다 — 16조각 서른두 장, 그다음 36조각 … (2026-08-25 사용자) */
+  for(var j=0;j<LEVELS.length;j++) for(var i=0;i<PICS.length;i++) out.push({p:i,l:j});
   return out;
 }
 function paintAch(){
@@ -760,7 +762,8 @@ function paintAch(){
     var e=document.createElement('span'); e.className='slot blank'; g.appendChild(e);
   }
 
-  $('#achPage').textContent=T.achPage(achPage+1,pages);
+  var lv=LEVELS[Math.min(LEVELS.length-1,achPage)];
+  $('#achPage').textContent=T.pieces2(lv.cols*lv.cols)+'  ·  '+T.achPage(achPage+1,pages);
   $('#achPrev').disabled=(achPage===0);
   $('#achNext').disabled=(achPage>=pages-1);
 }
@@ -1247,7 +1250,7 @@ function finish(){
   var k=bkey(G.pic.id,G.lev), old=save.best[k], isNew=(old==null)||secs<old;
   if(isNew){ save.best[k]=Math.round(secs); }
   clearRun();  store();
-  for(var pi=0;pi<PICS.length;pi++) if(PICS[pi].id===G.pic.id) lastDone=pi*LEVELS.length+G.lev;
+  for(var pi=0;pi<PICS.length;pi++) if(PICS[pi].id===G.pic.id) lastDone=G.lev*PICS.length+pi;
   $('#dTitle').textContent=T.complete;
   $('#dName').textContent=(KO?G.pic.ko:G.pic.en)+' · '+G.pieces.length;
   $('#dTime').textContent=fmt(secs);
