@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#FCF3D9">
+<title>CRISPY — 육각 크래커 퍼즐 | 오름게임즈</title>
+<meta name="description" content="육각 크래커를 놓아 토핑을 잇는 무료 단계별 퍼즐게임. 같은 토핑 3장이 이어지면 바삭! 판마다 목표 토핑을 정해진 수 안에 터뜨립니다.">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%;overflow:hidden;overscroll-behavior:none}
+  body{
+    /* 바탕은 여기 한 곳에서만 칠합니다 — 캔버스가 따로 칠하면 표시줄 위아래로 이음매가 생깁니다 */
+    background:#F6E6B8;
+    background:radial-gradient(ellipse 120% 80% at 50% 42%, #FFFBEC 0%, #F6E6B8 100%);
+    color:#6B5A42;
+    font-family:"Pretendard","Pretendard Variable",-apple-system,BlinkMacSystemFont,
+                "Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    -webkit-tap-highlight-color:transparent;
+    touch-action:none;user-select:none;-webkit-user-select:none;
+  }
+  #app{position:fixed;inset:0;display:flex;flex-direction:column}
+
+  /* 위쪽 표시줄 — 하얀 둥근 카드 세 장 */
+  #hud{
+    flex:0 0 auto;
+    padding:calc(30px + env(safe-area-inset-top)) 12px 4px;
+    display:flex;align-items:center;justify-content:center;gap:8px;
+  }
+  @media (min-width:520px){#hud{padding-top:calc(12px + env(safe-area-inset-top))}}
+  #hud .col{
+    display:flex;flex-direction:column;align-items:center;min-width:78px;
+    background:#fff;border-radius:16px;padding:7px 12px 8px;
+    box-shadow:0 3px 0 rgba(206,186,140,.35), 0 5px 14px rgba(180,158,110,.18);
+  }
+  #hud .lab{
+    font-size:9.5px;font-weight:800;letter-spacing:.14em;
+    text-transform:uppercase;margin-bottom:1px;color:#F0A93C;
+  }
+  #hud .val{font-size:17px;font-weight:900;color:#5E4C34;line-height:1.05;
+            font-variant-numeric:tabular-nums}
+  #hud .col.main{min-width:96px;padding:6px 14px 9px}
+  #hud .col.main .lab{color:#4FAEE0}
+  #hud .col.main .val{font-size:30px;color:#3E88BC;letter-spacing:-.02em}
+  #hud .col.mv .lab{color:#84C33F}
+  #hud .col.main .val .slash{opacity:.45;margin:0 1px;font-weight:800}
+  #hud .col.mv.warn .val{color:#E4452F}          /* 남은 수가 얼마 없을 때 */
+
+  /* 좁은 화면에서는 오른쪽 일시정지 단추 자리를 비워 두고 카드도 줄입니다.
+     기본 규칙보다 뒤에 와야 먹습니다 — 앞에 두면 같은 우선순위라 덮어써집니다. */
+  @media (max-width:519px){
+    #hud{gap:6px;padding-left:8px;padding-right:8px}
+    #hud .col{min-width:56px;padding:6px 8px 7px}
+    #hud .lab{font-size:9px;letter-spacing:.08em}
+    #hud .val{font-size:15px}
+    #hud .col.main{min-width:78px;padding:5px 11px 8px}
+    #hud .col.main .val{font-size:26px}
+  }
+  @media (max-width:400px){          /* 320px 같은 아주 좁은 폰 */
+    #hud{padding-left:5px;padding-right:5px;gap:4px}
+    #hud .col{min-width:46px;padding:5px 6px 6px}
+    #hud .lab{font-size:8px;letter-spacing:.02em}
+    #hud .val{font-size:13px}
+    #hud .col.main{min-width:64px;padding:4px 9px 7px}
+    #hud .col.main .val{font-size:22px}
+  }
+
+  #cv{flex:1 1 auto;display:block;width:100%;height:100%}
+
+  /* 덮개 */
+  .sheet{
+    position:fixed;inset:0;z-index:60;
+    background:rgba(250,240,208,.82);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+    display:flex;align-items:center;justify-content:center;padding:24px;
+    opacity:0;pointer-events:none;transition:opacity .22s ease;
+  }
+  .sheet.on{opacity:1;pointer-events:auto}
+  .card{
+    width:100%;max-width:340px;text-align:center;
+    background:#fff;border-radius:26px;padding:26px 22px 22px;
+    box-shadow:0 6px 0 rgba(206,186,140,.38), 0 18px 44px rgba(150,125,80,.26);
+  }
+  .card h1{font-size:30px;font-weight:900;letter-spacing:.1em;margin-bottom:4px;
+           background:linear-gradient(90deg,#FF80AC,#8FCB3F 52%,#4FAEE0);
+           -webkit-background-clip:text;background-clip:text;color:transparent}
+  .card .sub{font-size:11.5px;font-weight:800;letter-spacing:.13em;color:#B7A588;
+             text-transform:uppercase;margin-bottom:18px}
+  .rules{text-align:left;display:flex;flex-direction:column;gap:11px;margin-bottom:20px}
+  .rule{display:flex;gap:10px;align-items:flex-start}
+  .rule .ic{flex:0 0 26px;height:26px;border-radius:50%;display:grid;place-items:center;
+            font-size:12px;font-weight:900;color:#fff}
+  .rule p{font-size:12.5px;line-height:1.55;color:#7C6B52}
+  .rule b{color:#4E4130;font-weight:800}
+  .btn{
+    width:100%;padding:15px;border:0;border-radius:18px;cursor:pointer;
+    font-family:inherit;font-size:14px;font-weight:900;letter-spacing:.13em;
+    color:#fff;background:linear-gradient(180deg,#9AD556,#77BE33);
+    box-shadow:0 4px 0 #5C9B22, 0 8px 16px rgba(119,190,51,.30);
+  }
+  .btn:active{transform:translateY(2px);box-shadow:0 2px 0 #5C9B22}
+  .btn.ghost{background:#F4EFE2;color:#9A8A6E;box-shadow:0 3px 0 #DFD5BF;margin-top:9px}
+  .btn.ghost:active{box-shadow:0 1px 0 #DFD5BF}
+  .final{display:flex;justify-content:center;gap:26px;margin:6px 0 20px}
+  .final div{display:flex;flex-direction:column;gap:2px}
+  .final .lab{font-size:9.5px;font-weight:800;letter-spacing:.14em;color:#B7A588}
+  .final .val{font-size:28px;font-weight:900;color:#5E4C34;font-variant-numeric:tabular-nums}
+
+  /* 소리·규칙은 아래 오른쪽으로 뺍니다 — 위쪽은 표시줄이 다 쓰기 때문입니다
+     (왼쪽 아래는 전체화면 단추 자리라 겹치지 않게 오른쪽) */
+  /* 2026-08-25 사용자 지시 — STAGE 카드들과 같은 줄, 오른쪽 끝.
+     표시줄 안에 넣어야 좁은 화면에서 카드와 안 겹친다(붙박이로 띄우면 겹친다). */
+  #tools{display:flex;gap:7px;align-items:center;margin-left:6px;flex:0 0 auto}
+  #tools #btnPause{font-size:13px}
+  #tools button, #btnPause{
+    width:34px;height:34px;border-radius:50%;cursor:pointer;border:0;
+    background:#fff;color:#B29A6E;font-family:inherit;font-size:14px;font-weight:900;
+    display:grid;place-items:center;
+    box-shadow:0 3px 0 rgba(206,186,140,.42), 0 4px 10px rgba(180,158,110,.20);
+  }
+  #tools button:active,#btnPause:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(206,186,140,.42)}
+  /* 좁은 화면에서 카드 셋 + 단추 넷을 한 줄에 넣으려면 단추도 같이 줄여야 합니다.
+     ⚠ 이 블록은 위의 기본 크기 규칙보다 **뒤에** 와야 먹습니다. */
+  @media (max-width:519px){
+    #tools{gap:5px;margin-left:5px}
+    #tools button{width:30px;height:30px;font-size:13px}
+    #tools #btnPause{font-size:12px}
+  }
+  @media (max-width:400px){
+    #tools{gap:4px;margin-left:4px}
+    #tools button{width:27px;height:27px;font-size:12px}
+    #tools #btnPause{font-size:11px}
+  }
+  /* 꺼진 것은 글자를 ✕ 로 바꾸지 않고 흐리게 + 사선으로 표시합니다.
+     단추가 둘이라 둘 다 ✕ 가 되면 어느 것이 무엇인지 알 수 없습니다. */
+  #tools button{position:relative}
+  #tools button.off{color:#D3C6AE}
+  #tools button.off::after{
+    content:'';position:absolute;left:6px;right:6px;top:50%;height:2px;border-radius:2px;
+    background:#C0AE90;transform:rotate(-42deg);
+  }
+  /* 일시정지는 크기는 같게, 색만 다르게 (2026-08-25 사용자: 같은 크기로 한 줄에) */
+  /* 글자 크기는 위 미디어쿼리가 맡습니다 — 여기에 두면 좁은 화면 설정을 덮습니다 */
+  #tools #btnPause{
+    color:#fff;letter-spacing:-1px;
+    background:linear-gradient(180deg,#9AD556,#77BE33);
+    box-shadow:0 3px 0 #5C9B22, 0 5px 12px rgba(119,190,51,.30);
+  }
+  #tools #btnPause:active{box-shadow:0 1px 0 #5C9B22}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="hud">
+    <div class="col"><div class="lab">Stage</div><div class="val" id="stage">1</div></div>
+    <div class="col main"><div class="lab" id="goalLab">Goal</div>
+      <div class="val"><span id="goalGot">0</span><span class="slash">/</span><span id="goalNeed">10</span></div></div>
+    <div class="col mv"><div class="lab">Moves</div><div class="val" id="moves">0</div></div>
+    <div id="tools">
+      <button id="btnMusic" title="음악" aria-label="음악 켜기 끄기">&#9835;</button>
+      <button id="btnSound" title="효과음" aria-label="효과음 켜기 끄기">&#9834;</button>
+      <button id="btnHelp" title="규칙">?</button>
+      <button id="btnPause" title="일시정지" aria-label="일시정지">&#10074;&#10074;</button>
+    </div>
+  </div>
+  <canvas id="cv"></canvas>
+</div>
+
+<div class="sheet" id="sheetPause">
+  <div class="card">
+    <h1 style="font-size:24px;letter-spacing:.18em">PAUSE</h1>
+    <div class="sub">잠깐 멈췄습니다</div>
+    <button class="btn" id="btnResume">RESUME</button>
+    <button class="btn ghost" id="btnPauseRules">규칙 보기</button>
+  </div>
+</div>
+
+<div class="sheet on" id="sheetHelp">
+  <div class="card">
+    <h1>CRISPY</h1>
+    <div class="sub">Hex Cracker Puzzle</div>
+    <div class="rules">
+      <div class="rule"><div class="ic" style="background:#F0A93C">1</div>
+        <p>크래커를 빈 칸에 놓습니다. 고른 크래커를 한 번 더 누르면 <b>회전</b>합니다.</p></div>
+      <div class="rule"><div class="ic" style="background:#FF80AC">2</div>
+        <p>맞닿은 변의 <b>토핑이 같으면</b> 이어집니다.</p></div>
+      <div class="rule"><div class="ic" style="background:#8FCB3F">3</div>
+        <p>같은 토핑으로 <b>3장이 이어지면</b> 그 자리에서 바삭! 부서집니다. 떨어져 있던 덩어리 둘을 한 번에 이으면 더 크게 터집니다.</p></div>
+      <div class="rule"><div class="ic" style="background:#BCAE95">4</div>
+        <p>판마다 <b>목표 토핑을 정해진 장수만큼</b> 터뜨려야 합니다. 위에 남은 수가 뜹니다. 다 쓰거나 판이 꽉 차면 GAME OVER.</p></div>
+      <div class="rule"><div class="ic" style="background:#9A8A6E">5</div>
+        <p>오래 둔 크래커는 <b>SOGGY</b>가 되어 아무와도 이어지지 않습니다.</p></div>
+    </div>
+    <button class="btn" id="btnStart">START</button>
+  </div>
+</div>
+
+<div class="sheet" id="sheetClear">
+  <div class="card">
+    <h1 style="font-size:23px;letter-spacing:.16em">STAGE CLEAR</h1>
+    <div class="sub" id="clearSub">다음 판으로</div>
+    <div class="final">
+      <div><span class="lab">SCORE</span><span class="val" id="cScore">0</span></div>
+      <div><span class="lab">MOVES LEFT</span><span class="val" id="cLeft">0</span></div>
+    </div>
+    <button class="btn" id="btnNext">NEXT STAGE</button>
+  </div>
+</div>
+
+<div class="sheet" id="sheetOver">
+  <div class="card">
+    <h1 style="font-size:22px;letter-spacing:.2em">GAME OVER</h1>
+    <div class="sub" id="overSub">수를 다 썼습니다</div>
+    <div class="final">
+      <div><span class="lab">STAGE</span><span class="val" id="fStage">1</span></div>
+      <div><span class="lab">BEST STAGE</span><span class="val" id="fBest">1</span></div>
+    </div>
+    <button class="btn" id="btnRetry">RETRY STAGE</button>
+    <button class="btn ghost" id="btnFirst">1판부터 다시</button>
+  </div>
+</div>
+
+<script src="/assets/game-home.js?v=5" data-fullscreen="1" defer></script>
+<script>
+(function(){
+'use strict';
+
+/* ── 판 기본값 ── */
+/* 판은 작게 시작해서 점수가 오르면 한 겹 넓어집니다.
+ * 처음부터 37칸을 펼쳐 두면 첫판이 막막해 보이고 크래커도 잘아집니다.
+ *   반지름 2 = 19칸(첫판)  →  반지름 3 = 37칸 */
+var R_MAX = 3, R = 2, GROW_AT = 450;   // 450점이면 대개 20수 안팎
+/* 납작머리(flat-top) 육각 — 판이 가로보다 세로로 길어져 휴대폰 화면을 알뜰히 씁니다.
+ * 변 0~5 는 아래오른쪽부터 시계 반대 방향, 마주보는 변은 (k+3)%6 입니다. */
+var DIRS = [[1,0],[0,1],[-1,1],[-1,0],[0,-1],[1,-1]];
+var CLEAR_MIN = 3;                                      // 부서지는 데 필요한 최소 장수
+
+/* 눅눅해지기까지의 수 — 수를 둘수록 짧아집니다(난이도 곡선) */
+/* 봇 5판×실력 3단계로 재서 고른 값 — 실력 0.6/0.8/0.95 에서 156·259·405수, 2485·4075·8030점 */
+var LIFE_BASE = 16, LIFE_STEP = 10, LIFE_MIN = 6;
+
+/* 크림색 바탕·황금빛 크래커와 부딪히지 않는 세 가지.
+ * 노랑은 크래커 몸통과 뭉개져서 레퍼런스의 하늘색을 씁니다. */
+var TOP = [
+  { a:'#FF7FAC', b:'#DE3F79', hi:'#FFCBDE' },   // STRAWBERRY
+  { a:'#9BD44A', b:'#67A11F', hi:'#D8F3A6' },   // PISTACHIO
+  { a:'#5BBDEE', b:'#2686BF', hi:'#C2E9FB' }    // BLUEBERRY
+];
+
+/* ── 상태 ── */
+var board = new Map();
+var hand  = [null,null,null];
+var sel = -1, score = 0, moves = 0, over = false, started = false, paused = false;
+var lastChain = 0;
+var stage = 1, bestStage = 1, goalColor = 0, goalNeed = 6, goalGot = 0, movesLeft = 16, cleared = false;
+var fx = [], pops = [];
+var soundOn = true;      // 효과음
+var musicOn = true;      // 음악 — 따로 끄고 켭니다
+
+function key(q,r){ return q+','+r; }
+function inBoard(q,r){ return Math.abs(q)<=R && Math.abs(r)<=R && Math.abs(q+r)<=R; }
+/* CELLS 는 늘 최대 크기(R_MAX)로 두고, 지금 쓰는 칸만 inBoard 로 걸러 씁니다.
+ * 여기서 R 을 쓰면 판이 넓어져도 칸이 안 늘어납니다. */
+var CELLS = [];
+for (var iq=-R_MAX; iq<=R_MAX; iq++) for (var ir=-R_MAX; ir<=R_MAX; ir++){
+  if (Math.abs(iq)<=R_MAX && Math.abs(ir)<=R_MAX && Math.abs(iq+ir)<=R_MAX) CELLS.push([iq,ir]);
+}
+
+/* 크래커에 두께가 있어서, 위에 있는 것부터 그려야 아래 것이 제대로 덮입니다 */
+var ORDER = CELLS.slice().sort(function(a,b){ return (a[1]+a[0]/2) - (b[1]+b[0]/2); });
+
+function life(){ return Math.max(LIFE_MIN, LIFE_BASE - Math.floor(moves/LIFE_STEP)); }
+
+/* 반죽에 찍는 구멍 자리 — 한 겹에 6개, 60도씩 균일하게. 가운데는 비웁니다.
+ * 공장에서 찍어낸 크래커는 다 똑같이 생겼으므로 크래커마다 흔들지 않고 이 표를 그대로 씁니다. */
+var DOCK = (function(){
+  var n = 6, rad = 0.32, base = 30, p = [];
+  for (var i=0; i<n; i++){
+    var a = (base + i*(360/n)) * Math.PI/180;
+    p.push([ Math.cos(a)*rad, Math.sin(a)*rad ]);
+  }
+  return p;
+})();
+
+/* ── 크래커 만들기 ── */
+function rndInt(n){ return Math.floor(Math.random()*n); }
+function shuffled(a){ a=a.slice(); for(var i=a.length-1;i>0;i--){var j=rndInt(i+1),t=a[i];a[i]=a[j];a[j]=t;} return a; }
+
+var RUNS2 = [[3,3],[4,2],[5,1],[2,4]];
+var RUNS3 = [[2,2,2],[3,2,1],[4,1,1],[1,2,3],[2,3,1]];
+
+function makeTile(){
+  var v = Math.random(), runs;
+  if (v < 0.08)      runs = [6];
+  else if (v < 0.55) runs = RUNS2[rndInt(RUNS2.length)];
+  else               runs = RUNS3[rndInt(RUNS3.length)];
+
+  var pool = shuffled([0,1,2]), raw = new Array(6), i = 0;
+  for (var k=0;k<runs.length;k++){
+    var c = pool[k % 3];
+    for (var j=0;j<runs[k];j++) raw[i++] = c;
+  }
+  var off = rndInt(6), out = new Array(6);
+  for (var m=0;m<6;m++) out[m] = raw[(m+off)%6];
+  return { e:out, rot:0 };
+}
+function edgesOf(t){                        /* rot 만큼 돌린 변 색 */
+  var o = new Array(6);
+  for (var k=0;k<6;k++) o[k] = t.e[(k - t.rot + 12) % 6];
+  return o;
+}
+
+function dealHand(){ hand = [makeTile(), makeTile(), makeTile()]; sel = -1; }
+
+/* ── 놓기 · 검사 ── */
+function cellCount(){
+  var n = 0;
+  for (var i=0;i<CELLS.length;i++) if (inBoard(CELLS[i][0], CELLS[i][1])) n++;
+  return n;
+}
+function emptyCount(){ return cellCount() - board.size; }
+
+/* ── 스테이지 ──
+ * 판마다 '어느 토핑을 몇 장 터뜨려라' 가 목표고, 정해진 수 안에 해내야 합니다.
+ * 목표 색은 판 번호로 정해집니다 — 같은 판은 늘 같은 목표라 운으로 갈리지 않습니다. */
+var COLNAME = ['딸기', '피스타치오', '블루베리'];
+function stageGoalColor(n){ return (n - 1) % 3; }
+/* 아래 넷은 봇으로 재서 맞춘 값입니다. 근거 없이 만지지 마세요 */
+/* 봇으로 재서 고른 값 — 처음 막히는 판이 실력 0.6/0.8/0.95 에서 6·9·11판.
+ * 막히면 그 판만 다시 하므로(1판부터가 아니라) 이 정도가 알맞습니다. */
+var ST = { need0:4, needStep:0.9, mv0:20, mvStep:0.8, wide:4, life0:17, lifeStep:0.5, lifeMin:8 };
+function stageNeed(n){ return ST.need0 + Math.round((n - 1) * ST.needStep); }
+function stageMoves(n){ return ST.mv0 + Math.round((n - 1) * ST.mvStep); }
+function stageRadius(n){ return n < ST.wide ? 2 : 3; }
+function stageLife(n){ return Math.max(ST.lifeMin, ST.life0 - Math.floor((n - 1) * ST.lifeStep)); }
+
+function paintGoal(){
+  var T = TOP[goalColor];
+  var lab = document.getElementById('goalLab');
+  lab.textContent = COLNAME[goalColor];
+  lab.style.color = T.b;
+  var got = document.getElementById('goalGot');
+  got.textContent = Math.min(goalGot, goalNeed);
+  got.style.color = T.b;                       /* 숫자에도 목표 토핑 색을 입힙니다 */
+  document.getElementById('goalNeed').textContent = goalNeed;
+  document.getElementById('stage').textContent = stage;
+  var left = Math.max(0, movesLeft);
+  document.getElementById('moves').textContent = left;
+  document.querySelector('#hud .col.mv').classList.toggle('warn', left <= 3);
+}
+
+function startStage(n){
+  stage = n;
+  goalColor = stageGoalColor(n);
+  goalNeed  = stageNeed(n);
+  goalGot   = 0;
+  movesLeft = stageMoves(n);
+  R = stageRadius(n);
+  LIFE_BASE = stageLife(n);
+  board.clear(); fx.length = 0; pops.length = 0;
+  moves = 0; over = false; cleared = false; sel = -1;
+  layout();
+  bgmVol(musicOn ? BGM_VOL : 0);
+  dealHand();
+  paintGoal();
+  document.getElementById('sheetOver').classList.remove('on');
+  document.getElementById('sheetClear').classList.remove('on');
+}
+
+function stageClear(){
+  cleared = true;
+  if (stage >= bestStage){ bestStage = stage + 1;
+    try{ localStorage.setItem('crispy.stage', String(bestStage)); }catch(e){} }
+  bgmVol(musicOn ? BGM_VOL*0.4 : 0);
+  document.getElementById('cScore').textContent = score;
+  document.getElementById('cLeft').textContent = Math.max(0, movesLeft);
+  document.getElementById('clearSub').textContent = COLNAME[goalColor] + ' ' + goalNeed + '장 완료';
+  setTimeout(function(){ document.getElementById('sheetClear').classList.add('on'); }, 500);
+}
+
+function place(q,r,slot){
+  var t = hand[slot];
+  if (!t || board.has(key(q,r)) || !inBoard(q,r)) return false;
+  board.set(key(q,r), { e:edgesOf(t), born:moves, soggy:false, pop:1 });
+  hand[slot] = null;
+  moves++;
+  sel = -1;
+  if (!hand[0] && !hand[1] && !hand[2]) dealHand();
+
+  var L = life();
+  board.forEach(function(t2){ if (!t2.soggy && moves - t2.born >= L) t2.soggy = true; });
+
+  movesLeft--;
+  lastChain = resolve();
+  paintGoal();
+
+  if (goalGot >= goalNeed){ stageClear(); return true; }
+  if (emptyCount() === 0 || movesLeft <= 0) gameOver();
+  return true;
+}
+
+/* 같은 토핑으로 이어진 덩어리를 찾습니다. 3장이 되면 그 자리에서 터집니다.
+ *
+ * 전에는 여기에 '그 토핑이 빈 칸을 향하지 않아야 한다'는 조건이 더 있었습니다.
+ * 그게 화면에 안 보여서, 똑같이 두 변을 맞춰도 열 번에 아홉 번은 아무 일이 없고
+ * 한 번은 다섯 장이 사라졌습니다(봇 480수로 확인). 그래서 조건을 없앴습니다.
+ * 이제 몇 장 이었는지만 세면 되고, 떨어진 덩어리 둘을 한 번에 이으면 크게 터집니다. */
+function clusters(){
+  var found = [];
+  for (var c=0;c<3;c++){
+    var seen = {};
+    for (var i=0;i<CELLS.length;i++){
+      var q0 = CELLS[i][0], r0 = CELLS[i][1], k0 = key(q0,r0);
+      if (seen[k0]) continue;
+      var t0 = board.get(k0);
+      if (!t0 || t0.soggy || t0.e.indexOf(c) < 0) continue;
+
+      var cells = [[q0,r0]], stack = [[q0,r0]];
+      seen[k0] = 1;
+      while (stack.length){
+        var cur = stack.pop(), cq = cur[0], cr = cur[1];
+        var ct = board.get(key(cq,cr));
+        for (var k=0;k<6;k++){
+          if (ct.e[k] !== c) continue;
+          var nq = cq + DIRS[k][0], nr = cr + DIRS[k][1];
+          if (!inBoard(nq,nr)) continue;
+          var nk = key(nq,nr), nt = board.get(nk);
+          if (!nt || nt.soggy) continue;               // 빈 칸·눅눅한 크래커는 안 이어짐
+          if (nt.e[(k+3)%6] !== c) continue;           // 맞닿은 변의 토핑이 달라도 안 이어짐
+          if (!seen[nk]) { seen[nk]=1; cells.push([nq,nr]); stack.push([nq,nr]); }
+        }
+      }
+      if (cells.length >= CLEAR_MIN) found.push({ c:c, cells:cells });
+    }
+  }
+  return found;
+}
+
+function resolve(){
+  var found = clusters();
+  if (!found.length) return 0;
+
+  var combo = found.length, gained = 0, kill = {}, i, j;
+  for (i=0;i<found.length;i++){
+    var f = found[i], n = f.cells.length;
+    gained += n * n * 10;
+    for (j=0;j<n;j++) kill[key(f.cells[j][0], f.cells[j][1])] = f.c;
+  }
+  if (combo > 1) gained = Math.round(gained * (1 + 0.5*(combo-1)));
+
+  /* 옆에 붙은 눅눅한 크래커도 같이 쓸려 나갑니다 — 막힌 판을 푸는 유일한 길 */
+  var sweep = 0;
+  Object.keys(kill).slice().forEach(function(k){
+    var p = k.split(','), cq = +p[0], cr = +p[1];
+    for (var d=0;d<6;d++){
+      var nk = key(cq+DIRS[d][0], cr+DIRS[d][1]), nt = board.get(nk);
+      if (nt && nt.soggy && !(nk in kill)) { kill[nk] = -1; sweep++; }
+    }
+  });
+  gained += sweep * 5;
+
+  var biggest = 0;
+  for (i=0;i<found.length;i++){
+    biggest = Math.max(biggest, found[i].cells.length);
+    if (found[i].c === goalColor) goalGot += found[i].cells.length;   // 목표 토핑만 셉니다
+  }
+
+  var cx = 0, cy = 0, cnt = 0;
+  Object.keys(kill).forEach(function(k){
+    var p = k.split(','), cq = +p[0], cr = +p[1];
+    var t = board.get(k), pt2 = hexPx(cq,cr);
+    cx += pt2.x; cy += pt2.y; cnt++;
+    burst(pt2.x, pt2.y, kill[k], t && t.soggy);
+    board.delete(k);
+  });
+
+  score += gained;
+
+  while (pops.length >= 2) pops.shift();
+  pops.push({
+    x: cx/cnt, y: cy/cnt, t: 0,
+    txt: 'CRISPY! \u00d7' + biggest, sub: '+' + gained,
+    combo: combo > 1 ? 'COMBO \u00d7' + combo : ''
+  });
+  crunch(Math.min(1, 0.35 + biggest*0.07));
+  return 1;
+}
+
+function gameOver(){
+  over = true;
+  bgmVol(musicOn ? BGM_VOL*0.3 : 0);
+  document.getElementById('overSub').textContent =
+    (emptyCount() === 0) ? '판이 꽉 찼습니다' : '수를 다 썼습니다';
+  document.getElementById('fStage').textContent = stage;
+  document.getElementById('fBest').textContent = bestStage;
+  setTimeout(function(){ document.getElementById('sheetOver').classList.add('on'); }, 450);
+}
+
+function reset(){          /* 1판부터 다시 */
+  score = 0;
+  startStage(1);
+}
+
+/* ── 화면 ── */
+var cv = document.getElementById('cv'), ctx = cv.getContext('2d');
+var W = 0, H = 0, SZ = 40, BX = 0, BY = 0, HSZ = 30, HY = 0, slots = [], BW = 11, BH = 12.12, PR = 6.41;
+
+function layout(){
+  var dpr = Math.min(window.devicePixelRatio || 1, 2.5);
+  var rect = cv.getBoundingClientRect();
+  W = rect.width; H = rect.height;
+  cv.width = Math.round(W*dpr); cv.height = Math.round(H*dpr);
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+
+  /* 판 크기는 반지름 R 에 따라 달라집니다. 여기에 판↔손패 사이(0.5칸)와 손패(1.6칸)를
+   * 더한 만큼이 늘 들어가야 손패가 화면 밖으로 잘리지 않습니다. */
+  var bottom = 58;                       // 왼쪽 아래 전체화면 단추 자리를 비웁니다
+  BW = 3*R + 2;                          // 판 가로(칸 단위)
+  BH = 3.464*R + 1.732;                  // 판 세로
+  SZ  = Math.min((W - 20) / (BW + 0.3), (H - bottom - 8) / (BH + 2.1), 62);
+  HSZ = SZ * 0.80;
+  var need = BH*SZ + 0.5*SZ + 2*HSZ;
+  var free = Math.max(0, (H - bottom - 8) - need);   // 남는 세로 공간을 위·사이로 나눕니다
+  var top  = 8 + free*0.5;
+
+  BX = W/2;
+  BY = top + (BH/2)*SZ;
+  HY = top + (BH + 0.5)*SZ + free*0.5 + HSZ;
+
+  PR = Math.max(BW/1.732, BH/2) + 0.06;     // 접시(뾰족머리 육각)가 판을 덮을 반지름
+
+  var gap = HSZ * 2.5;
+  slots = [];
+  for (var i=0;i<3;i++) slots.push({ x: W/2 + (i-1)*gap, y: HY });
+}
+
+function hexPx(q,r){
+  return { x: BX + SZ*1.5*q, y: BY + SZ*Math.sqrt(3)*(r + q/2) };
+}
+function pxHex(x,y){
+  var px = (x-BX)/SZ, py = (y-BY)/SZ;
+  var fq = 2/3*px, fr = -px/3 + Math.sqrt(3)/3*py;
+  var x3 = fq, z3 = fr, y3 = -x3-z3;
+  var rx = Math.round(x3), ry = Math.round(y3), rz = Math.round(z3);
+  var dx = Math.abs(rx-x3), dy = Math.abs(ry-y3), dz = Math.abs(rz-z3);
+  if (dx > dy && dx > dz) rx = -ry-rz; else if (dy > dz) ry = -rx-rz; else rz = -rx-ry;
+  return { q:rx, r:rz };
+}
+/* off 를 주지 않으면 납작머리(크래커), 30 을 주면 뾰족머리(접시) 육각입니다 */
+function hexPts(cx,cy,s,off){
+  var p = [], o = off || 0;
+  for (var k=0;k<6;k++){ var a = (60*k + o)*Math.PI/180; p.push([cx + s*Math.cos(a), cy + s*Math.sin(a)]); }
+  return p;
+}
+function roundPath(p, rad){
+  ctx.beginPath();
+  for (var i=0;i<p.length;i++){
+    var a = p[i], b = p[(i+1)%p.length], c = p[(i+2)%p.length];
+    var v1x = a[0]-b[0], v1y = a[1]-b[1], v2x = c[0]-b[0], v2y = c[1]-b[1];
+    var l1 = Math.hypot(v1x,v1y), l2 = Math.hypot(v2x,v2y);
+    var r1 = Math.min(rad, l1/2), r2 = Math.min(rad, l2/2);
+    var s1x = b[0]+v1x/l1*r1, s1y = b[1]+v1y/l1*r1;
+    var s2x = b[0]+v2x/l2*r2, s2y = b[1]+v2y/l2*r2;
+    if (i===0) ctx.moveTo(s1x, s1y); else ctx.lineTo(s1x, s1y);
+    ctx.quadraticCurveTo(b[0], b[1], s2x, s2y);
+  }
+  ctx.closePath();
+}
+
+function drawCracker(cx, cy, s, e, o){
+  o = o || {};
+  var a = (o.alpha == null) ? 1 : o.alpha;
+  var soggy = !!o.soggy;
+  ctx.save();
+  ctx.globalAlpha = a;
+  if (o.scale && o.scale !== 1){ ctx.translate(cx,cy); ctx.scale(o.scale,o.scale); ctx.translate(-cx,-cy); }
+
+  var RR   = s*0.34;                    // 모서리를 큼직하게 굴려야 오동통해 보입니다
+  var LIFT = s*0.12;                    // 크래커 두께
+  var pts  = hexPts(cx, cy, s*0.95);
+  var low  = hexPts(cx, cy + LIFT, s*0.95);
+
+  /* 접시에 놓인 그림자 */
+  ctx.save();
+  ctx.shadowColor = 'rgba(150,120,70,.42)'; ctx.shadowBlur = s*0.34; ctx.shadowOffsetY = s*0.15;
+  roundPath(low, RR);
+  ctx.fillStyle = soggy ? '#B4A992' : '#D09A4C';
+  ctx.fill();
+  ctx.restore();
+
+  /* 옆면 — 아래로 살짝 내려 그려서 두께가 드러나게 */
+  var side = ctx.createLinearGradient(cx, cy, cx, cy + s);
+  if (soggy){ side.addColorStop(0,'#D8CFBC'); side.addColorStop(1,'#AA9E88'); }
+  else      { side.addColorStop(0,'#E8B45E'); side.addColorStop(1,'#C1832F'); }
+  roundPath(low, RR);
+  ctx.fillStyle = side; ctx.fill();
+
+  /* 윗면 — 가운데가 봉긋하게 부푼 느낌 */
+  roundPath(pts, RR);
+  var g = ctx.createRadialGradient(cx - s*0.34, cy - s*0.40, s*0.05, cx, cy, s*1.22);
+  if (soggy){
+    g.addColorStop(0,'#F0EADC'); g.addColorStop(0.45,'#DED5C4');
+    g.addColorStop(0.80,'#C7BCA7'); g.addColorStop(1,'#B0A48D');
+  } else {
+    g.addColorStop(0,'#FFF4D4'); g.addColorStop(0.40,'#F9DB9E');
+    g.addColorStop(0.76,'#EBBC6C'); g.addColorStop(1,'#CE9139');
+  }
+  ctx.fillStyle = g; ctx.fill();
+
+  /* 구워진 테두리 */
+  ctx.strokeStyle = soggy ? 'rgba(150,138,116,.5)' : 'rgba(196,136,58,.62)';
+  ctx.lineWidth = Math.max(1, s*0.055); ctx.stroke();
+
+  /* 곧 눅눅해집니다 — 크래커 얼굴은 건드리지 않고 테두리만 붉게 깜빡입니다 */
+  if (o.danger){
+    roundPath(pts, RR);
+    ctx.strokeStyle = '#FF5B4A';
+    ctx.lineWidth = Math.max(1.4, s*0.075);
+    ctx.globalAlpha = a * (0.45 + 0.45*Math.abs(Math.sin(perf/260)));
+    ctx.stroke();
+    ctx.globalAlpha = a;
+  }
+
+  /* 반죽에 찍은 구멍 일곱 개.
+   * 빛은 왼쪽 위에서 옵니다. 그러면 구멍 속은 이렇게 보입니다:
+   *   - 가까운 쪽(왼위) 벽은 빛을 등져서 가장 어둡고
+   *   - 먼 쪽(오른아래) 벽은 빛을 정면으로 받아 밝습니다
+   *   - 구멍 둘레는 반죽이 밀려 올라와 왼위 가장자리가 살짝 반짝입니다
+   * 이 셋을 겹쳐야 붙여 놓은 점이 아니라 파인 구멍으로 보입니다. */
+  ctx.save(); roundPath(pts, RR); ctx.clip();
+  /* 크기: 0.095배는 연탄, 0.045배는 참깨였습니다. 그 사이입니다. */
+  var HR = s*0.072;
+  ctx.lineCap = 'butt';
+  for (var h=0;h<DOCK.length;h++){
+    var hx = cx + DOCK[h][0]*s;
+    var hy = cy + DOCK[h][1]*s;
+    var hr = Math.max(1.1, HR);
+
+    /* 빛 받는 뒷벽을 먼저 깔고, 그늘진 앞벽 원을 왼위로 살짝 옮겨 덮습니다.
+     * 그러면 오른아래에 밝은 초승달만 남아 "속이 파였다"고 읽힙니다. */
+    /* 그늘을 원 전체에 깔고, 오른아래를 도로 밝혀 초승달을 만듭니다.
+     * 반드시 반투명이어야 합니다 — 불투명한 갈색 원으로 그리면 표면에 얹힌
+     * 알갱이(참깨)로 보입니다. 밑의 크래커 색이 비쳐야 '파인 자국'이 됩니다. */
+    ctx.beginPath(); ctx.arc(hx, hy, hr, 0, 6.2832);
+    ctx.fillStyle = soggy ? 'rgba(70,62,48,.46)' : 'rgba(112,62,12,.60)';
+    ctx.fill();
+
+    /* 빛을 정면으로 받는 먼 쪽 벽 — 표면보다 살짝 밝아야 깊이가 보입니다 */
+    ctx.beginPath(); ctx.arc(hx + hr*0.38, hy + hr*0.38, hr*0.78, 0, 6.2832);
+    ctx.fillStyle = soggy ? 'rgba(250,246,238,.40)' : 'rgba(255,242,204,.58)';
+    ctx.fill();
+
+    /* 가장 깊은 자리 */
+    ctx.beginPath(); ctx.arc(hx - hr*0.20, hy - hr*0.20, hr*0.46, 0, 6.2832);
+    ctx.fillStyle = soggy ? 'rgba(56,50,38,.30)' : 'rgba(78,40,4,.34)';
+    ctx.fill();
+  }
+  ctx.lineCap = 'round';
+  ctx.restore();
+
+  /* 토핑 — 도톰하게 짜 올린 잼·치즈처럼. 빛은 늘 위에서 온다고 보고 광택을 위쪽에 넣습니다 */
+  ctx.lineCap = 'round';
+  for (var k=0;k<6;k++){
+    var v1 = pts[k], v2 = pts[(k+1)%6];
+    var ix1 = v1[0] + (cx-v1[0])*0.135, iy1 = v1[1] + (cy-v1[1])*0.135;
+    var ix2 = v2[0] + (cx-v2[0])*0.135, iy2 = v2[1] + (cy-v2[1])*0.135;
+    var tx1 = ix1 + (ix2-ix1)*0.13, ty1 = iy1 + (iy2-iy1)*0.13;
+    var tx2 = ix1 + (ix2-ix1)*0.87, ty2 = iy1 + (iy2-iy1)*0.87;
+    var T = TOP[e[k]];
+
+    /* 토핑이 크래커 위에 드리우는 그늘 */
+    ctx.beginPath();
+    ctx.moveTo(tx1, ty1 + s*0.035); ctx.lineTo(tx2, ty2 + s*0.035);
+    ctx.lineWidth = s*0.208;
+    ctx.strokeStyle = 'rgba(84,44,12,.28)'; ctx.stroke();
+
+    /* 테두리(진한 색) → 몸통(밝은 색) 순으로 겹쳐 도톰한 튜브를 만듭니다 */
+    ctx.beginPath(); ctx.moveTo(tx1,ty1); ctx.lineTo(tx2,ty2);
+    ctx.lineWidth = s*0.222;
+    ctx.strokeStyle = soggy ? 'rgba(146,136,120,.9)' : T.b;
+    ctx.stroke();
+
+    ctx.beginPath(); ctx.moveTo(tx1,ty1); ctx.lineTo(tx2,ty2);
+    ctx.lineWidth = s*0.162;
+    ctx.strokeStyle = soggy ? 'rgba(196,188,174,.9)' : T.a;
+    ctx.stroke();
+
+    if (!soggy){
+      /* 아랫배 — 아래쪽은 빛이 덜 들어 살짝 가라앉습니다 */
+      ctx.beginPath();
+      ctx.moveTo(tx1, ty1 + s*0.044); ctx.lineTo(tx2, ty2 + s*0.044);
+      ctx.lineWidth = s*0.052; ctx.strokeStyle = T.b;
+      ctx.globalAlpha = a*0.32; ctx.stroke();
+
+      /* 넓은 광택 — 위쪽 절반이 통째로 밝습니다 */
+      ctx.beginPath();
+      ctx.moveTo(tx1 + s*0.012, ty1 - s*0.038); ctx.lineTo(tx2 - s*0.012, ty2 - s*0.038);
+      ctx.lineWidth = s*0.062; ctx.strokeStyle = T.hi;
+      ctx.globalAlpha = a*0.85; ctx.stroke();
+
+      /* 반짝임 — 가늘고 하얀 줄 하나. 튜브 길이의 60%만 지나갑니다 */
+      ctx.beginPath();
+      ctx.moveTo(tx1 + (tx2-tx1)*0.16, ty1 + (ty2-ty1)*0.16 - s*0.046);
+      ctx.lineTo(tx1 + (tx2-tx1)*0.76, ty1 + (ty2-ty1)*0.76 - s*0.046);
+      ctx.lineWidth = s*0.030; ctx.strokeStyle = '#FFFFFF';
+      ctx.globalAlpha = a*0.88; ctx.stroke();
+
+      ctx.globalAlpha = a;
+    }
+  }
+
+  /* 축축하게 젖은 느낌 — 차가운 기운을 덮습니다.
+   * 아직 눅눅해지지 않았어도 수명이 얼마 안 남으면 미리 조금씩 어두워집니다. */
+  var wet = soggy ? 0.06 : (o.wilt || 0) * 0.22;
+  if (wet > 0){
+    roundPath(pts, RR);
+    ctx.fillStyle = 'rgba(96,104,118,' + wet.toFixed(3) + ')'; ctx.fill();
+  }
+  ctx.restore();
+}
+
+function burst(x, y, c, soggy){
+  for (var i=0;i<16;i++){
+    var a = Math.random()*Math.PI*2, sp = (0.7 + Math.random()*2.6)*(SZ/40);
+    fx.push({
+      x:x, y:y, vx:Math.cos(a)*sp, vy:Math.sin(a)*sp - 1.6*(SZ/40),
+      r:(1.4 + Math.random()*3.4)*(SZ/40), rot:Math.random()*6.28,
+      vr:(Math.random()-0.5)*0.3, t:0, life:34 + Math.random()*22,
+      col: soggy ? '#C0B5A0'
+                 : ((i%3===0 && c>=0) ? TOP[c].a : (Math.random()<0.5 ? '#E8BE72' : '#C98F3F'))
+    });
+  }
+  if (c >= 0) fx.push({ ring:true, x:x, y:y, t:0, life:22, col:TOP[c].a });
+}
+
+var perf = 0, drag = null, hover = null, prevSel = -1;
+
+function draw(ts){
+  perf = ts || 0;
+  ctx.clearRect(0,0,W,H);
+
+  /* 바탕은 body 가 칠합니다 — 캔버스는 비워 두어야 이음매가 안 생깁니다 */
+
+  /* 판 — 하얀 테를 두른 연하늘 쟁반 */
+  ctx.save();
+  roundPath(hexPts(BX, BY, SZ*PR, 30), SZ*(PR*0.172));
+  ctx.fillStyle = '#FFFFFF';
+  ctx.shadowColor = 'rgba(168,146,100,.28)'; ctx.shadowBlur = SZ*0.5; ctx.shadowOffsetY = SZ*0.16;
+  ctx.fill();
+  ctx.restore();
+  roundPath(hexPts(BX, BY, SZ*(PR-0.22), 30), SZ*(PR*0.156));
+  var tray = ctx.createLinearGradient(BX, BY - SZ*6, BX, BY + SZ*6);
+  tray.addColorStop(0, '#EAF4FC'); tray.addColorStop(1, '#D9EAF7');
+  ctx.fillStyle = tray; ctx.fill();
+
+  var i, k;
+  for (i=0;i<CELLS.length;i++){
+    var q = CELLS[i][0], r = CELLS[i][1];
+    if (!inBoard(q,r) || board.has(key(q,r))) continue;
+    var p = hexPx(q,r);
+    roundPath(hexPts(p.x, p.y, SZ*0.90), SZ*0.30);
+    ctx.fillStyle = '#B7D3EA'; ctx.fill();
+    roundPath(hexPts(p.x, p.y - SZ*0.045, SZ*0.855), SZ*0.29);
+    ctx.fillStyle = '#D3E6F6'; ctx.fill();
+  }
+
+  if (sel >= 0 && hand[sel] && hover && inBoard(hover.q,hover.r) && !board.has(key(hover.q,hover.r)) && !over){
+    var hp = hexPx(hover.q, hover.r);
+    var he = edgesOf(hand[sel]);
+    ctx.save(); ctx.globalAlpha = 0.4;
+    drawCracker(hp.x, hp.y, SZ, he, {});
+    ctx.restore();
+    for (k=0;k<6;k++){
+      var nt0 = board.get(key(hover.q + DIRS[k][0], hover.r + DIRS[k][1]));
+      if (!nt0 || nt0.soggy) continue;
+      var ok = (nt0.e[(k+3)%6] === he[k]);
+      var vv = hexPts(hp.x, hp.y, SZ*0.955), A = vv[k], Bp = vv[(k+1)%6];
+      ctx.beginPath();
+      ctx.moveTo(A[0]+(Bp[0]-A[0])*0.16, A[1]+(Bp[1]-A[1])*0.16);
+      ctx.lineTo(A[0]+(Bp[0]-A[0])*0.84, A[1]+(Bp[1]-A[1])*0.84);
+      ctx.lineWidth = SZ*0.09; ctx.lineCap = 'round';
+      ctx.strokeStyle = ok ? '#FFFFFF' : 'rgba(108,92,64,.55)';
+      ctx.globalAlpha = ok ? 1 : 0.6; ctx.stroke();
+      if (ok){ ctx.lineWidth = SZ*0.035; ctx.strokeStyle = '#4CA82E'; ctx.stroke(); }
+      ctx.globalAlpha = 1;
+    }
+  }
+
+
+  var L = life();
+  for (i=0;i<ORDER.length;i++){
+    var oq = ORDER[i][0], orr = ORDER[i][1];
+    var t = board.get(key(oq,orr));
+    if (!t) continue;
+    var pp = hexPx(oq, orr);
+    if (t.pop > 0) t.pop = Math.max(0, t.pop - 0.09);
+    var left = L - (moves - t.born);
+    drawCracker(pp.x, pp.y, SZ, t.e, {
+      soggy:  t.soggy,
+      wilt:   t.soggy ? 0 : Math.max(0, 1 - left/6),
+      danger: !t.soggy && left <= 2,
+      scale:  1 + 0.16*t.pop*t.pop
+    });
+  }
+
+  for (var f=fx.length-1; f>=0; f--){
+    var o = fx[f]; o.t++;
+    if (o.ring){
+      var pr = o.t/o.life;
+      ctx.save(); ctx.globalAlpha = (1-pr)*0.55;
+      ctx.beginPath(); ctx.arc(o.x, o.y, SZ*(0.5 + pr*1.5), 0, 6.2832);
+      ctx.lineWidth = SZ*0.10*(1-pr); ctx.strokeStyle = o.col; ctx.stroke(); ctx.restore();
+      if (o.t >= o.life) fx.splice(f,1);
+      continue;
+    }
+    o.vy += 0.36*(SZ/40); o.x += o.vx; o.y += o.vy; o.rot += o.vr; o.vx *= 0.985;
+    var al = 1 - o.t/o.life;
+    if (al <= 0){ fx.splice(f,1); continue; }
+    ctx.save(); ctx.globalAlpha = al; ctx.translate(o.x,o.y); ctx.rotate(o.rot);
+    ctx.fillStyle = o.col; ctx.fillRect(-o.r/2, -o.r/2, o.r, o.r*0.8);
+    ctx.restore();
+  }
+
+  for (var pI=pops.length-1; pI>=0; pI--){
+    var pz = pops[pI]; pz.t++;
+    var pr2 = pz.t/56;
+    if (pr2 >= 1){ pops.splice(pI,1); continue; }
+    var ease = 1 - Math.pow(1 - Math.min(1, pz.t/12), 3);
+    ctx.save();
+    ctx.globalAlpha = pr2 > 0.7 ? (1-pr2)/0.3 : 1;
+    ctx.translate(pz.x, pz.y - pr2*SZ*1.1);
+    ctx.scale(0.7 + 0.3*ease, 0.7 + 0.3*ease);
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.lineJoin = 'round';
+    ctx.font = '900 ' + Math.round(SZ*0.55) + 'px Pretendard,system-ui,sans-serif';
+    /* 밝은 판이라 흰 테를 두르고 글자는 진한 갈색으로 씁니다 */
+    ctx.lineWidth = SZ*0.20; ctx.strokeStyle = '#FFFFFF';
+    ctx.strokeText(pz.txt, 0, 0); ctx.fillStyle = '#5A4830'; ctx.fillText(pz.txt, 0, 0);
+    ctx.font = '800 ' + Math.round(SZ*0.36) + 'px Pretendard,system-ui,sans-serif';
+    ctx.lineWidth = SZ*0.15;
+    ctx.strokeText(pz.sub, 0, SZ*0.52); ctx.fillStyle = '#E8892B'; ctx.fillText(pz.sub, 0, SZ*0.52);
+    if (pz.combo){
+      ctx.font = '900 ' + Math.round(SZ*0.30) + 'px Pretendard,system-ui,sans-serif';
+      ctx.strokeText(pz.combo, 0, -SZ*0.54); ctx.fillStyle = '#5FA82A'; ctx.fillText(pz.combo, 0, -SZ*0.54);
+    }
+    ctx.restore();
+  }
+
+  for (var s2=0;s2<3;s2++){
+    var sl = slots[s2], t3 = hand[s2];
+    roundPath(hexPts(sl.x, sl.y, HSZ*0.96), HSZ*0.30);
+    ctx.fillStyle = 'rgba(214,190,140,.16)'; ctx.fill();
+    if (!t3) continue;
+    var picked = (s2 === sel);
+    if (picked && drag && drag.moved) continue;
+    if (picked){
+      ctx.save();
+      ctx.beginPath(); ctx.arc(sl.x, sl.y, HSZ*1.24, 0, 6.2832);
+      ctx.fillStyle = 'rgba(255,255,255,.75)'; ctx.fill();
+      ctx.restore();
+    }
+    drawCracker(sl.x, sl.y, HSZ*(picked?1.08:1), edgesOf(t3), {});
+    if (picked) drawRotBadge(sl.x + HSZ*0.98, sl.y - HSZ*0.98, HSZ*0.34);
+  }
+
+  if (drag && drag.moved && sel >= 0 && hand[sel]){
+    drawCracker(drag.x, drag.y - SZ*0.9, SZ*1.02, edgesOf(hand[sel]), { alpha:0.95 });
+  }
+
+  requestAnimationFrame(draw);
+}
+
+function drawRotBadge(x,y,r){
+  ctx.save();
+  ctx.translate(x,y);
+  ctx.beginPath(); ctx.arc(0,0,r,0,6.2832);
+  ctx.fillStyle = '#77BE33'; ctx.fill();
+  ctx.strokeStyle = '#FFFFFF'; ctx.lineWidth = r*0.26; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.arc(0,0,r*0.46, -2.4, 1.5); ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(r*0.46*Math.cos(1.5) + r*0.30, r*0.46*Math.sin(1.5));
+  ctx.lineTo(r*0.46*Math.cos(1.5) - r*0.05, r*0.46*Math.sin(1.5) + r*0.22);
+  ctx.lineTo(r*0.46*Math.cos(1.5) - r*0.05, r*0.46*Math.sin(1.5) - r*0.30);
+  ctx.closePath(); ctx.fillStyle = '#FFFFFF'; ctx.fill();
+  ctx.restore();
+}
+
+/* ── 조작 ── */
+function pt(ev){
+  var r = cv.getBoundingClientRect();
+  return { x: ev.clientX - r.left, y: ev.clientY - r.top };
+}
+function slotAt(x,y){
+  for (var i=0;i<3;i++){
+    if (!hand[i]) continue;
+    if (Math.hypot(x - slots[i].x, y - slots[i].y) < HSZ*1.15) return i;
+  }
+  return -1;
+}
+function cellAt(x,y){
+  var c = pxHex(x,y);
+  if (!inBoard(c.q,c.r)) return null;
+  var p = hexPx(c.q,c.r);
+  if (Math.hypot(x-p.x, y-p.y) > SZ*1.02) return null;
+  return c;
+}
+function rotate(){
+  if (sel >= 0 && hand[sel]){ hand[sel].rot = (hand[sel].rot + 1) % 6; tick(); }
+}
+
+cv.addEventListener('pointerdown', function(ev){
+  /* 음악이 아직 안 걸렸으면 이 조작에서 다시 붙입니다.
+   * START 때 파일이 덜 받아졌거나 브라우저가 소리통을 재웠을 수 있습니다. */
+  if (started){
+    if (actx && actx.state === 'suspended') actx.resume();
+    if (!bgmSrc){ loadSnd('bgm', 'audio/bgm.mp3'); startBgm(); }
+    if (!snd.crisp) loadSnd('crisp', 'audio/crisp.mp3');
+  }
+  if (over || cleared || paused || !started) return;
+  try { cv.setPointerCapture(ev.pointerId); } catch(e){}
+  var p = pt(ev), si = slotAt(p.x, p.y);
+  prevSel = sel;
+  if (si >= 0){
+    sel = si;
+    drag = { x:p.x, y:p.y, sx:p.x, sy:p.y, moved:false, from:'hand' };
+    return;
+  }
+  var c = cellAt(p.x, p.y);
+  if (c && sel >= 0 && hand[sel] && !board.has(key(c.q,c.r))){
+    drag = { x:p.x, y:p.y, sx:p.x, sy:p.y, moved:false, from:'board', cell:c };
+    hover = c;
+  }
+});
+cv.addEventListener('pointermove', function(ev){
+  var p = pt(ev);
+  if (drag){
+    drag.x = p.x; drag.y = p.y;
+    if (Math.hypot(p.x-drag.sx, p.y-drag.sy) > 9) drag.moved = true;
+    if (drag.moved && sel >= 0) hover = cellAt(p.x, p.y - SZ*0.9) || cellAt(p.x, p.y);
+  } else if (sel >= 0 && ev.pointerType === 'mouse'){
+    hover = cellAt(p.x, p.y);
+  }
+});
+cv.addEventListener('pointerup', function(ev){
+  if (!drag) return;
+  var p = pt(ev), d = drag; drag = null;
+  if (sel < 0 || !hand[sel]){ hover = null; return; }
+  if (d.moved){
+    var c = cellAt(p.x, p.y - SZ*0.9) || cellAt(p.x, p.y);
+    if (c && !board.has(key(c.q,c.r))){ tap(); place(c.q, c.r, sel); }
+    hover = null;
+    return;
+  }
+  if (d.from === 'board' && d.cell && !board.has(key(d.cell.q, d.cell.r))){
+    tap(); place(d.cell.q, d.cell.r, sel); hover = null; return;
+  }
+  if (d.from === 'hand' && prevSel === sel) rotate();
+});
+cv.addEventListener('pointercancel', function(){ drag = null; });
+cv.addEventListener('contextmenu', function(ev){ ev.preventDefault(); rotate(); });
+cv.addEventListener('wheel', function(ev){
+  if (sel < 0 || !hand[sel]) return;
+  ev.preventDefault();
+  hand[sel].rot = (hand[sel].rot + (ev.deltaY > 0 ? 1 : 5)) % 6; tick();
+}, { passive:false });
+
+window.addEventListener('keydown', function(ev){
+  if (ev.key === 'Escape' && started && !over){ setPaused(!paused); ev.preventDefault(); return; }
+  if (over || cleared || paused || !started) return;
+  var k = ev.key.toLowerCase();
+  if (k === 'r' || k === ' '){ rotate(); ev.preventDefault(); }
+  else if (k === '1' || k === '2' || k === '3'){ var i = +k - 1; if (hand[i]) sel = i; }
+});
+
+/* ── 소리 ──
+ * 바삭 소리와 배경음은 audio/ 의 mp3 를 씁니다(픽사베이, 상업 이용 가능).
+ * 파일을 못 읽으면 아래 합성음으로 그냥 넘어갑니다 — 소리 때문에 게임이 멈추면 안 됩니다. */
+var actx = null, snd = {}, bgmSrc = null, bgmGain = null;
+var BGM_VOL = 0.30;
+
+/* soundOn 과 무관하게 소리통을 얻습니다 — 배경음 음량을 0 으로 줄여 두려면 통이 있어야 합니다.
+ * ⛔ 이름을 ctx 로 두지 말 것 — 아래 `var ctx = cv.getContext('2d')` 가 덮어써서 소리가 통째로 죽습니다. */
+function sndCtx(){
+  try { if (!actx) actx = new (window.AudioContext||window.webkitAudioContext)(); } catch(e){ return null; }
+  if (actx.state === 'suspended') actx.resume();
+  return actx;
+}
+function audio(){ return soundOn ? sndCtx() : null; }
+
+var loading = {};
+function loadSnd(name, url){
+  var a = sndCtx();
+  if (!a || snd[name] || loading[name]) return;   // 받는 중이면 또 받지 않습니다
+  loading[name] = 1;
+  fetch(url).then(function(r){ if (!r.ok) throw 0; return r.arrayBuffer(); })
+    .then(function(b){ return a.decodeAudioData(b); })
+    .then(function(d){ delete loading[name]; snd[name] = d; if (name === 'bgm') startBgm(); })
+    .catch(function(){ delete loading[name]; }); // 실패해도 못 박지 않습니다 — 다음 조작에서 다시 시도
+}
+function playSnd(name, vol, rate){
+  var a = audio(); if (!a || !snd[name]) return false;
+  var s = a.createBufferSource(); s.buffer = snd[name];
+  s.playbackRate.value = rate || 1;               // 같은 소리가 반복돼도 지겹지 않게 음높이를 흔듭니다
+  var g = a.createGain(); g.gain.value = vol;
+  s.connect(g); g.connect(a.destination); s.start();
+  return true;
+}
+function startBgm(){
+  var a = sndCtx(); if (!a || !snd.bgm || bgmSrc) return;
+  bgmGain = a.createGain(); bgmGain.gain.value = musicOn ? BGM_VOL : 0;
+  bgmSrc = a.createBufferSource(); bgmSrc.buffer = snd.bgm; bgmSrc.loop = true;
+  bgmSrc.connect(bgmGain); bgmGain.connect(a.destination);
+  bgmSrc.start();
+}
+function bgmVol(v){
+  if (!bgmGain || !actx) return;
+  /* setTargetAtTime 은 지수 감쇠라 0 에 닿지 않습니다(음소거해도 0.03 쯤 남아 들립니다).
+   * 선형으로 밀어야 정확히 0 이 됩니다. */
+  var g = bgmGain.gain, t = actx.currentTime;
+  g.cancelScheduledValues(t);
+  g.setValueAtTime(g.value, t);
+  g.linearRampToValueAtTime(v, t + 0.18);
+}
+function noise(dur, freq, Q, vol, decay){
+  var a = audio(); if (!a) return;
+  var len = Math.max(1, Math.floor(a.sampleRate*dur));
+  var buf = a.createBuffer(1, len, a.sampleRate), d = buf.getChannelData(0);
+  for (var i=0;i<len;i++) d[i] = (Math.random()*2-1) * Math.pow(1 - i/len, decay);
+  var src = a.createBufferSource(); src.buffer = buf;
+  var bp = a.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = freq; bp.Q.value = Q;
+  var g = a.createGain(); g.gain.value = vol;
+  src.connect(bp); bp.connect(g); g.connect(a.destination); src.start();
+}
+function crunch(v){                        /* 바삭 — mp3 가 있으면 그걸, 없으면 잡음 두 겹 */
+  if (playSnd('crisp', Math.min(1, 0.85*v), 0.94 + Math.random()*0.13)) return;
+  noise(0.16, 2400, 0.8, 0.5*v, 3.0);
+  setTimeout(function(){ noise(0.12, 1500, 1.2, 0.34*v, 4.0); }, 42);
+}
+function tap(){  noise(0.05, 900,  1.6, 0.16, 6); }
+function tick(){ noise(0.03, 2000, 2.2, 0.10, 8); }
+
+/* ── 시작 ── */
+try { bestStage = parseInt(localStorage.getItem('crispy.stage') || '1', 10) || 1; } catch(e){}
+try { soundOn = localStorage.getItem('crispy.sound') !== '0'; } catch(e){}
+try { musicOn = localStorage.getItem('crispy.music') !== '0'; } catch(e){}
+document.getElementById('btnSound').classList.toggle('off', !soundOn);
+document.getElementById('btnMusic').classList.toggle('off', !musicOn);
+
+document.getElementById('btnSound').addEventListener('click', function(){
+  soundOn = !soundOn;
+  this.classList.toggle('off', !soundOn);
+  try { localStorage.setItem('crispy.sound', soundOn ? '1' : '0'); } catch(e){}
+  if (soundOn) tick();
+});
+document.getElementById('btnMusic').addEventListener('click', function(){
+  musicOn = !musicOn;
+  this.classList.toggle('off', !musicOn);
+  try { localStorage.setItem('crispy.music', musicOn ? '1' : '0'); } catch(e){}
+  if (musicOn){ loadSnd('bgm', 'audio/bgm.mp3'); startBgm(); }
+  bgmVol(musicOn ? BGM_VOL : 0);
+});
+document.getElementById('btnHelp').addEventListener('click', function(){
+  document.getElementById('sheetHelp').classList.add('on');
+});
+document.getElementById('btnStart').addEventListener('click', function(){
+  document.getElementById('sheetHelp').classList.remove('on');
+  if (!started){ started = true; reset(); }
+  sndCtx();
+  loadSnd('crisp', 'audio/crisp.mp3');
+  loadSnd('bgm',   'audio/bgm.mp3');
+  startBgm();
+});
+document.getElementById('btnRetry').addEventListener('click', function(){ startStage(stage); });
+document.getElementById('btnFirst').addEventListener('click', function(){ reset(); });
+document.getElementById('btnNext').addEventListener('click', function(){
+  document.getElementById('sheetClear').classList.remove('on');
+  startStage(stage + 1);
+});
+
+/* ── 일시정지 ── */
+function setPaused(on){
+  if (!started || over) return;
+  paused = on;
+  document.getElementById('sheetPause').classList.toggle('on', on);
+  bgmVol(musicOn ? (on ? BGM_VOL*0.25 : BGM_VOL) : 0);
+  if (on){ sel = -1; hover = null; drag = null; }
+}
+document.getElementById('btnPause').addEventListener('click', function(){ setPaused(!paused); });
+document.getElementById('btnResume').addEventListener('click', function(){ setPaused(false); });
+document.getElementById('btnPauseRules').addEventListener('click', function(){
+  document.getElementById('sheetHelp').classList.add('on');
+});
+/* 다른 창으로 넘어가면 알아서 멈춥니다 */
+document.addEventListener('visibilitychange', function(){
+  if (document.hidden) setPaused(true);
+});
+
+
+window.addEventListener('resize', layout);
+window.addEventListener('orientationchange', function(){ setTimeout(layout, 120); });
+layout(); dealHand();
+requestAnimationFrame(draw);
+
+/* 자동 검사용 — 봇으로 돌려 보기 위한 손잡이 (window.CRISPY) */
+window.CRISPY = {
+  board:board, CELLS:CELLS, DIRS:DIRS, edgesOf:edgesOf, sealed:clusters,
+  begin:function(){ started = true; reset(); document.getElementById('sheetHelp').classList.remove('on'); },
+  hands:function(){ return hand; },
+  rad:function(){ return R; },
+  stage:function(){ return { 판:stage, 목표색:goalColor, 필요:goalNeed, 모음:goalGot,
+                             남은수:movesLeft, 깸:cleared, 끝:over, 점수:score, 연쇄:lastChain }; },
+  next:function(){ startStage(stage+1); },
+  snd:function(){ return { 바삭:!!snd.crisp, 배경음:!!snd.bgm, 배경음재생중:!!bgmSrc,
+                           배경음량:bgmGain?+bgmGain.gain.value.toFixed(3):null,
+                           소리통:actx&&actx.state, 효과음:soundOn, 음악:musicOn }; },
+  pick:function(i){ sel = i; },
+  stageTune:function(o){ for(var k in o) ST[k]=o[k]; },
+  clearMin:function(v){ if(v!=null) CLEAR_MIN=v; return CLEAR_MIN; },
+  tune:function(o){ if(o.base!=null)LIFE_BASE=o.base; if(o.step!=null)LIFE_STEP=o.step; if(o.min!=null)LIFE_MIN=o.min; if(o.growAt!=null)GROW_AT=o.growAt; },
+  put:function(q,r,slot,rot){ if(hand[slot]) hand[slot].rot = rot % 6; return place(q,r,slot); },
+  state:function(){
+    var sg = 0; board.forEach(function(t){ if (t.soggy) sg++; });
+    return { score:score, moves:moves, over:over, filled:board.size, empty:emptyCount(), soggy:sg };
+  }
+};
+})();
+</script>
+</body>
+</html>

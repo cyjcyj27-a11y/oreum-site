@@ -144,6 +144,22 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://oreumgames.com/games/mini/crispy/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/games/mini/crispy/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/games/mini/crispy/"/>
+    <lastmod>2026-08-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://oreumgames.com/games/mini/crispy/play/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/games/mini/crispy/play/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/games/mini/crispy/play/"/>
+    <lastmod>2026-08-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://oreumgames.com/games/mini/doldam/</loc>
     <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/games/mini/doldam/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/games/mini/doldam/"/>
