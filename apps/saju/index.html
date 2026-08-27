@@ -810,8 +810,8 @@ html[lang="en"] .two-face i { width: auto; display: block; padding-top: 0; margi
 
 </div>
 
-<script src="i18n_content.js?v=18"></script>
-<script src="i18n.js?v=31"></script>
+<script src="i18n_content.js?v=19"></script>
+<script src="i18n.js?v=32"></script>
 <script>
 /* =========================================================
    data-core.js
@@ -7067,14 +7067,17 @@ function logMbtiPair(input, res) {
 /* ── 결과 그리기 ─────────────────────────────────────── */
 function renderResult(input, r) {
   var s = r.sections;
-  var who = input.name ? input.name + '님' : '당신';
+  /* 영어에서는 '이름+님' 이 사전에 없어 'A님은' 이 그대로 나왔다(2026-08-27 전수조사).
+     영어면 이름만, 이름이 없으면 You */
+  var enR = window.SAJU_LANG === 'en';
+  var who = input.name ? (enR ? input.name : input.name + '님') : (enR ? 'You' : '당신');
   var h = [];
 
   /* 머리말 — 세부유형을 제목으로 뽑는다 */
   h.push('<div class="r-head">');
   h.push('<div class="who">' + input.year + '년 ' + input.month + '월 ' + input.day + '일생' +
          (r.saju.hasHour ? '' : ' · 시간 미입력') + '</div>');
-  h.push('<h2>' + esc(who) + '은<br><span style="color:var(--gold)">' + esc(r.subtype.label) + '</span></h2>');
+  h.push('<h2>' + esc(who) + (enR ? '<br>' : '은<br>') + '<span style="color:var(--gold)">' + esc(r.subtype.label) + '</span></h2>');
   h.push('<p class="hero-sub" style="margin-top:8px">' + esc(r.subtype.nick) + '</p>');
   h.push('<div class="tags">');
   h.push('<span class="tag gold">' + r.saju.dayStem.ko + r.saju.dayStem.han + ' · ' + r.saju.dayStem.nick + '</span>');

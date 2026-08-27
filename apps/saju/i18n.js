@@ -340,6 +340,13 @@
   ];
   // 병오년(丙午) 같은 간지+년 표기
   const GZ_YEAR_RE = /([갑을병정무기경신임계])([자축인묘진사오미신유술해])년(\((?:[甲乙丙丁戊己庚辛壬癸])(?:[子丑寅卯辰巳午未申酉戌亥])\))?/g;
+  /* 일주 이름 두 글자(경진)를 로마자로 — 문장 속에 박혀 있으면 사전이 못 잡는다(2026-08-27) */
+  function ilju2en(k) {
+    if (!k || k.length !== 2) return k;
+    const a = DICT[k[0]], b = DICT[k[1]];
+    return (a && b) ? `${a}-${b}` : k;
+  }
+
   function atomSub(s) {
     let out = s;
     for (const [ko, en] of ATOM_LIST) out = out.split(ko).join(en);
@@ -391,10 +398,10 @@
     [/^(.{1,24}?)[은는] (.+?)[과와] (.+?)에 붙습니다\. (.+)$/, (m, tr) => `${tr(m[1])} maps to ${m[2]} and ${m[3]}. ${tr(m[4])}`],
     // 십이운성 이름은 한글 1~3자로 못박습니다 — 뒤에 문장이 더 붙어도 통째로 삼키지 않게(양→Sheep 오역의 원인이었음)
     [/^일주는 (.+?)\((.+?)\)이고 십이운성으로는 ([가-힣]{1,3})입니다\.(?:\s+(.+))?$/, (m, tr) =>
-      `Your day pillar is ${m[1]} (${m[2]}), and in the twelve life stages it sits at ${UNSEONG_EN[m[3]] || tr(m[3])}.` + (m[4] ? ' ' + tr(m[4]) : '')],
+      `Your day pillar is ${ilju2en(m[1])} (${m[2]}), and in the twelve life stages it sits at ${UNSEONG_EN[m[3]] || tr(m[3])}.` + (m[4] ? ' ' + tr(m[4]) : '')],
     [/^들으면 기운이 나는 말은 ["“](.+?)["”] 같은 표현입니다\.$/, (m, tr) => `Words that put strength in you sound like "${tr(m[1])}".`],
-    [/^(.+?)\((.+?)\)[이가] 일간인 당신의 천을귀인 글자는 (.+?)\((.+?)\)[와과] (.+?)\((.+?)\)입니다\.$/, (m) => `With ${m[1]} (${m[2]}) as your day master, your Cheoneul benefactor signs are ${m[3]} (${m[4]}) and ${m[5]} (${m[6]}).`],
-    [/^([A-Z]{4}) — (.+?) \(다시 누르면 선택 해제\)$/, (m, tr) => `${m[1]} — ${tr(m[2])} (tap again to unselect)`],
+    [/^(.+?)\((.+?)\)[이가] 일간인 당신의 천을귀인 글자는 (.+?)\((.+?)\)[와과] (.+?)\((.+?)\)입니다\.$/, (m) => `With ${DICT[m[1]] || m[1]} (${m[2]}) as your day master, your Cheoneul benefactor signs are ${BRANCH_EN[m[3]] || m[3]} (${m[4]}) and ${BRANCH_EN[m[5]] || m[5]} (${m[6]}).`],
+    [/^([A-Z]{4}) — (.+?) \(다시 누르면 (?:선택|optional) ?해제\)$/, (m, tr) => `${m[1]} — ${tr(m[2])} (tap again to unselect)`],
     [/^같은 (.+?)들이 스스로 하는 말$/, (m, tr) => `What fellow ${m[1]}s say about themselves`],
     [/^그중 힘이 센 자리에 앉은 (.+?)[을를] 먼저 봅니다\.$/, (m, tr) => `Among them, ${tr(m[1])} sits in the seat of power, so we read it first.`],
     [/^(.+?)[이가] 나란히 가장 많습니다\.$/, (m, tr) => `${tr(m[1])} tie for your most abundant energy.`],

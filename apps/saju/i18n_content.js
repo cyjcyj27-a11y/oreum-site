@@ -2515,4 +2515,8 @@ window.SAJU_EN_CONTENT = {
 // ── 2026-08-27 관계역학 소개 문구 ──
 '연인 · 친구 · 부모자식 · 비즈니스궁합 — 같은 두 사람이라도 관계가 다르면 궁합이 달라질수있습니다.': 'Partners · friends · parent and child · business — the same two people can match very differently depending on the relationship.',
 '아빠같은 자식. 딸같은 엄마. 사주와 MBTI가 관계의 역동성을 정합니다. 두사람의 사주정보만 입력하면 바로 나오는 무료궁합입니다.': 'The child who acts like the father. The mother who acts like a daughter. Saju and MBTI set the dynamics between you. Enter both birth charts and the free compatibility reading comes straight back.',
+
+// ── 2026-08-27 대문 문구(무료사주) ──
+'무료사주 · MBTI × 사주 분석 엔진': 'Free saju reading · MBTI × Saju analysis engine',
+'생년월일만 넣으면 사주 여덟 글자와 MBTI로 성향을 분석해드립니다.': 'Enter your birth date and we read your character from the eight characters of your saju together with your MBTI.',
 };
