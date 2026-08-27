@@ -601,6 +601,7 @@
   }
   addEventListener('DOMContentLoaded', () => {
     document.title = 'MBTI Saju — Oreum Games';
+    document.documentElement.lang = 'en';   // 영어일 때만 바꾼다 — CSS 에서 html[lang=en] 으로 갈라 쓴다
     // 마크업으로 쪼개진 안내문은 통째로 갈아끼웁니다
     // (히어로 문구는 2026-08-13 개편 후 줄 단위 사전으로 처리되므로 여기서 다루지 않습니다)
     const mbtiHint = document.querySelector('#mbtiGrid') &&
