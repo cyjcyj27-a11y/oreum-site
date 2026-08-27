@@ -105,7 +105,10 @@
   /* 방문자 수를 화면에 그리는 곳은 홈 푸터 한 곳뿐입니다.
      게임·사주 같은 다른 페이지에서는 숫자를 받아봐야 쓸 데가 없는데도 매번 읽어오고 있었습니다.
      Abacus 는 10초에 30번까지만 받아서(429), 쓸데없는 요청이 진짜 필요한 요청을 밀어냅니다. */
-  var needNumber = !!document.getElementById('visitCount');
+  /* 화면에 숫자를 안 보여 주므로(2026-08-27) 숫자를 받아올 이유도 없다.
+     세는 것(hit)은 아래에서 그대로 한다 — 가져오기(get)만 안 한다.
+     Abacus 는 10초에 30번까지만 받아서, 쓸데없는 요청을 줄이면 진짜 요청이 살아남는다 */
+  var needNumber = false;
 
   function countOnce(flag, key) {
     var done = store ? store.getItem(flag) === today : true;
@@ -141,16 +144,11 @@
     countOnce('oreum_counted', 'total'),
     countOnce('oreum_day', 'day_' + today)
   ]).then(function (res) {
-    var total = res[0], todays = res[1];
-    if (!total) return;
-    // 방문자 수 표시는 홈 푸터에만 있습니다. 다른 페이지에는 없으니 그냥 넘어갑니다.
-    var el = document.getElementById('visitCount');
-    if (!el) return;
-    var en = document.documentElement.lang === 'en';
-    el.textContent = en
-      ? (todays ? todays.value : 0) + ' visitors today · ' + total.value + ' in total'
-      : '오늘 방문자수 ' + (todays ? todays.value : 0) + ' 전체 방문자수 ' + total.value;
-    el.hidden = false;
+    /* 방문자 수를 화면에 안 보이게 했습니다(2026-08-27 사용자 지시).
+       세는 건 그대로입니다 — 숫자는 stats.html 에서 봅니다.
+       꼬리말의 <p id="visitCount" hidden> 은 그대로 두었습니다 —
+       다시 보이게 하려면 이 자리만 되돌리면 됩니다 */
+    if (!res[0]) return;
   });
 
   // ── 지표 — 신규/재방문(⑤)과 유입 경로(②). 화면 표시는 없고 대시보드(stats.html)에서 봅니다. ──
