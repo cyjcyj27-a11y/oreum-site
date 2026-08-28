@@ -1,0 +1,1937 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>BREAK IT ALL — 무료 벽돌깨기 게임</title>
+<meta name="description" content="초가집부터 핵방공호까지 건물 100채를 무너뜨리는 무료 벽돌깨기 게임. 설치 없이 바로 즐기는 웹게임·캐주얼게임·아케이드게임.">
+<meta name="keywords" content="벽돌깨기, 캐주얼게임, 아케이드게임, 무료게임, 웹게임, 오름게임즈, arcadegame, casualgame, webgame, freegame, oreumgames">
+<meta property="og:title" content="BREAK IT ALL — 무료 벽돌깨기 게임">
+<meta property="og:description" content="건물 100채를 무너뜨리는 무료 벽돌깨기 게임. 캐주얼·아케이드 웹게임.">
+<meta property="og:type" content="website">
+<!-- 글꼴: 주아체(둥글고 두툼, 한글+영문 한 벌). 오프라인이면 맑은 고딕으로 대신 그립니다 -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
+<style>
+  /* 페어붐의 문법(흰 카드·두툼한 아래턱)만 가져오고 색은 다르다 —
+     초록 들판 위 철거 현장: 그린 하늘 + 공사장 주황 포인트 */
+  :root{
+    --sky:   #3fdd77;
+    --sky-2: #a9f7c0;
+    --sky-3: #12b95c;
+    --ink:   #123f2a;
+    --ink-2: #4f8a68;
+    --card:  #ffffff;
+    --pink:  #ff7a1a;   /* 이름은 그대로 두고 색만 안전 주황 */
+    --yellow:#ffd23f;
+    --lime:  #35cf6e;
+    --orange:#ff8a3d;
+    --lip:   #96d8ac;
+    --lip-2: #b8e8c7;
+  }
+  *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  /* 100% 로 두면 폰 주소창 때문에 아래 고정 단추(전체화면)가 화면 밖으로 밀린다 */
+  html,body{ height:100%; height:100dvh; margin:0; overflow:hidden; }
+  body{
+    background:
+      repeating-linear-gradient(114deg,
+        rgba(255,255,255,.18) 0 64px, rgba(255,255,255,0) 64px 158px),
+      linear-gradient(158deg, var(--sky-2) 0%, var(--sky) 52%, var(--sky-3) 100%);
+    color:var(--ink);
+    font-family:'Jua',"Malgun Gothic","Apple SD Gothic Neo",-apple-system,sans-serif;
+    user-select:none; -webkit-user-select:none;
+    touch-action:none;
+  }
+
+  #cv{ position:fixed; inset:0; display:block; touch-action:none; }
+
+  /* ── 계기판 (화면 위 한 줄) ── */
+  #hud{
+    position:fixed; top:calc(8px + env(safe-area-inset-top, 0px)); left:0; right:0; z-index:10;
+    display:flex; gap:8px; justify-content:center; align-items:flex-start;
+    pointer-events:none;
+    padding:0 8px 0 118px;   /* 왼쪽 위 OREUM GAMES 알약 자리 */
+  }
+  /* 계기판은 작게 — 페어붐 폰 화면과 같은 결(작은 카드 + 더 작은 라벨).
+     크면 판이 아래로 밀린다 */
+  .stat{
+    background:var(--card); border-radius:11px;
+    padding:3px 10px; min-width:0; text-align:center;
+    box-shadow:0 3px 0 var(--lip), 0 4px 9px rgba(16,55,36,.13);
+  }
+  .stat b{ display:block; font-size:1.02rem; line-height:1.12; font-weight:400; color:var(--ink); font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .stat span{ font-size:.58rem; color:var(--ink-2); letter-spacing:.2px; }
+  .stat.pink b{ color:var(--pink); }
+  #hud .btns{ display:flex; gap:6px; pointer-events:auto; }
+  #hud button{
+    font-family:inherit; font-size:.92rem; color:var(--ink);
+    background:var(--card); border:none; border-radius:11px;
+    padding:6px 9px; cursor:pointer; line-height:1;
+    box-shadow:0 3px 0 var(--lip), 0 4px 9px rgba(16,55,36,.15);
+    transition:transform .06s, box-shadow .06s;
+  }
+  #hud button:active{ transform:translateY(4px); box-shadow:0 0 0 var(--lip); }
+  #hud button.off{ filter:grayscale(1); opacity:.55; }
+
+  /* ── 덮개(시작·정지·강화·끝) — 페어붐 카드 문법 그대로 ── */
+  .veil{
+    position:fixed; inset:0; z-index:40;
+    background:rgba(14,50,34,.55); backdrop-filter:blur(4px);
+    display:none; align-items:center; justify-content:center; padding:16px;
+  }
+  .veil.on{ display:flex; }
+  .veil.bright{
+    background:
+      repeating-linear-gradient(114deg,
+        rgba(255,255,255,.18) 0 64px, rgba(255,255,255,0) 64px 158px),
+      linear-gradient(180deg, var(--sky-2) 0%, var(--sky) 46%, var(--sky-3) 100%);
+    backdrop-filter:none;
+  }
+  .card{
+    background:var(--card); border-radius:24px;
+    padding:24px 26px; text-align:center; max-width:520px; width:100%;
+    box-shadow:0 10px 0 rgba(17,58,38,.14), 0 26px 60px rgba(13,45,30,.4);
+    animation:popIn .3s cubic-bezier(.2,1.5,.5,1) both;
+  }
+  @keyframes popIn{ from{ transform:scale(.86) translateY(14px); opacity:0; } }
+  .card h2{ margin:0 0 4px; font-size:1.7rem; font-weight:400; color:var(--ink); }
+  .card h2 em{ font-style:normal; color:var(--pink); }
+  .card p{ margin:6px 0; color:var(--ink-2); font-size:.95rem; line-height:1.55; }
+  .card .big{ font-size:2.4rem; color:var(--pink); margin:6px 0 0; font-variant-numeric:tabular-nums; }
+  .row{ display:flex; gap:8px; justify-content:center; margin-top:16px; flex-wrap:wrap; }
+
+  button.act{
+    font-family:inherit; font-size:1.1rem; color:var(--ink);
+    background:var(--card); border:none; border-radius:16px;
+    padding:13px 26px; cursor:pointer;
+    box-shadow:0 4px 0 var(--lip), 0 6px 14px rgba(16,55,36,.16);
+    transition:transform .06s, box-shadow .06s, background .12s;
+  }
+  button.act:hover{ background:#f2fcf5; }
+  button.act:active{ transform:translateY(4px); box-shadow:0 0 0 var(--lip); }
+  /* 초록 배경 위라 주요 단추는 주황 — 초록 단추는 하늘에 묻힌다 */
+  button.act.primary{ background:var(--pink); color:#fff; box-shadow:0 4px 0 #c65a08, 0 6px 14px rgba(16,55,36,.2); }
+  button.act.primary:hover{ background:#ff8f3d; }
+  button.act.primary:active{ box-shadow:0 0 0 #c65a08; }
+  button.act.ghost{ background:rgba(255,255,255,.94); }
+
+  /* ── 시작 화면 ── */
+  #veilTitle h1{
+    margin:0; font-weight:400; font-style:italic; letter-spacing:2px; color:#fff;
+    font-size:clamp(2.4rem, 6.5vw, 4.4rem); line-height:1.05;
+    text-shadow:0 4px 0 #123f2a, 0 7px 0 #123f2a, 0 14px 26px rgba(15,50,33,.32);
+  }
+  #veilTitle h1 em{ font-style:italic; color:var(--yellow); }
+  #veilTitle .tagline{ color:#0f4a2c; opacity:.85; font-size:clamp(.9rem,2.4vw,1.15rem); margin:10px 0 0; }
+  #veilTitle .tagline b{ font-weight:400; color:var(--pink); font-size:1.25em; text-shadow:0 2px 0 rgba(255,255,255,.55); }
+  #veilTitle{ flex-direction:column; text-align:center; }
+  .title-btns{ display:flex; flex-direction:column; gap:12px; margin-top:30px; width:min(300px,84vw); }
+  .title-btns .act{ width:100%; font-size:1.25rem; padding:15px 20px; border-radius:20px; }
+  .title-note{ margin:20px 0 0; color:#0f4a2c; opacity:.8; font-size:.88rem; }
+
+  .rules{ text-align:left; font-size:.98rem; line-height:1.9; color:var(--ink); margin:12px 0 0; }
+  .rules b{ color:var(--pink); }
+
+  /* ── 강화 고르기 ── */
+
+  /* ── 알림쪽지 ── */
+  #toast{
+    position:fixed; left:50%; bottom:26px; transform:translateX(-50%) translateY(20px);
+    background:#fff; color:var(--ink);
+    padding:11px 22px; border-radius:999px; font-size:.95rem;
+    opacity:0; pointer-events:none; transition:opacity .2s, transform .2s; z-index:60;
+    box-shadow:0 4px 0 var(--lip), 0 12px 26px rgba(15,50,33,.28);
+  }
+  #toast.on{ opacity:1; transform:translateX(-50%) translateY(0); }
+
+  /* ── 세로로 들면 ── */
+  #rotate{
+    position:fixed; inset:0; z-index:80; display:none;
+    background:linear-gradient(180deg, var(--sky-2), var(--sky-3));
+    color:#fff; text-align:center;
+    flex-direction:column; align-items:center; justify-content:center; gap:10px;
+    font-size:1.3rem; text-shadow:0 3px 0 #123f2a;
+  }
+  #rotate .ico{ font-size:3.4rem; animation:rot 1.6s ease-in-out infinite; }
+  @keyframes rot{ 0%,100%{ transform:rotate(0deg);} 50%{ transform:rotate(90deg);} }
+  /* 폰을 가로로 눕혔을 때만 (PC 가로 모니터는 해당 없음) */
+  @media (orientation:landscape) and (max-height:500px){ #rotate{ display:flex; } }
+
+  @media (max-width:820px){
+    #hud{ padding-left:96px; gap:4px; }
+  }
+  /* 폰 세로 — 페어붐 폰 화면과 같은 크기로 바싹 (stat 2px/6px · b .95rem · span .54rem) */
+  @media (max-width:560px){
+    /* 왼쪽 위 OREUM 알약과 겹치지 않게, 계기판을 알약 아랫줄로 내린다 */
+    #hud{ top:calc(28px + env(safe-area-inset-top, 0px)); padding:0 5px; gap:4px; }
+    .stat{ padding:2px 6px; border-radius:10px; }
+    .stat b{ font-size:.95rem; }
+    .stat span{ font-size:.54rem; letter-spacing:0; }
+    /* 소리·정지 단추는 판의 오른쪽 위 (알약과 같은 줄) — 판 기준이라 밖으로 안 나간다 */
+    #hud .btns{ position:absolute; right:calc(5px + env(safe-area-inset-right, 0px)); top:-24px; gap:4px; }
+    #hud button{ padding:5px 6px; font-size:.8rem; border-radius:10px; }
+    .card{ padding:16px 14px; }
+    .ucards{ gap:8px; }
+    .ucard{ min-width:118px; padding:10px 8px 10px; }
+    .ucard .uico{ font-size:1.7rem; }
+    .ucard .uname{ font-size:.95rem; }
+    .ucard .udesc{ font-size:.72rem; min-height:3em; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="cv"></canvas>
+
+<!-- 계기판 -->
+<div id="hud" style="display:none">
+  <div class="stat"><b id="hStage">1</b><span>STAGE</span></div>
+  <div class="stat"><b id="hScore">0</b><span>SCORE</span></div>
+  <div class="stat"><b id="hWall">0%</b><span>DEMOLISH</span></div>
+  <div class="stat"><b id="hBall">●●●</b><span>BALL</span></div>
+  <div class="btns">
+    <button id="btnBgm" title="음악">🎵</button>
+    <button id="btnSnd" title="소리">🔊</button>
+    <button id="btnPause" title="일시정지">⏸</button>
+  </div>
+</div>
+
+<!-- 시작 화면 -->
+<div id="veilTitle" class="veil bright on">
+  <h1>BREAK IT <em>ALL</em></h1>
+  <p class="tagline" data-en="100 buildings · from a straw hut to a <b>nuclear bunker</b>">건물 100채 · 초가집부터 <b>핵방공호까지</b></p>
+  <div class="title-btns">
+    <button class="act primary" id="btnContinue" style="display:none">이어하기</button>
+    <button class="act primary" id="btnStart" data-en="Start">시작하기</button>
+    <button class="act ghost" id="btnHow" data-en="How to play">게임 방법</button>
+  </div>
+  <p class="title-note" data-en="PC &amp; mobile · portrait · sound on">PC·모바일 겸용 · 세로 화면 · 소리 있음</p>
+</div>
+
+<!-- 게임 방법 -->
+<div id="veilHow" class="veil">
+  <div class="card">
+    <h2 data-en="How to play">게임 방법</h2>
+    <div class="rules" data-en="🏓 The <b>paddle</b> follows your finger or mouse<br>🔨 Each hit cracks a block: <b>crack → split → break</b><br>🏛 Break a <b>pillar</b> and the floors above come down — aim for the weak spot<br>🧱 Rubble breaks when it collides, or when it <b>falls off the building</b><br>🏚 Dig out the <b>base</b> and everything above pours down at once<br>💣 Bomb blocks take their neighbours with them<br>💥 Clear <b>75%</b> of the building to finish the stage<br>🔧 Your <b>ball and paddle grow stronger</b> as the stages climb">
+      🏓 <b>패들</b>은 손가락·마우스를 따라 좌우로 움직입니다<br>
+      🔨 공이 벽에 맞으면 <b>균열 → 금 → 파괴</b> 순서로 부서집니다<br>
+      🏛 <b>기둥</b>을 부수면 위층이 통째로 무너집니다 — 급소를 노리세요<br>
+      🧱 잔해끼리 부딪히거나 <b>건물 아래로 떨어지면</b> 부서집니다<br>
+      🏚 <b>밑동</b>을 부수면 그 위가 통째로 쏟아져 내립니다<br>
+      💣 폭탄 블록은 주변을 함께 날립니다<br>
+      💥 파괴율 <b>75%</b>를 채우면 판이 끝납니다<br>
+      🔧 판이 오르면 <b>공과 패들이 저절로 강해집니다</b>
+    </div>
+    <div class="row"><button class="act primary" id="btnHowOk" data-en="Got it">알겠어요</button></div>
+  </div>
+</div>
+
+<!-- 일시정지 -->
+<div id="veilPause" class="veil">
+  <div class="card">
+    <h2>PAUSE</h2>
+    <div class="row">
+      <button class="act primary" id="btnResume" data-en="Resume">계속하기</button>
+      <button class="act" id="btnQuit" data-en="Title screen">처음으로</button>
+    </div>
+  </div>
+</div>
+
+<!-- 게임 오버 -->
+<div id="veilOver" class="veil">
+  <div class="card">
+    <h2>GAME <em>OVER</em></h2>
+    <p id="overInfo">STAGE 1 · 파괴율 0%</p>
+    <div class="big" id="overScore">0</div>
+    <p style="margin:2px 0 0">SCORE</p>
+    <p id="overBest" style="margin-top:8px"></p>
+    <div class="row">
+      <button class="act primary" id="btnRetry" data-en="Continue">이어하기</button>
+      <button class="act" id="btnRestart" data-en="From stage 1">처음부터</button>
+    </div>
+  </div>
+</div>
+
+<!-- 100판 엔딩 -->
+<div id="veilEnd" class="veil bright">
+  <div class="card">
+    <h2>ALL <em>CLEAR!</em></h2>
+    <p id="endMsg" data-en="All 100 buildings are down! 🎉">건물 100채를 모두 부쉈습니다! 🎉</p>
+    <div class="big" id="endScore">0</div>
+    <p style="margin:2px 0 0">SCORE</p>
+    <div class="row"><button class="act primary" id="btnEndRetry" data-en="Play again">처음부터 다시</button></div>
+  </div>
+</div>
+
+<audio id="bgm" src="audio/bgm.mp3?v=2" loop preload="auto"></audio>
+<div id="toast"></div>
+<div id="rotate"><div class="ico">📱</div><span data-en="Please turn your phone upright">세로로 돌려 주세요</span></div>
+
+<script src="lib/matter.min.js"></script>
+<script>
+'use strict';
+/* ── 말(한국어·영어) ──
+   `?lang=en` 이면 영어로 바꾼다. 한국어가 원본이고 영어를 덧씌우는 방식이다.
+   ⚠ `L` 이라는 이름을 함수 안에서 다시 쓰지 말 것 (페어붐에서 통째로 터진 적 있다) */
+const EN_MODE = (new URLSearchParams(location.search).get('lang') || '').toLowerCase() === 'en';
+const L = (ko, en) => EN_MODE ? en : ko;
+function applyLang(){
+  if (!EN_MODE) return;
+  document.documentElement.lang = 'en';
+  document.title = 'BREAK IT ALL — free brick breaker game';
+  document.querySelectorAll('[data-en]').forEach(el => { el.innerHTML = el.dataset.en; });
+}
+
+/* ============================================================
+   WALL COLLAPSE — 건물 붕괴 물리 브레이크아웃 (시제품, 2026-08-27)
+   가로 화면: 왼쪽 패들이 세로로 움직이고, 공이 가로로 날아가
+   오른쪽에 서 있는 건물을 무너뜨린다. 잔해는 중력으로 떨어져
+   서로 부딪히며 연쇄로 부서진다.
+   ============================================================ */
+const { Engine, World, Bodies, Body, Events, Sleeping, Composite } = Matter;
+
+/* ── 세계 크기 (고정 좌표계, 화면에 맞춰 통째로 확대·축소) ──
+   세로 화면(폰) 기준. 구조물은 가운데 '받침(절벽)' 위에 서고,
+   패들은 화면 아래에서 좌우로 움직인다. 받침 밖으로 떨어진 잔해는 그대로 부서진다 */
+const W = 720, H = 1440;
+const TOP_Y = 165;            // 구조물 꼭대기를 계기판 바로 아래 이 높이에 맞춘다
+let ledgeY = 900;             // 받침 윗면 — 판마다 구조물 키에 맞춰 오르내린다
+const PADDLE_Y = H - 140;     // 패들 y
+let CELL_W = 58, CELL_H = 38;    // 판마다 구조물 폭에 맞춰 다시 정한다 (집이 가로로 꽉 차게)
+const TOTAL_STAGES = 100;        // 건물 도감(BUILDINGS) 26종 × 재료 5시대 × 층수 변주로 채운다
+
+/* ── 블록 재질 ──
+   hp: 공 1방 = 1. 낙하 충격도 1~2씩 깎는다.
+   val: 점수 배수 */
+/* 벽 재료가 시대를 말한다: 나무(1) → 벽돌(2) → 돌(3) → 콘크리트(4) → 강철(5).
+   판이 오를수록 재료 자체가 단단해진다 — 숫자 보너스가 아니라 질감으로 */
+const MATS = {
+  glass:    { hp:1, val:1 },   // 창문
+  wood:     { hp:1, val:1 },   // 나무판자 — 초반 집
+  brick:    { hp:2, val:2 },   // 붉은 벽돌
+  stone:    { hp:3, val:4 },   // 돌벽
+  concrete: { hp:4, val:5 },   // 콘크리트 패널
+  steel:    { hp:5, val:6 },   // 강철판 — 최후반
+  slab:     { hp:2, val:2 },   // 층간 바닥·처마
+  pillar:   { hp:3, val:3 },   // 나무 기둥 — 급소
+  roof:     { hp:2, val:2 },   // 기와지붕
+  door:     { hp:2, val:2 },   // 대문
+  bomb:     { hp:1, val:6 },
+};
+
+/* ── 강화 목록 ── */
+/* 강화 — from: 이 판부터 상점에 나온다.
+   초반엔 기본기(파괴력·패들·예비공)만, 멀티볼·큰공은 한참 뒤에 풀린다
+   (2026-08-28 사용자: "공은 초반부터 멀티로 나올 이유가 없어, 큰볼도 마찬가지") */
+const UPG = [
+  { id:'power',  ico:'🔨', name:'POWER',       max:5, base:30, from:1,  desc:'공의 파괴력 +1' },
+  { id:'paddle', ico:'🏓', name:'LONG PADDLE', max:4, base:18, from:1,  desc:'패들 길이 +20%' },
+  { id:'ball',   ico:'🎱', name:'+1 BALL',     max:9, base:24, from:1,  desc:'예비 공이 하나 늘어납니다' },
+  { id:'speed',  ico:'⚡', name:'SPEED',       max:4, base:22, from:12, desc:'공 속도 +8%' },
+  { id:'blast',  ico:'💥', name:'BLAST',       max:3, base:34, from:30, desc:'블록 파괴 시 15%×Lv 확률로 충격파' },
+  { id:'big',    ico:'⚫', name:'BIG BALL',    max:3, base:26, from:45, desc:'공이 크고 무거워져 블록을 세게 밀칩니다' },
+  { id:'multi',  ico:'⚪⚪', name:'MULTI BALL', max:2, base:45, from:65, desc:'공이 동시에 하나 더 나옵니다' },
+];
+
+/* ── 게임 상태 ── */
+const S = {
+  mode:'title',        // title | play | shop | over | pause
+  stage:1, score:0, stock:3,
+  combo:0, comboT:0,
+  lv:{ power:0, speed:0, big:0, paddle:0, ball:0, blast:0, multi:0 },
+  totalBlocks:0, destroyed:0, runDestroyed:0, runTotal:0,
+  shakeT:0, shakeAmp:0,
+  settling:false, clearing:false, grace:0,
+};
+const best = +(localStorage.getItem('wc_best') || 0);
+
+/* 강화가 반영된 실제 수치 */
+const ballSpeed  = () => 13.65 * Math.pow(1.08, S.lv.speed);   // 기본 +30% (2026-08-28)
+const ballPower  = () => 1 + S.lv.power;
+/* 공 크기는 블록 크기를 따라간다 — 큰 공은 한 번에 여러 블록을 때려서 실질 파괴력도 세다 */
+const ballRadius = () => Math.round(CELL_W * 0.24) + 3 * S.lv.big;
+const paddleH    = () => 132 * Math.pow(1.2, S.lv.paddle);
+/* ══ 자동 성장표 ══
+   강화는 고르는 게 아니라 판이 오르면 저절로 붙는다
+   (2026-08-28 사용자: "강화고르기 메뉴를 없애고 난이도에 따라 저절로 추가").
+   [판, 강화] — 총 30개가 100판에 걸쳐 퍼져 있다. 멀티볼·큰공은 한참 뒤 */
+const GRANTS = [
+  [3,'paddle'], [6,'power'], [9,'ball'], [12,'paddle'], [15,'power'],
+  [18,'speed'], [24,'ball'], [25,'power'], [28,'paddle'], [32,'speed'], [35,'power'],
+  [36,'blast'], [39,'ball'], [42,'paddle'], [45,'power'], [48,'speed'], [52,'blast'],
+  [54,'ball'], [57,'big'], [60,'speed'], [63,'ball'], [68,'blast'], [70,'big'],
+  [72,'ball'], [78,'big'], [81,'ball'], [84,'multi'], [88,'ball'], [92,'multi'], [95,'ball'],
+];
+/* n판에 서 있을 때의 강화 수준 — 이어하기·되돌리기에도 늘 같은 값이 나온다 */
+function applyGrants(n){
+  for (const k in S.lv) S.lv[k] = 0;
+  for (const [st, id] of GRANTS) if (n >= st) S.lv[id]++;
+}
+
+/* ── 물리 세계 ── */
+const engine = Engine.create({ enableSleeping:true });
+engine.positionIterations = 10;
+engine.velocityIterations = 8;
+
+function staticRect(x,y,w,h,label){
+  const b = Bodies.rectangle(x,y,w,h,{ isStatic:true, label });
+  /* ⚠ Matter는 고정 물체를 만들 때 friction=1, restitution=0 으로 덮어쓴다.
+     만든 뒤에 다시 입혀야 한다 */
+  b.friction = 0.55; b.restitution = 0;
+  return b;
+}
+/* 받침대는 없다 — 블록이 고정으로 서 있으므로 물리적 받침이 필요 없고,
+   화면에 "안 깨지는 것"이 하나도 없다. ledgeY는 건물 밑선(기준 높이)일 뿐이다.
+   밑동을 부수면 위층이 연쇄로 깨어나 허공으로 쏟아지며 부서진다 */
+const wallTop = staticRect(W/2, -30, W + 400, 60, 'wall');
+const wallL   = staticRect(-30, H/2, 60, H + 400, 'wall');
+const wallR   = staticRect(W + 30, H/2, 60, H + 400, 'wall');
+let paddle = staticRect(W/2, PADDLE_Y, paddleH(), 18, 'paddle');
+World.add(engine.world, [wallTop, wallL, wallR, paddle]);
+
+/* ── 블록 ── */
+let blocks = [];            // {body, mat, hp, maxHp, w, h, seed, dead, lastHit}
+const byId = new Map();     // body.id → block
+
+let curHpBonus = 0;   // 후반 단계에서 벽이 단단해진다 (buildStage가 정한다)
+function addBlock(cx, cy, w, h, mat){
+  const body = Bodies.rectangle(cx, cy, w, h, {
+    label:'block',
+    friction:0.7, frictionStatic:1.0, restitution:0.04,
+    density:0.0011,
+  });
+  /* 처음엔 고정으로 세워 둔다 — 부서지거나 충격을 받으면 wakeBlock으로 깨어나 물리를 탄다.
+     (동적으로 만들었다가 고정하는 순서라, 깨울 때 원래 질량·마찰이 복원된다) */
+  Body.setStatic(body, true);
+  const hp = Math.max(1, MATS[mat].hp + (mat === 'glass' || mat === 'bomb' ? 0 : curHpBonus));
+  const blk = { body, mat, hp, maxHp:hp,
+                w, h, seed:Math.random()*1000|0, dead:false, lastHit:-999, vacated:false,
+                gx:cx, home:{ x:cx, y:cy } };
+  blocks.push(blk); byId.set(body.id, blk);
+  World.add(engine.world, body);
+  return blk;
+}
+
+/* ── 구조물 짓기 ──
+   6가지가 돌아가며 나온다: 집 → 빌딩 → 쌍둥이집 → 탑 → 성 → 피라미드.
+   6판마다 한 바퀴(tier)가 돌고, tier가 오를수록 커지고(상한 있음) 돌벽이 늘며,
+   25판대부터는 벽 HP에 보너스가 붙는다. 100판이 끝. */
+let bombLeft = 0;
+let hardN = 1;    // 재질은 판 번호를 따른다 — 시대가 바뀌면 재료가 바뀐다
+let eraIdx = 0;   // 0나무 1벽돌 2돌 3콘크리트 4강철 — 하늘·지붕 색이 따라간다
+let stageRnd = Math.random;   // 판 번호 씨앗 난수 — 같은 판은 늘 같은 모양
+
+/* 시대마다 하늘이 바뀐다 — 같은 집도 다른 그림이 되도록 */
+const SKIES = [
+  ['#a9f7c0', '#3fdd77', '#12b95c'],   // 나무 — 초록 들판
+  ['#c3ecff', '#54c3f2', '#1b90d6'],   // 벽돌 — 파란 낮
+  ['#ffe3ae', '#ffa94e', '#ef7222'],   // 돌 — 노을
+  ['#e6dcff', '#a78cf2', '#7857dd'],   // 콘크리트 — 보랏빛 저녁
+  ['#4f6288', '#2b3c60', '#141f3a'],   // 강철 — 밤
+];
+function setSky(i){
+  const s = SKIES[i], st = document.documentElement.style;
+  st.setProperty('--sky-2', s[0]); st.setProperty('--sky', s[1]); st.setProperty('--sky-3', s[2]);
+}
+
+/* 창문 배치 3가지 — 판마다 다른 패턴이 걸린다 */
+function winAt(c, cols, pat){
+  switch (pat){
+    case 0: return c % 2 === 1;                    // 하나 걸러 하나
+    case 1: return c <= 2 || c >= cols - 3;        // 양끝 쌍창
+    case 2: return c >= 2 && c <= cols - 3;        // 가운데 통창 띠
+    case 3: return true;                           // 전면 커튼월
+    case 4: return c % 3 === 1;                    // 드문드문
+    default: return c % 2 === 0 && c > 1;          // 어긋난 창
+  }
+}
+function wallMat(){
+  if (bombLeft > 0 && Math.random() < 0.06){ bombLeft--; return 'bomb'; }
+  const n = hardN;
+  const mix = (a, b, t) => (Math.random() < t ? b : a);   // 다음 시대 재료가 섞이며 예고된다
+  if (n <= 4)  return mix('wood',     'brick',    Math.max(0, (n - 2) / 6));
+  if (n <= 12) return mix('brick',    'stone',    (n - 4) / 24);
+  if (n <= 18) return mix('stone',    'concrete', (n - 12) / 18);
+  if (n <= 24) return mix('concrete', 'steel',    (n - 18) / 18);
+  return mix('steel', 'concrete', 0.25);
+}
+function slabRow(x0, y, cols){
+  const cy = y - CELL_H/2;
+  for (let c = 0; c < cols; c += 2){
+    const span = Math.min(2, cols - c);
+    addBlock(x0 + c*CELL_W + span*CELL_W/2, cy, span*CELL_W - 2, CELL_H - 0.5, 'slab');
+  }
+  return y - CELL_H;
+}
+function roofGable(x0, y, cols){
+  let span = cols, off = 0;
+  while (span >= 1){
+    const cy = y - CELL_H/2;
+    for (let c = off; c < off + span; c++)
+      addBlock(x0 + c*CELL_W + CELL_W/2, cy, CELL_W - 2, CELL_H - 0.5, 'roof');
+    y -= CELL_H; span -= 2; off += 1;
+  }
+  return y;
+}
+/* ══════════ 건물 도감 ══════════
+   판마다 다른 건물이 선다. 각 줄이 설계도 하나다.
+   cols 폭(칸) · fl 층수[최소,최대] · roof 지붕모양 · era 나오는 시대[처음,끝] · ex 부속물
+   wall 벽 재료 고정(없으면 시대 재료를 따른다)
+   ⚠ 새 건물을 넣을 땐 roofRows/extraRows에 높이도 알려줘야 칸 크기 계산이 맞는다 */
+const BUILDINGS = [
+  /* ── 가장 약한 것들부터: 초가집 한 채로 시작한다 ── */
+  { ko:'초가집', en:'Straw Hut',     cols:7,  fl:[1,1], roof:'hip',   era:[0,0], ex:[], wall:'wood' },
+  { ko:'서당', en:'Village School',       cols:7,  fl:[1,1], roof:'hip',   era:[0,1], ex:[], wall:'wood' },
+  { ko:'주막', en:'Tavern',       cols:7,  fl:[1,2], roof:'hip',   era:[0,1], ex:[] },
+  { ko:'기와집', en:'Tiled House',     cols:9,  fl:[1,2], roof:'hip',   era:[0,1], ex:[], wall:'wood' },
+  { ko:'여인숙', en:'Inn',     cols:7,  fl:[2,2], roof:'gable', era:[0,2], ex:[] },
+  { ko:'양조장', en:'Brewery',     cols:8,  fl:[2,3], roof:'gable', era:[0,2], ex:['silo'] },
+  { ko:'정미소', en:'Rice Mill',     cols:7,  fl:[2,3], roof:'hip',   era:[0,2], ex:['silo'] },
+  { ko:'한의원', en:'Herb Clinic',     cols:7,  fl:[1,2], roof:'hip',   era:[1,3], ex:[] },
+  { ko:'비닐하우스', en:'Poly Tunnel', cols:9,  fl:[1,1], roof:'arch',  era:[1,3], ex:[], wall:'glass' },
+  /* ── 나무·벽돌 시대: 시골과 마을 ── */
+  { ko:'단독주택', en:'House',   cols:7,  fl:[1,3], roof:'gable', era:[0,2], ex:['chimney'] },
+  { ko:'연립주택', en:'Townhouse',   cols:8,  fl:[2,3], roof:'twin',  era:[0,2], ex:['chimney'] },
+  { ko:'협소주택', en:'Narrow House',   cols:5,  fl:[3,5], roof:'gable', era:[0,3], ex:['chimney'] },
+  { ko:'통나무집', en:'Log Cabin',   cols:7,  fl:[1,2], roof:'gable', era:[0,1], ex:['chimney'], wall:'wood' },
+  { ko:'농가', en:'Farmhouse',       cols:9,  fl:[1,2], roof:'gable', era:[0,1], ex:['chimney'] },
+  { ko:'축사', en:'Barn',       cols:9,  fl:[1,2], roof:'gable', era:[0,1], ex:[], wall:'wood' },
+  { ko:'방앗간', en:'Mill',     cols:6,  fl:[2,3], roof:'hip',   era:[0,2], ex:['silo'] },
+  { ko:'풍차', en:'Windmill',       cols:5,  fl:[3,4], roof:'hip',   era:[0,2], ex:['blades'] },
+  { ko:'교회', en:'Church',       cols:7,  fl:[1,3], roof:'spire', era:[0,2], ex:[] },
+  { ko:'한옥', en:'Hanok',       cols:9,  fl:[1,2], roof:'hip',   era:[0,1], ex:[], wall:'wood' },
+  { ko:'사찰', en:'Temple',       cols:9,  fl:[1,2], roof:'hip',   era:[0,2], ex:['bell'] },
+  { ko:'창고', en:'Warehouse',       cols:9,  fl:[1,2], roof:'arch',  era:[0,3], ex:[] },
+  { ko:'여관', en:'Guesthouse',       cols:8,  fl:[2,3], roof:'gable', era:[0,2], ex:['sign'] },
+  { ko:'대장간', en:'Forge',     cols:6,  fl:[1,2], roof:'shed',  era:[0,1], ex:['chimney'] },
+  { ko:'별장', en:'Cottage',       cols:7,  fl:[1,2], roof:'hip',   era:[0,2], ex:['chimney'] },
+  /* ── 벽돌·돌 시대: 읍내와 상권 ── */
+  { ko:'학교', en:'School',       cols:9,  fl:[2,3], roof:'flat',  era:[1,3], ex:['clock'] },
+  { ko:'상가', en:'Shops',       cols:8,  fl:[1,2], roof:'flat',  era:[1,3], ex:['sign'] },
+  { ko:'은행', en:'Bank',       cols:8,  fl:[2,3], roof:'flat',  era:[1,3], ex:['columns'] },
+  { ko:'도서관', en:'Library',     cols:9,  fl:[2,3], roof:'dome',  era:[1,3], ex:['columns'] },
+  { ko:'우체국', en:'Post Office',     cols:8,  fl:[2,3], roof:'flat',  era:[1,3], ex:['sign'] },
+  { ko:'경찰서', en:'Police Station',     cols:8,  fl:[2,3], roof:'flat',  era:[1,3], ex:['tower'] },
+  { ko:'시장', en:'Market',       cols:10, fl:[1,2], roof:'shed',  era:[1,3], ex:['sign'] },
+  { ko:'빵집', en:'Bakery',       cols:6,  fl:[1,2], roof:'gable', era:[1,3], ex:['sign','chimney'] },
+  { ko:'목욕탕', en:'Bathhouse',     cols:8,  fl:[1,2], roof:'flat',  era:[1,3], ex:['stack'] },
+  { ko:'공장', en:'Factory',       cols:9,  fl:[1,2], roof:'saw',   era:[1,4], ex:['stack'] },
+  { ko:'등대', en:'Lighthouse',       cols:5,  fl:[4,6], roof:'spire', era:[1,4], ex:['lamp'] },
+  { ko:'급수탑', en:'Water Tower',     cols:5,  fl:[3,4], roof:'flat',  era:[1,3], ex:['tank'] },
+  { ko:'시계탑', en:'Clock Tower',     cols:5,  fl:[4,5], roof:'spire', era:[1,3], ex:['clock'] },
+  { ko:'박물관', en:'Museum',     cols:9,  fl:[2,3], roof:'dome',  era:[1,4], ex:['columns'] },
+  { ko:'식당', en:'Diner',       cols:7,  fl:[1,2], roof:'flat',  era:[1,3], ex:['sign'] },
+  { ko:'카페', en:'Cafe',       cols:6,  fl:[1,2], roof:'gable', era:[1,3], ex:['sign'] },
+  { ko:'서점', en:'Bookstore',       cols:7,  fl:[2,2], roof:'flat',  era:[1,3], ex:['sign'] },
+  { ko:'약국', en:'Pharmacy',       cols:6,  fl:[1,2], roof:'flat',  era:[1,3], ex:['cross'] },
+  { ko:'정비소', en:'Auto Shop',     cols:8,  fl:[1,2], roof:'shed',  era:[1,3], ex:['garage'] },
+  { ko:'세탁소', en:'Laundry',     cols:6,  fl:[1,2], roof:'flat',  era:[1,3], ex:['sign','stack'] },
+  /* ── 돌·콘크리트 시대: 도시 ── */
+  { ko:'시청', en:'City Hall',       cols:9,  fl:[2,3], roof:'dome',  era:[2,4], ex:['clock'] },
+  { ko:'법원', en:'Courthouse',       cols:9,  fl:[2,3], roof:'dome',  era:[2,4], ex:['columns'] },
+  { ko:'병원', en:'Hospital',       cols:8,  fl:[3,5], roof:'flat',  era:[2,4], ex:['cross'] },
+  { ko:'빌라', en:'Low-rise Flats',       cols:8,  fl:[3,4], roof:'flat',  era:[2,4], ex:['balcony','tank'] },
+  { ko:'체육관', en:'Gym',     cols:9,  fl:[1,2], roof:'arch',  era:[2,4], ex:['sign'] },
+  { ko:'마트', en:'Supermarket',       cols:9,  fl:[1,2], roof:'flat',  era:[2,4], ex:['sign'] },
+  { ko:'백화점', en:'Department Store',     cols:9,  fl:[3,4], roof:'flat',  era:[2,4], ex:['sign'] },
+  { ko:'기차역', en:'Train Station',     cols:10, fl:[1,2], roof:'arch',  era:[2,4], ex:['clock'] },
+  { ko:'버스터미널', en:'Bus Terminal', cols:10, fl:[1,2], roof:'flat',  era:[2,4], ex:['sign'] },
+  { ko:'대학교', en:'University',     cols:9,  fl:[2,3], roof:'dome',  era:[2,4], ex:['columns','clock'] },
+  { ko:'기숙사', en:'Dormitory',     cols:8,  fl:[3,4], roof:'flat',  era:[2,4], ex:[] },
+  { ko:'유치원', en:'Kindergarten',     cols:8,  fl:[1,2], roof:'gable', era:[2,4], ex:['sign'] },
+  { ko:'요양원', en:'Care Home',     cols:8,  fl:[2,3], roof:'flat',  era:[2,4], ex:['balcony'] },
+  { ko:'온실', en:'Glasshouse',       cols:9,  fl:[1,2], roof:'arch',  era:[2,4], ex:[], wall:'glass' },
+  { ko:'격납고', en:'Hangar',     cols:10, fl:[1,2], roof:'arch',  era:[2,4], ex:['garage'] },
+  { ko:'발전소', en:'Power Plant',     cols:9,  fl:[1,2], roof:'flat',  era:[2,4], ex:['stack'] },
+  { ko:'물류창고', en:'Distribution Center',   cols:10, fl:[1,2], roof:'shed',  era:[2,4], ex:['garage'] },
+  { ko:'주유소', en:'Gas Station',     cols:8,  fl:[1,1], roof:'flat',  era:[2,4], ex:['canopy'] },
+  { ko:'소방서', en:'Fire Station',     cols:8,  fl:[2,2], roof:'flat',  era:[2,4], ex:['tower','garage'] },
+  { ko:'수영장', en:'Swimming Pool',     cols:9,  fl:[1,2], roof:'arch',  era:[2,4], ex:[] },
+  { ko:'교도소', en:'Prison',     cols:9,  fl:[2,3], roof:'flat',  era:[2,4], ex:['tower'] },
+  /* ── 콘크리트·강철 시대: 현대 도시 ── */
+  { ko:'호텔', en:'Hotel',       cols:8,  fl:[4,6], roof:'flat',  era:[3,4], ex:['sign'] },
+  { ko:'아파트', en:'Apartment',     cols:8,  fl:[4,6], roof:'flat',  era:[3,4], ex:['tank'] },
+  { ko:'오피스텔', en:'Studio Tower',   cols:8,  fl:[4,6], roof:'flat',  era:[3,4], ex:['balcony'] },
+  { ko:'오피스', en:'Office',     cols:8,  fl:[4,6], roof:'flat',  era:[3,4], ex:['antenna'] },
+  { ko:'펜트하우스', en:'Penthouse', cols:8,  fl:[3,4], roof:'step',  era:[3,4], ex:['balcony'] },
+  { ko:'주차타워', en:'Parking Tower',   cols:8,  fl:[4,6], roof:'flat',  era:[3,4], ex:[] },
+  { ko:'방송국', en:'Broadcast Center',     cols:7,  fl:[3,4], roof:'flat',  era:[3,4], ex:['antenna'] },
+  { ko:'데이터센터', en:'Data Center', cols:9,  fl:[2,3], roof:'flat',  era:[3,4], ex:['tank'] },
+  { ko:'연구소', en:'Research Lab',     cols:8,  fl:[3,4], roof:'flat',  era:[3,4], ex:['antenna'] },
+  { ko:'컨벤션센터', en:'Convention Center', cols:10, fl:[2,3], roof:'arch',  era:[3,4], ex:['sign'] },
+  { ko:'경기장', en:'Stadium',     cols:11, fl:[2,3], roof:'arch',  era:[3,4], ex:['sign'] },
+  { ko:'쇼핑몰', en:'Shopping Mall',     cols:10, fl:[2,3], roof:'flat',  era:[3,4], ex:['sign'] },
+  { ko:'관제탑', en:'Control Tower',     cols:5,  fl:[5,7], roof:'flat',  era:[3,4], ex:['lamp'] },
+  { ko:'전망대', en:'Viewing Tower',     cols:5,  fl:[5,7], roof:'dome',  era:[3,4], ex:['antenna'] },
+  { ko:'정유소', en:'Refinery',     cols:9,  fl:[1,2], roof:'flat',  era:[3,4], ex:['stack','silo'] },
+  /* ── 골목 상권: 작은 가게들 ── */
+  { ko:'편의점', en:'Convenience Store',     cols:6,  fl:[1,2], roof:'flat',  era:[1,4], ex:['sign'] },
+  { ko:'꽃집', en:'Flower Shop',       cols:6,  fl:[1,1], roof:'gable', era:[1,4], ex:['sign'] },
+  { ko:'정육점', en:'Butcher',     cols:6,  fl:[1,2], roof:'flat',  era:[1,4], ex:['sign'] },
+  { ko:'철물점', en:'Hardware Store',     cols:7,  fl:[1,2], roof:'shed',  era:[1,4], ex:['sign'] },
+  { ko:'미용실', en:'Hair Salon',     cols:6,  fl:[1,2], roof:'flat',  era:[1,4], ex:['sign'] },
+  { ko:'사진관', en:'Photo Studio',     cols:6,  fl:[1,2], roof:'flat',  era:[1,3], ex:['sign'] },
+  { ko:'문방구', en:'Stationery Shop',     cols:6,  fl:[1,1], roof:'gable', era:[1,3], ex:['sign'] },
+  { ko:'부동산', en:'Realtor',     cols:6,  fl:[1,2], roof:'flat',  era:[2,4], ex:['sign'] },
+  { ko:'어시장', en:'Fish Market',     cols:10, fl:[1,1], roof:'shed',  era:[1,3], ex:['sign'] },
+  /* ── 관공서·문화 ── */
+  { ko:'구청', en:'District Office',       cols:9,  fl:[2,3], roof:'dome',  era:[2,4], ex:['clock'] },
+  { ko:'세무서', en:'Tax Office',     cols:9,  fl:[2,3], roof:'flat',  era:[2,4], ex:[] },
+  { ko:'대사관', en:'Embassy',     cols:8,  fl:[2,3], roof:'flat',  era:[2,4], ex:['columns'] },
+  { ko:'미술관', en:'Art Gallery',     cols:9,  fl:[2,3], roof:'flat',  era:[2,4], ex:['columns'] },
+  { ko:'영화관', en:'Cinema',     cols:9,  fl:[2,3], roof:'flat',  era:[2,4], ex:['sign'] },
+  { ko:'콘서트홀', en:'Concert Hall',   cols:10, fl:[2,3], roof:'arch',  era:[3,4], ex:['sign'] },
+  { ko:'아쿠아리움', en:'Aquarium', cols:10, fl:[2,3], roof:'arch',  era:[3,4], ex:['sign'] },
+  { ko:'식물원', en:'Botanical Garden',     cols:9,  fl:[1,2], roof:'arch',  era:[2,4], ex:[], wall:'glass' },
+  { ko:'천문대', en:'Observatory',     cols:5,  fl:[4,6], roof:'dome',  era:[2,4], ex:[] },
+  /* ── 생활·의료·교육 ── */
+  { ko:'학원', en:'Cram School',       cols:8,  fl:[3,4], roof:'flat',  era:[2,4], ex:['sign'] },
+  { ko:'독서실', en:'Study Hall',     cols:7,  fl:[2,3], roof:'flat',  era:[2,4], ex:[] },
+  { ko:'어린이집', en:'Daycare',   cols:7,  fl:[1,2], roof:'gable', era:[2,4], ex:['sign'] },
+  { ko:'치과', en:'Dental Clinic',       cols:7,  fl:[2,3], roof:'flat',  era:[2,4], ex:['cross'] },
+  { ko:'동물병원', en:'Vet Clinic',   cols:7,  fl:[1,2], roof:'flat',  era:[2,4], ex:['cross'] },
+  { ko:'헬스장', en:'Fitness Center',     cols:8,  fl:[2,3], roof:'flat',  era:[3,4], ex:['sign'] },
+  { ko:'볼링장', en:'Bowling Alley',     cols:9,  fl:[1,2], roof:'arch',  era:[3,4], ex:['sign'] },
+  { ko:'노래방', en:'Karaoke',     cols:7,  fl:[2,3], roof:'flat',  era:[3,4], ex:['sign'] },
+  { ko:'피시방', en:'PC Cafe',     cols:7,  fl:[2,3], roof:'flat',  era:[3,4], ex:['sign'] },
+  /* ── 산업 ── */
+  { ko:'변전소', en:'Substation',     cols:8,  fl:[1,2], roof:'flat',  era:[2,4], ex:['antenna'] },
+  { ko:'정수장', en:'Water Works',     cols:9,  fl:[1,2], roof:'flat',  era:[2,4], ex:['tank'] },
+  { ko:'소각장', en:'Incinerator',     cols:9,  fl:[1,2], roof:'flat',  era:[3,4], ex:['stack'] },
+  { ko:'제철소', en:'Steel Mill',     cols:10, fl:[1,2], roof:'saw',   era:[3,4], ex:['stack'] },
+  { ko:'증권사', en:'Trading House',     cols:8,  fl:[4,5], roof:'flat',  era:[3,4], ex:['antenna'] },
+  /* ── 최후: 가장 단단한 것들 ── */
+  { ko:'지하벙커', en:'Underground Bunker',   cols:9,  fl:[2,3], roof:'flat',  era:[4,4], ex:['antenna'], wall:'concrete' },
+  { ko:'금고', en:'Vault',       cols:7,  fl:[2,3], roof:'flat',  era:[4,4], ex:[], wall:'steel' },
+  { ko:'초고층빌딩', en:'Skyscraper', cols:7,  fl:[6,8], roof:'step',  era:[4,4], ex:['antenna'] },
+  { ko:'핵방공호', en:'Nuclear Bunker',   cols:9,  fl:[3,4], roof:'flat',  era:[4,4], ex:['antenna','tank'], wall:'steel' },
+];
+/* 지붕이 잡아먹는 줄 수 — 칸 높이를 미리 계산하려면 필요하다 */
+function roofRows(roof, cols){
+  switch (roof){
+    case 'gable': return Math.ceil(cols / 2);
+    case 'twin':  return Math.ceil(cols / 4) + 1;
+    case 'step':  return 4;
+    case 'saw':   return 2;
+    case 'spire': return 4;
+    case 'dome':  return 3;
+    case 'arch':  return 3;
+    case 'hip':   return 2;
+    case 'shed':  return 2;
+    default:      return 1;   // flat
+  }
+}
+/* 부속물이 지붕 위로 더 올라가는 줄 수 */
+function extraRows(ex){
+  let r = 0;
+  for (const e of ex){
+    const h = e === 'antenna' ? 4
+            : (e === 'stack' || e === 'tower' || e === 'cross' || e === 'silo' || e === 'blades') ? 3
+            : (e === 'lamp' || e === 'clock' || e === 'bell') ? 2
+            : e === 'garage' ? 0 : 1;
+    if (h > r) r = h;
+  }
+  return r;
+}
+function specRows(spec, floors){
+  return floors * 4 + roofRows(spec.roof, spec.cols) + extraRows(spec.ex);
+}
+
+/* 시대 구분 — 판 번호로 정해진다 */
+function eraOf(n){ return n <= 15 ? 0 : n <= 35 ? 1 : n <= 55 ? 2 : n <= 78 ? 3 : 4; }
+
+/* ══ 판 배정표 ══
+   100판에 100채가 서로 다르게 서도록, 시작할 때 한 번 짜 둔다.
+   도감이 약한 것부터 정렬돼 있으므로 앞에서부터 꺼내면 자연히 약→강 순서가 된다.
+   마지막 판은 핵방공호로 못박는다 */
+const STAGE_PLAN = (() => {
+  const boss = BUILDINGS.find(b => b.ko === '핵방공호');
+  const used = new Set([boss.ko]);
+  const plan = [];
+  for (let n = 1; n <= TOTAL_STAGES; n++){
+    const era = eraOf(n);
+    const fit = (b) => era >= b.era[0] && era <= b.era[1];
+    let cand = BUILDINGS.filter(b => fit(b) && !used.has(b.ko));
+    if (!cand.length) cand = BUILDINGS.filter(fit);   // 동날 땐 재등장 허용
+    const pick = cand[0];
+    used.add(pick.ko);
+    plan.push(pick);
+  }
+  plan[TOTAL_STAGES - 1] = boss;
+  return plan;
+})();
+
+/* ══════════ 설계도대로 짓기 ══════════ */
+function genSpec(spec, floors){
+  const cols = spec.cols, x0 = (W - cols*CELL_W) / 2, center = cols >> 1;
+  const pat = (stageRnd() * 6) | 0;              // 이 건물의 창문 배치
+  const has = (e) => spec.ex.includes(e);
+  const openDeck = spec.ko === '주차타워';       // 창 대신 뚫린 층
+  const colonnade = has('columns');              // 은행·법원 1층 기둥열
+  const balcony  = has('balcony');
+  const garage   = has('garage');                // 정비소·소방서 큰 문
+  const put = (c, cy, mat, wmul) =>
+    addBlock(x0 + c*CELL_W + CELL_W/2, cy, (wmul || 1)*CELL_W - 2, CELL_H - 0.5, mat);
+  const wm = () => spec.wall || wallMat();
+  const frame = () => spec.wall ? spec.wall
+    : eraIdx >= 3 ? (hardN >= 80 ? 'steel' : 'concrete') : (eraIdx >= 2 ? 'stone' : 'pillar');
+
+  let y = ledgeY;
+  for (let f = 0; f < floors; f++){
+    for (let r = 0; r < 3; r++){
+      const cy = y - CELL_H/2 - r*CELL_H;
+      for (let c = 0; c < cols; c++){
+        const doorHere = f === 0 && r < 2 &&
+          (garage ? Math.abs(c - center) <= 1 : c === center);
+        if (c === 0 || c === cols - 1)                      put(c, cy, frame());
+        else if (doorHere)                                  put(c, cy, 'door').noHandle = (r === 1 || garage);
+        else if (colonnade && f === 0 && c % 2 === 0)       put(c, cy, 'pillar');
+        else if (openDeck && r === 1)                       { /* 뚫린 주차층 — 비운다 */ }
+        else if (balcony && r === 2 && (c === 1 || c === cols - 2)) put(c, cy, 'slab');
+        else if (!openDeck && r === 1 && winAt(c, cols, (pat + f) % 6)) put(c, cy, 'glass');
+        else                                                put(c, cy, wm());
+      }
+    }
+    y -= 3 * CELL_H;
+    y = slabRow(x0, y, cols);
+  }
+
+  const eaves = y;   // 처마 높이 — 굴뚝이 여기 붙는다
+  switch (spec.roof){
+    case 'gable': y = roofGable(x0, y, cols); break;
+    case 'twin': {                                   // 지붕 두 개 — 연립주택
+      const h = cols >> 1;
+      y = Math.min(roofGable(x0, y, h), roofGable(x0 + h*CELL_W, y, cols - h));
+      break;
+    }
+    case 'hip':                                      // 모임지붕 — 사방으로 흘러내린다
+      for (let k = 0; k < 2; k++){
+        for (let c = 1 + k; c < cols - 1 - k; c++) put(c, y - CELL_H/2, 'roof');
+        y -= CELL_H;
+      }
+      break;
+    case 'shed':                                     // 외쪽지붕 — 한쪽으로 기운다
+      for (let c = 0; c < cols; c++) put(c, y - CELL_H/2, 'roof');
+      y -= CELL_H;
+      for (let c = cols >> 1; c < cols; c++) put(c, y - CELL_H/2, 'roof');
+      y -= CELL_H;
+      break;
+    case 'step': {                                   // 펜트하우스·초고층 — 물러나며 올라간다
+      let sp = cols - 2, off = 1;
+      for (let k = 0; k < 2 && sp >= 2; k++){
+        for (let c = off; c < off + sp; c++) put(c, y - CELL_H/2, 'roof');
+        y -= CELL_H;
+        for (let c = off; c < off + sp; c += 2) put(c, y - CELL_H/2, 'slab');
+        y -= CELL_H;
+        sp -= 2; off += 1;
+      }
+      break;
+    }
+    case 'saw':                                      // 공장 톱니지붕 — 유리와 지붕이 번갈아
+      for (let c = 0; c < cols; c++){
+        put(c, y - CELL_H/2, c % 2 === 0 ? 'roof' : 'glass');
+        if (c % 2 === 0) put(c, y - CELL_H*1.5, 'roof');
+      }
+      y -= CELL_H * 2; break;
+    case 'arch':                                     // 창고·체육관·경기장 아치지붕
+      for (let k = 0; k < 3; k++){
+        for (let c = 1 + k; c < cols - 1 - k; c++) put(c, y - CELL_H/2, 'roof');
+        y -= CELL_H;
+      }
+      break;
+    case 'dome':                                     // 도서관·시청 돔
+      for (let c = 2; c < cols - 2; c++) put(c, y - CELL_H/2, 'roof');
+      y -= CELL_H;
+      for (let c = 3; c < cols - 3; c++) put(c, y - CELL_H/2, 'roof');
+      y -= CELL_H;
+      put(center, y - CELL_H/2, 'roof'); y -= CELL_H; break;
+    case 'spire':                                    // 교회·등대 첨탑
+      for (let c = center - 1; c <= center + 1; c++) put(c, y - CELL_H/2, 'roof');
+      y -= CELL_H;
+      for (let k = 0; k < 3; k++){ put(center, y - CELL_H/2, 'roof'); y -= CELL_H; }
+      break;
+    default:                                         // 평지붕 — 난간만 한 칸 걸러
+      for (let c = 0; c < cols; c += 2) put(c, y - CELL_H/2, 'slab');
+      y -= CELL_H;
+  }
+
+  /* 부속물 — 겹치지 않게 지붕 위(rt)에서 시작한다 */
+  const rt = y;
+  for (const e of spec.ex){
+    if (e === 'chimney' && stageRnd() < 0.7){
+      const cc = stageRnd() < 0.5 ? 1 : cols - 2;
+      addBlock(x0 + cc*CELL_W + CELL_W/2, eaves - CELL_H*1.5, CELL_W*0.6, CELL_H - 0.5, 'brick');
+    }
+    else if (e === 'tank'){
+      const tc = 1 + ((stageRnd() * (cols - 3)) | 0);
+      addBlock(x0 + tc*CELL_W + CELL_W*0.7, rt - CELL_H/2, CELL_W*1.6, CELL_H - 0.5, 'concrete');
+    }
+    else if (e === 'sign'){                          // 간판 — 빛나는 띠
+      for (let c = 1; c < cols - 1; c++) put(c, rt - CELL_H/2, 'glass');
+    }
+    else if (e === 'canopy'){                        // 주유소 지붕
+      for (let c = 0; c < cols; c++) put(c, rt - CELL_H/2, 'slab');
+    }
+    else if (e === 'cross'){                         // 병원·약국 십자 표시
+      put(center, rt - CELL_H/2, 'roof');
+      for (let c = center - 1; c <= center + 1; c++) put(c, rt - CELL_H*1.5, 'roof');
+      put(center, rt - CELL_H*2.5, 'roof');
+    }
+    else if (e === 'stack'){                         // 공장·목욕탕 굴뚝
+      for (const cc of [1, cols - 2])
+        for (let k = 0; k < 3; k++)
+          addBlock(x0 + cc*CELL_W + CELL_W/2, rt - CELL_H/2 - k*CELL_H, CELL_W*0.62, CELL_H - 0.5, 'brick');
+    }
+    else if (e === 'silo'){                          // 방앗간·정유소 사일로
+      for (let k = 0; k < 3; k++)
+        addBlock(x0 + (cols - 1)*CELL_W + CELL_W/2, rt - CELL_H/2 - k*CELL_H, CELL_W*0.8, CELL_H - 0.5, 'concrete');
+    }
+    else if (e === 'blades'){                        // 풍차 날개
+      put(center, rt - CELL_H*0.5, 'wood');
+      put(center - 1, rt - CELL_H*1.5, 'wood');
+      put(center, rt - CELL_H*1.5, 'wood');
+      put(center + 1, rt - CELL_H*1.5, 'wood');
+      put(center, rt - CELL_H*2.5, 'wood');
+    }
+    else if (e === 'antenna'){                       // 오피스·방송국 안테나
+      for (let k = 0; k < 4; k++)
+        addBlock(x0 + center*CELL_W + CELL_W/2, rt - CELL_H/2 - k*CELL_H, CELL_W*0.3, CELL_H - 0.5, 'steel');
+    }
+    else if (e === 'tower'){                         // 소방서·경찰서 훈련탑
+      for (let k = 0; k < 3; k++) put(cols - 2, rt - CELL_H/2 - k*CELL_H, k === 1 ? 'glass' : wm());
+    }
+    else if (e === 'lamp'){                          // 등대·관제탑 불빛
+      put(center, rt - CELL_H/2, 'glass');
+      put(center, rt - CELL_H*1.5, 'roof');
+    }
+    else if (e === 'clock' || e === 'bell'){         // 학교·시청 시계탑 / 사찰 종
+      put(center, rt - CELL_H/2, wm());
+      put(center, rt - CELL_H*1.5, 'glass');
+    }
+  }
+  return cols;
+}
+
+function buildStage(n){
+  for (const b of blocks) World.remove(engine.world, b.body);
+  blocks = []; byId.clear();
+
+  /* 판마다 도감에서 건물 하나를 뽑는다 — 시대가 오르면 나오는 건물도 바뀐다.
+     ⚠ 판수는 TOTAL_STAGES(100). 건물 26종 × 재료 5시대 × 층수 변주로 채운다
+     (2026-08-28: 4종뿐이라 30판으로 줄였던 걸, 도감을 갖춰 100판으로 되살림) */
+  stageRnd = mulberry(n * 7919);          // 같은 판은 늘 같은 모양
+  eraIdx = eraOf(n);
+  setSky(eraIdx);
+
+  const spec = STAGE_PLAN[n - 1];   // 판마다 고유한 건물
+  const span = spec.fl[1] - spec.fl[0] + 1;
+  /* 시대가 오르면 한 층 더 — 후반에 조무래기 건물이 안 서게 */
+  const floors = Math.min(spec.fl[1], spec.fl[0] + (n % span) + (eraIdx >= 2 ? 1 : 0));
+
+  /* 칸 크기 — 건물 폭이 화면을 채우게. 세로는 "공 놀 공간"이 우선이라 눌러 담는다 */
+  CELL_W = Math.min(Math.floor(664 / spec.cols), 96);
+  CELL_H = Math.min(Math.round(CELL_W * 0.66),
+                    Math.floor((950 - TOP_Y) / specRows(spec, floors)));
+  bombLeft   = Math.min(1 + Math.floor(n / 20), 4);
+  hardN      = n;
+  curHpBonus = n >= 90 ? 1 : 0;   // 단단함은 재료가 말한다 — 마지막 담금질만 숫자로
+  S.structName = L(spec.ko, spec.en);
+
+  const cols = genSpec(spec, floors);
+  /* 주춧돌 — 맨 아랫줄은 더 단단하다(초반 +1, 20판부터 +2).
+     밑동 저격으로 건물이 통째로 쏟아지는 게 제일 강한 수라, 값을 치르게 한다 */
+  const footBonus = n < 6 ? 0 : n < 40 ? 1 : 2;
+  for (const blk of blocks){
+    if (blk.mat === 'glass' || blk.mat === 'bomb') continue;
+    if (blk.body.position.y > ledgeY - CELL_H){ blk.hp += footBonus; blk.maxHp += footBonus; }
+  }
+
+  /* 구조물 꼭대기를 계기판 바로 아래(TOP_Y)에 맞춘다 — 받침이 키에 맞춰 따라온다 */
+  let minY = Infinity;
+  for (const blk of blocks) minY = Math.min(minY, blk.body.position.y - blk.h/2);
+  const shift = TOP_Y - minY;
+  for (const blk of blocks){
+    Body.setPosition(blk.body, { x: blk.body.position.x, y: blk.body.position.y + shift });
+  }
+  ledgeY += shift;
+
+  S.totalBlocks = blocks.length;
+  S.destroyed = 0;
+  S.clearing = false;
+  S.runTotal += blocks.length;
+
+  /* 블록이 전부 고정으로 서 있으므로 정착 과정이 필요 없다 — 지은 그대로가 '제자리'다 */
+  for (const blk of blocks) blk.home = { x:blk.body.position.x, y:blk.body.position.y };
+}
+
+/* ── 공 — MULTI BALL 강화로 동시에 여러 개가 나온다 ── */
+let balls = [];           // { body, attached, off }
+function ballCount(){ return 1 + S.lv.multi; }
+function spawnBalls(){
+  for (const b of balls) World.remove(engine.world, b.body);
+  balls = [];
+  const n = ballCount(), r = ballRadius();
+  for (let i = 0; i < n; i++){
+    const off = (i - (n - 1) / 2) * (r * 2 + 12);
+    const body = Bodies.circle(paddle.position.x + off, PADDLE_Y - 34, r, {
+      label:'ball',
+      friction:0, frictionAir:0, restitution:1,
+      density:0.004 * (1 + 0.45 * S.lv.big),
+    });
+    World.add(engine.world, body);
+    balls.push({ body, attached:true, off });
+  }
+}
+function launchBalls(){
+  let any = false;
+  for (const b of balls){
+    if (!b.attached) continue;
+    b.attached = false; any = true;
+    const a = (Math.random() * 0.5 - 0.25) + b.off * 0.004;
+    Body.setVelocity(b.body, { x: Math.sin(a) * ballSpeed(), y: -Math.cos(a) * ballSpeed() });
+  }
+  if (any) sfx.pong();
+}
+
+/* ── 물리 훅: 공은 중력을 안 받고, 속도가 일정하다 ── */
+Events.on(engine, 'beforeUpdate', () => {
+  const g = engine.gravity;
+  for (const b of balls){
+    if (!b.attached) Body.applyForce(b.body, b.body.position, { x:0, y: -b.body.mass * g.y * g.scale });
+  }
+});
+let decayTick = 0;
+Events.on(engine, 'afterUpdate', () => {
+  /* 제자리에서 밀려나 바닥에 누운 잔해는 서서히 부스러진다.
+     블록마다 씨앗으로 박자를 흩어 놓아 2.5초에 하나씩 조용히 무너진다 */
+  if (!S.settling && S.mode === 'play'){
+    decayTick++;
+    /* 제자리를 벗어난 블록은 위층의 받침이 아니게 된다 — 바로 위를 깨운다 */
+    for (const blk of blocks){
+      if (blk.dead || blk.vacated || blk.body.isStatic) continue;
+      const vx = blk.body.position.x - blk.home.x, vy = blk.body.position.y - blk.home.y;
+      if (vx*vx + vy*vy > (CELL_H * 0.8) * (CELL_H * 0.8)){
+        blk.vacated = true;
+        wakeAbove(blk.home.x, blk.home.y);
+      }
+    }
+    for (const blk of blocks){
+      if (blk.dead) continue;
+      if ((decayTick + blk.seed) % 150 !== 0) continue;
+      const b = blk.body;
+      /* 잠들지 않았어도 거의 멈춰 있으면 잔해로 친다 (공에 계속 치이면 영영 못 잠들기 때문) */
+      if (!b.isSleeping && Math.hypot(b.velocity.x, b.velocity.y) > 0.9) continue;
+      const dx = b.position.x - blk.home.x, dy = b.position.y - blk.home.y;
+      if (b.position.y > ledgeY - 90 && (dx*dx + dy*dy > 900 || Math.abs(b.angle) > 0.45)){
+        blk.lastHit = -999;
+        hitBlock(blk, 1, false);
+      }
+    }
+  }
+  for (const b of balls){
+    if (b.attached){
+      Body.setPosition(b.body, { x: paddle.position.x + b.off, y: PADDLE_Y - 34 });
+      Body.setVelocity(b.body, {x:0, y:0});
+      continue;
+    }
+    const sp = ballSpeed();
+    let { x:vx, y:vy } = b.body.velocity;
+    let s = Math.hypot(vx, vy);
+    if (s < 0.01){ vx = 0; vy = -sp; s = sp; }
+    vx *= sp / s; vy *= sp / s;
+    /* 가로로만 오가며 갇히지 않게, 세로 성분을 최소 20% 지킨다 */
+    const minVy = 0.2 * sp;
+    if (Math.abs(vy) < minVy){
+      const sgn = vy === 0 ? -1 : Math.sign(vy);
+      vy = sgn * minVy;
+      vx = Math.sign(vx || 1) * Math.sqrt(sp*sp - vy*vy);
+    }
+    Body.setVelocity(b.body, { x:vx, y:vy });
+  }
+});
+
+/* ── 충돌: 피해 판정 ── */
+Events.on(engine, 'collisionStart', (e) => {
+  if (S.settling) return;
+  for (const pr of e.pairs){
+    const a = pr.bodyA, b = pr.bodyB;
+
+    /* 공이 낀 충돌 */
+    const bl = a.label === 'ball' ? a : (b.label === 'ball' ? b : null);
+    if (bl){
+      const other = bl === a ? b : a;
+      if (other.label === 'block'){
+        const blk = byId.get(other.id);
+        if (blk){
+          hitBlock(blk, ballPower(), true);
+          /* 이미 깨어난 잔해만 공이 밀쳐 낸다 — 서 있는 벽은 부서지기 전까지 버틴다 */
+          if (!blk.dead && !blk.body.isStatic){
+            const v = bl.velocity, s = Math.hypot(v.x, v.y) || 1;
+            Sleeping.set(blk.body, false);
+            Body.setVelocity(blk.body, {
+              x: blk.body.velocity.x + v.x / s * 3.2,
+              y: blk.body.velocity.y + v.y / s * 3.2,
+            });
+          }
+        }
+      } else if (other.label === 'paddle'){
+        reflectOffPaddle(bl);
+      } else if (other.label !== 'ball'){
+        sfx.tick();
+      }
+      continue;
+    }
+
+    /* 블록끼리·블록과 땅 — 세게 부딪히면 서로 부서진다 */
+    const A = byId.get(a.id), B = byId.get(b.id);
+    if (!A && !B) continue;
+    const rel = Math.hypot(a.velocity.x - b.velocity.x, a.velocity.y - b.velocity.y);
+    /* 굴러온 잔해가 서 있는 블록을 세게 치면 깨운다 (가볍게 스치는 건 무시) */
+    if (A && B && a.isStatic !== b.isStatic && rel > 3) wakeBlock(a.isStatic ? A : B);
+    if (rel > 4.5){
+      const dmg = rel > 9 ? 2 : 1;
+      if (A) hitBlock(A, dmg, false);
+      if (B) hitBlock(B, dmg, false);
+      if (rel > 8){ sfx.thud(); shake(4, 140); }
+    }
+  }
+});
+
+function reflectOffPaddle(bb){
+  const be = balls.find(x => x.body === bb);
+  if (!be || be.attached) return;
+  const off = Math.max(-1, Math.min(1, (bb.position.x - paddle.position.x) / (paddleH()/2)));
+  const sp = ballSpeed();
+  const vx = off * 0.78 * sp;
+  const vy = -Math.sqrt(sp*sp - vx*vx);      // 위로 튕긴다
+  Body.setVelocity(bb, { x:vx, y:vy });
+  sfx.pong();
+}
+
+/* ── 깨우기: 고정으로 서 있던 블록이 물리를 타기 시작한다 ── */
+function wakeBlock(blk){
+  if (blk.dead || !blk.body.isStatic) return;
+  Body.setStatic(blk.body, false);
+  /* 고정으로 만들 때 Matter가 마찰·반발을 덮어쓰므로 다시 입힌다 */
+  blk.body.friction = 0.7; blk.body.frictionStatic = 1.0; blk.body.restitution = 0.04;
+  Sleeping.set(blk.body, false);
+}
+/* 벽돌쌓기 지지 판정 — 바로 아래뿐 아니라 아래 양옆(대각선)도 받침으로 친다.
+   그래서 한 칸 뚫린 걸로는 위가 안 무너지고, 아랫줄을 2~3칸 파야 쏟아진다 */
+function hasSupport(blk){
+  /* 바로 아래 = 완전 지지. 대각선 아래 = 반쪽 지지(양쪽 다 있어야 버틴다) */
+  const bx = blk.body.position.x, by = blk.body.position.y;
+  let s = 0;
+  for (const nb of blocks){
+    if (nb === blk || nb.dead || nb.vacated) continue;
+    const dy = nb.body.position.y - by;              // 아래쪽이면 양수
+    if (dy < CELL_H * 0.4 || dy > CELL_H * 1.7) continue;
+    const dx = Math.abs(nb.body.position.x - bx);
+    if (dx < CELL_W * 0.6) return true;
+    if (dx < CELL_W * 1.15){ s += 0.5; if (s >= 1) return true; }
+  }
+  return false;
+}
+/* (x,y) 위쪽 블록들 중 받침을 전부 잃은 것만 깨운다 */
+function wakeAbove(x, y){
+  for (const nb of blocks){
+    if (nb.dead || !nb.body.isStatic) continue;
+    const ddx = Math.abs(nb.body.position.x - x);
+    const ddy = y - nb.body.position.y;
+    if (ddx < CELL_W * 1.4 && ddy > CELL_H * 0.4 && ddy < CELL_H * 1.7 && !hasSupport(nb)) wakeBlock(nb);
+  }
+}
+
+/* ── 블록 피해·파괴 ── */
+function hitBlock(blk, dmg, byBall){
+  if (blk.dead) return;
+  /* 쿨타임은 실제 시계가 아니라 게임 걸음수로 잰다 — 빨리감기·백그라운드에서도 일정하게 */
+  if (decayTick - blk.lastHit < 6) return;    // 같은 순간 여러 번 깎이지 않게 (6걸음 ≈ 0.1초)
+  blk.lastHit = decayTick;
+
+  blk.hp -= dmg;
+  /* 금이 가도 벽은 벽 — 완전히 부서지기 전엔 깨우지 않는다.
+     (공이 한 번 훑을 때마다 멀쩡한 벽이 밀려나 통째로 무너지던 문제의 핵심 수정) */
+  if (!blk.body.isStatic) Sleeping.set(blk.body, false);
+  if (blk.hp <= 0){ destroyBlock(blk, byBall); }
+  else {
+    sfx.crack(blk.mat);
+    /* 금 갈 때도 팍팍 튀어야 때리는 맛이 난다 */
+    fx.chips(blk.body.position.x, blk.body.position.y, matColor(blk.mat).chip, 9);
+    fx.dust(blk.body.position.x, blk.body.position.y, 2);
+  }
+}
+
+function destroyBlock(blk, byBall){
+  if (blk.dead) return;
+  blk.dead = true;
+  World.remove(engine.world, blk.body);
+  byId.delete(blk.body.id);
+  S.destroyed++; S.runDestroyed++;
+
+  /* 콤보·점수 */
+  S.combo++; S.comboT = performance.now();
+  const val = MATS[blk.mat].val;
+  /* 콤보 배수는 30에서 멈춘다 — 안 그러면 대붕괴 한 번에 점수가 자릿수째 튄다 */
+  S.score += val * 12 + (Math.min(S.combo, 30) - 1) * val * 2;
+  const p = blk.body.position;
+  wakeAbove(p.x, p.y);     // 위에 얹혀 있던 것들이 실제로 무너져 내린다
+  fx.burst(p.x, p.y, matColor(blk.mat).chip);
+  fx.pop(p.x, p.y - 14, `+${val}`);
+  if (S.combo >= 3) fx.comboShow(S.combo);
+  if (S.combo > 0 && S.combo % 10 === 0) shake(7, 220);   // 연쇄가 클수록 화면이 들썩 — 파괴의 맛
+  sfx.pop(S.combo);
+  updateHud();
+
+  /* 폭탄 → 주변을 함께 날린다 */
+  if (blk.mat === 'bomb') explode(p.x, p.y, 76, 1);
+  /* BLAST 강화 → 확률 충격파 */
+  else if (S.lv.blast > 0 && Math.random() < 0.15 * S.lv.blast) explode(p.x, p.y, 72, 1);
+
+  /* 파괴율 90%면 클리어 — 남은 잔해는 마무리 붕괴로 쓸어 담는다 */
+  if (!S.clearing && S.mode === 'play' && S.destroyed >= Math.ceil(S.totalBlocks * 0.75)){
+    S.clearing = true;
+    setTimeout(finishSweep, 350);
+    setTimeout(stageClear, 1100);
+  }
+}
+function finishSweep(){
+  shake(8, 400);
+  for (const blk of blocks){
+    if (blk.dead) continue;
+    blk.lastHit = -999;
+    hitBlock(blk, 99, false);
+  }
+}
+
+function explode(x, y, R, dmg){
+  shake(10, 320); sfx.boom();
+  fx.ring(x, y);
+  fx.burst(x, y, '#ffd23f', 34);
+  fx.dust(x, y, 10);
+  fx.sparks(x, y, 8);
+  for (const blk of blocks){
+    if (blk.dead) continue;
+    const dx = blk.body.position.x - x, dy = blk.body.position.y - y;
+    const d = Math.hypot(dx, dy);
+    if (d < R){
+      wakeBlock(blk);
+      Sleeping.set(blk.body, false);
+      const k = 5.5 * (1 - d / R);
+      Body.setVelocity(blk.body, { x: blk.body.velocity.x + dx/d*k, y: blk.body.velocity.y + dy/d*k - 2 });
+      blk.lastHit = -999;                 // 폭발은 쿨타임을 무시
+      hitBlock(blk, dmg, false);
+    }
+  }
+}
+
+/* ── 판 흐름 ── */
+function startRun(){
+  S.stage = 1; S.score = 0; S.combo = 0;
+  S.stock = 3; S.runDestroyed = 0; S.runTotal = 0;
+  for (const k in S.lv) S.lv[k] = 0;
+  rebuildPaddle();
+  startStage();
+}
+/* 진행 저장 — 판에 들어설 때마다 남겨서, 죽거나 껐다 켜도 그 판부터 이어한다 */
+function saveRun(){
+  try {
+    localStorage.setItem('wc_save', JSON.stringify(
+      { stage:S.stage, score:S.score, stock:Math.max(S.stock, 3), lv:S.lv,
+        runDestroyed:S.runDestroyed, runTotal:S.runTotal }));
+  } catch(e){}
+}
+function loadRun(){
+  try { return JSON.parse(localStorage.getItem('wc_save') || 'null'); } catch(e){ return null; }
+}
+function startStage(){
+  /* 이 판에서 새로 붙는 강화 — 고르지 않아도 저절로 */
+  const fresh = GRANTS.filter(g => g[0] === S.stage).map(g => g[1]);
+  applyGrants(S.stage);
+  rebuildPaddle();
+  for (const id of fresh){
+    if (id === 'ball') S.stock++;
+    const u = UPG.find(x => x.id === id);
+    if (u) toast(`${u.ico} ${u.name} +1`);
+  }
+  buildStage(S.stage);
+  spawnBalls();
+  S.mode = 'play';
+  hud.style.display = 'flex';
+  fx.stageBanner(`STAGE ${S.stage}`, S.structName);
+  updateHud();
+  bgmApply();
+  saveRun();
+}
+function stageClear(){
+  if (S.mode !== 'play') return;   // 늦게 도착한 예약 호출이 다음 판을 덮지 않게
+  sfx.clear();
+  fx.confetti();
+  if (S.stage >= TOTAL_STAGES){   // 마지막 판 — 엔딩
+    S.mode = 'over';
+    document.getElementById('endScore').textContent = S.score.toLocaleString();
+    const prev = +(localStorage.getItem('wc_best') || 0);
+    if (S.score > prev) localStorage.setItem('wc_best', S.score);
+    show('veilEnd');
+    bgmApply();
+    return;
+  }
+  /* 상점 없이 곧장 다음 판 — 잠깐 멈춰 무너진 자리를 보여준 뒤 넘어간다 */
+  S.mode = 'clear';
+  fx.stageBanner('CLEAR!');
+  setTimeout(() => { if (S.mode === 'clear') nextStage(); }, 1500);
+}
+function nextStage(){
+  S.stage++;
+  startStage();
+}
+/* 공 하나가 바닥으로 빠졌다. 마지막 공이었으면 목숨 하나를 잃는다 */
+function dropBall(be){
+  World.remove(engine.world, be.body);
+  balls.splice(balls.indexOf(be), 1);
+  if (balls.length > 0) return;
+  S.stock--;
+  updateHud();
+  sfx.lost();
+  if (S.stock <= 0) gameOver();
+  else { spawnBalls(); toast(L(`남은 공 ${S.stock}`, `${S.stock} ball${S.stock>1?'s':''} left`)); }
+}
+function gameOver(){
+  S.mode = 'over';
+  const rate = S.runTotal ? Math.round(S.runDestroyed / S.runTotal * 100) : 0;
+  document.getElementById('overInfo').textContent = L(`STAGE ${S.stage} · 파괴율 ${rate}%`, `STAGE ${S.stage} · ${rate}% demolished`);
+  document.getElementById('overScore').textContent = S.score.toLocaleString();
+  const prev = +(localStorage.getItem('wc_best') || 0);
+  if (S.score > prev){
+    localStorage.setItem('wc_best', S.score);
+    document.getElementById('overBest').innerHTML = L('🎉 <b style="color:var(--pink)">최고 기록!</b>', '🎉 <b style="color:var(--pink)">New best!</b>');
+  } else {
+    document.getElementById('overBest').textContent = `BEST ${prev.toLocaleString()}`;
+  }
+  show('veilOver');
+  bgmApply();
+}
+
+function rebuildPaddle(){
+  const x = paddle.position.x;
+  World.remove(engine.world, paddle);
+  paddle = staticRect(x, PADDLE_Y, paddleH(), 18, 'paddle');
+  World.add(engine.world, paddle);
+}
+
+/* ── 화면 흔들림 ── */
+function shake(amp, ms){
+  S.shakeAmp = Math.max(S.shakeAmp, amp);
+  S.shakeT = Math.max(S.shakeT, performance.now() + ms);
+}
+
+/* ============================================================
+   그리기 — 페어붐의 타일 문법(윗광택 + 아래턱 + 진한 테)을
+   캔버스에서 그대로 흉내 낸다
+   ============================================================ */
+const cv = document.getElementById('cv');
+const ctx = cv.getContext('2d');
+let scale = 1, offX = 0, offY = 0;
+
+function fit(){
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  cv.width = innerWidth * dpr; cv.height = innerHeight * dpr;
+  cv.style.width = innerWidth + 'px'; cv.style.height = innerHeight + 'px';
+  scale = Math.min(innerWidth / W, innerHeight / H);
+  offX = (innerWidth - W * scale) / 2;
+  offY = (innerHeight - H * scale) / 2;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+  /* 계기판을 게임 판 테두리 안에 가둔다 — 화면 기준으로 두면 판 밖으로 삐져나간다.
+     (2026-08-28 "음악·포즈 아이콘이 밖으로 삐져나갔는데") */
+  const el = document.getElementById('hud');
+  if (el){
+    el.style.left  = offX + 'px';
+    el.style.width = (W * scale) + 'px';
+    el.style.right = 'auto';
+    /* 판이 화면 왼쪽에 바짝 붙으면 오름게임즈 알약과 겹치니 그만큼 비워 준다 */
+    el.style.paddingLeft = innerWidth > 560 ? Math.max(0, 104 - offX) + 'px' : '';
+    /* 폰에서는 소리·정지 단추를 판의 오른쪽 위(알약과 같은 줄)로 올린다.
+       미디어 쿼리에 맡기면 환경에 따라 안 먹어 단추가 판 밖으로 밀려났다 — JS로 못박는다 */
+    const bt = el.querySelector('.btns');
+    if (bt){
+      const narrow = innerWidth <= 560;
+      bt.style.position = narrow ? 'absolute' : '';
+      bt.style.right    = narrow ? '5px' : '';
+      bt.style.top      = narrow ? '-24px' : '';
+    }
+  }
+}
+addEventListener('resize', fit); fit();
+
+/* 쨍한 팔레트 — 재료마다 색이 다르고, 색만 봐도 단단함이 보인다 */
+function matColor(m){
+  switch(m){
+    case 'glass':    return { top:'#e2fbff', bot:'#54d8f5', lip:'#0f9cc9', chip:'#8deafb' };
+    case 'wood':     return { top:'#ffd58e', bot:'#e09a4a', lip:'#96601e', chip:'#f0b968' };
+    case 'brick':    return { top:'#f0a081', bot:'#c9603c', lip:'#8a3c22', chip:'#dd8560' };
+    case 'stone':    return { top:'#d3e0ea', bot:'#8ba6bd', lip:'#54708a', chip:'#b3c6d6' };
+    case 'concrete': return { top:'#f0f3f6', bot:'#b9c2cb', lip:'#7d8a96', chip:'#d3dbe2' };
+    case 'steel':    return { top:'#b3c9df', bot:'#5e7690', lip:'#324459', chip:'#8ba3bc' };
+    case 'slab':     return { top:'#ffffff', bot:'#e6dcc3', lip:'#a99771', chip:'#f2ead6' };
+    case 'pillar':   return { top:'#dfa960', bot:'#b06f24', lip:'#71430e', chip:'#c98d42' };
+    /* 지붕도 시대를 따라간다 — 주황기와 → 붉은기와 → 슬레이트 → 청록금속 → 다크금속 */
+    case 'roof':     return [
+      { top:'#ffb066', bot:'#f4711c', lip:'#b04a08', chip:'#ff8f3d' },
+      { top:'#ff8a72', bot:'#e03a2c', lip:'#992014', chip:'#f56a52' },
+      { top:'#b9c6d0', bot:'#778a97', lip:'#4a5a66', chip:'#9aabb8' },
+      { top:'#8ce4d3', bot:'#2fa392', lip:'#166b5f', chip:'#5fcbb8' },
+      { top:'#93a6bf', bot:'#4a5c78', lip:'#26334a', chip:'#7285a0' },
+    ][eraIdx];
+    case 'door':     return { top:'#bd7c3d', bot:'#844a15', lip:'#4d2a08', chip:'#a06427' };
+    case 'bomb':     return { top:'#ff77b5', bot:'#ff1f7d', lip:'#bd0a56', chip:'#ff55a0' };
+  }
+}
+
+function rr(x, y, w, h, r){
+  ctx.beginPath();
+  ctx.moveTo(x+r, y);
+  ctx.arcTo(x+w, y, x+w, y+h, r);
+  ctx.arcTo(x+w, y+h, x, y+h, r);
+  ctx.arcTo(x, y+h, x, y, r);
+  ctx.arcTo(x, y, x+w, y, r);
+  ctx.closePath();
+}
+
+/* 균열 무늬 — 블록마다 정해진 씨앗으로 같은 모양을 유지한다 */
+function drawCracks(blk){
+  const rnd = mulberry(blk.seed);
+  const n = blk.maxHp - blk.hp;         // 깎인 만큼 줄이 는다
+  const per = blk.maxHp >= 4 ? 1 : 2;   // 기둥은 한 단계에 한 줄
+  const lines = Math.min(n * per, 6);
+  ctx.strokeStyle = 'rgba(20,40,30,.55)';
+  ctx.lineWidth = 1.6;
+  ctx.lineCap = 'round';
+  for (let i = 0; i < lines; i++){
+    let x = (rnd() - 0.5) * blk.w * 0.8;
+    let y = (rnd() - 0.5) * blk.h * 0.8;
+    ctx.beginPath(); ctx.moveTo(x, y);
+    const segs = 2 + (rnd() * 2 | 0);
+    for (let s = 0; s < segs; s++){
+      x += (rnd() - 0.5) * blk.w * 0.5;
+      y += (rnd() - 0.5) * blk.h * 0.7;
+      ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+  }
+}
+function mulberry(seed){
+  let t = seed + 0x6D2B79F5;
+  return function(){
+    t += 0x6D2B79F5;
+    let r = Math.imul(t ^ t >>> 15, 1 | t);
+    r = r + Math.imul(r ^ r >>> 7, 61 | r) ^ r;
+    return ((r ^ r >>> 14) >>> 0) / 4294967296;
+  };
+}
+
+function drawBlock(blk){
+  const { x, y } = blk.body.position;
+  const c = matColor(blk.mat);
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(blk.body.angle);
+  /* 맞은 직후엔 부르르 떤다 — 벽이 안 밀리는 대신 타격감은 살린다 */
+  if (blk.body.isStatic && decayTick - blk.lastHit < 8){
+    ctx.translate((Math.random() - .5) * 3.5, (Math.random() - .5) * 3.5);
+  }
+  const w = blk.w, h = blk.h;
+
+  /* 아래턱 */
+  rr(-w/2, -h/2 + 3, w, h, 5);
+  ctx.fillStyle = c.lip; ctx.fill();
+  /* 몸통 */
+  const g = ctx.createLinearGradient(0, -h/2, 0, h/2);
+  g.addColorStop(0, c.top); g.addColorStop(1, c.bot);
+  rr(-w/2, -h/2, w, h - 3, 5);
+  ctx.fillStyle = g; ctx.fill();
+  /* 만화식 진한 테두리 — 블록이 또렷하게 선다 */
+  ctx.strokeStyle = 'rgba(10,55,32,.3)'; ctx.lineWidth = 2; ctx.stroke();
+  /* 윗광택 */
+  const gl = ctx.createLinearGradient(0, -h/2, 0, 0);
+  gl.addColorStop(0, 'rgba(255,255,255,.6)'); gl.addColorStop(1, 'rgba(255,255,255,0)');
+  rr(-w/2 + 2, -h/2 + 2, w - 4, h/2, 4);
+  ctx.fillStyle = gl; ctx.fill();
+
+  /* 재질 무늬 — 판이 오를수록 나무 → 벽돌 → 돌 → 콘크리트 → 강철 */
+  if (blk.mat === 'wood'){
+    /* 나무판자 — 가로 결 + 옹이 */
+    ctx.strokeStyle = 'rgba(125,70,15,.4)'; ctx.lineWidth = 1.6;
+    ctx.beginPath();
+    ctx.moveTo(-w/2 + 3, -h/6); ctx.lineTo(w/2 - 3, -h/6);
+    ctx.moveTo(-w/2 + 3, h/5); ctx.lineTo(w/2 - 3, h/5);
+    ctx.stroke();
+    ctx.beginPath(); ctx.arc(w/5, -h/3, 2.6, 0, 7);
+    ctx.stroke();
+  } else if (blk.mat === 'brick'){
+    /* 붉은 벽돌 — 어긋난 줄눈 */
+    ctx.strokeStyle = 'rgba(90,30,15,.4)'; ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(-w/2 + 3, 0); ctx.lineTo(w/2 - 3, 0);
+    ctx.moveTo(-w/6, -h/2 + 3); ctx.lineTo(-w/6, -1);
+    ctx.moveTo(w/6, 1); ctx.lineTo(w/6, h/2 - 5);
+    ctx.stroke();
+  } else if (blk.mat === 'concrete'){
+    /* 콘크리트 패널 — 매끈한 면 + 폼타이 구멍 */
+    ctx.strokeStyle = 'rgba(70,80,90,.22)'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(-w/2 + 4, 0); ctx.lineTo(w/2 - 4, 0); ctx.stroke();
+    ctx.fillStyle = 'rgba(70,80,90,.35)';
+    for (const [dx, dy] of [[-w/3, -h/4], [w/3, -h/4], [-w/3, h/4], [w/3, h/4]]){
+      ctx.beginPath(); ctx.arc(dx, dy, 2, 0, 7); ctx.fill();
+    }
+  } else if (blk.mat === 'steel'){
+    /* 강철판 — 금속 광 + 리벳 */
+    ctx.strokeStyle = 'rgba(235,245,255,.4)'; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.moveTo(-w/2 + 7, h/4); ctx.lineTo(-w/8, -h/2 + 5); ctx.stroke();
+    ctx.fillStyle = 'rgba(20,32,48,.55)';
+    for (const [dx, dy] of [[-w/2 + 7, -h/2 + 7], [w/2 - 7, -h/2 + 7], [-w/2 + 7, h/2 - 9], [w/2 - 7, h/2 - 9]]){
+      ctx.beginPath(); ctx.arc(dx, dy, 2.6, 0, 7); ctx.fill();
+    }
+  } else if (blk.mat === 'stone'){
+    /* 돌벽 — 굵은 줄눈 */
+    ctx.strokeStyle = 'rgba(55,75,85,.35)'; ctx.lineWidth = 1.8;
+    ctx.beginPath();
+    ctx.moveTo(-w/2 + 3, 0); ctx.lineTo(w/2 - 3, 0);
+    ctx.moveTo(0, -h/2 + 3); ctx.lineTo(0, -1);
+    ctx.moveTo(-w/4, 1); ctx.lineTo(-w/4, h/2 - 5);
+    ctx.stroke();
+  } else if (blk.mat === 'pillar'){
+    /* 나무 기둥 — 세로 결 */
+    ctx.strokeStyle = 'rgba(90,55,20,.4)'; ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(-w/4, -h/2 + 3); ctx.lineTo(-w/4, h/2 - 6);
+    ctx.moveTo(w/4, -h/2 + 3); ctx.lineTo(w/4, h/2 - 6);
+    ctx.stroke();
+  } else if (blk.mat === 'glass'){
+    /* 창문 — 흰 창틀 + 십자 살 + 유리 반짝임 */
+    ctx.strokeStyle = 'rgba(255,255,255,.95)'; ctx.lineWidth = 3;
+    rr(-w/2 + 3, -h/2 + 3, w - 6, h - 9, 3); ctx.stroke();
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(0, -h/2 + 4); ctx.lineTo(0, h/2 - 7);
+    ctx.moveTo(-w/2 + 4, -1); ctx.lineTo(w/2 - 4, -1);
+    ctx.stroke();
+    ctx.strokeStyle = 'rgba(255,255,255,.55)'; ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(-w/2 + 8, h/4); ctx.lineTo(-w/8, -h/2 + 6);
+    ctx.stroke();
+  } else if (blk.mat === 'roof'){
+    /* 기와 — 가로 골과 반원 끝단 */
+    ctx.strokeStyle = 'rgba(140,45,15,.4)'; ctx.lineWidth = 1.6;
+    ctx.beginPath();
+    ctx.moveTo(-w/2 + 3, -h/6); ctx.lineTo(w/2 - 3, -h/6);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(-w/4, h/2 - 6, 4.5, Math.PI, 0);
+    ctx.arc(w/4, h/2 - 6, 4.5, Math.PI, 0);
+    ctx.stroke();
+  } else if (blk.mat === 'door'){
+    /* 대문 — 널빤지 결 + 손잡이 */
+    ctx.strokeStyle = 'rgba(50,28,10,.4)'; ctx.lineWidth = 1.6;
+    ctx.beginPath();
+    ctx.moveTo(-w/6, -h/2 + 3); ctx.lineTo(-w/6, h/2 - 5);
+    ctx.moveTo(w/6, -h/2 + 3); ctx.lineTo(w/6, h/2 - 5);
+    ctx.stroke();
+    if (!blk.noHandle){
+      ctx.beginPath(); ctx.arc(w/3, 0, 2.6, 0, 7);
+      ctx.fillStyle = '#ffd23f'; ctx.fill();
+    }
+  } else if (blk.mat === 'bomb'){
+    ctx.font = `${h * 0.72}px serif`;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText('💣', 0, -1);
+  }
+
+  if (blk.hp < blk.maxHp) drawCracks(blk);
+  ctx.restore();
+}
+
+/* ── 효과 입자 ── */
+const fx = {
+  list: [],
+  /* 파편 — 고추가루 팍팍. 빠른 놈, 느린 놈, 큰 놈, 작은 놈이 섞여야 팍 터지는 맛이 난다 */
+  chips(x, y, color, n = 6){
+    for (let i = 0; i < n; i++){
+      const fast = Math.random() < 0.35;
+      this.list.push({
+        t:'chip', x, y,
+        vx:(Math.random()-.5) * (fast ? 16 : 8),
+        vy:-Math.random() * (fast ? 10 : 5) - 1,
+        g:.3, life:1, dk:.02 + Math.random()*.02,
+        size:2.5 + Math.random()*5.5, color,
+        rot:Math.random()*6, vr:(Math.random()-.5)*.5,
+      });
+    }
+  },
+  /* 흙먼지 — 퍼지며 사라지는 뿌연 구름 */
+  dust(x, y, n = 5){
+    for (let i = 0; i < n; i++) this.list.push({
+      t:'dust', x:x+(Math.random()-.5)*24, y:y+(Math.random()-.5)*18,
+      vx:(Math.random()-.5)*2.2, vy:-Math.random()*1.6,
+      life:.8+Math.random()*.3, dk:.02, size:9+Math.random()*13, grow:.9,
+    });
+  },
+  /* 반짝이 조각 */
+  sparks(x, y, n = 4){
+    for (let i = 0; i < n; i++) this.list.push({
+      t:'twk', x, y, vx:(Math.random()-.5)*11, vy:-Math.random()*8-2,
+      g:.25, life:1, dk:.035, size:3+Math.random()*4,
+    });
+  },
+  burst(x, y, color, n = 22){
+    this.chips(x, y, color, n);
+    this.dust(x, y, 5);
+    this.sparks(x, y, 4);
+    this.list.push({ t:'flash', x, y, life:1, dk:.09, size:30 });
+  },
+  ring(x, y){
+    this.list.push({ t:'ring', x, y, life:1, dk:.05, size:12 });
+  },
+  pop(x, y, text, big = false){
+    this.list.push({ t:'pop', x, y, vy:-1.1, life:1, dk: big ? .016 : .028, text, big });
+  },
+  /* 콤보는 한 자리에서 숫자만 갈아 끼운다 — 블록마다 띄우면 도배가 된다 */
+  comboP: null,
+  comboShow(n){
+    if (this.comboP && this.comboP.life > 0){
+      this.comboP.text = `COMBO ×${n}`; this.comboP.life = 1;
+    } else {
+      this.comboP = { t:'pop', x:W*0.5, y:H*0.66, vy:0, life:1, dk:.014, text:`COMBO ×${n}`, big:true };
+      this.list.push(this.comboP);
+    }
+  },
+  stageBanner(text, sub){
+    /* 앞 배너는 걷어낸다 — CLEAR! 가 남은 채 다음 판 배너가 겹쳐 찍히던 문제 */
+    this.list = this.list.filter(p => p.t !== 'banner');
+    this.list.push({ t:'banner', x:W/2, y:H*0.74, life:1, dk:.011, text });
+    if (sub) this.list.push({ t:'banner', small:true, x:W/2, y:H*0.74 + 52, life:1, dk:.011, text:sub });
+  },
+  confetti(){
+    for (let i = 0; i < 60; i++) this.list.push({
+      t:'chip', x:Math.random()*W, y:-20-Math.random()*120,
+      vx:(Math.random()-.5)*3, vy:2+Math.random()*3, g:.05, life:1, dk:.008,
+      size:5+Math.random()*6, rot:Math.random()*6, vr:(Math.random()-.5)*.3,
+      color:['#ff7a1a','#ffd23f','#ffffff','#8b5cf6','#ff5470'][i%5],
+    });
+  },
+  step(){
+    for (const p of this.list){
+      p.life -= p.dk;
+      if (p.vx !== undefined){ p.x += p.vx; }
+      if (p.vy !== undefined){ p.y += p.vy; if (p.g) p.vy += p.g; }
+      if (p.vr !== undefined){ p.rot += p.vr; }
+      if (p.grow) p.size += p.grow;
+      if (p.t === 'ring') p.size += 6;
+    }
+    this.list = this.list.filter(p => p.life > 0);
+    /* 대붕괴 때 입자가 무한정 쌓이지 않게 */
+    if (this.list.length > 700) this.list.splice(0, this.list.length - 700);
+  },
+  draw(){
+    for (const p of this.list){
+      ctx.save();
+      ctx.globalAlpha = Math.max(0, Math.min(1, p.life));
+      if (p.t === 'chip'){
+        ctx.translate(p.x, p.y); ctx.rotate(p.rot);
+        ctx.fillStyle = p.color;
+        ctx.fillRect(-p.size/2, -p.size/2, p.size, p.size);
+      } else if (p.t === 'flash'){
+        const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size);
+        g.addColorStop(0, 'rgba(255,255,255,.95)'); g.addColorStop(1, 'rgba(255,255,255,0)');
+        ctx.fillStyle = g;
+        ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, 7); ctx.fill();
+      } else if (p.t === 'ring'){
+        ctx.strokeStyle = '#fff'; ctx.lineWidth = 5;
+        ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, 7); ctx.stroke();
+      } else if (p.t === 'dust'){
+        ctx.globalAlpha = Math.max(0, p.life) * 0.4;
+        const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size);
+        g.addColorStop(0, 'rgba(255,251,240,.9)'); g.addColorStop(1, 'rgba(255,251,240,0)');
+        ctx.fillStyle = g;
+        ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, 7); ctx.fill();
+      } else if (p.t === 'twk'){
+        ctx.translate(p.x, p.y); ctx.rotate(p.life * 4);
+        ctx.fillStyle = '#fff';
+        const s = p.size;
+        ctx.beginPath();
+        ctx.moveTo(0, -s); ctx.lineTo(s*0.3, -s*0.3); ctx.lineTo(s, 0); ctx.lineTo(s*0.3, s*0.3);
+        ctx.lineTo(0, s); ctx.lineTo(-s*0.3, s*0.3); ctx.lineTo(-s, 0); ctx.lineTo(-s*0.3, -s*0.3);
+        ctx.closePath(); ctx.fill();
+      } else if (p.t === 'pop'){
+        ctx.font = (p.big ? 42 : 24) + "px 'Jua','Malgun Gothic',sans-serif";
+        ctx.textAlign = 'center';
+        ctx.fillStyle = '#fff';
+        ctx.shadowColor = p.big ? '#ff7a1a' : 'rgba(15,50,33,.5)';
+        ctx.shadowOffsetY = 3; ctx.shadowBlur = 0;
+        ctx.fillText(p.text, p.x, p.y);
+      } else if (p.t === 'banner'){
+        ctx.font = (p.small ? "36px" : "80px") + " 'Jua','Malgun Gothic',sans-serif";
+        ctx.textAlign = 'center';
+        ctx.fillStyle = '#fff';
+        ctx.shadowColor = '#123f2a'; ctx.shadowOffsetY = 5; ctx.shadowBlur = 0;
+        ctx.fillText(p.text, p.x, p.y);
+      }
+      ctx.restore();
+    }
+  },
+};
+
+/* ── 화면 그리기 ── */
+function draw(){
+  ctx.clearRect(0, 0, innerWidth, innerHeight);
+  ctx.save();
+  let sx = 0, sy = 0;
+  if (performance.now() < S.shakeT){
+    sx = (Math.random() - .5) * S.shakeAmp;
+    sy = (Math.random() - .5) * S.shakeAmp;
+  } else S.shakeAmp = 0;
+  ctx.translate(offX + sx * scale, offY + sy * scale);
+  ctx.scale(scale, scale);
+
+  /* 게임판 테두리 — 공이 다니는 범위. 아래쪽은 뚫려 있어 주황 점선으로 */
+  {
+    ctx.strokeStyle = 'rgba(255,255,255,.8)'; ctx.lineWidth = 5;
+    ctx.beginPath();
+    ctx.moveTo(4, H - 4); ctx.lineTo(4, 24);
+    ctx.arcTo(4, 4, 24, 4, 20); ctx.lineTo(W - 24, 4);
+    ctx.arcTo(W - 4, 4, W - 4, 24, 20); ctx.lineTo(W - 4, H - 4);
+    ctx.stroke();
+    ctx.strokeStyle = 'rgba(255,122,26,.95)'; ctx.lineWidth = 4;
+    ctx.setLineDash([16, 12]);
+    ctx.beginPath();
+    ctx.moveTo(10, H - 5); ctx.lineTo(W - 10, H - 5);
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  /* 블록 */
+  for (const blk of blocks) if (!blk.dead) drawBlock(blk);
+
+  /* 패들 — 쨍한 형광노랑 + 네온 발광 */
+  {
+    const pw = paddleH(), px = paddle.position.x;
+    rr(px - pw/2, PADDLE_Y - 9 + 4, pw, 18, 9);
+    ctx.fillStyle = '#a9b500'; ctx.fill();               // 아래턱(어두운 올리브)
+    ctx.shadowColor = '#eaff00'; ctx.shadowBlur = 16;    // 네온 발광
+    rr(px - pw/2, PADDLE_Y - 9, pw, 18, 9);
+    ctx.fillStyle = '#efff17'; ctx.fill();
+    ctx.shadowBlur = 0; ctx.shadowColor = 'transparent';
+    rr(px - pw/2 + 3, PADDLE_Y - 9 + 3, pw - 6, 5, 3);
+    ctx.fillStyle = 'rgba(255,255,255,.6)'; ctx.fill();  // 윗광택
+  }
+
+  /* 공 — 쨍한 형광핑크 + 네온 발광 (여러 개일 수 있다) */
+  let hintDrawn = false;
+  for (const be of balls){
+    const r = ballRadius(), p = be.body.position;
+    const g = ctx.createRadialGradient(p.x - r*0.35, p.y - r*0.35, r*0.15, p.x, p.y, r);
+    g.addColorStop(0, '#ff9dd0'); g.addColorStop(0.55, '#ff2e9a'); g.addColorStop(1, '#d1006e');
+    ctx.shadowColor = '#ff2e9a'; ctx.shadowBlur = 18;
+    ctx.beginPath(); ctx.arc(p.x, p.y, r, 0, 7);
+    ctx.fillStyle = g; ctx.fill();
+    ctx.shadowBlur = 0; ctx.shadowColor = 'transparent';
+    ctx.strokeStyle = 'rgba(255,255,255,.6)'; ctx.lineWidth = 2.5; ctx.stroke();
+    ctx.beginPath(); ctx.arc(p.x - r*0.35, p.y - r*0.4, r*0.22, 0, 7);
+    ctx.fillStyle = 'rgba(255,255,255,.85)'; ctx.fill();
+    if (be.attached && !hintDrawn){
+      hintDrawn = true;
+      ctx.font = "22px 'Jua','Malgun Gothic',sans-serif";
+      ctx.textAlign = 'center'; ctx.fillStyle = '#fff';
+      ctx.shadowColor = 'rgba(15,50,33,.5)'; ctx.shadowOffsetY = 2;
+      ctx.fillText(L('눌러서 발사!', 'Tap to launch!'), paddle.position.x, p.y - r - 16);
+      ctx.shadowColor = 'transparent';
+    }
+  }
+
+  fx.draw();
+  ctx.restore();
+}
+
+/* ── 계기판 ── */
+const hud = document.getElementById('hud');
+function updateHud(){
+  document.getElementById('hStage').textContent = `${S.stage}/${TOTAL_STAGES}`;
+  document.getElementById('hScore').textContent = S.score.toLocaleString();
+  document.getElementById('hWall').textContent =
+    (S.totalBlocks ? Math.min(100, Math.round(S.destroyed / S.totalBlocks * 100)) : 0) + '%';
+  document.getElementById('hBall').textContent =
+    S.stock <= 5 ? '●'.repeat(Math.max(S.stock, 0)) || '—' : `●×${S.stock}`;
+}
+
+/* ============================================================
+   소리 — 웹오디오로 그 자리에서 만든다 (무기 연상 소리는 안 쓴다)
+   ============================================================ */
+const sfx = (() => {
+  let ac = null, master = null, on = localStorage.getItem('wc_snd') !== '0';
+  function ensure(){
+    if (!ac){
+      ac = new (window.AudioContext || window.webkitAudioContext)();
+      master = ac.createGain(); master.gain.value = 0.5; master.connect(ac.destination);
+    }
+    if (ac.state === 'suspended') ac.resume();
+  }
+  function tone(f0, f1, dur, type, vol){
+    if (!on) return; ensure();
+    const t = ac.currentTime;
+    const o = ac.createOscillator(), g = ac.createGain();
+    o.type = type; o.frequency.setValueAtTime(f0, t);
+    o.frequency.exponentialRampToValueAtTime(Math.max(f1, 1), t + dur);
+    g.gain.setValueAtTime(vol, t);
+    g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+    o.connect(g); g.connect(master);
+    o.start(t); o.stop(t + dur + 0.02);
+  }
+  function noise(dur, vol, cutoff){
+    if (!on) return; ensure();
+    const t = ac.currentTime;
+    const len = ac.sampleRate * dur | 0;
+    const buf = ac.createBuffer(1, len, ac.sampleRate);
+    const d = buf.getChannelData(0);
+    for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / len);
+    const src = ac.createBufferSource(); src.buffer = buf;
+    const f = ac.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = cutoff;
+    const g = ac.createGain(); g.gain.value = vol;
+    src.connect(f); f.connect(g); g.connect(master);
+    src.start(t);
+  }
+  return {
+    get on(){ return on; },
+    toggle(){ on = !on; localStorage.setItem('wc_snd', on ? '1' : '0'); return on; },
+    pong(){ tone(420, 640, 0.09, 'triangle', 0.25); },
+    tick(){ tone(900, 700, 0.04, 'sine', 0.08); },
+    crack(mat){
+      if (mat === 'glass') tone(1500, 900, 0.06, 'triangle', 0.16);
+      else noise(0.07, 0.16, 2200);
+    },
+    pop(combo){
+      const step = Math.min(combo, 20);
+      const f = 480 * Math.pow(2, step / 12);
+      tone(f, f * 1.4, 0.12, 'triangle', 0.24);
+      noise(0.06, 0.1, 3000);
+    },
+    thud(){ tone(120, 60, 0.16, 'sine', 0.22); noise(0.1, 0.12, 500); },
+    boom(){ tone(90, 40, 0.35, 'sine', 0.35); noise(0.3, 0.2, 400); },
+    lost(){ tone(400, 130, 0.4, 'sawtooth', 0.14); },
+    buy(){ tone(660, 990, 0.1, 'triangle', 0.2); tone(990, 1320, 0.12, 'triangle', 0.16); },
+    clear(){
+      [523, 659, 784, 1047].forEach((f, i) =>
+        setTimeout(() => tone(f, f, 0.18, 'triangle', 0.22), i * 110));
+    },
+  };
+})();
+
+/* ============================================================
+   입력
+   ============================================================ */
+let targetX = W / 2;
+function toWorldX(clientX){ return (clientX - offX) / scale; }
+cv.addEventListener('pointermove', e => { targetX = toWorldX(e.clientX); });
+cv.addEventListener('pointerdown', e => {
+  targetX = toWorldX(e.clientX);
+  if (S.mode === 'play') launchBalls();
+});
+const keys = {};
+addEventListener('keydown', e => {
+  keys[e.key] = true;
+  if (e.key === ' ' && S.mode === 'play'){ launchBalls(); e.preventDefault(); }
+  if ((e.key === 'p' || e.key === 'P' || e.key === 'Escape')) togglePause();
+});
+addEventListener('keyup', e => { keys[e.key] = false; });
+
+function togglePause(){
+  if (S.mode === 'play'){ S.mode = 'pause'; show('veilPause'); }
+  else if (S.mode === 'pause'){ S.mode = 'play'; hide('veilPause'); }
+}
+
+/* ── 덮개·쪽지 도우미 ── */
+function show(id){ document.getElementById(id).classList.add('on'); }
+function hide(id){ document.getElementById(id).classList.remove('on'); }
+let toastT = 0;
+function toast(msg){
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('on');
+  clearTimeout(toastT);
+  toastT = setTimeout(() => el.classList.remove('on'), 1800);
+}
+
+/* ── 단추 연결 ── */
+document.getElementById('btnStart').onclick = () => { hide('veilTitle'); startRun(); };
+/* 이어하기 — 저장된 판부터, 강화는 판 번호대로 다시 붙는다 */
+const btnContinue = document.getElementById('btnContinue');
+function refreshContinue(){
+  const sv = loadRun();
+  if (sv && sv.stage > 1 && sv.stage <= TOTAL_STAGES){
+    btnContinue.style.display = '';
+    btnContinue.textContent = L(`이어하기 (${sv.stage}판)`, `Continue (stage ${sv.stage})`);
+  } else btnContinue.style.display = 'none';
+}
+applyLang();
+refreshContinue();
+function resumeRun(){
+  const sv = loadRun();
+  if (!sv) return startRun();
+  S.stage = sv.stage; S.score = sv.score;
+  S.stock = Math.max(sv.stock || 3, 3); S.combo = 0;
+  S.runDestroyed = sv.runDestroyed || 0; S.runTotal = sv.runTotal || 0;
+  for (const k in S.lv) S.lv[k] = (sv.lv && sv.lv[k]) || 0;
+  rebuildPaddle();
+  startStage();
+}
+btnContinue.onclick = () => { hide('veilTitle'); resumeRun(); };
+document.getElementById('btnHow').onclick   = () => show('veilHow');
+document.getElementById('btnHowOk').onclick = () => hide('veilHow');
+document.getElementById('btnResume').onclick= () => togglePause();
+document.getElementById('btnQuit').onclick  = () => { hide('veilPause'); S.mode = 'title'; hud.style.display = 'none'; setSky(0); refreshContinue(); show('veilTitle'); bgmApply(); };
+document.getElementById('btnRetry').onclick = () => {   // 죽은 판부터 다시
+  hide('veilOver'); S.stock = 3; startStage();
+};
+document.getElementById('btnRestart').onclick = () => { hide('veilOver'); startRun(); };
+document.getElementById('btnEndRetry').onclick = () => {
+  try { localStorage.removeItem('wc_save'); } catch(e){}
+  hide('veilEnd'); startRun();
+};
+document.getElementById('btnPause').onclick = () => togglePause();
+const btnSnd = document.getElementById('btnSnd');
+btnSnd.classList.toggle('off', !sfx.on);
+btnSnd.onclick = () => { btnSnd.classList.toggle('off', !sfx.toggle()); };
+
+/* ── 배경음악 (Pixabay: geoffharvey - Quirky Fiddlesticks, 상업이용 가능) ──
+   ⚠ 여기서 load()를 부르면 안 된다 — 페어붐에서 무한루프 났던 함정 */
+const bgm = document.getElementById('bgm');
+bgm.volume = 0.35;
+let bgmOn = localStorage.getItem('wc_bgm') !== '0';
+const btnBgm = document.getElementById('btnBgm');
+btnBgm.classList.toggle('off', !bgmOn);
+function bgmApply(){
+  const playing = bgmOn && (S.mode === 'play' || S.mode === 'clear' || S.mode === 'pause');
+  if (playing) bgm.play().catch(() => {});
+  else bgm.pause();
+}
+btnBgm.onclick = () => {
+  bgmOn = !bgmOn;
+  localStorage.setItem('wc_bgm', bgmOn ? '1' : '0');
+  btnBgm.classList.toggle('off', !bgmOn);
+  bgmApply();
+};
+
+/* ============================================================
+   본 고리 — 60fps 고정 걸음
+   ============================================================ */
+let acc = 0, last = performance.now();
+function frame(now){
+  requestAnimationFrame(frame);
+  let dt = now - last; last = now;
+  if (dt > 200) dt = 200;
+
+  if (S.mode === 'play'){
+    acc += dt;
+    const turbo = window.__wc && window.__wc.turbo || 1;
+    let steps = 0;
+    while (acc >= 1000/60 && steps < 4 * turbo){
+      /* 패들 이동 — 좌우 */
+      if (keys.ArrowLeft) targetX -= 11;
+      if (keys.ArrowRight) targetX += 11;
+      if (window.__wc && window.__wc.auto && balls.length){
+        /* 자동 시험: 살아 있는 블록을 하나 골라 그쪽으로 반사각을 만든다 */
+        launchBalls();
+        const b0 = balls[0].body;
+        const alive = blocks.filter(b => !b.dead);
+        if (alive.length){
+          const tgt = alive[(now/1000|0) % alive.length].body.position;
+          const off = Math.max(-0.85, Math.min(0.85, (tgt.x - b0.position.x) / 450));
+          targetX = b0.position.x - off * paddleH()/2;
+        } else targetX = b0.position.x;
+      }
+      const pw = paddleH();
+      const px = Math.max(pw/2 + 6, Math.min(W - pw/2 - 6, targetX));
+      Body.setPosition(paddle, { x:px, y:PADDLE_Y });
+
+      Engine.update(engine, 1000/60);
+
+      /* 공을 놓쳤다 — 화면 아래로 */
+      for (const be of [...balls]){
+        if (!be.attached && be.body.position.y > H + ballRadius() + 20) dropBall(be);
+      }
+      /* 건물 밑선 아래로 떨어진 잔해는 그대로 부서진다 */
+      for (const blk of blocks){
+        const p = blk.body.position;
+        if (!blk.dead && (p.y > ledgeY + 90 || p.x < -60 || p.x > W + 60)) destroyBlock(blk, false);
+      }
+      /* 콤보 시간 창 */
+      if (S.combo > 0 && performance.now() - S.comboT > 2000) S.combo = 0;
+
+      fx.step();
+      acc -= 1000/60;
+      steps++;
+    }
+    if (steps >= 4 * turbo) acc = 0;
+  } else {
+    fx.step();
+    acc = 0;
+  }
+  draw();
+}
+requestAnimationFrame(frame);
+updateHud();
+
+/* ── 자동 시험용 손잡이 (콘솔에서만 쓴다) ── */
+window.__wc = {
+  auto: false, turbo: 1,
+  state(){ return {
+    mode: S.mode, stage: S.stage, score: S.score,
+    stock: S.stock, alive: blocks.filter(b => !b.dead).length, total: S.totalBlocks,
+  }; },
+  start(){ hide('veilTitle'); hide('veilOver'); startRun(); },
+  skip(){ if (S.mode === 'shop') nextStage(); },
+};
+/* 이펙트 눈검사용 — #fx 로 열면 파괴 이펙트를 터뜨린 채 얼려서 보여준다 */
+if (location.hash === '#fx'){
+  addEventListener('load', () => {
+    window.__wc.start(); S.stage = 5; startStage();
+    setTimeout(() => {
+      const cx = W/2, cy = ledgeY - 90;
+      explode(cx - 60, cy, 76, 1);
+      fx.burst(cx + 100, cy - 130, '#9fe6f2', 26);
+      fx.burst(cx - 150, cy - 60, '#f5e3bd', 26);
+      fx.comboShow(14);
+      for (let i = 0; i < 9; i++) fx.step();
+      fx.step = () => {};        // 얼림
+    }, 400);
+  });
+}
+/* 헤드리스 화면 검증용 — #auto 는 스스로 시작해 놀고, #auto37 처럼 판 번호도 지정 가능 */
+if (location.hash.startsWith('#auto')){
+  addEventListener('load', () => {
+    window.__wc.start();
+    const m = location.hash.match(/^#auto(\d+)$/);
+    if (m){ S.stage = +m[1]; startStage(); }
+    window.__wc.auto = true;
+  });
+}
+</script>
+<!-- 오름게임즈 알약(왼쪽 위) + 전체화면(왼쪽 아래) — 모든 게임 기본 탑재 -->
+<script src="/assets/game-home.js?v=5" data-top="4" data-left="4" data-fullscreen="1" defer></script>
+<script>
+/* file:// 로 그냥 열었을 때를 위한 예비 줄 — /assets/… 절대경로는 서버가 있어야 잡힌다.
+   서버로 열면 위 줄이 이미 붙여 놓으므로 여기선 아무 일도 안 한다.
+   ../ 개수는 이 파일에서 사이트 뿌리까지의 깊이대로 (games/mini/break-it-all/play/ 기준) */
+(function(){
+  function f(){
+    if (document.getElementById('oreumHome')) return;
+    var s = document.createElement('script');
+    s.src = '../../../../assets/game-home.js?v=5';
+    s.setAttribute('data-top','4'); s.setAttribute('data-left','4');
+    s.setAttribute('data-fullscreen','1');
+    document.body.appendChild(s);
+  }
+  document.readyState === 'complete' ? f() : addEventListener('load', f);
+})();
+</script>
+</body>
+</html>
