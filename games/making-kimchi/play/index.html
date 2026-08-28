@@ -45,7 +45,7 @@
     width:28px;height:28px;border-radius:8px;font-size:13px;cursor:pointer;display:grid;
     place-items:center;padding:0;flex:0 0 auto;box-shadow:0 2px 6px rgba(0,0,0,.18)}
   #hold{position:absolute;z-index:10;left:calc(10px + env(safe-area-inset-left));
-    bottom:calc(46px + env(safe-area-inset-bottom));display:flex;align-items:center;gap:7px;
+    bottom:calc(74px + env(safe-area-inset-bottom));display:flex;align-items:center;gap:7px;
     padding:6px 11px;border-radius:999px;background:rgba(255,253,247,.93);border:1px solid var(--line);
     font-size:12px;color:var(--ink2);box-shadow:0 2px 8px rgba(0,0,0,.2);max-width:46%;
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -62,8 +62,12 @@
   #ovBox.full{max-width:none;height:100%;border-radius:0;background-size:cover;
     background-position:center;background-color:#241a12;animation:none}
   #ovBox.full #ovHead{display:none}
-  #ovBox.full #ovFoot{background:rgba(255,250,241,.94);border-top:0;border-radius:22px 22px 0 0;margin:0 8px}
-  #ovBox.full #ovFoot .btn{font-size:3.8vh;padding:1.7vh 14px;border-radius:999px}
+  #ovBox.full #ovFoot{background:transparent;border-top:0;padding:0 10px 8px;
+    display:flex;justify-content:center;pointer-events:none}
+  #ovBox.full #ovFoot .btn{pointer-events:auto;width:auto;min-width:34vw;max-width:70vw;
+    font-size:3.4vh;padding:1.5vh 5vw;border-radius:999px;
+    box-shadow:0 4px 0 rgba(0,0,0,.18),0 6px 18px rgba(0,0,0,.3)}
+  #ovBox.full #ovFoot .row{pointer-events:auto;display:flex;gap:8px;justify-content:center}
   #ovHead{flex:0 0 auto;display:flex;align-items:center;gap:8px;padding:6px 10px;
     border-bottom:1px solid var(--line);background:linear-gradient(#fffaf1,#fff3e3)}
   #ovTitle{font:900 17px/1.2 inherit;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -2334,6 +2338,10 @@ function stageHint(c,w,h,txt,top){
   c.fillStyle='#ffe9c9'; c.textAlign='center'; c.textBaseline='middle';
   c.fillText(txt,w/2,py+ph/2); c.textAlign='left';
 }
+function meterY(h,wid,row){          /* 왼쪽 아래에서 위로 쌓는다 */
+  var mh=Math.max(26,wid*.105);
+  return h-12-mh-(row||0)*(mh+8);
+}
 function stageMeter(c,x,y,wid,label,frac,col){
   var mh=Math.max(26,wid*.105), fs=mh*.5;
   c.fillStyle='rgba(40,26,16,.68)'; rr(c,x,y,wid,mh,mh/2); c.fill();
@@ -2514,8 +2522,8 @@ function uiBoard(){
     chips.forEach(function(ch){ c.globalAlpha=ch.a; c.fillStyle=ch.col;
       c.beginPath(); c.arc(ch.x,ch.y,ch.r,0,7); c.fill(); });
     c.globalAlpha=1;
-    stageMeter(c,12,12,w*.34,'칼질 '+Math.min(cur+1,N)+' / '+N, cur/N);
-    if(!done) stageHint(c,w,h,'칼이 과녁 위에 올 때 누르세요');
+    stageMeter(c,12,meterY(h,w*.34,0),w*.34,'칼질 '+Math.min(cur+1,N)+' / '+N, cur/N);
+    if(!done) stageHint(c,w,h,'칼이 과녁 위에 올 때 누르세요',true);
   }
   var lastT2=0;
   function tick(t){ if(!alive) return;
@@ -2646,12 +2654,12 @@ function uiBrine(){
       c.restore();
     }
     var off=total-target;
-    stageMeter(c,12,16,w*.36,'소금',clamp(total/(target+tol),0,1),
+    stageMeter(c,12,meterY(h,w*.36,1),w*.36,'소금',clamp(total/(target+tol),0,1),
       Math.abs(off)<=tol?'#7ab84f':off>tol?'#d6704f':'#e8c05f');
-    stageMeter(c,12,16+Math.max(26,w*.36*.105)+8,w*.36,'고르게',total?even():0,'#7ab84f');
+    stageMeter(c,12,meterY(h,w*.36,0),w*.36,'고르게',total?even():0,'#7ab84f');
     if(!done){
-      if(total===0) stageHint(c,w,h,'소금 그릇을 잡아 배추 위에서 움직이세요');
-      else stageHint(c,w,h,'위·아래·구석까지 골고루 뿌려야 「고르게」가 찹니다');
+      if(total===0) stageHint(c,w,h,'소금 그릇을 잡아 배추 위에서 움직이세요',true);
+      else stageHint(c,w,h,'위·아래·구석까지 골고루 뿌려야 「고르게」가 찹니다',true);
     }
   }
   function even(){
@@ -2869,7 +2877,7 @@ function uiBowl(){
         add[sel],1,false,items[sel].id);
       c.restore();
     }
-    stageMeter(c,12,12,Math.min(w*.34,w-rackW-30),'양념 '+
+    stageMeter(c,12,meterY(h,Math.min(w*.34,w-rackW-30),0),Math.min(w*.34,w-rackW-30),'양념 '+
       add.reduce(function(a,b){return a+b;},0)+' / '+need,
       add.reduce(function(a,b){return a+b;},0)/need);
     if(!done&&sel<0) stageHint(c,w-rackW,h,'오른쪽 선반에서 양념 단지를 고르세요',true);
@@ -3028,10 +3036,10 @@ function mixGame(){
       c.stroke(); c.restore(); });
     if(hand) drawHand(hand.x,hand.y);
     var cov=cells?covered/cells:0, ow=clamp((dist-limit)/(limit*.9),0,1);
-    stageMeter(c,12,16,w*.36,(mx.mode==='stuff'?'속이 찬 정도':'양념 입힘')+' '+
+    stageMeter(c,12,meterY(h,w*.36,1),w*.36,(mx.mode==='stuff'?'속이 찬 정도':'양념 입힘')+' '+
       Math.round(cov*100)+'%',cov);
-    stageMeter(c,12,16+Math.max(26,w*.36*.105)+8,w*.36,'잎 뭉개짐',ow,ow<.4?'#e8c05f':'#d6704f');
-    if(!done) stageHint(c,w,h,'하얀 데를 찾아 문지르세요 — 같은 데를 벅벅 밀면 잎이 뭉개집니다');
+    stageMeter(c,12,meterY(h,w*.36,0),w*.36,'잎 뭉개짐',ow,ow<.4?'#e8c05f':'#d6704f');
+    if(!done) stageHint(c,w,h,'하얀 데를 찾아 문지르세요 — 같은 데를 벅벅 밀면 잎이 뭉개집니다',true);
   }
   function tick(){ if(!alive) return;
     sheens.forEach(function(s2){ s2.a-=.015; });
