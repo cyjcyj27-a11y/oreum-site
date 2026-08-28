@@ -136,14 +136,16 @@
   /* ── 강화 고르기 ── */
 
   /* ── 알림쪽지 ── */
+  /* 알림은 게임 판 한가운데 — 아래에 뜨면 눈이 안 간다 (2026-08-28 사용자 지시).
+     화면(fixed) 가운데가 곧 판 가운데다: 판은 늘 화면 정중앙에 놓이므로 */
   #toast{
-    position:fixed; left:50%; bottom:26px; transform:translateX(-50%) translateY(20px);
+    position:fixed; left:50%; top:50%; transform:translate(-50%,-50%) scale(.86);
     background:#fff; color:var(--ink);
-    padding:11px 22px; border-radius:999px; font-size:.95rem;
-    opacity:0; pointer-events:none; transition:opacity .2s, transform .2s; z-index:60;
-    box-shadow:0 4px 0 var(--lip), 0 12px 26px rgba(15,50,33,.28);
+    padding:14px 28px; border-radius:999px; font-size:1.15rem;
+    opacity:0; pointer-events:none; transition:opacity .18s, transform .18s; z-index:60;
+    box-shadow:0 5px 0 var(--lip), 0 14px 30px rgba(15,50,33,.32);
   }
-  #toast.on{ opacity:1; transform:translateX(-50%) translateY(0); }
+  #toast.on{ opacity:1; transform:translate(-50%,-50%) scale(1); }
 
   /* ── 세로로 들면 ── */
   #rotate{
