@@ -3887,7 +3887,7 @@ function askOpenShop(){
   };
 }
 function goalHTML(){
-  var man=S.act==='manhattan', cur=man?S.manTotal:S.total, goal=man?1200000:20000;
+  var man=S.act==='manhattan', cur=man?S.manTotal:S.total, goal=man?1000000:20000;
   return '<div style="display:flex;align-items:baseline;gap:7px;flex-wrap:wrap">'+
       '<span class="label">'+(man?'맨해튼 신축 콘도까지':'맨해튼 진출까지')+'</span>'+
       '<b style="font-size:16.5px">'+won(cur)+'</b>'+
@@ -3963,12 +3963,12 @@ function closeShop(sold){
   });
   h+='<div class="card" style="margin-top:8px">'+goalHTML()+'</div>';
   var lbl = (S.act==='hood'&&S.total>=20000)?'맨해튼으로' :
-            (S.act==='manhattan'&&S.manTotal>=1200000)?'…':'다음 날';
+            (S.act==='manhattan'&&S.manTotal>=1000000)?'…':'다음 날';
   showOv('영업 마감','오픈 '+S.day+'일',h,'<button class="btn" id="nx2">'+lbl+'</button>',false);
   $('nx2').onclick=function(){
     sfx('tap');
     if(S.act==='hood'&&S.total>=20000) return scrManhattan();
-    if(S.act==='manhattan'&&S.manTotal>=1200000) return scrEnding();
+    if(S.act==='manhattan'&&S.manTotal>=1000000) return scrEnding();
     newDay(); hideOv();
     checkDead();
     toast('오픈 '+S.day+'일 — 재료를 사고 김치를 담그세요');
@@ -4068,8 +4068,8 @@ function intro(){
     '<p class="sub" style="margin-top:6px;font-size:12.5px">밑천은 <b style="color:var(--ink)">$500</b>. '+
     '재료를 사서 김치를 담가 팝니다.</p></div>'+
     '<div class="tip" style="margin-top:8px">'+
-      '<b>$20,000</b>를 모으면 맨해튼으로 가게를 옮기고, 거기서 <b>$1.2M</b>'+
-      '(맨해튼 콘도 중위 시세)을 벌면 콘도로 갑니다.<br>'+
+      '<b>$20,000</b>를 모으면 맨해튼으로 가게를 옮기고, 거기서 <b>$1M</b>'+
+      '을 벌면 콘도로 갑니다.<br>'+
       '설비를 누르면 걸어가서 바로 씁니다. 손님도 눌러서 응대합니다.<br>'+
       '키보드로는 <b>WASD·화살표</b>로 걷고 <b>스페이스/E</b>로 씁니다.</div>'+
     '<div class="tip" style="margin-top:8px">재료·분량·절임 시간·발효 온도는 '+
