@@ -105,15 +105,19 @@
   #ovBox.vn #ovHead{display:none}
   #ovBox.vn #ovBody{padding:2px;overflow-y:auto;-webkit-overflow-scrolling:touch}
   #ovBox.vn .hr{margin:6px 0}
-  #ovBox.vn #ovFoot{background:transparent;border-top:0;padding:8px 2px 2px}
-  .cuscard{position:relative;background:#fffdf7;border:2.5px solid #d9c5a4;border-radius:34px;
-    padding:12px 16px;margin-bottom:17px;box-shadow:0 5px 18px rgba(0,0,0,.22)}
-  .cuscard:before{content:'';position:absolute;left:46px;bottom:-15px;
-    border:15px solid transparent;border-bottom:0;border-top-color:#d9c5a4}
-  .cuscard:after{content:'';position:absolute;left:49px;bottom:-10px;
-    border:12px solid transparent;border-bottom:0;border-top-color:#fffdf7}
-  .actblk{background:var(--cream);border:2px solid #e0cdb0;border-radius:24px;
-    padding:10px 12px;box-shadow:0 5px 18px rgba(0,0,0,.22)}
+  #ovBox.vn #ovFoot{background:transparent;border-top:0;padding:6px 2px 2px}
+  .cuscard{position:relative;display:inline-block;max-width:100%;
+    background:#fffdf7;border:2.5px solid #d9c5a4;border-radius:26px;
+    padding:7px 14px;margin-bottom:12px;box-shadow:0 5px 18px rgba(0,0,0,.22)}
+  .cuscard:before{content:'';position:absolute;left:40px;bottom:-11px;
+    border:11px solid transparent;border-bottom:0;border-top-color:#d9c5a4}
+  .cuscard:after{content:'';position:absolute;left:43px;bottom:-7px;
+    border:8px solid transparent;border-bottom:0;border-top-color:#fffdf7}
+  .actblk{background:var(--cream);border:2px solid #e0cdb0;border-radius:20px;
+    padding:8px 11px;box-shadow:0 5px 18px rgba(0,0,0,.22)}
+  #ovBox.vn .btn{padding:9px 12px}
+  #ovBox.vn .g2,#ovBox.vn .g4{gap:6px}
+  #ovBox.vn .label{margin:0 0 4px!important}
   .statrow{display:flex;gap:6px;margin-bottom:6px}
   .stat{flex:1;background:#fffdf7;border:2px solid #ecd9b8;border-radius:20px;
     padding:5px 4px;text-align:center;min-width:0}
@@ -129,8 +133,8 @@
     text-shadow:0 2px 0 rgba(0,0,0,.25)}
   .bigbtn:active{transform:translateY(3px);box-shadow:0 2px 0 #3d7420}
   .nmchip{display:inline-block;background:linear-gradient(#b0503f,#933f30);color:#fff3e2;
-    font-size:14px;font-weight:900;letter-spacing:.5px;padding:5px 16px;border-radius:999px;
-    margin-bottom:7px;box-shadow:0 2px 0 rgba(0,0,0,.18)}
+    font-size:14px;font-weight:900;letter-spacing:.5px;padding:3px 13px;border-radius:999px;
+    margin-bottom:4px;box-shadow:0 2px 0 rgba(0,0,0,.18)}
   .ucard{display:flex;gap:12px;align-items:center;padding:12px 14px;border-radius:20px;
     background:linear-gradient(135deg,#fff9ec,#ffedc9);position:relative;overflow:hidden;
     border:2px solid #e0b562;box-shadow:0 3px 10px rgba(180,130,40,.18)}
@@ -3541,11 +3545,11 @@ function cusCard(u,extra){
     '<span class="nmchip">'+u.c.n+' '+MOOD[T2.lv]+
       (T2.lv?' · '+T2.ko:'')+'</span>'+
     '<div style="display:flex;gap:12px;align-items:flex-start">'+
-    '<span style="width:64px;height:64px;flex:0 0 auto;background:#f4ead9;border-radius:50%;'+
+    '<span style="width:46px;height:46px;flex:0 0 auto;background:#f4ead9;border-radius:50%;'+
       'display:block;overflow:hidden;border:2px solid #e0cdb0">'+face(u.c.f[0],u.c.f[1],u.c.f[2])+'</span>'+
     '<div style="flex:1;min-width:0">'+
-      '<div style="font-size:17px;font-weight:800;line-height:1.35">"'+(u.en||u.c.en)+'"</div>'+
-      '<div class="sub" style="font-size:14px;margin-top:3px">'+(u.ko||u.c.ko)+'</div></div></div>'+
+      '<div style="font-size:17px;font-weight:800;line-height:1.28">"'+(u.en||u.c.en)+'"</div>'+
+      '<div class="sub" style="font-size:14px;margin-top:1px;line-height:1.3">'+(u.ko||u.c.ko)+'</div></div></div>'+
     '</div>'+(extra?'<div class="actblk">'+extra+'</div>':'');
 }
 function shelfPick(){
@@ -3707,7 +3711,7 @@ function phHaggle(u,kid){
     {en:"Come on, that's steep. Give me a deal.",ko:'비싸잖아요. 좀 깎아 주세요.'}),
     '<div style="display:flex;justify-content:space-between;font-size:14px"><span>'+k.name+
     ' 한 통</span><b>'+won(price)+'</b></div>'+
-    '<div class="label" style="margin:10px 0 6px">얼마나 깎아 줄까요</div>'+
+    '<div class="label" style="margin:6px 0 4px">얼마나 깎아 줄까요</div>'+
     '<div class="g2">'+[0,10,20,30].map(function(d){
       return '<button class="btn '+(d?'ghost':'')+' hbtn" data-d="'+d+'" style="padding:9px 6px;'+
         'font-size:12.5px">'+(d?d+'% — '+won(Math.round(price*(1-d/100))):'정가 '+won(price))+'</button>';
