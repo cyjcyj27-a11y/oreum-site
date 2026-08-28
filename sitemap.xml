@@ -40,16 +40,6 @@
   <url>
     <loc>https://oreumgames.com/apps/saju/</loc>
     <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/apps/saju/"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/apps/saju/"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/apps/saju/"/>
-    <lastmod>2026-08-28</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://oreumgames.com/en/apps/saju/</loc>
-    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/apps/saju/"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/apps/saju/"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/apps/saju/"/>
     <lastmod>2026-08-28</lastmod>
     <changefreq>weekly</changefreq>
@@ -378,6 +368,16 @@
   <url>
     <loc>https://oreumgames.com/saju/</loc>
     <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/saju/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/apps/saju/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/saju/"/>
+    <lastmod>2026-08-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://oreumgames.com/en/apps/saju/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/saju/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/apps/saju/"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/saju/"/>
     <lastmod>2026-08-28</lastmod>
     <changefreq>weekly</changefreq>

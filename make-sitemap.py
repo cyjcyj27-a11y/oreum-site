@@ -26,6 +26,14 @@ PRIORITY = [
     ("/privacy/", "0.3"),
 ]
 
+# 주소가 좌우로 안 맞는 짝은 여기에 손으로 적습니다 (한국어 주소 → 영어 주소)
+#  · /saju/ 는 설명 페이지, 영어판은 /en/apps/saju/ 에 있습니다
+#  · /apps/saju/ 는 앱 자체(언어 전환 내장)라 영어 짝을 두지 않습니다
+PAIRS = {
+    "/saju/": "/en/apps/saju/",
+}
+NO_EN = {"/apps/saju/"}
+
 def priority_of(path):
     if path == "/":
         return "1.0"
@@ -58,8 +66,8 @@ def main():
 
     body = []
     for k in ko:
-        e = "/en" + k if k != "/" else "/en/"
-        has_en = e in pages
+        e = PAIRS.get(k) or ("/en" + k if k != "/" else "/en/")
+        has_en = e in pages and k not in NO_EN
         pri = priority_of(k)
         for loc in ([k, e] if has_en else [k]):
             body.append(
@@ -86,7 +94,8 @@ f"""  <url>
     print("sitemap.xml written")
     print("  pages:", xml.count("<loc>"))
     for p in ko:
-        print("   ", p, "(+en)" if ("/en" + p if p != "/" else "/en/") in pages else "")
+        e = PAIRS.get(p) or ("/en" + p if p != "/" else "/en/")
+        print("   ", p, "(+en)" if (e in pages and p not in NO_EN) else "")
 
 if __name__ == "__main__":
     main()
