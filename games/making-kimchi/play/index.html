@@ -103,7 +103,7 @@
   #ovBox.vn{border-radius:30px;border:2.5px solid #e0cdb0;box-shadow:0 -6px 30px rgba(0,0,0,.35)}
   #ovBox.vn{background:transparent;border:0;box-shadow:none}
   #ovBox.vn #ovHead{display:none}
-  #ovBox.vn #ovBody{padding:2px;overflow:visible}
+  #ovBox.vn #ovBody{padding:2px;overflow-y:auto;-webkit-overflow-scrolling:touch}
   #ovBox.vn .hr{margin:6px 0}
   #ovBox.vn #ovFoot{background:transparent;border-top:0;padding:8px 2px 2px}
   .cuscard{position:relative;background:#fffdf7;border:2.5px solid #d9c5a4;border-radius:34px;
@@ -1650,6 +1650,15 @@ function wantKO(w){
   return {any:'아무거나',spicy:'아주 매운 것',mild:'맵지 않은 것',
     vegan:'젓갈 없는 것',crunchy:'아삭한 것',sour:'푹 익은 신김치'}[w] || ((BYID[w]||{}).name||w);
 }
+/* 지금 담글 수 있는 것 중에 그런 김치가 있는가 — 없으면 그런 주문은 안 나온다 */
+function wantPossible(w){
+  if(w==='any') return true;
+  var list=[];
+  (S.unlocked||[]).forEach(function(id){ if(BYID[id]) list.push(BYID[id]); });
+  if((S.unlocked||[]).indexOf('baechu')>=0) list.push(MUK);
+  for(var i=0;i<list.length;i++) if(wantOK(list[i],w)) return true;
+  return false;
+}
 function wantOK(k,w){
   if(w==='any') return true;
   if(w==='spicy') return k.spicy>=3;
@@ -1763,7 +1772,9 @@ function showOv(title,sub,body,foot,closable,onClose,tight){
 }
 function applyOvZoom(){
   var ob=$('ovBox'); if(!ob) return;
+  /* 낮은 가로 화면(폰)에서는 덜 키운다 — 키우면 내용이 잘린다 */
   var uz=clamp((window.innerHeight||480)/480,1,2.1);
+  if((window.innerHeight||480)<560) uz=clamp((window.innerHeight||480)/430,1,1.45);
   if(ob.classList.contains('full')){ ob.style.zoom=1; ob.style.width=''; return; }
   ob.style.zoom=uz;
   ob.style.width=ob.classList.contains('vn')?(96/uz)+'%':'';
@@ -3445,6 +3456,7 @@ function makeCustomer(){
   var t=tp[Math.random()*tp.length|0], w=c.w, en=null, ko=null;
   if(t==='allergy') w=(Math.random()<.5?'vegan':'mild');
   else if(BYID[w] && S.unlocked.indexOf(w)<0) w=['any','any','any','spicy','crunchy'][Math.random()*5|0];
+  if(!wantPossible(w)) w='any';          /* 아직 못 만드는 종류는 안 시킨다 */
   if(w!==c.w && GEN[w]){ en=GEN[w][0]; ko=GEN[w][1]; }
   if(t==='refund' && S.served<4) t='haggle';
   if(S.sns && t!=='haggle' && t!=='refund' && t!=='allergy' && Math.random()<.6){
@@ -3464,6 +3476,7 @@ function makeBulk(){
   var b=BIZ[Math.random()*BIZ.length|0], man=S.act==='manhattan';
   /* 가게가 감당할 만큼만 주문한다 — 진열대의 40~85% */
   var have=shelfJars();
+  if(!wantPossible(b.w)) b=BIZ.filter(function(x){ return wantPossible(x.w); })[0]||b;
   var qty=Math.round(have*(.4+Math.random()*.45));
   qty=clamp(qty, man?60:20, man?1600:260);
   var cut=Math.random()<(man?.4:.28);
