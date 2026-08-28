@@ -1450,13 +1450,20 @@ function drawHall(c){
   box(c,832,108,152,106,4,'#2e3d33');
   textC(c,'MENU',908,124,'800 15px Jua,sans-serif','#e8d9a8');
   c.textAlign='left';
-  for(var mi=0;mi<Math.min(S.unlocked.length,10);mi++){
-    var mk=BYID[S.unlocked[mi]]; if(!mk) continue;
+  /* 묵은지도 파는 물건이다 — 담가 뒀거나 진열해 뒀으면 차림표에 올린다 */
+  var menu=S.unlocked.slice();
+  var mst=S.shelf['mukeunji'];
+  if((mst&&mst.jars)||(S.aging&&S.aging.length)) menu.push('mukeunji');
+  for(var mi=0;mi<Math.min(menu.length,10);mi++){
+    var mk=BYID[menu[mi]]; if(!mk) continue;
     var mx=838+(mi%2)*78, my=142+((mi/2)|0)*15;
+    var mp=(mk.id==='mukeunji'&&mst&&mst.jars)
+      ? jarPrice(mk,{stars:mst.stars,age:mst.age||1})
+      : jarPrice(mk,{stars:4});
     c.font='700 10.5px Jua,sans-serif'; c.fillStyle='#e8d9a8';
     c.fillText(mk.name,mx,my);
     c.textAlign='right'; c.fillStyle='#f2e2b0';
-    c.fillText(won(jarPrice(mk,{stars:4})),mx+72,my);
+    c.fillText(won(mp),mx+72,my);
     c.textAlign='left';
   }
   c.textAlign='center';
