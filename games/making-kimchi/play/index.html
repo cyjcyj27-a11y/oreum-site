@@ -1883,6 +1883,22 @@ function paintComp(){
   var h='';
   if(CTAB==='quick'){
     h+='<div class="tip" style="margin-bottom:9px">김치 한 판은 <b>30통</b>입니다.</div>';
+    /* 다음에 열리는 김치 — 언제 열리는지 보이게 */
+    for(var ui=0;ui<KIMCHI.length;ui++){
+      var nk=KIMCHI[ui];
+      if(S.unlocked.indexOf(nk.id)>=0) continue;
+      var need2=UNLOCK[ui], got2=clamp(S.total/need2,0,1);
+      h+='<div class="card" style="margin-bottom:8px;padding:9px 11px">'+
+        '<div style="display:flex;align-items:baseline;gap:8px;font-size:13.5px">'+
+          '<b>다음 김치 — '+nk.name+'</b>'+
+          '<b style="margin-left:auto;color:'+(S.total>=need2?'#3d8b4a':'var(--ink2)')+'">'+
+            won(S.total)+' / '+won(need2)+'</b></div>'+
+        '<div class="bar" style="margin-top:5px"><i style="width:'+(got2*100)+'%"></i></div>'+
+        '<div class="sub" style="font-size:11.5px;margin-top:4px">'+
+          (S.total>=need2?'<b style="color:#3d8b4a">오늘 마감하면 열립니다</b>'
+                         :'누적 매출이 '+won(need2)+'이 되면 열립니다')+'</div></div>';
+      break;
+    }
     S.unlocked.forEach(function(kid){
       var k=BYID[kid], kr=batchCost(kid,false);
       h+='<div class="card" style="margin-bottom:7px;padding:9px">'+
