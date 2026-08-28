@@ -3498,7 +3498,7 @@ var TROUBLE={ none:{lv:0,ko:''}, haggle:{lv:2,ko:'값 깎기'}, quiz:{lv:1,ko:'�
   sample:{lv:1,ko:'시식 요청'} };
 var TR_HOOD=['none','none','haggle','quiz','review','haggle','refund','sample'];
 var TR_MAN =['none','none','haggle','refund','allergy','quiz','review','haggle','sample'];
-var spawnGap=0, bulkDone=true, bulkAt=0;
+var spawnGap=0, bulkLeft=0, bulkAt=0;
 function freeSeat(){ for(var i=0;i<SEATS.length;i++){
   if(!CUS.some(function(u){ return u.seat===i && u.state!=='out'; })) return i; } return -1; }
 function makeCustomer(){
@@ -3540,14 +3540,16 @@ function makeBulk(){
 }
 function spawnTick(dt){
   /* 도매상 — 재고가 넉넉한 날, 하루 한 번, 개점 한참 뒤에 */
-  if(!bulkDone && T.min>=bulkAt){
+  if(bulkLeft>0 && T.min>=bulkAt){
     var need=S.act==='manhattan'?300:60, have=shelfJars();
     if(have<need){ bulkAt=T.min+45; }                 /* 재고가 쌓이면 다시 본다 */
     else if(have>=need*2 || Math.random()<.8){        /* 넉넉하면 반드시 온다 */
       var bl=makeBulk();
-      if(bl){ bulkDone=true; CUS.push(bl); sfx('door');
-        toast('<b>도매 주문</b>이 들어왔습니다'); }
-      else bulkAt=T.min+30;                           /* 자리가 없으면 조금 뒤에 */
+      if(bl){ bulkLeft--; CUS.push(bl); sfx('door');
+        toast('<b>도매 주문</b>이 들어왔습니다');
+        /* 재고가 아직도 넘치면 오늘 한 번 더 온다 */
+        bulkAt=T.min+120+Math.random()*180;
+      } else bulkAt=T.min+30;                         /* 자리가 없으면 조금 뒤에 */
     }
     else bulkAt=T.min+90+Math.random()*120;           /* 이번엔 안 왔다 — 다시 기회 */
   }
@@ -3867,7 +3869,10 @@ function askOpenShop(){
     hideOv(); sfx('bell');
     T.running=true; S.signSold=false; CUS=[]; spawnGap=6; serveHint=true;
     DAY={gross:0,sold:0,rep0:S.rep,newK:[]};
-    bulkDone=false; bulkAt=T.min+90+Math.random()*180;    /* 개점 1시간 반~4시간 뒤 */
+    /* 재고가 넘치는 날은 도매상이 일찍, 그리고 두 번까지 온다 */
+    var need0=S.act==='manhattan'?300:60, have0=shelfJars();
+    bulkLeft=have0>=need0*4?2:1;
+    bulkAt=T.min+(have0>=need0*4? 25+Math.random()*50 : 90+Math.random()*180);
     toast('영업 시작 — 손님이 들어옵니다');
   };
 }
