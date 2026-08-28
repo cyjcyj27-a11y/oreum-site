@@ -3395,7 +3395,7 @@ var TROUBLE={ none:{lv:0,ko:''}, haggle:{lv:2,ko:'값 깎기'}, quiz:{lv:1,ko:'�
   sample:{lv:1,ko:'시식 요청'} };
 var TR_HOOD=['none','none','haggle','quiz','review','haggle','refund','sample'];
 var TR_MAN =['none','none','haggle','refund','allergy','quiz','review','haggle','sample'];
-var spawnGap=0;
+var spawnGap=0, bulkDone=true, bulkAt=0;
 function freeSeat(){ for(var i=0;i<SEATS.length;i++){
   if(!CUS.some(function(u){ return u.seat===i && u.state!=='out'; })) return i; } return -1; }
 function makeCustomer(){
@@ -3422,7 +3422,10 @@ function makeCustomer(){
 function makeBulk(){
   var seat=freeSeat(); if(seat<0) return null;
   var b=BIZ[Math.random()*BIZ.length|0], man=S.act==='manhattan';
-  var qty=(man?800:120)+((Math.random()*(man?800:130))|0);
+  /* 가게가 감당할 만큼만 주문한다 — 진열대의 40~85% */
+  var have=shelfJars();
+  var qty=Math.round(have*(.4+Math.random()*.45));
+  qty=clamp(qty, man?60:20, man?1600:260);
   var cut=Math.random()<(man?.4:.28);
   var pat=(man?70:80)+Math.random()*20;
   return {c:b, t:'bulk', want:b.w, qty:qty, min:b.min||0, cut:cut, lv:cut?2:0, seat:seat,
@@ -3431,6 +3434,15 @@ function makeBulk(){
     skin:b.f[0], hair:b.f[1], hairLong:b.f[2]===1||b.f[2]===5, body:'#6a6f7a'};
 }
 function spawnTick(dt){
+  /* 도매상 — 재고가 넉넉한 날, 하루 한 번, 개점 한참 뒤에 */
+  if(!bulkDone && T.min>=bulkAt){
+    bulkDone=true;
+    var need=S.act==='manhattan'?300:60;
+    if(shelfJars()>=need && Math.random()<.7){
+      var bl=makeBulk(); if(bl){ CUS.push(bl); sfx('door');
+        toast('<b>도매 주문</b>이 들어왔습니다'); }
+    }
+  }
   spawnGap-=dt;
   if(spawnGap>0) return;
   var cn=false; for(var kk in S.shelf) if(S.shelf[kk].jars&&S.shelf[kk].cn) cn=true;
@@ -3621,8 +3633,8 @@ function phBulk(u){
         k.name+' '+n+'통 · 통당 '+won(unit)+(short?' · <b>물량이 모자랐습니다</b>':''));
     }; });
   $('no3').onclick=function(){ sfx('bad');
-    outcome(u,"Then I'll find another shop.",'그럼 다른 데 알아보죠.',0,-7,
-      '도매 거래처를 놓치면 평판이 깎입니다.'); };
+    var short2=fillN<u.qty;                       /* 애초에 못 채울 양이면 덜 깎는다 */
+    outcome(u,"Then I'll find another shop.",'그럼 다른 데 알아보죠.',0,short2?-2:-7,''); };
 }
 function phSample(u){
   sfx(FEMALE[u.c.n]?'talkf':'talkm');
@@ -3746,8 +3758,8 @@ function askOpenShop(){
     hideOv(); sfx('bell');
     T.running=true; S.signSold=false; CUS=[]; spawnGap=6; serveHint=true;
     DAY={gross:0,sold:0,rep0:S.rep};
-    var bulk=makeBulk(); if(bulk) CUS.push(bulk);
-    toast('영업 시작 — <b>도매 주문</b>이 먼저 들어왔습니다');
+    bulkDone=false; bulkAt=T.min+120+Math.random()*300;   /* 오전 늦게~오후 */
+    toast('영업 시작 — 손님이 들어옵니다');
   };
 }
 function goalHTML(){
