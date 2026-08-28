@@ -3404,10 +3404,10 @@ function uiFerm(place){
   });
 }
 /* 묵은지 숙성 등급 — 게임을 꺼둔 시간도 그대로 쌓인다(벽시계 기준) */
-var AGE=[{t:600,   n:'6개월', m:1.0},
-         {t:1800,  n:'1년',   m:1.4},
-         {t:7200,  n:'2년',   m:2.0},
-         {t:21600, n:'3년',   m:2.8}];   /* 3년이 상한 — 더 둬도 오르지 않는다 */
+var AGE=[{t:600,   n:'6개월', m:1.0},    /* 일반 김치의 1.5배 */
+         {t:1800,  n:'1년',   m:2.0},    /* 3배 */
+         {t:7200,  n:'2년',   m:3.67},   /* 5.5배 */
+         {t:21600, n:'3년',   m:6.67}];  /* 10배 — 3년이 상한 */
 var CROCKS=3;                            /* 항아리 칸 */
 function ageOf(b){                       /* 지금 등급 (없으면 -1) */
   var e=now()-b.at, g=-1;
@@ -3421,10 +3421,12 @@ function hms(sec){ sec=Math.max(0,Math.round(sec));
   return h2? h2+'시간 '+m2+'분' : (m2? m2+'분 '+s2+'초' : s2+'초'); }
 function uiCrock(){
   var h='<div class="tip" style="margin-bottom:8px">배추김치를 항아리에 담가 두면 <b>묵은지</b>가 됩니다. '
-    +'<b>오래 둘수록 값이 오릅니다</b> — 게임을 꺼 둔 동안에도 삭습니다.</div>';
+    +'게임을 꺼 둔 동안에도 삭아서, <b>3년이면 일반 김치의 열 배</b> 값을 받습니다.</div>';
+  var baseK=BYID['baechu']?BYID['baechu'].price:14;
   h+='<div class="statrow" style="margin-bottom:7px">'+AGE.map(function(a,i){
+      var x=Math.round(a.m*MUK.price/baseK*10)/10;
       return '<div class="stat"><div class="big" style="font-size:14px">'+a.n+'</div>'+
-        '<div class="sm">값 '+a.m.toFixed(1)+'배</div></div>'; }).join('')+'</div>';
+        '<div class="sm">'+x+'배</div></div>'; }).join('')+'</div>';
   var st=S.shelf['baechu'], can=st&&st.jars>=10&&S.aging.length<CROCKS;
   h+='<div class="card" style="margin-bottom:8px;padding:9px">'+
     '<div style="display:flex;align-items:center;gap:9px">'+
@@ -4051,7 +4053,7 @@ function showMenu(){
     '<div class="tip" style="margin-top:8px">김치마다 <b>제 자리</b>가 있습니다. '+
       '맞는 곳에 넣어야 별을 잃지 않습니다.</div>'+
     '<div class="tip" style="margin-top:7px">김치 담그기가 힘들어지면 <b>묵은지</b>에 주목하세요. '+
-      '브라우저를 꺼도 김치가 묵어서, <b>3년 된 김치는 최고 가격</b>을 받습니다.</div>'+
+      '브라우저를 꺼도 김치가 묵어서, <b>3년이면 일반 김치의 열 배</b> 값입니다.</div>'+
     '<div class="tip" style="margin-top:7px;border-color:#d9a9a0;color:#a03a2a">'+
       '<b>손질을 대충 하면 별이 깎이고 값이 떨어집니다.</b> 망쳐도 팔 수는 있지만 '+
       '별 하나짜리는 다섯 개짜리의 <b>절반 값</b>도 못 받습니다.</div>',
