@@ -543,7 +543,7 @@ var CUSTOMERS=[
  {n:'Mei',    f:['#f2d5b4','#181315',1], en:'Ponytail radish — the little whole ones.', ko:'총각김치요. 통째로 담근 거.', w:'chonggak'}
 ];
 var BYID={}; KIMCHI.forEach(function(k){ BYID[k.id]=k; });
-/* 묵은지 — 항아리에서 배추김치를 삭혀 만든다. 배추김치의 1.5배 값 */
+/* 묵은지 — 항아리에서 배추김치를 삭힌다. 6개월 1.0배 ~ 3년 2.8배 (AGE 참고) */
 var MUK={id:'mukeunji', name:'묵은지', en:'MUK-EUN-JI (Aged Sour Kimchi)',
   tag:'항아리에서 푹 삭힌 신김치 — 찌개·찜용', price:21, spicy:3, vegan:false,
   texture:2, color:'#8e1812'};
@@ -3830,7 +3830,7 @@ function askOpenShop(){
   if(S.suspended>0){
     showOv('🚫 영업정지','남은 '+S.suspended+'일',
       '<div class="tip">문에 정지 딱지가 붙었습니다. 오늘은 손님을 받을 수 없습니다.<br>'+
-      '정지 중에도 김치는 담글 수 있습니다. <b>한국산</b>으로 담가 두면 다음 단속은 넘깁니다.</div>',
+      '정지 중에도 김치는 담글 수 있습니다.</div>',
       '<button class="btn" id="skip">하루 넘기기</button>');
     $('skip').onclick=function(){ newDay(); S.money-=RENT[S.act]; save();
       sfx('tap'); hideOv(); checkDead();
