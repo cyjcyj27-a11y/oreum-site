@@ -3502,8 +3502,9 @@ function spawnTick(dt){
   }
   spawnGap-=dt;
   if(spawnGap>0) return;
-  var cn=false; for(var kk in S.shelf) if(S.shelf[kk].jars&&S.shelf[kk].cn) cn=true;
-  var base=(S.act==='manhattan'?7.5:10.5) - (cn?2.6:0) - clamp((S.rep-50)/14,-2,2.5)
+  /* 문 연 지 얼마 안 된 가게엔 손님이 뜸하다 — 여드레에 걸쳐 소문이 난다 */
+  var early=Math.max(0, 30-(S.day-1)*4.5);
+  var base=(S.act==='manhattan'?7.5:10.5) + early - clamp((S.rep-50)/14,-2,2.5)
     - (S.sns&&S.act==='hood'?2.4:0);
   spawnGap=Math.max(3.4,base)+Math.random()*3;
   var u=makeCustomer(); if(u){ CUS.push(u); sfx('door'); }
