@@ -1037,7 +1037,7 @@ var ST=[
  {id:'open',  n:L$('가게 문'),      x:762,y:420,w:52, h:56, fx:740,fy:400}
 ];
 var STID={}; ST.forEach(function(s){ STID[s.id]=s; });
-var SEATS=[{x:836,y:302},{x:890,y:302},{x:942,y:302}];
+var SEATS=[{x:888,y:300},{x:888,y:356},{x:888,y:412}];
 
 /* ── 그리기 도구 ─────────────────────────────────────────────── */
 function rr(c,x,y,w,h,r){ r=Math.min(r,w/2,h/2); c.beginPath();
@@ -1485,9 +1485,9 @@ function drawHall(c){
   box(c,829,51,156,36,6,'#c9472f','#7a2418');
   textC(c,'K-KIMCHI',907,75,'900 26px Jua,sans-serif','#ffe9c9');
   /* 메뉴판 — 파는 김치를 아이콘으로 */
-  box(c,826,102,164,118,6,'#6f4a26','#4a2f1a');
-  box(c,832,108,152,106,4,'#2e3d33');
-  textC(c,'MENU',908,124,'800 15px Jua,sans-serif','#e8d9a8');
+  box(c,826,96,164,98,6,'#6f4a26','#4a2f1a');
+  box(c,832,102,152,86,4,'#2e3d33');
+  textC(c,'MENU',908,117,'800 14px Jua,sans-serif','#e8d9a8');
   c.textAlign='left';
   /* 묵은지도 파는 물건이다 — 담가 뒀거나 진열해 뒀으면 차림표에 올린다 */
   var menu=S.unlocked.slice();
@@ -1495,7 +1495,7 @@ function drawHall(c){
   if((mst&&mst.jars)||(S.aging&&S.aging.length)) menu.push('mukeunji');
   for(var mi=0;mi<Math.min(menu.length,10);mi++){
     var mk=BYID[menu[mi]]; if(!mk) continue;
-    var mx=838+(mi%2)*78, my=142+((mi/2)|0)*15;
+    var mx=838+(mi%2)*78, my=132+((mi/2)|0)*13;
     var mp=(mk.id==='mukeunji'&&mst&&mst.jars)
       ? jarPrice(mk,{stars:mst.stars,age:mst.age||1})
       : jarPrice(mk,{stars:4});
@@ -1535,8 +1535,11 @@ function drawTags(c){
     if(mute && !badge) return;
     if(near||badge){
       var t=mute?badge:(s.n+(badge?' · '+badge:'')), wdt=t.length*9.6+20;
-      bubble(c,s.x+s.w/2,s.y-6,wdt,26);
-      textC(c,t,s.x+s.w/2,s.y-15,'800 15px Jua,sans-serif',badge?'#c8402f':'#3b2a1e');
+      var ty2=Math.max(s.y-6,86);            /* 위쪽 HUD 띠 아래로 */
+      var bx2=s.x+s.w/2;
+      if(ty2<112) bx2=Math.min(bx2,816-wdt/2); /* 간판을 넘지 않게 */
+      bubble(c,bx2,ty2,wdt,26);
+      textC(c,t,bx2,ty2-9,'800 15px Jua,sans-serif',badge?'#c8402f':'#3b2a1e');
     }
   });
 }
@@ -1693,7 +1696,7 @@ function render(){
 }
 function drawWant(c,u){
   if(u.state!=='wait') return;
-  var uy=u.y-((u.seat&1)?38:0);  /* 옆자리와 말풍선 높이 엇갈리게 */
+  var uy=u.y+28;                  /* 세로줄이라 높이를 맞춰도 안 겹친다 */
   var w=u.t==='bulk'?148:118, h=38;
   bubble(c,u.x,uy-90,w,h);
   if(u.t==='bulk'){
@@ -1701,7 +1704,7 @@ function drawWant(c,u){
     textC(c,L$('도매 ')+u.qty+L$('통'),u.x+8,uy-103,'800 15px Jua,sans-serif','#a8712a');
   } else {
     var k=BYID[u.want];
-    if(k){ drawJar(c,u.x-38,uy-82,1.15,k.color);
+    if(k){ drawJar(c,u.x-40,uy-104,1.15,k.color);
       textC(c,k.name,u.x+12,uy-103,'800 15px Jua,sans-serif','#3b2a1e'); }
     else textC(c,wantKO(u.want),u.x,uy-103,'800 15px Jua,sans-serif','#3b2a1e');
   }
