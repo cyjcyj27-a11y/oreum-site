@@ -710,6 +710,19 @@ function initSfx(){
 }
 document.addEventListener('pointerdown',function f(){ initSfx();
   document.removeEventListener('pointerdown',f); });
+/* 창을 내리거나 다른 앱으로 가면 소리를 멈춘다 */
+function audioSleep(sleep){
+  try{ if(!AC) return;
+    if(sleep){ if(AC.state==='running') AC.suspend(); }
+    else if(SOUND && AC.state==='suspended') AC.resume();
+  }catch(e){}
+}
+document.addEventListener('visibilitychange',function(){ audioSleep(document.hidden); });
+/* 돌아왔는데도 잠들어 있으면, 다음 손짓에 깨운다 */
+['pointerdown','keydown'].forEach(function(ev){
+  document.addEventListener(ev,function(){ if(!document.hidden) audioSleep(false); },true); });
+window.addEventListener('pagehide',function(){ audioSleep(true); });
+window.addEventListener('blur',function(){ if(document.hidden) audioSleep(true); });
 function clip(k,vol){
   if(!SOUND||!AC||!SFXB[k]) return false;
   var t=Date.now();
