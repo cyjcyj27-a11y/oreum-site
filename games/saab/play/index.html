@@ -627,7 +627,7 @@ function audio(){
    파일 이름이 그대로면 브라우저가 캐시에 있는 옛것을 계속 쓴다 —
    2026-08-29 총 그림을 바꿨는데 사용자 화면에는 옛 총이 그대로 나왔다.
    손 영상·효과음·엔딩 영상 주소 뒤에 `?v=` 로 붙는다. */
-const MEDIA_VER='?v=44';   // 44 = Scatter Laser 손 영상 rembg 로 다시 뽑음(2026-08-29)
+const MEDIA_VER='?v=45';   // 45 = 손 영상 셋 + 애니 걷기 시트를 rembg 로 다시 뽑음(2026-08-29)
 const SFX_FILES={
   pistol:'sfx/shot_pistol.mp3', rifle:'sfx/shot_rifle.mp3', shotgun:'sfx/shot_shotgun.mp3',
   sniper:'sfx/shot_sniper.mp3', explosion:'sfx/explosion.mp3', cannon:'sfx/cannon.mp3',
@@ -960,7 +960,9 @@ function placeAnnie(){
     const back=new THREE.Mesh(new THREE.PlaneGeometry(1,1),
       new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(bc),transparent:true,depthWrite:false}));
     back.position.z=-0.04; annieSprite.add(back);
-    new THREE.TextureLoader().load('sprites/annie_walk.webp',tx=>{
+    /* ⚠판 번호(MEDIA_VER)를 붙여야 한다 — 안 붙이면 그림을 갈아 끼워도
+       사용자 화면에는 캐시의 옛 애니가 계속 나온다(2026-08-29에 빠져 있던 것을 발견). */
+    new THREE.TextureLoader().load('sprites/annie_walk.webp'+MEDIA_VER,tx=>{
       const CW=tx.image.width/FR, CH=tx.image.height;
       const AH=1.66*CH/(CH-2*PAD), AW=AH*CW/CH;
       tx.repeat.set(1/FR,1);                 // 가로로 이어 붙인 시트 — 한 칸씩 보여 준다
