@@ -675,19 +675,6 @@ const Snd = (()=>{
     isOn(){ return on; },
     stepInfo(){ return {음원:!!walkBuf, 돌아가는중:!!walkSrc}; },
     whisper(v){ if(whisperGain) whisperGain.gain.value = clamp(v,0,0.16); },
-    heart(v){                                   // 심장 박동 두 번
-      if(!ac||!on) return;
-      [0,0.17].forEach((d,i)=>{
-        const o=ac.createOscillator(); o.type='sine';
-        o.frequency.setValueAtTime(62,ac.currentTime+d);
-        o.frequency.exponentialRampToValueAtTime(34,ac.currentTime+d+0.14);
-        const g=ac.createGain();
-        g.gain.setValueAtTime(0.0001,ac.currentTime+d);
-        g.gain.exponentialRampToValueAtTime(v*(i?0.6:1),ac.currentTime+d+0.02);
-        g.gain.exponentialRampToValueAtTime(0.0001,ac.currentTime+d+0.2);
-        o.connect(g); g.connect(master); o.start(ac.currentTime+d); o.stop(ac.currentTime+d+0.26);
-      });
-    },
     hasWalk(){ return !!walkBuf; },
     /* 걷는 동안 녹음을 이어서 돌린다. 멈추면 소리를 줄이고 끈다. */
     walk(moving, run){
@@ -1098,7 +1085,7 @@ const P = {
   x:0, z:0, vx:0, vz:0, yaw:0, pitch:0,
   torch:false, usedTorch:false, battery:100, stam:100, tired:false,
   hidden:false, hideSpot:null, hideT:0,
-  fear:0, stepPhase:0, bobT:0, heartT:0, alive:true,
+  fear:0, stepPhase:0, bobT:0, alive:true,
 };
 
 const DIFF = [
@@ -1234,7 +1221,7 @@ function startGame(){
   P.x=cx2wx(22); P.z=cy2wz(5); P.vx=P.vz=0;
   P.yaw=Math.PI; P.pitch=0;   // 교실 뒷문 쪽, 책상 무리 바깥
   P.torch=false; P.usedTorch=false; P.battery=100; P.stam=100; P.tired=false;
-  P.hidden=false; P.hideSpot=null; P.fear=0; P.alive=true; P.bobT=0; P.heartT=0;
+  P.hidden=false; P.hideSpot=null; P.fear=0; P.alive=true; P.bobT=0;
 
   G.x=cx2wx(4); G.z=cy2wz(23); G.dirX=0; G.dirZ=-1;
   G.state='patrol'; G.path=[]; G.pathT=0; G.repath=0;
@@ -1455,11 +1442,10 @@ function updateGhost(dt){
   el.fearFx.style.opacity = (P.fear*0.85).toFixed(2);
   el.vig.style.opacity = (0.85 + P.fear*0.1).toFixed(2);
 
-  P.heartT -= dt;
-  if(P.fear>0.12 && P.heartT<=0){
-    Snd.heart(0.05+P.fear*0.16);
-    P.heartT = lerp(1.25, 0.42, P.fear);
-  }
+  /* ⚠심장박동(62→34Hz 순수 사인파)을 넣었다가 뺐다 (2026-08-29 사용자 지적).
+     폰 스피커는 그렇게 낮은 순음을 못 내서 찌그러진 전자음으로 나온다.
+     1분에 212번이나 울려 발소리에 기계음이 섞여 들렸다.
+     귀신이 가까운 건 속삭임(P.fear 에 따라 커진다)으로 알 수 있다. 되살리지 말 것. */
 }
 
 function updateWorld(dt){
