@@ -629,16 +629,11 @@ const Snd = (()=>{
       ac.decodeAudioData(u.buffer, buf=>{ walkBuf=buf; }, ()=>{});
     }catch(e){}
 
-    // 낮게 깔리는 웅웅거림
-    droneGain = ac.createGain(); droneGain.gain.value=0.028; droneGain.connect(master);
-    [41,54.5,82].forEach((f,i)=>{
-      const o=ac.createOscillator(); o.type='sine'; o.frequency.value=f;
-      const lfo=ac.createOscillator(); lfo.frequency.value=0.05+i*0.037;
-      const lg=ac.createGain(); lg.gain.value=1.6;
-      lfo.connect(lg); lg.connect(o.detune); lfo.start();
-      const g2=ac.createGain(); g2.gain.value=0.4-i*0.1;
-      o.connect(g2); g2.connect(droneGain); o.start();
-    });
+    /* ⚠낮게 깔리는 웅웅거림(41·54.5·82Hz 사인파)을 넣었다가 뺐다 (2026-08-29).
+       폰 스피커는 그 낮은음을 제대로 못 내서 위잉거리는 기계음으로 들렸다.
+       사용자가 시킨 적 없는 것이었으니 되살리지 말 것. */
+    droneGain = ac.createGain(); droneGain.gain.value=0; droneGain.connect(master);
+
     // 바람 같은 잡음
     const nb=noiseBuf(4);
     const ns=ac.createBufferSource(); ns.buffer=nb; ns.loop=true;
