@@ -305,8 +305,9 @@
     border:1px solid #5FD3C8; box-shadow:0 0 18px rgba(95,211,200,.35)}
   #rotate .sub{font-size:13px; color:#7f9a98; line-height:1.7}
   #rotate .sub b{color:#cdeee9}
-  @media (orientation:portrait){ body.touch #rotate{display:grid} }
-  body.touch #rotate.off{display:none !important}      /* 아래 JS 가 실제 가로/세로를 보고 끈다 */
+  /* ⚠`@media (orientation:portrait)` 에 맡기지 않는다 — 전체화면에서 방향이 늦게/안 바뀌는 폰이 있다.
+     실제 창 비율을 재서 JS 가 `body.portrait` 를 붙인다(메이킹김치와 같은 방식). */
+  body.touch.portrait #rotate{display:grid}
   body.touch #hudB{display:none}                 /* 키보드 안내는 폰에서 쓸모없다 */
   /* 폰 화면은 좁다 — 단추와 겹치는 판은 치우고, 물약 칸은 왼쪽 위로 올린다.
      (목표판 #goals 는 PC 용 안내라 폰에서는 없앤다. 물약 수는 왼쪽 위에서 계속 보인다.) */
@@ -666,10 +667,22 @@ const sfx={
 };
 
 /* ═══════════════ 렌더러 · 씬 ═══════════════ */
-const renderer=new THREE.WebGLRenderer({antialias:true});
+/* ⚠폰은 안티에일리어싱·고해상도에서 WebGL 자체가 못 뜨는 경우가 있다.
+   터치 기기면 끄고 낮춘다. 만들다 실패하면 검은 화면 대신 이유를 보여 준다. */
+const _isTouchDev = matchMedia('(pointer:coarse)').matches || navigator.maxTouchPoints>0;
+let renderer;
+try{
+  renderer=new THREE.WebGLRenderer({antialias:!_isTouchDev, powerPreference:'high-performance'});
+}catch(err){
+  document.body.innerHTML='<div style="position:fixed;inset:0;display:grid;place-items:center;'+
+    'background:#0a1014;color:#cdeee9;font:16px/1.9 monospace;text-align:center;padding:8vw">'+
+    '이 기기에서는 3D 화면(WebGL)을 열 수 없습니다.<br>다른 브라우저로 열어 보시겠어요?<br>'+
+    '<span style="font-size:12px;opacity:.6">'+(err&&err.message||err)+'</span></div>';
+  throw err;
+}
 window.__snap=(w,h,q,focus)=>{if(renderer.domElement.width===0){renderer.setSize(w||320,h||180);camera.aspect=(w||320)/(h||180);camera.updateProjectionMatrix();}if(focus&&window.__wardrobe&&window.__wardrobe.body){const p=new THREE.Vector3();window.__wardrobe.body.getWorldPosition(p);camera.position.set(p.x+1.6,p.y+1.5,p.z+2.4);camera.lookAt(p.x,p.y+1.0,p.z);}renderer.render(scene,camera);const c=document.createElement('canvas');c.width=w||320;c.height=h||180;c.getContext('2d').drawImage(renderer.domElement,0,0,c.width,c.height);return c.toDataURL('image/jpeg',q||0.6);}; // 개발용 캡처
 window.__cam=(x,y,z,tx,ty,tz)=>{camera.position.set(x,y,z);camera.lookAt(tx,ty,tz);}; // 개발용 카메라 이동
-renderer.setPixelRatio(Math.min(devicePixelRatio,1.6));
+renderer.setPixelRatio(Math.min(devicePixelRatio, _isTouchDev?1.25:1.6));
 document.body.insertBefore(renderer.domElement, document.body.firstChild);
 
 const scene=new THREE.Scene();
@@ -3384,11 +3397,15 @@ $('mdHard').onclick=()=>{ MODE='hard'; storeSet('saab.mode',MODE); if(TOUCH)goLa
      실제 화면 비율을 보고 가로면 끈다. 사용자가 '세로로 하기'를 눌렀으면 그대로 둔다. */
   let skipped=false;
   if($('rotSkip'))$('rotSkip').addEventListener('click',()=>skipped=true);
+  /* ⚠미디어쿼리에 맡기지 않는다 — 전체화면에서 방향이 늦게/안 바뀌는 폰이 있다.
+     실제 창 비율을 재서 `body.portrait` 를 붙였다 뗀다(메이킹김치와 같은 방식). */
   const syncRot=()=>{ if(!TOUCH)return;
-    const wide=innerWidth>innerHeight;
-    $('rotate').classList.toggle('off', wide||skipped); };
-  addEventListener('resize',syncRot); addEventListener('orientationchange',()=>setTimeout(syncRot,220));
-  syncRot();
+    const w=innerWidth,h=innerHeight;
+    if(w<10||h<10)return;                        // 창이 잠깐 0으로 잡히는 순간은 건너뛴다
+    document.body.classList.toggle('portrait', !skipped && h>w*1.02); };
+  addEventListener('resize',syncRot);
+  addEventListener('orientationchange',()=>setTimeout(syncRot,240));
+  syncRot(); setTimeout(syncRot,400);
 }
 $('btnRetry').onclick=()=>startGame(diedStage);   // 1 이 아니라 죽은 스테이지부터
 $('btnRestart').onclick=()=>startGame(1);         // 처음부터 — 무기·해금 전부 초기화
