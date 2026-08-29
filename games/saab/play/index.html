@@ -283,7 +283,9 @@
     background:rgba(10,26,28,.42); border:1px solid rgba(95,211,200,.45); color:#cdeee9;
     font-family:var(--mono); font-size:13px; letter-spacing:.06em; backdrop-filter:blur(2px)}
   #touch .tbtn:active{background:rgba(20,60,58,.7)}
-  #tStick{position:absolute; left:5vw; bottom:6vh; width:34vh; height:34vh; max-width:190px; max-height:190px;
+  /* ⚠왼쪽 아래 구석은 game-home.js 의 '전체화면' 단추 자리다 — 스틱을 그 위로 올린다
+     (2026-08-29 사용자: "조이스틱을 위로 올려라"). */
+  #tStick{position:absolute; left:5vw; bottom:16%; width:34vh; height:34vh; max-width:190px; max-height:190px;
     border-radius:50%; background:rgba(8,18,20,.28); border:1px solid rgba(95,211,200,.3)}
   #tKnob{position:absolute; left:50%; top:50%; width:42%; height:42%; margin:-21% 0 0 -21%;
     border-radius:50%; background:rgba(95,211,200,.32); border:1px solid rgba(95,211,200,.7)}
