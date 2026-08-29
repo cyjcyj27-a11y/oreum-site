@@ -283,22 +283,25 @@
     background:rgba(10,26,28,.42); border:1px solid rgba(95,211,200,.45); color:#cdeee9;
     font-family:var(--mono); font-size:13px; letter-spacing:.06em; backdrop-filter:blur(2px)}
   #touch .tbtn:active{background:rgba(20,60,58,.7)}
-  /* ⚠왼쪽 아래 구석은 game-home.js 의 '전체화면' 단추 자리다 — 스틱을 그 위로 올린다
-     (2026-08-29 사용자: "조이스틱을 위로 올려라"). */
-  #tStick{position:absolute; left:5vw; bottom:16%; width:34vh; height:34vh; max-width:190px; max-height:190px;
+  /* ⚠왼쪽 아래 구석은 game-home.js 의 '전체화면' 단추 자리다(bottom:10px, 높이 ~30px) — 그 위로 올린다.
+     ⚠스틱은 작아야 한다. 2026-08-29 폰 실기: 190px 스틱이 왼쪽을 다 먹어서
+     정작 화면을 문질러 돌아볼 자리가 없었다. 포키 계열 모바일 FPS 기준 ≈80px. */
+  #tStick{position:absolute; left:5vw; bottom:15%; width:24vh; height:24vh; max-width:96px; max-height:96px;
     border-radius:50%; background:rgba(8,18,20,.28); border:1px solid rgba(95,211,200,.3)}
   #tKnob{position:absolute; left:50%; top:50%; width:42%; height:42%; margin:-21% 0 0 -21%;
     border-radius:50%; background:rgba(95,211,200,.32); border:1px solid rgba(95,211,200,.7)}
-  /* 오른손 한 덩어리 — FIRE 는 크게 오른쪽 아래, 나머지는 그 왼쪽에 2열로.
-     ⚠세로 390px 짜리 폰 가로화면 기준으로 잡았다. 더 키우면 오른쪽 HUD 글씨와 겹친다. */
-  #tFire{right:3vw; bottom:8%; width:26vh; height:26vh; max-width:112px; max-height:112px;
-    background:rgba(60,14,14,.45); border-color:rgba(242,120,110,.6); color:#ffd7d2; font-size:14px}
-  #touch .sm{width:15vh; height:15vh; max-width:60px; max-height:60px; font-size:12px}
-  #tJump  {right:calc(3vw + 122px); bottom:8%}
-  #tCrouch{right:calc(3vw + 122px); bottom:calc(8% + 68px)}
-  #tCover {right:calc(3vw + 190px); bottom:8%}
-  #tGunSw {right:calc(3vw + 190px); bottom:calc(8% + 68px)}
-  #tPot   {right:calc(3vw + 258px); bottom:8%}
+  /* 오른손 — 오른쪽 아래 구석에 2×2 로 뭉친다. 나머지 화면은 전부 조준(문지르기)용으로 비운다.
+     ⚠단추를 왼쪽으로 늘어놓지 말 것. 예전엔 여섯 개가 오른쪽 370px 을 먹어 조준할 자리가 없었다.
+     ⚠세로 390px 짜리 폰 가로화면 기준. 더 키우면 오른쪽 HUD 글씨와 겹친다. */
+  #tFire{right:3vw; bottom:6%; width:20vh; height:20vh; max-width:76px; max-height:76px;
+    background:rgba(60,14,14,.45); border-color:rgba(242,120,110,.6); color:#ffd7d2; font-size:13px}
+  #touch .sm{width:15vh; height:15vh; max-width:58px; max-height:58px; font-size:12px}
+  #tJump  {right:calc(3vw + 9px);  bottom:calc(6% + 84px)}
+  #tGunSw {right:calc(3vw + 84px); bottom:6%}
+  #tPot   {right:calc(3vw + 84px); bottom:calc(6% + 66px)}
+  /* 앉기·엄폐는 폰에서 뺀다(2026-08-29 사용자). PC 키보드에는 그대로 있다.
+     ⚠`#touch .tbtn` 이 더 세므로 `#touch` 를 붙여 이겨야 한다. */
+  #touch #tCrouch, #touch #tCover{display:none}
   /* 세로로 들면 가로로 돌리라고 알린다 — 1인칭은 세로에서 못 한다 */
   #rotate{position:fixed; inset:0; z-index:90; display:none; place-items:center; text-align:center;
     background:#0a1014; color:#cdeee9; font-family:var(--mono); font-size:17px; line-height:1.8; padding:8vw}
@@ -2793,6 +2796,11 @@ async function goLandscape(){
 const TOUCH = matchMedia('(pointer:coarse)').matches || navigator.maxTouchPoints>0
   || /[?&]touch=1/.test(location.search);   // 검증용 — PC 에서 ?touch=1 로 터치 조작을 켜 본다
 if(TOUCH) document.body.classList.add('touch');
+/* 스틱·단추가 아닌 손가락 목록. 첫 손가락 = 시점, 둘이면 핀치 줌.
+   ⚠예전에는 `e.touches.length===1` 로 시점을 걸렀는데, 그러면 왼손이 스틱에 닿아 있는 동안
+   시점이 통째로 죽는다 — **걸으면서 돌아보는 게 아예 불가능했다**(2026-08-29 폰 실기).
+   화면 위 손가락 수가 아니라 '조준용 손가락 수'로 세야 한다. */
+const freeIds=[];
 {
   const stick=$('tStick'), knob=$('tKnob');
   let stickId=null, sx0=0, sy0=0, lookId=null, lx=0, ly=0;
@@ -2824,8 +2832,9 @@ if(TOUCH) document.body.classList.add('touch');
   addEventListener('touchstart',e=>{
     if(!TOUCH||G.state!=='play')return;
     for(const t of e.changedTouches){
-      if(lookId!==null||t.target.closest('#touch .tbtn,#tStick'))continue;
-      lookId=t.identifier; lx=t.clientX; ly=t.clientY;
+      if(t.target.closest('#touch .tbtn,#tStick'))continue;
+      if(!freeIds.includes(t.identifier))freeIds.push(t.identifier);
+      if(lookId===null){ lookId=t.identifier; lx=t.clientX; ly=t.clientY; }
     }
   },{passive:true});
   addEventListener('touchmove',e=>{
@@ -2834,34 +2843,46 @@ if(TOUCH) document.body.classList.add('touch');
       if(t.identifier===stickId){
         const b=stick.getBoundingClientRect();
         setKeys(t.clientX-(b.left+b.width/2), t.clientY-(b.top+b.height/2), b.width/2);
-      }else if(t.identifier===lookId&&e.touches.length===1){
+      }else if(t.identifier===lookId&&freeIds.length===1){   // 둘이면 핀치 줌이라 시점은 쉰다
         const zs=camera.fov/62;                  // 확대 중이면 천천히 돈다
-        player.yaw  -= (t.clientX-lx)*0.0042*CFG.sens*zs;
-        player.pitch = clamp(player.pitch-(t.clientY-ly)*0.0038*CFG.sens*zs,-1.40,1.40);
+        /* 감도 — 0.0055 = 손가락 1px 에 0.32°, 90° 도는 데 엄지 한 번(≈285px).
+           ⚠예전 0.0042 는 시점이 죽어 있어서 아무도 못 느껴 본 값이다. 빠르면 낮추고 느리면 올린다.
+           (게임 안 설정의 '감도' 막대가 CFG.sens 로 여기에 곱해진다.) */
+        player.yaw  -= (t.clientX-lx)*0.0055*CFG.sens*zs;
+        player.pitch = clamp(player.pitch-(t.clientY-ly)*0.0048*CFG.sens*zs,-1.40,1.40);
         lx=t.clientX; ly=t.clientY;
       }
     }
   },{passive:true});
   const endTouch=e=>{
     for(const t of e.changedTouches){
+      const i=freeIds.indexOf(t.identifier); if(i>=0)freeIds.splice(i,1);
       if(t.identifier===stickId){ stickId=null; clearKeys(); }
       if(t.identifier===lookId) lookId=null;
     }
+    if(lookId===null&&freeIds.length) lookId=freeIds[0];
+    /* ⚠핀치가 끝났거나 시점 손가락이 바뀌면 기준점을 다시 잡는다.
+       안 그러면 옛 좌표와의 차이가 통째로 들어가 화면이 확 튄다. */
+    if(lookId!==null) for(const q of e.touches) if(q.identifier===lookId){ lx=q.clientX; ly=q.clientY; }
   };
   addEventListener('touchend',endTouch);
   addEventListener('touchcancel',endTouch);
 }
 
-/* 모바일: 두 손가락 벌리기(핀치)로 확대·축소. */
+/* 모바일: 두 손가락 벌리기(핀치)로 확대·축소.
+   ⚠'화면 위 손가락 둘'로 세면 안 된다 — 스틱을 잡고 걸으면서 조준할 때마다(스틱+조준=둘)
+   화면이 멋대로 확대된다. `freeIds`(조준용 손가락)로만 센다(2026-08-29). */
 let pinchD=0;
-addEventListener('touchstart',e=>{
-  if(e.touches.length===2)
-    pinchD=Math.hypot(e.touches[0].clientX-e.touches[1].clientX, e.touches[0].clientY-e.touches[1].clientY);
-},{passive:true});
+const freeGap=e=>{                              // 조준용 손가락이 정확히 둘일 때 그 사이 거리
+  if(freeIds.length!==2)return 0;
+  let a=null,b=null;
+  for(const t of e.touches){ if(t.identifier===freeIds[0])a=t; else if(t.identifier===freeIds[1])b=t; }
+  return a&&b?Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY):0;
+};
+addEventListener('touchstart',e=>{ const d=freeGap(e); if(d)pinchD=d; },{passive:true});
 addEventListener('touchmove',e=>{
-  if(e.touches.length!==2||!pinchD)return;
+  const d=freeGap(e); if(!d||!pinchD)return;
   if(G.state==='play')e.preventDefault();       // 브라우저 화면 확대와 겹치지 않게
-  const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX, e.touches[0].clientY-e.touches[1].clientY);
   if(d>4&&G.state==='play'){ zoomT=clamp(zoomT*(pinchD/d),22,70); pinchD=d; }
 },{passive:false});
 addEventListener('touchend',()=>{ pinchD=0; });
