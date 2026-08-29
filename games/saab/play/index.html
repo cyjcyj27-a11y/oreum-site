@@ -299,8 +299,14 @@
   #tPot   {right:calc(3vw + 258px); bottom:8%}
   /* 세로로 들면 가로로 돌리라고 알린다 — 1인칭은 세로에서 못 한다 */
   #rotate{position:fixed; inset:0; z-index:90; display:none; place-items:center; text-align:center;
-    background:#0a1014; color:#cdeee9; font-family:var(--mono); font-size:17px; line-height:1.9; padding:8vw}
+    background:#0a1014; color:#cdeee9; font-family:var(--mono); font-size:17px; line-height:1.8; padding:8vw}
+  #rotate button{margin:22px 0 18px; padding:16px 34px; font-family:var(--mono); font-size:17px;
+    letter-spacing:.1em; color:#bdeee9; background:rgba(8,40,40,.75); cursor:pointer;
+    border:1px solid #5FD3C8; box-shadow:0 0 18px rgba(95,211,200,.35)}
+  #rotate .sub{font-size:13px; color:#7f9a98; line-height:1.7}
+  #rotate .sub b{color:#cdeee9}
   @media (orientation:portrait){ body.touch #rotate{display:grid} }
+  body.touch #rotate.off{display:none !important}      /* 아래 JS 가 실제 가로/세로를 보고 끈다 */
   body.touch #hudB{display:none}                 /* 키보드 안내는 폰에서 쓸모없다 */
   /* 폰 화면은 좁다 — 단추와 겹치는 판은 치우고, 물약 칸은 왼쪽 위로 올린다.
      (목표판 #goals 는 PC 용 안내라 폰에서는 없앤다. 물약 수는 왼쪽 위에서 계속 보인다.) */
@@ -398,7 +404,14 @@
   <div class="tbtn sm" id="tGunSw">무기</div>
   <div class="tbtn sm" id="tPot">물약</div>
 </div>
-<div id="rotate">기기를 가로로 돌려 주세요</div>
+<div id="rotate">
+  <div>
+    <p>가로 화면에서 하는 게임입니다</p>
+    <button type="button" id="rotGo">가로로 돌리기</button>
+    <p class="sub">단추가 안 먹으면 폰의 <b>화면 회전 잠금</b>을 풀고 눕혀 주세요<br>
+      <a href="#" id="rotSkip" style="color:#7f9a98">그래도 세로로 하기</a></p>
+  </div>
+</div>
 
 <div class="hud" id="hudB">
   <div>WASD 이동 · 마우스 시점 · SHIFT 질주 · SPACE 점프 · X 앉기 · E 엄폐 · Q/숫자키 무기 교체 · R 물약 · 좌클릭 사격 · 휠 확대/축소 · P 일시정지</div>
@@ -2726,6 +2739,15 @@ addEventListener('wheel',e=>{
    ⚠포인터 잠금은 폰에 없다 — 잠금이 풀리면 자동 일시정지하는 규칙을 터치에서는 꺼야 한다.
      안 그러면 시작하자마자 '일시정지'로 떨어진다.
    ⚠시점 끌기는 **손가락 하나일 때만**. 두 손가락은 아래 핀치(확대)가 가져간다. */
+/* ⚠**"가로로 돌려 주세요"만 띄우면 막다른 길이다.** 폰은 대부분 화면 회전 잠금이 켜져 있어
+   눕혀도 안 돌아간다(2026-08-29 사용자가 실제 폰에서 막혔다).
+   → 전체화면으로 들어간 뒤 `screen.orientation.lock('landscape')` 로 **우리가 직접 눕힌다.**
+   안드로이드 크롬에서 된다. iOS 사파리는 방향 잠금이 없어 안내만 남는다(그래서 안내도 같이 띄운다). */
+async function goLandscape(){
+  try{ if(!document.fullscreenElement && document.documentElement.requestFullscreen)
+         await document.documentElement.requestFullscreen(); }catch(e){}
+  try{ if(screen.orientation&&screen.orientation.lock) await screen.orientation.lock('landscape'); }catch(e){}
+}
 const TOUCH = matchMedia('(pointer:coarse)').matches || navigator.maxTouchPoints>0
   || /[?&]touch=1/.test(location.search);   // 검증용 — PC 에서 ?touch=1 로 터치 조작을 켜 본다
 if(TOUCH) document.body.classList.add('touch');
@@ -3353,8 +3375,21 @@ $('btnStart').onclick=()=>{
   $('mdEasy').classList.toggle('sel',MODE==='easy');
   $('mdHard').classList.toggle('sel',MODE==='hard');
 };
-$('mdEasy').onclick=()=>{ MODE='easy'; storeSet('saab.mode',MODE); startGame(1); };
-$('mdHard').onclick=()=>{ MODE='hard'; storeSet('saab.mode',MODE); startGame(1); };
+/* 난이도를 고르는 그 터치가 '사용자 조작'이다 — 전체화면·방향 잠금은 이때만 허락된다 */
+$('mdEasy').onclick=()=>{ MODE='easy'; storeSet('saab.mode',MODE); if(TOUCH)goLandscape(); startGame(1); };
+$('mdHard').onclick=()=>{ MODE='hard'; storeSet('saab.mode',MODE); if(TOUCH)goLandscape(); startGame(1); };
+{ const rg=$('rotGo'); if(rg)rg.addEventListener('click',goLandscape);
+  const rs=$('rotSkip'); if(rs)rs.addEventListener('click',e=>{e.preventDefault(); $('rotate').classList.add('off');});
+  /* ⚠미디어쿼리만 믿으면 안 된다 — 전체화면에서 방향이 늦게 반영되는 폰이 있다(안내가 안 사라짐).
+     실제 화면 비율을 보고 가로면 끈다. 사용자가 '세로로 하기'를 눌렀으면 그대로 둔다. */
+  let skipped=false;
+  if($('rotSkip'))$('rotSkip').addEventListener('click',()=>skipped=true);
+  const syncRot=()=>{ if(!TOUCH)return;
+    const wide=innerWidth>innerHeight;
+    $('rotate').classList.toggle('off', wide||skipped); };
+  addEventListener('resize',syncRot); addEventListener('orientationchange',()=>setTimeout(syncRot,220));
+  syncRot();
+}
 $('btnRetry').onclick=()=>startGame(diedStage);   // 1 이 아니라 죽은 스테이지부터
 $('btnRestart').onclick=()=>startGame(1);         // 처음부터 — 무기·해금 전부 초기화
 /* 물약 칸을 눌러도 마신다 — 휴대전화용. PC 는 조준 중 커서가 잠겨 있어 R 키를 쓴다. */
