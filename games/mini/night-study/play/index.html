@@ -626,7 +626,7 @@ const WALK_MP3 = "SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjYyLjEyLjEwMgAAAAAAAAAAAAAA//
 
 /* ══════════ 소리 — 파일 없이 그때그때 만들어 낸다 ══════════ */
 const Snd = (()=>{
-  let ac=null, master=null, droneGain=null, whisperGain=null, on=true;
+  let ac=null, master=null, whisperGain=null, on=true;
   let walkBuf=null;                        // 다 풀리기 전에는 합성음으로 버틴다
   let walkSrc=null, walkGain=null;
   function init(){
@@ -643,17 +643,11 @@ const Snd = (()=>{
       ac.decodeAudioData(u.buffer, buf=>{ walkBuf=buf; }, ()=>{});
     }catch(e){}
 
-    /* ⚠낮게 깔리는 웅웅거림(41·54.5·82Hz 사인파)을 넣었다가 뺐다 (2026-08-29).
-       폰 스피커는 그 낮은음을 제대로 못 내서 위잉거리는 기계음으로 들렸다.
-       사용자가 시킨 적 없는 것이었으니 되살리지 말 것. */
-    droneGain = ac.createGain(); droneGain.gain.value=0; droneGain.connect(master);
-
-    // 바람 같은 잡음
-    const nb=noiseBuf(4);
-    const ns=ac.createBufferSource(); ns.buffer=nb; ns.loop=true;
-    const nf=ac.createBiquadFilter(); nf.type='lowpass'; nf.frequency.value=340;
-    const ng=ac.createGain(); ng.gain.value=0.026;
-    ns.connect(nf); nf.connect(ng); ng.connect(master); ns.start();
+    /* ⚠늘 깔리는 소리를 넣지 말 것 (2026-08-29 사용자 지시로 둘 다 뺐다).
+       - 낮은 웅웅거림(41·54.5·82Hz 사인파): 폰 스피커가 못 내서 위잉거리는 기계음이 됐다
+       - 바람 잡음: "학교 안인데 왠 바람"
+       걸을 때는 걷는 소리만 난다. 나머지는 다 무슨 일이 있을 때만 난다
+       (심장박동·귀신 속삭임·줍기·사물함·들킴·비명·현관 열림). 되살리지 말 것. */
 
     // 귀신이 가까울수록 커지는 속삭임
     whisperGain = ac.createGain(); whisperGain.gain.value=0; whisperGain.connect(master);
