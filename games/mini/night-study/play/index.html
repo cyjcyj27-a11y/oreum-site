@@ -1475,18 +1475,19 @@ function updateWorld(dt){
   }
   // 안내 글
   let msg='';
-  if(P.hidden) msg='E — 사물함에서 나오기';
+  if(P.hidden) msg='사물함에서 나오기';
   else {
     for(const p of pickups){
       if(!p.taken && Math.hypot(P.x-p.x,P.z-p.z)<1.5){
-        msg = p.kind==='paper' ? 'E — 시험지 줍기' : 'E — 건전지 줍기'; break;
+        msg = p.kind==='paper' ? '시험지 줍기' : '건전지 줍기'; break;
       }
     }
     if(!msg) for(const h of hideSpots){
-      if(Math.hypot(P.x-h.x,P.z-h.z)<2.0){ msg='E — 사물함에 숨기'; break; }
+      if(Math.hypot(P.x-h.x,P.z-h.z)<2.0){ msg='사물함에 숨기'; break; }
     }
   }
-  el.hint.textContent=msg;
+  // 폰에는 E 키가 없다. 키보드로 할 때만 키 이름을 앞에 붙인다
+  el.hint.textContent = msg ? (TOUCH ? msg : 'E — ' + msg) : '';
   el.hint.style.opacity = msg?'1':'0';
   if(el.tAct) el.tAct.textContent =
       msg.indexOf('나오기')>=0 ? '나오기' : (msg.indexOf('숨기')>=0 ? '숨기' : '줍기');
