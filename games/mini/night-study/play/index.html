@@ -147,6 +147,17 @@
     body.touch .btn{margin-top:8px;padding:7px 24px;font-size:16px}
     body.touch #dead h1, body.touch #win h1{font-size:min(9vw,42px)}
   }
+  /* 안드로이드에 흔한 800x360 가로화면 — 여기서도 제목부터 '들어가기'까지 다 보여야 한다 */
+  @media (max-height:400px){
+    body.touch .screen{padding-bottom:calc(22vh + env(safe-area-inset-bottom))}
+    body.touch .screen h1{font-size:min(7vw,29px);letter-spacing:2px}
+    body.touch .screen h1 em{font-size:min(2.6vw,11px);letter-spacing:4px;margin-top:2px}
+    body.touch .screen p{font-size:11px;margin-top:4px;line-height:1.35}
+    body.touch .keys{font-size:11px;gap:0 7px;margin-top:5px}
+    body.touch .opts{margin-top:5px;gap:4px}
+    body.touch .opt{padding:3px 9px;font-size:11px}
+    body.touch .btn{margin-top:6px;padding:6px 22px;font-size:15px}
+  }
 </style>
 </head>
 <body>
@@ -190,11 +201,13 @@
   <p>야자하다 엎드려 잠들었다. 눈을 뜨니 학교엔 아무도 없다.<br>
      흩어진 <b>시험지 6장</b>을 모아 1층 현관으로 나가라.<br>
      <b style="color:#c9b7b7">복도에 소복 입은 무언가가 있다.</b> 들키면 뛰어야 한다.</p>
+  <!-- 폰 안내는 PC 것을 옮기지 말고, 무엇을 어디서 만지는지로 쓴다 (2026-08-30 사용자) -->
   <div class="keys forTouch">
-    <b>왼쪽 스틱</b><span>걷기 — 끝까지 밀면 달리기</span>
+    <b>왼쪽 아래 스틱</b><span>밀면 걷기 · 끝까지 밀면 달리기</span>
     <b>화면 문지르기</b><span>둘러보기</span>
-    <b>손전등</b><span>밝지만 들키기 쉽다</span>
-    <b>줍기</b><span>시험지 줍기 · 사물함에 숨기</span>
+    <b>손전등 단추</b><span>밝지만 귀신 눈에 두 배로 띈다</span>
+    <b>줍기 단추</b><span>시험지 줍기 · 사물함에 숨기</span>
+    <b>왼쪽 위 II</b><span>잠깐 멈추기</span>
   </div>
   <div class="keys forPc">
     <b>W A S D</b><span>걷기</span>
