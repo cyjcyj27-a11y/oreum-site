@@ -365,6 +365,40 @@
     .ov .msm{padding:4px 0; width:88px; font-size:10px}
     .ov .msm small{font-size:8px}
   }
+  /* 폰 가로화면 — **사망·승리·일시정지 화면**도 같이 줄인다.
+     ⚠46차에서 시작 메뉴(`#menu`)만 줄이고 이걸 빠뜨렸다. 그래서 폰에서 죽으면
+     제목이 화면을 다 먹고 통계 글씨가 두 줄로 접히고 RETRY 단추가 아래로 잘려 나갔다
+     (2026-08-29 사용자 실기 화면). **한 화면을 줄였으면 같은 틀의 나머지도 같이 줄일 것.**
+     ⚠글씨만 줄이지 말고 **여백부터** 줄인다(위 메뉴 규칙과 같은 방침). */
+  @media (max-height:470px){
+    #over h1{font-size:26px; letter-spacing:.1em; margin-bottom:1px}
+    #over .sub{font-size:10px; letter-spacing:.16em; margin-bottom:0}
+    #over .stats{padding:4px 8px; margin-bottom:6px}
+    #over .stats div{padding:0 11px}
+    #over .stats .n{font-size:16px}
+    /* ⚠'도달 스테이지'·'최고 콤보'가 두 줄로 접히던 것 — 칸을 좁히지 말고 줄바꿈을 막는다 */
+    #over .stats .k{font-size:9px; letter-spacing:.06em; margin-top:1px; white-space:nowrap}
+    #over .stats .ic{width:13px; height:13px; margin-bottom:2px}
+    #ovGoal{padding:4px 12px 3px; margin-bottom:5px}
+    #over .ng{font-size:12px; margin-bottom:2px}
+    #ovTrack{margin:2px 4px 0}
+    #ovTrack::before{top:5px}
+    #ovTrack .tn i{width:8px; height:8px}
+    #ovTrack .tn b{font-size:8px; margin-top:1px}
+    #over #best{font-size:10px; margin:3px 0 0}
+    #btnRetry{margin-top:6px; padding:6px 30px; font-size:12px}
+    #btnRetry small{font-size:8px; letter-spacing:.24em}
+    #btnRestart{margin-top:5px; padding:5px 26px; font-size:12px}
+    #btnRestart small{font-size:8px; letter-spacing:.2em}
+    /* 승리·일시정지도 같은 틀이라 같은 병에 걸린다 */
+    #win h1,#pause h1{font-size:26px; letter-spacing:.1em; margin-bottom:1px}
+    #win .sub,#pause .sub{font-size:10px; letter-spacing:.16em; margin-bottom:6px}
+    #win .stats{gap:16px; margin-bottom:8px}
+    #win .stats .n{font-size:16px}
+    #win .stats .k{font-size:9px; white-space:nowrap}
+    #win .ng{font-size:12px; margin-bottom:6px}
+    #btnWinRetry,#btnResume{padding:6px 28px; font-size:12px}
+  }
   /* 폰에서는 "PC 크롬 권장 · 클릭하면 조준이 잠긴다" 가 틀린 안내다 — 자리도 아깝다 */
   body.touch #mTip{display:none}
   /* 어떤 화면에서도 메뉴가 잘려서 못 누르는 일은 없게 — 넘치면 세로로 굴러간다.
@@ -593,7 +627,7 @@ function audio(){
    파일 이름이 그대로면 브라우저가 캐시에 있는 옛것을 계속 쓴다 —
    2026-08-29 총 그림을 바꿨는데 사용자 화면에는 옛 총이 그대로 나왔다.
    손 영상·효과음·엔딩 영상 주소 뒤에 `?v=` 로 붙는다. */
-const MEDIA_VER='?v=43';
+const MEDIA_VER='?v=44';   // 44 = Scatter Laser 손 영상 rembg 로 다시 뽑음(2026-08-29)
 const SFX_FILES={
   pistol:'sfx/shot_pistol.mp3', rifle:'sfx/shot_rifle.mp3', shotgun:'sfx/shot_shotgun.mp3',
   sniper:'sfx/shot_sniper.mp3', explosion:'sfx/explosion.mp3', cannon:'sfx/cannon.mp3',
