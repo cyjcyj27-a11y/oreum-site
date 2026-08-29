@@ -338,6 +338,33 @@
     .mrow{margin-top:10px}
     .ov .msm{padding:7px 0}
   }
+  /* 폰 가로화면(세로 400px 안팎) — 위 규칙으로도 메뉴가 화면 밖으로 잘린다(실기 확인 2026-08-29).
+     ⚠글씨만 줄이지 말고 **여백부터** 줄일 것. 그래도 넘치면 아래 `.ov{overflow:auto}` 가 받는다. */
+  @media (max-height:470px){
+    #menu h1{font-size:25px; letter-spacing:.1em}
+    #menu h1::after{height:3px; margin:3px auto 4px}
+    #menu .sub{margin-bottom:5px; font-size:10px; letter-spacing:.14em}
+    .mwrap{padding:7px 14px 7px}
+    #menu .stats{padding:3px 10px; margin-bottom:5px}
+    #menu .stats .n{font-size:15px}
+    #menu .stats .k{font-size:9px}
+    #mGoal{padding:4px 10px 3px; margin-bottom:6px}
+    #mNext{font-size:12px}
+    #mTrack{margin-top:3px}
+    #mTrack .tn b{font-size:8px; margin-top:1px}
+    #mTrack .tn i{width:8px; height:8px}
+    #btnStart,#btnLoad{padding:6px 24px; font-size:12px}
+    #btnStart small,#btnLoad small{font-size:8px; letter-spacing:.2em}
+    #btnLoad{margin-top:5px}
+    .mrow{margin-top:5px; gap:5px}
+    .ov .msm{padding:4px 0; width:88px; font-size:10px}
+    .ov .msm small{font-size:8px}
+  }
+  /* 폰에서는 "PC 크롬 권장 · 클릭하면 조준이 잠긴다" 가 틀린 안내다 — 자리도 아깝다 */
+  body.touch #mTip{display:none}
+  /* 어떤 화면에서도 메뉴가 잘려서 못 누르는 일은 없게 — 넘치면 세로로 굴러간다.
+     ⚠`place-content:center` 는 넘칠 때 **위쪽이 잘리고 스크롤도 안 된다**. `safe` 를 붙여야 한다. */
+  .ov{overflow-y:auto; overscroll-behavior:contain; place-content:safe center; padding:6px 0}
   .mwrap{border:1px solid rgba(95,211,200,.4); background:rgba(8,18,20,.55);
     padding:26px 34px 22px; box-shadow:0 0 34px rgba(95,211,200,.12), inset 0 0 40px rgba(95,211,200,.05)}
   .ov .mbtn{display:block; width:380px; margin:12px auto 0; padding:15px 0; cursor:pointer;
