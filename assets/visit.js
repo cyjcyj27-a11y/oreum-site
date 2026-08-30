@@ -90,10 +90,15 @@
         });
       });
   }
-  function ymd(d) {
-    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  // 날짜는 '한국시간' 기준으로 고정합니다.
+  // 예전에는 방문자 컴퓨터의 시계를 그대로 썼습니다. 그러면 한국이 8월 31일 아침일 때
+  // 미국·유럽 방문자는 아직 8월 30일이라, 전체 방문 수는 오르는데 '오늘' 칸은 어제 칸으로
+  // 들어갔습니다. 대시보드에서 오전마다 전체와 오늘이 어긋나 보이던 이유입니다.
+  // ※ 보는 쪽(stats.html)도 같은 기준이어야 합니다.
+  function ymd() {
+    return new Date(Date.now() + 9 * 3600 * 1000).toISOString().slice(0, 10);
   }
-  var today = ymd(new Date());
+  var today = ymd();
   // 내 컴퓨터에서 열어보는 건 방문 수에 넣지 않습니다 (숫자를 직접 부풀리지 않도록)
   var local = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) || location.protocol === 'file:';
 

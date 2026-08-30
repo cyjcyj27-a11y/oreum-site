@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<title>루루냥 지표 — 오름게임즈</title>
+<title>오름게임즈 지표</title>
 <meta name="keywords" content="웹게임, 브라우저게임, 프리게임, 퍼즐게임, 무료게임, 설치없는게임, 회원가입없는게임, 인디게임, 오름게임즈, webgame, browsergame, freegame, puzzlegame, oreumgames">
 <style>
   :root {
@@ -49,7 +49,7 @@
 </head>
 <body>
 <div class="wrap">
-  <h1>🐾 루루냥 지표</h1>
+  <h1>🐾 오름게임즈 지표</h1>
   <p class="sub">쿠키 없이 · 브라우저당 하루 1회 집계 · 실시간</p>
 
   <div class="card">
@@ -110,7 +110,8 @@
 (function () {
   var NS = 'oreumgames';
   var base = 'https://abacus.jasoncameron.dev/get/' + NS + '/';
-  function ymd(d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+  // 날짜는 '한국시간' 기준 — 세는 쪽(assets/visit.js)과 같은 기준이어야 '오늘' 칸이 맞습니다
+  function ymd() { return new Date(Date.now() + 9 * 3600 * 1000).toISOString().slice(0, 10); }
   function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
   var failed = 0;
   // 한 번도 기록된 적 없는 값은 404로 옵니다 — 그건 진짜 0입니다.
@@ -138,7 +139,7 @@
         return sleep(600 * (tries + 1)).then(function () { return get(k, tries + 1); });
       });
   }
-  var today = ymd(new Date());
+  var today = ymd();
   // 유입 경로(src_*)와 국가(cc_*)는 뺐습니다. 구글 애널리틱스가 더 정확하게 보여줍니다.
   var keys = ['total', 'returning', 'game_open', 'game_session', 'game_players', 'game_returning',
               'pageviews', 'pv_home', 'pv_saju', 'pv_guide', 'pv_support', 'pv_privacy',
