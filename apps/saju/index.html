@@ -965,7 +965,7 @@ html[lang="en"] .zw-top { padding-right: 22px; }
 </div>
 
 <script src="i18n_content.js?v=19"></script>
-<script src="i18n.js?v=35"></script>
+<script src="i18n.js?v=36"></script>
 <script>
 /* =========================================================
    data-core.js
@@ -4865,6 +4865,184 @@ var SAJU_PATTERNS = [
     lines: ['재물·자리·공부의 세 별을 모두 갖춘 배치입니다. 고전에서 귀하게 치던 균형형 구조라, 한 방향으로 몰아치기보다 세 가지를 고루 굴릴 때 안정적으로 올라갑니다.',
             '벌고, 맡고, 배우는 축이 다 살아 있는 사주입니다. 한쪽에 전부를 걸 이유가 없는 구조이니, 지금 부족하다고 느끼는 축부터 순서대로 채우면 됩니다.'] }
 ];
+
+/* =========================================================
+   2026-08-31 2차분 — 수집 규칙 248개에서 더 꺼낸 격언 26개
+
+   [고른 기준]
+   248개 중 엔진이 판별할 수 있는 것은 234개(도구/규칙변환.py).
+   그 중에서
+     · 이미 위에 있는 26개
+     · 앱의 다른 칸이 이미 하는 말 (일간 10종 · 십성 개수 · 오행 과다 ·
+       합충 · 십이운성 · 신강약)
+     · 절반 넘는 사람에게 걸려 '패턴'이라 부를 수 없는 것
+       (양간/음간, 억부, 일간합, 길격 …)
+   을 빼고, 명리서가 따로 이름 붙여 부르던 것만 남겼다.
+
+   [남은 것]
+   판별은 되지만 안 넣은 것이 약 100개 있다. 대부분 위의 '이미 하는 말'
+   쪽이다. 화면에서 겹치면 dedupe.js가 한 번 더 걸러 준다.
+
+   [못 넣은 것]
+   14개는 글자 인접·삼합 반합처럼 엔진이 자리 관계를 추적해야 알 수 있어
+   버렸다. 억지로 넣으면 틀린 조건으로 문장이 뜬다.
+   ========================================================= */
+
+/* ── 규칙이 쓰는 판별 도우미 ───────────────────────────── */
+
+/* 사주 여덟 글자 안에 그 지지가 있는가 */
+function ruleHasBranch(s, ko) {
+  var p = s.pillars;
+  var list = [p.year.branch, p.month.branch, p.day.branch];
+  if (p.hour) list.push(p.hour.branch);
+  for (var i = 0; i < list.length; i++) {
+    if (BRANCHES[list[i]].ko === ko) return true;
+  }
+  return false;
+}
+
+/* 일지·월지의 십성(10종) — facts는 5종만 갖고 있어 여기서 따로 낸다 */
+function ruleBranchGod10(s, branchIdx) {
+  var b = BRANCHES[branchIdx];
+  return tenGod10(s.dayEl, s.dayYin, b.el, branchIdx % 2 === 1);
+}
+function ruleDayBranchGod10(s) { return ruleBranchGod10(s, s.pillars.day.branch); }
+function ruleMonthBranchGod10(s) { return ruleBranchGod10(s, s.pillars.month.branch); }
+
+/* 일지·월지의 십이운성 (일간 기준) */
+function ruleUnseongDay(s) {
+  return unseongOf(s.dayStem.ko, s.pillars.day.branch, s.dayStem.yin);
+}
+function ruleUnseongMonth(s) {
+  return unseongOf(s.dayStem.ko, s.pillars.month.branch, s.dayStem.yin);
+}
+
+/* 그 오행의 삼합국이 섰는가.
+   facts의 samhap은 배열이 아니라 '섰으면 그 한 벌, 아니면 null' 이다. */
+function ruleSamhap(f, el) {
+  return !!f.samhap && f.samhap.el === el;
+}
+
+/* 가장 많은 오행의 개수 */
+function ruleMaxElement(s) {
+  var max = 0;
+  Object.keys(s.elementCount).forEach(function (k) {
+    if (s.elementCount[k] > max) max = s.elementCount[k];
+  });
+  return max;
+}
+
+SAJU_PATTERNS.push(
+  { key: 'gokjik', pr: 28, t: '곡직(曲直) — 목으로 뭉친 배치',
+    when: function (s, f) { return ruleSamhap(f, '목'); },
+    lines: ['지지가 나무의 세력으로 하나가 된 배치입니다. 굽히지 않고 곧게 뻗으려는 힘이 삶 전체를 관통해서, 한번 정한 방향은 웬만해선 바꾸지 않습니다.'] },
+
+  { key: 'yeomsang', pr: 28, t: '염상(炎上) — 화로 뭉친 배치',
+    when: function (s, f) { return ruleSamhap(f, '화'); },
+    lines: ['지지가 불의 세력으로 하나가 된 배치입니다. 안에 담아두기보다 끊임없이 드러내고 퍼뜨리는 쪽이라, 조용한 자리에 오래 두면 사람이 시듭니다.'] },
+
+  { key: 'jonghyeok', pr: 28, t: '종혁(從革) — 금으로 뭉친 배치',
+    when: function (s, f) { return ruleSamhap(f, '금'); },
+    lines: ['지지가 쇠의 세력으로 하나가 된 배치입니다. 어수선한 것을 잘라 정리하는 힘이 세서, 남들이 손 못 대는 것을 끝내 주는 자리에 어울립니다.'] },
+
+  { key: 'yunha', pr: 28, t: '윤하(潤下) — 수로 뭉친 배치',
+    when: function (s, f) { return ruleSamhap(f, '수'); },
+    lines: ['지지가 물의 세력으로 하나가 된 배치입니다. 부딪히지 않고 스며들어 넓게 퍼지는 힘이라, 당장은 티가 안 나도 시간이 지나면 영향이 남습니다.'] },
+
+  { key: 'wangji-chung', pr: 31, t: '왕지충(旺支沖) — 한쪽으로 확 기우는 충',
+    when: function (s) { return (ruleHasBranch(s, '묘') && ruleHasBranch(s, '유')) ||
+                                (ruleHasBranch(s, '자') && ruleHasBranch(s, '오')); },
+    lines: ['계절이 한창인 글자끼리 정면으로 부딪히는 배치입니다. 결과가 중간에 머물지 않고 한쪽으로 확 기울어서, 아니다 싶으면 지난 것을 통째로 잘라내고 새로 시작합니다. 이별도 싸움도 뒤끝이 없는 편입니다.'] },
+
+  { key: 'saengji-chung', pr: 48, t: '생지충(生支沖) — 시동이 걸리는 충',
+    when: function (s) { return (ruleHasBranch(s, '인') && ruleHasBranch(s, '신')) ||
+                                (ruleHasBranch(s, '사') && ruleHasBranch(s, '해')); },
+    lines: ['계절을 여는 글자끼리 부딪히는 배치입니다. 삶의 진폭이 크고 예측이 잘 안 되는 대신, 가라앉은 판에 시동을 거는 힘이 남다릅니다. 에너지를 밖으로 써야 편해집니다.'] },
+
+  { key: 'bung-chung', pr: 38, t: '붕충(朋沖) — 소소하게 꼬이는 충',
+    when: function (s) { return (ruleHasBranch(s, '진') && ruleHasBranch(s, '술')) ||
+                                (ruleHasBranch(s, '축') && ruleHasBranch(s, '미')); },
+    lines: ['같은 흙끼리 부딪히는 배치라 큰 사건보다 잔일이 엉키는 쪽으로 나타납니다. 대신 낯선 판에 적응하고 이해가 갈린 사람들을 맞춰주는 재주가 붙습니다.'] },
+
+  { key: 'hwagae-to', pr: 44, t: '화개(華蓋) — 모으고 이어주는 배치',
+    when: function (s) { return s.elementCount['토'] >= 3; },
+    lines: ['가운데서 조율하고 저장하는 기운이 두꺼운 배치입니다. 사람과 일 사이를 잇는 자리에 잘 맞고 끈기가 있는데, 모아두는 쪽으로 기울면 결정을 오래 미루게 됩니다.'] },
+
+  { key: 'jong-gyeok', pr: 46, t: '종격(從格) — 한 기운으로 쏠린 배치',
+    when: function (s) { return ruleMaxElement(s) >= 4; },
+    lines: ['한 기운이 판을 거의 다 차지한 배치입니다. 이런 사주는 균형을 맞추려 애쓰기보다 그 쏠린 기운을 아예 자기 정체성으로 삼는 편이 순리라고 봅니다.'] },
+
+  { key: 'yang-ji', pr: 35, t: '양지동차강(陽支動且强) — 크고 빠르게 벌어지는 삶',
+    when: function (s, f) { return f.yinyang === 'yang'; },
+    lines: ['여덟 글자가 거의 다 양으로 채워진 배치입니다. 좋은 일이든 나쁜 일이든 빠르고 크게 벌어지는 리듬이라, 숨기고 기다리는 방식은 이 사주에 잘 안 맞습니다.'] },
+
+  { key: 'eum-ji', pr: 42, t: '음지정차전(陰支靜且專) — 좁고 더디게 오는 삶',
+    when: function (s, f) { return f.yinyang === 'yin'; },
+    lines: ['여덟 글자가 거의 다 음으로 채워진 배치입니다. 성과도 문제도 천천히 체감되는 리듬이라, 조급하게 결과를 확인하려 들면 스스로만 지칩니다.'] },
+
+  { key: 'johu-cold', pr: 37, t: '조후(調候) — 데워줄 불이 없는 겨울',
+    when: function (s, f) { return f.season === '겨울' && s.elementCount['화'] === 0; },
+    lines: ['한겨울에 태어났는데 데워줄 불이 한 글자도 없는 배치입니다. 능력이 있어도 밖으로 나오는 속도가 느리니, 몸을 움직이게 만드는 환경을 일부러 만들어 두는 것이 처방입니다.'] },
+
+  { key: 'johu-hot', pr: 36, t: '조후(調候) — 식혀줄 물이 없는 여름',
+    when: function (s, f) { return f.season === '여름' && s.elementCount['수'] === 0; },
+    lines: ['한여름에 태어났는데 식혀줄 물이 한 글자도 없는 배치입니다. 달아오르면 스스로 멈추기 어려우니, 쉬는 시간을 일정에 넣어두는 것이 실력 관리가 됩니다.'] },
+
+  { key: 'deukryeong', pr: 36, t: '득령(得令) — 월지 하나로 버티는 배치',
+    when: function (s, f) { return ['비겁', '인성'].indexOf(f.monthGod) >= 0 && f.strength.level === '신약'; },
+    lines: ['나머지 자리는 내 편이 아닌데 가장 힘이 센 월지 하나가 나를 받쳐주는 배치입니다. 밖에서 보기엔 약해 보여도 끝까지 버티는 힘은 여기서 나옵니다.'] },
+
+  { key: 'geuk-sinyak', pr: 37, t: '극신약(極身弱) — 받쳐줄 글자가 없는 배치',
+    when: function (s) { return s.godCountRaw['비겁'] === 0 && s.godCountRaw['인성'] === 0; },
+    lines: ['나를 돕는 글자가 겉에 하나도 없는 배치입니다. 그런데 실제로는 오히려 아주 강한 사람처럼 보이는 경우가 많습니다. 겉의 단단함과 속의 소모가 다른 유형이라, 회복하는 시간을 스스로 챙겨야 합니다.'] },
+
+  { key: 'sinwang-jaewang', pr: 29, t: '신왕재왕(身旺財旺) — 그릇과 재물이 함께 큰 배치',
+    when: function (s, f) { return f.strength.level === '신강' && s.godCount['재성'] >= 2; },
+    /* 2.5로 두면 한 명도 안 걸린다. 이 엔진의 신강 판정에서 재성은 빼는 쪽으로
+       세므로 신강+재성 과다가 겹치기 어렵다. 표본 4,176명에서 재성 최댓값이
+       2.43이라 2로 낮췄다 (신강자의 약 3%). */
+    lines: ['담을 그릇도 두껍고 담길 재물도 큰 배치입니다. 고전이 귀하게 치던 짜임이라, 판을 키우는 결정에서 겁먹지 않아도 되는 몇 안 되는 구조입니다.'] },
+
+  { key: 'mujae', pr: 47, t: '무재사주(無財四柱) — 재물 글자가 없는 배치',
+    when: function (s) { return s.godCountRaw['재성'] === 0; },
+    lines: ['여덟 글자에 재물의 별이 없습니다. 없다고 못 버는 것이 아니라 원국에 존재감이 없다는 뜻이라, 재물 운이 들어오는 시기에 몰아서 터지는 구조로 봅니다.'] },
+
+  { key: 'ingwa-jae', pr: 30, t: '인태과 희견재(印太過喜見財) — 준비가 과한 배치',
+    when: function (s) { return s.godCount['인성'] >= 3 && s.godCount['재성'] >= 1; },
+    lines: ['받아들이고 준비하는 기운이 넘치는데, 그것을 현실로 눌러주는 재물의 별도 함께 있는 배치입니다. 생각만 길어질 때 마감이나 숫자를 걸어두면 바로 굴러갑니다.'] },
+
+  { key: 'gwanin-yangjeon', pr: 39, t: '관인양전(官印兩全) — 자리와 자격을 함께 쥔 배치',
+    when: function (s) { return s.god10['정관'] >= 1 && s.god10['인수'] >= 1; },
+    lines: ['맡을 자리와 그것을 받쳐줄 자격이 둘 다 있는 배치입니다. 조직 안에서 순서대로 올라가는 데 유리해서, 자격을 먼저 갖추고 자리를 받는 순서가 잘 맞습니다.'] },
+
+  { key: 'yugwan-muin', pr: 45, t: '유관무인(有官無印) — 자리는 있고 받침이 없는 배치',
+    when: function (s) { return s.godCount['관성'] >= 1 && s.godCountRaw['인성'] === 0; },
+    lines: ['맡는 자리는 있는데 그것을 받쳐줄 자격과 지원이 겉에 없는 배치입니다. 직책에 비해 뒷심이 달리기 쉬우니, 공부와 자격을 채우는 것이 곧 방어가 됩니다.'] },
+
+  { key: 'gwanseong-taegwa', pr: 33, t: '관성태과(官星太過) — 눌리는 힘이 과한 배치',
+    when: function (s) { return s.godCount['관성'] >= 3; },
+    lines: ['나를 통제하는 별이 지나치게 많은 배치입니다. 책임이 몰릴수록 실력이 펴지지 않으니, 맡는 개수를 줄이는 것이 곧 성과를 올리는 방법이 됩니다.'] },
+
+  { key: 'jeonggwan-gyeok', pr: 38, t: '정관격(正官格) — 순리대로 올라가는 배치',
+    when: function (s) { return ruleMonthBranchGod10(s) === '정관' && s.god10Raw['상관'] === 0; },
+    lines: ['가장 힘이 센 자리에 정관이 앉고, 그것을 깨는 상관이 없는 배치입니다. 규칙이 살아 있는 판에서 순서대로 올라가는 유형이라, 편법이 통하는 자리에 가면 오히려 헤맵니다.'] },
+
+  { key: 'gito-tagim', pr: 31, t: '기토탁임(己土濁壬) — 조직과 내가 섞이는 배치',
+    when: function (s) { return s.dayStem.ko === '임' && s.god10['정관'] >= 1; },
+    lines: ['나를 통제해야 할 기운이 나를 확실히 누르지 못해, 나와 조직의 경계가 흐려지는 배치입니다. 규칙과 부딪히기보다 안으로 스며들어 뜻을 이루는 쪽이 이 사주의 방식입니다.'] },
+
+  { key: 'hyosin', pr: 45, t: '효신(梟神) — 배우자 자리에 앉은 어머니 별',
+    when: function (s) { return ruleDayBranchGod10(s) === '편인'; },
+    lines: ['배우자 자리에 어머니의 별이 앉은 배치입니다. 결혼 뒤에도 원가족과의 거리 조절이 숙제가 되기 쉬워서, 두 집 사이의 규칙을 일찍 정해두면 갈등이 크게 줍니다.'] },
+
+  { key: 'jeolcheo', pr: 39, t: '절처봉생(絶處逢生) — 끊겼다 다시 시작되는 자리',
+    when: function (s) { return ruleUnseongDay(s) === '절'; },
+    lines: ['배우자 자리가 한번 끊겼다 다시 이어지는 기운 위에 있습니다. 인연도 사는 곳도 변동이 잦은 대신, 상황이 바뀔 때 적응하는 속도가 남다릅니다.'] },
+
+  { key: 'jajung-moheo', pr: 34, t: '자중모허(子衆母虛) — 사람은 많고 몫은 얇은 배치',
+    when: function (s) { return s.godCount['비겁'] >= 3; },
+    lines: ['나와 같은 급의 글자가 여럿인 배치입니다. 주변에 사람은 많은데 한 사람 몫으로 오는 지원은 얇아지는 구조라, 넓게 걸치기보다 한두 곳을 깊게 두는 편이 낫습니다.'] }
+);
 
 </script>
 <script>
