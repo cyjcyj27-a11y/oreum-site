@@ -893,8 +893,24 @@ body{ font-size:19px; }
 .more-card .mc i{ display:block; font-style:normal; font-size:15px; margin-top:8px; color:var(--muted); }
 
 @media (max-width:1180px){ .showcase .grid{ grid-template-columns:repeat(2,1fr); } }
+/* 2026-08-31 — 폰에서 카드가 한 칸씩만 나와 화면 하나에 게임 하나만 보였다.
+   대문에 들어온 사람이 게임까지 못 가고 나가는 원인이라 두 칸으로 바꾼다.
+   여백을 먼저 줄이고 글씨는 칸에 들어갈 만큼만 줄였다.
+   ⚠ 761px 이상(PC)은 손대지 않는다 — 네 칸 그대로다 */
 @media (max-width:760px){
-  .showcase .grid{ grid-template-columns:1fr; }
+  .showcase{ padding:26px 0 42px; }
+  .showcase .grid{ grid-template-columns:repeat(2,1fr); gap:12px; }
+  .showcase .lede{ margin:26px 0 0; }
+  .mini{ border-radius:14px; }
+  .mbody{ padding:10px 11px 12px; }
+  .mbody b{ font-size:16px; line-height:1.25; }
+  .mbody i{ font-size:12.5px; margin-top:2px; }
+  .kind{ left:7px; top:7px; font-size:11px; padding:2px 8px; }
+  .isnew{ right:7px; top:7px; font-size:10.5px; padding:2px 8px; }
+  .more-card .mc{ padding:16px 12px; }
+  .more-card .mc b{ font-size:16px; }
+  .more-card .mc i{ font-size:12.5px; margin-top:6px; }
+  .mini-jump{ grid-column:1 / -1; }
   .header-inner{ gap:14px; }
   .header-inner .values{ display:none; }
 }
