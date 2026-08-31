@@ -900,7 +900,7 @@ body{ font-size:19px; }
 @media (max-width:760px){
   .showcase{ padding:26px 0 42px; }
   .showcase .grid{ grid-template-columns:repeat(2,1fr); gap:12px; }
-  .showcase .lede{ margin:26px 0 0; }
+  .showcase .lede{ margin:26px 0 0; font-size:14px; line-height:1.6; }
   .mini{ border-radius:14px; }
   .mbody{ padding:10px 11px 12px; }
   .mbody b{ font-size:16px; line-height:1.25; }
