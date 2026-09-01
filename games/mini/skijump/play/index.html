@@ -704,6 +704,7 @@ function ambience() {
 }
 
 /* ── 조작: 왼쪽 / 오른쪽, 그게 다 ── */
+/* PC 는 ← →, 폰은 아무 데나 짚고 좌우로 밀기(한 손으로 된다). */
 /* 조작은 왼쪽·오른쪽 둘뿐이다.
  * 스스로 뛰는 기능을 넣었다가 뺐다(2026-09-01) — 점프대를 밟으면 알아서 뜨니
  * 손으로 뛰는 게 겹쳤다. 키가 둘로 돌아왔다. */
@@ -723,25 +724,43 @@ addEventListener('keyup', e => {
   if (k === 'arrowright' || k === 'd') key.R = false;
 });
 
-/* 손가락은 화면 좌우 절반으로 나눠 받는다. 여러 손가락도 따로 센다 */
-const touches = new Map();
+/* 손가락은 화면 아무 데나 짚고 좌우로 민다 — 민 쪽으로 간다.
+ * 한 손으로 폰을 쥔 채 엄지만 움직여도 되게 바꿨다(2026-09-01, 사용자 요구).
+ * 전에는 화면 왼쪽 절반/오른쪽 절반이었는데, 그러면 두 손이 필요했다.
+ *
+ * 짚은 자리가 기준점이다. 거기서 DEAD 만큼 밀면 그쪽 방향이 된다.
+ * ⚠ 방향은 **반대로 밀거나 손을 뗄 때까지 유지된다**(누르고 있는 것과 같다).
+ *   손을 떼면 곧게 선다. 화면 가운데로 돌아올 필요가 없다.
+ * ⚠ 기준점은 손가락을 DEAD 만큼 떨어져 따라다닌다. 안 그러면 한 방향으로
+ *   계속 밀어야 하고, 되돌릴 때 민 거리만큼 도로 끌어와야 한다.
+ *   따라다니게 해 두면 되돌리는 데 늘 DEAD 두 뼘이면 된다.
+ * 여러 손가락도 따로 센다(양쪽이 서로 다른 방향이면 서로 지운다). */
+const touches = new Map();          // pointerId → {x: 기준점, dir: -1 | 0 | 1}
 function readTouch() {
   key.L = key.R = false;
-  for (const side of touches.values()) { if (side < 0) key.L = true; else key.R = true; }
+  for (const t of touches.values()) {
+    if (t.dir < 0) key.L = true; else if (t.dir > 0) key.R = true;
+  }
 }
-function side(e) {
+/* 판이 좁으면 뼘도 좁아야 한다. 화면 폭의 2.5%, 최소 7px */
+function grip() {
   const r = cv.getBoundingClientRect();
-  return (e.clientX - r.left) < r.width / 2 ? -1 : 1;
+  return { x0: r.left, dead: Math.max(7, r.width * .025) };
 }
 cv.addEventListener('pointerdown', e => {
   audioStart();
   if (S !== 'play') return;
   cv.setPointerCapture(e.pointerId);
-  touches.set(e.pointerId, side(e)); readTouch(); e.preventDefault();
+  touches.set(e.pointerId, { x: e.clientX - grip().x0, dir: 0 });
+  readTouch(); e.preventDefault();
 });
 cv.addEventListener('pointermove', e => {
-  if (!touches.has(e.pointerId)) return;
-  touches.set(e.pointerId, side(e)); readTouch();
+  const t = touches.get(e.pointerId);
+  if (!t) return;
+  const g = grip(), x = e.clientX - g.x0, dx = x - t.x;
+  if      (dx >=  g.dead) { t.dir =  1; t.x = x - g.dead; }
+  else if (dx <= -g.dead) { t.dir = -1; t.x = x + g.dead; }
+  readTouch();
 });
 const drop = e => { touches.delete(e.pointerId); readTouch(); };
 cv.addEventListener('pointerup', drop);
@@ -1532,7 +1551,7 @@ function showMenu() {
   const fresh = unlocked <= 1 && !bests.length;
   veilShow({
     hero: true, title: true,
-    keys: (TOUCH ? '화면 왼쪽·오른쪽으로 방향을 바꿉니다' : '← → 로 방향을 바꿉니다') +
+    keys: (TOUCH ? '손가락을 좌우로 밀어 방향을 바꿉니다' : '← → 로 방향을 바꿉니다') +
           '<br><b>STAGE ' + stage + '</b> / ' + STAGES,
     go:   fresh ? '시작하기' : '이어하기',
     go2:  fresh ? null : '처음부터'
