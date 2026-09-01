@@ -1,0 +1,1858 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>SKI JUMP — 오름게임즈</title>
+<meta name="robots" content="noindex">
+<link rel="canonical" href="https://oreumgames.com/games/mini/skijump/">
+<meta name="description" content="점프대를 밟고 날아오르는 스키 게임. 좌우 둘만 누르면 됩니다.">
+<meta name="theme-color" content="#cfe4f2">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;overflow:hidden;background:#0e1a24;
+    -webkit-tap-highlight-color:transparent;touch-action:none;overscroll-behavior:none}
+  body{display:flex;align-items:center;justify-content:center;
+    font:600 16px/1.4 -apple-system,BlinkMacSystemFont,"Pretendard","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+    color:#12222e;user-select:none;-webkit-user-select:none}
+
+  /* 세로 판. 화면 높이에 맞추되 9:16 을 넘지 않게 가운데 놓는다 */
+  #wrap{position:relative;height:100dvh;width:min(100vw,56.25dvh);
+    box-shadow:0 0 60px rgba(0,0,0,.55);overflow:hidden;background:#e8f2fa}
+  canvas{display:block;width:100%;height:100%}
+
+  /* ── 덮개(시작·끝·PAUSE) ── */
+  #veil{position:absolute;inset:0;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;gap:0;text-align:center;
+    padding:0 22px 46px;background:rgba(214,234,247,.93);backdrop-filter:blur(3px)}
+  #veil.off{display:none}
+  #title{font-size:clamp(40px,13vw,72px);font-weight:900;letter-spacing:-.02em;
+    line-height:.94;color:#22406e;text-shadow:0 3px 0 rgba(255,255,255,.85)}
+  #title small{display:block;font-size:.3em;font-weight:800;letter-spacing:.28em;
+    color:#5a7fae;margin-top:10px;text-shadow:none}
+  #lead{margin-top:16px;font-size:clamp(15px,4vmin,19px);font-weight:700;color:#2b556e;line-height:1.5}
+  #lead b{color:#c0392b}
+  #lead .over{display:block;margin-top:2px;font-weight:900;letter-spacing:.08em;
+    font-size:clamp(30px,9vw,50px);line-height:1.05;color:#5a7fae}
+  #lead .over.best{color:#c0392b}
+  #keys{margin-top:14px;font-size:clamp(13px,3.4vmin,16px);font-weight:700;color:#5a8199;line-height:1.6}
+  #big{margin-top:10px;font-size:clamp(52px,15vmin,86px);font-weight:900;color:#22406e;line-height:1;
+    letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+  #bigUnit{font-size:.34em;font-weight:800;color:#5a7fae;margin-left:4px}
+  #sub{margin-top:8px;font-size:clamp(14px,3.8vmin,18px);font-weight:800;color:#5a7fae}
+  #sub img{width:1.15em;height:1.15em;vertical-align:-.22em;margin-right:.12em}
+  /* ⚠ font 축약형에 inherit 을 쓰면 그 줄이 통째로 버려진다(PIXL 때 겪은 함정).
+   *   실제로 단추 글씨가 13.3px Arial 로 나오고 있었다. 낱개 속성으로 쓸 것. */
+  button{font-family:inherit}
+  #go{margin-top:26px;border:0;border-radius:999px;cursor:pointer;
+    padding:16px 40px;font-weight:900;font-size:clamp(17px,4.6vmin,21px);line-height:1;letter-spacing:.02em;
+    background:#22406e;color:#fff;box-shadow:0 5px 0 #152a4a;transition:transform .08s,box-shadow .08s}
+  #go:active{transform:translateY(4px);box-shadow:0 1px 0 #152a4a}
+  /* 두 번째 단추 — 첫 단추와 같은 모양에 색만 뺀다 */
+  #go2{margin-top:10px;border:2px solid #22406e;border-radius:999px;cursor:pointer;
+    padding:14px 38px;font-weight:900;font-size:clamp(15px,4.2vmin,19px);line-height:1;letter-spacing:.02em;
+    background:transparent;color:#22406e;transition:transform .08s}
+  #go2:active{transform:translateY(2px)}
+  #go2[hidden]{display:none}
+
+  #alt{margin-top:12px;border:0;background:none;cursor:pointer;
+    font-weight:800;font-size:clamp(13px,3.6vmin,15px);line-height:1;letter-spacing:.06em;
+    color:#5a7fae;text-decoration:underline;text-underline-offset:4px;padding:8px 10px}
+  #alt[hidden]{display:none}
+
+/* 시작 화면 스키어 */
+  #hero{display:block;width:clamp(136px,38vw,206px);height:auto;margin:0 auto -10px}
+  #hero[hidden]{display:none}
+
+  /* ── 판 고르기 ── */
+  #pick{position:absolute;inset:0;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;gap:12px;padding:16px 12px 52px;
+    background:rgba(214,234,247,.97)}
+  #pick[hidden]{display:none}
+  #pickTop{font-weight:900;font-size:clamp(20px,6vw,30px);line-height:1;letter-spacing:.14em;color:#22406e}
+  #grid{display:grid;grid-template-columns:repeat(10,1fr);gap:3px;
+    width:100%;max-width:460px}
+  #grid button{aspect-ratio:1;border:0;border-radius:5px;cursor:pointer;padding:0;
+    font-weight:800;font-size:clamp(9px,2.4vw,13px);line-height:1;
+    background:#fff;color:#22406e;box-shadow:0 1px 0 rgba(34,64,110,.18)}
+  #grid button.done{background:#2b8558;color:#fff}
+  #grid button.now{background:#22406e;color:#fff;outline:2px solid #d8462a}
+  #grid button:disabled{background:rgba(255,255,255,.34);color:rgba(34,64,110,.3);
+    cursor:default;box-shadow:none}
+  #pickBack{margin-top:4px;border:0;border-radius:999px;cursor:pointer;
+    padding:12px 30px;font-weight:900;font-size:clamp(14px,4vmin,17px);line-height:1;
+    background:#22406e;color:#fff;box-shadow:0 4px 0 #152a4a}
+
+  /* ── PAUSE 단추(오른쪽 위) ── */
+  #pauseBtn{position:absolute;top:8px;right:104px;z-index:5;
+    width:42px;height:42px;border:0;border-radius:12px;cursor:pointer;
+    background:rgba(255,255,255,.72);color:#22406e;font-weight:900;font-size:12px;line-height:1;
+    display:flex;align-items:center;justify-content:center}
+  #pauseBtn:active{background:#fff}
+  #pauseBtn.off{display:none}
+
+  /* 소리 끄기 — PAUSE 왼쪽에 나란히 */
+  #soundBtn{position:absolute;top:8px;right:56px;z-index:5;
+    width:42px;height:42px;border:0;border-radius:12px;cursor:pointer;
+    background:rgba(255,255,255,.72);color:#22406e;
+    display:flex;align-items:center;justify-content:center}
+  #soundBtn:active{background:#fff}
+  #bgmBtn{position:absolute;top:8px;right:8px;z-index:5;
+    width:42px;height:42px;border:0;border-radius:12px;cursor:pointer;
+    background:rgba(255,255,255,.72);color:#22406e;
+    display:flex;align-items:center;justify-content:center;
+    font-weight:400;font-size:19px;line-height:1}
+  #bgmBtn:active{background:#fff}
+  #bgmBtn.off{filter:grayscale(1);opacity:.5}
+  #soundBtn svg{width:20px;height:20px;fill:none;stroke:#22406e;
+    stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  #soundBtn.off{filter:grayscale(1);opacity:.5}
+  #soundBtn.off svg{stroke:rgba(34,64,110,.38)}
+
+</style>
+</head>
+<body>
+<div id="wrap">
+  <canvas id="cv"></canvas>
+  <button id="bgmBtn" type="button" aria-label="MUSIC"></button>
+  <button id="soundBtn" type="button" aria-label="SOUND"></button>
+  <button id="pauseBtn" class="off" type="button" aria-label="PAUSE">II</button>
+  <div id="veil">
+    <canvas id="hero" width="280" height="250" aria-hidden="true"></canvas>
+    <div id="title">SKI JUMP<small>OREUM GAMES</small></div>
+    <div id="lead"></div>
+    <div id="big" hidden></div>
+    <div id="sub" hidden></div>
+    <div id="keys"></div>
+    <button id="go" type="button">START</button>
+    <button id="go2" type="button" hidden></button>
+    <button id="alt" type="button" hidden></button>
+    <div id="pick" hidden>
+      <div id="pickTop">STAGE</div>
+      <div id="grid"></div>
+      <button id="pickBack" type="button">BACK</button>
+    </div>
+  </div>
+</div>
+<script src="/assets/game-home.js?v=5" data-top="4" data-left="4" data-fullscreen="1" defer></script>
+<script>
+/* ─────────────────────────────────────────────────────────────
+ * SKI JUMP — 점프대를 밟고 날아오르는 스키. 오름게임즈.
+ *
+ * 조작은 좌우 둘뿐이지만, 그 둘이 두 가지 일을 한다:
+ *   땅에서 = 옆으로 이동(기울일수록 옆으로 빨리, 대신 아래로 느려진다)
+ *   공중에서 = 회전
+ * 그래서 "조심할까 지를까"가 조작 자체에 들어 있다. 이게 이 게임의 전부다.
+ *
+ * 좌표: y 가 커질수록 산 아래. 카메라는 플레이어를 따라 내려간다.
+ * 눈사태가 쫓아오던 판이었는데, 나무에 한 번만 박아도 끝이 되면서 눈사태가 할 일이
+ * 없어졌다(2026-09-01). 그래서 걷어내고 **점프대**를 판의 중심으로 옮겼다.
+ * ───────────────────────────────────────────────────────────── */
+'use strict';
+
+/* 논리 판 폭은 고정, 높이는 화면 비율을 그대로 받는다.
+ * (높이까지 고정하면 세로로 긴 폰에서 그림이 가로로 눌린다) */
+const W = 450;
+let H = 800;
+
+/* 내리막(앞)은 화면 아래쪽이고, 눈사태(뒤)는 위쪽이다.
+ * 그래서 사람은 위에 둔다 — 화면의 3분의 2가 앞을 보는 자리가 된다 */
+let EYE = H * 0.34;
+
+const CFG = {
+  speedMax:    560,   // 똑바로 섰을 때 초당 하강 거리
+  speedMin:    250,   // 완전히 눕혔을 때 (기울기의 대가)
+  lateral:     430,   // 완전히 눕혔을 때 초당 옆 이동
+  leanRate:    5.2,   // 기울어지는 빠르기 (1초에 이만큼)
+  leanBack:    6.4,   // 손을 뗐을 때 되돌아오는 빠르기
+  airTime:     0.92,  // 점프대에서 떠 있는 시간(초)
+  wipeTime:    0.60,  // 나무에 박고 나뒹구는 시간 — 이게 끝나면 게임오버
+  airSpeed:    1.22,  // 공중에서는 조금 더 빠르다
+  spinRate:    520,   // 공중 회전 (초당 도)
+  boostTime:   1.5,   // 착지 성공 뒤 가속이 붙는 시간
+  boostMul:    1.28,
+  courseW:     360,   // 나무 벽 사이 실제 폭
+  coinPt:      10,    // 동전 한 알 점수
+  grab:        27,    // 동전 줍는 반경
+  /* 점프대는 반폭이 40 이라 어디를 밟느냐에 따라 이륙 자리가 그만큼 어긋난다.
+   * 27 로는 날아가는 길의 동전을 다 흘린다 — 뜬 동안만 넉넉히 넓혀 준다 */
+  airGrab:     62,
+};
+
+/* ── 100 판 ──
+ * 끝없이 내려가는 대신 판을 나눈다. 판마다 도착선이 있고, 거기까지 가면 이긴다.
+ * 아래 t 는 0(1판) → 1(100판). 숫자는 전부 여기 한 곳에서만 정한다 —
+ * 난이도를 만지고 싶으면 이 함수만 보면 된다. */
+const STAGES = 100;
+
+function stageCfg(n) {
+  const t = (n - 1) / (STAGES - 1);
+  /* 나무에 한 번만 박아도 끝이라, 초반은 **아주** 헐거워야 한다.
+   * 그래서 t 를 그대로 쓰지 않고 제곱해서 앞쪽을 눌러 놓는다 —
+   * 1~10판은 거의 빈 산이고, 어려워지는 건 뒤쪽에 몰린다.
+   * 1판은 조작을 익히는 자리다: 나무가 거의 없고 눈사태도 안 쫓아온다. */
+  /* ⚠ 예전엔 t^1.35 였다. 앞쪽이 너무 눌려서 **27판에 나무가 5그루**뿐이었다
+   *   (208m 에 1그루인 판도 있었다). 곧게 오르게 바꾸고 바닥값을 올렸다. */
+  const a = t;                         // 산이 빽빽해지는 몫
+  const e = t * t;                     // 눈사태가 사나워지는 몫 — 뒤쪽에 몰아 둔다
+  return {
+    goal:   Math.round(150 + 640 * t),   // 1판 150m(약 7초) → 100판 790m
+    /* ⚠ fillP 가 초반 난이도를 쥐고 있다. 줄마다 반드시 뭔가 놓으면
+     * 1판에도 나무가 열 몇 그루 깔린다 — 한 번만 박아도 끝인 게임에서는 너무 많다.
+     * 1판은 다섯 줄에 한 줄만 채운다 */
+    /* 통나무가 생긴 뒤로는 좁은 것들을 덜 깔아도 된다 — 안 그러면 후반이 과해진다 */
+    fillP:  0.26 + 0.38 * a,             // 이 줄에 뭐라도 놓을 확률
+    dens:   0.04 + 0.24 * a,             // 놓는다면 둘일 확률
+    space:  250 - 90 * a,                // 줄 사이 간격
+    /* 점프대는 확률이 아니라 **간격**으로 놓는다 — 리듬이 있어야 재미가 된다.
+     * 공중에 0.92초 떠서 630px 를 가니, 1250px 마다면 가는 시간의 절반쯤을 난다 */
+    rampGap: 1300 - 260 * t,
+    coinP:  0.34,                        // 한 줄 뒤에 동전 줄이 따라올 확률
+    /* 통나무 — 가로로 누운 넓은 장애물(반폭 62, 코스의 3분의 1을 덮는다).
+     * 좁은 것만 있으면 한 줄에 한두 개로는 **아무것도 안 누르고 내려가는 길**을 못 막는다.
+     * 그래서 확률이 아니라 점프대처럼 **간격**으로 놓는다 — 수를 직접 쥐려고.
+     * 8판쯤부터 나오기 시작한다(그 전은 조작 익히는 자리라 비워 둔다) */
+    logGap: n < 8 ? 1e9 : 2000 - 1050 * t,
+  };
+}
+
+/* 어디까지 깼는지 — 저장은 이 두 줄이 전부다 */
+let stage = 1, unlocked = 1, bests = [], coinTotal = 0;
+try {
+  const j = JSON.parse(localStorage.getItem('skijump.prog') || '{}');
+  unlocked  = clampInt(j.u, 1, STAGES);
+  bests     = Array.isArray(j.b) ? j.b : [];
+  coinTotal = Math.max(0, parseInt(j.c, 10) || 0);   // 여태 모은 동전
+} catch (e) {}
+stage = unlocked;
+function clampInt(v, a, b) { v = parseInt(v, 10); return isFinite(v) ? Math.max(a, Math.min(b, v)) : a; }
+function saveProg() {
+  try {
+    localStorage.setItem('skijump.prog',
+      JSON.stringify({ u: unlocked, b: bests, c: coinTotal }));
+  } catch (e) {}
+}
+
+const cv  = document.getElementById('cv');
+const ctx = cv.getContext('2d', { alpha: false });
+
+/* 화면 해상도에 맞춰 캔버스를 잡고, 논리 좌표(W×H)로 그리게 배율을 건다 */
+function fit() {
+  const r = cv.getBoundingClientRect();
+  const dpr = Math.min(devicePixelRatio || 1, 2.5);
+  cv.width  = Math.round(r.width  * dpr);
+  cv.height = Math.round(r.height * dpr);
+  H = Math.round(W * (r.height / r.width));      // 가로세로가 늘 같은 비율이 되게
+  EYE = H * 0.34;
+  const k = cv.width / W;
+  ctx.setTransform(k, 0, 0, k, 0, 0);
+  ctx.imageSmoothingEnabled = true;
+}
+addEventListener('resize', fit);
+
+/* ── 뒤섞기: 같은 씨앗이면 같은 산이 나온다(검증할 때 쓴다) ── */
+let seed = 1;
+function rnd() { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; }
+function rr(a, b) { return a + (b - a) * rnd(); }
+
+/* ── 게임 상태 ── */
+let S = 'menu';                 // menu | pick | play | pause | clear | fail
+let player, obs, coins, flakes, trail, cam, dist, score, combo, shake, msg, frontY;
+let ST, goalY, nextRamp, nextLog, zoneA, zoneB;   // zoneA~zoneB = 착지 구역(여기엔 아무것도 안 놓는다)                  // 지금 판의 설정, 도착선 위치(px)
+let clock = 0;                  // 그림이 흔들리는 데 쓰는 시계(초). 눈사태의 rumble 을 대신한다
+
+
+function reset(n) {
+  stage  = clampInt(n || stage, 1, STAGES);
+  ST     = stageCfg(stage);
+  goalY  = ST.goal * 26;
+  /* 판마다 산 모양이 정해져 있다 — 몇 번을 다시 해도 같은 판이라야 외워서 넘을 수 있다 */
+  seed   = stage * 7919 + 13;
+
+  player = { x: 0, lean: 0, y: 0, prevY: 0, state: 'ski', t: 0, spin: 0, boost: 0, hurt: 0,
+             trick: 0, coin: 0 };
+  obs    = [];
+  coins  = [];
+  trail  = [];
+  flakes = [];
+  for (let i = 0; i < 46; i++) flakes.push({ x: rr(0, W), y: rr(0, H), r: rr(.8, 2.4), v: rr(.25, .8) });
+  cam = 0; dist = 0; score = 0; combo = 0; shake = 0; msg = null;
+
+  /* 첫 400px 는 비워 둔다 — 시작하자마자 나무에 박으면 억울하다.
+   * 도착선 앞 260px 도 비운다 — 마지막 한 발짝에서 박히면 제일 억울하다 */
+  lane = 0;
+  laneGoal = rr(0, 1) < .5 ? -1 : 1;      // 첫 방향은 판마다 다르게
+  frontY = 420;
+  nextRamp = 620;                 // 첫 점프대는 일찍 — 무엇을 하는 게임인지 바로 보이게
+  nextLog  = 1400;
+  logSide  = rr(0, 1) < .5 ? -1 : 1;
+  zoneA = zoneB = -1;
+  fill(3200);
+}
+
+/* 앞쪽을 이만큼까지 채운다.
+ * 점프대는 **뚫려 있는 길(lane) 위에** 놓는다 — 굳이 찾아가지 않아도 밟히게.
+ * 그게 이 게임의 재미라서, 어쩌다 만나는 물건이면 안 된다. */
+function fill(upto) {
+  const half = CFG.courseW / 2;
+  while (frontY < upto && frontY < goalY - 300) {
+    /* ⚠ 착지 구역에는 아무것도 놓지 않는다.
+     * 공중에서는 방향을 못 잡으니(좌우가 회전이다) 내려앉는 자리에 나무가 있으면
+     * 피할 도리가 없다. 실제로 봇이 죽는 40번 중 22번이 착지 직후였다. */
+    const landing = frontY > zoneA && frontY < zoneB;
+    if (!landing) spawnRow(frontY);
+
+    /* 통나무 — 길 밖 넓은 자리를 덮는다. 착지 구역에는 놓지 않는다 */
+    if (!landing && frontY >= nextLog) {
+      const half2 = CFG.courseW / 2, keep = 32 + 62;
+      /* 길 양옆 중 자리가 넓은 쪽에 눕힌다.
+       * ⚠ 늘 길 바로 옆에만 놓으면 **바깥 벽에 붙어 내려가는 길**이 안 막힌다
+       *   (실제로 왼쪽 벽 붙기가 33판이나 통과했다). 그래서 안쪽/바깥쪽을 번갈아 쓴다. */
+      /* ⚠ '넓은 쪽'으로만 고르면 한쪽에 쏠린다(오른쪽 벽 붙기가 20판 통과했다).
+       *   번갈아 눕히되, 그쪽에 자리가 없으면 반대쪽을 쓴다. */
+      const room = d => d * (half2 - 30) - (lane + d * keep);
+      logSide = -logSide;
+      const side = room(logSide) * logSide > 30 ? logSide : -logSide;
+      const inner = lane + side * keep;                 // 길에 붙은 끝
+      const outer = side * (half2 - 30);                // 벽에 붙은 끝
+      let lx = inner + (outer - inner) * (rnd() < .5 ? rr(0, .30) : rr(.70, 1));
+      if (Math.abs(lx - lane) >= keep) {
+        obs.push({ x: lx, y: frontY + rr(-10, 10), type: 'log', rad: 62, seed: rnd(), hit: 0 });
+        if (coins.length) {
+          coins = coins.filter(c => Math.abs(c.y - (frontY)) > 40 || Math.abs(c.x - lx) > 70);
+        }
+      }
+      nextLog = frontY + rr(ST.logGap * .75, ST.logGap * 1.25);
+    }
+
+    if (frontY >= nextRamp) {
+      const rx = clamp(lane + rr(-16, 16), -half + 44, half - 44);
+      obs.push({ x: rx, y: frontY + rr(-8, 8), type: 'jump', rad: 40, seed: rnd(), hit: 0 });
+      const cx = clamp(rx, -half + 20, half - 20);
+      /* 점프대로 이끄는 동전 — 따라오다 보면 밟게 된다 */
+      for (let i = 0; i < 3; i++) {
+        const cy = frontY - 210 + i * 68;
+        if (obs.some(o => Math.abs(o.y - cy) < 34 && Math.abs(o.x - cx) < 30)) continue;
+        coins.push({ x: cx, y: cy, got: 0 });
+      }
+      /* 날아가는 길에 놓인 동전 — **미리 깔아 둔다**. 뜨고 나서 생기면 안 된다.
+       * 점프대 한가운데 줄로 세워 두고, 옆으로 어긋난 채 떠도 다 먹히게
+       * 공중에서는 줍는 범위를 넓혀 준다(CFG.airGrab) */
+      for (let i = 1; i <= 9; i++) {
+        coins.push({ x: cx, y: frontY + 60 * i + 70, got: 0 });
+      }
+      /* 뜬 뒤 내려앉는 자리.
+       * 그냥 뜨면 0.92초 × 683px/s ≒ 630px, **착지 가속이 붙어 있으면 800px 넘게** 난다.
+       * 그 차이를 안 보면 가속 중에 뛴 사람만 나무에 처박힌다 */
+      zoneA = frontY + 400;
+      zoneB = frontY + 960;
+      nextRamp = frontY + rr(ST.rampGap * .75, ST.rampGap * 1.3);
+    } else if (!landing && rnd() < ST.coinP) {
+      spawnCoins(frontY + 60);
+    }
+    frontY += rr(ST.space * .62, ST.space);
+  }
+}
+
+/* ── 산 만들기 ──
+ * 판마다 씨앗이 고정이라, 한 번 막힌 배치가 나오면 그 판은 영영 못 깬다.
+ * 그래서 **줄마다 반드시 뚫린 자리(lane)를 하나 남긴다**.
+ * lane 은 한 줄에 reach 만큼만 움직인다 — 다음 줄에 닿을 때까지 몸을 눕혀
+ * 갈 수 있는 거리다. 그러니 아무리 촘촘해져도 길은 늘 있다. */
+let lane = 0, laneGoal = 0, logSide = 1;
+
+function spawnRow(y) {
+  const half  = CFG.courseW / 2;
+  /* 한 줄에서 다음 줄까지 걸리는 동안 옆으로 갈 수 있는 거리(넉넉히 7할만 쓴다) */
+  const reach = CFG.lateral * (ST.space / CFG.speedMax) * 0.7;
+
+  /* ⚠ 길을 아무렇게나 흔들면(random walk) 벽에 붙어 굳는다.
+   *   그러면 가운데가 계속 비어서 **아무것도 안 누르고 직진만 해도 깨진다**
+   *   (실제로 100판 중 14판이 그랬다). 그래서 좌우로 **왕복**시킨다.
+   *   한 줄에 reach 이상 움직이지 않으니 사람이 따라올 수 있는 건 그대로다. */
+  const step = reach * .55;
+  if (Math.abs(lane - laneGoal) < step) {
+    const side = laneGoal <= 0 ? 1 : -1;                 // 늘 반대쪽으로 넘어간다
+    laneGoal = side * rr(half * .45, half * .85);
+  }
+  lane = clamp(lane + Math.sign(laneGoal - lane) * step, -half + 46, half - 46);
+  const open = 64;                                  // 이만큼은 늘 비워 둔다
+
+  const n = rnd() < ST.fillP ? (rnd() < ST.dens ? 2 : 1) : 0;   // 빈 줄도 있다
+  if (!n) return;
+  for (let i = 0; i < n; i++) {
+    const r = rnd();
+    let type, rad;
+    /* rad 는 그림의 반폭과 같아야 한다 — 어느 한쪽만 키우면 판정이 어긋난다.
+     * 점프대는 여기 없다. 아래 fill() 에서 '길 위에' 따로 놓는다 */
+    if (r < 0.34)               { type = 'rock'; rad = 20; }
+    else if (r < 0.50)          { type = 'stump'; rad = 15; }
+    else                        { type = 'tree'; rad = 16; }
+
+    /* ⚠ 자리를 손대 봤지만 다 더 나빠져서 되돌렸다(2026-09-01).
+     *   '길 반대편에 몰기' → 가운데가 뻥 뚫려 직진 통과가 11 → 32판.
+     *   '가운데·양쪽 벽을 돌아가며 막기' → 나무가 오히려 사라져 27판이 11 → 5그루.
+     *   자리 규칙으로는 못 푼다. 진짜 답은 아래 '남은 문제' 참고. */
+    let x = rr(-half + 22, half - 22);
+    if (type !== 'jump') {
+      /* 뚫린 자리를 막으면 안 된다 — 가까운 쪽 바깥으로 밀어낸다 */
+      const keep = open / 2 + rad;
+      if (Math.abs(x - lane) < keep) {
+        const l = lane - keep, rgt = lane + keep;
+        const okL = l > -half + 22, okR = rgt < half - 22;
+        if (okL && okR) x = (x < lane) === okL ? l : rgt;
+        else if (okL)   x = l;
+        else if (okR)   x = rgt;
+        else            continue;                   // 양쪽 다 안 되면 이 하나는 그냥 뺀다
+      }
+    }
+    /* 너무 붙어 있으면 피할 길이 없다 — 겹치면 버린다 */
+    if (obs.some(o => Math.abs(o.y - y) < 60 && Math.abs(o.x - x) < 74)) continue;
+    const o = { x, y: y + rr(-24, 24), type, rad, seed: rnd(), hit: 0 };
+    obs.push(o);
+    /* 이 줄은 앞서 깔아 둔 동전 위에 놓일 수도 있다. 깔린 동전은 걷어 낸다 */
+    if (coins.length) {
+      coins = coins.filter(c =>
+        Math.abs(o.y - c.y) > 34 || Math.abs(o.x - c.x) > 30);
+    }
+  }
+}
+
+/* ── 동전 ──
+ * 한 알씩 흩어 놓으면 그냥 주워진다. 줄로 놓아야 "저기까지 갈까 말까"가 생긴다.
+ * 줄은 옆으로 휜다 — 따라가려면 몸을 눕혀야 하고, 눕히면 아래로 느려진다.
+ * 그 값이 이 게임에서 동전 한 줄의 진짜 가격이다. */
+function spawnCoins(y) {
+  const half = CFG.courseW / 2 - 26;
+  const n    = 4 + Math.floor(rnd() * 5);
+  const bend = rr(-1, 1);                     // 얼마나 휘는가
+  let x = rr(-half, half);
+  for (let i = 0; i < n; i++) {
+    x = clamp(x + bend * 30, -half, half);
+    const cy = y + i * 44;
+    /* 나무에 겹친 동전은 먹을 수가 없다 — 그런 건 버린다 */
+    if (obs.some(o => Math.abs(o.y - cy) < 34 && Math.abs(o.x - x) < 30)) continue;
+    coins.push({ x, y: cy, got: 0 });
+  }
+}
+
+/* ─────────────── 소리 ───────────────
+ * 두 갈래로 나눠 놨다.
+ *
+ *  ① 계속 나는 소리 — 코드로 만든다(파일 없음)
+ *     눈 갈리는 소리 / 바람 / 눈사태 굉음. 셋 다 속도·기울기·눈사태 거리에
+ *     맞춰 실시간으로 오르내려야 하는데, mp3 한 장으로는 그게 안 된다.
+ *     게다가 끊김 없이 반복되려면 mp3 는 앞뒤 여백 때문에 늘 틈이 생긴다.
+ *
+ *  ② 한 번씩 나는 소리 — Pixabay mp3 (audio/ 폴더)
+ *     점프·착지·충돌·도착·실패·눈사태. 반복이 없으니 파일이 알맞다.
+ *
+ * 동전은 ①도 ②도 아니고 합성음이다 — 한 줄을 먹으면 초당 열 번 넘게 나는데
+ * mp3 는 그렇게 겹치면 지저분해진다.
+ *
+ * ⚠ 소리에는 rnd() 를 쓰지 말 것. 그건 판을 만드는 씨앗이라, 소리가 한 번
+ *   당길 때마다 지형이 달라진다. 소리 쪽은 Math.random() 을 쓴다. */
+
+const SFX = { jump: null, land: null, crash: null, clear: null, fail: null, coin: null };
+let AC = null, master = null, sfxGain = null, amb = null;
+/* 음악과 효과음을 따로 끈다(BREAK IT ALL 과 같은 방식).
+ * 저장은 '0' 이면 꺼짐 — 값이 없으면 켜짐이 기본이다 */
+let sndOn = true, bgmOn = true;
+try {
+  sndOn = localStorage.getItem('skijump.snd') !== '0';
+  bgmOn = localStorage.getItem('skijump.bgm') !== '0';
+} catch (e) {}
+
+/* ⚠ 준비와 재생을 나눈다.
+ * 예전엔 사람이 누른 **뒤에야** 파일을 받기 시작해서 배경음이 한참 뒤에 나왔다.
+ *   audioSetup() — 페이지가 뜨자마자. AudioContext 는 suspended 로 태어나므로
+ *                  소리는 안 나지만 파일을 받고 풀어 놓을 수 있다.
+ *   audioStart() — 사람이 처음 누를 때. resume 하고 배경음을 건다. 곧바로 난다. */
+function audioSetup() {
+  if (AC) return;
+  try {
+    AC = new (window.AudioContext || window.webkitAudioContext)();
+  } catch (e) { return; }
+  master = AC.createGain();
+  master.connect(AC.destination);
+  sfxGain = AC.createGain();                 // 효과음·바람 소리가 여기로 모인다
+  sfxGain.gain.value = sndOn ? 1 : 0;
+  sfxGain.connect(master);
+
+  /* 잡음 한 덩이를 만들어 세 층이 나눠 쓴다 */
+  const nb = AC.createBuffer(1, Math.floor(AC.sampleRate * 2), AC.sampleRate);
+  const d = nb.getChannelData(0);
+  for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+
+  const layer = (type, freq, q) => {
+    const s = AC.createBufferSource(); s.buffer = nb; s.loop = true;
+    const f = AC.createBiquadFilter(); f.type = type; f.frequency.value = freq;
+    if (q) f.Q.value = q;
+    const g = AC.createGain(); g.gain.value = 0;
+    s.connect(f); f.connect(g); g.connect(sfxGain); s.start();
+    return { f, g };
+  };
+  amb = {
+    hiss:   layer('bandpass', 1500, 0.6),   // 스키가 눈을 가르는 소리
+    wind:   layer('lowpass',   420)         // 바람
+  };
+
+  loadBgm();
+
+  /* 못 읽으면 <audio> 로 넘어간다 — 파일이 없다고 게임이 멈추면 안 된다 */
+  for (const k of Object.keys(SFX)) {
+    fetch('audio/' + k + '.mp3?v=2')
+      .then(r => r.ok ? r.arrayBuffer() : Promise.reject())
+      .then(b => AC.decodeAudioData(b))
+      .then(buf => { SFX[k] = buf; })
+      .catch(() => elFallback());
+  }
+}
+
+/* ── 배경음 ──
+ * mp3 는 앞뒤에 인코더가 붙인 여백이 있어서, 파일 통째로 반복시키면 한 바퀴마다 틈이 생긴다.
+ * 그래서 반복 지점을 **파일 안쪽**에 잡는다:
+ *   파일 = [40ms 무음] + [12마디짜리 본문 26.5초] + [뒤 여유 0.4초]
+ * 앞 무음 길이(40ms)를 상수로 두고 거기서부터 26.5초만 돌린다. 여백을 아예 안 건드리게 된다.
+ * (본문은 만들 때 이미 90ms 크로스페이드를 구워 넣어서 이음매 단차가 0.008 뿐이다) */
+/* ── 배경음 ──
+ * 곡: Guitar Rush (cloud_purple, Pixabay 316179) — 사용자가 고른 곡.
+ *
+ * 곡을 바꾸는 법:
+ *   1. `_참고/bgm_루프만들기.py` 로 루프를 만든다(마디에 맞춰 자르고 크로스페이드를 굽는다)
+ *   2. 나온 audio/bgm.mp3 를 넣고, 그 대본이 찍어 주는 세 숫자를 아래에 옮겨 적는다
+ *   3. BGM_ON 을 true 로 바꾸고 ?v= 번호를 올린다
+ * 효과음은 이 스위치와 상관없이 그대로 난다. */
+const BGM_ON = true;
+/* 배경음 크기. 한 곳에서만 고친다 — 세 군데(WebAudio·<audio>·음소거)가 이 값을 본다 */
+const BGM_VOL = 0.55, BGM_VOL_VEIL = 0.38;
+const BGM_HEAD = 0.040, BGM_LOOP = 26.544, BGM_FILE = 26.984;
+let bgm = null, bgmNode = null, bgmGain = null;
+
+function loadBgm() {
+  if (!BGM_ON) return;
+  fetch('audio/bgm.mp3?v=3')
+    .then(r => r.ok ? r.arrayBuffer() : Promise.reject())
+    .then(b => AC.decodeAudioData(b))
+    .then(buf => { bgm = buf; if (AC.state === 'running') startBgm(); })
+    .catch(() => elFallback());
+}
+
+/* 본문이 어디서 시작하나.
+ * 브라우저가 mp3 여백을 제대로 걷어 냈으면 길이가 원본 그대로다 — 그러면 잴 것 없이
+ * 앞에 깔아 둔 무음 길이(40ms)를 그냥 쓴다.
+ * ⚠ 무음이 끝나는 자리를 '재는' 방법은 쓰지 말 것: mp3 인코더가 소리를 앞으로 조금
+ *   번지게 해서 5ms 쯤 이르게 잡히고, 그만큼 반복 지점이 어긋나 딸깍 소리가 난다. */
+function bgmMark(buf) {
+  if (Math.abs(buf.duration - BGM_FILE) < 0.012) return BGM_HEAD;
+  const d = buf.getChannelData(0), sr = buf.sampleRate;
+  const lim = Math.min(d.length, Math.floor(sr * 0.5));
+  for (let i = 0; i < lim; i++) if (Math.abs(d[i]) > 0.02) return Math.max(0, i / sr - 0.005);
+  return BGM_HEAD;
+}
+
+function startBgm() {
+  if (!AC || !bgm || bgmNode) return;
+  const mark = bgmMark(bgm);
+  bgmNode = AC.createBufferSource();
+  bgmNode.buffer = bgm;
+  bgmNode.loop = true;
+  bgmNode.loopStart = mark;
+  bgmNode.loopEnd = Math.min(mark + BGM_LOOP, bgm.duration);
+  bgmGain = AC.createGain();
+  bgmGain.gain.value = bgmOn ? (S === 'play' ? BGM_VOL : BGM_VOL_VEIL) : 0;
+  bgmNode.connect(bgmGain); bgmGain.connect(master);
+  bgmNode.start(0, mark);
+}
+
+/* 사람이 처음 누를 때 — 여기서부터 실제로 소리가 난다 */
+function audioStart() {
+  audioSetup();
+  if (AC && AC.state === 'suspended') AC.resume();
+  startBgm();
+  if (elMode && ELS.bgm && BGM_ON && bgmOn) ELS.bgm.play().catch(() => {});
+}
+
+/* ── file:// 로 열었을 때 ──
+ * 브라우저는 file:// 에서 fetch() 를 막는다. 그래서 소리 파일을 통째로 못 읽는다.
+ * (그림 quokka.webp 는 <img> 라서 잘 온다 — 그게 헷갈리는 지점이다)
+ *
+ * 그럴 때는 <audio> 태그로 돌린다. 반복 지점을 못 잡아 배경음이 한 바퀴마다
+ * 아주 짧게 끊기지만, 안 들리는 것보다는 낫다.
+ * 홈페이지(http)에서는 위쪽 길(fetch+WebAudio)로 가서 이음매 없이 돈다. */
+let elMode = false;
+const ELS = {};
+
+function elFallback() {
+  if (elMode) return;
+  elMode = true;
+  for (const k of Object.keys(SFX)) {
+    const a = new Audio('audio/' + k + '.mp3?v=2');
+    a.preload = 'auto';
+    ELS[k] = a;
+  }
+  if (BGM_ON) {
+    const b = new Audio('audio/bgm.mp3');
+    b.loop = true;
+    b.preload = 'auto';
+    b.volume = bgmOn ? BGM_VOL : 0;
+    ELS.bgm = b;
+    if (AC && AC.state === 'running') b.play().catch(() => {});
+  }
+}
+
+function setSnd(on) {
+  sndOn = !!on;
+  try { localStorage.setItem('skijump.snd', sndOn ? '1' : '0'); } catch (e) {}
+  if (sfxGain) sfxGain.gain.setTargetAtTime(sndOn ? 1 : 0, AC.currentTime, .02);
+}
+
+function setBgm(on) {
+  bgmOn = !!on;
+  try { localStorage.setItem('skijump.bgm', bgmOn ? '1' : '0'); } catch (e) {}
+  if (bgmGain) bgmGain.gain.setTargetAtTime(bgmOn ? BGM_VOL_VEIL : 0, AC.currentTime, .05);
+  if (ELS.bgm) {
+    ELS.bgm.volume = bgmOn ? BGM_VOL : 0;
+    if (bgmOn) ELS.bgm.play().catch(() => {}); else ELS.bgm.pause();
+  }
+}
+
+/* mp3 한 발. 같은 소리가 잇달아 나면 음높이를 조금 흔들어 준다 */
+function play(k, vol, spread) {
+  if (!sndOn) return false;
+  if (elMode) {
+    const src = ELS[k];
+    if (!src) return false;
+    const a = src.cloneNode();                    // 겹쳐 나도 끊기지 않게 복제해서 쓴다
+    a.volume = Math.min(1, vol == null ? 1 : vol);
+    a.play().catch(() => {});
+    return true;
+  }
+  if (!AC || !SFX[k]) return false;
+  const s = AC.createBufferSource();
+  s.buffer = SFX[k];
+  s.playbackRate.value = 1 + (Math.random() * 2 - 1) * (spread || 0);
+  const g = AC.createGain();
+  g.gain.value = vol == null ? 1 : vol;
+  s.connect(g); g.connect(sfxGain); s.start();
+  return true;
+}
+
+/* 합성음 한 발 */
+function beep(freq, len, type, vol) {
+  if (!AC || !sndOn) return;
+  try {
+    const o = AC.createOscillator(), g = AC.createGain();
+    o.type = type || 'sine';
+    o.frequency.setValueAtTime(freq, AC.currentTime);
+    o.frequency.exponentialRampToValueAtTime(freq * .55, AC.currentTime + len);
+    g.gain.setValueAtTime(vol == null ? .14 : vol, AC.currentTime);
+    g.gain.exponentialRampToValueAtTime(.0001, AC.currentTime + len);
+    o.connect(g); g.connect(sfxGain);
+    o.start(); o.stop(AC.currentTime + len + .02);
+  } catch (e) {}
+}
+
+/* 동전은 이어 먹을수록 음이 올라간다 — 줄을 다 먹었을 때가 제일 기분 좋게.
+ * 0.3초짜리 짧은 소리라 초당 열 번 나도 겹쳐서 지저분해지지 않는다.
+ * (긴 소리를 쓰면 안 된다 — 동전 한 줄을 훑으면 그만큼 자주 난다) */
+function sndCoin() {
+  const step = Math.min(player.coin, 14);
+  const rate = Math.pow(2, step / 26);              // 반음씩 올라간다
+  if (elMode && ELS.coin && sndOn) {
+    const a = ELS.coin.cloneNode();
+    a.playbackRate = rate; a.volume = .55;
+    a.play().catch(() => {});
+  } else if (AC && sndOn && SFX.coin) {
+    const n = AC.createBufferSource();
+    n.buffer = SFX.coin;
+    n.playbackRate.value = rate;
+    const g = AC.createGain(); g.gain.value = .55;
+    n.connect(g); g.connect(sfxGain); n.start();
+  } else {
+    beep(880 * rate, .07, 'triangle', .06);
+  }
+}
+const sndJump  = () => { if (!play('jump',  .85, .05)) beep(520, .16, 'triangle', .11); };
+const sndLand  = () => { if (!play('land',  1.0, .06)) beep(760, .20, 'triangle', .13); };
+const sndCrash = () => { if (!play('crash', .95, .08)) beep(90,  .34, 'sawtooth', .16); };
+
+/* 계속 나는 세 층을 매 틀마다 손본다.
+ * 값을 바로 꽂지 않고 setTargetAtTime 으로 미끄러뜨린다 — 안 그러면 딱딱거린다 */
+function ambience() {
+  if (!AC || !amb) return;
+  const t = AC.currentTime;
+  let hiss = 0, wind = 0, hf = 1200;
+
+  if (S === 'play') {
+    const p = player;
+    const sp  = clamp((p.vy || 0) / CFG.speedMax, 0, 1.4);
+    const air = p.state === 'air';
+    const ln  = Math.abs(p.lean);
+    /* 눕힐수록 눈을 더 긁는다. 떠 있으면 눈에 닿지 않으니 조용해진다 */
+    hiss = air ? .012 : .045 + sp * .085 + ln * .10;
+    hf   = 850 + sp * 1400 + ln * 1500;
+    wind = .018 + sp * sp * .085 + (air ? .05 : 0);
+  }
+  amb.hiss.g.gain.setTargetAtTime(hiss, t, .07);
+  amb.hiss.f.frequency.setTargetAtTime(hf, t, .07);
+  amb.wind.g.gain.setTargetAtTime(wind, t, .09);
+
+  /* 배경음은 판 위에서 제일 크고, 덮개가 떠 있을 때는 뒤로 물린다 */
+  if (bgmGain) bgmGain.gain.setTargetAtTime(bgmOn ? (S === 'play' ? BGM_VOL : BGM_VOL_VEIL) : 0, t, .25);
+  else if (ELS.bgm && bgmOn) ELS.bgm.volume = S === 'play' ? BGM_VOL : BGM_VOL_VEIL;
+}
+
+/* ── 조작: 왼쪽 / 오른쪽, 그게 다 ── */
+/* 조작은 왼쪽·오른쪽 둘뿐이다.
+ * 스스로 뛰는 기능을 넣었다가 뺐다(2026-09-01) — 점프대를 밟으면 알아서 뜨니
+ * 손으로 뛰는 게 겹쳤다. 키가 둘로 돌아왔다. */
+const key = { L: false, R: false };
+
+addEventListener('keydown', e => {
+  if (e.repeat) return;
+  const k = e.key.toLowerCase();
+  if (k === 'arrowleft'  || k === 'a') { key.L = true; e.preventDefault(); }
+  if (k === 'arrowright' || k === 'd') { key.R = true; e.preventDefault(); }
+  if (k === 'p' || k === 'escape') togglePause();
+  if (k === 'enter' || k === ' ') { if (S !== 'play') { go.click(); e.preventDefault(); } }
+});
+addEventListener('keyup', e => {
+  const k = e.key.toLowerCase();
+  if (k === 'arrowleft'  || k === 'a') key.L = false;
+  if (k === 'arrowright' || k === 'd') key.R = false;
+});
+
+/* 손가락은 화면 좌우 절반으로 나눠 받는다. 여러 손가락도 따로 센다 */
+const touches = new Map();
+function readTouch() {
+  key.L = key.R = false;
+  for (const side of touches.values()) { if (side < 0) key.L = true; else key.R = true; }
+}
+function side(e) {
+  const r = cv.getBoundingClientRect();
+  return (e.clientX - r.left) < r.width / 2 ? -1 : 1;
+}
+cv.addEventListener('pointerdown', e => {
+  audioStart();
+  if (S !== 'play') return;
+  cv.setPointerCapture(e.pointerId);
+  touches.set(e.pointerId, side(e)); readTouch(); e.preventDefault();
+});
+cv.addEventListener('pointermove', e => {
+  if (!touches.has(e.pointerId)) return;
+  touches.set(e.pointerId, side(e)); readTouch();
+});
+const drop = e => { touches.delete(e.pointerId); readTouch(); };
+cv.addEventListener('pointerup', drop);
+cv.addEventListener('pointercancel', drop);
+addEventListener('blur', () => { touches.clear(); key.L = key.R = false; });
+
+/* ─────────────── 한 틀(프레임) 계산 ─────────────── */
+function update(dt) {
+  const p = player;
+
+  /* ── 1. 기울기 ── */
+  const dir = (key.R ? 1 : 0) - (key.L ? 1 : 0);
+  if (p.state === 'air') {
+    /* 점프대에서 뜬 동안은 같은 키가 회전이 된다 */
+    p.spin += dir * CFG.spinRate * dt;
+  } else if (p.state === 'ski') {
+    if (dir) p.lean = clamp(p.lean + dir * CFG.leanRate * dt, -1, 1);
+    else     p.lean = towards(p.lean, 0, CFG.leanBack * dt);
+  } else {
+    p.lean = towards(p.lean, 0, 3 * dt);       // 나뒹구는 동안은 그냥 눕는다
+  }
+
+  /* ── 2. 속도 ── */
+  let vy;
+  if (p.state === 'wipe') {
+    vy = CFG.speedMin * 0.35;                  // 거의 멈춘다
+  } else if (p.state === 'air') {
+    vy = CFG.speedMax * CFG.airSpeed;
+  } else {
+    /* 눕힐수록 느려진다 — 이 한 줄이 게임 전체의 갈등이다 */
+    vy = CFG.speedMax - (CFG.speedMax - CFG.speedMin) * Math.abs(p.lean);
+  }
+  if (p.boost > 0) { vy *= CFG.boostMul; p.boost -= dt; }
+
+  p.vy = vy;                                    // 소리(바람·눈 갈리는 소리)가 이 값을 본다
+  p.prevY = p.y;
+  p.y += vy * dt;
+
+  /* 스키 자국은 '지금 자리에서 뻗은 선'이 아니라 '지나온 자리'다.
+   * 곡선을 계산해 그리면 사람에게 딱 붙어 따라다녀서 줄에 매달린 것처럼 보인다 */
+  if (p.state === 'air') {
+    if (trail.length && trail[trail.length - 1]) trail.push(null);   // 떠 있는 동안은 끊긴다
+  } else {
+    const last = trail.length ? trail[trail.length - 1] : null;
+    if (!last || p.y - last.y > 11) trail.push({ x: p.x, y: p.y });
+  }
+  while (trail.length && (!trail[0] || trail[0].y < p.y - 250)) trail.shift();
+  if (p.state === 'ski') {
+    p.x = clamp(p.x + p.lean * CFG.lateral * dt,
+                -CFG.courseW / 2 + 14, CFG.courseW / 2 - 14);
+  }
+
+  dist  = p.y / 26;                             // 26px ≒ 1m 로 친다
+  score = p.coin * CFG.coinPt + Math.floor(p.trick);
+  /* 도착선을 넘으면 이긴 것이다 */
+  if (p.y >= goalY) return win();
+
+  /* ── 3. 몸 상태 시계 ── */
+  p.t -= dt;
+  if (p.state === 'air'  && p.t <= 0) land();
+  if (p.state === 'wipe' && p.t <= 0) return dead();     // 나뒹굴다 끝
+  if (p.hurt > 0) p.hurt -= dt;
+
+
+  /* ── 5. 새 지형 뿌리고 지난 것 걷기 ── */
+  fill(p.y + H * 1.6);
+  obs   = obs.filter(o => o.y > cam - 200);
+  coins = coins.filter(c => c.y > cam - 200 && c.got < 1);
+
+  /* ── 6. 부딪히기 ── */
+  /* 떠 있는 동안(점프대·스스로 뛴 것)은 넘어간다. 이게 점프의 쓸모다.
+   * 나뒹구는 중에는 조종을 못 하니 판정에서 빼 준다 — 피할 수 없는 죽음은 억울하다 */
+  if (p.state === 'ski') {
+    for (const o of obs) {
+      if (o.hit || o.y < p.prevY - 20 || o.y > p.y + 20) continue;
+      const dx = Math.abs(o.x - p.x);
+      if (o.type === 'jump') {
+        if (dx < o.rad + 8) { o.hit = 1; takeoff(); }
+      } else if (dx < o.rad + 10) {
+        o.hit = 1; crash();
+        return;                                // 박은 순간 이 틀은 끝
+      }
+    }
+  }
+
+  /* ── 6-2. 동전 줍기 ── */
+  {
+    for (const c of coins) {
+      if (c.got || c.y < p.prevY - 26 || c.y > p.y + 26) continue;
+      if (Math.abs(c.x - p.x) > (p.state === 'air' ? CFG.airGrab : CFG.grab)) continue;
+      c.got = 0.01;                            // 0 → 1 로 차오르면서 튀어 오르다 사라진다
+      p.coin++;                                  // 점수는 score 에서 한 번만 센다
+      sndCoin();
+    }
+  }
+  for (const c of coins) if (c.got) c.got = Math.min(1, c.got + dt * 2.6);
+
+  /* ── 7. 눈발과 화면 흔들림 ── */
+  for (const f of flakes) {
+    f.y += (vy * 0.16 + f.v * 60) * dt;
+    f.x -= p.lean * 40 * dt;
+    if (f.y > H) { f.y = -6; f.x = rr(0, W); }
+    if (f.x < -6) f.x += W; else if (f.x > W + 6) f.x -= W;
+  }
+  if (shake > 0) shake = Math.max(0, shake - dt * 3.2);
+  if (msg) { msg.t -= dt; if (msg.t <= 0) msg = null; }
+
+  cam = p.y - EYE;
+}
+
+function takeoff() {
+  const p = player;
+  p.state = 'air'; p.t = CFG.airTime; p.spin = 0;
+  sndJump();
+}
+
+/* 착지 — 회전이 어중간하면 넘어진다. 이게 "지를까 말까"의 값이다 */
+/* 착지. 예전엔 회전이 어긋나면 비틀거렸는데(WIPEOUT) 2026-09-01 에 걷어냈다 —
+ * 죽는 건 나무에 박았을 때 하나로 족하다. 지금은 늘 제대로 선다. */
+function land() {
+  const p = player;
+  const turns = Math.floor(Math.abs(p.spin) / 360);
+  p.state = 'ski'; p.spin = 0; p.boost = CFG.boostTime;
+  if (turns > 0) {
+    combo++;
+    const gain = turns * 120 * Math.min(combo, 5);
+    p.trick = (p.trick || 0) + gain;
+    msg = { t: 1.1, big: turns + ' SPIN', sm: '+' + gain + 'P' + (combo > 1 ? '   COMBO ×' + Math.min(combo, 5) : '') };
+    sndLand();
+  } else {
+    p.trick = (p.trick || 0) + 50;
+    msg = { t: .7, big: 'CLEAN', sm: '+50P' };
+    sndLand();
+  }
+}
+
+/* 나무·바위에 박으면 끝이다. 나뒹구는 걸 잠깐 보여 주고 게임오버로 넘어간다 */
+function crash() {
+  const p = player;
+  p.state = 'wipe'; p.t = CFG.wipeTime; p.hurt = 1;
+  combo = 0; shake = 1;
+  msg = { t: CFG.wipeTime, big: 'CRASH', sm: null, bad: true };
+  sndCrash();
+  /* 손가락으로 한 번이라도 눌러 본 뒤에만 떨린다 — 아니면 브라우저가 경고를 쏟는다 */
+  if (navigator.vibrate && navigator.userActivation && navigator.userActivation.hasBeenActive) {
+    try { navigator.vibrate(45); } catch (e) {}
+  }
+}
+
+function dead() {
+  S = 'fail';
+  pauseBtn.classList.add('off');
+  showFail();
+  if (!play('crash', 1.0)) beep(200, .5, 'sawtooth', .18);
+  setTimeout(() => play('fail', .8), 300);
+}
+
+function win() {
+  S = 'clear';
+  pauseBtn.classList.add('off');
+  const i = stage - 1;
+  const isBest = score > (bests[i] || 0);
+  if (isBest) bests[i] = score;
+  coinTotal += player.coin;          // 도착선을 넘어야 가져간다. 죽으면 못 가져간다
+  /* ⚠ 주소로 건너뛴 판(?stage=)은 진도를 밀어 주지 않는다.
+   *   50판을 그렇게 깼다고 51판이 열리면 34~49판을 건너뛴 게 된다. */
+  if (stage <= unlocked && stage >= unlocked && unlocked < STAGES) unlocked = stage + 1;
+  saveProg();
+  showClear(isBest);
+  if (!play('clear', .9)) {
+    beep(680, .12, 'triangle', .12);
+    setTimeout(() => beep(1020, .22, 'triangle', .12), 110);
+  }
+}
+
+const clamp   = (v, a, b) => v < a ? a : v > b ? b : v;
+const towards = (v, t, s) => v > t ? Math.max(t, v - s) : Math.min(t, v + s);
+
+/* ─────────────── 그리기 ───────────────
+ * 화면에 있는 것은 모두 코드로 그린다(그림 파일 없음).
+ * 세계 좌표 → 화면: sx = W/2 + o.x,  sy = o.y - cam */
+
+/* 자리마다 늘 같은 값이 나오는 난수. 나무 벽·눈 자국이 흔들리지 않게 */
+function hs(n) { n = Math.imul(n ^ 0x9e3779b9, 2654435761) >>> 0; return ((n >>> 8) & 0xffff) / 65536; }
+
+const SNOW_HI = '#ffffff', SNOW_LO = '#dbe9f4';
+
+function draw() {
+  const p = player;
+
+  ctx.save();
+  if (shake > 0) {
+    const s = shake * 7;
+    ctx.translate(rr(-s, s), rr(-s, s));
+  }
+
+  /* 1. 눈밭 바탕 */
+  const bg = ctx.createLinearGradient(0, 0, 0, H);
+  bg.addColorStop(0, '#c3dcee');
+  bg.addColorStop(.28, '#e4f0f9');
+  bg.addColorStop(1, '#fbfdff');
+  ctx.fillStyle = bg;
+  ctx.fillRect(-20, -20, W + 40, H + 40);
+
+  /* 2. 눈 위의 굴곡 — 부드러운 그늘을 띄엄띄엄 */
+  ctx.fillStyle = 'rgba(146,180,206,.16)';
+  const k0 = Math.floor(cam / 62) - 1;
+  for (let k = k0; k < k0 + Math.ceil(H / 62) + 3; k++) {
+    const sy = k * 62 - cam + hs(k) * 30;
+    const sx = 40 + hs(k * 7 + 1) * (W - 80);
+    ctx.beginPath();
+    ctx.ellipse(sx, sy, 22 + hs(k * 3) * 26, 6, 0, 0, 7);
+    ctx.fill();
+  }
+
+  /* 3. 스키 자국 */
+  const px = W / 2 + p.x, py = EYE;
+  drawTracks();
+
+  /* 4. 코스 밖 나무 벽 */
+  drawWalls();
+
+  /* 4-2. 동전 — 나무보다 먼저 그린다(나무 뒤로 들어가게) */
+  for (const c of coins) {
+    if (c.y < cam - 60 || c.y > cam + H + 60) continue;
+    drawCoin(W / 2 + c.x, c.y - cam, c);
+  }
+
+  /* 5. 장애물 — 위에 있는 것부터 그려야 앞뒤가 맞는다.
+   * 내 줄에서 멀수록 작게 그린다(원근). 부딪히는 순간은 딱 1.0 이라
+   * 판정 크기와 어긋나지 않는다 — 커 보이는데 안 죽는 일이 없게 */
+  const lo = cam - 80, hi = cam + H + 80;
+  for (const o of obs) {
+    if (o.y < lo || o.y > hi) continue;
+    const sx = W / 2 + o.x, sy = o.y - cam;
+    const d = 1 - .26 * Math.min(1, Math.abs(sy - EYE) / (H * .7));
+    if (o.type === 'tree')       drawTree(sx, sy, d, o.seed);
+    else if (o.type === 'rock')  drawRock(sx, sy, o.seed, d);
+    else if (o.type === 'stump') drawStump(sx, sy, d);
+    else if (o.type === 'log')   drawLog(sx, sy, d);
+    else                         drawJump(sx, sy, d);
+  }
+
+  /* 5-2. 도착선 */
+  drawGoal();
+
+  /* 6. 사람 */
+  drawSkier(px, py);
+
+  /* 8. 눈발 */
+  ctx.fillStyle = 'rgba(255,255,255,.85)';
+  for (const f of flakes) {
+    ctx.beginPath(); ctx.arc(f.x, f.y, f.r, 0, 7); ctx.fill();
+  }
+
+  /* 9. 가장자리를 살짝 눌러 가운데가 앞으로 나와 보이게 */
+  const vig = ctx.createRadialGradient(W / 2, EYE, H * .30, W / 2, EYE, H * .86);
+  vig.addColorStop(0, 'rgba(70,110,150,0)');
+  vig.addColorStop(1, 'rgba(70,110,150,.16)');
+  ctx.fillStyle = vig;
+  ctx.fillRect(0, 0, W, H);
+
+  ctx.restore();
+  drawHUD();
+}
+
+/* 코스 양옆 — 빽빽한 침엽수로 벽을 삼는다 */
+/* 눈에 파인 자국.
+ * 그늘진 홈 위에 밀려난 흰 눈이 얹힌 모양이라야 '파였다'로 보인다.
+ * 선 하나만 그으면 줄처럼 보인다.
+ * 멀어질수록 옅어지는 건 그라데이션에 맡긴다 — 마디마다 알파를 바꿔 가며
+ * 그으면 한 판에 수백 번을 긋게 된다 */
+function drawTracks() {
+  if (trail.length < 2) return;
+
+  const path = (gap, dy) => {
+    ctx.beginPath();
+    let pen = false;
+    for (const t of trail) {
+      if (!t) { pen = false; continue; }          // 떠 있던 구간은 건너뛴다
+      const x = W / 2 + t.x + gap, y = t.y - cam + dy;
+      if (pen) ctx.lineTo(x, y); else { ctx.moveTo(x, y); pen = true; }
+    }
+  };
+  const fade = (c0, c1) => {
+    const g = ctx.createLinearGradient(0, EYE, 0, EYE * .18);
+    g.addColorStop(0, c0); g.addColorStop(1, c1);
+    return g;
+  };
+  const groove = fade('rgba(128,166,196,.58)', 'rgba(128,166,196,0)');
+  const lip    = fade('rgba(255,255,255,.62)', 'rgba(255,255,255,0)');
+
+  ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  for (const gap of [-7, 7]) {
+    ctx.strokeStyle = groove; ctx.lineWidth = 8.4; path(gap, 0);    ctx.stroke();
+    ctx.strokeStyle = lip;    ctx.lineWidth = 2.4; path(gap, -3);   ctx.stroke();
+  }
+}
+
+function drawWalls() {
+  const half = CFG.courseW / 2;
+  const L = W / 2 - half, R = W / 2 + half;
+  ctx.fillStyle = '#cddfee';
+  ctx.fillRect(-20, -20, L + 20, H + 40);
+  ctx.fillRect(R, -20, W - R + 20, H + 40);
+
+  /* 코스 안쪽에 쌓인 눈두둑 — 길이 파여 있다는 느낌을 준다 */
+  for (const [ex, dir] of [[L, 1], [R, -1]]) {
+    const g = ctx.createLinearGradient(ex, 0, ex + dir * 17, 0);
+    g.addColorStop(0, 'rgba(255,255,255,.92)');
+    g.addColorStop(.55, 'rgba(246,251,255,.62)');
+    g.addColorStop(1, 'rgba(246,251,255,0)');
+    ctx.fillStyle = g;
+    ctx.fillRect(dir > 0 ? ex : ex - 17, -20, 17, H + 40);
+    ctx.fillStyle = 'rgba(120,163,196,.20)';                 // 두둑이 지는 그늘
+    ctx.fillRect(dir > 0 ? ex - 3 : ex, -20, 3, H + 40);
+  }
+
+  /* 벽은 바닥보다 조금 느리게 흐른다 — 멀리 있는 것처럼 보이게(시차) */
+  const cam2 = cam * .9;
+  const k0 = Math.floor(cam2 / 46) - 2;
+  for (let k = k0; k < k0 + Math.ceil(H / 46) + 4; k++) {
+    const sy = k * 46 - cam2 + hs(k) * 30;
+    for (let lane = 0; lane < 2; lane++) {
+      for (let c = 0; c < 2; c++) {
+        const h2 = hs(k * 31 + lane * 17 + c * 5);
+        const x = lane === 0 ? L - 12 - c * 26 - h2 * 14
+                             : R + 12 + c * 26 + h2 * 14;
+        drawTree(x, sy + c * 21, .82 + h2 * .3, h2);
+      }
+    }
+  }
+}
+
+function drawTree(x, y, s, sd) {
+  s = s || 1;
+  /* 눈밭에 드리운 그림자 — 빛이 왼쪽 위에서 드니 오른쪽 아래로 눕는다.
+   * 이게 있어야 나무가 '서 있다'로 읽힌다 */
+  ctx.fillStyle = 'rgba(100,142,176,.17)';
+  ctx.beginPath();
+  ctx.ellipse(x + 9 * s, y + 4 * s, 19 * s, 5 * s, -.34, 0, 7); ctx.fill();
+  ctx.beginPath();
+  ctx.ellipse(x, y + 2.5 * s, 13 * s, 4.2 * s, 0, 0, 7); ctx.fill();
+
+  /* 줄기 */
+  ctx.fillStyle = WOOD_D;
+  roundRect(ctx, x - 3 * s, y - 9 * s, 6 * s, 12 * s, 2.4 * s);
+
+  /* 잎 세 단. 끝을 둥글리고 밑동을 부풀려 종 모양으로 —
+   * 캐릭터가 둥근 그림이라 나무만 뾰족하면 따로 논다 */
+  for (let i = 0; i < 3; i++) {
+    const w = (18 - i * 3.8) * s;
+    const bot = y - i * 13 * s;
+    const top = bot - (21 - i * 1.5) * s;
+    const bell = (ww, tt, bb) => {
+      ctx.beginPath();
+      ctx.moveTo(x, tt);
+      ctx.quadraticCurveTo(x + ww * .62, tt + (bb - tt) * .58, x + ww, bb);
+      ctx.quadraticCurveTo(x, bb + 4.5 * s, x - ww, bb);
+      ctx.quadraticCurveTo(x - ww * .62, tt + (bb - tt) * .58, x, tt);
+      ctx.closePath();
+    };
+    ctx.fillStyle = i === 2 ? PINE_L : (sd > .5 ? PINE : PINE_D);
+    bell(w, top, bot); ctx.fill();
+    /* 얹힌 눈 */
+    ctx.fillStyle = 'rgba(252,254,255,.92)';
+    bell(w * .58, top + 1.4 * s, bot - (bot - top) * .40); ctx.fill();
+    /* 왼쪽 위에서 드는 빛 */
+    ctx.fillStyle = 'rgba(255,255,255,.10)';
+    ctx.beginPath();
+    ctx.moveTo(x, top);
+    ctx.quadraticCurveTo(x - w * .62, top + (bot - top) * .58, x - w, bot);
+    ctx.lineTo(x, bot); ctx.closePath(); ctx.fill();
+  }
+}
+
+/* 동전 — 제자리에서 돌아간다(두께가 늘었다 줄었다).
+ * 먹으면 위로 튀어 오르면서 사라진다 */
+function drawCoin(x, y, c) {
+  const t  = clock;
+  const a  = c.got ? 1 - c.got : 1;
+  const up = c.got ? c.got * 38 : Math.sin(t * 2.6 + c.x * .05) * 2;
+  const sc = c.got ? 1 + c.got * .7 : 1;
+  const w  = (Math.abs(Math.cos(t * 3.4 + c.x * .07)) * 8.4 + 2.2) * sc;
+
+  ctx.globalAlpha = a;
+  if (!c.got) {
+    ctx.fillStyle = 'rgba(104,146,178,.20)';
+    ctx.beginPath(); ctx.ellipse(x, y + 9, 7, 2.6, 0, 0, 7); ctx.fill();
+  }
+  ctx.fillStyle = '#d99a17';
+  ctx.beginPath(); ctx.ellipse(x, y - up, w, 10.5 * sc, 0, 0, 7); ctx.fill();
+  ctx.fillStyle = '#f8d259';
+  ctx.beginPath(); ctx.ellipse(x, y - up - 1, Math.max(.6, w - 2.4), 8.4 * sc, 0, 0, 7); ctx.fill();
+  ctx.globalAlpha = 1;
+}
+
+/* 바위 — 작으면 눈밭 얼룩과 구별이 안 된다.
+ * 덩치를 키우고, 밑을 어둡게 눌러 '땅에 박힌 것'으로 보이게 한다. rad 와 반폭을 맞춰 뒀다 */
+function drawRock(x, y, sd, s) {
+  s = s || 1;
+  ctx.save(); ctx.translate(x, y); ctx.scale(s, s); ctx.translate(-x, -y);
+
+  ctx.fillStyle = 'rgba(100,142,176,.18)';
+  ctx.beginPath(); ctx.ellipse(x + 10, y + 9, 24, 6.5, -.24, 0, 7); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(x, y + 8, 19, 5.5, 0, 0, 7); ctx.fill();
+
+  /* 뒤에 붙은 작은 돌 — 덩어리가 하나면 심심하다 */
+  ctx.fillStyle = ROCK_D;
+  ctx.beginPath(); ctx.ellipse(x + 12, y - 3, 8.5, 8, .2, 0, 7); ctx.fill();
+
+  /* 큰 덩이. 가로보다 세로를 살려야 '서 있는 돌'로 보인다 */
+  ctx.fillStyle = ROCK_D;
+  ctx.beginPath();
+  ctx.moveTo(x - 19, y + 5);
+  ctx.quadraticCurveTo(x - 20, y - 10, x - 8, y - 17);
+  ctx.quadraticCurveTo(x + 4, y - 23, x + 12, y - 12);
+  ctx.quadraticCurveTo(x + 19, y - 4, x + 16, y + 5);
+  ctx.closePath(); ctx.fill();
+
+  ctx.fillStyle = ROCK;                            // 빛 받는 면
+  ctx.beginPath();
+  ctx.moveTo(x - 15, y + 3);
+  ctx.quadraticCurveTo(x - 16, y - 9, x - 6, y - 15);
+  ctx.quadraticCurveTo(x + 3, y - 19, x + 9, y - 10);
+  ctx.quadraticCurveTo(x + 13, y - 3, x + 11, y + 3);
+  ctx.closePath(); ctx.fill();
+  ctx.fillStyle = '#a3b1be';
+  ctx.beginPath(); ctx.ellipse(x - 6, y - 9, 8, 5.5, -.35, 0, 7); ctx.fill();
+
+  /* 눈모자 */
+  ctx.fillStyle = ROCK_T;
+  ctx.beginPath();
+  ctx.moveTo(x - 13, y - 11);
+  ctx.quadraticCurveTo(x - 4, y - 22, x + 8, y - 13);
+  ctx.quadraticCurveTo(x - 2, y - 15, x - 13, y - 11);
+  ctx.closePath(); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(x + 12, y - 9, 7, 3, .1, 0, 7); ctx.fill();
+  ctx.restore();
+}
+
+/* 통나무 — 가로로 누운 넓은 장애물(반폭 62). 좁은 것만으로는 못 막는 자리를 막는다.
+ * 껍질 결과 잘린 단면을 보여 줘야 '나무'로 읽힌다 */
+function drawLog(x, y, s) {
+  s = s || 1;
+  ctx.save(); ctx.translate(x, y); ctx.scale(s, s); ctx.translate(-x, -y);
+  const W2 = 62, R = 11;
+
+  ctx.fillStyle = 'rgba(100,142,176,.18)';       // 드리운 그림자
+  ctx.beginPath(); ctx.ellipse(x + 9, y + 9, W2 + 12, 8, -.05, 0, 7); ctx.fill();
+
+  ctx.fillStyle = WOOD_D;                        // 몸통 아래쪽(그늘)
+  roundRect(ctx, x - W2, y - R, W2 * 2, R * 2, R);
+  ctx.fillStyle = WOOD;                          // 빛 받는 위쪽
+  roundRect(ctx, x - W2 + 2, y - R + 1, W2 * 2 - 4, R * 1.35, R * .68);
+
+  ctx.strokeStyle = 'rgba(90,58,32,.42)';        // 껍질 결
+  ctx.lineWidth = 1.3; ctx.lineCap = 'round';
+  for (let i = -2; i <= 2; i++) {
+    const xx = x + i * 22 + 6;
+    ctx.beginPath(); ctx.moveTo(xx - 7, y - 3); ctx.lineTo(xx + 7, y - 1); ctx.stroke();
+  }
+  /* 양 끝 잘린 단면 */
+  for (const k of [-1, 1]) {
+    ctx.fillStyle = '#a8794b';
+    ctx.beginPath(); ctx.ellipse(x + k * W2, y, 5.5, R, 0, 0, 7); ctx.fill();
+    ctx.strokeStyle = 'rgba(90,58,32,.45)'; ctx.lineWidth = 1.1;
+    ctx.beginPath(); ctx.ellipse(x + k * W2, y, 2.6, R * .5, 0, 0, 7); ctx.stroke();
+  }
+  ctx.fillStyle = 'rgba(252,254,255,.82)';       // 위에 얹힌 눈
+  roundRect(ctx, x - W2 + 6, y - R - 2.5, W2 * 2 - 12, 6, 3);
+  ctx.restore();
+}
+
+/* 그루터기 — 이것도 작아서 잘 안 보였다. 옆면을 보여 키를 준다 */
+function drawStump(x, y, s) {
+  s = s || 1;
+  ctx.save(); ctx.translate(x, y); ctx.scale(s, s); ctx.translate(-x, -y);
+
+  ctx.fillStyle = 'rgba(100,142,176,.17)';
+  ctx.beginPath(); ctx.ellipse(x + 7, y + 6, 18, 5, -.24, 0, 7); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(x, y + 5, 14, 4.4, 0, 0, 7); ctx.fill();
+
+  ctx.fillStyle = WOOD_D;                          // 옆면
+  ctx.beginPath();
+  ctx.moveTo(x - 14, y - 4); ctx.lineTo(x - 14, y + 1);
+  ctx.ellipse(x, y + 1, 14, 5.5, 0, Math.PI, 0, true);
+  ctx.lineTo(x + 14, y - 4); ctx.closePath(); ctx.fill();
+
+  ctx.fillStyle = WOOD;                            // 잘린 면
+  ctx.beginPath(); ctx.ellipse(x, y - 4, 14, 8, 0, 0, 7); ctx.fill();
+  ctx.strokeStyle = 'rgba(90,58,32,.5)'; ctx.lineWidth = 1.3;
+  for (const r of [4.5, 8.5]) { ctx.beginPath(); ctx.ellipse(x, y - 4, r, r * .57, 0, 0, 7); ctx.stroke(); }
+  ctx.fillStyle = 'rgba(252,254,255,.8)';          // 얹힌 눈
+  ctx.beginPath(); ctx.ellipse(x - 4, y - 7.5, 7.5, 3.2, -.18, 0, 7); ctx.fill();
+  ctx.restore();
+}
+
+function drawJump(x, y, s) {
+  s = s || 1;
+  ctx.save(); ctx.translate(x, y); ctx.scale(s, s); ctx.translate(-x, -y);
+
+  const W2 = 40, TOP = y - 50, LIP = y - 34, BOT = y + 16;
+
+  /* ① 눈밭에 드리운 그늘 */
+  ctx.fillStyle = 'rgba(100,142,176,.20)';
+  ctx.beginPath(); ctx.ellipse(x + 12, y + 13, 46, 11, -.12, 0, 7); ctx.fill();
+
+  /* ② 옆으로 흘러내린 눈 — 쌓아 만든 턱처럼 보이게 */
+  ctx.fillStyle = 'rgba(236,246,253,.85)';
+  ctx.beginPath();
+  ctx.moveTo(x - W2 - 12, BOT);
+  ctx.quadraticCurveTo(x, y - 26, x + W2 + 12, BOT);
+  ctx.closePath(); ctx.fill();
+
+  /* ③ 몸통 */
+  const g = ctx.createLinearGradient(x - W2, TOP, x + W2, BOT);
+  g.addColorStop(0, '#ffffff');
+  g.addColorStop(.55, '#f2f9ff');
+  g.addColorStop(1, '#d3e5f3');
+  ctx.fillStyle = g;
+  ctx.beginPath();
+  ctx.moveTo(x - W2, BOT);
+  ctx.quadraticCurveTo(x - W2 * .82, LIP, x - W2 * .5, TOP + 4);
+  ctx.quadraticCurveTo(x, TOP - 5, x + W2 * .5, TOP + 4);
+  ctx.quadraticCurveTo(x + W2 * .82, LIP, x + W2, BOT);
+  ctx.closePath(); ctx.fill();
+
+  /* ④ 끝의 턱 — 여기서 뜬다. 진하게 눌러야 '모서리'로 읽힌다 */
+  ctx.fillStyle = '#9fc2dc';
+  ctx.beginPath();
+  ctx.moveTo(x - W2 * .52, TOP + 6);
+  ctx.quadraticCurveTo(x, TOP - 7, x + W2 * .52, TOP + 6);
+  ctx.quadraticCurveTo(x, TOP + 15, x - W2 * .52, TOP + 6);
+  ctx.closePath(); ctx.fill();
+  ctx.fillStyle = '#ffffff';                       // 턱 위에 얹힌 눈
+  ctx.beginPath();
+  ctx.moveTo(x - W2 * .52, TOP + 6);
+  ctx.quadraticCurveTo(x, TOP - 7, x + W2 * .52, TOP + 6);
+  ctx.quadraticCurveTo(x, TOP + 1, x - W2 * .52, TOP + 6);
+  ctx.closePath(); ctx.fill();
+  ctx.fillStyle = 'rgba(120,163,196,.28)';         // 오른쪽 그늘 — 덩어리로 보이게
+  ctx.beginPath();
+  ctx.moveTo(x + W2 * .52, TOP + 6);
+  ctx.quadraticCurveTo(x + W2 * .86, LIP, x + W2, BOT);
+  ctx.lineTo(x + W2 * .42, BOT);
+  ctx.closePath(); ctx.fill();
+
+  /* ⑤ 화살표 — 밟으라는 표시 */
+  ctx.strokeStyle = CAP; ctx.lineWidth = 3.4;
+  ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  for (let i = 0; i < 2; i++) {
+    const yy = y - 22 + i * 14;
+    ctx.beginPath();
+    ctx.moveTo(x - 14, yy); ctx.lineTo(x, yy + 9); ctx.lineTo(x + 14, yy);
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+function drawSkier(x, y) {
+  const p = player;
+  const air = p.state === 'air';
+  /* 공중에 뜬 만큼 위로 띄우고 크게 그린다 — 높이가 보여야 짜릿하다 */
+  const lift = air ? Math.sin((1 - p.t / CFG.airTime) * Math.PI) * 62 : 0;
+
+  /* 그림자는 땅에 남는다. 떠 있을수록 작고 옅어진다 */
+  ctx.fillStyle = 'rgba(96,138,176,' + (lift > 0 ? .20 : .34) + ')';
+  ctx.beginPath();
+  ctx.ellipse(x + 6 + lift * .12, y + 12, 13 - lift * .05, 4.6 - lift * .02, -.26, 0, 7); ctx.fill();
+
+  let rot;
+  if (air)                     rot = p.spin * Math.PI / 180;
+  /* 박았을 때는 나뒹군다 — 도는 게 보여야 '끝났다'가 읽힌다 */
+  else if (p.state === 'wipe') rot = 1.35 + (1 - p.t / CFG.wipeTime) * 5.2;
+  else                         rot = p.lean * .42;
+
+  ctx.save();
+  ctx.translate(x, y - lift);
+  const sc = 1 + lift / 300;
+  ctx.rotate(rot);
+  ctx.scale(sc, sc);
+  /* 그림이 아직 안 왔으면 이 틀은 건너뛴다 — 곧 도착한다 */
+  if (sprOk) ctx.drawImage(SPR, -SPR_W / 2, SPR_TOP, SPR_W, SPR_H);
+  ctx.restore();
+}
+
+/* ── 주인공 그림 ──
+ * 사용자가 준 쿼카 그림을 누끼 떠서 그대로 쓴다(_참고/누끼.py, 22KB webp).
+ * 아직 안 왔으면 그 틀은 건너뛴다(곧 도착한다).
+ *
+ * 크기는 눈대중이 아니라 재서 맞췄다: 그림에서 부츠가 닿는 폭이 가로의 57% 인데,
+ * 부딪힘 판정이 몸 반폭 10 이라 그 폭이 20 이 되도록 잡았다. */
+const SPR = new Image();
+let sprOk = false;
+SPR.onload = () => {
+  sprOk = SPR.naturalWidth > 0;
+  /* ⚠ 그림은 늦게 도착한다. 여기서 다시 그리지 않으면 **처음 온 사람은**
+   *   시작 화면에서 캐릭터를 못 본다(그릴 때 아직 그림이 없었으니까). */
+  if (typeof paintHero === 'function') paintHero();
+};
+SPR.src = 'quokka.webp?v=1';
+const SPR_W = 35.4, SPR_H = 68.7, SPR_TOP = -53;
+
+/* 세상 색. 주인공 그림에서 뽑아 온 것이라 캐릭터와 결이 맞는다 */
+const PINE = '#2f7a58', PINE_D = '#215c43', PINE_L = '#3d9068';
+const ROCK = '#8d9aa8', ROCK_D = '#71808e', ROCK_T = '#f2f8fd';
+const WOOD = '#8a6039', WOOD_D = '#6b4526';
+const CAP  = '#2b4a7e';                      // 캐릭터 모자색 — 점프대 화살표에 쓴다
+
+function roundRect(g, x, y, w, h, r) {
+  g.beginPath();
+  if (g.roundRect) g.roundRect(x, y, w, h, r);
+  else {
+    g.moveTo(x + r, y);
+    g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r);
+    g.arcTo(x, y + h, x, y, r);         g.arcTo(x, y, x + w, y, r);
+  }
+  g.fill();
+}
+
+/* 도착선 — 깃대 둘과 그 사이에 걸린 띠.
+ * 화면에 들어오는 순간부터 보여야 "저기까지만 버티자"가 된다 */
+function drawGoal() {
+  const sy = goalY - cam;
+  if (sy < -40 || sy > H + 60) return;
+  const half = CFG.courseW / 2, L = W / 2 - half, R = W / 2 + half;
+
+  ctx.fillStyle = 'rgba(110,150,178,.20)';
+  ctx.fillRect(L, sy + 1, R - L, 9);
+
+  /* 바닥에 깔린 띠 — 체크무늬 */
+  for (let x = L, i = 0; x < R; x += 18, i++) {
+    ctx.fillStyle = i % 2 ? '#e9f2f8' : '#2b3b47';
+    ctx.fillRect(x, sy - 9, Math.min(18, R - x), 11);
+  }
+  /* 깃대 */
+  for (const x of [L + 6, R - 6]) {
+    ctx.fillStyle = '#7a5233';
+    ctx.fillRect(x - 2.5, sy - 62, 5, 62);
+    ctx.fillStyle = '#d94f3d';
+    ctx.beginPath();
+    ctx.moveTo(x + 2, sy - 62);
+    ctx.lineTo(x + 30, sy - 54);
+    ctx.lineTo(x + 2, sy - 46);
+    ctx.closePath(); ctx.fill();
+  }
+  /* 머리 위로 걸린 띠 */
+  ctx.strokeStyle = '#2b3b47'; ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.moveTo(L + 6, sy - 58); ctx.lineTo(R - 6, sy - 58); ctx.stroke();
+  ctx.fillStyle = '#2b3b47';
+  ctx.font = '900 19px -apple-system,BlinkMacSystemFont,Pretendard,"Malgun Gothic",sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('GOAL', W / 2, sy - 26);
+}
+
+/* ─────────────── 판 위 글자 ───────────────
+ * 왼쪽 위는 OREUM GAMES 배지 자리, 왼쪽 아래는 전체화면 단추 자리다. 비워 둔다 */
+function drawHUD() {
+
+  /* 붉은 테두리를 얹어 봤지만, 화면 위쪽이 눈사태에 가려 아래만 물들어
+   * 노을처럼 보였다. 눈사태가 이미 화면을 채우고 있으니 경고는 그것으로 충분하다 */
+
+  /* 글씨가 나무에 묻히지 않게 위쪽에 옅은 안개를 깐다 */
+  const haze = ctx.createLinearGradient(0, 0, 0, 96);
+  haze.addColorStop(0, 'rgba(240,248,253,.90)');
+  haze.addColorStop(1, 'rgba(240,248,253,0)');
+  ctx.fillStyle = haze;
+  ctx.fillRect(0, 0, W, 96);
+
+  /* 맨 위 얇은 띠 — 도착선까지 얼마나 왔나 */
+  const prog = clamp(player.y / goalY, 0, 1);
+  ctx.fillStyle = 'rgba(120,158,186,.28)';
+  ctx.fillRect(0, 0, W, 5);
+  ctx.fillStyle = '#2f7a58';
+  ctx.fillRect(0, 0, W * prog, 5);
+
+  /* 남은 거리를 크게. 0 을 향해 줄어드는 수가 도착선을 재촉한다 */
+  const left = Math.max(0, Math.ceil(ST.goal - dist));
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#22406e';
+  ctx.font = '900 46px -apple-system,BlinkMacSystemFont,Pretendard,"Malgun Gothic",sans-serif';
+  ctx.fillText(left, W / 2, 54);
+  ctx.font = '800 15px -apple-system,BlinkMacSystemFont,Pretendard,"Malgun Gothic",sans-serif';
+  ctx.fillStyle = '#5a7fae';
+  ctx.fillText('m', W / 2 + String(left).length * 13 + 12, 54);
+  ctx.font = '800 13px -apple-system,BlinkMacSystemFont,Pretendard,"Malgun Gothic",sans-serif';
+  ctx.fillText('STAGE ' + stage, W / 2, 72);
+
+  /* 오른쪽 위는 소리·PAUSE 단추 자리, 왼쪽 위는 오름 배지 자리다.
+   * 점수는 배지 바로 아래 왼쪽에 붙인다 */
+  ctx.textAlign = 'left';
+  ctx.font = '800 13px -apple-system,BlinkMacSystemFont,Pretendard,"Malgun Gothic",sans-serif';
+  ctx.fillStyle = 'rgba(90,127,174,.95)';
+  ctx.fillText('SCORE ' + score, 14, 44);
+  if (player.coin > 0) {                         /* 글자 앞에 동전 한 알 */
+    ctx.fillStyle = '#e8b12a';
+    ctx.beginPath(); ctx.arc(19, 58, 5, 0, 7); ctx.fill();
+    ctx.fillStyle = '#c07a24';
+    ctx.fillText('× ' + player.coin, 29, 62);
+  }
+
+  /* 콤보·충돌 알림 — 가운데 크게, 잠깐 */
+  if (msg) {
+    const a = Math.min(1, msg.t * 2.6);
+    ctx.textAlign = 'center';
+    ctx.globalAlpha = a;
+    ctx.fillStyle = msg.bad ? '#c0392b' : '#e08a1e';
+    ctx.font = '900 40px -apple-system,BlinkMacSystemFont,Pretendard,"Malgun Gothic",sans-serif';
+    ctx.fillText(msg.big, W / 2, H * .34);
+    if (msg.sm) {
+      ctx.fillStyle = '#22406e';
+      ctx.font = '800 19px -apple-system,BlinkMacSystemFont,Pretendard,"Malgun Gothic",sans-serif';
+      ctx.fillText(msg.sm, W / 2, H * .34 + 28);
+    }
+    ctx.globalAlpha = 1;
+  }
+
+}
+
+/* ─────────────── 돌리기 ─────────────── */
+const veil = document.getElementById('veil');
+const elTitle = document.getElementById('title');
+const elBig = document.getElementById('big');
+const elSub = document.getElementById('sub');
+const elLead = document.getElementById('lead');
+const elKeys = document.getElementById('keys');
+const go = document.getElementById('go');
+const go2 = document.getElementById('go2');
+const alt = document.getElementById('alt');
+const hero = document.getElementById('hero');
+const pick = document.getElementById('pick');
+const grid = document.getElementById('grid');
+const pickBack = document.getElementById('pickBack');
+const pauseBtn = document.getElementById('pauseBtn');
+const soundBtn = document.getElementById('soundBtn');
+const bgmBtn = document.getElementById('bgmBtn');
+
+const TOUCH = matchMedia('(hover:none)').matches || 'ontouchstart' in window;
+
+let last = 0;
+function frame(now) {
+  requestAnimationFrame(frame);
+  const dt = Math.min(.05, (now - last) / 1000 || 0);   // 탭을 다녀와도 튀지 않게 자른다
+  last = now;
+  clock += dt;
+  if (S === 'play') update(dt);
+  draw();
+  ambience();
+}
+
+function start(n) {
+  audioStart();         // 판 고르기에서 바로 들어오는 길도 있으니 여기서 한 번 더
+  reset(n);
+  S = 'play';
+  veil.classList.add('off');
+  pick.hidden = true;
+  pauseBtn.classList.remove('off');
+  touches.clear(); key.L = key.R = false;
+}
+
+/* 덮개의 조각들을 한 번에 여닫는다 — 화면마다 뭘 켜고 끌지 여기서만 정한다 */
+function veilShow(o) {
+  hero.hidden    = !o.hero;
+  elTitle.hidden = !o.title;
+  elBig.hidden   = !o.big;
+  elSub.hidden   = !o.sub;
+  elLead.hidden  = !o.lead;
+  elBig.innerHTML  = o.big  || '';
+  elSub.innerHTML = o.sub || '';
+  elLead.innerHTML = o.lead || '';
+  elKeys.innerHTML = o.keys || '';
+  go.textContent   = o.go;
+  go2.hidden       = !o.go2;
+  go2.textContent  = o.go2 || '';
+  alt.hidden       = !o.alt;
+  alt.textContent  = o.alt || '';
+  pick.hidden = true;
+  veil.classList.remove('off');
+  pauseBtn.classList.add('off');
+}
+
+function showMenu() {
+  S = 'menu';
+  stage = unlocked;                 // 이어하기는 늘 '깨야 할 판'에서 시작한다
+  reset(stage);
+  paintHero();
+  const fresh = unlocked <= 1 && !bests.length;
+  veilShow({
+    hero: true, title: true,
+    keys: (TOUCH ? '화면 왼쪽·오른쪽으로 방향을 바꿉니다' : '← → 로 방향을 바꿉니다') +
+          '<br><b>STAGE ' + stage + '</b> / ' + STAGES,
+    go:   fresh ? '시작하기' : '이어하기',
+    go2:  fresh ? null : '처음부터'
+  });
+}
+
+/* 처음부터 = 기록이 사라진다. 한 번 물어보고 지운다 */
+function showWipe() {
+  S = 'wipe';
+  veilShow({
+    lead: '<span class="over">처음부터</span>',
+    sub:  '깬 ' + Math.max(0, unlocked - 1) + '판 기록과 모은 동전 ' + coinTotal + '개가 지워집니다',
+    go:   '지우고 시작',
+    go2:  '취소'
+  });
+}
+
+function showClear(isBest) {
+  const done = stage >= STAGES;
+  veilShow({
+    lead: '<span class="over ' + (done ? 'best' : '') + '">' +
+          (done ? 'ALL CLEAR' : 'STAGE ' + stage + ' CLEAR') + '</span>',
+    big:  score + '<span id="bigUnit">P</span>',
+    /* 동전 둘(이번 판 / 여태 모은 것)과 점수 하나가 한 줄에 있다.
+     * 동전 쪽에 그림을 둘 다 붙여야 '합계가 점수냐'는 헷갈림이 없다 */
+    sub:  '<img src="' + COIN_ICON + '" alt="동전">+' + player.coin +
+          '   ·   <img src="' + COIN_ICON + '" alt="동전">' + coinTotal +
+          '   ·   BEST ' + (bests[stage - 1] || 0) + 'P',
+    go:   done ? 'STAGE SELECT' : 'STAGE ' + (stage + 1) + '  NEXT',
+    alt:  done ? null : 'STAGE SELECT'      // 다 깼으면 큰 단추가 이미 STAGE SELECT 다
+  });
+}
+
+function showFail() {
+  veilShow({
+    lead: '<span class="over">GAME OVER</span>',
+    big:  score + '<span id="bigUnit">P</span>',
+    sub:  'STAGE ' + stage + '   ·   ' + Math.floor(dist) + ' / ' + ST.goal + 'm',
+    go:   'RETRY',
+    alt:  'STAGE SELECT'
+  });
+}
+
+function togglePause() {
+  if (S === 'play') {
+    S = 'pause';
+    veilShow({ lead: '<span class="over">PAUSE</span>', go: 'RESUME', alt: 'STAGE SELECT' });
+    touches.clear(); key.L = key.R = false;
+  } else if (S === 'pause') {
+    S = 'play';
+    veil.classList.add('off');
+    pauseBtn.classList.remove('off');
+    last = performance.now();
+  }
+}
+
+/* ── 판 고르기: 깬 데까지만 열린다 ── */
+function showPick() {
+  S = 'pick';
+  grid.innerHTML = '';
+  /* '지금 할 판'은 하나뿐이어야 한다 — 안 깬 판이 여럿이면 그 중 제일 앞 하나만 */
+  let next = 0;
+  for (let n = 1; n <= unlocked; n++) if (bests[n - 1] == null) { next = n; break; }
+  if (!next) next = unlocked;
+
+  for (let n = 1; n <= STAGES; n++) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.textContent = n;
+    if (n > unlocked) b.disabled = true;
+    else if (n === next) b.className = 'now';      // 지금 할 판
+    else if (bests[n - 1] != null) b.className = 'done';
+    b.addEventListener('click', () => start(n));
+    grid.appendChild(b);
+  }
+  veil.classList.remove('off');
+  pauseBtn.classList.add('off');
+  pick.hidden = false;
+  /* 지금 판이 보이게 굴려 준다 */
+  const cur = grid.children[next - 1];
+  if (cur && cur.scrollIntoView) cur.scrollIntoView({ block: 'nearest' });
+}
+pickBack.addEventListener('click', () => { pick.hidden = true; showMenu(); });
+alt.addEventListener('click', showPick);
+
+pauseBtn.addEventListener('click', togglePause);
+
+const ICON_ON  = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z"/>' +
+                 '<path d="M16.5 8.5a5 5 0 0 1 0 7"/><path d="M19 6a8.5 8.5 0 0 1 0 12"/></svg>';
+const ICON_OFF = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z"/>' +
+                 '<path d="M17 10l4 4M21 10l-4 4"/></svg>';
+function paintSound() {
+  soundBtn.innerHTML = sndOn ? ICON_ON : ICON_OFF;
+  soundBtn.classList.toggle('off', !sndOn);
+  soundBtn.setAttribute('aria-label', sndOn ? 'SOUND ON' : 'SOUND OFF');
+  bgmBtn.textContent = '♪';
+  bgmBtn.classList.toggle('off', !bgmOn);
+  bgmBtn.setAttribute('aria-label', bgmOn ? 'MUSIC ON' : 'MUSIC OFF');
+}
+soundBtn.addEventListener('click', () => { audioStart(); setSnd(!sndOn); paintSound(); });
+bgmBtn.addEventListener('click',   () => { audioStart(); setBgm(!bgmOn); paintSound(); });
+paintSound();
+
+
+go.addEventListener('click', () => {
+  audioStart();
+  if (S === 'pause')      togglePause();
+  else if (S === 'clear') { if (stage >= STAGES) showPick(); else start(stage + 1); }
+  else if (S === 'wipe')  { unlocked = 1; bests = []; coinTotal = 0; saveProg(); start(1); }
+  else                    start(stage);
+});
+
+go2.addEventListener('click', () => {
+  audioStart();
+  if (S === 'wipe') showMenu();        // 취소
+  else              showWipe();        // 처음부터
+});
+
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden && S === 'play') togglePause();
+});
+
+/* 시작 화면 스키어 — 판에서 쓰는 것과 같은 그림(quokka.webp)을 크게 얹는다.
+ * 캔버스 크기는 HTML 에 박아 두고 CSS 로 줄여 놓았다.
+ * ⚠ 그림은 늦게 도착하므로 SPR.onload 에서 여기를 다시 부른다 —
+ *   안 그러면 처음 온 사람은 시작 화면에서 캐릭터를 못 본다. */
+/* 글 사이에 끼워 넣을 동전 그림. 판에서 굴러다니는 그 동전과 같은 색으로 한 번 구워 둔다 */
+const COIN_ICON = (() => {
+  const c = document.createElement('canvas');
+  c.width = c.height = 48;
+  const g = c.getContext('2d');
+  g.fillStyle = '#c78a12';
+  g.beginPath(); g.ellipse(24, 25, 19, 21, 0, 0, 7); g.fill();
+  g.fillStyle = '#d99a17';
+  g.beginPath(); g.ellipse(24, 24, 19, 21, 0, 0, 7); g.fill();
+  g.fillStyle = '#f8d259';
+  g.beginPath(); g.ellipse(24, 23, 14.5, 16.5, 0, 0, 7); g.fill();
+  g.fillStyle = 'rgba(255,255,255,.55)';
+  g.beginPath(); g.ellipse(19, 17, 4.5, 6, -.4, 0, 7); g.fill();
+  return c.toDataURL();
+})();
+
+function paintHero() {
+  const g = hero.getContext('2d');
+  g.clearRect(0, 0, hero.width, hero.height);
+  if (!sprOk) return;          // 그림이 아직이면 도착할 때 다시 불린다
+
+  const cx = 140, base = 158, sc = 2.55;
+  const gy = base + 34;        // 스키가 닿는 눈밭 높이
+
+  /* ── 발밑 눈더미 ──
+   * 지나온 자국을 그려 봤지만, 앞을 보고 선 그림이라 자국이 몸에 가려 안 보였다.
+   * 그래서 자국을 걷어내고 **눈을 밟고 선 모양**으로 바꿨다. */
+  g.fillStyle = 'rgba(108,148,180,.20)';                 // 눈더미가 지는 그늘
+  g.beginPath(); g.ellipse(cx + 8, gy + 12, 60, 13, -.04, 0, 7); g.fill();
+
+  const mound = g.createLinearGradient(0, gy - 20, 0, gy + 16);
+  mound.addColorStop(0, '#ffffff');
+  mound.addColorStop(.6, '#f4fafe');
+  mound.addColorStop(1, '#dceaf5');
+  g.fillStyle = mound;
+  g.beginPath();
+  g.moveTo(cx - 68, gy + 15);
+  g.quadraticCurveTo(cx - 46, gy - 17, cx - 8, gy - 12);
+  g.quadraticCurveTo(cx + 30, gy - 20, cx + 52, gy - 6);
+  g.quadraticCurveTo(cx + 70, gy + 4, cx + 68, gy + 15);
+  g.closePath(); g.fill();
+
+  g.fillStyle = 'rgba(255,255,255,.95)';                 // 위에 얹힌 밝은 눈
+  g.beginPath(); g.ellipse(cx - 10, gy - 4, 40, 8, -.05, 0, 7); g.fill();
+
+  g.fillStyle = 'rgba(178,206,228,.35)';                 // 파인 자리(스키가 눌린 곳)
+  g.beginPath(); g.ellipse(cx, gy + 5, 30, 5.5, 0, 0, 7); g.fill();
+
+  /* ── 쿼카 ── 바로 세운다 */
+  g.save();
+  g.translate(cx, base);
+  const w = SPR_W * sc, h = SPR_H * sc;
+  g.drawImage(SPR, -w / 2, SPR_TOP * sc, w, h);
+  g.restore();
+
+  /* ── 스키를 덮는 눈 ── 파묻힌 것처럼 보이게. 사람 다음에 그린다 */
+  g.fillStyle = 'rgba(250,253,255,.92)';
+  g.beginPath();
+  g.moveTo(cx - 46, gy + 14);
+  g.quadraticCurveTo(cx - 16, gy - 1, cx + 6, gy + 3);
+  g.quadraticCurveTo(cx + 30, gy + 6, cx + 48, gy + 14);
+  g.closePath(); g.fill();
+  g.fillStyle = 'rgba(255,255,255,.8)';                  // 흩어진 눈 알갱이
+  for (const [dx, dy, r] of [[-58, 6, 4], [56, 2, 3.4], [-30, -12, 2.6], [34, -14, 3]]) {
+    g.beginPath(); g.arc(cx + dx, gy + dy, r, 0, 7); g.fill();
+  }
+}
+
+/* ─────────────── 검증용 손잡이 ───────────────
+ * 콘솔에서 __sr.bot(true) 로 자동 주행을 켤 수 있다.
+ * 화면이 안 보이는 곳에서 돌릴 땐 __sr.step(1/60) 을 직접 부른다 */
+let botOn = false, botGreedy = true;
+window.__sr = {
+  get state() { return S; },
+  get info() {
+    return { stage, goal: ST.goal, dist: Math.round(dist), score,
+             coin: player.coin,
+             lean: +player.lean.toFixed(2), st: player.state, obs: obs.length };
+  },
+  get prog() { return { unlocked, bests: bests.slice(), coinTotal }; },
+  cfg: stageCfg,
+  start, reset, step: dt => { if (S === 'play') update(dt); },
+  bot(on, greedy) { botOn = on !== false; botGreedy = greedy !== false; return botOn; },
+  /* 한 판을 끝까지 돌려 보고 결과만 돌려준다 */
+  run(n, maxSec, greedy) {
+    this.start(n); const was = botOn, wasG = botGreedy;
+    botOn = true; botGreedy = greedy !== false;
+    let f = 0, crash = 0, prev = 'ski';
+    const cap = 60 * (maxSec || 180);
+    while (S === 'play' && f < cap) {
+      update(1 / 60); f++;
+      if (prev !== 'wipe' && player.state === 'wipe') crash++;
+      prev = player.state;
+    }
+    botOn = was; botGreedy = wasG;
+    return { stage: n, sec: +(f / 60).toFixed(1), end: S, dist: Math.round(dist),
+             goal: ST.goal, score, coin: player.coin, crash };
+  }
+};
+
+/* 자동 주행 운전수.
+ * 사람이 보는 만큼(화면 아래쪽 전부) 앞을 보고, 막힌 자리를 빼고 남은 틈 가운데
+ * 지금 자리에서 제일 가까운 곳으로 간다. 사람만큼은 아니지만
+ * "이 판을 깰 수 있나"를 재는 잣대로는 쓸 만하다. */
+function botDrive() {
+  const p = player;
+  if (p.state === 'air') {          // 공중에선 한 바퀴만 돌고 놓는다
+    const a = ((p.spin % 360) + 360) % 360;
+    key.L = false; key.R = Math.abs(p.spin) < 330;   // 한 바퀴만 돌린다
+    return;
+  }
+
+  const half = CFG.courseW / 2;
+  /* 1. 앞쪽에서 막힌 구간을 모은다 (가까운 것일수록 넓게 잡는다) */
+  const bars = [];
+  for (const o of obs) {
+    const d = o.y - p.y;
+    if (o.hit || o.type === 'jump' || d < -10 || d > 430) continue;
+    const pad = o.rad + 15;
+    bars.push([o.x - pad, o.x + pad]);
+  }
+  bars.sort((u, v) => u[0] - v[0]);
+
+  /* 2. 남은 틈 가운데 지금 자리에서 제일 가까운 곳 */
+  let target = p.x, bestD = 1e9, edge = -half + 16;
+  const take = (l, r) => {
+    if (r - l < 44) return;                       // 이 정도는 못 빠져나간다
+    const c = clamp(p.x, l + 22, r - 22);
+    const d = Math.abs(c - p.x);
+    if (d < bestD) { bestD = d; target = c; }
+  };
+  for (const [l, r] of bars) { take(edge, l); edge = Math.max(edge, r); }
+  take(edge, half - 16);
+
+  /* 3. 길이 열려 있으면 점프대를 밟는다 — 후반은 이 가속 없이는 못 깬다 */
+  if (bestD < 1) {
+    let bd = 1e9;
+    for (const o of obs) {
+      const d = o.y - p.y;
+      if (o.hit || o.type !== 'jump' || d < 40 || d > 340) continue;
+      if (Math.abs(o.x - p.x) > 130) continue;
+      if (bars.some(([l, r]) => o.x > l - 10 && o.x < r + 10)) continue;   // 막힌 자리면 말고
+      if (d < bd) { bd = d; target = o.x; }
+    }
+    if (bd < 1e9) { const off0 = target - p.x; key.L = off0 < -4; key.R = off0 > 4; return; }
+  }
+
+  /* 4. 그래도 급할 게 없으면 동전을 주우러 간다 */
+  if (bestD < 1 && botGreedy) {
+    let bd = 1e9;
+    for (const c of coins) {
+      const d = c.y - p.y;
+      if (c.got || d < 20 || d > 320) continue;
+      if (d < bd && Math.abs(c.x - p.x) < 150) { bd = d; target = c.x; }
+    }
+  }
+
+  const off = target - p.x;
+  key.L = off < -6; key.R = off > 6;
+
+}
+
+const _update = update;
+update = function (dt) { if (botOn) botDrive(); return _update(dt); };
+
+fit();
+audioSetup();          // 소리 파일을 미리 받아 둔다. 재생은 사람이 누를 때부터
+showMenu();
+
+/* ── 주소로 바로 그 판 ── `?stage=50`
+ * 확인할 때 쓰라고 열어 둔 문이다. 잠긴 판도 들어가진다.
+ * 다만 그렇게 깨도 **진도는 안 밀린다**(위 win() 참고) — 안 그러면 중간 판을 건너뛰게 된다.
+ * ⚠ 홈페이지에 올리기 전에 뺄지 정할 것. 두면 누구나 판을 건너뛸 수 있다. */
+try {
+  const q = parseInt(new URLSearchParams(location.search).get('stage'), 10);
+  if (q >= 1 && q <= STAGES) start(q);
+} catch (e) {}
+requestAnimationFrame(frame);
+</script>
+<script>
+/* file:// 로 그냥 열었을 때를 위한 예비 줄 — /assets/... 절대경로는 서버가 있어야 잡힌다.
+   서버로 열면 위 줄이 이미 붙여 놓으므로 여기선 아무 일도 안 한다.
+   ../ 개수는 이 파일에서 사이트 뿌리까지의 깊이대로 (games/mini/skijump/play/ 기준) */
+(function(){
+  function f(){
+    if (document.getElementById('oreumHome')) return;
+    var s = document.createElement('script');
+    s.src = '../../../../assets/game-home.js?v=5';
+    s.setAttribute('data-top','4'); s.setAttribute('data-left','4');
+    s.setAttribute('data-fullscreen','1');
+    document.body.appendChild(s);
+  }
+  document.readyState === 'complete' ? f() : addEventListener('load', f);
+})();
+</script>
+</body>
+</html>
