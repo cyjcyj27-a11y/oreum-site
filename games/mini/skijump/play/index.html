@@ -117,16 +117,21 @@
     z-index:5;display:none;justify-content:center;gap:16px;pointer-events:none}
   body.touch #pad{display:flex}
   #veil:not(.off) ~ #pad{display:none}
-  #pad button{pointer-events:auto;width:104px;height:70px;border:0;border-radius:18px;
-    background:rgba(255,255,255,.66);box-shadow:0 4px 0 rgba(34,64,110,.20);
-    display:flex;align-items:center;justify-content:center;cursor:pointer;
+  /* 받침대 없이 화살표만 반투명으로 띄운다(2026-09-01, 사용자 요구).
+   * 누르는 자리는 그대로 104x76 — 보이는 것보다 넓어야 손가락이 안 빗나간다. */
+  #pad button{pointer-events:auto;width:104px;height:76px;border:0;padding:0;
+    background:none;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
     -webkit-tap-highlight-color:transparent;touch-action:none;
-    transition:transform .06s, box-shadow .06s, background .06s}
-  /* 두께 4px = 눌릴 때 내려가는 거리 4px. 어긋나면 눌리는 느낌이 안 난다 */
-  #pad button.on{transform:translateY(4px);box-shadow:0 0 0 rgba(34,64,110,.20);
-    background:rgba(255,255,255,.92)}
-  #pad svg{width:32px;height:32px;fill:none;stroke:#22406e;stroke-width:3.4;
-    stroke-linecap:round;stroke-linejoin:round}
+    transition:transform .06s}
+  #pad svg{width:46px;height:46px;fill:none;stroke:#22406e;stroke-width:3.2;
+    stroke-linecap:round;stroke-linejoin:round;opacity:.38;
+    transition:opacity .06s;
+    /* 눈밭에도 나무에도 묻히지 않게 흰 테를 두른다 */
+    filter:drop-shadow(0 1px 1.5px rgba(255,255,255,.95))}
+  /* 눌린 표시는 진하기로 한다 — 받침대가 없으니 두께로는 못 보여 준다 */
+  #pad button.on svg{opacity:.78}
+  #pad button.on{transform:scale(.9)}
 
 </style>
 </head>
@@ -219,7 +224,18 @@ function stageCfg(n) {
   const a = t;                         // 산이 빽빽해지는 몫
   const e = t * t;                     // 눈사태가 사나워지는 몫 — 뒤쪽에 몰아 둔다
   return {
-    goal:   Math.round(150 + 640 * t),   // 1판 150m(약 7초) → 100판 790m
+    /* ⚠ **내려오는 빠르기는 판마다 다르다**(2026-09-01, 사용자 요구).
+     * 지금까지 쓰던 속도(CFG.speedMax)가 **100판 속도**다. 초반은 그보다 느리다.
+     * 1판 0.72배 → 100판 1.00배. 눕혔을 때(speedMin)도 같은 비율로 줄여야
+     * "눕히면 느려진다"는 저울이 안 흔들린다.
+     * ⚠ 이 값을 더 내리지 말 것. 점프대에서 나는 거리가 속도에 그대로 붙는데,
+     *   0.72 배에서 452px 다. 점프대 뒤 빈 구역이 +400 부터라 그 아래로 내려가면
+     *   **착지 지점에 나무가 서 있게 된다.**
+     * ⚠ 산 만드는 쪽(spawnRow·zoneA·zoneB)에는 이 값을 넣지 않았다 —
+     *   넣으면 100판 지형이 전부 바뀌고 봇 기준선(81/100)을 다시 재야 한다.
+     *   느려진 만큼 옆으로 갈 시간이 늘어나므로 지형은 그대로도 더 헐거워진다. */
+    spd:    0.72 + 0.28 * t,
+    goal:   Math.round(150 + 640 * t),   // 1판 150m → 100판 790m
     /* ⚠ fillP 가 초반 난이도를 쥐고 있다. 줄마다 반드시 뭔가 놓으면
      * 1판에도 나무가 열 몇 그루 깔린다 — 한 번만 박아도 끝인 게임에서는 너무 많다.
      * 1판은 다섯 줄에 한 줄만 채운다 */
@@ -362,7 +378,8 @@ function fill(upto) {
        * 점프대 한가운데 줄로 세워 두고, 옆으로 어긋난 채 떠도 다 먹히게
        * 공중에서는 줍는 범위를 넓혀 준다(CFG.airGrab) */
       for (let i = 1; i <= 9; i++) {
-        coins.push({ x: cx, y: frontY + 60 * i + 70, got: 0 });
+        /* ⚠ 판마다 빠르기가 달라 나는 거리도 다르다. 같은 비율로 줄여야 9알 다 먹는다 */
+        coins.push({ x: cx, y: frontY + (60 * i + 70) * ST.spd, got: 0 });
       }
       /* 뜬 뒤 내려앉는 자리.
        * 그냥 뜨면 0.92초 × 683px/s ≒ 630px, **착지 가속이 붙어 있으면 800px 넘게** 난다.
@@ -798,14 +815,16 @@ function update(dt) {
   }
 
   /* ── 2. 속도 ── */
+  /* 판마다 빠르기가 다르다 — 초반은 느리고 100판이 지금까지의 속도다 */
+  const vMax = CFG.speedMax * ST.spd, vMin = CFG.speedMin * ST.spd;
   let vy;
   if (p.state === 'wipe') {
-    vy = CFG.speedMin * 0.35;                  // 거의 멈춘다
+    vy = vMin * 0.35;                          // 거의 멈춘다
   } else if (p.state === 'air') {
-    vy = CFG.speedMax * CFG.airSpeed;
+    vy = vMax * CFG.airSpeed;
   } else {
     /* 눕힐수록 느려진다 — 이 한 줄이 게임 전체의 갈등이다 */
-    vy = CFG.speedMax - (CFG.speedMax - CFG.speedMin) * Math.abs(p.lean);
+    vy = vMax - (vMax - vMin) * Math.abs(p.lean);
   }
   if (p.boost > 0) { vy *= CFG.boostMul; p.boost -= dt; }
 
