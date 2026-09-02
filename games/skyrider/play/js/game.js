@@ -174,6 +174,8 @@
   }
   // RETRY: 페이지를 다시 읽지 않고 제자리에서 다시 시작 (전체화면·가로 고정이 안 풀린다)
   function restart() {
+    if (DEAD.go) { const go = DEAD.go; DEAD.go = null; const over = document.getElementById('over'); window.removeEventListener('pointerdown', go, true); window.removeEventListener('keydown', go, true); over.removeEventListener('click', go, true); over.removeEventListener('touchend', go, true); }
+    input.drag = null; input.padF = input.padS = 0; input.btnUp = input.btnDn = false; input.tSteer = input.tFwd = 0;
     const bankrupt = (DEAD.reason || '').startsWith('파산');
     DEAD.on = false; DEAD.shown = false; DEAD.t = 0; DEAD.reason = '';
     HP.hp = HP.max; HP.inv = 0; drawHp();
@@ -274,7 +276,14 @@
     document.getElementById('overStat').textContent = reason.startsWith('파산') ? '' : '🪙 ' + Math.round(D.money);
     document.getElementById('over').classList.add('show');
     document.getElementById('hud').classList.remove('show'); document.getElementById('topbar').classList.remove('show'); mmC.classList.remove('show'); closeBig(); elTut.classList.remove('on'); elMsg.classList.remove('on'); elSub.classList.remove('on');
-    setTimeout(() => { const go = e => { window.removeEventListener('pointerdown', go); window.removeEventListener('keydown', go); if (e && e.stopPropagation) e.stopPropagation(); restart(); }; window.addEventListener('pointerdown', go, true); window.addEventListener('keydown', go, true); }, 1200);
+    // RETRY: 0.6초 뒤부터 어디를 눌러도(터치·클릭·키) 제자리에서 다시 시작
+    setTimeout(() => {
+      const over = document.getElementById('over');
+      const go = e => { if (!DEAD.shown) return; if (e && e.stopPropagation) e.stopPropagation(); if (e && e.cancelable && e.type === 'touchend') e.preventDefault(); restart(); };
+      DEAD.go = go;
+      window.addEventListener('pointerdown', go, true); window.addEventListener('keydown', go, true);
+      over.addEventListener('click', go, true); over.addEventListener('touchend', go, true);
+    }, 600);
   }
   function updateDead(dt) {
     DEAD.t += dt;
