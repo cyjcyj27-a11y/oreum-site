@@ -14,6 +14,7 @@
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="icon" href="/assets/icon-512.png" type="image/png" sizes="512x512">
 <link rel="apple-touch-icon" href="/assets/icon-180.png">
+<link rel="manifest" href="/manifest.webmanifest">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="오름게임즈">
 <meta property="og:title" content="고객지원 — 오름게임즈">
@@ -24,7 +25,7 @@
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="ko_KR">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="stylesheet" href="/style.css?v=23">
+<link rel="stylesheet" href="/style.css?v=24">
 </head>
 <body>
 
@@ -61,7 +62,8 @@
 
     <div class="card">
       <strong>문의 이메일</strong>
-      <p style="margin:8px 0 0"><button type="button" class="js-mail mailbtn" data-u="cyjcyj27" data-d="gmail.com" data-open="no">email</button></p>
+      <p style="margin:8px 0 0"><button type="button" class="js-mail mailbtn" data-u="cyjcyj27" data-d="gmail.com" data-open="no">email</button>
+      <button type="button" class="js-install mailbtn" hidden>📲 앱 설치</button></p>
       <p class="small" style="margin:6px 0 0">보통 2~3일 안에 답장드립니다.</p>
     </div>
 
@@ -127,5 +129,6 @@
 })();
 </script>
 <script src="/assets/mail.js" defer></script>
+<script src="/assets/install.js?v=1" defer></script>
 </body>
 </html>

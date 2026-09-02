@@ -1,0 +1,30 @@
+{
+  "name": "오름게임즈",
+  "short_name": "오름게임즈",
+  "description": "설치 없이 링크 하나로 바로 시작하는 무료 웹게임",
+  "lang": "ko",
+  "start_url": "/?src=app",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f8f5ec",
+  "theme_color": "#f8f5ec",
+  "icons": [
+    {
+      "src": "/assets/icon-180.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    },
+    {
+      "src": "/assets/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
