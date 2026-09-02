@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<!-- 이 한 줄이 없으면 폰이 "980픽셀짜리 데스크톱 화면"인 척 그린 다음 통째로 축소해 버립니다.
+     그러면 게임이 화면 왼쪽 위 구석에 손톱만하게 처박힙니다.
+     user-scalable=no 는 손가락으로 화면 자체가 확대되는 걸 막습니다 — 두 손가락은 게임 줌에 씁니다. -->
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>루루냥의 제주살이 — 제주 힐링 고양이 게임 | 오름게임즈</title>
+<!-- 검색 노출용 설명·대표이미지. 대표 주소는 루트(play.oreumgames.com/)로 몰아줍니다 -->
+<meta name="description" content="서울 집값에 밀려 제주로 온 고양이 루루. 낡은 빈집에서 농사짓기, 해녀 물질, 조랑말 경마, 헌집 고치기로 새 삶을 일구는 힐링 게임. 설치 없이 브라우저에서 바로 플레이하세요.">
+<link rel="canonical" href="/games/lulu/play/">
+<!-- 검색엔진 사이트 소유 확인 -->
+<meta name="google-site-verification" content="BG736F-J65BHS-viz8rkCjKJ53pxgIhSlPpzVnpGlt4" />
+<meta name="naver-site-verification" content="ab271f63395c45e00a72d66675ab21ae1e234c75" />
+<link rel="alternate" hreflang="ko" href="/games/lulu/play/">
+<link rel="alternate" hreflang="en" href="/games/lulu/play/en/">
+<link rel="alternate" hreflang="x-default" href="/games/lulu/play/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="오름게임즈">
+<meta property="og:title" content="루루냥의 제주살이">
+<meta property="og:description" content="서울 집값에 밀려 제주로 온 고양이 루루. 농사, 해녀 물질, 경마, 헌집 고치기로 제주에서 두 번째 인생을 시작하는 힐링 게임.">
+<meta property="og:url" content="/games/lulu/play/">
+<meta property="og:image" content="https://oreumgames.com/games/lulu/assets/farmcat/og_cover.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="루루냥의 제주살이">
+<meta name="twitter:description" content="제주에서 두 번째 인생을 시작하는 고양이 힐링 게임. 브라우저에서 바로 플레이.">
+<meta name="twitter:image" content="https://oreumgames.com/games/lulu/assets/farmcat/og_cover.jpg">
+<!-- 홈 화면에 설치할 수 있는 앱(PWA) 정보 — 구글플레이 출시(TWA)의 기반이 됩니다 -->
+<meta name="theme-color" content="#2f7fd0">
+<link rel="icon" href="../assets/icon-192.png">
+<link rel="apple-touch-icon" href="../assets/icon-192.png">
+<!-- 시작 화면 그림 — 여기서 미리 불러둡니다.
+     이 줄이 없으면 브라우저가 큰 스크립트를 다 읽은 뒤에야 그림을 받으러 가서,
+     시작 화면이 1초쯤 늦게 뜹니다. -->
+<link rel="preload" as="image" href="../assets/farmcat/scene_farm.webp">
+<link rel="preload" as="image" href="../assets/farmcat/scene_dive.webp">
+<link rel="preload" as="image" href="../assets/farmcat/scene_horse.webp">
+<link rel="preload" as="image" href="../assets/farmcat/scene_house.webp">
+<link rel="preload" as="image" href="../assets/farmcat/scene_date.webp?v=3">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 100%; height: 100%; overflow: hidden; background: #a9d3ea; }
+  canvas { display: block; }
+
+  #ui {
+    position: fixed; inset: 0; pointer-events: none;
+    font-family: "맑은 고딕", "Malgun Gothic", sans-serif;
+    color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,.55);
+  }
+  #title {
+    position: absolute; top: 30px; left: 20px;
+    font-size: 20px; font-weight: 700; letter-spacing: -.3px;
+  }
+  #title small { display: block; font-size: 12px; font-weight: 400; opacity: .85; margin-top: 3px; }
+
+  /* 오른쪽 위 아이콘 2개 — 새게임(↻)·저장(💾)을 나란히 */
+  #topRow {
+    position: absolute; top: 14px; right: 16px;
+    display: flex; gap: 8px; pointer-events: auto;
+  }
+
+  #help {
+    position: absolute; top: 60px; right: 20px;
+    background: rgba(0,0,0,.35); border-radius: 10px; padding: 12px 14px;
+    font-size: 12.5px; line-height: 1.9; backdrop-filter: blur(4px);
+    transition: transform .6s ease, top .6s ease, bottom .6s ease, opacity .6s ease;
+  }
+  #help b { display: inline-block; min-width: 92px; color: #ffe08a; font-weight: 700; }
+  /* 접속 1분 뒤 — 조작 설명을 절반 크기로 줄여 오른쪽 아래 구석으로 (게임을 익혔을 테니 자리를 비켜줍니다) */
+  #help.mini {
+    top: auto; bottom: 16px; right: 16px;
+    transform: scale(0.5); transform-origin: bottom right;
+    opacity: .78;
+  }
+
+  .badge {
+    position: absolute; left: 20px;
+    background: rgba(0,0,0,.45); border-radius: 999px;
+    padding: 9px 16px; font-size: 13.5px;
+  }
+  /* 할 일 안내(상황 안내) 배지 — 지금 뭘 하면 되는지 알려주는 문구라 눈에 잘 띄어야 합니다.
+     글자를 키우고, 바탕을 진하게, 노란 테두리로 상태 배지들과 구분합니다. */
+  #ropeBadge {
+    bottom: 66px;
+    /* 안내 글 속의 줄바꿈(\n)이 화면에서도 보이고, 단어 중간에서 줄이 끊기지 않게 */
+    white-space: pre-line; word-break: keep-all;
+    font-size: 15.5px; font-weight: 600; line-height: 1.45;
+    color: #fff8ea;
+    background: rgba(10, 18, 28, .78);
+    border: 1px solid rgba(255, 214, 130, .55);
+    border-radius: 14px;
+    padding: 11px 18px;
+    max-width: min(78vw, 560px);
+    text-shadow: 0 1px 2px rgba(0,0,0,.6);
+    backdrop-filter: blur(3px);
+  }
+  /* 조작 버튼을 키워 올린 만큼, 안내 배지도 위로 비켜줍니다 */
+  body.touch #ropeBadge { font-size: 14px; padding: 10px 14px; bottom: 128px; }
+  /* 돈(💵) 배지 바로 아래 — 상자를 끌 때만 나타나므로 평소엔 자리를 차지하지 않습니다 */
+  #boxBadge { top: 104px; bottom: auto; font-size: 11.5px; padding: 6px 11px; }
+
+  /* 누를 수 있는 배지 — #ui 전체가 손가락 입력을 막고 있어서 이것만 다시 열어줍니다 */
+  .badge.tappable {
+    pointer-events: auto; cursor: pointer;
+    border: 1px solid rgba(255,255,255,.3);
+    user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+  .badge.tappable:active { background: rgba(255,190,80,.7); color: #2a1806; }
+  /* 손가락으로 누르는 것은 최소 44px은 되어야 빗나가지 않습니다 */
+  body.touch .badge.tappable { padding: 13px 18px; font-size: 13px; }
+  /* 상자가 가득 차면 배지가 주황빛으로 바뀌어 배송할 때가 됐음을 알립니다 */
+  #boxBadge.full { background: rgba(196, 96, 16, .85); color: #fff3d6; font-weight: 700; }
+  #hint {
+    position: absolute; left: 50%; bottom: 22px; transform: translateX(-50%);
+    font-size: 12.5px; opacity: .75;
+  }
+
+  #coinBadge {
+    position: absolute; top: 18px; left: 20px; transform: translateY(58px);
+    background: rgba(0,0,0,.45); border-radius: 999px;
+    padding: 8px 16px; font-size: 15px; font-weight: 700; color: #ffe08a;
+  }
+  /* 빚진 상태 — 붉게 물들여 한눈에 알아보게 */
+  #coinBadge.debt { color: #ff9a8a; background: rgba(90, 20, 16, .6); }
+  /* 돈 배지 바로 아래 — 제주에 온 지 며칠째인지, 지금 몇 시인지 */
+  #clockBadge {
+    position: absolute; top: 18px; left: 20px; transform: translateY(96px);
+    background: rgba(6, 12, 20, .62); border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, .16);
+    padding: 6px 14px; font-size: 12.5px; font-weight: 800;
+    /* 흐린 회청색이면 돌담·풀밭 위에서 묻힙니다 — 흰 글씨에 진한 그림자 */
+    color: #ffffff; text-shadow: 0 1px 3px rgba(0, 0, 0, .9), 0 0 8px rgba(0, 0, 0, .6);
+  }
+  /* 달력 그림은 따로 감싸둡니다 — 안 그러면 뒤의 숫자까지 이모지 글꼴로 그려집니다 */
+  #clockBadge .cbIcon { margin-right: .35em; font-size: .95em; }
+  /* 밤에는 바탕만 밤빛으로 — 글씨는 낮과 똑같이 흰색을 지킵니다 */
+  #clockBadge.night { color: #ffffff; background: rgba(8, 16, 34, .74); }
+  /* 폰은 화면이 작고 배경(돌담·풀밭)이 어수선해서 그냥 두면 날짜가 묻힙니다 */
+  body.touch #clockBadge {
+    font-size: 15px; padding: 8px 16px;
+    background: rgba(6, 12, 20, .74);
+    transform: translateY(102px);  /* 커진 만큼 돈 배지와 붙지 않게 조금 내립니다 */
+  }
+  /* 떠오르는 알림 문구 — 어두운 틀에 감싸야 밝은 하늘·풀밭 어디서든 또렷이 읽힙니다 */
+  .moneyPopup {
+    position: absolute; transform: translate(-50%, 0);
+    color: #fff3d6; font-size: 15px; font-weight: 700;
+    text-shadow: 0 1px 2px rgba(0,0,0,.6);
+    background: rgba(10, 18, 28, .78);
+    border: 1px solid rgba(255, 214, 130, .55);
+    border-radius: 11px;
+    padding: 7px 13px;
+    /* pre-line: 알림 글 속의 줄바꿈(\n)이 화면에서도 줄바꿈으로 보입니다
+       keep-all: 단어 중간이 아니라 띄어쓰기에서만 줄이 바뀝니다 */
+    max-width: 78vw; white-space: pre-line; word-break: keep-all; text-align: center; line-height: 1.4;
+    will-change: top, left, opacity;
+  }
+  /* 크게 보여야 하는 알림 — 해녀 할망 말씀처럼 새겨들어야 하는 것들 (글자 두 배).
+     폰에서는 화면 폭에 맞춰 조금 줄어듭니다 — 안 그러면 서너 줄로 쪼개집니다. */
+  .moneyPopup.big {
+    font-size: clamp(22px, 6.4vw, 30px);
+    padding: 13px 20px;
+    border-radius: 16px;
+    border-color: rgba(255, 214, 130, .8);
+    background: rgba(10, 18, 28, .88);
+    box-shadow: 0 6px 20px rgba(0,0,0,.5);
+    max-width: 94vw;
+  }
+
+  #fileWarn {
+    display: none;
+    position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+    background: rgba(120, 30, 30, .88); border-radius: 12px;
+    padding: 20px 26px; font-size: 14px; line-height: 1.8; max-width: 520px;
+    pointer-events: auto;
+  }
+  #fileWarn b { color: #ffe08a; }
+
+  /* 숨이 차면 화면 가장자리가 조여옵니다 (인사이드의 물속 구간처럼) */
+  #vignette {
+    position: absolute; inset: 0; pointer-events: none; opacity: 0;
+    background: radial-gradient(ellipse at center, rgba(4,20,28,0) 32%, rgba(3,14,20,.96) 92%);
+    transition: opacity .35s ease;
+  }
+
+  /* ---- 숨이 다했을 때: 서서히 어두워지며 제주 속담과 DIE 자막이 떠오릅니다 ---- */
+  #deathOverlay {
+    position: absolute; inset: 0; pointer-events: none;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: clamp(10px, 2.5vh, 22px);
+    background: radial-gradient(ellipse at center, rgba(24,2,8,.3) 0%, rgba(4,0,8,.92) 100%);
+    opacity: 0; transition: opacity 1.6s ease;
+  }
+  #deathOverlay.show { opacity: 1; }
+  #deathOverlay .proverb {
+    font-size: clamp(15px, 3.6vw, 25px); letter-spacing: .22em; color: #e8dcc8;
+    text-shadow: 0 1px 5px #000;
+    opacity: 0; transition: opacity 1.4s ease .3s;
+  }
+  #deathOverlay.show .proverb { opacity: 1; }
+  #deathOverlay .die {
+    font-size: clamp(64px, 18vw, 150px); font-weight: 900; letter-spacing: .14em;
+    color: #c21f1f; text-shadow: 0 0 30px rgba(170,10,10,.85), 0 3px 8px #000;
+    opacity: 0; transform: scale(1.3);
+    transition: opacity 1.2s ease .8s, transform 1.4s ease .8s;
+  }
+  #deathOverlay.show .die { opacity: 1; transform: scale(1); }
+
+  /* 집·상점을 드나들 때 화면이 잠깐 어두워지는 장면 전환막 */
+  #sceneFade {
+    position: absolute; inset: 0; pointer-events: none; background: #000;
+    opacity: 0; transition: opacity .38s ease;
+  }
+  #sceneFade.show { opacity: 1; }
+
+  /* ---- 도감(업적) 화면 — 📖 버튼 ---- */
+  #bookWrap {
+    display: none;
+    position: absolute; inset: 0; pointer-events: auto;
+    background: rgba(8, 18, 16, .82);
+    align-items: center; justify-content: center;
+    cursor: pointer;
+  }
+  #bookList {
+    width: min(480px, 92vw); max-height: 82vh; overflow-y: auto;
+    background: #f6edd8; border-radius: 16px; padding: 18px 20px;
+    box-shadow: 0 4px 0 rgba(150,128,90,.55), 0 14px 40px rgba(0,0,0,.5);
+    touch-action: pan-y;   /* 손가락으로 위아래 스크롤 허용 */
+    overscroll-behavior: contain;
+    cursor: default;
+  }
+  #bookList .bookTip { text-align: center; font-size: 11px; color: #a09378; text-shadow: none; margin-bottom: 8px; }
+  #bookList .bookHead {
+    font-size: 17px; font-weight: 800; color: #3a2817; text-shadow: none;
+    margin-bottom: 10px; text-align: center;
+  }
+  #bookList .ach {
+    padding: 8px 10px; border-radius: 10px; margin-bottom: 6px;
+    background: rgba(150,128,90,.12);
+  }
+  #bookList .ach b { display: block; color: #8a7355; font-size: 14px; text-shadow: none; }
+  #bookList .ach span { display: block; color: #a09378; font-size: 12px; text-shadow: none; margin-top: 2px; }
+  #bookList .ach.on { background: rgba(217,121,60,.14); }
+  #bookList .ach.on b { color: #b3541e; }
+  #bookList .ach.on span { color: #6b5537; }
+  /* ---- 가방(아이템) — 가진 것만 작은 아이콘 + 개수로 ---- */
+  #bookList .bagMoney {
+    text-align: center; font-size: 19px; font-weight: 800;
+    color: #7a5c1e; text-shadow: none; margin-bottom: 2px;
+  }
+  /* 현금 바로 아래 — 가진 물건값까지 다 더한 총자산 */
+  #bookList .bagTotal {
+    text-align: center; font-size: 15.5px; font-weight: 700;
+    color: #9a6a2a; text-shadow: none; margin-bottom: 12px;
+  }
+  #bookList .bagTotal small { font-weight: 500; color: #8a7a5c; font-size: 12px; }
+  /* ---- 자산 화면 카드 — 밭 현황과 재산 내역을 테두리 카드 하나에 담습니다 ---- */
+  #bookList .bagCard {
+    background: rgba(255,255,255,.5); border: 1.5px solid rgba(170,140,95,.32);
+    border-radius: 14px; padding: 10px 12px 9px; margin: 0 0 10px; text-shadow: none;
+  }
+  #bookList .bagCard .bagCardTitle {
+    text-align: center; font-weight: 800; font-size: 13.5px; color: #4a7a2a; margin-bottom: 7px;
+  }
+  #bookList .bagCard .bagRow {
+    display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 14px;
+    font-size: 12px; font-weight: 700; color: #5a4426;
+  }
+  #bookList .bagCard .bagSub { text-align: center; font-size: 11.5px; color: #7a6444; margin-top: 6px; }
+  #bookList .bagCard .bagSub b { color: #9a6a2a; }
+  #bookList .bagCard hr { border: none; border-top: 1px solid rgba(170,140,95,.3); margin: 9px 0 2px; }
+  #bookList .bagCard .bagCardTitle.munam { color: #b3541e; }
+  #bookList .bagHearts { text-align: center; font-size: 21px; letter-spacing: 3px; margin: 2px 0 1px; }
+  #bookList .bagGrid { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+  #bookList .bagItem {
+    width: 72px; padding: 11px 2px 9px; position: relative;
+    background: rgba(255,255,255,.55); border: 1.5px solid rgba(170,140,95,.28);
+    border-radius: 14px; text-align: center;
+  }
+  #bookList .bagItem .em { font-size: 30px; line-height: 1; }
+  #bookList .bagItem .nm { font-size: 11px; font-weight: 700; color: #5a4426; text-shadow: none; margin-top: 6px; }
+  /* 이름 아래 값 — 이 물건이 자산에 얼마로 잡히는지 */
+  #bookList .bagItem .pr {
+    font-size: 10px; font-weight: 800; color: #b3541e; text-shadow: none; margin-top: 2px;
+  }
+  #bookList .bagItem .ct {
+    position: absolute; top: 3px; right: 6px;
+    font-size: 12px; font-weight: 800; color: #b3541e; text-shadow: none;
+  }
+  /* 아직 못 가진 것 — 회색으로 흐릿하게 (뭘 모을 수 있는지 한눈에 보이게) */
+  #bookList .bagItem.off { background: rgba(95,85,70,.10); filter: grayscale(1); opacity: .45; }
+
+  /* ---- 색 고르기 팝업 (벽지·외벽 페인트) ---- */
+  #pickWrap {
+    display: none;
+    position: absolute; inset: 0; pointer-events: auto;
+    background: rgba(8, 18, 16, .82);
+    align-items: center; justify-content: center;
+  }
+  #pickBox {
+    position: relative;
+    width: min(420px, 90vw);
+    background: #f6edd8; border-radius: 16px; padding: 18px 20px;
+    box-shadow: 0 4px 0 rgba(150,128,90,.55), 0 14px 40px rgba(0,0,0,.5);
+  }
+  /* 창 오른쪽 위 닫기 단추 — 컴퓨터에서는 F·ESC로도 닫힙니다 */
+  #pickBox .closeX {
+    position: absolute; top: 8px; right: 10px;
+    width: 32px; height: 32px; border-radius: 50%;
+    border: none; background: rgba(58,40,23,.1); color: #6b5537;
+    font-size: 16px; font-family: inherit; line-height: 1; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    user-select: none; -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+  }
+  #pickBox .closeX:active { background: rgba(179,84,30,.3); }
+  #pickTitle { font-size: 17px; font-weight: 800; color: #3a2817; text-shadow: none; text-align: center; margin-bottom: 12px; }
+  #pickPrice { text-align: center; margin-top: 14px; }
+  #pickGrid { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+  #pickGrid .swItem { text-align: center; }
+  #pickGrid .swatch {
+    width: 58px; height: 58px; border-radius: 12px;
+    border: 3px solid rgba(58,40,23,.35); cursor: pointer;
+  }
+  /* 지금 골라둔 색 — 주황 테두리로 또렷하게 */
+  #pickGrid .swatch.sel { border-color: #b3541e; box-shadow: 0 0 0 3px rgba(179,84,30,.35); }
+  #pickGrid .swName { font-size: 10.5px; color: #6b5537; text-shadow: none; margin-top: 4px; }
+  /* 물건 미리보기 (이모지 크게) */
+  .bigPreview { font-size: 64px; text-align: center; padding: 6px 24px 2px; }
+  /* 이모지에 없어서 직접 그린 물건 (망사리) — 이모지와 같은 크기로 맞춥니다 */
+  .bigPreview.drawn { width: 86px; height: 86px; margin: 4px auto 0; padding: 0; }
+  /* 가격 단추 — 이걸 눌러야 최종 구입됩니다 */
+  .buyBtn {
+    pointer-events: auto; cursor: pointer; font-family: inherit;
+    background: #d97a2e; color: #fff3e0; font-weight: 800;
+    border: none; border-radius: 999px; padding: 11px 24px; font-size: 15px;
+    box-shadow: 0 3px 0 rgba(163,84,36,.4);
+    user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+  .buyBtn:disabled { opacity: .45; cursor: default; box-shadow: none; }
+  .buyBtn:active:not(:disabled) { transform: translateY(2px); box-shadow: 0 1px 0 rgba(163,84,36,.4); }
+  .pickTip { text-align: center; font-size: 11px; color: #a09378; text-shadow: none; margin-top: 12px; }
+
+  /* ---- 대화 카드 — 이장님·돌하르방과 이야기 ---- */
+  #talkBox {
+    display: none;
+    position: absolute; left: 50%; bottom: 110px; transform: translateX(-50%);
+    width: min(560px, 92vw);
+    background: #f6edd8; color: #3a2817;
+    border-radius: 14px; padding: 14px 18px 10px;
+    box-shadow: 0 4px 0 rgba(150,128,90,.55), 0 10px 24px rgba(0,0,0,.35);
+    pointer-events: auto; cursor: pointer;
+    user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent;
+  }
+  #talkBox b { display: block; color: #b3541e; font-size: 16px; margin-bottom: 6px; text-shadow: none; }
+  /* NPC 대사는 새겨들어야 하니 크게 (할망 말씀 팝업과 같은 규칙).
+     pre-line: 글 속의 줄바꿈(\n)이 화면에서도 줄바꿈으로 보입니다
+     keep-all: 단어 중간이 아니라 띄어쓰기에서만 줄이 바뀝니다 */
+  #talkBox p {
+    font-size: clamp(19px, 5.2vw, 24px); line-height: 1.55;
+    text-shadow: none; white-space: pre-line; word-break: keep-all;
+  }
+  #talkBox .next { text-align: right; font-size: 13px; color: #6b5537; margin-top: 8px; text-shadow: none; }
+
+  /* ---- 경마 — 직접 뽑으신 경주 영상이 전체 화면으로 나옵니다 ---- */
+  #raceWrap {
+    display: none;
+    position: absolute; inset: 0; pointer-events: auto;
+    background: #000;
+    align-items: center; justify-content: center; flex-direction: column;
+  }
+  #raceVideo, .raceVid { max-width: 100%; max-height: 92%; }
+  /* 영상을 미리 받아두는 동안 잠깐 뜨는 글씨 */
+  #raceWrap .loading { color: #cfc8b8; font-size: 15px; letter-spacing: 1px; }
+  #raceWrap .cap {
+    margin-top: 8px; font-size: 13px; color: #cfc8b8; opacity: .8;
+  }
+  /* 이야기 사이에 끼는 짧은 영상은 바탕이 흰색입니다 — 검은 테두리가 남으면 이어붙인 티가 납니다 */
+  #raceWrap.light { background: #fff; }
+  #raceWrap.light .cap { color: #8a8378; }
+  /* 짧은 영상이 도는 동안에는 화면 위 글씨·배지·버튼을 잠깐 치웁니다 */
+  body.clipping #title, body.clipping #topRow, body.clipping #iconRow, body.clipping #help,
+  body.clipping #coinBadge, body.clipping #clockBadge, body.clipping .badge, body.clipping #touchBtns,
+  body.clipping #hint, body.clipping .moneyPopup, body.clipping #homeLink, body.clipping #gameHomeLink { display: none; }
+
+  /* 시작 화면이 떠 있는 동안에는 "게임 중" UI를 치웁니다.
+     안 그러면 왼쪽 위에서 언어 단추·제목·홈페이지 링크가 서로 겹쳐 글자가 포개집니다.
+     (시작 화면에는 가운데 큰 제목과 자기 몫의 홈페이지 링크가 따로 있습니다) */
+  body.starting #gameHomeLink, body.starting #title,
+  body.starting #coinBadge, body.starting #clockBadge,
+  /* 조작 버튼도 시작 화면 위로 비쳐 보였습니다. 눌러도 게임이 시작되지 않아
+     "버튼이 고장났나" 로 보이고, 🎒를 누르면 열리는 창은 시작 화면 밑에 깔려 안 보였습니다 */
+  body.starting #touchBtns, body.starting #iconRow, body.starting #topRow,
+  body.starting #help, body.starting #hint { display: none; }
+
+  /* ---- 물질할 때만 나오는 숨 게이지 ---- */
+  #breathBar {
+    display: none;
+    position: absolute; left: 50%; top: 22px; transform: translateX(-50%);
+    width: min(260px, 60vw); height: 16px;
+    background: rgba(0,0,0,.45); border-radius: 999px; padding: 3px;
+  }
+  #breathFill {
+    height: 100%; width: 100%; border-radius: 999px;
+    background: #5fc6e8; transition: width .12s linear, background .3s;
+  }
+  /* 라벨을 CSS로 박아두면 번역기가 닿지 못해 영어판에서도 한글로 나옵니다.
+     실제 요소(#breathLabel)로 두어야 언어에 따라 바뀝니다 */
+  #breathLabel {
+    position: absolute; left: -26px; top: 1px;
+    font-size: 12px; font-weight: 700;
+  }
+  #netBadge { display: none; left: auto; right: 14px; bottom: 50px; font-size: 11.5px; padding: 6px 11px; }
+  #carrotBadge { display: none; bottom: 110px; }
+
+  #netBadge.full { background: rgba(196, 96, 16, .85); color: #fff3d6; font-weight: 700; }
+
+  /* ---- 왼쪽 아래 아이콘 줄 (다시하기·저장·종료·지도·음악) ---- */
+  #iconRow {
+    position: absolute; left: 16px; bottom: 16px;
+    display: flex; gap: 8px; pointer-events: auto;
+  }
+  .ibtn {
+    width: 40px; height: 40px; border-radius: 50%;
+    border: 1px solid rgba(255,255,255,.35); background: rgba(0,0,0,.45);
+    color: #fff; font-size: 18px; line-height: 1; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    user-select: none; -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+  }
+  .ibtn:active { background: rgba(255,190,80,.7); }
+  /* 버튼 속 그림(제주도 지도 아이콘)이 손가락 입력을 가로채지 않게 합니다 */
+  .ibtn svg { pointer-events: none; display: block; }
+  /* 폰에서는 왼쪽 아이콘을 작게 만들어 왼쪽 구석에 붙입니다 —
+     오른쪽 행동 버튼을 누를 때 손가락이 걸리지 않게 멀찍이 띄우는 것입니다 */
+  /* 왼쪽 아이콘은 작게 둡니다 — 오른쪽 조작키까지 키우면 좁은 폰에서 두 줄이 부딪힙니다.
+     높이만 조작키와 맞춰 나란히 놓습니다. */
+  body.touch #iconRow { left: 6px; bottom: 68px; gap: 4px; }
+  body.touch .ibtn { width: 30px; height: 30px; font-size: 13px; }
+  body.touch .ibtn svg { width: 19px; height: 12px; }
+
+  /* ---- 시작 화면, 언어 단추 바로 아래 — 오름게임즈 홈페이지로 가는 작은 링크 (새 탭으로 열립니다) ---- */
+  #homeLink {
+    position: absolute; top: 52px; left: 10px;
+    pointer-events: auto; color: var(--paper); opacity: .75; font-size: 11px;
+    text-decoration: underline; text-underline-offset: 2px; white-space: nowrap;
+    text-shadow: 0 1px 3px rgba(0,0,0,.55);
+    -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+    padding: 6px 8px;   /* 글자가 작아도 손가락이 닿는 면적은 넉넉하게 */
+  }
+  #homeLink:active { opacity: 1; }
+  /* ---- 게임 화면 왼쪽 위 맨 꼭대기 — 같은 링크의 게임 중 버전.
+     그 아래로 제목 → 돈 → 날짜 순서로 내려갑니다 ---- */
+  #gameHomeLink {
+    position: absolute; top: 4px; left: 20px;
+    pointer-events: auto; color: #fff; opacity: .6; font-size: 11px;
+    text-decoration: underline; text-underline-offset: 2px; white-space: nowrap;
+    text-shadow: 0 1px 3px rgba(0,0,0,.55);
+    -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+    padding: 5px 8px 5px 0;   /* 글자가 작아도 손가락이 닿는 면적은 넉넉하게 */
+  }
+  #gameHomeLink:active { opacity: 1; }
+
+  /* ---- 전체 지도 (M키 / 🗺 배지) ---- */
+  #mapWrap {
+    display: none;
+    position: absolute; inset: 0; pointer-events: auto;
+    background: rgba(8, 18, 16, .82);
+    align-items: center; justify-content: center; flex-direction: column; gap: 12px;
+    cursor: pointer;
+  }
+  #mapCanvas {
+    width: min(86vw, 86vh, 560px); height: min(86vw, 86vh, 560px);
+    border-radius: 14px; border: 3px solid rgba(242,231,207,.5);
+    box-shadow: 0 14px 40px rgba(0,0,0,.5);
+  }
+  #mapWrap .cap { font-size: 13px; color: #ddd6c0; }
+
+  /* ---- 시작 화면 ----
+     브라우저는 사용자가 한 번 누르기 전에는 소리를 못 내게 막습니다.
+     그 "한 번 누르기"를 자연스럽게 받아내면서, 조작법도 같이 알려주는 화면입니다. */
+  /* 색은 시안 그대로 — 낡은 종이 크림, 진한 나무 갈색, 금빛 제목, 주황 시작 버튼 */
+  #start {
+    --paper: #f6edd8;
+    --ink: #3a2817;
+    --ink2: #6b5537;
+    --card: rgba(38, 44, 50, .88);
+    --gold: #e9c877;
+    --desc: #c9c3b6;
+    --orange: #d9793c;
+    position: absolute; inset: 0; pointer-events: auto;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: clamp(7px, 1.5vh, 14px); padding: clamp(10px, 2.2vw, 20px);
+    /* 배경은 살아 있는 게임 화면 위에 얇은 장막만 덮습니다 */
+    background:
+      linear-gradient(rgba(12, 26, 22, .45), rgba(8, 20, 18, .72));
+    text-align: center; cursor: pointer;
+    transition: opacity .45s ease;
+    overflow: hidden;
+    /* 그림이 다 받아지기 전에는 통째로 숨겨둡니다.
+       안 그러면 "시작하기"만 먼저 뜨고 카드 그림이 뒤늦게 하나씩 튀어나옵니다. */
+    opacity: 0;
+  }
+  #start.ready { opacity: 1; }
+  #start.gone { opacity: 0; pointer-events: none; }
+
+  /* ---- 스튜디오 로고 — 루루 시작 화면보다 먼저 뜨는 첫 장면 ---- */
+  #splash {
+    position: fixed; inset: 0; z-index: 9999;
+    display: flex; align-items: center; justify-content: center;
+    background: #f8f5ec;
+    transition: opacity .45s ease;
+  }
+  #splash img {
+    width: min(46vw, 40vh, 260px); height: auto;
+    animation: splashIn .4s ease both;
+  }
+  #splash.gone { opacity: 0; pointer-events: none; }
+  @keyframes splashIn {
+    from { opacity: 0; transform: scale(.94); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+  @media (prefers-reduced-motion: reduce) { #splash img { animation: none; } }
+
+  /* 제목 — 위쪽을 가로지르는 크림색 현판 */
+  #startTitle {
+    width: min(430px, 80vw);
+    background: var(--paper);
+    border-radius: 18px;
+    padding: clamp(9px, 1.8vh, 16px) clamp(16px, 4vw, 30px);
+    box-shadow: 0 4px 0 rgba(150,128,90,.55), 0 14px 28px rgba(0,0,0,.4);
+  }
+  #startTitle h1 {
+    font-size: clamp(21px, 5.4vw, 34px); font-weight: 800; letter-spacing: -1.5px;
+    color: var(--ink); text-shadow: none; line-height: 1.15;
+    display: flex; align-items: center; justify-content: center; gap: .35em;
+  }
+  #startTitle h1 .paw { font-size: .58em; opacity: .8; letter-spacing: -.15em; }
+  #startTitle small {
+    display: block; margin-top: 3px;
+    font-size: clamp(10.5px, 2.4vw, 14px); font-weight: 500; letter-spacing: 0;
+    color: var(--ink2);
+  }
+
+  /* 일거리 카드 — 그림이 들어갈 자리를 미리 잡아둡니다.
+     그림이 아직 없어도 자리가 무너지지 않도록 큼직한 이모지를 밑에 깔아둡니다. */
+  #startJobs {
+    display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: clamp(5px, 1.6vw, 8px);
+    width: min(200px, 56vw, 26vh);
+    margin: 0 auto;
+  }
+  .job {
+    position: relative; overflow: hidden;
+    border-radius: 16px; background: var(--card);
+    display: flex; flex-direction: column;
+  }
+  .job .shot {
+    position: relative; width: 100%; aspect-ratio: 4 / 3;
+    background: rgba(0,0,0,.28);
+    display: flex; align-items: center; justify-content: center;
+    font-size: clamp(28px, 7.5vw, 44px);   /* 그림이 없을 때 보이는 이모지 */
+  }
+  .job .shot img {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    object-fit: cover; display: block;
+    opacity: 0; transition: opacity .25s ease;   /* 뜨는 순간 톡 튀지 않게 */
+  }
+  .job .shot img.on { opacity: 1; }
+  .job .shot img:not([src]), .job .shot img[src=""] { display: none; }
+  .job .cap { padding: 5px 8px 7px; text-align: center; }
+  .job .cap b {
+    display: flex; align-items: center; justify-content: center; gap: 5px;
+    color: var(--gold); font-weight: 700;
+    font-size: clamp(11px, 2.4vw, 13px);
+  }
+  .job .cap span {
+    display: block; margin-top: 3px; color: var(--desc);
+    font-size: clamp(10px, 2.4vw, 12.5px); line-height: 1.45;
+  }
+  /* 루루와 무남이의 데이트 — 일거리 넉 장 아래에 큼직하게 한 장.
+     이 게임에서 돈을 모으는 진짜 이유라 대문 자리를 내줬습니다. */
+  #startRomance {
+    position: relative;
+    /* 칸을 조금 줄여서라도 그림이 통째로 들어가야 합니다.
+       flex: none 이 없으면 화면이 짧을 때 시작 화면이 이 카드를 눌러 버려서,
+       칸 높이가 그림보다 작아지고 아래(=루루 얼굴)가 잘려 나갑니다. */
+    flex: none;
+    width: min(180px, 50vw, 21vh);
+    margin: clamp(5px, 1.6vw, 8px) auto 0;
+  }
+  /* 그림은 원래 비율(16:9) 그대로, 잘리지 않게 통째로 넣습니다 */
+  #startRomance .shot { aspect-ratio: 16 / 9; flex: none; }
+  #startRomance .shot img { object-fit: contain; }
+  /* 글자는 그림 위에 얹지 않고 아래에 제자리로 둡니다.
+     얹어두면 어떻게 놓든 얼굴 한쪽을 가리게 됩니다. */
+  #startRomance .cap { position: static; padding: 5px 8px 7px; }
+  #startRomance .cap b { color: #ffb3cf; text-shadow: 0 1px 4px rgba(0,0,0,.9); }
+  /* 아직 안 만든 일거리에는 "준비 중" 딱지를 붙입니다 */
+  .job.soon .cap b::after {
+    content: '준비 중'; margin-left: auto;
+    background: rgba(255,255,255,.14); color: #ddd6c8;
+    font-size: 10px; font-weight: 500; padding: 2px 8px; border-radius: 999px;
+  }
+
+  #startKeys {
+    display: grid; grid-template-columns: auto 1fr; gap: 5px 22px;
+    align-items: center; justify-items: start;
+    background: var(--card); border-radius: 14px;
+    padding: clamp(10px, 1.8vh, 15px) clamp(16px, 4.5vw, 26px);
+    font-size: clamp(10.5px, 2.6vw, 13.5px); line-height: 1.5;
+    color: var(--desc);
+  }
+  #startKeys b { color: var(--paper); font-weight: 700; }
+
+  #startGo {
+    background: var(--orange); color: #fff3e0; font-weight: 800;
+    border-radius: 999px; padding: clamp(10px, 1.9vh, 14px) clamp(28px, 7vw, 40px);
+    font-size: clamp(15px, 3.8vw, 19px);
+    display: flex; align-items: center; gap: .55em;
+    box-shadow: 0 4px 0 #a3542440, 0 8px 20px rgba(0,0,0,.4);
+    animation: bob 1.8s ease-in-out infinite;
+  }
+  #startGo .paw { font-size: .8em; opacity: .75; }
+  /* 전체화면 단추 — 오른쪽 위 구석에 띄웁니다.
+     시작하기 아래에 두면 화면 낮은 폰에서 밖으로 밀려나 버립니다. */
+  #startFull {
+    position: absolute; top: 10px; right: 10px;
+    color: var(--paper); font-weight: 700;
+    font-size: clamp(11px, 2.8vw, 13px);
+    padding: 8px 14px; border-radius: 999px;
+    border: 1px solid rgba(246, 237, 216, .38);
+    background: rgba(10, 18, 16, .55);
+    backdrop-filter: blur(3px);
+    white-space: nowrap;
+  }
+  #startFull.hidden { display: none; }
+  /* 언어 전환 단추 — 전체화면 단추와 같은 생김새로 왼쪽 위에 */
+  #startLang {
+    position: absolute; top: 10px; left: 10px;
+    color: var(--paper); font-weight: 700;
+    font-size: clamp(11px, 2.8vw, 13px);
+    padding: 8px 14px; border-radius: 999px;
+    border: 1px solid rgba(246, 237, 216, .38);
+    background: rgba(10, 18, 16, .55);
+    backdrop-filter: blur(3px);
+    white-space: nowrap; cursor: pointer;
+  }
+  @keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+  @media (prefers-reduced-motion: reduce) { #startGo { animation: none; } }
+  /* 화면이 낮으면(노트북 가로 화면 등) 조작 설명표는 접습니다.
+     같은 내용이 오른쪽 위 안내표에 계속 떠 있으니 없어도 됩니다. */
+  @media (max-height: 720px) { #startKeys { display: none; } }
+
+  /* ---- 손가락 조작 (폰·태블릿에서만 보입니다) ---- */
+  /* 평소엔 전부 숨겨두고, 터치 기기라고 판정되면 body에 touch 클래스가 붙어 나타납니다 */
+  #touchBtns { display: none; }
+  body.touch #touchBtns { display: flex; }
+  /* 폰에서는 상태 배지가 행동 버튼·아이콘 줄과 겹칩니다. 겹치지 않는 자리로 옮깁니다.
+     상자는 화면 위 가운데(숨 게이지가 없을 때만 뜨므로 자리가 안 겹칩니다),
+     망사리는 숨 게이지 바로 아래로 — 물질 중에 둘을 한눈에 봅니다. */
+  body.touch #boxBadge {
+    left: 50%; right: auto; top: 16px; transform: translateX(-50%);
+  }
+  body.touch #netBadge {
+    left: 50%; right: auto; bottom: auto; top: 48px; transform: translateX(-50%);
+  }
+  /* 오른쪽 아래 행동 버튼들 — 왼쪽 아이콘 줄과 같은 크기·같은 높이.
+     화면 맨 아래는 브라우저 막대와 손바닥에 가려서, 조금 띄워 올려둡니다. */
+  #touchBtns {
+    position: absolute; right: 12px; bottom: 62px;
+    flex-wrap: nowrap; justify-content: flex-end; gap: 10px;
+    pointer-events: auto;
+  }
+  .tbtn {
+    width: 56px; height: 56px; border-radius: 50%;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    background: rgba(0,0,0,.42); border: 2px solid rgba(255,255,255,.5);
+    font-size: 10px; font-weight: 700; line-height: 1.15; text-align: center;
+    user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent;
+    touch-action: none;
+  }
+  /* 버튼 안의 글자·이모지는 손가락 입력을 받지 않게 합니다.
+     그래야 어디를 눌러도 항상 버튼 자체가 눌린 것으로 처리됩니다. */
+  .tbtn * { pointer-events: none; }
+  .tbtn .k { font-size: 20px; }
+  .tbtn.on { background: rgba(255,190,80,.75); border-color: #fff; }
+  /* 폰은 화면이 좁아서 조작 안내표와 아래쪽 설명은 접어둡니다 */
+  body.touch #help, body.touch #hint { display: none; }
+  body.touch .badge { font-size: 12px; padding: 7px 12px; }
+  /* 시작 화면의 조작 설명 — 폰에서는 화면 버튼이 눈에 보이니 설명 자체를 뺍니다 */
+  #startKeys .mob { display: none; }
+  body.touch #startKeys { display: none; }
+</style>
+</head>
+<!-- starting: 시작 화면이 떠 있는 동안만 붙어 있습니다 (시작하면 jeju3d.js가 뗍니다) -->
+<body class="starting">
+
+<!-- 오름게임즈 로고 — 게임이 준비되는 동안 먼저 보여주는 첫 장면입니다.
+     루루 시작 화면(#start)이 다 준비되면 부드럽게 걷힙니다. -->
+<div id="splash"><img src="../assets/oreum-logo.png" alt="오름게임즈"></div>
+<script>
+  // 안전장치 — 게임 스크립트가 아예 안 읽히더라도 로고가 화면을 영영 막고 있으면 안 됩니다
+  setTimeout(function () {
+    var s = document.getElementById('splash');
+    if (s) { s.classList.add('gone'); setTimeout(function () { s.remove(); }, 500); }
+  }, 8000);
+</script>
+
+<div id="ui">
+  <div id="title">
+    루루냥의 제주살이
+  </div>
+
+  <div id="help">
+    <b>이동</b> ← ↑ ↓ → (방향키)<br>
+    <b>시야 회전</b> A D (올려보기 W S)<br>
+    <b>줌</b> Z 멀리 / X 가까이<br>
+    <b>달리기</b> Shift<br>
+    <b>점프</b> Space<br>
+    <b>상호작용</b> F (구입은 마우스로 · 창 나가기는 ESC)<br>
+    <b>물속에서</b> F 채집 · ↑ 떠오르기 · ↓ 잠수 · ←→ 헤엄 · 수면에서 F 나가기<br>
+    <b>전체 지도</b> M (또는 🗺 배지)<br>
+    <b>왼쪽 아래</b> 🎒 자산 · 🗺 지도 · 🎵 음악<br>
+    <b>오른쪽 위</b> ⏭ 다음 곡 · ↻ 새로 시작 · 💾 저장
+  </div>
+
+  <div id="coinBadge">💵 0원</div>
+  <div id="clockBadge">🗓 1일차 · 오전 9:00</div>
+  <!-- 게임 화면에서도 홈페이지로 갈 수 있게 — 날짜 배지 아래 작은 링크 (새 탭으로 열립니다) -->
+  <a id="gameHomeLink" href="/">Oreum Games</a>
+  <div id="topRow">
+    <button class="ibtn" id="nextSongBadge" title="다음 곡">⏭</button>
+    <button class="ibtn" id="restartTop" title="처음부터 다시하기">↻</button>
+    <button class="ibtn" id="btnSave" title="저장하기">💾</button>
+  </div>
+  <div id="mapWrap">
+    <canvas id="mapCanvas"></canvas>
+    <div class="cap" id="mapCap">M 키나 화면을 누르면 닫힙니다</div>
+  </div>
+  <div id="vignette"></div>
+  <div id="deathOverlay">
+    <div class="proverb">욕심내민 바당이 데려간다</div>
+    <div class="die">DIE</div>
+  </div>
+  <div id="sceneFade"></div>
+  <div id="talkBox"><b id="talkName"></b><p id="talkText"></p><div class="next">누르면 다음</div></div>
+  <div id="bookWrap"><div id="bookList"></div></div>
+  <div id="pickWrap"><div id="pickBox">
+    <div id="pickTitle"></div><div id="pickGrid"></div><div id="pickPrice"></div>
+    <div class="pickTip" id="pickTip">관광지라 물가가 비싸구나 ㅠㅠ</div>
+  </div></div>
+  <div id="raceWrap">
+    <div class="loading" id="raceLoading">경주 준비 중…</div>
+    <div class="cap"></div>
+  </div>
+  <div id="breathBar"><span id="breathLabel">숨</span><div id="breathFill"></div></div>
+
+  <div id="iconRow">
+    <button class="ibtn" id="fullBadge" title="전체화면">⛶</button>
+    <button class="ibtn" id="bookBadge" title="자산 (갖고 있는 아이템)">🎒</button>
+    <button class="ibtn" id="mapBadge" title="지도 (M)">
+      <!-- 제주도를 단순화한 모양: 동서로 길쭉한 섬 가운데에 한라산이 볼록 -->
+      <svg width="24" height="15" viewBox="0 0 48 30" aria-hidden="true">
+        <path d="M5 18 Q3 12 10 10 Q16 4 24 5 Q34 3 41 9 Q46 12 44 17 Q42 22 33 24 Q22 27 12 24 Q6 22 5 18 Z"
+              fill="#8fce76" stroke="#3c6e33" stroke-width="2.4" stroke-linejoin="round"/>
+        <path d="M19 13 L24 7 L29 13 Z" fill="#3c6e33"/>
+      </svg>
+    </button>
+    <button class="ibtn" id="musicBadge" title="배경음악">🎵</button>
+  </div>
+  <div class="badge" id="carrotBadge">🥕 당근 0개</div>
+  <div class="badge" id="netBadge">🧺 망사리 0/24</div>
+  <div class="badge" id="boxBadge">📦 상자 0/20</div>
+  <div class="badge" id="ropeBadge">📦 상자에 가까이 가면 F로 잡을 수 있어요</div>
+  <!-- (아래 상시 안내줄은 뺐습니다 — "F로 상호작용"은 게이머라면 다 아는 것이고,
+       박스값·지도는 배지와 돌하르방 튜토리얼이 이미 알려줍니다) -->
+
+  <!-- 시작 화면: 아무 데나 누르면 사라지면서 배경음악이 시작됩니다 -->
+  <div id="start">
+    <div id="startTitle">
+      <h1>루루냥의 <span class="paw">🐾</span> 제주살이</h1>
+      <small>서울 집값에 밀려 제주로 온 고양이<br>낡은 빈집에서 시작하는 두 번째 인생</small>
+    </div>
+
+    <!-- 일거리 그림.
+         src가 비어 있으면 그림 없이 이모지만 보이고, 그림 파일을 넣으면 자동으로 채워집니다.
+         파일은 assets/farmcat/ 에 아래 이름 그대로 넣으시면 됩니다. -->
+    <div id="startJobs">
+      <div class="job">
+        <div class="shot">🍊<img alt="" data-src="../assets/farmcat/scene_farm.webp"></div>
+        <div class="cap"><b>농사짓기</b></div>
+      </div>
+      <div class="job">
+        <div class="shot">🤿<img alt="" data-src="../assets/farmcat/scene_dive.webp"></div>
+        <div class="cap"><b>해녀 물질</b></div>
+      </div>
+      <div class="job">
+        <div class="shot">🐴<img alt="" data-src="../assets/farmcat/scene_horse.webp"></div>
+        <div class="cap"><b>조랑말 경마</b></div>
+      </div>
+      <div class="job">
+        <div class="shot">🏚<img alt="" data-src="../assets/farmcat/scene_house.webp"></div>
+        <div class="cap"><b>헌집 고치기</b></div>
+      </div>
+    </div>
+
+    <!-- 대문 — 노을 지는 돌담에 나란히 앉은 루루와 무남이 -->
+    <div class="job" id="startRomance">
+      <div class="shot">💕<img alt="" data-src="../assets/farmcat/scene_date.webp?v=3"></div>
+      <div class="cap"><b>그리고 설레는 사랑 💕</b></div>
+    </div>
+
+    <div id="startKeys">
+      <b class="pc">방향키</b><span class="pc">루루 이동</span>
+      <b class="pc">A D · W S</b><span class="pc">시야 돌리기 · 올려보기</span>
+      <b class="pc">Z X</b><span class="pc">줌</span>
+      <b class="pc">F</b><span class="pc">모든 상호작용 (따기·사기·상자·물질…)</span>
+      <b class="pc">M</b><span class="pc">전체 지도</span>
+      <b class="pc">Shift · Space</b><span class="pc">달리기 · 점프</span>
+      <b class="mob">왼쪽 화면</b><span class="mob">끌면 루루가 걸어갑니다</span>
+      <b class="mob">오른쪽 화면</b><span class="mob">끌면 시야가 돌아갑니다</span>
+      <b class="mob">두 손가락</b><span class="mob">벌리고 오므리면 줌</span>
+      <b class="mob">행동 버튼</b><span class="mob">모든 상호작용 (따기·사기·상자·물질…)</span>
+      <b class="mob">🗺 배지</b><span class="mob">전체 지도</span>
+      <b class="mob">🎵 배지</b><span class="mob">누르면 배경음악 꺼짐</span>
+    </div>
+    <div id="startGo"><span class="paw">🐾</span>시작하기<span class="paw">🐾</span></div>
+    <!-- 폰 브라우저의 주소창까지 걷어내고 꽉 찬 화면으로 보고 싶을 때 -->
+    <div id="startFull">⛶ 전체화면으로 보기</div>
+    <!-- 언어 전환 — 한국어/영어 (i18n.js가 글씨를 채우고 동작을 답니다) -->
+    <div id="startLang"></div>
+    <!-- 언어 단추 바로 아래 — 오름게임즈 홈페이지로 가는 작은 링크 (새 탭으로 열립니다) -->
+    <a id="homeLink" href="https://oreumgames.com/" target="_blank" rel="noopener">Oreum Games</a>
+  </div>
+
+  <!-- 폰용: 왼쪽 화면을 끌면 이동, 오른쪽 화면을 끌면 시야, 오른쪽 아래엔 행동 버튼입니다 -->
+  <div id="touchBtns">
+    <div class="tbtn" id="btnAction"><span class="k">🐾</span>행동</div>
+    <div class="tbtn" id="btnRun"><span class="k">💨</span>달리기</div>
+    <div class="tbtn" id="btnJump"><span class="k">⤴</span>점프</div>
+  </div>
+
+  <div id="fileWarn">
+    지금은 <b>루루 그림과 성산일출봉 그림이 안 보이는 상태</b>입니다.<br>
+    브라우저 보안 규칙 때문에, html 파일을 그냥 더블클릭하면 그림 파일을 화면에 입힐 수 없습니다.<br><br>
+    폴더에 있는 <b>「루루3D실행.bat」</b>을 더블클릭해서 열어주세요.<br>
+    (작은 서버를 켜고 같은 화면을 여는 것뿐이라 하시던 대로 하시면 됩니다)
+  </div>
+</div>
+
+<script>
+// 오프라인 캐시 등록 — 인터넷이 느려도 게임이 켜집니다 (앱 설치의 기반)
+if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+  navigator.serviceWorker.getRegistrations().then(rs => rs.forEach(r => r.unregister())).catch(() => {});
+}
+</script>
+<!-- 방문 수·유입 경로·국가 — 홍보 링크는 홈페이지를 거치지 않고 이 게임 주소로 바로 옵니다.
+     예전에는 이 집계가 홈페이지에만 있어서 그렇게 들어온 사람이 통째로 빠졌습니다. -->
+<script src="/assets/visit.js?v=11" defer></script>
+<script>
+// ── 게임 지표 — 쿠키 없이, 하루 1회 중복만 걸러 셉니다 (카운터=Abacus, 대시보드=oreumgames.com/stats.html) ──
+// 여기서는 "실제 게임을 연 수"와 체류시간을 잽니다. 방문·유입·국가는 위 visit.js가 셉니다.
+(function () {
+  var local = location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.protocol === 'file:';
+  var base = 'https://abacus.jasoncameron.dev/hit/oreumgames/';
+  // 저장소를 아예 못 쓰는 브라우저(시크릿·쿠키 차단)가 있습니다.
+  // 그냥 window.localStorage 를 만지면 그 자리에서 터져서 게임 지표가 통째로 사라집니다.
+  var LS = null;
+  try { window.localStorage.setItem('g_probe', '1'); window.localStorage.removeItem('g_probe'); LS = window.localStorage; } catch (e) { LS = null; }
+  function hit(k) { if (local) return; try { fetch(base + k, { mode: 'cors' }).catch(function () {}); } catch (e) {} }
+  function ymd(d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+  var today = ymd(new Date());
+  // "하루 1회"를 지킬 방법이 없으면 아예 세지 않습니다.
+  // 예전에는 저장소가 막혀도 그냥 셌기 때문에, 새로고침할 때마다 게임 실행 수가 부풀었습니다.
+  function onceToday(flag, k) {
+    if (!LS) return;
+    try { if (LS.getItem(flag) === today) return; LS.setItem(flag, today); } catch (e) { return; }
+    hit(k);
+  }
+
+  // ③ 실제 게임을 연 수 (하루 1회)
+  onceToday('g_open', 'game_open');
+  // ④ 체류율의 '분모' — 게임 세션 수. 열 때마다(새로고침·재접속 포함) 셉니다.
+  //    체류 버킷(play_1m 등)도 세션마다 세니까, 같은 단위라 비율이 100%를 안 넘습니다.
+  hit('game_session');
+
+  // ⑤ 재방문 — 진짜 '게임 생명력' 지표. 이 브라우저가 게임을 처음 연 날을 남기고,
+  //    다른 날 또 켜면 '재방문 플레이어'로 딱 한 번만 셉니다. (홈페이지 재방문이 아니라 게임 재방문)
+  if (LS) try {
+    var gfirst = LS.getItem('g_first');
+    if (!gfirst) { LS.setItem('g_first', today); hit('game_players'); }              // 이 브라우저의 첫 게임 = 고유 플레이어
+    else if (gfirst !== today && LS.getItem('g_ret') !== '1') { LS.setItem('g_ret', '1'); hit('game_returning'); }  // 처음으로 다른 날 복귀
+  } catch (e) {}
+
+  // ④ 체류시간 — 세션 길이를 버킷으로 (탭이 숨겨지거나 닫힐 때 한 번)
+  var start = Date.now(), sent = {};
+  function flush() {
+    var s = (Date.now() - start) / 1000;
+    if (s >= 60 && !sent.m1) { sent.m1 = 1; hit('play_1m'); }
+    if (s >= 180 && !sent.m3) { sent.m3 = 1; hit('play_3m'); }
+    if (s >= 600 && !sent.m10) { sent.m10 = 1; hit('play_10m'); }
+  }
+  addEventListener('visibilitychange', function () { if (document.visibilityState === 'hidden') flush(); });
+  addEventListener('pagehide', flush);
+})();
+</script>
+<script src="i18n.js?v=45"></script>
+<script src="lib/three.min.js"></script>
+<!-- ?v= 뒤 숫자는 "캐시 무시용" 표시입니다. jeju3d.js를 고쳤는데 화면이 그대로면 숫자를 1 올리세요. -->
+<script src="jeju3d.js?v=425"></script>
+</body>
+</html>
