@@ -937,3 +937,12 @@ body{ font-size:19px; }
 .js-install[hidden] { display: none; }
 .js-install { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; vertical-align: middle; }
 .install-ico { height: 18px; width: auto; display: block; }
+/* 게임 소개 페이지 — 본문·이런 분께·자주 묻는 질문 (2026-09-02) */
+.gp-body{ margin:12px 0 0; font-size:16px; line-height:1.8; color:var(--ink-2); }
+.gp-for{ margin:18px 0 0; font-size:15px; line-height:1.7; color:var(--muted); }
+.faq{ margin-top:26px; }
+.faq h2{ font-size:18px; margin:0 0 8px; }
+.faq details{ border-top:1px solid var(--line); padding:10px 0; }
+.faq details:last-child{ border-bottom:1px solid var(--line); }
+.faq summary{ cursor:pointer; font-weight:700; font-size:15px; }
+.faq details p{ margin:8px 0 0; font-size:15px; line-height:1.7; color:var(--ink-2); }

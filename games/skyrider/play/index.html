@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<link rel="canonical" href="https://oreumgames.com/games/skyrider/">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, viewport-fit=cover">
+<title>스카이라이더 — Sky Rider</title>
+<style>
+  @font-face { font-family: 'Griun'; src: url('fonts/Griun_Fromsol-Rg.ttf') format('truetype'); font-display: swap; }
+  @font-face { font-family: 'Ria'; src: url('fonts/RiaSans-ExtraBold.woff2') format('woff2'); font-display: swap; }   /* 리아체 — 롯데GRS 무료, 임베딩 허용 */
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: none; font-family: 'Griun', 'Noto Sans KR', 'Malgun Gothic', sans-serif; color: #f2ede4; user-select: none; }
+  #c { display: block; width: 100vw; height: 100vh; touch-action: none; }
+  #vig { position: fixed; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 50% 48%, rgba(0,0,0,0) 52%, rgba(10,12,18,0.55) 100%); }
+  #flash { position: fixed; inset: 0; pointer-events: none; background: #fff; opacity: 0; transition: opacity .15s; }
+  #hit { position: fixed; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 50% 50%, rgba(255,40,20,0) 40%, rgba(255,40,20,.55) 100%); opacity: 0; transition: opacity .12s; }
+  #hit.on { opacity: 1; }
+  .stat.hp b { color: #ff5a4a; letter-spacing: 2px; font-size: 16px; display: inline-flex; gap: 3px; align-items: center; }
+  .stat.hp svg.wr { width: 19px; height: 19px; display: block; fill: #ffb43a; stroke: #4a2c0a; stroke-width: 1.3; stroke-linejoin: round; filter: drop-shadow(0 1px 0 rgba(0,0,0,.35)); }
+  .stat.hp svg.wr.off { fill: #6d6a63; stroke: #3a3733; opacity: .45; filter: none; } .stat.hp.shake { animation: slipshake .45s; }
+  @keyframes slipshake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 50%{transform:translateX(6px)} 75%{transform:translateX(-4px)} }
+
+  /* HUD */
+  #hud { position: fixed; left: 0; right: 0; top: 0; padding: 14px 28px; display: flex; justify-content: center; align-items: flex-start; text-align: center; pointer-events: none; opacity: 0; transition: opacity .8s; text-shadow: 0 1px 2px rgba(0,0,0,.6), 0 0 18px rgba(0,0,0,.35); }
+  #hud.show { opacity: 1; }
+  .hgt { font-size: 64px; line-height: 1; letter-spacing: -1px; }
+  .hgt small { font-size: 22px; margin-left: 4px; opacity: .8; }
+  .sub { font-size: 15px; opacity: .8; margin-top: 6px; display: flex; gap: 18px; }
+  .right { text-align: center; line-height: 1.6; }
+  #deliv { font-size: 20px; }
+  #hud .right { text-align: center; }
+  /* 높이차 표시는 화면 위 가운데 (방향 화살표는 없앴다 — 작은 지도가 내비 구실을 한다, 2026-09-02) */
+  #vert { position: fixed; left: 50%; top: 126px; transform: translateX(-50%); font-size: 18px; opacity: .95; white-space: nowrap; }
+  #arrow { display: none !important; }
+  #vert.sink::after { content: '  ▼ 가라앉는 중'; color: #ff9a7a; }
+  #arrow { position: fixed; left: 50%; top: 84px; margin-left: -22px; font-size: 44px; line-height: 1; color: #ffd27a; text-shadow: 0 2px 8px rgba(0,0,0,.6); opacity: 0; transition: opacity .3s; pointer-events: none; transform-origin: 50% 50%; }
+  #pkg { font-size: 14px; opacity: .8; }
+  /* 상단 바 — 오름 알약(왼쪽 위 93px) 오른쪽부터 */
+  #topbar { position: fixed; left: 0; right: 0; top: 0; height: calc(44px + env(safe-area-inset-top)); padding: env(safe-area-inset-top) 10px 0 104px; display: flex; align-items: center; gap: 8px; background: linear-gradient(180deg, rgba(10,14,20,.55), rgba(10,14,20,0)); pointer-events: none; z-index: 5; opacity: 0; transition: opacity .8s; }
+  #topbar.show { opacity: 1; }
+  .stat { display: inline-flex; align-items: center; gap: 5px; padding: 5px 10px; border-radius: 999px; background: rgba(0,0,0,.35); border: 1px solid rgba(255,255,255,.14); font-size: 15px; white-space: nowrap; text-shadow: 0 1px 2px rgba(0,0,0,.6); }
+  .stat b { font-weight: normal; font-size: 17px; } .stat small { font-size: 11px; opacity: .7; } .stat .ic { font-size: 13px; }
+  .stat.dim { opacity: .75; font-size: 13px; } .stat.dim b { font-size: 15px; }
+  .stat .bar { width: 64px; height: 6px; background: rgba(255,255,255,.18); border-radius: 3px; overflow: hidden; }
+  #fuelbar { height: 100%; width: 100%; background: #e8e2d4; border-radius: 3px; transition: background .3s; }
+  #fuel.solar #fuelbar { background: #ffd24a; } #fuel.solar small { display: none; } #fuel.solar .ic { display: none; }
+  #fuel.mid #fuelbar { background: #ffd24a; }
+  #fuel.low #fuelbar { background: #e05a3a; animation: blink .7s infinite; } #fuel.low { border-color: rgba(224,90,58,.7); } #fuel.filling #fuelbar { background: #7fd48a; animation: none; }
+  .spacer { flex: 1; }
+  .tog { pointer-events: auto; width: 36px; height: 36px; border-radius: 50%; border: 1px solid rgba(255,255,255,.3); background: rgba(0,0,0,.4); color: #fff; font-family: inherit; font-size: 17px; line-height: 1; padding: 0; touch-action: manipulation; }
+  .tog.off { opacity: .4; text-decoration: line-through; }
+  #hud { top: calc(48px + env(safe-area-inset-top)); padding: 8px 14px; justify-content: center; }
+  .brk { display: none; }
+  @media (max-width: 700px) {
+    .stat { padding: 4px 8px; font-size: 13px; gap: 4px; } .stat b { font-size: 15px; } .stat .bar { width: 48px; } .stat.dim { display: none; }
+    #topbar { flex-wrap: wrap; height: auto; padding: calc(6px + env(safe-area-inset-top)) 8px 4px 100px; gap: 5px; row-gap: 6px; }
+    .brk { display: block; flex-basis: 100%; height: 0; }
+    #hud { top: calc(92px + env(safe-area-inset-top)); }
+    #vert { top: calc(194px + env(safe-area-inset-top)); }
+    #arrow { top: calc(118px + env(safe-area-inset-top)); }
+    #vert { top: calc(150px + env(safe-area-inset-top)); }
+    #tut { top: 24%; }
+  }
+  #btnShop { position: fixed; left: 50%; transform: translateX(-50%); bottom: 40px; padding: 12px 22px; border-radius: 999px; border: 1px solid rgba(255,210,122,.7); background: rgba(20,16,12,.7); color: #ffd27a; font-family: inherit; font-size: 18px; letter-spacing: 1px; display: none; touch-action: manipulation; z-index: 6; }
+  #btnShop.show { display: block; }
+  body.touch #btnShop { bottom: 140px; }
+  #shop { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%) scale(.96); width: min(92vw, 560px); max-height: 82vh; overflow-y: auto; background: rgba(18,16,20,.94); border: 1px solid rgba(255,210,122,.35); border-radius: 14px; padding: 12px 14px 16px; opacity: 0; pointer-events: none; transition: opacity .25s, transform .25s; z-index: 20; }
+  #shop.show { opacity: 1; pointer-events: auto; transform: translate(-50%, -50%) scale(1); }
+  #shop .head { display: flex; justify-content: space-between; align-items: center; font-size: 22px; letter-spacing: 2px; color: #ffd27a; margin-bottom: 8px; }
+  #shop .head button { background: none; border: 0; color: #fff; font-size: 22px; font-family: inherit; }
+  #shop .card { display: flex; gap: 12px; align-items: center; padding: 10px 8px; border-top: 1px solid rgba(255,255,255,.08); }
+  #shop .card.cur { background: rgba(255,210,122,.08); border-radius: 8px; }
+  #shop .thumb { width: 96px; height: 96px; border-radius: 10px; flex: none; background-size: cover; background-position: center; border: 1px solid rgba(255,255,255,.15); }
+  #shop .info { flex: 1; min-width: 0; } #shop .info b { font-weight: normal; font-size: 18px; } #shop .info p { margin: 2px 0 6px; font-size: 13px; opacity: .75; }
+  #shop .bars { display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px 14px; font-size: 12px; opacity: .9; }
+  #shop .bars span { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+  #shop .bars u { display: inline-flex; gap: 3px; text-decoration: none; }
+  #shop .bars i { display: inline-block; width: 14px; height: 7px; border-radius: 2px; background: rgba(255,255,255,.14); }
+  #shop .bars i.on { background: #4fb0ff; box-shadow: 0 0 6px rgba(79,176,255,.6); }
+  #shop .act { flex: none; width: 92px; text-align: right; }
+  #shop .act button { width: 100%; padding: 9px 0; border-radius: 999px; border: 1px solid rgba(255,210,122,.7); background: rgba(255,210,122,.12); color: #ffd27a; font-family: inherit; font-size: 15px; touch-action: manipulation; }
+  #shop .act button:disabled { opacity: .35; border-color: rgba(255,255,255,.2); color: #ccc; }
+  #shop .act em { font-style: normal; color: #ffd27a; font-size: 14px; }
+  @media (max-width: 700px) { #shop .thumb { width: 72px; height: 72px; } #shop .bars { grid-template-columns: 1fr; gap: 2px; } #shop .act { width: 70px; } #shop .info b { font-size: 15px; } }
+  #minimap { position: fixed; left: 14px; bottom: 58px; width: 150px; height: 150px; border-radius: 50%; border: 2px solid rgba(255,255,255,.35); background: rgba(10,14,20,.55); box-shadow: 0 2px 12px rgba(0,0,0,.4); opacity: 0; transition: opacity .8s; z-index: 16; touch-action: manipulation; cursor: pointer; }
+  #minimap.show { opacity: 1; }
+  body.touch #minimap { left: 12px; bottom: 136px; width: 120px; height: 120px; }
+  #bigmap { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%) scale(.96); width: min(92vw, 86vh, 640px); background: rgba(14,16,22,.94); border: 1px solid rgba(255,255,255,.2); border-radius: 14px; padding: 10px 12px 12px; opacity: 0; pointer-events: none; transition: opacity .25s, transform .25s; z-index: 20; }
+  #bigmap.show { opacity: 1; pointer-events: auto; transform: translate(-50%, -50%) scale(1); }
+  #bigmap .head { display: flex; justify-content: space-between; align-items: center; font-size: 22px; letter-spacing: 3px; color: #ffd27a; margin-bottom: 6px; }
+  #bigmap .head button { background: none; border: 0; color: #fff; font-size: 22px; font-family: inherit; }
+  #bigmapc { width: 100%; aspect-ratio: 1; display: block; border-radius: 10px; background: rgba(255,255,255,.04); }
+  #bigmap .legend { font-size: 20px; opacity: .8; margin-top: 8px; text-align: center; }
+  #pause { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(10,12,16,.45); opacity: 0; pointer-events: none; transition: opacity .2s; z-index: 15; text-shadow: 0 2px 12px rgba(0,0,0,.6); }
+  #pause.show { opacity: 1; pointer-events: auto; }
+  #pause h2 { font-family: Arial, sans-serif; font-weight: 900; font-size: 56px; letter-spacing: 10px; margin: 0 0 10px; }
+  #pause p { font-size: 40px; margin: 0; opacity: .8; }
+  #btnPause { font-size: 13px; }
+  /* 주민 말풍선 — 도착하면 멘트가 여기 뜬다 (늦으면 두 번) */
+  #bubble { position: fixed; left: 50%; top: 26%; transform: translate(-50%, 0) scale(.9); max-width: min(78vw, 640px); background: #fffaf0; color: #23201a; padding: 16px 24px 18px; border-radius: 22px; font-size: 24px; line-height: 1.35; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,.35); opacity: 0; pointer-events: none; transition: opacity .18s, transform .18s; z-index: 12; }
+  #bubble.on { opacity: 1; transform: translate(-50%, 0) scale(1); }
+  #bubble::after { content: ''; position: absolute; left: 50%; bottom: -16px; margin-left: -14px; border: 14px solid transparent; border-top-color: #fffaf0; border-bottom: 0; }
+  #bubble b { display: block; font-size: 15px; color: #d9781e; letter-spacing: 1px; margin-bottom: 6px; }
+  body.touch #bubble { top: 30%; font-size: 19px; padding: 12px 18px 14px; }
+  #sub { position: fixed; left: 0; right: 0; top: 42%; text-align: center; font-size: 20px; opacity: 0; transition: opacity .5s; pointer-events: none; text-shadow: 0 2px 6px rgba(0,0,0,.6); color: #ffe6b8; }
+  #sub.on { opacity: 1; }
+  #over { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(10,8,8,.55); opacity: 0; pointer-events: none; transition: opacity 1.5s; text-align: center; text-shadow: 0 2px 12px rgba(0,0,0,.7); }
+  #over.show { opacity: 1; pointer-events: auto; }
+  #over h2 { font-size: 64px; font-weight: 900; margin: 0 0 12px; letter-spacing: 8px; -webkit-text-stroke: 2px #f7f2e8; paint-order: stroke fill; font-family: Arial, sans-serif; }
+  #over .again { font-family: Arial, sans-serif; letter-spacing: 4px; font-size: 22px; }
+  #over p { font-size: 20px; opacity: .9; margin: 4px 0; } #over .again { margin-top: 36px; opacity: .6; animation: blink 2.4s infinite; }
+  #msg { position: fixed; left: 50%; top: 34%; transform: translateX(-50%); text-align: center; font-size: 34px; opacity: 0; transition: opacity .5s; pointer-events: none; text-shadow: 0 2px 6px rgba(0,0,0,.6); letter-spacing: 2px; white-space: nowrap; padding: 10px 32px 12px; border-radius: 18px; background: rgba(18,22,28,.72); border: 1px solid rgba(255,255,255,.14); box-shadow: 0 8px 26px rgba(0,0,0,.35); }
+  #msg.on { opacity: 1; }
+  #msg svg.spoon { width: .9em; height: 1.25em; vertical-align: -.26em; margin-right: 10px; fill: #ffd27a; stroke: #4a2c0a; stroke-width: 1.2; stroke-linejoin: round; filter: drop-shadow(0 2px 0 rgba(0,0,0,.35)); }
+  #msg.pop { font-size: 52px; letter-spacing: 1px; color: #ffd27a; animation: popin .5s cubic-bezier(.2,1.4,.4,1); }
+  #msg.pop.bad { color: #ff5a3a; }
+  @keyframes popin { 0%{transform: translateX(-50%) scale(.6)} 100%{transform: translateX(-50%) scale(1)} }
+  #fuel.low .ic, #fuel.empty .ic { animation: blink 1s infinite; }
+  #fuel.empty #fuelbar { background: #e05a3a; } #fuel.empty { border-color: #ff5a3a; box-shadow: 0 0 12px rgba(255,90,58,.6); animation: blink .6s infinite; }
+  #tut { position: fixed; left: 50%; top: 18%; transform: translateX(-50%); padding: 12px 26px; background: rgba(12,16,24,.55); border: 1px solid rgba(255,255,255,.25); border-radius: 10px; font-size: 21px; letter-spacing: 1px; white-space: nowrap; opacity: 0; transition: opacity .5s; pointer-events: none; text-shadow: 0 1px 3px rgba(0,0,0,.6); }
+  #tut.on { opacity: 1; }
+  #tut b { color: #ffd27a; font-weight: normal; }
+  #hint { position: fixed; left: 0; right: 0; bottom: 60px; text-align: center; font-size: 16px; opacity: 0; transition: opacity .3s; pointer-events: none; text-shadow: 0 1px 3px rgba(0,0,0,.7); }
+  #hint.on { opacity: 1; }
+  #keys { position: fixed; right: 26px; bottom: 26px; font-size: 13px; opacity: .55; text-align: right; line-height: 1.7; pointer-events: none; text-shadow: 0 1px 2px rgba(0,0,0,.6); }
+  .tbtn { display: none; position: fixed; bottom: 26px; width: 96px; height: 96px; border-radius: 50%; border: 2px solid rgba(255,255,255,.55); background: rgba(0,0,0,.32); color: #fff; font-family: inherit; font-size: 22px; letter-spacing: 2px; touch-action: none; }
+  .tbtn:active { background: rgba(255,255,255,.35); }
+  #up { right: 24px; } #dn { left: 24px; }
+  body.touch .tbtn { display: block; } body.touch #keys { display: none; }
+
+  /* 타이틀 */
+  #title { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding-top: 7vh; background: linear-gradient(180deg, rgba(20,26,36,.28), rgba(20,26,36,0) 45%, rgba(20,26,36,0) 70%, rgba(20,26,36,.5)); transition: opacity 1.2s; text-align: center; }
+  #title.hide { opacity: 0; pointer-events: none; }
+  #title .brand { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; padding: 6px 14px 6px 8px; border-radius: 999px; background: rgba(255,253,247,.92); color: #2e6b39; font-size: 14px; letter-spacing: 1px; }
+  #title .brand img { width: 30px; height: 15px; }
+  #title h1 { font-family: 'Ria', 'Griun', sans-serif; font-size: min(116px, 10vw); margin: 0; font-weight: 400; letter-spacing: 6px; white-space: nowrap; -webkit-text-stroke: 6px #f0821e; paint-order: stroke fill; text-shadow: 0 4px 18px rgba(0,0,0,.35); text-shadow: 0 4px 30px rgba(0,0,0,.6); }
+  #title .tag { display: none; font-size: 20px; opacity: .85; margin-top: 4px; letter-spacing: 3px; }
+  #title .how { position: absolute; left: 0; right: 0; bottom: 64px; margin: 0; font-size: 13px; line-height: 1.9; opacity: .8; }
+  #title .how b { min-width: 0; margin-right: 6px; } #title .how div { display: inline; } #title .how div + div::before { content: '  ·  '; opacity: .5; }
+  #title .how b { display: inline-block; min-width: 130px; text-align: right; margin-right: 14px; opacity: .7; font-weight: normal; }
+  #title .go { position: absolute; left: 50%; transform: translateX(-50%); bottom: 96px; margin: 0; font-size: 34px; letter-spacing: 8px; text-indent: 8px; padding: 12px 46px 14px; border-radius: 20px; background: rgba(18,22,28,.72); border: 1px solid rgba(255,255,255,.16); box-shadow: 0 8px 26px rgba(0,0,0,.35); animation: blink 2.4s infinite; }
+  @keyframes blink { 0%,100%{opacity:.35} 50%{opacity:1} }
+  .touchonly { display: none; } body.touch .touchonly { display: block; } body.touch .mouseonly { display: none; }
+  @media (max-width: 700px) { .hgt { font-size: 44px; } #title h1 { font-size: min(60px, 12vw); letter-spacing: 5px; } #title .how { font-size: 14px; } #hud { padding: 14px 16px; } #tut { font-size: 14px; white-space: normal; max-width: 90vw; text-align: center; } #deliv { font-size: 16px; } }
+  #shop .card .price { font-weight: 600; font-size: 13px; color: #ffd27a; margin-left: 8px; letter-spacing: 0; }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <symbol id="sp" viewBox="0 0 26 36">
+    <path d="M13 1.2 C19 1.2 21.8 5.4 21.8 9.8 C21.8 14 18.6 16.9 15.6 17.6 L15.9 27.5 C16 31.6 15.2 34.6 13 34.6 C10.8 34.6 10 31.6 10.1 27.5 L10.4 17.6 C7.4 16.9 4.2 14 4.2 9.8 C4.2 5.4 7 1.2 13 1.2 Z"/>
+    <ellipse cx="13" cy="9.9" rx="5.4" ry="5.9" fill="rgba(0,0,0,.22)" stroke="none"/>
+    <ellipse cx="10.3" cy="6.9" rx="1.7" ry="2.4" fill="rgba(255,255,255,.7)" stroke="none"/>
+  </symbol>
+  <symbol id="wr" viewBox="0 0 24 24">
+    <mask id="wrm"><rect width="24" height="24" fill="#fff"/><rect x="9.4" y="-1" width="5.2" height="7.6" rx="1.6" fill="#000"/></mask>
+    <g transform="rotate(-38 12 12)" mask="url(#wrm)">
+      <circle cx="12" cy="6.6" r="6.2"/>
+      <rect x="8.4" y="8.5" width="7.2" height="15" rx="3.6"/>
+    </g>
+  </symbol>
+</defs></svg>
+<canvas id="c"></canvas>
+<audio id="sndOrder" src="assets/order.mp3" preload="auto"></audio>
+<audio id="sndWind" src="assets/wind.mp3" preload="auto" loop></audio>
+<audio id="sndCrash" src="assets/crash.mp3" preload="auto"></audio>
+<audio id="sndWarn" src="assets/warn.mp3" preload="auto"></audio>
+<audio id="sndRefuel" src="assets/refuel.mp3?v=200" preload="auto" loop></audio>
+<div id="vig"></div>
+<div id="flash"></div>
+<div id="hit"></div>
+
+<div id="topbar">
+  <div class="stat coin"><span class="ic">🪙</span><b id="money">0</b><small>코인</small></div>
+  <div class="stat fuel" id="fuel"><span class="ic">⛽</span><div class="bar"><div id="fuelbar"></div></div><b id="fuelnum">100</b><small>L</small></div>
+  <div class="brk"></div>
+  <div class="stat hp" id="hp"><b>❤❤❤</b></div>
+  <div class="stat"><span class="ic">⏱</span><b id="time">0:00</b></div>
+  <span id="done" hidden></span>
+  <div class="spacer"></div>
+  <button id="btnPause" class="tog" title="일시정지">❚❚</button>
+  <button id="btnMusic" class="tog" title="음악">♪</button>
+  <button id="btnSfx" class="tog" title="효과음">🔊</button>
+</div>
+<div id="hud">
+  <div class="right"><div id="deliv">…</div><div id="vert"></div><div id="pkg"></div></div>
+</div>
+<span id="h" hidden></span>
+<div id="sub"></div>
+<div id="bubble"><b></b><span></span></div>
+<div id="pause"><h2>PAUSE</h2><p>▶</p></div>
+<canvas id="minimap" width="300" height="300"></canvas>
+<div id="bigmap"><div class="head"><span>지도</span><button id="bigmapClose">✕</button></div><canvas id="bigmapc" width="900" height="900"></canvas><div class="legend">🏠 집 &nbsp; ⛽ 주유소 &nbsp; 🏍 모터샵 &nbsp; ★ 식당 &nbsp; <span style="color:#b26bff">●</span> 지금 배달 갈 곳</div></div>
+<button id="btnShop">🏍 모터샵</button>
+<div id="shop">
+  <div class="head"><span>모터샵</span><button id="shopClose">✕</button></div>
+  <div id="shopList"></div>
+</div>
+<div id="over">
+  <h2 id="overReason">GAME OVER</h2>
+  <p id="overStat"></p>
+  <p class="again">RETRY</p>
+</div>
+<div id="arrow">➤</div>
+<div id="msg"></div>
+<div id="tut"></div>
+<div id="hint"></div>
+<div id="keys">↑↓←→ 이동 · 스페이스 상승 · Shift 하강<br>T 지도 · M 음악 · K 효과음 · R 리스폰</div>
+<button id="dn" class="tbtn">아래로</button>
+<button id="up" class="tbtn">위로</button>
+
+<div id="title">
+  <h1>스카이 라이더</h1>
+  <div class="tag">SKY RIDER</div>
+  <div class="go">시작</div>
+</div>
+
+<script src="assets/game-home.js" data-top="6" data-left="6" data-fullscreen="1" defer></script>
+<script src="lib/three.min.js"></script>
+<script src="js/noise.js?v=200"></script>
+<script src="js/terrain.js?v=200"></script>
+<script src="js/physics.js?v=200"></script>
+<script src="js/player.js?v=200"></script>
+<script src="js/scenery.js?v=200"></script>
+<script src="js/audio.js?v=200"></script>
+<script src="js/delivery.js?v=200"></script>
+<script src="js/game.js?v=200"></script>
+</body>
+</html>
