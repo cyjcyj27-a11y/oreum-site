@@ -164,8 +164,26 @@
     document.getElementById('title').classList.add('hide');
     document.getElementById('hud').classList.add('show'); document.getElementById('topbar').classList.add('show'); mmC.classList.add('show');
     t0 = performance.now();
-    // 첫 주문은 10초 뒤에 (멈춤 중이면 풀릴 때까지 기다린다)
-    setTimeout(function firstOrder() { if (paused) { setTimeout(firstOrder, 500); return; } if (!DEAD.on) DELIVERY.begin(bike().g.position); }, 10000);
+    scheduleFirstOrder();
+  }
+  // 첫 주문은 10초 뒤에 (멈춤 중이면 풀릴 때까지 기다린다). 다시 시작하면 옛 예약은 버린다
+  let orderGen = 0;
+  function scheduleFirstOrder() {
+    const gen = ++orderGen;
+    setTimeout(function firstOrder() { if (gen !== orderGen) return; if (paused) { setTimeout(firstOrder, 500); return; } if (!DEAD.on) DELIVERY.begin(bike().g.position); }, 10000);
+  }
+  // RETRY: 페이지를 다시 읽지 않고 제자리에서 다시 시작 (전체화면·가로 고정이 안 풀린다)
+  function restart() {
+    const bankrupt = (DEAD.reason || '').startsWith('파산');
+    DEAD.on = false; DEAD.shown = false; DEAD.t = 0; DEAD.reason = '';
+    HP.hp = HP.max; HP.inv = 0; drawHp();
+    FUEL.fuel = FUEL.tank; FUEL.warnT = 0; FUEL.refueling = false;
+    const B = bike(); B.g.rotation.set(0, 0, 0); SCENERY.parkBikeAtHome(); seatRider(); snapCamera(); shake = 0;
+    DELIVERY.reset(); if (bankrupt) DELIVERY.D.money = 10;
+    document.getElementById('over').classList.remove('show');
+    document.getElementById('hud').classList.add('show'); document.getElementById('topbar').classList.add('show'); mmC.classList.add('show');
+    paused = false; t0 = performance.now();
+    scheduleFirstOrder();
   }
 
   // ── 오토바이 ───────────────────────────────────────
@@ -256,7 +274,7 @@
     document.getElementById('overStat').textContent = reason.startsWith('파산') ? '' : '🪙 ' + Math.round(D.money);
     document.getElementById('over').classList.add('show');
     document.getElementById('hud').classList.remove('show'); document.getElementById('topbar').classList.remove('show'); mmC.classList.remove('show'); closeBig(); elTut.classList.remove('on'); elMsg.classList.remove('on'); elSub.classList.remove('on');
-    setTimeout(() => { window.addEventListener('pointerdown', () => location.reload(), { once: true }); window.addEventListener('keydown', () => location.reload(), { once: true }); }, 1200);
+    setTimeout(() => { const go = e => { window.removeEventListener('pointerdown', go); window.removeEventListener('keydown', go); if (e && e.stopPropagation) e.stopPropagation(); restart(); }; window.addEventListener('pointerdown', go, true); window.addEventListener('keydown', go, true); }, 1200);
   }
   function updateDead(dt) {
     DEAD.t += dt;
@@ -594,7 +612,7 @@
     renderer.render(scene, camera);
     if (!canvas.classList.contains('ready')) canvas.classList.add('ready');
   }
-  window.GAME = { scene, renderer, camera, input, RIDE, FUEL, DEAD, orbit, BIKES, GARAGE, applyBike, openShop };
+  window.GAME = { scene, renderer, camera, input, RIDE, FUEL, DEAD, orbit, BIKES, GARAGE, applyBike, openShop, crash, restart };
   requestAnimationFrame(frame);
   }, 20);
 })();

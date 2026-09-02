@@ -139,5 +139,10 @@
     padDisc.material.opacity = 0.45 + 0.2 * Math.sin(performance.now() * 0.005);
   }
 
-  window.DELIVERY = { D, init, begin, update, hit };
+  // 다시 시작: 주문·표시를 걷는다 (코인·집 멘트 순서는 그대로)
+  function reset() {
+    paintHut(D.cur, false); D.cur = null; D.state = 'idle'; D.t = 0; D.hover = 0;
+    glow.visible = padRing.visible = padDisc.visible = signSp.visible = false;
+  }
+  window.DELIVERY = { D, init, begin, update, hit, reset };
 })();
