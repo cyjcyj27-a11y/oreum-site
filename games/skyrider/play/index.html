@@ -152,6 +152,7 @@
   #shop .card .price { font-weight: 600; font-size: 13px; color: #ffd27a; margin-left: 8px; letter-spacing: 0; }
   /* 폰 가로(짧은 화면): 지도는 왼쪽 위, 카드는 높이 표시 아래, 단추는 오른쪽 아래 작게 */
   @media (max-height: 520px) {
+    #topbar { padding-left: 168px; }   /* 왼쪽 위 오름 알약과 안 겹치게 */
     body.touch #minimap { top: calc(56px + env(safe-area-inset-top)); width: 192px; height: 192px; }
     #hud { padding-top: 8px; } #vert { top: 104px; font-size: 16px; }
     #msg { top: 50%; font-size: 24px; padding: 8px 18px 10px; letter-spacing: 1px; } #msg.pop { font-size: 30px; }
@@ -197,7 +198,7 @@
 <audio id="sndWind" src="assets/wind.mp3" preload="auto" loop></audio>
 <audio id="sndCrash" src="assets/crash.mp3" preload="auto"></audio>
 <audio id="sndWarn" src="assets/warn.mp3" preload="auto"></audio>
-<audio id="sndRefuel" src="assets/refuel.mp3?v=208" preload="auto" loop></audio>
+<audio id="sndRefuel" src="assets/refuel.mp3?v=209" preload="auto" loop></audio>
 <div id="vig"></div>
 <div id="flash"></div>
 <div id="hit"></div>
@@ -251,13 +252,13 @@
 
 <script src="assets/game-home.js" data-top="6" data-left="6" data-fullscreen="1" defer></script>
 <script src="lib/three.min.js"></script>
-<script src="js/noise.js?v=208"></script>
-<script src="js/terrain.js?v=208"></script>
-<script src="js/physics.js?v=208"></script>
-<script src="js/player.js?v=208"></script>
-<script src="js/scenery.js?v=208"></script>
-<script src="js/audio.js?v=208"></script>
-<script src="js/delivery.js?v=208"></script>
-<script src="js/game.js?v=208"></script>
+<script src="js/noise.js?v=209"></script>
+<script src="js/terrain.js?v=209"></script>
+<script src="js/physics.js?v=209"></script>
+<script src="js/player.js?v=209"></script>
+<script src="js/scenery.js?v=209"></script>
+<script src="js/audio.js?v=209"></script>
+<script src="js/delivery.js?v=209"></script>
+<script src="js/game.js?v=209"></script>
 </body>
 </html>
