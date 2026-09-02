@@ -935,3 +935,4 @@ body{ font-size:19px; }
 /* 작품 제목 밑에 붙는 부제 (오름길 '고장난 물리엔진' 처럼) */
 .gp-sub{ display:block; margin-top:6px; font-size:15px; font-weight:700; color:var(--muted); letter-spacing:.02em; }
 .js-install[hidden] { display: none; }
+.install-ico { height: 20px; width: auto; vertical-align: -5px; margin-right: 5px; }
