@@ -54,19 +54,24 @@ venv/Scripts/python -m http.server 4321 --directory oreum-site
 
 반영까지 보통 10분 ~ 몇 시간 걸립니다.
 
-## 현재 연결된 주소 (2026-08-10 완료)
+## 현재 연결된 주소 (2026-09-02 기준)
 
 | 주소 | 무엇 | 저장소 |
 |------|------|--------|
 | `https://oreumgames.com` | 이 홈페이지 | `oreum-site` |
 | `https://www.oreumgames.com` | 같은 홈페이지 | `oreum-site` |
-| `https://play.oreumgames.com` | 루루냥의 제주살이 | `lulu-farm` |
+
+저장소는 `oreum-site` 하나입니다. 게임도 전부 이 안에 있습니다
+(루루냥 `games/lulu/play/`, 영생의 가격 `games/immortality/play/`, 미니게임 `games/mini/*/play/`).
+
+`play.oreumgames.com`(옛 `lulu-farm` 저장소)은 2026-09-02에 없앴습니다.
+홈에서 다른 도메인으로 넘어가면 GA 세션이 끊기고 방문이 새어 나가서, 게임을 이 저장소로 옮기고
+DNS·저장소·검색 등록을 모두 지웠습니다. 새 게임은 절대 따로 도메인을 파지 말고 `games/<이름>/play/`에 둡니다.
 
 후이즈 DNS에 들어가 있는 것:
 
 - A 레코드 4개 (호스트명 비움) → `185.199.108~111.153`
 - CNAME `www` → `cyjcyj27-a11y.github.io.`
-- CNAME `play` → `cyjcyj27-a11y.github.io.`
 
 **주의** — 깃허브 Pages 설정의 Custom domain 칸을 비우거나 Remove 하면
 저장소의 `CNAME` 파일이 지워지면서 도메인 연결이 끊깁니다.

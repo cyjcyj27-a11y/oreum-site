@@ -90,6 +90,12 @@
   </div>
 
   <div class="card">
+    <h2>📲 앱 설치 <span class="em">홈 화면에 넣고 쓰는 사람</span></h2>
+    <div id="install"><div class="loading">불러오는 중…</div></div>
+    <div class="note">푸터의 "굳이 설치하기"로 잰 숫자예요. 설치는 크롬(안드로이드·PC)만 알려주고, 아이폰은 앱으로 연 횟수로만 보입니다.</div>
+  </div>
+
+  <div class="card">
     <h2>⑦ 사주 ↔ 실제 MBTI <span class="em">추정표를 고칠 근거를 모으는 중</span></h2>
     <div id="pair"><div class="note">칸이 많아 위 지표와 같이 부르면 화면이 늦게 뜹니다. 필요할 때만 눌러 주세요.</div></div>
     <a class="reload" id="pairBtn">↻ 불러오기</a>
@@ -144,7 +150,7 @@
   var keys = ['total', 'returning', 'game_open', 'game_session', 'game_players', 'game_returning',
               'pageviews', 'pv_home', 'pv_saju', 'pv_guide', 'pv_support', 'pv_privacy',
               'pv_board', 'pv_board_en', 'pv_privacy_play', 'pv_immortality', 'day_' + today,
-              'play_1m', 'play_3m', 'play_10m'];
+              'play_1m', 'play_3m', 'play_10m', 'install_click', 'app_install', 'app_open'];
   // 한꺼번에 많이 부르면 속도 제한에 걸리므로 나눠 부르고 사이에 잠깐 쉽니다.
   // 3개씩 260ms로는 화면이 뜨기까지 30초가 걸려서 멈춘 것처럼 보였습니다.
   // 막히면 위 get()이 알아서 쉬었다 다시 부르므로, 여기서는 조금 넉넉하게 갑니다.
@@ -259,6 +265,16 @@
       return '<div class="bar"><div class="name">' + s[0] + '</div>' +
              '<div class="track"><div class="fill" style="width:' + Math.max(pct, s[1] ? 4 : 0) + '%;background:var(--ember)"></div></div>' +
              '<div class="val">' + fmt(s[1]) + '회 · ' + pct + '%</div></div>';
+    }).join('');
+
+    // 📲 앱 설치 — 단추 누름 → 실제 설치(크롬만) → 앱으로 연 날 수(아이폰 포함, 하루 한 번)
+    var instDefs = [['단추 누름', d.install_click], ['설치됨', d.app_install], ['앱으로 열림', d.app_open]];
+    var instMax = Math.max(1, d.install_click, d.app_install, d.app_open);
+    document.getElementById('install').innerHTML = instDefs.map(function (s) {
+      var pct = Math.round(s[1] / instMax * 100);
+      return '<div class="bar"><div class="name">' + s[0] + '</div>' +
+             '<div class="track"><div class="fill" style="width:' + Math.max(pct, s[1] ? 4 : 0) + '%;background:var(--green-lit)"></div></div>' +
+             '<div class="val">' + fmt(s[1]) + '회</div></div>';
     }).join('');
   }).catch(function (e) { showReadError(); console.error(e); });
 
