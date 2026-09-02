@@ -907,6 +907,7 @@ body{ font-size:19px; }
   .mbody i{ font-size:12.5px; margin-top:2px; }
   .kind{ left:7px; top:7px; font-size:11px; padding:2px 8px; }
   .isnew{ right:7px; top:7px; font-size:10.5px; padding:2px 8px; }
+  .showcase .grid a.mini:first-child .shot::after{ right:7px; top:7px; font-size:10.5px; padding:2px 8px; }
   .more-card .mc{ padding:16px 12px; }
   .more-card .mc b{ font-size:16px; }
   .more-card .mc i{ font-size:12.5px; margin-top:6px; }
@@ -946,3 +947,9 @@ body{ font-size:19px; }
 .faq details:last-child{ border-bottom:1px solid var(--line); }
 .faq summary{ cursor:pointer; font-weight:700; font-size:15px; }
 .faq details p{ margin:8px 0 0; font-size:15px; line-height:1.7; color:var(--ink-2); }
+/* NEW 표시는 목록 맨 앞 카드 하나에만 자동으로 붙는다 (2026-09-02 "가장 최신 것만 하나") */
+.showcase .grid a.mini:first-child .shot::after{
+  content:'NEW'; position:absolute; right:10px; top:10px; font-size:12px; font-weight:800; letter-spacing:.14em;
+  padding:3px 10px; border-radius:999px; background:#e4572e; color:#fff; border:1px solid rgba(0,0,0,.06);
+  box-shadow:0 2px 8px rgba(228,87,46,.35);
+}
