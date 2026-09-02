@@ -124,6 +124,17 @@
     el.addEventListener('pointerdown', e => { e.stopPropagation(); e.preventDefault(); input[k] = true; if (!started) start(); });
     el.addEventListener('pointerup', () => { input[k] = false; }); el.addEventListener('pointercancel', () => { input[k] = false; }); el.addEventListener('pointerleave', () => { input[k] = false; });
   }
+  // 십자 화살표: 누르는 동안만 (앞뒤 = padF, 좌우 = padS. 왼쪽이 +)
+  input.padF = 0; input.padS = 0;
+  for (const [id, key, val] of [['padU', 'padF', 1], ['padD', 'padF', -1], ['padL', 'padS', 1], ['padR', 'padS', -1]]) {
+    const el = document.getElementById(id); if (!el) continue;
+    const off = () => { if (input[key] === val) input[key] = 0; };
+    el.addEventListener('pointerdown', e => { e.stopPropagation(); e.preventDefault(); input[key] = val; if (!started) start(); });
+    el.addEventListener('pointerup', off); el.addEventListener('pointercancel', off); el.addEventListener('pointerleave', off);
+  }
+  // 브라우저를 숨기거나 닫으면 소리도 같이 멈춘다
+  document.addEventListener('visibilitychange', () => { if (window.AUDIO && AUDIO.pause) AUDIO.pause(document.hidden || paused); });
+  window.addEventListener('pagehide', () => { if (window.AUDIO && AUDIO.pause) AUDIO.pause(true); });
   if ('ontouchstart' in window) { document.body.classList.add('touch'); input.touch = true; }
   const btnMusic = document.getElementById('btnMusic'), btnSfx = document.getElementById('btnSfx');
   function syncTog() { btnMusic.classList.toggle('off', !AUDIO.musicOn); btnSfx.classList.toggle('off', !AUDIO.sfxOn); }
@@ -133,7 +144,7 @@
   function togglePause() {
     if (!started || DEAD.on) return;
     paused = !paused;
-    if (paused) { pausedAt = performance.now(); input.keys = {}; input.btnUp = input.btnDn = false; input.drag = null; input.tSteer = input.tFwd = 0; }
+    if (paused) { pausedAt = performance.now(); input.keys = {}; input.btnUp = input.btnDn = false; input.drag = null; input.tSteer = input.tFwd = 0; input.padF = input.padS = 0; }
     else t0 += performance.now() - pausedAt;
     document.getElementById('pause').classList.toggle('show', paused);
     document.getElementById('btnPause').textContent = paused ? '▶' : '❚❚';
@@ -260,8 +271,8 @@
   function updateRide(dt) {
     const B = bike(); bumpCD -= dt; HP.inv = Math.max(0, HP.inv - dt);
     const k = input.keys;
-    let steer = (k.ArrowLeft || k.KeyA ? 1 : 0) - (k.ArrowRight || k.KeyD ? 1 : 0) - input.tSteer;
-    let fwd = (k.ArrowUp || k.KeyW ? 1 : 0) - (k.ArrowDown || k.KeyS ? 1 : 0) + input.tFwd;
+    let steer = (k.ArrowLeft || k.KeyA ? 1 : 0) - (k.ArrowRight || k.KeyD ? 1 : 0) - input.tSteer + (input.padS || 0);
+    let fwd = (k.ArrowUp || k.KeyW ? 1 : 0) - (k.ArrowDown || k.KeyS ? 1 : 0) + input.tFwd + (input.padF || 0);
     let climb = (k.Space || input.btnUp ? 1 : 0) - (k.ShiftLeft || k.ShiftRight || k.ControlLeft || k.ControlRight || input.btnDn ? 1 : 0);
     steer = Math.max(-1, Math.min(1, steer)); fwd = Math.max(-1, Math.min(1, fwd));
     // 연료
