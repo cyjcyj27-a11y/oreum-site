@@ -82,7 +82,7 @@
     background:#fff;border-radius:26px;padding:26px 22px 22px;
     box-shadow:0 6px 0 rgba(206,186,140,.38), 0 18px 44px rgba(150,125,80,.26);
   }
-  .card h1{font-size:30px;font-weight:900;letter-spacing:.1em;margin-bottom:4px;
+  .card :is(h1,h2){font-size:30px;font-weight:900;letter-spacing:.1em;margin-bottom:4px;
            background:linear-gradient(90deg,#FF80AC,#8FCB3F 52%,#4FAEE0);
            -webkit-background-clip:text;background-clip:text;color:transparent}
   .card .sub{font-size:11.5px;font-weight:800;letter-spacing:.13em;color:#B7A588;
@@ -169,7 +169,7 @@
 
 <div class="sheet" id="sheetPause">
   <div class="card">
-    <h1 style="font-size:24px;letter-spacing:.18em">PAUSE</h1>
+    <h2 style="font-size:24px;letter-spacing:.18em">PAUSE</h2>
     <div class="sub">잠깐 멈췄습니다</div>
     <button class="btn" id="btnResume">RESUME</button>
     <button class="btn ghost" id="btnPauseRules">규칙 보기</button>
@@ -198,7 +198,7 @@
 
 <div class="sheet" id="sheetClear">
   <div class="card">
-    <h1 style="font-size:23px;letter-spacing:.16em">STAGE CLEAR</h1>
+    <h2 style="font-size:23px;letter-spacing:.16em">STAGE CLEAR</h2>
     <div class="sub" id="clearSub">다음 판으로</div>
     <div class="final">
       <div><span class="lab">SCORE</span><span class="val" id="cScore">0</span></div>
@@ -210,7 +210,7 @@
 
 <div class="sheet" id="sheetOver">
   <div class="card">
-    <h1 style="font-size:22px;letter-spacing:.2em">GAME OVER</h1>
+    <h2 style="font-size:22px;letter-spacing:.2em">GAME OVER</h2>
     <div class="sub" id="overSub">수를 다 썼습니다</div>
     <div class="final">
       <div><span class="lab">STAGE</span><span class="val" id="fStage">1</span></div>

@@ -96,7 +96,7 @@
   .ov{position:fixed; inset:0; display:grid; place-content:center; text-align:center;
     background:radial-gradient(90% 80% at 50% 30%, rgba(13,17,23,.55), rgba(13,17,23,.94));
     z-index:10}
-  .ov h1{font-size:64px; letter-spacing:.22em; font-weight:800; margin-bottom:6px;
+  .ov :is(h1,h2){font-size:64px; letter-spacing:.22em; font-weight:800; margin-bottom:6px;
     background:linear-gradient(180deg,#fff,#F2C14E 70%); -webkit-background-clip:text; background-clip:text; color:transparent;
     text-shadow:0 0 60px rgba(242,193,78,.25)}
   .ov .sub{font-family:var(--mono); font-size:19px; color:var(--dim); letter-spacing:.28em; margin-bottom:26px}
@@ -112,7 +112,7 @@
   .ov .tiny{margin-top:18px; font-size:13px; color:var(--dim); font-family:var(--mono)}
   #over{display:none}
   #win{display:none}   /* 처음부터 승리 화면이 떠 있던 버그 — 시작 화면 위에 겹쳤다 */
-  #over h1{font-size:44px; background:linear-gradient(180deg,#fff,#E5484D 70%); -webkit-background-clip:text; background-clip:text}
+  #over :is(h1,h2){font-size:44px; background:linear-gradient(180deg,#fff,#E5484D 70%); -webkit-background-clip:text; background-clip:text}
   .stats{display:flex; gap:34px; justify-content:center; margin-bottom:30px; font-family:var(--mono)}
   .stats div{text-align:center}
   .stats .n{font-size:34px; font-weight:700; color:var(--amber)}
@@ -181,7 +181,7 @@
      빨강-검정 계기판. 모서리 브래킷·좌측 생체 패널·우측 시스템 로그·스테이지 트랙. */
   #over{background:
     radial-gradient(90% 80% at 50% 30%, rgba(40,8,10,.66), rgba(12,4,5,.95))}
-  #over h1{font-family:var(--mono); font-size:78px; font-weight:800; letter-spacing:.14em;
+  #over :is(h1,h2){font-family:var(--mono); font-size:78px; font-weight:800; letter-spacing:.14em;
     background:linear-gradient(180deg,#ff7a72,#E5484D 55%,#a11d24);
     -webkit-background-clip:text; background-clip:text; color:transparent;
     text-shadow:none; filter:drop-shadow(0 0 26px rgba(229,72,77,.5)); margin-bottom:10px}
@@ -223,17 +223,17 @@
     padding:11px 52px; line-height:1.35; font-size:17px}
   #btnRestart:hover{filter:brightness(1.3); transform:none; background:rgba(46,50,58,.7)}
   #btnRestart small{display:block; font-size:11.5px; letter-spacing:.3em; color:#7c8492; font-weight:500}
-  @media (max-width:1080px), (max-height:700px){ #over h1{font-size:56px} }
+  @media (max-width:1080px), (max-height:700px){ #over :is(h1,h2){font-size:56px} }
 
   /* ── 시작 메뉴 (2026-08-28 재구성) — **사망 화면과 같은 디자인**을 청록으로.
      구조가 같다: 큰 제목 + 밑줄 바 → 통계 넉 칸 → 트랙 패널 → 주 단추 → 보조 단추.
      아이콘 SVG 는 사망 화면 것을 그대로 복사해 왔다(같은 그림이어야 한 벌로 보인다). ── */
   #menu{background:radial-gradient(90% 80% at 50% 30%, rgba(8,34,36,.62), rgba(4,11,13,.95))}
-  #menu h1{font-family:var(--mono); font-size:78px; font-weight:800; letter-spacing:.14em;
+  #menu :is(h1,h2){font-family:var(--mono); font-size:78px; font-weight:800; letter-spacing:.14em;
     background:linear-gradient(180deg,#d9fffa,#5FD3C8 55%,#1c6f68);
     -webkit-background-clip:text; background-clip:text; color:transparent;
     text-shadow:none; filter:drop-shadow(0 0 26px rgba(95,211,200,.45)); margin-bottom:2px}
-  #menu h1::after{content:''; display:block; width:330px; height:9px; margin:10px auto 12px;
+  #menu :is(h1,h2)::after{content:''; display:block; width:330px; height:9px; margin:10px auto 12px;
     background:linear-gradient(90deg,rgba(95,211,200,0),rgba(95,211,200,.85) 20%,rgba(95,211,200,.85) 80%,rgba(95,211,200,0))}
   #menu .sub{color:#9ee5dd; letter-spacing:.3em; margin-bottom:22px}
   #menu .stats{background:rgba(6,20,22,.72); border-top:1px solid rgba(95,211,200,.55);
@@ -330,11 +330,11 @@
   .ov .msm:hover{background:rgba(18,48,50,.85); color:#eafffd; transform:none; filter:none;
     box-shadow:0 0 14px rgba(95,211,200,.35)}
   .ov .msm small{display:block; font-size:10px; letter-spacing:.22em; color:#5f8f8a; font-weight:500}
-  @media (max-width:1080px), (max-height:760px){ #menu h1{font-size:58px} }
+  @media (max-width:1080px), (max-height:760px){ #menu :is(h1,h2){font-size:58px} }
   /* 낮은 화면(노트북 1024x600 등) — 그냥 두면 제목과 아래 단추가 화면 밖으로 잘린다(실측) */
   @media (max-height:680px){
-    #menu h1{font-size:44px}
-    #menu h1::after{height:7px; margin:7px auto 8px}
+    #menu :is(h1,h2){font-size:44px}
+    #menu :is(h1,h2)::after{height:7px; margin:7px auto 8px}
     #menu .sub{margin-bottom:14px; font-size:13px}
     #menu .stats{padding:10px 22px; margin-bottom:14px}
     #menu .stats .n{font-size:26px}
@@ -346,8 +346,8 @@
   /* 폰 가로화면(세로 400px 안팎) — 위 규칙으로도 메뉴가 화면 밖으로 잘린다(실기 확인 2026-08-29).
      ⚠글씨만 줄이지 말고 **여백부터** 줄일 것. 그래도 넘치면 아래 `.ov{overflow:auto}` 가 받는다. */
   @media (max-height:470px){
-    #menu h1{font-size:25px; letter-spacing:.1em}
-    #menu h1::after{height:3px; margin:3px auto 4px}
+    #menu :is(h1,h2){font-size:25px; letter-spacing:.1em}
+    #menu :is(h1,h2)::after{height:3px; margin:3px auto 4px}
     #menu .sub{margin-bottom:5px; font-size:10px; letter-spacing:.14em}
     .mwrap{padding:7px 14px 7px}
     #menu .stats{padding:3px 10px; margin-bottom:5px}
@@ -371,7 +371,7 @@
      (2026-08-29 사용자 실기 화면). **한 화면을 줄였으면 같은 틀의 나머지도 같이 줄일 것.**
      ⚠글씨만 줄이지 말고 **여백부터** 줄인다(위 메뉴 규칙과 같은 방침). */
   @media (max-height:470px){
-    #over h1{font-size:26px; letter-spacing:.1em; margin-bottom:1px}
+    #over :is(h1,h2){font-size:26px; letter-spacing:.1em; margin-bottom:1px}
     #over .sub{font-size:10px; letter-spacing:.16em; margin-bottom:0}
     #over .stats{padding:4px 8px; margin-bottom:6px}
     #over .stats div{padding:0 11px}
@@ -391,7 +391,7 @@
     #btnRestart{margin-top:5px; padding:5px 26px; font-size:12px}
     #btnRestart small{font-size:8px; letter-spacing:.2em}
     /* 승리·일시정지도 같은 틀이라 같은 병에 걸린다 */
-    #win h1,#pause h1{font-size:26px; letter-spacing:.1em; margin-bottom:1px}
+    #win :is(h1,h2),#pause :is(h1,h2){font-size:26px; letter-spacing:.1em; margin-bottom:1px}
     #win .sub,#pause .sub{font-size:10px; letter-spacing:.16em; margin-bottom:6px}
     #win .stats{gap:16px; margin-bottom:8px}
     #win .stats .n{font-size:16px}
@@ -435,7 +435,7 @@
   .mpanel .list .dim2{color:#6d918d}
 
   #pause{display:none}
-  #pause h1{font-size:36px}
+  #pause :is(h1,h2){font-size:36px}
 </style>
 </head>
 <body>
@@ -549,7 +549,7 @@
 </div>
 
 <div class="ov" id="over">
-  <h1>YOU DIED</h1>
+  <h2>YOU DIED</h2>
   <div class="sub" id="overWhy">OPERATOR DOWN</div>
   <div class="stats">
     <div><svg class="ic" width="20" height="20" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.6" fill="none"/><path d="M10 5.5 V10 L13 12" stroke="currentColor" stroke-width="1.6" fill="none"/></svg><div class="n" id="sTime">0:00</div><div class="k">생존 시간</div></div>
@@ -567,7 +567,7 @@
 </div>
 
 <div class="ov" id="win">
-  <h1>VICTORY</h1>
+  <h2>VICTORY</h2>
   <div class="sub" id="winSub">ANNIE RECOVERED</div>
   <div class="stats">
     <div><div class="n" id="wTime">0:00</div><div class="k">클리어 시간</div></div>
@@ -584,7 +584,7 @@
 </div>
 
 <div class="ov" id="pause">
-  <h1>일시정지</h1>
+  <h2>일시정지</h2>
   <div class="sub">PAUSED</div>
   <button id="btnResume">RESUME</button>
 </div>

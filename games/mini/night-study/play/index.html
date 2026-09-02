@@ -95,9 +95,9 @@
     align-items:center;justify-content:center;text-align:center;padding:20px;
     overflow-y:auto;   /* 창이 낮아도 '들어가기'에 손이 닿게 */
     background:radial-gradient(ellipse at 50% 40%, #14161c 0%, #05060a 70%)}
-  .screen h1{font-size:min(15vw,86px);font-weight:900;letter-spacing:6px;line-height:.95;
+  .screen :is(h1,h2){font-size:min(15vw,86px);font-weight:900;letter-spacing:6px;line-height:.95;
     color:#efeae0;text-shadow:0 0 26px rgba(150,180,255,.18)}
-  .screen h1 em{display:block;font-style:normal;font-size:min(5.4vw,26px);letter-spacing:10px;
+  .screen :is(h1,h2) em{display:block;font-style:normal;font-size:min(5.4vw,26px);letter-spacing:10px;
     font-weight:700;color:#8c8fa0;margin-top:10px}
   .screen p{font-size:17px;font-weight:600;color:#9a958a;line-height:1.65;margin-top:16px;max-width:560px}
   .keys{display:grid;grid-template-columns:auto auto;gap:5px 14px;margin-top:20px;
@@ -114,9 +114,9 @@
     border:1px solid rgba(255,255,255,.12)}
   .opt.on{background:#e8e2d4;color:#12141a;border-color:#e8e2d4}
   #dead{display:none;background:#000}
-  #dead h1{color:#c33;letter-spacing:10px;text-shadow:0 0 40px rgba(200,20,20,.5)}
+  #dead :is(h1,h2){color:#c33;letter-spacing:10px;text-shadow:0 0 40px rgba(200,20,20,.5)}
   #win{display:none;background:radial-gradient(ellipse at 50% 45%,#1b2030 0%,#05060a 72%)}
-  #win h1{color:#dfe6f2}
+  #win :is(h1,h2){color:#dfe6f2}
   #pause{display:none;background:rgba(4,5,8,.94)}
   #loading{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;
     background:#05060a;font-size:16px;font-weight:800;color:#5d5850;letter-spacing:3px}
@@ -124,34 +124,34 @@
   .screen::-webkit-scrollbar{display:none}
   /* 폰 가로화면(높이 390px 쯤)에서도 '들어가기'까지 한 화면에 들어오게 */
   @media (max-height:540px){
-    .screen h1{font-size:min(9.5vw,44px);letter-spacing:4px}
-    .screen h1 em{font-size:min(3.4vw,15px);letter-spacing:6px;margin-top:4px}
+    .screen :is(h1,h2){font-size:min(9.5vw,44px);letter-spacing:4px}
+    .screen :is(h1,h2) em{font-size:min(3.4vw,15px);letter-spacing:6px;margin-top:4px}
     .screen p{font-size:13px;margin-top:8px;line-height:1.5}
     .keys{font-size:13px;gap:2px 10px;margin-top:9px}
     .opts{margin-top:9px;gap:6px}
     .opt{padding:5px 13px;font-size:13px}
     .btn{margin-top:11px;padding:9px 30px;font-size:18px}
-    #dead h1,#win h1{font-size:min(11vw,52px)}
+    #dead :is(h1,h2),#win :is(h1,h2){font-size:min(11vw,52px)}
   }
   /* ⚠안드로이드는 전체화면으로 들어갈 때 '위에서 드래그해서 나가세요' 안내를
      화면 **아래쪽**에 띄운다. 그게 단추들을 덮어서 시작을 못 한다(2026-08-29 사용자 폰).
      그 높이만큼 아래를 비우고, 대신 글·단추를 더 조여서 한 화면에 그대로 담는다. */
   body.touch .screen{padding-bottom:calc(26vh + env(safe-area-inset-bottom))}
   @media (max-height:560px){
-    body.touch .screen h1{font-size:min(8vw,36px);letter-spacing:3px}
-    body.touch .screen h1 em{font-size:min(3vw,13px);letter-spacing:5px;margin-top:3px}
+    body.touch .screen :is(h1,h2){font-size:min(8vw,36px);letter-spacing:3px}
+    body.touch .screen :is(h1,h2) em{font-size:min(3vw,13px);letter-spacing:5px;margin-top:3px}
     body.touch .screen p{font-size:11.5px;margin-top:5px;line-height:1.4}
     body.touch .keys{font-size:11.5px;gap:0 8px;margin-top:6px}
     body.touch .opts{margin-top:6px;gap:5px}
     body.touch .opt{padding:3px 10px;font-size:11.5px}
     body.touch .btn{margin-top:8px;padding:7px 24px;font-size:16px}
-    body.touch #dead h1, body.touch #win h1{font-size:min(9vw,42px)}
+    body.touch #dead :is(h1,h2), body.touch #win :is(h1,h2){font-size:min(9vw,42px)}
   }
   /* 안드로이드에 흔한 800x360 가로화면 — 여기서도 제목부터 '들어가기'까지 다 보여야 한다 */
   @media (max-height:400px){
     body.touch .screen{padding-bottom:calc(22vh + env(safe-area-inset-bottom))}
-    body.touch .screen h1{font-size:min(7vw,29px);letter-spacing:2px}
-    body.touch .screen h1 em{font-size:min(2.6vw,11px);letter-spacing:4px;margin-top:2px}
+    body.touch .screen :is(h1,h2){font-size:min(7vw,29px);letter-spacing:2px}
+    body.touch .screen :is(h1,h2) em{font-size:min(2.6vw,11px);letter-spacing:4px;margin-top:2px}
     body.touch .screen p{font-size:11px;margin-top:4px;line-height:1.35}
     body.touch .keys{font-size:11px;gap:0 7px;margin-top:5px}
     body.touch .opts{margin-top:5px;gap:4px}
@@ -230,19 +230,19 @@
 </div>
 
 <div class="screen" id="dead">
-  <h1>붙 잡 혔 다</h1>
+  <h2>붙 잡 혔 다</h2>
   <p id="deadMsg">차가운 손이 어깨를 잡았다.</p>
   <button class="btn ghosty" id="retryBtn">다시 하기</button>
 </div>
 
 <div class="screen" id="win">
-  <h1>탈 출</h1>
+  <h2>탈 출</h2>
   <p id="winMsg"></p>
   <button class="btn" id="againBtn">한 번 더</button>
 </div>
 
 <div class="screen" id="pause">
-  <h1 style="font-size:44px;letter-spacing:8px">잠 깐 멈 춤</h1>
+  <h2 style="font-size:44px;letter-spacing:8px">잠 깐 멈 춤</h2>
   <p>화면을 누르면 이어서 합니다.</p>
   <button class="btn" id="resumeBtn">이어 하기</button>
 </div>
