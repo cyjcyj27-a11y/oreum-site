@@ -85,7 +85,7 @@
   @media (max-width: 700px) { #shop .thumb { width: 72px; height: 72px; } #shop .bars { grid-template-columns: 1fr; gap: 2px; } #shop .act { width: 70px; } #shop .info b { font-size: 15px; } }
   #minimap { position: fixed; left: 14px; bottom: 58px; width: 150px; height: 150px; border-radius: 50%; border: 2px solid rgba(255,255,255,.35); background: rgba(10,14,20,.55); box-shadow: 0 2px 12px rgba(0,0,0,.4); opacity: 0; transition: opacity .8s; z-index: 16; touch-action: manipulation; cursor: pointer; }
   #minimap.show { opacity: 1; }
-  body.touch #minimap { left: 12px; bottom: auto; top: calc(236px + env(safe-area-inset-top)); width: 110px; height: 110px; }   /* 폰: 지도는 위쪽 왼쪽 */
+  body.touch #minimap { left: 12px; bottom: auto; top: calc(236px + env(safe-area-inset-top)); width: 220px; height: 220px; }   /* 폰: 지도는 위쪽 왼쪽 */
   #bigmap { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%) scale(.96); width: min(92vw, 86vh, 640px); background: rgba(14,16,22,.94); border: 1px solid rgba(255,255,255,.2); border-radius: 14px; padding: 10px 12px 12px; opacity: 0; pointer-events: none; transition: opacity .25s, transform .25s; z-index: 20; }
   #bigmap.show { opacity: 1; pointer-events: auto; transform: translate(-50%, -50%) scale(1); }
   #bigmap .head { display: flex; justify-content: space-between; align-items: center; font-size: 22px; letter-spacing: 3px; color: #ffd27a; margin-bottom: 6px; }
@@ -152,7 +152,7 @@
   #shop .card .price { font-weight: 600; font-size: 13px; color: #ffd27a; margin-left: 8px; letter-spacing: 0; }
   /* 폰 가로(짧은 화면): 지도는 왼쪽 위, 카드는 높이 표시 아래, 단추는 오른쪽 아래 작게 */
   @media (max-height: 520px) {
-    body.touch #minimap { top: calc(60px + env(safe-area-inset-top)); width: 96px; height: 96px; }
+    body.touch #minimap { top: calc(56px + env(safe-area-inset-top)); width: 192px; height: 192px; }
     #hud { padding-top: 8px; } #vert { top: 104px; font-size: 16px; }
     #msg { top: 50%; font-size: 24px; padding: 8px 18px 10px; letter-spacing: 1px; } #msg.pop { font-size: 30px; }
     #bubble { top: 36%; font-size: 19px; padding: 10px 16px 12px; }
@@ -166,11 +166,11 @@
   #pad button:active { background: rgba(255,255,255,.4); }
   #padU { left: 63px; top: 0; } #padD { left: 63px; bottom: 0; } #padL { left: 0; top: 63px; } #padR { right: 0; top: 63px; }
   body.touch #pad { display: block; }
-  body.touch .tbtn { width: 76px; height: 76px; font-size: 17px; bottom: auto; top: calc(356px + env(safe-area-inset-top)); }
+  body.touch .tbtn { width: 76px; height: 76px; font-size: 17px; bottom: auto; top: calc(468px + env(safe-area-inset-top)); }
   body.touch #dn { left: 12px; right: auto; } body.touch #up { left: 96px; right: auto; }
   @media (max-height: 520px) {
-    body.touch .tbtn { width: 64px; height: 64px; font-size: 15px; top: calc(166px + env(safe-area-inset-top)); }
-    body.touch #dn { left: 12px; } body.touch #up { left: 84px; }
+    body.touch .tbtn { width: 60px; height: 60px; font-size: 15px; top: calc(256px + env(safe-area-inset-top)); }
+    body.touch #dn { left: 12px; } body.touch #up { left: 80px; }
     #pad { width: 160px; height: 160px; right: 10px; bottom: calc(10px + env(safe-area-inset-bottom)); }
     #pad button { width: 52px; height: 52px; font-size: 20px; }
     #padU { left: 54px; } #padD { left: 54px; } #padL { top: 54px; } #padR { top: 54px; }
@@ -197,7 +197,7 @@
 <audio id="sndWind" src="assets/wind.mp3" preload="auto" loop></audio>
 <audio id="sndCrash" src="assets/crash.mp3" preload="auto"></audio>
 <audio id="sndWarn" src="assets/warn.mp3" preload="auto"></audio>
-<audio id="sndRefuel" src="assets/refuel.mp3?v=206" preload="auto" loop></audio>
+<audio id="sndRefuel" src="assets/refuel.mp3?v=207" preload="auto" loop></audio>
 <div id="vig"></div>
 <div id="flash"></div>
 <div id="hit"></div>
@@ -251,13 +251,13 @@
 
 <script src="assets/game-home.js" data-top="6" data-left="6" data-fullscreen="1" defer></script>
 <script src="lib/three.min.js"></script>
-<script src="js/noise.js?v=206"></script>
-<script src="js/terrain.js?v=206"></script>
-<script src="js/physics.js?v=206"></script>
-<script src="js/player.js?v=206"></script>
-<script src="js/scenery.js?v=206"></script>
-<script src="js/audio.js?v=206"></script>
-<script src="js/delivery.js?v=206"></script>
-<script src="js/game.js?v=206"></script>
+<script src="js/noise.js?v=207"></script>
+<script src="js/terrain.js?v=207"></script>
+<script src="js/physics.js?v=207"></script>
+<script src="js/player.js?v=207"></script>
+<script src="js/scenery.js?v=207"></script>
+<script src="js/audio.js?v=207"></script>
+<script src="js/delivery.js?v=207"></script>
+<script src="js/game.js?v=207"></script>
 </body>
 </html>
