@@ -103,6 +103,12 @@
   #bubble::after { content: ''; position: absolute; left: 50%; bottom: -16px; margin-left: -14px; border: 14px solid transparent; border-top-color: #fffaf0; border-bottom: 0; }
   #bubble b { display: block; font-size: 15px; color: #d9781e; letter-spacing: 1px; margin-bottom: 6px; }
   body.touch #bubble { top: 30%; font-size: 19px; padding: 12px 18px 14px; }
+  /* 폰 세로로 들면: 돌리라는 그림만 (가로 전용) */
+  #rotate { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(14,18,24,.92); z-index: 40; pointer-events: none; }
+  #rotate .ph { width: 70px; height: 120px; border: 5px solid #ffd27a; border-radius: 14px; position: relative; animation: turnph 1.6s ease-in-out infinite; }
+  #rotate .ph::after { content: ''; position: absolute; left: 50%; bottom: 8px; width: 14px; height: 14px; margin-left: -7px; border-radius: 50%; background: #ffd27a; }
+  @keyframes turnph { 0%, 20% { transform: rotate(0deg); } 60%, 100% { transform: rotate(-90deg); } }
+  @media (orientation: portrait) { body.touch #rotate { display: flex; } }
   #sub { position: fixed; left: 0; right: 0; top: 42%; text-align: center; font-size: 20px; opacity: 0; transition: opacity .5s; pointer-events: none; text-shadow: 0 2px 6px rgba(0,0,0,.6); color: #ffe6b8; }
   #sub.on { opacity: 1; }
   #over { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(10,8,8,.55); opacity: 0; pointer-events: none; transition: opacity 1.5s; text-align: center; text-shadow: 0 2px 12px rgba(0,0,0,.7); }
@@ -144,6 +150,15 @@
   .touchonly { display: none; } body.touch .touchonly { display: block; } body.touch .mouseonly { display: none; }
   @media (max-width: 700px) { .hgt { font-size: 44px; } #msg { top: 47%; font-size: 24px; padding: 8px 18px 10px; letter-spacing: 1px; } #msg.pop { font-size: 32px; } #bubble { top: 33%; } #title h1 { font-size: min(60px, 12vw); letter-spacing: 5px; } #title .how { font-size: 14px; } #hud { padding: 14px 16px; } #tut { font-size: 14px; white-space: normal; max-width: 90vw; text-align: center; } #deliv { font-size: 16px; } }
   #shop .card .price { font-weight: 600; font-size: 13px; color: #ffd27a; margin-left: 8px; letter-spacing: 0; }
+  /* 폰 가로(짧은 화면): 지도는 왼쪽 위, 카드는 높이 표시 아래, 단추는 오른쪽 아래 작게 */
+  @media (max-height: 520px) {
+    body.touch #minimap { top: calc(60px + env(safe-area-inset-top)); width: 96px; height: 96px; }
+    #hud { padding-top: 8px; } #vert { top: 104px; font-size: 16px; }
+    #msg { top: 50%; font-size: 24px; padding: 8px 18px 10px; letter-spacing: 1px; } #msg.pop { font-size: 30px; }
+    #bubble { top: 36%; font-size: 19px; padding: 10px 16px 12px; }
+    .tbtn { width: 92px; height: 92px; bottom: calc(10px + env(safe-area-inset-bottom)); font-size: 20px; }
+    #up { right: 12px; } #dn { right: 116px; }
+  }
 </style>
 </head>
 <body>
@@ -166,7 +181,7 @@
 <audio id="sndWind" src="assets/wind.mp3" preload="auto" loop></audio>
 <audio id="sndCrash" src="assets/crash.mp3" preload="auto"></audio>
 <audio id="sndWarn" src="assets/warn.mp3" preload="auto"></audio>
-<audio id="sndRefuel" src="assets/refuel.mp3?v=202" preload="auto" loop></audio>
+<audio id="sndRefuel" src="assets/refuel.mp3?v=205" preload="auto" loop></audio>
 <div id="vig"></div>
 <div id="flash"></div>
 <div id="hit"></div>
@@ -188,6 +203,7 @@
 </div>
 <span id="h" hidden></span>
 <div id="sub"></div>
+<div id="rotate"><div class="ph"></div></div>
 <div id="bubble"><b></b><span></span></div>
 <div id="pause"><h2>PAUSE</h2><p>▶</p></div>
 <canvas id="minimap" width="300" height="300"></canvas>
@@ -218,13 +234,13 @@
 
 <script src="assets/game-home.js" data-top="6" data-left="6" data-fullscreen="1" defer></script>
 <script src="lib/three.min.js"></script>
-<script src="js/noise.js?v=202"></script>
-<script src="js/terrain.js?v=202"></script>
-<script src="js/physics.js?v=202"></script>
-<script src="js/player.js?v=202"></script>
-<script src="js/scenery.js?v=202"></script>
-<script src="js/audio.js?v=202"></script>
-<script src="js/delivery.js?v=202"></script>
-<script src="js/game.js?v=202"></script>
+<script src="js/noise.js?v=205"></script>
+<script src="js/terrain.js?v=205"></script>
+<script src="js/physics.js?v=205"></script>
+<script src="js/player.js?v=205"></script>
+<script src="js/scenery.js?v=205"></script>
+<script src="js/audio.js?v=205"></script>
+<script src="js/delivery.js?v=205"></script>
+<script src="js/game.js?v=205"></script>
 </body>
 </html>

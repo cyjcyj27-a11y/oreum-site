@@ -142,8 +142,14 @@
   document.getElementById('btnPause').addEventListener('pointerdown', e => { e.stopPropagation(); e.preventDefault(); togglePause(); });
   document.getElementById('pause').addEventListener('pointerdown', e => { e.stopPropagation(); togglePause(); });
 
+  // 폰은 가로 전용: 시작하는 손짓에 전체화면 + 가로 고정을 건다 (막히면 그냥 넘어간다)
+  function lockLandscape() {
+    try { if (screen.orientation && screen.orientation.lock) screen.orientation.lock('landscape').catch(() => { }); } catch (e) { }
+  }
+  document.addEventListener('fullscreenchange', () => { if (document.fullscreenElement && input.touch) lockLandscape(); });
   function start() {
     started = true; AUDIO.init();
+    if (input.touch) { try { const el = document.documentElement; const p = (el.requestFullscreen || el.webkitRequestFullscreen).call(el); if (p && p.then) p.then(lockLandscape).catch(() => { }); else lockLandscape(); } catch (e) { lockLandscape(); } }
     document.getElementById('title').classList.add('hide');
     document.getElementById('hud').classList.add('show'); document.getElementById('topbar').classList.add('show'); mmC.classList.add('show');
     t0 = performance.now();
