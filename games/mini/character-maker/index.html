@@ -228,6 +228,18 @@
   <div id="toast"></div>
 </main>
 
+<script>
+/* ?lang=en 으로 열면 아래 모듈이 엔진을 받아오기 전에도 제목이 한글로 남지 않게 먼저 바꿔 둡니다.
+   (말 두 벌은 아래 STR 에 있습니다 — 여기서는 제목 한 줄만) */
+(function(){
+  var q = new URLSearchParams(location.search).get('lang');
+  var en = q === 'en' || (q !== 'ko' && !(navigator.language || '').toLowerCase().startsWith('ko'));
+  if(!en) return;
+  document.documentElement.lang = 'en';
+  document.title = 'Character Bench · 캐릭터 조립대';
+  var h = document.getElementById('tTitle'); if(h) h.textContent = 'Character Bench';
+})();
+</script>
 <script type="module">
 import * as THREE from 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.module.js';
 

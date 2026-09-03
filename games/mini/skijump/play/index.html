@@ -178,6 +178,15 @@
  * ───────────────────────────────────────────────────────────── */
 'use strict';
 
+/* ── 말(한국어·영어) ── `?lang=en` 이면 영어를 덧씌운다. 한국어가 원본이다.
+   ⚠ `L` 은 이 파일 안에서 지역 변수로 이미 쓰여서 `T` 로 부른다. 함수 안에서 다시 정의하지 말 것 */
+const EN_MODE = (new URLSearchParams(location.search).get('lang') || '').toLowerCase() === 'en';
+const T = (ko, en) => EN_MODE ? en : ko;
+if (EN_MODE) {
+  document.documentElement.lang = 'en';
+  document.title = 'SKI JUMP — free ski jump game';
+}
+
 /* 논리 판 폭은 고정, 높이는 화면 비율을 그대로 받는다.
  * (높이까지 고정하면 세로로 긴 폰에서 그림이 가로로 눌린다) */
 const W = 450;
@@ -1585,10 +1594,10 @@ function showMenu() {
   const fresh = unlocked <= 1 && !bests.length;
   veilShow({
     hero: true, title: true,
-    keys: (TOUCH ? '아래 화살표 단추로 방향을 바꿉니다' : '← → 로 방향을 바꿉니다') +
+    keys: (TOUCH ? T('아래 화살표 단추로 방향을 바꿉니다', 'Steer with the arrow buttons below') : T('← → 로 방향을 바꿉니다', 'Steer with ← →')) +
           '<br><b>STAGE ' + stage + '</b> / ' + STAGES,
-    go:   fresh ? '시작하기' : '이어하기',
-    go2:  fresh ? null : '처음부터'
+    go:   fresh ? 'START' : T('이어하기', 'CONTINUE'),
+    go2:  fresh ? null : T('처음부터', 'NEW GAME')
   });
 }
 
@@ -1596,10 +1605,11 @@ function showMenu() {
 function showWipe() {
   S = 'wipe';
   veilShow({
-    lead: '<span class="over">처음부터</span>',
-    sub:  '깬 ' + Math.max(0, unlocked - 1) + '판 기록과 모은 동전 ' + coinTotal + '개가 지워집니다',
-    go:   '지우고 시작',
-    go2:  '취소'
+    lead: '<span class="over">' + T('처음부터', 'NEW GAME') + '</span>',
+    sub:  T('깬 ' + Math.max(0, unlocked - 1) + '판 기록과 모은 동전 ' + coinTotal + '개가 지워집니다',
+            'Erases ' + Math.max(0, unlocked - 1) + ' cleared stages and ' + coinTotal + ' coins'),
+    go:   T('지우고 시작', 'ERASE & START'),
+    go2:  T('취소', 'CANCEL')
   });
 }
 
@@ -1611,8 +1621,8 @@ function showClear(isBest) {
     big:  score + '<span id="bigUnit">P</span>',
     /* 동전 둘(이번 판 / 여태 모은 것)과 점수 하나가 한 줄에 있다.
      * 동전 쪽에 그림을 둘 다 붙여야 '합계가 점수냐'는 헷갈림이 없다 */
-    sub:  '<img src="' + COIN_ICON + '" alt="동전">+' + player.coin +
-          '   ·   <img src="' + COIN_ICON + '" alt="동전">' + coinTotal +
+    sub:  '<img src="' + COIN_ICON + '" alt="' + T('동전', 'coin') + '">+' + player.coin +
+          '   ·   <img src="' + COIN_ICON + '" alt="' + T('동전', 'coin') + '">' + coinTotal +
           '   ·   BEST ' + (bests[stage - 1] || 0) + 'P',
     go:   done ? 'STAGE SELECT' : 'STAGE ' + (stage + 1) + '  NEXT',
     alt:  done ? null : 'STAGE SELECT'      // 다 깼으면 큰 단추가 이미 STAGE SELECT 다

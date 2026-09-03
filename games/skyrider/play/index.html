@@ -34,6 +34,7 @@
   #vert { position: fixed; left: 50%; top: 126px; transform: translateX(-50%); font-size: 18px; opacity: .95; white-space: nowrap; }
   #arrow { display: none !important; }
   #vert.sink::after { content: '  ▼ 가라앉는 중'; color: #ff9a7a; }
+  html[lang="en"] #vert.sink::after { content: '  ▼ SINKING'; }
   #arrow { position: fixed; left: 50%; top: 84px; margin-left: -22px; font-size: 44px; line-height: 1; color: #ffd27a; text-shadow: 0 2px 8px rgba(0,0,0,.6); opacity: 0; transition: opacity .3s; pointer-events: none; transform-origin: 50% 50%; }
   #pkg { font-size: 14px; opacity: .8; }
   /* 상단 바 — 오름 알약(왼쪽 위 93px) 오른쪽부터 */
@@ -204,16 +205,16 @@
 <div id="hit"></div>
 
 <div id="topbar">
-  <div class="stat coin"><span class="ic">🪙</span><b id="money">0</b><small>코인</small></div>
+  <div class="stat coin"><span class="ic">🪙</span><b id="money">0</b><small data-en="COIN">코인</small></div>
   <div class="stat fuel" id="fuel"><span class="ic">⛽</span><div class="bar"><div id="fuelbar"></div></div><b id="fuelnum">100</b><small>L</small></div>
   <div class="brk"></div>
   <div class="stat hp" id="hp"><b>❤❤❤</b></div>
   <div class="stat"><span class="ic">⏱</span><b id="time">0:00</b></div>
   <span id="done" hidden></span>
   <div class="spacer"></div>
-  <button id="btnPause" class="tog" title="일시정지">❚❚</button>
-  <button id="btnMusic" class="tog" title="음악">♪</button>
-  <button id="btnSfx" class="tog" title="효과음">🔊</button>
+  <button id="btnPause" class="tog" title="일시정지" data-en-title="Pause">❚❚</button>
+  <button id="btnMusic" class="tog" title="음악" data-en-title="Music">♪</button>
+  <button id="btnSfx" class="tog" title="효과음" data-en-title="Sound">🔊</button>
 </div>
 <div id="hud">
   <div class="right"><div id="deliv">…</div><div id="vert"></div><div id="pkg"></div></div>
@@ -224,10 +225,10 @@
 <div id="bubble"><b></b><span></span></div>
 <div id="pause"><h2>PAUSE</h2><p>▶</p></div>
 <canvas id="minimap" width="300" height="300"></canvas>
-<div id="bigmap"><div class="head"><span>지도</span><button id="bigmapClose">✕</button></div><canvas id="bigmapc" width="900" height="900"></canvas><div class="legend">🏠 집 &nbsp; ⛽ 주유소 &nbsp; 🏍 모터샵 &nbsp; ★ 식당 &nbsp; <span style="color:#b26bff">●</span> 지금 배달 갈 곳</div></div>
-<button id="btnShop">🏍 모터샵</button>
+<div id="bigmap"><div class="head"><span data-en="MAP">지도</span><button id="bigmapClose">✕</button></div><canvas id="bigmapc" width="900" height="900"></canvas><div class="legend" data-en="🏠 Home &nbsp; ⛽ Gas &nbsp; 🏍 Shop &nbsp; ★ Diner &nbsp; <span style='color:#b26bff'>●</span> Delivery">🏠 집 &nbsp; ⛽ 주유소 &nbsp; 🏍 모터샵 &nbsp; ★ 식당 &nbsp; <span style="color:#b26bff">●</span> 지금 배달 갈 곳</div></div>
+<button id="btnShop" data-en="🏍 SHOP">🏍 모터샵</button>
 <div id="shop">
-  <div class="head"><span>모터샵</span><button id="shopClose">✕</button></div>
+  <div class="head"><span data-en="SHOP">모터샵</span><button id="shopClose">✕</button></div>
   <div id="shopList"></div>
 </div>
 <div id="over">
@@ -239,26 +240,38 @@
 <div id="msg"></div>
 <div id="tut"></div>
 <div id="hint"></div>
-<div id="keys">↑↓←→ 이동 · 스페이스 상승 · Shift 하강<br>T 지도 · M 음악 · K 효과음 · R 리스폰</div>
-<button id="dn" class="tbtn">아래로</button>
-<button id="up" class="tbtn">위로</button>
+<div id="keys" data-en="↑↓←→ Move · Space Up · Shift Down<br>T Map · M Music · K Sound · R Respawn">↑↓←→ 이동 · 스페이스 상승 · Shift 하강<br>T 지도 · M 음악 · K 효과음 · R 리스폰</div>
+<button id="dn" class="tbtn" data-en="DOWN">아래로</button>
+<button id="up" class="tbtn" data-en="UP">위로</button>
 <div id="pad"><button id="padU">▲</button><button id="padL">◀</button><button id="padR">▶</button><button id="padD">▼</button></div>
 
 <div id="title">
-  <h1>스카이 라이더</h1>
+  <h1 data-en="SKY RIDER">스카이 라이더</h1>
   <div class="tag">SKY RIDER</div>
-  <div class="go">시작</div>
+  <div class="go" data-en="START">시작</div>
 </div>
 
 <script src="assets/game-home.js" data-top="6" data-left="6" data-fullscreen="1" defer></script>
+<script>
+/* ── 말(한국어·영어) ── `?lang=en` 이면 영어를 덧씌운다. 한국어가 원본이다.
+   ⚠ 이 게임은 L(기울기 벡터)·T(TERRAIN)를 이미 쓰고 있어 번역 함수 이름을 TX 로 지었다. 함수 안에서 TX 를 다시 정의하지 말 것 */
+const EN_MODE = (new URLSearchParams(location.search).get('lang') || '').toLowerCase() === 'en';
+const TX = (ko, en) => EN_MODE ? en : ko;
+if (EN_MODE) {
+  document.documentElement.lang = 'en';
+  document.title = 'SKY RIDER — free sky delivery motorbike game';
+  document.querySelectorAll('[data-en]').forEach(el => { el.innerHTML = el.dataset.en; });
+  document.querySelectorAll('[data-en-title]').forEach(el => { el.title = el.dataset.enTitle; });
+}
+</script>
 <script src="lib/three.min.js"></script>
-<script src="js/noise.js?v=210"></script>
-<script src="js/terrain.js?v=210"></script>
-<script src="js/physics.js?v=210"></script>
-<script src="js/player.js?v=210"></script>
-<script src="js/scenery.js?v=210"></script>
-<script src="js/audio.js?v=210"></script>
-<script src="js/delivery.js?v=210"></script>
-<script src="js/game.js?v=210"></script>
+<script src="js/noise.js?v=211"></script>
+<script src="js/terrain.js?v=211"></script>
+<script src="js/physics.js?v=211"></script>
+<script src="js/player.js?v=211"></script>
+<script src="js/scenery.js?v=211"></script>
+<script src="js/audio.js?v=211"></script>
+<script src="js/delivery.js?v=211"></script>
+<script src="js/game.js?v=211"></script>
 </body>
 </html>

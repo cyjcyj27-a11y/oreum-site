@@ -170,10 +170,10 @@
 
 <div id="hud">
   <div id="clock">PM 11:04</div>
-  <div id="paperBox"><b id="pgot">0</b><span id="pneed">/6</span><i>시험지</i></div>
+  <div id="paperBox"><b id="pgot">0</b><span id="pneed">/6</span><i data-en="PAPERS">시험지</i></div>
   <div id="bars">
-    <div class="barLbl">손전등</div><div class="bar"><div id="batFill"></div></div>
-    <div class="barLbl">숨</div><div class="bar"><div id="stamFill"></div></div>
+    <div class="barLbl" data-en="LIGHT">손전등</div><div class="bar"><div id="batFill"></div></div>
+    <div class="barLbl" data-en="BREATH">숨</div><div class="bar"><div id="stamFill"></div></div>
   </div>
   <div id="hint"></div>
   <div id="toast"></div>
@@ -182,72 +182,86 @@
 
 <div id="touch">
   <div id="tStick"><div id="tKnob"></div></div>
-  <div class="tbtn" id="tAct">줍기</div>
-  <div class="tbtn" id="tTorch">손전등</div>
+  <div class="tbtn" id="tAct" data-en="TAKE">줍기</div>
+  <div class="tbtn" id="tTorch" data-en="LIGHT">손전등</div>
   <div class="tbtn" id="tPause">II</div>
 </div>
 
 <div id="rotate">
   <div>
-    <p>가로 화면에서 하는 게임입니다</p>
-    <button type="button" id="rotGo">가로로 돌리기</button>
-    <p class="sub">단추가 안 먹으면 폰의 <b>화면 회전 잠금</b>을 풀고 눕혀 주세요<br>
-      <a href="#" id="rotSkip">그래도 세로로 하기</a></p>
+    <p data-en="This game plays in landscape">가로 화면에서 하는 게임입니다</p>
+    <button type="button" id="rotGo" data-en="Turn to landscape">가로로 돌리기</button>
+    <p class="sub"><span data-en="If the button does nothing, turn off your phone's <b>rotation lock</b> and lay it sideways">단추가 안 먹으면 폰의 <b>화면 회전 잠금</b>을 풀고 눕혀 주세요</span><br>
+      <a href="#" id="rotSkip" data-en="Play in portrait anyway">그래도 세로로 하기</a></p>
   </div>
 </div>
 
 <div class="screen" id="title">
-  <h1>NIGHT STUDY<em>야 간 자 율 학 습</em></h1>
-  <p>야자하다 엎드려 잠들었다. 눈을 뜨니 학교엔 아무도 없다.<br>
+  <h1>NIGHT STUDY<em data-en="A F T E R &nbsp; H O U R S">야 간 자 율 학 습</em></h1>
+  <p data-en="You dozed off at your desk during night study. You woke up, and the school is empty.<br>Find the <b>6 exam papers</b> and get out through the front door on the first floor.<br><b style='color:#c9b7b7'>Something in a white gown is in the hallway.</b> If it sees you, run.">야자하다 엎드려 잠들었다. 눈을 뜨니 학교엔 아무도 없다.<br>
      흩어진 <b>시험지 6장</b>을 모아 1층 현관으로 나가라.<br>
      <b style="color:#c9b7b7">복도에 소복 입은 무언가가 있다.</b> 들키면 뛰어야 한다.</p>
   <!-- 폰 안내는 PC 것을 옮기지 말고, 무엇을 어디서 만지는지로 쓴다 (2026-08-30 사용자) -->
   <div class="keys forTouch">
-    <b>왼쪽 아래 스틱</b><span>밀면 걷기 · 끝까지 밀면 달리기</span>
-    <b>화면 문지르기</b><span>둘러보기</span>
-    <b>손전등 단추</b><span>밝지만 귀신 눈에 두 배로 띈다</span>
-    <b>줍기 단추</b><span>시험지 줍기 · 사물함에 숨기</span>
-    <b>왼쪽 위 II</b><span>잠깐 멈추기</span>
+    <b data-en="Stick, bottom left">왼쪽 아래 스틱</b><span data-en="push to walk · push to the edge to run">밀면 걷기 · 끝까지 밀면 달리기</span>
+    <b data-en="Swipe the screen">화면 문지르기</b><span data-en="look around">둘러보기</span>
+    <b data-en="LIGHT button">손전등 단추</b><span data-en="bright, but she spots you twice as far away">밝지만 귀신 눈에 두 배로 띈다</span>
+    <b data-en="TAKE button">줍기 단추</b><span data-en="take papers · hide in a locker">시험지 줍기 · 사물함에 숨기</span>
+    <b data-en="II, top left">왼쪽 위 II</b><span data-en="pause">잠깐 멈추기</span>
   </div>
   <div class="keys forPc">
-    <b>W A S D</b><span>걷기</span>
-    <b>마우스</b><span>둘러보기</span>
-    <b>Shift</b><span>달리기 (숨이 찬다)</span>
-    <b>F</b><span>손전등 — 밝지만 들키기 쉽다</span>
-    <b>E</b><span>줍기 · 사물함에 숨기</span>
-    <b>Esc</b><span>잠깐 멈추기</span>
+    <b>W A S D</b><span data-en="walk">걷기</span>
+    <b data-en="Mouse">마우스</b><span data-en="look around">둘러보기</span>
+    <b>Shift</b><span data-en="run (you lose your breath)">달리기 (숨이 찬다)</span>
+    <b>F</b><span data-en="flashlight — bright, but easy to spot">손전등 — 밝지만 들키기 쉽다</span>
+    <b>E</b><span data-en="take · hide in a locker">줍기 · 사물함에 숨기</span>
+    <b>Esc</b><span data-en="pause">잠깐 멈추기</span>
   </div>
   <div class="opts" id="diffOpts">
-    <button class="opt" data-d="0">쉬움</button>
-    <button class="opt on" data-d="1">보통</button>
-    <button class="opt" data-d="2">어려움</button>
+    <button class="opt" data-d="0" data-en="EASY">쉬움</button>
+    <button class="opt on" data-d="1" data-en="NORMAL">보통</button>
+    <button class="opt" data-d="2" data-en="HARD">어려움</button>
   </div>
   <div class="opts">
-    <button class="opt on" id="optShadow">그림자 켜기</button>
-    <button class="opt on" id="optSound">소리 켜기</button>
+    <button class="opt on" id="optShadow" data-en="SHADOWS ON">그림자 켜기</button>
+    <button class="opt on" id="optSound" data-en="SOUND ON">소리 켜기</button>
   </div>
-  <button class="btn" id="startBtn">들어가기</button>
+  <button class="btn" id="startBtn" data-en="START">들어가기</button>
 </div>
 
 <div class="screen" id="dead">
-  <h2>붙 잡 혔 다</h2>
-  <p id="deadMsg">차가운 손이 어깨를 잡았다.</p>
-  <button class="btn ghosty" id="retryBtn">다시 하기</button>
+  <h2 data-en="GAME OVER">붙 잡 혔 다</h2>
+  <p id="deadMsg" data-en="A cold hand grabbed your shoulder.">차가운 손이 어깨를 잡았다.</p>
+  <button class="btn ghosty" id="retryBtn" data-en="RETRY">다시 하기</button>
 </div>
 
 <div class="screen" id="win">
-  <h2>탈 출</h2>
+  <h2 data-en="ESCAPED">탈 출</h2>
   <p id="winMsg"></p>
-  <button class="btn" id="againBtn">한 번 더</button>
+  <button class="btn" id="againBtn" data-en="PLAY AGAIN">한 번 더</button>
 </div>
 
 <div class="screen" id="pause">
-  <h2 style="font-size:44px;letter-spacing:8px">잠 깐 멈 춤</h2>
-  <p>화면을 누르면 이어서 합니다.</p>
-  <button class="btn" id="resumeBtn">이어 하기</button>
+  <h2 style="font-size:44px;letter-spacing:8px" data-en="PAUSE">잠 깐 멈 춤</h2>
+  <p data-en="Tap the screen to continue.">화면을 누르면 이어서 합니다.</p>
+  <button class="btn" id="resumeBtn" data-en="RESUME">이어 하기</button>
 </div>
 
-<div id="loading">준비하는 중…</div>
+<div id="loading" data-en="Loading&hellip;">준비하는 중…</div>
+
+<script>
+/* ── 말(한국어·영어) ──
+   `?lang=en` 이면 영어로 바꾼다. 한국어가 원본이고 영어를 덧씌우는 방식이다.
+   ⚠ `L` 이라는 이름을 함수 안에서 다시 쓰지 말 것 */
+const EN_MODE = (new URLSearchParams(location.search).get('lang') || '').toLowerCase() === 'en';
+const L = (ko, en) => EN_MODE ? en : ko;
+(function applyLang(){
+  if (!EN_MODE) return;
+  document.documentElement.lang = 'en';
+  document.title = 'NIGHT STUDY — free horror escape game';
+  document.querySelectorAll('[data-en]').forEach(el => { el.innerHTML = el.dataset.en; });
+})();
+</script>
 
 <!-- 오름게임즈 알약(왼쪽 위) + 전체화면(왼쪽 아래) — 모든 게임 기본 탑재 -->
 <script src="/assets/game-home.js?v=5" data-top="4" data-left="4" data-fullscreen="1" defer></script>
@@ -439,7 +453,8 @@ function makeBoardTex(){
   }
   g.font='900 52px sans-serif'; g.fillStyle='rgba(240,238,228,.72)';
   g.textAlign='center';
-  g.fillText(pick(['집에 가지 마','아직 안 끝났어','한 명이 모자라','같이 있어 줘']), 256, 150);
+  g.fillText(pick(L(['집에 가지 마','아직 안 끝났어','한 명이 모자라','같이 있어 줘'],
+                   ["don't go home","it isn't over yet","one of you is missing","stay with me"])), 256, 150);
   g.fillStyle='#6b5636'; g.fillRect(0,238,512,18);
   return tex(c);
 }
@@ -1166,7 +1181,7 @@ function toggleTorch(){
   P.torch=!P.torch;
   if(P.torch) P.usedTorch=true;
   Snd.clank();
-  toast(P.torch ? '손전등을 켰다 — 멀리서도 보인다' : '손전등을 껐다');
+  toast(P.torch ? L('손전등을 켰다 — 멀리서도 보인다','Flashlight on — you can be seen from far away') : L('손전등을 껐다','Flashlight off'));
 }
 
 function interact(){
@@ -1182,10 +1197,10 @@ function interact(){
       p.taken=true; scene.remove(p.mesh); scene.remove(p.halo);
       if(p.kind==='paper'){
         S.papers++; Snd.ding();
-        toast(S.papers>=S.needed ? '다 모았다. 현관으로!' : '시험지를 주웠다  '+S.papers+' / '+S.needed);
+        toast(S.papers>=S.needed ? L('다 모았다. 현관으로!',"That's all of them. To the front door!") : L('시험지를 주웠다  ','Picked up an exam paper  ')+S.papers+' / '+S.needed);
         if(S.papers>=S.needed){ Snd.unlock(); exitDoor.material.color.setHex(0x6a5a3c); }
       }else{
-        P.battery=Math.min(100,P.battery+45); Snd.ding(); toast('건전지를 주웠다');
+        P.battery=Math.min(100,P.battery+45); Snd.ding(); toast(L('건전지를 주웠다','Picked up a battery'));
       }
       return;
     }
@@ -1204,7 +1219,7 @@ function interact(){
     // 쫓기던 중이었다면, 들어가는 걸 봤다
     if(G.state==='chase' && G.lastSeen<1.2){
       G.state='check'; G.checkT=0; setGoal(best.cx, best.cy);
-      toast('봤다. 들켰다.');
+      toast(L('봤다. 들켰다.','She saw you go in.'));
     }
   }
 }
@@ -1250,7 +1265,7 @@ function startGame(){
   RUN_STATE='play';
   Snd.start();
   if(!TOUCH) canvas.requestPointerLock();
-  toast('교실에서 잠이 들었다… 학교엔 아무도 없다');
+  toast(L('교실에서 잠이 들었다… 학교엔 아무도 없다','You fell asleep in class… No one is left in the school'));
 }
 function pauseGame(){
   if(RUN_STATE!=='play') return;
@@ -1283,16 +1298,16 @@ function die(msg){
 
   el.flash.style.transition='none'; el.flash.style.opacity='0.75';
   setTimeout(()=>{ el.flash.style.transition='opacity .55s'; el.flash.style.opacity='0'; },50);
-  el.deadMsg.textContent = msg || '차가운 손이 어깨를 잡았다.';
+  el.deadMsg.textContent = msg || L('차가운 손이 어깨를 잡았다.','A cold hand grabbed your shoulder.');
   setTimeout(()=>{ el.hud.style.display='none'; el.dead.style.display='flex'; }, 1600);
 }
 function winGame(){
   RUN_STATE='win'; Snd.unlock(); Snd.whisper(0); Snd.walk(false);
   if(document.pointerLockElement) document.exitPointerLock();
   el.hud.style.display='none'; el.slats.style.display='none';
-  el.winMsg.innerHTML = '교문 밖은 아직 캄캄했다.<br>걸린 시간 <b>'+
-    Math.floor(S.t/60)+'분 '+Math.floor(S.t%60)+'초</b>' +
-    (P.usedTorch?'':'<br><span style="color:#8fbf9a">한 번도 손전등을 켜지 않았다</span>');
+  el.winMsg.innerHTML = L('교문 밖은 아직 캄캄했다.<br>걸린 시간 <b>','Outside the gate it was still pitch dark.<br>Time <b>')+
+    Math.floor(S.t/60)+L('분 ','m ')+Math.floor(S.t%60)+L('초</b>','s</b>') +
+    (P.usedTorch?'':'<br><span style="color:#8fbf9a">'+L('한 번도 손전등을 켜지 않았다','Never turned on the flashlight')+'</span>');
   el.win.style.display='flex';
 }
 
@@ -1356,7 +1371,7 @@ function updatePlayer(dt){
   // 손전등
   if(P.torch){
     P.battery -= 1.05*dt;
-    if(P.battery<=0){ P.battery=0; P.torch=false; toast('손전등이 나갔다'); }
+    if(P.battery<=0){ P.battery=0; P.torch=false; toast(L('손전등이 나갔다','The flashlight died')); }
   }
   const flick = P.battery<20 ? (Math.random()<0.06?0.2:1) : 1;
   torch.intensity = lerp(torch.intensity, P.torch ? 1.55*flick : 0, 1-Math.pow(0.002,dt));
@@ -1380,7 +1395,7 @@ function updateGhost(dt){
   }
 
   if(sees){
-    if(G.state!=='chase'){ Snd.sting(); toast('들켰다 — 뛰어!'); }
+    if(G.state!=='chase'){ Snd.sting(); toast(L('들켰다 — 뛰어!','She sees you — RUN!')); }
     G.state='chase'; G.lostFor=0; G.lastSeen=0;
   } else {
     G.lastSeen+=dt;
@@ -1413,7 +1428,7 @@ function updateGhost(dt){
     if(!P.hidden){ G.state='chase'; G.lostFor=0; }
     else if(dist<1.8){
       G.checkT+=dt;
-      if(G.checkT>2.0){ die('사물함 문이 열렸다.'); return; }
+      if(G.checkT>2.0){ die(L('사물함 문이 열렸다.','The locker door opened.')); return; }
     }
   }
   else {                                          // 순찰
@@ -1473,30 +1488,31 @@ function updateWorld(dt){
     p.halo.material.opacity = 0.32+Math.sin(p.ph*1.7)*0.1;
   }
   // 안내 글
-  let msg='';
-  if(P.hidden) msg='사물함에서 나오기';
+  let msg='', act='take';
+  if(P.hidden){ msg=L('사물함에서 나오기','Leave the locker'); act='out'; }
   else {
     for(const p of pickups){
       if(!p.taken && Math.hypot(P.x-p.x,P.z-p.z)<1.5){
-        msg = p.kind==='paper' ? '시험지 줍기' : '건전지 줍기'; break;
+        msg = p.kind==='paper' ? L('시험지 줍기','Take the exam paper') : L('건전지 줍기','Take the battery'); break;
       }
     }
     if(!msg) for(const h of hideSpots){
-      if(Math.hypot(P.x-h.x,P.z-h.z)<2.0){ msg='사물함에 숨기'; break; }
+      if(Math.hypot(P.x-h.x,P.z-h.z)<2.0){ msg=L('사물함에 숨기','Hide in the locker'); act='hide'; break; }
     }
   }
   // 폰에는 E 키가 없다. 키보드로 할 때만 키 이름을 앞에 붙인다
   el.hint.textContent = msg ? (TOUCH ? msg : 'E — ' + msg) : '';
   el.hint.style.opacity = msg?'1':'0';
   if(el.tAct) el.tAct.textContent =
-      msg.indexOf('나오기')>=0 ? '나오기' : (msg.indexOf('숨기')>=0 ? '숨기' : '줍기');
+      act==='out' ? L('나오기','OUT') : (act==='hide' ? L('숨기','HIDE') : L('줍기','TAKE'));
 
   // 현관
   const inExit = (wz2cy(P.z)>=24) && (wx2cx(P.x)>=13 && wx2cx(P.x)<=16);
   if(inExit){
     if(S.papers>=S.needed) winGame();
     else if(!el.hint.textContent){
-      el.hint.textContent='잠겨 있다 — 시험지 '+(S.needed-S.papers)+'장이 더 필요하다';
+      el.hint.textContent=L('잠겨 있다 — 시험지 '+(S.needed-S.papers)+'장이 더 필요하다',
+        'Locked — '+(S.needed-S.papers)+(S.needed-S.papers===1?' more exam paper':' more exam papers')+' needed');
       el.hint.style.opacity='1';
     }
   }
@@ -1540,7 +1556,7 @@ resize();
 /* ══════════ 시작 화면 단추 ══════════ */
 let diffIdx=1, useShadow=!TOUCH, useSound=true;
 $('optShadow').classList.toggle('on', useShadow);
-$('optShadow').textContent = useShadow?'그림자 켜기':'그림자 끄기';
+$('optShadow').textContent = useShadow?L('그림자 켜기','SHADOWS ON'):L('그림자 끄기','SHADOWS OFF');
 document.querySelectorAll('#diffOpts .opt').forEach(b=>{
   b.addEventListener('click',()=>{
     document.querySelectorAll('#diffOpts .opt').forEach(o=>o.classList.remove('on'));
@@ -1549,13 +1565,13 @@ document.querySelectorAll('#diffOpts .opt').forEach(b=>{
 });
 $('optShadow').addEventListener('click',function(){
   useShadow=!useShadow; this.classList.toggle('on',useShadow);
-  this.textContent = useShadow?'그림자 켜기':'그림자 끄기';
+  this.textContent = useShadow?L('그림자 켜기','SHADOWS ON'):L('그림자 끄기','SHADOWS OFF');
   renderer.shadowMap.enabled=useShadow; torch.castShadow=useShadow;
   scene.traverse(o=>{ if(o.isMesh||o.isInstancedMesh) o.material.needsUpdate=true; });
 });
 $('optSound').addEventListener('click',function(){
   useSound=!useSound; this.classList.toggle('on',useSound);
-  this.textContent = useSound?'소리 켜기':'소리 끄기';
+  this.textContent = useSound?L('소리 켜기','SOUND ON'):L('소리 끄기','SOUND OFF');
   Snd.mute(!useSound);
 });
 $('startBtn').addEventListener('click',()=>{ Snd.start(); Snd.mute(!useSound); startGame(); });

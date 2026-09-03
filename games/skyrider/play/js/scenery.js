@@ -85,7 +85,7 @@
     const dmat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 1 });
     const placed = [], specs = [];
     // 주유소 기둥 넷: 동서남북 같은 거리에 먼저 세운다 (화면 왼쪽이 +x = 서쪽)
-    const ST = [['북쪽 주유소', 0, 135, 150], ['동쪽 주유소', -135, 0, 125], ['남쪽 주유소', 0, -135, 165], ['서쪽 주유소', 135, 0, 135]];
+    const ST = [[TX('북쪽 주유소', 'North Gas'), 0, 135, 150], [TX('동쪽 주유소', 'East Gas'), -135, 0, 125], [TX('남쪽 주유소', 'South Gas'), 0, -135, 165], [TX('서쪽 주유소', 'West Gas'), 135, 0, 135]];
     ST.forEach(([name, x, z, h], i) => {
       const sp = { i, x, z, dist: Math.hypot(x, z), rad: 9, h, flat: true, station: true, hut: false, yaw: Math.atan2(-x, -z) + Math.PI, sc: 1, stName: name };
       placed.push({ x, z, r: 9 }); specs.push(sp);
@@ -369,7 +369,7 @@
       const sign = new THREE.Mesh(new THREE.BoxGeometry(3.6, 1.0, 0.12), [dark, dark, dark, dark, new THREE.MeshStandardMaterial({ map: st, emissive: 0xffffff, emissiveMap: st, emissiveIntensity: 0.55 }), dark]); sign.position.set(0, 3.6, 1.6); shop.add(sign);
       const sg = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex(), transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, depthTest: false, fog: false, opacity: 0.55, color: 0xffd27a })); sg.position.set(0, 3.6, 1.6); sg.scale.set(5, 5, 1); sg.renderOrder = 20; shop.add(sg);
       g.updateMatrixWorld(true);
-      S.shop = { pos: new THREE.Vector3(0, 0, 8.2).applyMatrix4(g.matrixWorld), name: '모터샵' };
+      S.shop = { pos: new THREE.Vector3(0, 0, 8.2).applyMatrix4(g.matrixWorld), name: TX('모터샵', 'Shop') };
       S.buildings.push({ x: S.shop.pos.x, z: S.shop.pos.z, r: 3.2, y0: y, y1: y + 4.2 });
     }
     scene.add(g);

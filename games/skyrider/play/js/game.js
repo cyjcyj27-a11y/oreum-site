@@ -81,8 +81,8 @@
     if (e.code === 'KeyC' && !started) { titleFreeze = !titleFreeze; return; }
     if (KEYS[e.code]) { e.preventDefault(); input.keys[e.code] = true; if (!started) start(); }
     if (e.repeat) return;
-    if (e.code === 'KeyM') { AUDIO.init(); const on = AUDIO.toggleMusic(); UI.msg(on ? '음악 켬' : '음악 끔'); syncTog(); }
-    if (e.code === 'KeyK') { AUDIO.init(); const on = AUDIO.toggleSfx(); UI.msg(on ? '효과음 켬' : '효과음 끔'); syncTog(); }
+    if (e.code === 'KeyM') { AUDIO.init(); const on = AUDIO.toggleMusic(); UI.msg(on ? TX('음악 켬', 'Music ON') : TX('음악 끔', 'Music OFF')); syncTog(); }
+    if (e.code === 'KeyK') { AUDIO.init(); const on = AUDIO.toggleSfx(); UI.msg(on ? TX('효과음 켬', 'Sound ON') : TX('효과음 끔', 'Sound OFF')); syncTog(); }
     if (e.code === 'KeyR') input.resetHold = 0.0001;
     if (e.code === 'KeyF') input.far = !input.far;
     if ((e.code === 'KeyP' || (e.code === 'Escape' && !shopOpen && !bigOpen)) && started && !DEAD.on) togglePause();
@@ -192,11 +192,11 @@
   const FUEL = { tank: 100, fuel: 100, price: 1.0 / 100, refueling: false };   // 한 통 가득 = 1코인
   // ── 오토바이 기종 ──────────────────────────────────
   const BIKES = [
-    { name: '스쿠터', pay: 10, tag: '가볍고 싸다. 한 번 부딪히면 끝', price: 0, color: 0xf0ede4, speed: 20, accel: 12, turn: 1.6, climb: 9, tank: 100, eff: 1.0, tough: 10, cargo: 0.9, extra: 'scooter', hp: 1, bars: [1, 1, 3, 2, 1], sink: 8, lift: 13 },
-    { name: '오프로드', pay: 20, tag: '스쿠터 내구성의 두 배', price: 100, color: 0xd42a1a, speed: 24, accel: 15, turn: 1.8, climb: 11, tank: 110, eff: 1.1, tough: 10, cargo: 1.0, extra: 'dirt', hp: 2, bars: [2, 2, 3, 2, 2], sink: 8, lift: 12 },
-    { name: '슈퍼스포츠', pay: 30, tag: '스포티한 감각. 바람을 느껴봐', price: 300, color: 0x2352c8, speed: 28, accel: 18, turn: 2.1, climb: 11, tank: 90, eff: 0.6, tough: 10, cargo: 1.2, extra: 'sport', hp: 3, bars: [3, 3, 2, 3, 2], sink: 7, lift: 15 },
-    { name: '전기 바이크', pay: 50, tag: '하이브리드, 기름은 반만', price: 500, color: 0xeeeeea, speed: 32, accel: 22, turn: 1.9, climb: 12, tank: 120, eff: 0.4, tough: 10, cargo: 0.7, extra: 'electric', hp: 4, bars: [4, 4, 4, 5, 3], quiet: true, sink: 6, lift: 11 },
-    { name: '호버바이크', pay: 100, tag: '태양광, 기름 없이 난다. 멈춰도 안 떨어진다', price: 1000, color: 0xf4f1ea, speed: 36, accel: 24, turn: 2.0, climb: 16, tank: 130, eff: 0, solar: true, tough: 10, cargo: 0.8, extra: 'sky', hp: 5, bars: [5, 5, 3, 4, 5], sink: 0, lift: 1, hover: true },
+    { name: TX('스쿠터', 'Scooter'), pay: 10, tag: TX('가볍고 싸다. 한 번 부딪히면 끝', 'Light and cheap. One hit and it is over'), price: 0, color: 0xf0ede4, speed: 20, accel: 12, turn: 1.6, climb: 9, tank: 100, eff: 1.0, tough: 10, cargo: 0.9, extra: 'scooter', hp: 1, bars: [1, 1, 3, 2, 1], sink: 8, lift: 13 },
+    { name: TX('오프로드', 'Off-road'), pay: 20, tag: TX('스쿠터 내구성의 두 배', 'Twice the scooter durability'), price: 100, color: 0xd42a1a, speed: 24, accel: 15, turn: 1.8, climb: 11, tank: 110, eff: 1.1, tough: 10, cargo: 1.0, extra: 'dirt', hp: 2, bars: [2, 2, 3, 2, 2], sink: 8, lift: 12 },
+    { name: TX('슈퍼스포츠', 'Supersport'), pay: 30, tag: TX('스포티한 감각. 바람을 느껴봐', 'Sporty feel. Feel the wind'), price: 300, color: 0x2352c8, speed: 28, accel: 18, turn: 2.1, climb: 11, tank: 90, eff: 0.6, tough: 10, cargo: 1.2, extra: 'sport', hp: 3, bars: [3, 3, 2, 3, 2], sink: 7, lift: 15 },
+    { name: TX('전기 바이크', 'Electric Bike'), pay: 50, tag: TX('하이브리드, 기름은 반만', 'Hybrid, half the fuel'), price: 500, color: 0xeeeeea, speed: 32, accel: 22, turn: 1.9, climb: 12, tank: 120, eff: 0.4, tough: 10, cargo: 0.7, extra: 'electric', hp: 4, bars: [4, 4, 4, 5, 3], quiet: true, sink: 6, lift: 11 },
+    { name: TX('호버바이크', 'Hoverbike'), pay: 100, tag: TX('태양광, 기름 없이 난다. 멈춰도 안 떨어진다', 'Solar. Flies without fuel, never drops when stopped'), price: 1000, color: 0xf4f1ea, speed: 36, accel: 24, turn: 2.0, climb: 16, tank: 130, eff: 0, solar: true, tough: 10, cargo: 0.8, extra: 'sky', hp: 5, bars: [5, 5, 3, 4, 5], sink: 0, lift: 1, hover: true },
   ];
   const GARAGE = { owned: [0], cur: 0 };
   try { const g = JSON.parse(localStorage.getItem('maedal.garage') || 'null'); if (g && Array.isArray(g.owned)) { GARAGE.owned = g.owned.filter(i => BIKES[i]); if (!GARAGE.owned.includes(0)) GARAGE.owned.unshift(0); GARAGE.cur = BIKES[g.cur] && GARAGE.owned.includes(g.cur) ? g.cur : 0; } } catch (e) { }
@@ -378,19 +378,19 @@
   function nearHome() { const B = bike(); const sh = SCENERY.S.shop; if (!sh) return false; return Math.hypot(B.g.position.x - sh.pos.x, B.g.position.z - sh.pos.z) < 9 && Math.abs(B.g.position.y - sh.pos.y) < 6; }
   function renderShop() {
     const D = DELIVERY.D; let html = '';
-    const LAB = ['속도', '내구성', '적재량', '연비', '부양'];
+    const LAB = TX(['속도', '내구성', '적재량', '연비', '부양'], ['Speed', 'Durability', 'Cargo', 'Fuel economy', 'Lift']);
     BIKES.forEach((b, i) => {
       const owned = GARAGE.owned.includes(i), cur = GARAGE.cur === i;
       const pips = v => { let h = ''; for (let k = 0; k < 5; k++) h += '<i class="' + (k < v ? 'on' : '') + '"></i>'; return h; };
-      html += '<div class="card' + (cur ? ' cur' : '') + '"><div class="thumb" style="background-image:url(' + b.img + ')"></div><div class="info"><b>' + (i + 1) + '. ' + b.name + ' <span class="price">' + (b.price ? '🪙 ' + b.price : '기본') + '</span></b><p>' + b.tag + '</p>' +
+      html += '<div class="card' + (cur ? ' cur' : '') + '"><div class="thumb" style="background-image:url(' + b.img + ')"></div><div class="info"><b>' + (i + 1) + '. ' + b.name + ' <span class="price">' + (b.price ? '🪙 ' + b.price : TX('기본', 'Free')) + '</span></b><p>' + b.tag + '</p>' +
         '<div class="bars">' + LAB.map((l, k) => '<span>' + l + '<u>' + pips(b.bars[k]) + '</u></span>').join('') + '</div></div>' +
-        '<div class="act">' + (cur ? '<em>타는 중</em>' : owned ? '<button data-ride="' + i + '">타기</button>' : '<button data-buy="' + i + '"' + (D.money < b.price ? ' disabled' : '') + '>구매</button>') + '</div></div>';
+        '<div class="act">' + (cur ? '<em>' + TX('타는 중', 'Riding') + '</em>' : owned ? '<button data-ride="' + i + '">' + TX('타기', 'Ride') + '</button>' : '<button data-buy="' + i + '"' + (D.money < b.price ? ' disabled' : '') + '>' + TX('구매', 'Buy') + '</button>') + '</div></div>';
     });
     elShopList.innerHTML = html;
   }
   elShopList.addEventListener('pointerdown', e => {
     const t = e.target.closest('button'); if (!t) return; e.stopPropagation();
-    if (t.dataset.buy !== undefined) { const i = +t.dataset.buy; const b = BIKES[i]; if (DELIVERY.D.money >= b.price) { DELIVERY.D.money -= b.price; GARAGE.owned.push(i); applyBike(i); UI.msg(b.name + ' 샀다!', true); AUDIO.deliver(true); renderShop(); } }
+    if (t.dataset.buy !== undefined) { const i = +t.dataset.buy; const b = BIKES[i]; if (DELIVERY.D.money >= b.price) { DELIVERY.D.money -= b.price; GARAGE.owned.push(i); applyBike(i); UI.msg(TX(b.name + ' 샀다!', 'Bought ' + b.name + '!'), true); AUDIO.deliver(true); renderShop(); } }
     if (t.dataset.ride !== undefined) { applyBike(+t.dataset.ride); renderShop(); }
   });
   function openShop() { if (!nearHome() || DEAD.on) return; if (!thumbsDone) { renderBikeThumbs(); thumbsDone = true; } shopOpen = true; renderShop(); elShop.classList.add('show'); }
@@ -451,8 +451,8 @@
       ctx.save(); ctx.font = (showNames ? 30 : 11) + 'px Griun, sans-serif'; ctx.fillStyle = '#fff'; ctx.fillText('⛽', x, y + 1); ctx.restore();
       if (showNames) { ctx.save(); ctx.font = '38px Griun, sans-serif'; ctx.fillStyle = 'rgba(255,255,255,.95)'; ctx.fillText(st.name, x, y + 48); ctx.restore(); }
     }
-    if (SCENERY.S.shop) { const [x, y] = toXY(SCENERY.S.shop.pos.x, SCENERY.S.shop.pos.z); const sx = x + (showNames ? 34 : 8), sy = y - (showNames ? 16 : 6); ctx.fillText('🏍', sx, sy); if (showNames) { ctx.save(); ctx.font = '30px Griun, sans-serif'; ctx.fillStyle = 'rgba(255,255,255,.9)'; ctx.fillText('모터샵', sx, sy - 34); ctx.restore(); } }
-    { const [x, y] = toXY(0, 0); ctx.fillStyle = '#ffd27a'; ctx.fillText('★', x, y - 1); if (showNames) { ctx.save(); ctx.font = '38px Griun, sans-serif'; ctx.fillStyle = 'rgba(255,255,255,.95)'; ctx.fillText('식당', x, y + 42); ctx.restore(); } }
+    if (SCENERY.S.shop) { const [x, y] = toXY(SCENERY.S.shop.pos.x, SCENERY.S.shop.pos.z); const sx = x + (showNames ? 34 : 8), sy = y - (showNames ? 16 : 6); ctx.fillText('🏍', sx, sy); if (showNames) { ctx.save(); ctx.font = '30px Griun, sans-serif'; ctx.fillStyle = 'rgba(255,255,255,.9)'; ctx.fillText(TX('모터샵', 'Shop'), sx, sy - 34); ctx.restore(); } }
+    { const [x, y] = toXY(0, 0); ctx.fillStyle = '#ffd27a'; ctx.fillText('★', x, y - 1); if (showNames) { ctx.save(); ctx.font = '38px Griun, sans-serif'; ctx.fillStyle = 'rgba(255,255,255,.95)'; ctx.fillText(TX('식당', 'Diner'), x, y + 42); ctx.restore(); } }
     // 배달 갈 곳: 맥박 원
     if (D.state === 'carry' && D.cur) {
       let [x, y] = toXY(D.cur.pos.x, D.cur.pos.z);
@@ -492,13 +492,13 @@
   };
   window.UI = UI;
   const TUT = ('ontouchstart' in window) ? [
-    '화면을 <b>끌어서</b> 조종 (좌우 = 방향, 위아래 = 앞뒤) · <b>위로 / 아래로</b> 단추',
-    '왼쪽 아래 <b>지도</b>의 빨간 원이 배달 갈 집.  위쪽 화살표를 따라가서 <b>마당 위에 천천히 멈추면</b> 배달',
-    '지도를 누르면 크게.  바위에 부딪히면 튕기고, 구름 속은 앞이 안 보입니다',
+    TX('화면을 <b>끌어서</b> 조종 (좌우 = 방향, 위아래 = 앞뒤) · <b>위로 / 아래로</b> 단추', '<b>Drag</b> the screen to steer (left/right = turn, up/down = forward/back) · <b>UP / DOWN</b> buttons'),
+    TX('왼쪽 아래 <b>지도</b>의 빨간 원이 배달 갈 집.  위쪽 화살표를 따라가서 <b>마당 위에 천천히 멈추면</b> 배달', 'The red circle on the <b>map</b> is the house.  Follow the arrow and <b>stop slowly over the yard</b> to deliver'),
+    TX('지도를 누르면 크게.  바위에 부딪히면 튕기고, 구름 속은 앞이 안 보입니다', 'Tap the map to enlarge.  Rocks bounce you, clouds block the view'),
   ] : [
-    '<b>↑</b> 앞으로 · <b>←→</b> 방향 · <b>스페이스</b> 위로 · <b>Shift</b> 아래로',
-    '왼쪽 아래 <b>지도</b>의 빨간 원이 배달 갈 집.  위쪽 화살표를 따라가서 <b>마당 위에 천천히 멈추면</b> 배달 (<b>T</b> = 큰 지도)',
-    '늦으면 0코인.  바위에 부딪히면 튕기고, 구름 속은 앞이 안 보입니다',
+    TX('<b>↑</b> 앞으로 · <b>←→</b> 방향 · <b>스페이스</b> 위로 · <b>Shift</b> 아래로', '<b>↑</b> Forward · <b>←→</b> Turn · <b>Space</b> Up · <b>Shift</b> Down'),
+    TX('왼쪽 아래 <b>지도</b>의 빨간 원이 배달 갈 집.  위쪽 화살표를 따라가서 <b>마당 위에 천천히 멈추면</b> 배달 (<b>T</b> = 큰 지도)', 'The red circle on the <b>map</b> is the house.  Follow the arrow and <b>stop slowly over the yard</b> to deliver (<b>T</b> = big map)'),
+    TX('늦으면 0코인.  바위에 부딪히면 튕기고, 구름 속은 앞이 안 보입니다', 'Late = 0 coins.  Rocks bounce you, clouds block the view'),
   ];
   let moved = 0, tutT = 0;
   function tutorial(dt) { elTut.classList.remove('on'); return;
@@ -514,28 +514,28 @@
     const B = bike(); const D = DELIVERY.D;
     elH.textContent = Math.max(0, B.g.position.y).toFixed(0);
     const s = Math.floor((performance.now() - t0) / 1000); elTime.textContent = Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
-    elMoney.textContent = Math.round(D.money); elDone.textContent = D.done + (D.best ? ' / 최고 ' + D.best : '');
+    elMoney.textContent = Math.round(D.money); elDone.textContent = D.done + (D.best ? TX(' / 최고 ', ' / Best ') + D.best : '');
     if (msgT > 0) { msgT -= dt; if (msgT <= 0) elMsg.classList.remove('on'); }
     if (subT > 0) { subT -= dt; if (subT <= 0) elSub.classList.remove('on'); }
-    elFuel.style.width = (FUEL.fuel / FUEL.tank * 100).toFixed(1) + '%'; document.getElementById('fuelnum').textContent = bikeSpec().solar ? '☀ 태양광' : Math.ceil(FUEL.fuel);
+    elFuel.style.width = (FUEL.fuel / FUEL.tank * 100).toFixed(1) + '%'; document.getElementById('fuelnum').textContent = bikeSpec().solar ? TX('☀ 태양광', '☀ Solar') : Math.ceil(FUEL.fuel);
     elFuelWrap.classList.toggle('solar', !!bikeSpec().solar);
     const fr = FUEL.fuel / FUEL.tank; elFuelWrap.classList.toggle('mid', fr <= 0.5 && fr > 0.3); elFuelWrap.classList.toggle('low', fr <= 0.3 && FUEL.fuel > 0); elFuelWrap.classList.toggle('empty', FUEL.fuel <= 0 && !bikeSpec().solar); elFuelWrap.classList.toggle('filling', FUEL.refueling);
     elMoney.style.color = D.money < 60 ? '#ff8a6a' : '';
     elVert.classList.toggle('sink', !!RIDE.sinking && !nearHome());
     const nh = nearHome(); if (nh !== atHome) { atHome = nh; btnShop.classList.toggle('show', nh); if (!nh && shopOpen) closeShop(); }
     if (shopOpen && !nh) closeShop();
-    elPkg.textContent = D.state === 'carry' ? D.pkg.icon + ' ' + D.pkg.name + '  ' + D.pay + '코인' : '';
-    if (D.state !== 'carry' || !D.cur) { elDeliv.textContent = '다음 주문 기다리는 중…'; elArrow.style.opacity = 0; elVert.textContent = ''; }
+    elPkg.textContent = D.state === 'carry' ? D.pkg.icon + ' ' + D.pkg.name + '  ' + D.pay + TX('코인', ' coins') : '';
+    if (D.state !== 'carry' || !D.cur) { elDeliv.textContent = TX('다음 주문 기다리는 중…', 'Waiting for next order…'); elArrow.style.opacity = 0; elVert.textContent = ''; }
     else {
       const dx = D.cur.pos.x - B.g.position.x, dz = D.cur.pos.z - B.g.position.z, dy = D.cur.pos.y - B.g.position.y;
       const dist = Math.hypot(dx, dz); const left = Math.max(0, D.limit - D.t);
-      elDeliv.textContent = D.cur.name + '  ' + Math.round(Math.hypot(dist, dy)) + 'm' + (left > 0 ? '   ⏱ ' + Math.ceil(left) + 's' : '   늦음');
+      elDeliv.textContent = D.cur.name + '  ' + Math.round(Math.hypot(dist, dy)) + 'm' + (left > 0 ? '   ⏱ ' + Math.ceil(left) + 's' : TX('   늦음', '   LATE'));
       const ang = Math.atan2(dx, dz) - RIDE.yaw;
       elArrow.style.opacity = 1; elArrow.style.transform = 'rotate(' + (-ang * 180 / Math.PI) + 'deg)';
-      elVert.textContent = Math.abs(dy) < 3 ? '같은 높이' : (dy > 0 ? '▲ ' + Math.round(dy) + 'm 위' : '▼ ' + Math.round(-dy) + 'm 아래');
+      elVert.textContent = Math.abs(dy) < 3 ? TX('같은 높이', 'Same height') : (dy > 0 ? '▲ ' + Math.round(dy) + TX('m 위', 'm up') : '▼ ' + Math.round(-dy) + TX('m 아래', 'm down'));
     }
     const y = B.g.position.y;
-    if (input.resetHold > 0) { input.resetHold += dt; hint.textContent = 'R 계속 누르면 식당로… ' + Math.max(0, 1.5 - input.resetHold).toFixed(1); hint.classList.add('on'); if (input.resetHold > 1.5) { input.resetHold = 0; doReset(); } }
+    if (input.resetHold > 0) { input.resetHold += dt; hint.textContent = TX('R 계속 누르면 식당로… ', 'Hold R to respawn… ') + Math.max(0, 1.5 - input.resetHold).toFixed(1); hint.classList.add('on'); if (input.resetHold > 1.5) { input.resetHold = 0; doReset(); } }
     else hint.classList.remove('on');
   }
   const seen = { cloud: false };

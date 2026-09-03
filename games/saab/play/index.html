@@ -445,43 +445,43 @@
 <div id="hurt"></div>
 
 <div class="hud" id="hudL">
-  <div class="bar" id="bHp"><div class="lb"><span>체력 HP</span><b id="tHp"></b></div><div class="tr"><i></i></div></div>
+  <div class="bar" id="bHp"><div class="lb"><span data-en="HP">체력 HP</span><b id="tHp"></b></div><div class="tr"><i></i></div></div>
 </div>
 
 <div class="hud" id="hudR">
   <div>STAGE <b id="tWave">1</b> / 10</div>
-  <div>무기 <b id="tGun">권총</b></div>
-  <div>생존 <b id="tTime">0:00</b></div>
-  <div>격파 <b id="tKill">0</b></div>
-  <div>잔존 <b id="tLeft">0</b></div>
+  <div><span data-en="GUN">무기</span> <b id="tGun" data-en="PISTOL">권총</b></div>
+  <div><span data-en="TIME">생존</span> <b id="tTime">0:00</b></div>
+  <div><span data-en="KILLS">격파</span> <b id="tKill">0</b></div>
+  <div><span data-en="LEFT">잔존</span> <b id="tLeft">0</b></div>
   <div style="font-size:13px" id="tNext"></div>
 </div>
 
 <div class="hud" id="potBar">
   <div class="row"><div class="pot off"><i></i></div><div class="pot off"><i></i></div><div class="pot off"><i></i></div></div>
-  <div class="cap"><b>R</b> 물약</div>
+  <div class="cap"><b>R</b> <span data-en="POTION">물약</span></div>
 </div>
 
 <div id="touch">
   <div id="tStick"><div id="tKnob"></div></div>
   <div class="tbtn" id="tFire">FIRE</div>
-  <div class="tbtn sm" id="tJump">점프</div>
-  <div class="tbtn sm" id="tCrouch">앉기</div>
-  <div class="tbtn sm" id="tCover">엄폐</div>
-  <div class="tbtn sm" id="tGunSw">무기</div>
-  <div class="tbtn sm" id="tPot">물약</div>
+  <div class="tbtn sm" id="tJump" data-en="JUMP">점프</div>
+  <div class="tbtn sm" id="tCrouch" data-en="CROUCH">앉기</div>
+  <div class="tbtn sm" id="tCover" data-en="COVER">엄폐</div>
+  <div class="tbtn sm" id="tGunSw" data-en="GUN">무기</div>
+  <div class="tbtn sm" id="tPot" data-en="POTION">물약</div>
 </div>
 <div id="rotate">
   <div>
-    <p>가로 화면에서 하는 게임입니다</p>
-    <button type="button" id="rotGo">가로로 돌리기</button>
-    <p class="sub">단추가 안 먹으면 폰의 <b>화면 회전 잠금</b>을 풀고 눕혀 주세요<br>
-      <a href="#" id="rotSkip" style="color:#7f9a98">그래도 세로로 하기</a></p>
+    <p data-en="This game plays in landscape">가로 화면에서 하는 게임입니다</p>
+    <button type="button" id="rotGo" data-en="ROTATE TO LANDSCAPE">가로로 돌리기</button>
+    <p class="sub"><span data-en="If the button does nothing, unlock <b>screen rotation</b> and turn your phone sideways">단추가 안 먹으면 폰의 <b>화면 회전 잠금</b>을 풀고 눕혀 주세요</span><br>
+      <a href="#" id="rotSkip" style="color:#7f9a98" data-en="Play in portrait anyway">그래도 세로로 하기</a></p>
   </div>
 </div>
 
 <div class="hud" id="hudB">
-  <div>WASD 이동 · 마우스 시점 · SHIFT 질주 · SPACE 점프 · X 앉기 · E 엄폐 · Q/숫자키 무기 교체 · R 물약 · 좌클릭 사격 · 휠 확대/축소 · P 일시정지</div>
+  <div data-en="WASD move · Mouse look · SHIFT sprint · SPACE jump · X crouch · E cover · Q/number keys weapon · R potion · Left click fire · Wheel zoom · P pause">WASD 이동 · 마우스 시점 · SHIFT 질주 · SPACE 점프 · X 앉기 · E 엄폐 · Q/숫자키 무기 교체 · R 물약 · 좌클릭 사격 · 휠 확대/축소 · P 일시정지</div>
 </div>
 
 <div id="wave"><h2></h2><p></p></div>
@@ -490,31 +490,31 @@
 <div id="combo"><div class="mx"></div><div class="cn"></div><div class="cb"><i></i></div></div>
 
 <div class="hud" id="goals">
-  <div class="gl"><span class="t">지금</span><b id="g1">—</b></div>
-  <div class="gl"><span class="t">이번 판</span><b id="g2">—</b><div class="gp"><i id="g2b"></i></div></div>
-  <div class="gl rec" id="g3w"><span class="t">기록</span><b id="g3">—</b></div>
+  <div class="gl"><span class="t" data-en="NOW">지금</span><b id="g1">—</b></div>
+  <div class="gl"><span class="t" data-en="THIS RUN">이번 판</span><b id="g2">—</b><div class="gp"><i id="g2b"></i></div></div>
+  <div class="gl rec" id="g3w"><span class="t" data-en="RECORD">기록</span><b id="g3">—</b></div>
 </div>
 
 <div class="ov" id="menu">
   <h1>S.A.A.B.</h1>
   <div class="sub">SEMI-AUTONOMOUS ANIMALISTIC BEING</div>
   <div class="stats" id="mStats">
-    <div><svg class="ic" width="20" height="20" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.6" fill="none"/><path d="M10 5.5 V10 L13 12" stroke="currentColor" stroke-width="1.6" fill="none"/></svg><div class="n" id="mTime">-</div><div class="k">최고 생존</div></div>
-    <div><svg class="ic" width="20" height="20" viewBox="0 0 20 20"><path d="M10 2 L17 6 V14 L10 18 L3 14 V6 Z" stroke="currentColor" stroke-width="1.6" fill="none"/></svg><div class="n" id="mWave">-</div><div class="k">최고 스테이지</div></div>
-    <div><svg class="ic" width="20" height="20" viewBox="0 0 20 20"><circle cx="10" cy="10" r="6.5" stroke="currentColor" stroke-width="1.6" fill="none"/><circle cx="10" cy="10" r="1.4" fill="currentColor"/><path d="M10 1 V5 M10 15 V19 M1 10 H5 M15 10 H19" stroke="currentColor" stroke-width="1.6"/></svg><div class="n" id="mKill">-</div><div class="k">격파</div></div>
-    <div><svg class="ic" width="20" height="20" viewBox="0 0 20 20"><path d="M10 2 L12.4 7.6 L18.5 8.1 L13.9 12 L15.3 18 L10 14.8 L4.7 18 L6.1 12 L1.5 8.1 L7.6 7.6 Z" stroke="currentColor" stroke-width="1.4" fill="none"/></svg><div class="n" id="mCombo">-</div><div class="k">최고 콤보</div></div>
+    <div><svg class="ic" width="20" height="20" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.6" fill="none"/><path d="M10 5.5 V10 L13 12" stroke="currentColor" stroke-width="1.6" fill="none"/></svg><div class="n" id="mTime">-</div><div class="k" data-en="BEST TIME">최고 생존</div></div>
+    <div><svg class="ic" width="20" height="20" viewBox="0 0 20 20"><path d="M10 2 L17 6 V14 L10 18 L3 14 V6 Z" stroke="currentColor" stroke-width="1.6" fill="none"/></svg><div class="n" id="mWave">-</div><div class="k" data-en="BEST STAGE">최고 스테이지</div></div>
+    <div><svg class="ic" width="20" height="20" viewBox="0 0 20 20"><circle cx="10" cy="10" r="6.5" stroke="currentColor" stroke-width="1.6" fill="none"/><circle cx="10" cy="10" r="1.4" fill="currentColor"/><path d="M10 1 V5 M10 15 V19 M1 10 H5 M15 10 H19" stroke="currentColor" stroke-width="1.6"/></svg><div class="n" id="mKill">-</div><div class="k" data-en="KILLS">격파</div></div>
+    <div><svg class="ic" width="20" height="20" viewBox="0 0 20 20"><path d="M10 2 L12.4 7.6 L18.5 8.1 L13.9 12 L15.3 18 L10 14.8 L4.7 18 L6.1 12 L1.5 8.1 L7.6 7.6 Z" stroke="currentColor" stroke-width="1.4" fill="none"/></svg><div class="n" id="mCombo">-</div><div class="k" data-en="BEST COMBO">최고 콤보</div></div>
   </div>
   <div id="mGoal">
     <div class="ng" id="mNext"></div>
     <div id="mTrack"></div>
-    <div id="mTip">PC 크롬 권장 · 화면을 클릭하면 조준이 잠긴다</div>
+    <div id="mTip" data-en="PC Chrome recommended · click the screen to lock aim">PC 크롬 권장 · 화면을 클릭하면 조준이 잠긴다</div>
   </div>
-  <button id="btnStart">게임 시작<small>START</small></button>
-  <button id="btnLoad">이어하기<small id="loadSub">LOAD</small></button>
+  <button id="btnStart"><span data-en="START">게임 시작</span><small data-en="NEW MISSION">START</small></button>
+  <button id="btnLoad"><span data-en="CONTINUE">이어하기</span><small id="loadSub">LOAD</small></button>
   <div class="mrow">
-    <button class="msm" id="btnSet">설정<small>SETTINGS</small></button>
-    <button class="msm" id="btnEncy">도감<small>ENCYCLOPEDIA</small></button>
-    <button class="msm" id="btnExit">나가기<small>EXIT</small></button>
+    <button class="msm" id="btnSet"><span data-en="SETTINGS">설정</span><small data-en="OPTIONS">SETTINGS</small></button>
+    <button class="msm" id="btnEncy"><span data-en="CODEX">도감</span><small data-en="ENCYCLOPEDIA">ENCYCLOPEDIA</small></button>
+    <button class="msm" id="btnExit"><span data-en="EXIT">나가기</span><small data-en="CLOSE TAB">EXIT</small></button>
   </div>
 </div>
 
@@ -533,8 +533,8 @@
     <div class="row"><b>VOLUME</b><input type="range" id="rgVol" min="0" max="100" value="100"><span class="val" id="rgVolV">100%</span></div>
     <div class="row"><b>SENSITIVITY</b><input type="range" id="rgSens" min="30" max="200" value="100"><span class="val" id="rgSensV">1.00</span></div>
     <div class="keys2">
-      <b>WASD</b> 이동&nbsp; <b>SHIFT</b> 질주&nbsp; <b>SPACE</b> 점프&nbsp; <b>X</b> 앉기&nbsp; <b>E</b> 벽 엄폐<br>
-      <b>마우스</b> 조준&nbsp; <b>좌클릭</b> 사격&nbsp; <b>휠</b> 확대/축소&nbsp; <b>Q/숫자</b> 무기 교체&nbsp; <b>R</b> 물약&nbsp; <b>G</b> 무기 강화&nbsp; <b>P</b> 일시정지
+      <span data-en="<b>WASD</b> move&nbsp; <b>SHIFT</b> sprint&nbsp; <b>SPACE</b> jump&nbsp; <b>X</b> crouch&nbsp; <b>E</b> wall cover<br><b>Mouse</b> aim&nbsp; <b>Left click</b> fire&nbsp; <b>Wheel</b> zoom&nbsp; <b>Q/number</b> weapon&nbsp; <b>R</b> potion&nbsp; <b>G</b> upgrade&nbsp; <b>P</b> pause"><b>WASD</b> 이동&nbsp; <b>SHIFT</b> 질주&nbsp; <b>SPACE</b> 점프&nbsp; <b>X</b> 앉기&nbsp; <b>E</b> 벽 엄폐<br>
+      <b>마우스</b> 조준&nbsp; <b>좌클릭</b> 사격&nbsp; <b>휠</b> 확대/축소&nbsp; <b>Q/숫자</b> 무기 교체&nbsp; <b>R</b> 물약&nbsp; <b>G</b> 무기 강화&nbsp; <b>P</b> 일시정지</span>
     </div>
     <button class="mbtn" data-back="setOv">BACK</button>
   </div>
@@ -552,27 +552,27 @@
   <h2>YOU DIED</h2>
   <div class="sub" id="overWhy">OPERATOR DOWN</div>
   <div class="stats">
-    <div><svg class="ic" width="20" height="20" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.6" fill="none"/><path d="M10 5.5 V10 L13 12" stroke="currentColor" stroke-width="1.6" fill="none"/></svg><div class="n" id="sTime">0:00</div><div class="k">생존 시간</div></div>
-    <div><svg class="ic" width="20" height="20" viewBox="0 0 20 20"><path d="M10 2 L17 6 V14 L10 18 L3 14 V6 Z" stroke="currentColor" stroke-width="1.6" fill="none"/></svg><div class="n" id="sWave">1</div><div class="k">도달 스테이지</div></div>
-    <div><svg class="ic" width="20" height="20" viewBox="0 0 20 20"><circle cx="10" cy="10" r="6.5" stroke="currentColor" stroke-width="1.6" fill="none"/><circle cx="10" cy="10" r="1.4" fill="currentColor"/><path d="M10 1 V5 M10 15 V19 M1 10 H5 M15 10 H19" stroke="currentColor" stroke-width="1.6"/></svg><div class="n" id="sKill">0</div><div class="k">격파</div></div>
-    <div><svg class="ic" width="20" height="20" viewBox="0 0 20 20"><path d="M10 2 L12.4 7.6 L18.5 8.1 L13.9 12 L15.3 18 L10 14.8 L4.7 18 L6.1 12 L1.5 8.1 L7.6 7.6 Z" stroke="currentColor" stroke-width="1.4" fill="none"/></svg><div class="n" id="sCombo">0</div><div class="k">최고 콤보</div></div>
+    <div><svg class="ic" width="20" height="20" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.6" fill="none"/><path d="M10 5.5 V10 L13 12" stroke="currentColor" stroke-width="1.6" fill="none"/></svg><div class="n" id="sTime">0:00</div><div class="k" data-en="TIME">생존 시간</div></div>
+    <div><svg class="ic" width="20" height="20" viewBox="0 0 20 20"><path d="M10 2 L17 6 V14 L10 18 L3 14 V6 Z" stroke="currentColor" stroke-width="1.6" fill="none"/></svg><div class="n" id="sWave">1</div><div class="k" data-en="STAGE REACHED">도달 스테이지</div></div>
+    <div><svg class="ic" width="20" height="20" viewBox="0 0 20 20"><circle cx="10" cy="10" r="6.5" stroke="currentColor" stroke-width="1.6" fill="none"/><circle cx="10" cy="10" r="1.4" fill="currentColor"/><path d="M10 1 V5 M10 15 V19 M1 10 H5 M15 10 H19" stroke="currentColor" stroke-width="1.6"/></svg><div class="n" id="sKill">0</div><div class="k" data-en="KILLS">격파</div></div>
+    <div><svg class="ic" width="20" height="20" viewBox="0 0 20 20"><path d="M10 2 L12.4 7.6 L18.5 8.1 L13.9 12 L15.3 18 L10 14.8 L4.7 18 L6.1 12 L1.5 8.1 L7.6 7.6 Z" stroke="currentColor" stroke-width="1.4" fill="none"/></svg><div class="n" id="sCombo">0</div><div class="k" data-en="BEST COMBO">최고 콤보</div></div>
   </div>
   <div id="ovGoal">
     <div class="ng" id="nextGoal"></div>
     <div id="ovTrack"></div>
     <div id="best"></div>
   </div>
-  <button id="btnRetry">다시 도전<small>RETRY MISSION</small></button>
-  <button id="btnRestart">처음부터<small>RESTART · STAGE 1</small></button>
+  <button id="btnRetry"><span data-en="RETRY">다시 도전</span><small>RETRY MISSION</small></button>
+  <button id="btnRestart"><span data-en="RESTART">처음부터</span><small data-en="FROM STAGE 1">RESTART · STAGE 1</small></button>
 </div>
 
 <div class="ov" id="win">
   <h2>VICTORY</h2>
   <div class="sub" id="winSub">ANNIE RECOVERED</div>
   <div class="stats">
-    <div><div class="n" id="wTime">0:00</div><div class="k">클리어 시간</div></div>
-    <div><div class="n" id="wKill">0</div><div class="k">격파</div></div>
-    <div><div class="n" id="wCombo">0</div><div class="k">최고 콤보</div></div>
+    <div><div class="n" id="wTime">0:00</div><div class="k" data-en="CLEAR TIME">클리어 시간</div></div>
+    <div><div class="n" id="wKill">0</div><div class="k" data-en="KILLS">격파</div></div>
+    <div><div class="n" id="wCombo">0</div><div class="k" data-en="BEST COMBO">최고 콤보</div></div>
   </div>
   <div class="ng" id="nextGoal2"></div>
   <button id="btnWinRetry">RETRY</button>
@@ -580,11 +580,11 @@
 
 <div class="ov" id="endingOv" style="display:none; background:#000">
   <video id="endVid" playsinline style="max-width:96vw; max-height:92vh"></video>
-  <div class="tiny">클릭 — 건너뛰기</div>
+  <div class="tiny" data-en="CLICK — SKIP">클릭 — 건너뛰기</div>
 </div>
 
 <div class="ov" id="pause">
-  <h2>일시정지</h2>
+  <h2 data-en="PAUSE">일시정지</h2>
   <div class="sub">PAUSED</div>
   <button id="btnResume">RESUME</button>
 </div>
@@ -600,6 +600,15 @@ import {GLTFLoader} from 'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js
 const rnd=(a,b)=>a+Math.random()*(b-a);
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const $=id=>document.getElementById(id);
+/* ── 말(한국어·영어) — `?lang=en` 이면 영어를 덧씌운다. 한국어가 원본이다.
+   정적 HTML 은 data-en 속성, JS 문자열은 LT(ko,en). ⚠ `L`/`TX` 는 이 파일 안에서 이미 쓰여 LT 로 이름 지었다. */
+const EN_MODE=(new URLSearchParams(location.search).get('lang')||'').toLowerCase()==='en';
+const LT=(ko,en)=>EN_MODE?en:ko;
+if(EN_MODE){
+  document.documentElement.lang='en';
+  document.title='S.A.A.B. — free first-person shooter';
+  document.querySelectorAll('[data-en]').forEach(el=>{el.innerHTML=el.dataset.en;});
+}
 // 저장소·포인터잠금은 환경에 따라 막힐 수 있어 항상 안전하게 감싼다
 function storeGet(k){ try{return localStorage.getItem(k);}catch(e){return null;} }
 function storeSet(k,v){ try{localStorage.setItem(k,v);}catch(e){} }
@@ -742,7 +751,7 @@ try{
 }catch(err){
   document.body.innerHTML='<div style="position:fixed;inset:0;display:grid;place-items:center;'+
     'background:#0a1014;color:#cdeee9;font:16px/1.9 monospace;text-align:center;padding:8vw">'+
-    '이 기기에서는 3D 화면(WebGL)을 열 수 없습니다.<br>다른 브라우저로 열어 보시겠어요?<br>'+
+    LT('이 기기에서는 3D 화면(WebGL)을 열 수 없습니다.<br>다른 브라우저로 열어 보시겠어요?<br>','This device cannot open a 3D view (WebGL).<br>Try another browser.<br>')+
     '<span style="font-size:12px;opacity:.6">'+(err&&err.message||err)+'</span></div>';
   throw err;
 }
@@ -986,7 +995,7 @@ function placeAnnie(){
   sx.fillStyle='#0e1013'; sx.fillRect(0,0,1024,192);
   sx.fillStyle='#F2C14E'; sx.font='bold 108px "Malgun Gothic",sans-serif';
   sx.textAlign='center'; sx.textBaseline='middle';
-  sx.fillText('휴 먼  전 시 관',512,104);
+  sx.fillText(LT('휴 먼  전 시 관','HUMAN EXHIBIT'),512,104);
   const stx=new THREE.CanvasTexture(sc); stx.anisotropy=8;
   const sign=new THREE.Mesh(new THREE.PlaneGeometry(3.4,0.66),   // FrontSide — DoubleSide 면 뒤에서 거울 글씨
     new THREE.MeshBasicMaterial({map:stx,transparent:true}));
@@ -1130,10 +1139,10 @@ function potionHUD(){
 }
 function usePotion(){
   if(G.state!=='play')return;
-  if(!G.potions){ toast('물약 없음',true); sfx.deny(); return; }
-  if(player.hp>=player.maxHp){ toast('체력이 이미 가득 찼습니다'); sfx.deny(); return; }
+  if(!G.potions){ toast(LT('물약 없음','NO POTION'),true); sfx.deny(); return; }
+  if(player.hp>=player.maxHp){ toast(LT('체력이 이미 가득 찼습니다','HP already full')); sfx.deny(); return; }
   G.potions--; player.hp=player.maxHp;
-  sfx.repair(); toast('물약 사용 — 체력 완전 회복'); potionHUD();
+  sfx.repair(); toast(LT('물약 사용 — 체력 완전 회복','POTION — HP fully restored')); potionHUD();
 }
 function updatePotions(dt){
   for(const p of POTIONS){
@@ -1146,7 +1155,7 @@ function updatePotions(dt){
        && G.potions<POT_MAX){
       p.taken=true; p.grp.visible=false;
       G.potions++;
-      sfx.pick(); toast('물약 +1  ('+G.potions+'/'+POT_MAX+')');
+      sfx.pick(); toast(LT('물약','POTION')+' +1  ('+G.potions+'/'+POT_MAX+')');
       burst(p.grp.position.clone(),0x6ee87a,12,5,4);
       potionHUD();
     }
@@ -1900,14 +1909,14 @@ rifle.rotation.set(0,0,0);
 /* ═══════════════ 스테이지 무기 시스템: guns.glb 10정, 스테이지마다 해금 ═══════════════ */
 const WEAPONS=[
   {id:'w01',name:'PULSE PISTOL',cd:0.28,mult:1.1,pellets:1,spread:0,      snd:'pistol', vol:0.50},
-  {id:'w02',name:'리볼버',cd:0.5,mult:2.4,pellets:1,spread:0,      snd:'pistol', vol:0.62},
-  {id:'w03',name:'기관단총',cd:0.085,mult:0.6,pellets:1,spread:0.012, snd:'rifle',  vol:0.30},
-  {id:'w04',name:'샷건',cd:0.8,mult:0.55,pellets:6,spread:0.05,    snd:'shotgun',vol:0.55},
+  {id:'w02',name:LT('리볼버','REVOLVER'),cd:0.5,mult:2.4,pellets:1,spread:0,      snd:'pistol', vol:0.62},
+  {id:'w03',name:LT('기관단총','SMG'),cd:0.085,mult:0.6,pellets:1,spread:0.012, snd:'rifle',  vol:0.30},
+  {id:'w04',name:LT('샷건','SHOTGUN'),cd:0.8,mult:0.55,pellets:6,spread:0.05,    snd:'shotgun',vol:0.55},
   {id:'w05',name:'Scatter Laser',cd:0.115,mult:1.0,pellets:1,spread:0.006, snd:'laser',  vol:0.42, laser:true, vm:'img/hands_w05.webm'},
-  {id:'w06',name:'불펍 소총',cd:0.1,mult:1.15,pellets:1,spread:0.005, snd:'rifle',  vol:0.40},
+  {id:'w06',name:LT('불펍 소총','BULLPUP RIFLE'),cd:0.1,mult:1.15,pellets:1,spread:0.005, snd:'rifle',  vol:0.40},
   {id:'w07',name:'ION BLASTER',cd:0.095,mult:1.3,pellets:1,spread:0.005, snd:'laser',  vol:0.46, laser:true, vm:'img/hands_w07.webm'},
-  {id:'w08',name:'더블배럴',cd:0.7,mult:0.6,pellets:8,spread:0.07,  snd:'shotgun',vol:0.6},
-  {id:'w09',name:'저격소총',cd:1.05,mult:5.5,pellets:1,spread:0,    snd:'sniper', vol:0.6},
+  {id:'w08',name:LT('더블배럴','DOUBLE BARREL'),cd:0.7,mult:0.6,pellets:8,spread:0.07,  snd:'shotgun',vol:0.6},
+  {id:'w09',name:LT('저격소총','SNIPER RIFLE'),cd:1.05,mult:5.5,pellets:1,spread:0,    snd:'sniper', vol:0.6},
   {id:'w10',name:'RPG',cd:1.30,mult:1.7,pellets:1,spread:0.004, snd:'rpg',   vol:0.55,
    dmg:330, rocket:true, vm:'img/hands_w10.webm'},
 ];
@@ -1924,9 +1933,9 @@ const WEAPONS=[
    ⚠**적 체력이나 스테이지 배율을 건드리면 이 숫자를 다시 맞춰야 한다.**
    ⚠`vm` 은 그 무기를 든 손 영상(사용자가 그려 오면 파일만 넣으면 된다). 없으면 기본 손. */
 const WEP_UP=[
-  {stage:5,  idx:4, why:'휴머노이드 로봇 등장'},   // Scatter Laser
-  {stage:8,  idx:6, why:'사이버타이탄 등장'},      // ION BLASTER
-  {stage:10, idx:9, why:'SKYHOUND 등장'},          // RPG
+  {stage:5,  idx:4, why:LT('휴머노이드 로봇 등장','humanoid robots appear')},   // Scatter Laser
+  {stage:8,  idx:6, why:LT('사이버타이탄 등장','Cybertitans appear')},      // ION BLASTER
+  {stage:10, idx:9, why:LT('SKYHOUND 등장','SKYHOUND appears')},          // RPG
 ];
 function upgradeAt(n){ return WEP_UP.find(u=>u.stage===n); }
 /* 그 스테이지까지 손에 들어오는 무기 목록 */
@@ -1975,7 +1984,7 @@ function equipWeapon(i,silent){
   flashMesh.material.color.set(w.laser?0xcfefff:0xffd27a);
   const vf=document.getElementById('vmFlash'); if(vf)vf.classList.toggle('laser',!!w.laser);
   if(applyVM)applyVM(w);          // 무기별 손(그림/영상) 갈아끼우기
-  if(!silent)toast('무기: '+w.name);
+  if(!silent)toast(LT('무기: ','GUN: ')+w.name);
 }
 /* 가진 무기 목록(G.owned)이 곧 해금 상태다. 번호가 띄엄띄엄이라 '개수'로는 못 센다. */
 function ownedList(){ return (G.owned&&G.owned.length)?G.owned:[0]; }
@@ -1993,7 +2002,7 @@ function grantWeapon(idx){
   if(!G.owned)G.owned=[0];
   if(G.owned.indexOf(idx)<0)G.owned.push(idx);
   equipWeapon(idx,true);
-  toast('무기 강화 — '+WEAPONS[idx].name+'  ('+(G.owned.indexOf(idx)+1)+'번 키)');
+  toast(LT('무기 강화 — ','WEAPON UPGRADE — ')+WEAPONS[idx].name+'  ('+LT((G.owned.indexOf(idx)+1)+'번 키','key '+(G.owned.indexOf(idx)+1))+')');
   sfx.pick();
 }
 
@@ -2692,7 +2701,7 @@ let BEST=loadBest();
    지킬 코어가 없다. 적이 나를 사냥하고, 나는 도시로 흩어져 하나씩 지운다.
    시간이 아니라 "전멸"이 다음 스테이지를 연다 — 한 기라도 남으면 넘어가지 않는다. */
 const STAGES=10;
-const ENAME={drone:'드론',robot:'휴머노이드 로봇',titan:'사이버타이탄',jet:'SKYHOUND'};
+const ENAME={drone:LT('드론','DRONE'),robot:LT('휴머노이드 로봇','HUMANOID ROBOT'),titan:LT('사이버타이탄','CYBERTITAN'),jet:'SKYHOUND'};
 function actOf(n){ return n<=4?'drone':(n<=7?'robot':(n<STAGES?'titan':'jet')); }
 
 function stagePlan(n){
@@ -2721,12 +2730,12 @@ function huntSpawnPos(){
 /* 소탕 완료 배너 — 스테이지 배너와 같은 자리, 문구만 다르다 */
 function announceHunt(){
   const el=$('wave');
-  el.querySelector('h2').textContent='적 전멸';
-  el.querySelector('p').textContent='도시 어딘가에 애니가 있다 — 찾아라';
+  el.querySelector('h2').textContent=LT('적 전멸','ALL CLEAR');
+  el.querySelector('p').textContent=LT('도시 어딘가에 애니가 있다 — 찾아라','Annie is somewhere in the city — find her');
   el.classList.add('on');
   setTimeout(()=>el.classList.remove('on'),4200);
   sfx.horn();
-  toast('전 스테이지 소탕 완료 — 애니를 찾아라');
+  toast(LT('전 스테이지 소탕 완료 — 애니를 찾아라','All stages cleared — find Annie'));
 }
 function announceWave(n,msg){
   const el=$('wave');
@@ -2748,10 +2757,10 @@ function nextWave(){
   const plan=stagePlan(n), cnt={};
   for(const t of plan)cnt[t]=(cnt[t]||0)+1;
   let msg=['titan','robot','drone'].filter(t=>cnt[t]).map(t=>ENAME[t]+' '+cnt[t]).join(' · ');
-  if(n===1)      msg+='  —  건물 뒤로 숨어라. 못 보면 못 쏜다';
-  if(n===5)      msg+='  —  드론 소탕 완료, 휴머노이드 로봇 투입!';
-  if(n===8)      msg+='  —  사이버타이탄 돌입!!';
-  if(n===STAGES) msg+='  —  SKYHOUND 출현!! 최후의 소탕전';
+  if(n===1)      msg+=LT('  —  건물 뒤로 숨어라. 못 보면 못 쏜다','  —  Hide behind buildings. Unseen is unshot');
+  if(n===5)      msg+=LT('  —  드론 소탕 완료, 휴머노이드 로봇 투입!','  —  Drones cleared. Humanoid robots deployed!');
+  if(n===8)      msg+=LT('  —  사이버타이탄 돌입!!','  —  Cybertitans incoming!!');
+  if(n===STAGES) msg+=LT('  —  SKYHOUND 출현!! 최후의 소탕전','  —  SKYHOUND sighted!! Final battle');
   announceWave(n,msg);
 
   let t=0;
@@ -2779,18 +2788,18 @@ addEventListener('keydown',e=>{
   if(G.state!=='play')return;
   if(e.code==='KeyR')usePotion();          // 물약 마시기 (칸을 눌러도 된다)
   if(e.code==='KeyP')setPause(true);
-  if(e.code==='KeyX'&&!e.repeat){crouching=!crouching;toast(crouching?'앉기':'일어서기');}
+  if(e.code==='KeyX'&&!e.repeat){crouching=!crouching;toast(crouching?LT('앉기','CROUCH'):LT('일어서기','STAND'));}
   if(e.code==='KeyE'&&!e.repeat)toggleCover();
   if(e.code==='KeyQ'&&!e.repeat)cycleWeapon();
   if(/^Digit[0-9]$/.test(e.code)){
     const n=e.code==='Digit0'?10:parseInt(e.code.slice(5),10);
     const o=ownedList();
     if(n<=o.length)equipWeapon(o[n-1]);
-    else{ const u=WEP_UP[n-2]; toast(u?('STAGE '+u.stage+' 에서 강화 — '+u.why):'없는 무기',true); }
+    else{ const u=WEP_UP[n-2]; toast(u?(LT('STAGE '+u.stage+' 에서 강화 — ','Upgrade at STAGE '+u.stage+' — ')+u.why):LT('없는 무기','No such weapon'),true); }
   }
   // 개발용 숨김 키: B 무적 토글, N 다음 스테이지 즉시
-  if(e.code==='KeyB'){G.god=!G.god;toast('테스트: 무적 '+(G.god?'ON':'OFF'));}
-  if(e.code==='KeyN'){for(const en of[...enemies])killEnemy(en);G.spawnQueue.length=0;toast('테스트: 이번 스테이지 전멸');}
+  if(e.code==='KeyB'){G.god=!G.god;toast(LT('테스트: 무적 ','TEST: god mode ')+(G.god?'ON':'OFF'));}
+  if(e.code==='KeyN'){for(const en of[...enemies])killEnemy(en);G.spawnQueue.length=0;toast(LT('테스트: 이번 스테이지 전멸','TEST: stage wiped'));}
 });
 addEventListener('keyup',e=>keys[e.code]=false);
 
@@ -2860,7 +2869,7 @@ const freeIds=[];
   };
   hold($('tFire'), ()=>{mouseDown=true;}, ()=>{mouseDown=false;});
   hold($('tJump'), ()=>{keys.Space=true; setTimeout(()=>keys.Space=false,90);});
-  hold($('tCrouch'),()=>{ if(G.state==='play'){crouching=!crouching; toast(crouching?'앉기':'일어서기');} });
+  hold($('tCrouch'),()=>{ if(G.state==='play'){crouching=!crouching; toast(crouching?LT('앉기','CROUCH'):LT('일어서기','STAND'));} });
   hold($('tCover'), ()=>{ if(G.state==='play')toggleCover(); });
   hold($('tGunSw'),()=>{ if(G.state==='play')cycleWeapon(); });
   hold($('tPot'),  ()=>{ if(G.state==='play')usePotion(); });
@@ -2985,15 +2994,15 @@ function toggleCover(){
     const dx=player.pos.x-nx, dz=player.pos.z-nz, d=Math.hypot(dx,dz);
     if(d>1e-6&&d<bd){bd=d;best={nx:dx/d,nz:dz/d,px:nx,pz:nz};}
   }
-  if(!best){toast('붙을 벽이 없습니다 — 건물 바로 옆에서 E',true);return;}
+  if(!best){toast(LT('붙을 벽이 없습니다 — 건물 바로 옆에서 E','No wall here — press E right next to a building'),true);return;}
   // 벽면과 직각으로 정렬 (모서리 근처면 더 가까운 축을 따른다)
   if(Math.abs(best.nx)>=Math.abs(best.nz)){best.nx=Math.sign(best.nx)||1;best.nz=0;}
   else{best.nz=Math.sign(best.nz)||1;best.nx=0;}
   cover={nx:best.nx,nz:best.nz};
   player.pos.x=best.px+best.nx*0.5; player.pos.z=best.pz+best.nz*0.5;
-  toast('벽 엄폐 — 받는 피해 60% 감소');
+  toast(LT('벽 엄폐 — 받는 피해 60% 감소','WALL COVER — damage taken -60%'));
 }
-function exitCover(){ if(cover){cover=null; toast('엄폐 해제');} }
+function exitCover(){ if(cover){cover=null; toast(LT('엄폐 해제','COVER OFF'));} }
 
 renderer.domElement.addEventListener('click',()=>{
   if(G.state==='play'&&document.pointerLockElement!==renderer.domElement)
@@ -3255,7 +3264,7 @@ function hurtPlayer(d){
   player.hp-=d; player.lastHurt=G.time;
   $('hurt').style.opacity=0.9;
   setTimeout(()=>$('hurt').style.opacity=0,120);
-  if(player.hp<=0){player.hp=0; player.dead=true; gameOver('체력 소진 · OPERATOR DOWN');}
+  if(player.hp<=0){player.hp=0; player.dead=true; gameOver(LT('체력 소진 · OPERATOR DOWN','HP DEPLETED · OPERATOR DOWN'));}
 }
 function explode(pos,dmg,pRad=6.5){
   bigFlash(pos,3.5); burst(pos,0xffa040,20,8,6); sfx.explode();
@@ -3423,8 +3432,8 @@ function gameOver(why){
   best.kills=Math.max(best.kills||0,G.kills);
   if(recT||recW||recC){ storeSet(BEST_KEY,JSON.stringify(best)); BEST=best; }
   const rec=recT||recW||recC;
-  $('best').textContent=(rec?'★ 신기록! ':'최고 기록: ')+fmtTime(best.time||0)+' · STAGE '+(best.wave||0)
-    +' · 격파 '+(best.kills||0)+' · 콤보 '+(best.combo||0);
+  $('best').textContent=(rec?LT('★ 신기록! ','★ NEW RECORD! '):LT('최고 기록: ','BEST: '))+fmtTime(best.time||0)+' · STAGE '+(best.wave||0)
+    +LT(' · 격파 ',' · KILLS ')+(best.kills||0)+LT(' · 콤보 ',' · COMBO ')+(best.combo||0);
   renderOverHud();
   $('btnRetry').querySelector('small').textContent='RETRY · STAGE '+diedStage;
   $('over').style.display='grid';
@@ -3441,7 +3450,7 @@ function victory(){
   $('wCombo').textContent=G.maxCombo;
   $('nextGoal2').textContent=nextGoalText();
   /* 승리는 애니를 찾았을 때만 온다(10스테이지 클리어는 소탕 완료일 뿐). */
-  $('winSub').textContent='애니 구출 · STAGE '+G.wave+' 까지 소탕';
+  $('winSub').textContent=LT('애니 구출 · STAGE '+G.wave+' 까지 소탕','ANNIE RESCUED · STAGE '+G.wave+' CLEARED');
   const best=BEST;
   if(!best.clear||G.time<best.clearTime){
     best.clear=true; best.clearTime=G.time;
@@ -3506,7 +3515,7 @@ function menuLoadStage(){ const v=parseInt(storeGet('saab_save')||'0',10); retur
 function refreshMenu(){
   const ls=menuLoadStage();
   $('btnLoad').classList.toggle('dim',!ls);
-  $('loadSub').textContent=ls?('LOAD · STAGE '+ls):'LOAD · 기록 없음';
+  $('loadSub').textContent=ls?('LOAD · STAGE '+ls):LT('LOAD · 기록 없음','LOAD · NO SAVE');
   // 최고 기록 넉 칸 (사망 화면과 같은 배치)
   $('mTime').textContent=BEST.time?fmtTime(BEST.time):'-';
   $('mWave').textContent=BEST.wave||'-';
@@ -3520,12 +3529,12 @@ function refreshMenu(){
     h+='<div class="tn'+cls+'"><i></i><b>'+i+'</b></div>';
   }
   $('mTrack').innerHTML=h;
-  $('mNext').innerHTML=ls?('이어하기 - <em>STAGE '+ls+'</em> 부터')
-                        :'첫 임무 - <em>STAGE 1</em> 부터';
+  $('mNext').innerHTML=ls?LT('이어하기 - <em>STAGE '+ls+'</em> 부터','CONTINUE — from <em>STAGE '+ls+'</em>')
+                        :LT('첫 임무 - <em>STAGE 1</em> 부터','FIRST MISSION — from <em>STAGE 1</em>');
 }
 refreshMenu();
 $('btnLoad').onclick=()=>{ const ls=menuLoadStage(); if(ls)startGame(ls); };
-$('btnExit').onclick=()=>{ window.close(); toast('브라우저 탭을 닫아 주세요'); };
+$('btnExit').onclick=()=>{ window.close(); toast(LT('브라우저 탭을 닫아 주세요','Close this browser tab')); };
 for(const b of document.querySelectorAll('[data-back]'))
   b.onclick=()=>{ $(b.dataset.back).style.display='none'; $('menu').style.display='grid'; refreshMenu(); };
 $('btnSet').onclick=()=>{
@@ -3540,20 +3549,20 @@ $('rgSens').oninput=e=>{ CFG.sens=e.target.value/100; $('rgSensV').textContent=C
 $('btnEncy').onclick=()=>{
   $('menu').style.display='none'; $('encyOv').style.display='grid';
   const E=[
-    ['드론','낮게 떠서 옆으로 돌며 쏜다. 약하지만 떼로 온다.','HP 26'],
-    ['휴머노이드 로봇','걸어와 사거리에서 멈춰 3발 점사. 머리는 2.5배.','HP 95'],
-    ['사이버타이탄','달려와 들이받는다. 멀면 라이트바 포격.','HP 340'],
-    ['SKYHOUND','최종 보스. 도시 위를 선회하며 폭격한다.','HP 700+'],
+    [ENAME.drone,LT('낮게 떠서 옆으로 돌며 쏜다. 약하지만 떼로 온다.','Hovers low, strafes and shoots. Weak, but comes in swarms.'),'HP 26'],
+    [ENAME.robot,LT('걸어와 사거리에서 멈춰 3발 점사. 머리는 2.5배.','Walks in, stops at range, fires 3-round bursts. Headshots x2.5.'),'HP 95'],
+    [ENAME.titan,LT('달려와 들이받는다. 멀면 라이트바 포격.','Charges and rams. Shells you with its light bar from afar.'),'HP 340'],
+    ['SKYHOUND',LT('최종 보스. 도시 위를 선회하며 폭격한다.','Final boss. Circles over the city and bombs.'),'HP 700+'],
   ];
   let h='<h3>HOSTILES</h3>';
   for(const [nm,ds,hp] of E)h+='<b>'+nm+'</b> <span class="dim2">'+hp+'</span><br>'+ds+'<br>';
   h+='<h3>WEAPONS</h3>';
-  WEAPONS.forEach((w,i)=>{ h+='<b>'+w.name+'</b> <span class="dim2">스테이지 '+(i+1)+' 해금</span><br>'; });
+  WEAPONS.forEach((w,i)=>{ h+='<b>'+w.name+'</b> <span class="dim2">'+LT('스테이지 '+(i+1)+' 해금','STAGE '+(i+1)+' unlock')+'</span><br>'; });
   $('encyList').innerHTML=h;
 };
 $('btnResume').onclick=()=>setPause(false);
 // (최고 기록은 refreshMenu 의 통계 넉 칸이 보여 준다 — menuBest 삭제)
-  +' · 격파 '+BEST.kills+(BEST.combo?' · 콤보 '+BEST.combo:'');
+  +LT(' · 격파 ',' · KILLS ')+BEST.kills+(BEST.combo?LT(' · 콤보 ',' · COMBO ')+BEST.combo:'');
 
 /* ═══════════════ HUD 갱신 ═══════════════ */
 function updateHUD(){
@@ -3569,7 +3578,7 @@ function updateHUD(){
   $('tKill').textContent=G.kills;
   const left=enemies.length+G.spawnQueue.length;
   $('tLeft').textContent=left;
-  $('tNext').textContent=left?'':(G.wave>=STAGES?'':'다음 스테이지 '+Math.ceil(Math.max(G.waveTimer,0))+'초');
+  $('tNext').textContent=left?'':(G.wave>=STAGES?'':LT('다음 스테이지 ','NEXT STAGE ')+Math.ceil(Math.max(G.waveTimer,0))+LT('초','s'));
   updateGoals();
 }
 
@@ -3577,16 +3586,16 @@ function updateHUD(){
 function updateGoals(){
   const left=enemies.length+G.spawnQueue.length;
   const w=Math.max(G.wave,1);
-  $('g1').textContent = left ? (ENAME[actOf(w)]+' 소탕 · '+left+'기 남음')
-    : (G.wave>=STAGES ? '소탕 완료 — 애니를 찾아라' : '정비 중 · 다음 스테이지 '+Math.ceil(Math.max(G.waveTimer,0))+'초');
+  $('g1').textContent = left ? LT(ENAME[actOf(w)]+' 소탕 · '+left+'기 남음','CLEAR '+ENAME[actOf(w)]+' · '+left+' left')
+    : (G.wave>=STAGES ? LT('소탕 완료 — 애니를 찾아라','ALL CLEAR — find Annie') : LT('정비 중 · 다음 스테이지 ','REGROUP · NEXT STAGE ')+Math.ceil(Math.max(G.waveTimer,0))+LT('초','s'));
   $('g2').textContent='STAGE '+w+' / '+STAGES;
   $('g2b').style.width=(w/STAGES*100)+'%';
   const bw=BEST.wave||0, box=$('g3w');
   let t, hot=false;
-  if(!bw)                t='첫 기록 도전 중';
-  else if(G.wave>bw)   { t='★ 최고 기록 경신 중'; hot=true; }
-  else if(G.wave===bw) { t='최고 기록과 동률 — 한 단계 더'; hot=true; }
-  else                   t='최고 STAGE '+bw+'까지 '+(bw-G.wave)+'단계';
+  if(!bw)                t=LT('첫 기록 도전 중','FIRST RUN');
+  else if(G.wave>bw)   { t=LT('★ 최고 기록 경신 중','★ NEW BEST STAGE'); hot=true; }
+  else if(G.wave===bw) { t=LT('최고 기록과 동률 — 한 단계 더','TIED WITH BEST — one more'); hot=true; }
+  else                   t=LT('최고 STAGE '+bw+'까지 '+(bw-G.wave)+'단계','BEST STAGE '+bw+' · '+(bw-G.wave)+' to go');
   $('g3').textContent=t;
   box.classList.toggle('hot',hot);
 }
@@ -3594,10 +3603,10 @@ function updateGoals(){
 /* 종료 화면에 띄울 "다음에 해볼 것" — 다시하기를 누를 이유 */
 function nextGoalText(){
   const bw=BEST.wave||0, bc=BEST.combo||0;
-  if(G.wave<STAGES && bw>G.wave) return '다음 목표 — 최고 기록 STAGE '+bw+'까지 '+(bw-G.wave)+'단계';
-  if(G.wave<STAGES)              return '다음 목표 — STAGE '+(G.wave+1)+' 돌파';
-  if(bc>G.maxCombo)          return '다음 목표 — 최고 콤보 '+bc+' 넘기';
-  return '다음 목표 — 더 빠른 클리어';
+  if(G.wave<STAGES && bw>G.wave) return LT('다음 목표 — 최고 기록 STAGE '+bw+'까지 '+(bw-G.wave)+'단계','NEXT GOAL — best STAGE '+bw+' · '+(bw-G.wave)+' to go');
+  if(G.wave<STAGES)              return LT('다음 목표 — STAGE '+(G.wave+1)+' 돌파','NEXT GOAL — beat STAGE '+(G.wave+1));
+  if(bc>G.maxCombo)          return LT('다음 목표 — 최고 콤보 '+bc+' 넘기','NEXT GOAL — combo over '+bc);
+  return LT('다음 목표 — 더 빠른 클리어','NEXT GOAL — faster clear');
 }
 
 /* ═══════════════ 메인 루프 ═══════════════ */

@@ -3,10 +3,12 @@
   const T = TERRAIN;
   const rng = NOISE.makeRng(6061);
   // 하늘 위에 사는 사람들은 만드는 사람들이다 — 화가·작가·감독·가수·배우·유튜버·축구선수·CEO (2026-09-02)
-  const NAMES = ['아틀리에', '집필실', '촬영장', '녹음실', '연습실', '방송실', '대기업', '훈련장', '편집실', '스튜디오'];
-  const WHO = ['화가', '작가', '영화감독', '가수', '배우', '유튜버', 'CEO', '축구선수', '웹툰작가', '사진작가'];
+  const NAMES = TX(['아틀리에', '집필실', '촬영장', '녹음실', '연습실', '방송실', '대기업', '훈련장', '편집실', '스튜디오'],
+    ['Atelier', 'Writing Room', 'Film Set', 'Recording Booth', 'Rehearsal Hall', 'Streaming Room', 'Corp HQ', 'Training Ground', 'Editing Room', 'Photo Studio']);
+  const WHO = TX(['화가', '작가', '영화감독', '가수', '배우', '유튜버', 'CEO', '축구선수', '웹툰작가', '사진작가'],
+    ['Painter', 'Novelist', 'Film Director', 'Singer', 'Actor', 'YouTuber', 'CEO', 'Footballer', 'Webtoon Artist', 'Photographer']);
   // 주민 멘트 — 사장님이 직접 씀 (2026-09-02). 갈 때마다 1번부터 순서대로 나온다
-  const LINES = [
+  const LINES_KO = [
     ['잠깐만요. 지금 색감 잡고 있으니까 조용히요.', '이거 놓고 가지 마세요. 작품의 일부예요.', '피자 박스가 너무 예쁜데요? 캔버스로 써도 돼요?', '방금 문 여는 순간 영감이 떠올랐어요.', '제 그림보다 배달원님이 더 입체적이네요.', '이거 빨간색으로 칠하면 더 맛있어 보이겠죠?', '잠깐, 움직이지 마세요. 당신을 그리고 싶어요.', '배달비요? 현금 말고 그림으로 드려도 되죠?', '오늘은 붓보다 젓가락을 잡겠습니다.', '이 음식… 구도가 완벽하네요.'],
     ['잠깐만요. 지금 주인공이 죽기 직전이에요.', '배달원님, 혹시 오늘 있었던 일 좀 이야기해주실래요?', '문 앞에 두고 가세요. 인간관계는 피곤해서요.', '방금 노크 소리, 소설에 넣어도 되겠네요.', '배달원님 이름이 어떻게 되죠? 등장인물로 쓰게요.', '오늘 마감인데 음식까지 늦으면 제 인생도 늦습니다.', '이 음식의 향기를 묘사할 단어가 없어요.', '잠깐만요. 지금 엄청난 문장이 떠올랐어요.', '배달비가 올랐군요. 인플레이션을 소재로 써야겠어요.', '감사합니다. 당신은 오늘 제 소설의 첫 문장입니다.'],
     ['컷! 다시 들어와 주세요. 그림이 안 나왔어요.', '좋아요. 문 여는 타이밍 완벽했습니다.', '잠깐! 배달원님, 카메라 쪽 한번 봐주세요.', '이 장면은 롱테이크로 갑니다.', '음식 내려놓고 3초만 정지해 주세요.', '좋습니다. 자연스러웠어요. 다시 한 번만.', '이 배달, 예산 초과인데요?', '오늘 촬영 끝났습니다. 이제 먹죠.', '이건 상업영화보다 예술영화 냄새가 나네요.', '배달원님, 방금 표정 좋았습니다. 배우 하실 생각 없어요?'],
@@ -18,8 +20,22 @@
     ['잠깐만요. 지금 마감 3일째입니다.', '배달원님 얼굴 참고해도 돼요?', '이 장면 웹툰에 넣겠습니다.', '지금 손이 너무 아파서 문도 못 열어요.', '오늘도 원고보다 배달이 먼저 왔네요.', '작가님이라고 불러주세요. 오늘은 기분 좋으니까.', '잠깐, 그 포즈 그대로 있어보세요.', '이 음식이 다음 화의 복선입니다.', '연재 마감이 5시간 남았는데 밥부터 먹겠습니다.', '배달원님, 혹시 악역 할 생각 없으세요?'],
     ['잠깐만요. 빛이 너무 좋아요.', '음식 내려놓기 전에 사진부터 찍을게요.', '배달원님, 거기 그대로 서주세요.', '오늘의 컨셉은 자연스러움입니다.', '이 음식 색감이 미쳤네요.', '잠깐만요. 그림자까지 완벽해요.', '이건 필터 없이도 나오겠는데요?', '배달원님 손만 찍어도 작품 나오겠어요.', '사진 한 장만 찍고 드세요.', '오늘 최고의 피사체는 음식이 아니었네요.'],
   ];
+  // 영어판 멘트 — 위 한국어 멘트와 같은 순서·같은 개수 (집마다 10줄)
+  const LINES_EN = [
+    ["Hold on. I'm fixing the colors, keep it quiet.", "Don't take this away. It's part of the work.", "This pizza box is so pretty. Can I use it as a canvas?", "The moment you opened the door, inspiration struck.", "You look more three-dimensional than my painting.", "If I paint this red, it'd look tastier, right?", "Wait, don't move. I want to paint you.", "Delivery fee? Can I pay in paintings instead of cash?", "Today I pick up chopsticks, not a brush.", "This food… the composition is perfect."],
+    ["Hold on. My protagonist is about to die.", "Could you tell me about your day?", "Leave it at the door. People are exhausting.", "That knock just now could go in my novel.", "What's your name? I'll make you a character.", "Deadline is today. If the food is late, so is my life.", "There are no words to describe this aroma.", "Hold on. A brilliant sentence just came to me.", "Delivery fees went up. Inflation is my next theme.", "Thank you. You're the first line of my novel today."],
+    ["Cut! Come in again. The shot didn't work.", "Good. Your door timing was perfect.", "Wait! Look at the camera for me.", "This scene is one long take.", "Set the food down and freeze for 3 seconds.", "Great. Very natural. Just one more time.", "This delivery is over budget.", "That's a wrap for today. Let's eat.", "This smells more art-house than blockbuster.", "Nice expression just now. Ever thought of acting?"],
+    ["Ding-dong~ delivery's here~♪", "Hold on. I'm recording a song.", "Instead of a tip, shall I sing you my new single?", "My voice is great today, so the food will taste great too.", "This smell… a melody is coming to me.", "Are you a fan? Want an autograph first?", "Let me express this feeling called hunger in song.", "After this, straight to the encore.", "You have a nice voice, you know.", "Hold on. One verse before I eat."],
+    ["Hold on. I'm shooting my death scene.", "Do you recognize me?", "Sorry, I still can't get out of character.", "Shall I act surprised at this food?", "You look like an actor yourself.", "I was getting into the emotion and you showed up now.", "This looks tastier than the movie I was in.", "No cameras, right? Then come on in.", "This food wasn't in the script.", "Good. Close the door naturally. Cut!"],
+    ["Wait! Say hi to my subscribers!", "Look at the camera and hit 'like' for me!", "Today's content: delivery food review.", "This isn't sponsored, right?", "Hold on. Unboxing comes first.", "What's your handle?", "This is going to get views.", "One million subscribers are watching.", "I need to film a mukbang, so wait 30 minutes.", "Wait! One face for the thumbnail, please."],
+    ["How many minutes late are you?", "Good. Faster than our own logistics.", "I'd like to recruit you to my company.", "Give me a receipt. It's the corporate card.", "From now on, this food is on the meeting agenda.", "Service like this, I'd consider investing.", "What's the delivery fee? Is it negotiable?", "I wish my company worked at this speed.", "Good. I'll send over a contract.", "Hold on. Are you the delivery platform's CEO?"],
+    ["Nice! What a precise assist!", "Delivered right to the goalmouth.", "Your pass is incredible.", "I was looking forward to this more than today's match.", "Wait! Want an autograph first?", "I have to play the second half after this.", "Delivery fee? I scored today, so I earned it.", "That's a perfect cross.", "Give me 10 minutes. Haven't showered yet.", "Join our team. You've got speed."],
+    ["Hold on. Day 3 of deadline crunch.", "Can I use your face as reference?", "This scene goes in my webtoon.", "My hand hurts so much I can't even open the door.", "Delivery beat my manuscript again today.", "Call me 'author'. I'm in a good mood today.", "Wait, hold that pose.", "This food is next episode's foreshadowing.", "5 hours to deadline, but food first.", "Ever thought of playing a villain?"],
+    ["Hold on. The light is too good.", "Photo first, then set the food down.", "Stay right there.", "Today's concept is natural.", "The colors of this food are insane.", "Hold on. Even the shadows are perfect.", "This would work without a filter.", "Even just your hands would make art.", "One photo, then eat.", "Today's best subject wasn't the food."],
+  ];
+  const LINES = TX(LINES_KO, LINES_EN);
   const PKG = [
-    { key: 'food', name: '음식', icon: '🍱', w: 1.0, pay: 1.0, time: 1.0, fragile: false },
+    { key: 'food', name: TX('음식', 'Food'), icon: '🍱', w: 1.0, pay: 1.0, time: 1.0, fragile: false },
   ];
   const D = { targets: [], cur: null, home: null, money: 10, done: 0, late: 0, t: 0, limit: 0, state: 'idle', best: 0, pkg: PKG[0], value: 1, broken: false, lastFrom: null, pay: 0 };
   D.startMoney = D.money;
@@ -36,7 +52,7 @@
       const pad = h.group.position.clone().lerp(h.pos, 0.8); pad.y = h.pos.y;   // 집 문 앞
       D.targets.push({ name: NAMES[i % NAMES.length] + (i >= NAMES.length ? ' ' + (Math.floor(i / NAMES.length) + 1) : ''), who: WHO[i % WHO.length], lines: LINES[i % LINES.length], pos: h.pos.clone(), pad, hut: h });
     }
-    D.home = { name: '식당', pos: new THREE.Vector3(0, T.SUMMIT, 0) };
+    D.home = { name: TX('식당', 'Diner'), pos: new THREE.Vector3(0, T.SUMMIT, 0) };
     const bg = new THREE.CylinderGeometry(1.2, 1.6, 300, 12, 1, true).translate(0, 150, 0);
     beam = new THREE.Mesh(bg, new THREE.MeshBasicMaterial({ color: 0xffd27a, transparent: true, opacity: 0.16, depthWrite: false, side: THREE.DoubleSide, blending: THREE.AdditiveBlending, fog: false }));
     beam.visible = false; beam.renderOrder = 8;   // 빛기둥은 안 쓴다 (미니맵으로 대체)
@@ -88,7 +104,7 @@
     padRing.visible = true; padRing.position.copy(t.pad); padRing.position.y += 0.16;
     padDisc.visible = true; padDisc.position.copy(t.pad); padDisc.position.y += 0.15;
     if (window.AUDIO && AUDIO.order) AUDIO.order();   // 딩동 먼저, 자막은 살짝 뒤에
-    if (window.UI) setTimeout(function () { if (D.cur === t) UI.pop('🥄 주문 → ' + t.name); }, 600);
+    if (window.UI) setTimeout(function () { if (D.cur === t) UI.pop(TX('🥄 주문 → ', '🥄 ORDER → ') + t.name); }, 600);
   }
   function begin(from) { D.lastFrom = from.clone(); pickNext(from); }
 
@@ -96,8 +112,8 @@
   function hit(impact) {
     if (D.state !== 'carry' || !D.pkg.fragile || D.broken) return;
     D.value *= impact > 7 ? 0.35 : 0.6;
-    if (D.value < 0.2) { D.broken = true; D.value = 0; if (window.UI) UI.msg('짐이 깨졌다…', true); }
-    else if (window.UI) UI.msg('짐이 흔들렸다!  값 ' + Math.round(D.value * 100) + '%');
+    if (D.value < 0.2) { D.broken = true; D.value = 0; if (window.UI) UI.msg(TX('짐이 깨졌다…', 'Cargo broke…'), true); }
+    else if (window.UI) UI.msg(TX('짐이 흔들렸다!  값 ', 'Cargo shaken!  value ') + Math.round(D.value * 100) + '%');
   }
 
   function update(dt, bikePos, speed) {
@@ -123,7 +139,7 @@
         if (window.UI) UI.bubble(who, line, late ? 2.6 : 2.8);
         const coin = function () { D.money += pay; if (window.UI) UI.pop('🪙 +' + pay); };
         if (late) {
-          setTimeout(function () { if (window.UI) UI.bubble(who, '늦었으니까 음식값은 반만 받아요', 2.8); }, 2800);
+          setTimeout(function () { if (window.UI) UI.bubble(who, TX('늦었으니까 음식값은 반만 받아요', 'You were late, so I pay half.'), 2.8); }, 2800);
           setTimeout(coin, 4300);
         } else {
           setTimeout(coin, 1500);

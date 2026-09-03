@@ -158,10 +158,10 @@
       <div class="val"><span id="goalGot">0</span><span class="slash">/</span><span id="goalNeed">10</span></div></div>
     <div class="col mv"><div class="lab">Moves</div><div class="val" id="moves">0</div></div>
     <div id="tools">
-      <button id="btnMusic" title="음악" aria-label="음악 켜기 끄기">&#9835;</button>
-      <button id="btnSound" title="효과음" aria-label="효과음 켜기 끄기">&#9834;</button>
-      <button id="btnHelp" title="규칙">?</button>
-      <button id="btnPause" title="일시정지" aria-label="일시정지">&#10074;&#10074;</button>
+      <button id="btnMusic" title="음악" aria-label="음악 켜기 끄기" data-en-title="Music">&#9835;</button>
+      <button id="btnSound" title="효과음" aria-label="효과음 켜기 끄기" data-en-title="Sound">&#9834;</button>
+      <button id="btnHelp" title="규칙" data-en-title="Rules">?</button>
+      <button id="btnPause" title="일시정지" aria-label="일시정지" data-en-title="Pause">&#10074;&#10074;</button>
     </div>
   </div>
   <canvas id="cv"></canvas>
@@ -170,9 +170,9 @@
 <div class="sheet" id="sheetPause">
   <div class="card">
     <h2 style="font-size:24px;letter-spacing:.18em">PAUSE</h2>
-    <div class="sub">잠깐 멈췄습니다</div>
+    <div class="sub" data-en="Paused">잠깐 멈췄습니다</div>
     <button class="btn" id="btnResume">RESUME</button>
-    <button class="btn ghost" id="btnPauseRules">규칙 보기</button>
+    <button class="btn ghost" id="btnPauseRules" data-en="RULES">규칙 보기</button>
   </div>
 </div>
 
@@ -182,15 +182,15 @@
     <div class="sub">Hex Cracker Puzzle</div>
     <div class="rules">
       <div class="rule"><div class="ic" style="background:#F0A93C">1</div>
-        <p>크래커를 빈 칸에 놓습니다. 고른 크래커를 한 번 더 누르면 <b>회전</b>합니다.</p></div>
+        <p data-en="Place a cracker on an empty cell. Tap the picked cracker again to <b>rotate</b> it.">크래커를 빈 칸에 놓습니다. 고른 크래커를 한 번 더 누르면 <b>회전</b>합니다.</p></div>
       <div class="rule"><div class="ic" style="background:#FF80AC">2</div>
-        <p>맞닿은 변의 <b>토핑이 같으면</b> 이어집니다.</p></div>
+        <p data-en="Touching edges connect when their <b>toppings match</b>.">맞닿은 변의 <b>토핑이 같으면</b> 이어집니다.</p></div>
       <div class="rule"><div class="ic" style="background:#8FCB3F">3</div>
-        <p>같은 토핑으로 <b>3장이 이어지면</b> 그 자리에서 바삭! 부서집니다. 떨어져 있던 덩어리 둘을 한 번에 이으면 더 크게 터집니다.</p></div>
+        <p data-en="Link <b>3 crackers</b> with the same topping and they go crispy! and break on the spot. Join two separate clusters in one move for a bigger burst.">같은 토핑으로 <b>3장이 이어지면</b> 그 자리에서 바삭! 부서집니다. 떨어져 있던 덩어리 둘을 한 번에 이으면 더 크게 터집니다.</p></div>
       <div class="rule"><div class="ic" style="background:#BCAE95">4</div>
-        <p>판마다 <b>목표 토핑을 정해진 장수만큼</b> 터뜨려야 합니다. 위에 남은 수가 뜹니다. 다 쓰거나 판이 꽉 차면 GAME OVER.</p></div>
+        <p data-en="Each stage asks you to break <b>a set number of the goal topping</b>. Moves left show at the top. Run out of moves or fill the board and it is GAME OVER.">판마다 <b>목표 토핑을 정해진 장수만큼</b> 터뜨려야 합니다. 위에 남은 수가 뜹니다. 다 쓰거나 판이 꽉 차면 GAME OVER.</p></div>
       <div class="rule"><div class="ic" style="background:#9A8A6E">5</div>
-        <p>오래 둔 크래커는 <b>SOGGY</b>가 되어 아무와도 이어지지 않습니다.</p></div>
+        <p data-en="A cracker left too long turns <b>SOGGY</b> and no longer connects to anything.">오래 둔 크래커는 <b>SOGGY</b>가 되어 아무와도 이어지지 않습니다.</p></div>
     </div>
     <button class="btn" id="btnStart">START</button>
   </div>
@@ -199,7 +199,7 @@
 <div class="sheet" id="sheetClear">
   <div class="card">
     <h2 style="font-size:23px;letter-spacing:.16em">STAGE CLEAR</h2>
-    <div class="sub" id="clearSub">다음 판으로</div>
+    <div class="sub" id="clearSub" data-en="On to the next stage">다음 판으로</div>
     <div class="final">
       <div><span class="lab">SCORE</span><span class="val" id="cScore">0</span></div>
       <div><span class="lab">MOVES LEFT</span><span class="val" id="cLeft">0</span></div>
@@ -211,13 +211,13 @@
 <div class="sheet" id="sheetOver">
   <div class="card">
     <h2 style="font-size:22px;letter-spacing:.2em">GAME OVER</h2>
-    <div class="sub" id="overSub">수를 다 썼습니다</div>
+    <div class="sub" id="overSub" data-en="Out of moves">수를 다 썼습니다</div>
     <div class="final">
       <div><span class="lab">STAGE</span><span class="val" id="fStage">1</span></div>
       <div><span class="lab">BEST STAGE</span><span class="val" id="fBest">1</span></div>
     </div>
     <button class="btn" id="btnRetry">RETRY STAGE</button>
-    <button class="btn ghost" id="btnFirst">1판부터 다시</button>
+    <button class="btn ghost" id="btnFirst" data-en="FROM STAGE 1">1판부터 다시</button>
   </div>
 </div>
 
@@ -225,6 +225,23 @@
 <script>
 (function(){
 'use strict';
+
+/* ── 말(한국어·영어) ──
+   `?lang=en` 이면 영어로 바꾼다. 한국어가 원본이고 영어를 덧씌우는 방식이다.
+   ⚠ 이 게임은 `L` 을 수명 변수로 쓰고 있어서 번역 함수는 `tx` 로 둔다. 함수 안에서 다시 정의하지 말 것 */
+var EN_MODE = (new URLSearchParams(location.search).get('lang') || '').toLowerCase() === 'en';
+var tx = function(ko, en){ return EN_MODE ? en : ko; };
+function applyLang(){
+  if (!EN_MODE) return;
+  document.documentElement.lang = 'en';
+  document.title = 'CRISPY — hex cracker puzzle | Oreum Games';
+  document.querySelectorAll('[data-en]').forEach(function(el){ el.innerHTML = el.dataset.en; });
+  document.querySelectorAll('[data-en-title]').forEach(function(el){
+    el.title = el.dataset.enTitle;
+    if (el.hasAttribute('aria-label')) el.setAttribute('aria-label', el.dataset.enTitle);
+  });
+}
+applyLang();
 
 /* ── 판 기본값 ── */
 /* 판은 작게 시작해서 점수가 오르면 한 겹 넓어집니다.
@@ -324,7 +341,7 @@ function emptyCount(){ return cellCount() - board.size; }
 /* ── 스테이지 ──
  * 판마다 '어느 토핑을 몇 장 터뜨려라' 가 목표고, 정해진 수 안에 해내야 합니다.
  * 목표 색은 판 번호로 정해집니다 — 같은 판은 늘 같은 목표라 운으로 갈리지 않습니다. */
-var COLNAME = ['딸기', '피스타치오', '블루베리'];
+var COLNAME = EN_MODE ? ['Strawberry', 'Pistachio', 'Blueberry'] : ['딸기', '피스타치오', '블루베리'];
 function stageGoalColor(n){ return (n - 1) % 3; }
 /* 아래 넷은 봇으로 재서 맞춘 값입니다. 근거 없이 만지지 마세요 */
 /* 봇으로 재서 고른 값 — 처음 막히는 판이 실력 0.6/0.8/0.95 에서 6·9·11판.
@@ -375,7 +392,8 @@ function stageClear(){
   bgmVol(musicOn ? BGM_VOL*0.4 : 0);
   document.getElementById('cScore').textContent = score;
   document.getElementById('cLeft').textContent = Math.max(0, movesLeft);
-  document.getElementById('clearSub').textContent = COLNAME[goalColor] + ' ' + goalNeed + '장 완료';
+  document.getElementById('clearSub').textContent =
+    tx(COLNAME[goalColor] + ' ' + goalNeed + '장 완료', COLNAME[goalColor] + ' ×' + goalNeed + ' done');
   setTimeout(function(){ document.getElementById('sheetClear').classList.add('on'); }, 500);
 }
 
@@ -491,7 +509,7 @@ function gameOver(){
   over = true;
   bgmVol(musicOn ? BGM_VOL*0.3 : 0);
   document.getElementById('overSub').textContent =
-    (emptyCount() === 0) ? '판이 꽉 찼습니다' : '수를 다 썼습니다';
+    (emptyCount() === 0) ? tx('판이 꽉 찼습니다', 'Board is full') : tx('수를 다 썼습니다', 'Out of moves');
   document.getElementById('fStage').textContent = stage;
   document.getElementById('fBest').textContent = bestStage;
   setTimeout(function(){ document.getElementById('sheetOver').classList.add('on'); }, 450);

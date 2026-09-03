@@ -119,7 +119,23 @@ const LANG = (() => {
   if (q === 'en' || q === 'ko') return q;
   return (navigator.language || '').toLowerCase().startsWith('ko') ? 'ko' : 'en';
 })();
-if (LANG === "en") document.querySelector('meta[name="description"]').setAttribute("content", "A 3D character lab with soft-vinyl figure vibes. Swap jobs, motions and proportions on a tiny swordsman.");
+if (LANG === "en") {
+  const EN_DESC = "A 3D character lab with soft-vinyl figure vibes. Swap jobs, motions and proportions on a tiny swordsman. A free web experiment, no install.";
+  const EN_META = {
+    'meta[name="description"]': EN_DESC,
+    'meta[name="keywords"]': "character lab, 3D character viewer, sofubi, soft vinyl figure, three.js, web game, browser game, free game, free online games, no install, no sign-up, indie game, Oreum Games, oreumgames",
+    'meta[property="og:site_name"]': "Oreum Games",
+    'meta[property="og:title"]': "Character Lab — Vinyl Swordsman · Oreum Games",
+    'meta[property="og:description"]': EN_DESC,
+    'meta[property="og:image"]': "https://oreumgames.com/assets/character-lab-shot-en.webp?v=1",
+    'meta[property="og:image:alt"]': "A black sofubi-like figure standing on a dark stage, holding a short blade",
+    'meta[property="og:locale"]': "en_US",
+    'meta[name="twitter:title"]': "Character Lab — Vinyl Swordsman · Oreum Games",
+    'meta[name="twitter:description"]': EN_DESC,
+    'meta[name="twitter:image"]': "https://oreumgames.com/assets/character-lab-shot-en.webp?v=1"
+  };
+  Object.keys(EN_META).forEach(sel => { const m = document.querySelector(sel); if (m) m.setAttribute("content", EN_META[sel]); });
+}
 const STR = {
   ko: {
     title:'캐릭터 랩 — 소프비 칼잡이',
