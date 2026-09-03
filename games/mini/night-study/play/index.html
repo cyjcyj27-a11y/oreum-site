@@ -264,7 +264,7 @@ const L = (ko, en) => EN_MODE ? en : ko;
 </script>
 
 <!-- 오름게임즈 알약(왼쪽 위) + 전체화면(왼쪽 아래) — 모든 게임 기본 탑재 -->
-<script src="/assets/game-home.js?v=5" data-top="4" data-left="4" data-fullscreen="1" defer></script>
+<script src="/assets/game-home.js?v=6" data-top="4" data-left="4" data-fullscreen="1" defer></script>
 <script>
 /* file:// 로 그냥 열었을 때를 위한 예비 줄 — /assets/… 절대경로는 서버가 있어야 잡힌다.
    ../ 개수는 이 파일에서 사이트 뿌리까지의 깊이대로 (games/mini/night-study/play/ 기준) */
@@ -272,7 +272,7 @@ const L = (ko, en) => EN_MODE ? en : ko;
   function f(){
     if (document.getElementById('oreumHome')) return;
     var s = document.createElement('script');
-    s.src = '../../../../assets/game-home.js?v=5';
+    s.src = '../../../../assets/game-home.js?v=6';
     s.setAttribute('data-top','4'); s.setAttribute('data-left','4');
     s.setAttribute('data-fullscreen','1');
     document.body.appendChild(s);

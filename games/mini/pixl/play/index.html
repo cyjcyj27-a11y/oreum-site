@@ -315,7 +315,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;touch-
   </div>
 </section>
 
-<script src="/assets/game-home.js?v=5" data-top="4" data-left="4" data-fullscreen="1" defer></script>
+<script src="/assets/game-home.js?v=6" data-top="4" data-left="4" data-fullscreen="1" defer></script>
 <script>
 /* 왼쪽 위 OREUM GAMES 배지와 왼쪽 아래 전체화면 단추는 /assets/game-home.js 가 붙여 준다.
    그런데 파일을 그냥 두 번 눌러 여는 경우(file://) 맨 앞이 / 인 주소를 못 찾아 둘 다 안 나온다.
@@ -324,7 +324,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;touch-
   function fallback(){
     if(document.getElementById('oreumHome')) return;      // 이미 붙었으면 그만
     var s=document.createElement('script');
-    s.src='../../../../assets/game-home.js?v=5';
+    s.src='../../../../assets/game-home.js?v=6';
     s.setAttribute('data-top','4'); s.setAttribute('data-left','4');
     s.setAttribute('data-fullscreen','1');
     document.body.appendChild(s);

@@ -92,6 +92,48 @@
     document.body.appendChild(a);
 
     if (sc && sc.getAttribute('data-fullscreen') === '1') addFullscreen(ko);
+    inAppFix(ko);
+  }
+
+  /* ── 앱 안 브라우저(카카오톡·인스타·페북·네이버·라인) ──
+   * 이 브라우저들은 전체화면과 가로 고정 기능이 없다. 가로 전용 게임은 "가로로 돌려 주세요" 안내에서
+   * 단추를 눌러도 아무 일이 안 생겨 시작을 못 한다(2026-09-03 카톡에서 확인).
+   * 그래서 (1) 가로 안내의 단추를 "크롬으로 열기"로 바꾸고 (2) 위쪽에 얇은 안내 띠를 붙인다.
+   * 시험: PC 에서 ?inapp=1 을 붙이면 같은 화면을 볼 수 있다. */
+  function inAppFix(ko) {
+    var ua = navigator.userAgent || '';
+    var force = /[?&]inapp=1/.test(location.search);
+    var kakao = /KAKAOTALK/i.test(ua);
+    var inApp = kakao || /Instagram|FBAN|FBAV|FB_IAB|NAVER\(inapp|Line\/|DaumApps|everytimeApp|Whale.*inapp/i.test(ua);
+    var noFs = !(document.fullscreenEnabled || document.webkitFullscreenEnabled);
+    var mobile = /Android|iPhone|iPad|iPod/i.test(ua);
+    if (!force && !(mobile && (inApp || noFs))) return;
+    var android = /Android/i.test(ua) || force;
+    var url = location.href;
+    var open = kakao ? 'kakaotalk://web/openExternal?url=' + encodeURIComponent(url)
+             : android ? 'intent://' + location.host + location.pathname + location.search + '#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=' + encodeURIComponent(url) + ';end'
+             : 'x-safari-' + url;
+    var label = android || kakao ? (ko ? '크롬으로 열기' : 'Open in Chrome') : (ko ? '사파리로 열기' : 'Open in Safari');
+    function go(e) { if (e) { e.preventDefault(); e.stopPropagation(); } try { location.href = open; } catch (err) {} }
+
+    // (1) 가로 안내 단추가 있는 게임(메이킹김치·야간자율학습·SAAB): 단추를 바꿔치기
+    var rg = document.getElementById('rotGo');
+    if (rg) {
+      rg.textContent = label;
+      rg.addEventListener('click', go, true);
+      var h = document.getElementById('rotHint');
+      if (h) h.textContent = ko ? '앱 안 브라우저에서는 전체화면이 안 됩니다. 크롬으로 열거나, 폰을 옆으로 돌려 주세요.' : 'In-app browsers cannot go fullscreen. Open in Chrome, or turn your phone sideways.';
+    }
+    // (2) 모든 게임: 위쪽 안내 띠
+    var bar = document.createElement('div');
+    bar.id = 'oreumInApp';
+    bar.setAttribute('style', 'position:fixed;left:0;right:0;top:0;z-index:2147483000;display:flex;align-items:center;justify-content:center;gap:10px;padding:8px 12px calc(8px + env(safe-area-inset-top));padding-top:calc(8px + env(safe-area-inset-top));background:rgba(20,26,20,.92);color:#fff;font:600 13px/1.3 -apple-system,"Malgun Gothic",sans-serif;pointer-events:auto');
+    bar.innerHTML = '<span>' + (ko ? '앱 안에서는 가로 화면이 안 됩니다' : 'Landscape mode is unavailable in this in-app browser') + '</span>' +
+      '<a href="' + open.replace(/"/g, '&quot;') + '" style="flex:none;background:#7fbf4d;color:#0f2a12;text-decoration:none;font-weight:800;padding:7px 12px;border-radius:999px">' + label + '</a>' +
+      '<button type="button" aria-label="close" style="flex:none;background:none;border:0;color:#fff;font-size:18px;line-height:1;padding:0 4px">×</button>';
+    bar.querySelector('a').addEventListener('click', go);
+    bar.querySelector('button').addEventListener('click', function () { bar.remove(); });
+    document.body.appendChild(bar);
   }
 
   /* ── 전체화면 보기 ──
