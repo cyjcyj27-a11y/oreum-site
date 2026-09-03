@@ -163,7 +163,10 @@
               'pageviews', 'pv_home', 'pv_saju', 'pv_guide', 'pv_support', 'pv_privacy',
               'pv_board', 'pv_board_en', 'pv_privacy_play', 'pv_immortality', 'day_' + today,
               'play_1m', 'play_3m', 'play_10m', 'install_click', 'app_install', 'app_open',
-              'game_rounds', 'game_overs', 'rounds_fingerkick', 'rounds_lulu', 'rounds_skyrider', 'rounds_skijump', 'rounds_saab'];
+              'game_rounds', 'game_overs', 'rounds_fingerkick', 'rounds_lulu', 'rounds_skyrider', 'rounds_skijump', 'rounds_saab',
+              // 게임 소개·목록 페이지 (2026-09-03부터 pv_home 대신 여기에 센다. 핑거킥·스카이라이더는 처음부터 자기 칸)
+              'pv_intro', 'pv_intro_en', 'pv_games', 'pv_games_en', 'pv_mini', 'pv_mini_en',
+              'pv_fingerkick', 'pv_fingerkick_en', 'pv_skyrider', 'pv_skyrider_en'];
   // 한꺼번에 많이 부르면 속도 제한에 걸리므로 나눠 부르고 사이에 잠깐 쉽니다.
   // 3개씩 260ms로는 화면이 뜨기까지 30초가 걸려서 멈춘 것처럼 보였습니다.
   // 막히면 위 get()이 알아서 쉬었다 다시 부르므로, 여기서는 조금 넉넉하게 갑니다.
@@ -225,15 +228,18 @@
     var pvBoard = d.pv_board + d.pv_board_en;
     var pvGame = d.game_session + d.pv_privacy_play, pvSaju = d.pv_saju;
     var pvImmo = d.pv_immortality;   // 영생의 가격 (2026-08-13 공개)
-    var pvAll = pvHome + pvBoard + pvGame + pvSaju + pvImmo;
+    // 게임 소개·목록 페이지. 2026-09-03 전에는 pv_home(홈)에 섞여 들어갔다 — 그 전 숫자는 홈에서 못 갈라낸다.
+    var pvIntro = d.pv_intro + d.pv_intro_en + d.pv_games + d.pv_games_en + d.pv_mini + d.pv_mini_en
+                + d.pv_fingerkick + d.pv_fingerkick_en + d.pv_skyrider + d.pv_skyrider_en;
+    var pvAll = pvHome + pvBoard + pvGame + pvSaju + pvImmo + pvIntro;
     document.getElementById('pv-total').innerHTML = fmt(pvAll) + '<small>회</small>';
     document.getElementById('pv-note').textContent = pvAll === 0
       ? '아직 페이지뷰가 없어요. 어느 페이지든 열 때마다(새로고침·재방문 포함) 여기 숫자가 올라갑니다.'
       : '새로고침·재방문까지 합친 전체 열어본 횟수예요. 아래는 어디를 얼마나 봤는지 나눈 것.';
-    var cats = [['🏠 오름 홈페이지', pvHome], ['🎮 게임 (play)', pvGame],
+    var cats = [['🏠 오름 홈페이지', pvHome], ['🎮 게임 실행 (play)', pvGame], ['📋 게임 소개·목록', pvIntro],
                 ['⏳ 영생의 가격', pvImmo],
                 ['🔮 MBTI·사주', pvSaju], ['💬 커뮤니티', pvBoard]];
-    var catMax = Math.max(1, pvHome, pvGame, pvSaju, pvBoard, pvImmo);
+    var catMax = Math.max(1, pvHome, pvGame, pvSaju, pvBoard, pvImmo, pvIntro);
     document.getElementById('pv-cats').innerHTML = cats.map(function (c) {
       var pct = Math.round(c[1] / (pvAll || 1) * 100);
       return '<div class="bar"><div class="name" style="width:120px">' + c[0] + '</div>' +
@@ -270,6 +276,18 @@
     document.getElementById('r-note').textContent = rounds === 0
       ? '판 수 집계를 이제 막 시작했어요. 게임에서 START·RETRY 를 누를 때마다 오릅니다. 사람별 판 수는 구글 애널리틱스(game_start 이벤트 ÷ 사용자)에서 봅니다.'
       : '접속당 판 수가 3을 넘으면 붙잡는 힘이 있는 겁니다. "끝까지 한 비율"은 시작한 판 중 게임오버·클리어까지 간 비율이에요. 사람별 판 수는 구글 애널리틱스 game_start 이벤트에서 봅니다.';
+
+    // 게임 소개 세부 — 자기 칸이 있는 것만 (나머지 게임은 pv_intro 에 합쳐진다)
+    var introDefs = [['핑거킥', d.pv_fingerkick + d.pv_fingerkick_en], ['스카이라이더', d.pv_skyrider + d.pv_skyrider_en],
+                     ['게임 목록', d.pv_games + d.pv_games_en], ['미니게임 목록', d.pv_mini + d.pv_mini_en], ['그 밖의 소개', d.pv_intro + d.pv_intro_en]];
+    var introShown = introDefs.filter(function (s) { return s[1] > 0; }).sort(function (a, b) { return b[1] - a[1]; });
+    if (introShown.length) document.getElementById('pv-pages').innerHTML +=
+      '<div class="note" style="margin:10px 0 4px">↳ 게임 소개·목록 세부 (2026-09-03부터)</div>' + introShown.map(function (s) {
+        var n = s[1], pct = Math.round(n / (pvIntro || 1) * 100);
+        return '<div class="bar"><div class="name" style="width:96px">' + s[0] + '</div>' +
+               '<div class="track"><div class="fill" style="width:' + Math.max(pct, n ? 4 : 0) + '%;background:var(--cold)"></div></div>' +
+               '<div class="val">' + fmt(n) + '회 · ' + pct + '%</div></div>';
+      }).join('');
 
     // ⑤ 재방문율 = 게임을 다른 날 다시 켠 플레이어 / 전체 게임 플레이어 (진짜 '게임 생명력' 지표)
     // 홈페이지 재방문이 아니라 게임 재방문을 봅니다 — 게임하러 오는 사람은 게임 주소로 바로 오니까요.
