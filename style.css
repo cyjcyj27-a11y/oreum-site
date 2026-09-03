@@ -904,7 +904,7 @@ body{ font-size:19px; }
   .mini{ border-radius:14px; }
   .mbody{ padding:10px 11px 12px; }
   .mbody b{ font-size:16px; line-height:1.25; }
-  .mbody i{ font-size:12.5px; margin-top:2px; }
+  .mbody i{ font-size:12px; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }   /* 설명은 한 줄. 길면 … */
   .kind{ left:7px; top:7px; font-size:11px; padding:2px 8px; }
   .isnew{ right:7px; top:7px; font-size:10.5px; padding:2px 8px; }
   .showcase .grid a.mini:first-child .shot::after{ right:7px; top:7px; font-size:10.5px; padding:2px 8px; }
@@ -919,6 +919,8 @@ body{ font-size:19px; }
 /* 목록 페이지(/games/ /apps/) 머리 */
 .list-head{ margin:0 0 22px; }
 .list-head h1{ font-size:34px; letter-spacing:.02em; color:var(--ink); }
+/* 폰에서는 제목이 한 줄에 들어가게 화면 폭에 맞춰 줄인다 (370px 폰에서 약 26px) */
+@media (max-width:560px){ .list-head h1{ font-size:clamp(20px, 7vw, 34px); letter-spacing:0; } }
 .list-head p{ margin:6px 0 0; font-size:17px; color:var(--muted); }
 .more-card .mc i + i{ margin-top:10px; font-size:13px; letter-spacing:.1em; color:var(--muted); }
 
