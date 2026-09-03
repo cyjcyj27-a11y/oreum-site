@@ -44,6 +44,12 @@
   .foot { text-align: center; color: var(--muted); font-size: 12px; margin-top: 24px; }
   .reload { display: inline-block; margin-top: 4px; color: var(--green-lit); font-weight: 700; text-decoration: none; font-size: 13px; cursor: pointer; }
   .loading { color: var(--muted); font-size: 14px; }
+  .gt { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .gt th, .gt td { padding: 6px 4px; text-align: right; border-top: 1px solid var(--line); white-space: nowrap; }
+  .gt th { color: var(--muted); font-weight: 600; border-top: 0; font-size: 12px; }
+  .gt th:first-child, .gt td:first-child { text-align: left; }
+  .gt td.hot { color: var(--green-lit); font-weight: 800; }
+  .gt tr.zero td { color: var(--muted); }
   @media (max-width: 480px) { .bar .name { width: 62px; } .bar .val { width: 84px; } .big { font-size: 34px; } }
 </style>
 </head>
@@ -78,9 +84,15 @@
       <div class="chip"><div class="n" id="r-per">–</div><div class="l">접속당 판 수</div></div>
       <div class="chip cold"><div class="n" id="r-fin">–</div><div class="l">끝까지 한 비율</div></div>
       <div class="chip ember"><div class="n" id="r-sess">–</div><div class="l">게임 접속</div></div>
+      <div class="chip"><div class="n" id="r-min">–</div><div class="l">총 플레이 시간</div></div>
     </div>
-    <div id="r-games" style="margin-top:10px"></div>
     <div class="note" id="r-note"></div>
+  </div>
+
+  <div class="card">
+    <h2>🎮 게임별 <span class="em">접속 · 판 수 · 플레이 시간 — 2026-09-03부터</span></h2>
+    <div id="games-table"><div class="loading">위 지표를 먼저 불러온 뒤 이어서 불러옵니다…</div></div>
+    <div class="note">접속은 실행 화면을 연 횟수(새로고침 포함). 판은 START·RETRY 를 누른 횟수. 플레이는 탭이 보이는 동안 1분마다 1분. "분/접속"이 곧 한 번 켜서 몇 분 하는지입니다.</div>
   </div>
 
   <div class="card">
@@ -105,16 +117,6 @@
     <h2>📲 앱 설치 <span class="em">홈 화면에 넣고 쓰는 사람</span></h2>
     <div id="install"><div class="loading">불러오는 중…</div></div>
     <div class="note">푸터의 "굳이 설치하기"로 잰 숫자예요. 설치는 크롬(안드로이드·PC)만 알려주고, 아이폰은 앱으로 연 횟수로만 보입니다.</div>
-  </div>
-
-  <div class="card">
-    <h2>⑦ 사주 ↔ 실제 MBTI <span class="em">추정표를 고칠 근거를 모으는 중</span></h2>
-    <div id="pair"><div class="note">칸이 많아 위 지표와 같이 부르면 화면이 늦게 뜹니다. 필요할 때만 눌러 주세요.</div></div>
-    <a class="reload" id="pairBtn">↻ 불러오기</a>
-    <div class="note">MBTI사주에서 <b>본인이 직접 MBTI를 고른 사람</b>만 셉니다. 추정값은 정답이 아니라서 빼고,
-      같은 사주·같은 MBTI는 한 번만 셉니다. 생년월일은 보내지 않고 "십신 다섯 종류 중 하나 + 글자 하나"만 셉니다.
-      각 줄의 반대쪽(I·S·F·P)은 100에서 빼면 됩니다. 표본이 30을 넘어야 눈으로 볼 만합니다.<br>
-      아직 아무도 안 쌓였으면 10초쯤, 쌓였으면 40초쯤 걸립니다.</div>
   </div>
 
   <div class="foot">
@@ -163,7 +165,7 @@
               'pageviews', 'pv_home', 'pv_saju', 'pv_guide', 'pv_support', 'pv_privacy',
               'pv_board', 'pv_board_en', 'pv_privacy_play', 'pv_immortality', 'day_' + today,
               'play_1m', 'play_3m', 'play_10m', 'install_click', 'app_install', 'app_open',
-              'game_rounds', 'game_overs', 'rounds_fingerkick', 'rounds_lulu', 'rounds_skyrider', 'rounds_skijump', 'rounds_saab',
+              'game_rounds', 'game_overs', 'game_minutes', 'play_30m', 'play_1h', 'play_2h',
               // 게임 소개·목록 페이지 (2026-09-03부터 pv_home 대신 여기에 센다. 핑거킥·스카이라이더는 처음부터 자기 칸)
               'pv_intro', 'pv_intro_en', 'pv_games', 'pv_games_en', 'pv_mini', 'pv_mini_en',
               'pv_fingerkick', 'pv_fingerkick_en', 'pv_skyrider', 'pv_skyrider_en'];
@@ -197,7 +199,8 @@
     w.style.color = '#a35c10';        // 진행 표시(회색)로 남아 있지 않게 되돌립니다
     w.style.display = 'block';
   }
-  fetchChunked(keys, 8).then(function (vals) {
+  // 5개씩 2초(10초에 25번) — Abacus 제한(10초에 30번) 안쪽. 더 빨리 부르면 429로 막혀 재시도하느라 오히려 느려진다.
+  fetchChunked(keys, 5, 2000).then(function (vals) {
     var d = {}; keys.forEach(function (k, i) { d[k] = vals[i]; });
     // 끝내 못 읽은 값이 있으면 숫자가 실제보다 적게 보일 수 있으니 알려줍니다
     if (failed > 0) {
@@ -264,18 +267,10 @@
     document.getElementById('r-per').textContent = sess ? (rounds / sess).toFixed(1) + '판' : '–';
     document.getElementById('r-fin').textContent = rounds ? Math.round(d.game_overs / rounds * 100) + '%' : '–';
     document.getElementById('r-sess').textContent = fmt(sess);
-    var gDefs = [['핑거킥', 'rounds_fingerkick'], ['루루냥', 'rounds_lulu'], ['스카이라이더', 'rounds_skyrider'], ['스키점프', 'rounds_skijump'], ['SAAB', 'rounds_saab']];   // 다른 게임은 rounds_<폴더이름> 키로 쌓입니다. 보고 싶으면 여기 한 줄 추가
-    var gShown = gDefs.filter(function (g) { return d[g[1]] > 0; }).sort(function (a, b) { return d[b[1]] - d[a[1]]; });
-    var gMax = Math.max(1, gShown.length ? d[gShown[0][1]] : 1);
-    document.getElementById('r-games').innerHTML = gShown.map(function (g) {
-      var n = d[g[1]];
-      return '<div class="bar"><div class="name" style="width:96px">' + g[0] + '</div>' +
-             '<div class="track"><div class="fill" style="width:' + Math.max(Math.round(n / gMax * 100), 4) + '%;background:var(--green)"></div></div>' +
-             '<div class="val">' + fmt(n) + '판</div></div>';
-    }).join('');
+    var gm = d.game_minutes; document.getElementById('r-min').textContent = gm >= 120 ? Math.round(gm / 60) + '시간' : fmt(gm) + '분';
     document.getElementById('r-note').textContent = rounds === 0
       ? '판 수 집계를 이제 막 시작했어요. 게임에서 START·RETRY 를 누를 때마다 오릅니다. 사람별 판 수는 구글 애널리틱스(game_start 이벤트 ÷ 사용자)에서 봅니다.'
-      : '접속당 판 수가 3을 넘으면 붙잡는 힘이 있는 겁니다. "끝까지 한 비율"은 시작한 판 중 게임오버·클리어까지 간 비율이에요. 사람별 판 수는 구글 애널리틱스 game_start 이벤트에서 봅니다.';
+      : '접속당 판 수가 3을 넘으면 붙잡는 힘이 있는 겁니다. "끝까지 한 비율"은 시작한 판 중 게임오버·클리어까지 간 비율이에요. 총 플레이 시간은 탭이 보이는 동안만 1분 단위로 셉니다. 사람별 판 수는 구글 애널리틱스 game_start 이벤트에서 봅니다.';
 
     // 게임 소개 세부 — 자기 칸이 있는 것만 (나머지 게임은 pv_intro 에 합쳐진다)
     var introDefs = [['핑거킥', d.pv_fingerkick + d.pv_fingerkick_en], ['스카이라이더', d.pv_skyrider + d.pv_skyrider_en],
@@ -309,7 +304,7 @@
 
     // ④ 체류 · 몰입 — 게임 세션(매 접속) 기준. 분모=세션 수, 분자도 세션 단위라 100%를 안 넘습니다.
     var denom = d.game_session || d.game_open || 1;
-    var dwellDefs = [['1분+', d.play_1m], ['3분+', d.play_3m], ['10분+', d.play_10m]];
+    var dwellDefs = [['1분+', d.play_1m], ['3분+', d.play_3m], ['10분+', d.play_10m], ['30분+', d.play_30m], ['1시간+', d.play_1h], ['2시간+', d.play_2h]];   // 30분 이상은 2026-09-03부터
     document.getElementById('dwell').innerHTML = dwellDefs.map(function (s) {
       var pct = Math.min(100, Math.round(s[1] / denom * 100));
       return '<div class="bar"><div class="name">' + s[0] + '</div>' +
@@ -326,72 +321,30 @@
              '<div class="track"><div class="fill" style="width:' + Math.max(pct, s[1] ? 4 : 0) + '%;background:var(--green-lit)"></div></div>' +
              '<div class="val">' + fmt(s[1]) + '회</div></div>';
     }).join('');
+    loadGames();
   }).catch(function (e) { showReadError(); console.error(e); });
 
-  /* ⑦ 사주 ↔ 실제 MBTI — 누르면 그때 불러옵니다.
-     칸이 90개라 위 지표와 같이 부르면 화면 뜨는 데 1분이 걸립니다. */
-  /* 칸 이름은 영문입니다. Abacus 가 한글이 든 이름을 400으로 거절합니다.
-     [보이는 이름, 칸 이름] 순서이고, 칸 이름은 saju/index.html 의 logMbtiPair 와 똑같아야 합니다. */
-  var GODS = [['비겁', 'bigeop'], ['식상', 'siksang'], ['재성', 'jaeseong'],
-              ['관성', 'gwanseong'], ['인성', 'inseong']];
-  var ELS  = [['목', 'mok'], ['화', 'hwa'], ['토', 'to'], ['금', 'geum'], ['수', 'su']];
-  // 축마다 한쪽만 셉니다. 반대쪽은 분모에서 빼면 나옵니다.
-  var AXES = [['E', 'E / I'], ['N', 'N / S'], ['T', 'T / F'], ['J', 'J / P']];
-
-  document.getElementById('pairBtn').addEventListener('click', function () {
-    var box = document.getElementById('pair');
-    box.innerHTML = '<div class="loading">불러오는 중…</div>';
-
-    /* 분모(십신 5 + 오행 5)부터 봅니다.
-       아직 아무도 안 쌓였으면 여기서 끝내면 되는데, 예전에는 빈 상태에서도 50칸을 전부
-       불러오느라 100초를 기다려야 했습니다. 이제 열 칸만 보고 바로 끝납니다.
-
-       Abacus 는 10초에 30번까지만 받습니다(429). 넘기면 되던 것도 영영 안 뜹니다.
-       그래서 6개씩 2.6초 간격 — 10초에 24번으로 제한 안쪽입니다. */
-    var denomKeys = GODS.map(function (g) { return 'sj_' + g[1]; })
-                        .concat(ELS.map(function (e) { return 'sw_' + e[1]; }));
-
-    fetchChunked(denomKeys, 6, 2600).then(function (dv) {
-      var d = {}; denomKeys.forEach(function (k, i) { d[k] = dv[i]; });
-      var total = GODS.reduce(function (a, g) { return a + d['sj_' + g[1]]; }, 0);
-      if (!total) {
-        box.innerHTML = '<div class="note">아직 한 명도 안 쌓였습니다. MBTI를 직접 고르고 분석한 사람이 생기면 여기에 나옵니다.</div>';
-        return null;
-      }
-      // 쌓인 게 있을 때만 분자를 부릅니다
-      var numKeys = [];
-      GODS.forEach(function (g) { AXES.forEach(function (a) { numKeys.push('sj_' + g[1] + '_' + a[0]); }); });
-      ELS.forEach(function (e) { AXES.forEach(function (a) { numKeys.push('sw_' + e[1] + '_' + a[0]); }); });
-      return fetchChunked(numKeys, 6, 2600).then(function (nv) {
-        numKeys.forEach(function (k, i) { d[k] = nv[i]; });
-        return { d: d, total: total };
-      });
-    }).then(function (r) {
-      if (!r) return;
-      var d = r.d, total = r.total;
-      function 표(제목, 목록, 접두) {
-        var h = ['<div class="note" style="margin:14px 0 6px"><b>' + 제목 + '</b></div>'];
-        목록.forEach(function (x) {
-          var n = d[접두 + x[1]];
-          if (!n) return;
-          var 줄 = AXES.map(function (a) {
-            var pct = Math.round(d[접두 + x[1] + '_' + a[0]] / n * 100);
-            return a[1] + ' ' + pct + ':' + (100 - pct);
-          }).join('  ·  ');
-          h.push('<div class="bar"><div class="name">' + x[0] + '</div>' +
-                 '<div class="track" style="background:transparent;height:auto">' +
-                 '<span style="font-size:12.5px;color:var(--ink2)">' + 줄 + '</span></div>' +
-                 '<div class="val">' + n + '명</div></div>');
-        });
-        return h.join('');
-      }
-      box.innerHTML = '<div class="big">' + total + '<small>명 모임</small></div>' +
-                      표('십신별', GODS, 'sj_') + 표('오행별', ELS, 'sw_');
-    }).catch(function (e) {
-      box.innerHTML = '<div class="note">못 읽었습니다. 잠시 뒤 다시 눌러보세요.</div>';
-      console.error(e);
-    });
-  });
+  // 🎮 게임별 — 실행 화면이 있는 게임 전부. 칸이 많아(게임당 3개) 위 지표를 그린 뒤 이어서 부릅니다.
+  //    새 게임을 올리면 여기 한 줄 추가: [보이는 이름, 폴더 이름(games/<이름>/play 또는 games/mini/<이름>/play)]
+  var GAMES = [['핑거킥', 'fingerkick'], ['루루냥', 'lulu'], ['영생의 가격', 'immortality'], ['김치 담그기', 'making-kimchi'], ['S.A.A.B.', 'saab'], ['스카이 라이더', 'skyrider'],
+               ['스키점프', 'skijump'], ['다 부숴', 'break-it-all'], ['크리스피', 'crispy'], ['돌담', 'doldam'], ['칼 결투', 'knife-duel-v7'], ['인생 물류', 'life-logistics'],
+               ['야간자율학습', 'night-study'], ['냥 결투', 'nyang-duel'], ['오름냥', 'oreumnyang'], ['페어붐', 'pairboom'], ['픽셀', 'pixl'], ['극성 뒤집기', 'polarity-flip'], ['미끄럼 고양이', 'slip-cat']];
+  function loadGames() {
+    var fmt = function (n) { return (n || 0).toLocaleString('ko-KR'); };
+    var ks = []; GAMES.forEach(function (g) { ks.push('pv_game_' + g[1], 'rounds_' + g[1], 'min_' + g[1]); });
+    document.getElementById('games-table').innerHTML = '<div class="loading">게임별 불러오는 중… 30초쯤 걸립니다</div>';
+    fetchChunked(ks, 5, 2000).then(function (vals) {
+      var rows = GAMES.map(function (g, i) { return { name: g[0], pv: vals[i * 3], r: vals[i * 3 + 1], m: vals[i * 3 + 2] }; });
+      rows.sort(function (a, b) { return b.pv - a.pv || b.m - a.m; });
+      var maxMin = 0; rows.forEach(function (r) { if (r.pv) maxMin = Math.max(maxMin, r.m / r.pv); });
+      document.getElementById('games-table').innerHTML = '<table class="gt"><tr><th>게임</th><th>접속</th><th>판</th><th>판/접속</th><th>플레이</th><th>분/접속</th></tr>' +
+        rows.map(function (r) {
+          var per = r.pv ? (r.r / r.pv).toFixed(1) : '–', mp = r.pv ? (r.m / r.pv).toFixed(1) : '–';
+          var play = r.m >= 120 ? Math.round(r.m / 60) + '시간' : fmt(r.m) + '분';
+          return '<tr' + (r.pv ? '' : ' class="zero"') + '><td>' + r.name + '</td><td>' + fmt(r.pv) + '</td><td>' + fmt(r.r) + '</td><td>' + per + '</td><td>' + play + '</td><td' + (r.pv && r.m / r.pv >= maxMin && maxMin > 0 ? ' class="hot"' : '') + '>' + mp + '</td></tr>';
+        }).join('') + '</table>';
+    }).catch(function (e) { document.getElementById('games-table').innerHTML = '<div class="loading">게임별 표를 못 불러왔어요. 새로고침해 주세요.</div>'; console.error(e); });
+  }
 })();
 </script>
 </body>
