@@ -72,6 +72,18 @@
   </div>
 
   <div class="card">
+    <h2>🎯 판 수 <span class="em">한 번 열어서 몇 판 하는지 — 중독성</span></h2>
+    <div class="big" id="rounds">…</div>
+    <div class="split">
+      <div class="chip"><div class="n" id="r-per">–</div><div class="l">접속당 판 수</div></div>
+      <div class="chip cold"><div class="n" id="r-fin">–</div><div class="l">끝까지 한 비율</div></div>
+      <div class="chip ember"><div class="n" id="r-sess">–</div><div class="l">게임 접속</div></div>
+    </div>
+    <div id="r-games" style="margin-top:10px"></div>
+    <div class="note" id="r-note"></div>
+  </div>
+
+  <div class="card">
     <h2>⑤ 재방문율 <span class="em">게임에 생명력이 있는지</span></h2>
     <div class="rate"><span class="big" id="ret-rate">…</span></div>
     <div class="note" id="ret-note"></div>
@@ -150,7 +162,8 @@
   var keys = ['total', 'returning', 'game_open', 'game_session', 'game_players', 'game_returning',
               'pageviews', 'pv_home', 'pv_saju', 'pv_guide', 'pv_support', 'pv_privacy',
               'pv_board', 'pv_board_en', 'pv_privacy_play', 'pv_immortality', 'day_' + today,
-              'play_1m', 'play_3m', 'play_10m', 'install_click', 'app_install', 'app_open'];
+              'play_1m', 'play_3m', 'play_10m', 'install_click', 'app_install', 'app_open',
+              'game_rounds', 'game_overs', 'rounds_fingerkick', 'rounds_lulu', 'rounds_skyrider', 'rounds_skijump', 'rounds_saab'];
   // 한꺼번에 많이 부르면 속도 제한에 걸리므로 나눠 부르고 사이에 잠깐 쉽니다.
   // 3개씩 260ms로는 화면이 뜨기까지 30초가 걸려서 멈춘 것처럼 보였습니다.
   // 막히면 위 get()이 알아서 쉬었다 다시 부르므로, 여기서는 조금 넉넉하게 갑니다.
@@ -238,6 +251,25 @@
                  '<div class="val">' + fmt(n) + '회 · ' + pct + '%</div></div>';
         }).join('')
       : '';
+
+    // 🎯 판 수 — 게임 실행 페이지 공통 스크립트(assets/game-events.js)가 한 판 시작마다 셉니다 (2026-09-03부터)
+    var rounds = d.game_rounds, sess = d.game_session;
+    document.getElementById('rounds').innerHTML = fmt(rounds) + '<small>판</small>';
+    document.getElementById('r-per').textContent = sess ? (rounds / sess).toFixed(1) + '판' : '–';
+    document.getElementById('r-fin').textContent = rounds ? Math.round(d.game_overs / rounds * 100) + '%' : '–';
+    document.getElementById('r-sess').textContent = fmt(sess);
+    var gDefs = [['핑거킥', 'rounds_fingerkick'], ['루루냥', 'rounds_lulu'], ['스카이라이더', 'rounds_skyrider'], ['스키점프', 'rounds_skijump'], ['SAAB', 'rounds_saab']];   // 다른 게임은 rounds_<폴더이름> 키로 쌓입니다. 보고 싶으면 여기 한 줄 추가
+    var gShown = gDefs.filter(function (g) { return d[g[1]] > 0; }).sort(function (a, b) { return d[b[1]] - d[a[1]]; });
+    var gMax = Math.max(1, gShown.length ? d[gShown[0][1]] : 1);
+    document.getElementById('r-games').innerHTML = gShown.map(function (g) {
+      var n = d[g[1]];
+      return '<div class="bar"><div class="name" style="width:96px">' + g[0] + '</div>' +
+             '<div class="track"><div class="fill" style="width:' + Math.max(Math.round(n / gMax * 100), 4) + '%;background:var(--green)"></div></div>' +
+             '<div class="val">' + fmt(n) + '판</div></div>';
+    }).join('');
+    document.getElementById('r-note').textContent = rounds === 0
+      ? '판 수 집계를 이제 막 시작했어요. 게임에서 START·RETRY 를 누를 때마다 오릅니다. 사람별 판 수는 구글 애널리틱스(game_start 이벤트 ÷ 사용자)에서 봅니다.'
+      : '접속당 판 수가 3을 넘으면 붙잡는 힘이 있는 겁니다. "끝까지 한 비율"은 시작한 판 중 게임오버·클리어까지 간 비율이에요. 사람별 판 수는 구글 애널리틱스 game_start 이벤트에서 봅니다.';
 
     // ⑤ 재방문율 = 게임을 다른 날 다시 켠 플레이어 / 전체 게임 플레이어 (진짜 '게임 생명력' 지표)
     // 홈페이지 재방문이 아니라 게임 재방문을 봅니다 — 게임하러 오는 사람은 게임 주소로 바로 오니까요.

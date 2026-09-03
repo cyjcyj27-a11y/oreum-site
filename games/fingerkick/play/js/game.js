@@ -197,6 +197,7 @@
   function start() {
     G.score = [0, 0]; G.clock = MATCH; G.B = setup(HUMAN); G.turn = HUMAN; G.streak = 0; G.flick = null; G.resting = true; G.goalPause = 0; G.aiTimer = 0;
     G.mode = 'play'; $('title').classList.add('hide'); $('over').classList.remove('show'); updHud(); A.whistle();
+    if (window.OG) OG.start();   // 집계: 한 판 시작 (재시작 포함)
   }
   function fullTime() {
     G.mode = 'over'; A.whistle3();
@@ -205,6 +206,7 @@
     var rec = loadRec(); if (h > c) rec.w++; else if (h < c) rec.l++; else rec.d++; saveRec(rec); showRec();
     $('osc').textContent = h + ' : ' + c;
     $('over').classList.add('show');
+    if (window.OG) OG.over({ result: r.textContent, score: h + '_' + c });   // 집계: 한 판 끝
   }
   var last = 0;
   function loop(ts) {
