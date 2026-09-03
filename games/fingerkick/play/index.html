@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<link rel="canonical" href="https://oreumgames.com/games/fingerkick/">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, viewport-fit=cover">
+<title>핑거킥 — Finger Kick</title>
+<style>
+  @font-face { font-family: 'Griun'; src: url('fonts/Griun_Fromsol-Rg.ttf') format('truetype'); font-display: swap; }
+  @font-face { font-family: 'Ria'; src: url('fonts/RiaSans-ExtraBold.woff2') format('woff2'); font-display: swap; }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #3b2a1d; font-family: 'Griun', 'Noto Sans KR', 'Malgun Gothic', sans-serif; color: #f2ede4; user-select: none; }
+  #c { display: block; width: 100vw; height: 100vh; touch-action: none; }
+
+  /* 상단 바 — 오름 알약(왼쪽 위) 오른쪽부터 */
+  #topbar { position: fixed; left: 0; right: 0; top: 0; height: calc(46px + env(safe-area-inset-top)); padding: env(safe-area-inset-top) 10px 0 104px; display: flex; align-items: center; gap: 8px; pointer-events: none; z-index: 5; }
+  .stat { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 999px; background: rgba(0,0,0,.42); border: 1px solid rgba(255,255,255,.14); font-size: 15px; white-space: nowrap; text-shadow: 0 1px 2px rgba(0,0,0,.6); }
+  .stat b { font-weight: normal; font-size: 20px; min-width: 14px; text-align: center; }
+  .tm { display: inline-flex; align-items: center; gap: 5px; font-family: Arial, sans-serif; font-weight: 700; font-size: 12px; letter-spacing: 1px; opacity: .55; transition: opacity .25s; }
+  .tm.on { opacity: 1; }
+  .tm i { width: 14px; height: 14px; border-radius: 50%; border: 3px solid #fff; background: #e0343c; box-shadow: 0 1px 2px rgba(0,0,0,.5); }
+  .tm.cpu i { border-color: #ffd23a; background: #2a62d6; }
+  .tm.on i { box-shadow: 0 0 0 2px rgba(255,255,255,.35), 0 0 10px rgba(255,255,255,.55); }
+  #streak { font-size: 11px; letter-spacing: 2px; opacity: .9; }
+  #streak.h { color: #ff7a7a; } #streak.c { color: #7fb0ff; }
+  #clock b { font-family: Arial, sans-serif; font-weight: 700; font-size: 17px; letter-spacing: 1px; }
+  #clock.low b { color: #ff6a5a; }
+  .spacer { flex: 1; }
+  .tog { pointer-events: auto; width: 36px; height: 36px; border-radius: 50%; border: 1px solid rgba(255,255,255,.3); background: rgba(0,0,0,.4); color: #fff; font-family: inherit; font-size: 17px; line-height: 1; padding: 0; touch-action: manipulation; }
+  .tog.off { opacity: .4; text-decoration: line-through; }
+  @media (max-width: 520px) {
+    #topbar { padding-left: 96px; padding-right: 6px; gap: 4px; }
+    .stat { padding: 4px 7px; font-size: 12px; gap: 3px; } .stat b { font-size: 16px; min-width: 10px; }
+    .tm span { display: none; } .tm i { width: 12px; height: 12px; border-width: 2px; }
+    #streak { font-size: 9px; letter-spacing: 1px; padding: 5px 6px; }
+    #clock .ic { display: none; } #clock b { font-size: 15px; }
+    .tog { width: 30px; height: 30px; font-size: 14px; }
+  }
+
+  #goal { position: fixed; left: 50%; top: 42%; transform: translate(-50%, -50%) scale(.6); font-family: 'Ria', Arial, sans-serif; font-weight: 900; font-size: 92px; letter-spacing: 8px; color: #fff; -webkit-text-stroke: 3px #1b3d22; paint-order: stroke fill; text-shadow: 0 6px 24px rgba(0,0,0,.55); opacity: 0; pointer-events: none; z-index: 8; transition: opacity .2s, transform .35s cubic-bezier(.2,1.6,.4,1); }
+  #goal.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+
+  #keys { position: fixed; right: 12px; bottom: calc(10px + env(safe-area-inset-bottom)); font-size: 11px; opacity: .45; text-align: right; line-height: 1.5; pointer-events: none; z-index: 5; }
+  body.touch #keys { display: none; }
+
+  #title, #over { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; text-align: center; }
+  #title { pointer-events: none; }
+  #title h1 { font-family: 'Ria', Arial, sans-serif; font-weight: 900; font-size: min(22vw, 118px); margin: 0 0 4px; line-height: 1; color: #fff; -webkit-text-stroke: 3px #1b3d22; paint-order: stroke fill; text-shadow: 0 8px 30px rgba(0,0,0,.5); letter-spacing: 2px; }
+  #title .tag { font-family: Arial, sans-serif; font-weight: 700; letter-spacing: 8px; font-size: 16px; color: #fff; text-shadow: 0 1px 4px rgba(0,0,0,.7); margin-bottom: 44px; }
+  .rec { font-size: 15px; letter-spacing: 2px; color: #fff; text-shadow: 0 1px 4px rgba(0,0,0,.7); margin: -30px 0 34px; opacity: .9; }
+  .rec:empty { display: none; }
+  #over .rec { margin: -24px 0 30px; }
+  body.shot #topbar, body.shot #keys, body.shot #oreumHome, body.shot #oreumFs, body.shot #btnStart { display: none !important; }
+  #title .go, #over .again { pointer-events: auto; display: inline-block; padding: 14px 54px; border-radius: 999px; border: 2px solid #fff; background: rgba(15,40,20,.72); color: #fff; font-size: 24px; letter-spacing: 3px; cursor: pointer; box-shadow: 0 6px 20px rgba(0,0,0,.35); touch-action: manipulation; }
+  #title .go:active, #over .again:active { transform: scale(.96); }
+  #over { display: none; background: rgba(6,14,8,.55); }
+  #over.show { display: flex; }
+  #over h2 { font-family: Arial, sans-serif; font-weight: 900; font-size: min(6vw, 30px); letter-spacing: 6px; margin: 0 0 10px; opacity: .85; }
+  #over .res { font-family: 'Ria', Arial, sans-serif; font-weight: 900; font-size: min(20vw, 96px); line-height: 1; letter-spacing: 6px; -webkit-text-stroke: 3px #1b3d22; paint-order: stroke fill; margin-bottom: 6px; }
+  #over .res.win { color: #ffe066; } #over .res.lose { color: #ff7a6a; } #over .res.draw { color: #fff; }
+  #over .sc { font-family: Arial, sans-serif; font-weight: 700; font-size: 34px; letter-spacing: 4px; margin-bottom: 40px; }
+  #over .again { font-family: Arial, sans-serif; letter-spacing: 4px; font-size: 20px; }
+  #title.hide { display: none; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+
+<div id="topbar">
+  <span class="stat" id="score"><span class="tm you on" id="tmH"><i></i><span>YOU</span></span> <b id="s0">0</b> : <b id="s1">0</b> <span class="tm cpu" id="tmC"><span>CPU</span><i></i></span></span>
+  <span class="stat" id="streak">●●●</span>
+  <span class="stat" id="clock"><span class="ic">⏱</span> <b id="clk">3:00</b></span>
+  <span class="spacer"></span>
+  <button class="tog" id="tgBgm" title="M">♪</button>
+  <button class="tog" id="tgSnd" title="K">🔊</button>
+</div>
+
+<div id="goal">GOAL</div>
+<div id="keys">M 음악 · K 효과음</div>
+
+<div id="over">
+  <h2>FULL TIME</h2>
+  <div class="res" id="res">WIN</div>
+  <div class="sc" id="osc">0 : 0</div>
+  <div class="rec" id="rec2"></div>
+  <div class="again" id="btnRetry">RETRY</div>
+</div>
+
+<div id="title">
+  <h1>핑거킥</h1>
+  <div class="tag">FINGER KICK</div>
+  <div class="rec" id="rec"></div>
+  <div class="go" id="btnStart">시작</div>
+</div>
+
+<script src="assets/game-home.js" data-top="6" data-left="6" data-fullscreen="1" defer></script>
+<script src="js/audio.js?v=1"></script>
+<script src="js/game.js?v=1"></script>
+</body>
+</html>

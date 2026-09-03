@@ -76,11 +76,7 @@ def sort_cards(html, today):
 
     out = []
     for i, (href, card) in enumerate(dated + undated):
-        card = NEW_RE.sub("", card)                   # 옛 딱지는 먼저 다 뗀다
-        # 맨 앞 한 장에만 — 여러 장에 붙으면 '새것'이라는 뜻이 없어진다
-        if i == 0 and fresh(published(href), today):
-            card = card.replace('<span class="kind">',
-                                '<span class="isnew">NEW</span><span class="kind">', 1)
+        card = NEW_RE.sub("", card)                   # 옛 딱지는 다 뗀다 — NEW 는 style.css 가 맨 앞 두 장에 자동으로 붙인다 (2026-09-03)
         out.append(card)
     return out, [h for h, _ in dated + undated]
 
@@ -106,7 +102,7 @@ def main():
         print("%s  카드 %d개" % (rel, len(cards)))
         for i, h in enumerate(order[:4]):
             print("   %-34s %s%s" % (h, published(h) or "날짜없음",
-                                     "  ← NEW" if i == 0 and fresh(published(h), today) else ""))
+                                     "  ← NEW" if i < 2 and fresh(published(h), today) else ""))
         if not show and new != html:
             io.open(p, "w", encoding="utf-8", newline="").write(new)
 
