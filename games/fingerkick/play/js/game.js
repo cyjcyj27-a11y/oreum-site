@@ -17,11 +17,14 @@
   var view = { s: 1, ox: 0, oy: 0, land: false, dpr: 1, w: 0, h: 0 };
   var G = { mode: 'title', B: [], turn: HUMAN, streak: 0, score: [0, 0], clock: MATCH, flick: null, resting: true, goalPause: 0, aiTimer: 0, lastClk: '', conceded: HUMAN };
   var drag = null, glow = 0, isTouch = false;
+  // ── 말: ?lang=en 이면 영어. 한국어가 원본이고 영어를 덧씌운다 ──
+  var EN = /[?&]lang=en/i.test(location.search);
+  if (EN) { document.documentElement.lang = 'en'; document.body.classList.add('en'); document.title = 'Finger Kick — free flick soccer game'; Array.prototype.forEach.call(document.querySelectorAll('[data-en]'), function (el) { el.textContent = el.getAttribute('data-en'); }); }
 
   // ── 전적 (브라우저에 저장) ──
   function loadRec() { try { var r = JSON.parse(localStorage.getItem('fingerkick.rec') || '{}'); return { w: r.w | 0, d: r.d | 0, l: r.l | 0 }; } catch (e) { return { w: 0, d: 0, l: 0 }; } }
   function saveRec(r) { try { localStorage.setItem('fingerkick.rec', JSON.stringify(r)); } catch (e) {} }
-  function recText(r) { return (r.w + r.d + r.l) ? r.w + '승 ' + r.d + '무 ' + r.l + '패' : ''; }
+  function recText(r) { if (!(r.w + r.d + r.l)) return ''; return EN ? r.w + 'W ' + r.d + 'D ' + r.l + 'L' : r.w + '승 ' + r.d + '무 ' + r.l + '패'; }
   function showRec() { var t = recText(loadRec()); $('rec').textContent = t; $('rec2').textContent = t; }
 
   // ── 화면 맞추기 ──
