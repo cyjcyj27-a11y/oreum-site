@@ -40,7 +40,7 @@ GAMES = [
     ("polarity-flip", "/games/mini/polarity-flip/", "/en/games/mini/polarity-flip/", "극성 반전",        "전략 보드게임",             "Polarity Flip",            "strategy board game",           {"puzzle", "board", "pvp"}),
 ]
 # 미니게임 목록에서 '실험작'으로 표시한 것 — 이 페이지들에도 블록은 붙지만, 다른 페이지가 추천하지는 않는다 (2026-09-04 사장님 지시)
-EXPERIMENTAL = {"life-logistics", "slip-cat", "knife-duel-v7", "nyang-duel"}
+EXPERIMENTAL = {"life-logistics", "slip-cat", "knife-duel-v7", "nyang-duel", "polarity-flip"}
 N_RELATED = 6      # 페이지마다 관련 게임 수
 N_SIMILAR = 4      # 그중 태그가 겹치는 것 수 (나머지는 돌림 순서로 채워 전체가 이어지게)
 
