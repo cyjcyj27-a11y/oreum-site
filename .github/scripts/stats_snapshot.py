@@ -84,29 +84,27 @@ def main():
         open(out_path, "w", encoding="utf-8").write(text)
         print("wrote", out_path, len(values), "values,", len(missing), "missing")
         return
-    # ── 'stats' 브랜치에 커밋 (액션 안에서) ──
-    work = os.path.join(ROOT, "_stats_branch")
-    subprocess.run(["git", "worktree", "remove", "--force", work], cwd=ROOT, capture_output=True)
-    has = subprocess.run(["git", "ls-remote", "--heads", "origin", "stats"], cwd=ROOT, capture_output=True, text=True).stdout.strip()
-    if has:
-        subprocess.run(["git", "fetch", "origin", "stats"], cwd=ROOT, check=True)
-        subprocess.run(["git", "worktree", "add", work, "origin/stats"], cwd=ROOT, check=True)
-        subprocess.run(["git", "checkout", "-B", "stats"], cwd=work, check=True)
-    else:
-        subprocess.run(["git", "worktree", "add", "--detach", work], cwd=ROOT, check=True)
-        subprocess.run(["git", "checkout", "--orphan", "stats"], cwd=work, check=True)
-        subprocess.run(["git", "rm", "-rfq", "."], cwd=work, capture_output=True)
-        open(os.path.join(work, "README.md"), "w", encoding="utf-8").write("# stats\n\n지표 스냅샷 브랜치. 깃허브 액션이 20분마다 stats.json 을 갱신합니다. 손으로 고치지 않습니다.\n")
-    open(os.path.join(work, "stats.json"), "w", encoding="utf-8").write(text)
-    subprocess.run(["git", "config", "user.name", "stats-bot"], cwd=work, check=True)
-    subprocess.run(["git", "config", "user.email", "stats-bot@users.noreply.github.com"], cwd=work, check=True)
-    subprocess.run(["git", "add", "-A"], cwd=work, check=True)
-    st = subprocess.run(["git", "status", "--porcelain"], cwd=work, capture_output=True, text=True).stdout.strip()
-    if not st:
+    # ── 'stats' 브랜치에 커밋 — 작업 폴더를 건드리지 않고 git 저수준 명령으로 트리를 직접 만든다 ──
+    def git(*a, **kw):
+        r = subprocess.run(["git"] + list(a), cwd=ROOT, capture_output=True, text=True, encoding="utf-8", **kw)
+        if r.returncode != 0:
+            raise SystemExit("git %s 실패: %s" % (" ".join(a), r.stderr.strip()))
+        return r.stdout.strip()
+    subprocess.run(["git", "fetch", "origin", "stats"], cwd=ROOT, capture_output=True)
+    parent = subprocess.run(["git", "rev-parse", "--verify", "-q", "origin/stats"], cwd=ROOT, capture_output=True, text=True).stdout.strip()
+    NL, TAB = chr(10), chr(9)
+    readme = "# stats" + NL + NL + "지표 스냅샷 브랜치. 깃허브 액션이 20분마다 stats.json 을 갱신합니다. 손으로 고치지 않습니다." + NL
+    b_json = git("hash-object", "-w", "--stdin", input=text)
+    b_md = git("hash-object", "-w", "--stdin", input=readme)
+    tree = git("mktree", input="100644 blob " + b_md + TAB + "README.md" + NL + "100644 blob " + b_json + TAB + "stats.json" + NL)
+    if parent and git("rev-parse", parent + "^{tree}") == tree:
         print("변화 없음"); return
-    subprocess.run(["git", "commit", "-qm", "stats %s (%d values)" % (snap["at"], len(values))], cwd=work, check=True)
-    subprocess.run(["git", "push", "origin", "stats"], cwd=work, check=True)
-    print("pushed", len(values), "values,", len(missing), "missing")
+    env = dict(os.environ, GIT_AUTHOR_NAME="stats-bot", GIT_AUTHOR_EMAIL="stats-bot@users.noreply.github.com",
+               GIT_COMMITTER_NAME="stats-bot", GIT_COMMITTER_EMAIL="stats-bot@users.noreply.github.com")
+    args = ["commit-tree", tree, "-m", "stats %s (%d values)" % (snap["at"], len(values))] + (["-p", parent] if parent else [])
+    commit = subprocess.run(["git"] + args, cwd=ROOT, capture_output=True, text=True, env=env, check=True).stdout.strip()
+    git("push", "origin", "%s:refs/heads/stats" % commit)
+    print("pushed", commit[:8], len(values), "values,", len(missing), "missing")
 
 
 if __name__ == "__main__":
