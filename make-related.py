@@ -39,6 +39,8 @@ GAMES = [
     ("nyang-duel",    "/games/mini/nyang-duel/",    "/en/games/mini/nyang-duel/",    "냥냥 검객 대전",   "2D 격투 게임",              "Nyang Duel",               "2D fighting game",              {"action", "fighting", "cat", "pvp"}),
     ("polarity-flip", "/games/mini/polarity-flip/", "/en/games/mini/polarity-flip/", "극성 반전",        "전략 보드게임",             "Polarity Flip",            "strategy board game",           {"puzzle", "board", "pvp"}),
 ]
+# 미니게임 목록에서 '실험작'으로 표시한 것 — 이 페이지들에도 블록은 붙지만, 다른 페이지가 추천하지는 않는다 (2026-09-04 사장님 지시)
+EXPERIMENTAL = {"life-logistics", "slip-cat", "knife-duel-v7", "nyang-duel"}
 N_RELATED = 6      # 페이지마다 관련 게임 수
 N_SIMILAR = 4      # 그중 태그가 겹치는 것 수 (나머지는 돌림 순서로 채워 전체가 이어지게)
 
@@ -51,7 +53,7 @@ def pick(i):
     if _PICKS is None:
         n = len(GAMES); inbound = [0] * n; _PICKS = [None] * n
         for a in range(n):
-            me = GAMES[a]; others = [k for k in range(n) if k != a]
+            me = GAMES[a]; others = [k for k in range(n) if k != a and GAMES[k][0] not in EXPERIMENTAL]
             sim = sorted([k for k in others if me[7] & GAMES[k][7]], key=lambda k: (-len(me[7] & GAMES[k][7]), (k - a) % n))[:N_SIMILAR]
             out = list(sim)
             while len(out) < N_RELATED:
@@ -107,7 +109,7 @@ def main():
         r2 = apply(os.path.join(root, g[2].strip("/"), "index.html"), block(i, True))
         print(f"{g[0]:<15} ko={r1:<10} en={r2:<10} → " + ", ".join(GAMES[k][0] for k in pick(i)))
     print("\n들어오는 링크 수:", ", ".join(f"{k}={v}" for k, v in inbound.items()))
-    low = [k for k, v in inbound.items() if v < 3]
+    low = [k for k, v in inbound.items() if v < 3 and k not in EXPERIMENTAL]
     print("3개 미만:", low or "없음")
 
 if __name__ == "__main__":
