@@ -124,13 +124,22 @@
     el.addEventListener('pointerdown', e => { e.stopPropagation(); e.preventDefault(); input[k] = true; if (!started) start(); });
     el.addEventListener('pointerup', () => { input[k] = false; }); el.addEventListener('pointercancel', () => { input[k] = false; }); el.addEventListener('pointerleave', () => { input[k] = false; });
   }
-  // 십자 화살표: 누르는 동안만 (앞뒤 = padF, 좌우 = padS. 왼쪽이 +)
+  // 둥근 조이스틱: 손가락 벡터를 앞뒤 = padF, 좌우 = padS 로 (왼쪽이 +). 놓으면 0
   input.padF = 0; input.padS = 0;
-  for (const [id, key, val] of [['padU', 'padF', 1], ['padD', 'padF', -1], ['padL', 'padS', 1], ['padR', 'padS', -1]]) {
-    const el = document.getElementById(id); if (!el) continue;
-    const off = () => { if (input[key] === val) input[key] = 0; };
-    el.addEventListener('pointerdown', e => { e.stopPropagation(); e.preventDefault(); input[key] = val; if (!started) start(); });
-    el.addEventListener('pointerup', off); el.addEventListener('pointercancel', off); el.addEventListener('pointerleave', off);
+  const pad = document.getElementById('pad'), knob = document.getElementById('knob');
+  if (pad && knob) {
+    let padId = null;
+    const padMove = e => {
+      const r = pad.getBoundingClientRect(), R = r.width / 2, max = R - knob.offsetWidth / 2;
+      const mx = e.clientX - (r.left + R), my = e.clientY - (r.top + R), d = Math.hypot(mx, my), s = d > max ? max / d : 1;
+      const kx = mx * s, ky = my * s; knob.style.transform = 'translate(' + kx + 'px,' + ky + 'px)';
+      let nx = kx / max, ny = ky / max; if (Math.hypot(nx, ny) < 0.08) nx = ny = 0;   // 데드존 8%
+      input.padS = -nx; input.padF = -ny;
+    };
+    const padEnd = e => { if (padId !== e.pointerId) return; padId = null; pad.classList.remove('on'); knob.style.transform = ''; input.padS = input.padF = 0; };
+    pad.addEventListener('pointerdown', e => { e.stopPropagation(); e.preventDefault(); if (padId !== null) return; padId = e.pointerId; try { pad.setPointerCapture(padId); } catch (_) { } pad.classList.add('on'); padMove(e); if (!started) start(); });
+    pad.addEventListener('pointermove', e => { if (padId !== e.pointerId) return; e.stopPropagation(); padMove(e); });
+    pad.addEventListener('pointerup', padEnd); pad.addEventListener('pointercancel', padEnd); pad.addEventListener('lostpointercapture', padEnd);
   }
   // 브라우저를 숨기거나 닫으면 소리도 같이 멈춘다
   document.addEventListener('visibilitychange', () => { if (window.AUDIO && AUDIO.pause) AUDIO.pause(document.hidden || paused); });

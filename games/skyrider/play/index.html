@@ -162,11 +162,10 @@
     #up { right: 12px; } #dn { right: 116px; }
   }
 
-  /* 폰 조작: 왼쪽 위 지도 아래에 아래로·위로(70% 크기), 오른쪽에 십자 화살표 */
-  #pad { display: none; position: fixed; right: 14px; bottom: calc(14px + env(safe-area-inset-bottom)); width: 186px; height: 186px; pointer-events: none; }
-  #pad button { position: absolute; width: 60px; height: 60px; border-radius: 14px; border: 2px solid rgba(255,255,255,.75); background: rgba(20,24,30,.62); color: #fff; font-size: 24px; font-family: inherit; pointer-events: auto; touch-action: none; -webkit-user-select: none; user-select: none; }
-  #pad button:active { background: rgba(255,255,255,.4); }
-  #padU { left: 63px; top: 0; } #padD { left: 63px; bottom: 0; } #padL { left: 0; top: 63px; } #padR { right: 0; top: 63px; }
+  /* 폰 조작: 왼쪽 위 지도 아래에 아래로·위로(70% 크기), 오른쪽에 둥근 조이스틱(바깥 원 + 손가락 따라 움직이는 놉) */
+  #pad { display: none; position: fixed; right: 14px; bottom: calc(14px + env(safe-area-inset-bottom)); width: 186px; height: 186px; border-radius: 50%; border: 2px solid rgba(255,255,255,.45); background: rgba(20,24,30,.38); touch-action: none; -webkit-user-select: none; user-select: none; z-index: 6; }
+  #knob { position: absolute; left: 50%; top: 50%; width: 72px; height: 72px; margin: -36px 0 0 -36px; border-radius: 50%; border: 2px solid rgba(255,255,255,.75); background: rgba(255,255,255,.3); pointer-events: none; }
+  #pad.on #knob { background: rgba(255,255,255,.5); }
   body.touch #pad { display: block; }
   body.touch .tbtn { width: 76px; height: 76px; font-size: 17px; bottom: auto; top: calc(468px + env(safe-area-inset-top)); }
   body.touch #dn { left: 12px; right: auto; } body.touch #up { left: 96px; right: auto; }
@@ -174,8 +173,7 @@
     body.touch .tbtn { width: 60px; height: 60px; font-size: 15px; top: calc(256px + env(safe-area-inset-top)); }
     body.touch #dn { left: 12px; } body.touch #up { left: 80px; }
     #pad { width: 160px; height: 160px; right: 10px; bottom: calc(10px + env(safe-area-inset-bottom)); }
-    #pad button { width: 52px; height: 52px; font-size: 20px; }
-    #padU { left: 54px; } #padD { left: 54px; } #padL { top: 54px; } #padR { top: 54px; }
+    #knob { width: 62px; height: 62px; margin: -31px 0 0 -31px; }
   }
 </style>
 </head>
@@ -243,7 +241,7 @@
 <div id="keys" data-en="↑↓←→ Move · Space Up · Shift Down<br>T Map · M Music · K Sound · R Respawn">↑↓←→ 이동 · 스페이스 상승 · Shift 하강<br>T 지도 · M 음악 · K 효과음 · R 리스폰</div>
 <button id="dn" class="tbtn" data-en="DOWN">아래로</button>
 <button id="up" class="tbtn" data-en="UP">위로</button>
-<div id="pad"><button id="padU">▲</button><button id="padL">◀</button><button id="padR">▶</button><button id="padD">▼</button></div>
+<div id="pad"><div id="knob"></div></div>
 
 <div id="title">
   <h1 data-en="SKY RIDER">스카이 라이더</h1>
@@ -272,7 +270,7 @@ if (EN_MODE) {
 <script src="js/scenery.js?v=211"></script>
 <script src="js/audio.js?v=211"></script>
 <script src="js/delivery.js?v=211"></script>
-<script src="js/game.js?v=211"></script>
+<script src="js/game.js?v=212"></script>
 <script src="/assets/visit.js?v=11" defer></script>
 <script src="/assets/game-events.js?v=1" defer></script>
 </body>
