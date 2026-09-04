@@ -96,4 +96,4 @@ GA4 트래픽 획득에서 소스별로 방문을 맞춰 보기 위한 기록. �
 
 | 날짜 | 곳 | 주소 | 게임 | 메모 |
 |---|---|---|---|---|
-| 2026-09-04 | itch.io | https://oreumgames.itch.io/finger-kick | 핑거킥(영어판 실행 포함) | 설명글에 원본 페이지·홈 링크 2개(nofollow). 게임 안 OREUM GAMES 알약 → oreumgames.com/en/?utm_source=itch |
+| 2026-09-04 | itch.io | https://oreumgames.itch.io/finger-kick | 핑거킥(영어판 실행 포함) | 설명글 링크 2개(nofollow) + Metadata→External links 에 Homepage(원본 페이지)·YouTube·TikTok. 조작 Mouse·Touchscreen, 언어 English·Korean, 한 판 A few minutes. 게임 안 OREUM GAMES 알약 → oreumgames.com/en/?utm_source=itch |
