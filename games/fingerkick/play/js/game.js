@@ -369,9 +369,14 @@
   $('btnRetry').addEventListener('click', function () { A.init(); start(); });
   $('tgSnd').addEventListener('click', function () { A.init(); A.toggleSnd(); syncTog(); });
   $('tgBgm').addEventListener('click', function () { A.init(); A.toggleBgm(); syncTog(); });
+  var toastT = 0;
+  function toast(txt) { var t = $('toast'); t.textContent = txt; t.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(function () { t.classList.remove('on'); }, 1400); }
+  function nextTrack() { A.init(); var r = A.nextTrack(); toast('\u266a ' + r.index + ' / ' + r.total); }
+  $('tgNext').addEventListener('click', nextTrack);
   addEventListener('keydown', function (e) {
     if (e.key === 'm' || e.key === 'M') { A.init(); A.toggleBgm(); syncTog(); }
     if (e.key === 'k' || e.key === 'K') { A.init(); A.toggleSnd(); syncTog(); }
+    if (e.key === 'n' || e.key === 'N') nextTrack();
   });
   if ('ontouchstart' in window && matchMedia('(pointer: coarse)').matches) { isTouch = true; document.body.classList.add('touch'); }
   addEventListener('resize', resize);

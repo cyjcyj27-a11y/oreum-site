@@ -29,6 +29,8 @@
   .spacer { flex: 1; }
   .tog { pointer-events: auto; width: 36px; height: 36px; border-radius: 50%; border: 1px solid rgba(255,255,255,.3); background: rgba(0,0,0,.4); color: #fff; font-family: inherit; font-size: 17px; line-height: 1; padding: 0; touch-action: manipulation; }
   .tog.off { opacity: .4; text-decoration: line-through; }
+  #toast { position: fixed; left: 50%; top: calc(58px + env(safe-area-inset-top)); transform: translateX(-50%); padding: 6px 14px; border-radius: 999px; background: rgba(0,0,0,.55); color: #fff; font-family: Arial, sans-serif; font-weight: 700; font-size: 14px; letter-spacing: 1px; opacity: 0; transition: opacity .25s; pointer-events: none; z-index: 6; }
+  #toast.on { opacity: 1; }
   @media (max-width: 520px) {
     #topbar { padding-left: 96px; padding-right: 6px; gap: 4px; }
     .stat { padding: 4px 7px; font-size: 12px; gap: 3px; } .stat b { font-size: 16px; min-width: 10px; }
@@ -68,12 +70,14 @@
 <body>
 <canvas id="c"></canvas>
 
+<div id="toast"></div>
 <div id="topbar">
   <span class="stat" id="score"><span class="tm you on" id="tmH"><i></i><span>YOU</span></span> <b id="s0">0</b> : <b id="s1">0</b> <span class="tm cpu" id="tmC"><span>CPU</span><i></i></span></span>
   <span class="stat" id="streak">●●●</span>
   <span class="stat" id="clock"><span class="ic">⏱</span> <b id="clk">3:00</b></span>
   <span class="spacer"></span>
   <button class="tog" id="tgBgm" title="M">♪</button>
+  <button class="tog" id="tgNext" title="N">⏭</button>
   <button class="tog" id="tgSnd" title="K">🔊</button>
 </div>
 
@@ -96,8 +100,8 @@
 </div>
 
 <script src="/assets/game-home.js?v=6" data-top="6" data-left="6" data-fullscreen="1" defer></script>
-<script src="js/audio.js?v=1"></script>
-<script src="js/game.js?v=1"></script>
+<script src="js/audio.js?v=2"></script>
+<script src="js/game.js?v=2"></script>
 <script src="/assets/visit.js?v=11" defer></script>
 <script src="/assets/game-events.js?v=1" defer></script>
 </body>

@@ -11,7 +11,17 @@
   function save(k, v) { try { localStorage.setItem(KEY + '.' + k, v ? '1' : '0'); } catch (e) {} }
 
   function mk(src, loop, vol) { var a = new Audio(src); a.loop = !!loop; a.preload = 'auto'; a.volume = vol; return a; }
-  var crowd = mk('assets/crowd.mp3', true, 0.45);
+  // 경기장 함성 — 나라별 실제 녹음 (출처 assets/SOUNDS.md). 고른 곡만 내려받고, ⏭(N) 으로 넘긴다. 어느 팀인지는 화면에 안 알려 준다.
+  var TRACKS = ['crowd-nl', 'crowd-en', 'crowd-de', 'crowd-br', 'crowd-ie', 'crowd-wc', 'crowd-esnl', 'crowd-wh'];
+  var ti = 0; try { ti = Math.max(0, Math.min(TRACKS.length - 1, parseInt(localStorage.getItem(KEY + '.track') || '0', 10) || 0)); } catch (e) {}
+  var crowd = mk('assets/' + TRACKS[ti] + '.mp3', true, 0.45);
+  function nextTrack() {
+    var wasOn = bgm; try { crowd.pause(); } catch (e) {}
+    ti = (ti + 1) % TRACKS.length; try { localStorage.setItem(KEY + '.track', String(ti)); } catch (e) {}
+    crowd = mk('assets/' + TRACKS[ti] + '.mp3', true, 0.45);
+    if (wasOn) crowdSync();
+    return { index: ti + 1, total: TRACKS.length };
+  }
   var goalS = mk('assets/goal.mp3', false, 1.0);
   var shout = mk('assets/shout.mp3', false, 0.9);   // 해설 "골!" 외침
   var whis = mk('assets/whistle.mp3', false, 0.7);
@@ -50,6 +60,7 @@
     get snd() { return snd; }, get bgm() { return bgm; },
     toggleSnd: function () { snd = !snd; save('snd', snd); return snd; },
     toggleBgm: function () { bgm = !bgm; save('bgm', bgm); crowdSync(); return bgm; },
+    nextTrack: nextTrack,
     flick: function (p) { if (!ok()) return; var t = ac.currentTime; burst(t, 0.06, 0.25 + p * 0.3, 1800); tone(240, 'sine', t, 0.08, 0.25, 110); },
     hit: function (s) { if (!ok()) return; var t = ac.currentTime, v = Math.min(0.5, 0.06 + s * 0.05); tone(1000 + s * 40, 'sine', t, 0.05, v, 500); burst(t, 0.03, v * 0.6, 3000); },
     wall: function (s) { if (!ok()) return; var t = ac.currentTime, v = Math.min(0.35, 0.05 + s * 0.04); tone(140, 'sine', t, 0.09, v, 60); burst(t, 0.04, v * 0.4, 700); },
@@ -60,7 +71,7 @@
       if (bgm && snd) { crowd.volume = 1.0; var t0 = Date.now(); (function ease() { var k = (Date.now() - t0) / 3500; if (k >= 1) { crowd.volume = 0.45; return; } crowd.volume = 1.0 - 0.55 * k; setTimeout(ease, 60); })(); }
     },
     whistle3: function () { play(full); },
-    _els: { crowd: crowd, goal: goalS, shout: shout, whistle: whis, full: full }
+    get _els() { return { crowd: crowd, goal: goalS, shout: shout, whistle: whis, full: full }; }
   };
   window.FKAudio = A;
 })();
