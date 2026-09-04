@@ -1,0 +1,31 @@
+# 지표 스냅샷 — 20분마다 Abacus 카운터를 읽어 'stats' 브랜치의 stats.json 으로 저장합니다.
+# stats.html 은 이 JSON 을 한 번에 읽어 바로 그립니다 (브라우저에서 100번 부르던 것을 없앴습니다).
+name: Stats snapshot
+
+on:
+  schedule:
+    - cron: "*/20 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: stats-snapshot
+  cancel-in-progress: false
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: 카운터 읽어 stats 브랜치에 저장
+        run: python .github/scripts/stats_snapshot.py

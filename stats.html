@@ -199,17 +199,13 @@
     w.style.color = '#a35c10';        // 진행 표시(회색)로 남아 있지 않게 되돌립니다
     w.style.display = 'block';
   }
-  // 5개씩 2초(10초에 25번) — Abacus 제한(10초에 30번) 안쪽. 더 빨리 부르면 429로 막혀 재시도하느라 오히려 느려진다.
-  fetchChunked(keys, 5, 2000).then(function (vals) {
-    var d = {}; keys.forEach(function (k, i) { d[k] = vals[i]; });
-    // 끝내 못 읽은 값이 있으면 숫자가 실제보다 적게 보일 수 있으니 알려줍니다
-    if (failed > 0) {
-      var w = document.getElementById('readWarn');
-      w.textContent = '값 ' + failed + '개를 못 읽었어요. 실제보다 적게 보일 수 있으니 새로고침해 주세요.';
-      w.style.display = 'block';
-    }
-    var fmt = function (n) { return n.toLocaleString('ko-KR'); };
+  // ── 빠른 길: 깃허브 액션이 20분마다 만들어 두는 스냅샷(stats.json)을 한 번에 읽어 바로 그린다.
+  //    (브라우저에서 카운터 100개를 하나씩 읽던 옛길은 40~50초가 걸렸다. 스냅샷을 못 읽으면 그 옛길로 간다.)
+  var SNAP = 'https://raw.githubusercontent.com/cyjcyj27-a11y/oreum-site/stats/stats.json';
+  var fmt = function (n) { return (n || 0).toLocaleString('ko-KR'); };
+  var stones = [37, 100, 300, 1000, 3000, 10000];
 
+  function renderVisits(d) {
     // ① 방문 수 + 신규/재방문/오늘 (신규 = 전체 − 재방문)
     var newV = Math.max(0, d.total - d.returning);
     document.getElementById('visits').innerHTML = fmt(d.total) + '<small>명</small>';
@@ -218,12 +214,19 @@
     document.getElementById('v-today').textContent = fmt(d['day_' + today]);
 
     // 마일스톤 37 → 100 → 300 → 1000
-    var stones = [37, 100, 300, 1000], msEl = document.getElementById('milestone'), passed = -1;
+    var msEl = document.getElementById('milestone'), passed = -1;
     stones.forEach(function (s, i) { if (d.total >= s) passed = i; });
     msEl.innerHTML = stones.map(function (s, i) {
       var cls = i <= passed ? 'ms done' : (i === passed + 1 ? 'ms now' : 'ms');
       return '<div class="' + cls + '">' + (i <= passed ? '✓ ' : '') + fmt(s) + '</div>';
     }).join('');
+
+  }
+
+  function render(d) {
+    var fmt = function (n) { return n.toLocaleString('ko-KR'); };
+
+    renderVisits(d);
 
     // 👣 페이지뷰 — 카테고리별(오름 홈페이지 / 게임 play / MBTI사주). 새로고침·재방문까지 전부 셉니다.
     // 게임은 매 접속마다 세는 game_session이 곧 게임 페이지뷰라 그걸 씁니다.
@@ -249,17 +252,7 @@
              '<div class="track"><div class="fill" style="width:' + Math.max(Math.round(c[1] / catMax * 100), c[1] ? 4 : 0) + '%;background:var(--cold)"></div></div>' +
              '<div class="val">' + fmt(c[1]) + '회 · ' + pct + '%</div></div>';
     }).join('');
-    // 오름 홈페이지 세부 (홈/가이드/문의/개인정보)
-    var subDefs = [['홈', 'pv_home'], ['가이드', 'pv_guide'], ['문의', 'pv_support'], ['개인정보', 'pv_privacy']];
-    var subShown = subDefs.filter(function (s) { return d[s[1]] > 0; }).sort(function (a, b) { return d[b[1]] - d[a[1]]; });
-    document.getElementById('pv-pages').innerHTML = subShown.length
-      ? '<div class="note" style="margin:10px 0 4px">↳ 오름 홈페이지 세부</div>' + subShown.map(function (s) {
-          var n = d[s[1]], pct = Math.round(n / (pvHome || 1) * 100);
-          return '<div class="bar"><div class="name" style="width:96px">' + s[0] + '</div>' +
-                 '<div class="track"><div class="fill" style="width:' + Math.max(pct, n ? 4 : 0) + '%;background:var(--ember)"></div></div>' +
-                 '<div class="val">' + fmt(n) + '회 · ' + pct + '%</div></div>';
-        }).join('')
-      : '';
+    document.getElementById('pv-pages').innerHTML = '';
 
     // 🎯 판 수 — 게임 실행 페이지 공통 스크립트(assets/game-events.js)가 한 판 시작마다 셉니다 (2026-09-03부터)
     var rounds = d.game_rounds, sess = d.game_session;
@@ -321,19 +314,12 @@
              '<div class="track"><div class="fill" style="width:' + Math.max(pct, s[1] ? 4 : 0) + '%;background:var(--green-lit)"></div></div>' +
              '<div class="val">' + fmt(s[1]) + '회</div></div>';
     }).join('');
-    loadGames();
-  }).catch(function (e) { showReadError(); console.error(e); });
+  }
 
-  // 🎮 게임별 — 실행 화면이 있는 게임 전부. 칸이 많아(게임당 3개) 위 지표를 그린 뒤 이어서 부릅니다.
-  //    새 게임을 올리면 여기 한 줄 추가: [보이는 이름, 폴더 이름(games/<이름>/play 또는 games/mini/<이름>/play)]
   var GAMES = [['핑거킥', 'fingerkick'], ['루루냥', 'lulu'], ['영생의 가격', 'immortality'], ['김치 담그기', 'making-kimchi'], ['S.A.A.B.', 'saab'], ['스카이 라이더', 'skyrider'],
                ['스키점프', 'skijump'], ['다 부숴', 'break-it-all'], ['크리스피', 'crispy'], ['돌담', 'doldam'], ['칼 결투', 'knife-duel-v7'], ['인생 물류', 'life-logistics'],
                ['야간자율학습', 'night-study'], ['냥 결투', 'nyang-duel'], ['오름냥', 'oreumnyang'], ['페어붐', 'pairboom'], ['픽셀', 'pixl'], ['극성 뒤집기', 'polarity-flip'], ['미끄럼 고양이', 'slip-cat']];
-  function loadGames() {
-    var fmt = function (n) { return (n || 0).toLocaleString('ko-KR'); };
-    var ks = []; GAMES.forEach(function (g) { ks.push('pv_game_' + g[1], 'rounds_' + g[1], 'min_' + g[1]); });
-    document.getElementById('games-table').innerHTML = '<div class="loading">게임별 불러오는 중… 30초쯤 걸립니다</div>';
-    fetchChunked(ks, 5, 2000).then(function (vals) {
+  function renderGames(vals) {
       var rows = GAMES.map(function (g, i) { return { name: g[0], pv: vals[i * 3], r: vals[i * 3 + 1], m: vals[i * 3 + 2] }; });
       rows.sort(function (a, b) { return b.pv - a.pv || b.m - a.m; });
       var maxMin = 0; rows.forEach(function (r) { if (r.pv) maxMin = Math.max(maxMin, r.m / r.pv); });
@@ -343,8 +329,50 @@
           var play = r.m >= 120 ? Math.round(r.m / 60) + '시간' : fmt(r.m) + '분';
           return '<tr' + (r.pv ? '' : ' class="zero"') + '><td>' + r.name + '</td><td>' + fmt(r.pv) + '</td><td>' + fmt(r.r) + '</td><td>' + per + '</td><td>' + play + '</td><td' + (r.pv && r.m / r.pv >= maxMin && maxMin > 0 ? ' class="hot"' : '') + '>' + mp + '</td></tr>';
         }).join('') + '</table>';
-    }).catch(function (e) { document.getElementById('games-table').innerHTML = '<div class="loading">게임별 표를 못 불러왔어요. 새로고침해 주세요.</div>'; console.error(e); });
   }
+
+  function note(text, color) {
+    var w = document.getElementById('readWarn');
+    w.textContent = text; w.style.color = color || '#6b7280'; w.style.display = text ? 'block' : 'none';
+  }
+
+  function fromSnapshot() {
+    return timed(fetch(SNAP + '?t=' + Math.floor(Date.now() / 60000), { cache: 'no-store' }), 6000)
+      .then(function (r) { if (!r.ok) throw new Error('snapshot ' + r.status); return r.json(); })
+      .then(function (j) {
+        var v = j.values || {}, d = {};
+        keys.forEach(function (k) { d[k] = v[k] || 0; });
+        if (j.kst_day !== today) d['day_' + today] = 0;          // 날이 바뀌었으면 '오늘'은 아래서 실시간으로 채운다
+        render(d);
+        var vals = []; GAMES.forEach(function (g) { vals.push(v['pv_game_' + g[1]] || 0, v['rounds_' + g[1]] || 0, v['min_' + g[1]] || 0); });
+        renderGames(vals);
+        var ago = Math.max(0, Math.round((Date.now() - Date.parse(j.at)) / 60000));
+        note('자동 집계 ' + (ago < 60 ? ago + '분' : Math.round(ago / 60) + '시간') + ' 전 기준 · 방문 수와 오늘은 지금 값으로 맞춥니다…');
+        // 머릿수 세 칸만 실시간으로 덧읽는다 (요청 3번)
+        return Promise.all([get('total'), get('returning'), get('day_' + today)]).then(function (vs) {
+          d.total = vs[0]; d.returning = vs[1]; d['day_' + today] = vs[2];
+          renderVisits(d);
+          note(ago > 180 ? '자동 집계가 ' + Math.round(ago / 60) + '시간 전에 멈춰 있어요. 방문 수와 오늘만 지금 값입니다.' : '', ago > 180 ? '#a35c10' : '#6b7280');
+        });
+      });
+  }
+
+  function fromCounters() {
+    // 옛길: 카운터를 5개씩 2초 간격으로 읽는다 — Abacus 는 10초에 30번까지만 받는다(429)
+    return fetchChunked(keys, 5, 2000).then(function (vals) {
+      var d = {}; keys.forEach(function (k, i) { d[k] = vals[i]; });
+      if (failed > 0) note('값 ' + failed + '개를 못 읽었어요. 실제보다 적게 보일 수 있으니 새로고침해 주세요.', '#a35c10');
+      render(d);
+      var ks = []; GAMES.forEach(function (g) { ks.push('pv_game_' + g[1], 'rounds_' + g[1], 'min_' + g[1]); });
+      document.getElementById('games-table').innerHTML = '<div class="loading">게임별 불러오는 중… 30초쯤 걸립니다</div>';
+      return fetchChunked(ks, 5, 2000).then(renderGames);
+    });
+  }
+
+  fromSnapshot().catch(function (e) {
+    console.warn('스냅샷 못 읽음, 카운터를 직접 읽습니다', e);
+    fromCounters().catch(function (err) { showReadError(); console.error(err); });
+  });
 })();
 </script>
 </body>
