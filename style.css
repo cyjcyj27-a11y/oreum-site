@@ -956,14 +956,18 @@ body{ font-size:19px; }
   box-shadow:0 2px 8px rgba(228,87,46,.35);
 }
 
-/* ── 관련 게임 (make-related.py 가 모든 소개 페이지에 넣는다) ── */
+/* ── 다른 게임 플레이 (make-related.py 가 모든 소개 페이지에 넣는다) ── */
 .related { padding: 8px 0 40px; }
 .related h2 { font-size: 24px; font-weight: 800; color: var(--ink); margin: 0 0 14px; padding-top: 22px; border-top: 1px solid var(--line); }
-.related-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; }
-.related-list a { display: flex; flex-direction: column; gap: 3px; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--line-2); background: rgba(255,255,255,.6); color: var(--ink); text-decoration: none; }
-.related-list a:hover { border-color: var(--green-lit); background: #fff; }
-.related-list b { font-size: 17px; }
-.related-list span { font-size: 14px; color: var(--muted); }
+.related-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 10px; }
+.related-list a { display: flex; align-items: center; gap: 12px; padding: 10px 12px 10px 10px; border-radius: 14px; border: 1px solid var(--line-2); background: var(--panel); color: var(--ink); text-decoration: none; box-shadow: 0 1px 2px rgba(0,0,0,.04); transition: transform .12s, box-shadow .12s, border-color .12s; }
+.related-list a:hover, .related-list a:focus-visible { transform: translateY(-2px); border-color: var(--green); box-shadow: 0 6px 16px rgba(0,0,0,.10); }
+.related-list img, .related-noimg { flex: none; width: 96px; height: 60px; object-fit: cover; border-radius: 8px; background: var(--deep); display: block; }
+.related-txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.related-txt b { font-size: 17px; line-height: 1.25; color: var(--green-lit); text-decoration: underline; text-decoration-color: rgba(46,107,57,.35); text-underline-offset: 3px; }
+.related-txt span { font-size: 14px; color: var(--muted); }
+.related-list em { flex: none; font-style: normal; font-size: 13px; font-weight: 800; letter-spacing: .5px; color: #fff; background: var(--green); padding: 6px 10px; border-radius: 999px; }
+.related-list a:hover em { background: var(--green-lit); }
 .related-more { margin: 16px 0 0; font-size: 15px; color: var(--muted); }
-.related-more a { color: var(--ink-2); font-weight: 700; text-decoration: none; }
-.related-more a:hover { text-decoration: underline; }
+.related-more a { color: var(--ink-2); font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
+.related-more a:hover { color: var(--green-lit); }

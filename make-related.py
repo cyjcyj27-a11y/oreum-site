@@ -62,12 +62,22 @@ def pick(i):
             _PICKS[a] = out
     return _PICKS[i]
 
+SHOT_ALIAS = {"knife-duel-v7": "knife-duel"}
+def thumb(slug, en):
+    """assets/<slug>-shot(-en).webp 가 있으면 그 주소, 없으면 None"""
+    root = os.path.dirname(os.path.abspath(__file__)); base = SHOT_ALIAS.get(slug, slug)
+    for name in ([f"{base}-shot-en.webp"] if en else []) + [f"{base}-shot.webp", f"{base}-teaser.webp"]:
+        if os.path.exists(os.path.join(root, "assets", name)): return "/assets/" + name
+    return None
+
 def block(i, en):
     items = []
     for k in pick(i):
         g = GAMES[k]
         href, name, genre = (g[2], g[5], g[6]) if en else (g[1], g[3], g[4])
-        items.append(f'      <li><a href="{href}"><b>{name}</b><span>{genre}</span></a></li>')
+        shot = thumb(g[0], en)
+        img = f'<img src="{shot}" alt="" width="96" height="60" loading="lazy">' if shot else '<i class="related-noimg"></i>'
+        items.append(f'      <li><a href="{href}">{img}<span class="related-txt"><b>{name}</b><span>{genre}</span></span><em>{"PLAY" if en else "플레이"} ▸</em></a></li>')
     if en:
         title, more = "Play Other Games", '<a href="/en/games/">All free games</a> · <a href="/en/games/mini/">Mini games</a> · <a href="/en/">Oreum Games home</a>'
     else:
@@ -84,7 +94,7 @@ def apply(path, html_block):
     else:
         assert s.count("</main>") == 1, path
         s = s.replace("</main>", html_block + "\n</main>")
-    s = re.sub(r"style\.css\?v=\d+", "style.css?v=31", s)
+    s = re.sub(r"style\.css\?v=\d+", "style.css?v=32", s)
     io.open(path, "w", encoding="utf-8", newline="\n").write(s)
     return "OK"
 
