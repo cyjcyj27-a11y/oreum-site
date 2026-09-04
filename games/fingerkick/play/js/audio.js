@@ -12,7 +12,7 @@
 
   function mk(src, loop, vol) { var a = new Audio(src); a.loop = !!loop; a.preload = 'auto'; a.volume = vol; return a; }
   // 경기장 함성 — 나라별 실제 녹음 (출처 assets/SOUNDS.md). 고른 곡만 내려받고, ⏭(N) 으로 넘긴다. 어느 팀인지는 화면에 안 알려 준다.
-  var TRACKS = ['crowd-nl', 'crowd-en', 'crowd-de', 'crowd-br', 'crowd-ie', 'crowd-wc', 'crowd-esnl', 'crowd-wh'];
+  var TRACKS = ['crowd-en', 'crowd-nl', 'crowd-de', 'crowd-br', 'crowd-ie', 'crowd-wc', 'crowd-esnl', 'crowd-wh'];
   var ti = 0; try { ti = Math.max(0, Math.min(TRACKS.length - 1, parseInt(localStorage.getItem(KEY + '.track') || '0', 10) || 0)); } catch (e) {}
   var crowd = mk('assets/' + TRACKS[ti] + '.mp3', true, 0.45);
   function nextTrack() {
