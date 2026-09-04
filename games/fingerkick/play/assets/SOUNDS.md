@@ -11,3 +11,5 @@
 | fulltime.mp3 | 위 호루라기를 짧게·짧게·길게 세 번 이어 붙임 | — | ffmpeg amix |
 
 받은 날: 2026-09-03
+
+녹음 장소(2026-09-04 확인): crowd.mp3 원본은 Freesound https://freesound.org/people/Sandermotions/sounds/494360/ — 네덜란드 레이우아르던 캄뷔르 스타디움(SC Cambuur 홈)에서 2019-11 Zoom H1 으로 녹음한 현장음, CC0. 관중 응원가·말소리는 네덜란드어.
