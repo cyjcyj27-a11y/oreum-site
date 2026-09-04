@@ -69,9 +69,9 @@ def block(i, en):
         href, name, genre = (g[2], g[5], g[6]) if en else (g[1], g[3], g[4])
         items.append(f'      <li><a href="{href}"><b>{name}</b><span>{genre}</span></a></li>')
     if en:
-        title, more = "Related Games", '<a href="/en/games/">All free games</a> · <a href="/en/games/mini/">Mini games</a> · <a href="/en/">Oreum Games home</a>'
+        title, more = "Play Other Games", '<a href="/en/games/">All free games</a> · <a href="/en/games/mini/">Mini games</a> · <a href="/en/">Oreum Games home</a>'
     else:
-        title, more = "관련 게임", '<a href="/games/">무료게임 전체 목록</a> · <a href="/games/mini/">미니게임 모음</a> · <a href="/">오름게임즈 홈</a>'
+        title, more = "다른 게임 플레이", '<a href="/games/">무료게임 전체 목록</a> · <a href="/games/mini/">미니게임 모음</a> · <a href="/">오름게임즈 홈</a>'
     return (f'{MARK_S}\n  <section class="related" aria-label="{title}">\n    <div class="wrap game-page">\n      <h2>{title}</h2>\n      <ul class="related-list">\n'
             + "\n".join(items) + f'\n      </ul>\n      <p class="related-more">{more}</p>\n    </div>\n  </section>\n  {MARK_E}')
 
