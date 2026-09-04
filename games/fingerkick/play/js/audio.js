@@ -14,11 +14,12 @@
   // 경기장 함성 — 나라별 실제 녹음 (출처 assets/SOUNDS.md). 고른 곡만 내려받고, ⏭(N) 으로 넘긴다. 어느 팀인지는 화면에 안 알려 준다.
   var TRACKS = ['crowd-en', 'crowd-nl', 'crowd-de', 'crowd-br', 'crowd-ie', 'crowd-wc', 'crowd-esnl', 'crowd-wh'];
   var ti = 0; try { ti = Math.max(0, Math.min(TRACKS.length - 1, parseInt(localStorage.getItem(KEY + '.track') || '0', 10) || 0)); } catch (e) {}
-  var crowd = mk('assets/' + TRACKS[ti] + '.mp3', true, 0.45);
+  function mkCrowd() { var a = mk('assets/' + TRACKS[ti] + '.mp3', false, 0.45); a.addEventListener('ended', function () { if (a === crowd) nextTrack(); }); return a; }
+  var crowd = mkCrowd();
   function nextTrack() {
     var wasOn = bgm; try { crowd.pause(); } catch (e) {}
     ti = (ti + 1) % TRACKS.length; try { localStorage.setItem(KEY + '.track', String(ti)); } catch (e) {}
-    crowd = mk('assets/' + TRACKS[ti] + '.mp3', true, 0.45);
+    crowd = mkCrowd();
     if (wasOn) crowdSync();
     return { index: ti + 1, total: TRACKS.length };
   }
@@ -27,6 +28,9 @@
   var whis = mk('assets/whistle.mp3', false, 0.7);
   var full = mk('assets/fulltime.mp3', false, 0.7);
   function play(a) { if (!snd) return; try { a.currentTime = 0; var p = a.play(); if (p && p.catch) p.catch(function () {}); } catch (e) {} }
+  // 화면을 벗어나면(다른 탭·홈 화면·브라우저 최소화) 함성을 멈추고, 돌아오면 이어서 튼다
+  document.addEventListener('visibilitychange', function () { if (document.hidden) { try { crowd.pause(); } catch (e) {} } else if (bgm && ac) crowdSync(); });
+  addEventListener('pagehide', function () { try { crowd.pause(); } catch (e) {} });
   function crowdSync() { if (bgm) { var p = crowd.play(); if (p && p.catch) p.catch(function () {}); } else crowd.pause(); }
 
   function ensure() {
