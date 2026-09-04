@@ -352,7 +352,7 @@
         return Promise.all([get('total'), get('returning'), get('day_' + today)]).then(function (vs) {
           d.total = vs[0]; d.returning = vs[1]; d['day_' + today] = vs[2];
           renderVisits(d);
-          note(ago > 180 ? '자동 집계가 ' + Math.round(ago / 60) + '시간 전에 멈춰 있어요. 방문 수와 오늘만 지금 값입니다.' : '', ago > 180 ? '#a35c10' : '#6b7280');
+          note(ago > 300 ? '자동 집계가 ' + Math.round(ago / 60) + '시간 전에 멈춰 있어요. 방문 수와 오늘만 지금 값입니다.' : '', ago > 300 ? '#a35c10' : '#6b7280');
         });
       });
   }
