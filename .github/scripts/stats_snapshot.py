@@ -4,7 +4,7 @@
 지표 스냅샷 — Abacus 카운터 100개쯤을 서버(깃허브 액션)에서 천천히 읽어 stats.json 한 장으로 만듭니다.
 
 왜: stats.html 이 브라우저에서 카운터를 하나씩 읽으면 Abacus 속도 제한(10초에 30번) 때문에 40~50초가 걸립니다.
-    액션이 20분마다 미리 읽어 두면 페이지는 JSON 한 장만 받아 바로 그리고, '오늘' 같은 몇 칸만 실시간으로 덧읽습니다.
+    액션이 2시간마다 미리 읽어 두면 페이지는 JSON 한 장만 받아 바로 그리고, '오늘' 같은 몇 칸만 실시간으로 덧읽습니다.
 
 어디에: 'stats' 브랜치(main 과 따로)에 stats.json 으로 커밋합니다. 페이지는
         https://raw.githubusercontent.com/cyjcyj27-a11y/oreum-site/stats/stats.json 을 읽습니다.
@@ -75,7 +75,7 @@ def push_snapshot(text, snap, values, missing):
     (윈도우에서 text 모드 stdin 은 줄바꿈을 CRLF 로 바꿔 파일 이름 끝에 CR 이 붙으므로, 내용은 파일로 넘기고 mktree 는 -z 로 부른다)"""
     subprocess.run(["git", "fetch", "origin", "stats"], cwd=ROOT, capture_output=True)
     parent = subprocess.run(["git", "rev-parse", "--verify", "-q", "origin/stats"], cwd=ROOT, capture_output=True, text=True).stdout.strip()
-    readme = "# stats" + NL + NL + "지표 스냅샷 브랜치. 깃허브 액션이 20분마다 stats.json 을 갱신합니다. 손으로 고치지 않습니다." + NL
+    readme = "# stats" + NL + NL + "지표 스냅샷 브랜치. 깃허브 액션이 2시간마다 stats.json 을 갱신합니다. 손으로 고치지 않습니다." + NL
     tmp_json = os.path.join(ROOT, "_stats_snapshot.json")
     tmp_md = os.path.join(ROOT, "_stats_readme.md")
     open(tmp_json, "wb").write(text.encode("utf-8"))

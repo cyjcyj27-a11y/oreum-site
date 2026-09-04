@@ -199,7 +199,7 @@
     w.style.color = '#a35c10';        // 진행 표시(회색)로 남아 있지 않게 되돌립니다
     w.style.display = 'block';
   }
-  // ── 빠른 길: 깃허브 액션이 20분마다 만들어 두는 스냅샷(stats.json)을 한 번에 읽어 바로 그린다.
+  // ── 빠른 길: 깃허브 액션이 2시간마다 만들어 두는 스냅샷(stats.json)을 한 번에 읽어 바로 그린다.
   //    (브라우저에서 카운터 100개를 하나씩 읽던 옛길은 40~50초가 걸렸다. 스냅샷을 못 읽으면 그 옛길로 간다.)
   var SNAP = 'https://raw.githubusercontent.com/cyjcyj27-a11y/oreum-site/stats/stats.json';
   var fmt = function (n) { return (n || 0).toLocaleString('ko-KR'); };

@@ -1,10 +1,10 @@
-# 지표 스냅샷 — 20분마다 Abacus 카운터를 읽어 'stats' 브랜치의 stats.json 으로 저장합니다.
+# 지표 스냅샷 — 2시간마다 Abacus 카운터를 읽어 'stats' 브랜치의 stats.json 으로 저장합니다.
 # stats.html 은 이 JSON 을 한 번에 읽어 바로 그립니다 (브라우저에서 100번 부르던 것을 없앴습니다).
 name: Stats snapshot
 
 on:
   schedule:
-    - cron: "*/20 * * * *"
+    - cron: "0 */2 * * *"
   workflow_dispatch:
 
 permissions:
