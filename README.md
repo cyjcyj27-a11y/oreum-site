@@ -6,8 +6,8 @@
 
 ```
 index.html     메인 (스튜디오 소개 + 게임 소개)
-support.html   고객지원 / 자주 묻는 질문   ← 구글플레이 "지원 URL"에 넣는 주소
-privacy.html   개인정보처리방침            ← 구글플레이 "개인정보처리방침 URL"에 넣는 주소
+support/       고객지원 / 자주 묻는 질문
+privacy/       개인정보처리방침
 style.css      전체 디자인 (색·글자·반응형·다크모드)
 CNAME          연결할 도메인 (oreumgames.com)
 robots.txt     검색엔진 안내
@@ -77,15 +77,9 @@ DNS·저장소·검색 등록을 모두 지웠습니다. 새 게임은 절대 �
 저장소의 `CNAME` 파일이 지워지면서 도메인 연결이 끊깁니다.
 끊겼을 때는 그 칸에 도메인을 다시 넣고 Save 하면 복구됩니다.
 
-## 구글플레이 제출용 주소
-
-- 개인정보처리방침 URL : `https://oreumgames.com/privacy.html`
-- 지원 URL : `https://oreumgames.com/support.html`
-- 웹사이트 : `https://oreumgames.com`
-
 ## 내용 고칠 때
 
-- 글씨·문장 → `index.html`, `support.html`, `privacy.html` 을 메모장으로 열어 수정
+- 글씨·문장 → `index.html`, `support/index.html`, `privacy/index.html` 을 메모장으로 열어 수정
 - 색깔 → `style.css` 맨 위 `:root` 안의 색 코드
 - 로고 → `assets/logo.svg` 파일만 교체하면 헤더·푸터·스튜디오 섹션이 한 번에 바뀜
 - 게임을 새로 추가할 때 → `index.html` 의 `<article class="game">` 블록을 복사해서 아래에 붙여넣기
