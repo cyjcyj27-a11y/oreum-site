@@ -97,3 +97,4 @@ GA4 트래픽 획득에서 소스별로 방문을 맞춰 보기 위한 기록. �
 | 날짜 | 곳 | 주소 | 게임 | 메모 |
 |---|---|---|---|---|
 | 2026-09-04 | itch.io | https://oreumgames.itch.io/finger-kick | 핑거킥(영어판 실행 포함) | 설명글 링크 2개(nofollow) + Metadata→External links 에 Homepage(원본 페이지)·YouTube·TikTok. 조작 Mouse·Touchscreen, 언어 English·Korean, 한 판 A few minutes. 트레일러 유튜브 쇼츠 r7CPBOsC52Q(영어판 쇼츠). 게임 안 OREUM GAMES 알약 → oreumgames.com/en/?utm_source=itch |
+| 2026-09-05 | itch.io 게시판 | https://itch.io/t/6896221/finger-kick-one-finger-table-soccer-3-minute-matches-browser-free | 핑거킥 | Release Announcements 글. 태그 Browser, 표지 그림 1장, 게임 페이지·사이트 영어 소개 링크. CPU 표현 없음 |
