@@ -45,6 +45,8 @@
   #touch #tAct{right:4vw;bottom:8%;width:21vh;height:21vh;max-width:82px;max-height:82px;font-size:15px}
   #touch #tTorch{right:calc(4vw + 92px);bottom:8%;width:16vh;height:16vh;
     max-width:60px;max-height:60px;font-size:12px}
+  #touch #tRun{right:4vw;bottom:calc(8% + 96px);width:16vh;height:16vh;max-width:60px;max-height:60px;font-size:12px}
+  #touch #tRun.on{background:rgba(127,196,232,.42);border-color:#b6e2f7}
   #touch #tPause{top:calc(38px + env(safe-area-inset-top));
     left:calc(6px + env(safe-area-inset-left));width:38px;height:38px;font-size:15px}
   /* 폰에서는 게이지를 위로 뺀다 — 아래는 단추 자리다 */
@@ -184,6 +186,7 @@
   <div id="tStick"><div id="tKnob"></div></div>
   <div class="tbtn" id="tAct" data-en="TAKE">줍기</div>
   <div class="tbtn" id="tTorch" data-en="LIGHT">손전등</div>
+  <div class="tbtn" id="tRun" data-en="RUN">달리기</div>
   <div class="tbtn" id="tPause">II</div>
 </div>
 
@@ -204,6 +207,7 @@
   <!-- 폰 안내는 PC 것을 옮기지 말고, 무엇을 어디서 만지는지로 쓴다 (2026-08-30 사용자) -->
   <div class="keys forTouch">
     <b data-en="Stick, bottom left">왼쪽 아래 스틱</b><span data-en="push to walk · push to the edge to run">밀면 걷기 · 끝까지 밀면 달리기</span>
+    <b data-en="Run button">달리기 단추</b><span data-en="hold to run (you lose your breath)">누르고 있으면 달리기 (숨이 찬다)</span>
     <b data-en="Swipe the screen">화면 문지르기</b><span data-en="look around">둘러보기</span>
     <b data-en="LIGHT button">손전등 단추</b><span data-en="bright, but she spots you twice as far away">밝지만 귀신 눈에 두 배로 띈다</span>
     <b data-en="TAKE button">줍기 단추</b><span data-en="take papers · hide in a locker">시험지 줍기 · 사물함에 숨기</span>
@@ -1335,9 +1339,12 @@ function updatePlayer(dt){
   if(mag>0){ fx/=mag; fz/=mag; }
 
   const wantRun = (keys.ShiftLeft||keys.ShiftRight) && mag>0 && !P.tired;
-  if(wantRun){ P.stam-=24*dt; if(P.stam<=0){ P.stam=0; P.tired=true; } }
-  else { P.stam=Math.min(100,P.stam+12*dt); if(P.tired && P.stam>32) P.tired=false; }
+  if(wantRun){ P.stam-=10*dt; if(P.stam<=0){ P.stam=0; P.tired=true; } }
+  else { P.stam=Math.min(100,P.stam+14*dt); if(P.tired && P.stam>30) P.tired=false; }
   const spd = wantRun ? RUN : WALK;
+  // 달릴 때 시야가 넓어진다 — 달리고 있다는 걸 몸으로 느끼게
+  const fovTarget = wantRun ? 82 : 74;
+  if(Math.abs(camera.fov-fovTarget)>0.05){ camera.fov = lerp(camera.fov, fovTarget, 1-Math.pow(0.01,dt)); camera.updateProjectionMatrix(); }
 
   // 카메라가 보는 앞쪽은 (-sin yaw, -cos yaw), 오른쪽은 (cos yaw, -sin yaw)
   const s=Math.sin(P.yaw), c=Math.cos(P.yaw);
@@ -1614,6 +1621,13 @@ if(TOUCH){
     const b=$(id); if(!b) return;
     b.addEventListener('touchstart',e=>{ e.preventDefault(); if(RUN_STATE==='play') fn(); },{passive:false});
   };
+  // 달리기 단추 — 누르고 있는 동안만. 스틱을 끝까지 밀어도 여전히 달린다.
+  { const b=$('tRun'); let hold=false;
+    const set=v=>{ hold=v; keys.ShiftRight=v; b.classList.toggle('on',v); };
+    b.addEventListener('touchstart',e=>{ e.preventDefault(); set(true); },{passive:false});
+    b.addEventListener('touchend',e=>{ e.preventDefault(); set(false); },{passive:false});
+    b.addEventListener('touchcancel',()=>set(false));
+  }
   tap('tAct',   interact);
   tap('tTorch', toggleTorch);
   tap('tPause', pauseGame);
