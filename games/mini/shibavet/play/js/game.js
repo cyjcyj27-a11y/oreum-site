@@ -33,7 +33,7 @@
   // 터치: 왼쪽 조이스틱 / 오른쪽 드래그 시점
   const joy = { id: null, x0: 0, y0: 0, dx: 0, dy: 0 }, look = { id: null, x: 0, y: 0 };
   const jb = $('joy'), jk = $('joyKnob');
-  canvas.addEventListener('touchstart', e => { for (const t of e.changedTouches) { if (t.clientX < innerWidth / 2 && joy.id === null) { /* 왼쪽 화면 끌기 = 이동, 오른쪽 화면 끌기 = 시점 (루루냥 표준) */ joy.id = t.identifier; joy.x0 = t.clientX; joy.y0 = t.clientY; joy.dx = joy.dy = 0; }   /* 스틱 자체는 고정, 손잡이만 움직인다 */ else if (look.id === null) { look.id = t.identifier; look.x = t.clientX; look.y = t.clientY; } } e.preventDefault(); }, { passive: false });
+  canvas.addEventListener('touchstart', e => { for (const t of e.changedTouches) { if (look.id === null) { look.id = t.identifier; look.x = t.clientX; look.y = t.clientY; } } e.preventDefault(); }, { passive: false });   // 화면 끌기 = 시점. 이동은 오른쪽 아래 패드 (스카이라이더와 같음)
   canvas.addEventListener('touchmove', e => { for (const t of e.changedTouches) { if (t.identifier === joy.id) { let dx = t.clientX - joy.x0, dy = t.clientY - joy.y0; const l = Math.hypot(dx, dy); if (l > 55) { dx *= 55 / l; dy *= 55 / l; } joy.dx = dx / 55; joy.dy = dy / 55; jk.style.transform = `translate(${dx}px,${dy}px)`; } else if (t.identifier === look.id) { lookDX += (t.clientX - look.x) * 2.2; lookDY += (t.clientY - look.y) * 2.2; look.x = t.clientX; look.y = t.clientY; } } e.preventDefault(); }, { passive: false });
   const tEnd = e => { for (const t of e.changedTouches) { if (t.identifier === joy.id) { joy.id = null; joy.dx = joy.dy = 0; jk.style.transform = ''; } if (t.identifier === look.id) look.id = null; } };
   canvas.addEventListener('touchend', tEnd); canvas.addEventListener('touchcancel', tEnd);
@@ -42,7 +42,13 @@
   $('btnDoor').addEventListener('touchstart', e => { e.preventDefault(); toggleDoor(); }, { passive: false });
   $('btnTreat').addEventListener('click', () => useItem('treat'));
   $('btnToy').addEventListener('click', () => useItem('toy'));
-  $('btnFs').addEventListener('click', () => { try { if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen(); } catch (e) { } });
+  // 둥근 패드 — 손가락 벡터를 이동으로. 놓으면 0 (스카이라이더와 같은 코드)
+  { const pad = $('pad'), knob = $('knob'); let padId = null;
+    const padMove = e => { const r = pad.getBoundingClientRect(), R = r.width / 2, max = R - knob.offsetWidth / 2; const mx = e.clientX - (r.left + R), my = e.clientY - (r.top + R), d = Math.hypot(mx, my), sc = d > max ? max / d : 1; const kx = mx * sc, ky = my * sc; knob.style.transform = 'translate(' + kx + 'px,' + ky + 'px)'; let nx = kx / max, ny = ky / max; if (Math.hypot(nx, ny) < .08) nx = ny = 0; joy.dx = nx; joy.dy = ny; joy.id = 'pad'; };
+    const padEnd = e => { if (padId !== e.pointerId) return; padId = null; pad.classList.remove('on'); knob.style.transform = ''; joy.dx = joy.dy = 0; joy.id = null; };
+    pad.addEventListener('pointerdown', e => { e.stopPropagation(); e.preventDefault(); if (padId !== null) return; padId = e.pointerId; try { pad.setPointerCapture(padId); } catch (_) { } pad.classList.add('on'); padMove(e); });
+    pad.addEventListener('pointermove', e => { if (padId !== e.pointerId) return; e.stopPropagation(); padMove(e); });
+    pad.addEventListener('pointerup', padEnd); pad.addEventListener('pointercancel', padEnd); pad.addEventListener('lostpointercapture', padEnd); }
   $('btnRun').addEventListener('touchstart', e => { e.preventDefault(); tRun = !tRun; if (tRun) tSneak = false; $('btnRun').classList.toggle('on', tRun); $('btnSneak').classList.remove('on'); }, { passive: false });
   $('btnSneak').addEventListener('touchstart', e => { e.preventDefault(); tSneak = !tSneak; if (tSneak) tRun = false; $('btnSneak').classList.toggle('on', tSneak); $('btnRun').classList.remove('on'); }, { passive: false });
   $('btnSfx').addEventListener('click', () => { $('btnSfx').classList.toggle('off', !A.toggle()); });
