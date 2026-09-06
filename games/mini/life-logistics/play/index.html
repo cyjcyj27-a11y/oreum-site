@@ -162,10 +162,20 @@
   #res .v { font-size:23px; font-weight:800; }
   #rank { font-size:19px; font-weight:800; color:#ffd479; margin-top:6px; }
   .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;border:0}
+/* 세로로 들면 가로로 눕히라고 알린다 (다른 가로 게임과 같은 방식, 2026-09-06) */
+#rotate{position:fixed;inset:0;z-index:9000;display:none;place-items:center;text-align:center;background:#12161c;color:#e8e2d4;font-size:17px;line-height:1.8;padding:8vw}
+body.touch.portrait #rotate{display:grid}
+#rotate button{margin:22px 0 16px;padding:15px 32px;border:0;border-radius:99px;cursor:pointer;font-family:inherit;font-size:17px;font-weight:800;color:#12141a;background:#e8e2d4}
+#rotate .sub{font-size:14px;color:#8d8778;line-height:1.7}#rotate .sub a{color:#bdb5a3}
 </style>
 
 <h1 class="sr-only">LIFE LOGISTICS · 물류터미널</h1>
 <canvas id="cv"></canvas>
+<div id="rotate"><div>
+  <p>가로 화면에서 하는 게임입니다</p>
+  <button type="button" id="rotGo">가로로 돌리기</button>
+  <p class="sub"><span>단추가 안 먹으면 폰의 화면 회전 잠금을 풀고 눕혀 주세요</span><br><a href="#" id="rotSkip">그래도 세로로 하기</a></p>
+</div></div>
 
 <div id="ui">
   <div id="labels"><div id="mon"><div class="t">PACKING STATION</div><div class="l"></div></div></div>
@@ -1661,6 +1671,15 @@ resize();
 showMenu();
 updateHUD();
 requestAnimationFrame(frame);
+</script>
+<script>
+(function(){
+  var isTouch=('ontouchstart' in window)&&matchMedia('(pointer: coarse)').matches; if(isTouch) document.body.classList.add('touch');
+  var skipped=false; function sync(){ var w=innerWidth,h=innerHeight; if(w<10||h<10) return; document.body.classList.toggle('portrait', isTouch&&!skipped&&h>w*1.02); }
+  document.getElementById('rotGo').addEventListener('click', async function(){ try{ if(!document.fullscreenElement&&document.documentElement.requestFullscreen) await document.documentElement.requestFullscreen(); }catch(e){} try{ if(screen.orientation&&screen.orientation.lock) await screen.orientation.lock('landscape'); }catch(e){} });
+  document.getElementById('rotSkip').addEventListener('click', function(e){ e.preventDefault(); skipped=true; sync(); });
+  addEventListener('resize', sync); addEventListener('orientationchange', function(){ setTimeout(sync,240); }); sync(); setTimeout(sync,400);
+})();
 </script>
 <script src="/assets/game-home.js?v=6" data-top="4" data-left="4" data-fullscreen="1" defer></script>
 <script src="/assets/game-events.js?v=1" defer></script>
