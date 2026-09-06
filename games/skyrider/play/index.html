@@ -85,7 +85,7 @@
   @media (max-width: 700px) { #shop .thumb { width: 72px; height: 72px; } #shop .bars { grid-template-columns: 1fr; gap: 2px; } #shop .act { width: 70px; } #shop .info b { font-size: 15px; } }
   #minimap { position: fixed; left: 14px; bottom: 58px; width: 150px; height: 150px; border-radius: 50%; border: 2px solid rgba(255,255,255,.35); background: rgba(10,14,20,.55); box-shadow: 0 2px 12px rgba(0,0,0,.4); opacity: 0; transition: opacity .8s; z-index: 16; touch-action: manipulation; cursor: pointer; }
   #minimap.show { opacity: 1; }
-  body.touch #minimap { left: 12px; bottom: auto; top: calc(236px + env(safe-area-inset-top)); width: 220px; height: 220px; }   /* 폰: 지도는 위쪽 왼쪽 */
+  body.touch #minimap { left: auto; right: calc(12px + env(safe-area-inset-right)); bottom: auto; top: calc(236px + env(safe-area-inset-top)); width: 220px; height: 220px; }   /* 폰: 지도는 오른쪽 위 (왼쪽 아래는 패드) */
   #bigmap { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%) scale(.96); width: min(92vw, 86vh, 640px); background: rgba(14,16,22,.94); border: 1px solid rgba(255,255,255,.2); border-radius: 14px; padding: 10px 12px 12px; opacity: 0; pointer-events: none; transition: opacity .25s, transform .25s; z-index: 20; }
   #bigmap.show { opacity: 1; pointer-events: auto; transform: translate(-50%, -50%) scale(1); }
   #bigmap .head { display: flex; justify-content: space-between; align-items: center; font-size: 22px; letter-spacing: 3px; color: #ffd27a; margin-bottom: 6px; }
@@ -153,7 +153,7 @@
   /* 폰 가로(짧은 화면): 지도는 왼쪽 위, 카드는 높이 표시 아래, 단추는 오른쪽 아래 작게 */
   @media (max-height: 520px) {
     #topbar { padding-left: 168px; }   /* 왼쪽 위 오름 알약과 안 겹치게 */
-    body.touch #minimap { top: calc(56px + env(safe-area-inset-top)); width: 192px; height: 192px; }
+    body.touch #minimap { top: calc(56px + env(safe-area-inset-top)); width: 150px; height: 150px; }
     #hud { padding-top: 8px; } #vert { top: 104px; font-size: 16px; }
     #msg { top: 50%; font-size: 24px; padding: 8px 18px 10px; letter-spacing: 1px; } #msg.pop { font-size: 30px; }
     #bubble { top: 36%; font-size: 19px; padding: 10px 16px 12px; }
@@ -162,16 +162,17 @@
   }
 
   /* 폰 조작: 왼쪽 위 지도 아래에 아래로·위로(70% 크기), 오른쪽에 둥근 조이스틱(바깥 원 + 손가락 따라 움직이는 놉) */
-  #pad { display: none; position: fixed; right: 14px; bottom: calc(14px + env(safe-area-inset-bottom)); width: 186px; height: 186px; border-radius: 50%; border: 2px solid rgba(255,255,255,.45); background: rgba(20,24,30,.38); touch-action: none; -webkit-user-select: none; user-select: none; z-index: 6; }
+  #pad { display: none; position: fixed; left: calc(14px + env(safe-area-inset-left)); bottom: calc(48px + env(safe-area-inset-bottom)); width: 186px; height: 186px; border-radius: 50%; border: 2px solid rgba(255,255,255,.45); background: rgba(20,24,30,.38); touch-action: none; -webkit-user-select: none; user-select: none; z-index: 6; }
   #knob { position: absolute; left: 50%; top: 50%; width: 72px; height: 72px; margin: -36px 0 0 -36px; border-radius: 50%; border: 2px solid rgba(255,255,255,.75); background: rgba(255,255,255,.3); pointer-events: none; }
   #pad.on #knob { background: rgba(255,255,255,.5); }
   body.touch #pad { display: block; }
-  body.touch .tbtn { width: 76px; height: 76px; font-size: 17px; bottom: auto; top: calc(468px + env(safe-area-inset-top)); }
-  body.touch #dn { left: 12px; right: auto; } body.touch #up { left: 96px; right: auto; }
+  /* 왼쪽 이동(패드) · 오른쪽 행동(위로·아래로) — 모바일 표준 배치 (2026-09-06) */
+  body.touch .tbtn { width: 76px; height: 76px; font-size: 17px; top: auto; bottom: calc(18px + env(safe-area-inset-bottom)); }
+  body.touch #up { right: calc(14px + env(safe-area-inset-right)); left: auto; } body.touch #dn { right: calc(100px + env(safe-area-inset-right)); left: auto; }
   @media (max-height: 520px) {
-    body.touch .tbtn { width: 60px; height: 60px; font-size: 15px; top: calc(256px + env(safe-area-inset-top)); }
-    body.touch #dn { left: 12px; } body.touch #up { left: 80px; }
-    #pad { width: 160px; height: 160px; right: 10px; bottom: calc(10px + env(safe-area-inset-bottom)); }
+    body.touch .tbtn { width: 60px; height: 60px; font-size: 15px; }
+    body.touch #up { right: calc(12px + env(safe-area-inset-right)); } body.touch #dn { right: calc(82px + env(safe-area-inset-right)); }
+    #pad { width: 160px; height: 160px; left: calc(10px + env(safe-area-inset-left)); bottom: calc(44px + env(safe-area-inset-bottom)); }   /* 전체화면 알약 위 */
     #knob { width: 62px; height: 62px; margin: -31px 0 0 -31px; }
   }
 </style>

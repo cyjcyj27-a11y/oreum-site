@@ -383,6 +383,21 @@
   /* 이야기 사이에 끼는 짧은 영상은 바탕이 흰색입니다 — 검은 테두리가 남으면 이어붙인 티가 납니다 */
   #raceWrap.light { background: #fff; }
   #raceWrap.light .cap { color: #8a8378; }
+  /* 짧은 영상은 가로 화면에서도 한가운데 — 세로 영상이면 양옆이 비고, 높이를 꽉 채운다 */
+  @media (orientation: landscape) { #raceVideo, .raceVid { max-height: 94%; } #raceWrap .cap { position: absolute; bottom: 6px; margin: 0; } }
+
+  /* ---- 세로로 들면 가로로 눕히라고 알린다 (다른 게임과 같은 방식) ---- */
+  #rotate { position: fixed; inset: 0; z-index: 9000; display: none; place-items: center; text-align: center; background: #10201c; color: #f6edd8; font-size: 17px; line-height: 1.8; padding: 8vw; }
+  body.touch.portrait #rotate { display: grid; }
+  #rotate button { margin: 22px 0 16px; padding: 15px 32px; border: 0; border-radius: 99px; cursor: pointer; font-family: inherit; font-size: 17px; font-weight: 800; color: #2a1c08; background: #e9c877; }
+  #rotate .sub { font-size: 14px; color: #b8b0a0; line-height: 1.7; } #rotate .sub a { color: #d8cfbc; }
+
+  /* ---- 왼쪽 아래 고정 둥근 패드 (다른 게임과 같은 표준: 왼쪽 이동, 오른쪽 행동) ---- */
+  #pad { display: none; position: absolute; left: calc(14px + env(safe-area-inset-left)); bottom: calc(14px + env(safe-area-inset-bottom)); width: 150px; height: 150px; border-radius: 50%; border: 2px solid rgba(255,255,255,.45); background: rgba(20,24,30,.38); touch-action: none; -webkit-user-select: none; user-select: none; z-index: 6; pointer-events: auto; }
+  #knob { position: absolute; left: 50%; top: 50%; width: 60px; height: 60px; margin: -30px 0 0 -30px; border-radius: 50%; border: 2px solid rgba(255,255,255,.75); background: rgba(255,255,255,.3); pointer-events: none; }
+  #pad.on #knob { background: rgba(255,255,255,.5); }
+  body.touch #pad { display: block; } body.starting #pad, body.clipping #pad { display: none; }
+
   /* 짧은 영상이 도는 동안에는 화면 위 글씨·배지·버튼을 잠깐 치웁니다 */
   body.clipping #title, body.clipping #topRow, body.clipping #iconRow, body.clipping #help,
   body.clipping #coinBadge, body.clipping #clockBadge, body.clipping .badge, body.clipping #touchBtns,
@@ -442,6 +457,8 @@
   body.touch #iconRow { left: 6px; bottom: 68px; gap: 4px; }
   body.touch .ibtn { width: 30px; height: 30px; font-size: 13px; }
   body.touch .ibtn svg { width: 19px; height: 12px; }
+  /* 가로 폰: 왼쪽 아래는 패드 자리라 작은 아이콘 줄은 오른쪽 위 아이콘 옆으로 (이 줄이 위 규칙보다 뒤에 있어야 이긴다) */
+  @media (orientation: landscape) { body.touch #iconRow { left: auto; right: 132px; top: 14px; bottom: auto; } }
 
   /* ---- 시작 화면, 언어 단추 바로 아래 — 오름게임즈 홈페이지로 가는 작은 링크 (새 탭으로 열립니다) ---- */
   #homeLink {
@@ -655,6 +672,18 @@
   /* 화면이 낮으면(노트북 가로 화면 등) 조작 설명표는 접습니다.
      같은 내용이 오른쪽 위 안내표에 계속 떠 있으니 없어도 됩니다. */
   @media (max-height: 720px) { #startKeys { display: none; } }
+  /* ---- 가로 화면의 시작 화면: 일거리 넉 장을 한 줄로, 전부 한 화면에 ---- */
+  @media (orientation: landscape) and (max-height: 520px) {
+    #start { gap: 6px; padding: 8px; }
+    #startTitle { width: min(360px, 60vw); padding: 5px 14px; border-radius: 12px; }
+    #startTitle h1 { font-size: 19px; } #startTitle small { font-size: 10px; margin-top: 1px; }
+    #startJobs { grid-template-columns: repeat(4, minmax(0, 1fr)); width: min(440px, 64vw); gap: 6px; }
+    .job { border-radius: 10px; } .job .cap { padding: 2px 6px 4px; } .job .cap b { font-size: 11px; }
+    #startRomance { width: min(150px, 30vh); margin-top: 2px; }
+    #startGo { padding: 8px 26px; font-size: 15px; }
+    #startKeys { display: none; }
+  }
+
 
   /* ---- 손가락 조작 (폰·태블릿에서만 보입니다) ---- */
   /* 평소엔 전부 숨겨두고, 터치 기기라고 판정되면 body에 touch 클래스가 붙어 나타납니다 */
@@ -822,7 +851,7 @@
       <b class="pc">F</b><span class="pc">모든 상호작용 (따기·사기·상자·물질…)</span>
       <b class="pc">M</b><span class="pc">전체 지도</span>
       <b class="pc">Shift · Space</b><span class="pc">달리기 · 점프</span>
-      <b class="mob">왼쪽 화면</b><span class="mob">끌면 루루가 걸어갑니다</span>
+      <b class="mob">왼쪽 아래 패드</b><span class="mob">밀면 루루가 걸어갑니다</span>
       <b class="mob">오른쪽 화면</b><span class="mob">끌면 시야가 돌아갑니다</span>
       <b class="mob">두 손가락</b><span class="mob">벌리고 오므리면 줌</span>
       <b class="mob">행동 버튼</b><span class="mob">모든 상호작용 (따기·사기·상자·물질…)</span>
@@ -839,12 +868,21 @@
   </div>
 
   <!-- 폰용: 왼쪽 화면을 끌면 이동, 오른쪽 화면을 끌면 시야, 오른쪽 아래엔 행동 버튼입니다 -->
+  <div id="pad"><div id="knob"></div></div>
   <div id="touchBtns">
     <div class="tbtn" id="btnAction"><span class="k">🐾</span>행동</div>
     <div class="tbtn" id="btnRun"><span class="k">💨</span>달리기</div>
     <div class="tbtn" id="btnJump"><span class="k">⤴</span>점프</div>
   </div>
 
+  <div id="rotate">
+    <div>
+      <p>가로 화면에서 하는 게임입니다</p>
+      <button type="button" id="rotGo">가로로 돌리기</button>
+      <p class="sub"><span>단추가 안 먹으면 폰의 화면 회전 잠금을 풀고 눕혀 주세요</span><br>
+        <a href="#" id="rotSkip">그래도 세로로 하기</a></p>
+    </div>
+  </div>
   <div id="fileWarn">
     지금은 <b>루루 그림과 성산일출봉 그림이 안 보이는 상태</b>입니다.<br>
     브라우저 보안 규칙 때문에, html 파일을 그냥 더블클릭하면 그림 파일을 화면에 입힐 수 없습니다.<br><br>
@@ -914,5 +952,28 @@ if ('serviceWorker' in navigator && location.protocol !== 'file:') {
 <!-- ?v= 뒤 숫자는 "캐시 무시용" 표시입니다. jeju3d.js를 고쳤는데 화면이 그대로면 숫자를 1 올리세요. -->
 <script src="jeju3d.js?v=425"></script>
 <script src="/assets/game-events.js?v=1" defer data-abacus="0"></script>
+<script>
+// ── 가로 안내 + 왼쪽 아래 패드 (2026-09-06, 다른 게임과 같은 표준) ──
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var skipped = false;
+  function syncRot() { var w = innerWidth, h = innerHeight; if (w < 10 || h < 10) return; document.body.classList.toggle('portrait', document.body.classList.contains('touch') && !skipped && h > w * 1.02); }
+  $('rotGo').addEventListener('click', async function () {
+    try { if (!document.fullscreenElement && document.documentElement.requestFullscreen) await document.documentElement.requestFullscreen(); } catch (e) { }
+    try { if (screen.orientation && screen.orientation.lock) await screen.orientation.lock('landscape'); } catch (e) { }
+  });
+  $('rotSkip').addEventListener('click', function (e) { e.preventDefault(); skipped = true; syncRot(); });
+  addEventListener('resize', syncRot); addEventListener('orientationchange', function () { setTimeout(syncRot, 240); }); syncRot(); setTimeout(syncRot, 400); setTimeout(syncRot, 1500);
+  // 패드 — 손가락 벡터를 touchMove(앞뒤 f, 좌우 r)로. 스카이라이더·시바와 같은 코드
+  var pad = $('pad'), knob = $('knob'); if (!pad || typeof touchMove === 'undefined') return;
+  var padId = null;
+  function padMove(e) { var r = pad.getBoundingClientRect(), R = r.width / 2, max = R - knob.offsetWidth / 2; var mx = e.clientX - (r.left + R), my = e.clientY - (r.top + R), d = Math.hypot(mx, my), sc = d > max ? max / d : 1; var kx = mx * sc, ky = my * sc; knob.style.transform = 'translate(' + kx + 'px,' + ky + 'px)'; var nx = kx / max, ny = ky / max; if (Math.hypot(nx, ny) < .08) nx = ny = 0; touchMove.r = nx; touchMove.f = -ny; }
+  function padEnd(e) { if (padId !== e.pointerId) return; padId = null; pad.classList.remove('on'); knob.style.transform = ''; touchMove.r = 0; touchMove.f = 0; }
+  pad.addEventListener('pointerdown', function (e) { e.stopPropagation(); e.preventDefault(); if (padId !== null) return; padId = e.pointerId; try { pad.setPointerCapture(padId); } catch (_) { } pad.classList.add('on'); padMove(e); });
+  pad.addEventListener('pointermove', function (e) { if (padId !== e.pointerId) return; e.stopPropagation(); padMove(e); });
+  pad.addEventListener('pointerup', padEnd); pad.addEventListener('pointercancel', padEnd); pad.addEventListener('lostpointercapture', padEnd);
+  ['touchstart', 'touchmove', 'touchend'].forEach(function (ev) { pad.addEventListener(ev, function (e) { e.stopPropagation(); if (e.cancelable) e.preventDefault(); }, { passive: false }); });
+})();
+</script>
 </body>
 </html>
