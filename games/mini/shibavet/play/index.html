@@ -72,11 +72,13 @@
   /* 클리어 */
   #over { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(20,14,8,.5); opacity: 0; pointer-events: none; transition: opacity 1.2s; text-align: center; text-shadow: 0 2px 12px rgba(0,0,0,.7); z-index: 10; }
   #over.show { opacity: 1; pointer-events: auto; }
-  #over h2 { font-family: 'Ria', sans-serif; font-size: min(7.2vw, 64px); font-weight: 900; margin: 0 0 10px; letter-spacing: 4px; color: #ffd24a; -webkit-text-stroke: 2px #7a3a1a; paint-order: stroke fill; }
+  #over h2 { font-family: 'Ria', sans-serif; font-size: min(5.6vw, 56px); font-weight: 900; margin: 0 0 10px; letter-spacing: 2px; color: #ffd24a; -webkit-text-stroke: 2px #7a3a1a; paint-order: stroke fill; }
   #over p { font-size: 26px; margin: 4px 0; font-family: 'Ria', sans-serif; letter-spacing: 1px; } #over p small { font-size: 15px; opacity: .7; margin-right: 8px; font-family: 'Griun', sans-serif; }
-  #vetVid { width: auto; height: min(46vh, 420px); aspect-ratio: 9 / 16; border-radius: 14px; border: 2px solid rgba(255,255,255,.55); box-shadow: 0 10px 40px rgba(0,0,0,.5); margin: 6px 0 10px; background: #000; opacity: 0; transition: opacity .8s; }
+  #vetVid { width: auto; height: min(56vh, 520px); aspect-ratio: 9 / 16; border-radius: 14px; border: 2px solid rgba(255,255,255,.55); box-shadow: 0 10px 40px rgba(0,0,0,.5); margin: 6px 0 10px; background: #000; opacity: 0; transition: opacity .8s; }
   #over.show #vetVid { opacity: 1; }
-  @media (max-height: 560px) { #vetVid { height: 34vh; } #over h2 { margin-bottom: 4px; } }
+  #over .txt { display: flex; flex-direction: column; align-items: center; }
+  /* 가로 화면: 기록은 오른쪽으로 빼고 영상은 왼쪽에 크게 */
+  @media (orientation: landscape) { #over { flex-direction: row; gap: 5vw; } #vetVid { height: 82vh; margin: 0; } #over .txt { max-width: 46vw; } #over h2 { font-size: min(4.2vw, 48px); margin-bottom: 4px; } #over .again { margin-top: 14px; } #over p { margin: 2px 0; } }
   #over .again { margin-top: 36px; opacity: .6; animation: blink 2.4s infinite; font-family: 'Ria', sans-serif; letter-spacing: 6px; font-size: 24px; cursor: pointer; }
   @media (max-width: 700px) { #topbar { padding-left: 96px; gap: 5px; } .stat { font-size: 13px; padding: 3px 7px; gap: 4px; } .stat b { font-size: 15px; } .stat .bar { width: 56px; } #over h2 { font-size: min(6vw, 30px); letter-spacing: 1px; } }
 </style>
@@ -125,13 +127,15 @@
 </div>
 
 <div id="over">
+  <video id="vetVid" src="assets/vet.mp4" poster="assets/vet-poster.jpg" playsinline preload="none"></video>
+  <div class="txt">
   <div class="stage" id="overStage">STAGE 1</div>
   <h2>CONGRATULATIONS</h2>
-  <video id="vetVid" src="assets/vet.mp4" poster="assets/vet-poster.jpg" playsinline preload="none"></video>
   <p><span id="overTime">0:00.0</span></p>
   <p><small data-en="BEST">최고</small><span id="overBest">0:00.0</span></p>
   <p class="gain" id="overItems"></p>
   <p class="again">NEXT</p>
+  </div>
 </div>
 
 <script src="/assets/game-home.js?v=6" data-top="6" data-left="6" data-fullscreen="1" defer></script>
@@ -141,7 +145,7 @@
 <script src="js/items.js?v=3"></script>
 <script src="js/dog.js?v=22"></script>
 <script src="js/player.js?v=14"></script>
-<script src="js/game.js?v=31"></script>
+<script src="js/game.js?v=32"></script>
 <script>
 </script>
 <script src="/assets/game-events.js?v=1" defer></script>
