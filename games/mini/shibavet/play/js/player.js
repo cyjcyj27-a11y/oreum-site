@@ -33,7 +33,7 @@
 
   // 몸 둘레 8점 중 막힌 칸에 든 점의 수
   P.blockedCount = function (L, x, z) {
-    const r = .24, pts = [[x + r, z], [x - r, z], [x, z + r], [x, z - r], [x + r * .7, z + r * .7], [x - r * .7, z + r * .7], [x + r * .7, z - r * .7], [x - r * .7, z - r * .7]];
+    const r = .2, pts = [[x + r, z], [x - r, z], [x, z + r], [x, z - r], [x + r * .7, z + r * .7], [x - r * .7, z + r * .7], [x + r * .7, z - r * .7], [x - r * .7, z - r * .7]];
     let n = 0; for (const p of pts) if (!W.passable(L, W.cellOf(p[0]), W.cellOf(p[1]), false)) n++;
     if (!W.passable(L, W.cellOf(x), W.cellOf(z), false)) n += 4;
     return n;

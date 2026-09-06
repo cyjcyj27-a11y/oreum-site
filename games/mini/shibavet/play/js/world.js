@@ -20,8 +20,14 @@
   const wallZ = (L, z, x0, x1) => fill(L, x0, z, x1, z + .5, T.WALL);
   function door(L, x, z, axis) { // axis 'x' = 문이 X 방향으로 누움(벽이 Z 고정)
     const cells = axis === 'x' ? [[cellOf(x), cellOf(z)], [cellOf(x) + 1, cellOf(z)]] : [[cellOf(x), cellOf(z)], [cellOf(x), cellOf(z) + 1]];
+    // 문이 좁아 불편하다(2026-09-06) — 벽이 이어지는 쪽으로 한 칸 더 넓힌다(1m → 1.5m). 모서리·벽 갈림목이면 그대로 둔다
+    const g = (cx, cz) => grid[L][idx(cx, cz)], last = cells[cells.length - 1];
+    const c3 = axis === 'x' ? [last[0] + 1, last[1]] : [last[0], last[1] + 1], c4 = axis === 'x' ? [last[0] + 2, last[1]] : [last[0], last[1] + 2];
+    const side = axis === 'x' ? [[c3[0], c3[1] - 1], [c3[0], c3[1] + 1]] : [[c3[0] - 1, c3[1]], [c3[0] + 1, c3[1]]];
+    if (g(c3[0], c3[1]) === T.WALL && g(c4[0], c4[1]) === T.WALL && side.every(c => g(c[0], c[1]) !== T.WALL)) cells.push(c3);
     cells.forEach(c => grid[L][idx(c[0], c[1])] = T.DOOR);
-    const d = { cells, layer: L, axis, hx: axis === 'x' ? x : x + .25, hz: axis === 'x' ? z + .25 : z, open: true, t: 1, id: doors.length };
+    const w = cells.length * CELL;
+    const d = { cells, layer: L, axis, w, hx: axis === 'x' ? x : x + .25, hz: axis === 'x' ? z + .25 : z, cx: axis === 'x' ? x + w / 2 : x + .25, cz: axis === 'x' ? z + .25 : z + w / 2, open: true, t: 1, id: doors.length };
     doors.push(d); return d;
   }
   function hide(L, x0, z0, x1, z1) { fill(L, x0, z0, x1, z1, T.HIDE); for (let cz = cellOf(z0); cz < cellOf(z1); cz++) for (let cx = cellOf(x0); cx < cellOf(x1); cx++) hideSpots.push({ L, cx, cz }); }
@@ -295,9 +301,9 @@
     doors.forEach(d => {
       const y0 = d.layer ? FH : 0;
       const piv = new THREE.Group(); piv.position.set(d.hx, y0, d.hz);
-      const panel = new THREE.Mesh(new THREE.BoxGeometry(d.axis === 'x' ? 1 : .07, 2.1, d.axis === 'x' ? .07 : 1), M.wood);
-      panel.position.set(d.axis === 'x' ? .5 : 0, 1.05, d.axis === 'x' ? 0 : .5); panel.castShadow = true; piv.add(panel);
-      const knob = new THREE.Mesh(new THREE.SphereGeometry(.04, 8, 8), M.steel); knob.position.set(d.axis === 'x' ? .88 : .06, 1, d.axis === 'x' ? .06 : .88); piv.add(knob);
+      const panel = new THREE.Mesh(new THREE.BoxGeometry(d.axis === 'x' ? d.w : .07, 2.1, d.axis === 'x' ? .07 : d.w), M.wood);
+      panel.position.set(d.axis === 'x' ? d.w / 2 : 0, 1.05, d.axis === 'x' ? 0 : d.w / 2); panel.castShadow = true; piv.add(panel);
+      const knob = new THREE.Mesh(new THREE.SphereGeometry(.04, 8, 8), M.steel); knob.position.set(d.axis === 'x' ? d.w - .12 : .06, 1, d.axis === 'x' ? .06 : d.w - .12); piv.add(knob);
       d.mesh = piv; (d.layer ? upG : lowG).add(piv);
     });
   }

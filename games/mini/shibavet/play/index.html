@@ -45,11 +45,11 @@
   .tbtn { display: none; position: fixed; width: 76px; height: 76px; border-radius: 50%; border: 2px solid rgba(255,255,255,.55); background: rgba(0,0,0,.32); color: #fff; font-family: inherit; font-size: 15px; letter-spacing: 1px; touch-action: none; z-index: 6; text-shadow: 0 1px 2px rgba(0,0,0,.6); padding: 0; }
   .tbtn.on { background: rgba(255,210,74,.75); color: #2a1c08; border-color: #ffd24a; }
   body.touch.playing .tbtn, body.touch.playing #pad { display: block; }
-  #btnGrab { right: calc(14px + env(safe-area-inset-right)); bottom: calc(24px + env(safe-area-inset-bottom)); width: 88px; height: 88px; font-size: 17px; background: rgba(255,120,60,.55); } #btnDoor { right: calc(112px + env(safe-area-inset-right)); bottom: calc(30px + env(safe-area-inset-bottom)); opacity: .35; } #btnDoor.show { opacity: 1; }
+  #btnGrab { right: calc(14px + env(safe-area-inset-right)); bottom: calc(24px + env(safe-area-inset-bottom)); width: 88px; height: 88px; font-size: 17px; background: rgba(255,120,60,.55); } #btnDoor { right: calc(116px + env(safe-area-inset-right)); bottom: calc(24px + env(safe-area-inset-bottom)); width: 84px; height: 84px; font-size: 17px; opacity: .35; } #btnDoor.show { opacity: 1; background: rgba(120,200,255,.45); }
   #btnRun { right: calc(20px + env(safe-area-inset-right)); bottom: calc(126px + env(safe-area-inset-bottom)); } #btnSneak { right: calc(112px + env(safe-area-inset-right)); bottom: calc(126px + env(safe-area-inset-bottom)); font-size: 13px; }
   @media (max-height: 520px) {
     .tbtn { width: 60px; height: 60px; font-size: 13px; } #btnSneak { font-size: 11px; }
-    #btnGrab { width: 72px; height: 72px; font-size: 15px; bottom: calc(16px + env(safe-area-inset-bottom)); } #btnDoor { bottom: calc(22px + env(safe-area-inset-bottom)); right: calc(94px + env(safe-area-inset-right)); } #btnRun, #btnSneak { bottom: calc(100px + env(safe-area-inset-bottom)); } #btnSneak { right: calc(94px + env(safe-area-inset-right)); } #btnRun { right: calc(20px + env(safe-area-inset-right)); }
+    #btnGrab { width: 72px; height: 72px; font-size: 15px; bottom: calc(16px + env(safe-area-inset-bottom)); } #btnDoor { bottom: calc(16px + env(safe-area-inset-bottom)); right: calc(98px + env(safe-area-inset-right)); width: 72px; height: 72px; font-size: 15px; } #btnRun, #btnSneak { bottom: calc(100px + env(safe-area-inset-bottom)); } #btnSneak { right: calc(94px + env(safe-area-inset-right)); } #btnRun { right: calc(20px + env(safe-area-inset-right)); }
     #pad { width: 160px; height: 160px; left: calc(10px + env(safe-area-inset-left)); bottom: calc(46px + env(safe-area-inset-bottom)); }   /* 전체화면 알약 위 */ #knob { width: 62px; height: 62px; margin: -31px 0 0 -31px; }
   }
   #joy { display: none; }
@@ -150,12 +150,12 @@
 
 <script src="/assets/game-home.js?v=6" data-top="6" data-left="6" data-fullscreen="1" defer></script>
 <script src="lib/three.min.js"></script>
-<script src="js/world.js?v=14"></script>
+<script src="js/world.js?v=15"></script>
 <script src="js/audio.js?v=14"></script>
 <script src="js/items.js?v=3"></script>
 <script src="js/dog.js?v=22"></script>
-<script src="js/player.js?v=15"></script>
-<script src="js/game.js?v=43"></script>
+<script src="js/player.js?v=16"></script>
+<script src="js/game.js?v=44"></script>
 <script>
 </script>
 <script src="/assets/game-events.js?v=1" defer></script>

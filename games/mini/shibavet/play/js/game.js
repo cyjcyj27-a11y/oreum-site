@@ -99,8 +99,8 @@
     if (player.lunge()) { }
   }
   function nearestDoor() {
-    let best = null, bd = 1.7;
-    for (const d of W.doors) { if (d.layer !== player.L) continue; const cx = d.axis === 'x' ? d.hx + .5 : d.hx, cz = d.axis === 'x' ? d.hz : d.hz + .5; const dd = Math.hypot(cx - player.x, cz - player.z); if (dd < bd) { bd = dd; best = d; } }
+    let best = null, bd = 2.0;
+    for (const d of W.doors) { if (d.layer !== player.L) continue; const cx = d.cx, cz = d.cz; const dd = Math.hypot(cx - player.x, cz - player.z); if (dd < bd) { bd = dd; best = d; } }
     return best;
   }
   function toggleDoor() {
