@@ -33,15 +33,16 @@
   // 터치: 왼쪽 조이스틱 / 오른쪽 드래그 시점
   const joy = { id: null, x0: 0, y0: 0, dx: 0, dy: 0 }, look = { id: null, x: 0, y: 0 };
   const jb = $('joy'), jk = $('joyKnob');
-  canvas.addEventListener('touchstart', e => { for (const t of e.changedTouches) { if (t.clientX > innerWidth / 2 && joy.id === null) { /* 오른손 = 이동 스틱, 왼손 = 시점 (2026-09-06: 이동은 오른쪽, 행동은 왼쪽) */ joy.id = t.identifier; joy.x0 = t.clientX; joy.y0 = t.clientY; joy.dx = joy.dy = 0; }   /* 스틱 자체는 고정, 손잡이만 움직인다 */ else if (look.id === null) { look.id = t.identifier; look.x = t.clientX; look.y = t.clientY; } } e.preventDefault(); }, { passive: false });
+  canvas.addEventListener('touchstart', e => { for (const t of e.changedTouches) { if (t.clientX < innerWidth / 2 && joy.id === null) { /* 왼쪽 화면 끌기 = 이동, 오른쪽 화면 끌기 = 시점 (루루냥 표준) */ joy.id = t.identifier; joy.x0 = t.clientX; joy.y0 = t.clientY; joy.dx = joy.dy = 0; }   /* 스틱 자체는 고정, 손잡이만 움직인다 */ else if (look.id === null) { look.id = t.identifier; look.x = t.clientX; look.y = t.clientY; } } e.preventDefault(); }, { passive: false });
   canvas.addEventListener('touchmove', e => { for (const t of e.changedTouches) { if (t.identifier === joy.id) { let dx = t.clientX - joy.x0, dy = t.clientY - joy.y0; const l = Math.hypot(dx, dy); if (l > 55) { dx *= 55 / l; dy *= 55 / l; } joy.dx = dx / 55; joy.dy = dy / 55; jk.style.transform = `translate(${dx}px,${dy}px)`; } else if (t.identifier === look.id) { lookDX += (t.clientX - look.x) * 2.2; lookDY += (t.clientY - look.y) * 2.2; look.x = t.clientX; look.y = t.clientY; } } e.preventDefault(); }, { passive: false });
   const tEnd = e => { for (const t of e.changedTouches) { if (t.identifier === joy.id) { joy.id = null; joy.dx = joy.dy = 0; jk.style.transform = ''; } if (t.identifier === look.id) look.id = null; } };
   canvas.addEventListener('touchend', tEnd); canvas.addEventListener('touchcancel', tEnd);
   let tRun = false, tSneak = false;
   $('btnGrab').addEventListener('touchstart', e => { e.preventDefault(); doAction(); }, { passive: false });
   $('btnDoor').addEventListener('touchstart', e => { e.preventDefault(); toggleDoor(); }, { passive: false });
-  $('btnTreat').addEventListener('touchstart', e => { e.preventDefault(); useItem('treat'); }, { passive: false });
-  $('btnToy').addEventListener('touchstart', e => { e.preventDefault(); useItem('toy'); }, { passive: false });
+  $('btnTreat').addEventListener('click', () => useItem('treat'));
+  $('btnToy').addEventListener('click', () => useItem('toy'));
+  $('btnFs').addEventListener('click', () => { try { if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen(); } catch (e) { } });
   $('btnRun').addEventListener('touchstart', e => { e.preventDefault(); tRun = !tRun; if (tRun) tSneak = false; $('btnRun').classList.toggle('on', tRun); $('btnSneak').classList.remove('on'); }, { passive: false });
   $('btnSneak').addEventListener('touchstart', e => { e.preventDefault(); tSneak = !tSneak; if (tSneak) tRun = false; $('btnSneak').classList.toggle('on', tSneak); $('btnRun').classList.remove('on'); }, { passive: false });
   $('btnSfx').addEventListener('click', () => { $('btnSfx').classList.toggle('off', !A.toggle()); });
@@ -85,7 +86,7 @@
     const it = IT.use(cat, player.x, player.z, player.L, player.yaw); if (!it) return;
     A.grab(); updItems();
   }
-  function updItems() { $('invTreat').textContent = IT.count('treat'); $('invToy').textContent = IT.count('toy'); $('btnTreat').textContent = '🦴 ' + IT.count('treat'); $('btnToy').textContent = '🎾 ' + IT.count('toy'); }
+  function updItems() { $('invTreat').textContent = IT.count('treat'); $('invToy').textContent = IT.count('toy'); }
   function doAction() {
     if (G.state !== 'play') return;
     if (player.carry) { dog.struggle = Math.max(0, dog.struggle - .16); player.patT = .35; A.pat(); return; }
@@ -257,7 +258,7 @@
       if (joy.id !== null) { ix += joy.dx; iz -= joy.dy; }
       const run = !!(keys.ShiftLeft || keys.ShiftRight) || tRun, sneak = !!(keys.KeyC) || tSneak;
       player.yaw = camYaw; player.move(dt, ix, iz, camYaw, run && !sneak, sneak);
-      IT.update(dt); { const got = IT.checkPickup(player); if (got) { A.pat(); updItems(); const el = $('inv'); el.classList.remove('got'); void el.offsetWidth; el.classList.add('got'); } }
+      IT.update(dt); { const got = IT.checkPickup(player); if (got) { A.pat(); updItems(); const el = $(got === 'treat' ? 'btnTreat' : 'btnToy'); el.classList.remove('got'); void el.offsetWidth; el.classList.add('got'); } }
       dog.update(dt, player, G); tryCatch(); player.animate(dt, player.carry ? dog : null);
       W.doors.forEach(d => { const tg = d.open ? 1 : 0; d.t += (tg - d.t) * Math.min(1, dt * 7); d.mesh.rotation.y = (d.axis === 'x' ? -1 : 1) * d.t * Math.PI * .52; });
       world.goal.rotation.z += dt; world.goal.material.opacity = .4 + Math.sin(G.time * 5) * .2;

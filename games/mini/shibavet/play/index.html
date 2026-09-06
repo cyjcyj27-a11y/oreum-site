@@ -14,23 +14,43 @@
   #vig { position: fixed; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 50% 50%, rgba(0,0,0,0) 60%, rgba(20,16,10,.35) 100%); }
   @keyframes blink { 0%,100%{opacity:.35} 50%{opacity:1} }
 
-  #topbar { position: fixed; left: 0; right: 0; top: 0; height: calc(44px + env(safe-area-inset-top)); padding: env(safe-area-inset-top) 10px 0 104px; display: flex; align-items: center; gap: 8px; pointer-events: none; z-index: 5; opacity: 0; transition: opacity .8s; }
-  #topbar.show { opacity: 1; }
   [hidden] { display: none !important; }
   /* 세로로 들면 가로로 눕히라고 알린다 (야간자율학습과 같은 방식) */
   #rotate { position: fixed; inset: 0; z-index: 90; display: none; place-items: center; text-align: center; background: #1a120a; color: #f2ede4; font-size: 17px; line-height: 1.8; padding: 8vw; }
   body.touch.portrait #rotate { display: grid; }
   #rotate button { margin: 22px 0 16px; padding: 15px 32px; border: 0; border-radius: 99px; cursor: pointer; font-family: inherit; font-size: 17px; font-weight: 800; color: #2a1c08; background: #ffd24a; }
   #rotate .sub { font-size: 14px; color: #b8ae9c; line-height: 1.7; } #rotate .sub a { color: #d8cfbc; }
-  body.shot #topbar, body.shot #oreumHome, body.shot #oreumFs, body.shot #title .go, body.shot #title .stage, body.shot #title .best, body.shot #title .items, body.shot #keys { display: none !important; }   /* ?shot=1 — 소개 그림용 */   /* .stat 의 display 가 hidden 속성을 이기지 않게 */
-  .stat { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 999px; background: rgba(30,22,14,.45); border: 1px solid rgba(255,255,255,.18); font-size: 16px; white-space: nowrap; text-shadow: 0 1px 2px rgba(0,0,0,.6); }
-  .stat b { font-weight: normal; font-size: 18px; font-family: 'Ria', 'Griun', sans-serif; letter-spacing: 1px; }
-  .stat .bar { width: 110px; height: 8px; background: rgba(255,255,255,.2); border-radius: 4px; overflow: hidden; }
+  body.shot #topbar, body.shot #iconRow, body.shot #title .go, body.shot #title .stage, body.shot #title .best, body.shot #title .items, body.shot #keys { display: none !important; }   /* ?shot=1 — 소개 그림용 */   /* .stat 의 display 가 hidden 속성을 이기지 않게 */
   #carryBar { height: 100%; width: 0; background: #ffd24a; border-radius: 4px; transition: width .1s; }
   #carry.hot #carryBar { background: #ff5a3a; animation: blink .4s infinite; }
   .spacer { flex: 1; }
-  .tog { pointer-events: auto; width: 36px; height: 36px; border-radius: 50%; border: 1px solid rgba(255,255,255,.3); background: rgba(30,22,14,.5); color: #fff; font-family: inherit; font-size: 17px; line-height: 1; padding: 0; touch-action: manipulation; }
-  .tog.off { opacity: .4; text-decoration: line-through; }
+  /* ── HUD — 루루냥 표준. 왼쪽 위: Oreum Games 링크 → 제목 → 배지. 오른쪽 위: 둥근 아이콘. 왼쪽 아래: 작은 아이콘 줄. 오른쪽 아래: 행동 단추 ── */
+  #topbar { position: fixed; inset: 0; pointer-events: none; z-index: 5; opacity: 0; transition: opacity .8s; }
+  #topbar.show { opacity: 1; }
+  #gameHomeLink { position: absolute; top: calc(4px + env(safe-area-inset-top)); left: 20px; pointer-events: auto; color: #fff; opacity: .6; font-size: 11px; text-decoration: underline; text-underline-offset: 2px; white-space: nowrap; text-shadow: 0 1px 3px rgba(0,0,0,.55); padding: 5px 8px 5px 0; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+  #gname { position: absolute; top: calc(30px + env(safe-area-inset-top)); left: 20px; font-size: 20px; font-weight: 700; letter-spacing: -.3px; text-shadow: 0 1px 3px rgba(0,0,0,.55); }
+  .badge { position: absolute; left: 20px; background: rgba(0,0,0,.45); border-radius: 999px; padding: 8px 16px; font-size: 15px; font-weight: 700; color: #ffe08a; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+  #stageH { top: calc(76px + env(safe-area-inset-top)); }
+  #timeB { top: calc(120px + env(safe-area-inset-top)); color: #fff; }
+  #carry { top: calc(164px + env(safe-area-inset-top)); color: #fff; }
+  #carry .bar { width: 110px; height: 8px; background: rgba(255,255,255,.2); border-radius: 4px; overflow: hidden; }
+  #carryBar { height: 100%; width: 0; background: #ffd24a; border-radius: 4px; transition: width .1s; }
+  #carry.hot #carryBar { background: #ff5a3a; animation: blink .4s infinite; }
+  #topRow { position: absolute; top: calc(14px + env(safe-area-inset-top)); right: 16px; display: flex; gap: 8px; pointer-events: auto; }
+  .ibtn { width: 40px; height: 40px; border-radius: 50%; border: 1px solid rgba(255,255,255,.35); background: rgba(0,0,0,.45); color: #fff; font-size: 18px; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; position: relative; padding: 0; font-family: inherit; user-select: none; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+  .ibtn:active { background: rgba(255,190,80,.7); } .ibtn.off { opacity: .4; }
+  .ibtn i { position: absolute; right: -4px; bottom: -4px; font-style: normal; font-size: 11px; font-weight: 800; background: #ffd24a; color: #2a1c08; border-radius: 999px; min-width: 18px; height: 18px; line-height: 18px; text-align: center; padding: 0 4px; }
+  .ibtn.got { animation: got .6s ease-out; } @keyframes got { 0% { transform: scale(1.35); } 100% { transform: scale(1); } }
+  #iconRow { position: absolute; left: 12px; bottom: calc(16px + env(safe-area-inset-bottom)); display: flex; gap: 8px; pointer-events: auto; }
+  body.touch #iconRow { left: 6px; bottom: calc(68px + env(safe-area-inset-bottom)); gap: 4px; }
+  body.touch .ibtn { width: 34px; height: 34px; font-size: 15px; } body.touch .ibtn i { font-size: 10px; min-width: 16px; height: 16px; line-height: 16px; }
+  #touchBtns { display: none; position: absolute; right: 12px; bottom: calc(62px + env(safe-area-inset-bottom)); gap: 10px; justify-content: flex-end; pointer-events: auto; }
+  body.touch.playing #touchBtns { display: flex; }
+  .tbtn { width: 56px; height: 56px; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(0,0,0,.42); border: 2px solid rgba(255,255,255,.5); color: #fff; font-size: 10px; font-weight: 700; line-height: 1.15; text-align: center; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; touch-action: none; }
+  .tbtn * { pointer-events: none; } .tbtn .k { font-size: 20px; }
+  .tbtn.on { background: rgba(255,190,80,.75); border-color: #fff; }
+  #btnGrab { background: rgba(255,120,60,.55); } #btnDoor { opacity: .3; } #btnDoor.show { opacity: 1; }
+  #joy { display: none; }
   #hud { display: none; }
 
   #keys { position: fixed; right: 22px; bottom: 20px; font-size: 13px; opacity: 0; text-align: right; line-height: 1.7; pointer-events: none; text-shadow: 0 1px 2px rgba(0,0,0,.7); transition: opacity .8s; }
@@ -41,22 +61,8 @@
   #cross.show { display: block; } #cross.hot { transform: scale(2.2); background: #ffd24a; }
 
   /* 터치 */
-  .tbtn { display: none; position: fixed; width: 76px; height: 76px; border-radius: 50%; border: 2px solid rgba(255,255,255,.55); background: rgba(30,22,14,.5); color: #fff; font-family: inherit; font-size: 15px; z-index: 6; touch-action: manipulation; text-shadow: 0 1px 2px rgba(0,0,0,.6); }
-  body.touch.playing .tbtn { display: block; } .tbtn.on { background: rgba(255,210,74,.75); color: #2a1c08; border-color: #ffd24a; }
-  /* 단추는 왼쪽(왼손), 이동 스틱은 오른쪽 반쪽 아무 데나. 왼쪽 아래 구석은 전체화면 알약 자리라 그 위부터 */
-  /* 행동 단추는 바닥줄, 전체화면 알약(왼쪽 아래 구석) 오른쪽부터 */
-  #btnGrab { left: 136px; bottom: calc(14px + env(safe-area-inset-bottom)); width: 74px; height: 74px; font-size: 16px; background: rgba(255,120,60,.6); }
-  #btnDoor { left: 218px; bottom: calc(22px + env(safe-area-inset-bottom)); width: 58px; height: 58px; font-size: 13px; opacity: .35; } #btnDoor.show { opacity: 1; }
-  #btnRun { left: 284px; bottom: calc(22px + env(safe-area-inset-bottom)); width: 58px; height: 58px; font-size: 13px; } #btnSneak { left: 350px; bottom: calc(22px + env(safe-area-inset-bottom)); width: 58px; height: 58px; font-size: 12px; }
-  /* 아이템은 작게, 위쪽 알약 바로 아래 */
-  #btnTreat { left: 10px; top: calc(54px + env(safe-area-inset-top)); width: 46px; height: 46px; font-size: 12px; } #btnToy { left: 62px; top: calc(54px + env(safe-area-inset-top)); width: 46px; height: 46px; font-size: 12px; }
-  #inv.got { animation: got .6s ease-out; } @keyframes got { 0% { transform: scale(1); background: rgba(255,210,74,.9); color: #2a1c08; } 100% { transform: scale(1); } }
-  #inv .key { font-size: 10px; opacity: .55; border: 1px solid rgba(255,255,255,.4); border-radius: 4px; padding: 0 4px; margin: 0 6px 0 -2px; font-family: Arial, sans-serif; } body.touch #inv { display: none; }
   #title .items { position: absolute; left: 50%; transform: translateX(-50%); bottom: calc(12vh + 60px); font-size: 15px; opacity: .85; text-shadow: 0 1px 3px rgba(0,0,0,.6); letter-spacing: 1px; }
   #over .gain { font-size: 22px !important; color: #ffd24a; margin-top: 8px !important; }
-  /* 이동 스틱 — 오른쪽 아래에 고정, 불투명. 오른쪽 반쪽 아무 데나 문지르면 손잡이가 따라 움직인다 */
-  #joy { position: fixed; right: 28px; bottom: calc(28px + env(safe-area-inset-bottom)); width: 120px; height: 120px; border-radius: 50%; border: 3px solid rgba(255,255,255,.85); background: rgba(30,22,14,.88); display: none; pointer-events: none; z-index: 6; box-shadow: 0 4px 16px rgba(0,0,0,.35); }
-  body.touch.playing #joy { display: block; } #joyKnob { position: absolute; left: 35px; top: 35px; width: 50px; height: 50px; border-radius: 50%; background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,.4); }
 
   /* 타이틀 */
   #title { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding-top: 8vh; background: linear-gradient(180deg, rgba(20,26,36,.25), rgba(20,26,36,0) 45%, rgba(20,26,36,0) 70%, rgba(20,26,36,.45)); transition: opacity 1s; text-align: center; z-index: 10; }
@@ -83,7 +89,6 @@
   /* 가로 화면: 기록은 오른쪽으로 빼고 영상은 왼쪽에 크게 */
   @media (orientation: landscape) { #over { flex-direction: row; gap: 5vw; } #vetVid { height: 82vh; margin: 0; } #over .txt { max-width: 46vw; } #over h2 { font-size: min(4.2vw, 48px); margin-bottom: 4px; } #over .again { margin-top: 14px; } #over p { margin: 2px 0; } }
   #over .again { margin-top: 36px; opacity: .6; animation: blink 2.4s infinite; font-family: 'Ria', sans-serif; letter-spacing: 6px; font-size: 24px; cursor: pointer; }
-  @media (max-width: 700px) { #topbar { padding-left: 96px; gap: 5px; } .stat { font-size: 13px; padding: 3px 7px; gap: 4px; } .stat b { font-size: 15px; } .stat .bar { width: 56px; } #over h2 { font-size: min(6vw, 30px); letter-spacing: 1px; } }
 </style>
 </head>
 <body>
@@ -91,12 +96,17 @@
 <div id="vig"></div>
 
 <div id="topbar">
-  <div class="stat" id="stageH">STAGE 1</div>
-  <div class="stat"><span class="ic">⏱</span><b id="time">0:00.0</b></div>
-  <div class="stat" id="inv"><span>🦴</span><b id="invTreat">0</b><span class="key">1</span><span>🎾</span><b id="invToy">0</b><span class="key">2</span></div>
-  <div class="stat" id="carry" hidden><span class="ic">🐾</span><div class="bar"><div id="carryBar"></div></div></div>
-  <div class="spacer"></div>
-  <button id="btnSfx" class="tog" title="효과음">🔊</button>
+  <a id="gameHomeLink" href="https://oreumgames.com/" target="_blank" rel="noopener">Oreum Games</a>
+  <div id="gname" data-en="Shiba Vet Day">시바 병원 가는 날</div>
+  <div class="badge" id="stageH">STAGE 1</div>
+  <div class="badge" id="timeB">⏱ <b id="time">0:00.0</b></div>
+  <div class="badge" id="carry" hidden>🐾 <div class="bar"><div id="carryBar"></div></div></div>
+  <div id="topRow"><button class="ibtn" id="btnSfx" title="효과음">🔊</button></div>
+  <div id="iconRow">
+    <button class="ibtn" id="btnFs" title="전체화면">⛶</button>
+    <button class="ibtn" id="btnTreat" title="간식">🦴<i id="invTreat">0</i></button>
+    <button class="ibtn" id="btnToy" title="장난감">🎾<i id="invToy">0</i></button>
+  </div>
 </div>
 <div id="hud"></div>
 <div id="cross"></div>
@@ -104,9 +114,12 @@
 <div id="keys" data-en="WASD move · Mouse / ←→ look · Shift run · C sneak<br>Space grab · E door · 1 treat · 2 toy · K sound">WASD 이동 · 마우스 / ←→ 시점 · Shift 달리기 · C 살금살금<br>스페이스 잡기 · E 문 · 1 간식 · 2 장난감 · K 효과음</div>
 
 <div id="joy"><div id="joyKnob"></div></div>
-<button id="btnGrab" class="tbtn" data-en="GRAB">잡기</button>
-<button id="btnDoor" class="tbtn" data-en="DOOR">문</button>
-<button id="btnRun" class="tbtn" data-en="RUN">달리기</button>
+<div id="touchBtns">
+  <div class="tbtn" id="btnGrab"><span class="k">🐾</span><span data-en="GRAB">잡기</span></div>
+  <div class="tbtn" id="btnDoor"><span class="k">🚪</span><span data-en="DOOR">문</span></div>
+  <div class="tbtn" id="btnRun"><span class="k">💨</span><span data-en="RUN">달리기</span></div>
+  <div class="tbtn" id="btnSneak"><span class="k">🤫</span><span data-en="SNEAK">살금살금</span></div>
+</div>
 <div id="rotate">
   <div>
     <p data-en="This game plays in landscape">가로 화면에서 하는 게임입니다</p>
@@ -115,7 +128,6 @@
       <a href="#" id="rotSkip" data-en="Play in portrait anyway">그래도 세로로 하기</a></p>
   </div>
 </div>
-<button id="btnSneak" class="tbtn" data-en="SNEAK">살금살금</button>
 <button id="btnTreat" class="tbtn">🦴 0</button>
 <button id="btnToy" class="tbtn">🎾 0</button>
 
@@ -141,14 +153,13 @@
   </div>
 </div>
 
-<script src="/assets/game-home.js?v=6" data-top="6" data-left="6" data-fullscreen="1" defer></script>
 <script src="lib/three.min.js"></script>
 <script src="js/world.js?v=14"></script>
 <script src="js/audio.js?v=14"></script>
 <script src="js/items.js?v=3"></script>
 <script src="js/dog.js?v=22"></script>
 <script src="js/player.js?v=14"></script>
-<script src="js/game.js?v=33"></script>
+<script src="js/game.js?v=34"></script>
 <script>
 </script>
 <script src="/assets/game-events.js?v=1" defer></script>
