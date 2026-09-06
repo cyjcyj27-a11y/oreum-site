@@ -461,6 +461,17 @@ const STR = {
     <button id="go">${fired ? 'Apply for reassignment (from shift 1)' : `To shift ${G.shift + 1}`}${window.OREUM_TOUCH ? '' : ' (R)'}</button>`
   }
 }[LANG];
+// 폰에는 키보드가 없다 — 3D 라벨·안내·일시정지의 E·F·Q·R 을 화면 단추 이름으로 (2026-09-06 "없는 E키 다 빼")
+if (window.OREUM_TOUCH) {
+  const ko = !/[?&]lang=en/.test(location.search);
+  STR.lRack = (n) => ko ? n + ' 집기' : 'Pick ' + n;
+  STR.lDrop = ko ? '투입' : 'Drop in';
+  STR.tSealed = (n) => ko ? `포장 마감 → ${n} (${STR.btnGrab} 버튼으로 상자 집기)` : `Sealed → ${n} (pick the box up with ${STR.btnGrab})`;
+  STR.pauseHtml = ko
+    ? `<h1>일시정지</h1><div class="lead">화면을 누르면 이어서 작업합니다.</div><button id="go">이어하기</button>`
+    : `<h1>Paused</h1><div class="lead">Tap the screen to continue.</div><button id="go">Continue</button>`;
+}
+
 document.documentElement.lang = LANG;
 document.title = STR.title;
 document.querySelectorAll('#top .card .k').forEach((el,i)=>{ el.textContent = STR.cards[i]; });
@@ -1629,10 +1640,11 @@ function drawPrompt(){
   // 폰에는 키보드가 없으니 눌러야 할 화면 버튼 이름으로 바꿔 말한다
   if(window.OREUM_TOUCH){
     msg = msg
-      .replace('<kbd>F</kbd> ' + STR.sealWord, '<kbd>' + STR.btnGrab + '</kbd>' + STR.btnWord + STR.sealWord)
-      .replace('<kbd>E</kbd> ', '<kbd>' + STR.btnGrab + '</kbd>' + STR.btnWord)
-      .replace('<kbd>Q</kbd> ', '<kbd>' + STR.btnDrop + '</kbd>' + STR.btnWord)
-      .replace('<kbd>R</kbd> ', '<kbd>' + STR.btnAgain + '</kbd>' + STR.btnWord);
+      .split('<kbd>F</kbd> ' + STR.sealWord).join('<kbd>' + STR.btnGrab + '</kbd>' + STR.btnWord + STR.sealWord)
+      .split('<kbd>E</kbd> ').join('<kbd>' + STR.btnGrab + '</kbd>' + STR.btnWord)
+      .split('<kbd>Q</kbd> ').join('<kbd>' + STR.btnDrop + '</kbd>' + STR.btnWord)
+      .split('<kbd>R</kbd> ').join('<kbd>' + STR.btnAgain + '</kbd>' + STR.btnWord)
+      .replace(/\[E\]\s?/g, '').replace(/\[F\]\s?/g, '').replace(/\[Q\]\s?/g, '');
   }
   pEl.innerHTML = msg;
   pEl.style.opacity = msg ? 1 : 0;
