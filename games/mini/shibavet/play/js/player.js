@@ -51,7 +51,7 @@
   P.move = function (dt, ix, iz, camYaw, run, sneak) {
     const len = Math.hypot(ix, iz);
     let want = 0;
-    if (len > 0) { want = run ? 4.7 : sneak ? 1.35 : 2.9; if (this.carry) want = run ? 3.6 : sneak ? 1.2 : 2.6; }
+    if (len > 0) { want = run ? 5.35 : sneak ? 1.35 : 3.15; if (this.carry) want = run ? 4.1 : sneak ? 1.2 : 2.8; }   // 야간자율학습과 같은 걷기·달리기 속도
     if (this.lunging > 0) want = 6.5;
     this.mode = len === 0 && this.lunging <= 0 ? 'still' : run ? 'run' : sneak ? 'sneak' : 'walk';
     this.speed += (want - this.speed) * Math.min(1, dt * (want > this.speed ? 10 : 14));

@@ -251,11 +251,13 @@
       let ix = 0, iz = 0; if (keys.KeyW || keys.ArrowUp) iz += 1; if (keys.KeyS || keys.ArrowDown) iz -= 1; if (keys.KeyA) ix -= 1; if (keys.KeyD) ix += 1;
       if (keys.ArrowLeft) camYaw += dt * 2.4; if (keys.ArrowRight) camYaw -= dt * 2.4; // 화살표 좌우 = 몸 돌리기
       // 폰 패드: 앞뒤는 걷기, 좌우는 몸 돌리기(카메라가 같이 돈다). 옆걸음이면 시점을 따로 끌어야 해서 한 손으로 못 한다
+      // 폰 패드 — 야간자율학습 스틱과 같은 규칙: 방향은 켜짐/꺼짐, 끝까지(78%) 밀면 달린다. 시점은 화면 끌기만
       let padRun = false;
       if (joy.id !== null) {
-        camYaw -= joy.dx * 2.4 * dt; iz -= joy.dy;
-        padRun = Math.hypot(joy.dx, joy.dy) > .85 && joy.dy < -.3;   // 끝까지 밀면 달린다 (야간자율학습과 같은 규칙)
-        camPitch += (0 - camPitch) * Math.min(1, dt * 2.5);           // 패드로 움직이는 동안 시선은 수평으로 돌아온다
+        const n = Math.hypot(joy.dx, joy.dy), on = n > .22;
+        if (on && joy.dx < -.12) ix -= 1; if (on && joy.dx > .12) ix += 1;
+        if (on && joy.dy < -.12) iz += 1; if (on && joy.dy > .12) iz -= 1;
+        padRun = n > .78;
       }
       const run = !!(keys.ShiftLeft || keys.ShiftRight) || tRun || padRun, sneak = !!(keys.KeyC) || tSneak;
       player.yaw = camYaw; player.move(dt, ix, iz, camYaw, run && !sneak, sneak);
