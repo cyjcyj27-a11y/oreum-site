@@ -2833,11 +2833,7 @@ addEventListener('wheel',e=>{
    눕혀도 안 돌아간다(2026-08-29 사용자가 실제 폰에서 막혔다).
    → 전체화면으로 들어간 뒤 `screen.orientation.lock('landscape')` 로 **우리가 직접 눕힌다.**
    안드로이드 크롬에서 된다. iOS 사파리는 방향 잠금이 없어 안내만 남는다(그래서 안내도 같이 띄운다). */
-async function goLandscape(){
-  try{ if(!document.fullscreenElement && document.documentElement.requestFullscreen)
-         await document.documentElement.requestFullscreen(); }catch(e){}
-  try{ if(screen.orientation&&screen.orientation.lock) await screen.orientation.lock('landscape'); }catch(e){}
-}
+function goLandscape(){ if(window.OL) OL.go(); }   // 전체화면 → 가로 잠금 → 안 되면 화면을 통째로 돌린다 (/assets/landscape.js)
 const TOUCH = matchMedia('(pointer:coarse)').matches || navigator.maxTouchPoints>0
   || /[?&]touch=1/.test(location.search);   // 검증용 — PC 에서 ?touch=1 로 터치 조작을 켜 본다
 if(TOUCH) document.body.classList.add('touch');

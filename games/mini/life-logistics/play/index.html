@@ -16,6 +16,7 @@
 <meta name="twitter:title" content="LIFE LOGISTICS · 오름게임즈">
 <meta name="twitter:description" content="시간이 화폐인 세계의 1인칭 3D 창고 작업. 주문을 채우고 출고하며 수명을 적립합니다. 설치 없이 하는 브라우저게임, 영생의 가격 세계관.">
 <meta name="twitter:image" content="https://oreumgames.com/assets/life-logistics-shot.webp?v=1">
+<script src="/assets/landscape.js?v=1"></script>
 <script src="/assets/visit.js?v=11" defer></script>
 <meta name="description" content="시간이 화폐인 세계의 1인칭 3D 창고 작업. 주문을 채우고 출고하며 수명을 적립합니다. 설치 없이 하는 브라우저게임, 영생의 가격 세계관.">
 <meta name="keywords" content="웹게임, 브라우저게임, 프리게임, 퍼즐게임, 무료게임, 설치없는게임, 회원가입없는게임, 인디게임, 오름게임즈, webgame, browsergame, freegame, puzzlegame, oreumgames">
@@ -1676,7 +1677,7 @@ requestAnimationFrame(frame);
 (function(){
   var isTouch=('ontouchstart' in window)&&matchMedia('(pointer: coarse)').matches; if(isTouch) document.body.classList.add('touch');
   var skipped=false; function sync(){ var w=innerWidth,h=innerHeight; if(w<10||h<10) return; document.body.classList.toggle('portrait', isTouch&&!skipped&&h>w*1.02); }
-  document.getElementById('rotGo').addEventListener('click', async function(){ try{ if(!document.fullscreenElement&&document.documentElement.requestFullscreen) await document.documentElement.requestFullscreen(); }catch(e){} try{ if(screen.orientation&&screen.orientation.lock) await screen.orientation.lock('landscape'); }catch(e){} });
+  document.getElementById('rotGo').addEventListener('click', function(){ if(window.OL) OL.go(); });
   document.getElementById('rotSkip').addEventListener('click', function(e){ e.preventDefault(); skipped=true; sync(); });
   addEventListener('resize', sync); addEventListener('orientationchange', function(){ setTimeout(sync,240); }); sync(); setTimeout(sync,400);
 })();

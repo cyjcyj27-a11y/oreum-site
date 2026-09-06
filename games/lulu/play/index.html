@@ -392,6 +392,15 @@
   #rotate button { margin: 22px 0 16px; padding: 15px 32px; border: 0; border-radius: 99px; cursor: pointer; font-family: inherit; font-size: 17px; font-weight: 800; color: #2a1c08; background: #e9c877; }
   #rotate .sub { font-size: 14px; color: #b8b0a0; line-height: 1.7; } #rotate .sub a { color: #d8cfbc; }
 
+  html.ol-land #start { gap: 6px; padding: 8px; }
+  html.ol-land #startTitle { width: min(360px, 60vh); padding: 5px 14px; border-radius: 12px; }
+  html.ol-land #startTitle h1 { font-size: 19px; } html.ol-land #startTitle small { font-size: 10px; margin-top: 1px; }
+  html.ol-land #startJobs { grid-template-columns: repeat(4, minmax(0, 1fr)); width: min(440px, 64vh); gap: 6px; }
+  html.ol-land .job { border-radius: 10px; } html.ol-land .job .cap { padding: 2px 6px 4px; } html.ol-land .job .cap b { font-size: 11px; }
+  html.ol-land #startRomance { width: min(150px, 30vw); margin-top: 2px; }
+  html.ol-land #startGo { padding: 8px 26px; font-size: 15px; }
+  html.ol-land #startKeys { display: none; }
+  html.ol-land #raceVideo, html.ol-land .raceVid { max-height: 94%; } html.ol-land #raceWrap .cap { position: absolute; bottom: 6px; margin: 0; }
   /* ---- 왼쪽 아래 고정 둥근 패드 (다른 게임과 같은 표준: 왼쪽 이동, 오른쪽 행동) ---- */
   #pad { display: none; position: absolute; left: calc(14px + env(safe-area-inset-left)); bottom: calc(14px + env(safe-area-inset-bottom)); width: 150px; height: 150px; border-radius: 50%; border: 2px solid rgba(255,255,255,.45); background: rgba(20,24,30,.38); touch-action: none; -webkit-user-select: none; user-select: none; z-index: 6; pointer-events: auto; }
   #knob { position: absolute; left: 50%; top: 50%; width: 60px; height: 60px; margin: -30px 0 0 -30px; border-radius: 50%; border: 2px solid rgba(255,255,255,.75); background: rgba(255,255,255,.3); pointer-events: none; }
@@ -459,6 +468,7 @@
   body.touch .ibtn svg { width: 19px; height: 12px; }
   /* 가로 폰: 왼쪽 아래는 패드 자리라 작은 아이콘 줄은 오른쪽 위 아이콘 옆으로 (이 줄이 위 규칙보다 뒤에 있어야 이긴다) */
   @media (orientation: landscape) { body.touch #iconRow { left: auto; right: 132px; top: 14px; bottom: auto; } }
+  html.ol-land body.touch #iconRow { left: auto; right: 132px; top: 14px; bottom: auto; }
 
   /* ---- 시작 화면, 언어 단추 바로 아래 — 오름게임즈 홈페이지로 가는 작은 링크 (새 탭으로 열립니다) ---- */
   #homeLink {
@@ -732,6 +742,7 @@
 <!-- 오름게임즈 로고 — 게임이 준비되는 동안 먼저 보여주는 첫 장면입니다.
      루루 시작 화면(#start)이 다 준비되면 부드럽게 걷힙니다. -->
 <div id="splash"><img src="../assets/oreum-logo.png" alt="오름게임즈"></div>
+<script src="/assets/landscape.js?v=1"></script>
 <script>
   // 안전장치 — 게임 스크립트가 아예 안 읽히더라도 로고가 화면을 영영 막고 있으면 안 됩니다
   setTimeout(function () {
@@ -958,10 +969,7 @@ if ('serviceWorker' in navigator && location.protocol !== 'file:') {
   var $ = function (id) { return document.getElementById(id); };
   var skipped = false;
   function syncRot() { var w = innerWidth, h = innerHeight; if (w < 10 || h < 10) return; document.body.classList.toggle('portrait', document.body.classList.contains('touch') && !skipped && h > w * 1.02); }
-  $('rotGo').addEventListener('click', async function () {
-    try { if (!document.fullscreenElement && document.documentElement.requestFullscreen) await document.documentElement.requestFullscreen(); } catch (e) { }
-    try { if (screen.orientation && screen.orientation.lock) await screen.orientation.lock('landscape'); } catch (e) { }
-  });
+  $('rotGo').addEventListener('click', function () { if (window.OL) OL.go(); });   // 전체화면 → 가로 잠금 → 안 되면 화면을 통째로 돌린다
   $('rotSkip').addEventListener('click', function (e) { e.preventDefault(); skipped = true; syncRot(); });
   addEventListener('resize', syncRot); addEventListener('orientationchange', function () { setTimeout(syncRot, 240); }); syncRot(); setTimeout(syncRot, 400); setTimeout(syncRot, 1500);
   // 패드 — 손가락 벡터를 touchMove(앞뒤 f, 좌우 r)로. 스카이라이더·시바와 같은 코드

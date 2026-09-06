@@ -88,6 +88,7 @@
   #over .txt { display: flex; flex-direction: column; align-items: center; }
   /* 가로 화면: 기록은 오른쪽으로 빼고 영상은 왼쪽에 크게 */
   @media (orientation: landscape) { #over { flex-direction: row; gap: 5vw; } #vetVid { height: 82vh; margin: 0; } #over .txt { max-width: 46vw; } #over h2 { font-size: min(4.2vw, 48px); margin-bottom: 4px; } #over .again { margin-top: 14px; } #over p { margin: 2px 0; } }
+  html.ol-land #over { flex-direction: row; gap: 5vh; } html.ol-land #vetVid { height: 82vw; margin: 0; } html.ol-land #over .txt { max-width: 46vh; } html.ol-land #over h2 { font-size: min(4.2vh, 48px); margin-bottom: 4px; } html.ol-land #over .again { margin-top: 14px; } html.ol-land #over p { margin: 2px 0; }
   #over .again { margin-top: 36px; opacity: .6; animation: blink 2.4s infinite; font-family: 'Ria', sans-serif; letter-spacing: 6px; font-size: 24px; cursor: pointer; }
 </style>
 </head>
@@ -149,13 +150,14 @@
 </div>
 
 <script src="/assets/game-home.js?v=6" data-top="6" data-left="6" data-fullscreen="1" defer></script>
+<script src="/assets/landscape.js?v=1"></script>
 <script src="lib/three.min.js"></script>
 <script src="js/world.js?v=15"></script>
 <script src="js/audio.js?v=14"></script>
 <script src="js/items.js?v=3"></script>
 <script src="js/dog.js?v=22"></script>
 <script src="js/player.js?v=16"></script>
-<script src="js/game.js?v=44"></script>
+<script src="js/game.js?v=45"></script>
 <script>
 </script>
 <script src="/assets/game-events.js?v=1" defer></script>

@@ -274,10 +274,7 @@
   // 세로로 들면 가로로 눕히라고 알린다. 미디어쿼리 대신 실제 창 비율을 잰다(전체화면에서 방향이 늦게 바뀌는 폰이 있다)
   let rotSkipped = false;
   function syncRot() { const w = innerWidth, h = innerHeight; if (w < 10 || h < 10) return; document.body.classList.toggle('portrait', isTouch && !rotSkipped && h > w * 1.02); }
-  $('rotGo').addEventListener('click', async () => {
-    try { if (!document.fullscreenElement && document.documentElement.requestFullscreen) await document.documentElement.requestFullscreen(); } catch (e) { }
-    try { if (screen.orientation && screen.orientation.lock) await screen.orientation.lock('landscape'); } catch (e) { }
-  });
+  $('rotGo').addEventListener('click', () => { if (window.OL) OL.go(); });   // 전체화면 → 가로 잠금 → 안 되면 화면을 통째로 돌린다 (assets/landscape.js)
   $('rotSkip').addEventListener('click', e => { e.preventDefault(); rotSkipped = true; syncRot(); });
   addEventListener('resize', syncRot); addEventListener('orientationchange', () => setTimeout(syncRot, 240)); syncRot(); setTimeout(syncRot, 400);
   if (/[?&]shot=1/.test(location.search)) document.body.classList.add('shot');   // 스크린샷용 — 단추·상단바 숨김
