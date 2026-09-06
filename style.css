@@ -949,6 +949,22 @@ body{ font-size:19px; }
 .faq details:last-child{ border-bottom:1px solid var(--line); }
 .faq summary{ cursor:pointer; font-weight:700; font-size:15px; }
 .faq details p{ margin:8px 0 0; font-size:15px; line-height:1.7; color:var(--ink-2); }
+/* 플래시게임 모음 — 이 페이지에만 있는 글 (2026-09-07 빙 입구 페이지 판정 대응) */
+.flash-note{ margin-top:30px; }
+.flash-note h2{ font-size:18px; margin:22px 0 8px; }
+.flash-note h2:first-child{ margin-top:0; }
+.flash-note p{ margin:0; font-size:15px; line-height:1.8; color:var(--ink-2); }
+.flash-lines{ list-style:none; margin:0; padding:0; }
+.flash-lines li{ display:flex; align-items:center; gap:14px; border-top:1px solid var(--line); padding:9px 0; font-size:15px; line-height:1.6; color:var(--ink-2); }
+.flash-lines li:last-child{ border-bottom:1px solid var(--line); }
+.flash-lines a{ display:flex; align-items:center; gap:12px; flex:0 0 auto; font-weight:700; color:var(--ink); }
+.flash-lines img{ width:96px; height:60px; object-fit:cover; border-radius:8px; border:1px solid var(--line); }
+.flash-lines b{ min-width:120px; }
+@media (max-width:640px){
+  .flash-lines li{ flex-wrap:wrap; gap:8px 10px; }
+  .flash-lines b{ min-width:0; }
+  .flash-lines li > span{ flex:1 1 100%; font-size:14px; }
+}
 /* NEW 표시는 목록 맨 앞 카드 두 장에 자동으로 붙는다 (2026-09-03 "어제 올린거랑 같이 NEW띄우자") */
 .showcase .grid a.mini:nth-child(-n+2) .shot::after{
   content:'NEW'; position:absolute; right:10px; top:10px; font-size:12px; font-weight:800; letter-spacing:.14em;
