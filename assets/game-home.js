@@ -72,7 +72,8 @@
       '#oreumFs:hover,#oreumFs:focus-visible{opacity:1}' +
       '#oreumFs svg{width:13px;height:13px;display:block;fill:none;' +
         'stroke:#4e8f4a;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}' +
-      '#oreumFs:active{background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.18)}';
+      '#oreumFs:active{background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.18)}' +
+      '#oreumFs.on{padding:8px;gap:0}#oreumFs.on svg{width:15px;height:15px}';
     document.head.appendChild(css);
 
     // 글이 위에서부터 흐르는 게임은 배지에 가리지 않게 본문을 내립니다
@@ -160,7 +161,9 @@
     function paint(){
       var t = on() ? (ko ? '전체화면 끄기' : 'Exit full screen')
                    : (ko ? '전체화면'      : 'Full screen');
-      b.innerHTML = (on() ? OUT : IN) + '<span>' + t + '</span>';
+      /* 전체화면일 때는 글자 없이 네모만 (2026-09-06 사장님: "전체화면일때 전체화면보기글씨를 빼고 네모만") */
+      b.innerHTML = on() ? OUT : IN + '<span>' + t + '</span>';
+      b.classList.toggle('on', on());
       b.setAttribute('aria-label', t);
     }
     paint();
