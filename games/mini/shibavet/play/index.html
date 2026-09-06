@@ -38,19 +38,19 @@
   .tog { pointer-events: auto; width: 36px; height: 36px; border-radius: 50%; border: 1px solid rgba(255,255,255,.3); background: rgba(0,0,0,.4); color: #fff; font-family: inherit; font-size: 17px; line-height: 1; padding: 0; touch-action: manipulation; }
   .tog.off { opacity: .4; text-decoration: line-through; }
   @media (max-width: 700px) { #topbar { padding-left: calc(104px + env(safe-area-inset-left)); gap: 4px 5px; } .stat { font-size: 13px; padding: 3px 7px; gap: 4px; } .stat b { font-size: 15px; } .stat .bar { width: 56px; } .tog { width: 32px; height: 32px; font-size: 15px; } }
-  /* 폰: 오른쪽 아래 고정 둥근 패드로 이동, 왼쪽 아래 행동 단추 (스카이라이더와 같은 배치) */
-  #pad { display: none; position: fixed; right: calc(14px + env(safe-area-inset-right)); bottom: calc(14px + env(safe-area-inset-bottom)); width: 186px; height: 186px; border-radius: 50%; border: 2px solid rgba(255,255,255,.45); background: rgba(20,24,30,.38); touch-action: none; -webkit-user-select: none; user-select: none; z-index: 6; }
+  /* 폰: 왼쪽 아래 고정 둥근 패드로 이동, 오른쪽 아래 행동 단추 (야간자율학습·일반 관례). 왼쪽 아래 구석은 전체화면 알약이라 패드는 그 위 */
+  #pad { display: none; position: fixed; left: calc(14px + env(safe-area-inset-left)); bottom: calc(50px + env(safe-area-inset-bottom)); width: 186px; height: 186px; border-radius: 50%; border: 2px solid rgba(255,255,255,.45); background: rgba(20,24,30,.38); touch-action: none; -webkit-user-select: none; user-select: none; z-index: 6; }
   #knob { position: absolute; left: 50%; top: 50%; width: 72px; height: 72px; margin: -36px 0 0 -36px; border-radius: 50%; border: 2px solid rgba(255,255,255,.75); background: rgba(255,255,255,.3); pointer-events: none; }
   #pad.on #knob { background: rgba(255,255,255,.5); }
   .tbtn { display: none; position: fixed; width: 76px; height: 76px; border-radius: 50%; border: 2px solid rgba(255,255,255,.55); background: rgba(0,0,0,.32); color: #fff; font-family: inherit; font-size: 15px; letter-spacing: 1px; touch-action: none; z-index: 6; text-shadow: 0 1px 2px rgba(0,0,0,.6); padding: 0; }
   .tbtn.on { background: rgba(255,210,74,.75); color: #2a1c08; border-color: #ffd24a; }
   body.touch.playing .tbtn, body.touch.playing #pad { display: block; }
-  #btnGrab { left: calc(12px + env(safe-area-inset-left)); bottom: calc(140px + env(safe-area-inset-bottom)); background: rgba(255,120,60,.55); } #btnDoor { left: calc(96px + env(safe-area-inset-left)); bottom: calc(140px + env(safe-area-inset-bottom)); opacity: .35; } #btnDoor.show { opacity: 1; }
-  #btnRun { left: calc(12px + env(safe-area-inset-left)); bottom: calc(56px + env(safe-area-inset-bottom)); } #btnSneak { left: calc(96px + env(safe-area-inset-left)); bottom: calc(56px + env(safe-area-inset-bottom)); font-size: 13px; }
+  #btnGrab { right: calc(14px + env(safe-area-inset-right)); bottom: calc(24px + env(safe-area-inset-bottom)); width: 88px; height: 88px; font-size: 17px; background: rgba(255,120,60,.55); } #btnDoor { right: calc(112px + env(safe-area-inset-right)); bottom: calc(30px + env(safe-area-inset-bottom)); opacity: .35; } #btnDoor.show { opacity: 1; }
+  #btnRun { right: calc(20px + env(safe-area-inset-right)); bottom: calc(126px + env(safe-area-inset-bottom)); } #btnSneak { right: calc(112px + env(safe-area-inset-right)); bottom: calc(126px + env(safe-area-inset-bottom)); font-size: 13px; }
   @media (max-height: 520px) {
     .tbtn { width: 60px; height: 60px; font-size: 13px; } #btnSneak { font-size: 11px; }
-    #btnGrab, #btnDoor { bottom: calc(118px + env(safe-area-inset-bottom)); } #btnRun, #btnSneak { bottom: calc(52px + env(safe-area-inset-bottom)); } #btnDoor, #btnSneak { left: calc(80px + env(safe-area-inset-left)); }
-    #pad { width: 160px; height: 160px; right: calc(10px + env(safe-area-inset-right)); bottom: calc(10px + env(safe-area-inset-bottom)); } #knob { width: 62px; height: 62px; margin: -31px 0 0 -31px; }
+    #btnGrab { width: 72px; height: 72px; font-size: 15px; bottom: calc(16px + env(safe-area-inset-bottom)); } #btnDoor { bottom: calc(22px + env(safe-area-inset-bottom)); right: calc(94px + env(safe-area-inset-right)); } #btnRun, #btnSneak { bottom: calc(100px + env(safe-area-inset-bottom)); } #btnSneak { right: calc(94px + env(safe-area-inset-right)); } #btnRun { right: calc(20px + env(safe-area-inset-right)); }
+    #pad { width: 160px; height: 160px; left: calc(10px + env(safe-area-inset-left)); bottom: calc(46px + env(safe-area-inset-bottom)); }   /* 전체화면 알약 위 */ #knob { width: 62px; height: 62px; margin: -31px 0 0 -31px; }
   }
   #joy { display: none; }
   #hud { display: none; }
@@ -155,7 +155,7 @@
 <script src="js/items.js?v=3"></script>
 <script src="js/dog.js?v=22"></script>
 <script src="js/player.js?v=15"></script>
-<script src="js/game.js?v=41"></script>
+<script src="js/game.js?v=43"></script>
 <script>
 </script>
 <script src="/assets/game-events.js?v=1" defer></script>
