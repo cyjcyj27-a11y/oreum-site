@@ -387,7 +387,7 @@
   @media (orientation: landscape) { #raceVideo, .raceVid { max-height: 94%; } #raceWrap .cap { position: absolute; bottom: 6px; margin: 0; } }
 
   /* ---- 세로로 들면 가로로 눕히라고 알린다 (다른 게임과 같은 방식) ---- */
-  #rotate { position: fixed; inset: 0; z-index: 9000; display: none; place-items: center; text-align: center; background: #10201c; color: #f6edd8; font-size: 17px; line-height: 1.8; padding: 8vw; }
+  #rotate { position: fixed; inset: 0; z-index: 9000; pointer-events: auto; display: none; place-items: center; text-align: center; background: #10201c; color: #f6edd8; font-size: 17px; line-height: 1.8; padding: 8vw; }
   body.touch.portrait #rotate { display: grid; }
   #rotate button { margin: 22px 0 16px; padding: 15px 32px; border: 0; border-radius: 99px; cursor: pointer; font-family: inherit; font-size: 17px; font-weight: 800; color: #2a1c08; background: #e9c877; }
   #rotate .sub { font-size: 14px; color: #b8b0a0; line-height: 1.7; } #rotate .sub a { color: #d8cfbc; }
