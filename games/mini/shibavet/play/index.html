@@ -28,10 +28,13 @@
   #topbar { position: fixed; inset: 0; pointer-events: none; z-index: 5; opacity: 0; transition: opacity .8s; }
   #topbar.show { opacity: 1; }
   #gameHomeLink { position: absolute; top: calc(4px + env(safe-area-inset-top)); left: 20px; pointer-events: auto; color: #fff; opacity: .6; font-size: 11px; text-decoration: underline; text-underline-offset: 2px; white-space: nowrap; text-shadow: 0 1px 3px rgba(0,0,0,.55); padding: 5px 8px 5px 0; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
-  #gname { position: absolute; top: calc(30px + env(safe-area-inset-top)); left: 20px; font-size: 20px; font-weight: 700; letter-spacing: -.3px; text-shadow: 0 1px 3px rgba(0,0,0,.55); }
-  .badge { position: absolute; left: 20px; background: rgba(0,0,0,.45); border-radius: 999px; padding: 8px 16px; font-size: 15px; font-weight: 700; color: #ffe08a; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
-  #stageH { top: calc(76px + env(safe-area-inset-top)); }
-  #timeB { top: calc(120px + env(safe-area-inset-top)); color: #fff; }
+  #gname { position: absolute; top: calc(24px + env(safe-area-inset-top)); left: 20px; font-size: 20px; font-weight: 700; letter-spacing: -.3px; text-shadow: 0 1px 3px rgba(0,0,0,.55); }
+  .badge { position: absolute; left: 20px; background: rgba(0,0,0,.45); border-radius: 999px; padding: 6px 14px; font-size: 14px; font-weight: 700; color: #ffe08a; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+  #stageH { top: calc(56px + env(safe-area-inset-top)); }
+  #timeB { top: calc(92px + env(safe-area-inset-top)); color: #fff; }
+  #ind { top: calc(128px + env(safe-area-inset-top)); color: #fff; gap: 8px; }
+  #ind .arrow { display: inline-block; font-size: 16px; line-height: 1; transition: transform .12s; }
+  #ind.near .arrow { opacity: .35; }
   #carry { top: calc(164px + env(safe-area-inset-top)); color: #fff; }
   #carry .bar { width: 110px; height: 8px; background: rgba(255,255,255,.2); border-radius: 4px; overflow: hidden; }
   #carryBar { height: 100%; width: 0; background: #ffd24a; border-radius: 4px; transition: width .1s; }
@@ -55,8 +58,6 @@
 
   #keys { position: fixed; right: 22px; bottom: 20px; font-size: 13px; opacity: 0; text-align: right; line-height: 1.7; pointer-events: none; text-shadow: 0 1px 2px rgba(0,0,0,.7); transition: opacity .8s; }
   #keys.show { opacity: .6; } body.touch #keys { display: none; }
-  #ind { position: fixed; left: 50%; top: 50%; width: 44px; height: 44px; margin: -22px 0 0 -22px; border-radius: 50%; background: rgba(255,210,74,.9); border: 2px solid #fff; display: none; align-items: center; justify-content: center; font-size: 24px; pointer-events: none; box-shadow: 0 2px 10px rgba(0,0,0,.4); z-index: 4; }
-  #ind.show { display: flex; }
   #cross { position: fixed; left: 50%; top: 50%; width: 6px; height: 6px; margin: -3px 0 0 -3px; border-radius: 50%; background: rgba(255,255,255,.85); box-shadow: 0 0 3px rgba(0,0,0,.6); pointer-events: none; display: none; transition: transform .12s, background .12s; z-index: 4; }
   #cross.show { display: block; } #cross.hot { transform: scale(2.2); background: #ffd24a; }
 
@@ -100,6 +101,7 @@
   <div id="gname" data-en="Shiba Vet Day">시바 병원 가는 날</div>
   <div class="badge" id="stageH">STAGE 1</div>
   <div class="badge" id="timeB">⏱ <b id="time">0:00.0</b></div>
+  <div class="badge" id="ind"><span id="indIco">🐕</span><span class="arrow">➜</span></div>
   <div class="badge" id="carry" hidden>🐾 <div class="bar"><div id="carryBar"></div></div></div>
   <div id="topRow"><button class="ibtn" id="btnSfx" title="효과음">🔊</button></div>
   <div id="iconRow">
@@ -110,7 +112,6 @@
 </div>
 <div id="hud"></div>
 <div id="cross"></div>
-<div id="ind">🐕</div>
 <div id="keys" data-en="WASD move · Mouse / ←→ look · Shift run · C sneak<br>Space grab · E door · 1 treat · 2 toy · K sound">WASD 이동 · 마우스 / ←→ 시점 · Shift 달리기 · C 살금살금<br>스페이스 잡기 · E 문 · 1 간식 · 2 장난감 · K 효과음</div>
 
 <div id="joy"><div id="joyKnob"></div></div>
@@ -159,7 +160,7 @@
 <script src="js/items.js?v=3"></script>
 <script src="js/dog.js?v=22"></script>
 <script src="js/player.js?v=14"></script>
-<script src="js/game.js?v=34"></script>
+<script src="js/game.js?v=35"></script>
 <script>
 </script>
 <script src="/assets/game-events.js?v=1" defer></script>

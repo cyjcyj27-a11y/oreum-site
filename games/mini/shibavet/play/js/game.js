@@ -228,22 +228,11 @@
     $('btnDoor').classList.toggle('show', !!nearestDoor());
     { const dx = dog.x - player.x, dz = dog.z - player.z, d = Math.hypot(dx, dz); let rel = Math.atan2(dx, dz) - player.yaw; rel = Math.atan2(Math.sin(rel), Math.cos(rel));
       $('cross').classList.toggle('hot', !player.carry && ((!!nearestDoor()) || (d < 1.5 && Math.abs(rel) < .9 && (dog.L === player.L || W.inStair(dog.x, dog.z))))); }
-    // 개 위치 표식 (화면 밖이면 가장자리)
-    if (!player.carry) {
-      v.set(dog.x, W.height(dog.L, dog.x, dog.z) + .4, dog.z).project(camera);
-      const behind = v.z > 1; let x = v.x, y = -v.y; if (behind) { x = -x; y = -y; }
-      const out = behind || Math.abs(x) > .92 || Math.abs(y) > .85;
-      if (out) { const m = Math.max(Math.abs(x) / .92, Math.abs(y) / .85, 1e-6); x /= m; y /= m; ind.style.left = ((x * .5 + .5) * innerWidth) + 'px'; ind.style.top = ((y * .5 + .5) * innerHeight) + 'px'; ind.classList.add('show'); }
-      else ind.classList.remove('show');
-    } else {
-      // 안고 있으면 표식이 차를 가리킨다 — 차가 안 보이는 쪽에 서 있어도 어디로 갈지 안다
-      const C = W.CAR; v.set((C.x0 + C.x1) / 2, 1.2, (C.z0 + C.z1) / 2).project(camera);
-      const behind = v.z > 1; let x = v.x, y = -v.y; if (behind) { x = -x; y = -y; }
-      const out = behind || Math.abs(x) > .92 || Math.abs(y) > .85;
-      if (out) { const m = Math.max(Math.abs(x) / .92, Math.abs(y) / .85, 1e-6); x /= m; y /= m; ind.style.left = ((x * .5 + .5) * innerWidth) + 'px'; ind.style.top = ((y * .5 + .5) * innerHeight) + 'px'; ind.classList.add('show'); }
-      else ind.classList.remove('show');
-    }
-    ind.textContent = player.carry ? '🚗' : '🐕';
+    // 개(안고 있으면 차) 방향 — 왼쪽 위 배지의 화살표가 그쪽으로 돈다. 화면 위 = 내 앞
+    { let tx, tz; if (player.carry) { const C = W.CAR; tx = (C.x0 + C.x1) / 2; tz = (C.z0 + C.z1) / 2; } else { tx = dog.x; tz = dog.z; }
+      const dx = tx - player.x, dz = tz - player.z, d = Math.hypot(dx, dz); let rel = Math.atan2(dx, dz) - camYaw; rel = Math.atan2(Math.sin(rel), Math.cos(rel));
+      ind.querySelector('.arrow').style.transform = 'rotate(' + (-90 + rel * 180 / Math.PI) + 'deg)';
+      $('indIco').textContent = player.carry ? '🚗' : '🐕'; ind.classList.toggle('near', d < 2.5); }
   }
 
   /* ---------- 루프 ---------- */
