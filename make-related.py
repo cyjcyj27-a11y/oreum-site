@@ -26,6 +26,7 @@ GAMES = [
     ("immortality",   "/games/immortality/",        "/en/games/immortality/",        "영생의 가격",      "내러티브 생존 어드벤처",     "The Price of Immortality", "narrative survival adventure",  {"story", "adventure", "survival"}),
     ("lulu",          "/games/lulu/",               "/en/games/lulu/",               "루루냥의 제주살이", "제주 3D 고양이 생활게임",    "Lulu the Cat's Jeju Life", "3D cat life sim on Jeju",       {"3d", "sim", "cat", "jeju"}),
     ("skijump",       "/games/mini/skijump/",       "/en/games/mini/skijump/",       "SKI JUMP",        "스키점프 게임",             "SKI JUMP",                 "ski jump game",                 {"sport", "arcade"}),
+    ("shibavet",      "/games/mini/shibavet/",      "/en/games/mini/shibavet/",      "시바 병원 가는 날", "시바견 잡기 게임",          "SHIBA VET DAY",            "shiba dog catching game",       {"3d", "action", "animal"}),
     ("night-study",   "/games/mini/night-study/",   "/en/games/mini/night-study/",   "야간자율학습",     "폐교 탈출 공포게임",         "NIGHT STUDY",              "school horror escape game",     {"horror", "3d", "adventure"}),
     ("break-it-all",  "/games/mini/break-it-all/",  "/en/games/mini/break-it-all/",  "BREAK IT ALL",    "벽돌깨기 게임",             "BREAK IT ALL",             "brick breaker game",            {"arcade", "physics"}),
     ("pixl",          "/games/mini/pixl/",          "/en/games/mini/pixl/",          "PIXL",            "직소퍼즐 게임",             "PIXL",                     "jigsaw puzzle game",            {"puzzle"}),

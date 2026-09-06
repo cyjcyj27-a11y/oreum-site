@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, viewport-fit=cover">
+<title>시바 병원 가는 날 — 오름게임즈</title>
+<style>
+  @font-face { font-family: 'Griun'; src: url('fonts/Griun_Fromsol-Rg.ttf') format('truetype'); font-display: swap; }
+  @font-face { font-family: 'Ria'; src: url('fonts/RiaSans-ExtraBold.woff2') format('woff2'); font-display: swap; }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #9fd0f2; font-family: 'Griun', 'Noto Sans KR', 'Malgun Gothic', sans-serif; color: #fff8ec; user-select: none; }
+  #c { display: block; width: 100vw; height: 100vh; touch-action: none; }
+  #vig { position: fixed; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 50% 50%, rgba(0,0,0,0) 60%, rgba(20,16,10,.35) 100%); }
+  @keyframes blink { 0%,100%{opacity:.35} 50%{opacity:1} }
+
+  #topbar { position: fixed; left: 0; right: 0; top: 0; height: calc(44px + env(safe-area-inset-top)); padding: env(safe-area-inset-top) 10px 0 104px; display: flex; align-items: center; gap: 8px; pointer-events: none; z-index: 5; opacity: 0; transition: opacity .8s; }
+  #topbar.show { opacity: 1; }
+  [hidden] { display: none !important; }
+  body.shot #topbar, body.shot #oreumHome, body.shot #oreumFs, body.shot #title .go, body.shot #title .stage, body.shot #title .best, body.shot #title .items, body.shot #keys { display: none !important; }   /* ?shot=1 — 소개 그림용 */   /* .stat 의 display 가 hidden 속성을 이기지 않게 */
+  .stat { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 999px; background: rgba(30,22,14,.45); border: 1px solid rgba(255,255,255,.18); font-size: 16px; white-space: nowrap; text-shadow: 0 1px 2px rgba(0,0,0,.6); }
+  .stat b { font-weight: normal; font-size: 18px; font-family: 'Ria', 'Griun', sans-serif; letter-spacing: 1px; }
+  .stat .bar { width: 110px; height: 8px; background: rgba(255,255,255,.2); border-radius: 4px; overflow: hidden; }
+  #carryBar { height: 100%; width: 0; background: #ffd24a; border-radius: 4px; transition: width .1s; }
+  #carry.hot #carryBar { background: #ff5a3a; animation: blink .4s infinite; }
+  .spacer { flex: 1; }
+  .tog { pointer-events: auto; width: 36px; height: 36px; border-radius: 50%; border: 1px solid rgba(255,255,255,.3); background: rgba(30,22,14,.5); color: #fff; font-family: inherit; font-size: 17px; line-height: 1; padding: 0; touch-action: manipulation; }
+  .tog.off { opacity: .4; text-decoration: line-through; }
+  #hud { display: none; }
+
+  #keys { position: fixed; right: 22px; bottom: 20px; font-size: 13px; opacity: 0; text-align: right; line-height: 1.7; pointer-events: none; text-shadow: 0 1px 2px rgba(0,0,0,.7); transition: opacity .8s; }
+  #keys.show { opacity: .6; } body.touch #keys { display: none; }
+  #ind { position: fixed; left: 50%; top: 50%; width: 44px; height: 44px; margin: -22px 0 0 -22px; border-radius: 50%; background: rgba(255,210,74,.9); border: 2px solid #fff; display: none; align-items: center; justify-content: center; font-size: 24px; pointer-events: none; box-shadow: 0 2px 10px rgba(0,0,0,.4); z-index: 4; }
+  #ind.show { display: flex; }
+  #cross { position: fixed; left: 50%; top: 50%; width: 6px; height: 6px; margin: -3px 0 0 -3px; border-radius: 50%; background: rgba(255,255,255,.85); box-shadow: 0 0 3px rgba(0,0,0,.6); pointer-events: none; display: none; transition: transform .12s, background .12s; z-index: 4; }
+  #cross.show { display: block; } #cross.hot { transform: scale(2.2); background: #ffd24a; }
+
+  /* 터치 */
+  .tbtn { display: none; position: fixed; width: 76px; height: 76px; border-radius: 50%; border: 2px solid rgba(255,255,255,.55); background: rgba(30,22,14,.5); color: #fff; font-family: inherit; font-size: 15px; z-index: 6; touch-action: manipulation; text-shadow: 0 1px 2px rgba(0,0,0,.6); }
+  body.touch .tbtn { display: block; } .tbtn.on { background: rgba(255,210,74,.75); color: #2a1c08; border-color: #ffd24a; }
+  #btnGrab { right: 24px; bottom: 34px; width: 92px; height: 92px; font-size: 18px; background: rgba(255,120,60,.6); }
+  #btnDoor { right: 130px; bottom: 44px; opacity: .35; } #btnDoor.show { opacity: 1; }
+  #btnRun { right: 40px; bottom: 140px; } #btnSneak { right: 130px; bottom: 140px; }
+  #btnTreat { right: 40px; bottom: 236px; width: 64px; height: 64px; font-size: 14px; } #btnToy { right: 130px; bottom: 236px; width: 64px; height: 64px; font-size: 14px; }
+  #inv.got { animation: got .6s ease-out; } @keyframes got { 0% { transform: scale(1); background: rgba(255,210,74,.9); color: #2a1c08; } 100% { transform: scale(1); } }
+  #inv .key { font-size: 10px; opacity: .55; border: 1px solid rgba(255,255,255,.4); border-radius: 4px; padding: 0 4px; margin: 0 6px 0 -2px; font-family: Arial, sans-serif; } body.touch #inv { display: none; }
+  #title .items { position: absolute; left: 50%; transform: translateX(-50%); bottom: calc(12vh + 60px); font-size: 15px; opacity: .85; text-shadow: 0 1px 3px rgba(0,0,0,.6); letter-spacing: 1px; }
+  #over .gain { font-size: 22px !important; color: #ffd24a; margin-top: 8px !important; }
+  #joy { position: fixed; width: 120px; height: 120px; border-radius: 50%; border: 2px solid rgba(255,255,255,.4); background: rgba(30,22,14,.3); display: none; pointer-events: none; z-index: 6; }
+  #joy.on { display: block; } #joyKnob { position: absolute; left: 35px; top: 35px; width: 50px; height: 50px; border-radius: 50%; background: rgba(255,255,255,.75); }
+
+  /* 타이틀 */
+  #title { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding-top: 8vh; background: linear-gradient(180deg, rgba(20,26,36,.25), rgba(20,26,36,0) 45%, rgba(20,26,36,0) 70%, rgba(20,26,36,.45)); transition: opacity 1s; text-align: center; z-index: 10; }
+  #title.hide { opacity: 0; pointer-events: none; }
+  #title h1 { font-family: 'Ria', 'Griun', sans-serif; font-weight: 900; font-size: clamp(42px, 9vw, 96px); margin: 8px 0 0; letter-spacing: 2px; color: #fff4dc; text-shadow: 0 4px 0 #a8562b, 0 8px 24px rgba(0,0,0,.45); -webkit-text-stroke: 1.5px #7a3a1a; paint-order: stroke fill; line-height: 1.1; }
+  #title .tag { font-family: 'Ria', sans-serif; letter-spacing: 8px; font-size: 18px; opacity: .9; margin-top: 8px; text-shadow: 0 1px 3px rgba(0,0,0,.6); }
+  #title .brand { display: flex; align-items: center; gap: 8px; padding: 6px 14px 6px 8px; border-radius: 999px; background: rgba(255,253,247,.92); color: #2e6b39; font-size: 14px; letter-spacing: 1px; }
+  #title .brand img { width: 30px; height: 15px; }
+  #title .go { position: absolute; left: 50%; transform: translateX(-50%); bottom: 12vh; margin: 0; font-family: 'Ria', sans-serif; font-size: 30px; letter-spacing: 8px; text-indent: 8px; padding: 12px 46px 14px; border-radius: 20px; background: rgba(40,24,12,.72); border: 1px solid rgba(255,255,255,.16); box-shadow: 0 8px 26px rgba(0,0,0,.35); animation: blink 2.4s infinite; cursor: pointer; }
+  #title .stage, #over .stage { font-family: 'Ria', sans-serif; font-weight: 900; letter-spacing: 6px; font-size: 20px; color: #fff; text-shadow: 0 2px 8px rgba(0,0,0,.6); }
+  #title .stage { position: absolute; left: 50%; transform: translateX(-50%); bottom: calc(12vh + 116px); }
+  #over .stage { margin-bottom: 6px; opacity: .9; }
+  #stageH { font-family: 'Ria', sans-serif; font-weight: 900; letter-spacing: 2px; }
+  #title .best { position: absolute; left: 50%; transform: translateX(-50%); bottom: calc(12vh + 84px); font-size: 16px; opacity: .85; text-shadow: 0 1px 3px rgba(0,0,0,.6); }
+
+  /* 클리어 */
+  #over { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(20,14,8,.5); opacity: 0; pointer-events: none; transition: opacity 1.2s; text-align: center; text-shadow: 0 2px 12px rgba(0,0,0,.7); z-index: 10; }
+  #over.show { opacity: 1; pointer-events: auto; }
+  #over h2 { font-family: 'Ria', sans-serif; font-size: min(9vw, 64px); font-weight: 900; margin: 0 0 10px; letter-spacing: 4px; color: #ffd24a; -webkit-text-stroke: 2px #7a3a1a; paint-order: stroke fill; }
+  #over p { font-size: 26px; margin: 4px 0; font-family: 'Ria', sans-serif; letter-spacing: 1px; } #over p small { font-size: 15px; opacity: .7; margin-right: 8px; font-family: 'Griun', sans-serif; }
+  #vetVid { width: auto; height: min(46vh, 420px); aspect-ratio: 9 / 16; border-radius: 14px; border: 2px solid rgba(255,255,255,.55); box-shadow: 0 10px 40px rgba(0,0,0,.5); margin: 6px 0 10px; background: #000; opacity: 0; transition: opacity .8s; }
+  #over.show #vetVid { opacity: 1; }
+  @media (max-height: 560px) { #vetVid { height: 34vh; } #over h2 { margin-bottom: 4px; } }
+  #over .again { margin-top: 36px; opacity: .6; animation: blink 2.4s infinite; font-family: 'Ria', sans-serif; letter-spacing: 6px; font-size: 24px; cursor: pointer; }
+  @media (max-width: 700px) { #topbar { padding-left: 96px; gap: 5px; } .stat { font-size: 13px; padding: 3px 7px; gap: 4px; } .stat b { font-size: 15px; } .stat .bar { width: 56px; } #over h2 { font-size: 30px; letter-spacing: 2px; } }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="vig"></div>
+
+<div id="topbar">
+  <div class="stat" id="stageH">STAGE 1</div>
+  <div class="stat"><span class="ic">⏱</span><b id="time">0:00.0</b></div>
+  <div class="stat" id="inv"><span>🦴</span><b id="invTreat">0</b><span class="key">1</span><span>🎾</span><b id="invToy">0</b><span class="key">2</span></div>
+  <div class="stat" id="carry" hidden><span class="ic">🐾</span><div class="bar"><div id="carryBar"></div></div></div>
+  <div class="spacer"></div>
+  <button id="btnSfx" class="tog" title="효과음">🔊</button>
+</div>
+<div id="hud"></div>
+<div id="cross"></div>
+<div id="ind">🐕</div>
+<div id="keys" data-en="WASD move · Mouse / ←→ look · Shift run · C sneak<br>Space grab · E door · 1 treat · 2 toy · K sound">WASD 이동 · 마우스 / ←→ 시점 · Shift 달리기 · C 살금살금<br>스페이스 잡기 · E 문 · 1 간식 · 2 장난감 · K 효과음</div>
+
+<div id="joy"><div id="joyKnob"></div></div>
+<button id="btnGrab" class="tbtn" data-en="GRAB">잡기</button>
+<button id="btnDoor" class="tbtn" data-en="DOOR">문</button>
+<button id="btnRun" class="tbtn" data-en="RUN">달리기</button>
+<button id="btnSneak" class="tbtn" data-en="SNEAK">살금살금</button>
+<button id="btnTreat" class="tbtn">🦴 0</button>
+<button id="btnToy" class="tbtn">🎾 0</button>
+
+<div id="title">
+  <div class="brand"><img src="assets/logo-oreum.svg" alt="">OREUM GAMES</div>
+  <h1 data-en="SHIBA<br>VET DAY">시바<br>병원 가는 날</h1>
+  <div class="tag" data-en="CATCH THE SHIBA">SHIBA VET DAY</div>
+  <div class="stage" id="stageT">STAGE 1</div>
+  <div class="best" id="titleBest"></div>
+  <div class="items" id="titleItems"></div>
+  <div class="go" data-en="START">시작</div>
+</div>
+
+<div id="over">
+  <div class="stage" id="overStage">STAGE 1</div>
+  <h2>CONGRATULATIONS</h2>
+  <video id="vetVid" src="assets/vet.mp4" poster="assets/vet-poster.jpg" playsinline preload="none"></video>
+  <p><span id="overTime">0:00.0</span></p>
+  <p><small data-en="BEST">최고</small><span id="overBest">0:00.0</span></p>
+  <p class="gain" id="overItems"></p>
+  <p class="again">NEXT</p>
+</div>
+
+<script src="/assets/game-home.js?v=6" data-top="6" data-left="6" data-fullscreen="1" defer></script>
+<script src="lib/three.min.js"></script>
+<script src="js/world.js?v=14"></script>
+<script src="js/audio.js?v=14"></script>
+<script src="js/items.js?v=3"></script>
+<script src="js/dog.js?v=22"></script>
+<script src="js/player.js?v=14"></script>
+<script src="js/game.js?v=28"></script>
+<script>
+</script>
+<script src="/assets/game-events.js?v=1" defer></script>
+</body>
+</html>
