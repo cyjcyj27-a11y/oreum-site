@@ -92,3 +92,5 @@ GA4 트래픽 획득에서 소스별로 방문을 맞춰 보기 위한 기록. �
 |---|---|---|---|---|
 | 2026-09-04 | itch.io | https://oreumgames.itch.io/finger-kick | 핑거킥(영어판 실행 포함) | 설명글 링크 2개(nofollow) + Metadata→External links 에 Homepage(원본 페이지)·YouTube·TikTok. 조작 Mouse·Touchscreen, 언어 English·Korean, 한 판 A few minutes. 트레일러 유튜브 쇼츠 r7CPBOsC52Q(영어판 쇼츠). 게임 안 OREUM GAMES 알약 → oreumgames.com/en/?utm_source=itch |
 | 2026-09-05 | itch.io 게시판 | https://itch.io/t/6896221/finger-kick-one-finger-table-soccer-3-minute-matches-browser-free | 핑거킥 | Release Announcements 글. 태그 Browser, 표지 그림 1장, 게임 페이지·사이트 영어 소개 링크. CPU 표현 없음 |
+| 2026-09-06 | itch.io 게임잼 | https://itch.io/jam/feedback-quest-9-indiegames-x-indie-streamers/rate/4970887 | 핑거킥 | Feedback Quest 9(스트리머가 출품작을 플레이·평가하는 잼, 기존 게임 허용) 제출. AI 표시 Mostly AI Generated, 장르 Other, Family Friendly. 규칙: 다른 출품작 1개에 평가·댓글 남기기(사장님 몫). 투표 10월 5일까지 |
+| 2026-09-06 | itch.io 개발 일지 | https://oreumgames.itch.io/finger-kick/devlog/1654071/why-finger-kick-sounds-like-a-real-stadium-and-what-the-site-version-adds | 핑거킥 | 함성 녹음·튕기기 설계·사이트 리그전 소개. 사이트 영어 소개 페이지·홈 링크 2개 |
