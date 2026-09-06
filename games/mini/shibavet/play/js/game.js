@@ -33,7 +33,7 @@
   // 터치: 왼쪽 조이스틱 / 오른쪽 드래그 시점
   const joy = { id: null, x0: 0, y0: 0, dx: 0, dy: 0 }, look = { id: null, x: 0, y: 0 };
   const jb = $('joy'), jk = $('joyKnob');
-  canvas.addEventListener('touchstart', e => { for (const t of e.changedTouches) { if (t.clientX < innerWidth / 2 && joy.id === null) { joy.id = t.identifier; joy.x0 = t.clientX; joy.y0 = t.clientY; joy.dx = joy.dy = 0; jb.style.left = (t.clientX - 60) + 'px'; jb.style.top = (t.clientY - 60) + 'px'; jb.classList.add('on'); } else if (look.id === null) { look.id = t.identifier; look.x = t.clientX; look.y = t.clientY; } } e.preventDefault(); }, { passive: false });
+  canvas.addEventListener('touchstart', e => { for (const t of e.changedTouches) { if (t.clientX > innerWidth / 2 && joy.id === null) { /* 오른손 = 이동 스틱, 왼손 = 시점 (2026-09-06: 이동은 오른쪽, 행동은 왼쪽) */ joy.id = t.identifier; joy.x0 = t.clientX; joy.y0 = t.clientY; joy.dx = joy.dy = 0; jb.style.left = (t.clientX - 60) + 'px'; jb.style.top = (t.clientY - 60) + 'px'; jb.classList.add('on'); } else if (look.id === null) { look.id = t.identifier; look.x = t.clientX; look.y = t.clientY; } } e.preventDefault(); }, { passive: false });
   canvas.addEventListener('touchmove', e => { for (const t of e.changedTouches) { if (t.identifier === joy.id) { let dx = t.clientX - joy.x0, dy = t.clientY - joy.y0; const l = Math.hypot(dx, dy); if (l > 55) { dx *= 55 / l; dy *= 55 / l; } joy.dx = dx / 55; joy.dy = dy / 55; jk.style.transform = `translate(${dx}px,${dy}px)`; } else if (t.identifier === look.id) { lookDX += (t.clientX - look.x) * 2.2; lookDY += (t.clientY - look.y) * 2.2; look.x = t.clientX; look.y = t.clientY; } } e.preventDefault(); }, { passive: false });
   const tEnd = e => { for (const t of e.changedTouches) { if (t.identifier === joy.id) { joy.id = null; joy.dx = joy.dy = 0; jb.classList.remove('on'); jk.style.transform = ''; } if (t.identifier === look.id) look.id = null; } };
   canvas.addEventListener('touchend', tEnd); canvas.addEventListener('touchcancel', tEnd);
@@ -75,7 +75,7 @@
   function saveStage() { try { localStorage.setItem('shibavet.stage', String(G.stage)); localStorage.setItem('shibavet.bests', JSON.stringify(G.bests)); } catch (e) { } }
   function showStage() { $('stageT').textContent = 'STAGE ' + G.stage; $('stageH').textContent = 'STAGE ' + G.stage; const b = G.bests[G.stage]; $('titleBest').textContent = b ? '🏆 ' + fmt(b) : ''; $('titleItems').textContent = (IT.count('treat') + IT.count('toy')) ? '🦴 ' + IT.count('treat') + '   🎾 ' + IT.count('toy') : ''; }
   function start() {
-    A.unlock(); G.state = 'play'; G.time = 0; player.reset(); dog.reset(); dog.D = stageKnobs(G.stage); showStage(); IT.clear(); IT.spawn(); updItems(); dog.m.g.visible = true; W.doors.forEach(d => { d.open = true; d.t = 1; }); world.goal.visible = false;
+    document.body.classList.add('playing'); A.unlock(); G.state = 'play'; G.time = 0; player.reset(); dog.reset(); dog.D = stageKnobs(G.stage); showStage(); IT.clear(); IT.spawn(); updItems(); dog.m.g.visible = true; W.doors.forEach(d => { d.open = true; d.t = 1; }); world.goal.visible = false;
     camYaw = Math.PI; camPitch = 0; $('title').classList.add('hide'); $('over').classList.remove('show'); $('topbar').classList.add('show'); $('keys').classList.add('show'); $('hud').classList.add('show'); $('cross').classList.add('show');
     $('carry').hidden = true; { const v = $('vetVid'); v.pause(); } lockPointer();
     if (window.OG) OG.start();   // 집계: 한 판 시작
@@ -128,7 +128,7 @@
     if (!player.carry) return;
     const C = W.CAR, ddx = Math.max(C.x0 - player.x, 0, player.x - C.x1), ddz = Math.max(C.z0 - player.z, 0, player.z - C.z1);   // 차 상자까지 거리
     if (Math.hypot(ddx, ddz) < 1.1 || Math.hypot(player.x - W.GOAL.x, player.z - W.GOAL.z) < 1.6) {
-      G.state = 'clear'; G.clearT = 0; A.clear(); setTimeout(() => A.engine(), 600);
+      document.body.classList.remove('playing'); G.state = 'clear'; G.clearT = 0; A.clear(); setTimeout(() => A.engine(), 600);
       const t = G.time, b = G.bests[G.stage]; if (!b || t < b) G.bests[G.stage] = t;
       $('overStage').textContent = 'STAGE ' + G.stage; $('overTime').textContent = fmt(t); $('overBest').textContent = fmt(G.bests[G.stage]);
       $('overItems').textContent = (IT.count('treat') + IT.count('toy')) ? '🦴 ' + IT.count('treat') + '   🎾 ' + IT.count('toy') : '';   // 쌓아 둔 것
@@ -267,6 +267,15 @@
   }
   function loop(now) { const dt = Math.min(.05, (now - last) / 1000); last = now; frame(dt); requestAnimationFrame(loop); }
   requestAnimationFrame(loop);
+  // 세로로 들면 가로로 눕히라고 알린다. 미디어쿼리 대신 실제 창 비율을 잰다(전체화면에서 방향이 늦게 바뀌는 폰이 있다)
+  let rotSkipped = false;
+  function syncRot() { const w = innerWidth, h = innerHeight; if (w < 10 || h < 10) return; document.body.classList.toggle('portrait', isTouch && !rotSkipped && h > w * 1.02); }
+  $('rotGo').addEventListener('click', async () => {
+    try { if (!document.fullscreenElement && document.documentElement.requestFullscreen) await document.documentElement.requestFullscreen(); } catch (e) { }
+    try { if (screen.orientation && screen.orientation.lock) await screen.orientation.lock('landscape'); } catch (e) { }
+  });
+  $('rotSkip').addEventListener('click', e => { e.preventDefault(); rotSkipped = true; syncRot(); });
+  addEventListener('resize', syncRot); addEventListener('orientationchange', () => setTimeout(syncRot, 240)); syncRot(); setTimeout(syncRot, 400);
   if (/[?&]shot=1/.test(location.search)) document.body.classList.add('shot');   // 스크린샷용 — 단추·상단바 숨김
   showStage(); updItems();
   window.__sv = { tick(n, dt) { for (let i = 0; i < (n || 1); i++) frame(dt || 1 / 60); }, setCam(y) { camYaw = y; }, G, player, dog, W, start, keys, doAction, toggleDoor, camera, stageKnobs, saveStage, showStage, useItem, IT };
