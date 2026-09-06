@@ -34,7 +34,7 @@
   const joy = { id: null, x0: 0, y0: 0, dx: 0, dy: 0 }, look = { id: null, x: 0, y: 0 };
   const jb = $('joy'), jk = $('joyKnob');
   canvas.addEventListener('touchstart', e => { for (const t of e.changedTouches) { if (look.id === null) { look.id = t.identifier; look.x = t.clientX; look.y = t.clientY; } } e.preventDefault(); }, { passive: false });   // 화면 끌기 = 시점. 이동은 오른쪽 아래 패드 (스카이라이더와 같음)
-  canvas.addEventListener('touchmove', e => { for (const t of e.changedTouches) { if (t.identifier === joy.id) { let dx = t.clientX - joy.x0, dy = t.clientY - joy.y0; const l = Math.hypot(dx, dy); if (l > 55) { dx *= 55 / l; dy *= 55 / l; } joy.dx = dx / 55; joy.dy = dy / 55; jk.style.transform = `translate(${dx}px,${dy}px)`; } else if (t.identifier === look.id) { lookDX += (t.clientX - look.x) * 2.2; lookDY += (t.clientY - look.y) * 2.2; look.x = t.clientX; look.y = t.clientY; } } e.preventDefault(); }, { passive: false });
+  canvas.addEventListener('touchmove', e => { for (const t of e.changedTouches) { if (t.identifier === joy.id) { let dx = t.clientX - joy.x0, dy = t.clientY - joy.y0; const l = Math.hypot(dx, dy); if (l > 55) { dx *= 55 / l; dy *= 55 / l; } joy.dx = dx / 55; joy.dy = dy / 55; jk.style.transform = `translate(${dx}px,${dy}px)`; } else if (t.identifier === look.id) { lookDX += (t.clientX - look.x) * 2.8; lookDY += (t.clientY - look.y) * 2.4; look.x = t.clientX; look.y = t.clientY; } } e.preventDefault(); }, { passive: false });
   const tEnd = e => { for (const t of e.changedTouches) { if (t.identifier === joy.id) { joy.id = null; joy.dx = joy.dy = 0; jk.style.transform = ''; } if (t.identifier === look.id) look.id = null; } };
   canvas.addEventListener('touchend', tEnd); canvas.addEventListener('touchcancel', tEnd);
   let tRun = false, tSneak = false;
@@ -250,7 +250,8 @@
       G.time += dt;
       let ix = 0, iz = 0; if (keys.KeyW || keys.ArrowUp) iz += 1; if (keys.KeyS || keys.ArrowDown) iz -= 1; if (keys.KeyA) ix -= 1; if (keys.KeyD) ix += 1;
       if (keys.ArrowLeft) camYaw += dt * 2.4; if (keys.ArrowRight) camYaw -= dt * 2.4; // 화살표 좌우 = 몸 돌리기
-      if (joy.id !== null) { ix += joy.dx; iz -= joy.dy; }
+      // 폰 패드: 앞뒤는 걷기, 좌우는 몸 돌리기(카메라가 같이 돈다). 옆걸음이면 시점을 따로 끌어야 해서 한 손으로 못 한다
+      if (joy.id !== null) { camYaw -= joy.dx * 2.4 * dt; iz -= joy.dy; }
       const run = !!(keys.ShiftLeft || keys.ShiftRight) || tRun, sneak = !!(keys.KeyC) || tSneak;
       player.yaw = camYaw; player.move(dt, ix, iz, camYaw, run && !sneak, sneak);
       IT.update(dt); { const got = IT.checkPickup(player); if (got) { A.pat(); updItems(); const el = $(got === 'treat' ? 'btnTreat' : 'btnToy'); el.classList.remove('got'); void el.offsetWidth; el.classList.add('got'); } }
