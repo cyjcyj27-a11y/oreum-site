@@ -14,6 +14,9 @@
 | crowd-wc.mp3 | 월드컵 거리 파티(나라 미상) | football party people in the streets — https://pixabay.com/sound-effects/city-football-party-people-in-the-streets-24170/ (kaumodaki) | 123s |
 | crowd-esnl.mp3 | 2014 월드컵 스페인–네덜란드, 네덜란드 교외 환호 | Spain Holland 1-5 140613_00 — https://pixabay.com/sound-effects/people-spain-holland-1-5-140613-00-74382/ (klankbeeld) | 36s |
 | crowd-wh.mp3 | 잉글랜드 웨스트햄 응원가 "Bubbles" 합창 | west ham bubbles — https://pixabay.com/sound-effects/people-west-ham-bubbles-77370/ (zedkah) | 26s |
+| crowd-be.mp3 | 벨기에 샤를루아, 서포터 합창·반응(경기장 30m 거리) | 001980_Charleroi's Zebra supporters singing and reaction, around 30m away. — https://pixabay.com/sound-effects/people-001980-charleroi39s-zebra-supporters-singing-and-reaction-around-30m-away-53135/ (freesound_community) | 앞 150초 (8:41 중 가장 큰 구간) |
+| crowd-ar.mp3 | 아르헨티나 부에노스아이레스 거리, 팬 축제 날 응원가·폭죽 (경기장 아님) | 018839_Explosions, football's chants in street celebration (12-12-2012) — https://pixabay.com/sound-effects/city-018839-explosions-football39s-chants-in-street-celebration-in-the-boca-juniors-fan-national-day-12-12-2012-54413/ (freesound_community) | 전체 72초 |
+| crowd-fr.mp3 | 프랑스, 2018 월드컵 우승 날 마당에서 들리는 환호·경적 (경기장 아님) | 2018 football world cup from my garden edit — https://pixabay.com/sound-effects/people-2018-football-world-cup-from-my-garden-edit-55039/ (freesound_community) | 전체 78초 |
 
 옛 crowd.mp3(캄뷔르 45초)는 crowd-nl.mp3 로 대체했다. 관중이 부르는 노래의 곡 저작권은 녹음 라이선스와 별개인데, 사장님 판단(2026-09-04)으로 위험보다 이득이 크다고 보고 넣었다. 문제 제기가 오면 해당 파일만 빼면 된다. 게임 화면에는 어느 팀인지 표시하지 않는다(맞혀 보는 재미).
 
@@ -26,4 +29,4 @@
 | whistle.mp3 | https://pixabay.com/sound-effects/film-special-effects-referee-whistle-blow-gymnasium-6320/ | freesound_community (SpliceSound) | 앞 1.2초 |
 | fulltime.mp3 | 위 호루라기를 짧게·짧게·길게 세 번 이어 붙임 | — | ffmpeg amix |
 
-받은 날: 효과음 2026-09-03, 경기장 함성 2026-09-04
+받은 날: 효과음 2026-09-03, 경기장 함성 2026-09-04 (벨기에·아르헨티나·프랑스는 2026-09-06)

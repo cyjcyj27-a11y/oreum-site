@@ -1,7 +1,7 @@
 /* 핑거킥 — 말을 튕겨 공을 맞히는 탁상 축구. 캔버스 2D, 모듈 없음(file:// 로 열어도 돈다). */
 (function () {
   'use strict';
-  var A = window.FKAudio;
+  var A = window.FKAudio, L = window.FKLeague;
 
   // ── 논리 좌표 (세로 경기장). 가로 화면이면 90도 돌려 그린다 ──
   var LW = 700, LH = 1100, X0 = 50, X1 = 650, Y0 = 100, Y1 = 1000, CX = 350, CY = 550;
@@ -10,7 +10,7 @@
   var SUB = 3, REST = 0.86, WALL = 0.62, SPEED = 8.5, MAXD = 170, MAXFLICK = 3, MATCH = 180;
   var HUMAN = 0, CPU = 1;
   var POSTS = [{ x: GX0, y: Y0 }, { x: GX1, y: Y0 }, { x: GX0, y: Y1 }, { x: GX1, y: Y1 }];
-  var COL = [{ ring: '#ffffff', body: '#e0343c', gk: '#8f1d22' }, { ring: '#ffd23a', body: '#2a62d6', gk: '#173a86' }];
+  var COL = [{ ring: '#cd2e3a', body: '#0047a0', gk: '#002a60' }, { ring: '#ffd23a', body: '#2a62d6', gk: '#173a86' }];
 
   var cv = document.getElementById('c'), ctx = cv.getContext('2d');
   var $ = function (id) { return document.getElementById(id); };
@@ -194,7 +194,18 @@
     G.B = setup(G.conceded); G.turn = G.conceded; G.streak = 0; G.flick = null; G.resting = true;
     if (G.turn === CPU) G.aiTimer = 0.8; updHud();
   }
+  // ── 리그: 상대 나라 색·약칭·함성 ──
+  function dressOpp() {
+    if (L.seasonOver()) L.nextSeason();
+    var t = L.opponent();
+    COL[1] = { ring: t.ring, body: t.body, gk: t.gk };
+    var el = $('tmC'); el.querySelector('span').textContent = t.iso;
+    var dotEl = el.querySelector('i'); dotEl.style.borderColor = t.ring; dotEl.style.background = t.body;
+    $('mday').textContent = L.dayText(); $('lday').textContent = L.dayText(); $('stars').textContent = L.stars();
+    A.setCrowd(t.crowd); $('tgNext').style.display = A.tracks > 1 ? '' : 'none';
+  }
   function start() {
+    dressOpp(); $('table').classList.remove('show');
     G.score = [0, 0]; G.clock = MATCH; G.B = setup(HUMAN); G.turn = HUMAN; G.streak = 0; G.flick = null; G.resting = true; G.goalPause = 0; G.aiTimer = 0;
     G.mode = 'play'; $('title').classList.add('hide'); $('over').classList.remove('show'); updHud(); A.whistle();
     if (window.OG) OG.start();   // 집계: 한 판 시작 (재시작 포함)
@@ -207,6 +218,38 @@
     $('osc').textContent = h + ' : ' + c;
     $('over').classList.add('show');
     if (window.OG) OG.over({ result: r.textContent, score: h + '_' + c });   // 집계: 한 판 끝
+    var res = L.record(h, c);
+    if (window.OG && OG.ev) { OG.ev('league_day', { season: L.season(), day: L.state.day, result: r.textContent }); if (res.over) OG.ev('league_end', { season: L.season(), place: res.after, outcome: res.outcome }); }
+    setTimeout(function () { if (G.mode === 'over') showTable(res); }, 2200);
+  }
+  // ── 순위표 ──
+  function showTable(res) {
+    G.mode = 'table'; $('over').classList.remove('show');
+    var rows = L.rows(), body = $('trows'), html = '', i, r;
+    for (i = 0; i < rows.length; i++) {
+      r = rows[i];
+      html += '<div class="tr' + (r.me ? ' me' : '') + (i === 0 ? ' up' : '') + '">' +
+        '<span class="pos">' + (i + 1) + '</span><i style="border-color:' + r.ring + ';background:' + r.body + '"></i>' +
+        '<span class="nm">' + r.name + '</span><span class="n">' + r.w + '</span><span class="n">' + r.d + '</span><span class="n">' + r.l + '</span>' +
+        '<span class="n gd">' + (r.gd > 0 ? '+' : '') + r.gd + '</span><span class="n pt">' + r.pts + '</span></div>';
+    }
+    body.innerHTML = html;
+    $('thead').textContent = res && res.over ? L.seasonText() : L.playedText();
+    var big = $('tbig'), btn = $('btnNext');
+    big.className = 'big'; big.textContent = '';
+    if (res && res.over) {
+      big.textContent = res.outcome === 'champions' ? 'CHAMPIONS' : 'SEASON OVER'; big.className = 'big ' + res.outcome;
+      btn.textContent = 'NEXT SEASON';
+    } else btn.textContent = 'NEXT';
+    $('table').classList.add('show');
+    // 내 줄이 지난 순위에서 지금 순위로 미끄러진다
+    if (res && res.before !== res.after) {
+      var me = body.querySelector('.me'), rh = me.offsetHeight + 4;
+      me.style.transition = 'none'; me.style.transform = 'translateY(' + (res.before - res.after) * rh + 'px)';
+      void me.offsetHeight;   // 강제 배치
+      setTimeout(function () { me.style.transition = 'transform .45s cubic-bezier(.2,.9,.3,1.2)'; me.style.transform = 'translateY(0)'; }, 30);
+    }
+    showRec();
   }
   var last = 0;
   function loop(ts) {
@@ -366,7 +409,8 @@
   cv.addEventListener('contextmenu', function (e) { e.preventDefault(); });
 
   $('btnStart').addEventListener('click', function () { A.init(); start(); });
-  $('btnRetry').addEventListener('click', function () { A.init(); start(); });
+  $('over').addEventListener('click', function () { if (G.mode === 'over') showTable(L.state.last); });   // 경기 끝 화면은 어디를 눌러도 순위표로
+  $('btnNext').addEventListener('click', function () { A.init(); start(); });
   $('tgSnd').addEventListener('click', function () { A.init(); A.toggleSnd(); syncTog(); });
   $('tgBgm').addEventListener('click', function () { A.init(); A.toggleBgm(); syncTog(); });
   var toastT = 0;
@@ -382,8 +426,8 @@
   addEventListener('resize', resize);
 
   if (/[?&]shot=1/.test(location.search)) document.body.classList.add('shot');   // 스크린샷용 — 상단 바·알약 숨김
-  G.B = setup(HUMAN); syncTog(); updHud(); showRec(); resize();
+  G.B = setup(HUMAN); dressOpp(); syncTog(); updHud(); showRec(); resize();
   requestAnimationFrame(loop);
   // 시험용 손잡이 — 화면이 멈춘 곳(숨은 탭)에서 프레임을 손으로 돌린다
-  window.__fk = { G: G, view: view, setup: setup, simulate: simulate, aiChoose: aiChoose, toScreen: function (x, y) { var sx = view.land ? LH - y : x, sy = view.land ? x : y; return { x: view.ox + sx * view.s, y: view.oy + sy * view.s }; }, tick: function (n) { for (var k = 0; k < (n || 1); k++) loop(last + 16.7); } };
+  window.__fk = { G: G, view: view, setup: setup, simulate: simulate, aiChoose: aiChoose, league: L, showTable: showTable, toScreen: function (x, y) { var sx = view.land ? LH - y : x, sy = view.land ? x : y; return { x: view.ox + sx * view.s, y: view.oy + sy * view.s }; }, tick: function (n) { for (var k = 0; k < (n || 1); k++) loop(last + 16.7); } };
 })();

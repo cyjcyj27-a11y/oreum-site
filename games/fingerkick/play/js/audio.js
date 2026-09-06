@@ -12,16 +12,25 @@
 
   function mk(src, loop, vol) { var a = new Audio(src); a.loop = !!loop; a.preload = 'auto'; a.volume = vol; return a; }
   // 경기장 함성 — 나라별 실제 녹음 (출처 assets/SOUNDS.md). 고른 곡만 내려받고, ⏭(N) 으로 넘긴다. 어느 팀인지는 화면에 안 알려 준다.
-  var TRACKS = ['crowd-en', 'crowd-nl', 'crowd-de', 'crowd-br', 'crowd-ie', 'crowd-wc', 'crowd-esnl', 'crowd-wh'];
-  var ti = 0; try { ti = Math.max(0, Math.min(TRACKS.length - 1, parseInt(localStorage.getItem(KEY + '.track') || '0', 10) || 0)); } catch (e) {}
+  // 리그전: 경기마다 상대 나라의 경기장 녹음 목록을 setCrowd() 로 받는다(league.js). 첫 곡은 목록 안에서 무작위.
+  var TRACKS = ['crowd-nl'], ti = 0;
   function mkCrowd() { var a = mk('assets/' + TRACKS[ti] + '.mp3', false, 0.45); a.addEventListener('ended', function () { if (a === crowd) nextTrack(); }); return a; }
   var crowd = mkCrowd();
   function nextTrack() {
     var wasOn = bgm; try { crowd.pause(); } catch (e) {}
-    ti = (ti + 1) % TRACKS.length; try { localStorage.setItem(KEY + '.track', String(ti)); } catch (e) {}
+    ti = (ti + 1) % TRACKS.length;
     crowd = mkCrowd();
     if (wasOn) crowdSync();
     return { index: ti + 1, total: TRACKS.length };
+  }
+  function setCrowd(list) {
+    if (!list || !list.length) return;
+    var same = list.length === TRACKS.length && list.every(function (t, i) { return t === TRACKS[i]; });
+    if (same) return;
+    var wasOn = bgm; try { crowd.pause(); } catch (e) {}
+    TRACKS = list.slice(); ti = Math.floor(Math.random() * TRACKS.length);
+    crowd = mkCrowd();
+    if (wasOn && ac) crowdSync();
   }
   var goalS = mk('assets/goal.mp3', false, 1.0);
   var shout = mk('assets/shout.mp3', false, 0.9);   // 해설 "골!" 외침
@@ -64,7 +73,7 @@
     get snd() { return snd; }, get bgm() { return bgm; },
     toggleSnd: function () { snd = !snd; save('snd', snd); return snd; },
     toggleBgm: function () { bgm = !bgm; save('bgm', bgm); crowdSync(); return bgm; },
-    nextTrack: nextTrack,
+    nextTrack: nextTrack, setCrowd: setCrowd, get tracks() { return TRACKS.length; },
     flick: function (p) { if (!ok()) return; var t = ac.currentTime; burst(t, 0.06, 0.25 + p * 0.3, 1800); tone(240, 'sine', t, 0.08, 0.25, 110); },
     hit: function (s) { if (!ok()) return; var t = ac.currentTime, v = Math.min(0.5, 0.06 + s * 0.05); tone(1000 + s * 40, 'sine', t, 0.05, v, 500); burst(t, 0.03, v * 0.6, 3000); },
     wall: function (s) { if (!ok()) return; var t = ac.currentTime, v = Math.min(0.35, 0.05 + s * 0.04); tone(140, 'sine', t, 0.09, v, 60); burst(t, 0.04, v * 0.4, 700); },

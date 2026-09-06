@@ -18,7 +18,7 @@
   .stat b { font-weight: normal; font-size: 20px; min-width: 14px; text-align: center; }
   .tm { display: inline-flex; align-items: center; gap: 5px; font-family: Arial, sans-serif; font-weight: 700; font-size: 12px; letter-spacing: 1px; opacity: .55; transition: opacity .25s; }
   .tm.on { opacity: 1; }
-  .tm i { width: 14px; height: 14px; border-radius: 50%; border: 3px solid #fff; background: #e0343c; box-shadow: 0 1px 2px rgba(0,0,0,.5); }
+  .tm i { width: 14px; height: 14px; border-radius: 50%; border: 3px solid #cd2e3a; background: #0047a0; box-shadow: 0 1px 2px rgba(0,0,0,.5); }
   .tm.cpu i { border-color: #ffd23a; background: #2a62d6; }
   .tm.on i { box-shadow: 0 0 0 2px rgba(255,255,255,.35), 0 0 10px rgba(255,255,255,.55); }
   #streak { font-size: 11px; letter-spacing: 2px; opacity: .9; }
@@ -63,6 +63,34 @@
   #over .res.win { color: #ffe066; } #over .res.lose { color: #ff7a6a; } #over .res.draw { color: #fff; }
   #over .sc { font-family: Arial, sans-serif; font-weight: 700; font-size: 34px; letter-spacing: 4px; margin-bottom: 40px; }
   #over .again { font-family: Arial, sans-serif; letter-spacing: 4px; font-size: 20px; }
+  #title .lday, #over .mday { font-family: Arial, sans-serif; font-weight: 700; font-size: 14px; letter-spacing: 3px; color: #fff; text-shadow: 0 1px 4px rgba(0,0,0,.7); opacity: .9; margin: -34px 0 8px; }
+  #over .mday { margin: 0 0 6px; opacity: .7; }
+  #title .stars { color: #ffd23a; font-size: 18px; letter-spacing: 2px; text-shadow: 0 1px 4px rgba(0,0,0,.7); margin-bottom: 24px; min-height: 22px; }
+  #title .stars:empty { display: none; }
+  .rec { margin-top: 0; }
+
+  /* 순위표 */
+  #table { position: fixed; inset: 0; display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 11; background: rgba(6,14,8,.72); text-align: center; padding: 0 12px; }
+  #table.show { display: flex; }
+  #table h2 { font-family: Arial, sans-serif; font-weight: 900; font-size: min(5vw, 22px); letter-spacing: 5px; margin: 0 0 14px; opacity: .85; }
+  #table .big { font-family: 'Ria', Arial, sans-serif; font-weight: 900; font-size: min(11vw, 64px); line-height: 1; letter-spacing: 4px; -webkit-text-stroke: 2px #1b3d22; paint-order: stroke fill; margin: 0 0 12px; color: #fff; }
+  #table .big:empty { display: none; }
+  #table .big.champions { color: #ffe066; }
+  #table .tbl { width: min(94vw, 460px); background: rgba(0,0,0,.45); border: 1px solid rgba(255,255,255,.16); border-radius: 14px; padding: 8px 10px; font-family: Arial, sans-serif; }
+  #table .tr { display: grid; grid-template-columns: 22px 18px 1fr 26px 26px 26px 38px 34px; align-items: center; gap: 4px; padding: 6px 4px; border-radius: 8px; font-size: 15px; text-align: right; position: relative; }
+  #table .tr.me { background: rgba(255,255,255,.14); font-weight: 700; }
+  #table .tr.up { border-bottom: 1px dashed rgba(255,224,102,.55); border-radius: 8px 8px 0 0; }
+  #table .tr .pos { opacity: .7; }
+  #table .tr i { width: 14px; height: 14px; border-radius: 50%; border: 3px solid #fff; display: inline-block; box-shadow: 0 1px 2px rgba(0,0,0,.5); }
+  #table .tr .nm { text-align: left; font-family: 'Griun', 'Noto Sans KR', 'Malgun Gothic', sans-serif; font-size: 16px; padding-left: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #table .tr .n { opacity: .8; font-variant-numeric: tabular-nums; }
+  #table .tr .pt { opacity: 1; font-weight: 900; font-size: 17px; }
+  #table .hd { font-size: 11px; opacity: .55; padding: 2px 4px 6px; letter-spacing: 1px; }
+  #table .hd .nm { text-align: left; }
+  #table .again { pointer-events: auto; display: inline-block; margin-top: 22px; padding: 12px 44px; border-radius: 999px; border: 2px solid #fff; background: rgba(15,40,20,.72); color: #fff; font-family: Arial, sans-serif; font-size: 20px; letter-spacing: 4px; cursor: pointer; box-shadow: 0 6px 20px rgba(0,0,0,.35); touch-action: manipulation; }
+  #table .again:active { transform: scale(.96); }
+  @media (max-height: 560px) { #table h2 { margin-bottom: 6px; } #table .tr { padding: 3px 4px; font-size: 13px; } #table .again { margin-top: 10px; padding: 8px 34px; } }
+  @media (max-height: 420px) { #table h2 { font-size: 14px; margin: 0 0 4px; } #table .big { font-size: 30px; -webkit-text-stroke: 1px #1b3d22; margin: 0 0 4px; } #table .tbl { padding: 4px 8px; } #table .tr { padding: 1px 4px; font-size: 12px; } #table .tr .nm { font-size: 13px; } #table .tr .pt { font-size: 13px; } #table .tr i { width: 11px; height: 11px; border-width: 2px; } #table .hd { padding: 0 4px 2px; font-size: 10px; } #table .again { margin-top: 6px; padding: 5px 28px; font-size: 15px; } }   /* 폰 가로: 9줄 표가 한 화면에 들어가게 */
   #title.hide { display: none; }
 </style>
 </head>
@@ -84,23 +112,37 @@
 <div id="keys" data-en="M music · K sound">M 음악 · K 효과음</div>
 
 <div id="over">
+  <div class="mday" id="mday"></div>
   <h2>FULL TIME</h2>
   <div class="res" id="res">WIN</div>
   <div class="sc" id="osc">0 : 0</div>
   <div class="rec" id="rec2"></div>
-  <div class="again" id="btnRetry">RETRY</div>
+  <div class="again" id="btnRetry">NEXT</div>
+</div>
+
+<div id="table">
+  <h2 id="thead"></h2>
+  <div class="big" id="tbig"></div>
+  <div class="tbl">
+    <div class="tr hd"><span></span><span></span><span class="nm"></span><span>W</span><span>D</span><span>L</span><span>GD</span><span>PTS</span></div>
+    <div id="trows"></div>
+  </div>
+  <div class="again" id="btnNext">NEXT</div>
 </div>
 
 <div id="title">
   <h1 data-en="FINGER KICK">핑거킥</h1>
   <div class="tag" data-en="FLICK SOCCER">FINGER KICK</div>
+  <div class="lday" id="lday"></div>
+  <div class="stars" id="stars"></div>
   <div class="rec" id="rec"></div>
   <div class="go" id="btnStart" data-en="START">시작</div>
 </div>
 
 <script src="/assets/game-home.js?v=7" data-top="6" data-left="6" data-fullscreen="1" defer></script>
-<script src="js/audio.js?v=4"></script>
-<script src="js/game.js?v=2"></script>
+<script src="js/audio.js?v=5"></script>
+<script src="js/league.js?v=3"></script>
+<script src="js/game.js?v=4"></script>
 <script src="/assets/visit.js?v=11" defer></script>
 <script src="/assets/game-events.js?v=1" defer></script>
 </body>
