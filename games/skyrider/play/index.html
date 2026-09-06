@@ -104,7 +104,10 @@
   #bubble b { display: block; font-size: 15px; color: #d9781e; letter-spacing: 1px; margin-bottom: 6px; }
   body.touch #bubble { top: 30%; font-size: 19px; padding: 12px 18px 14px; }
   /* 폰 세로로 들면: 돌리라는 그림만 (가로 전용) */
-  #rotate { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(14,18,24,.92); z-index: 40; pointer-events: none; }
+  #rotate { position: fixed; inset: 0; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 10px; background: rgba(14,18,24,.94); z-index: 40; pointer-events: auto; text-align: center; color: #e8e2d4; font-size: 17px; line-height: 1.8; padding: 8vw; }
+  #rotate.off { display: none !important; }
+  #rotate p { margin: 0; } #rotate .sub { font-size: 14px; color: #8d8778; line-height: 1.7; } #rotate .sub a { color: #bdb5a3; }
+  #rotate button { margin: 8px 0 4px; padding: 15px 32px; border: 0; border-radius: 99px; cursor: pointer; font-family: inherit; font-size: 17px; font-weight: 800; color: #12141a; background: #ffd27a; }
   #rotate .ph { width: 70px; height: 120px; border: 5px solid #ffd27a; border-radius: 14px; position: relative; animation: turnph 1.6s ease-in-out infinite; }
   #rotate .ph::after { content: ''; position: absolute; left: 50%; bottom: 8px; width: 14px; height: 14px; margin-left: -7px; border-radius: 50%; background: #ffd27a; }
   @keyframes turnph { 0%, 20% { transform: rotate(0deg); } 60%, 100% { transform: rotate(-90deg); } }
@@ -219,7 +222,11 @@
 </div>
 <span id="h" hidden></span>
 <div id="sub"></div>
-<div id="rotate"><div class="ph"></div></div>
+<div id="rotate"><div class="ph"></div>
+  <p data-en="This game plays in landscape">가로 화면에서 하는 게임입니다</p>
+  <button type="button" id="rotGo" data-en="Turn to landscape">가로로 돌리기</button>
+  <p class="sub"><span data-en="If the button does nothing, turn off your phone's rotation lock and lay it sideways">단추가 안 먹으면 폰의 화면 회전 잠금을 풀고 눕혀 주세요</span><br><a href="#" id="rotSkip" data-en="Play in portrait anyway">그래도 세로로 하기</a></p>
+</div>
 <div id="bubble"><b></b><span></span></div>
 <div id="pause"><h2>PAUSE</h2><p>▶</p></div>
 <canvas id="minimap" width="300" height="300"></canvas>
@@ -249,6 +256,10 @@
   <div class="go" data-en="START">시작</div>
 </div>
 
+<script src="/assets/landscape.js?v=1"></script>
+<script>
+(function(){ var g=document.getElementById('rotGo'), k=document.getElementById('rotSkip'); if(g) g.addEventListener('click', function(){ if(window.OL) OL.go(); }); if(k) k.addEventListener('click', function(e){ e.preventDefault(); document.getElementById('rotate').classList.add('off'); }); })();
+</script>
 <script src="/assets/game-home.js?v=7" data-top="6" data-left="6" data-fullscreen="1" defer></script>
 <script>
 /* ── 말(한국어·영어) ── `?lang=en` 이면 영어를 덧씌운다. 한국어가 원본이다.
