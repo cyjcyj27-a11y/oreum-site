@@ -33,9 +33,9 @@
   // 터치: 왼쪽 조이스틱 / 오른쪽 드래그 시점
   const joy = { id: null, x0: 0, y0: 0, dx: 0, dy: 0 }, look = { id: null, x: 0, y: 0 };
   const jb = $('joy'), jk = $('joyKnob');
-  canvas.addEventListener('touchstart', e => { for (const t of e.changedTouches) { if (t.clientX > innerWidth / 2 && joy.id === null) { /* 오른손 = 이동 스틱, 왼손 = 시점 (2026-09-06: 이동은 오른쪽, 행동은 왼쪽) */ joy.id = t.identifier; joy.x0 = t.clientX; joy.y0 = t.clientY; joy.dx = joy.dy = 0; jb.style.left = (t.clientX - 60) + 'px'; jb.style.top = (t.clientY - 60) + 'px'; jb.classList.add('on'); } else if (look.id === null) { look.id = t.identifier; look.x = t.clientX; look.y = t.clientY; } } e.preventDefault(); }, { passive: false });
+  canvas.addEventListener('touchstart', e => { for (const t of e.changedTouches) { if (t.clientX > innerWidth / 2 && joy.id === null) { /* 오른손 = 이동 스틱, 왼손 = 시점 (2026-09-06: 이동은 오른쪽, 행동은 왼쪽) */ joy.id = t.identifier; joy.x0 = t.clientX; joy.y0 = t.clientY; joy.dx = joy.dy = 0; }   /* 스틱 자체는 고정, 손잡이만 움직인다 */ else if (look.id === null) { look.id = t.identifier; look.x = t.clientX; look.y = t.clientY; } } e.preventDefault(); }, { passive: false });
   canvas.addEventListener('touchmove', e => { for (const t of e.changedTouches) { if (t.identifier === joy.id) { let dx = t.clientX - joy.x0, dy = t.clientY - joy.y0; const l = Math.hypot(dx, dy); if (l > 55) { dx *= 55 / l; dy *= 55 / l; } joy.dx = dx / 55; joy.dy = dy / 55; jk.style.transform = `translate(${dx}px,${dy}px)`; } else if (t.identifier === look.id) { lookDX += (t.clientX - look.x) * 2.2; lookDY += (t.clientY - look.y) * 2.2; look.x = t.clientX; look.y = t.clientY; } } e.preventDefault(); }, { passive: false });
-  const tEnd = e => { for (const t of e.changedTouches) { if (t.identifier === joy.id) { joy.id = null; joy.dx = joy.dy = 0; jb.classList.remove('on'); jk.style.transform = ''; } if (t.identifier === look.id) look.id = null; } };
+  const tEnd = e => { for (const t of e.changedTouches) { if (t.identifier === joy.id) { joy.id = null; joy.dx = joy.dy = 0; jk.style.transform = ''; } if (t.identifier === look.id) look.id = null; } };
   canvas.addEventListener('touchend', tEnd); canvas.addEventListener('touchcancel', tEnd);
   let tRun = false, tSneak = false;
   $('btnGrab').addEventListener('touchstart', e => { e.preventDefault(); doAction(); }, { passive: false });

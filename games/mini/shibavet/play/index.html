@@ -44,16 +44,19 @@
   .tbtn { display: none; position: fixed; width: 76px; height: 76px; border-radius: 50%; border: 2px solid rgba(255,255,255,.55); background: rgba(30,22,14,.5); color: #fff; font-family: inherit; font-size: 15px; z-index: 6; touch-action: manipulation; text-shadow: 0 1px 2px rgba(0,0,0,.6); }
   body.touch.playing .tbtn { display: block; } .tbtn.on { background: rgba(255,210,74,.75); color: #2a1c08; border-color: #ffd24a; }
   /* 단추는 왼쪽(왼손), 이동 스틱은 오른쪽 반쪽 아무 데나. 왼쪽 아래 구석은 전체화면 알약 자리라 그 위부터 */
-  #btnGrab { left: 24px; bottom: 92px; width: 92px; height: 92px; font-size: 18px; background: rgba(255,120,60,.6); }
-  #btnDoor { left: 130px; bottom: 100px; opacity: .35; } #btnDoor.show { opacity: 1; }
-  #btnRun { left: 130px; bottom: 196px; } #btnSneak { left: 40px; bottom: 196px; }
-  #btnTreat { left: 40px; bottom: 292px; width: 64px; height: 64px; font-size: 14px; } #btnToy { left: 130px; bottom: 292px; width: 64px; height: 64px; font-size: 14px; }
+  /* 행동 단추는 바닥줄, 전체화면 알약(왼쪽 아래 구석) 오른쪽부터 */
+  #btnGrab { left: 136px; bottom: calc(14px + env(safe-area-inset-bottom)); width: 74px; height: 74px; font-size: 16px; background: rgba(255,120,60,.6); }
+  #btnDoor { left: 218px; bottom: calc(22px + env(safe-area-inset-bottom)); width: 58px; height: 58px; font-size: 13px; opacity: .35; } #btnDoor.show { opacity: 1; }
+  #btnRun { left: 284px; bottom: calc(22px + env(safe-area-inset-bottom)); width: 58px; height: 58px; font-size: 13px; } #btnSneak { left: 350px; bottom: calc(22px + env(safe-area-inset-bottom)); width: 58px; height: 58px; font-size: 12px; }
+  /* 아이템은 작게, 위쪽 알약 바로 아래 */
+  #btnTreat { left: 10px; top: calc(54px + env(safe-area-inset-top)); width: 46px; height: 46px; font-size: 12px; } #btnToy { left: 62px; top: calc(54px + env(safe-area-inset-top)); width: 46px; height: 46px; font-size: 12px; }
   #inv.got { animation: got .6s ease-out; } @keyframes got { 0% { transform: scale(1); background: rgba(255,210,74,.9); color: #2a1c08; } 100% { transform: scale(1); } }
   #inv .key { font-size: 10px; opacity: .55; border: 1px solid rgba(255,255,255,.4); border-radius: 4px; padding: 0 4px; margin: 0 6px 0 -2px; font-family: Arial, sans-serif; } body.touch #inv { display: none; }
   #title .items { position: absolute; left: 50%; transform: translateX(-50%); bottom: calc(12vh + 60px); font-size: 15px; opacity: .85; text-shadow: 0 1px 3px rgba(0,0,0,.6); letter-spacing: 1px; }
   #over .gain { font-size: 22px !important; color: #ffd24a; margin-top: 8px !important; }
-  #joy { position: fixed; width: 120px; height: 120px; border-radius: 50%; border: 2px solid rgba(255,255,255,.4); background: rgba(30,22,14,.3); display: none; pointer-events: none; z-index: 6; }
-  #joy.on { display: block; } #joyKnob { position: absolute; left: 35px; top: 35px; width: 50px; height: 50px; border-radius: 50%; background: rgba(255,255,255,.75); }
+  /* 이동 스틱 — 오른쪽 아래에 고정, 불투명. 오른쪽 반쪽 아무 데나 문지르면 손잡이가 따라 움직인다 */
+  #joy { position: fixed; right: 28px; bottom: calc(28px + env(safe-area-inset-bottom)); width: 120px; height: 120px; border-radius: 50%; border: 3px solid rgba(255,255,255,.85); background: rgba(30,22,14,.88); display: none; pointer-events: none; z-index: 6; box-shadow: 0 4px 16px rgba(0,0,0,.35); }
+  body.touch.playing #joy { display: block; } #joyKnob { position: absolute; left: 35px; top: 35px; width: 50px; height: 50px; border-radius: 50%; background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,.4); }
 
   /* 타이틀 */
   #title { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding-top: 8vh; background: linear-gradient(180deg, rgba(20,26,36,.25), rgba(20,26,36,0) 45%, rgba(20,26,36,0) 70%, rgba(20,26,36,.45)); transition: opacity 1s; text-align: center; z-index: 10; }
@@ -145,7 +148,7 @@
 <script src="js/items.js?v=3"></script>
 <script src="js/dog.js?v=22"></script>
 <script src="js/player.js?v=14"></script>
-<script src="js/game.js?v=32"></script>
+<script src="js/game.js?v=33"></script>
 <script>
 </script>
 <script src="/assets/game-events.js?v=1" defer></script>
