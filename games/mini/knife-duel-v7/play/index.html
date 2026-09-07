@@ -106,7 +106,7 @@
     </div>
     <div class="row" style="margin-top:6px"><label>즉사 아닐 때 배율</label><input type="range" id="hm" min="150" max="600" value="320"><span class="v" id="v_hm">3.2</span></div>
     <h2>연출</h2>
-    <div class="row"><label>피 양</label><input type="range" id="bl" min="0" max="250" value="100"><span class="v" id="v_bl">1.0</span></div>
+    <div class="row" hidden><label>피 양</label><input type="range" id="bl" min="0" max="250" value="100"><span class="v" id="v_bl">1.0</span></div>
     <div class="row"><label>리플레이 배속</label><input type="range" id="rs" min="15" max="80" value="28"><span class="v" id="v_rs">0.28</span></div>
     <h2>규칙</h2>
     <div class="row"><label>체력</label><input type="range" id="hp" min="40" max="200" value="100" step="10"><span class="v" id="v_hp">100</span></div>
@@ -474,7 +474,10 @@ const mGeo=new THREE.BufferGeometry(); mGeo.setAttribute('position',new THREE.Bu
 scene.add(new THREE.Points(mGeo,new THREE.PointsMaterial({color:0xd63b2a,size:0.028,
   transparent:true,opacity:0.55,depthWrite:false})));
 let bI=0,mI=0;
+// 피 처리 없음 (2026-09-07, 플래시게임 진열대용) — 튀는 피·핏줄기·바닥 얼룩·급소 덩어리를 모두 끈다
+const NO_BLOOD=true;
 function bloodBurst(x,y,z,dx,dy,dz,amount,spread){
+  if(NO_BLOOD)return;
   const n=Math.round(amount*T.bl); if(n<=0)return;
   const dl=Math.hypot(dx,dy,dz)||1; dx/=dl;dy/=dl;dz/=dl;
   for(let i=0;i<n;i++){ const k=bI++%BMAX;
@@ -492,7 +495,7 @@ function bloodBurst(x,y,z,dx,dy,dz,amount,spread){
     mV[k*3+2]=(dz+(Math.random()-0.5)*sp)*s;
     mL[k]=0.25+Math.random()*0.35; } }
 const jets=[];
-function arterialJet(rig,dx,dy,dz){ jets.push({rig,dx,dy,dz,f:0,life:46}); }
+function arterialJet(rig,dx,dy,dz){ if(NO_BLOOD)return; jets.push({rig,dx,dy,dz,f:0,life:46}); }
 function stepJets(sc){ for(let i=jets.length-1;i>=0;i--){ const j=jets[i];
   j.f+=sc; if(j.f>=j.life){jets.splice(i,1);continue;}
   const p=j.rig.critPt.getWorldPosition(_tmpV);
@@ -513,7 +516,7 @@ for(let i=0;i<DMAXD;i++){ const m=new THREE.Mesh(new THREE.PlaneGeometry(1,1),
     depthWrite:false,polygonOffset:true,polygonOffsetFactor:-2}));
   m.rotation.x=-Math.PI/2; m.position.y=0.014; m.visible=false; scene.add(m); decals.push(m); }
 let dI=0;
-function addDecal(x,z,s){ if(!optDecal||Math.hypot(x,z)>ARENA)return;
+function addDecal(x,z,s){ if(NO_BLOOD||!optDecal||Math.hypot(x,z)>ARENA)return;
   const m=decals[dI++%DMAXD]; m.position.set(x,0.014+((dI%7)*0.0006),z);
   m.rotation.z=Math.random()*6.3; m.scale.setScalar(s);
   m.material.opacity=0.55+Math.random()*0.30; m.visible=true; }
@@ -897,7 +900,7 @@ function poseChar(r,f,t){
   r.mouth.scale.set(1,1,1); r.mouth.position.y=-0.075;
   r.root.rotation.set(0,f.yaw,0);
   r.trail.material.opacity=0;
-  r.gore.visible=f.gore>0;
+  r.gore.visible=!NO_BLOOD&&f.gore>0;
 
   const ph=f.phase(),d=f.st==='atk'?f.data():null;
   const moving=f.st==='idle'&&Math.hypot(f.vx,f.vz)>0.2;
