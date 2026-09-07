@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>망망대해 — 오름게임즈</title>
+<style>
+  @font-face { font-family: 'Griun'; src: url('fonts/Griun_Fromsol-Rg.ttf') format('truetype'); font-display: swap; }
+  @font-face { font-family: 'Ria'; src: url('fonts/RiaSans-ExtraBold.woff2') format('woff2'); font-display: swap; }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #2f88a8; font-family: 'Griun', 'Noto Sans KR', 'Malgun Gothic', sans-serif; color: #fff8ec; user-select: none; }
+  #c { display: block; width: 100vw; height: 100vh; touch-action: none; }
+  #vig { position: fixed; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 50% 50%, rgba(0,0,0,0) 60%, rgba(6,16,26,.4) 100%); }
+  @keyframes blink { 0%,100%{opacity:.35} 50%{opacity:1} }
+  [hidden] { display: none !important; }
+  #rotate { position: fixed; inset: 0; z-index: 90; display: none; place-items: center; text-align: center; background: #0a1824; color: #f2ede4; font-size: 17px; line-height: 1.8; padding: 8vw; }
+  body.touch.portrait #rotate { display: grid; }
+  #rotate button { margin: 22px 0 16px; padding: 15px 32px; border: 0; border-radius: 99px; cursor: pointer; font-family: inherit; font-size: 17px; font-weight: 800; color: #2a1c08; background: #ffd24a; }
+  #rotate .sub { font-size: 14px; color: #b8ae9c; line-height: 1.7; } #rotate .sub a { color: #d8cfbc; }
+
+  /* ── HUD — 스카이라이더 기본 UI ── */
+  #topbar { position: fixed; left: 0; right: 0; top: 0; min-height: calc(44px + env(safe-area-inset-top)); padding: calc(6px + env(safe-area-inset-top)) calc(112px + env(safe-area-inset-right)) 6px calc(112px + env(safe-area-inset-left)); display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px 8px; background: linear-gradient(180deg, rgba(10,14,20,.5), rgba(10,14,20,0)); pointer-events: none; z-index: 5; opacity: 0; transition: opacity .8s; }
+  #topbar.show { opacity: 1; }
+  .stat { display: inline-flex; align-items: center; gap: 5px; padding: 5px 10px; border-radius: 999px; background: rgba(0,0,0,.35); border: 1px solid rgba(255,255,255,.14); font-size: 15px; white-space: nowrap; text-shadow: 0 1px 2px rgba(0,0,0,.6); }
+  .stat b { font-weight: normal; font-size: 17px; font-family: 'Ria', 'Griun', sans-serif; letter-spacing: 1px; } .stat .ic { font-size: 13px; }
+  .stat .bar { width: 64px; height: 6px; background: rgba(255,255,255,.18); border-radius: 3px; overflow: hidden; }
+  #foodBar { height: 100%; width: 100%; background: #ffd24a; border-radius: 3px; transition: width .2s; }
+  #food.hot #foodBar { background: #e05a3a; animation: blink .5s infinite; } #food.hot { border-color: rgba(224,90,58,.7); }
+  .stat.item { pointer-events: auto; cursor: pointer; touch-action: manipulation; } .stat.item.got { animation: got .6s ease-out; } @keyframes got { 0% { transform: scale(1.3); background: rgba(255,210,74,.9); color: #2a1c08; } 100% { transform: scale(1); } }
+  .stat.item.dim { opacity: .45; }
+  #bait.on1 { border-color: rgba(200,220,230,.8); } #bait.on2 { border-color: #ffd24a; background: rgba(120,90,20,.5); }
+  .stat .cut { width: 26px; height: 12px; fill: rgba(255,255,255,.35); } .stat .cut .eye { fill: rgba(0,0,0,.6); }
+  #bait.on1 .cut { fill: #cfe0e8; } #bait.on2 .cut { fill: #ffd24a; }
+  @media (max-width: 700px) { .stat .cut { width: 22px; height: 10px; } }
+  .spacer { display: none; }
+  .tog { position: absolute; top: calc(4px + env(safe-area-inset-top)); right: calc(10px + env(safe-area-inset-right)); pointer-events: auto; width: 36px; height: 36px; border-radius: 50%; border: 1px solid rgba(255,255,255,.3); background: rgba(0,0,0,.4); color: #fff; font-family: inherit; font-size: 17px; line-height: 1; padding: 0; touch-action: manipulation; }
+  .tog.off { opacity: .4; text-decoration: line-through; }
+  @media (max-width: 700px) { #topbar { padding-left: calc(104px + env(safe-area-inset-left)); padding-right: calc(80px + env(safe-area-inset-right)); gap: 4px 5px; } .stat { font-size: 13px; padding: 3px 7px; gap: 4px; } .stat b { font-size: 15px; } .stat .bar { width: 56px; } .tog { width: 32px; height: 32px; font-size: 15px; } }
+
+  /* 던지기 힘 · 줄 긴장 막대 */
+  #meter { position: fixed; left: 50%; bottom: calc(15vh + env(safe-area-inset-bottom)); width: min(280px, 44vw); height: 12px; margin-left: calc(min(280px, 44vw) / -2); border-radius: 6px; background: rgba(0,0,0,.4); border: 1px solid rgba(255,255,255,.35); overflow: hidden; opacity: 0; transition: opacity .25s; z-index: 4; pointer-events: none; }
+  #meter.show { opacity: 1; }
+  #meterBar { height: 100%; width: 0; background: #ffd24a; border-radius: 6px; }
+  #meter.tens #meterBar { background: linear-gradient(90deg, #7fd8a0 0%, #ffd24a 60%, #ff5a3a 100%); background-size: min(280px, 44vw) 100%; }
+  #meter.hot { border-color: #ff5a3a; animation: blink .3s infinite; }
+  /* 물음표·느낌표 — 찌 위 */
+  #toast { position: fixed; left: 50%; top: 32%; transform: translate(-50%, -50%) scale(.6); font-family: 'Ria', sans-serif; font-size: clamp(34px, 7vw, 76px); letter-spacing: 4px; color: #ffd24a; -webkit-text-stroke: 2px #5a2a10; paint-order: stroke fill; text-shadow: 0 6px 24px rgba(0,0,0,.5); opacity: 0; pointer-events: none; z-index: 8; text-align: center; white-space: nowrap; transition: opacity .25s, transform .25s; }
+  #toast.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  #toast.red { color: #ff7a5a; }
+  #toast small { display: block; font-family: 'Griun', sans-serif; font-size: clamp(16px, 2.6vw, 26px); letter-spacing: 2px; -webkit-text-stroke: 0; color: #fff8ec; text-shadow: 0 2px 8px rgba(0,0,0,.7); margin-top: 4px; }
+  #keys { position: fixed; right: 22px; bottom: 20px; font-size: 13px; opacity: 0; text-align: right; line-height: 1.7; pointer-events: none; text-shadow: 0 1px 2px rgba(0,0,0,.7); transition: opacity .8s; }
+  #keys.show { opacity: .6; } body.touch #keys { display: none; }
+  /* 폰: 오른쪽 아래 행동 단추 (이동이 없는 게임이라 패드는 없다) */
+  .tbtn { display: none; position: fixed; width: 88px; height: 88px; border-radius: 50%; border: 2px solid rgba(255,255,255,.55); background: rgba(255,120,60,.55); color: #fff; font-family: inherit; font-size: 17px; letter-spacing: 1px; touch-action: none; z-index: 6; text-shadow: 0 1px 2px rgba(0,0,0,.6); padding: 0; right: calc(14px + env(safe-area-inset-right)); bottom: calc(24px + env(safe-area-inset-bottom)); }
+  .tbtn.on { background: rgba(255,210,74,.8); color: #2a1c08; border-color: #ffd24a; }
+  .tbtn.bite { background: rgba(255,60,40,.85); animation: blink .25s infinite; }
+  body.touch.playing .tbtn { display: block; }
+  @media (max-height: 520px) { .tbtn { width: 72px; height: 72px; font-size: 15px; bottom: calc(16px + env(safe-area-inset-bottom)); } }
+  #fade { position: fixed; inset: 0; background: #000; opacity: 0; pointer-events: none; transition: opacity 1.5s; z-index: 9; } #fade.show { opacity: .75; } #fade.white { background: #fff8ec; }
+
+  /* 타이틀 */
+  #title { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding-top: 8vh; background: linear-gradient(180deg, rgba(10,20,30,.25), rgba(10,20,30,0) 45%, rgba(10,20,30,0) 70%, rgba(10,20,30,.45)); transition: opacity 1s; text-align: center; z-index: 10; }
+  #title.hide { opacity: 0; pointer-events: none; }
+  #title h1 { font-family: 'Ria', 'Griun', sans-serif; font-weight: 900; font-size: clamp(44px, 10vw, 104px); margin: 8px 0 0; letter-spacing: 6px; color: #fff4dc; text-shadow: 0 4px 0 #1f5a70, 0 8px 24px rgba(0,0,0,.45); -webkit-text-stroke: 1.5px #0d3446; paint-order: stroke fill; line-height: 1.1; }
+  #title .tag { font-family: 'Ria', sans-serif; letter-spacing: 8px; font-size: 18px; opacity: .9; margin-top: 8px; text-shadow: 0 1px 3px rgba(0,0,0,.6); }
+  #title .brand { display: flex; align-items: center; gap: 8px; padding: 6px 14px 6px 8px; border-radius: 999px; background: rgba(255,253,247,.92); color: #2e6b39; font-size: 14px; letter-spacing: 1px; }
+  #title .brand img { width: 30px; height: 15px; }
+  #title .go { position: absolute; left: 50%; transform: translateX(-50%); bottom: 12vh; margin: 0; font-family: 'Ria', sans-serif; font-size: 30px; letter-spacing: 8px; text-indent: 8px; padding: 12px 46px 14px; border-radius: 20px; background: rgba(10,30,44,.72); border: 1px solid rgba(255,255,255,.16); box-shadow: 0 8px 26px rgba(0,0,0,.35); animation: blink 2.4s infinite; cursor: pointer; }
+  #title .best { position: absolute; left: 50%; transform: translateX(-50%); bottom: calc(12vh + 84px); font-size: 16px; opacity: .85; text-shadow: 0 1px 3px rgba(0,0,0,.6); letter-spacing: 1px; }
+
+  #title .dexT { position: absolute; right: calc(18px + env(safe-area-inset-right)); bottom: calc(12vh + 4px); padding: 9px 16px; border-radius: 999px; background: rgba(10,30,44,.62); border: 1px solid rgba(255,255,255,.18); font-size: 15px; letter-spacing: 1px; cursor: pointer; pointer-events: auto; text-shadow: 0 1px 3px rgba(0,0,0,.6); }
+
+  /* 도감 */
+  #dex { position: fixed; inset: 0; z-index: 30; display: grid; place-items: center; background: rgba(4,12,20,.62); opacity: 0; pointer-events: none; transition: opacity .25s; padding: calc(12px + env(safe-area-inset-top)) calc(12px + env(safe-area-inset-right)) calc(12px + env(safe-area-inset-bottom)) calc(12px + env(safe-area-inset-left)); }
+  #dex.show { opacity: 1; pointer-events: auto; }
+  #dex .panel { width: min(920px, 100%); max-height: 100%; display: flex; flex-direction: column; border-radius: 18px; background: rgba(12,28,40,.92); border: 1px solid rgba(255,255,255,.16); box-shadow: 0 16px 48px rgba(0,0,0,.5); overflow: hidden; }
+  #dex .head { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px 10px 20px; font-family: 'Ria', 'Griun', sans-serif; font-size: 22px; letter-spacing: 2px; color: #ffd24a; border-bottom: 1px solid rgba(255,255,255,.1); }
+  #dex .head button { width: 36px; height: 36px; border-radius: 50%; border: 1px solid rgba(255,255,255,.3); background: rgba(0,0,0,.35); color: #fff; font-size: 17px; font-family: inherit; cursor: pointer; padding: 0; touch-action: manipulation; }
+  #dex .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; padding: 14px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+  #dex .card { position: relative; border-radius: 12px; background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.1); padding: 8px 8px 9px; text-align: center; }
+  #dex .card.have { background: rgba(255,210,74,.14); border-color: rgba(255,210,74,.55); }
+  #dex .card .n { position: absolute; right: 10px; top: 10px; padding: 2px 8px; border-radius: 999px; background: #ffd24a; color: #2a1c08; font-family: 'Ria', 'Griun', sans-serif; font-size: 14px; font-weight: normal; letter-spacing: 1px; }
+  #dex .acts { display: flex; gap: 5px; margin-top: 7px; }
+  #dex .act { flex: 1; padding: 6px 0 5px; border-radius: 9px; border: 1px solid rgba(255,255,255,.28); background: rgba(0,0,0,.38); color: #fff8ec; font-family: inherit; font-size: 13px; line-height: 1; cursor: pointer; touch-action: manipulation; white-space: nowrap; }
+  #dex .act b { font-family: 'Ria', 'Griun', sans-serif; font-weight: normal; font-size: 15px; letter-spacing: 1px; color: #ffd24a; }
+  #dex .act .cut { width: 22px; height: 10px; fill: #cfe0e8; vertical-align: -1px; } #dex .act .cut .eye { fill: rgba(0,0,0,.6); }
+  #dex .act:active { transform: scale(.95); } #dex .act.off { opacity: .3; pointer-events: none; }
+  #dex .card.seen img { filter: grayscale(1) brightness(.75); } #dex .card.seen .nm, #dex .card.seen .rc { color: rgba(255,255,255,.5); }
+  #dex .card img { display: block; width: 100%; aspect-ratio: 2 / 1; object-fit: contain; border-radius: 8px; background: radial-gradient(ellipse at 50% 60%, rgba(120,190,220,.28), rgba(20,50,70,.2) 75%); }
+  #dex .card .nm { margin-top: 7px; font-size: 15px; letter-spacing: 1px; }
+  #dex .card .rc { margin-top: 2px; font-family: 'Ria', 'Griun', sans-serif; font-size: 15px; color: #ffd24a; letter-spacing: 1px; }
+  #dex .card.no img { filter: brightness(0) opacity(.55); }
+  #dex .card.no .nm { opacity: .55; } #dex .card.no .rc { color: rgba(255,255,255,.35); }
+  @media (max-width: 700px) { #dex .grid { grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 7px; padding: 10px; } #dex .head { font-size: 18px; padding: 8px 10px 7px 14px; } #dex .card { padding: 6px 6px 7px; } #dex .card .nm, #dex .card .rc { font-size: 13px; } #dex .act { font-size: 12px; padding: 5px 0 4px; } #dex .act b { font-size: 13px; } #title .dexT { font-size: 13px; padding: 7px 12px; } }
+  @media (max-height: 480px) { #dex .grid { grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); gap: 6px; padding: 8px; } #dex .head { font-size: 17px; padding: 6px 8px 5px 12px; } #dex .head button { width: 30px; height: 30px; } #dex .card { padding: 5px 5px 6px; } #dex .card .nm { margin-top: 4px; font-size: 12px; } #dex .card .rc { font-size: 12px; } }
+  body.dexOpen .tbtn { display: none; }
+
+  /* 게임오버 · 클리어 */
+  #over { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(6,14,22,.45); opacity: 0; pointer-events: none; transition: opacity 1.2s; text-align: center; text-shadow: 0 2px 12px rgba(0,0,0,.7); z-index: 10; }
+  #over.show { opacity: 1; pointer-events: auto; }
+  #over h2 { font-family: 'Ria', sans-serif; font-size: min(7vw, 64px); font-weight: 900; margin: 0 0 10px; letter-spacing: 4px; color: #ffd24a; -webkit-text-stroke: 2px #5a2a10; paint-order: stroke fill; }
+  #over.clear h2 { color: #fff4dc; -webkit-text-stroke: 2px #1f5a70; }
+  #over p { font-size: 26px; margin: 4px 0; font-family: 'Ria', sans-serif; letter-spacing: 1px; } #over p small { font-size: 15px; opacity: .7; margin-right: 8px; font-family: 'Griun', sans-serif; }
+  #over .again { margin-top: 36px; opacity: .6; animation: blink 2.4s infinite; font-family: 'Ria', sans-serif; letter-spacing: 6px; font-size: 24px; cursor: pointer; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="vig"></div>
+
+<div id="topbar">
+  <div class="stat" id="dayH">DAY 1</div>
+  <div class="stat" id="food"><span class="ic">🍖</span><div class="bar"><div id="foodBar"></div></div><b id="foodN">100</b></div>
+  <div class="stat item" id="invF" title="물고기"><span class="ic">🐟</span><b id="nF">0</b></div>
+  <div class="stat item" id="bait" title="미끼"><svg class="ic cut" viewBox="0 0 40 18" aria-hidden="true"><path d="M0 9 L7 2 Q10 1 11 3 L11 15 Q10 17 7 16 Z"/><path d="M13.5 2 L20 1.5 L20 16.5 L13.5 16 Z"/><path d="M22.5 1.5 L29 2.5 L29 15.5 L22.5 16.5 Z"/><path d="M31.5 3 L34 5 L40 1 L38 9 L40 17 L34 13 L31.5 15 Z"/><circle cx="4.5" cy="7.5" r="1.1" class="eye"/></svg><b id="baitT">—</b></div>
+  <div class="spacer"></div>
+  <button id="btnSfx" class="tog" title="효과음">🔊</button>
+</div>
+<div id="meter"><div id="meterBar"></div></div>
+<div id="toast"></div>
+<div id="keys" data-en="Space · hold to cast / hook / tap to reel<br>Drag · look · Wheel · zoom · 1 eat · B bait · D fish · K sound">스페이스 · 꾹 던지기 / 걸기 / 연타 감기<br>끌기 · 시점 · 휠 · 당겨 보기 · 1 먹기 · B 미끼 · D 물고기 · K 효과음</div>
+<button id="btnAct" class="tbtn" data-en="CAST">던지기</button>
+<div id="rotate">
+  <div>
+    <p data-en="This game plays in landscape">가로 화면에서 하는 게임입니다</p>
+    <button type="button" id="rotGo" data-en="Turn to landscape">가로로 돌리기</button>
+    <p class="sub"><span data-en="If the button does nothing, turn off your phone's rotation lock and lay it sideways">단추가 안 먹으면 폰의 화면 회전 잠금을 풀고 눕혀 주세요</span><br>
+      <a href="#" id="rotSkip" data-en="Play in portrait anyway">그래도 세로로 하기</a></p>
+  </div>
+</div>
+<div id="fade"></div>
+
+<div id="title">
+  <div class="brand"><img src="assets/logo-oreum.svg" alt="">OREUM GAMES</div>
+  <h1 data-en="OPEN SEA">망망대해</h1>
+  <div class="tag" data-en="CASTAWAY FISHING">CASTAWAY</div>
+  <div class="best" id="titleBest"></div>
+  <div class="go" data-en="START">시작</div>
+  <div class="dexT" id="titleDex">🐟</div>
+</div>
+
+<div id="dex">
+  <div class="panel">
+    <div class="head"><span id="dexH">도감</span><button type="button" id="dexX" aria-label="close">✕</button></div>
+    <div class="grid" id="dexGrid"></div>
+  </div>
+</div>
+
+<div id="over">
+  <h2 id="overH">GAME OVER</h2>
+  <p><small>DAY</small><span id="overDay">1</span></p>
+  <p id="overFish"><small data-en="BIGGEST">최고</small><span id="overCm">—</span></p>
+  <p><small data-en="FISH">물고기</small><span id="overDex">0/14</span></p>
+  <p class="again">RETRY</p>
+</div>
+
+<script src="assets/game-home.js" data-top="6" data-left="6" data-fullscreen="1" defer></script>
+<script src="assets/landscape.js?v=48"></script>
+<script src="lib/three.min.js"></script>
+<script src="lib/GLTFLoader.global.js"></script>
+<script src="js/sea.js?v=48"></script>
+<script src="js/fish.js?v=48"></script>
+<script src="js/world.js?v=48"></script>
+<script src="js/audio.js?v=48"></script>
+<script src="js/game.js?v=48"></script>
+</body>
+</html>
