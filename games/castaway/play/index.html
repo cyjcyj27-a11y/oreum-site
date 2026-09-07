@@ -61,7 +61,7 @@
 
   /* 타이틀 */
   #title { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding-top: 8vh; background: linear-gradient(180deg, rgba(10,20,30,.25), rgba(10,20,30,0) 45%, rgba(10,20,30,0) 70%, rgba(10,20,30,.45)); transition: opacity 1s; text-align: center; z-index: 10; }
-  #title.hide { opacity: 0; pointer-events: none; }
+  #title.hide { opacity: 0; pointer-events: none; } #title.hide .dexT { pointer-events: none; }   /* 사라진 타이틀의 🐟 단추가 감기 단추 위에 남지 않게 */
   #title h1 { font-family: 'Ria', 'Griun', sans-serif; font-weight: 900; font-size: clamp(44px, 10vw, 104px); margin: 8px 0 0; letter-spacing: 6px; color: #fff4dc; text-shadow: 0 4px 0 #1f5a70, 0 8px 24px rgba(0,0,0,.45); -webkit-text-stroke: 1.5px #0d3446; paint-order: stroke fill; line-height: 1.1; }
   #title .tag { font-family: 'Ria', sans-serif; letter-spacing: 8px; font-size: 18px; opacity: .9; margin-top: 8px; text-shadow: 0 1px 3px rgba(0,0,0,.6); }
   #title .brand { display: flex; align-items: center; gap: 8px; padding: 6px 14px 6px 8px; border-radius: 999px; background: rgba(255,253,247,.92); color: #2e6b39; font-size: 14px; letter-spacing: 1px; }
