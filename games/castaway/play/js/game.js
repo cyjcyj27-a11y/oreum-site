@@ -83,6 +83,7 @@
   function start() {
     if (G.state !== 'title') return; A.unlock(); G.state = 'play'; $('title').classList.add('hide'); $('topbar').classList.add('show'); $('keys').classList.add('show'); document.body.classList.add('playing');
     camYaw = Math.PI; G.time = 0; hud();
+    if (window.OG) OG.start();   // 집계: 한 판 시작
   }
   const busy = () => G.state !== 'play' || G.eatT > 0 || dexOpen;
   function actDown() {
@@ -199,11 +200,13 @@
   function saveBest() { try { localStorage.setItem('castaway.best', JSON.stringify(best)); } catch (e) { } }
   function gameOver() {
     G.state = 'over'; G.down = true; W.setPose('down'); W.setLine(false); L.st = 'idle'; A.gameover();
+    if (window.OG) OG.over({ result: 'GAME OVER', day: G.day, cm: G.bestCm, dex: dexCount() });   // 집계: 한 판 끝
     if (G.day > best.days) { best.days = G.day; saveBest(); }
     setTimeout(() => { $('fade').classList.add('show'); }, 800);
     setTimeout(() => { $('overH').textContent = 'GAME OVER'; $('overDay').textContent = G.day; $('overDex').textContent = dexCount() + '/' + F.SPECIES.length; $('overCm').textContent = G.bestCm ? G.bestCm + 'cm' : '—'; $('over').classList.add('show'); }, 2400);
   }
   function showClear() {
+    if (window.OG) OG.over({ result: 'CLEAR', day: G.day, cm: G.bestCm, dex: dexCount() });   // 집계: 클리어
     if (G.day > best.days) { best.days = G.day; saveBest(); }
     $('fade').classList.add('white'); $('fade').classList.add('show');
     setTimeout(() => { $('over').classList.add('clear'); $('overH').textContent = 'CLEAR'; $('overDay').textContent = G.day; $('overDex').textContent = dexCount() + '/' + F.SPECIES.length; $('overCm').textContent = G.bestCm + 'cm'; $('over').classList.add('show'); }, 1500);
