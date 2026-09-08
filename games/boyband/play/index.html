@@ -116,17 +116,17 @@
   #scene-title{position:relative}
   #scene-title{position:fixed;left:0;top:0;width:var(--vwz,100vw);height:var(--vhz,100vh);display:flex;flex-direction:column;padding:54px 14px 14px;box-sizing:border-box}
   #scene-title .stage{flex:1;height:auto;min-height:0}
-  #scene-title .stage .idol{bottom:9%}
+  #scene-title .stage .idol{bottom:9%;--hm:.78}   /* 제목·START 자리 확보(2026-09-08) */
   #scene-title .stage .idol.pro{bottom:6%}
   @media(max-height:900px){ #scene-title .stage .idol{--hm:.82} }
   @media(max-height:700px){ #scene-title .stage .idol{--hm:.66} }
-  #scene-title .ttl{position:absolute;left:0;right:0;top:calc(54px + 2vh);text-align:center;pointer-events:none}
-  #scene-title h1{font-family:'Nanum Pen Script','Ria',cursive;font-size:clamp(72px,11vw,170px);letter-spacing:2px;color:#fff;
+  #scene-title .ttl{position:absolute;left:0;right:0;top:6px;text-align:center;pointer-events:none}
+  #scene-title h1{font-family:'Nanum Pen Script','Ria',cursive;font-size:clamp(90px,12vw,240px);letter-spacing:2px;color:#fff;
     text-shadow:0 2px 0 #3a2440,0 0 18px rgba(242,167,196,.8),0 0 40px rgba(95,179,217,.6);line-height:1.1}
-  #scene-title .en{font-family:'Ria',sans-serif;font-size:clamp(24px,3vw,44px);letter-spacing:8px;color:#f6e3c8;opacity:.9;margin-top:0}
-  #scene-title .go{position:absolute;left:0;right:0;top:30%;text-align:center;margin:0;z-index:5;pointer-events:none}   /* 제목과 인물 사이 빈 자리에 (2026-09-08) */
+  #scene-title .en{font-family:'Ria',sans-serif;font-size:clamp(30px,3.4vw,64px);letter-spacing:10px;color:#f6e3c8;opacity:.9;margin-top:0}
+  #scene-title .go{position:absolute;left:0;right:0;top:31%;text-align:center;margin:0;z-index:5;pointer-events:none}   /* 제목과 인물 사이 빈 자리에 (2026-09-08) */
   #scene-title .go .btn{pointer-events:auto}
-  #scene-title .go .btn{font-size:52.8px;padding:14px 46px;box-shadow:0 8px 30px rgba(242,167,196,.35)}
+  #scene-title .go .btn{font-size:96px;padding:22px 80px;border-radius:24px;box-shadow:0 8px 30px rgba(242,167,196,.35)}
 
   /* ── 카드 ── */
   .hdr{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap}
@@ -312,19 +312,19 @@
   #cutin.right .cut-char{left:auto;right:6%}
   .cut-char img{bottom:0;height:100%}
   .cut-char img.full{height:118%;top:0;bottom:auto}
-  .cut-box,#cutin.right .cut-box{position:absolute;left:3%;right:3%;top:auto;bottom:3%;max-width:none;margin:0;min-height:18vh;display:flex;align-items:center;
+  .cut-box,#cutin.right .cut-box{position:absolute;left:3%;right:3%;top:auto;bottom:9%;max-width:none;margin:0;min-height:18vh;display:flex;align-items:center;
     padding:44px 56px 40px;border-radius:26px;background:rgba(255,255,255,.96);border:2px solid var(--line);
-    font-size:clamp(38px,3.4vw,74px);line-height:1.4;box-shadow:0 18px 50px rgba(40,30,60,.22)}
+    font-size:clamp(44px,4vw,96px);line-height:1.4;box-shadow:0 18px 50px rgba(40,30,60,.22)}
   .cut-box::before,#cutin.right .cut-box::before{display:none}
   .cut-name{position:absolute;left:36px;top:-30px;background:var(--pink);color:#fff;padding:8px 26px;border-radius:14px;
     font-size:clamp(20px,1.6vw,30px);letter-spacing:2px;margin:0;box-shadow:0 8px 20px rgba(224,105,156,.35)}
   .cut-next{right:28px;bottom:16px;font-size:26px}
   #cutText,.cut-narr{white-space:pre-wrap}
-  .cut-narr,#cutin.right .cut-narr{position:absolute;left:3%;right:3%;top:auto;bottom:3%;width:auto;max-width:none;height:auto;min-height:18vh;
-    padding:44px 56px 40px;border-radius:26px;font-size:clamp(38px,3.4vw,74px);line-height:1.4;text-align:left;align-items:center}
+  .cut-narr,#cutin.right .cut-narr{position:absolute;left:3%;right:3%;top:auto;bottom:9%;width:auto;max-width:none;height:auto;min-height:18vh;
+    padding:44px 56px 40px;border-radius:26px;font-size:clamp(44px,4vw,96px);line-height:1.4;text-align:left;align-items:center}
   .cut-narr::after{right:28px;bottom:16px;font-size:26px}
-  .cut-choices,#cutin.right .cut-choices{position:absolute;left:3%;right:3%;top:auto;bottom:3%;max-width:none;margin:0;gap:22px}   /* 선택지는 대사 상자 자리, 글씨는 대사와 같은 크기(2026-09-08 여백 지적) */
-  .cut-choices .opt{text-align:center;padding:34px 40px;border-radius:26px;font-size:clamp(38px,3.4vw,74px);line-height:1.35;background:rgba(255,255,255,.97);border:2px solid var(--line)}
+  .cut-choices,#cutin.right .cut-choices{position:absolute;left:3%;right:3%;top:auto;bottom:9%;max-width:none;margin:0;gap:22px}   /* 선택지는 대사 상자 자리, 글씨는 대사와 같은 크기(2026-09-08 여백 지적) */
+  .cut-choices .opt{text-align:center;padding:34px 40px;border-radius:26px;font-size:clamp(44px,4vw,96px);line-height:1.35;background:rgba(255,255,255,.97);border:2px solid var(--line)}
   .cut-choices .opt small{font-size:clamp(26px,2.1vw,44px);margin-top:8px}
   @media(max-width:700px){ html:not(.zm) .cut-char{left:0;width:100%;height:62%;bottom:34%} html:not(.zm) #cutin.right .cut-char{right:0} html:not(.zm) .cut-box,html:not(.zm) #cutin.right .cut-box,html:not(.zm) .cut-narr,html:not(.zm) #cutin.right .cut-narr{left:2%;right:2%;bottom:2%;min-height:30%;padding:34px 22px 30px;font-size:22px} html:not(.zm) .cut-name{left:18px;top:-22px;font-size:16px;padding:6px 16px} html:not(.zm) .cut-choices,html:not(.zm) #cutin.right .cut-choices{left:4%;right:4%;top:12%} html:not(.zm) .cut-choices .opt{font-size:20px;padding:16px} }
 </style>
@@ -426,11 +426,11 @@
     <p class="sub"><span data-en="If the button does nothing, turn off your phone's rotation lock and lay it sideways">단추가 안 먹으면 폰의 화면 회전 잠금을 풀고 눕혀 주세요</span></p>
   </div>
 </div>
-<script src="assets/landscape.js?v=786700"></script>
-<script src="js/data.js?v=786700"></script>
-<script src="js/story.js?v=786700"></script>
-<script src="js/audio.js?v=786700"></script>
-<script src="js/game.js?v=786700"></script>
+<script src="assets/landscape.js?v=787100"></script>
+<script src="js/data.js?v=787100"></script>
+<script src="js/story.js?v=787100"></script>
+<script src="js/audio.js?v=787100"></script>
+<script src="js/game.js?v=787100"></script>
 <script src="/assets/visit.js?v=11" defer></script>
 </body>
 </html>
