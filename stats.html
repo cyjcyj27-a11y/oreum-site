@@ -70,11 +70,11 @@
   </div>
 
   <div class="card">
-    <h2>👣 페이지뷰 <span class="em">반복 방문까지 — 카테고리별</span></h2>
+    <h2>👣 페이지뷰 <span class="em">반복 방문까지 · 아래는 게임 전체 — 2026-09-03부터</span></h2>
     <div class="big" id="pv-total">…</div>
     <div class="note" id="pv-note"></div>
-    <div id="pv-cats" style="margin-top:10px"></div>
-    <div id="pv-pages" style="margin-top:4px"></div>
+    <div id="games-table" style="margin-top:12px"><div class="loading">불러오는 중…</div></div>
+    <div class="note">접속은 실행 화면을 연 횟수(새로고침 포함). 판은 START·RETRY 를 누른 횟수. 플레이는 탭이 보이는 동안 1분마다 1분. "분/접속"이 곧 한 번 켜서 몇 분 하는지입니다.</div>
   </div>
 
   <div class="card">
@@ -87,12 +87,6 @@
       <div class="chip"><div class="n" id="r-min">–</div><div class="l">총 플레이 시간</div></div>
     </div>
     <div class="note" id="r-note"></div>
-  </div>
-
-  <div class="card">
-    <h2>🎮 게임별 <span class="em">접속 · 판 수 · 플레이 시간 — 2026-09-03부터</span></h2>
-    <div id="games-table"><div class="loading">위 지표를 먼저 불러온 뒤 이어서 불러옵니다…</div></div>
-    <div class="note">접속은 실행 화면을 연 횟수(새로고침 포함). 판은 START·RETRY 를 누른 횟수. 플레이는 탭이 보이는 동안 1분마다 1분. "분/접속"이 곧 한 번 켜서 몇 분 하는지입니다.</div>
   </div>
 
   <div class="card">
@@ -247,18 +241,8 @@
     document.getElementById('pv-total').innerHTML = fmt(pvAll) + '<small>회</small>';
     document.getElementById('pv-note').textContent = pvAll === 0
       ? '아직 페이지뷰가 없어요. 어느 페이지든 열 때마다(새로고침·재방문 포함) 여기 숫자가 올라갑니다.'
-      : '새로고침·재방문까지 합친 전체 열어본 횟수예요. 아래는 어디를 얼마나 봤는지 나눈 것.';
-    var cats = [['🏠 오름 홈페이지', pvHome], ['🎮 게임 실행 (play)', pvGame], ['📋 게임 소개·목록', pvIntro],
-                ['⏳ 영생의 가격', pvImmo],
-                ['🔮 MBTI·사주', pvSaju], ['💬 커뮤니티', pvBoard]];
-    var catMax = Math.max(1, pvHome, pvGame, pvSaju, pvBoard, pvImmo, pvIntro);
-    document.getElementById('pv-cats').innerHTML = cats.map(function (c) {
-      var pct = Math.round(c[1] / (pvAll || 1) * 100);
-      return '<div class="bar"><div class="name" style="width:120px">' + c[0] + '</div>' +
-             '<div class="track"><div class="fill" style="width:' + Math.max(Math.round(c[1] / catMax * 100), c[1] ? 4 : 0) + '%;background:var(--cold)"></div></div>' +
-             '<div class="val">' + fmt(c[1]) + '회 · ' + pct + '%</div></div>';
-    }).join('');
-    document.getElementById('pv-pages').innerHTML = '';
+      : '새로고침·재방문까지 합친 전체 열어본 횟수예요. 아래는 게임마다 실행 화면을 연 횟수와 판 수, 플레이 시간.';
+    // 카테고리별 막대는 2026-09-09 뺐다 — 총합만 보이고 아래에 게임 전체 표를 붙인다 (사장님 지시)
 
     // 🎯 판 수 — 게임 실행 페이지 공통 스크립트(assets/game-events.js)가 한 판 시작마다 셉니다 (2026-09-03부터)
     var rounds = d.game_rounds, sess = d.game_session;
@@ -270,20 +254,6 @@
     document.getElementById('r-note').textContent = rounds === 0
       ? '판 수 집계를 이제 막 시작했어요. 게임에서 START·RETRY 를 누를 때마다 오릅니다. 사람별 판 수는 구글 애널리틱스(game_start 이벤트 ÷ 사용자)에서 봅니다.'
       : '접속당 판 수가 3을 넘으면 붙잡는 힘이 있는 겁니다. "끝까지 한 비율"은 시작한 판 중 게임오버·클리어까지 간 비율이에요. 총 플레이 시간은 탭이 보이는 동안만 1분 단위로 셉니다. 사람별 판 수는 구글 애널리틱스 game_start 이벤트에서 봅니다.';
-
-    // 게임 소개 세부 — 자기 칸이 있는 것만 (나머지 게임은 pv_intro 에 합쳐진다)
-    var introDefs = [['핑거킥', d.pv_fingerkick + d.pv_fingerkick_en], ['스카이라이더', d.pv_skyrider + d.pv_skyrider_en],
-                     ['시바 병원', d.pv_shibavet + d.pv_shibavet_en], ['망망대해', d.pv_castaway + d.pv_castaway_en], ['알까기', d.pv_alkkagi + d.pv_alkkagi_en],
-                     ['코인빨래방', d.pv_coinwash + d.pv_coinwash_en], ['제발 데뷔해줘', d.pv_boyband + d.pv_boyband_en], ['보아뱀', d.pv_boa + d.pv_boa_en], ['고양이용 게임', d.pv_catmobile + d.pv_catmobile_en],
-                     ['게임 목록', d.pv_games + d.pv_games_en], ['미니게임 목록', d.pv_mini + d.pv_mini_en], ['그 밖의 소개', d.pv_intro + d.pv_intro_en]];
-    var introShown = introDefs.filter(function (s) { return s[1] > 0; }).sort(function (a, b) { return b[1] - a[1]; });
-    if (introShown.length) document.getElementById('pv-pages').innerHTML +=
-      '<div class="note" style="margin:10px 0 4px">↳ 게임 소개·목록 세부 (2026-09-03부터)</div>' + introShown.map(function (s) {
-        var n = s[1], pct = Math.round(n / (pvIntro || 1) * 100);
-        return '<div class="bar"><div class="name" style="width:96px">' + s[0] + '</div>' +
-               '<div class="track"><div class="fill" style="width:' + Math.max(pct, n ? 4 : 0) + '%;background:var(--cold)"></div></div>' +
-               '<div class="val">' + fmt(n) + '회 · ' + pct + '%</div></div>';
-      }).join('');
 
     // ⑤ 재방문율 = 게임을 다른 날 다시 켠 플레이어 / 전체 게임 플레이어 (진짜 '게임 생명력' 지표)
     // 홈페이지 재방문이 아니라 게임 재방문을 봅니다 — 게임하러 오는 사람은 게임 주소로 바로 오니까요.
@@ -324,7 +294,7 @@
     }).join('');
   }
 
-  var GAMES = [['코인빨래방', 'coinwash'], ['제발 데뷔해줘', 'boyband'], ['망망대해', 'castaway'], ['시바 병원 가는 날', 'shibavet'], ['핑거킥', 'fingerkick'], ['루루냥', 'lulu'], ['영생의 가격', 'immortality'], ['김치 담그기', 'making-kimchi'], ['S.A.A.B.', 'saab'], ['스카이 라이더', 'skyrider'],
+  var GAMES = [['고양이용 게임', 'catmobile'], ['보아뱀', 'boa'], ['알까기', 'alkkagi'], ['코인빨래방', 'coinwash'], ['제발 데뷔해줘', 'boyband'], ['망망대해', 'castaway'], ['시바 병원 가는 날', 'shibavet'], ['핑거킥', 'fingerkick'], ['루루냥', 'lulu'], ['영생의 가격', 'immortality'], ['김치 담그기', 'making-kimchi'], ['S.A.A.B.', 'saab'], ['스카이 라이더', 'skyrider'],
                ['스키점프', 'skijump'], ['다 부숴', 'break-it-all'], ['크리스피', 'crispy'], ['돌담', 'doldam'], ['칼 결투', 'knife-duel-v7'], ['인생 물류', 'life-logistics'],
                ['야간자율학습', 'night-study'], ['냥 결투', 'nyang-duel'], ['오름냥', 'oreumnyang'], ['페어붐', 'pairboom'], ['픽셀', 'pixl'], ['극성 뒤집기', 'polarity-flip'], ['미끄럼 고양이', 'slip-cat']];
   function renderGames(vals) {
