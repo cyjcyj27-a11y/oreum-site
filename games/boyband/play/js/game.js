@@ -750,7 +750,8 @@
     const out = score < 45;
     const win = score >= 45;   // 라이브클럽 매진부터 뮤비, 원곡. 아래면 어두운 놀이터에 넷이 가만히
     buildStage($('resultStage'), a, { confetti: score >= 80, stick: c.stick, sign: win ? S.name : '', dim: !win, still: !win, noCrowd: !win });
-    if (win) { $('resultStage').insertAdjacentHTML('beforeend', `<video class="mv" src="assets/mv.mp4" autoplay muted loop playsinline></video>`); A.ending(); }
+    $('scene-result').classList.toggle('has-mv', win); $('scene-result').querySelectorAll('.mvcol').forEach(e => e.remove());
+    if (win) { $('scene-result').insertAdjacentHTML('beforeend', `<div class="mvcol"><video class="mv" src="assets/mv.mp4" autoplay muted loop playsinline></video></div>`); A.ending(); }   // 뮤비는 오른쪽 세로 기둥에 크게(사장님, 2026-09-08)
     else A.quiet();
     $('rsRank').textContent = L(R.rank); $('rsRank').classList.toggle('big', !!R.big);
     $('rsScore').innerHTML = `<span>${c.ico} ${L(c.n)}</span><span class="num">SCORE ${score.toFixed(1)}</span><span class="num">🔥 ${Math.round(fame)}</span><span class="num">🎵 ${Math.round(skill)}</span><span class="num">🤝 ${Math.round(S.team)}</span>`;
@@ -774,7 +775,7 @@
     if (!win) items.push(...ST.PRODUCER.fail);
     if (win) {   // 뮤비 한 바퀴 뒤에(길이는 영상에서 읽는다) / 실패면 바로
       let fired = false; const go = () => { if (fired) return; fired = true; cutStart(items); };
-      const mv = $('resultStage').querySelector('video.mv');
+      const mv = $('scene-result').querySelector('video.mv');
       if (mv) { const arm = () => setTimeout(go, mv.duration * 1000 + 500); if (mv.duration) arm(); else mv.addEventListener('loadedmetadata', arm, { once: true }); }
       setTimeout(go, 40000);
     } else setTimeout(() => cutStart(items), 1200);
