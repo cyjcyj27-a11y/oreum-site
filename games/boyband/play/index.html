@@ -124,7 +124,8 @@
   #scene-title h1{font-family:'Nanum Pen Script','Ria',cursive;font-size:clamp(72px,11vw,170px);letter-spacing:2px;color:#fff;
     text-shadow:0 2px 0 #3a2440,0 0 18px rgba(242,167,196,.8),0 0 40px rgba(95,179,217,.6);line-height:1.1}
   #scene-title .en{font-family:'Ria',sans-serif;font-size:clamp(24px,3vw,44px);letter-spacing:8px;color:#f6e3c8;opacity:.9;margin-top:0}
-  #scene-title .go{text-align:center;margin:12px 0 0;flex:none}
+  #scene-title .go{position:absolute;left:0;right:0;top:30%;text-align:center;margin:0;z-index:5;pointer-events:none}   /* 제목과 인물 사이 빈 자리에 (2026-09-08) */
+  #scene-title .go .btn{pointer-events:auto}
   #scene-title .go .btn{font-size:52.8px;padding:14px 46px;box-shadow:0 8px 30px rgba(242,167,196,.35)}
 
   /* ── 카드 ── */
@@ -424,11 +425,11 @@
     <p class="sub"><span data-en="If the button does nothing, turn off your phone's rotation lock and lay it sideways">단추가 안 먹으면 폰의 화면 회전 잠금을 풀고 눕혀 주세요</span></p>
   </div>
 </div>
-<script src="assets/landscape.js?v=786400"></script>
-<script src="js/data.js?v=786400"></script>
-<script src="js/story.js?v=786400"></script>
-<script src="js/audio.js?v=786400"></script>
-<script src="js/game.js?v=786400"></script>
+<script src="assets/landscape.js?v=786500"></script>
+<script src="js/data.js?v=786500"></script>
+<script src="js/story.js?v=786500"></script>
+<script src="js/audio.js?v=786500"></script>
+<script src="js/game.js?v=786500"></script>
 <script src="/assets/visit.js?v=11" defer></script>
 </body>
 </html>
