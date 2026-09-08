@@ -323,8 +323,9 @@
   .cut-narr,#cutin.right .cut-narr{position:absolute;left:3%;right:3%;top:auto;bottom:3%;width:auto;max-width:none;height:auto;min-height:18vh;
     padding:44px 56px 40px;border-radius:26px;font-size:clamp(38px,3.4vw,74px);line-height:1.4;text-align:left;align-items:center}
   .cut-narr::after{right:28px;bottom:16px;font-size:26px}
-  .cut-choices,#cutin.right .cut-choices{position:absolute;left:18%;right:18%;top:22%;bottom:auto;max-width:none;margin:0;gap:18px}
-  .cut-choices .opt{text-align:center;padding:26px 30px;border-radius:20px;font-size:clamp(26px,2.2vw,44px);background:rgba(255,255,255,.97);border:2px solid var(--line)}
+  .cut-choices,#cutin.right .cut-choices{position:absolute;left:3%;right:3%;top:auto;bottom:3%;max-width:none;margin:0;gap:22px}   /* 선택지는 대사 상자 자리, 글씨는 대사와 같은 크기(2026-09-08 여백 지적) */
+  .cut-choices .opt{text-align:center;padding:34px 40px;border-radius:26px;font-size:clamp(38px,3.4vw,74px);line-height:1.35;background:rgba(255,255,255,.97);border:2px solid var(--line)}
+  .cut-choices .opt small{font-size:clamp(26px,2.1vw,44px);margin-top:8px}
   @media(max-width:700px){ html:not(.zm) .cut-char{left:0;width:100%;height:62%;bottom:34%} html:not(.zm) #cutin.right .cut-char{right:0} html:not(.zm) .cut-box,html:not(.zm) #cutin.right .cut-box,html:not(.zm) .cut-narr,html:not(.zm) #cutin.right .cut-narr{left:2%;right:2%;bottom:2%;min-height:30%;padding:34px 22px 30px;font-size:22px} html:not(.zm) .cut-name{left:18px;top:-22px;font-size:16px;padding:6px 16px} html:not(.zm) .cut-choices,html:not(.zm) #cutin.right .cut-choices{left:4%;right:4%;top:12%} html:not(.zm) .cut-choices .opt{font-size:20px;padding:16px} }
 </style>
 </head>
@@ -425,11 +426,11 @@
     <p class="sub"><span data-en="If the button does nothing, turn off your phone's rotation lock and lay it sideways">단추가 안 먹으면 폰의 화면 회전 잠금을 풀고 눕혀 주세요</span></p>
   </div>
 </div>
-<script src="assets/landscape.js?v=786600"></script>
-<script src="js/data.js?v=786600"></script>
-<script src="js/story.js?v=786600"></script>
-<script src="js/audio.js?v=786600"></script>
-<script src="js/game.js?v=786600"></script>
+<script src="assets/landscape.js?v=786700"></script>
+<script src="js/data.js?v=786700"></script>
+<script src="js/story.js?v=786700"></script>
+<script src="js/audio.js?v=786700"></script>
+<script src="js/game.js?v=786700"></script>
 <script src="/assets/visit.js?v=11" defer></script>
 </body>
 </html>
