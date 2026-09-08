@@ -109,6 +109,10 @@
   @media(max-width:420px){ html:not(.zm) .idol{--hm:.68} }
 
   /* ── 타이틀 ── */
+  #rotate{position:fixed;inset:0;z-index:95;display:none;place-items:center;text-align:center;background:#1a1426;color:#f2ede4;font-size:17px;line-height:1.8;padding:8vw;pointer-events:auto}
+  body.touch.portrait #rotate{display:grid}
+  #rotate button{margin:22px 0 16px;padding:15px 32px;border:0;border-radius:99px;cursor:pointer;font-family:inherit;font-size:17px;font-weight:800;color:#2a1c08;background:#ffd24a}
+  #rotate .sub{font-size:14px;color:#b8ae9c;line-height:1.7} #rotate .sub a{color:#d8cfbc}
   #scene-title{position:relative}
   #scene-title{position:fixed;left:0;top:0;width:var(--vwz,100vw);height:var(--vhz,100vh);display:flex;flex-direction:column;padding:54px 14px 14px;box-sizing:border-box}
   #scene-title .stage{flex:1;height:auto;min-height:0}
@@ -413,10 +417,19 @@
 <div id="overlay"></div>
 
 <script src="assets/game-home.js" data-top="6" data-left="6" data-fullscreen="1" defer></script>
-<script src="js/data.js?v=786200"></script>
-<script src="js/story.js?v=786200"></script>
-<script src="js/audio.js?v=786200"></script>
-<script src="js/game.js?v=786200"></script>
+<div id="rotate">
+  <div>
+    <p data-en="This game plays in landscape">가로 화면에서 하는 게임입니다</p>
+    <button type="button" id="rotGo" data-en="Turn to landscape">가로로 돌리기</button>
+    <p class="sub"><span data-en="If the button does nothing, turn off your phone's rotation lock and lay it sideways">단추가 안 먹으면 폰의 화면 회전 잠금을 풀고 눕혀 주세요</span><br>
+      <a href="#" id="rotSkip" data-en="Play in portrait anyway">그래도 세로로 하기</a></p>
+  </div>
+</div>
+<script src="assets/landscape.js?v=786300"></script>
+<script src="js/data.js?v=786300"></script>
+<script src="js/story.js?v=786300"></script>
+<script src="js/audio.js?v=786300"></script>
+<script src="js/game.js?v=786300"></script>
 <script src="/assets/visit.js?v=11" defer></script>
 </body>
 </html>
