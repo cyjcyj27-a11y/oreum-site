@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="14 68 154 74" role="img" aria-label="오름게임즈 로고">
+  <title>오름게임즈</title>
+  <defs>
+    <mask id="oreum-cut">
+      <rect x="0" y="0" width="220" height="200" fill="#fff"/>
+      <!-- 분화구 -->
+      <ellipse cx="96" cy="77" rx="13" ry="4" fill="#000"/>
+      <!-- 능선 -->
+      <path d="M32,117 C66,104 112,101 150,108"
+            fill="none" stroke="#000" stroke-width="4.5" stroke-linecap="round"/>
+    </mask>
+  </defs>
+  <g fill="#16211a" mask="url(#oreum-cut)">
+    <!-- 오름 -->
+    <path d="M32,126 C44,112 62,86 76,78 L116,78 C130,86 144,110 150,126 Z"/>
+    <!-- 아래 잎 -->
+    <path d="M20,121 C62,110 124,108 160,116 C126,131 58,134 20,121 Z"/>
+  </g>
+</svg>

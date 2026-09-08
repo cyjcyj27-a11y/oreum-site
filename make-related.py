@@ -18,6 +18,7 @@ import io, os, re, sys
 
 # slug, 한국어 경로, 영어 경로, 한국어 이름, 한국어 장르 앵커, 영어 이름, 영어 장르 앵커, 태그
 GAMES = [
+    ("coinwash",      "/games/coinwash/",           "/en/games/coinwash/",           "코인빨래방",       "빨래방 방치형 경영게임",     "COIN LAUNDRY 24",          "idle laundromat game",          {"sim", "tycoon", "idle"}),
     ("boyband",       "/games/boyband/",            "/en/games/boyband/",            "제발 데뷔해줘",     "인디밴드 육성 시뮬레이션게임",        "HOTSHOT INDIE",            "indie band manager sim",        {"sim", "story"}),
     ("castaway",      "/games/castaway/",           "/en/games/castaway/",           "망망대해",         "뗏목 낚시 생존게임",         "OPEN SEA",                 "raft fishing survival game",    {"3d", "sim", "survival", "fishing"}),
     ("fingerkick",    "/games/fingerkick/",         "/en/games/fingerkick/",         "핑거킥",          "손가락 축구게임",           "FINGER KICK",              "finger soccer game",            {"sport", "physics", "pvp"}),
