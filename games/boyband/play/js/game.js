@@ -23,8 +23,13 @@
   function fitZoom() {
     const w = window.innerWidth, h = window.innerHeight;
     const land = w > h;   // 폰 가로도 데스크톱 판을 줄여서 쓴다(사장님, 2026-09-08 "모바일 가로화면에 맞춰")
-    const z = (w >= 1000 || land) ? Math.max(.22, Math.min(w / 2000, h / 1200)) : 1;
+    let z = (w >= 1000 || land) ? Math.max(.22, Math.min(w / 2000, h / 1200)) : 1;
     const root = document.documentElement.style;
+    if (z !== 1) {   // 내용이 세로로 넘치면 더 줄여서 한 화면에 다 넣는다(사장님, 2026-09-08 "화면에 다 들어가게")
+      root.zoom = String(z);
+      const need = Math.max(document.body.scrollHeight, 1200);
+      if (need * z > h) z = Math.max(.22, h / need);
+    }
     root.zoom = z === 1 ? '' : String(z);
     document.documentElement.classList.toggle('zm', z !== 1);   // 줄인 상태에선 폰용 미디어쿼리를 끈다
     document.body.classList.toggle('portrait', isTouch && h > w && !document.documentElement.classList.contains('ol-land'));   // 폰 세로면 가로로 돌리기 덮개
@@ -168,7 +173,7 @@
     $('tbWeek').textContent = `${Math.min(S.week, S.maxWeek)}/${S.maxWeek}`;
     $('tbMoney').parentNode.classList.toggle('warn', S.money < 200);
   }
-  function show(id) { ['title', 'audition', 'setup', 'training', 'concept', 'result'].forEach(s => $('scene-' + s).classList.toggle('hidden', s !== id)); window.scrollTo(0, 0); }
+  function show(id) { ['title', 'audition', 'setup', 'training', 'concept', 'result'].forEach(s => $('scene-' + s).classList.toggle('hidden', s !== id)); window.scrollTo(0, 0); setTimeout(fitZoom, 0); }
   function floatText(x, y, txt) { const d = document.createElement('div'); d.className = 'float'; d.textContent = txt; d.style.left = x + 'px'; d.style.top = y + 'px'; document.body.appendChild(d); setTimeout(() => d.remove(), 1200); }
 
   /* ══════ 타이틀 ══════ */
@@ -331,6 +336,7 @@
     cutStart(ST.PRODUCER.intro.slice());
   };
   function renderTraining(anim) {
+    setTimeout(fitZoom, 0);
     hud();
     $('tbName').textContent = S.name;
     $('tbLeader').textContent = `LEADER ${disp(leader())}`;
