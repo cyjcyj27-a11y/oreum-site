@@ -169,7 +169,8 @@
               // 게임 소개·목록 페이지 (2026-09-03부터 pv_home 대신 여기에 센다. 핑거킥·스카이라이더는 처음부터 자기 칸)
               'pv_intro', 'pv_intro_en', 'pv_games', 'pv_games_en', 'pv_mini', 'pv_mini_en',
               'pv_fingerkick', 'pv_fingerkick_en', 'pv_skyrider', 'pv_skyrider_en',
-              'pv_shibavet', 'pv_shibavet_en', 'pv_castaway', 'pv_castaway_en', 'pv_alkkagi', 'pv_alkkagi_en'];   // 시바(2026-09-06)·망망대해(2026-09-07) 소개 페이지
+              'pv_shibavet', 'pv_shibavet_en', 'pv_castaway', 'pv_castaway_en', 'pv_alkkagi', 'pv_alkkagi_en',   // 시바(2026-09-06)·망망대해(2026-09-07) 소개 페이지
+              'pv_coinwash', 'pv_coinwash_en', 'pv_boyband', 'pv_boyband_en'];   // 코인빨래방·제발 데뷔해줘(2026-09-08) 소개 페이지
   // 한꺼번에 많이 부르면 속도 제한에 걸리므로 나눠 부르고 사이에 잠깐 쉽니다.
   // 3개씩 260ms로는 화면이 뜨기까지 30초가 걸려서 멈춘 것처럼 보였습니다.
   // 막히면 위 get()이 알아서 쉬었다 다시 부르므로, 여기서는 조금 넉넉하게 갑니다.
@@ -238,7 +239,8 @@
     // 게임 소개·목록 페이지. 2026-09-03 전에는 pv_home(홈)에 섞여 들어갔다 — 그 전 숫자는 홈에서 못 갈라낸다.
     var pvIntro = d.pv_intro + d.pv_intro_en + d.pv_games + d.pv_games_en + d.pv_mini + d.pv_mini_en
                 + d.pv_fingerkick + d.pv_fingerkick_en + d.pv_skyrider + d.pv_skyrider_en
-                + d.pv_shibavet + d.pv_shibavet_en + d.pv_castaway + d.pv_castaway_en + d.pv_alkkagi + d.pv_alkkagi_en;
+                + d.pv_shibavet + d.pv_shibavet_en + d.pv_castaway + d.pv_castaway_en + d.pv_alkkagi + d.pv_alkkagi_en
+                + d.pv_coinwash + d.pv_coinwash_en + d.pv_boyband + d.pv_boyband_en;
     var pvAll = pvHome + pvBoard + pvGame + pvSaju + pvImmo + pvIntro;
     document.getElementById('pv-total').innerHTML = fmt(pvAll) + '<small>회</small>';
     document.getElementById('pv-note').textContent = pvAll === 0
@@ -270,6 +272,7 @@
     // 게임 소개 세부 — 자기 칸이 있는 것만 (나머지 게임은 pv_intro 에 합쳐진다)
     var introDefs = [['핑거킥', d.pv_fingerkick + d.pv_fingerkick_en], ['스카이라이더', d.pv_skyrider + d.pv_skyrider_en],
                      ['시바 병원', d.pv_shibavet + d.pv_shibavet_en], ['망망대해', d.pv_castaway + d.pv_castaway_en], ['알까기', d.pv_alkkagi + d.pv_alkkagi_en],
+                     ['코인빨래방', d.pv_coinwash + d.pv_coinwash_en], ['제발 데뷔해줘', d.pv_boyband + d.pv_boyband_en],
                      ['게임 목록', d.pv_games + d.pv_games_en], ['미니게임 목록', d.pv_mini + d.pv_mini_en], ['그 밖의 소개', d.pv_intro + d.pv_intro_en]];
     var introShown = introDefs.filter(function (s) { return s[1] > 0; }).sort(function (a, b) { return b[1] - a[1]; });
     if (introShown.length) document.getElementById('pv-pages').innerHTML +=
@@ -319,7 +322,7 @@
     }).join('');
   }
 
-  var GAMES = [['망망대해', 'castaway'], ['시바 병원 가는 날', 'shibavet'], ['핑거킥', 'fingerkick'], ['루루냥', 'lulu'], ['영생의 가격', 'immortality'], ['김치 담그기', 'making-kimchi'], ['S.A.A.B.', 'saab'], ['스카이 라이더', 'skyrider'],
+  var GAMES = [['코인빨래방', 'coinwash'], ['제발 데뷔해줘', 'boyband'], ['망망대해', 'castaway'], ['시바 병원 가는 날', 'shibavet'], ['핑거킥', 'fingerkick'], ['루루냥', 'lulu'], ['영생의 가격', 'immortality'], ['김치 담그기', 'making-kimchi'], ['S.A.A.B.', 'saab'], ['스카이 라이더', 'skyrider'],
                ['스키점프', 'skijump'], ['다 부숴', 'break-it-all'], ['크리스피', 'crispy'], ['돌담', 'doldam'], ['칼 결투', 'knife-duel-v7'], ['인생 물류', 'life-logistics'],
                ['야간자율학습', 'night-study'], ['냥 결투', 'nyang-duel'], ['오름냥', 'oreumnyang'], ['페어붐', 'pairboom'], ['픽셀', 'pixl'], ['극성 뒤집기', 'polarity-flip'], ['미끄럼 고양이', 'slip-cat']];
   function renderGames(vals) {

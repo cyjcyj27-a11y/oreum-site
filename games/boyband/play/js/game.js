@@ -197,6 +197,7 @@
     return `<div class="ava ${tired ? 'tired' : ''}" style="--p0:${m.pal[0]};--p1:${m.pal[1]}"><img src="${imgFace(m)}" alt="">${rest ? '<span class="zz">💤</span>' : ''}${crown ? '<span class="crown">👑</span>' : ''}</div>`;
   }
   function startAudition() {
+    if (window.OG) OG.start();   // 집계: 한 판 시작
     _id = 0; S.applicants = D.NAMED.map(make);
     S.picked = [];
     $('topbar').classList.add('show'); hud();
@@ -752,6 +753,7 @@
 
     show('result');
     const out = score < 45;
+    if (window.OG) OG.over({ result: score >= 45 ? 'CLEAR' : 'FAIL', score: Math.round(score) });   // 집계: 한 판 끝
     const win = score >= 45;   // 라이브클럽 매진부터 뮤비, 원곡. 아래면 어두운 놀이터에 넷이 가만히
     buildStage($('resultStage'), a, { confetti: score >= 80, stick: c.stick, sign: win ? S.name : '', dim: !win, still: !win, noCrowd: !win });
     $('scene-result').classList.toggle('has-mv', win); $('scene-result').querySelectorAll('.mvcol').forEach(e => e.remove());
@@ -785,6 +787,7 @@
     } else setTimeout(() => cutStart(items), 1200);
   }
   function gameOver() {
+    if (window.OG) OG.over({ result: 'GAME OVER' });   // 집계: 한 판 끝
     A.sfx.rain(); A.music(false);
     $('overlay').innerHTML = `<div class="ovl"><div class="modal center">
       <div class="rank" style="font-size:96px">GAME OVER</div>

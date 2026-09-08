@@ -504,7 +504,7 @@
   }
   $('btnPay').addEventListener('click', () => { const p2 = Math.min(S.money, S.debt); if (p2 <= 0) return; S.money -= p2; S.debt -= p2; SND.play('coins'); save(); if (S.debt <= 0 && !S.ended) ending(); else renderPanel(); });
   $('btnNext').addEventListener('click', () => { if (G.place !== 'panel') return; closePanel(); });
-  function ending() { S.ended = true; save(); $('endDay').textContent = S.day; $('endCoin').textContent = S.earned; $('ending').classList.add('show'); SND.play('clear'); setTimeout(() => SND.play('nice'), 600); }
+  function ending() { S.ended = true; save(); if (window.OG) OG.over({ result: 'CLEAR', day: S.day, earned: S.earned }); /* 집계: 클리어 */ $('endDay').textContent = S.day; $('endCoin').textContent = S.earned; $('ending').classList.add('show'); SND.play('clear'); setTimeout(() => SND.play('nice'), 600); }
   $('endGo').addEventListener('click', () => { $('ending').classList.remove('show'); if (G.place === 'panel') renderPanel(); });
 
   // ── 떠나 있던 동안 ──
@@ -520,6 +520,7 @@
 
   // ── 시작 ──
   function begin(away) {
+    if (window.OG) OG.start({ day: S.day, cont: away ? 1 : 0 });   // 집계: 한 판 시작
     SND.init(); $('title').classList.add('hide'); resetShop(); if (!away) rollWeather(); G.today = 0; G.servedN = 0; G.angryN = 0; G.rep0 = S.rep; G.shown = S.money;
     G.place = 'shop'; document.body.classList.add('playing'); $('topbar').classList.add('show'); $('keys').classList.add('show');
     toast(SEASON_IC[season()] + ' DAY ' + S.day, false, 1400); SND.play('bell'); hud();
