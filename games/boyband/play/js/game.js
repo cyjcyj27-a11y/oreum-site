@@ -521,10 +521,10 @@
     });
   }
   /* 영상 한 편 — 화면을 덮고 소리째 튼다. 끝나거나 누르면 닫힌다(예능 출연 영상, 2026-09-08) */
-  function playVideo(src, cb) {
+  function playVideo(src, cb, label) {
     A.duck(true);
     const ov = document.createElement('div'); ov.id = 'vidov';
-    ov.innerHTML = `<video src="${src}" autoplay playsinline></video><div class="onair">ON AIR</div><div class="cut-next">▼</div>`;
+    ov.innerHTML = `<video src="${src}" autoplay playsinline></video><div class="onair">${label || 'ON AIR'}</div><div class="cut-next">▼</div>`;
     document.body.appendChild(ov);
     let done = false;
     const end = () => { if (done) return; done = true; const v = ov.querySelector('video'); try { v.pause(); } catch (e) { } ov.remove(); A.duck(false); cb && cb(); };
@@ -733,7 +733,7 @@
     return clamp(skill, 0, 100);
   }
   function calcScore(c) { return clamp(clamp(S.hype * (c.fameMul || 1), 0, 100) * 0.72 + calcSkill(c) * 0.42, 0, 125); }
-  function release(cid) {
+  function release(cid, seen) {
     const c = D.CONCEPTS.find(x => x.id === cid), a = alive();
     S.concept = c;
     const skill = calcSkill(c);
@@ -741,6 +741,10 @@
     let score = fame * 0.72 + skill * 0.42;
     score = clamp(score, 0, 125);
     const R = D.RANKS.find(r => score >= r.min);
+    if (!seen) {   // 등급 영상 먼저(2026-09-08 사장님): 음악방송 1위 = 트로피, 홍대 골목 스타 = 버스킹
+      if (score >= 80) { A.sfx.cheer(); return playVideo('assets/win.mp4', () => release(cid, true), '#1'); }
+      if (R.min === 25) return playVideo('assets/busking.mp4', () => release(cid, true), 'LIVE');
+    }
 
     let best = 0; try { best = +localStorage.getItem('boyband.best') || 0; } catch (e) { }
     const newBest = score > best;
