@@ -18,6 +18,7 @@ import io, os, re, sys
 
 # slug, 한국어 경로, 영어 경로, 한국어 이름, 한국어 장르 앵커, 영어 이름, 영어 장르 앵커, 태그
 GAMES = [
+    ("boyband",       "/games/boyband/",            "/en/games/boyband/",            "제발 데뷔해줘",     "인디밴드 육성 시뮬레이션게임",        "HOTSHOT INDIE",            "indie band manager sim",        {"sim", "story"}),
     ("castaway",      "/games/castaway/",           "/en/games/castaway/",           "망망대해",         "뗏목 낚시 생존게임",         "OPEN SEA",                 "raft fishing survival game",    {"3d", "sim", "survival", "fishing"}),
     ("fingerkick",    "/games/fingerkick/",         "/en/games/fingerkick/",         "핑거킥",          "손가락 축구게임",           "FINGER KICK",              "finger soccer game",            {"sport", "physics", "pvp"}),
     ("skyrider",      "/games/skyrider/",           "/en/games/skyrider/",           "스카이 라이더",    "하늘 오토바이 배달게임",     "SKY RIDER",                "flying motorbike delivery game", {"3d", "driving", "delivery"}),
