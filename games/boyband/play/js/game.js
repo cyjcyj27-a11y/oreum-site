@@ -19,9 +19,7 @@
   /* 화면 맞춤 — 2000×1080 을 기준으로 그린 화면을 창 크기에 맞춰 통째로 줄이고 키운다(카드 4장이 항상 한 화면). 폰(1000px 아래)은 그대로 */
   const isTouch = ('ontouchstart' in window) && matchMedia('(pointer: coarse)').matches;
   if (isTouch) document.body.classList.add('touch');
-  let skipRot = false;
   document.getElementById('rotGo').addEventListener('click', () => { if (window.OL) OL.go(); });
-  document.getElementById('rotSkip').addEventListener('click', e => { e.preventDefault(); skipRot = true; document.body.classList.remove('portrait'); });
   function fitZoom() {
     const w = window.innerWidth, h = window.innerHeight;
     const land = w > h;   // 폰 가로도 데스크톱 판을 줄여서 쓴다(사장님, 2026-09-08 "모바일 가로화면에 맞춰")
@@ -29,7 +27,7 @@
     const root = document.documentElement.style;
     root.zoom = z === 1 ? '' : String(z);
     document.documentElement.classList.toggle('zm', z !== 1);   // 줄인 상태에선 폰용 미디어쿼리를 끈다
-    document.body.classList.toggle('portrait', isTouch && !skipRot && h > w && !document.documentElement.classList.contains('ol-land'));   // 폰 세로면 가로로 돌리기 덮개
+    document.body.classList.toggle('portrait', isTouch && h > w && !document.documentElement.classList.contains('ol-land'));   // 폰 세로면 가로로 돌리기 덮개
     // zoom 을 걸면 fixed 요소가 창보다 짧게 잡힌다 — 창 크기를 배율로 나눠 직접 준다
     root.setProperty('--vwz', (w / z) + 'px'); root.setProperty('--vhz', (h / z) + 'px');
   }
