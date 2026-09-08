@@ -19,7 +19,7 @@
 // ─────────────────────────────────────────────────────────────
 (function () {
   var local = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) || location.protocol === 'file:';
-  var mm = location.pathname.match(/\/games\/(?:mini\/)?([^\/]+)/);
+  var mm = location.pathname.match(/\/games\/(?:mini\/|flash\/)?([^\/]+)/);   // 미니·플래시 루트 아래 게임 이름
   var game = mm ? mm[1] : location.pathname.replace(/^\/|\/$/g, '').replace(/[^\w-]+/g, '_') || 'home';
   var me = document.currentScript || {}; var ds = me.dataset || {};
   var useAbacus = ds.abacus !== '0', useAuto = ds.auto !== '0';

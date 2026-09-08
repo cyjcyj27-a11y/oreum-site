@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, viewport-fit=cover">
+<title>보아뱀 — Boa</title>
+<style>
+  @font-face { font-family: 'Griun'; src: url('fonts/Griun_Fromsol-Rg.ttf') format('truetype'); font-display: swap; }
+  @font-face { font-family: 'Ria'; src: url('fonts/RiaSans-ExtraBold.woff2') format('woff2'); font-display: swap; }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #efe3c4; font-family: 'Griun', 'Noto Sans KR', 'Malgun Gothic', sans-serif; color: #f2ede4; user-select: none; }
+  #c { display: block; width: 100vw; height: 100vh; touch-action: none; }
+
+  /* 상단 바 — 오름 알약(왼쪽 위) 오른쪽부터 */
+  #topbar { position: fixed; left: 0; right: 0; top: 0; height: calc(46px + env(safe-area-inset-top)); padding: env(safe-area-inset-top) calc(10px + env(safe-area-inset-right)) 0 calc(104px + env(safe-area-inset-left)); display: flex; align-items: center; gap: 8px; pointer-events: none; z-index: 5; background: linear-gradient(rgba(0,0,0,.28), rgba(0,0,0,0)); }
+  .stat { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 999px; background: rgba(0,0,0,.42); border: 1px solid rgba(255,255,255,.14); font-size: 15px; white-space: nowrap; text-shadow: 0 1px 2px rgba(0,0,0,.6); }
+  .stat b { font-weight: normal; font-size: 19px; min-width: 14px; text-align: center; font-family: 'Ria', Arial, sans-serif; }
+  .stat .ic { font-size: 15px; }
+  .stat.hot { background: rgba(190,40,30,.6); }
+  #stg { font-family: Arial, sans-serif; font-weight: 700; font-size: 13px; letter-spacing: 1px; }
+  #stg .nm { font-family: 'Griun', sans-serif; font-weight: normal; font-size: 15px; letter-spacing: 0; }
+  #tm { display: none; } #tm.show { display: inline-flex; }
+  .spacer { flex: 1; }
+  .tog { pointer-events: auto; width: 36px; height: 36px; border-radius: 50%; border: 1px solid rgba(255,255,255,.3); background: rgba(0,0,0,.4); color: #fff; font-family: inherit; font-size: 17px; line-height: 1; padding: 0; touch-action: manipulation; }
+  .tog.off { opacity: .4; text-decoration: line-through; }
+  @media (max-width: 700px) {
+    #topbar { padding-left: calc(96px + env(safe-area-inset-left)); padding-right: 6px; gap: 4px; }
+    .stat { padding: 4px 8px; font-size: 12px; gap: 3px; } .stat b { font-size: 16px; min-width: 10px; } .stat .ic { font-size: 13px; }
+    #stg { font-size: 11px; } #stg .nm { font-size: 13px; }
+    .tog { width: 30px; height: 30px; font-size: 14px; }
+  }
+  @media (max-width: 420px) { #sc { display: none; } }
+
+  #flash { position: fixed; left: 50%; top: 40%; transform: translate(-50%, -50%) scale(.6); font-family: 'Ria', Arial, sans-serif; font-weight: 900; font-size: min(16vw, 76px); letter-spacing: 6px; color: #ffe066; -webkit-text-stroke: 3px #3a2810; paint-order: stroke fill; text-shadow: 0 6px 24px rgba(0,0,0,.45); opacity: 0; pointer-events: none; z-index: 8; transition: opacity .2s, transform .35s cubic-bezier(.2,1.6,.4,1); }
+  #flash.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  #flash.bad { color: #ff7a6a; }
+
+  #keys { position: fixed; right: 12px; bottom: calc(10px + env(safe-area-inset-bottom)); font-size: 11px; color: #3a2810; opacity: .55; text-align: right; line-height: 1.5; pointer-events: none; z-index: 5; }
+  body.touch #keys { display: none; }
+
+  /* 폰: 왼쪽 아래 이동 패드, 오른쪽 아래 돌진 단추 */
+  #pad { display: none; position: fixed; left: calc(14px + env(safe-area-inset-left)); bottom: calc(60px + env(safe-area-inset-bottom)); width: 186px; height: 186px; border-radius: 50%; background: rgba(0,0,0,.30); border: 2px solid rgba(255,255,255,.35); z-index: 6; touch-action: none; }
+  #knob { position: absolute; left: 50%; top: 50%; width: 72px; height: 72px; margin: -36px 0 0 -36px; border-radius: 50%; background: rgba(255,255,255,.55); border: 2px solid rgba(255,255,255,.8); pointer-events: none; }
+  #btnDash { display: none; position: fixed; right: calc(16px + env(safe-area-inset-right)); bottom: calc(24px + env(safe-area-inset-bottom)); width: 88px; height: 88px; border-radius: 50%; background: rgba(0,0,0,.32); border: 2px solid rgba(255,255,255,.55); color: #fff; font-family: Arial, sans-serif; font-weight: 700; font-size: 13px; letter-spacing: 2px; z-index: 6; touch-action: none; }
+  #btnDash.on { background: rgba(255,224,102,.7); color: #3a2810; }
+  #btnDash.cd { opacity: .45; }
+  body.touch.play #pad, body.touch.play #btnDash { display: block; }
+  @media (max-height: 460px) { #pad { width: 160px; height: 160px; } #knob { width: 62px; height: 62px; margin: -31px 0 0 -31px; } }
+
+  #title, #over, #card { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; text-align: center; }
+  #title { pointer-events: none; }
+  #title h1 { font-family: 'Ria', Arial, sans-serif; font-weight: 900; font-size: min(24vw, 128px); margin: 0 0 6px; line-height: 1; color: #fff; -webkit-text-stroke: 3px #3a2810; paint-order: stroke fill; text-shadow: 0 8px 30px rgba(0,0,0,.35); letter-spacing: 4px; }
+  body.en #title h1 { font-size: min(16vw, 104px); letter-spacing: 3px; }
+  #title .tag { font-family: Arial, sans-serif; font-weight: 700; letter-spacing: 7px; font-size: 15px; color: #3a2810; margin-bottom: 18px; }
+  .rec { font-family: Arial, sans-serif; font-weight: 700; font-size: 14px; letter-spacing: 3px; color: #7a4a10; margin: 0 0 20px; min-height: 18px; }
+  .rec:empty { display: none; }
+  #title .go, #over .again { pointer-events: auto; display: inline-block; padding: 14px 54px; border-radius: 999px; border: 2px solid #fff; background: rgba(58,40,16,.82); color: #fff; font-size: 24px; letter-spacing: 3px; cursor: pointer; box-shadow: 0 6px 20px rgba(0,0,0,.3); touch-action: manipulation; }
+  #title .go:active, #over .again:active { transform: scale(.96); }
+  #title .p2 { pointer-events: auto; margin-top: 14px; padding: 8px 26px; border-radius: 999px; border: 1px solid rgba(58,40,16,.7); background: rgba(58,40,16,.55); color: #fff; font-family: Arial, sans-serif; font-weight: 700; font-size: 14px; letter-spacing: 3px; cursor: pointer; touch-action: manipulation; }
+  #title .p2:empty { display: none; }
+  #title.hide { display: none; }
+  body.shot #topbar, body.shot #keys, body.shot #oreumHome, body.shot #oreumFs, body.shot #btnStart, body.shot #btnCont, body.shot .rec { display: none !important; }
+
+  #card { display: none; pointer-events: none; }
+  #card.show { display: flex; }
+  #card .em { font-size: min(20vw, 96px); line-height: 1; margin-bottom: 8px; filter: drop-shadow(0 6px 14px rgba(0,0,0,.25)); }
+  #card .nm { font-family: 'Ria', Arial, sans-serif; font-weight: 900; font-size: min(14vw, 72px); color: #fff; -webkit-text-stroke: 3px #3a2810; paint-order: stroke fill; letter-spacing: 3px; line-height: 1.1; }
+  #card .no { font-family: Arial, sans-serif; font-weight: 700; font-size: 14px; letter-spacing: 5px; color: #3a2810; margin-top: 10px; }
+
+  #over { display: none; background: rgba(30,18,6,.45); }
+  #over.show { display: flex; }
+  #over h2 { font-family: Arial, sans-serif; font-weight: 900; font-size: min(6vw, 22px); letter-spacing: 6px; margin: 0 0 8px; opacity: .9; }
+  #over .res { font-family: 'Ria', Arial, sans-serif; font-weight: 900; font-size: min(16vw, 88px); line-height: 1; letter-spacing: 6px; -webkit-text-stroke: 3px #3a2810; paint-order: stroke fill; margin-bottom: 10px; }
+  #over .res.win { color: #ffe066; } #over .res.lose { color: #ff7a6a; }
+  #hat { display: none; width: min(70vw, 420px); height: auto; margin: 4px 0 10px; border-radius: 10px; }
+  #hat.show { display: block; }
+  #over .sc { font-family: 'Ria', Arial, sans-serif; font-size: 26px; color: #fff; text-shadow: 0 1px 4px rgba(0,0,0,.6); margin-bottom: 16px; }
+  #over .again { font-family: Arial, sans-serif; letter-spacing: 4px; font-size: 20px; }
+  #over .home { pointer-events: auto; margin-top: 16px; font-family: Arial, sans-serif; font-weight: 700; font-size: 13px; letter-spacing: 3px; opacity: .8; cursor: pointer; padding: 6px 14px; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+
+<div id="topbar">
+  <span class="stat" id="stg"><span class="ic" id="stgIc">🌿</span><span class="nm" id="stgNm">정글</span></span>
+  <span class="stat" id="fd"><span class="ic" id="fdIc">🐸</span><b id="fdN">0</b><span id="fdQ">/8</span></span>
+  <span class="stat" id="tm"><span class="ic">⏱</span><b id="tmN">40</b></span>
+  <span class="stat" id="sc"><span class="ic">⭐</span><b id="scN">0</b></span>
+  <span class="spacer"></span>
+  <button class="tog" id="tgPause" title="P">❚❚</button>
+  <button class="tog" id="tgSnd" title="K">🔊</button>
+</div>
+
+<div id="flash">GULP</div>
+<div id="keys" data-en="↑↓←→ move · SPACE dash · P pause · K sound">↑↓←→ 이동 · 스페이스 돌진 · P 일시정지 · K 효과음</div>
+
+<div id="pad"><div id="knob"></div></div>
+<button id="btnDash">DASH</button>
+
+<div id="card"><div class="em" id="cardEm">🌿</div><div class="nm" id="cardNm">정글</div><div class="no" id="cardNo">STAGE 1</div></div>
+
+<div id="over">
+  <h2 id="oh">STAGE 1</h2>
+  <div class="res win" id="ores">CLEAR</div>
+  <canvas id="hat" width="640" height="360"></canvas>
+  <div class="sc" id="osc">⭐ 0</div>
+  <div class="again" id="btnRetry">NEXT</div>
+  <div class="home" id="btnHome">TITLE</div>
+</div>
+
+<div id="title">
+  <h1 data-en="BOA">보아뱀</h1>
+  <div class="tag">B-612</div>
+  <div class="rec" id="rec"></div>
+  <div class="go" id="btnStart" data-en="START">시작</div>
+  <div class="p2" id="btnCont"></div>
+</div>
+
+<script src="assets/game-home.js" data-top="6" data-left="6" data-fullscreen="1" defer></script>
+<script src="js/audio.js?v=1"></script>
+<script src="js/game.js?v=9"></script>
+<script src="/assets/visit.js?v=11" defer></script>
+<script src="/assets/game-events.js?v=2" defer></script>
+</body>
+</html>
