@@ -742,8 +742,7 @@
     let score = fame * 0.72 + skill * 0.42;
     score = clamp(score, 0, 125);
     const R = D.RANKS.find(r => score >= r.min);
-    if (!seen) {   // 등급 영상 먼저(2026-09-08 사장님): 음악방송 1위 = 트로피, 홍대 골목 스타 = 버스킹
-      if (score >= 80) { A.sfx.cheer(); return playVideo('assets/win.mp4', () => release(cid, true), '#1'); }
+    if (!seen) {   // 등급 영상(2026-09-08 사장님): 홍대 골목 스타 = 버스킹 컷. 1위 트로피 영상은 따로 틀지 않고 엔딩 뮤비 앞에 붙였다(mv_win.mp4)
       if (R.min === 25) return playVideo('assets/busking.mp4', () => release(cid, true), 'LIVE');
     }
 
@@ -757,7 +756,8 @@
     const win = score >= 45;   // 라이브클럽 매진부터 뮤비, 원곡. 아래면 어두운 놀이터에 넷이 가만히
     buildStage($('resultStage'), a, { confetti: score >= 80, stick: c.stick, sign: win ? S.name : '', dim: !win, still: !win, noCrowd: !win });
     $('scene-result').classList.toggle('has-mv', win); $('scene-result').querySelectorAll('.mvcol').forEach(e => e.remove());
-    if (win) { $('scene-result').insertAdjacentHTML('beforeend', `<div class="mvcol"><video class="mv" src="assets/mv.mp4" autoplay muted loop playsinline></video></div>`); A.ending(); }   // 뮤비는 오른쪽 세로 기둥에 크게(사장님, 2026-09-08)
+    if (win) { if (score >= 80) A.sfx.cheer(); const mv = score >= 80 ? 'assets/mv_win.mp4' : 'assets/mv.mp4';   // 1위면 트로피 영상(소리 없음)+뮤비 합본
+      $('scene-result').insertAdjacentHTML('beforeend', `<div class="mvcol"><video class="mv" src="${mv}" autoplay muted loop playsinline></video></div>`); A.ending(); }   // 뮤비는 오른쪽 세로 기둥에 크게(사장님, 2026-09-08)
     else A.quiet();
     $('rsRank').textContent = L(R.rank); $('rsRank').classList.toggle('big', !!R.big);
     $('rsScore').innerHTML = `<span>${c.ico} ${L(c.n)}</span><span class="num">SCORE ${score.toFixed(1)}</span><span class="num">🔥 ${Math.round(fame)}</span><span class="num">🎵 ${Math.round(skill)}</span><span class="num">🤝 ${Math.round(S.team)}</span>`;
