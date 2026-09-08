@@ -171,7 +171,8 @@
               'pv_fingerkick', 'pv_fingerkick_en', 'pv_skyrider', 'pv_skyrider_en',
               'pv_shibavet', 'pv_shibavet_en', 'pv_castaway', 'pv_castaway_en', 'pv_alkkagi', 'pv_alkkagi_en',   // 시바(2026-09-06)·망망대해(2026-09-07) 소개 페이지
               'pv_coinwash', 'pv_coinwash_en', 'pv_boyband', 'pv_boyband_en',   // 코인빨래방·제발 데뷔해줘(2026-09-08) 소개 페이지
-              'pv_boa', 'pv_boa_en'];   // 보아뱀(2026-09-09) 소개 페이지
+              'pv_boa', 'pv_boa_en',   // 보아뱀(2026-09-09) 소개 페이지
+              'pv_catmobile', 'pv_catmobile_en'];   // 고양이용 게임(2026-09-09) 소개 페이지
   // 한꺼번에 많이 부르면 속도 제한에 걸리므로 나눠 부르고 사이에 잠깐 쉽니다.
   // 3개씩 260ms로는 화면이 뜨기까지 30초가 걸려서 멈춘 것처럼 보였습니다.
   // 막히면 위 get()이 알아서 쉬었다 다시 부르므로, 여기서는 조금 넉넉하게 갑니다.
@@ -241,7 +242,7 @@
     var pvIntro = d.pv_intro + d.pv_intro_en + d.pv_games + d.pv_games_en + d.pv_mini + d.pv_mini_en
                 + d.pv_fingerkick + d.pv_fingerkick_en + d.pv_skyrider + d.pv_skyrider_en
                 + d.pv_shibavet + d.pv_shibavet_en + d.pv_castaway + d.pv_castaway_en + d.pv_alkkagi + d.pv_alkkagi_en
-                + d.pv_coinwash + d.pv_coinwash_en + d.pv_boyband + d.pv_boyband_en + d.pv_boa + d.pv_boa_en;
+                + d.pv_coinwash + d.pv_coinwash_en + d.pv_boyband + d.pv_boyband_en + d.pv_boa + d.pv_boa_en + d.pv_catmobile + d.pv_catmobile_en;
     var pvAll = pvHome + pvBoard + pvGame + pvSaju + pvImmo + pvIntro;
     document.getElementById('pv-total').innerHTML = fmt(pvAll) + '<small>회</small>';
     document.getElementById('pv-note').textContent = pvAll === 0
@@ -273,7 +274,7 @@
     // 게임 소개 세부 — 자기 칸이 있는 것만 (나머지 게임은 pv_intro 에 합쳐진다)
     var introDefs = [['핑거킥', d.pv_fingerkick + d.pv_fingerkick_en], ['스카이라이더', d.pv_skyrider + d.pv_skyrider_en],
                      ['시바 병원', d.pv_shibavet + d.pv_shibavet_en], ['망망대해', d.pv_castaway + d.pv_castaway_en], ['알까기', d.pv_alkkagi + d.pv_alkkagi_en],
-                     ['코인빨래방', d.pv_coinwash + d.pv_coinwash_en], ['제발 데뷔해줘', d.pv_boyband + d.pv_boyband_en], ['보아뱀', d.pv_boa + d.pv_boa_en],
+                     ['코인빨래방', d.pv_coinwash + d.pv_coinwash_en], ['제발 데뷔해줘', d.pv_boyband + d.pv_boyband_en], ['보아뱀', d.pv_boa + d.pv_boa_en], ['고양이용 게임', d.pv_catmobile + d.pv_catmobile_en],
                      ['게임 목록', d.pv_games + d.pv_games_en], ['미니게임 목록', d.pv_mini + d.pv_mini_en], ['그 밖의 소개', d.pv_intro + d.pv_intro_en]];
     var introShown = introDefs.filter(function (s) { return s[1] > 0; }).sort(function (a, b) { return b[1] - a[1]; });
     if (introShown.length) document.getElementById('pv-pages').innerHTML +=

@@ -18,6 +18,7 @@ import io, os, re, sys
 
 # slug, 한국어 경로, 영어 경로, 한국어 이름, 한국어 장르 앵커, 영어 이름, 영어 장르 앵커, 태그
 GAMES = [
+    ("catmobile",     "/games/flash/catmobile/",     "/en/games/flash/catmobile/",     "고양이용 게임",     "고양이·아기 터치게임",       "GAME FOR CAT",             "tap game for cats and toddlers", {"casual", "animal", "kids"}),
     ("boa",           "/games/flash/boa/",           "/en/games/flash/boa/",           "보아뱀",          "코끼리 삼키는 뱀게임",        "BOA",                      "elephant-swallowing snake game", {"arcade", "casual", "animal"}),
     ("coinwash",      "/games/coinwash/",           "/en/games/coinwash/",           "코인빨래방",       "빨래방 방치형 경영게임",     "COIN LAUNDRY 24",          "idle laundromat game",          {"sim", "tycoon", "idle"}),
     ("boyband",       "/games/boyband/",            "/en/games/boyband/",            "제발 데뷔해줘",     "인디밴드 육성 시뮬레이션게임",        "HOTSHOT INDIE",            "indie band manager sim",        {"sim", "story"}),
