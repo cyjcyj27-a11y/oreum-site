@@ -113,6 +113,14 @@
   body.touch.portrait #rotate{display:grid}
   #rotate button{margin:22px 0 16px;padding:15px 32px;border:0;border-radius:99px;cursor:pointer;font-family:inherit;font-size:17px;font-weight:800;color:#2a1c08;background:#ffd24a}
   #rotate .sub{font-size:14px;color:#b8ae9c;line-height:1.7} #rotate .sub a{color:#d8cfbc}
+  /* 폰 가로 안전 여백 — 카메라 구멍 옆으로 게임 화면을 들여놓는다(--pad 는 fitZoom 이 준다) */
+  html.zm body{padding-left:calc(18px + var(--pad,0px));padding-right:calc(18px + var(--pad,0px))}
+  html.zm #topbar{left:var(--pad,0px);width:calc(var(--vwz,100vw) - 2*var(--pad,0px))}
+  html.zm #oreumHome{left:calc(6px + var(--pad,0px) + env(safe-area-inset-left)) !important}
+  html.zm #oreumFs{left:calc(6px + var(--pad,0px) + env(safe-area-inset-left)) !important}
+  html.zm #scene-title{padding-left:calc(14px + var(--pad,0px));padding-right:calc(14px + var(--pad,0px))}
+  html.zm .cut-box,html.zm #cutin.right .cut-box,html.zm .cut-narr,html.zm #cutin.right .cut-narr,html.zm .cut-choices,html.zm #cutin.right .cut-choices{left:calc(3% + var(--pad,0px));right:calc(3% + var(--pad,0px))}
+  html.zm #vidov .onair{left:calc(24px + var(--pad,0px))}
   #scene-title{position:relative}
   #scene-title{position:fixed;left:0;top:0;width:var(--vwz,100vw);height:var(--vhz,100vh);display:flex;flex-direction:column;padding:54px 14px 14px;box-sizing:border-box}
   #scene-title .stage{flex:1;height:auto;min-height:0}
@@ -426,11 +434,11 @@
     <p class="sub"><span data-en="If the button does nothing, turn off your phone's rotation lock and lay it sideways">단추가 안 먹으면 폰의 화면 회전 잠금을 풀고 눕혀 주세요</span></p>
   </div>
 </div>
-<script src="assets/landscape.js?v=787200"></script>
-<script src="js/data.js?v=787200"></script>
-<script src="js/story.js?v=787200"></script>
-<script src="js/audio.js?v=787200"></script>
-<script src="js/game.js?v=787200"></script>
+<script src="assets/landscape.js?v=787300"></script>
+<script src="js/data.js?v=787300"></script>
+<script src="js/story.js?v=787300"></script>
+<script src="js/audio.js?v=787300"></script>
+<script src="js/game.js?v=787300"></script>
 <script src="/assets/visit.js?v=11" defer></script>
 </body>
 </html>

@@ -23,12 +23,15 @@
   function fitZoom() {
     const w = window.innerWidth, h = window.innerHeight;
     const land = w > h;   // 폰 가로도 데스크톱 판을 줄여서 쓴다(사장님, 2026-09-08 "모바일 가로화면에 맞춰")
-    let z = (w >= 1000 || land) ? Math.max(.22, Math.min(w / 2000, h / 1200)) : 1;
+    const pad = land && (isTouch || h < 520) ? 72 : 0;   // 폰 가로: 카메라 구멍·모서리 피해 양옆을 비운다(사장님, 2026-09-08)
+    let z = (w >= 1000 || land) ? Math.max(.22, Math.min((w - pad * 2) / 2000, h / 1200)) : 1;
     const root = document.documentElement.style;
+    root.setProperty('--pad', (pad / (z || 1)) + 'px');
     if (z !== 1) {   // 내용이 세로로 넘치면 더 줄여서 한 화면에 다 넣는다(사장님, 2026-09-08 "화면에 다 들어가게")
       root.zoom = String(z);
       const need = Math.max(document.body.scrollHeight, 1200);
       if (need * z > h) z = Math.max(.22, h / need);
+      root.setProperty('--pad', (pad / z) + 'px');
     }
     root.zoom = z === 1 ? '' : String(z);
     document.documentElement.classList.toggle('zm', z !== 1);   // 줄인 상태에선 폰용 미디어쿼리를 끈다
