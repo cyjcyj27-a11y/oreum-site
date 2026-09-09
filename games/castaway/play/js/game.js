@@ -185,9 +185,9 @@
   let DEX = {}; try { DEX = JSON.parse(localStorage.getItem('castaway.dex') || '{}') || {}; } catch (e) { }
   let dexOpen = false;
   const dexCount = () => F.SPECIES.filter(sp => DEX[sp.id]).length;
-  function syncStage() {   // tier 1 순서: 자리돔·각재기 → 고등어·정어리 → 나머지. 거대 참다랑어는 나머지 29종을 다 잡은 뒤
+  function syncStage() {   // tier 1 순서: 멸치 → 자리돔 → 각재기 → 정어리 → 고등어 → 나머지. 거대 참다랑어는 나머지 29종을 다 잡은 뒤
     const has = id => !!DEX[id];
-    F.stage = (has('damsel') && has('scad')) ? ((has('mackerel') && has('sardine')) ? 2 : 1) : 0;
+    const chain = ['anchovy', 'damsel', 'scad', 'sardine', 'mackerel']; let st = 0; while (st < chain.length && has(chain[st])) st++; F.stage = st;   // 멸치→자리돔→각재기→정어리→고등어 차례로 열린다
     F.giantOK = F.SPECIES.every(sp => sp.tier === 4 || has(sp.id));
   }
   syncStage();

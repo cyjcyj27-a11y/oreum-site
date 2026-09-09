@@ -1,20 +1,20 @@
 /* fish.js — 물고기 종류·모양·헤엄·행동. 몸통은 회전체, 지느러미 판을 한 덩어리로 합쳐 셰이더로 구부린다 */
 (function () {
   // tier 1 발밑에서 빈바늘에도 무는 고기 · 2 미끼를 걸어야 오는 고기 · 3 미끼 걸고 멀리 던져야 오는 대물 · 4 거대 참다랑어 — 다른 29종을 다 잡은 뒤에만 나타나고, 잡으면 엔딩(사장님, 2026-09-09)
-  // stage(tier 1): 0 자리돔·각재기부터 → 1 고등어·정어리 → 2 나머지(사장님, 2026-09-09 "맨처음 잡히는건 자리돔 각재기 그다음 고등어 정어리")
+  // stage(tier 1): 0 멸치 → 1 자리돔 → 2 각재기 → 3 정어리 → 4 고등어 → 5 나머지. 앞 것을 잡아야 다음이 나온다(사장님, 2026-09-09 "제일 먼저 발밑에서 잡히는 고기는 멸치, 그다음 자리돔 각재기 정어리 고등어 순")
   // len 은 cm, pull 은 당기는 힘(0~1), sta 는 체력(초), food 는 배부름, cut 은 미끼로 쓸 때 토막 수(자리돔 2토막부터 크기대로 늘어난다 — 사장님 2026-09-09), wt 는 나타날 확률 가중치, night 는 밤에만, dusk 는 밤에 잘 옴
   const SPECIES = [
-    { id: 'damsel', ko: '자리돔', en: 'Damselfish', tier: 1, stage: 0, len: [10, 18], top: 0x3a3a48, belly: 0xb8b0c0, h: 1.5, w: 0.6, tail: 0.8, dorsal: 0.9, pull: 0.15, sta: 2, speed: 1.3, food: 10, cut: 3, wt: 3 },
-    { id: 'scad', ko: '각재기', en: 'Horse Mackerel', tier: 1, stage: 0, len: [22, 38], top: 0x3a6a62, belly: 0xd6e4e6, h: 1.0, w: 0.7, tail: 1.0, dorsal: 0.5, pull: 0.28, sta: 3, speed: 1.9, food: 22, cut: 5, wt: 2.5 },
-    { id: 'mackerel', ko: '고등어', en: 'Mackerel', tier: 1, stage: 1, len: [30, 46], top: 0x1c5a78, belly: 0xcfe0e8, stripe: 1, h: 1.0, w: 0.75, tail: 1.1, dorsal: 0.45, pull: 0.34, sta: 4, speed: 2.1, food: 30, cut: 6, wt: 2 },
-    { id: 'sardine', ko: '정어리', en: 'Sardine', tier: 1, stage: 1, len: [18, 28], top: 0x2a4f6e, belly: 0xd8e6ee, h: 1.05, w: 0.7, tail: 0.9, dorsal: 0.5, pull: 0.22, sta: 2.5, speed: 1.6, food: 18, cut: 4, wt: 3 },
-    { id: 'anchovy', ko: '멸치', en: 'Anchovy', tier: 1, stage: 2, len: [8, 14], top: 0x3a5a78, belly: 0xe0eaf0, h: 0.9, w: 0.55, tail: 0.8, dorsal: 0.4, pull: 0.12, sta: 1.5, speed: 1.5, food: 6, cut: 2, wt: 2 },
-    { id: 'gizzard', ko: '전어', en: 'Gizzard Shad', tier: 1, stage: 2, len: [18, 26], top: 0x2f4f5f, belly: 0xdde8ea, h: 1.3, w: 0.6, tail: 0.9, dorsal: 0.5, pull: 0.2, sta: 2.5, speed: 1.6, food: 16, cut: 4, wt: 2 },
-    { id: 'rockfish', ko: '볼락', en: 'Rockfish', tier: 1, stage: 2, len: [18, 30], top: 0x5a3428, belly: 0xd8b8a0, h: 1.5, w: 0.8, tail: 0.8, dorsal: 1.1, pull: 0.3, sta: 3.5, speed: 1.3, food: 20, cut: 4, wt: 1.2, dusk: 1 },
-    { id: 'filefish', ko: '쥐치', en: 'Filefish', tier: 1, stage: 2, len: [15, 25], top: 0x8a7a4a, belly: 0xd8ccaa, h: 1.7, w: 0.45, tail: 0.7, dorsal: 1.4, pull: 0.22, sta: 3, speed: 1.0, food: 14, cut: 3, wt: 1.2 },
-    { id: 'halfbeak', ko: '학공치', en: 'Halfbeak', tier: 1, stage: 2, len: [25, 40], top: 0x5a7a8a, belly: 0xe4ecee, h: 0.7, w: 0.5, tail: 0.9, dorsal: 0.3, bill: 1, pull: 0.24, sta: 3, speed: 2.2, food: 18, cut: 5, wt: 1.2 },
-    { id: 'puffer', ko: '복어', en: 'Pufferfish', tier: 1, stage: 2, len: [20, 35], top: 0x6a6a5a, belly: 0xf0f0e0, h: 1.5, w: 1.4, tail: 0.6, dorsal: 0.3, blunt: 1, pull: 0.2, sta: 3, speed: 0.8, food: 12, cut: 4, wt: 1 },
-    { id: 'cutlass', ko: '갈치', en: 'Cutlassfish', tier: 1, stage: 2, len: [70, 120], top: 0xaab8c4, belly: 0xe2eaee, h: 1.4, w: 0.25, tail: 0.25, dorsal: 0.8, pull: 0.36, sta: 5, speed: 1.8, food: 35, cut: 13, wt: 2, night: 1 },
+    { id: 'anchovy', ko: '멸치', en: 'Anchovy', tier: 1, stage: 0, len: [8, 14], top: 0x3a5a78, belly: 0xe0eaf0, h: 0.9, w: 0.55, tail: 0.8, dorsal: 0.4, pull: 0.12, sta: 1.5, speed: 1.5, food: 6, cut: 2, wt: 2 },
+    { id: 'damsel', ko: '자리돔', en: 'Damselfish', tier: 1, stage: 1, len: [10, 18], top: 0x3a3a48, belly: 0xb8b0c0, h: 1.5, w: 0.6, tail: 0.8, dorsal: 0.9, pull: 0.15, sta: 2, speed: 1.3, food: 10, cut: 3, wt: 3 },
+    { id: 'scad', ko: '각재기', en: 'Horse Mackerel', tier: 1, stage: 2, len: [22, 38], top: 0x3a6a62, belly: 0xd6e4e6, h: 1.0, w: 0.7, tail: 1.0, dorsal: 0.5, pull: 0.28, sta: 3, speed: 1.9, food: 22, cut: 5, wt: 2.5 },
+    { id: 'sardine', ko: '정어리', en: 'Sardine', tier: 1, stage: 3, len: [18, 28], top: 0x2a4f6e, belly: 0xd8e6ee, h: 1.05, w: 0.7, tail: 0.9, dorsal: 0.5, pull: 0.22, sta: 2.5, speed: 1.6, food: 18, cut: 4, wt: 3 },
+    { id: 'mackerel', ko: '고등어', en: 'Mackerel', tier: 1, stage: 4, len: [30, 46], top: 0x1c5a78, belly: 0xcfe0e8, stripe: 1, h: 1.0, w: 0.75, tail: 1.1, dorsal: 0.45, pull: 0.34, sta: 4, speed: 2.1, food: 30, cut: 6, wt: 2 },
+    { id: 'gizzard', ko: '전어', en: 'Gizzard Shad', tier: 1, stage: 5, len: [18, 26], top: 0x2f4f5f, belly: 0xdde8ea, h: 1.3, w: 0.6, tail: 0.9, dorsal: 0.5, pull: 0.2, sta: 2.5, speed: 1.6, food: 16, cut: 4, wt: 2 },
+    { id: 'rockfish', ko: '볼락', en: 'Rockfish', tier: 1, stage: 5, len: [18, 30], top: 0x5a3428, belly: 0xd8b8a0, h: 1.5, w: 0.8, tail: 0.8, dorsal: 1.1, pull: 0.3, sta: 3.5, speed: 1.3, food: 20, cut: 4, wt: 1.2, dusk: 1 },
+    { id: 'filefish', ko: '쥐치', en: 'Filefish', tier: 1, stage: 5, len: [15, 25], top: 0x8a7a4a, belly: 0xd8ccaa, h: 1.7, w: 0.45, tail: 0.7, dorsal: 1.4, pull: 0.22, sta: 3, speed: 1.0, food: 14, cut: 3, wt: 1.2 },
+    { id: 'halfbeak', ko: '학공치', en: 'Halfbeak', tier: 1, stage: 5, len: [25, 40], top: 0x5a7a8a, belly: 0xe4ecee, h: 0.7, w: 0.5, tail: 0.9, dorsal: 0.3, bill: 1, pull: 0.24, sta: 3, speed: 2.2, food: 18, cut: 5, wt: 1.2 },
+    { id: 'puffer', ko: '복어', en: 'Pufferfish', tier: 1, stage: 5, len: [20, 35], top: 0x6a6a5a, belly: 0xf0f0e0, h: 1.5, w: 1.4, tail: 0.6, dorsal: 0.3, blunt: 1, pull: 0.2, sta: 3, speed: 0.8, food: 12, cut: 4, wt: 1 },
+    { id: 'cutlass', ko: '갈치', en: 'Cutlassfish', tier: 1, stage: 5, len: [70, 120], top: 0xaab8c4, belly: 0xe2eaee, h: 1.4, w: 0.25, tail: 0.25, dorsal: 0.8, pull: 0.36, sta: 5, speed: 1.8, food: 35, cut: 13, wt: 2, night: 1 },
     { id: 'bream', ko: '감성돔', en: 'Black Seabream', tier: 2, len: [30, 55], top: 0x2a2c32, belly: 0x9aa4aa, h: 1.6, w: 0.7, tail: 1.0, dorsal: 1.0, pull: 0.5, sta: 8, speed: 1.6, food: 50, cut: 6, wt: 1.5 },
     { id: 'beakfish', ko: '돌돔', en: 'Striped Beakfish', tier: 2, len: [30, 60], top: 0xc4c8cc, belly: 0xe4e6e8, stripe: 1, h: 1.6, w: 0.7, tail: 0.95, dorsal: 1.1, pull: 0.6, sta: 10, speed: 1.5, food: 55, cut: 7, wt: 1 },
     { id: 'opaleye', ko: '벵에돔', en: 'Opaleye', tier: 2, len: [30, 50], top: 0x2a3a3a, belly: 0x8a9a9a, h: 1.6, w: 0.7, tail: 1.0, dorsal: 1.0, pull: 0.5, sta: 8, speed: 1.6, food: 48, cut: 6, wt: 1.3 },
@@ -171,7 +171,7 @@
         f.tgt.copy(f.pos); grp.position.copy(f.pos); scene.add(grp); fishes.push(f); return f;
       },
       depthFor(sp) { return sp.tier === 1 ? 0.3 + Math.random() * 0.9 : sp.tier === 2 ? 0.5 + Math.random() * 1.6 : sp.tier === 4 ? 2.0 + Math.random() * 1.0 : 0.55 + Math.random() * 0.9; },
-      schoolSp() { return F.stage === 0 ? 'damsel' : 'sardine'; },   // 무리 지어 다니는 기본 고기: 처음엔 자리돔, 그 뒤엔 정어리
+      schoolSp() { return F.stage === 0 ? 'anchovy' : F.stage < 3 ? 'damsel' : 'sardine'; },   // 무리 지어 다니는 기본 고기: 멸치 → 자리돔 → 정어리
       remove(f) { f.alive = false; scene.remove(f.grp); f.mat.dispose(); const i = fishes.indexOf(f); if (i >= 0) fishes.splice(i, 1); if (F.active === f) F.active = null; },
       count(tier) { let n = 0; for (const f of fishes) if (f.sp.tier === tier && f.state !== 'caught') n++; return n; },
       // 뗏목 근처를 어슬렁대는 기본 무리
