@@ -57,11 +57,11 @@
 
   // ── 수치 ──
   const cnt = t => S.city.filter(b => b.type === t && b.done).length;
-  const GROW = () => 20;   // 한 판 익는 데 20초 고정(사장님 2026-09-09 최종: "20초로 동일하게 하고 수확량만 단계적으로 올리자"). 태양광·연구소는 속도 대신 수확량을 올린다
+  const GROW = () => 50;   // 한 판 익는 데 50초 고정(사장님 2026-09-09 최종). 태양광·연구소는 속도 대신 수확량을 올린다
   const YLD = () => Math.round(YIELD[S.up.seed] * (1 + .25 * S.up.solar) * (1 + .05 * cnt('lab')) * (1 + .05 * cnt('park')) * (1 + .15 * S.up.yield));   // 수확량: 씨앗 × 태양광(+25%/단계) × 연구소(+5%/채) × 공원(+5%/채) × 수확량 강화(+15%/단계)
   const CAP = () => Math.round(60 * Math.pow(1.5, S.up.cargo));   // 화물칸: 작물로 사서 끝없이 넓힌다(60→90→135→…)
   const RATE = () => 1 + .1 * cnt('hab') + .2 * cnt('sky');
-  const TRIP = () => Math.max(4, 10 * Math.pow(.9, cnt('port')) * Math.pow(.85, S.up.dish));   // 로켓 왕복 10초(사장님: 45초는 너무 길다)
+  const TRIP = () => Math.max(6, 15 * Math.pow(.9, cnt('port')) * Math.pow(.85, S.up.dish));   // 로켓 왕복 15초(사장님 2026-09-09 최종), 교통·안테나로 최소 6초
   const WCAP = () => 40 + 150 * S.up.res + 1000 * S.up.dam;
   const REGEN = () => .08 + .12 * S.up.drill * (1 + .25 * S.up.res) + .6 * S.up.dam;
   const SPEED = () => 70 + 35 * S.up.wheels;
@@ -294,7 +294,7 @@
     G.anim += dt; if (G.place !== 'play') { draw(); return; }
     advance(dt);
     const growing = S.plots.filter(p => !p.ripe).length;
-    S.water = clamp(S.water + (REGEN() - .1 * growing * (G.storm > 0 ? 0 : 1)) * dt, 0, WCAP());
+    S.water = clamp(S.water + (REGEN() - .04 * growing * (G.storm > 0 ? 0 : 1)) * dt, 0, WCAP());   // 물: 자라는 판당 초당 0.04(50초 기준, 한 판 키우는 물은 20초 때와 같게)
     const gmul = (G.storm > 0 ? 0 : 1) * (S.water <= 0 ? .3 : 1);
     S.plots.forEach(p => { if (!p.ripe) { p.t += dt / GROW() * gmul * (p.dust ? .5 : 1); if (p.t >= 1) { p.t = 1; p.ripe = true; } } });
     if (R.state === 'pad' && S.up.auto && S.crop >= CAP()) launch();
