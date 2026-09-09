@@ -1,0 +1,21 @@
+# Cloudflare Pages 캐시 규칙 (깃허브 페이지스에서는 그냥 무시되는 파일)
+# 원칙: 글·게임 코드는 늘 새로 받고, 무거운 소재(3D·음악·그림·글꼴)만 오래 저장한다.
+
+/*
+  Cache-Control: public, max-age=0, must-revalidate
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+
+# 사이트 공용 파일 — 주소 뒤 ?v= 를 올려서 바꾼다
+/assets/*
+  Cache-Control: public, max-age=604800
+
+# 게임 실행 화면의 소재 — 3D 모델·음악·질감·글꼴. 파일 이름이 바뀌지 않으면 그대로 쓴다
+/games/:game/play/assets/*
+  Cache-Control: public, max-age=2592000
+/games/:game/play/fonts/*
+  Cache-Control: public, max-age=2592000
+/games/:cat/:game/play/assets/*
+  Cache-Control: public, max-age=2592000
+/games/:cat/:game/play/fonts/*
+  Cache-Control: public, max-age=2592000
