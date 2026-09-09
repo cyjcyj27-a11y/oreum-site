@@ -98,7 +98,7 @@
     W.setBait(G.bait); W.setRack(invAll());
     start();
   }
-  $('title').querySelector('.go.cont').classList.toggle('show', !!loadProg());
+  $('title').querySelector('.go.cont').classList.toggle('off', !loadProg());   // 저장이 없으면 흐리게(눌러도 아무 일 없음)
   addEventListener('pagehide', saveProg); document.addEventListener('visibilitychange', () => { if (document.hidden) saveProg(); });
   const busy = () => G.state !== 'play' || G.eatT > 0 || dexOpen;
   function actDown() {

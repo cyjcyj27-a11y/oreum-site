@@ -67,7 +67,8 @@
   #title .brand { display: flex; align-items: center; gap: 8px; padding: 6px 14px 6px 8px; border-radius: 999px; background: rgba(255,253,247,.92); color: #2e6b39; font-size: 14px; letter-spacing: 1px; }
   #title .brand img { width: 30px; height: 15px; }
   #title .goRow { position: absolute; left: 0; right: 0; bottom: 12vh; display: flex; justify-content: center; gap: 18px; }   /* 이어하기 + 시작 (2026-09-09) */
-  #title .go.cont { display: none; animation: none; } #title .go.cont.show { display: block; }
+  /* 이어하기는 늘 보이고, 저장이 없으면 흐리게 (사장님 2026-09-10 "이어하기 새로시작하기 두 개 넣어") */
+  #title .go.cont { animation: none; } #title .go.cont.off { opacity: .35; box-shadow: none; cursor: default; }
   #title .go { margin: 0; font-family: 'Ria', sans-serif; font-size: 30px; letter-spacing: 8px; text-indent: 8px; padding: 12px 46px 14px; border-radius: 20px; background: rgba(10,30,44,.72); border: 1px solid rgba(255,255,255,.16); box-shadow: 0 8px 26px rgba(0,0,0,.35); animation: blink 2.4s infinite; cursor: pointer; }
   #title .best { position: absolute; left: 50%; transform: translateX(-50%); bottom: calc(12vh + 84px); font-size: 16px; opacity: .85; text-shadow: 0 1px 3px rgba(0,0,0,.6); letter-spacing: 1px; }
 
@@ -138,7 +139,7 @@
   <h1 data-en="OPEN SEA">망망대해</h1>
   <div class="tag" data-en="CASTAWAY FISHING">CASTAWAY</div>
   <div class="best" id="titleBest"></div>
-  <div class="goRow"><div class="go cont" data-en="CONTINUE">이어하기</div><div class="go start" data-en="START">시작</div></div>
+  <div class="goRow"><div class="go cont" data-en="CONTINUE">이어하기</div><div class="go start" data-en="NEW GAME">새로 시작</div></div>
   <div class="dexT" id="titleDex">🐟</div>
 </div>
 
@@ -158,14 +159,14 @@
 </div>
 
 <script src="assets/game-home.js" data-top="6" data-left="6" data-fullscreen="1" defer></script>
-<script src="assets/landscape.js?v=53"></script>
+<script src="assets/landscape.js?v=54"></script>
 <script src="lib/three.min.js"></script>
 <script src="lib/GLTFLoader.global.js"></script>
-<script src="js/sea.js?v=53"></script>
-<script src="js/fish.js?v=53"></script>
-<script src="js/world.js?v=53"></script>
-<script src="js/audio.js?v=53"></script>
-<script src="js/game.js?v=53"></script>
+<script src="js/sea.js?v=54"></script>
+<script src="js/fish.js?v=54"></script>
+<script src="js/world.js?v=54"></script>
+<script src="js/audio.js?v=54"></script>
+<script src="js/game.js?v=54"></script>
 <script src="/assets/visit.js?v=11" defer></script>
 <script src="/assets/game-events.js?v=1" defer></script>
 </body>
