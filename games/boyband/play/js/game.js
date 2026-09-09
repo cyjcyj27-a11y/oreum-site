@@ -45,6 +45,19 @@
   const S = { applicants: [], picked: [], members: [], leaderId: null, name: '',
     week: 1, maxWeek: 12, money: 1500, team: 30, hype: 10, log: [], usedEvents: [], epDone: [], songBuff: 0, concept: null, tasted: false };
 
+  /* ══════ 저장 · 이어하기 — 매주 시작 때 저장, 데뷔 결과·GAME OVER 에서 지운다(사장님, 2026-09-09 "이어하기 버튼이 없어") ══════ */
+  const SAVE_KEY = 'boyband.prog', SAVE_S = ['week', 'money', 'team', 'hype', 'usedEvents', 'epDone', 'songBuff', 'tasted', 'name', 'leaderId'];
+  const NOSAVE = ['trait', 'sig'];   // 멤버에서 다시 만들 수 있는 것(D.NAMED 에서 온다)
+  function save() {
+    try {
+      const o = { v: 1, log: S.log.slice(0, 40), members: S.members.map(m => { const d = {}; for (const k in m) if (!NOSAVE.includes(k) && typeof m[k] !== 'function') d[k] = m[k]; return d; }) };
+      SAVE_S.forEach(k => o[k] = S[k]);
+      localStorage.setItem(SAVE_KEY, JSON.stringify(o));
+    } catch (e) { }
+  }
+  function clearSave() { try { localStorage.removeItem(SAVE_KEY); } catch (e) { } }
+  function loadSave() { try { const o = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); return o && o.v === 1 && o.members && o.members.length && o.members.every(d => D.NAMED.some(c => c.key === d.key)) ? o : null; } catch (e) { return null; } }
+
   /* ══════ 소리 토글 (스카이라이더 규칙) ══════ */
   function syncTog() { $('btnBgm').classList.toggle('off', !A.bgm); $('btnSnd').classList.toggle('off', !A.snd); }
   $('btnBgm').onclick = () => { A.toggleBgm(); syncTog(); };
@@ -183,6 +196,19 @@
   const titleCast = D.NAMED.slice().sort(() => Math.random() - .5).slice(0, N).map(make);
   buildStage($('titleStage'), titleCast, { h: 62, still: true, xs: [10, 30, 70, 90], producer: true }); $('titleStage').classList.add('frozen');   // 시작화면은 가만히 서 있는다
   $('btnStart').onclick = () => { A.music(A.bgm); startAudition(); cutStart(ST.PRODUCER.prologue.slice()); };
+  $('btnCont').classList.toggle('hidden', !loadSave());
+  $('btnCont').onclick = () => { const o = loadSave(); if (!o) { $('btnCont').classList.add('hidden'); return; } resume(o); };
+  function resume(o) {
+    SAVE_S.forEach(k => S[k] = o[k]);
+    S.log = o.log || []; S.doom = false; S.concept = null; S.applicants = []; S.picked = [];
+    S.members = o.members.map(d => { const m = make(D.NAMED.find(c => c.key === d.key)); Object.assign(m, d); m.gains = {}; return m; });
+    _id = Math.max(...S.members.map(m => m.id));
+    if (window.OG) OG.start();   // 집계: 이어하기도 한 판 시작으로
+    A.music(A.bgm);
+    $('topbar').classList.add('show'); hud(); renderLog();
+    show('training'); renderTraining();
+    if (S.week > S.maxWeek) goConcept();   // 컨셉 고르던 중이었으면 바로 컨셉 화면
+  }
 
   /* ══════ 섭외 ══════ */
   function bar(label, v, color, delta, cls) {
@@ -336,7 +362,7 @@
     S.name = $('groupName').value.trim().toUpperCase();
     show('training');
     addLog(`<b>${S.name}</b> — LEADER <b>${disp(leader())}</b>`, 0);
-    renderTraining();
+    renderTraining(); save();
     cutStart(ST.PRODUCER.intro.slice());
   };
   function renderTraining(anim) {
@@ -376,9 +402,9 @@
     if (m && !m.out) { m.act = b.dataset.act; renderTraining(); }
   });
   function addLog(html, week) {
-    S.log.unshift({ html, w: week === undefined ? S.week : week });
-    $('log').innerHTML = S.log.slice(0, 40).map(l => `<div class="li"><span class="wk">${l.w ? 'W' + l.w : '—'}</span>${l.html}</div>`).join('');
+    S.log.unshift({ html, w: week === undefined ? S.week : week }); renderLog();
   }
+  function renderLog() { $('log').innerHTML = S.log.slice(0, 40).map(l => `<div class="li"><span class="wk">${l.w ? 'W' + l.w : '—'}</span>${l.html}</div>`).join(''); }
   const staminaMult = m => { const p = m.stamina / m.maxStam; return p >= .7 ? 1.15 : p >= .45 ? 1.0 : p >= .22 ? .68 : .35; };
   const good = s => `<span class="good">${s}</span>`, bad = s => `<span class="bad">${s}</span>`;
   function dropOut(m) { m.out = true; S.doom = true; addLog(bad(`💔 ${disp(m)} OUT`)); A.sfx.out(); return { m, e: 'sad', t: ST.LINES[m.key].out }; }   // 넷이 정예 — 하나라도 빠지면 GAME OVER(사장님, 2026-09-08)
@@ -555,7 +581,7 @@
     if (gone.length) { renderTraining(); return cutStart(gone.map(dropOut), gameOver); }
     renderTraining();
     if (S.doom || alive().length === 0) return gameOver();
-    S.week++;
+    S.week++; save();
     if (S.week > S.maxWeek) { return setTimeout(goConcept, 400); }
     hud(); weekBtn();
   }
@@ -736,7 +762,7 @@
   function calcScore(c) { return clamp(clamp(S.hype * (c.fameMul || 1), 0, 100) * 0.72 + calcSkill(c) * 0.42, 0, 125); }
   function release(cid, seen) {
     const c = D.CONCEPTS.find(x => x.id === cid), a = alive();
-    S.concept = c;
+    S.concept = c; clearSave();
     const skill = calcSkill(c);
     const fame = clamp(S.hype * (c.fameMul || 1), 0, 100);
     let score = fame * 0.72 + skill * 0.42;
@@ -788,7 +814,7 @@
   }
   function gameOver() {
     if (window.OG) OG.over({ result: 'GAME OVER' });   // 집계: 한 판 끝
-    A.sfx.rain(); A.music(false);
+    clearSave(); A.sfx.rain(); A.music(false);
     $('overlay').innerHTML = `<div class="ovl"><div class="modal center">
       <div class="rank" style="font-size:96px">GAME OVER</div>
       <div class="pos num" style="margin:6px 0 18px">🪙 ${S.money}</div>
@@ -798,5 +824,5 @@
   $('btnRetry').onclick = () => location.reload();
 
   /* 시험용 손잡이 — 미리보기 창에서 판을 빨리 돌려 본다 */
-  window.__bb = { S, CUT, runWeek, afterEpisodes, release, goConcept, playEvent, playEpisode, EVENTS, buildStage, cutStart, cutNext, playVideo };
+  window.__bb = { S, CUT, save, loadSave, resume, runWeek, afterEpisodes, release, goConcept, playEvent, playEpisode, EVENTS, buildStage, cutStart, cutNext, playVideo };
 })();

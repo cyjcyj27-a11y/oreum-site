@@ -58,7 +58,8 @@
   $('invF').addEventListener('click', () => toggleDex()); $('bait').addEventListener('click', cycleBait); $('titleDex').addEventListener('click', () => toggleDex(true)); $('dexX').addEventListener('click', () => toggleDex(false)); $('dex').addEventListener('click', e => { if (e.target === $('dex')) toggleDex(false); });
   $('btnSfx').addEventListener('click', toggleSfx); function toggleSfx() { const on = A.toggle(); $('btnSfx').classList.toggle('off', !on); }
   $('btnSfx').classList.toggle('off', !A.on);
-  $('title').querySelector('.go').addEventListener('click', start);
+  $('title').querySelector('.go.start').addEventListener('click', start);
+  $('title').querySelector('.go.cont').addEventListener('click', resume);
   $('over').querySelector('.again').addEventListener('click', () => location.reload());
   let rotSkipped = false;
   function syncRot() { const w = innerWidth, h = innerHeight; if (w < 10 || h < 10) return; document.body.classList.toggle('portrait', isTouch && !rotSkipped && h > w * 1.02); }
@@ -82,9 +83,23 @@
   /* ---------- 규칙 ---------- */
   function start() {
     if (G.state !== 'title') return; A.unlock(); G.state = 'play'; $('title').classList.add('hide'); $('topbar').classList.add('show'); $('keys').classList.add('show'); document.body.classList.add('playing');
-    camYaw = Math.PI; G.time = 0; hud();
+    camYaw = Math.PI; G.time = 0; hud(); saveT = 0;
     if (window.OG) OG.start();   // 집계: 한 판 시작
   }
+  /* 저장 · 이어하기 — 노는 동안 5초마다, 창을 닫을 때. GAME OVER·엔딩 시작에서 지운다(사장님, 2026-09-09 "망망대해도 이어하기가 없어") */
+  const SAVE_KEY = 'castaway.prog', SAVE_G = ['day', 'food', 'inv', 'bait', 'baitSp', 'baitUses', 'bestCm', 'caught']; let saveT = 0;
+  function saveProg() { if (G.state !== 'play' || G.ending) return; try { const o = { v: 1, dayT: sea.dayT }; SAVE_G.forEach(k => o[k] = G[k]); localStorage.setItem(SAVE_KEY, JSON.stringify(o)); } catch (e) { } }
+  function clearProg() { try { localStorage.removeItem(SAVE_KEY); } catch (e) { } }
+  function loadProg() { try { const o = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); return o && o.v === 1 && o.day >= 1 && o.food > 0 ? o : null; } catch (e) { return null; } }
+  function resume() {
+    const o = loadProg(); if (!o || G.state !== 'title') return;
+    SAVE_G.forEach(k => { if (o[k] !== undefined) G[k] = o[k]; }); G.inv = G.inv || {}; sea.dayT = o.dayT || 0.1;
+    if (G.baitSp && !F.BY[G.baitSp]) { G.baitSp = null; G.bait = 0; G.baitUses = 0; }
+    W.setBait(G.bait); W.setRack(invAll());
+    start();
+  }
+  $('title').querySelector('.go.cont').classList.toggle('show', !!loadProg());
+  addEventListener('pagehide', saveProg); document.addEventListener('visibilitychange', () => { if (document.hidden) saveProg(); });
   const busy = () => G.state !== 'play' || G.eatT > 0 || dexOpen;
   function actDown() {
     if (dexOpen) return;
@@ -108,7 +123,7 @@
   function onNibble(f) { if (L.st !== 'float') return; L.dip = 0.14 + f.len * 0.1; A.nibble(); W.splash(L.pos, 0.25); }
   function onBite(f) {
     if (L.st !== 'float') { f.state = 'wander'; F.active = null; return; }
-    L.st = 'bite'; L.fish = f; L.biteT = f.sp.tier === 3 ? 0.7 : f.sp.tier === 2 ? 0.85 : 1.0; L.dip = 0.5; A.bite(); W.splash(L.pos, 0.6 + f.len);
+    L.st = 'bite'; L.fish = f; L.biteT = f.sp.tier >= 3 ? 0.7 : f.sp.tier === 2 ? 0.85 : 1.0; L.dip = 0.5; A.bite(); W.splash(L.pos, 0.6 + f.len);
   }
   function hookFish() {
     const f = L.fish; L.st = 'fight'; L.hold = false; f.state = 'hooked'; f.t = 0;
@@ -127,14 +142,14 @@
     const f = L.fish; L.st = 'land'; L.t = 0; f.state = 'caught'; f.flop = 2.2; f.fightPos = null; F.active = null; W.setRodBend(0); W.setPose('cheer', null, null, 14); G.cheerT = 1.3;   // 잡았다! 두 팔 번쩍
     const cm = Math.round(f.len * 100); G.caught++;
     const rec = cm > G.bestCm; G.bestCm = Math.max(G.bestCm, cm); if (cm > best.cm) { best.cm = cm; saveBest(); }
-    A.catchFan(f.sp.tier); A.splash(1 + f.len);
+    A.catchFan(Math.min(3, f.sp.tier)); A.splash(1 + f.len);
     const name = EN ? f.sp.en : f.sp.ko;
     const first = dexRecord(f.sp.id, cm);
     if (first) { toast('NEW!', name + ' ' + cm + 'cm', false, 2.8); }
     else toast('CATCH!', name + ' ' + cm + 'cm' + (rec && G.caught > 1 ? ' · ' + T('신기록', 'NEW RECORD') : ''), false, 2.6);
     useBait();
     L.landFrom = f.pos.clone(); L.landTo = new V(); W.deckPoint(0.35, 0.15, L.landTo);
-    if (f.sp.tier === 3) { G.ending = { t: 0 }; G.sit = true; W.setPose('sit'); }
+    if (f.sp.tier === 4) { G.ending = { t: 0 }; G.sit = true; W.setPose('sit'); clearProg(); }   // 엔딩은 거대 참다랑어(30번째)만
   }
   function eat(which) {
     if (G.state !== 'play' || G.eatT > 0 || (L.st !== 'idle' && L.st !== 'float')) return;
@@ -145,7 +160,7 @@
     if (dexOpen) buildDex();
   }
   function cycleBait() {
-    if (busy() || L.st !== 'idle') return;
+    if (busy() || (L.st !== 'idle' && L.st !== 'float')) return;   // 찌가 떠 있을 때도 미끼를 바꿀 수 있다(사장님, 2026-09-09 만새기 단추)
     // 지금 걸린 미끼는 돌려받고 다음 것으로
     if (G.baitSp && G.baitUses === BAIT_USES[G.baitSp]) G.inv[G.baitSp] = (G.inv[G.baitSp] || 0) + 1;   // 안 쓴 미끼만 돌려받는다
     // 작은 것 → 큰 것 → 없음 순으로 돈다
@@ -155,7 +170,7 @@
     G.baitSp = next; G.bait = next ? F.BY[next].tier : 0; G.baitUses = next ? BAIT_USES[next] : 0; W.setBait(G.bait); W.setRack(invAll()); pop('bait'); hud();
   }
   function setBaitSp(id) {
-    if (G.state !== 'play' || G.eatT > 0 || L.st !== 'idle' || (G.inv[id] || 0) <= 0) return;
+    if (G.state !== 'play' || G.eatT > 0 || (L.st !== 'idle' && L.st !== 'float') || (G.inv[id] || 0) <= 0) return;
     if (G.baitSp === id && G.baitUses === BAIT_USES[id]) return;   // 이미 그게 걸려 있다
     if (G.baitSp && G.baitUses === BAIT_USES[G.baitSp]) G.inv[G.baitSp] = (G.inv[G.baitSp] || 0) + 1;   // 안 쓴 미끼만 돌려받는다
     G.inv[id]--; G.baitSp = id; G.bait = F.BY[id].tier; G.baitUses = BAIT_USES[id]; W.setBait(G.bait); W.setRack(invAll()); pop('bait'); hud();
@@ -170,7 +185,13 @@
   let DEX = {}; try { DEX = JSON.parse(localStorage.getItem('castaway.dex') || '{}') || {}; } catch (e) { }
   let dexOpen = false;
   const dexCount = () => F.SPECIES.filter(sp => DEX[sp.id]).length;
-  function dexRecord(id, cm) { const first = !DEX[id]; const d = DEX[id] || (DEX[id] = { n: 0, cm: 0 }); d.n++; d.cm = Math.max(d.cm, cm); try { localStorage.setItem('castaway.dex', JSON.stringify(DEX)); } catch (e) { } return first; }
+  function syncStage() {   // tier 1 순서: 자리돔·각재기 → 고등어·정어리 → 나머지. 거대 참다랑어는 나머지 29종을 다 잡은 뒤
+    const has = id => !!DEX[id];
+    F.stage = (has('damsel') && has('scad')) ? ((has('mackerel') && has('sardine')) ? 2 : 1) : 0;
+    F.giantOK = F.SPECIES.every(sp => sp.tier === 4 || has(sp.id));
+  }
+  syncStage();
+  function dexRecord(id, cm) { const first = !DEX[id]; const d = DEX[id] || (DEX[id] = { n: 0, cm: 0 }); d.n++; d.cm = Math.max(d.cm, cm); try { localStorage.setItem('castaway.dex', JSON.stringify(DEX)); } catch (e) { } syncStage(); return first; }
   const CUT_SVG = $('bait').querySelector('svg').outerHTML;   // 상단바의 토막난 생선 그림을 그대로 쓴다
   function buildDex() {
     const grid = $('dexGrid'); grid.innerHTML = '';
@@ -182,7 +203,7 @@
       if (n > 0) {   // 먹기 · 미끼 고르기
         const acts = document.createElement('div'); acts.className = 'acts';
         const bE = document.createElement('button'); bE.type = 'button'; bE.className = 'act eat'; bE.innerHTML = '🍖 <b>+' + sp.food + '</b>'; bE.addEventListener('click', () => eat(sp.id)); acts.appendChild(bE);
-        const bB = document.createElement('button'); bB.type = 'button'; bB.className = 'act bait' + (L.st === 'idle' ? '' : ' off'); bB.innerHTML = CUT_SVG + ' <b>×' + sp.cut + '</b>'; bB.addEventListener('click', () => setBaitSp(sp.id)); acts.appendChild(bB);
+        const bB = document.createElement('button'); bB.type = 'button'; bB.className = 'act bait' + ((L.st === 'idle' || L.st === 'float') ? '' : ' off'); bB.innerHTML = CUT_SVG + ' <b>×' + sp.cut + '</b>'; bB.addEventListener('click', () => setBaitSp(sp.id)); acts.appendChild(bB);
         card.appendChild(acts);
       } else { const rc = document.createElement('div'); rc.className = 'rc'; rc.textContent = d ? d.cm + 'cm' : (sp.len[0] + '~' + sp.len[1] + 'cm'); card.appendChild(rc); }
       grid.appendChild(card);
@@ -199,7 +220,7 @@
   function useBait() { if (G.bait <= 0) return; G.baitUses--; if (G.baitUses <= 0) { G.bait = 0; G.baitSp = null; G.baitUses = 0; W.setBait(0); } }
   function saveBest() { try { localStorage.setItem('castaway.best', JSON.stringify(best)); } catch (e) { } }
   function gameOver() {
-    G.state = 'over'; G.down = true; W.setPose('down'); W.setLine(false); L.st = 'idle'; A.gameover();
+    G.state = 'over'; G.down = true; W.setPose('down'); W.setLine(false); L.st = 'idle'; A.gameover(); clearProg();
     if (window.OG) OG.over({ result: 'GAME OVER', day: G.day, cm: G.bestCm, dex: dexCount() });   // 집계: 한 판 끝
     if (G.day > best.days) { best.days = G.day; saveBest(); }
     setTimeout(() => { $('fade').classList.add('show'); }, 800);
@@ -238,6 +259,7 @@
     const raft = W.raftPos; const f = L.fish;
     if (G.state === 'play') {
       G.food -= dt * (100 / 170); if (G.food <= 0) { G.food = 0; gameOver(); }
+      saveT += dt; if (saveT > 5) { saveT = 0; saveProg(); }
       if (G.eatT > 0) { G.eatT -= dt; if (G.eatT <= 0) W.setPose(L.st === 'fight' ? 'fight' : 'idle'); }
       if (G.cheerT > 0) { G.cheerT -= dt; if (G.cheerT <= 0 && !G.ending) W.setPose('idle'); }
       G.pull += (((L.st === 'fight' && L.pulse > 0) ? 1 : 0) - G.pull) * Math.min(1, dt * 12);
@@ -263,13 +285,13 @@
         // 체력은 줄이 팽팽할 때 빠진다
         // 체력은 줄이 팽팽할 때 빠지고, 달릴 때도 제풀에 빠진다
         L.sta = Math.max(0, L.sta - dt / sp.sta * (L.tension > 0.35 ? 1 : L.run > 0 ? 0.5 : 0.15));
-        if (L.run <= 0 && L.runRest <= 0 && Math.random() < dt * (sp.tier === 3 ? 0.3 : sp.tier === 2 ? 0.45 : 0.3) * (0.2 + L.sta)) {
-          L.run = L.runDur = (sp.tier === 3 ? 1.5 : 1.0) + Math.random() * 1.0; L.runRest = 1.2 + Math.random() * 1.5; A.splash(0.6 + f.len); W.splash(f.pos, 0.6 + f.len);   // 물보라가 예고
+        if (L.run <= 0 && L.runRest <= 0 && Math.random() < dt * (sp.tier >= 3 ? 0.3 : sp.tier === 2 ? 0.45 : 0.3) * (0.2 + L.sta)) {
+          L.run = L.runDur = (sp.tier >= 3 ? 1.5 : 1.0) + Math.random() * 1.0; L.runRest = 1.2 + Math.random() * 1.5; A.splash(0.6 + f.len); W.splash(f.pos, 0.6 + f.len);   // 물보라가 예고
           if (sp.tier >= 2 && !L.jump && Math.random() < 0.55) { L.jump = { t: 0, dur: 0.75 + f.len * 0.15, h: 0.8 + f.len * 0.6 }; }
         }
         if (L.run > 0) L.run -= dt; else L.runRest -= dt;
-        const runK = L.run > 0 ? Math.min(1, (L.runDur - L.run) / (sp.tier === 3 ? 0.9 : 0.5)) : 0;   // 달리기 힘은 반 초(참치는 0.9초)에 걸쳐 차오른다
-        const pullBase = sp.pull * (0.3 + 0.7 * L.sta), pull = pullBase * (1 + (sp.tier === 3 ? 0.95 : 0.7) * runK);
+        const runK = L.run > 0 ? Math.min(1, (L.runDur - L.run) / (sp.tier >= 3 ? 0.9 : 0.5)) : 0;   // 달리기 힘은 반 초(참치는 0.9초)에 걸쳐 차오른다
+        const pullBase = sp.pull * (0.3 + 0.7 * L.sta), pull = pullBase * (1 + (sp.tier >= 3 ? 0.95 : 0.7) * runK);
         const far = L.dist > 28 ? 0.45 : 1;   // 줄이 많이 풀리면 물의 저항으로 덜 끌려 나간다
         // 긴장은 물고기 힘에 따른 목표치로 수렴한다 — 작은 놈은 계속 감아도 안 끊기고, 큰 놈은 달릴 때 감고 있으면 끊긴다
         const reeling = L.pulse > 0; L.pulse -= dt;
@@ -364,5 +386,5 @@
   function loop(now) { const dt = (now - last) / 1000; last = now; frame(dt); requestAnimationFrame(loop); }
   requestAnimationFrame(loop);
   hud();
-  window.__cw = { orbit(y, p, d) { orbYaw = y; if (p != null) orbPitch = p; if (d != null) orbDist = d; }, render() { renderer.render(scene, camera); }, tick(n, dt) { for (let i = 0; i < (n || 1); i++) frame(dt || 1 / 60); }, G, L, F, W, sea, camera, start, actDown, actUp, eat, cycleBait, toggleDex, dexRecord, setBaitSp, setYaw(y) { camYaw = y; }, landFish, hookFish };
+  window.__cw = { saveProg, resume, loadProg, orbit(y, p, d) { orbYaw = y; if (p != null) orbPitch = p; if (d != null) orbDist = d; }, render() { renderer.render(scene, camera); }, tick(n, dt) { for (let i = 0; i < (n || 1); i++) frame(dt || 1 / 60); }, G, L, F, W, sea, camera, start, actDown, actUp, eat, cycleBait, toggleDex, dexRecord, setBaitSp, setYaw(y) { camYaw = y; }, landFish, hookFish };
 })();

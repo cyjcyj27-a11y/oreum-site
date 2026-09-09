@@ -503,7 +503,7 @@
   function drawRocket(n) {
     const x = POS.pad.x, y = POS.pad.y; if (R.state === 'pad' && !vis(x, y, 200)) return;
     if (R.state === 'away') { if (vis(x, y, 100)) { bar(x, y - 70, 60, 1 - R.t / TRIP(), '#7fdcff'); icon('🌍', x, y - 88, 18); } return; }
-    const t = R.state === 'pad' ? 0 : clamp(R.y / 420, 0, 1), P0 = lanePos(t), s = 1 - .55 * t, ang = R.state === 'pad' ? 0 : Math.atan2(P0.dy, P0.dx) + Math.PI / 2 + (R.state === 'down' ? Math.PI : 0);
+    const t = R.state === 'pad' ? 0 : clamp(R.y / 420, 0, 1), P0 = lanePos(t), s = 1 - .55 * t, ang = R.state === 'pad' ? 0 : Math.atan2(P0.dy, P0.dx) + Math.PI / 2;   // 내려올 때도 발사 때와 같은 방향 — 꼬리(불꽃)부터 착륙(사장님, 2026-09-09)
     if (!vis(P0.x, P0.y, 120)) return;
     ctx.save(); ctx.translate(P0.x, P0.y); ctx.rotate(ang); ctx.scale(s, s);
     if (R.state !== 'pad') { ctx.fillStyle = 'rgba(255,176,48,.9)'; ctx.beginPath(); ctx.ellipse(0, 12, 12 + rnd(0, 4), 16 + rnd(0, 6), 0, 0, TAU); ctx.fill(); ctx.fillStyle = '#fff3a0'; ctx.beginPath(); ctx.ellipse(0, 10, 6, 8, 0, 0, TAU); ctx.fill(); }

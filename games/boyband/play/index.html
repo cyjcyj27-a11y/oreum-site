@@ -142,6 +142,7 @@
   #scene-title .go{position:absolute;left:0;right:0;top:31%;text-align:center;margin:0;z-index:5;pointer-events:none}   /* 제목과 인물 사이 빈 자리에 (2026-09-08) */
   #scene-title .go .btn{pointer-events:auto}
   #scene-title .go .btn{font-size:96px;padding:22px 80px;border-radius:24px;box-shadow:0 8px 30px rgba(242,167,196,.35)}
+  #scene-title .go .btn{margin:0 18px}   /* 이어하기 + START 두 단추(2026-09-09) */
 
   /* ── 카드 ── */
   .hdr{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap}
@@ -364,7 +365,7 @@
       <h1 data-en="HOTSHOT INDIE">제발 데뷔해줘</h1>
       <div class="en" data-en="FROM HONGDAE BUSKING, 12 WEEKS">HOTSHOT INDIE</div>
     </div>
-    <div class="go"><button class="btn" id="btnStart" data-en="START">START</button></div>
+    <div class="go"><button class="btn hidden" id="btnCont" data-en="CONTINUE">이어하기</button><button class="btn" id="btnStart" data-en="START">START</button></div>
   </section>
 
   <!-- 섭외 -->
@@ -445,7 +446,7 @@
 <script src="js/data.js?v=787700"></script>
 <script src="js/story.js?v=787700"></script>
 <script src="js/audio.js?v=787700"></script>
-<script src="js/game.js?v=787704"></script>
+<script src="js/game.js?v=787705"></script>
 <script src="/assets/visit.js?v=11" defer></script>
 <script src="/assets/game-events.js?v=1" defer></script>
 </body>
