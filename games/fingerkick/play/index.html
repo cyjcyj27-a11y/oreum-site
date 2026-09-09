@@ -56,6 +56,8 @@
   body.shot #topbar, body.shot #keys, body.shot #oreumHome, body.shot #oreumFs, body.shot #btnStart { display: none !important; }
   #title .go, #over .again { pointer-events: auto; display: inline-block; padding: 14px 54px; border-radius: 999px; border: 2px solid #fff; background: rgba(15,40,20,.72); color: #fff; font-size: 24px; letter-spacing: 3px; cursor: pointer; box-shadow: 0 6px 20px rgba(0,0,0,.35); touch-action: manipulation; }
   #title .go:active, #over .again:active { transform: scale(.96); }
+  #title .p2 { pointer-events: auto; margin-top: 14px; padding: 8px 26px; border-radius: 999px; border: 1px solid rgba(255,255,255,.6); background: rgba(15,40,20,.55); color: #fff; font-family: Arial, sans-serif; font-weight: 700; font-size: 14px; letter-spacing: 3px; cursor: pointer; touch-action: manipulation; }
+  #title .p2:active { transform: scale(.96); }
   #over { display: none; background: rgba(6,14,8,.55); }
   #over.show { display: flex; }
   #over h2 { font-family: Arial, sans-serif; font-weight: 900; font-size: min(6vw, 30px); letter-spacing: 6px; margin: 0 0 10px; opacity: .85; }
@@ -137,12 +139,13 @@
   <div class="stars" id="stars"></div>
   <div class="rec" id="rec"></div>
   <div class="go" id="btnStart" data-en="START">시작</div>
+  <div class="p2" id="btn2p">2 PLAYERS</div>
 </div>
 
 <script src="/assets/game-home.js?v=7" data-top="6" data-left="6" data-fullscreen="1" defer></script>
 <script src="js/audio.js?v=5"></script>
 <script src="js/league.js?v=3"></script>
-<script src="js/game.js?v=4"></script>
+<script src="js/game.js?v=5"></script>
 <script src="/assets/visit.js?v=11" defer></script>
 <script src="/assets/game-events.js?v=1" defer></script>
 </body>

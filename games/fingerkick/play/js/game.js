@@ -8,14 +8,14 @@
   var GX0 = 270, GX1 = 430, GD = 52, POST = 6;
   var DR = 22, GKR = 26, BR = 11, DM = 15, BM = 1, GKM = 30, DFR = 0.98, BFR = 0.988;   // 골키퍼는 막대에 꽂혀 있는 셈 — 무겁게
   var SUB = 3, REST = 0.86, WALL = 0.62, SPEED = 8.5, MAXD = 170, MAXFLICK = 3, MATCH = 180;
-  var HUMAN = 0, CPU = 1;
+  var HUMAN = 0, CPU = 1, WIN2 = 3;   // WIN2: 2인 대전은 3골 먼저 넣으면 이긴다(시간제한 없음)
   var POSTS = [{ x: GX0, y: Y0 }, { x: GX1, y: Y0 }, { x: GX0, y: Y1 }, { x: GX1, y: Y1 }];
   var COL = [{ ring: '#cd2e3a', body: '#0047a0', gk: '#002a60' }, { ring: '#ffd23a', body: '#2a62d6', gk: '#173a86' }];
 
   var cv = document.getElementById('c'), ctx = cv.getContext('2d');
   var $ = function (id) { return document.getElementById(id); };
   var view = { s: 1, ox: 0, oy: 0, land: false, dpr: 1, w: 0, h: 0 };
-  var G = { mode: 'title', B: [], turn: HUMAN, streak: 0, score: [0, 0], clock: MATCH, flick: null, resting: true, goalPause: 0, aiTimer: 0, lastClk: '', conceded: HUMAN };
+  var G = { mode: 'title', B: [], p2: false, turn: HUMAN, streak: 0, score: [0, 0], clock: MATCH, flick: null, resting: true, goalPause: 0, aiTimer: 0, lastClk: '', conceded: HUMAN };
   var drag = null, glow = 0, isTouch = false;
   // ── 말: ?lang=en 이면 영어. 한국어가 원본이고 영어를 덧씌운다 ──
   var EN = /[?&]lang=en/i.test(location.search);
@@ -129,12 +129,13 @@
     },
     wall: function (b) { var s = Math.hypot(b.vx, b.vy); if (s > 1.2) A.wall(s); }
   };
+  function humanTurn() { return G.p2 || G.turn === HUMAN; }
   function onRest() {
     if (G.flick) {
       if (!(G.flick.touched && G.streak < MAXFLICK)) { G.turn = 1 - G.turn; G.streak = 0; }
       G.flick = null;
     }
-    if (G.turn === CPU) G.aiTimer = 0.55 + Math.random() * 0.4;
+    if (!G.p2 && G.turn === CPU) G.aiTimer = 0.55 + Math.random() * 0.4;
     updHud();
   }
 
@@ -191,8 +192,9 @@
   }
   function afterGoal() {
     $('goal').classList.remove('show');
+    if (G.p2 && (G.score[0] >= WIN2 || G.score[1] >= WIN2)) { fullTime(); return; }
     G.B = setup(G.conceded); G.turn = G.conceded; G.streak = 0; G.flick = null; G.resting = true;
-    if (G.turn === CPU) G.aiTimer = 0.8; updHud();
+    if (!G.p2 && G.turn === CPU) G.aiTimer = 0.8; updHud();
   }
   // ── 리그: 상대 나라 색·약칭·함성 ──
   function dressOpp() {
@@ -204,8 +206,20 @@
     $('mday').textContent = L.dayText(); $('lday').textContent = L.dayText(); $('stars').textContent = L.stars();
     A.setCrowd(t.crowd); $('tgNext').style.display = A.tracks > 1 ? '' : 'none';
   }
-  function start() {
-    dressOpp(); $('table').classList.remove('show');
+  // 2인 대전: 1P 는 대한민국, 2P 는 8개 나라 중 무작위(색·약칭·함성 모두 그 나라)
+  function dress2P() {
+    var T = L.TEAMS, t = T[Math.floor(Math.random() * T.length)];
+    COL[1] = { ring: t.ring, body: t.body, gk: t.gk };
+    var el = $('tmC'); el.querySelector('span').textContent = '2P ' + t.iso;
+    var dotEl = el.querySelector('i'); dotEl.style.borderColor = t.ring; dotEl.style.background = t.body;
+    $('tmH').querySelector('span').textContent = '1P KOR';
+    $('mday').textContent = ''; $('lday').textContent = ''; $('stars').textContent = '';
+    A.setCrowd(t.crowd); $('tgNext').style.display = A.tracks > 1 ? '' : 'none';
+  }
+  function start(p2) {
+    G.p2 = !!p2;
+    if (G.p2) dress2P(); else { dressOpp(); $('tmH').querySelector('span').textContent = 'YOU'; }
+    $('table').classList.remove('show');
     G.score = [0, 0]; G.clock = MATCH; G.B = setup(HUMAN); G.turn = HUMAN; G.streak = 0; G.flick = null; G.resting = true; G.goalPause = 0; G.aiTimer = 0;
     G.mode = 'play'; $('title').classList.add('hide'); $('over').classList.remove('show'); updHud(); A.whistle();
     if (window.OG) OG.start();   // 집계: 한 판 시작 (재시작 포함)
@@ -213,9 +227,16 @@
   function fullTime() {
     G.mode = 'over'; A.whistle3();
     var h = G.score[0], c = G.score[1], r = $('res');
+    if (G.p2) {   // 2인 대전: 리그 기록·순위표 없이 이긴 쪽만
+      r.textContent = h > c ? '1P WIN' : '2P WIN'; r.className = 'res win';
+      $('osc').textContent = h + ' : ' + c; $('rec2').textContent = ''; $('mday').textContent = ''; $('btnRetry').textContent = 'RETRY';
+      $('over').classList.add('show');
+      if (window.OG) OG.over({ result: h > c ? '1p' : '2p', score: h + '_' + c });
+      return;
+    }
     r.textContent = h > c ? 'WIN' : h < c ? 'LOSE' : 'DRAW'; r.className = 'res ' + (h > c ? 'win' : h < c ? 'lose' : 'draw');
     var rec = loadRec(); if (h > c) rec.w++; else if (h < c) rec.l++; else rec.d++; saveRec(rec); showRec();
-    $('osc').textContent = h + ' : ' + c;
+    $('osc').textContent = h + ' : ' + c; $('btnRetry').textContent = 'NEXT';
     $('over').classList.add('show');
     if (window.OG) OG.over({ result: r.textContent, score: h + '_' + c });   // 집계: 한 판 끝
     var res = L.record(h, c);
@@ -260,7 +281,7 @@
       if (G.goalPause > 0) {
         G.goalPause -= dt; if (G.goalPause <= 0) afterGoal();
       } else {
-        if (G.clock > 0) G.clock = Math.max(0, G.clock - dt);
+        if (!G.p2 && G.clock > 0) G.clock = Math.max(0, G.clock - dt);
         var mv = false, k;
         for (k = 0; k < SUB; k++) mv = step(G.B, EV) || mv;
         var gl = goalOf(G.B[0]);
@@ -269,8 +290,8 @@
           if (!mv && !G.resting) onRest();
           G.resting = !mv;
           if (G.resting) {
-            if (G.clock <= 0) fullTime();
-            else if (G.turn === CPU && G.aiTimer > 0) { G.aiTimer -= dt; if (G.aiTimer <= 0) aiChoose(); }
+            if (!G.p2 && G.clock <= 0) fullTime();
+            else if (!G.p2 && G.turn === CPU && G.aiTimer > 0) { G.aiTimer -= dt; if (G.aiTimer <= 0) aiChoose(); }
           }
         }
       }
@@ -288,8 +309,9 @@
     var st = $('streak'); st.textContent = s; st.className = 'stat ' + (G.turn === HUMAN ? 'h' : 'c');
   }
   function updClock() {
+    if (G.p2) { if (G.lastClk !== 'p2') { G.lastClk = 'p2'; $('clk').textContent = WIN2; $('clock').classList.remove('low'); $('clock').querySelector('.ic').textContent = '⚽'; } return; }
     var c = Math.ceil(G.clock), t = Math.floor(c / 60) + ':' + (c % 60 < 10 ? '0' : '') + (c % 60);
-    if (t !== G.lastClk) { G.lastClk = t; $('clk').textContent = t; $('clock').classList.toggle('low', c <= 15); }
+    if (t !== G.lastClk) { G.lastClk = t; $('clk').textContent = t; $('clock').querySelector('.ic').textContent = '⏱'; $('clock').classList.toggle('low', c <= 15); }
   }
   function syncTog() {
     $('tgSnd').classList.toggle('off', !A.snd); $('tgBgm').classList.toggle('off', !A.bgm);
@@ -346,9 +368,9 @@
       }
     }
     // 말·공
-    var B = G.B, canPick = G.mode === 'play' && G.turn === HUMAN && G.resting && G.goalPause <= 0;
+    var B = G.B, canPick = G.mode === 'play' && humanTurn() && G.resting && G.goalPause <= 0;
     var pulse = 0.45 + 0.35 * Math.sin(glow * 5);
-    for (i = 1; i < B.length; i++) drawDisc(B[i], canPick && B[i].t === HUMAN ? pulse : 0, drag && drag.i === i);
+    for (i = 1; i < B.length; i++) drawDisc(B[i], canPick && B[i].t === G.turn ? pulse : 0, drag && drag.i === i);
     if (B.length) drawBall(B[0]);
   }
   function drawNet(y, h) {
@@ -389,9 +411,9 @@
   }
   cv.addEventListener('pointerdown', function (e) {
     if (e.pointerType === 'touch') { isTouch = true; document.body.classList.add('touch'); }
-    if (G.mode !== 'play' || G.turn !== HUMAN || !G.resting || G.goalPause > 0) return;
-    var p = toLogical(e.clientX, e.clientY), best = -1, bd = 1e9, i;
-    for (i = 1; i <= 5; i++) { var b = G.B[i], d = Math.hypot(b.x - p.x, b.y - p.y); if (d < DR * 1.9 && d < bd) { bd = d; best = i; } }
+    if (G.mode !== 'play' || !humanTurn() || !G.resting || G.goalPause > 0) return;
+    var p = toLogical(e.clientX, e.clientY), best = -1, bd = 1e9, i, lo = G.turn === HUMAN ? 1 : 6;
+    for (i = lo; i <= lo + 4; i++) { var b = G.B[i], d = Math.hypot(b.x - p.x, b.y - p.y); if (d < DR * 1.9 && d < bd) { bd = d; best = i; } }
     if (best < 0) return;
     drag = { i: best, x: p.x, y: p.y };
     try { cv.setPointerCapture(e.pointerId); } catch (err) {}
@@ -401,16 +423,17 @@
   function release() {
     if (!drag) return;
     var d = G.B[drag.i], v = aimVec(d); var i = drag.i; drag = null;
-    if (v.pow < 0.06 || G.turn !== HUMAN || !G.resting) return;
+    if (v.pow < 0.06 || !humanTurn() || !G.resting) return;
     flick(i, v.ang, v.pow);
   }
   cv.addEventListener('pointerup', release);
   cv.addEventListener('pointercancel', function () { drag = null; });
   cv.addEventListener('contextmenu', function (e) { e.preventDefault(); });
 
-  $('btnStart').addEventListener('click', function () { A.init(); start(); });
-  $('over').addEventListener('click', function () { if (G.mode === 'over') showTable(L.state.last); });   // 경기 끝 화면은 어디를 눌러도 순위표로
-  $('btnNext').addEventListener('click', function () { A.init(); start(); });
+  $('btnStart').addEventListener('click', function () { A.init(); start(false); });
+  $('btn2p').addEventListener('click', function () { A.init(); start(true); });
+  $('over').addEventListener('click', function () { if (G.mode !== 'over') return; if (G.p2) start(true); else showTable(L.state.last); });   // 경기 끝 화면은 어디를 눌러도 순위표로
+  $('btnNext').addEventListener('click', function () { A.init(); start(false); });
   $('tgSnd').addEventListener('click', function () { A.init(); A.toggleSnd(); syncTog(); });
   $('tgBgm').addEventListener('click', function () { A.init(); A.toggleBgm(); syncTog(); });
   var toastT = 0;

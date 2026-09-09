@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>핑거킥 — 설치 없는 무료 온라인 게임, 손가락 축구</title>
-<meta name="description" content="보드판의 축구말을 손가락으로 튕겨 공을 골문에 넣는 스포츠 게임. 설치 없이 브라우저에서 바로 시작합니다. 5 대 5, 3분 한 판, 공을 맞히면 3번까지 슛을 할 수 있습니다. 8개 나라와 겨루는 리그전, 나라별 실제 함성.">
+<meta name="description" content="보드판의 축구말을 손가락으로 튕겨 공을 골문에 넣는 스포츠 게임. 설치 없이 브라우저에서 바로 시작합니다. 5 대 5, 3분 한 판, 공을 맞히면 3번까지 슛을 할 수 있습니다. 8개 나라와 겨루는 리그전, 나라별 실제 함성. 둘이 번갈아 하는 2인 대전은 3골 승부.">
 <meta name="keywords" content="무료게임, 무료게임 웹, 플래시게임, 축구게임, 탁상축구, 튕기기게임, 물리게임, 스포츠게임, 브라우저게임, 오름게임즈, free game, soccer game, flick football, table football, web game, 설치없는게임, 회원가입없는게임">
 <link rel="canonical" href="https://oreumgames.com/games/fingerkick/">
 <link rel="alternate" hreflang="ko" href="https://oreumgames.com/games/fingerkick/">
@@ -42,10 +42,10 @@
   "applicationCategory": "GameApplication",
   "operatingSystem": "Web browser",
   "genre": ["Sports", "Casual"],
-  "playMode": "SinglePlayer",
-  "numberOfPlayers": { "@type": "QuantitativeValue", "minValue": 1, "maxValue": 1 },
+  "playMode": ["SinglePlayer", "MultiPlayer"],
+  "numberOfPlayers": { "@type": "QuantitativeValue", "minValue": 1, "maxValue": 2 },
   "datePublished": "2026-09-03",
-  "dateModified": "2026-09-06",
+  "dateModified": "2026-09-09",
   "inLanguage": ["ko", "en"],
   "gamePlatform": "Web browser",
   "offers": { "@type": "Offer", "price": "0", "priceCurrency": "KRW" },
@@ -64,6 +64,7 @@
     { "@type": "Question", "name": "조작은 어떻게 하나요?", "acceptedAnswer": { "@type": "Answer", "text": "내 말을 잡고 뒤로 당겼다 놓으면 반대쪽으로 튕겨 나갑니다. 많이 당길수록 세게 나갑니다. 튕긴 말이 공을 맞히면 내 차례가 이어지고, 한 차례에 최대 3번까지입니다." } },
     { "@type": "Question", "name": "기록은 저장되나요?", "acceptedAnswer": { "@type": "Answer", "text": "승·무·패 전적과 리그 시즌 진행이 브라우저에 저장됩니다. 같은 기기·같은 브라우저로 다시 열면 그 자리에서 이어집니다. 서버에는 아무것도 보내지 않습니다." } },
     { "@type": "Question", "name": "리그전은 어떻게 진행되나요?", "acceptedAnswer": { "@type": "Answer", "text": "한 시즌은 아일랜드·네덜란드·벨기에·잉글랜드·독일·프랑스·아르헨티나·브라질 8개 나라와 한 번씩, 8경기입니다. 승점 3·1·0으로 순위를 매기고 다른 나라들끼리의 경기 결과도 같이 반영됩니다. 시즌 1위면 CHAMPIONS, 타이틀마다 별이 하나씩 붙습니다." } },
+    { "@type": "Question", "name": "둘이서 같이 할 수 있나요?", "acceptedAnswer": { "@type": "Answer", "text": "네. 타이틀에서 2 PLAYERS 를 누르면 2인 대전입니다. 한 기기에서 둘이 번갈아 튕기고, 시간 제한 없이 3골을 먼저 넣는 쪽이 이깁니다. 1P는 대한민국, 2P는 8개 나라 중 하나가 무작위로 정해집니다." } },
     { "@type": "Question", "name": "혼자서도 할 수 있나요?", "acceptedAnswer": { "@type": "Answer", "text": "네. 상대 팀은 말 5개로 수백 가지 수를 미리 굴려 보고 가장 좋은 수를 고릅니다." } },
     { "@type": "Question", "name": "배경 함성은 어디 소리인가요?", "acceptedAnswer": { "@type": "Answer", "text": "그날 상대하는 나라에서 녹음한 소리입니다. 네덜란드·독일·잉글랜드·아일랜드·브라질·벨기에는 경기장 안팎, 아르헨티나·프랑스는 거리 축제의 함성과 응원가입니다. 곡이 둘인 나라는 위쪽 ⏭ 단추(PC는 N 키)로 바꿀 수 있습니다." } }
   ]
@@ -100,7 +101,8 @@
       <a class="backlink" href="/games/">← 무료게임 목록</a>
       <div class="gp-shot"><img src="/assets/fingerkick-shot.webp?v=3" alt="초록 잔디 탁상 축구장 위에 빨강 말과 파랑 말, 공이 놓여 있고 가운데에 핑거킥 제목이 있다" width="800" height="500"></div>
       <h1>핑거킥 FINGER KICK</h1>
-      <p class="gp-cta"><a class="btn btn-primary" href="play/?v=20260906">🎮 바로 플레이</a></p>
+      <p class="gp-cta"><a class="btn btn-primary" href="play/?v=20260909">🎮 바로 플레이</a></p>
+      <p class="gp-line"><strong>2026-09-09</strong> — 2인 대전이 생겼습니다. 타이틀에서 <strong>2 PLAYERS</strong>를 누르면 한 기기에서 둘이 번갈아 튕깁니다. 시간 제한 없이 3골을 먼저 넣는 쪽이 이깁니다. 1P는 대한민국, 2P는 8개 나라 중 하나가 무작위로 정해집니다.</p>
       <p class="gp-line">핑거킥은 탁상 축구 말을 손가락으로 튕겨 공을 골문에 넣는 무료게임입니다. 설치 없이 웹에서 바로 시작합니다.</p>
       <p class="gp-body">파란 몸통에 빨간 테두리, 대한민국 색 말 다섯 개가 내 팀입니다. 상대 팀 말은 그날 만나는 나라의 색을 입고 나옵니다. 내 차례에 말 하나를 잡고 뒤로 당겼다 놓으면 새총처럼 튕겨 나갑니다. 튕긴 말이 공을 맞히면 내 차례가 이어지고, 한 차례에 최대 3번까지 튕길 수 있습니다. 공을 못 맞히면 상대 차례로 넘어갑니다.</p>
       <p class="gp-body">공이 골라인을 넘으면 골이고, 골을 먹은 쪽이 가운데에서 킥오프합니다. 경기장 사방이 벽이라 공이 밖으로 나가지 않고, 말끼리 부딪혀 밀어내도 됩니다. 골키퍼는 공에 밀리지 않으니 정면 슛보다 옆에서 돌아 들어가는 슛이 잘 들어갑니다.</p>
@@ -108,7 +110,7 @@
       <dl class="spec"><dt>분류</dt><dd>무료게임 · 스포츠게임 · 축구게임</dd>
               <dt>사용기술</dt><dd>HTML / JavaScript / Canvas</dd>
               <dt>플레이 환경</dt><dd>PC · 모바일 — 마우스나 손가락으로 말을 당겼다 놓기, M 음악 · K 효과음</dd>
-              <dt>최종 업데이트</dt><dd>2026-09-06</dd></dl>
+              <dt>최종 업데이트</dt><dd>2026-09-09</dd></dl>
       <p class="gp-for">이런 분께 — 축구 게임과 당구·알까기 같은 튕기기 게임을 좋아하는 분, 3분에 한 판씩 짧게 겨루고 싶은 분. 전적은 브라우저에 자동 저장됩니다.</p>
       <section class="faq">
         <h2>자주 묻는 질문</h2>
@@ -118,6 +120,7 @@
         <details><summary>조작은 어떻게 하나요?</summary><p>내 말을 잡고 뒤로 당겼다 놓으면 반대쪽으로 튕겨 나갑니다. 많이 당길수록 세게 나갑니다. 튕긴 말이 공을 맞히면 내 차례가 이어지고, 한 차례에 최대 3번까지입니다.</p></details>
         <details><summary>기록은 저장되나요?</summary><p>승·무·패 전적과 리그 시즌 진행이 브라우저에 저장됩니다. 같은 기기·같은 브라우저로 다시 열면 그 자리에서 이어집니다. 서버에는 아무것도 보내지 않습니다.</p></details>
         <details><summary>리그전은 어떻게 진행되나요?</summary><p>한 시즌은 아일랜드·네덜란드·벨기에·잉글랜드·독일·프랑스·아르헨티나·브라질 8개 나라와 한 번씩, 8경기입니다. 승점 3·1·0으로 순위를 매기고 다른 나라들끼리의 경기 결과도 같이 반영됩니다. 시즌 1위면 CHAMPIONS, 타이틀마다 별이 하나씩 붙습니다.</p></details>
+        <details><summary>둘이서 같이 할 수 있나요?</summary><p>네. 타이틀에서 2 PLAYERS 를 누르면 2인 대전입니다. 한 기기에서 둘이 번갈아 튕기고, 시간 제한 없이 3골을 먼저 넣는 쪽이 이깁니다. 1P는 대한민국, 2P는 8개 나라 중 하나가 무작위로 정해집니다.</p></details>
         <details><summary>혼자서도 할 수 있나요?</summary><p>네. 상대 팀은 말 5개로 수백 가지 수를 미리 굴려 보고 가장 좋은 수를 고릅니다.</p></details>
         <details><summary>배경 함성은 어디 소리인가요?</summary><p>그날 상대하는 나라에서 녹음한 소리입니다. 네덜란드·독일·잉글랜드·아일랜드·브라질·벨기에는 경기장 안팎, 아르헨티나·프랑스는 거리 축제의 함성과 응원가입니다. 곡이 둘인 나라는 위쪽 ⏭ 단추(PC는 N 키)로 바꿀 수 있습니다.</p></details>
       </section>
