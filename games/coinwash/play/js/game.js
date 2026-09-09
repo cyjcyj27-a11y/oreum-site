@@ -44,7 +44,7 @@
   // ── 저장 ──
   const REG_NAMES = { cust1: ['지수', 'Jisu'], cust2: ['순자', 'Sunja'], cust3: ['민준', 'Minjun'], cust4: ['서연', 'Seoyeon'], cust5: ['하늘', 'Haneul'], cust6: ['도윤', 'Doyun'], cust7: ['은지', 'Eunji'], cust8: ['태호', 'Taeho'], blanket: ['미영', 'Miyoung'], clerk: ['준호', 'Junho'] };
   const DEBT0 = 3000;
-  function fresh() { return { day: 1, clock: 18.0, money: 0, debt: DEBT0, up: { wash: 0, motor: 0, soap: 0, box: 0, tough: 0, cart: 0, tools: 0, mop: 0, shoes: 0, vend: 0, bench: 0, cctv: 0, neon: 0, plant: 0, fold: 0, alarm: 0, branch: 0 }, reg: {}, rep: 3, ended: false, earned: 0, served: 0, weather: 'clear', rate: 0, t: 0 }; }
+  function fresh() { return { day: 1, clock: 18.0, money: 0, debt: DEBT0, up: { wash: 0, motor: 0, soap: 0, box: 0, tough: 0, cart: 0, tools: 0, mop: 0, shoes: 0, vend: 0, bench: 0, rack: 0, cctv: 0, neon: 0, plant: 0, fold: 0, alarm: 0, branch: 0 }, reg: {}, rep: 3, ended: false, earned: 0, served: 0, weather: 'clear', rate: 0, t: 0 }; }
   let S = fresh();
   function load() { try { const s = JSON.parse(localStorage.getItem('coinwash.save') || 'null'); if (s && s.up) { S = Object.assign(fresh(), s); S.up = Object.assign(fresh().up, s.up); return true; } } catch (_) { } return false; }
   function save() { S.t = Date.now(); try { localStorage.setItem('coinwash.save', JSON.stringify(S)); } catch (_) { } }
@@ -64,6 +64,7 @@
     { id: 'shoes', ic: '👟', ko: '운동화', en: 'Sneakers', price: [200, 400] },
     { id: 'vend', ic: '🥤', ko: '자판기', en: 'Vending machine', price: [400] },
     { id: 'bench', ic: '🪑', ko: '벤치 +1', en: 'Bench +1', price: [200] },
+    { id: 'rack', ic: '🧺', ko: '진열대 +3', en: 'Rack +3', price: [350, 700] },
     { id: 'cctv', ic: '📷', ko: 'CCTV', en: 'CCTV', price: [500] },
     { id: 'neon', ic: '💡', ko: '네온 간판', en: 'Neon sign', price: [450, 900] },
     { id: 'plant', ic: '🪴', ko: '화분', en: 'Plant', price: [120, 180, 240] },
@@ -71,7 +72,8 @@
     { id: 'alarm', ic: '⏰', ko: '알람시계', en: 'Alarm clock', price: [800, 2000] },
     { id: 'branch', ic: '🏪', ko: '', en: '', price: [6000, 15000, 40000] },
   ];
-  const CAP = () => 12 + 12 * S.up.box, PAY = () => 4 + S.up.soap, WASH_T = () => 16 * [1, .8, .65, .55][S.up.motor], OFF_CAP = () => [3, 6, 12][S.up.alarm] * 3600, FIX_N = 3, MOP_N = 2;
+  const PILE_CAP = () => 3 + 3 * S.up.rack,   // 개어 놓을 자리: 접는 탁자 3 + 진열대 한 칸마다 3 (사장님 2026-09-10 "옷을 놓을 데가 없어")
+    CAP = () => 12 + 12 * S.up.box, PAY = () => 4 + S.up.soap, WASH_T = () => 16 * [1, .8, .65, .55][S.up.motor], OFF_CAP = () => [3, 6, 12][S.up.alarm] * 3600, FIX_N = 3, MOP_N = 2;
   const SPEED = () => 70 + 35 * S.up.shoes;
 
   // ── 시간 ──
@@ -242,7 +244,7 @@
     c.hits = (c.hits || 0) + 1; SND.play('shoo'); c.x += (c.face || 1) * -4;
     const need = c.kind === 'drunk' ? 3 : 1;
     if (c.hits >= need) {
-      if (c.kind === 'thief' && c.loot) { if (c.loot.coins) spill(c.x, c.y, c.loot.coins); else if (piles.length < 3) piles.push({ owner: c.loot.owner, cloth: c.loot.cloth, folded: true, x: freePileX() }); c.loot = null; }
+      if (c.kind === 'thief' && c.loot) { if (c.loot.coins) spill(c.x, c.y, c.loot.coins); else if (piles.length < PILE_CAP()) piles.push(Object.assign({ owner: c.loot.owner, cloth: c.loot.cloth, folded: true }, freeSlot())); c.loot = null; }
       c.state = 'leave'; c.seat = -1; c.img = c.kind; goTo(c, DOOR.x + 30, DOOR.y); float(c.x, c.y - 70, '💨', '#fff'); SND.play('nice'); repAdd(.03);
     } else float(c.x, c.y - 70, '💢', '#ff8a6a');
   }
@@ -293,22 +295,28 @@
   function breakW(w) { if (w.state === 'broken') return; w.prev = w.state === 'wash' ? 'wash' : w.state; w.state = 'broken'; w.hits = 0; SND.play('spark'); for (let i = 0; i < 6; i++) smoke.push({ x: w.x + rnd(-14, 14), y: WASH_Y - 60, r: rnd(3, 6), t: rnd(.6, 1.4), vy: rnd(-18, -30) }); }
   function fixW(w) { w.state = w.prev === 'wash' ? 'wash' : (w.owner && w.cloth ? 'done' : 'idle'); w.hits = 0; SND.play('fixed'); float(w.x, WASH_Y - 80, '✓', '#7fe08a'); }
   function startFold(w) {
-    if (piles.length >= 3) { float(TABLE.x, TOP - 30, 'FULL', '#ff7a5a'); return false; }
+    if (piles.length >= PILE_CAP()) { float(TABLE.x, TOP - 30, 'FULL', '#ff7a5a'); return false; }
     w.state = 'fold'; w.t = 1.2; w.total = 1.2; SND.play('grab'); return true;
   }
   function collect(w) {
     const n = w.coins; if (n <= 0) return; w.coins = 0; earn(n); flyCoins(w.x, WASH_Y - 44, n); float(w.x, WASH_Y - 80, '+' + n); SND.play('coins');
   }
   function mopDone(p) { const i = puddles.indexOf(p); if (i >= 0) puddles.splice(i, 1); SND.play('fold'); float(p.x, p.y - 30, '✨', '#fff'); }
-  function freePileX() { const xs = [TABLE.x - 44, TABLE.x, TABLE.x + 44]; return xs.find(x => !piles.some(p => p.x === x)) || TABLE.x; }
+  const SHELF = [228, 196];   // 진열대(벽 선반) 두 칸의 높이 — 탁자 위가 차면 여기 올린다
+  function pileSlots() {
+    const xs = [TABLE.x - 44, TABLE.x, TABLE.x + 44], out = xs.map(x => ({ x, y: TOP }));
+    for (let i = 0; i < S.up.rack && i < SHELF.length; i++) for (const x of xs) out.push({ x, y: SHELF[i] });
+    return out;
+  }
+  function freeSlot() { return pileSlots().find(s => !piles.some(p => p.x === s.x && p.y === s.y)) || { x: TABLE.x, y: TOP }; }
   function updWasher(w, dt) {
     w.blink += dt;
     if (w.state === 'wash') {
       w.t -= dt; w.rot += dt * 5;
       if (w.breakAt > 0 && 1 - w.t / w.total > w.breakAt) { w.breakAt = -1; breakW(w); return; }
       if (w.t <= 0) { w.t = 0; w.state = 'done'; w.doneT = 0; SND.play('beep'); }
-    } else if (w.state === 'done') { w.doneT += dt; if (orphan(w)) { w.state = 'idle'; w.owner = null; w.cloth = null; } else if (S.up.fold && w.doneT > 4 && piles.length < 3) startFold(w); }
-    else if (w.state === 'fold') { w.t -= dt; if (w.t <= 0) { if (!orphan(w)) piles.push({ owner: w.owner, cloth: w.cloth, folded: true, x: freePileX() }); w.state = 'idle'; w.owner = null; w.cloth = null; SND.play('fold'); float(TABLE.x, TOP - 30, '✓', '#7fe08a'); } }
+    } else if (w.state === 'done') { w.doneT += dt; if (orphan(w)) { w.state = 'idle'; w.owner = null; w.cloth = null; } else if (S.up.fold && w.doneT > 4 && piles.length < PILE_CAP()) startFold(w); }
+    else if (w.state === 'fold') { w.t -= dt; if (w.t <= 0) { if (!orphan(w)) piles.push(Object.assign({ owner: w.owner, cloth: w.cloth, folded: true }, freeSlot())); w.state = 'idle'; w.owner = null; w.cloth = null; SND.play('fold'); float(TABLE.x, TOP - 30, '✓', '#7fe08a'); } }
     else if (w.state === 'broken') { if (Math.random() < dt * 1.5) smoke.push({ x: w.x + rnd(-12, 12), y: WASH_Y - 66, r: rnd(2, 5), t: rnd(.8, 1.6), vy: rnd(-14, -26) }); }
   }
 
@@ -607,7 +615,7 @@
     if (c.kind === 'thief' && c.loot && !c.loot.coins) spr('folded', c.x + 6, c.y - 30, 1, 0);
     if (c.kind === 'drunk' && c.hits) bar(c.x, top - 12, 24, c.hits / 3, '#ffd24a');
   }
-  function drawPile(p) { spr('folded', p.x, TOP, 1, 0); }
+  function drawPile(p) { spr('folded', p.x, p.y || TOP, 1, 0); }
   function tintRoom() {
     const h = S.clock; let a = 0, col = '20,30,80';
     if (h >= 22 || h < 2) a = .16; else if (h < 4) { a = .22; col = '40,20,80'; } else if (h < 5) { a = .16; col = '60,30,80'; } else if (h < 6) { a = .12; col = '200,110,60'; } else if (h >= 18 && h < 22) { a = .08 * (h - 18) / 4 + .04; col = '255,150,60'; }
@@ -622,11 +630,17 @@
     if (S.up.vend) { shadow(VEND.x, VEND.y, 20); spr('vending', VEND.x, VEND.y, 1); }
     for (let i = 0; i < S.up.plant; i++) spr('plant', PLANTS[i][0], PLANTS[i][1], 1);
     spr('basket', 40, 300, 1);
+    for (let i = 0; i < S.up.rack && i < SHELF.length; i++) {   // 진열대(벽 선반)
+      const y = SHELF[i];
+      ctx.fillStyle = 'rgba(0,0,0,.18)'; ctx.fillRect(TABLE.x - 74, y + 5, 148, 3);
+      ctx.fillStyle = '#5a4634'; ctx.fillRect(TABLE.x - 74, y, 148, 5);
+      ctx.fillStyle = '#7a6248'; ctx.fillRect(TABLE.x - 74, y, 148, 2);
+    }
     const ents = [];
     ents.push({ y: BENCH.y - 2, f: () => { shadow(BENCH.x, BENCH.y, 50); spr('bench', BENCH.x, BENCH.y, 1); } });
     if (S.up.bench) ents.push({ y: BENCH2.y - 2, f: () => { shadow(BENCH2.x, BENCH2.y, 50); spr('bench', BENCH2.x, BENCH2.y, 1); } });
     ents.push({ y: TABLE.y - 2, f: () => { shadow(TABLE.x, TABLE.y, 100); spr('table', TABLE.x, TABLE.y, 1); if (S.up.fold) spr('folder', TABLE.x + 90, TABLE.y, 1); } });
-    for (const p of piles) ents.push({ y: TABLE.y - 1.5, f: () => drawPile(p) });
+    for (const p of piles) ents.push({ y: (p.y || TOP) === TOP ? TABLE.y - 1.5 : p.y, f: () => drawPile(p) });   // 선반 위 빨래는 벽 쪽이라 먼저 그린다
     for (const p of puddles) ents.push({ y: p.y - 30, f: () => { ring(p.x, p.y + 4, 20, 8, '#9fe07a'); if (ok('puddle')) spr('puddle', p.x, p.y + 6, 1); else { ctx.fillStyle = 'rgba(120,180,60,.7)'; ctx.beginPath(); ctx.ellipse(p.x, p.y, 16, 7, 0, 0, Math.PI * 2); ctx.fill(); } if (p.hits) bar(p.x, p.y - 30, 24, p.hits / MOP_N, '#7fe08a'); } });
     for (const k of fcoins) ents.push({ y: k.y - 20, f: () => { const b = k.t < .6 ? Math.abs(Math.sin(k.t * 12)) * 10 : 0; if (ok('coin')) ctx.drawImage(IMG.coin, Math.round(k.x - 5), Math.round(k.y - 5 - b), 10, 10); else { ctx.fillStyle = '#ffd24a'; ctx.beginPath(); ctx.arc(k.x, k.y - b, 4, 0, Math.PI * 2); ctx.fill(); } } });
     for (const c of custs) if (!c.gone && c.state !== 'away') ents.push({ y: seated(c) ? (c.seat < 3 ? BENCH.y : BENCH2.y) + 1 : c.y, f: () => drawCust(c) });
