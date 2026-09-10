@@ -64,19 +64,20 @@
     { id: 'shoes', ic: '👟', ko: '운동화', en: 'Sneakers', price: [200, 400] },
     { id: 'vend', ic: '🥤', ko: '자판기', en: 'Vending machine', price: [400] },
     { id: 'bench', ic: '🪑', ko: '벤치 +1', en: 'Bench +1', price: [200] },
-    { id: 'rack', ic: '🧺', ko: '진열대 +3', en: 'Rack +3', price: [350, 700] },
+    { id: 'rack', ic: '🪑', ko: '접는 탁자 +1', en: 'Folding table +1', price: [350, 700] },
     { id: 'cctv', ic: '📷', ko: 'CCTV', en: 'CCTV', price: [500] },
     { id: 'neon', ic: '💡', ko: '네온 간판', en: 'Neon sign', price: [450, 900] },
     { id: 'plant', ic: '🪴', ko: '화분', en: 'Plant', price: [120, 180, 240] },
     { id: 'fold', ic: '🤖', ko: '빨래 개는 기계', en: 'Folding machine', price: [1200] },
-    { id: 'alarm', ic: '⏰', ko: '알람시계', en: 'Alarm clock', price: [800, 2000] },
+    { id: 'alarm', ic: '🗞️', ko: '야간 전단지', en: 'Night flyers', price: [800, 2000] },   // 새벽 손님이 더 온다
     { id: 'branch', ic: '🏪', ko: '', en: '', price: [6000, 15000, 40000] },
   ];
   const PILE_CAP = () => 3 + 3 * S.up.rack,   // 개어 놓을 자리: 접는 탁자 3 + 진열대 한 칸마다 3 (사장님 2026-09-10 "옷을 놓을 데가 없어")
     CAP = () => 12 + 12 * S.up.box, PAY = () => 4 + S.up.soap, WASH_T = () => 16 * [1, .8, .65, .55][S.up.motor], FIX_N = 3, MOP_N = 2;
   // 없는 동안 — 밤 손님이 드문드문 와서 스스로 돌리고 간다. 동전통·금고가 차면 거기서 멈춘다(초당 수입과 무관)
-  const NIGHT_H = () => NW * PAY() * 2 * (S.up.neon ? 1.5 : 1),
-    NIGHT_CAP = () => NW * CAP() * (2 + 2 * S.up.alarm);
+  // 없는 동안 — 빨래를 넣어 놓고 간 손님이 있어서 세탁기마다 딱 한 판씩 돌아간다.
+  // 시간은 보지 않는다. 세탁기를 많이 살수록만 늘어난다 (사장님 2026-09-10)
+  const NIGHT_ONE = () => NW * PAY(), AWAY_MIN = 20 * 60;
   const SPEED = () => 70 + 35 * S.up.shoes;
 
   // ── 시간 ──
@@ -90,7 +91,8 @@
     if (S.clock >= 24) S.clock -= 24;
     if ((before < 6 && S.clock >= 6) || (before > S.clock && S.clock >= 6)) dayEnd();
   }
-  function hourMul() { const h = S.clock; return h < 2 ? .9 : h < 5 ? 1.5 : h < 6 ? 1.2 : h < 10 ? 2.4 : h < 17 ? 1.8 : h < 22 ? 1.1 : .9; }
+  function hourMul() { const h = S.clock, night = 1 + .3 * S.up.alarm;   // 야간 전단지 — 늦은 밤·새벽에 손님이 더 온다
+    return h < 2 ? .9 / night : h < 5 ? 1.5 / night : h < 6 ? 1.2 / night : h < 10 ? 2.4 : h < 17 ? 1.8 : h < 22 ? 1.1 : .9 / night; }
 
   // ── 가게 상태 ──
   const P = { x: 320, y: 236, face: 1, path: [], bob: 0, clock: 0, moving: false, task: null, hold: 0, idleT: 3, user: false };
@@ -305,13 +307,15 @@
     const n = w.coins; if (n <= 0) return; w.coins = 0; earn(n); flyCoins(w.x, WASH_Y - 44, n); float(w.x, WASH_Y - 80, '+' + n); SND.play('coins');
   }
   function mopDone(p) { const i = puddles.indexOf(p); if (i >= 0) puddles.splice(i, 1); SND.play('fold'); float(p.x, p.y - 30, '✨', '#fff'); }
-  const SHELF = [228, 196];   // 진열대(벽 선반) 두 칸의 높이 — 탁자 위가 차면 여기 올린다
+  // 탁자를 더 놓는다 — 벽 선반은 부자연스러워서 접는 탁자 그림을 하나씩 더 놓는 것으로 바꿨다(사장님 2026-09-10)
+  const TABLES = [{ x: 172, y: 262 }, { x: 488, y: 262 }];
+  const tablesOn = () => [TABLE].concat(TABLES.slice(0, S.up.rack));
   function pileSlots() {
-    const xs = [TABLE.x - 44, TABLE.x, TABLE.x + 44], out = xs.map(x => ({ x, y: TOP }));
-    for (let i = 0; i < S.up.rack && i < SHELF.length; i++) for (const x of xs) out.push({ x, y: SHELF[i] });
+    const out = [];
+    for (const t of tablesOn()) for (const dx of [-44, 0, 44]) out.push({ x: t.x + dx, y: t.y - 40, sy: t.y - 1.5 });
     return out;
   }
-  function freeSlot() { return pileSlots().find(s => !piles.some(p => p.x === s.x && p.y === s.y)) || { x: TABLE.x, y: TOP }; }
+  function freeSlot() { return pileSlots().find(s => !piles.some(p => p.x === s.x && p.y === s.y)) || { x: TABLE.x, y: TOP, sy: TABLE.y - 1.5 }; }
   function updWasher(w, dt) {
     w.blink += dt;
     if (w.state === 'wash') {
@@ -354,24 +358,36 @@
 
   // ── 주인 — 장식이자 자동화. 카트·공구함·대걸레를 사면 알아서 돈다 ──
   const nearest = list => { let b = null, bd = 1e9; for (const o of list) { const d = Math.hypot(o.x - P.x, (o.y || WASH_Y) - P.y); if (d < bd) { bd = d; b = o; } } return b; };
+  // 일 고르기 — 시켜서 할 때(byHand)는 설비가 없어도 한다. 설비를 사면 시키지 않아도 알아서 한다
+  function pickOwnerTask(byHand) {
+    const can = k => byHand || S.up[k];
+    let t = null;
+    if (can('tools')) { const w = nearest(washers.filter(w => w.state === 'broken')); if (w) t = { kind: 'fix', o: w, x: w.x, y: WASH_Y + 12, dur: (byHand && !S.up.tools ? 3.2 : 2.2) - .4 * S.up.tough }; }
+    if (!t && can('mop') && puddles.length) { const p = nearest(puddles); t = { kind: 'mop', o: p, x: p.x, y: p.y, dur: byHand && !S.up.mop ? 2 : 1.4 }; }
+    if (!t && can('fold')) { const w = nearest(washers.filter(w => w.state === 'done' && !orphan(w))); if (w && piles.length < PILE_CAP()) t = { kind: 'fold', o: w, x: w.x, y: WASH_Y + 12, dur: .4 }; }
+    if (!t && can('cart')) { const w = nearest(washers.filter(w => w.coins >= (byHand ? 1 : Math.min(CAP(), 8)) && w.state !== 'broken')); if (w) t = { kind: 'coins', o: w, x: w.x, y: WASH_Y + 12, dur: .3 }; }
+    if (!t && can('cart') && cash.length) { const k = nearest(cash); t = { kind: 'cash', o: k, x: k.x, y: k.y, dur: .35 }; }
+    return t;
+  }
+  // 아저씨를 탭하면 일하러 간다
+  function orderOwner() {
+    const t = pickOwnerTask(true);
+    P.user = false;
+    if (!t) { P.task = null; SND.play('click'); float(P.x, P.y - 76, '💤', '#cfd6dd'); return; }
+    P.task = t; P.hold = 0; goTo(P, t.x, t.y);
+    SND.play('grab'); float(P.x, P.y - 76, { fix: '🔧', mop: '🧹', coins: '🪙', cash: '🪙', fold: '👕' }[t.kind] || '💪');
+  }
   function updOwner(dt) {
     P.clock += dt;
-    if (!P.task && !P.user) {
-      let t = null;
-      if (S.up.tools) { const w = nearest(washers.filter(w => w.state === 'broken')); if (w) t = { kind: 'fix', o: w, x: w.x, y: WASH_Y + 12, dur: 2.2 - .4 * S.up.tough }; }
-      if (!t && S.up.mop && puddles.length) { const p = nearest(puddles); t = { kind: 'mop', o: p, x: p.x, y: p.y, dur: 1.4 }; }
-      if (!t && S.up.cart) { const w = nearest(washers.filter(w => w.coins >= Math.min(CAP(), 8) && w.state !== 'broken')); if (w) t = { kind: 'coins', o: w, x: w.x, y: WASH_Y + 12, dur: .3 }; }
-      if (!t && S.up.cart && cash.length) { const k = nearest(cash); t = { kind: 'cash', o: k, x: k.x, y: k.y, dur: .35 }; }
-      if (t) { P.task = t; P.hold = 0; goTo(P, t.x, t.y); }
-    }
+    if (!P.task && !P.user) { const t = pickOwnerTask(false); if (t) { P.task = t; P.hold = 0; goTo(P, t.x, t.y); } }
     if (P.task) {
       const t = P.task;
-      if ((t.kind === 'fix' && t.o.state !== 'broken') || (t.kind === 'mop' && !puddles.includes(t.o)) || (t.kind === 'coins' && t.o.coins <= 0) || (t.kind === 'cash' && !cash.includes(t.o))) { P.task = null; P.path = []; P.moving = false; return; }
+      if ((t.kind === 'fix' && t.o.state !== 'broken') || (t.kind === 'mop' && !puddles.includes(t.o)) || (t.kind === 'coins' && t.o.coins <= 0) || (t.kind === 'cash' && !cash.includes(t.o)) || (t.kind === 'fold' && t.o.state !== 'done')) { P.task = null; P.path = []; P.moving = false; return; }
       if (P.path.length) { walk(P, dt, SPEED()); P.moving = true; }
       else {
         P.moving = false; P.face = 1; P.hold += dt;
         if (t.kind === 'fix' && Math.floor(P.hold * 2) !== Math.floor((P.hold - dt) * 2)) SND.play('fix');
-        if (P.hold >= t.dur) { if (t.kind === 'fix') fixW(t.o); else if (t.kind === 'mop') mopDone(t.o); else if (t.kind === 'cash') grabCash(t.o); else collect(t.o); P.task = null; P.hold = 0; }
+        if (P.hold >= t.dur) { if (t.kind === 'fix') fixW(t.o); else if (t.kind === 'mop') mopDone(t.o); else if (t.kind === 'cash') grabCash(t.o); else if (t.kind === 'fold') { collect(t.o); startFold(t.o); } else collect(t.o); P.task = null; P.hold = 0; }
       }
     } else if (P.path.length) { walk(P, dt, SPEED()); P.moving = true; if (!P.path.length) { P.user = false; P.idleT = rnd(5, 10); } }
     else { P.moving = false; P.idleT -= dt; if (P.idleT <= 0) { P.idleT = rnd(5, 10); goTo(P, rnd(200, 440), rnd(222, 250)); } }
@@ -389,6 +405,7 @@
       else if (w.state === 'done') startFold(w);
       return;
     }
+    if (Math.abs(x - P.x) < 24 && y > P.y - 72 && y < P.y + 12) { orderOwner(); return; }
     if (x > FLOOR.x1 && x < FLOOR.x2 && y > FLOOR.y1 && y < FLOOR.y2) { P.task = null; P.user = true; goTo(P, x, y); }
   }
   canvas.addEventListener('pointerdown', e => { if (G.place !== 'shop') return; e.preventDefault(); const r = canvas.getBoundingClientRect(); tap((e.clientX - r.left) / r.width * W, (e.clientY - r.top) / r.height * H); });
@@ -474,13 +491,11 @@
   }
   // 밤새 번 돈은 동전통에 먼저 차고, 넘친 건 바닥에 흩어진다 — 주워야 내 돈이 된다
   function dropBack(b) {
-    let left = b.n + (b.bonus ? b.bonus.coin : 0);
+    for (const w of washers) w.coins = Math.min(CAP() - 3, w.coins + PAY());   // 세탁기마다 한 판치
+    let extra = b.bonus ? b.bonus.coin : 0;
     if (b.bonus && b.bonus.rep) repAdd(b.bonus.rep);
-    for (const w of washers) { const room = CAP() - 3 - w.coins; if (room > 0 && left > 0) { const put = Math.min(room, left); w.coins += put; left -= put; } }   // 동전통을 꽉 채우면 손님을 못 받으니 조금 남긴다
-    const unit = Math.max(5, Math.round(b.n / 7));
-    let guard = 0;
-    while (left > 0 && guard++ < 14) { const v = Math.min(left, unit); left -= v; cash.push({ x: rnd(FLOOR.x1 + 40, FLOOR.x2 - 40), y: rnd(FLOOR.y1 + 30, FLOOR.y2 - 20), val: v, t: rnd(0, 6) }); }
-    if (left > 0) { earn(left); flyCoins(320, 200, left); }
+    if (extra > 0) { const unit = Math.max(5, Math.round(extra / 3)); let left = extra, guard = 0;
+      while (left > 0 && guard++ < 6) { const v = Math.min(left, unit); left -= v; cash.push({ x: rnd(FLOOR.x1 + 40, FLOOR.x2 - 40), y: rnd(FLOOR.y1 + 30, FLOOR.y2 - 20), val: v, t: rnd(0, 6) }); } }
     for (let i = 0; i < b.mess.puddle; i++) { const ws = washers.filter(w => !dirty(w)); if (ws.length) { const w = pick(ws); puddles.push({ w, x: w.x, y: WASH_Y + 16, hits: 0 }); } }
     if (b.mess.broken) { const ws = washers.filter(w => w.state !== 'broken'); if (ws.length > 1) breakW(pick(ws)); }
     SND.play('coins'); if (b.bonus) SND.play('nice');
@@ -497,8 +512,8 @@
     if (G.mode === 'back') {
       const b = G.back;
       let h = '<div class="sum"><div class="card"><div class="k">⏱</div><div class="v">' + fmtAway(b.away) + '</div></div>'
-        + '<div class="card"><div class="k">🌙</div><div class="v">' + b.cust + '</div></div>'
-        + '<div class="card"><div class="k">🪙</div><div class="v up">+' + b.n + (b.capped ? ' <small>MAX</small>' : '') + '</div></div></div>';
+        + '<div class="card"><div class="k">🫧</div><div class="v">' + b.cust + '</div></div>'
+        + '<div class="card"><div class="k">🪙</div><div class="v up">+' + b.n + '</div></div></div>';
       if (b.bonus) h += '<div class="clerk"><div class="say">' + b.bonus.ic + ' ' + T(b.bonus.ko, b.bonus.en) + ' <b>+' + b.bonus.coin + '</b></div></div>';
       const m = [];
       if (b.mess.puddle) m.push('🧹 ' + b.mess.puddle);
@@ -545,21 +560,21 @@
 
   // ── 떠나 있던 동안 ──
   function offline(sec) {
-    const full = NIGHT_CAP(), n = Math.min(Math.floor(NIGHT_H() * sec / 3600), full);
-    return { n, full, cust: Math.floor(n / Math.max(1, PAY())) };
+    if (sec < AWAY_MIN) return { n: 0, cust: 0 };
+    return { n: NIGHT_ONE(), cust: NW };
   }
   const BONUS = [
-    { ic: '💵', ko: '세탁기 안에 지폐가 있었다', en: 'A bill was left in a washer', k: .5 },
-    { ic: '💝', ko: '단골이 선물을 두고 갔다', en: 'A regular left a gift', k: .2, rep: .3 },
-    { ic: '😴', ko: '밤새 자고 간 손님이 팁을 두고 갔다', en: 'Someone slept over and left a tip', k: .3 },
-    { ic: '💍', ko: '빨래에서 반지가 나왔다', en: 'A ring turned up in the laundry', k: .15, rep: .5 },
+    { ic: '💵', ko: '세탁기 안에 지폐가 있었다', en: 'A bill was left in a washer', k: 3 },
+    { ic: '💝', ko: '단골이 선물을 두고 갔다', en: 'A regular left a gift', k: 1.5, rep: .3 },
+    { ic: '😴', ko: '밤새 자고 간 손님이 팁을 두고 갔다', en: 'Someone slept over and left a tip', k: 2 },
+    { ic: '💍', ko: '빨래에서 반지가 나왔다', en: 'A ring turned up in the laundry', k: 1, rep: .5 },
   ];
   function checkBack(away) {
     if (G.place !== 'shop' || away < 60) return;
     const o = offline(away); if (o.n <= 0) return;
-    o.away = away; o.capped = o.n >= o.full;
+    o.away = away;
     o.bonus = Math.random() < .15 ? Object.assign({}, pick(BONUS)) : null;
-    if (o.bonus) o.bonus.coin = Math.max(10, Math.round(o.full * o.bonus.k));
+    if (o.bonus) o.bonus.coin = Math.max(8, Math.round(o.n * o.bonus.k));
     o.mess = { puddle: away > 1800 ? 1 + (Math.random() < .5 ? 1 : 0) : 0, broken: (away > 7200 && Math.random() < .6) ? 1 : 0 };
     G.back = o; openPanel('back');
   }
@@ -671,17 +686,12 @@
     if (S.up.vend) { shadow(VEND.x, VEND.y, 20); spr('vending', VEND.x, VEND.y, 1); }
     for (let i = 0; i < S.up.plant; i++) spr('plant', PLANTS[i][0], PLANTS[i][1], 1);
     spr('basket', 40, 300, 1);
-    for (let i = 0; i < S.up.rack && i < SHELF.length; i++) {   // 진열대(벽 선반)
-      const y = SHELF[i];
-      ctx.fillStyle = 'rgba(0,0,0,.18)'; ctx.fillRect(TABLE.x - 74, y + 5, 148, 3);
-      ctx.fillStyle = '#5a4634'; ctx.fillRect(TABLE.x - 74, y, 148, 5);
-      ctx.fillStyle = '#7a6248'; ctx.fillRect(TABLE.x - 74, y, 148, 2);
-    }
     const ents = [];
     ents.push({ y: BENCH.y - 2, f: () => { shadow(BENCH.x, BENCH.y, 50); spr('bench', BENCH.x, BENCH.y, 1); } });
     if (S.up.bench) ents.push({ y: BENCH2.y - 2, f: () => { shadow(BENCH2.x, BENCH2.y, 50); spr('bench', BENCH2.x, BENCH2.y, 1); } });
     ents.push({ y: TABLE.y - 2, f: () => { shadow(TABLE.x, TABLE.y, 100); spr('table', TABLE.x, TABLE.y, 1); if (S.up.fold) spr('folder', TABLE.x + 90, TABLE.y, 1); } });
-    for (const p of piles) ents.push({ y: (p.y || TOP) === TOP ? TABLE.y - 1.5 : p.y, f: () => drawPile(p) });   // 선반 위 빨래는 벽 쪽이라 먼저 그린다
+    for (const t of TABLES.slice(0, S.up.rack)) ents.push({ y: t.y - 2, f: () => { shadow(t.x, t.y, 100); spr('table', t.x, t.y, 1); } });
+    for (const p of piles) ents.push({ y: p.sy || TABLE.y - 1.5, f: () => drawPile(p) });
     for (const p of puddles) ents.push({ y: p.y - 30, f: () => { ring(p.x, p.y + 4, 20, 8, '#9fe07a'); if (ok('puddle')) spr('puddle', p.x, p.y + 6, 1); else { ctx.fillStyle = 'rgba(120,180,60,.7)'; ctx.beginPath(); ctx.ellipse(p.x, p.y, 16, 7, 0, 0, Math.PI * 2); ctx.fill(); } if (p.hits) bar(p.x, p.y - 30, 24, p.hits / MOP_N, '#7fe08a'); } });
     for (const k of cash) ents.push({ y: k.y - 1, f: () => {
       const b = Math.sin(G.anim * 2 + k.t) * 1.5;
