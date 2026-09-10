@@ -46,7 +46,7 @@
 
   // ── 저장 ──
   const CROPS = [['🥔', '감자', 'Potato'], ['🌾', '보리', 'Barley'], ['🌽', '옥수수', 'Corn'], ['🍞', '밀', 'Wheat'], ['🍚', '쌀', 'Rice']];   // 씨앗 단계 순서. 단가가 점점 오른다(사장님 2026-09-09)
-  const YIELD = [3, 3, 4, 4, 5], PRICE = [0.6, 1, 1.4, 2, 3];   // 단가는 원래(1/1.6/2.4/3.4/5)의 0.6배 — 사장님 "플레이시간 두 배"(2026-09-09), 건물값 2배·수확량 강화 10단계 상한과 함께   // 한 알당 🧱. 기본 수확량은 원래대로, 강화로 단계적으로 오른다
+  const YIELD = [3, 3, 4, 4, 5], PRICE = [1, 1.6, 2.4, 3.4, 5];   // 감자는 1대 1 — 10개 보내면 재료 10개. 위 씨앗은 단가가 오른다 (사장님 2026-09-10)
   function mkPlot() { return { t: 0, ripe: false, dust: false }; }
   function fresh() {
     return { sol: 1, clock: 8, crop: 0, mat: 0, water: 40, up: { plot: 0, drill: 0, res: 0, dam: 0, solar: 0, cargo: 0, auto: 0, wheels: 0, seed: 0, wall: 0, drone: 0, dish: 0, yield: 0, pine: 0 }, bought: {}, city: [], q: [], plots: [Object.assign(mkPlot(), { t: .9 }), Object.assign(mkPlot(), { t: .55 })], rate: 0, launches: 0, shipped: 0, built: 0, t: 0, lv: 0 };
@@ -57,7 +57,7 @@
 
   // ── 수치 ──
   const cnt = t => S.city.filter(b => b.type === t && b.done).length;
-  const GROW = () => 50;   // 한 판 익는 데 50초 고정(사장님 2026-09-09 최종). 태양광·연구소는 속도 대신 수확량을 올린다
+  const GROW = () => 20;   // 한 판 익는 데 20초 고정(사장님 2026-09-10). 태양광·연구소는 속도 대신 수확량을 올린다
   const YLD = () => Math.round(YIELD[S.up.seed] * (1 + .25 * S.up.solar) * (1 + .05 * cnt('lab')) * (1 + .05 * cnt('park')) * (1 + .15 * S.up.yield));   // 수확량: 씨앗 × 태양광(+25%/단계) × 연구소(+5%/채) × 공원(+5%/채) × 수확량 강화(+15%/단계)
   const CAP = () => Math.round(60 * Math.pow(1.5, S.up.cargo));   // 화물칸: 작물로 사서 끝없이 넓힌다(60→90→135→…)
   const RATE = () => 1 + .1 * cnt('hab') + .2 * cnt('sky');
@@ -309,6 +309,7 @@
     if (R.state === 'pad' && S.up.auto && S.crop >= CAP()) launch();
     if (R.state === 'up') { R.t += dt; R.y = R.t * R.t * 90; const lp = lanePos(clamp(R.y / 420, 0, 1)); if (R.t > .1 && Math.random() < .8) parts.push({ x: lp.x + rnd(-8, 8), y: lp.y + rnd(-6, 6), vx: rnd(-40, 40), vy: rnd(-20, 20), t: rnd(.6, 1.2), r: rnd(6, 12), col: 'rgba(240,230,220,.6)' }); if (R.y > 420) { R.state = 'away'; R.t = 0; } }
     else if (R.state === 'away') { R.t += dt; if (R.t >= TRIP()) { R.state = 'down'; R.t = 0; R.y = 420; } }
+    // 재료 = 보낸 작물 × 도시 보너스(주거·고층) × 씨앗 단가. 감자 단가가 1 이라 맨처음은 1대 1 (사장님 2026-09-10)
     else if (R.state === 'down') { R.t += dt; R.y = Math.max(0, 420 - R.t * 110); const lp2 = lanePos(clamp(R.y / 420, 0, 1)); if (Math.random() < .6) parts.push({ x: lp2.x + rnd(-6, 6), y: lp2.y + rnd(-4, 4), vx: rnd(-50, 50), vy: rnd(-30, 30), t: .5, r: rnd(3, 7), col: 'rgba(255,190,120,.7)' }); if (R.y <= 0) { R.state = 'pad'; SND.play('land'); for (let i = 0; i < 12; i++) puff(POS.pad.x + rnd(-30, 30), POS.pad.y + rnd(-10, 10)); const n = Math.round(R.cargo * RATE() * (R.price || 1)); R.cargo = 0; setTimeout(() => supply(n), 500); } }
     const nf = cnt('factory'); if (nf) { G.factT += dt; if (G.factT >= 10) { G.factT = 0; const n = Math.round(1.5 * nf); S.mat += n; const b = S.city.findIndex(c => c.type === 'factory' && c.done), a = lotPos(b); float(a.x, a.y - 70, '+' + n, '#ffb070'); } }
     robot(dt); bugStep(dt); stormStep(dt); camera(dt); roverStep(dt);
@@ -424,6 +425,47 @@
   function closeShop() { if (G.place !== 'shop') return; G.place = 'play'; $('shop').classList.remove('show'); }
   $('tabs').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; G.tab = b.dataset.tab; renderShop(); });
   document.getElementById('btnRedev').addEventListener('click', () => { document.getElementById('ending').classList.remove('show'); SND.play('click'); });
+  // ── 사면 뭘 얻는지 (사장님 2026-09-10) ──
+  // 지금 값 → 사고 난 값을 그대로 보여준다. 말로만 "+15%" 하면 그게 얼마인지 모른다.
+  const r1 = v => (Math.round(v * 100) / 100).toString();
+  const s1 = v => (Math.round(v * 10) / 10).toString();
+  function gainOf(it) {
+    const n = S.bought[it.id] || 0, u = S.up, C = cnt;
+    const yld = (seed, solar, yl, lab, park) => Math.round(YIELD[seed] * (1 + .25 * solar) * (1 + .05 * lab) * (1 + .05 * park) * (1 + .15 * yl));
+    const regen = (dr, res, dam) => .08 + .12 * dr * (1 + .25 * res) + .6 * dam;
+    const wcap = (res, dam) => 40 + 150 * res + 1000 * dam;
+    const trip = (port, dish) => Math.max(6, 15 * Math.pow(.9, port) * Math.pow(.85, dish));
+    const rate = (hab, sky) => 1 + .1 * hab + .2 * sky;
+    const A = (ko, en) => T(ko, en);
+    switch (it.id) {
+      case 'plot': return A('밭 ' + S.plots.length + '칸 → ' + (S.plots.length + 1) + '칸', 'Plots ' + S.plots.length + ' → ' + (S.plots.length + 1));
+      case 'yield': return A('한 판 수확 ' + yld(u.seed, u.solar, u.yield, C('lab'), C('park')) + ' → ' + yld(u.seed, u.solar, u.yield + 1, C('lab'), C('park')),
+                             'Harvest ' + yld(u.seed, u.solar, u.yield, C('lab'), C('park')) + ' → ' + yld(u.seed, u.solar, u.yield + 1, C('lab'), C('park')));
+      case 'solar': return A('한 판 수확 ' + yld(u.seed, u.solar, u.yield, C('lab'), C('park')) + ' → ' + yld(u.seed, u.solar + 1, u.yield, C('lab'), C('park')),
+                             'Harvest ' + yld(u.seed, u.solar, u.yield, C('lab'), C('park')) + ' → ' + yld(u.seed, u.solar + 1, u.yield, C('lab'), C('park')));
+      case 'seed': { const a = CROPS[u.seed], b = CROPS[Math.min(CROPS.length - 1, u.seed + 1)];
+        return A(a[0] + ' ' + a[1] + ' → ' + b[0] + ' ' + b[1] + ' · 단가 ' + r1(PRICE[u.seed]) + ' → ' + r1(PRICE[Math.min(4, u.seed + 1)]),
+                 a[0] + ' ' + a[2] + ' → ' + b[0] + ' ' + b[2] + ' · price ' + r1(PRICE[u.seed]) + ' → ' + r1(PRICE[Math.min(4, u.seed + 1)])); }
+      case 'drill': return A('물 회복 ' + r1(regen(u.drill, u.res, u.dam)) + ' → ' + r1(regen(u.drill + 1, u.res, u.dam)) + '/초',
+                             'Water ' + r1(regen(u.drill, u.res, u.dam)) + ' → ' + r1(regen(u.drill + 1, u.res, u.dam)) + '/s');
+      case 'res': return A('물통 ' + wcap(u.res, u.dam) + ' → ' + wcap(u.res + 1, u.dam), 'Tank ' + wcap(u.res, u.dam) + ' → ' + wcap(u.res + 1, u.dam));
+      case 'dam': return A('물통 ' + wcap(u.res, u.dam) + ' → ' + wcap(u.res, u.dam + 1), 'Tank ' + wcap(u.res, u.dam) + ' → ' + wcap(u.res, u.dam + 1));
+      case 'cargo': return A('자루 ' + CAP() + ' → ' + Math.round(60 * Math.pow(1.5, u.cargo + 1)), 'Bay ' + CAP() + ' → ' + Math.round(60 * Math.pow(1.5, u.cargo + 1)));
+      case 'wheels': return A('이동 ' + SPEED() + ' → ' + (70 + 35 * (u.wheels + 1)), 'Speed ' + SPEED() + ' → ' + (70 + 35 * (u.wheels + 1)));
+      case 'dish': return A('로켓 왕복 ' + s1(trip(C('port'), u.dish)) + '초 → ' + s1(trip(C('port'), u.dish + 1)) + '초', 'Trip ' + s1(trip(C('port'), u.dish)) + 's → ' + s1(trip(C('port'), u.dish + 1)) + 's');
+      case 'port': return A('로켓 왕복 ' + s1(trip(C('port'), u.dish)) + '초 → ' + s1(trip(C('port') + 1, u.dish)) + '초', 'Trip ' + s1(trip(C('port'), u.dish)) + 's → ' + s1(trip(C('port') + 1, u.dish)) + 's');
+      case 'auto': return A('자루가 차면 알아서 발사', 'Auto-launch when full');
+      case 'wall': return A('모래폭풍에 밭이 안 덮인다', 'Storms cannot bury plots');
+      case 'drone': return A('벌레를 알아서 쫓는다', 'Zaps bugs for you');
+      case 'hab': return A('작물 값 ×' + r1(rate(C('hab'), C('sky'))) + ' → ×' + r1(rate(C('hab') + 1, C('sky'))), 'Crop value ×' + r1(rate(C('hab'), C('sky'))) + ' → ×' + r1(rate(C('hab') + 1, C('sky'))));
+      case 'sky': return A('작물 값 ×' + r1(rate(C('hab'), C('sky'))) + ' → ×' + r1(rate(C('hab'), C('sky') + 1)), 'Crop value ×' + r1(rate(C('hab'), C('sky'))) + ' → ×' + r1(rate(C('hab'), C('sky') + 1)));
+      case 'lab': return A('한 판 수확 ' + yld(u.seed, u.solar, u.yield, C('lab'), C('park')) + ' → ' + yld(u.seed, u.solar, u.yield, C('lab') + 1, C('park')) + ' (+5%)', 'Harvest +5%');
+      case 'park': return A('한 판 수확 ' + yld(u.seed, u.solar, u.yield, C('lab'), C('park')) + ' → ' + yld(u.seed, u.solar, u.yield, C('lab'), C('park') + 1) + ' (+5%)', 'Harvest +5%');
+      case 'factory': return A('10초마다 🧱 ' + Math.round(1.5 * C('factory')) + ' → ' + Math.round(1.5 * (C('factory') + 1)), 'Bricks per 10s ' + Math.round(1.5 * C('factory')) + ' → ' + Math.round(1.5 * (C('factory') + 1)));
+      case 'pine': return A('화성이 초록으로 물든다 (경치)', 'Greens the planet (scenery)');
+    }
+    return '';
+  }
   function renderShop() {
     if (G.place !== 'shop') return;
     $('tabs').querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.tab === G.tab));
@@ -432,9 +474,12 @@
     $('shopBody').innerHTML = '<div class="items">' + list.map(it => {
       const p = priceOf(it), n = S.bought[it.id] || 0, max = p === null, lvl = it.price ? 'Lv ' + n + '/' + it.price.length : (it.id === 'cargo' ? 'Lv ' + n + (it.max ? '/' + it.max : '') + ' · ' + CAP() : '×' + n) + (isCity(it) && BL.length ? ' · ' + T(BL[pickPreview(it.id)].ko, BL[pickPreview(it.id)].en) : '');
       const cls = max ? 'max' : canBuy(it) ? '' : 'no';
-      return '<div class="item ' + cls + '" data-id="' + it.id + '"><span class="ic">' + it.ic + '</span><span class="n">' + T(it.ko, it.en) + '<small>' + lvl + '</small></span><span class="p">' + (max ? 'MAX' : curIc(it) + ' ' + p) + '</span></div>';
+      // 도시는 설명을 안 붙인다 — 작물 팔아 도시를 짓는 것 자체가 목표다 (사장님 2026-09-10)
+      const gain = (max || it.tab === 'city') ? '' : gainOf(it);
+      return '<div class="item ' + cls + '" data-id="' + it.id + '"><span class="ic">' + it.ic + '</span>' + '<span class="n">' + T(it.ko, it.en) + '<small>' + lvl + '</small>' + (gain ? '<em>' + gain + '</em>' : '') + '</span>' + '<span class="p">' + (max ? 'MAX' : curIc(it) + ' ' + p) + '</span></div>';
     }).join('') + (list.length ? '' : '<div style="opacity:.5;text-align:center;padding:30px">🔒</div>') + '</div>';
-    $('shopBody').querySelectorAll('.item').forEach(el => el.addEventListener('click', () => { const it = SHOP.find(i => i.id === el.dataset.id); if (it) buy(it); }));
+    // 사는 건 오른쪽 값(돈 표시)을 눌러야 된다 — 칸 아무 데나 눌러 잘못 사는 일이 없게 (사장님 2026-09-10)
+    $('shopBody').querySelectorAll('.item .p').forEach(el => el.addEventListener('click', e => { e.stopPropagation(); const it = SHOP.find(i => i.id === el.parentNode.dataset.id); if (it) buy(it); }));
   }
 
   // ── 시작 ──
