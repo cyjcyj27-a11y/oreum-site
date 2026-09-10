@@ -54,22 +54,22 @@
 
   // ── 상점 ──
   const SHOP = [
-    { id: 'wash', ic: '🫧', ko: '세탁기 +1', en: 'Washer +1', price: [300, 450, 650, 900, 1300] },
+    { id: 'wash', ic: '🫧', img: 'washer', ko: '세탁기 +1', en: 'Washer +1', price: [300, 450, 650, 900, 1300] },
     { id: 'motor', ic: '⚡', ko: '고속 모터', en: 'Fast motor', price: [250, 500, 900] },
     { id: 'soap', ic: '🧴', ko: '고급 세제', en: 'Premium soap', price: [400, 800] },
     { id: 'box', ic: '🪙', ko: '큰 동전통', en: 'Big coin box', price: [250, 500] },
     { id: 'tough', ic: '🔧', ko: '튼튼한 세탁기', en: 'Sturdy washers', price: [350, 700] },
-    { id: 'cart', ic: '🛒', ko: '동전 카트', en: 'Coin cart', price: [350] },
-    { id: 'tools', ic: '🧰', ko: '공구함', en: 'Toolbox', price: [600] },
+    { id: 'cart', ic: '🛒', img: 'coinbag', ko: '동전 카트', en: 'Coin cart', price: [350] },
+    { id: 'tools', ic: '🧰', img: 'toolbox', ko: '공구함', en: 'Toolbox', price: [600] },
     { id: 'mop', ic: '🧹', ko: '대걸레', en: 'Mop', price: [300] },
     { id: 'shoes', ic: '👟', ko: '운동화', en: 'Sneakers', price: [200, 400] },
-    { id: 'vend', ic: '🥤', ko: '자판기', en: 'Vending machine', price: [400] },
-    { id: 'bench', ic: '🪑', ko: '벤치 +1', en: 'Bench +1', price: [200] },
-    { id: 'rack', ic: '🧺', ko: '빨래 탁자 +1', en: 'Laundry table +1', price: [350, 700] },   // 벤치(앉는 자리)와 헷갈리지 않게 이름·아이콘을 빨래 쪽으로
-    { id: 'cctv', ic: '📷', ko: 'CCTV', en: 'CCTV', price: [500] },
-    { id: 'neon', ic: '💡', ko: '네온 간판', en: 'Neon sign', price: [450, 900] },
-    { id: 'plant', ic: '🪴', ko: '화분', en: 'Plant', price: [120, 180, 240] },
-    { id: 'fold', ic: '🤖', ko: '빨래 개는 기계', en: 'Folding machine', price: [1200] },
+    { id: 'vend', ic: '🥤', img: 'vending', ko: '자판기', en: 'Vending machine', price: [400] },
+    { id: 'bench', ic: '🪑', img: 'bench', ko: '벤치 +1', en: 'Bench +1', price: [200] },
+    { id: 'rack', ic: '🧺', img: 'table', ko: '빨래 탁자 +1', en: 'Laundry table +1', price: [350, 700] },   // 벤치(앉는 자리)와 헷갈리지 않게 이름·아이콘을 빨래 쪽으로
+    { id: 'cctv', ic: '📷', img: 'cctv', ko: 'CCTV', en: 'CCTV', price: [500] },
+    { id: 'neon', ic: '💡', img: 'neon', ko: '네온 간판', en: 'Neon sign', price: [450, 900] },
+    { id: 'plant', ic: '🪴', img: 'plant', ko: '화분', en: 'Plant', price: [120, 180, 240] },
+    { id: 'fold', ic: '🤖', img: 'folder', ko: '빨래 개는 기계', en: 'Folding machine', price: [1200] },
     { id: 'alarm', ic: '🗞️', ko: '야간 전단지', en: 'Night flyers', price: [800, 2000] },   // 새벽 손님이 더 온다
     { id: 'branch', ic: '🏪', ko: '', en: '', price: [6000, 15000, 40000] },
   ];
@@ -564,7 +564,8 @@
         const lv = S.up[it.id], max = lv >= it.price.length, price = max ? 0 : priceOf(it), can = canBuy(it);
         const d = document.createElement('div'); d.className = 'item' + (max ? ' max' : can ? '' : ' no');
         const name = it.id === 'branch' ? (max ? T('4호점', 'Branch 4') : branchName()) : T(it.ko, it.en);
-        d.innerHTML = '<div class="ic">' + it.ic + '</div><div class="n">' + name + '<small>' + (it.price.length > 1 && it.id !== 'branch' ? 'Lv ' + lv + ' / ' + it.price.length : (max ? '✓' : '')) + '</small></div><div class="p">' + (max ? 'MAX' : '🪙 ' + price) + '</div>';
+        const icon = it.img && ok(it.img) ? '<div class="ic pic"><img src="img/' + it.img + '.png" alt=""></div>' : '<div class="ic">' + it.ic + '</div>';
+        d.innerHTML = icon + '<div class="n">' + name + '<small>' + (it.price.length > 1 && it.id !== 'branch' ? 'Lv ' + lv + ' / ' + it.price.length : (max ? '✓' : '')) + '</small></div><div class="p">' + (max ? 'MAX' : '🪙 ' + price) + '</div>';
         if (can) d.addEventListener('click', () => { S.money -= price; S.up[it.id]++; SND.play('coins'); SND.play('nice'); applyUpgrade(it.id); save(); renderPanel(); toast(it.id === 'branch' ? '🏪' : 'NICE', false, 900); });
         wrap.appendChild(d);
       }
