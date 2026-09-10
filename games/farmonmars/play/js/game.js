@@ -9,7 +9,7 @@
   const T = (ko, en) => EN ? en : ko;
   const isTouch = ('ontouchstart' in window) && matchMedia('(pointer: coarse)').matches;
   if (isTouch) document.body.classList.add('touch');
-  const rnd = (a, b) => a + Math.random() * (b - a), clamp = (v, a, b) => v < a ? a : v > b ? b : v, lerp = (a, b, t) => a + (b - a) * t;
+  const rnd = (a, b) => a + Math.random() * (b - a), clamp = (v, a, b) => v < a ? a : v > b ? b : v, lerp = (a, b, t) => a + (b - a) * t, pick = a => a[Math.floor(Math.random() * a.length)];
   const TAU = Math.PI * 2;
 
   // ── 곰돌이 그림: 옆(오른쪽)·정면·뒷모습 4장씩 + 포즈 ──
@@ -65,7 +65,8 @@
   const WCAP = () => 40 + 150 * S.up.res + 1000 * S.up.dam;
   const REGEN = () => .08 + .12 * S.up.drill * (1 + .25 * S.up.res) + .6 * S.up.dam;
   const SPEED = () => 70 + 35 * S.up.wheels;
-  const OFF_CAP = () => (S.up.auto ? 8 : 2) * 3600;
+  // 없는 동안 — 자동 수확기가 사일로에 쌓는다. 사일로가 차면 멈춘다(초당 수확과 무관, 늘 3시간이면 가득)
+  const SILO_MUL = () => (S.up.auto ? 1 : .5), SILO_CAP = () => CAP() * 2 * SILO_MUL(), SILO_H = () => SILO_CAP() / 3;
   const LAUNCH_MIN = 10;
 
   // ── 상점 ──
@@ -74,7 +75,7 @@
     { id: 'plot', tab: 'farm', ic: '🌱', ko: '농장 돔 (개간)', en: 'Farm dome (reclaim)', price: plotPrices, dur: 4 },
     { id: 'yield', tab: 'farm', ic: '🧺', ko: '수확량', en: 'Yield', base: 300, mul: 1.4, max: 10, dur: 5, need: () => S.plots.length >= MAX_PLOT },
     { id: 'drill', tab: 'farm', ic: '⛏️', ko: '얼음 드릴', en: 'Ice drill', price: [30, 60, 120, 240, 480, 900], dur: 5 },
-    { id: 'cargo', tab: 'farm', ic: '🚀', ko: '화물칸', en: 'Cargo bay', base: 40, mul: 1.5, cur: 'crop', dur: 4 },   // 값은 작물(🌽)
+    { id: 'cargo', tab: 'farm', ic: '🚀', ko: '화물칸', en: 'Cargo bay', base: 40, mul: 1.5, max: 10, cur: 'crop', dur: 4 },   // 값은 작물(🌽). 10단계까지 — 오프라인 상한이 화물칸에 걸려 있어 끝없이 두면 자루가 너무 커진다
     { id: 'wheels', tab: 'farm', ic: '🛞', ko: '바퀴', en: 'Wheels', price: [35, 80, 180], dur: 3 },
     { id: 'seed', tab: 'farm', ic: '🌾', ko: '씨앗', en: 'Seeds', price: [50, 150, 400, 1000], dur: 3, need: () => S.launches >= 1 },
     { id: 'solar', tab: 'farm', ic: '☀️', ko: '태양광', en: 'Solar', price: [60, 120, 240, 480, 900], dur: 5, need: () => S.launches >= 1 },
@@ -170,7 +171,7 @@
   const P = { x: POS.pod.x, y: POS.pod.y + 70, dir: 'down', face: 1, clock: 0, moving: false, task: null, hold: 0, idleT: 2, hide: false, tx: null, ty: null, pose: null, poseT: 0, still: 0 };
   function doPose(n, t) { P.pose = n; P.poseT = t; }
   const R = { state: 'pad', t: 0, cargo: 0, y: 0 };
-  let bug = null, floats = [], flys = [], parts = [], sand = [], rovers = [];
+  let bug = null, floats = [], flys = [], parts = [], sand = [], rovers = [], sacks = [];
   const STORM_T = 12;
 
   // ── HUD ──
@@ -234,6 +235,7 @@
     S.plots.forEach((p, i) => { if (p.dust) { const a = plotPos(i), d = Math.hypot(a.x - P.x, a.y - P.y); if (d < bd) { bd = d; best = i; } } });
     if (best >= 0) { P.task = { kind: 'clean', i: best }; const a = plotPos(best); standAt(a.x, a.y); return; }
     if (bug && bug.state === 'eat' && !S.up.drone) { P.task = { kind: 'shoo' }; const a = plotPos(bug.plot); standAt(a.x, a.y); return; }
+    if (S.up.auto && sacks.length) { let k = null, kd = 1e9; for (const q of sacks) { const d = Math.hypot(q.x - P.x, q.y - P.y); if (d < kd) { kd = d; k = q; } } if (k) { P.task = { kind: 'sack', o: k }; standAt(k.x, k.y - 40); return; } }
     P.task = null;
   }
   function robot(dt) {
@@ -246,6 +248,7 @@
     if (t.kind === 'harvest') { const p = S.plots[t.i]; if (!p || !p.ripe) { P.task = null; return; } if (walkStep(dt)) { P.dir = 'up'; P.hold += dt; if (P.hold >= 1.1) { P.hold = 0; harvest(p, t.i, false); P.task = null; } } return; }
     if (t.kind === 'clean') { const p = S.plots[t.i]; if (!p || !p.dust) { P.task = null; return; } if (walkStep(dt)) { P.dir = 'up'; P.hold += dt; if (P.hold > .4 && P.hold < .45) SND.play('brush'); if (P.hold >= 1.4) { P.hold = 0; p.dust = false; const a = plotPos(t.i); for (let i = 0; i < 8; i++) puff(a.x + rnd(-25, 25), a.y - rnd(0, 40)); P.task = null; } } return; }
     if (t.kind === 'shoo') { if (!bug || bug.state !== 'eat') { P.task = null; return; } if (walkStep(dt)) { shoo(true); P.task = null; } return; }
+    if (t.kind === 'sack') { if (!sacks.includes(t.o)) { P.task = null; return; } if (walkStep(dt)) { P.dir = 'up'; P.hold += dt; if (P.hold >= .6) { P.hold = 0; grabSack(t.o); P.task = null; } } return; }
   }
 
   // ── 벌레 ──
@@ -314,17 +317,58 @@
 
   // ── 떠나 있던 동안 ──
   function offline(sec) {
-    const s = Math.min(sec, OFF_CAP()), crop = Math.floor(S.rate * s * .5); if (crop <= 0) return null;
-    if (S.up.auto) return { mat: Math.round(crop * RATE() * PRICE[S.up.seed]), crop: 0 };
-    return { crop, mat: 0 };
+    const full = Math.round(SILO_CAP()), crop = Math.min(Math.round(SILO_H() * sec / 3600), full);
+    return { crop, full };
   }
+  const BONUS = [
+    { ic: '☄️', ko: '밭에 운석이 떨어졌다', en: 'A meteorite fell on the farm', mat: .5 },
+    { ic: '📦', ko: '지구에서 소포가 왔다', en: 'A parcel came from Earth', mat: .35 },
+    { ic: '🌱', ko: '돌연변이 작물이 한 판 자랐다', en: 'A mutant crop grew overnight', crop: .6 },
+    { ic: '🏺', ko: '모래 속에서 유물이 나왔다', en: 'A relic turned up in the sand', mat: .8 },
+  ];
   function checkBack(away) {
-    if (G.place !== 'play' || away < 60) return; const o = offline(away); if (!o) return;
-    const c = toWorld(W / 2, H / 2);
-    if (o.mat) { S.mat += o.mat; fly(c.x, c.y, '🧱', 8, 'matN'); toast('+' + o.mat + ' 🧱', false, 2000); }
-    else { S.crop += o.crop; fly(c.x, c.y, CROPS[S.up.seed][0], 8, 'cropN'); toast('+' + o.crop + ' ' + CROPS[S.up.seed][0], false, 2000); }
-    SND.play('crates'); SND.play('nice'); save(); renderShop();
+    if (G.place !== 'play' || away < 60) return;
+    const o = offline(away); if (o.crop <= 0) return;
+    o.away = away; o.capped = o.crop >= o.full;
+    o.bonus = Math.random() < .15 ? Object.assign({}, pick(BONUS)) : null;
+    if (o.bonus) {
+      const base = o.full * PRICE[S.up.seed];
+      o.bonus.matN = o.bonus.mat ? Math.max(10, Math.round(base * o.bonus.mat)) : 0;
+      o.bonus.cropN = o.bonus.crop ? Math.max(10, Math.round(o.full * o.bonus.crop)) : 0;
+    }
+    o.mess = { dust: away > 1800 ? 2 + Math.floor(Math.random() * 3) : 0, bug: (away > 7200 && Math.random() < .5) ? 1 : 0 };
+    G.back = o; showBack(o);
   }
+  const fmtAway = s => { const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60); return h ? h + 'h ' + m + 'm' : m + 'm'; };
+  function showBack(o) {
+    const ic = CROPS[S.up.seed][0];
+    $('backRow').innerHTML = '⏱ ' + fmtAway(o.away) + '<br>' + ic + ' <b>+' + o.crop + '</b>' + (o.capped ? ' <small>MAX</small>' : '')
+      + (o.mess.dust || o.mess.bug ? '<br>' + (o.mess.dust ? '🌫️ ' + o.mess.dust + '  ' : '') + (o.mess.bug ? '🐛 ' + o.mess.bug : '') : '');
+    const bb = $('backBonus');
+    if (o.bonus) { bb.hidden = false; bb.innerHTML = o.bonus.ic + ' ' + T(o.bonus.ko, o.bonus.en) + ' <b>' + (o.bonus.matN ? '🧱 +' + o.bonus.matN : ic + ' +' + o.bonus.cropN) + '</b>'; }
+    else bb.hidden = true;
+    $('back').classList.add('show');
+  }
+  // 받기 — 자루가 밭에 쏟아진다. 주워야 내 것이 된다
+  function takeBack() {
+    const o = G.back; G.back = null; $('back').classList.remove('show');
+    if (!o) return;
+    let left = o.crop + (o.bonus ? o.bonus.cropN || 0 : 0);
+    if (o.bonus && o.bonus.matN) { S.mat += o.bonus.matN; fly(POS.pad.x, POS.pad.y - 40, '🧱', 8, 'matN'); float(POS.pad.x, POS.pad.y - 90, '+' + o.bonus.matN, '#ffb070'); }
+    const unit = Math.max(4, Math.round(left / 8));
+    let guard = 0;
+    while (left > 0 && guard++ < 16) {
+      const v = Math.min(left, unit); left -= v;
+      const i = Math.floor(Math.random() * Math.max(1, S.plots.length)), a = plotPos(i);
+      sacks.push({ x: a.x + rnd(-34, 34), y: a.y + rnd(6, 34), val: v, t: rnd(0, 6) });
+    }
+    S.plots.forEach(p => { p.t = 1; p.ripe = true; });   // 밭이 다 익어 있다
+    if (!S.up.wall) { let d = o.mess.dust; S.plots.forEach(p => { if (d > 0 && !p.dust) { p.dust = true; d--; } }); }
+    if (o.mess.bug && !bug) setTimeout(() => { if (!bug) spawnBug(); }, 1200);
+    SND.play('crates'); if (o.bonus) SND.play('nice'); save(); renderShop();
+  }
+  $('btnBack').addEventListener('click', takeBack);
+  function grabSack(k) { const i = sacks.indexOf(k); if (i < 0) return; sacks.splice(i, 1); S.crop += k.val; G.secCrop += k.val; fly(k.x, k.y - 10, CROPS[S.up.seed][0], Math.min(8, k.val), 'cropN'); float(k.x, k.y - 40, '+' + k.val); SND.play('pop'); }
   document.addEventListener('visibilitychange', () => { if (document.hidden) { if (G.place === 'play') save(); } else if (S.t && G.place === 'play') checkBack((Date.now() - S.t) / 1000); });
 
   // ── 입력: 탭 = 행동, 끌기 = 화면, 휠·손가락 벌리기 = 줌 ──
@@ -346,6 +390,7 @@
   canvas.addEventListener('pointerup', endPtr); canvas.addEventListener('pointercancel', endPtr);
   canvas.addEventListener('wheel', e => { if (G.place !== 'play') return; e.preventDefault(); const p = toLocal(e); zoomAt(p.x, p.y, e.deltaY < 0 ? 1.15 : 1 / 1.15); }, { passive: false });
   function tap(wx, wy) {
+    for (const k of sacks) if (Math.hypot(wx - k.x, (wy - k.y) * 1.4) < 30) { grabSack(k); return; }
     if (bug && bug.state === 'eat' && Math.hypot(wx - bug.x, wy - (bug.y - 12)) < 30) { shoo(false); return; }
     for (const q of S.q) if (Math.abs(wx - q.x) < 50 && Math.abs(wy - q.y) < 50) { q.prog = Math.min(q.dur, q.prog + q.dur / 3); /* 망치 3번이면 완공(사장님). 안 두드리면 곰이 천천히 짓는다 */ SND.play('hammer'); for (let i = 0; i < 6; i++) sparkle(q.x + rnd(-16, 16), q.y - rnd(0, 30)); if (q.prog >= q.dur) { S.q.splice(S.q.indexOf(q), 1); finishSite(q); if (P.task && P.task.q === q) P.task = null; } return; }
     if (Math.abs(wx - POS.pad.x) < 44 && wy > POS.pad.y - 130 && wy < POS.pad.y + 40) { if (R.state === 'pad') { if (!launch()) { SND.play('click'); float(POS.pad.x, POS.pad.y - 90, CROPS[S.up.seed][0] + ' ' + LAUNCH_MIN, '#fff'); } } return; }
@@ -387,7 +432,7 @@
     $('shopMat').textContent = Math.floor(S.mat);
     const list = SHOP.filter(it => it.tab === G.tab && visible(it));
     $('shopBody').innerHTML = '<div class="items">' + list.map(it => {
-      const p = priceOf(it), n = S.bought[it.id] || 0, max = p === null, lvl = it.price ? 'Lv ' + n + '/' + it.price.length : (it.id === 'cargo' ? 'Lv ' + n + ' · ' + CAP() : '×' + n) + (isCity(it) && BL.length ? ' · ' + T(BL[pickPreview(it.id)].ko, BL[pickPreview(it.id)].en) : '');
+      const p = priceOf(it), n = S.bought[it.id] || 0, max = p === null, lvl = it.price ? 'Lv ' + n + '/' + it.price.length : (it.id === 'cargo' ? 'Lv ' + n + (it.max ? '/' + it.max : '') + ' · ' + CAP() : '×' + n) + (isCity(it) && BL.length ? ' · ' + T(BL[pickPreview(it.id)].ko, BL[pickPreview(it.id)].en) : '');
       const cls = max ? 'max' : canBuy(it) ? '' : 'no';
       return '<div class="item ' + cls + '" data-id="' + it.id + '"><span class="ic">' + it.ic + '</span><span class="n">' + T(it.ko, it.en) + '<small>' + lvl + '</small></span><span class="p">' + (max ? 'MAX' : curIc(it) + ' ' + p) + '</span></div>';
     }).join('') + (list.length ? '' : '<div style="opacity:.5;text-align:center;padding:30px">🔒</div>') + '</div>';
@@ -397,7 +442,7 @@
   // ── 시작 ──
   function begin(away) {
     SND.init(); $('title').classList.add('hide'); $('cropIc').textContent = CROPS[S.up.seed][0];
-    G.shown.crop = S.crop; G.shown.mat = S.mat; P.x = POS.pod.x; P.y = POS.pod.y + 70; P.task = null; P.tx = null; P.pose = null; P.still = 0; R.state = 'pad'; R.cargo = 0; R.y = 0; G.storm = 0; G.warn = 0; G.stormT = rnd(150, 220); G.free = 0; G.z = .9; G.cam.x = P.x - W / 2 / G.z; G.cam.y = P.y - 20 - H / 2 / G.z; clampCam(); bug = null; floats = []; flys = []; parts = []; sand = [];
+    G.shown.crop = S.crop; G.shown.mat = S.mat; P.x = POS.pod.x; P.y = POS.pod.y + 70; P.task = null; P.tx = null; P.pose = null; P.still = 0; R.state = 'pad'; R.cargo = 0; R.y = 0; G.storm = 0; G.warn = 0; G.stormT = rnd(150, 220); G.free = 0; G.z = .9; G.cam.x = P.x - W / 2 / G.z; G.cam.y = P.y - 20 - H / 2 / G.z; clampCam(); bug = null; floats = []; flys = []; parts = []; sand = []; sacks = [];
     G.place = 'play'; document.body.classList.add('playing'); $('topbar').classList.add('show'); $('keys').classList.add('show');
     toast('DAY ' + S.sol, false, 1400); SND.play('bell'); hud();
     if (away) checkBack(away); save();
@@ -715,6 +760,15 @@
     S.plots.forEach((p, i) => L.push({ y: plotPos(i).y + 2, f: () => drawPlot(p, i, n) }));
     S.q.forEach(q => L.push({ y: q.y + 4, f: () => drawSite(q, n) }));
     S.city.forEach((b, i) => { if (b.done) L.push({ y: lotPos(i).y + 36, f: () => drawBuilding(b, i, n) }); });
+    for (const k of sacks) L.push({ y: k.y, f: () => {
+      if (!vis(k.x, k.y, 40)) return;
+      const b = Math.sin(G.anim * 2 + k.t) * 1.5;
+      ctx.save(); ctx.fillStyle = 'rgba(0,0,0,.25)'; ctx.beginPath(); ctx.ellipse(k.x, k.y + 6, 13, 5, 0, 0, TAU); ctx.fill(); ctx.restore();
+      ctx.fillStyle = mix('#c9a066', '#5a4a30', n); rr(k.x - 11, k.y - 16 + b, 22, 20, 6); ctx.fill();
+      ctx.fillStyle = mix('#8d6a3c', '#3c3020', n); rr(k.x - 8, k.y - 20 + b, 16, 6, 3); ctx.fill();
+      icon(CROPS[S.up.seed][0], k.x, k.y - 6 + b, 13);
+      txt('+' + k.val, k.x, k.y - 28 + b, '#ffd24a', 11);
+    } });
     L.push({ y: P.y + 4, f: drawBear }); if (bug) L.push({ y: bug.y + 1, f: drawBug }); L.push({ y: 1e9, f: () => drawDrone(n) });
     L.sort((a, b) => a.y - b.y); for (const o of L) o.f();
     ctx.restore();
@@ -733,5 +787,5 @@
   let last = performance.now();
   function frame(now) { const dt = Math.min(.05, (now - last) / 1000); last = now; update(dt); requestAnimationFrame(frame); }
   requestAnimationFrame(frame);
-  window.__fm = { tick(n) { for (let i = 0; i < (n || 1); i++) update(1 / 60); }, G, P, R, POS, plotPos, lotPos, get S() { return S; }, get bug() { return bug; }, tap, launch, buy, SHOP, newGame, contGame, openShop, closeShop, spawnBug, storm() { G.warn = .1; }, finishAll() { while (S.q.length) { const q = S.q.shift(); finishSite(q); } }, zoomAt, zrows, zcount, drect, DIST, save, load, loaded: () => FRAMES.side.length + FRAMES.down.length + FRAMES.up.length };
+  window.__fm = { get sacks() { return sacks; }, offline, checkBack, takeBack, tick(n) { for (let i = 0; i < (n || 1); i++) update(1 / 60); }, G, P, R, POS, plotPos, lotPos, get S() { return S; }, get bug() { return bug; }, tap, launch, buy, SHOP, newGame, contGame, openShop, closeShop, spawnBug, storm() { G.warn = .1; }, finishAll() { while (S.q.length) { const q = S.q.shift(); finishSite(q); } }, zoomAt, zrows, zcount, drect, DIST, save, load, loaded: () => FRAMES.side.length + FRAMES.down.length + FRAMES.up.length };
 })();

@@ -76,6 +76,14 @@
   .items .item .n { flex: 1; font-size: 15px; } .items .item .n small { display: block; font-size: 12px; opacity: .6; margin-top: 2px; }
   .items .item .p { font-family: 'Ria', sans-serif; font-size: 17px; color: #ffd24a; white-space: nowrap; } .items .item.max .p { color: #7fe08a; }
   @media (max-width: 700px) { #shop .body { padding: 10px; } #shop .head h2 { font-size: 18px; } #shop .tabs button { font-size: 13px; padding: 5px 10px; } .items { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); } .items .item { padding: 7px 9px; } }
+  #back { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(20,12,6,.72); z-index: 60; }
+  #back.show { display: flex; }
+  #back .box { background: #fff7e8; color: #3a2a18; border: 4px solid #d99a3a; border-radius: 22px; padding: 26px 32px; text-align: center; box-shadow: 0 12px 40px rgba(0,0,0,.45); max-width: 86vw; }
+  #back .ttl { font-size: clamp(18px, 3vw, 28px); font-weight: 900; letter-spacing: 2px; }
+  #back .row { font-size: clamp(15px, 2.4vw, 21px); margin-top: 12px; line-height: 1.7; }
+  #back .row b { font-weight: 900; }
+  #back .bonus { margin-top: 12px; padding: 10px 14px; border-radius: 14px; background: #ffeec4; font-size: clamp(14px, 2.2vw, 19px); }
+  #back .next { margin-top: 20px; font-size: 20px; padding: 10px 34px; }
   #ending { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(20,12,6,.72); z-index: 60; }
   #ending.show { display: flex; }
   #ending .box { background: #fff7e8; color: #3a2a18; border: 4px solid #d99a3a; border-radius: 22px; padding: 30px 36px; text-align: center; box-shadow: 0 12px 40px rgba(0,0,0,.45); max-width: 86vw; }
@@ -96,6 +104,7 @@
   <button id="btnSfx" class="tog" title="효과음">🔊</button>
 </div>
 <div id="toast"></div>
+<div id="back"><div class="box"><div class="ttl">WELCOME BACK</div><div class="row" id="backRow"></div><div class="bonus" id="backBonus" hidden></div><button class="next" id="btnBack" data-en="COLLECT">받기</button></div></div>
 <div id="ending"><div class="box"><div class="ttl" data-en="Colony on Mars complete.">화성에 식민지를 완공하였습니다.</div><div class="sub" data-en="Redevelop?">재개발하실까요?</div><button class="next" id="btnRedev" data-en="REDEVELOP">재개발</button></div></div>
 <div id="keys" data-en="Click act · Drag view · Wheel zoom<br>B build · M music · K sound">클릭 행동 · 끌기 화면 · 휠 확대<br>B 빌드 · M 음악 · K 효과음</div>
 <button id="btnShop" class="tbtn" data-en="BUILD">빌드</button>
@@ -132,7 +141,7 @@
 <script src="assets/landscape.js?v=48"></script>
 <script src="js/audio.js?v=1"></script>
 <script src="js/buildings.js?v=1"></script>
-<script src="js/game.js?v=47"></script>
+<script src="js/game.js?v=51"></script>
 <script src="/assets/visit.js" defer></script>
 <script src="/assets/game-events.js" defer></script>
 </body>
