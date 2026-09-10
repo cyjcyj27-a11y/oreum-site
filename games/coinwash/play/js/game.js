@@ -15,13 +15,14 @@
   const CUST_ALL = ['cust1', 'cust2', 'cust3', 'cust4', 'cust5', 'cust6', 'cust7', 'cust8'];
   const NAMES = ['washer', 'exch', 'table', 'basket', 'bench', 'vending', 'plant', 'pile', 'folded', 'coin', 'coinbag', 'toolbox', 'wall', 'owner', 'drunk', 'drunkz', 'kicker', 'thief', 'blanket', 'sleeper', 'cctv', 'neon', 'folder', 'puddle', 'clerk_face'].concat(CUST_ALL);
   const IMG = {}; let loaded = 0;
-  NAMES.forEach(n => { const im = new Image(); im.onload = () => { im.ok = true; loaded++; }; im.onerror = () => { loaded++; }; im.src = 'img/' + n + '.png'; IMG[n] = im; });
+  const IMGV = '?v=2';   // 그림을 고치면 이 번호를 올린다 (브라우저가 옛 그림을 물고 있다)
+  NAMES.forEach(n => { const im = new Image(); im.onload = () => { im.ok = true; loaded++; }; im.onerror = () => { loaded++; }; im.src = 'img/' + n + '.png' + IMGV; IMG[n] = im; });
   const ok = n => IMG[n] && IMG[n].ok;
   const ANIMS = ['idle', 'walk', 'fix', 'fold', 'sleep'], FRAMES = {}, FPS = 6;
   const PEOPLE = ['owner', 'drunk', 'kicker', 'thief', 'blanket'].concat(CUST_ALL);
   PEOPLE.forEach(n => { FRAMES[n] = {}; ANIMS.forEach(a => {
     const list = []; FRAMES[n][a] = list;
-    const probe = k => { const im = new Image(); im.onload = () => { im.ok = true; list.push(im); if (k < 30) probe(k + 1); }; im.onerror = () => { }; im.src = 'img/' + n + '/' + a + '_' + String(k).padStart(2, '0') + '.png'; };
+    const probe = k => { const im = new Image(); im.onload = () => { im.ok = true; list.push(im); if (k < 30) probe(k + 1); }; im.onerror = () => { }; im.src = 'img/' + n + '/' + a + '_' + String(k).padStart(2, '0') + '.png' + IMGV; };
     probe(1);
   }); });
   function frameOf(name, anim, clock) {
@@ -564,7 +565,7 @@
         const lv = S.up[it.id], max = lv >= it.price.length, price = max ? 0 : priceOf(it), can = canBuy(it);
         const d = document.createElement('div'); d.className = 'item' + (max ? ' max' : can ? '' : ' no');
         const name = it.id === 'branch' ? (max ? T('4호점', 'Branch 4') : branchName()) : T(it.ko, it.en);
-        const icon = it.img && ok(it.img) ? '<div class="ic pic"><img src="img/' + it.img + '.png" alt=""></div>' : '<div class="ic">' + it.ic + '</div>';
+        const icon = it.img && ok(it.img) ? '<div class="ic pic"><img src="img/' + it.img + '.png' + IMGV + '" alt=""></div>' : '<div class="ic">' + it.ic + '</div>';
         d.innerHTML = icon + '<div class="n">' + name + '<small>' + (it.price.length > 1 && it.id !== 'branch' ? 'Lv ' + lv + ' / ' + it.price.length : (max ? '✓' : '')) + '</small></div><div class="p">' + (max ? 'MAX' : '🪙 ' + price) + '</div>';
         if (can) d.addEventListener('click', () => { S.money -= price; S.up[it.id]++; SND.play('coins'); SND.play('nice'); applyUpgrade(it.id); save(); renderPanel(); toast(it.id === 'branch' ? '🏪' : 'NICE', false, 900); });
         wrap.appendChild(d);
@@ -575,7 +576,7 @@
       for (const k of CUST_ALL.concat(['blanket', 'clerk'])) {
         const img = k === 'clerk' ? 'clerk_face' : k; if (!ok(img)) continue; const r = S.reg[k], h = r ? heartsOf(k) : 0, met = r && r.n > 0;
         const d = document.createElement('div'); d.className = 'card' + (met ? '' : ' none');
-        d.innerHTML = '<img src="img/' + img + '.png" alt=""><div class="nm">' + (met ? T(REG_NAMES[k][0], REG_NAMES[k][1]) : '???') + '</div><div class="hs">' + '♥'.repeat(h) + '♡'.repeat(5 - h) + '</div><div class="cnt">' + (met ? '× ' + r.n : '') + '</div>';
+        d.innerHTML = '<img src="img/' + img + '.png' + IMGV + '" alt=""><div class="nm">' + (met ? T(REG_NAMES[k][0], REG_NAMES[k][1]) : '???') + '</div><div class="hs">' + '♥'.repeat(h) + '♡'.repeat(5 - h) + '</div><div class="cnt">' + (met ? '× ' + r.n : '') + '</div>';
         wrap.appendChild(d);
       }
       body.appendChild(wrap);
