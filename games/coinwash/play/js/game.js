@@ -65,7 +65,7 @@
     { id: 'shoes', ic: '👟', ko: '운동화', en: 'Sneakers', price: [200, 400] },
     { id: 'vend', ic: '🥤', ko: '자판기', en: 'Vending machine', price: [400] },
     { id: 'bench', ic: '🪑', ko: '벤치 +1', en: 'Bench +1', price: [200] },
-    { id: 'rack', ic: '🪑', ko: '접는 탁자 +1', en: 'Folding table +1', price: [350, 700] },
+    { id: 'rack', ic: '🧺', ko: '빨래 탁자 +1', en: 'Laundry table +1', price: [350, 700] },   // 벤치(앉는 자리)와 헷갈리지 않게 이름·아이콘을 빨래 쪽으로
     { id: 'cctv', ic: '📷', ko: 'CCTV', en: 'CCTV', price: [500] },
     { id: 'neon', ic: '💡', ko: '네온 간판', en: 'Neon sign', price: [450, 900] },
     { id: 'plant', ic: '🪴', ko: '화분', en: 'Plant', price: [120, 180, 240] },
