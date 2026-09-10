@@ -97,14 +97,14 @@
     return h < 2 ? .9 / night : h < 5 ? 1.5 / night : h < 6 ? 1.2 / night : h < 10 ? 2.4 : h < 17 ? 1.8 : h < 22 ? 1.1 : .9 / night; }
 
   // ── 가게 상태 ──
-  const P = { x: 320, y: 236, face: 1, path: [], bob: 0, clock: 0, moving: false, task: null, hold: 0, idleT: 3, user: false };
+  const P = { x: 320, y: 236, face: 1, path: [], bob: 0, clock: 0, moving: false, task: null, hold: 0, idleT: 3, user: false, pat: 0, wipe: 0 };
   let washers = [], custs = [], piles = [], floats = [], smoke = [], drops = [], puddles = [], fcoins = [], flys = [], cash = [];
   const mkWasher = i => ({ i, x: WX(i), state: 'idle', t: 0, total: 1, coins: 0, owner: null, cloth: null, blink: rnd(0, 6), rot: 0, hits: 0, doneT: 0 });
   function resetShop() {
     layout();
     washers = []; for (let i = 0; i < NW; i++) washers.push(mkWasher(i));
     custs = []; piles = []; floats = []; smoke = []; drops = []; puddles = []; fcoins = []; flys = []; cash = []; G.spawnT = 2.5; G.jerkT = 12;
-    P.x = 320; P.y = 236; P.path = []; P.task = null; P.user = false;
+    P.x = 320; P.y = 236; P.path = []; P.task = null; P.user = false; P.pat = 0; P.wipe = 0; P.idleT = 1.5;
   }
   function rollWeather() { S.weather = season() === 3 ? (Math.random() < .35 ? 'snow' : 'clear') : (Math.random() < .3 ? 'rain' : 'clear'); }
 
@@ -118,6 +118,7 @@
     const h = Math.floor(S.clock), m = Math.floor((S.clock % 1) * 60); $('clockN').textContent = String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0'); $('clock').classList.toggle('dawn', isDawn());
   }
   function float(x, y, s, col) { floats.push({ x, y, s, col: col || '#ffd24a', t: 1.2 }); }
+  function sparkleAt(x, y) { smoke.push({ x, y, r: rnd(1, 2.4), t: rnd(.3, .6), vy: rnd(-24, -8), col: '255,255,255' }); }
   function earn(n, x, y, pre) { S.money += n; S.earned += n; G.today += n; G.secEarn += n; if (x !== undefined) float(x, y, (pre || '+') + n); }
   function repAdd(d) { S.rep = clamp(S.rep + d * (d > 0 ? 1 + .15 * S.up.plant : 1), 1, 5); }
   function coinTarget() {
@@ -388,30 +389,51 @@
     rollWeather(); G.today = 0; G.servedN = 0; G.angryN = 0; G.rep0 = S.rep; save();
   }
 
-  // ── 주인 — 장식이자 자동화. 카트·공구함·대걸레를 사면 알아서 돈다 ──
+  const TASK_IC = { fix: '🔧', mop: '🧹', coins: '🪙', cash: '🪙', fold: '👕' };
+  // ── 주인 — 가게를 돌아다니며 스스로 일한다. 설비를 사면 같은 일을 더 빨리 한다 ──
   const nearest = list => { let b = null, bd = 1e9; for (const o of list) { const d = Math.hypot(o.x - P.x, (o.y || WASH_Y) - P.y); if (d < bd) { bd = d; b = o; } } return b; };
-  // 일 고르기 — 시켜서 할 때(byHand)는 설비가 없어도 한다. 설비를 사면 시키지 않아도 알아서 한다
+  // 일 고르기 — 설비가 없어도 다 한다(느리게). 공구함·대걸레·카트를 사면 빨라지고 미리미리 챙긴다
   function pickOwnerTask(byHand) {
-    const can = k => byHand || S.up[k];
+    const up = k => S.up[k] > 0;
+    const coinAt = n => { const w = nearest(washers.filter(w => w.coins >= n && w.state !== 'broken')); return w ? { kind: 'coins', o: w, x: w.x, y: WASH_Y + 12, dur: .3 } : null; };
     let t = null;
-    if (can('tools')) { const w = nearest(washers.filter(w => w.state === 'broken')); if (w) t = { kind: 'fix', o: w, x: w.x, y: WASH_Y + 12, dur: (byHand && !S.up.tools ? 3.2 : 2.2) - .4 * S.up.tough }; }
-    if (!t && can('mop') && puddles.length) { const p = nearest(puddles); t = { kind: 'mop', o: p, x: p.x, y: p.y, dur: byHand && !S.up.mop ? 2 : 1.4 }; }
-    if (!t && can('fold')) { const w = nearest(washers.filter(w => w.state === 'done' && !orphan(w))); if (w && piles.length < PILE_CAP()) t = { kind: 'fold', o: w, x: w.x, y: WASH_Y + 12, dur: .4 }; }
-    if (!t && can('cart')) { const w = nearest(washers.filter(w => w.coins >= (byHand ? 1 : Math.min(CAP(), 8)) && w.state !== 'broken')); if (w) t = { kind: 'coins', o: w, x: w.x, y: WASH_Y + 12, dur: .3 }; }
-    if (!t && can('cart') && cash.length) { const k = nearest(cash); t = { kind: 'cash', o: k, x: k.x, y: k.y, dur: .35 }; }
+    // 1. 고장 — 공구함이 있으면 빨리 고친다
+    { const w = nearest(washers.filter(w => w.state === 'broken')); if (w) t = { kind: 'fix', o: w, x: w.x, y: WASH_Y + 12, dur: (up('tools') ? 2.2 : 3.4) - .4 * S.up.tough }; }
+    // 2. 동전통이 꽉 찬 세탁기 — 비워야 손님이 다시 쓴다
+    if (!t) t = coinAt(byHand ? 1 : CAP());
+    // 3. 물웅덩이 — 대걸레가 있으면 빨리 닦는다
+    if (!t && puddles.length) { const p = nearest(puddles); t = { kind: 'mop', o: p, x: p.x, y: p.y, dur: up('mop') ? 1.4 : 2.2 }; }
+    // 4. 다 된 빨래를 개어 놓는다 (개는 기계를 사면 기계가 하고 아저씨는 딴 일을 한다)
+    if (!t && (byHand || !up('fold'))) { const w = nearest(washers.filter(w => w.state === 'done' && !orphan(w) && (byHand || w.doneT > 3))); if (w && piles.length < PILE_CAP()) t = { kind: 'fold', o: w, x: w.x, y: WASH_Y + 12, dur: up('fold') ? .4 : 1.3 }; }   // doneT 3초 — 손님이나 사장님이 먼저 가져갈 틈을 둔다
+    // 5. 카트가 있으면 꽉 차기 전에 미리 수금하고 흘린 동전도 줍는다
+    if (!t && up('cart')) t = coinAt(Math.min(CAP(), 8));
+    if (!t && cash.length && (byHand || up('cart'))) { const k = nearest(cash); t = { kind: 'cash', o: k, x: k.x, y: k.y, dur: .35 }; }
     return t;
+  }
+  // 일이 없을 때 도는 자리 — 세탁기 줄, 빨래 탁자, 환전기, 자판기, 문 앞
+  function patrolSpots() {
+    const a = [{ x: EXCH.x + 40, y: 246 }, { x: WX(0), y: WASH_Y + 16 }, { x: TABLE.x - 60, y: TABLE.y - 36 }, { x: WX(Math.floor(NW / 2)), y: WASH_Y + 16 }, { x: TABLE.x + 60, y: TABLE.y - 36 }, { x: WX(NW - 1), y: WASH_Y + 16 }, { x: DOOR.x - 68, y: 262 }];
+    if (S.up.vend) a.push({ x: VEND.x - 40, y: 246 });
+    return a;
+  }
+  function nextPatrol() {
+    const a = patrolSpots();
+    P.pat = (P.pat + 1 + (Math.random() < .3 ? 1 : 0)) % a.length;
+    const s = a[P.pat];
+    goTo(P, clamp(s.x + rnd(-10, 10), FLOOR.x1 + 16, FLOOR.x2 - 16), s.y);
+    P.wipe = s.y < 200 ? 1.4 : 0;   // 세탁기 앞에 서면 유리를 한 번 닦는다
   }
   // 아저씨를 탭하면 일하러 간다
   function orderOwner() {
     const t = pickOwnerTask(true);
     P.user = false;
     if (!t) { P.task = null; SND.play('click'); float(P.x, P.y - 76, '💤', '#cfd6dd'); return; }
-    P.task = t; P.hold = 0; goTo(P, t.x, t.y);
-    SND.play('grab'); float(P.x, P.y - 76, { fix: '🔧', mop: '🧹', coins: '🪙', cash: '🪙', fold: '👕' }[t.kind] || '💪');
+    P.task = t; P.hold = 0; P.wipe = 0; goTo(P, t.x, t.y);
+    SND.play('grab'); float(P.x, P.y - 76, TASK_IC[t.kind] || '💪');
   }
   function updOwner(dt) {
     P.clock += dt;
-    if (!P.task && !P.user) { const t = pickOwnerTask(false); if (t) { P.task = t; P.hold = 0; goTo(P, t.x, t.y); } }
+    if (!P.task && !P.user) { const t = pickOwnerTask(false); if (t) { P.task = t; P.hold = 0; P.wipe = 0; goTo(P, t.x, t.y); } }
     if (P.task) {
       const t = P.task;
       if ((t.kind === 'fix' && t.o.state !== 'broken') || (t.kind === 'mop' && !puddles.includes(t.o)) || (t.kind === 'coins' && t.o.coins <= 0) || (t.kind === 'cash' && !cash.includes(t.o)) || (t.kind === 'fold' && t.o.state !== 'done')) { P.task = null; P.path = []; P.moving = false; return; }
@@ -421,8 +443,12 @@
         if (t.kind === 'fix' && Math.floor(P.hold * 2) !== Math.floor((P.hold - dt) * 2)) SND.play('fix');
         if (P.hold >= t.dur) { if (t.kind === 'fix') fixW(t.o); else if (t.kind === 'mop') mopDone(t.o); else if (t.kind === 'cash') grabCash(t.o); else if (t.kind === 'fold') { collect(t.o); startFold(t.o); } else collect(t.o); P.task = null; P.hold = 0; }
       }
-    } else if (P.path.length) { walk(P, dt, SPEED()); P.moving = true; if (!P.path.length) { P.user = false; P.idleT = rnd(5, 10); } }
-    else { P.moving = false; P.idleT -= dt; if (P.idleT <= 0) { P.idleT = rnd(5, 10); goTo(P, rnd(200, 440), rnd(222, 250)); } }
+    } else if (P.path.length) { walk(P, dt, SPEED()); P.moving = true; if (!P.path.length) { P.user = false; P.idleT = P.wipe ? P.wipe + rnd(.5, 1.2) : rnd(1.2, 3); } }
+    else {
+      P.moving = false; P.idleT -= dt;
+      if (P.wipe > 0) { P.wipe -= dt; if (Math.random() < dt * 6) sparkleAt(P.x + rnd(-14, 14), WASH_Y - rnd(16, 46)); if (P.wipe <= 0) SND.play('fold'); }
+      if (P.idleT <= 0) { P.idleT = rnd(1.2, 3); nextPatrol(); }
+    }
   }
 
   // ── 탭 ──
@@ -438,7 +464,7 @@
       return;
     }
     if (Math.abs(x - P.x) < 24 && y > P.y - 72 && y < P.y + 12) { orderOwner(); return; }
-    if (x > FLOOR.x1 && x < FLOOR.x2 && y > FLOOR.y1 && y < FLOOR.y2) { P.task = null; P.user = true; goTo(P, x, y); }
+    if (x > FLOOR.x1 && x < FLOOR.x2 && y > FLOOR.y1 && y < FLOOR.y2) { P.task = null; P.user = true; P.wipe = 0; goTo(P, x, y); }
   }
   canvas.addEventListener('pointerdown', e => { if (G.place !== 'shop') return; e.preventDefault(); const r = canvas.getBoundingClientRect(); tap((e.clientX - r.left) / r.width * W, (e.clientY - r.top) / r.height * H); });
 
@@ -650,6 +676,7 @@
     spr('owner', P.x, P.y, P.face, P.bob, undefined, pa, P.clock);
     if (S.up.cart && ok('coinbag')) ctx.drawImage(IMG.coinbag, Math.round(P.x - P.face * 18 - 7), Math.round(P.y - 22), 15, 15);
     if (S.up.tools && ok('toolbox')) ctx.drawImage(IMG.toolbox, Math.round(P.x + P.face * 14 - 6), Math.round(P.y - 16), 12, 15);
+    if (P.task) icon(TASK_IC[P.task.kind] || '💪', P.x, P.y - 90, 13);   // 무슨 일을 하러 가는지 머리 위에
     if (busy && P.task.dur > .5) bar(P.x, P.y - 78, 34, P.hold / P.task.dur, P.task.kind === 'fix' ? '#ffb040' : '#7fe08a');
   }
   const skyAt = () => { const h = S.clock; if (h >= 7 && h < 18) return 0; if (h >= 20 || h < 5) return 1; if (h < 7) return 1 - (h - 5) / 2; return (h - 18) / 2; };
@@ -737,7 +764,7 @@
     for (const c of custs) if (!c.gone && c.state !== 'away') ents.push({ y: seated(c) ? (c.seat < 3 ? BENCH.y : BENCH2.y) + 1 : c.y, f: () => drawCust(c) });
     ents.push({ y: P.y, f: drawOwner });
     ents.sort((a, b) => a.y - b.y); for (const e of ents) e.f();
-    for (const s of smoke) { ctx.fillStyle = 'rgba(90,90,100,' + (s.t * .5) + ')'; ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2); ctx.fill(); }
+    for (const s of smoke) { ctx.fillStyle = 'rgba(' + (s.col || '90,90,100') + ',' + (s.t * (s.col ? 1.4 : .5)) + ')'; ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2); ctx.fill(); }
     tintRoom();
     for (const f of flys) { if (f.t < 0) continue; if (ok('coin')) ctx.drawImage(IMG.coin, Math.round(f.x - 6), Math.round(f.y - 6), 12, 12); else { ctx.fillStyle = '#ffd24a'; ctx.beginPath(); ctx.arc(f.x, f.y, 5, 0, Math.PI * 2); ctx.fill(); } }
   }
