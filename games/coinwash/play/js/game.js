@@ -36,6 +36,7 @@
   const FLOOR = { x1: 22, y1: WASH_Y + 6, x2: 618, y2: 348 };
   const EXCH = { x: 46, y: 236 }, VEND = { x: 592, y: 236 };
   const TABLE = { x: 330, y: 300, w: 150 }, BENCH = { x: 128, y: 306, w: 112 }, BENCH2 = { x: 500, y: 306, w: 112 };
+  const TABLES = [{ x: 172, y: 262 }, { x: 488, y: 262 }];   // 접는 탁자를 더 놓는 자리 (벽 선반 대신, 사장님 2026-09-10)
   const DOOR = { x: 640, y: 288 }, LANE = 205, TOP = TABLE.y - 40;
   let NW = 3, SEATS = [92, 128, 164];
   const WX = i => 320 + (i - (NW - 1) / 2) * (NW <= 6 ? 88 : 72);
@@ -157,11 +158,43 @@
     if (!(midBand(c.y) && midBand(ty))) { if (Math.abs(c.y - LANE) > 4) p.push([c.x, LANE]); if (Math.abs(tx - c.x) > 4) p.push([tx, LANE]); }
     p.push([tx, ty]); c.path = p;
   }
+  // 가구 발자리 — 사람이 뚫고 지나가지 못한다 (앉을 벤치·물건 놓을 탁자는 목적지일 때만 들어간다)
+  function furn() {
+    const a = [{ x: BENCH.x, y: BENCH.y - 2, w: 104, h: 22 }, { x: TABLE.x, y: TABLE.y - 4, w: 140, h: 30 }];
+    if (S.up.bench) a.push({ x: BENCH2.x, y: BENCH2.y - 2, w: 104, h: 22 });
+    for (const t of TABLES.slice(0, S.up.rack)) a.push({ x: t.x, y: t.y - 4, w: 112, h: 28 });
+    if (S.up.vend) a.push({ x: VEND.x, y: VEND.y + 6, w: 46, h: 20 });
+    a.push({ x: EXCH.x, y: EXCH.y + 8, w: 54, h: 22 });
+    return a;
+  }
+  const inRect = (x, y, r) => Math.abs(x - r.x) < r.w / 2 && Math.abs(y - r.y) < r.h / 2;
+  function blockedAt(x, y, goal) {
+    for (const r of furn()) { if (goal && inRect(goal[0], goal[1], r)) continue; if (inRect(x, y, r)) return true; }
+    return false;
+  }
   function walk(c, dt, speed) {
     if (!c.path.length) return true;
     const [tx, ty] = c.path[0]; const dx = tx - c.x, dy = ty - c.y, d = Math.hypot(dx, dy), s = (speed || 70) * dt;
-    if (d <= s) { c.x = tx; c.y = ty; c.path.shift(); return !c.path.length; }
-    c.x += dx / d * s; c.y += dy / d * s; if (Math.abs(dx) > 1) c.face = dx < 0 ? -1 : 1; c.bob += dt * 12; return false;
+    if (d <= s) { c.x = tx; c.y = ty; c.path.shift(); c.stuck = 0; return !c.path.length; }
+    const goal = c.path[c.path.length - 1];
+    let nx = c.x + dx / d * s, ny = c.y + dy / d * s;
+    if (blockedAt(nx, ny, goal) && !blockedAt(c.x, c.y, goal)) {   // 가구를 만나면 모서리를 따라 돈다
+      const mx = Math.abs(nx - c.x) > .01 && !blockedAt(nx, c.y, goal), my = Math.abs(ny - c.y) > .01 && !blockedAt(c.x, ny, goal);
+      if (mx) ny = c.y;
+      else if (my) nx = c.x;
+      else {   // 정면으로 막혔다 — 가까운 모서리 쪽으로 비켜 돈다
+        const r = furn().find(q => !(goal && inRect(goal[0], goal[1], q)) && inRect(nx, ny, q));
+        let side = -1;
+        if (r) { const L = c.x - (r.x - r.w / 2 - 12), R = (r.x + r.w / 2 + 12) - c.x; side = L < R ? -1 : 1; }
+        let ax = c.x + side * s;
+        if (blockedAt(ax, c.y, goal) || ax < FLOOR.x1 + 8 || ax > FLOOR.x2 - 8) ax = c.x - side * s;
+        if (blockedAt(ax, c.y, goal) || ax < FLOOR.x1 + 8 || ax > FLOOR.x2 - 8) ax = c.x;
+        nx = ax; ny = c.y;
+      }
+      c.stuck = (c.stuck || 0) + dt;
+      if (c.stuck > 1.1) { c.stuck = 0; if (c.path.length > 1) c.path.shift(); else { c.x = tx; c.y = ty; c.path.shift(); return true; } }   // 오래 막히면 다음 지점으로
+    } else c.stuck = 0;
+    c.x = nx; c.y = ny; if (Math.abs(dx) > 1) c.face = dx < 0 ? -1 : 1; c.bob += dt * 12; return false;
   }
   const seatY = i => (i < 3 ? BENCH.y : BENCH2.y) - 6;
   const freeSeat = () => SEATS.findIndex((_, i) => !custs.some(c => c.seat === i));
@@ -307,8 +340,6 @@
     const n = w.coins; if (n <= 0) return; w.coins = 0; earn(n); flyCoins(w.x, WASH_Y - 44, n); float(w.x, WASH_Y - 80, '+' + n); SND.play('coins');
   }
   function mopDone(p) { const i = puddles.indexOf(p); if (i >= 0) puddles.splice(i, 1); SND.play('fold'); float(p.x, p.y - 30, '✨', '#fff'); }
-  // 탁자를 더 놓는다 — 벽 선반은 부자연스러워서 접는 탁자 그림을 하나씩 더 놓는 것으로 바꿨다(사장님 2026-09-10)
-  const TABLES = [{ x: 172, y: 262 }, { x: 488, y: 262 }];
   const tablesOn = () => [TABLE].concat(TABLES.slice(0, S.up.rack));
   function pileSlots() {
     const out = [];
