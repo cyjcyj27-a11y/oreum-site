@@ -289,14 +289,16 @@
     sand = sand.filter(s => s.x > -40);
   }
 
+  const bearSeen = () => P.x > G.cam.x + 40 / G.z && P.x < G.cam.x + (W - 40) / G.z && P.y > G.cam.y + 110 / G.z && P.y < G.cam.y + (H - 20) / G.z;
   // ── 카메라: 손대지 않으면 곰을 따라간다(줌은 손대지 않음 — 확대·축소는 휠·손가락 벌리기로만) ──
   function camera(dt) {
-    if (G.free > 0) { G.free -= dt; }
+    if (G.free > 0) { G.free -= dt; if (G.free <= 0 && bearSeen()) G.free = .5; }   // 곰이 화면에 보이면 카메라를 도로 뺏지 않는다
     else { const k = 1 - Math.pow(.15, dt); G.cam.x += (P.x - W / 2 / G.z - G.cam.x) * k; G.cam.y += (P.y - 20 - H / 2 / G.z - G.cam.y) * k; }
     clampCam();
   }
-  function clampCam() { if (!isFinite(G.z)) G.z = .9; if (!isFinite(G.cam.x)) G.cam.x = 0; if (!isFinite(G.cam.y)) G.cam.y = 0; G.z = clamp(G.z, Math.min(W / (mapW() + 40), H / (mapH() + 40)), 1.6); const vw = W / G.z, vh = H / G.z; G.cam.x = vw >= mapW() ? (mapW() - vw) / 2 : clamp(G.cam.x, 0, mapW() - vw); G.cam.y = vh >= mapH() ? (mapH() - vh) / 2 : clamp(G.cam.y, -64 / G.z, mapH() - vh); }   // 위쪽은 상단바 높이만큼 더 내려올 수 있게(강이 HUD 에 가리지 않게)
-  function zoomAt(sx, sy, f) { const before = toWorld(sx, sy); G.z = G.z * f; G.cam.x = before.x - sx / G.z; G.cam.y = before.y - sy / G.z; G.free = 8; clampCam(); }
+  const zMin = () => Math.min(W / (mapW() + 40), H / (mapH() + 40));
+  function clampCam() { if (!isFinite(G.z)) G.z = .9; if (!isFinite(G.cam.x)) G.cam.x = 0; if (!isFinite(G.cam.y)) G.cam.y = 0; G.z = clamp(G.z, zMin(), 1.6); const vw = W / G.z, vh = H / G.z; G.cam.x = vw >= mapW() ? (mapW() - vw) / 2 : clamp(G.cam.x, 0, mapW() - vw); G.cam.y = vh >= mapH() ? (mapH() - vh) / 2 : clamp(G.cam.y, -64 / G.z, mapH() - vh); }   // 위쪽은 상단바 높이만큼 더 내려올 수 있게(강이 HUD 에 가리지 않게)
+  function zoomAt(sx, sy, f) { const before = toWorld(sx, sy); G.z = clamp(G.z * f, zMin(), 1.6); G.cam.x = before.x - sx / G.z; G.cam.y = before.y - sy / G.z; G.free = 8; clampCam(); }
 
   // ── 갱신 ──
   function update(dt) {
@@ -371,16 +373,16 @@
   document.addEventListener('visibilitychange', () => { if (document.hidden) { if (G.place === 'play') save(); } else if (S.t && G.place === 'play') checkBack((Date.now() - S.t) / 1000); });
 
   // ── 입력: 탭 = 행동, 끌기 = 화면, 휠·손가락 벌리기 = 줌 ──
-  const ptrs = new Map(); const drag = { on: false, moved: false, x0: 0, y0: 0, cx0: 0, cy0: 0, pinch: 0, z0: 1, mx: 0, my: 0 };
+  const ptrs = new Map(); const drag = { on: false, moved: false, x0: 0, y0: 0, cx0: 0, cy0: 0, pinch: 0, z0: 1, mx: 0, my: 0, wx: 0, wy: 0 };
   const toLocal = e => { const r = canvas.getBoundingClientRect(); return { x: (e.clientX - r.left) / r.width * W, y: (e.clientY - r.top) / r.height * H }; };
   canvas.addEventListener('pointerdown', e => {
     if (G.place !== 'play') return; e.preventDefault(); const p = toLocal(e); ptrs.set(e.pointerId, p); try { canvas.setPointerCapture(e.pointerId); } catch (_) { }
     if (ptrs.size === 1) { drag.on = true; drag.moved = false; drag.x0 = p.x; drag.y0 = p.y; drag.cx0 = G.cam.x; drag.cy0 = G.cam.y; }
-    else if (ptrs.size === 2) { const [a, b] = [...ptrs.values()]; drag.pinch = Math.hypot(a.x - b.x, a.y - b.y); drag.z0 = G.z; drag.mx = (a.x + b.x) / 2; drag.my = (a.y + b.y) / 2; drag.moved = true; }
+    else if (ptrs.size === 2) { const [a, b] = [...ptrs.values()]; drag.pinch = Math.hypot(a.x - b.x, a.y - b.y); drag.z0 = G.z; drag.mx = (a.x + b.x) / 2; drag.my = (a.y + b.y) / 2; const w0 = toWorld(drag.mx, drag.my); drag.wx = w0.x; drag.wy = w0.y; drag.moved = true; }
   });
   canvas.addEventListener('pointermove', e => {
     if (!ptrs.has(e.pointerId)) return; const p = toLocal(e); ptrs.set(e.pointerId, p);
-    if (ptrs.size >= 2) { const [a, b] = [...ptrs.values()], d = Math.hypot(a.x - b.x, a.y - b.y); if (drag.pinch > 0) { const before = toWorld(drag.mx, drag.my); G.z = drag.z0 * d / drag.pinch; G.cam.x = before.x - drag.mx / G.z; G.cam.y = before.y - drag.my / G.z; G.free = 8; clampCam(); } return; }
+    if (ptrs.size >= 2) { const [a, b] = [...ptrs.values()], d = Math.hypot(a.x - b.x, a.y - b.y); if (drag.pinch > 0) { const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2; G.z = clamp(drag.z0 * d / drag.pinch, zMin(), 1.6); G.cam.x = drag.wx - mx / G.z; G.cam.y = drag.wy - my / G.z; G.free = 8; clampCam(); } return; }
     if (!drag.on) return;
     if (Math.hypot(p.x - drag.x0, p.y - drag.y0) > 6) drag.moved = true;
     if (drag.moved) { G.cam.x = drag.cx0 - (p.x - drag.x0) / G.z; G.cam.y = drag.cy0 - (p.y - drag.y0) / G.z; G.free = 8; clampCam(); }
@@ -776,8 +778,10 @@
     // 걸을 때는 그림을 바꾸지 않고(얼굴이 돌아가지 않게) 위아래로 살짝 튀고 좌우로 기우뚱만 한다
     const w = h * fr.width / fr.height, step = P.clock * 9, bob = busy ? Math.abs(Math.sin(G.anim * 8)) * 3 : (P.moving ? Math.abs(Math.sin(step)) * 3 : Math.sin(G.anim * 2) * 1), tilt = P.moving && !P.pose ? Math.sin(step) * .06 : 0;
     ctx.save(); ctx.translate(Math.round(x), Math.round(y + 4 - bob - jump)); ctx.rotate(tilt); if (face < 0) ctx.scale(-1, 1); ctx.drawImage(fr, -w / 2, -h, w, h); ctx.restore();
-    if (busy && P.task.kind === 'build') { ctx.save(); ctx.translate(x + 20, y - 40); ctx.rotate(Math.sin(G.anim * 8) * .9 - .6); icon('🔨', 0, -8, 16); ctx.restore(); }
-    if (busy && P.task.kind === 'clean') { ctx.save(); ctx.translate(x + 18, y - 36 + Math.sin(G.anim * 12) * 4); icon('🧹', 0, 0, 16); ctx.restore(); }
+    // 연장은 몸 바깥 오른쪽에서만 돈다(머리에 겹치지 않게)
+    const armX = x + w * .58 + 4;
+    if (busy && P.task.kind === 'build') { ctx.save(); ctx.translate(armX, y - 30); ctx.rotate(1 + Math.sin(G.anim * 8) * .75); icon('🔨', 0, -16, 16); ctx.restore(); }
+    if (busy && P.task.kind === 'clean') { ctx.save(); ctx.translate(armX + 2, y - 36 + Math.sin(G.anim * 12) * 4); icon('🧹', 0, 0, 16); ctx.restore(); }
   }
   function drawBug() {
     if (!bug) return; const x = bug.x, y = bug.y - 8 - bug.z; if (!vis(x, y, 40)) return;
