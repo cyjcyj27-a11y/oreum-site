@@ -75,7 +75,7 @@
     { id: 'branch', ic: '🏪', ko: '', en: '', price: [6000, 15000, 40000] },
   ];
   const PILE_CAP = () => 3 + 3 * S.up.rack,   // 개어 놓을 자리: 접는 탁자 3 + 진열대 한 칸마다 3 (사장님 2026-09-10 "옷을 놓을 데가 없어")
-    CAP = () => 12 + 12 * S.up.box, PAY = () => 4 + S.up.soap, WASH_T = () => 16 * [1, .8, .65, .55][S.up.motor], FIX_N = 3, MOP_N = 2;
+    CAP = () => 12 + 12 * S.up.box, PAY = () => 4 + S.up.soap, DRINK = 2,   /* 자판기 음료 한 잔 */ WASH_T = () => 16 * [1, .8, .65, .55][S.up.motor], FIX_N = 3, MOP_N = 2;
   // 없는 동안 — 밤 손님이 드문드문 와서 스스로 돌리고 간다. 동전통·금고가 차면 거기서 멈춘다(초당 수입과 무관)
   // 없는 동안 — 빨래를 넣어 놓고 간 손님이 있어서 세탁기마다 딱 한 판씩 돌아간다.
   // 시간은 보지 않는다. 세탁기를 많이 살수록만 늘어난다 (사장님 2026-09-10)
@@ -137,7 +137,7 @@
     const heavy = (season() === 3 ? Math.random() < .3 : S.day >= 3 && Math.random() < .12) && !used.includes('blanket') && ok('blanket');
     if (!heavy && !free.length) return;
     const img = heavy ? 'blanket' : pick(free); const r = regOf(img); r.n++;
-    const c = { kind: 'cust', img, x: DOOR.x + 30, y: DOOR.y, tx: 0, ty: 0, path: [], state: 'findW', patience: 1, drain: 0, timer: 0, washer: null, seat: -1, face: -1, bob: 0, gone: false, heavy, mode: pick(['sit', 'sit', 'sit', 'out', 'out', 'sleep']), cloth: pick(['#e0607a', '#4a8ee0', '#6ac26a', '#f0b040', '#b070d0']), zzz: 0, h: heartsOf(img) };
+    const c = { kind: 'cust', img, x: DOOR.x + 30, y: DOOR.y, tx: 0, ty: 0, path: [], state: 'findW', patience: 1, drain: 0, timer: 0, washer: null, seat: -1, face: -1, bob: 0, gone: false, heavy, mode: pick(['sit', 'sit', 'sit', 'out', 'out', 'sleep']), cloth: pick(['#e0607a', '#4a8ee0', '#6ac26a', '#f0b040', '#b070d0']), zzz: 0, vendT: rnd(5, 10), h: heartsOf(img) };
     if (c.h >= 3 && c.mode === 'sleep') c.mode = 'sit';
     custs.push(c); SND.play('door');
     if (c.h >= 5 && !r.gift) { r.gift = 1; earn(40, c.x - 40, c.y - 70); toast('💝', false, 1200); SND.play('nice'); }
@@ -235,11 +235,13 @@
           const w = c.washer; w.state = 'wash'; w.total = WASH_T() * (c.heavy ? 1.7 : 1); w.t = w.total; w.coins += PAY(); w.cloth = c.cloth; w.hits = 0;
           const pb = (c.heavy ? .6 : Math.min(.3, .06 + .01 * S.day)) * (1 - .35 * S.up.tough); w.breakAt = Math.random() < pb ? rnd(.25, .8) : -1;
           SND.play('coins'); float(w.x, WASH_Y - 80, '+' + PAY()); c.patience = 1;
-          if (S.up.vend && Math.random() < .45) { c.state = 'toVend'; goTo(c, VEND.x - 30, VEND.y + 8); }
+          if (S.up.vend && Math.random() < .8) { c.state = 'toVend'; goTo(c, VEND.x - 30, VEND.y + 8); }
           else afterLoad(c);
         }
         break;
-      case 'toVend': if (walk(c, dt)) { earn(1, c.x, c.y - 70); SND.play('coin'); afterLoad(c); } break;
+      case 'toVend': if (walk(c, dt)) { earn(DRINK, c.x, c.y - 70); SND.play('coin'); afterLoad(c); } break;
+      // 기다리다가 한 잔 더 뽑고 자리로 돌아온다
+      case 'toVendSit': if (walk(c, dt)) { earn(DRINK, c.x, c.y - 70); SND.play('coin'); c.vendT = rnd(14, 24); c.state = 'toSeat'; goTo(c, SEATS[c.seat], seatY(c.seat)); } break;
       case 'goOut': if (walk(c, dt)) { c.state = 'away'; c.timer = rnd(12, 30); c.x = DOOR.x + 40; } break;
       case 'away':
         if (c.washer.state !== 'wash' && c.washer.state !== 'broken') { c.timer -= dt; if (c.timer <= 0) { c.state = 'return'; SND.play('door'); returnFor(c); } }
@@ -248,6 +250,7 @@
       case 'sit': case 'sleep':
         if (c.washer.state === 'broken') c.drain = .03;
         if (c.state === 'sit') {
+          if (S.up.vend && c.seat >= 0 && c.washer.state === 'wash') { c.vendT -= dt; if (c.vendT <= 0) { c.state = 'toVendSit'; goTo(c, VEND.x - 30, VEND.y + 8); break; } }
           if (c.washer.state === 'done' && c.washer.owner === c) { c.timer = (c.timer || rnd(3, 7)); c.timer -= dt; if (c.timer <= 0) { c.state = 'toUnload'; goTo(c, c.washer.x, WASH_Y + 12); } }
           else if (c.washer.owner !== c) { const p = pileOf(c); if (p) { c.state = 'toTable'; c.seat = -1; goTo(c, tableSpot(), TABLE.y + 16); } }
         } else {
