@@ -35,12 +35,13 @@
   // ── 가게 안 자리 ──
   const WASH_Y = 134;
   const FLOOR = { x1: 22, y1: WASH_Y + 6, x2: 618, y2: 348 };
-  const EXCH = { x: 46, y: 236 }, VEND = { x: 592, y: 236 };
+  const EXCH = { x: 46, y: 236 }, VEND = { x: 540, y: 240 };
   const TABLE = { x: 330, y: 300, w: 150 }, BENCH = { x: 128, y: 306, w: 112 }, BENCH2 = { x: 500, y: 306, w: 112 };
   const TABLES = [{ x: 172, y: 262 }, { x: 488, y: 262 }];   // 접는 탁자를 더 놓는 자리 (벽 선반 대신, 사장님 2026-09-10)
   const DOOR = { x: 640, y: 288 }, LANE = 205, TOP = TABLE.y - 40;
   let NW = 3, SEATS = [92, 128, 164];
-  const WX = i => 320 + (i - (NW - 1) / 2) * (NW <= 6 ? 88 : 72);
+  // 세탁기 줄을 좁히고 왼쪽으로 당겨, 오른쪽 벽 앞을 자판기·화분 자리로 비운다 (사장님 2026-09-11)
+  const WX = i => 296 + (i - (NW - 1) / 2) * (NW <= 6 ? 80 : 64);
   function layout() { NW = 3 + S.up.wash; SEATS = [92, 128, 164]; if (S.up.bench) SEATS = SEATS.concat([464, 500, 536]); }
 
   // ── 저장 ──
@@ -740,7 +741,7 @@
     if (season() === 3) a += .04;
     if (a) { ctx.fillStyle = 'rgba(' + col + ',' + a + ')'; ctx.fillRect(0, 0, W, H); }
   }
-  const PLANTS = [[614, 196], [606, 332], [218, 338]];
+  const PLANTS = [[594, 240], [218, 338], [596, 332]];   // 첫 화분은 자판기 옆(오른쪽 벽 앞)
   function drawShop() {
     drawRoom();
     for (const w of washers) drawWasher(w);
