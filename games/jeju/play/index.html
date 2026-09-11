@@ -75,9 +75,15 @@
 
   /* 폰 조작 */
   .tbtn, #pad { display: none; }
-  body.touch #pad { display: grid; position: fixed; left: 18px; bottom: 18px; grid-template-columns: 56px 56px 56px; grid-template-rows: 56px 56px 56px; gap: 4px; }
-  #pad button { border-radius: 12px; border: 1px solid rgba(255,255,255,.3); background: rgba(0,0,0,.35); color: #fff; font-size: 30px; touch-action: none; }
-  #padU { grid-column: 2; grid-row: 1; } #padL { grid-column: 1; grid-row: 2; } #padR { grid-column: 3; grid-row: 2; } #padD { grid-column: 2; grid-row: 3; }
+  /* 폰 이동은 왼쪽 아래 고정 둥근 조이스틱 (사장님 2026-09-12 "조이스틱은 둥근거 달아야지").
+     왼쪽 아래 구석은 전체화면 알약이라 그 위에 놓는다 — 시바·스카이라이더와 같은 코드 */
+  body.touch #pad { display: block; position: fixed; left: calc(14px + env(safe-area-inset-left)); bottom: calc(50px + env(safe-area-inset-bottom));
+    width: 186px; height: 186px; border-radius: 50%; border: 2px solid rgba(255,255,255,.45); background: rgba(20,24,30,.38);
+    touch-action: none; -webkit-user-select: none; user-select: none; z-index: 6; }
+  #knob { position: absolute; left: 50%; top: 50%; width: 72px; height: 72px; margin: -36px 0 0 -36px; border-radius: 50%;
+    border: 2px solid rgba(255,255,255,.75); background: rgba(255,255,255,.3); pointer-events: none; }
+  #pad.on #knob { background: rgba(255,255,255,.5); }
+  @media (max-height: 520px) { body.touch #pad { width: 160px; height: 160px; left: calc(10px + env(safe-area-inset-left)); bottom: calc(46px + env(safe-area-inset-bottom)); } #knob { width: 62px; height: 62px; margin: -31px 0 0 -31px; } }
   body.touch .tbtn { display: block; position: fixed; right: 18px; border-radius: 50%; border: 1px solid rgba(255,255,255,.35); background: rgba(0,0,0,.35); color: #fff; font-family: inherit; font-size: 22px; touch-action: none; }
   body.touch #horn { bottom: 118px; width: 60px; height: 60px; right: 25px; }
   #foot { display: none !important; } body.touch #foot.show { display: block !important; bottom: 196px; width: 60px; height: 60px; right: 25px; border-color: rgba(255,230,140,.7); color: #ffe6a0; } body.touch #brake { bottom: 18px; width: 88px; height: 88px; border-color: rgba(255,120,90,.6); }
@@ -209,6 +215,28 @@ body.shot #introv { display: none !important; }
   #gfsay .who.old { color: #ffd27a; }
   #gfsay .msg { font-size: 32px; line-height: 1.3; font-family: 'Griun', 'Ria', sans-serif; }
   @media (max-width: 900px) { #gfsay .who { font-size: 19px; } #gfsay .msg { font-size: 25px; } #gfsay .ph { padding: 8px 14px 10px; } }
+  /* 눕힌 폰(화면이 낮을 때) — HUD 를 확 줄인다. 폭이 740px쯤이라 max-width:700px 규칙이 안 걸려서
+     데스크톱용 큰 글씨가 그대로 나왔고, 급매 띠가 화면을 가로질러 앞이 안 보였다
+     (사장님 2026-09-12 "뭐가 보여야 운전을 하지") */
+  @media (max-height: 560px) {
+    #topbar { height: calc(34px + env(safe-area-inset-top)); padding-left: calc(92px + env(safe-area-inset-left)); gap: 4px; }
+    .stat { font-size: 14px; padding: 3px 7px; gap: 4px; } .stat b { font-size: 16px; } #gain { font-size: 14px; }
+    .tog { height: 28px; min-width: 28px; padding: 0 7px; font-size: 16px; }
+    body.touch #dest { font-size: 15px; padding: 4px 10px; gap: 6px; top: calc(38px + env(safe-area-inset-top)); }
+    #dest svg { width: 18px; height: 18px; }
+    #deal { font-size: 15px; padding: 4px 9px; gap: 5px; top: calc(74px + env(safe-area-inset-top)); } #deal b { font-size: 16px; } #deal .t { padding: 1px 7px; }
+    #rival { font-size: 15px; padding: 4px 9px; gap: 5px; top: calc(106px + env(safe-area-inset-top)); } #rival b { font-size: 16px; }
+    body.touch #speed { font-size: 30px; bottom: calc(8px + env(safe-area-inset-bottom)); }
+    body.touch #act { font-size: 19px; padding: 8px 16px; bottom: 40vh; } body.touch #act2 { font-size: 17px; padding: 7px 14px; bottom: calc(40vh - 42px); }
+    #gfsay .ph { width: min(54vw, 560px); margin-bottom: calc(10px + env(safe-area-inset-bottom)); padding: 6px 12px 8px; border-radius: 14px; }
+    #gfsay .who { font-size: 14px; } #gfsay .msg { font-size: 18px; }
+    body.touch #gfsay.show ~ #speed { opacity: 0; }   /* 말하는 동안엔 속도 숫자를 비운다 */
+    #card { width: 170px; padding: 9px 9px 13px; } #card .ph { height: 92px; font-size: 58px; } #card .nm { font-size: 19px; margin-top: 7px; } #card .cn { font-size: 16px; }
+    #call .ph { padding: 14px 16px 12px; border-radius: 18px; } #call .who { font-size: 17px; margin-bottom: 8px; } #call .msg { font-size: 23px; min-height: 46px; } #call .nx { font-size: 16px; }
+    body.touch #horn, body.touch #foot.show { width: 58px; height: 58px; font-size: 15px; }
+    body.touch #brake { width: 74px; height: 74px; font-size: 15px; }
+    #build .head, #assets .head, #shop .head, #map .head { font-size: 18px; }
+  }
 </style>
 </head>
 <body>
@@ -239,7 +267,7 @@ body.shot #introv { display: none !important; }
 <button id="brake" class="tbtn">브레이크</button>
 <button id="horn" class="tbtn">경적</button>
 <button id="foot" class="tbtn">내리기</button>
-<div id="pad"><button id="padU">▲</button><button id="padL">◀</button><button id="padR">▶</button><button id="padD">▼</button></div>
+<div id="pad"><div id="knob"></div></div>
 
 <div id="hint"></div>
 <div id="card"><div class="ph"><span id="cardIcon">📷</span><div id="cardStamp">JEJU</div></div><div class="nm" id="cardName"></div><div class="cn">🪙 <span id="cardCoin"></span></div></div>
@@ -297,7 +325,7 @@ body.shot #introv { display: none !important; }
   window.THREE = THREE;
   window.GLTFLoaderClass = GLTFLoader;
   window.SkeletonClone = skeletonClone;
-  const V = '348';
+  const V = '352';
   const names = ['noise','textures','spots','island','sky','post','roads','city','glb','vehicles','landmarks','traffic','player','audio','activity','blds','estate','npc','people','pet','game'];
   (async () => {
     let done = 0;

@@ -302,7 +302,22 @@
     if (g1) g1.addEventListener('click', () => { if (window.OL) OL.go(); });
     if (g2) g2.addEventListener('click', e => { e.preventDefault(); rotSkipped = true; syncRot(); });
     addEventListener('resize', syncRot); addEventListener('orientationchange', () => setTimeout(syncRot, 260)); syncRot(); }
-  for (const [id, key, val] of [['padU', 'padF', 1], ['padD', 'padF', -1], ['padL', 'padS', 1], ['padR', 'padS', -1], ['brake', 'brake', true], ['horn', 'horn', true]]) {
+  // 폰 이동: 왼쪽 아래 둥근 조이스틱. 손가락 벡터를 그대로 가속·조향으로 (사장님 2026-09-12)
+  { const pad = $('pad'), knob = $('knob'); let padId = null;
+    const padMove = e => {
+      const r = pad.getBoundingClientRect(), R = r.width / 2, max = R - knob.offsetWidth / 2;
+      const mx = e.clientX - (r.left + R), my = e.clientY - (r.top + R), d = Math.hypot(mx, my), sc = d > max ? max / d : 1;
+      const kx = mx * sc, ky = my * sc;
+      knob.style.transform = 'translate(' + kx + 'px,' + ky + 'px)';
+      let nx = kx / max, ny = ky / max; if (Math.hypot(nx, ny) < 0.12) nx = ny = 0;
+      input.padF = -ny; input.padS = -nx;   // 위로 밀면 앞으로, 왼쪽으로 밀면 왼쪽
+    };
+    const padEnd = e => { if (padId !== e.pointerId) return; padId = null; pad.classList.remove('on'); knob.style.transform = ''; input.padF = 0; input.padS = 0; };
+    pad.addEventListener('pointerdown', e => { e.stopPropagation(); e.preventDefault(); if (padId !== null) return; padId = e.pointerId;
+      try { pad.setPointerCapture(padId); } catch (err) {} pad.classList.add('on'); padMove(e); if (!started) start(!!loadPos()); });
+    pad.addEventListener('pointermove', e => { if (padId !== e.pointerId) return; e.stopPropagation(); padMove(e); });
+    pad.addEventListener('pointerup', padEnd); pad.addEventListener('pointercancel', padEnd); pad.addEventListener('lostpointercapture', padEnd); }
+  for (const [id, key, val] of [['brake', 'brake', true], ['horn', 'horn', true]]) {
     const el = $(id); if (!el) continue;
     const off = () => { if (key === 'brake' || key === 'horn') input[key] = false; else if (input[key] === val) input[key] = 0; };
     el.addEventListener('pointerdown', e => { e.stopPropagation(); e.preventDefault(); input[key] = val; if (!started) start(!!loadPos()); });
