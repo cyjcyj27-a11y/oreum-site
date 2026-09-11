@@ -1,8 +1,8 @@
 /* fish.js — 물고기 종류·모양·헤엄·행동. 몸통은 회전체, 지느러미 판을 한 덩어리로 합쳐 셰이더로 구부린다 */
 (function () {
-  // tier 1 발밑에서 빈바늘에도 무는 고기 · 2 미끼를 걸어야 오는 고기 · 3 미끼 걸고 멀리 던져야 오는 대물 · 4 거대 참다랑어 — 다른 29종을 다 잡은 뒤에만 나타나고, 잡으면 엔딩(사장님, 2026-09-09)
+  // tier 1 발밑에서 빈바늘에도 무는 고기 · 2 미끼를 걸어야 오는 고기 · 3 미끼 걸고 멀리 던져야 오는 대물 · 4 백상아리 — 다른 29종을 다 잡은 뒤에만 나타나고, 잡으면 엔딩(사장님, 2026-09-11 거대 참다랑어에서 바꿈)
   // stage(tier 1): 0 멸치 → 1 자리돔 → 2 각재기 → 3 정어리 → 4 고등어 → 5 나머지. 앞 것을 잡아야 다음이 나온다(사장님, 2026-09-09 "제일 먼저 발밑에서 잡히는 고기는 멸치, 그다음 자리돔 각재기 정어리 고등어 순")
-  // len 은 cm, pull 은 당기는 힘(0~1), sta 는 체력(초), food 는 배부름, cut 은 미끼로 쓸 때 토막 수(자리돔 2토막부터 크기대로 늘어난다 — 사장님 2026-09-09), wt 는 나타날 확률 가중치, night 는 밤에만, dusk 는 밤에 잘 옴
+  // len 은 cm, pull 은 당기는 힘(0~1), sta 는 체력(초), food 는 배부름, cut 은 미끼로 쓸 때 토막 수 = round(평균cm/8)+1. 상어(cut 0)만 미끼로 못 쓴다 — 사장님 2026-09-11, wt 는 나타날 확률 가중치, night 는 밤에만, dusk 는 밤에 잘 옴
   const SPECIES = [
     { id: 'anchovy', ko: '멸치', en: 'Anchovy', tier: 1, stage: 0, len: [8, 14], top: 0x3a5a78, belly: 0xe0eaf0, h: 0.9, w: 0.55, tail: 0.8, dorsal: 0.4, pull: 0.12, sta: 1.5, speed: 1.5, food: 20, cut: 2, wt: 2 },
     { id: 'damsel', ko: '자리돔', en: 'Damselfish', tier: 1, stage: 1, len: [10, 18], top: 0x3a3a48, belly: 0xb8b0c0, h: 1.5, w: 0.6, tail: 0.8, dorsal: 0.9, pull: 0.15, sta: 2, speed: 1.3, food: 24, cut: 3, wt: 3 },
@@ -29,11 +29,11 @@
     { id: 'dorado', ko: '만새기', en: 'Mahi-mahi', tier: 2, len: [70, 125], top: 0x1f8a6a, belly: 0xf0c94a, h: 1.5, w: 0.6, tail: 1.3, dorsal: 1.3, blunt: 1, pull: 0.68, sta: 12, speed: 3.0, food: 155, cut: 13, wt: 1.5 },
     { id: 'yellowtail', ko: '방어', en: 'Yellowtail', tier: 2, len: [65, 105], top: 0x2b4a72, belly: 0xdde6ea, band: 1, h: 1.15, w: 0.8, tail: 1.2, dorsal: 0.5, pull: 0.78, sta: 13, speed: 2.6, food: 180, cut: 12, wt: 1.2 },
     { id: 'amberjack', ko: '부시리', en: 'Amberjack', tier: 2, len: [80, 130], top: 0x2a4a6a, belly: 0xdde6ea, band: 1, h: 1.1, w: 0.8, tail: 1.3, dorsal: 0.5, pull: 0.82, sta: 14, speed: 2.8, food: 195, cut: 14, wt: 1 },
-    { id: 'sailfish', ko: '돛새치', en: 'Sailfish', tier: 3, len: [200, 300], top: 0x1a4a8a, belly: 0xc8d4dc, h: 1.0, w: 0.6, tail: 1.6, dorsal: 3.0, bill: 1, pull: 0.95, sta: 42, speed: 4.5, food: 300, cut: 0, wt: 1 },
-    { id: 'tuna', ko: '참다랑어', en: 'Bluefin Tuna', tier: 3, len: [230, 300], top: 0x0e1a3c, belly: 0xc9d4dc, band: 0, h: 1.25, w: 1.05, tail: 1.5, dorsal: 0.55, finlet: 1, pull: 1.0, sta: 45, speed: 3.6, food: 400, cut: 0, wt: 2 },
-    { id: 'marlin', ko: '청새치', en: 'Blue Marlin', tier: 3, len: [250, 350], top: 0x1a3a7a, belly: 0xc8d4dc, h: 1.1, w: 0.7, tail: 1.6, dorsal: 1.6, bill: 1, pull: 1.0, sta: 50, speed: 4.2, food: 550, cut: 0, wt: 1 },
-    { id: 'swordfish', ko: '황새치', en: 'Swordfish', tier: 3, len: [250, 380], top: 0x2a3a4a, belly: 0xc8d0d8, h: 1.0, w: 0.7, tail: 1.6, dorsal: 1.8, bill: 1, pull: 1.0, sta: 50, speed: 4.0, food: 700, cut: 0, wt: 1 },
-    { id: 'giant', ko: '거대 참다랑어', en: 'Giant Bluefin', tier: 4, len: [400, 480], top: 0x0a1430, belly: 0xc0ccd8, h: 1.3, w: 1.1, tail: 1.6, dorsal: 0.6, finlet: 1, pull: 1.0, sta: 80, speed: 3.2, food: 999, cut: 0, wt: 1 },
+    { id: 'sailfish', ko: '돛새치', en: 'Sailfish', tier: 3, len: [200, 300], top: 0x1a4a8a, belly: 0xc8d4dc, h: 1.0, w: 0.6, tail: 1.6, dorsal: 3.0, bill: 1, pull: 0.95, sta: 42, speed: 4.5, food: 300, cut: 32, wt: 1 },
+    { id: 'tuna', ko: '참다랑어', en: 'Bluefin Tuna', tier: 3, len: [230, 300], top: 0x0e1a3c, belly: 0xc9d4dc, band: 0, h: 1.25, w: 1.05, tail: 1.5, dorsal: 0.55, finlet: 1, pull: 1.0, sta: 45, speed: 3.6, food: 400, cut: 34, wt: 2 },
+    { id: 'marlin', ko: '청새치', en: 'Blue Marlin', tier: 3, len: [250, 350], top: 0x1a3a7a, belly: 0xc8d4dc, h: 1.1, w: 0.7, tail: 1.6, dorsal: 1.6, bill: 1, pull: 1.0, sta: 50, speed: 4.2, food: 550, cut: 39, wt: 1 },
+    { id: 'swordfish', ko: '황새치', en: 'Swordfish', tier: 3, len: [250, 380], top: 0x2a3a4a, belly: 0xc8d0d8, h: 1.0, w: 0.7, tail: 1.6, dorsal: 1.8, bill: 1, pull: 1.0, sta: 50, speed: 4.0, food: 700, cut: 40, wt: 1 },
+    { id: 'giant', ko: '백상아리', en: 'Great White Shark', tier: 4, len: [420, 600], top: 0x6e7d85, belly: 0xf2f5f7, h: 1.15, w: 1.0, tail: 1.5, dorsal: 1.0, shark: 1, pull: 1.0, sta: 80, speed: 3.2, food: 999, cut: 0, wt: 1 },
   ];
   const BY = {}; SPECIES.forEach(s => BY[s.id] = s);
 
@@ -83,6 +83,12 @@
   function bodyGeo(sp) {
     const N = 26, M = 14, pos = [], nor = [];
     const prof = (t) => { // t 0 꼬리 → 1 머리, 반지름
+      if (sp.shark) {                                                // 상어 — 코가 뾰족하고 몸통이 굵다
+        let r2 = Math.pow(Math.sin(Math.PI * t), 0.95) * 0.128;
+        if (t > 0.62) r2 *= 1 - (t - 0.62) * 0.55;                   // 주둥이로 갈수록 가늘어진다
+        if (t < 0.14) r2 = Math.max(r2, 0.011 + t * 0.13);           // 꼬리자루
+        return r2;
+      }
       let r = Math.pow(Math.sin(Math.PI * t), sp.blunt ? 0.55 : 0.75) * 0.11;
       if (sp.blunt && t > 0.8) r *= 1.0 + (t - 0.8) * 1.6;          // 만새기 이마
       if (t < 0.1) r = Math.max(r, 0.012 + t * 0.15);                // 꼬리자루
@@ -102,8 +108,27 @@
     ring([...a, ...b, ...c], pos); ring([...n, ...n, ...n], nor);
     ring([...a, ...c, ...b], pos); ring([...n, ...n, ...n], nor);
   }
+  // 상어 — 큰 삼각 등지느러미, 위가 긴 꼬리, 길게 뻗는 가슴지느러미
+  function buildShark(sp, pos, nor) {
+    const T = sp.tail * 0.13, D = sp.dorsal;
+    fin([[-0.5, 0.02, 0], [-0.5 - T * 1.35, T * 2.0, 0], [-0.5 - T * 0.55, 0.0, 0]], pos, nor);        // 꼬리 윗날 — 길다
+    fin([[-0.5, -0.01, 0], [-0.5 - T * 0.55, 0.0, 0], [-0.5 - T * 0.80, -T * 0.95, 0]], pos, nor);     // 꼬리 아랫날 — 짧다
+    fin([[0.14, 0.10 * sp.h, 0], [-0.02, 0.10 * sp.h + 0.25 * D, 0], [-0.17, 0.065 * sp.h, 0]], pos, nor);   // 등지느러미
+    fin([[-0.30, 0.075 * sp.h, 0], [-0.36, 0.075 * sp.h + 0.05, 0], [-0.43, 0.035, 0]], pos, nor);     // 두 번째 등지느러미
+    fin([[-0.28, -0.075 * sp.h, 0], [-0.36, -0.075 * sp.h - 0.05, 0], [-0.44, -0.03, 0]], pos, nor);   // 뒷지느러미
+    for (const s of [1, -1]) {                                                                          // 가슴지느러미
+      const z = 0.085 * sp.w * s;
+      const a = [0.17, -0.035, z], b = [-0.10, -0.11, z + 0.20 * s], c = [0.03, 0.005, z + 0.05 * s];
+      fin(s > 0 ? [a, b, c] : [a, c, b], pos, nor, s < 0);
+    }
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+    g.setAttribute('normal', new THREE.Float32BufferAttribute(nor, 3));
+    return g;
+  }
   function build(sp) {
     const { pos, nor } = bodyGeo(sp);
+    if (sp.shark) return buildShark(sp, pos, nor);
     const T = sp.tail * 0.13, ty = T * 1.15;
     fin([[-0.5, 0, 0], [-0.5 - T * 1.1, ty, 0], [-0.5 - T * 0.35, 0, 0]], pos, nor);      // 꼬리 위
     fin([[-0.5, 0, 0], [-0.5 - T * 0.35, 0, 0], [-0.5 - T * 1.1, -ty, 0]], pos, nor);    // 꼬리 아래
@@ -263,7 +288,7 @@
         const toward = (f) => { if (!hk) return; const rr = 1.5 + Math.random() * 3, aa = Math.random() * Math.PI * 2; f.tgt.set(hk.x + Math.cos(aa) * rr, -F.depthFor(f.sp), hk.z + Math.sin(aa) * rr); f.retgt = 3 + f.pos.distanceTo(f.tgt) / (f.speed * 0.7); };
         if (baitTier >= 1 && F.count(2) < 2 && Math.random() < 0.6) toward(F.spawn(F.pick(2), beyond(0)));
         if (baitTier >= 2 && F.count(3) < 1 && Math.random() < 0.6) toward(F.spawn(F.pick(3), Object.assign(beyond(6), { depth: 1.2 })));
-        if (baitTier >= 2 && F.giantOK && F.count(4) < 1 && Math.random() < 0.7) toward(F.spawn('giant', Object.assign(beyond(12), { depth: 2.4 })));   // 마지막: 거대 참다랑어 — 도감 29종을 다 채운 뒤에만
+        if (baitTier >= 2 && F.giantOK && F.count(4) < 1 && Math.random() < 0.7) toward(F.spawn('giant', Object.assign(beyond(12), { depth: 2.4 })));   // 마지막: 백상아리 — 도감 29종을 다 채운 뒤에만
       },
       // 가끔 지나가는 구경거리 — 미끼 없어도 좋은 물고기가 스쳐간다
       passerby() { if (F.count(2) < 1 && Math.random() < 0.5) F.spawn(F.pick(2), { r: 16 + Math.random() * 8 }); },

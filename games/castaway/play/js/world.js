@@ -289,7 +289,8 @@
     const W = {
       raft, man, bobber, hookPoint, rodTip, island, gullCenter, lamp, sail, splash, setPose,
       setFacing(y) { facing = y; }, setRodBend(b) { rodBend = b; }, setLine(on, to, slack) { lineOn = on; if (to) lineTo.copy(to); if (slack != null) lineSlack = slack; },
-      setBait(t) { bait.visible = t > 0; baitMat.color.setHex(t === 1 ? 0xb8c6cc : 0xd9a44a); bait.scale.set(t === 2 ? 2.4 : 1.8, t === 2 ? 1.1 : 0.8, t === 2 ? 0.8 : 0.6); },
+      // t 는 미끼로 쓴 고기의 등급(1~3). 2 이상이면 큼직하게 — 3등급 대물도 미끼가 된다(2026-09-11)
+      setBait(t) { bait.visible = t > 0; baitMat.color.setHex(t === 1 ? 0xb8c6cc : 0xd9a44a); const big = t >= 2; bait.scale.set(big ? 2.4 : 1.8, big ? 1.1 : 0.8, big ? 0.8 : 0.6); },
       setRack(n) { rackFish.forEach((f, i) => f.visible = i < n); },
       // 1인칭: 머리를 감추고(카메라가 그 자리) 눈 위치를 내준다
       setFirstPerson(on) { if (fpMode === on) return; fpMode = on; neck.visible = !on; if (RIG.b.Head) { RIG.b.Head.scale.setScalar(on ? 0.001 : 1); } setPose(lastPose, null, lastBlend); },

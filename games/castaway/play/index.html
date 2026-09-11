@@ -31,6 +31,11 @@
   .stat.item.dim { opacity: .45; }
   #bait.on1 { border-color: rgba(200,220,230,.8); } #bait.on2 { border-color: #ffd24a; background: rgba(120,90,20,.5); }
   .stat .cut { width: 26px; height: 12px; fill: rgba(255,255,255,.35); } .stat .cut .eye { fill: rgba(0,0,0,.6); }
+  /* 남은 미끼는 숫자 대신 토막 표시 — 물고기 마리 수로 읽히지 않게 (사장님 2026-09-11) */
+  .pip { display: inline-block; width: 5px; height: 14px; margin-right: 2px; border-radius: 2px; background: #cfe0e8; vertical-align: -2px; }
+  #bait.on2 .pip { background: #ffd24a; }
+  #dex .act .pip { height: 11px; width: 4px; background: #ffd24a; vertical-align: -1px; }
+  @media (max-width: 700px) { .pip { width: 4px; height: 12px; margin-right: 2px; } }
   #bait.on1 .cut { fill: #cfe0e8; } #bait.on2 .cut { fill: #ffd24a; }
   @media (max-width: 700px) { .stat .cut { width: 22px; height: 10px; } }
   .spacer { display: none; }
@@ -89,6 +94,7 @@
   #dex .act b { font-family: 'Ria', 'Griun', sans-serif; font-weight: normal; font-size: 15px; letter-spacing: 1px; color: #ffd24a; }
   #dex .act .cut { width: 22px; height: 10px; fill: #cfe0e8; vertical-align: -1px; } #dex .act .cut .eye { fill: rgba(0,0,0,.6); }
   #dex .act:active { transform: scale(.95); } #dex .act.off { opacity: .3; pointer-events: none; }
+  #dex .act.on { border-color: #ffd24a; background: rgba(255,210,74,.18); pointer-events: none; }
   #dex .card.seen img { filter: grayscale(1) brightness(.75); } #dex .card.seen .nm, #dex .card.seen .rc { color: rgba(255,255,255,.5); }
   #dex .card img { display: block; width: 100%; aspect-ratio: 2 / 1; object-fit: contain; border-radius: 8px; background: radial-gradient(ellipse at 50% 60%, rgba(120,190,220,.28), rgba(20,50,70,.2) 75%); }
   #dex .card .nm { margin-top: 7px; font-size: 15px; letter-spacing: 1px; }
@@ -168,10 +174,10 @@
 <script src="lib/three.min.js"></script>
 <script src="lib/GLTFLoader.global.js"></script>
 <script src="js/sea.js?v=54"></script>
-<script src="js/fish.js?v=55"></script>
-<script src="js/world.js?v=54"></script>
+<script src="js/fish.js?v=58"></script>
+<script src="js/world.js?v=55"></script>
 <script src="js/audio.js?v=54"></script>
-<script src="js/game.js?v=57"></script>
+<script src="js/game.js?v=65"></script>
 <script src="/assets/visit.js?v=11" defer></script>
 <script src="/assets/game-events.js?v=1" defer></script>
 </body>

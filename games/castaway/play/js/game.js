@@ -77,11 +77,13 @@
     $('foodBar').style.width = Math.max(0, Math.min(100, G.food)) + '%';
     $('foodN').textContent = Math.max(0, Math.round(G.food)); $('food').classList.toggle('hot', G.food < 25);
     $('nF').textContent = invAll(); $('invF').classList.toggle('dim', !invAll());
-    $('baitT').textContent = G.bait > 0 ? String(G.baitUses) : '—'; $('bait').className = 'stat item on' + G.bait;   // 남은 토막 수
+    $('baitT').innerHTML = G.bait > 0 ? pips(G.baitUses) : '—'; $('bait').className = 'stat item on' + Math.min(2, G.bait);   // 남은 토막
     const m = $('meter'); if (L.st === 'charge') { m.className = 'show'; $('meterBar').style.width = (L.power * 100) + '%'; } else if (L.st === 'fight') { m.className = 'show tens' + (L.tension > 0.78 ? ' hot' : ''); $('meterBar').style.width = (Math.min(1, L.tension) * 100) + '%'; } else m.className = '';
     if (isTouch) { btnAct.className = 'tbtn' + (L.st === 'bite' ? ' bite' : ((L.hold || L.pulse > 0) ? ' on' : '')); btnAct.textContent = L.st === 'bite' ? T('걸기', 'HOOK') : (L.st === 'idle' || L.st === 'charge') ? T('던지기', 'CAST') : T('감기', 'REEL'); }
   }
   function pop(id) { const el = $(id); el.classList.remove('got'); void el.offsetWidth; el.classList.add('got'); }
+  // 남은 미끼는 토막을 그대로 그린다 — 숫자만 있으면 물고기 마리 수로 읽힌다(사장님 2026-09-11)
+  function pips(n) { return n <= 8 ? '<i class="pip"></i>'.repeat(n) : '<i class="pip"></i>×' + n; }
 
   /* ---------- 규칙 ---------- */
   function start() {
@@ -158,7 +160,7 @@
     else toast('CATCH!', name + ' ' + cm + 'cm' + (rec && G.caught > 1 ? ' · ' + T('신기록', 'NEW RECORD') : ''), false, 2.6);
     useBait();
     L.landFrom = f.pos.clone(); L.landTo = new V(); W.deckPoint(0.35, 0.15, L.landTo);
-    if (f.sp.tier === 4) { G.ending = { t: 0 }; G.sit = true; W.setPose('sit'); clearProg(); }   // 엔딩은 거대 참다랑어를 잡으면 (사장님 2026-09-11 원래대로)
+    if (f.sp.tier === 4) { G.ending = { t: 0 }; G.sit = true; W.setPose('sit'); clearProg(); }   // 엔딩은 백상아리를 잡으면 (사장님 2026-09-11)
   }
   function eat(which) {
     if (G.state !== 'play' || G.eatT > 0 || (L.st !== 'idle' && L.st !== 'float')) return;
@@ -182,7 +184,9 @@
   }
   function setBaitSp(id) {
     if (G.state !== 'play' || G.eatT > 0 || (L.st !== 'idle' && L.st !== 'float') || (G.inv[id] || 0) <= 0) return;
-    if (G.baitSp === id && G.baitUses === BAIT_USES[id]) return;   // 이미 그게 걸려 있다
+    // 같은 고기가 이미 걸려 있고 토막이 남았으면 그대로 쓴다.
+    // 여기서 또 받으면 남은 토막을 버리고 새 고기를 한 마리 더 잡아먹는다 (사장님, 2026-09-11 멸치 두 마리)
+    if (G.baitSp === id && G.baitUses > 0) return;
     if (G.baitSp && G.baitUses === BAIT_USES[G.baitSp]) G.inv[G.baitSp] = (G.inv[G.baitSp] || 0) + 1;   // 안 쓴 미끼만 돌려받는다
     G.inv[id]--; G.baitSp = id; G.bait = F.BY[id].tier; G.baitUses = BAIT_USES[id]; W.setBait(G.bait); W.setRack(invAll()); pop('bait'); hud();
     if (dexOpen) buildDex();
@@ -191,7 +195,7 @@
   const BAIT_USES = {}; F.SPECIES.forEach(sp => BAIT_USES[sp.id] = sp.cut);
   const BAIT_ORDER = F.SPECIES.filter(sp => sp.cut > 0).sort((a, b) => a.food - b.food).map(sp => sp.id);
   // 빠른 먹기(1·2 키)는 가진 것 중 제일 작은 것부터. 미끼로 못 쓰는 큰 고기(cut 0)도 먹을 수 있어야 한다.
-  // 단, 거대 참다랑어(4등급)는 먹으면 끝이라 손으로 골라야 먹힌다 (사장님 2026-09-11)
+  // 단, 백상아리(4등급)는 먹으면 끝이라 손으로 골라야 먹힌다 (사장님 2026-09-11)
   const EAT_ORDER = F.SPECIES.filter(sp => sp.tier !== 4).sort((a, b) => a.food - b.food).map(sp => sp.id);
   // 가진 물고기 전부. 예전엔 미끼로 쓸 수 있는 것(cut>0)만 세서 돛새치·황새치를 잡아도 0 으로 나왔다 (사장님 2026-09-11)
   const invAll = () => F.SPECIES.reduce((n, sp) => n + (G.inv[sp.id] || 0), 0);
@@ -200,7 +204,7 @@
   let DEX = {}; try { DEX = JSON.parse(localStorage.getItem('castaway.dex') || '{}') || {}; } catch (e) { }
   let dexOpen = false;
   const dexCount = () => F.SPECIES.filter(sp => DEX[sp.id]).length;
-  function syncStage() {   // tier 1 순서: 멸치 → 자리돔 → 각재기 → 정어리 → 고등어 → 나머지. 거대 참다랑어는 나머지 29종을 다 잡은 뒤
+  function syncStage() {   // tier 1 순서: 멸치 → 자리돔 → 각재기 → 정어리 → 고등어 → 나머지. 백상아리는 나머지 29종을 다 잡은 뒤
     const has = id => !!DEX[id];
     const chain = ['anchovy', 'damsel', 'scad', 'sardine', 'mackerel']; let st = 0; while (st < chain.length && has(chain[st])) st++; F.stage = st;   // 멸치→자리돔→각재기→정어리→고등어 차례로 열린다
     F.giantOK = F.SPECIES.every(sp => sp.tier === 4 || has(sp.id));
@@ -218,7 +222,15 @@
       if (n > 0) {   // 먹기 · 미끼 고르기
         const acts = document.createElement('div'); acts.className = 'acts';
         const bE = document.createElement('button'); bE.type = 'button'; bE.className = 'act eat'; bE.innerHTML = '🍖 <b>+' + sp.food + '</b>'; bE.addEventListener('click', () => eat(sp.id)); acts.appendChild(bE);
-        const bB = document.createElement('button'); bB.type = 'button'; bB.className = 'act bait' + ((L.st === 'idle' || L.st === 'float') ? '' : ' off'); bB.innerHTML = CUT_SVG + ' <b>×' + sp.cut + '</b>'; bB.addEventListener('click', () => setBaitSp(sp.id)); acts.appendChild(bB);
+        // 미끼로 못 쓰는 고기(상어)는 미끼 단추를 아예 안 보여 준다
+        if (sp.cut > 0) {
+          // 이미 걸려 있어 남은 토막을 쓰는 중이면 눌러도 소용없으니 흐리게
+          const onHook = G.baitSp === sp.id && G.baitUses > 0;
+          const bB = document.createElement('button'); bB.type = 'button';
+          bB.className = 'act bait' + (onHook ? ' on' : (L.st === 'idle' || L.st === 'float') ? '' : ' off');
+          bB.innerHTML = CUT_SVG + ' <b>' + (onHook ? pips(G.baitUses) : '×' + sp.cut) + '</b>';
+          bB.addEventListener('click', () => setBaitSp(sp.id)); acts.appendChild(bB);
+        }
         card.appendChild(acts);
       } else { const rc = document.createElement('div'); rc.className = 'rc'; rc.textContent = d ? d.cm + 'cm' : (sp.len[0] + '~' + sp.len[1] + 'cm'); card.appendChild(rc); }
       grid.appendChild(card);
