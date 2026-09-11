@@ -80,7 +80,10 @@
     T.windowN = tex(normalFrom(hc, 2.5));
   }
   function water() { const S = 256; const hc = fill(canvas(S), (u, v) => { const k = Math.floor((tnoise(u, v, 8, 4) * 0.6 + tnoise(u + 0.5, v + 0.3, 30, 3) * 0.4) * 255); return [k, k, k]; }); T.waterN = tex(normalFrom(hc, 2.0)); }
-  function init() { grass(); asphalt(); concrete(); leaf(); tuft(); water(); windowNormal(64); }
+  // 늘 쓰는 질감만 미리 만든다. 풀·아스팔트·콘크리트는 사진(Poly Haven)이 대신하므로
+  // 사진이 없을 때만 만든다 — 셋을 항상 만드느라 시작이 2초 넘게 늦었다 (사장님 2026-09-12 "좀 빠르게")
+  function init() { leaf(); tuft(); water(); windowNormal(64); }
+  function initFallback() { if (T.grass) return; grass(); asphalt(); concrete(); }
 
   // ── 사진 재질 (Poly Haven, CC0) — assets/tex/<이름>/map·normal·rough.jpg ──
   // 코드로 그린 위 질감 대신 진짜 사진을 쓴다. 땅·길·인도·벽·지붕·돌담.
@@ -92,9 +95,9 @@
   }
   const PHOTOS = ['asphalt_02', 'pavement_02', 'concrete_pavement', 'painted_plaster_wall', 'leafy_grass', 'forrest_ground_01', 'coast_sand_01', 'aerial_rocks_02', 'roof_09'];
   // file:// 로 열면 브라우저가 사진을 3D 재질로 못 올린다(보안). 그땐 사진을 건너뛰고 코드 질감을 쓴다. ?photos=0 도 같음
-  function load() { if (location.protocol === 'file:' || new URLSearchParams(location.search).get('photos') === '0') return Promise.resolve(); return Promise.all(PHOTOS.map(loadPBR)); }
+  function load() { if (location.protocol === 'file:' || new URLSearchParams(location.search).get('photos') === '0') { initFallback(); return Promise.resolve(); } return Promise.all(PHOTOS.map(loadPBR)).then(() => { if (!hasPhotos()) initFallback(); }); }
   function hasPhotos() { return !!(P.leafy_grass && P.leafy_grass.map); }
   // 같은 사진을 다른 반복 간격으로 쓸 때
   function rep(t, x, y) { if (!t) return null; const c = t.clone(); c.repeat.set(x, y); c.needsUpdate = true; return c; }
-  window.TEX = Object.assign(T, { init, load, hasPhotos, P, rep, tnoise, normalFrom, fill, canvas, tex });
+  window.TEX = Object.assign(T, { init, initFallback, load, hasPhotos, P, rep, tnoise, normalFrom, fill, canvas, tex });
 })();

@@ -51,10 +51,10 @@
   #task { position: fixed; left: 50%; top: calc(96px + env(safe-area-inset-top)); transform: translateX(-50%); font-size: 39px; letter-spacing: 1px; color: #fff; text-shadow: 0 2px 8px rgba(0,0,0,.7); opacity: 0; transition: opacity .3s; pointer-events: none; white-space: nowrap; }
   #task.show { opacity: 1; }
   /* 짓기·매입 단추는 화면 중간쪽으로 — 밑에 박아 두면 안드로이드 알림바·홈바와 겹친다 (사장님 2026-09-11) */
-  #act { position: fixed; left: 50%; transform: translateX(-50%); bottom: 30vh; padding: 12px 26px; border-radius: 999px; border: 1px solid rgba(255,230,140,.8); background: rgba(20,16,12,.72); color: #ffe6a0; font-family: inherit; font-size: 33px; display: none; touch-action: manipulation; white-space: nowrap; box-shadow: 0 4px 18px rgba(0,0,0,.4); }
+  #act { position: fixed; z-index: 25; left: 50%; transform: translateX(-50%); bottom: 30vh; padding: 12px 26px; border-radius: 999px; border: 1px solid rgba(255,230,140,.8); background: rgba(20,16,12,.72); color: #ffe6a0; font-family: inherit; font-size: 33px; display: none; touch-action: manipulation; white-space: nowrap; box-shadow: 0 4px 18px rgba(0,0,0,.4); }
   #act.show { display: block; animation: popin .3s cubic-bezier(.2,1.4,.4,1); }
   /* 사고 나면 짓기 밑에 팔기를 같이 띄운다 (사장님 2026-09-11) */
-  #act2 { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(30vh - 54px); padding: 10px 22px; border-radius: 999px; border: 1px solid rgba(255,230,140,.55); background: rgba(20,16,12,.72); color: #ffe6a0; font-family: inherit; font-size: 28px; display: none; touch-action: manipulation; white-space: nowrap; box-shadow: 0 4px 18px rgba(0,0,0,.4); }
+  #act2 { position: fixed; z-index: 25; left: 50%; transform: translateX(-50%); bottom: calc(30vh - 54px); padding: 10px 22px; border-radius: 999px; border: 1px solid rgba(255,230,140,.55); background: rgba(20,16,12,.72); color: #ffe6a0; font-family: inherit; font-size: 28px; display: none; touch-action: manipulation; white-space: nowrap; box-shadow: 0 4px 18px rgba(0,0,0,.4); }
   #act2.show { display: block; animation: popin .3s cubic-bezier(.2,1.4,.4,1); }
   #act2.ask { border-color: #ffd24a; color: #ffd24a; }
   body.touch #act2 { bottom: calc(34vh - 52px); font-size: 26px; padding: 10px 18px; }
@@ -141,7 +141,11 @@
   #ending .ego { margin-top: 26px; padding: 12px 34px; font-size: 32px; border-radius: 999px; border: 2px solid rgba(255,210,122,.8); background: rgba(255,210,122,.14); color: #ffd27a; font-family: inherit; touch-action: manipulation; }
   @media (max-width: 700px) { #call .ph { padding: 20px 20px 16px; } #call .who { font-size: 26px; margin-bottom: 12px; } #call .msg { font-size: 36px; min-height: 74px; } #call .nx { font-size: 24px; } }
   #title { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: none; transition: opacity .6s; padding-bottom: 8vh; }
-  #title.hide { opacity: 0; }
+  /* 시작한 뒤엔 제목 화면을 화면에서 완전히 뺀다.
+     opacity 만 0 으로 두면 '시작·이어하기' 단추가 보이지 않는 채로 남아
+     그 자리에 겹치는 매입·짓기 단추의 누름을 가로챘다 (사장님 2026-09-12 "급매 사기·짓기가 안 눌린다") */
+  #title.hide { opacity: 0; visibility: hidden; transition: opacity .6s, visibility 0s .6s; }
+  #title.hide .gob { pointer-events: none; }
   /* 모바일은 가로로 (사장님 2026-09-11) */
   #rotate { position: fixed; inset: 0; z-index: 90; display: none; place-items: center; text-align: center; background: #0a1824; color: #f2ede4; font-family: 'Ria', 'Griun', 'Malgun Gothic', sans-serif; font-size: 26px; line-height: 1.8; padding: 8vw; }
   body.touch.portrait #rotate { display: grid; }
@@ -149,10 +153,16 @@
   #rotate .sub { font-size: 21px; color: #b8ae9c; line-height: 1.7; } #rotate .sub a { color: #d8cfbc; }
   #title h1 { font-family: 'Gasoek', 'Ria', 'Griun', sans-serif; font-weight: 400; font-size: min(13.5vw, 30vh); white-space: nowrap; margin: 0; letter-spacing: 4px; color: #fff8ec; -webkit-text-stroke: 2px #2b3a4a; paint-order: stroke fill; text-shadow: 0 6px 24px rgba(0,20,40,.45); }
   #title .tag { font-family: 'Gasoek', 'Ria', sans-serif; font-weight: 400; letter-spacing: 6px; font-size: clamp(16px, 3vw, 26px); margin-top: 4px; color: #fff; text-shadow: 0 0 6px rgba(0,20,40,.9), 0 2px 10px rgba(0,0,0,.7); }
-  #title .go { margin-top: 40px; font-size: 39px; letter-spacing: 6px; opacity: 0; animation: blink 2.2s infinite; text-shadow: 0 2px 8px rgba(0,0,0,.6); display: flex; gap: 18px; }
+  /* 세계가 다 만들어지기 전엔 단추를 내려 둔다. 예전엔 opacity:0 인데 blink 애니메이션이 그걸 덮어써서
+     아직 눌러도 안 되는 '시작'이 깜빡이고 있었다 (사장님 2026-09-12 "몇 번 눌러도 한참 있다 시작된다") */
+  #title .go { margin-top: 40px; font-size: 39px; letter-spacing: 6px; text-shadow: 0 2px 8px rgba(0,0,0,.6); display: none; gap: 18px; }
+  body.ready #title .go { display: flex; animation: blink 2.2s infinite; }
+  #title .ld { margin-top: 44px; font-family: 'Gasoek', 'Ria', sans-serif; font-size: 30px; letter-spacing: 5px; color: #fff8ec; text-shadow: 0 2px 8px rgba(0,0,0,.7); }
+  #title .ld i { display: inline-block; width: 260px; height: 8px; margin-left: 14px; vertical-align: middle; border-radius: 99px; background: rgba(255,248,236,.25); overflow: hidden; }
+  #title .ld i b { display: block; height: 100%; width: 0; background: #fff8ec; border-radius: 99px; transition: width .2s linear; }
+  body.ready #title .ld { display: none; }
   #title .gob { pointer-events: auto; padding: 10px 26px 10px 32px; border-radius: 999px; border: 2px solid rgba(255,248,236,.8); background: rgba(20,28,38,.55); cursor: pointer; touch-action: manipulation; }
   #title .gob:active { background: rgba(255,248,236,.25); }
-  body.ready #title .go { opacity: 1; }
   @keyframes blink { 0%, 100% { opacity: .35; } 50% { opacity: 1; } }
   #hint { position: fixed; left: 50%; bottom: 132px; transform: translateX(-50%) translateY(8px); background: rgba(20,28,38,.85); color: #fff8ec; font-family: 'Ria', 'Malgun Gothic', sans-serif; font-size: 28px; letter-spacing: 1px; padding: 9px 18px; border-radius: 22px; box-shadow: 0 6px 20px rgba(0,0,0,.35); opacity: 0; transition: opacity .25s, transform .25s; pointer-events: none; z-index: 30; white-space: nowrap; }
   #hint.on { opacity: 1; transform: translateX(-50%) translateY(0); }
@@ -187,18 +197,18 @@ body.shot #introv { display: none !important; }
   #deal b { font-size: 33px; }
   #deal .t { background: rgba(0,0,0,.28); border-radius: 14px; padding: 2px 10px; }
   @media (max-width: 700px) { #deal { font-size: 22px; padding: 6px 10px; } #deal b { font-size: 24px; } }
-  /* 여자친구·복덕방 대사 — 유학 친구 전화(#call)와 같은 크기·같은 자리 (사장님 2026-09-10) */
-  #gfsay { position: fixed; inset: 0; display: none; align-items: flex-start; justify-content: center;
+  /* 여자친구·복덕방 대사 — 달리는 중에 나오므로 화면 아래 자막 띠로 (사장님 2026-09-12 "달리는 동안 화면을 다 가리면 어캄").
+     전화(#call)는 멈춰 놓고 받는 거라 그대로 큰 창이다 */
+  #gfsay { position: fixed; left: 0; right: 0; bottom: 0; display: none; justify-content: center;
     z-index: 26; pointer-events: none; }
   #gfsay.show { display: flex; }
-  #gfsay .ph { width: min(92vw, 620px); margin-top: max(70px, 9vh); padding: 30px 34px 24px; border-radius: 30px;
-    background: rgba(12,14,20,.96); border: 2px solid rgba(255,255,255,.22);
-    box-shadow: 0 20px 60px rgba(0,0,0,.6); color: #f2ede4; }
-  #gfsay .who { font-size: 33px; letter-spacing: 2px; color: #ff9ec4; margin-bottom: 18px; }
+  #gfsay .ph { width: min(94vw, 1000px); margin: 0 0 calc(14px + env(safe-area-inset-bottom)); padding: 10px 20px 12px; border-radius: 20px;
+    background: rgba(12,14,20,.82); border: 1px solid rgba(255,255,255,.18);
+    box-shadow: 0 10px 30px rgba(0,0,0,.5); color: #f2ede4; }
+  #gfsay .who { font-size: 24px; letter-spacing: 1px; color: #ff9ec4; margin-bottom: 2px; }
   #gfsay .who.old { color: #ffd27a; }
-  #gfsay .msg { font-size: 51px; line-height: 1.4; min-height: 96px; font-family: 'Griun', 'Ria', sans-serif; }
-  @media (max-width: 700px) { #gfsay .ph { padding: 20px 20px 16px; } #gfsay .who { font-size: 26px; margin-bottom: 12px; }
-    #gfsay .msg { font-size: 36px; min-height: 74px; } }
+  #gfsay .msg { font-size: 32px; line-height: 1.3; font-family: 'Griun', 'Ria', sans-serif; }
+  @media (max-width: 900px) { #gfsay .who { font-size: 19px; } #gfsay .msg { font-size: 25px; } #gfsay .ph { padding: 8px 14px 10px; } }
 </style>
 </head>
 <body>
@@ -257,9 +267,23 @@ body.shot #introv { display: none !important; }
 
 <div id="title">
   <h1>BUY JEJU</h1>
+  <div class="ld" id="ld">LOADING 0%<i><b id="ldBar"></b></i></div>
   <div class="go"><span id="goCont" class="gob" hidden>이어하기</span><span id="goNew" class="gob">시작</span></div>
 </div>
 
+<script>
+  // 불러오는 동안 얼마나 됐는지 — 스크립트·질감·세계 조립이 저마다 여기에 적는다
+  window.__LOAD = (function () {
+    var p = 0, t = null, bar = null;
+    function paint() {
+      if (!t) { t = document.getElementById('ld'); bar = document.getElementById('ldBar'); }
+      if (!t) return;
+      t.firstChild.nodeValue = 'LOADING ' + Math.round(p * 100) + '%';
+      if (bar) bar.style.width = (p * 100).toFixed(1) + '%';
+    }
+    return { set: function (v) { if (v > p) { p = v; paint(); } } };
+  })();
+</script>
 <script src="assets/landscape.js?v=54"></script>
 <script src="assets/game-home.js" data-top="6" data-left="6" data-fullscreen="1" defer></script>
 <script type="importmap">
@@ -269,17 +293,20 @@ body.shot #introv { display: none !important; }
   import * as THREE from 'three';
   import { GLTFLoader } from './lib/addons/loaders/GLTFLoader.js';
   import { clone as skeletonClone } from './lib/addons/utils/SkeletonUtils.js';
+  window.__LOAD.set(0.08);
   window.THREE = THREE;
   window.GLTFLoaderClass = GLTFLoader;
   window.SkeletonClone = skeletonClone;
-  const V = '344';
+  const V = '348';
   const names = ['noise','textures','spots','island','sky','post','roads','city','glb','vehicles','landmarks','traffic','player','audio','activity','blds','estate','npc','people','pet','game'];
   (async () => {
+    let done = 0;
     for (const n of names) {
       await new Promise((res, rej) => {
         const el = document.createElement('script');
         el.src = 'js/' + n + '.js?v=' + V;
-        el.onload = res; el.onerror = () => rej(new Error('load fail ' + n));
+        el.onload = () => { window.__LOAD.set(0.08 + 0.5 * (++done / names.length)); res(); };
+        el.onerror = () => rej(new Error('load fail ' + n));
         document.body.appendChild(el);
       });
     }

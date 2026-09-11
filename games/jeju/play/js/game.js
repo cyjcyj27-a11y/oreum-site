@@ -1,5 +1,6 @@
 // 메인 루프 — 세계 조립, 입력, 카메라, HUD, 제목 화면, 물속·비행 화면 효과
 (function () {
+  const LOAD = window.__LOAD || { set: function () {} };
   const canvas = document.getElementById('c');
   const IS_TOUCH = 'ontouchstart' in window;
   const QS = new URLSearchParams(location.search);   // 시험용: ?post=0 &shadow=2048 &dpr=1 &msaa=0 &reset=1
@@ -32,8 +33,18 @@
   const clockEl = $('time'), title = $('title'), topbar = $('topbar'), keys = $('keys'), speedEl = $('speed'), btnSfx = $('btnSfx');
   let spawn = null;
 
-  TEX.load().then(function boot() {
-    ISLAND.init(scene); ROADS.init(scene); CITY.init(scene); LANDMARKS.init(scene); CITY.finishProps(scene);
+  // 세계를 한 번에 조립하면 그 몇 초 동안 화면이 멈춰 LOADING 숫자가 안 움직인다.
+  // 한 덩어리씩 만들고 그때마다 브라우저에 화면 한 장을 내준다 (사장님 2026-09-12)
+  const nextFrame = () => new Promise(res => { let done = false; const go = () => { if (done) return; done = true; res(); };
+    requestAnimationFrame(() => setTimeout(go, 0)); setTimeout(go, 80); });
+  const step = p => { LOAD.set(p); return nextFrame(); };
+  TEX.load().then(async function boot() {
+    await step(0.62);
+    ISLAND.init(scene); await step(0.70);
+    ROADS.init(scene); await step(0.76);
+    CITY.init(scene); await step(0.82);
+    LANDMARKS.init(scene); await step(0.90);
+    CITY.finishProps(scene); await step(0.93);
     // 출발: 공항 렌터카 앞 도로.
     // 공항 자리를 그대로 집으면 터미널(90×26m) 안이라 차가 건물 속에서 깨어난다.
     // 렌터카 줄(landmarks.js 의 x+60, z+26)에 가장 가까운 도로 마디를 쓴다.
@@ -41,8 +52,11 @@
     const ap = SPOTS.list.find(s => s.id === 'airport');
     const nd = ROADS.nearest(ap.x + 60, ap.z + 26).e.a;
     const e = nd.out[0]; spawn = { x: nd.x, z: nd.z, yaw: e ? Math.atan2(-e.dir.x, -e.dir.z) : 0, node: nd };
-    TRAFFIC.init(scene, spawn);
-    PLAYER.init(scene, spawn); ACT.init(scene); ESTATE.init(scene); NPC.init(scene); PEOPLE.init(scene, renderer); PET.init(scene);
+    TRAFFIC.init(scene, spawn); await step(0.95);
+    PLAYER.init(scene, spawn); ACT.init(scene); await step(0.97);
+    ESTATE.init(scene); await step(0.99);
+    NPC.init(scene); PEOPLE.init(scene, renderer); PET.init(scene);
+    LOAD.set(1);
     ready = true; document.body.classList.add('ready');
     // 막 지우고 들어온 판(?reset=1)에서는 이어하기를 숨긴다 — 지웠는데 이어하기가 보이면 헷갈린다
     if (!QS.get('reset') && (loadPos() || hasSave())) $('goCont').hidden = false;

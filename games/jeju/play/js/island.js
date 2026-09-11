@@ -27,6 +27,7 @@
   const TOWNS = SPOTS.TOWNS.map(t => Object.assign({}, t, geo(t.lon, t.lat)));
   for (const s of SPOTS.list) Object.assign(s, geo(s.lon, s.lat));
 
+  window.__IT=[['top',performance.now()]];const __i=n=>window.__IT.push([n,performance.now()]);
   // ── 해안 거리 래스터 (8m). 양수 = 땅 ──
   const CELL = 8, GW = Math.ceil((BOUNDS.x1 - BOUNDS.x0) / CELL) + 1, GH = Math.ceil((BOUNDS.z1 - BOUNDS.z0) / CELL) + 1;
   const dist = new Float32Array(GW * GH);
@@ -40,20 +41,36 @@
       xs.sort((p, q) => p - q);
       for (let k = 0; k + 1 < xs.length; k += 2) { const i0 = Math.max(0, Math.ceil((xs[k] - BOUNDS.x0) / CELL)), i1 = Math.min(GW - 1, Math.floor((xs[k + 1] - BOUNDS.x0) / CELL)); for (let i = i0; i <= i1; i++) inside[j * GW + i] = 1; }
     }
-    // 거리: 선분까지
-    for (let j = 0; j < GH; j++) for (let i = 0; i < GW; i++) {
-      const x = BOUNDS.x0 + i * CELL, z = BOUNDS.z0 + j * CELL; let best = 1e9;
-      for (let k = 0; k < n; k++) {
-        const a = coast[k], b = coast[(k + 1) % n]; const dx = b[0] - a[0], dz = b[1] - a[1];
-        let t = ((x - a[0]) * dx + (z - a[1]) * dz) / (dx * dx + dz * dz); t = t < 0 ? 0 : t > 1 ? 1 : t;
-        const ex = x - a[0] - dx * t, ez = z - a[1] - dz * t; const d2 = ex * ex + ez * ez; if (d2 < best) best = d2;
-      }
-      let d = Math.sqrt(best) * (inside[j * GW + i] ? 1 : -1);
-      // 부속 섬 (타원)
-      for (const s of ISLETS) { const t = Math.hypot((x - s.x) / s.rx, (z - s.z) / s.rz); const di = (1 - t) * Math.min(s.rx, s.rz); if (di > d) d = di; }
-      dist[j * GW + i] = d;
+    // 거리: 선분까지.
+    // 해안 마디 344개 × 칸 27만개 = 9천만 번이라 섬 하나 까는 데만 2.3초가 걸렸다(2026-09-12).
+    // 칸을 4×4(32m)씩 묶어, 그 묶음 한가운데에서 잰 거리로 '여기서 가장 가까울 수 있는 마디'만 골라 둔다.
+    // 묶음 반지름 R 만큼 어긋날 수 있으니 가장 가까운 거리 + 2R 안쪽 마디는 전부 남긴다 —
+    // 버린 마디는 어느 칸에서도 더 가까울 수 없어서 나오는 값은 예전과 한 치도 다르지 않다.
+    const SX = new Float64Array(n), SZ = new Float64Array(n), DX = new Float64Array(n), DZ = new Float64Array(n), IL = new Float64Array(n);
+    for (let k = 0; k < n; k++) {
+      const a = coast[k], b = coast[(k + 1) % n]; const dx = b[0] - a[0], dz = b[1] - a[1];
+      SX[k] = a[0]; SZ[k] = a[1]; DX[k] = dx; DZ[k] = dz; IL[k] = 1 / (dx * dx + dz * dz);
     }
-  })();
+    const seg2 = (x, z, k) => { let t = ((x - SX[k]) * DX[k] + (z - SZ[k]) * DZ[k]) * IL[k]; t = t < 0 ? 0 : t > 1 ? 1 : t; const ex = x - SX[k] - DX[k] * t, ez = z - SZ[k] - DZ[k] * t; return ex * ex + ez * ez; };
+    const BLK = 4, DC = new Float64Array(n), CAND = new Int32Array(n);
+    for (let bj = 0; bj < GH; bj += BLK) for (let bi = 0; bi < GW; bi += BLK) {
+      const iN = Math.min(GW, bi + BLK), jN = Math.min(GH, bj + BLK);
+      const rx = (iN - bi - 1) * CELL / 2, rz = (jN - bj - 1) * CELL / 2, R = Math.hypot(rx, rz);
+      const cx = BOUNDS.x0 + bi * CELL + rx, cz = BOUNDS.z0 + bj * CELL + rz;
+      let mind = 1e9;
+      for (let k = 0; k < n; k++) { const d = Math.sqrt(seg2(cx, cz, k)); DC[k] = d; if (d < mind) mind = d; }
+      const lim = mind + 2 * R; let m = 0;
+      for (let k = 0; k < n; k++) if (DC[k] <= lim) CAND[m++] = k;
+      for (let j = bj; j < jN; j++) for (let i = bi; i < iN; i++) {
+        const x = BOUNDS.x0 + i * CELL, z = BOUNDS.z0 + j * CELL; let best = 1e9;
+        for (let q = 0; q < m; q++) { const d2 = seg2(x, z, CAND[q]); if (d2 < best) best = d2; }
+        let d = Math.sqrt(best) * (inside[j * GW + i] ? 1 : -1);
+        // 부속 섬 (타원)
+        for (const s of ISLETS) { const t = Math.hypot((x - s.x) / s.rx, (z - s.z) / s.rz); const di = (1 - t) * Math.min(s.rx, s.rz); if (di > d) d = di; }
+        dist[j * GW + i] = d;
+      }
+    }
+  })(); __i('dist');
   function coastDist(x, z) {
     const fx = (x - BOUNDS.x0) / CELL, fz = (z - BOUNDS.z0) / CELL;
     const i = Math.floor(fx), j = Math.floor(fz);
@@ -256,5 +273,6 @@
     seaMat.uniforms.skyTop.value.copy(sky.skyTop); seaMat.uniforms.skyHor.value.copy(sky.skyHor);
   }
 
+  __i('end');
   window.ISLAND = { H, geo, coastDist, inIslet, coast, OREUMS, ISLETS, TOWNS, BOUNDS, HC, RIVER, init, update, smooth, hash2, rng, N, beaches };
 })();
