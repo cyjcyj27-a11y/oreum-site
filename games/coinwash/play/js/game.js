@@ -383,7 +383,6 @@
     for (const f of flys) { f.t += dt; if (f.t < 0) continue; if (f.t < .35) { f.x += f.vx * dt; f.y += f.vy * dt; f.vy += 520 * dt; } else { if (f.sx === undefined) { f.sx = f.x; f.sy = f.y; } const k = Math.min(1, (f.t - .35) / .45), e = k * k; f.x = f.sx + (f.tx - f.sx) * e; f.y = f.sy + (f.ty - f.sy) * e; } }
     flys = flys.filter(f => f.t < .8);
     if (S.weather !== 'clear') { if (drops.length < 40 && Math.random() < .5) drops.push({ x: rnd(0, W), y: -4, v: S.weather === 'rain' ? rnd(120, 180) : rnd(18, 30), d: rnd(0, 6) }); for (const d of drops) { d.y += d.v * dt; d.d += dt; } drops = drops.filter(d => d.y < 70); }
-    SND.hum(washers.filter(w => w.state === 'wash').length);
   }
   function dayEnd() {   // 06:00 — 하루가 넘어간다
     const perfect = G.angryN === 0; const bonus = perfect ? 10 + S.day : 4;

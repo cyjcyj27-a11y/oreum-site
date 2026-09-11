@@ -1,7 +1,7 @@
 /* 코인빨래방 — 소리 (Web Audio 합성, 파일 없음) */
 (function () {
   'use strict';
-  let ctx = null, master = null, bgmGain = null, bgmOn = true, sfxOn = true, bgmTimer = null, hum = null;
+  let ctx = null, master = null, bgmGain = null, bgmOn = true, sfxOn = true, bgmTimer = null;
   try { bgmOn = localStorage.getItem('coinwash.bgm') !== '0'; sfxOn = localStorage.getItem('coinwash.snd') !== '0'; } catch (_) { }
   function ensure() {
     if (ctx) { if (ctx.state === 'suspended') ctx.resume(); return; }
@@ -55,14 +55,10 @@
     });
     bgmTimer = setTimeout(bgmLoop, 6400);
   }
-  function humStart() {
-    if (!ctx || hum) return; hum = ctx.createOscillator(); const g = ctx.createGain(); g.gain.value = 0; hum.type = 'sawtooth'; hum.frequency.value = 55;
-    const f = ctx.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = 160; hum.connect(f); f.connect(g); g.connect(master); hum.start(); hum.g = g;
-  }
   window.SND = {
-    init() { ensure(); if (!ctx) return; if (!bgmTimer) bgmLoop(); humStart(); },
+    init() { ensure(); if (!ctx) return; if (!bgmTimer) bgmLoop(); },
     play(n) { if (!ctx || !sfxOn || !S[n]) return; S[n](); },
-    hum(v) { if (hum) hum.g.gain.setTargetAtTime(sfxOn ? Math.min(.12, v * .04) : 0, ctx.currentTime, .3); },
+    hum() { },   // 세탁기 '웅' 저음은 뺐다 (사장님 2026-09-11) — 부르는 데가 있어 자리만 남긴다
     get bgm() { return bgmOn; }, get sfx() { return sfxOn; },
     toggleBgm() { bgmOn = !bgmOn; try { localStorage.setItem('coinwash.bgm', bgmOn ? '1' : '0'); } catch (_) { } if (bgmGain) bgmGain.gain.setTargetAtTime(bgmOn ? .16 : 0, ctx.currentTime, .1); if (bgmOn && ctx && !bgmTimer) bgmLoop(); return bgmOn; },
     toggleSfx() { sfxOn = !sfxOn; try { localStorage.setItem('coinwash.snd', sfxOn ? '1' : '0'); } catch (_) { } return sfxOn; },
