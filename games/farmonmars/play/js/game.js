@@ -130,7 +130,7 @@
     let ci = -1;
     if (isCity(it)) { const z = zoneFor(it.id); if (z) { S.city.push({ type: it.id, done: false, b: pickPreview(it.id), z, k: zcount(z) }); ci = S.city.length - 1; } else { ci = redevTarget(it.id); if (ci < 0) return false; const c = S.city[ci]; c.type = it.id; c.b = pickPreview(it.id); c.done = false; } }
     S.bought[it.id] = (S.bought[it.id] || 0) + 1;
-    S.q.push({ id: it.id, x: at.x, y: at.y, prog: 0, dur: it.dur * 2, ci });   // 건설도 2배 천천히(전체 속도 늦춤)
+    S.q.push({ id: it.id, x: at.x, y: at.y, prog: 0, dur: it.dur, ci });   // 망치질이 너무 느려 절반으로(2배 느리게 하던 걸 돌려놓음) — 사장님 2026-09-11
     SND.play('click'); save(); renderShop(); return true;
   }
   function finishSite(q) {
