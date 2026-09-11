@@ -72,7 +72,9 @@
   function toast(txt, sub, red, len) { const el = $('toast'); el.innerHTML = txt + (sub ? '<small>' + sub + '</small>' : ''); el.classList.toggle('red', !!red); el.classList.add('show'); toastT = len || 1.6; }
   function hud() {
     $('dayH').textContent = 'DAY ' + G.day;
-    $('foodBar').style.width = Math.max(0, G.food) + '%'; $('foodN').textContent = Math.max(0, Math.round(G.food)); $('food').classList.toggle('hot', G.food < 25);
+    // 막대는 가득 차면 끝, 숫자는 쌓인 대로 보여 준다
+    $('foodBar').style.width = Math.max(0, Math.min(100, G.food)) + '%';
+    $('foodN').textContent = Math.max(0, Math.round(G.food)); $('food').classList.toggle('hot', G.food < 25);
     $('nF').textContent = invAll(); $('invF').classList.toggle('dim', !invAll());
     $('baitT').textContent = G.bait > 0 ? String(G.baitUses) : '—'; $('bait').className = 'stat item on' + G.bait;   // 남은 토막 수
     const m = $('meter'); if (L.st === 'charge') { m.className = 'show'; $('meterBar').style.width = (L.power * 100) + '%'; } else if (L.st === 'fight') { m.className = 'show tens' + (L.tension > 0.78 ? ' hot' : ''); $('meterBar').style.width = (Math.min(1, L.tension) * 100) + '%'; } else m.className = '';
@@ -155,7 +157,9 @@
     if (G.state !== 'play' || G.eatT > 0 || (L.st !== 'idle' && L.st !== 'float')) return;
     // 고른 것이 없으면 작은 것부터 먹는다
     const sp = which && (G.inv[which] || 0) > 0 ? which : BAIT_ORDER.find(id => (G.inv[id] || 0) > 0); if (!sp) return;
-    G.inv[sp]--; const gain = F.BY[sp].food; G.food = Math.min(100, G.food + gain);
+    // 배는 100 에서 막히지 않고 쌓인다 — 999짜리 큰 고기를 먹으면 며칠을 간다 (사장님 2026-09-11)
+    // 하루 = 150초, 배는 170초에 100 준다 — 100 이면 하루치다.
+    G.inv[sp]--; const gain = F.BY[sp].food; G.food = Math.min(999, G.food + gain);
     G.eatT = 1.3; W.setPose('eat'); A.eat(); pop('food'); toast('+' + gain, null, false, 0.9); W.setRack(invAll()); hud();
     if (dexOpen) buildDex();
   }
@@ -179,7 +183,8 @@
   // 미끼 한 마리는 토막 내어 여러 번 쓴다 — 종마다 cut 토막 (사장님 2026-09-07). 순서는 작은(배부름 낮은) 것부터
   const BAIT_USES = {}; F.SPECIES.forEach(sp => BAIT_USES[sp.id] = sp.cut);
   const BAIT_ORDER = F.SPECIES.filter(sp => sp.cut > 0).sort((a, b) => a.food - b.food).map(sp => sp.id);
-  const invAll = () => BAIT_ORDER.reduce((n, id) => n + (G.inv[id] || 0), 0);
+  // 가진 물고기 전부. 예전엔 미끼로 쓸 수 있는 것(cut>0)만 세서 돛새치·황새치를 잡아도 0 으로 나왔다 (사장님 2026-09-11)
+  const invAll = () => F.SPECIES.reduce((n, sp) => n + (G.inv[sp.id] || 0), 0);
 
   /* ---------- 도감 ---------- */
   let DEX = {}; try { DEX = JSON.parse(localStorage.getItem('castaway.dex') || '{}') || {}; } catch (e) { }
