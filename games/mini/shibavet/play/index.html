@@ -90,6 +90,11 @@
   @media (orientation: landscape) { #over { flex-direction: row; gap: 5vw; } #vetVid { height: 82vh; margin: 0; } #over .txt { max-width: 46vw; } #over h2 { font-size: min(4.2vw, 48px); margin-bottom: 4px; } #over .again { margin-top: 14px; } #over p { margin: 2px 0; } }
   html.ol-land #over { flex-direction: row; gap: 5vh; } html.ol-land #vetVid { height: 82vw; margin: 0; } html.ol-land #over .txt { max-width: 46vh; } html.ol-land #over h2 { font-size: min(4.2vh, 48px); margin-bottom: 4px; } html.ol-land #over .again { margin-top: 14px; } html.ol-land #over p { margin: 2px 0; }
   #over .again { margin-top: 36px; opacity: .6; animation: blink 2.4s infinite; font-family: 'Ria', sans-serif; letter-spacing: 6px; font-size: 24px; cursor: pointer; }
+  /* 숫자가 길어져도 상단 알약이 둘째 줄로 내려갔다 올라왔다 하지 않게 (2026-09-11) */
+  #topbar { flex-wrap: nowrap; }
+  #topbar .stat { min-width: 0; }
+  #topbar .stat b { font-variant-numeric: tabular-nums; font-feature-settings: 'tnum' 1; }
+  #topbar .stat .bar { flex: 0 1 auto; min-width: 14px; }
 </style>
 </head>
 <body>
