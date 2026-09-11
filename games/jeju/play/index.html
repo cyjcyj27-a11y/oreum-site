@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, viewport-fit=cover">
+<title>BUY JEJU — 제주도 오픈월드게임</title>
+<meta name="description" content="제주도 오픈월드게임 당신은 재벌집 양아치 막내아들입니다. 해외 유학생활에 적응하지 못한채 어느날 갑자기 제주도라는 섬에 꽂혀 제주도로 오게됩니다. 아버지에게 용돈으로 받은 100억으로 제주도땅을 사러 돌아다닙니다. 친구들은 왜 하필이면 촌구석에 삘이 꽂혔냐며 비웃지만 당신은 제주도에서 성공할 자신이 있습니다. 제주도를 사세요. 1100고지에 펜션을 짓고 함덕해수욕장에 나이트클럽을 지어 운영하세요 돈을 모아 더 많은 땅을 사서 더 많은 건물을 짓고 제주도를 전부 사들이고 부동산재벌이 되어 아버지 그늘에서 벗어나 부를 이룩하게 됩니다.">
+<meta property="og:title" content="BUY JEJU — 제주도 오픈월드게임"><meta property="og:description" content="제주도 오픈월드게임 당신은 재벌집 양아치 막내아들입니다. 해외 유학생활에 적응하지 못한채 어느날 갑자기 제주도라는 섬에 꽂혀 제주도로 오게됩니다. 아버지에게 용돈으로 받은 100억으로 제주도땅을 사러 돌아다닙니다. 친구들은 왜 하필이면 촌구석에 삘이 꽂혔냐며 비웃지만 당신은 제주도에서 성공할 자신이 있습니다. 제주도를 사세요. 1100고지에 펜션을 짓고 함덕해수욕장에 나이트클럽을 지어 운영하세요 돈을 모아 더 많은 땅을 사서 더 많은 건물을 짓고 제주도를 전부 사들이고 부동산재벌이 되어 아버지 그늘에서 벗어나 부를 이룩하게 됩니다.">
+
+<style>
+  @font-face { font-family: 'Griun'; src: url('fonts/Griun_Fromsol-Rg.ttf') format('truetype'); font-display: swap; }
+  @font-face { font-family: 'Ria'; src: url('fonts/RiaSans-ExtraBold.woff2') format('woff2'); font-display: swap; }
+  @font-face { font-family: 'Gasoek'; src: url('fonts/GasoekOne-title.woff2?v=1') format('woff2'); font-display: swap; }   /* 제목 전용 부분집합(가석원, OFL) */
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #8fb4d6; font-family: 'Griun', 'Noto Sans KR', 'Malgun Gothic', sans-serif; color: #f2ede4; user-select: none; }
+  #c { display: block; width: 100vw; height: 100vh; touch-action: none; }
+  #vig { position: fixed; inset: 0; pointer-events: none; background: none; }
+  body.under #vig { background: radial-gradient(ellipse at 50% 40%, rgba(20,90,140,0.25) 30%, rgba(5,30,60,0.75) 100%); }
+  #flash { position: fixed; inset: 0; pointer-events: none; background: #fff; opacity: 0; transition: opacity .25s; z-index: 30; }
+
+  #topbar { position: fixed; left: 0; right: 0; top: 0; height: calc(44px + env(safe-area-inset-top)); padding: env(safe-area-inset-top) 10px 0 104px; display: flex; align-items: center; gap: 8px; pointer-events: none; opacity: 0; transition: opacity .8s; }
+  #topbar.show { opacity: 1; }
+  .stat { display: inline-flex; align-items: center; gap: 5px; padding: 5px 10px; border-radius: 999px; background: rgba(0,0,0,.35); border: 1px solid rgba(255,255,255,.14); font-size: 22px; white-space: nowrap; text-shadow: 0 1px 2px rgba(0,0,0,.5); }
+  .stat b { font-weight: normal; font-size: 26px; }
+  .stat { position: relative; }
+  #gain { position: absolute; left: 50%; top: 100%; transform: translate(-50%, 2px); font-style: normal; color: #ffd24a; font-size: 22px; opacity: 0; transition: opacity .25s, transform .9s ease-out; pointer-events: none; white-space: nowrap; text-shadow: 0 1px 3px rgba(0,0,0,.7); }
+  #gain.on { opacity: 1; transform: translate(-50%, 12px); }
+  /* 말풍선은 화면 위쪽에. 가운데 두면 차와 주인공을 가린다 (사장님 2026-09-10) */
+  #call { position: fixed; inset: 0; display: none; align-items: flex-start; justify-content: center; background: rgba(0,0,0,.28); z-index: 30; }
+  #call.show { display: flex; }
+  #call .ph { width: min(92vw, 620px); margin-top: max(70px, 9vh); padding: 30px 34px 24px; border-radius: 30px; background: rgba(12,14,20,.96); border: 2px solid rgba(255,255,255,.22); box-shadow: 0 20px 60px rgba(0,0,0,.6); color: #f2ede4; animation: ring .9s ease-in-out 2; }
+  #call .who { font-size: 33px; letter-spacing: 2px; color: #9fe0a0; margin-bottom: 18px; }
+  #call .msg { font-size: 51px; line-height: 1.4; min-height: 96px; font-family: 'Griun', 'Ria', sans-serif; }
+  #call .nx { text-align: right; font-size: 30px; color: #ffd27a; animation: blink 1s infinite; }
+  @keyframes ring { 0%,100% { transform: rotate(0); } 20% { transform: rotate(-3deg); } 40% { transform: rotate(3deg); } 60% { transform: rotate(-2deg); } 80% { transform: rotate(2deg); } }
+  @keyframes blink { 50% { opacity: .2; } }
+  #build .thumb { display: flex; align-items: center; justify-content: center; font-size: 45px; background: rgba(255,255,255,.06); }
+  #build .card.cur { background: rgba(120,220,140,.1); }
+  #build button:disabled { opacity: .35; }
+  .spacer { flex: 1; }
+  .tog { pointer-events: auto; height: 36px; min-width: 36px; padding: 0 10px; border-radius: 999px; border: 1px solid rgba(255,255,255,.3); background: rgba(0,0,0,.4); color: #fff; font-family: inherit; font-size: 24px; line-height: 1; touch-action: manipulation; }
+  .tog.off { opacity: .4; text-decoration: line-through; }
+  @media (max-width: 700px) { .stat { padding: 4px 8px; font-size: 20px; } .stat b { font-size: 21px; } #topbar { padding-left: 100px; gap: 5px; } }
+
+  #speed { position: fixed; right: 18px; bottom: 44px; font-family: Arial, sans-serif; font-weight: 900; font-size: 92px; line-height: 1; color: #fff; text-shadow: 0 2px 8px rgba(0,0,0,.6); opacity: 0; transition: opacity .8s; pointer-events: none; }
+  #speed small { font-size: 34px; font-weight: 700; margin-left: 6px; opacity: .8; }
+  #speed.show { opacity: 1; }
+  body.touch #speed { right: auto; left: 50%; transform: translateX(-50%); bottom: 14px; font-size: 51px; }
+  #task { position: fixed; left: 50%; top: calc(96px + env(safe-area-inset-top)); transform: translateX(-50%); font-size: 39px; letter-spacing: 1px; color: #fff; text-shadow: 0 2px 8px rgba(0,0,0,.7); opacity: 0; transition: opacity .3s; pointer-events: none; white-space: nowrap; }
+  #task.show { opacity: 1; }
+  /* 짓기·매입 단추는 화면 중간쪽으로 — 밑에 박아 두면 안드로이드 알림바·홈바와 겹친다 (사장님 2026-09-11) */
+  #act { position: fixed; left: 50%; transform: translateX(-50%); bottom: 30vh; padding: 12px 26px; border-radius: 999px; border: 1px solid rgba(255,230,140,.8); background: rgba(20,16,12,.72); color: #ffe6a0; font-family: inherit; font-size: 33px; display: none; touch-action: manipulation; white-space: nowrap; box-shadow: 0 4px 18px rgba(0,0,0,.4); }
+  #act.show { display: block; animation: popin .3s cubic-bezier(.2,1.4,.4,1); }
+  /* 사고 나면 짓기 밑에 팔기를 같이 띄운다 (사장님 2026-09-11) */
+  #act2 { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(30vh - 54px); padding: 10px 22px; border-radius: 999px; border: 1px solid rgba(255,230,140,.55); background: rgba(20,16,12,.72); color: #ffe6a0; font-family: inherit; font-size: 28px; display: none; touch-action: manipulation; white-space: nowrap; box-shadow: 0 4px 18px rgba(0,0,0,.4); }
+  #act2.show { display: block; animation: popin .3s cubic-bezier(.2,1.4,.4,1); }
+  #act2.ask { border-color: #ffd24a; color: #ffd24a; }
+  body.touch #act2 { bottom: calc(34vh - 52px); font-size: 26px; padding: 10px 18px; }
+  body.touch #act { bottom: 34vh; font-size: 27px; padding: 12px 20px; }
+  @keyframes popin { from { transform: translateX(-50%) scale(.7); opacity: 0; } to { transform: translateX(-50%) scale(1); opacity: 1; } }
+  #keys { position: fixed; right: 14px; bottom: 12px; font-size: 18px; opacity: 0; color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,.7); text-align: right; line-height: 1.5; pointer-events: none; transition: opacity 1s; }
+  #keys.show { opacity: .55; }
+  body.touch #keys { display: none; }
+
+  /* 폴라로이드 */
+  #card { position: fixed; left: 50%; top: 42%; transform: translate(-50%, -50%) rotate(-4deg) scale(.6); width: 250px; padding: 14px 14px 20px; background: #fdfcf8; color: #222; border-radius: 6px; box-shadow: 0 12px 40px rgba(0,0,0,.45); opacity: 0; transition: all .35s cubic-bezier(.2,1.4,.4,1); pointer-events: none; text-align: center; z-index: 20; }
+  #card.on { opacity: 1; transform: translate(-50%, -50%) rotate(-4deg) scale(1); }
+  #card .ph { height: 150px; background: linear-gradient(160deg, #7fc4e8, #2a7bb8 60%, #4a9a3a); border-radius: 3px; display: flex; align-items: center; justify-content: center; font-size: 97px; position: relative; overflow: hidden; }
+  #card .nm { font-size: 33px; margin-top: 12px; font-family: 'Ria', 'Griun', sans-serif; }
+  #card .cn { font-size: 27px; color: #d9781e; margin-top: 2px; }
+  #cardStamp { position: absolute; right: 8px; bottom: 8px; width: 66px; height: 66px; border: 4px solid #d8352a; border-radius: 50%; color: #d8352a; font-family: 'Ria', sans-serif; font-size: 22px; display: flex; align-items: center; justify-content: center; transform: rotate(-16deg); background: rgba(255,255,255,.55); animation: stamp .4s .3s cubic-bezier(.2,1.4,.4,1) both; }
+  @keyframes stamp { from { transform: rotate(-16deg) scale(2.2); opacity: 0; } to { transform: rotate(-16deg) scale(1); opacity: 1; } }
+
+  /* 폰 조작 */
+  .tbtn, #pad { display: none; }
+  body.touch #pad { display: grid; position: fixed; left: 18px; bottom: 18px; grid-template-columns: 56px 56px 56px; grid-template-rows: 56px 56px 56px; gap: 4px; }
+  #pad button { border-radius: 12px; border: 1px solid rgba(255,255,255,.3); background: rgba(0,0,0,.35); color: #fff; font-size: 30px; touch-action: none; }
+  #padU { grid-column: 2; grid-row: 1; } #padL { grid-column: 1; grid-row: 2; } #padR { grid-column: 3; grid-row: 2; } #padD { grid-column: 2; grid-row: 3; }
+  body.touch .tbtn { display: block; position: fixed; right: 18px; border-radius: 50%; border: 1px solid rgba(255,255,255,.35); background: rgba(0,0,0,.35); color: #fff; font-family: inherit; font-size: 22px; touch-action: none; }
+  body.touch #horn { bottom: 118px; width: 60px; height: 60px; right: 25px; }
+  #foot { display: none !important; } body.touch #foot.show { display: block !important; bottom: 196px; width: 60px; height: 60px; right: 25px; border-color: rgba(255,230,140,.7); color: #ffe6a0; } body.touch #brake { bottom: 18px; width: 88px; height: 88px; border-color: rgba(255,120,90,.6); }
+
+  /* 지도·렌터카 */
+  .modal { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%) scale(.96); background: rgba(14,16,22,.94); border: 1px solid rgba(255,255,255,.2); border-radius: 14px; padding: 14px; opacity: 0; pointer-events: none; transition: all .2s; z-index: 25; color: #f2ede4; }
+  .modal.show { opacity: 1; pointer-events: auto; transform: translate(-50%, -50%) scale(1); }
+  .modal .head { display: flex; justify-content: space-between; align-items: center; font-size: 33px; letter-spacing: 3px; color: #ffd27a; margin-bottom: 8px; }
+  .modal .head button { background: none; border: 0; color: #fff; font-size: 33px; font-family: inherit; }
+  #map { width: min(94vw, 1100px); }
+  #mapc { width: 100%; aspect-ratio: 4800 / 3650; display: block; border-radius: 10px; background: #183a52; }
+  #mapCount { font-size: 27px; opacity: .85; margin-top: 8px; text-align: center; }
+  #mapc { touch-action: none; cursor: grab; }
+  #map .tools { position: absolute; right: 22px; top: 62px; display: flex; flex-direction: column; gap: 6px; }
+  #map .tools button { width: 40px; height: 40px; border-radius: 10px; border: 1px solid rgba(255,255,255,.35); background: rgba(0,0,0,.55); color: #fff; font-size: 30px; font-family: inherit; touch-action: manipulation; }
+  #dest { position: fixed; left: 50%; top: calc(52px + env(safe-area-inset-top)); transform: translateX(-50%); display: none; align-items: center; gap: 10px; padding: 6px 14px; border-radius: 999px; background: rgba(0,0,0,.4); border: 1px solid rgba(255,120,90,.6); font-size: 27px; white-space: nowrap; pointer-events: none; text-shadow: 0 1px 3px rgba(0,0,0,.6); }
+  #dest.show { display: flex; }
+  #destArrow { display: block; transition: transform .15s; filter: drop-shadow(0 1px 2px rgba(0,0,0,.6)); }
+  body.touch #dest { font-size: 22px; top: calc(48px + env(safe-area-inset-top)); }
+  #shop , #build { width: min(92vw, 520px); max-height: 82vh; overflow-y: auto; }
+  #assets { width: min(94vw, 70vw); height: 72vh; max-height: 72vh; overflow-y: auto; padding: 18px 20px; }
+  #assets .head { font-size: 45px; margin-bottom: 12px; }
+  #assets .head button { font-size: 45px; }
+  .stat.tap { pointer-events: auto; cursor: pointer; touch-action: manipulation; }
+  .stat.tap:active { background: rgba(255,210,122,.2); }
+  #assetSum { display: flex; flex-wrap: wrap; gap: 8px 22px; padding: 8px 4px 14px; font-size: 32px; color: #ffe6b0; border-bottom: 1px solid rgba(255,255,255,.12); }
+  #assetSum b { color: #fff; }
+  #assetList .card { display: flex; gap: 14px; align-items: center; padding: 13px 6px; border-top: 1px solid rgba(255,255,255,.08); }
+  #assetList .ic2 { width: 58px; height: 58px; flex: 0 0 58px; display: grid; place-items: center; font-size: 51px; background: rgba(255,255,255,.07); border-radius: 10px; }
+  #assetList .nm { flex: 1; min-width: 0; }
+  #assetList .nm b { display: block; font-size: 34px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #assetList .nm span { font-size: 26px; color: #cfc7ba; }
+  #assetList .rt { text-align: right; font-size: 26px; color: #cfc7ba; white-space: nowrap; }
+  #assetList .rt span { display: block; font-size: 22px; }
+  #assetSum .up , #assetList .up { color: #7fe08a; font-style: normal; }
+  #assetSum .dn , #assetList .dn { color: #ff8a7a; font-style: normal; }
+  #assetList button.sell { flex: 0 0 auto; padding: 10px 16px; border-radius: 999px; border: 1px solid rgba(255,210,122,.7); background: rgba(255,210,122,.12); color: #ffd27a; font-family: inherit; font-size: 26px; touch-action: manipulation; }
+  #assetList button.sell.ask { background: rgba(255,120,90,.25); border-color: #ff8a6a; color: #ffd9cc; }
+  #assetList .rt b { display: block; font-size: 34px; color: #7fe08a; }
+  #assetList .rt .no { color: #b9a; font-size: 27px; }
+  #assetList .none { padding: 30px 6px; color: #cfc7ba; text-align: center; font-size: 32px; }
+  @media (max-width: 700px) { #assets { width: 94vw; height: 78vh; max-height: 78vh; padding: 12px; } #assets .head { font-size: 33px; } #assetSum { font-size: 24px; gap: 6px 14px; } #assetList .ic2 { width: 44px; height: 44px; flex: 0 0 44px; font-size: 39px; } #assetList .nm b , #assetList .rt b { font-size: 27px; } #assetList .nm span , #assetList .rt { font-size: 21px; } }
+  #shop .card , #build .card { display: flex; gap: 12px; align-items: center; padding: 10px 8px; border-top: 1px solid rgba(255,255,255,.08); }
+  #shop .card.cur , #build .card.cur { background: rgba(255,210,122,.08); border-radius: 8px; }
+  #shop .thumb , #build .thumb { width: 64px; height: 44px; border-radius: 8px; flex: none; border: 1px solid rgba(255,255,255,.2); }
+  #shop .info , #build .info { flex: 1; } #shop .info b, #build .info b { font-weight: normal; font-size: 27px; }
+  #shop .bars , #build .bars { display: flex; gap: 14px; font-size: 18px; opacity: .9; margin-top: 4px; }
+  #shop .bars u , #build .bars u { display: inline-flex; gap: 3px; text-decoration: none; margin-left: 4px; }
+  #shop .bars i , #build .bars i { display: inline-block; width: 12px; height: 7px; border-radius: 2px; background: rgba(255,255,255,.14); }
+  #shop .bars i.on , #build .bars i.on { background: #4fb0ff; }
+  #shop .act , #build .act { width: 92px; text-align: right; }
+  #shop .act button , #build .act button { width: 100%; padding: 8px 0; border-radius: 999px; border: 1px solid rgba(255,210,122,.7); background: rgba(255,210,122,.12); color: #ffd27a; font-family: inherit; font-size: 22px; }
+  #shop .act button:disabled , #build .act button:disabled { opacity: .35; } #shop .act em { font-style: normal; color: #ffd27a; font-size: 27px; }
+
+  #ending { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(8,10,16,.78); z-index: 60; }
+  #ending.show { display: flex; }
+  #ending .ebox { background: linear-gradient(180deg, #1b2331, #131922); border: 3px solid #ffd27a; border-radius: 22px; padding: 34px 40px; text-align: center; max-width: 88vw; box-shadow: 0 18px 60px rgba(0,0,0,.6); }
+  #ending .ettl { font-family: 'Gasoek', 'Ria', sans-serif; font-size: clamp(34px, 7vw, 64px); color: #ffd27a; letter-spacing: 4px; }
+  #ending .esub { font-size: clamp(17px, 2.6vw, 24px); line-height: 1.6; margin-top: 14px; color: #fff8ec; }
+  #ending .estat { margin-top: 18px; font-size: clamp(15px, 2.2vw, 20px); color: #cfc7ba; line-height: 1.7; }
+  #ending .ego { margin-top: 26px; padding: 12px 34px; font-size: 32px; border-radius: 999px; border: 2px solid rgba(255,210,122,.8); background: rgba(255,210,122,.14); color: #ffd27a; font-family: inherit; touch-action: manipulation; }
+  @media (max-width: 700px) { #call .ph { padding: 20px 20px 16px; } #call .who { font-size: 26px; margin-bottom: 12px; } #call .msg { font-size: 36px; min-height: 74px; } #call .nx { font-size: 24px; } }
+  #title { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: none; transition: opacity .6s; padding-bottom: 8vh; }
+  #title.hide { opacity: 0; }
+  /* 모바일은 가로로 (사장님 2026-09-11) */
+  #rotate { position: fixed; inset: 0; z-index: 90; display: none; place-items: center; text-align: center; background: #0a1824; color: #f2ede4; font-family: 'Ria', 'Griun', 'Malgun Gothic', sans-serif; font-size: 26px; line-height: 1.8; padding: 8vw; }
+  body.touch.portrait #rotate { display: grid; }
+  #rotate button { margin: 26px 0 18px; padding: 20px 44px; border: 0; border-radius: 99px; cursor: pointer; font-family: inherit; font-size: 30px; font-weight: 800; color: #2a1c08; background: #ffd24a; }
+  #rotate .sub { font-size: 21px; color: #b8ae9c; line-height: 1.7; } #rotate .sub a { color: #d8cfbc; }
+  #title h1 { font-family: 'Gasoek', 'Ria', 'Griun', sans-serif; font-weight: 400; font-size: min(13.5vw, 30vh); white-space: nowrap; margin: 0; letter-spacing: 4px; color: #fff8ec; -webkit-text-stroke: 2px #2b3a4a; paint-order: stroke fill; text-shadow: 0 6px 24px rgba(0,20,40,.45); }
+  #title .tag { font-family: 'Gasoek', 'Ria', sans-serif; font-weight: 400; letter-spacing: 6px; font-size: clamp(16px, 3vw, 26px); margin-top: 4px; color: #fff; text-shadow: 0 0 6px rgba(0,20,40,.9), 0 2px 10px rgba(0,0,0,.7); }
+  #title .go { margin-top: 40px; font-size: 39px; letter-spacing: 6px; opacity: 0; animation: blink 2.2s infinite; text-shadow: 0 2px 8px rgba(0,0,0,.6); display: flex; gap: 18px; }
+  #title .gob { pointer-events: auto; padding: 10px 26px 10px 32px; border-radius: 999px; border: 2px solid rgba(255,248,236,.8); background: rgba(20,28,38,.55); cursor: pointer; touch-action: manipulation; }
+  #title .gob:active { background: rgba(255,248,236,.25); }
+  body.ready #title .go { opacity: 1; }
+  @keyframes blink { 0%, 100% { opacity: .35; } 50% { opacity: 1; } }
+  #hint { position: fixed; left: 50%; bottom: 132px; transform: translateX(-50%) translateY(8px); background: rgba(20,28,38,.85); color: #fff8ec; font-family: 'Ria', 'Malgun Gothic', sans-serif; font-size: 28px; letter-spacing: 1px; padding: 9px 18px; border-radius: 22px; box-shadow: 0 6px 20px rgba(0,0,0,.35); opacity: 0; transition: opacity .25s, transform .25s; pointer-events: none; z-index: 30; white-space: nowrap; }
+  #hint.on { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* 홍보 영상 촬영용(?shot=1) — 화면 글자·단추를 감춘다. 전화창(#call)은 남긴다 */
+body.shot #topbar, body.shot #dest, body.shot #task, body.shot #speed, body.shot #act, body.shot #act2,
+body.shot #keys, body.shot #brake, body.shot #horn, body.shot #foot, body.shot #pad,
+body.shot #hint, body.shot #card, body.shot #vig,
+body.shot #oreumHome, body.shot #oreumFs, body.shot #oreumInApp { display: none !important; }
+
+/* 시작 인트로 영상 */
+#introv { position: fixed; inset: 0; background: #000; z-index: 120; display: none; }
+#introv.on { display: block; }
+#introv video { width: 100%; height: 100%; object-fit: cover; display: block; }
+#introSkip { position: absolute; right: 20px; bottom: 20px; padding: 9px 18px; border: 0; border-radius: 22px;
+  background: rgba(20,28,38,.7); color: #fff8ec; font-family: 'Ria', 'Malgun Gothic', sans-serif; font-size: 26px;
+  letter-spacing: 1px; cursor: pointer; }
+body.shot #introv { display: none !important; }
+  /* 라디오 급매 속보 — 왼쪽 위, 남은 시간이 줄어든다 */
+  #deal { position: fixed; left: 12px; top: calc(96px + env(safe-area-inset-top)); display: none; align-items: center; gap: 8px;
+    padding: 8px 14px; border-radius: 22px; background: rgba(200,32,22,.92); color: #fff; font-family: 'Ria', 'Griun', 'Malgun Gothic', sans-serif;
+    font-size: 30px; letter-spacing: .5px; box-shadow: 0 6px 18px rgba(0,0,0,.4); z-index: 26; pointer-events: none; white-space: nowrap; }
+  #deal.show { display: flex; }
+  /* 라이벌 경고 — 급매 띠 아래, 노란빛 */
+  #rival { position: fixed; left: 12px; top: calc(146px + env(safe-area-inset-top)); display: none; align-items: center; gap: 8px;
+    padding: 8px 14px; border-radius: 22px; background: rgba(180,83,9,.92); color: #fff; font-family: 'Ria', 'Griun', 'Malgun Gothic', sans-serif;
+    font-size: 30px; letter-spacing: .5px; box-shadow: 0 6px 18px rgba(0,0,0,.4); z-index: 26; pointer-events: none; white-space: nowrap; }
+  #rival.show { display: flex; }
+  #rival b { font-size: 33px; }
+  #rival .t { background: rgba(0,0,0,.28); border-radius: 14px; padding: 2px 10px; }
+  @media (max-width: 700px) { #rival { font-size: 22px; padding: 6px 10px; top: calc(134px + env(safe-area-inset-top)); } #rival b { font-size: 24px; } }
+  #deal b { font-size: 33px; }
+  #deal .t { background: rgba(0,0,0,.28); border-radius: 14px; padding: 2px 10px; }
+  @media (max-width: 700px) { #deal { font-size: 22px; padding: 6px 10px; } #deal b { font-size: 24px; } }
+  /* 여자친구·복덕방 대사 — 유학 친구 전화(#call)와 같은 크기·같은 자리 (사장님 2026-09-10) */
+  #gfsay { position: fixed; inset: 0; display: none; align-items: flex-start; justify-content: center;
+    z-index: 26; pointer-events: none; }
+  #gfsay.show { display: flex; }
+  #gfsay .ph { width: min(92vw, 620px); margin-top: max(70px, 9vh); padding: 30px 34px 24px; border-radius: 30px;
+    background: rgba(12,14,20,.96); border: 2px solid rgba(255,255,255,.22);
+    box-shadow: 0 20px 60px rgba(0,0,0,.6); color: #f2ede4; }
+  #gfsay .who { font-size: 33px; letter-spacing: 2px; color: #ff9ec4; margin-bottom: 18px; }
+  #gfsay .who.old { color: #ffd27a; }
+  #gfsay .msg { font-size: 51px; line-height: 1.4; min-height: 96px; font-family: 'Griun', 'Ria', sans-serif; }
+  @media (max-width: 700px) { #gfsay .ph { padding: 20px 20px 16px; } #gfsay .who { font-size: 26px; margin-bottom: 12px; }
+    #gfsay .msg { font-size: 36px; min-height: 74px; } }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="vig"></div>
+<div id="flash"></div>
+
+<div id="topbar">
+  <div class="stat tap" id="statMoney" title="자산"><span class="ic">💰</span><b id="money">0</b><i id="gain"></i></div>
+  <div class="stat" style="display:none"><span class="ic">📷</span><b id="stamps">0/0</b></div>
+  <div class="stat"><span class="ic">⏱</span><b id="time">오전 9시</b></div>
+  <div class="spacer"></div>
+  <button id="btnMap" class="tog" title="지도">🗺 지도</button>
+  <button id="btnBack" class="tog" title="리스폰">↩</button>
+  <button id="btnBgm" class="tog" title="음악 M">♪</button>
+  <button id="btnNext" class="tog" title="다음 곡 N">⏭</button>
+  <button id="btnSfx" class="tog" title="효과음">🔊</button>
+</div>
+<div id="dest"><svg id="destArrow" viewBox="0 0 24 24" width="30" height="30"><polygon points="12,1 21,22 12,16 3,22" fill="#ff6a4a" stroke="#fff" stroke-width="1.5" stroke-linejoin="round"/></svg><span id="destName"></span><b id="destDist"></b></div>
+<div id="task"></div>
+<div id="deal"></div>
+<div id="rival"></div>
+<div id="gfsay"><div class="ph"><div class="who" id="gfWho"></div><div class="msg" id="gfMsg"></div></div></div>
+<div id="speed">0<small>km/h</small></div>
+<button id="act">📷 촬영</button>
+<button id="act2">💸 팔기</button>
+<div id="keys">↑↓←→ 운전 · 스페이스 핸드브레이크 · E 행동<br>T 지도 · H 경적 · R 리스폰 · K 효과음</div>
+<button id="brake" class="tbtn">브레이크</button>
+<button id="horn" class="tbtn">경적</button>
+<button id="foot" class="tbtn">내리기</button>
+<div id="pad"><button id="padU">▲</button><button id="padL">◀</button><button id="padR">▶</button><button id="padD">▼</button></div>
+
+<div id="hint"></div>
+<div id="card"><div class="ph"><span id="cardIcon">📷</span><div id="cardStamp">JEJU</div></div><div class="nm" id="cardName"></div><div class="cn">🪙 <span id="cardCoin"></span></div></div>
+
+<div id="map" class="modal"><div class="head"><span>지도</span><button id="mapClose">✕</button></div><canvas id="mapc" width="1440" height="1095"></canvas><div class="tools"><button id="mapZoomIn">＋</button><button id="mapZoomOut">－</button><button id="mapMe">◎</button></div><div id="mapCount"></div></div>
+<div id="build" class="modal"><div class="head"><span id="buildName">짓기</span><button id="buildClose">✕</button></div><div id="buildList"></div></div>
+<div id="assets" class="modal"><div class="head"><span>자산</span><button id="assetClose">✕</button></div><div id="assetSum"></div><div id="assetList"></div></div>
+<div id="shop" class="modal"><div class="head"><span>렌터카</span><button id="shopClose">✕</button></div><div id="shopList"></div></div>
+
+<div id="call"><div class="ph"><div class="who" id="callWho">📞 유학 친구</div><div class="msg" id="callMsg"></div><div class="nx">▼</div></div></div>
+<div id="ending"><div class="ebox">
+  <div class="ettl">부동산 재벌</div>
+  <div class="esub">1,000억을 모았다.<br>아버지 그늘에서 벗어나 제주도에 이름을 남겼다.</div>
+  <div class="estat" id="endStat"></div>
+  <button class="ego" id="endGo">계속하기</button>
+</div></div>
+<div id="rotate">
+  <div>
+    <p>가로 화면에서 하는 게임입니다</p>
+    <button type="button" id="rotGo">가로로 돌리기</button>
+    <p class="sub">단추가 안 먹으면 폰의 화면 회전 잠금을 풀고 눕혀 주세요<br>
+      <a href="#" id="rotSkip">그래도 세로로 하기</a></p>
+  </div>
+</div>
+
+<div id="title">
+  <h1>BUY JEJU</h1>
+  <div class="go"><span id="goCont" class="gob" hidden>이어하기</span><span id="goNew" class="gob">시작</span></div>
+</div>
+
+<script src="assets/landscape.js?v=54"></script>
+<script src="assets/game-home.js" data-top="6" data-left="6" data-fullscreen="1" defer></script>
+<script type="importmap">
+{ "imports": { "three": "./lib/three.module.js" } }
+</script>
+<script type="module">
+  import * as THREE from 'three';
+  import { GLTFLoader } from './lib/addons/loaders/GLTFLoader.js';
+  import { clone as skeletonClone } from './lib/addons/utils/SkeletonUtils.js';
+  window.THREE = THREE;
+  window.GLTFLoaderClass = GLTFLoader;
+  window.SkeletonClone = skeletonClone;
+  const V = '344';
+  const names = ['noise','textures','spots','island','sky','post','roads','city','glb','vehicles','landmarks','traffic','player','audio','activity','blds','estate','npc','people','pet','game'];
+  (async () => {
+    for (const n of names) {
+      await new Promise((res, rej) => {
+        const el = document.createElement('script');
+        el.src = 'js/' + n + '.js?v=' + V;
+        el.onload = res; el.onerror = () => rej(new Error('load fail ' + n));
+        document.body.appendChild(el);
+      });
+    }
+  })();
+</script>
+<script src="/assets/visit.js?v=11" defer></script>
+<script src="/assets/game-events.js?v=1" defer></script>
+</body>
+</html>
