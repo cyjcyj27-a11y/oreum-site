@@ -4,7 +4,11 @@
   const VS = 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }';
   const brightMat = new THREE.ShaderMaterial({ uniforms: { tex: { value: null }, thr: { value: 1.0 } }, vertexShader: VS, depthTest: false, depthWrite: false,
     fragmentShader: `uniform sampler2D tex; uniform float thr; varying vec2 vUv;
-      void main(){ vec3 c = texture2D(tex, vUv).rgb; float l = dot(c, vec3(0.2126, 0.7152, 0.0722)); float k = smoothstep(thr, thr + 1.2, l); gl_FragColor = vec4(c * k, 1.0); }` });
+      void main(){ vec3 c = texture2D(tex, vUv).rgb; float l = dot(c, vec3(0.2126, 0.7152, 0.0722)); float k = smoothstep(thr, thr + 1.2, l);
+        // 전조등을 받은 곳은 밝기가 10을 넘는다. 그대로 번지면 사람 둘레에 하얀 후광이 둘러친다
+        // (사장님 2026-09-12 "여친 머리 번쩍거리는거 왜그러냐"). 번지는 밝기를 2.2 로 자른다 — 간판·창 불빛 번짐은 그대로다
+        c = min(c, vec3(2.2));
+        gl_FragColor = vec4(c * k, 1.0); }` });
   const blurMat = new THREE.ShaderMaterial({ uniforms: { tex: { value: null }, dir: { value: new THREE.Vector2(1, 0) } }, vertexShader: VS, depthTest: false, depthWrite: false,
     fragmentShader: `uniform sampler2D tex; uniform vec2 dir; varying vec2 vUv;
       void main(){ vec3 c = texture2D(tex, vUv).rgb * 0.227;

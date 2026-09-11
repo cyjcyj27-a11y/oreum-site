@@ -115,15 +115,16 @@
   // (2026-09-10 발끝 뼈 넷의 높이차·짝 어긋남을 40칸으로 재서 고른 값. 0.16 은 앞발 하나가 들려 있어 걷다 만 것처럼 보였다)
   const HERO = { g: null, mixer: null, acts: null, h: 1.72, cur: '', holder: null, base: 0 };
   const C = { x: 0, z: 0, y: 0, yaw: 0, spd: 0 }; let catRoot = null;
-  function fitModel(g, h, precise, mip) {   // precise: 뼈가 움직인 실제 자세로 잰다(아니면 원본 자세 기준이라 발이 땅에 파묻힌다). mip: 밉맵 켬(작은 모델용)
+  function fitModel(g, h, precise) {   // precise: 뼈가 움직인 실제 자세로 잰다(아니면 원본 자세 기준이라 발이 땅에 파묻힌다)
     g.updateMatrixWorld(true);
     const box = new THREE.Box3().setFromObject(g, !!precise), sz = new THREE.Vector3(); box.getSize(sz);
     const s = h / (sz.y || 1); g.scale.setScalar(s);
     const holder = new THREE.Group(); holder.rotation.y = Math.PI; holder.position.y = -STAND - box.min.y * s; holder.add(g);
     g.traverse(o => { if (o.isMesh || o.isSkinnedMesh) { o.castShadow = true; o.frustumCulled = false; if (o.material) { o.material.roughness = 0.85; o.material.metalness = 0; if (o.material.color) o.material.color.set(0xffffff);   // 믹사모 FBX 의 어두운 재질색이 텍스처에 곱해지지 않게
-      // Meshy 텍스처는 조각난 UV 라 밉맵을 만들면 피부·옷 조각 색이 섞여 가장자리에 점이 생긴다 → 밉맵 없이 원본만 쓴다(인물은 늘 가까이 보인다)
-      // 단, 고양이처럼 화면에 작게 보이는 모델은 밉맵 없이 2048 텍스처를 뿌리면 텍셀을 건너뛰어 지글거리고 뭉개진다 → 밉맵+이방성 16
-      const m = o.material.map; if (m) { if (mip) { m.generateMipmaps = true; m.minFilter = THREE.LinearMipmapLinearFilter; m.magFilter = THREE.LinearFilter; m.anisotropy = 16; } else { m.generateMipmaps = false; m.minFilter = THREE.LinearFilter; m.magFilter = THREE.LinearFilter; m.anisotropy = 8; } m.needsUpdate = true; } } } });
+      // 2048 텍스처를 밉맵 없이 뿌리면 화면 한 점이 텍셀 서너 개를 건너뛰어, 밝은 텍셀이 들락날락하며 번쩍인다.
+      // 머리카락·검은 옷처럼 무늬가 촘촘한 곳에서 특히 심하고, 밤에 전조등을 받으면 블룸까지 타서 반짝이 뿌린 것처럼 보였다
+      // (사장님 2026-09-12 "여친 머리 번쩍거리는거 왜그러냐"). 밉맵 + 이방성 16 으로 켠다.
+      const m = o.material.map; if (m) { m.generateMipmaps = true; m.minFilter = THREE.LinearMipmapLinearFilter; m.magFilter = THREE.LinearFilter; m.anisotropy = 16; m.needsUpdate = true; } } } });
     return holder;
   }
   function loadGlb() {
@@ -148,7 +149,7 @@
     }).catch(e => console.warn('주인공 GLB 실패', e));
     GLB.load('assets/models/cat_luru.glb?v=2', {}).then(g => {
       CAT.mixer = g.userData.mixer; CAT.act = g.userData.play(); if (CAT.act) { CAT.mixer.setTime(CAT.idleT); CAT.act.paused = true; }   // 멈춘 액션은 setTime 이 안 먹는다 → 시간 맞춘 뒤 멈춤
-      CAT.g = fitModel(g, CAT.h, true, true); CAT.g.rotation.y = CAT.flip; catRoot.add(CAT.g); C.x = S.x; C.z = S.z; C.yaw = S.yaw;
+      CAT.g = fitModel(g, CAT.h, true); CAT.g.rotation.y = CAT.flip; catRoot.add(CAT.g); C.x = S.x; C.z = S.z; C.yaw = S.yaw;
     }).catch(e => console.warn('고양이 GLB 실패', e));
   }
   // 주인공 애니: idle / walk / run 을 섞어 바꾸고, 차 안에선 좌석에 가라앉혀 앉은 것처럼 보이게 한다
@@ -383,7 +384,7 @@
       const clips = g.userData.clips || [];
       const idle = clips.find(function (c) { return /idle/i.test(c.name); }) || clips[0];
       if (OLDM.mixer && idle) { OLDM.act = OLDM.mixer.clipAction(idle); OLDM.act.play(); }
-      OLDM.g = fitModel(g, 1.66, true, false); OLDM.root.add(OLDM.g);
+      OLDM.g = fitModel(g, 1.66, true); OLDM.root.add(OLDM.g);
       then && then();
     }).catch(function (e) { console.warn('복덕방 GLB 실패', e); });
   }
@@ -557,7 +558,7 @@
       if (GF.idleAct) { GF.idleAct.play(); GF.anim = 'idle'; }
       else if (GF.act) { GF.act.play(); GF.mixer.setTime(0.9); GF.act.paused = true; GF.anim = 'walk'; }
       if (GF.mixer && sit) GF.sitAct = GF.mixer.clipAction(sit);
-      GF.g = fitModel(g, GF.h, true, false); gfRoot.add(GF.g);
+      GF.g = fitModel(g, GF.h, true); gfRoot.add(GF.g);
       // 엉덩이 뼈를 좌석에 맞추는 데 쓰는 잣대 — 재는 건 실제로 앉힌 뒤로 미룬다(gfUpdate).
       // 서 있는 자세로 미리 재면 엉덩이가 20cm 띄어 주인공보다 솟아오른다 (사장님 2026-09-10)
       GF.hips = g.getObjectByName('mixamorigHips') || g.getObjectByName('Hips');
@@ -677,7 +678,7 @@
     }
   }
 
-  function update(dt, t) { if (!root) return; updateHero(dt, t); catUpdate(dt); gfUpdate(dt); gfSayTick(dt); brokerTick(dt); }
+  function update(dt, t) { if (!root) return; unhideNear(); updateHero(dt, t); catUpdate(dt); gfUpdate(dt); gfSayTick(dt); brokerTick(dt); }
   function updateHero(dt, t) {
     S.t += dt; S.lookT -= dt; if (S.lookT <= 0) { S.lookT = 1.5 + Math.random() * 3; S.lookTgt = (Math.random() - .5) * 1.4; }
     S.look += ((S.lookTgt || 0) - S.look) * Math.min(1, dt * 3);
@@ -825,6 +826,20 @@
     camPos.lerp(camWant, 1 - Math.exp(-7 * dt)); cam.position.copy(camPos);
     lookV.set(S.x, S.y + S.jy * .5 + .9, S.z); cam.lookAt(lookV);
     if (Math.abs(cam.fov - 60) > .05) { cam.fov = 60; cam.updateProjectionMatrix(); }
+    hideNear(cam);
+  }
+  // 두 손가락으로 바짝 당기면 카메라가 옆에 선 사람 속으로 들어간다. 그러면 앞면이 잘려 나가
+  // 속이 들여다보여 '투명'해 보이고 머리카락이 부서진 조각처럼 뻗친다 (사장님 2026-09-12 "여친 확대하니까 투명해지네").
+  // 카메라에서 한 걸음 안쪽에 선 사람은 잠깐 감춘다 — 3인칭 게임의 흔한 처리다.
+  const NEAR_HIDE = 1.1, hidden = [];
+  function nearCam(cam, x, z) { const dx = cam.position.x - x, dz = cam.position.z - z; return dx * dx + dz * dz < NEAR_HIDE * NEAR_HIDE; }
+  function unhideNear() { for (let i = 0; i < hidden.length; i++) hidden[i].visible = true; hidden.length = 0; }   // 감춘 것 되돌리기 — 차에 타면 camera() 가 안 돌아서 여기서 푼다
+  function hideNear(cam) {
+    const t = (root, x, z) => { if (root && root.visible && nearCam(cam, x, z)) { root.visible = false; hidden.push(root); } };
+    t(gfRoot, GF.x, GF.z);
+    t(catRoot, C.x, C.z);
+    if (OLDM.root) t(OLDM.root, OLDM.root.position.x, OLDM.root.position.z);
+    t(HERO.holder, S.x, S.z);
   }
   window.PET = { init, update, state: S, cat: CAT, catState: C, heroM: HERO, gfM: GF, toggleFoot, canToggle, board, control, hero, camera, get onFoot() { return S.onFoot; }, gfSay: gfSay, brokerAt: brokerAt, say: sayBox };
 })();
