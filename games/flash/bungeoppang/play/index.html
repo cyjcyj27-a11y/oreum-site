@@ -114,6 +114,15 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0d1220;
   font-family:inherit;font-size:23px;cursor:pointer;box-shadow:0 6px 22px rgba(0,0,0,.45)}
 #start:active{transform:scale(.96)}
 
+/* ---------- 가로로 돌리기 (폰 세로일 때만) ---------- */
+#rotate{position:fixed;inset:0;z-index:90;display:none;place-items:center;text-align:center;
+  background:#0d1220;color:#f2ede4;font-size:17px;line-height:1.8;padding:8vw}
+body.touch.portrait #rotate{display:grid}
+#rotate button{margin:22px 0 16px;padding:15px 32px;border:0;border-radius:99px;cursor:pointer;
+  font-family:inherit;font-size:17px;font-weight:800;color:#2a1a06;background:#e8a33d}
+#rotate .sub{font-size:14px;color:#9aa2b5;line-height:1.7}
+#rotate .sub a{color:#c8cede}
+
 /* ---------- 떠오르는 글 ---------- */
 #pops{position:fixed;inset:0;z-index:15;pointer-events:none;overflow:hidden}
 .pop{position:absolute;font-size:20px;color:#ffd98a;text-shadow:0 2px 6px rgba(0,0,0,.8);
@@ -165,16 +174,26 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0d1220;
   <div class="t" id="rankName"></div>
 </div></div>
 
+<div id="rotate">
+  <div>
+    <p data-t="rotTitle">가로 화면에서 하는 게임입니다</p>
+    <button type="button" id="rotGo" data-t="rotGo">가로로 돌리기</button>
+    <p class="sub"><span data-t="rotHelp">단추가 안 먹으면 폰의 화면 회전 잠금을 풀고 눕혀 주세요</span><br>
+      <a href="#" id="rotSkip" data-t="rotSkip">그래도 세로로 하기</a></p>
+  </div>
+</div>
+
 <div id="title">
   <h1>붕어빵</h1>
   <button id="start">START</button>
 </div>
 
 <script src="assets/game-home.js" data-top="6" data-left="6" data-fullscreen="1" defer></script>
-<script src="js/i18n.js?v=54"></script>
-<script src="js/audio.js?v=54"></script>
-<script src="js/art.js?v=54"></script>
-<script src="js/game.js?v=54"></script>
+<script src="assets/landscape.js?v=1"></script>
+<script src="js/i18n.js?v=55"></script>
+<script src="js/audio.js?v=55"></script>
+<script src="js/art.js?v=55"></script>
+<script src="js/game.js?v=55"></script>
 <script src="/assets/visit.js?v=11" defer></script>
 <script src="/assets/game-events.js?v=2" defer></script>
 </body>

@@ -817,7 +817,22 @@
   tSnd.onclick = function () { SND.toggle(); syncSnd(); };
   syncSnd();
 
-  window.addEventListener('resize', function () { layout(); draw(); });   // 크기가 바뀌면 캔버스가 지워진다 — 바로 다시 그린다
+  // ---------- 가로로 돌리기 ----------
+  // 폰은 눕혀서 한다. 좌판과 오뎅 통이 나란히 놓여야 실제 크기 비례가 산다
+  if (window.matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window)
+    document.body.classList.add('touch');
+  function orient() {
+    document.body.classList.toggle('portrait',
+      innerHeight > innerWidth && !document.documentElement.classList.contains('ol-land'));
+  }
+  document.getElementById('rotGo').addEventListener('click', function () { if (window.OL) OL.go(); });
+  document.getElementById('rotSkip').addEventListener('click', function (e) {
+    e.preventDefault(); document.body.classList.remove('portrait');
+  });
+  orient();
+
+  window.addEventListener('resize', function () { layout(); draw(); orient(); });   // 크기가 바뀌면 캔버스가 지워진다 — 바로 다시 그린다
+  window.addEventListener('orientationchange', function () { setTimeout(function () { layout(); draw(); orient(); }, 150); });
   window.addEventListener('pagehide', save);
   document.addEventListener('visibilitychange', function () { if (document.hidden) save(); });
 

@@ -11,7 +11,9 @@
     ranks: ['포장마차', '푸드트럭', '가게'],
     flavors: ['팥', '슈크림', '초코', '고구마', '치즈', '피자', '민트초코', '금붕어빵'],
     goal: '다음 단계', maxRank: 'MAX',
-    lock: '???'
+    lock: '???',
+    rotTitle: '가로 화면에서 하는 게임입니다', rotGo: '가로로 돌리기',
+    rotHelp: '단추가 안 먹으면 폰의 화면 회전 잠금을 풀고 눕혀 주세요', rotSkip: '그래도 세로로 하기'
   };
   var EN = {
     title: 'BUNGEOPPANG', shop: 'SHOP', dex: 'DEX', start: 'START',
@@ -24,7 +26,10 @@
     ranks: ['Street Tent', 'Food Truck', 'Shop'],
     flavors: ['Red Bean', 'Custard', 'Chocolate', 'Sweet Potato', 'Cheese', 'Pizza', 'Mint Choco', 'Golden'],
     goal: 'Next Tier', maxRank: 'MAX',
-    lock: '???'
+    lock: '???',
+    rotTitle: 'This game plays in landscape', rotGo: 'Turn to landscape',
+    rotHelp: "If the button does nothing, turn off your phone's rotation lock and lay it sideways",
+    rotSkip: 'Play in portrait anyway'
   };
   var q = new URLSearchParams(location.search).get('lang');
   var en = q ? q === 'en' : !/^ko/i.test(navigator.language || '');
