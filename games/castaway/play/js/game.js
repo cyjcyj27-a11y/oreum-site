@@ -37,7 +37,8 @@
     if (e.code === 'Escape' && dexOpen) { toggleDex(false); return; }
     if (e.code === 'KeyD') { toggleDex(); return; }
     if (dexOpen) return;
-    if (e.code === 'Digit1' || e.code === 'Digit2') eat(); if (e.code === 'KeyB') cycleBait(); if (e.code === 'KeyK') toggleSfx();
+    // 빠른 먹기 키(1·2)는 뺀다 — 있는 줄도 모른다고 하셔서. 먹기는 도감(D)에서 골라 누른다 (사장님 2026-09-11)
+    if (e.code === 'KeyB') cycleBait(); if (e.code === 'KeyK') toggleSfx();
     if (e.code === 'Enter' && G.state === 'title') start();
   });
   addEventListener('keyup', e => { if (e.code === 'Space') actUp(); });
@@ -87,6 +88,12 @@
     if (G.state !== 'title') return; A.unlock(); G.state = 'play'; $('title').classList.add('hide'); $('topbar').classList.add('show'); $('keys').classList.add('show'); document.body.classList.add('playing');
     camYaw = Math.PI; G.time = 0; hud(); saveT = 0;
     if (window.OG) OG.start();   // 집계: 한 판 시작
+    // 시험용: 주소 뒤 ?ending=1 이면 바로 엔딩을 보여 준다(검수용, 사장님 2026-09-11)
+    if (/[?&]ending=1/.test(location.search)) {
+      G.day = 23; G.bestCm = 468; G.caught = 61;
+      F.SPECIES.forEach(sp => dexRecord(sp.id, sp.len[1]));
+      G.ending = { t: 0 }; G.sit = true; W.setPose('sit'); clearProg();
+    }
   }
   /* 저장 · 이어하기 — 노는 동안 5초마다, 창을 닫을 때. GAME OVER·엔딩 시작에서 지운다(사장님, 2026-09-09 "망망대해도 이어하기가 없어") */
   const SAVE_KEY = 'castaway.prog', SAVE_G = ['day', 'food', 'inv', 'bait', 'baitSp', 'baitUses', 'bestCm', 'caught']; let saveT = 0;
@@ -151,12 +158,12 @@
     else toast('CATCH!', name + ' ' + cm + 'cm' + (rec && G.caught > 1 ? ' · ' + T('신기록', 'NEW RECORD') : ''), false, 2.6);
     useBait();
     L.landFrom = f.pos.clone(); L.landTo = new V(); W.deckPoint(0.35, 0.15, L.landTo);
-    if (f.sp.tier === 4) { G.ending = { t: 0 }; G.sit = true; W.setPose('sit'); clearProg(); }   // 엔딩은 거대 참다랑어(30번째)만
+    if (f.sp.tier === 4) { G.ending = { t: 0 }; G.sit = true; W.setPose('sit'); clearProg(); }   // 엔딩은 거대 참다랑어를 잡으면 (사장님 2026-09-11 원래대로)
   }
   function eat(which) {
     if (G.state !== 'play' || G.eatT > 0 || (L.st !== 'idle' && L.st !== 'float')) return;
     // 고른 것이 없으면 작은 것부터 먹는다
-    const sp = which && (G.inv[which] || 0) > 0 ? which : BAIT_ORDER.find(id => (G.inv[id] || 0) > 0); if (!sp) return;
+    const sp = which && (G.inv[which] || 0) > 0 ? which : EAT_ORDER.find(id => (G.inv[id] || 0) > 0); if (!sp) return;
     // 배는 100 에서 막히지 않고 쌓인다 — 999짜리 큰 고기를 먹으면 며칠을 간다 (사장님 2026-09-11)
     // 하루 = 150초, 배는 170초에 100 준다 — 100 이면 하루치다.
     G.inv[sp]--; const gain = F.BY[sp].food; G.food = Math.min(999, G.food + gain);
@@ -183,6 +190,9 @@
   // 미끼 한 마리는 토막 내어 여러 번 쓴다 — 종마다 cut 토막 (사장님 2026-09-07). 순서는 작은(배부름 낮은) 것부터
   const BAIT_USES = {}; F.SPECIES.forEach(sp => BAIT_USES[sp.id] = sp.cut);
   const BAIT_ORDER = F.SPECIES.filter(sp => sp.cut > 0).sort((a, b) => a.food - b.food).map(sp => sp.id);
+  // 빠른 먹기(1·2 키)는 가진 것 중 제일 작은 것부터. 미끼로 못 쓰는 큰 고기(cut 0)도 먹을 수 있어야 한다.
+  // 단, 거대 참다랑어(4등급)는 먹으면 끝이라 손으로 골라야 먹힌다 (사장님 2026-09-11)
+  const EAT_ORDER = F.SPECIES.filter(sp => sp.tier !== 4).sort((a, b) => a.food - b.food).map(sp => sp.id);
   // 가진 물고기 전부. 예전엔 미끼로 쓸 수 있는 것(cut>0)만 세서 돛새치·황새치를 잡아도 0 으로 나왔다 (사장님 2026-09-11)
   const invAll = () => F.SPECIES.reduce((n, sp) => n + (G.inv[sp.id] || 0), 0);
 
