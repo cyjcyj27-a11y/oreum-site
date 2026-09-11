@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>붕어빵 장사</title>
+<style>
+@font-face{font-family:'Kirang';src:url('fonts/KirangHaerang-title.woff2') format('woff2');font-display:swap}
+@font-face{font-family:'Ria';src:url('fonts/RiaSans-ExtraBold.woff2') format('woff2');font-display:swap}
+
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{width:100%;height:100%;overflow:hidden;background:#0d1220;
+  font-family:'Ria',-apple-system,'Malgun Gothic',sans-serif;color:#fff;
+  user-select:none;-webkit-user-select:none;touch-action:none}
+#cv{display:block;position:fixed;inset:0;width:100%;height:100%}
+
+/* ---------- 상단바 (스카이라이더 배치) ---------- */
+#topbar{position:fixed;top:0;left:0;right:0;z-index:20;display:flex;align-items:flex-start;
+  gap:6px;flex-wrap:wrap;pointer-events:none;
+  padding:6px 8px 26px calc(104px + env(safe-area-inset-left));
+  background:linear-gradient(180deg,rgba(0,0,0,.5),rgba(0,0,0,0))}
+.stat{display:flex;align-items:center;gap:6px;background:rgba(0,0,0,.35);
+  border-radius:15px;padding:5px 10px;backdrop-filter:blur(4px)}
+.stat i{font-style:normal;font-size:13px;opacity:.9}
+.stat b{font-size:17px;font-weight:400;letter-spacing:.3px}
+.bar{width:64px;height:6px;border-radius:3px;background:rgba(255,255,255,.22);overflow:hidden}
+.bar>span{display:block;height:100%;border-radius:3px;transition:width .18s}
+#dbar>span{background:#f2d9a8}
+#pbar>span{background:#c1683f}
+.spacer{flex:1 1 40px}
+.tog{pointer-events:auto;width:36px;height:36px;border-radius:50%;border:0;
+  background:rgba(0,0,0,.4);color:#fff;font-size:15px;cursor:pointer;
+  display:grid;place-items:center;position:relative;font-family:inherit}
+.tog.off{opacity:.4}
+.tog.off::after{content:'';position:absolute;left:6px;right:6px;top:50%;height:2px;
+  background:#fff;transform:rotate(-45deg);border-radius:1px}
+@media (max-width:700px){.stat b{font-size:15px}.stat{padding:5px 8px;gap:5px}.bar{width:34px}
+  #topbar{gap:5px}}
+@media (max-width:400px){.bar{width:26px}.stat b{font-size:14px}}
+
+/* ---------- 아래 단추 ---------- */
+#dock{position:fixed;left:0;right:0;bottom:0;z-index:20;display:flex;gap:10px;
+  justify-content:center;align-items:flex-end;
+  padding:0 12px calc(12px + env(safe-area-inset-bottom))}
+.dbtn{pointer-events:auto;min-width:104px;height:52px;border-radius:26px;border:0;
+  background:rgba(0,0,0,.42);color:#fff;font-family:inherit;font-size:17px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:7px;backdrop-filter:blur(4px);
+  border:1.5px solid rgba(255,255,255,.16)}
+.dbtn:active{transform:scale(.96)}
+.dbtn .dot{position:absolute;margin:-30px 0 0 84px;width:11px;height:11px;border-radius:50%;
+  background:#ffd23f;box-shadow:0 0 0 2px rgba(0,0,0,.45)}
+
+/* ---------- 패널 ---------- */
+#sheet{position:fixed;inset:0;z-index:30;display:none;background:rgba(6,9,16,.82);
+  backdrop-filter:blur(6px);overflow-y:auto;overscroll-behavior:contain;
+  padding:calc(14px + env(safe-area-inset-top)) 14px calc(88px + env(safe-area-inset-bottom))}
+#sheet.on{display:block}
+.wrap{max-width:620px;margin:0 auto}
+.shead{display:flex;align-items:center;gap:10px;margin:42px 2px 14px}
+.shead h2{font-size:24px;font-weight:400;letter-spacing:.5px;flex:1}
+.shead .stat{background:rgba(255,255,255,.12)}
+.x{width:38px;height:38px;border-radius:50%;border:0;background:rgba(255,255,255,.13);
+  color:#fff;font-size:19px;cursor:pointer;font-family:inherit}
+.row{display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.07);
+  border:1.5px solid rgba(255,255,255,.09);border-radius:16px;padding:11px 13px;margin-bottom:9px}
+.row .ic{width:44px;height:44px;border-radius:12px;background:rgba(0,0,0,.3);
+  display:grid;place-items:center;font-size:23px;flex:none}
+.row .tx{flex:1;min-width:0}
+.row .tx .nm{font-size:16px}
+.row .tx .lv{font-size:13px;opacity:.62;margin-top:2px}
+.buy{border:0;border-radius:13px;padding:10px 14px;background:#e8a33d;color:#2a1a06;
+  font-family:inherit;font-size:15px;cursor:pointer;white-space:nowrap;min-width:82px}
+.buy:disabled{background:rgba(255,255,255,.12);color:rgba(255,255,255,.42)}
+.buy:active:not(:disabled){transform:scale(.95)}
+.mx{background:rgba(255,255,255,.12);color:rgba(255,255,255,.5)}
+
+/* 다음 단계 */
+.row.goal{border-color:rgba(255,210,63,.34);background:rgba(255,210,63,.08)}
+.row.goal .ic{background:rgba(255,210,63,.16)}
+.row.goal .gl{font-size:12px;opacity:.6;letter-spacing:.4px}
+.row.goal .nm{font-size:17px;color:#ffd98a;margin-top:1px}
+.gbar{height:7px;border-radius:4px;background:rgba(255,255,255,.18);overflow:hidden;margin-top:7px}
+.gbar>span{display:block;height:100%;border-radius:4px;background:#ffd23f;transition:width .25s}
+.gnum{font-size:14px;opacity:.82;white-space:nowrap;align-self:flex-end}
+
+/* 상점 갈래 */
+.tabs{display:flex;gap:8px;margin:0 0 12px}
+.tab{flex:1;border:1.5px solid rgba(255,255,255,.12);border-radius:14px;padding:11px 8px;
+  background:rgba(255,255,255,.05);color:rgba(255,255,255,.55);font-family:inherit;
+  font-size:16px;cursor:pointer}
+.tab.on{background:rgba(232,163,61,.18);border-color:#e8a33d;color:#ffd9a0}
+.tab:active{transform:scale(.97)}
+
+/* 도감 */
+.dexg{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:9px}
+.dex{background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.09);
+  border-radius:15px;padding:11px 6px;text-align:center}
+.dex.lock{opacity:.34}
+.dex.cur{border-color:#ffd23f;background:rgba(255,210,63,.13)}
+.dex canvas{width:52px;height:52px;display:block;margin:0 auto 5px}
+.dex .nm{font-size:14px}
+.dex .pr{font-size:12px;opacity:.66;margin-top:2px}
+
+/* ---------- 타이틀 ---------- */
+#title{position:fixed;inset:0;z-index:40;display:flex;flex-direction:column;
+  align-items:center;justify-content:flex-start;gap:20px;padding-top:16vh;
+  background:linear-gradient(180deg,rgba(8,11,20,.30) 30%,rgba(8,11,20,.06) 60%)}
+#title h1{font-family:'Kirang',serif;font-size:clamp(52px,15vw,104px);font-weight:400;
+  color:#ffe1a8;line-height:1;letter-spacing:2px;
+  text-shadow:0 4px 0 #8a3d15,0 10px 30px rgba(0,0,0,.7)}
+#title.off{display:none}
+#start{border:0;border-radius:30px;padding:15px 52px;background:#e8a33d;color:#2a1a06;
+  font-family:inherit;font-size:23px;cursor:pointer;box-shadow:0 6px 22px rgba(0,0,0,.45)}
+#start:active{transform:scale(.96)}
+
+/* ---------- 떠오르는 글 ---------- */
+#pops{position:fixed;inset:0;z-index:15;pointer-events:none;overflow:hidden}
+.pop{position:absolute;font-size:20px;color:#ffd98a;text-shadow:0 2px 6px rgba(0,0,0,.8);
+  animation:up 1.05s ease-out forwards;white-space:nowrap}
+.pop.big{font-size:29px;color:#fff0c0}
+@keyframes up{0%{opacity:0;transform:translate(-50%,4px) scale(.8)}
+  18%{opacity:1;transform:translate(-50%,-8px) scale(1.08)}
+  100%{opacity:0;transform:translate(-50%,-58px) scale(1)}}
+
+/* ---------- 승급 ---------- */
+#rank{position:fixed;inset:0;z-index:45;display:none;align-items:center;justify-content:center;
+  background:rgba(6,9,16,.8);backdrop-filter:blur(5px)}
+#rank.on{display:flex}
+#rank .card{display:flex;flex-direction:column;align-items:center;gap:18px;padding:24px}
+#rank .card canvas{width:min(80vw,380px);height:auto;border-radius:16px;
+  box-shadow:0 12px 40px rgba(0,0,0,.6)}
+#rank .card .t{font-family:'Kirang',serif;font-size:clamp(30px,9vw,44px);color:#ffe1a8;
+  letter-spacing:1px;text-shadow:0 3px 0 #8a3d15}
+</style>
+</head>
+<body>
+
+<canvas id="cv"></canvas>
+
+<div id="topbar">
+  <div class="stat"><i>🪙</i><b id="coin">0</b></div>
+  <div class="stat"><i>🥣</i><span class="bar" id="dbar"><span></span></span><b id="dnum">0</b></div>
+  <div class="stat"><i>🫘</i><span class="bar" id="pbar"><span></span></span><b id="pnum">0</b></div>
+  <div class="spacer"></div>
+  <button class="tog" id="tSnd" title="효과음">🔊</button>
+</div>
+
+<div id="dock">
+  <button class="dbtn" id="bShop">🛒 <span data-t="shop">상점</span><span class="dot" id="shopDot" hidden></span></button>
+  <button class="dbtn" id="bDex">📖 <span data-t="dex">도감</span></button>
+</div>
+
+<div id="sheet"><div class="wrap">
+  <div class="shead"><h2 id="sTitle">상점</h2>
+    <div class="stat"><i>🪙</i><b id="sCoin">0</b></div>
+    <button class="x" id="bClose">✕</button></div>
+  <div id="sBody"></div>
+</div></div>
+
+<div id="pops"></div>
+
+<div id="rank"><div class="card">
+  <canvas id="rankCv" width="480" height="300"></canvas>
+  <div class="t" id="rankName"></div>
+</div></div>
+
+<div id="title">
+  <h1>붕어빵</h1>
+  <button id="start">START</button>
+</div>
+
+<script src="assets/game-home.js" data-top="6" data-left="6" data-fullscreen="1" defer></script>
+<script src="js/i18n.js?v=54"></script>
+<script src="js/audio.js?v=54"></script>
+<script src="js/art.js?v=54"></script>
+<script src="js/game.js?v=54"></script>
+<script src="/assets/visit.js?v=11" defer></script>
+<script src="/assets/game-events.js?v=2" defer></script>
+</body>
+</html>
