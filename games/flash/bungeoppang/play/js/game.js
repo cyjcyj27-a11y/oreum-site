@@ -812,9 +812,13 @@
   document.getElementById('bDex').onclick = function () { SND.unlock(); openDex(); };
   document.getElementById('bClose').onclick = closeSheet;
   sheet.addEventListener('pointerdown', function (e) { if (e.target === sheet) closeSheet(); });
-  var tSnd = document.getElementById('tSnd');
-  function syncSnd() { tSnd.classList.toggle('off', !SND.on); }
+  var tSnd = document.getElementById('tSnd'), tMus = document.getElementById('tMus');
+  function syncSnd() {                                   // 음악과 효과음은 단추가 따로다
+    tSnd.classList.toggle('off', !SND.on);
+    tMus.classList.toggle('off', !SND.music);
+  }
   tSnd.onclick = function () { SND.toggle(); syncSnd(); };
+  tMus.onclick = function () { SND.unlock(); SND.toggleMusic(); syncSnd(); };
   syncSnd();
 
   // ---------- 가로로 돌리기 ----------

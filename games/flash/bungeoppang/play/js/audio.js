@@ -1,7 +1,8 @@
 // 소리 — 코드로 만든 것 + assets/*.mp3 녹음 몇 개 (녹음이 없으면 코드 소리로 넘어간다)
 (function () {
-  var KEY = 'bungeoppang.snd';
-  var on = localStorage.getItem(KEY) !== '0';
+  var KEY = 'bungeoppang.snd', MKEY = 'bungeoppang.bgm';
+  var on = localStorage.getItem(KEY) !== '0';          // 효과음
+  var mus = localStorage.getItem(MKEY) !== '0';        // 배경 음악 — 단추가 따로다
   var ac = null, master = null, noiseBuf = null;
 
   function ctx() {
@@ -160,7 +161,7 @@
     var a = ctx(); if (!a) return null;
     if (!bgmGain) {
       bgmGain = a.createGain();
-      bgmGain.gain.value = on ? BGM_VOL : 0;
+      bgmGain.gain.value = mus ? BGM_VOL : 0;
       bgmGain.connect(master);
     }
     return bgmGain;
@@ -202,7 +203,9 @@
         try { bgmEl.volume = Math.max(bgmEl.volume, BGM_FILE_VOL * 0.5); } catch (e) {}
         bgmFade(BGM_FILE_VOL);
       } else {
-        bgmFade(0, function () { try { bgmEl.pause(); } catch (e) {} });
+        // 끌 때는 바로 멈춘다 — 페이드에 맡기면 타이머가 늦는 화면(배경 탭 등)에서 계속 울린다
+        clearInterval(fadeT);
+        try { bgmEl.volume = 0; bgmEl.pause(); } catch (e) {}
       }
       return;
     }
@@ -221,7 +224,7 @@
     }
     bgmTimer = setTimeout(bgmPass, (beat * BEAT + REST) * 1000);
   }
-  function bgmMute(v) {                              // 음소거 — 이미 울리던 음까지 바로 재운다
+  function bgmMute(v) {                              // 음악 끄기 — 이미 울리던 음까지 바로 재운다
     var a = ctx(), bus = bgmBus(); if (!a || !bus) return;
     bus.gain.cancelScheduledValues(a.currentTime);
     bus.gain.setTargetAtTime(v ? 0 : BGM_VOL, a.currentTime, 0.05);
@@ -237,20 +240,25 @@
       if (last[name] && now - last[name] < 0.035) return;   // 같은 소리가 겹쳐 터지는 것 막기
       last[name] = now; SFX[name](now);
     },
-    get on() { return on; },
-    toggle: function () {
+    get on() { return on; },                             // 효과음
+    get music() { return mus; },                         // 배경 음악
+    toggle: function () {                                // 효과음 단추 — 음악은 건드리지 않는다
       on = !on; localStorage.setItem(KEY, on ? '1' : '0');
-      bgmMute(!on);                                      // 배경 음악도 같은 단추에 걸린다
-      bgmRun(on && bgmOn);
       if (on) this.play('buy');
       return on;
     },
-    // 배경 음악 켜고 끄기 (게임이 시작될 때 켠다)
+    toggleMusic: function () {                           // 음악 단추
+      mus = !mus; localStorage.setItem(MKEY, mus ? '1' : '0');
+      bgmMute(!mus);
+      bgmRun(mus && bgmOn);
+      return mus;
+    },
+    // 배경 음악을 켤 자리인지 알려 준다 (게임이 시작될 때 켠다)
     bgm: function (v) {
       if (v === bgmOn) return bgmOn;
       bgmOn = !!v;
-      bgmMute(!on);
-      bgmRun(on && bgmOn);
+      bgmMute(!mus);
+      bgmRun(mus && bgmOn);
       return bgmOn;
     },
     unlock: function () {
