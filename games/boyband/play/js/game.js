@@ -782,7 +782,7 @@
     const win = score >= 45;   // 라이브클럽 매진부터 뮤비, 원곡. 아래면 어두운 놀이터에 넷이 가만히
     buildStage($('resultStage'), a, { confetti: score >= 80, stick: c.stick, sign: win ? S.name : '', dim: !win, still: !win, noCrowd: !win });
     $('scene-result').classList.toggle('has-mv', win); $('scene-result').querySelectorAll('.mvcol').forEach(e => e.remove());
-    if (win) { if (score >= 80) A.sfx.cheer(); const mv = score >= 80 ? 'assets/mv_win.mp4' : 'assets/mv.mp4';   // 1위면 트로피 영상(소리 없음)+뮤비 합본
+    if (win) { if (score >= 80) A.sfx.cheer(); const mv = score >= 80 ? 'assets/mv_win.mp4?v=2' : 'assets/mv.mp4';   // 1위면 트로피 영상(소리 없음)+뮤비 합본
       $('scene-result').insertAdjacentHTML('beforeend', `<div class="mvcol"><video class="mv" src="${mv}" autoplay muted loop playsinline></video></div>`); A.ending(); }   // 뮤비는 오른쪽 세로 기둥에 크게(사장님, 2026-09-08)
     else A.quiet();
     $('rsRank').textContent = L(R.rank); $('rsRank').classList.toggle('big', !!R.big);
