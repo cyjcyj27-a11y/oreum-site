@@ -410,7 +410,9 @@
         { const fb = $('foot'); if (fb) { const can = PET.canToggle(); fb.classList.toggle('show', can); fb.textContent = onFoot ? '타기' : '내리기'; } }
         syncButtons();
         AUDIO.radio(!introVideo && !PET.onFoot && !(ACT.cur && ACT.cur.under));   // 차에 타고 있을 때만 음악. 인트로 영상 중에는 안 튼다
-        if (PLAYER.mode === 'ground' || PLAYER.mode === 'water') AUDIO.engine(PLAYER.kmh, INTRO.on ? 0.55 : inp.throttle, PLAYER.params.quiet || PLAYER.veh === 'horse' || PLAYER.veh === 'bicycle' || PLAYER.veh === 'kayak' || PLAYER.veh === 'surf' ? 0.15 : 1); else AUDIO.engine(0, 0, 0);
+        // 내려서 걸을 때는 엔진을 끈다 - 세워 둔 차 소리가 계속 웅웅거렸다 (사장님 2026-09-12 "걸을 때 잡음")
+        if (!onFoot && (PLAYER.mode === 'ground' || PLAYER.mode === 'water')) AUDIO.engine(PLAYER.kmh, INTRO.on ? 0.55 : inp.throttle, PLAYER.params.quiet || PLAYER.veh === 'horse' || PLAYER.veh === 'bicycle' || PLAYER.veh === 'kayak' || PLAYER.veh === 'surf' ? 0.15 : 1); else AUDIO.engine(0, 0, 0);
+        AUDIO.ambient(onFoot ? 0.35 : 0);   // 걸어다닐 때만 새소리 배경음 (사장님 2026-09-12)
         AUDIO.skid(PLAYER.mode === 'ground' && PLAYER.kmh > 12 ? Math.max(0, PLAYER.slip - 2.5) / 6 + (inp.hb && PLAYER.kmh > 25 ? 0.5 : 0) : 0);
         AUDIO.horn(inp.horn);
         if (PLAYER.crash > 2.5) AUDIO.crash(PLAYER.crash, PLAYER.crashKind);

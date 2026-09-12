@@ -3,16 +3,22 @@
 (function () {
   const A = { ctx: null, on: true, master: null, buf: {}, engSrc: null, engG: null };
   // 충돌음은 무엇에 부딪히든 한 가지로 통일(사장님 2026-09-09). 매번 재생 속도를 조금 흔들어 같은 소리가 반복돼 들리지 않게 한다
-  const FILES = { engine: 'assets/sfx/engine.mp3', crash: 'assets/sfx/crash.mp3' };   // 경적은 파일을 안 쓴다 — 코드로 만든 소리가 낫다(사장님 2026-09-12). assets/sfx/horn.mp3 는 남겨만 둔다
+  const FILES = { engine: 'assets/sfx/engine.mp3', crash: 'assets/sfx/crash.mp3', amb: 'assets/sfx/ambient.mp3' };   // amb: 걸어다닐 때 나는 도시 새소리(사장님이 고름 2026-09-12). 경적은 파일을 안 쓴다 — 코드로 만든 소리가 낫다(사장님 2026-09-12). assets/sfx/horn.mp3 는 남겨만 둔다
   function loadFiles() {
     const seen = new Set();
     for (const k in FILES) { const u = FILES[k]; if (seen.has(u)) continue; seen.add(u);
-      fetch(u + '?v=1').then(r => r.ok ? r.arrayBuffer() : Promise.reject(r.status)).then(ab => A.ctx.decodeAudioData(ab)).then(b => { A.buf[u] = b; if (k === 'engine') startEngineFile(); }).catch(() => {}); }
+      fetch(u + '?v=1').then(r => r.ok ? r.arrayBuffer() : Promise.reject(r.status)).then(ab => A.ctx.decodeAudioData(ab)).then(b => { A.buf[u] = b; if (k === 'engine') startEngineFile(); if (k === 'amb') startAmbFile(); }).catch(() => {}); }
   }
   function startEngineFile() {   // 파일 엔진: 반복 재생, engine() 이 재생 속도·볼륨을 만진다. 합성 엔진은 끈다
     const ctx = A.ctx, s = ctx.createBufferSource(); s.buffer = A.buf[FILES.engine]; s.loop = true;
     const g = ctx.createGain(); g.gain.value = 0; s.connect(g); g.connect(A.master); s.start(); A.engSrc = s; A.engG = g;
   }
+  function startAmbFile() {   // 걸어다닐 때 배경음: 반복 재생, ambient() 가 크기만 만진다
+    const ctx = A.ctx, s = ctx.createBufferSource(); s.buffer = A.buf[FILES.amb]; s.loop = true;
+    const g = ctx.createGain(); g.gain.value = 0; s.connect(g); g.connect(A.master); s.start(); A.ambSrc = s; A.ambG = g;
+  }
+  // 걸어다닐 때만 켠다 - 차에 타면 엔진과 라디오가 있다 (사장님 2026-09-12)
+  function ambient(v) { if (A.ambG) A.ambG.gain.setTargetAtTime(Math.max(0, Math.min(1, v || 0)), A.ctx.currentTime, 0.6); }
   try { A.on = localStorage.getItem('jeju.snd') !== '0'; } catch (e) {}
   function init() {
     if (A.ctx) { if (A.ctx.state === 'suspended') A.ctx.resume(); return; }
@@ -144,6 +150,6 @@
   }
   function toggle() { A.on = !A.on; try { localStorage.setItem('jeju.snd', A.on ? '1' : '0'); } catch (e) {} if (A.master) A.master.gain.setTargetAtTime(A.on ? 1 : 0, A.ctx.currentTime, 0.05); return A.on; }
   function pause(p) { if (p && RD.el && !RD.el.paused) RD.el.pause(); if (!A.ctx) return; if (p) A.ctx.suspend(); else A.ctx.resume(); }
-  window.AUDIO = Object.assign(A, { init, engine, skid, horn, crash, splash, toggle, pause, radio, radioToggle, radioNext, nowPlaying, set onTrack(f) { RD.onTrack = f; }, radioVol(v) { RD.el && (RD.el.volume = v); }, shutter, stamp, ping, fanfare, coin, news, ring, tone });
+  window.AUDIO = Object.assign(A, { init, engine, ambient, skid, horn, crash, splash, toggle, pause, radio, radioToggle, radioNext, nowPlaying, set onTrack(f) { RD.onTrack = f; }, radioVol(v) { RD.el && (RD.el.volume = v); }, shutter, stamp, ping, fanfare, coin, news, ring, tone });
   Object.defineProperty(window.AUDIO, 'radioOn', { get() { return RD.on; } });
 })();

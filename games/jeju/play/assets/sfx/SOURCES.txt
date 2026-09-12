@@ -1,0 +1,5 @@
+픽사베이 무료 효과음(Pixabay Content License: 상업 이용 OK, 출처 표기 불필요). 2026-09-09.
+crash: dragon-studio-car-crash-sound-376882 (사장님이 고른 것 하나로 통일 — 건물·차·돌담·나무 모두 이 소리)
+engine: freesound_community-rally-car-idle-loop-17-84405 (0.5~4.5초 잘라 반복, 속도에 따라 재생 속도)
+horn: olenchic-car-horn-155026 (경적, 누르는 동안 반복)
+ambient: baranova_n-city-birds-444667 (도시 새소리, 평소 배경음으로 반복. 사장님이 고름 2026-09-12)
