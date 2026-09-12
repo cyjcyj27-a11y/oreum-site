@@ -346,7 +346,7 @@
   $('mapClose').addEventListener('click', () => ACT.toggleMap());
   $('shopClose').addEventListener('click', () => ACT.closeShop());
   $('foot').addEventListener('click', () => foot());
-  $('btnBack').addEventListener('click', () => { if (ACT.cur) ACT.abort(); else PLAYER.respawn(); });
+  // 리스폰 단추는 뺐다 (사장님 2026-09-12). 키보드 R 은 그대로 — 차가 끼거나 뒤집혔을 때 길 위로 돌려 놓는다
   document.addEventListener('visibilitychange', () => AUDIO.pause(document.hidden));
 
   function readInput() {
