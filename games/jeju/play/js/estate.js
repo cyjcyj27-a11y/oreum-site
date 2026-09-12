@@ -695,7 +695,7 @@
   const QUIET_SEC = 60;
   // 하르방 전화 대사 — {n} 땅 이름 · {b} 지을 건물 · {v} 급매가 · {p} 정상 시세
   const DEAL_LINES = [
-    '허허, 총각! {n}에 {b} 급매 나왔어. {v}에 준대. 얼른 오게!',
+    '허허, 총각! {n}에 {b} 부지 급매 나왔어. {v}에 준대. 얼른 오게!',
     '여보세, {n} 땅 임자가 급해졌다는구먼. {b} 자리가 {v}여. 반값이여.',
     '복덕방이여. {n}에 {v}짜리 급매가 들어왔는디, 생각 있나?',
     '허허허, 자네 주려고 제일 먼저 전화했어. {n} {b} 부지, 원래 {p}인디 {v}에 내놓았어.',
@@ -708,7 +708,7 @@
   ];
   // 영문판 대사 — 사전으로는 못 바꾼다. {n}{b}{v} 를 끼워 넣고 나면 통짜 문장이 아니라서다
   const DEAL_LINES_EN = [
-    'Young man! A {b} has come up at {n}. They will take {v}. Get over here!',
+    'Young man! A {b} site has come up at {n}. They will take {v}. Get over here!',
     'Listen, the owner at {n} is in a hurry. The {b} site goes for {v}. Half price.',
     'Broker here. A rush listing at {n}, {v}. Interested?',
     'I called you first, mind. {n} {b} site, worth {p}, going at {v}.',
@@ -778,7 +778,7 @@
       E.deal.left -= dt;
       if (E.deal.left <= 0) { dealEnd(false); return; }
       const s = Math.max(0, Math.floor(E.deal.left));
-      el('deal').innerHTML = '📞 급매 <b>' + E.deal.p.name + '</b> ' + lvOf(E.deal.p).n + ' ' + fmt(E.deal.price) +
+      el('deal').innerHTML = '📞 급매 <b>' + E.deal.p.name + '</b> ' + lotName(E.deal.p) + ' ' + fmt(E.deal.price) +
         ' <span class="t">' + Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0') + '</span>';
       return;
     }
