@@ -228,7 +228,7 @@
     const ev = ESTATE.estateWorth ? ESTATE.estateWorth() : nw;
     if (!ACT.calls.rich && ev >= 10000000) { ACT.calls.rich = 1; ACT.save(); callQueue(CALLS.rich, showEnding); }   // 총자산 1,000억 = 엔딩(현금 + 부동산 현재가)
   }
-  function callStart(who, lines) { if (who) { CALL.who = who; CALL.lines = lines; } CALL.i = 0; CALL.open = true; $('callWho').textContent = CALL.who; $('callMsg').textContent = CALL.lines[0]; $('call').classList.add('show'); AUDIO.ring(2); }   // 따르릉 (사장님 2026-09-12)
+  function callStart(who, lines) { if (who) { CALL.who = who; CALL.lines = lines; } CALL.i = 0; CALL.open = true; $('callWho').textContent = CALL.who; $('callMsg').textContent = CALL.lines[0]; $('call').classList.add('show'); AUDIO.ring(1); }   // 따르릉 한 번 (사장님 2026-09-12)
   function callNext() {
     CALL.i++;
     if (CALL.i >= CALL.lines.length) {
@@ -385,6 +385,7 @@
     const avg = adSum / adN; adT = 0; adN = 0; adSum = 0;
     if (avg > 0.022 && POST.scale > 0.6) POST.setScale(POST.scale - 0.1); else if (avg < 0.014 && POST.scale < 1) POST.setScale(POST.scale + 0.05);
   }
+  const EN_MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];   // 영문판 날짜
   const FOG_SEA = new THREE.Color(0.01, 0.07, 0.12);
   function frame(ts) {
     let dt = last ? (ts - last) / 1000 : 0.016; last = ts; if (dt > 0.1) dt = 0.1; if (dt < 0) dt = 0;   // 시각이 거꾸로 오면(시험용 tick 과 rAF 가 섞일 때) 0 으로
@@ -427,7 +428,9 @@
       adapt(dt);
       { const kh = PET.onFoot ? PET.hero().kmh : PLAYER.kmh; if (kh !== lastKmh) { lastKmh = kh; speedEl.firstChild.textContent = kh; } }
     }
-    const c = (ESTATE.monthNo ? ESTATE.monthNo() + '월 ' + ESTATE.monthDay() + '일 ' : (ESTATE.day || 1) + '일 ') + SKY.clock(); if (c !== lastClock) { lastClock = c; clockEl.textContent = c; }   // 며칠째인지 함께 — 시세는 하루가 지날 때 오른다
+    const en = window.LANG && LANG.en;
+    const c = (ESTATE.monthNo ? (en ? EN_MON[(ESTATE.monthNo() - 1) % 12] + ' ' + ESTATE.monthDay() + ' · ' : ESTATE.monthNo() + '월 ' + ESTATE.monthDay() + '일 ')
+                              : (en ? 'Day ' + (ESTATE.day || 1) + ' · ' : (ESTATE.day || 1) + '일 ')) + SKY.clock(); if (c !== lastClock) { lastClock = c; clockEl.textContent = c; }   // 며칠째인지 함께 — 시세는 하루가 지날 때 오른다
     POST.render(scene, camera, dt);
   }
   function loop(ts) { frame(ts); requestAnimationFrame(loop); }

@@ -153,7 +153,9 @@
     const t = pmrem.fromScene(envScene, 0.05); if (envTex) envTex.dispose(); envTex = t.texture; sceneRef.environment = envTex;
   }
   // 시간만 보여 준다 — 분은 게임 시간이 빨라 정신없이 올라간다(사장님 2026-09-09)
-  function clock() { const h = Math.floor(S.hour) % 24, k = h % 12; return (h < 12 ? '오전 ' : '오후 ') + (k === 0 ? 12 : k) + '시'; }
+  function clock() { const h = Math.floor(S.hour) % 24, k = h % 12;
+    if (window.LANG && LANG.en) return (k === 0 ? 12 : k) + (h < 12 ? ' AM' : ' PM');
+    return (h < 12 ? '오전 ' : '오후 ') + (k === 0 ? 12 : k) + '시'; }
 
   window.SKY = Object.assign(S, { init, update, follow, clock, initEnv, envTick });
 })();

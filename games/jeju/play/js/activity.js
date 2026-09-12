@@ -363,7 +363,7 @@
       const x = X(s.x), y = Z(s.z); if (x < -40 || y < -40 || x > W + 40 || y > Hh + 40) continue;
       if (A.dest === s) { g.fillStyle = 'rgba(255,60,40,0.35)'; g.beginPath(); g.arc(x, y, fs * 1.3, 0, 6.29); g.fill(); g.strokeStyle = '#ff3b2a'; g.lineWidth = 3; g.stroke(); }
       g.globalAlpha = 1; if (s.kind === 'shop') { g.font = fs + 'px "Segoe UI Emoji", sans-serif'; g.fillText(s.icon, x, y); } else { g.fillStyle = 'rgba(255,255,255,0.7)'; g.beginPath(); g.arc(x, y, Math.max(1.5, fs * 0.12), 0, 6.29); g.fill(); }
-      if (showNames || A.dest === s) { g.font = 'bold ' + Math.round(fs * 0.62) + 'px "Griun", "Malgun Gothic", sans-serif'; g.lineWidth = 4; g.strokeStyle = 'rgba(0,0,0,0.75)'; g.strokeText(s.name, x, y + fs * 0.95); g.fillStyle = A.done.has(s.id) ? '#ffd24a' : '#fff'; g.fillText(s.name, x, y + fs * 0.95); }
+      if (showNames || A.dest === s) { g.font = 'bold ' + Math.round(fs * 0.62) + 'px "Griun", "Malgun Gothic", sans-serif'; g.lineWidth = 4; g.strokeStyle = 'rgba(0,0,0,0.75)'; const nm = L(s.name); g.strokeText(nm, x, y + fs * 0.95); g.fillStyle = A.done.has(s.id) ? '#ffd24a' : '#fff'; g.fillText(nm, x, y + fs * 0.95); }
       g.globalAlpha = 1;
     }
     if (NAV.pts && NAV.pts.length > 1) {                 // 네비 경로
@@ -372,7 +372,7 @@
     }
     if (window.ESTATE) ESTATE.drawMap(g, X, Z, sc, fs);   // 매물·내 땅·건물
     const hp = HP(); g.save(); g.translate(X(hp.x), Z(hp.z)); g.rotate(-hp.yaw); g.fillStyle = '#ff3b2a'; g.beginPath(); g.moveTo(0, -fs * 0.9); g.lineTo(fs * 0.6, fs * 0.6); g.lineTo(0, fs * 0.25); g.lineTo(-fs * 0.6, fs * 0.6); g.closePath(); g.fill(); g.strokeStyle = '#fff'; g.lineWidth = 2; g.stroke(); g.restore();
-    for (const t of ROADS.towns) if (t.big || view.s > 1.8) { g.font = 'bold ' + fs + 'px "Griun", sans-serif'; g.fillStyle = '#1d2a1c'; g.fillText(t.name, X(t.cx), Z(t.cz) + fs); }
+    for (const t of ROADS.towns) if (t.big || view.s > 1.8) { g.font = 'bold ' + fs + 'px "Griun", sans-serif'; g.fillStyle = '#1d2a1c'; g.fillText(L(t.name), X(t.cx), Z(t.cz) + fs); }
     el('mapCount').textContent = (A.dest ? A.dest.icon + ' ' + A.dest.name + ' · ' : '') + (window.ESTATE ? '🏝 ' + ESTATE.ownedCount() + '/' + ESTATE.list.length + ' · 💰 ' + ESTATE.fmt(A.coins) : '');
   }
   function mapPoint(e) { const cv = el('mapc'), r = cv.getBoundingClientRect(); return { x: (e.clientX - r.left) * cv.width / r.width, y: (e.clientY - r.top) * cv.height / r.height }; }

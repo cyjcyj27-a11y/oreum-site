@@ -44,7 +44,7 @@
   .tog.off { opacity: .4; text-decoration: line-through; }
   @media (max-width: 700px) { .stat { padding: 4px 8px; font-size: 20px; } .stat b { font-size: 21px; } #topbar { padding-left: 100px; gap: 5px; } }
 
-  #speed { position: fixed; right: 18px; bottom: 44px; font-family: Arial, sans-serif; font-weight: 900; font-size: 92px; line-height: 1; color: #fff; text-shadow: 0 2px 8px rgba(0,0,0,.6); opacity: 0; transition: opacity .8s; pointer-events: none; }
+  #speed { position: fixed; right: 18px; bottom: 78px; font-family: Arial, sans-serif; font-weight: 900; font-size: 92px; line-height: 1; color: #fff; text-shadow: 0 2px 8px rgba(0,0,0,.6); opacity: 0; transition: opacity .8s; pointer-events: none; }
   #speed small { font-size: 34px; font-weight: 700; margin-left: 6px; opacity: .8; }
   #speed.show { opacity: 1; }
   body.touch #speed { right: auto; left: 50%; transform: translateX(-50%); bottom: 14px; font-size: 51px; }
@@ -330,8 +330,8 @@ body.shot #introv { display: none !important; }
   window.THREE = THREE;
   window.GLTFLoaderClass = GLTFLoader;
   window.SkeletonClone = skeletonClone;
-  const V = '373';
-  const names = ['noise','textures','spots','island','sky','post','roads','city','glb','vehicles','landmarks','traffic','player','audio','activity','blds','estate','npc','people','pet','game'];
+  const V = '378';
+  const names = ['lang','noise','textures','spots','island','sky','post','roads','city','glb','vehicles','landmarks','traffic','player','audio','activity','blds','estate','npc','people','pet','game'];
   (async () => {
     let done = 0;
     for (const n of names) {

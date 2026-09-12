@@ -63,7 +63,16 @@
   const lvOf = p => LV50[Math.max(0, Math.min(49, (p.lv || 1) - 1))];
   const TAG_IC = { beach: '🏖', nature: '🌿', city: '🏙', sight: '📷' };
 
+  // 영문판은 억·만 대신 원 단위(₩10B). 사람이 읽는 단위가 다르다
+  function fmtEn(v, dec) {
+    v = Math.round(v); const s = v < 0 ? '-' : ''; const w = Math.abs(v) * 10000;
+    const cut = (n, d) => n.toFixed(d).replace(/(\.\d*?)0+$/, '$1').replace(/\.$/, '');   // 소수점 뒤 0 만 턴다 — 100 을 1 로 만들면 안 된다
+    if (w >= 1e9) return s + '₩' + cut(w / 1e9, dec ? 2 : 1) + 'B';
+    if (w >= 1e6) return s + '₩' + cut(w / 1e6, dec ? 1 : 0) + 'M';
+    return w ? s + '₩' + cut(w / 1e3, 0) + 'K' : '₩0';
+  }
   function fmt(v) {
+    if (window.LANG && LANG.en) return fmtEn(v);
     v = Math.round(v); const s = v < 0 ? '-' : ''; v = Math.abs(v);
     if (v >= 1e8) return s + (v / 1e8).toFixed(2).replace(/\.?0+$/, '') + '조';
     if (v >= 10000) { const a = v / 10000; return s + (a >= 100 ? Math.round(a) : a.toFixed(1).replace(/\.0$/, '')) + '억'; }
@@ -71,6 +80,7 @@
   }
   // 자산 창처럼 자리가 넉넉한 곳에서 쓰는 긴 표기: 365000 → '36억 5천', 1120000 → '112억' (사장님 2026-09-09 "매입가 36억5천")
   function fmtLong(v) {
+    if (window.LANG && LANG.en) return fmtEn(v, 1);
     v = Math.round(v); const sg = v < 0 ? '-' : ''; v = Math.abs(v);
     const jo = Math.floor(v / 1e8), r = v % 1e8, eok = Math.floor(r / 10000), man = r % 10000, out = [];
     if (jo) out.push(jo + '조');
@@ -227,6 +237,7 @@
     // 칸에 꽉 차게 — 길면 글자를 눌러 담는다
     const fit = (txt, px, w) => { g.font = '900 ' + px + 'px "Ria", "Griun", "Malgun Gothic", sans-serif'; const m = g.measureText(txt).width; return m > w ? px * w / m : px; };
     g.fillStyle = CARD_INK[tone] || CARD_INK.buy;
+    line1 = L(line1); line2 = L(line2);   // 영문판(?lang=en)
     const s1 = fit(line1, line2 ? 108 : 124, 448);
     g.font = '900 ' + s1 + 'px "Ria", "Griun", "Malgun Gothic", sans-serif';
     g.fillText(line1, 256, line2 ? 76 : 102);
@@ -276,7 +287,7 @@
   function signTex(text, bg, fg, w, h, font) {
     const c = document.createElement('canvas'); c.width = w; c.height = h; const g = c.getContext('2d');
     g.fillStyle = bg; g.fillRect(0, 0, w, h); g.fillStyle = fg; g.textAlign = 'center'; g.textBaseline = 'middle';
-    g.font = (font || '900 ') + Math.floor(h * 0.62) + 'px "Ria", "Gasoek", "Malgun Gothic", sans-serif'; g.fillText(text, w / 2, h / 2 + h * 0.03);
+    g.font = (font || '900 ') + Math.floor(h * 0.62) + 'px "Ria", "Gasoek", "Malgun Gothic", sans-serif'; g.fillText(L(text), w / 2, h / 2 + h * 0.03);
     const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; return t;
   }
   function signMesh(text, bg, fg, W, Hh, x, y, z, ry, glow) {
@@ -920,9 +931,10 @@
       const x = X(p.x), y = Z(p.z); if (x < -30 || y < -30 || x > g.canvas.width + 30 || y > g.canvas.height + 30) continue;
       const r = Math.max(6, Math.min(18, p.side * sc * 0.5 + fs * 0.26));
       if (ACT.dest === p) { g.fillStyle = 'rgba(255,60,40,0.35)'; g.beginPath(); g.arc(x, y, r * 2.2, 0, 6.29); g.fill(); g.strokeStyle = '#ff3b2a'; g.lineWidth = 3; g.stroke(); }
-      const label = (txt, color) => { g.font = 'bold ' + Math.round(fs * 0.55) + 'px "Ria", "Griun", "Malgun Gothic", sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.lineWidth = 3; g.strokeStyle = 'rgba(0,0,0,0.75)'; g.strokeText(txt, x, y + r + fs * 0.45); g.fillStyle = color; g.fillText(txt, x, y + r + fs * 0.45); };
+      const label = (txt, color) => { g.font = 'bold ' + Math.round(fs * 0.55) + 'px "Ria", "Griun", "Malgun Gothic", sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.lineWidth = 3; g.strokeStyle = 'rgba(0,0,0,0.75)'; txt = L(txt); g.strokeText(txt, x, y + r + fs * 0.45); g.fillStyle = color; g.fillText(txt, x, y + r + fs * 0.45); };
       // 확대하면 부동산 앱 카드로 (값 + 평수)
       const card = (l1, l2, tone) => {
+        l1 = L(l1); l2 = L(l2);
         const f1 = Math.round(fs * 0.62), f2 = Math.round(fs * 0.5), pad = fs * 0.36;
         g.font = '900 ' + f1 + 'px "Ria", "Griun", "Malgun Gothic", sans-serif'; const w1 = g.measureText(l1).width;
         g.font = f2 + 'px "Griun", "Malgun Gothic", sans-serif'; const w2 = g.measureText(l2).width;
@@ -940,16 +952,16 @@
         // 네모를 따로 그릴 것 없다 — 값표 자체가 표식이다 (사장님 2026-09-11)
         const isDeal = E.deal && E.deal.p === p;
         const txt = p.own ? '내 땅' : p.rival ? RIVAL : p.sold ? 'SOLD' : isDeal ? '급매 ' + fmt(E.deal.price) : fmt(p.price);
-        const f = Math.round(fs * 0.78), pad = f * 0.4;
+        const f = Math.round(fs * 0.78), pad = f * 0.4; const txtL = L(txt);
         g.font = '900 ' + f + 'px "Ria", "Griun", "Malgun Gothic", sans-serif';
-        const w = g.measureText(txt).width + pad * 2, h = f + pad * 1.1;
+        const w = g.measureText(txtL).width + pad * 2, h = f + pad * 1.1;
         const bx = x - w / 2, by = y - h / 2;   // 땅 자리에 바로 올린다
         if (free(bx - 2, by - 2, bx + w + 2, by + h + 2)) {
           g.fillStyle = 'rgba(0,0,0,0.3)'; roundRect(g, bx + 1, by + 1.5, w, h, h * 0.34); g.fill();
           g.fillStyle = isDeal ? '#c82016' : p.rival ? '#6d4bd6' : p.own ? '#fff3d0' : p.sold ? '#e3e9ef' : '#ffffff'; roundRect(g, bx, by, w, h, h * 0.34); g.fill();
           g.textAlign = 'center'; g.textBaseline = 'middle';
           g.fillStyle = (isDeal || p.rival) ? '#ffffff' : CARD_INK[p.own ? 'own' : p.sold ? 'sold' : 'buy'] || CARD_INK.buy;
-          g.fillText(txt, x, by + h / 2);
+          g.fillText(txtL, x, by + h / 2);
           E.mapHit.push({ p: p, x0: bx, y0: by, x1: bx + w, y1: by + h });
         }
       }
