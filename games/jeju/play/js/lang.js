@@ -6,7 +6,15 @@
 //      그리기 직전에 L(글) 로 감싼다.
 // 사전은 '긴 말부터' 바꾸므로 '제주국제공항' 이 '제주' 보다 먼저 걸린다.
 (function () {
-  const EN = /[?&]lang=en/i.test(location.search);
+  // ?lang=en 으로 들어오면 그 탭에서는 계속 영어다 — 게임 안에서 주소가 바뀌어도 한국어로 떨어지지 않게.
+  // 한국어로 되돌리려면 ?lang=ko (사장님 2026-09-12 "영문판인데 한글")
+  const Q = new URLSearchParams(location.search), q = (Q.get('lang') || '').toLowerCase();
+  let EN = q === 'en';
+  try {
+    if (q === 'ko') sessionStorage.removeItem('jeju.lang');
+    else if (EN) sessionStorage.setItem('jeju.lang', 'en');
+    else if (sessionStorage.getItem('jeju.lang') === 'en') EN = true;
+  } catch (e) {}
 
   const T = {
     // ── 화면 단추·표준 용어 ──

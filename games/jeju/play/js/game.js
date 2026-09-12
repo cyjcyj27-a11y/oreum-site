@@ -329,7 +329,7 @@
     e.stopPropagation(); e.preventDefault();
     const el = $('goNew');
     if (QS.get('reset') || (!hasSave() && !loadPos())) { start(false); return; }   // 저장이 없거나 이미 지우고 들어왔으면 그냥 시작
-    if (newAsk) { try { localStorage.removeItem('jeju.prog'); localStorage.removeItem('jeju.pos'); } catch (err) {} location.href = location.pathname + '?reset=1'; return; }
+    if (newAsk) { try { localStorage.removeItem('jeju.prog'); localStorage.removeItem('jeju.pos'); } catch (err) {} location.href = location.pathname + '?reset=1' + (QS.get('lang') ? '&lang=' + QS.get('lang') : ''); return; }   // 말을 잃지 않는다 — 영문판에서 처음부터 누르면 한국어로 떨어졌다(2026-09-12)
     newAsk = 1; el.textContent = '처음부터?';                            // 한 번 더 누르면 진행을 지우고 새로 시작
     setTimeout(() => { if (newAsk) { newAsk = 0; el.textContent = '시작'; } }, 4000);
   });
