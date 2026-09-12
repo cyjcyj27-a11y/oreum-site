@@ -83,6 +83,8 @@
     // 오프닝을 뺐다 (사장님 2026-09-11 "오프닝을 빼자"). 게임은 공항 앞에 선 채로 바로 시작하고,
     // 유학 친구 전화가 그 자리에서 걸려 온다 — 대사는 CALL 의 기본값.
     // 찍을 때만 쓰는 연출은 주소로 켠다: ?intro=1 자동 주행, ?video=1 인트로 영상(assets/intro.mp4)
+    // 이어하기로 들어오면 첫 전화는 안 건다 — 통화 도중 창을 닫았으면 introDone 이 안 적혀 이어하기마다 친구가 또 걸었다 (사장님 2026-09-13)
+    if (resume && !ACT.introDone) { ACT.introDone = true; ACT.save(); }
     if (!ACT.introDone) {
       if (!pos && QS.get('intro') === '1' && introStart()) return;
       if (!pos && QS.get('video') === '1' && playIntroVideo()) return;
@@ -224,9 +226,8 @@
     for (const [k, need] of [['m150', 1500000], ['m300', 3000000], ['m600', 6000000]]) {
       if (!ACT.calls[k] && nw >= need) { ACT.calls[k] = 1; ACT.save(); callQueue(CALLS[k]); return; }
     }
-    // 엔딩은 부동산만 1,000억 — 현금을 쌓아 둔 것으로는 안 된다 (사장님 2026-09-11)
-    const ev = ESTATE.estateWorth ? ESTATE.estateWorth() : nw;
-    if (!ACT.calls.rich && ev >= 10000000) { ACT.calls.rich = 1; ACT.save(); callQueue(CALLS.rich, showEnding); }   // 총자산 1,000억 = 엔딩(현금 + 부동산 현재가)
+    // 엔딩은 총자산(현금 + 부동산 현재가) 1,000억 — 부동산만 세던 것을 되돌렸다 (사장님 2026-09-13 "부동산으로 1000억이 아니라")
+    if (!ACT.calls.rich && nw >= 10000000) { ACT.calls.rich = 1; ACT.save(); callQueue(CALLS.rich, showEnding); }   // 총자산 1,000억 = 엔딩(현금 + 부동산 현재가)
   }
   function callStart(who, lines) { if (who) { CALL.who = who; CALL.lines = lines; } CALL.i = 0; CALL.open = true; $('callWho').textContent = CALL.who; $('callMsg').textContent = CALL.lines[0]; $('call').classList.add('show'); AUDIO.ring(1); }   // 따르릉 한 번 (사장님 2026-09-12)
   function callNext() {

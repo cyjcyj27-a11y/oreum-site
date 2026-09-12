@@ -136,7 +136,7 @@
   const paidValue = p => (p.paid != null ? p.paid : p.price) + (p.b ? lvOf(p).c : 0);
   const sellValue = p => Math.round(bookValue(p) * (p.mk || 1) / 5000) * 5000;
   // 총자산 = 현금 + 가진 부동산의 현재가. 엔딩(1,000억)은 이 값으로 본다 — 다 팔지 않아도 값이 오르면 닿는다
-  // 엔딩은 현금 말고 **부동산만** 1,000억이어야 한다 (사장님 2026-09-11 "부동산으로 1000억을 채워야 엔딩")
+  // 2026-09-11 에 부동산만 세던 것을 9-13 에 되돌렸다 — 현금 포함 총자산 1,000억이면 엔딩 (사장님 "부동산으로 1000억이 아니라")
   function estateWorth() { let v = 0; for (const p of E.list) if (p.own) v += sellValue(p); return v; }
   function netWorth() { let v = ACT.coins; for (const p of E.list) if (p.own) v += sellValue(p); return v; }            // 현재가 = 매입가 × 시세. 건물도 함께 오른다(값 깎지 않는다)
   function spotTag(s) {
@@ -628,7 +628,7 @@
     const badge = BUILD.filter(b => kinds[b.k]).map(b => b.ic + ' ' + b.n + ' ' + kinds[b.k]).join('  ');
     el('assetSum').innerHTML = '<div>🏝 땅 <b>' + own.length + '</b> / ' + E.list.length + '</div><div>🏗 건물 <b>' + Object.values(kinds).reduce((a, b) => a + b, 0) + '</b></div>' +
       '<div>💼 매입가 <b>' + fmtLong(paid) + '</b></div><div>💎 현재가 <b>' + fmtLong(now) + '</b> <span class="' + (up >= 0 ? 'up' : 'dn') + '">' + (up >= 0 ? '▲' : '▼') + Math.abs(up) + '%</span></div>' +
-      '<div>📈 월세 <b>' + fmtLong(day * MONTH) + '</b> <span class="up">' + rentIn() + '일 뒤</span></div><div style="flex:1 0 100%">🏆 부동산 <b>' + fmtLong(estateWorth()) + '</b> / 1,000억</div>' + (badge ? '<div style="flex:1 0 100%">' + badge + '</div>' : '');
+      '<div>📈 월세 <b>' + fmtLong(day * MONTH) + '</b> <span class="up">' + rentIn() + '일 뒤</span></div><div style="flex:1 0 100%">🏆 총자산 <b>' + fmtLong(netWorth()) + '</b> / 1,000억</div>' + (badge ? '<div style="flex:1 0 100%">' + badge + '</div>' : '');
     const list = el('assetList'); list.innerHTML = '';
     if (!own.length) list.innerHTML = '<div class="none">아직 산 땅이 없다</div>';
     own.slice().sort((a, b) => sellValue(b) - sellValue(a)).forEach(p => {
