@@ -909,6 +909,9 @@
     // 멀리서 볼 때도 값이 보이게 값표를 붙인다. 매물이 90개가 넘어 다 붙이면 섬이 글씨로 덮이므로,
     // 이미 자리를 차지한 값표와 겹치면 그건 건너뛴다. 확대할수록 자리가 생겨 더 많이 보인다. (2026-09-10)
     const taken = [];
+    // 지도에서 누를 자리 — 값표·카드가 그려진 네모 그대로다. 예전엔 땅 좌표에서 반지름으로만 재서
+    // 말풍선 위쪽(값 글씨)을 누르면 안 먹고 조금 아래를 눌러야 했다 (사장님 2026-09-12)
+    E.mapHit = [];
     const free = (x0, y0, x1, y1) => {
       for (const t of taken) if (x0 < t[2] && x1 > t[0] && y0 < t[3] && y1 > t[1]) return false;
       taken.push([x0, y0, x1, y1]); return true;
@@ -930,6 +933,7 @@
         g.textAlign = 'center'; g.textBaseline = 'middle';
         g.fillStyle = CARD_INK[tone] || CARD_INK.buy; g.font = '900 ' + f1 + 'px "Ria", "Griun", "Malgun Gothic", sans-serif'; g.fillText(l1, x, by + pad * 0.8 + f1 * 0.5);
         g.fillStyle = '#4b5563'; g.font = f2 + 'px "Griun", "Malgun Gothic", sans-serif'; g.fillText(l2, x, by + h - pad * 0.7 - f2 * 0.5);
+        E.mapHit.push({ p: p, x0: bx, y0: by, x1: bx + w, y1: by + h + fs * 0.42 });
       };
       if (p.b) { g.font = Math.round(fs * 0.9) + 'px "Segoe UI Emoji", sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(lvOf(p).ic, x, y); if (zoomed) label(p.sold ? 'SOLD · ' + lvOf(p).n : '내 ' + lvOf(p).n, p.sold ? '#c8d4e0' : '#ffd24a'); continue; }
       if (!zoomed) {   // 멀리서는 값표 하나만, 확대하면 부동산 카드
@@ -946,13 +950,20 @@
           g.textAlign = 'center'; g.textBaseline = 'middle';
           g.fillStyle = (isDeal || p.rival) ? '#ffffff' : CARD_INK[p.own ? 'own' : p.sold ? 'sold' : 'buy'] || CARD_INK.buy;
           g.fillText(txt, x, by + h / 2);
+          E.mapHit.push({ p: p, x0: bx, y0: by, x1: bx + w, y1: by + h });
         }
       }
       if (zoomed) card(p.own ? '내 땅' : p.sold ? 'SOLD' : '매매 ' + fmt(p.price), lotName(p), p.own ? 'own' : p.sold ? 'sold' : 'buy');
     }
   }
   // 지도에서 누른 자리의 매물 (목적지로)
-  function parcelAt(mx, my, X, Z, rad) { let best = null, bd = rad; for (const p of E.list) { const d = Math.hypot(X(p.x) - mx, Z(p.z) - my); if (d < bd) { bd = d; best = p; } } return best; }
+  function parcelAt(mx, my, X, Z, rad) {
+    const hit = E.mapHit || [];
+    for (let i = hit.length - 1; i >= 0; i--) { const r = hit[i]; if (mx >= r.x0 && mx <= r.x1 && my >= r.y0 && my <= r.y1) return r.p; }   // 나중에 그린 것이 위에 있다
+    let best = null, bd = rad;
+    for (const p of E.list) { const d = Math.hypot(X(p.x) - mx, Z(p.z) - my); if (d < bd) { bd = d; best = p; } }
+    return best;
+  }
 
   // 화면 아래 팔기 단추: 한 번 누르면 묻고, 두 번째에 굴린다
   function sellNear() {
