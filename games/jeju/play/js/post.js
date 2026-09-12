@@ -51,6 +51,8 @@
     rt = new THREE.WebGLRenderTarget(4, 4, { type, samples: msaa != null ? msaa : 4, depthBuffer: true, stencilBuffer: false });
     bA = new THREE.WebGLRenderTarget(4, 4, { type }); bB = new THREE.WebGLRenderTarget(4, 4, { type });
     renderer.toneMapping = THREE.NoToneMapping;
+    // 폰은 적은 픽셀로 그려 늘려 보이므로 필름 그레인이 굵은 모래알로 번진다 — 폰에서는 끈다 (사장님 2026-09-13)
+    if (touch) P.grain = 0;
     P.on = true; return true;
   }
   const size = new THREE.Vector2();

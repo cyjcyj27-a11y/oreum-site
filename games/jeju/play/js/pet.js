@@ -129,7 +129,7 @@
   }
   function loadGlb() {
     if (!window.GLB) return;
-    GLB.load('assets/models/hero.glb?v=6', {}).then(g => {
+    GLB.load('assets/models/hero.glb?v=7', {}).then(g => {
       const mixer = g.userData.mixer, clips = g.userData.clips || []; if (!mixer) throw new Error('no anim');
       const find = re => clips.find(c => re.test(c.name)) || clips[0];
       // 믹사모 클립: idle · walk(제자리) · run(제자리) · sit(앉아 있기, 반복) · enter(차에 타기, 한 번) · exit(차에서 내리기, 한 번)
@@ -542,7 +542,7 @@
   function gfLoad() {
     if (!scene) return;
     gfRoot = new THREE.Group(); gfRoot.visible = false; scene.add(gfRoot);
-    GLB.load('assets/models/gf.glb?v=3', {}).then(function (g) {
+    GLB.load('assets/models/gf.glb?v=4', {}).then(function (g) {
       GF.mixer = g.userData.mixer;
       const clips = g.userData.clips || [];
       const walkRaw = clips.find(function (c) { return /walk/i.test(c.name); }) || clips[0];
