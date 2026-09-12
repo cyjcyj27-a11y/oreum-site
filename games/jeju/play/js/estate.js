@@ -661,12 +661,10 @@
   // 라디오 속보를 전화로 바꿈 — 소식을 전해 주는 사람이 있어야 달려갈 맛이 난다 (사장님 2026-09-10)
   // 넓은 섬을 달릴 이유를 만들고, 비어 있던 1분 간격에 긴장과 해소를 넣는다 (사장님 2026-09-10)
   const DEAL_SEC = 75, DEAL_GAP = [210, 420];   // 못 잴 때 쓰는 기본값, 다음 속보까지(3분30초~7분). 자주 뜨면 속보가 아니라 평상시
-  // 사장님 실주행으로 맞춘 값(2026-09-11): 비자림 2,066m 를 100초에 달렸다(제한 130초에 30초 남음).
-  // 물리 모형의 최단이 82.9초여서 1.2배 + 8초로 잡았는데, 그 뒤 네비·도로가 좋아져 더 빨리 달리게 됐다
-  // → "급매 도착 1분 남는다" (사장님 2026-09-12). 1.2 → 0.9 로 내렸다.
-  // 모형은 길 한가운데를 이상적으로 달린 시간이라, 사장님처럼 들판을 가로질러 지름길로 가면 그보다 빠르다.
-  // 지금 값으로 필요한 평균속도는 85~95km/h (오픈카 최고 198km/h). 못 닿는다고 하면 1.05 로 올린다.
-  const DEAL_MIN = 40, DEAL_MAX = 300, DEAL_SLACK = 0.9, DEAL_PARK = 6;
+  // 제한시간은 **길 거리 ÷ 119km/h + 4초** 뿐이다. 코너 한계속도까지 재던 물리 모형을 뺐다
+  // — 계산이 곧 속도 제한처럼 굴어 여유가 너무 컸다 (사장님 2026-09-12 "속도제한을 두지 말고 시간을 짧게 잡으라고").
+  // 오픈카 최고속도가 198km/h 라 밟으면 닿고, 머뭇거리면 놓친다. 놓친 땅은 되사기(1.5배)로 살 수 있다.
+  const DEAL_SPEED = 33, DEAL_MIN = 25, DEAL_MAX = 180, DEAL_PARK = 4;   // m/s · 초
   // 급매와 '곷 팔림'이 각자 돌아서 급매를 사자마자 또 떴다. 하나가 끝나면 한동안 조용하게 한다 (사장님 2026-09-10)
   const QUIET_SEC = 60;
   // 하르방 전화 대사 — {n} 땅 이름 · {b} 지을 건물 · {v} 급매가 · {p} 정상 시세
@@ -683,33 +681,14 @@
     '자네한테만 먼저 알려주는 거여. {n} {b} 자리, {v}. 탐라국개발이 냄새 맡기 전에 오게.',
   ];
   const DEAL_CALL = DEAL_LINES.map(function (t) { return function (n, b, v, p) { return t.replace('{n}', n).replace('{b}', b).replace('{v}', v).replace('{p}', p); }; });
-  // 급매 제한시간은 **그 땅까지 길을 따라 달리는 데 실제로 걸리는 시간**으로 정한다.
-  // 75초 고정이던 때는 거리를 전혀 안 봐서, 초반 13곳이 2~3배 모자라 아무리 밟아도 못 닿았다.
-  // (사장님 2026-09-11 "도착 가능한 시간이 아닌 거 같아") 제주 길은 구불구불해서 최고속도(198km/h)를
-  // 못 쓰고 실제 평균이 66~125km/h 라, 거리만 나눠서는 안 되고 코너 한계속도까지 봐야 맞는다.
+  // 제한시간 = 그 땅까지 **길 거리** ÷ DEAL_SPEED + 주차 몫. 75초 고정이던 때는 거리를 안 봐서
+  // 먼 곳이 아무리 밟아도 못 닿았다(사장님 2026-09-11). 거리로 재면 멀수록 길게, 가까우면 짧게 잡힌다.
   function dealSec(p) {
     const R = window.ROADS, rt = R && R.route && R.route(PLAYER.x, PLAYER.z, p.x, p.z);
-    if (!rt || rt.length < 2) return DEAL_SEC;
-    const V = 55, ACC = 12, GRIP = 7.5;                 // 오픈카 최고속도·가속·접지력 (vehicles.js)
-    const P = [{ x: rt[0].x, z: rt[0].z }];
-    for (let i = 1; i < rt.length; i++) {               // 3m 간격으로 다시 찍어야 코너가 잡힌다
-      const a = rt[i - 1], b = rt[i], L = Math.hypot(b.x - a.x, b.z - a.z), n = Math.max(1, Math.round(L / 3));
-      for (let k = 1; k <= n; k++) P.push({ x: a.x + (b.x - a.x) * k / n, z: a.z + (b.z - a.z) * k / n });
-    }
-    const N = P.length; if (N < 3) return DEAL_SEC;
-    const ds = []; for (let i = 1; i < N; i++) ds.push(Math.hypot(P[i].x - P[i - 1].x, P[i].z - P[i - 1].z));
-    const v = new Array(N).fill(V);
-    for (let i = 1; i < N - 1; i++) {                   // 꺾이는 각 -> 반지름 -> 한계속도
-      const ax = P[i].x - P[i - 1].x, az = P[i].z - P[i - 1].z, bx = P[i + 1].x - P[i].x, bz = P[i + 1].z - P[i].z;
-      const la = Math.hypot(ax, az) || 1, lb = Math.hypot(bx, bz) || 1;
-      const th = Math.acos(Math.max(-1, Math.min(1, (ax * bx + az * bz) / (la * lb))));
-      if (th > 0.02) v[i] = Math.min(V, Math.sqrt(GRIP * (la + lb) / 2 / (2 * Math.sin(th / 2))));
-    }
-    v[0] = Math.min(v[0], Math.abs(PLAYER.long || 0));  // 지금 속도에서 출발
-    for (let i = 1; i < N; i++) v[i] = Math.min(v[i], Math.sqrt(v[i - 1] * v[i - 1] + 2 * ACC * ds[i - 1]));
-    for (let i = N - 2; i >= 0; i--) v[i] = Math.min(v[i], Math.sqrt(v[i + 1] * v[i + 1] + 2 * ACC * ds[i]));
-    let t = 0; for (let i = 1; i < N; i++) t += ds[i - 1] / Math.max(0.1, (v[i - 1] + v[i]) / 2);
-    return Math.max(DEAL_MIN, Math.min(DEAL_MAX, Math.round(t * DEAL_SLACK + DEAL_PARK)));
+    let L = 0;
+    if (rt && rt.length > 1) { for (let i = 1; i < rt.length; i++) L += Math.hypot(rt[i].x - rt[i - 1].x, rt[i].z - rt[i - 1].z); }
+    else L = Math.hypot(p.x - PLAYER.x, p.z - PLAYER.z) * 1.3;   // 길을 못 찾으면 직선 거리에 굽이 몫만 얹는다
+    return Math.max(DEAL_MIN, Math.min(DEAL_MAX, Math.round(L / DEAL_SPEED + DEAL_PARK)));
   }
   function dealSpawn() {
     // 급매는 **1단계부터 순차적으로** 뜨다 (사장님 2026-09-11).
