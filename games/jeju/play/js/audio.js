@@ -9,12 +9,34 @@
     for (const k in FILES) { const u = FILES[k]; if (seen.has(u)) continue; seen.add(u);
       fetch(u + '?v=1').then(r => r.ok ? r.arrayBuffer() : Promise.reject(r.status)).then(ab => A.ctx.decodeAudioData(ab)).then(b => { A.buf[u] = b; if (k === 'engine') startEngineFile(); if (k === 'amb') startAmbFile(); }).catch(() => {}); }
   }
+  // 이음매 없는 반복 버퍼 만들기 (2026-09-12 "엔진음이 뚝뚝 끊긴다")
+  // mp3 는 앞뒤에 인코더가 넣은 빈 자리가 붙고, engine.mp3 는 끝에 0.5초 무음까지 있어
+  // 그대로 반복하면 3.5초마다 소리가 뚝 끊겼다. 앞뒤 무음을 잘라내고 끝을 앞에 겹쳐 넘긴다.
+  function loopBuffer(buf, fade) {
+    try {
+      const sr = buf.sampleRate, ch = buf.numberOfChannels, d0 = buf.getChannelData(0), thr = 0.004;
+      let a = 0, b = buf.length - 1;
+      while (a < b && Math.abs(d0[a]) < thr) a++;
+      while (b > a && Math.abs(d0[b]) < thr) b--;
+      const L = b - a + 1;
+      if (L < sr * 0.2) return buf;
+      const F = Math.max(1, Math.min(Math.round(sr * (fade || 0.12)), Math.floor(L / 3)));
+      const N = L - F;
+      const out = A.ctx.createBuffer(ch, N, sr);
+      for (let c = 0; c < ch; c++) {
+        const s = buf.getChannelData(c), o = out.getChannelData(c);
+        for (let i = 0; i < N; i++) o[i] = s[a + i];
+        for (let i = 0; i < F; i++) { const t = i / F; o[i] = s[a + i] * t + s[a + N + i] * (1 - t); }
+      }
+      return out;
+    } catch (e) { return buf; }
+  }
   function startEngineFile() {   // 파일 엔진: 반복 재생, engine() 이 재생 속도·볼륨을 만진다. 합성 엔진은 끈다
-    const ctx = A.ctx, s = ctx.createBufferSource(); s.buffer = A.buf[FILES.engine]; s.loop = true;
+    const ctx = A.ctx, s = ctx.createBufferSource(); s.buffer = loopBuffer(A.buf[FILES.engine], 0.12); s.loop = true;
     const g = ctx.createGain(); g.gain.value = 0; s.connect(g); g.connect(A.master); s.start(); A.engSrc = s; A.engG = g;
   }
   function startAmbFile() {   // 걸어다닐 때 배경음: 반복 재생, ambient() 가 크기만 만진다
-    const ctx = A.ctx, s = ctx.createBufferSource(); s.buffer = A.buf[FILES.amb]; s.loop = true;
+    const ctx = A.ctx, s = ctx.createBufferSource(); s.buffer = loopBuffer(A.buf[FILES.amb], 0.5); s.loop = true;
     const g = ctx.createGain(); g.gain.value = 0; s.connect(g); g.connect(A.master); s.start(); A.ambSrc = s; A.ambG = g;
   }
   // 걸어다닐 때만 켠다 - 차에 타면 엔진과 라디오가 있다 (사장님 2026-09-12)
