@@ -120,8 +120,30 @@
       tone(1976, 0.34, 'square', 0.07, d + 0.06);   // B6
     }
   }
+  // 따르릉 — 옛날 전화 종소리. 종 두 음을 빠르게 떨어 1초 울리고, 쉬었다 한 번 더 (사장님 2026-09-12)
+  function ring(times) {
+    if (!A.ctx) return;
+    const ctx = A.ctx, n = times || 2;
+    for (let k = 0; k < n; k++) {
+      const t0 = ctx.currentTime + k * 1.5, dur = 0.95;
+      const env = ctx.createGain(); env.gain.setValueAtTime(0.0001, t0);
+      env.gain.exponentialRampToValueAtTime(0.16, t0 + 0.03);
+      env.gain.setValueAtTime(0.16, t0 + dur - 0.12);
+      env.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+      env.connect(A.master);
+      const trem = ctx.createGain(); trem.gain.setValueAtTime(0.5, t0); trem.connect(env);   // 종을 때리는 떨림
+      const lfo = ctx.createOscillator(); lfo.type = 'square'; lfo.frequency.value = 23;
+      const lg = ctx.createGain(); lg.gain.value = 0.5; lfo.connect(lg); lg.connect(trem.gain);
+      lfo.start(t0); lfo.stop(t0 + dur + 0.05);
+      for (const f of [1046, 1396, 2093]) {   // 종은 배음이 어긋나야 쇳소리가 난다
+        const o = ctx.createOscillator(); o.type = f > 2000 ? 'sine' : 'triangle'; o.frequency.value = f;
+        const og = ctx.createGain(); og.gain.value = f > 2000 ? 0.25 : 1;
+        o.connect(og); og.connect(trem); o.start(t0); o.stop(t0 + dur + 0.05);
+      }
+    }
+  }
   function toggle() { A.on = !A.on; try { localStorage.setItem('jeju.snd', A.on ? '1' : '0'); } catch (e) {} if (A.master) A.master.gain.setTargetAtTime(A.on ? 1 : 0, A.ctx.currentTime, 0.05); return A.on; }
   function pause(p) { if (p && RD.el && !RD.el.paused) RD.el.pause(); if (!A.ctx) return; if (p) A.ctx.suspend(); else A.ctx.resume(); }
-  window.AUDIO = Object.assign(A, { init, engine, skid, horn, crash, splash, toggle, pause, radio, radioToggle, radioNext, nowPlaying, set onTrack(f) { RD.onTrack = f; }, radioVol(v) { RD.el && (RD.el.volume = v); }, shutter, stamp, ping, fanfare, coin, news, tone });
+  window.AUDIO = Object.assign(A, { init, engine, skid, horn, crash, splash, toggle, pause, radio, radioToggle, radioNext, nowPlaying, set onTrack(f) { RD.onTrack = f; }, radioVol(v) { RD.el && (RD.el.volume = v); }, shutter, stamp, ping, fanfare, coin, news, ring, tone });
   Object.defineProperty(window.AUDIO, 'radioOn', { get() { return RD.on; } });
 })();

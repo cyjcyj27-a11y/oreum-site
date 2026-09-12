@@ -228,7 +228,7 @@
     const ev = ESTATE.estateWorth ? ESTATE.estateWorth() : nw;
     if (!ACT.calls.rich && ev >= 10000000) { ACT.calls.rich = 1; ACT.save(); callQueue(CALLS.rich, showEnding); }   // 총자산 1,000억 = 엔딩(현금 + 부동산 현재가)
   }
-  function callStart(who, lines) { if (who) { CALL.who = who; CALL.lines = lines; } CALL.i = 0; CALL.open = true; $('callWho').textContent = CALL.who; $('callMsg').textContent = CALL.lines[0]; $('call').classList.add('show'); AUDIO.ping(1180); setTimeout(() => AUDIO.ping(1180), 260); }
+  function callStart(who, lines) { if (who) { CALL.who = who; CALL.lines = lines; } CALL.i = 0; CALL.open = true; $('callWho').textContent = CALL.who; $('callMsg').textContent = CALL.lines[0]; $('call').classList.add('show'); AUDIO.ring(2); }   // 따르릉 (사장님 2026-09-12)
   function callNext() {
     CALL.i++;
     if (CALL.i >= CALL.lines.length) {
