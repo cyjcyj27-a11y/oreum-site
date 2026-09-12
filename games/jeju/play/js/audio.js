@@ -1,9 +1,9 @@
 // 소리 — WebAudio 합성(타이어·경적·효과음) + 파일(assets/sfx/, 픽사베이 무료 효과음, 사장님 2026-09-09):
-//   엔진 주행 engine.mp3(반복, 속도에 따라 재생 속도), 충돌 crash.mp3(무엇에 부딪히든 한 가지), 경적 horn.mp3(누르는 동안 반복). 파일이 없으면 합성음으로.
+//   엔진 주행 engine.mp3(반복, 속도에 따라 재생 속도), 충돌 crash.mp3(무엇에 부딪히든 한 가지), 경적은 코드로 만든 합성음.
 (function () {
   const A = { ctx: null, on: true, master: null, buf: {}, engSrc: null, engG: null };
   // 충돌음은 무엇에 부딪히든 한 가지로 통일(사장님 2026-09-09). 매번 재생 속도를 조금 흔들어 같은 소리가 반복돼 들리지 않게 한다
-  const FILES = { engine: 'assets/sfx/engine.mp3', crash: 'assets/sfx/crash.mp3', horn: 'assets/sfx/horn.mp3' };
+  const FILES = { engine: 'assets/sfx/engine.mp3', crash: 'assets/sfx/crash.mp3' };   // 경적은 파일을 안 쓴다 — 코드로 만든 소리가 낫다(사장님 2026-09-12). assets/sfx/horn.mp3 는 남겨만 둔다
   function loadFiles() {
     const seen = new Set();
     for (const k in FILES) { const u = FILES[k]; if (seen.has(u)) continue; seen.add(u);
@@ -40,22 +40,8 @@
     A.engG.gain.setTargetAtTime((0.12 + throttle * 0.18 + k * 0.15) * vol, t, 0.1);
   }
   function skid(amount) { if (A.skidG) A.skidG.gain.setTargetAtTime(Math.min(0.25, amount * 0.25), A.ctx.currentTime, 0.05); }
-  // 경적: 파일이 있으면 누르는 동안 반복 재생, 없으면 합성음
+  // 경적: 코드로 만든 두 음(392·494Hz 톱니 + 저역통과). 녹음 파일보다 이게 낫다 (사장님 2026-09-12)
   function horn(on) {
-    const b = A.buf[FILES.horn];
-    if (b) {
-      const ctx = A.ctx;
-      if (on && !A.hornSrc) {
-        const s = ctx.createBufferSource(); s.buffer = b; s.loop = true;
-        const g = ctx.createGain(); g.gain.value = 0.55; s.connect(g); g.connect(A.master); s.start();
-        A.hornSrc = { s, g };
-      } else if (!on && A.hornSrc) {
-        const h = A.hornSrc; A.hornSrc = null;
-        h.g.gain.setTargetAtTime(0, ctx.currentTime, 0.03);
-        setTimeout(() => { try { h.s.stop(); } catch (e) {} }, 200);
-      }
-      return;
-    }
     if (A.hornG) A.hornG.gain.setTargetAtTime(on ? 0.12 : 0, A.ctx.currentTime, 0.02);
   }
   function crash(strength, kind) {
