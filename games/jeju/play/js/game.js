@@ -344,6 +344,8 @@
   $('statMoney').addEventListener('click', () => { if (started) ESTATE.openAssets(); });   // 💰 를 누르면 자산 창
   $('assetClose').addEventListener('click', () => ESTATE.closeAssets());
   $('mapClose').addEventListener('click', () => ACT.toggleMap());
+  // 지도 밖을 눌러도 닫힌다 — 닫기 단추를 못 찾아 갇히는 일이 없게 (사장님 2026-09-12)
+  window.addEventListener('pointerdown', e => { if (!ACT.mapOpen || !e.target.closest) return; if (e.target.closest('#map') || e.target.closest('#topbar')) return; ACT.toggleMap(); }, true);   // 상단바는 빼둔다 — 지도 단추가 여기서 닫고 click 에서 다시 여는 일이 없게
   $('shopClose').addEventListener('click', () => ACT.closeShop());
   $('foot').addEventListener('click', () => foot());
   // 리스폰 단추는 뺐다 (사장님 2026-09-12). 키보드 R 은 그대로 — 차가 끼거나 뒤집혔을 때 길 위로 돌려 놓는다
