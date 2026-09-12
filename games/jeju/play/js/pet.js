@@ -508,6 +508,7 @@
   // 흘러가 **미끄러지듯 걷는 것처럼** 보였다 (사장님 2026-09-11 "여친 이상하게 걷는데")
   const W_MPS = 1.6;                 // 주인공 걷기 클립 기준(주인공이 쓰는 값과 같다). 여친도 이 클립을 빌려 쓴다
   const R_MPS = 5.88;                // 주인공 달리기 클립을 여친 뼈대에 옮겨 붙였을 때 실제로 그리는 속도
+  const GF_LIFT = 0.544;   // 앉았을 때 여친을 올리는 높이(m). 주인공 머리뼈와 같은 높이가 되는 값 — 재서 맞췄다(2026-09-12)
   const GF = { g: null, mixer: null, act: null, h: 1.66, flip: Math.PI, x: 0, z: 0, y: 0, yaw: 0, spd: 2, moving: false, idle: 0, on: false };
   // 걷기 클립에서 고리로 돌렸을 때 제일 덜 튀는 구간을 찾는다.
   // 뉴버그 트랙(믹사모는 한 프레임씩 굽혀 있다)을 프레임끼리 비교해, 한 걸음 주기(25~48프레임) 안에서 차이가 제일 작은 쌍을 고른다.
@@ -620,7 +621,9 @@
       GF.g.rotation.set(0, GF.flip, 0); GF.g.scale.y = GF.g.scale.x; GF.g.position.y = 0;
       // 엉덩이 뼈를 좌석에 맞춘다 — 앉은 자세가 잡힌 뒤에 재야 맞는다
       if (!GF.hipSit && GF.hips) { gfRoot.position.set(0, 0, 0); gfRoot.quaternion.identity(); gfRoot.scale.setScalar(1); GF.hipSit = GF.hips.getWorldPosition(new THREE.Vector3()); }
-      carToWorld(-seat[0], seat[1], seat[2], tmpV);     // 운전석 반대쪽
+      // 조수석은 운전석 반대쪽. 앉은키를 GF_LIFT 만큼 올려 남자 머리와 눈높이를 맞춘다
+      // (사장님 2026-09-12 "여자애 앉은키가 남자 머리랑 같았으면") — 그냥 두면 13.6cm 낮아 좌석 머리받이에 가린다
+      carToWorld(-seat[0], seat[1] + GF_LIFT * (seat[3] || 1), seat[2], tmpV);
       const sc = seat[3] || 1;
       if (GF.hipSit) { hipV.copy(GF.hipSit).multiplyScalar(sc).applyQuaternion(carQ); gfRoot.position.copy(tmpV).sub(hipV); }
       else gfRoot.position.copy(tmpV);

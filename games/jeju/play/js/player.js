@@ -266,7 +266,11 @@
     camPos.lerp(want, 1 - Math.exp(-7 * dt));
     cam.position.copy(camPos);
     const fx = -Math.sin(P.yaw), fz = -Math.cos(P.yaw);
-    look.set(P.x + fx * 4.0, P.y + (P.mode === 'fly' ? -1 : 0.8), P.z + fz * 4.0);
+    // 시선은 차 앞을 내다본다. 다만 **카메라를 옆·앞으로 돌리면 그만큼 차 쪽으로 당긴다** —
+    // 늘 앞 4m 를 보게 두면 앞으로 돌렸을 때 차가 화면 밖으로 밀려나 탄 사람 얼굴을 볼 수 없었다
+    // (사장님 2026-09-12 "카메라 돌려서 애들 얼굴 볼라는데 안 보여")
+    const lead = 4.0 * Math.cos(orbit.yaw) * Math.min(1, orbit.zoom || 1);
+    look.set(P.x + fx * lead, P.y + (P.mode === 'fly' ? -1 : 0.8), P.z + fz * lead);
     cam.lookAt(look);
     const fov = 60 + Math.min(16, spd * 0.28);
     if (Math.abs(cam.fov - fov) > 0.05) { cam.fov = fov; cam.updateProjectionMatrix(); }
