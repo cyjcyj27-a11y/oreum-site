@@ -150,7 +150,8 @@
   function boughtCount() { let n = 0; for (const p of E.list) if (p.own || p.sold) n++; return n; }   // 100% 는 판 땅도 '사 봤다'로 친다
 
   // ── 매물 깔기: 섬을 130m 격자로 훑어 한 칸에 하나, 뭍·평지·건물과 길에서 떨어진 곳·길에서 260m 안 ──
-  function steep(x, z) { return Math.hypot(H(x + 8, z) - H(x - 8, z), H(x, z + 8) - H(x, z - 8)) / 16 > 0.5; }
+  const slopeAt = (x, z) => Math.hypot(H(x + 8, z) - H(x - 8, z), H(x, z + 8) - H(x, z - 8)) / 16;
+  function steep(x, z) { return slopeAt(x, z) > 0.5; }
   // 매물 이름은 지명에서만 빌린다. 기업·브랜드 이름이 붙은 명소는 후보에서 뺀다 (사장님 2026-09-10)
   // 값 매기는 데는 그대로 쓴다 — 신화월드 옆 땅이 비싼 건 사실이니까
   const BRAND = new Set(['nexon', 'ecoland', 'aquaplanet', 'teddy', 'osulloc', 'innisfree', 'shinhwa',
@@ -196,6 +197,19 @@
     const usedSpot = new Set(), uniq = [];
     for (const c of cand) { const key = c.ns ? c.ns.id : '제주'; if (usedSpot.has(key)) continue; usedSpot.add(key); uniq.push(c); }
     const picked = uniq.slice(0, LV50.length);
+    // 고른 자리를 둘레에서 **제일 평평한 곳**으로 조금 옮긴다 — 비탈에 놓이면 차를 대기도, 건물을 보기도 나쁘다
+    // (사장님 2026-09-12 "비자림 급매 위치를 좀더 평지쪽으로"). 이름·값은 그대로, 자리만 40m 안에서 움직인다
+    for (const q of picked) {
+      let bx = q.x, bz = q.z, bs = slopeAt(q.x, q.z);
+      for (let r = 12; r <= 40; r += 14) for (let a2 = 0; a2 < 360; a2 += 30) {
+        const nx = q.x + Math.cos(a2 * Math.PI / 180) * r, nz = q.z + Math.sin(a2 * Math.PI / 180) * r;
+        if (I.coastDist(nx, nz) < 18 || H(nx, nz) < 1 || I.inIslet(nx, nz)) continue;
+        if (PLAYER.insideBox(nx, nz, 12)) continue;
+        const rn2 = ROADS.nearest(nx, nz); if (rn2.e && rn2.d < 9) continue;   // 길 위는 안 된다
+        const sl = slopeAt(nx, nz); if (sl < bs - 0.01) { bs = sl; bx = nx; bz = nz; }
+      }
+      q.x = bx; q.z = bz;
+    }
     // 땅값 싼 곳부터 1단계(작은 농가주택), 제일 비싼 도심·해안가가 50단계(나이트클럽) (사장님 2026-09-10)
     picked.sort((a, b) => a.price - b.price);
     // 지역 등급 1~10 — 팔 때 굴리는 가챠의 상한을 정한다. 31곳을 값 순위대로 고르게 나눈다
@@ -270,7 +284,8 @@
   }
   function addMarker(p) {
     const w = Math.max(12, Math.min(44, sideOf(p))); p.side = w;
-    p.sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: spriteTex('매매 ' + fmt(p.price), pyeong(p), 'buy'), transparent: true, depthWrite: false })); p.sp.scale.set(34, 17, 1); p.sp.position.set(p.x, p.y + 20, p.z);   // 크게, 높이 (사장님 2026-09-11 — 조금 올리지 말고 확 키운다) p.sp.renderOrder = 5; E.scene.add(p.sp);
+    p.sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: spriteTex('매매 ' + fmt(p.price), pyeong(p), 'buy'), transparent: true, depthWrite: false })); p.sp.scale.set(34, 17, 1); p.sp.position.set(p.x, p.y + 20, p.z);   // 크게, 높이 (사장님 2026-09-11 — 조금 올리지 말고 확 키운다)
+    p.sp.renderOrder = 5; E.scene.add(p.sp);
   }
 
   // ── 건물(코드로 만든 소품): 몸체(정점색) + 간판(글자 캔버스) + 밤에 켜지는 창(발광) + 기단. 정면은 +z, 도로 쪽을 보게 돌린다 ──
@@ -691,7 +706,20 @@
     '{n}에 임자가 서울 올라간다고 {v}에 내놓았어. 다른 사람도 전화 돌리는 중이여.',
     '자네한테만 먼저 알려주는 거여. {n} {b} 자리, {v}. 탐라국개발이 냄새 맡기 전에 오게.',
   ];
-  const DEAL_CALL = DEAL_LINES.map(function (t) { return function (n, b, v, p) { return t.replace('{n}', n).replace('{b}', b).replace('{v}', v).replace('{p}', p); }; });
+  // 영문판 대사 — 사전으로는 못 바꾼다. {n}{b}{v} 를 끼워 넣고 나면 통짜 문장이 아니라서다
+  const DEAL_LINES_EN = [
+    'Young man! A {b} has come up at {n}. They will take {v}. Get over here!',
+    'Listen, the owner at {n} is in a hurry. The {b} site goes for {v}. Half price.',
+    'Broker here. A rush listing at {n}, {v}. Interested?',
+    'I called you first, mind. {n} {b} site, worth {p}, going at {v}.',
+    'Where are you right now? {n}, {v}, rush sale. Word gets around fast.',
+    'Land at {n} has dropped to {v}. Perfect for a {b}.',
+    'A family needs cash today. {n} {b} site, {v}. Gone if you are not here by tonight.',
+    'This comes up once a year, maybe. {n}, {v}. Miss it and you lose.',
+    'The owner at {n} is moving to Seoul, asking {v}. I am ringing others too.',
+    'Telling you first. {n} {b} site, {v}. Come before Tamna Development smells it.',
+  ];
+  const DEAL_CALL = (window.LANG && LANG.en ? DEAL_LINES_EN : DEAL_LINES).map(function (t) { return function (n, b, v, p) { return t.replace('{n}', n).replace('{b}', b).replace('{v}', v).replace('{p}', p); }; });
   // 제한시간 = 그 땅까지 **길 거리** ÷ DEAL_SPEED + 주차 몫. 75초 고정이던 때는 거리를 안 봐서
   // 먼 곳이 아무리 밟아도 못 닿았다(사장님 2026-09-11). 거리로 재면 멀수록 길게, 가까우면 짧게 잡힌다.
   function dealSec(p) {

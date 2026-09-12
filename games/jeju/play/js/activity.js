@@ -82,7 +82,7 @@
         while (I.coastDist(s.x, s.z) > 14 && k++ < 80) { s.x += sw.x * 3; s.z += sw.z * 3; }
       }
       if (s.river) { s.x = I.RIVER.a.x + 18; s.z = I.RIVER.a.z - 20; }
-      if (s.kind === 'shop') A.markers.push(markerFor(s));   // 관광지 액티비티는 전부 뺐다(BUY JEJU, 2026-09-08) — 이름만 남고 표식은 렌터카뿐
+      // 표식 없음 — 관광지 액티비티도 렌터카도 뺐다 (2026-09-12)
     }
     hud();
   }
@@ -97,19 +97,10 @@
     updateDest();
     navTick(dt);
     if (A.cur) return updateTask(dt, t);
-    // 가까운 명소
-    let best = null, bd = 1e9;
-    const hp = HP();
-    for (const s of A.spots) {
-      if (s.kind !== 'shop') continue;   // 렌터카만 행동이 있다
-      if (s.islet && !I.inIslet(hp.x, hp.z)) continue;
-      const d = Math.hypot(s.x - hp.x, s.z - hp.z); const rr = s.kind === 'oreum' ? 24 : 16;
-      if (d < rr && d < bd) { bd = d; best = s; }
-    }
-    A.near = best;
-    const b = btn();
-    if (best && PLAYER.kmh < 12 && PLAYER.mode === 'ground') { const lk = locked(best); b.textContent = (lk ? '🔒 ' : (A.done.has(best.id) && best.kind !== 'shop' && best.kind !== 'ferry' ? '✔ ' : best.icon + ' ')) + ACTION[best.kind] + ' · ' + best.name + (lk ? ' · ' + lk.tag : ''); b.classList.add('show'); }
-    else b.classList.remove('show');
+    // 명소 행동은 없다 — 렌터카까지 뺐다 (사장님 2026-09-12 "렌탈카 기능은 없애").
+    // 아래 단추는 매물(ESTATE)이 쓴다. 여기서는 비워 두기만 한다
+    A.near = null;
+    btn().classList.remove('show');
   }
 
   // ── 행동 ──
@@ -126,7 +117,6 @@
       case 'collect': return startCollect(s);
       case 'dive': { const c = locked(s); if (c) { hint(c.hint + ' · ' + s.name); AUDIO.ping(320); return; } return startDive(s); }
       case 'fly': return startFly(s);
-      case 'shop': return openShop();
     }
   }
   function stampNow(s, bonus) {
@@ -320,20 +310,9 @@
     endTask();
   }
 
-  // ── 렌터카 ──
-  function openShop() {
-    const list = el('shopList'); list.innerHTML = '';
-    for (const k of ['open', 'car', 'suv', 'ev', 'sport', 'camper']) {
-      const owned = A.owned.includes(k), cur = PLAYER.car === k; const p = VEH.PARAMS[k];
-      const card = document.createElement('div'); card.className = 'card' + (cur ? ' cur' : '');
-      card.innerHTML = '<div class="thumb" style="background:#' + p.tint.toString(16).padStart(6, '0') + '"></div><div class="info"><b>' + CARNAME[k] + '</b><div class="bars"><span>속도 ' + bars(p.max / 70) + '</span><span>가속 ' + bars(p.accel / 17) + '</span></div></div><div class="act">' + (cur ? '<em>✔</em>' : owned ? '<button data-k="' + k + '">타기</button>' : '<button data-k="' + k + '" ' + (A.coins < PRICE[k] ? 'disabled' : '') + '>🪙 ' + PRICE[k] + '</button>') + '</div>';
-      list.appendChild(card);
-    }
-    list.querySelectorAll('button').forEach(b => b.addEventListener('click', () => { const k = b.dataset.k; if (!A.owned.includes(k)) { if (A.coins < PRICE[k]) return; A.coins -= PRICE[k]; A.owned.push(k); AUDIO.stamp(); } PLAYER.car = k; PLAYER.setVehicle(k); save(); hud(); openShop(); }));
-    el('shop').classList.add('show'); A.shopOpen = true;
-  }
-  function bars(v) { let s = ''; for (let i = 0; i < 5; i++) s += '<i class="' + (v * 5 > i + 0.5 ? 'on' : '') + '"></i>'; return '<u>' + s + '</u>'; }
-  function closeShop() { el('shop').classList.remove('show'); A.shopOpen = false; }
+  // ── 렌터카는 뺐다 (사장님 2026-09-12). 다른 데서 부르는 자리가 남아 있어 빈 함수만 둔다 ──
+  function openShop() {}
+  function closeShop() { A.shopOpen = false; }
 
   // ── 지도: 확대(휠·두 손가락)·끌기, 명소를 누르면 목적지 ──
   const view = { s: 1, x: 0, y: 0 };
@@ -359,10 +338,10 @@
     const fs = Math.max(10, W / 60) * Math.min(2.2, Math.max(1, Math.sqrt(view.s)));
     const showNames = view.s >= 1.8;
     for (const s of A.spots) {
-      if (s.kind !== 'shop' && !showNames && A.dest !== s) continue;
+      if (!showNames && A.dest !== s) continue;
       const x = X(s.x), y = Z(s.z); if (x < -40 || y < -40 || x > W + 40 || y > Hh + 40) continue;
       if (A.dest === s) { g.fillStyle = 'rgba(255,60,40,0.35)'; g.beginPath(); g.arc(x, y, fs * 1.3, 0, 6.29); g.fill(); g.strokeStyle = '#ff3b2a'; g.lineWidth = 3; g.stroke(); }
-      g.globalAlpha = 1; if (s.kind === 'shop') { g.font = fs + 'px "Segoe UI Emoji", sans-serif'; g.fillText(s.icon, x, y); } else { g.fillStyle = 'rgba(255,255,255,0.7)'; g.beginPath(); g.arc(x, y, Math.max(1.5, fs * 0.12), 0, 6.29); g.fill(); }
+      g.globalAlpha = 1; g.fillStyle = 'rgba(255,255,255,0.7)'; g.beginPath(); g.arc(x, y, Math.max(1.5, fs * 0.12), 0, 6.29); g.fill();
       if (showNames || A.dest === s) { g.font = 'bold ' + Math.round(fs * 0.62) + 'px "Griun", "Malgun Gothic", sans-serif'; g.lineWidth = 4; g.strokeStyle = 'rgba(0,0,0,0.75)'; const nm = L(s.name); g.strokeText(nm, x, y + fs * 0.95); g.fillStyle = A.done.has(s.id) ? '#ffd24a' : '#fff'; g.fillText(nm, x, y + fs * 0.95); }
       g.globalAlpha = 1;
     }
