@@ -141,7 +141,7 @@
       const hF = G(P.x + fx * 1.4, P.z + fz * 1.4), hB = G(P.x - fx * 1.4, P.z - fz * 1.4), hL = G(P.x - rx * 0.9, P.z - rz * 0.9), hR = G(P.x + rx * 0.9, P.z + rz * 0.9);
       const ty = Math.max(g, (hF + hB) / 2) - P.sink * 1.6 + (P.params.gallop ? Math.abs(Math.sin(P.bob)) * 0.12 : 0);
       P.y += (ty - P.y) * 0.5;
-      P.pitch = Math.atan2(hF - hB, 2.8) * 0.9; P.roll = Math.atan2(hR - hL, 1.8) * 0.9;   // 앞이 높으면 코가 올라가고, 오른쪽이 높으면 오른쪽이 올라간다(부호가 뒤집혀 있었음, 2026-09-08)
+      P.pitch = Math.atan2(hF - hB, 2.8) * 0.9; P.roll = Math.atan2(hR - hL, 1.8) * TILT;   // 앞이 높으면 코가 올라가고, 오른쪽이 높으면 오른쪽이 올라간다(부호가 뒤집혀 있었음, 2026-09-08)
     } else if (P.mode === 'water') { P.y = 0.05 + Math.sin(P.bob * 0.7) * 0.08; P.pitch = Math.sin(P.bob * 0.9) * 0.03; P.roll = Math.sin(P.bob * 0.6) * 0.04 + P.steer * 0.15 * Math.min(1, Math.abs(P.long) / 6); }
     else if (P.mode === 'dive') { P.roll = -P.steer * 0.35; }
     else if (P.mode === 'fly') { P.roll = -P.steer * 0.6; }
@@ -249,6 +249,12 @@
   // ── 카메라 ──
   const camPos = new THREE.Vector3(), look = new THREE.Vector3(), want = new THREE.Vector3();
   let camInit = false;
+  // 비탈에서 차가 옆으로 눕는 정도. 1 이면 땅 기울기 그대로 눕는다 —
+  // 49° 비탈에서 롤이 28° 까지 가서 차만 비스듬히 붙어 보였다 (사장님 2026-09-12 "비스듬하게 보이는 건 어떻게").
+  // 앞뒤 기울기(피치)는 그대로 둔다 — 언덕을 오르는 맛이 거기서 나온다. ?tilt= 로 바꿔 볼 수 있다
+  const QS2 = new URLSearchParams(location.search);
+  const TILT = QS2.has('tilt') ? +QS2.get('tilt') : 0.55;
+  const CAMSLOPE = QS2.has('camslope') ? +QS2.get('camslope') : 0;   // 카메라가 비탈을 따라가는 정도(0 = 수평 유지)
   function camera(dt, cam, orbit) {
     const spd = Math.abs(P.long);
     const cy = P.yaw + orbit.yaw;
@@ -260,6 +266,8 @@
       const steps = 14;
       for (let i = 1; i <= steps; i++) { const t = i / steps, px = P.x + (want.x - P.x) * t, pz = P.z + (want.z - P.z) * t; if (insideBox(px, pz, 0.4)) { const tb = Math.max(0.12, (i - 1) / steps); want.set(P.x + (want.x - P.x) * tb, want.y, P.z + (want.z - P.z) * tb); break; } }
     }
+    // 언덕에서 카메라도 비탈을 따라간다 — 수평만 지키면 차만 비스듬히 붙어 보인다
+    if (CAMSLOPE > 0 && P.mode === 'ground') { const gy2 = Math.max(H(want.x, want.z), 0) + hgt; want.y += (gy2 - want.y) * CAMSLOPE; }
     if (P.mode === 'dive') { want.y = Math.min(-0.5, Math.max(H(want.x, want.z) + 0.6, want.y)); }
     else { const gy = Math.max(H(want.x, want.z), 0) + 1.0; if (want.y < gy) want.y = gy; }
     if (!camInit) { camPos.copy(want); camInit = true; }
