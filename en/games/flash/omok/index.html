@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GOMOKU — free five in a row game online, climb from 10 kyu to 1 dan</title>
+<meta name="description" content="A free Gomoku game on a 15x15 board. Play black against an AI that starts at 10 kyu and grows stronger each time you win, up to 1 dan. No double-three for either side, and two people can share one phone.">
+<meta name="keywords" content="gomoku, gomoku online, free gomoku, five in a row, gomoku ai, 2 player gomoku, gomoku rules, omok, gomoku no download, free browser game, Oreum Games">
+<link rel="canonical" href="https://oreumgames.com/en/games/flash/omok/">
+<link rel="alternate" hreflang="ko" href="https://oreumgames.com/games/flash/omok/">
+<link rel="alternate" hreflang="en" href="https://oreumgames.com/en/games/flash/omok/">
+<link rel="alternate" hreflang="x-default" href="https://oreumgames.com/games/flash/omok/">
+<meta name="theme-color" content="#f8f5ec">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" href="/assets/icon-512.png" type="image/png" sizes="512x512">
+<link rel="apple-touch-icon" href="/assets/icon-180.png">
+<link rel="manifest" href="/manifest.webmanifest">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Oreum Games">
+<meta property="og:title" content="GOMOKU — free five in a row game online, climb from 10 kyu to 1 dan">
+<meta property="og:description" content="A free Gomoku game on a 15x15 board. Play black against an AI that starts at 10 kyu and grows stronger each time you win, up to 1 dan. No double-three for either side, and two people can share one phone.">
+<meta property="og:url" content="https://oreumgames.com/en/games/flash/omok/">
+<meta property="og:image" content="https://oreumgames.com/assets/omok-og-en.webp?v=1">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="en_US">
+<meta name="twitter:card" content="summary_large_image">
+
+<link rel="stylesheet" href="/style.css?v=32">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "VideoGame",
+  "name": "GOMOKU",
+  "alternateName": ["오목", "Omok", "Five in a Row"],
+  "url": "https://oreumgames.com/en/games/flash/omok/",
+  "image": "https://oreumgames.com/assets/omok-og-en.webp?v=1",
+  "description": "A free Gomoku game on a 15x15 board. You play black against an AI that starts at 10 kyu; each win moves you up one rank, up to 1 dan. Connect five stones in a row to win. Double-three is not allowed for either side. Two people can take turns on one phone or PC.",
+  "genre": ["Board", "Strategy"],
+  "playMode": ["SinglePlayer", "MultiPlayer"],
+  "numberOfPlayers": { "@type": "QuantitativeValue", "minValue": 1, "maxValue": 2 },
+  "applicationCategory": "GameApplication",
+  "operatingSystem": "Web browser",
+  "datePublished": "2026-09-13",
+  "dateModified": "2026-09-13",
+  "inLanguage": ["ko", "en"],
+  "gamePlatform": "Web browser",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "isPartOf": { "@type": "CollectionPage", "name": "Games", "url": "https://oreumgames.com/en/games/" },
+  "publisher": { "@type": "Organization", "name": "Oreum Games", "url": "https://oreumgames.com/" }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What are the controls?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Tap or click where two lines cross to place a stone. On a phone, the row and column under your finger light up and the stone goes down when you lift your finger. On a PC, a faint stone shows where the mouse is."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What are the rules?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Black moves first. The first player to connect five stones of their color horizontally, vertically or diagonally wins, and six or more also counts. Neither side may play a double-three, a move that makes two open threes at once; a red X appears if you try. Four-four and four-three are allowed. If the board fills up, the game is a draw."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How strong is the AI? Can a beginner win?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "There are 11 steps, from 10 kyu to 1 dan. The 10 kyu opponent often misses stones it should block, so knowing the rules is enough to win. Higher ranks read further ahead, and at 1 dan the AI finds wins built from one four after another. They are steps of opponent strength inside this game, not official ranks."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can two people play, or play online?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Two people can play. Press 2 PLAYERS on the title screen and take turns on one phone or PC. There is no online play between different devices."
+      }
+    }
+  ]
+}
+</script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="/en/">
+      <img src="/assets/logo-full.webp?v=1" alt="Oreum Games" width="78" height="74">
+    </a>
+    <div class="brand-copy">
+      <p class="brandname">Oreum Games</p>
+      <p class="factory">INDIE GAME FACTORY</p>
+    </div>
+    <ul class="values">
+      <li><span>No install</span> one link and you are in</li>
+      <li><span>No sign-up</span> saves stay in your browser</li>
+    </ul>
+    <nav class="nav" aria-label="Main menu">
+      <a href="/en/games/">GAMES</a>
+      <a href="/en/apps/">APPS</a>
+      <a href="/en/board/">COMMUNITY</a>
+      <a href="/games/flash/omok/" lang="ko" hreflang="ko">한국어</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+  <section class="showcase">
+    <div class="wrap game-page">
+      <a class="backlink" href="/en/games/">← All games</a>
+      <div class="gp-shot"><img src="/assets/omok-shot-en.webp?v=1" alt="A wooden 15x15 Gomoku board with a few black and white stones near the edges and the title GOMOKU in the middle" width="1280" height="800"></div>
+      <h1>GOMOKU</h1>
+      <p class="gp-cta"><a class="btn btn-primary" href="/games/flash/omok/play/?lang=en&amp;v=20260913">🎮 Play now</a></p>
+      <p class="gp-line">GOMOKU is a free five-in-a-row game on a 15x15 board where you play the AI or a friend and climb from 10 kyu to 1 dan, right in the browser.</p>
+      <p class="gp-body">You play black and move first. Connect five stones horizontally, vertically or diagonally to win, and a gold line is drawn through them. Neither side may play a double-three, so a red X appears on those points. If the board fills up, it is a draw.</p>
+      <p class="gp-body">You start against a 10 kyu opponent. Win and NEXT takes you up one rank; lose and you play that rank again. Higher ranks read further ahead, and at 1 dan the AI finds wins built from one four after another. Your rank stays saved in the browser.</p>
+      <p class="gp-body">Block the opponent's four for NICE, or threaten two wins at once for GREAT. Press 2 PLAYERS on the title screen and two people take turns on one phone or PC.</p>
+      <dl class="spec"><dt>Type</dt><dd>Board game · Gomoku</dd>
+              <dt>Built in</dt><dd>1 day</dd>
+              <dt>Made with</dt><dd>Canvas 2D · alpha-beta search AI</dd>
+              <dt>Status</dt><dd>Complete · 11 ranks · 2-player mode</dd>
+              <dt>Released</dt><dd>2026-09-13</dd>
+              <dt>Last updated</dt><dd>2026-09-13</dd></dl>
+      <p class="gp-for">Good for — anyone who wants a Gomoku opponent at any hour, people looking for a Gomoku site with no app, and two people with one phone.</p>
+      <section class="faq">
+        <h2>Frequently asked questions</h2>
+        <details><summary>What are the controls?</summary><p>Tap or click where two lines cross to place a stone. On a phone, the row and column under your finger light up and the stone goes down when you lift your finger. On a PC, a faint stone shows where the mouse is.</p></details>
+        <details><summary>What are the rules?</summary><p>Black moves first. The first player to connect five stones of their color horizontally, vertically or diagonally wins, and six or more also counts. Neither side may play a double-three, a move that makes two open threes at once; a red X appears if you try. Four-four and four-three are allowed. If the board fills up, the game is a draw.</p></details>
+        <details><summary>How strong is the AI? Can a beginner win?</summary><p>There are 11 steps, from 10 kyu to 1 dan. The 10 kyu opponent often misses stones it should block, so knowing the rules is enough to win. Higher ranks read further ahead, and at 1 dan the AI finds wins built from one four after another. They are steps of opponent strength inside this game, not official ranks.</p></details>
+        <details><summary>Can two people play, or play online?</summary><p>Two people can play. Press 2 PLAYERS on the title screen and take turns on one phone or PC. There is no online play between different devices.</p></details>
+      </section>
+      <div class="talk"><p class="talk-title">Leave a note</p><p class="talk-go"><a href="/en/board/">Go to Community →</a></p></div>
+    </div>
+  </section>
+<!-- related:start -->
+  <section class="related" aria-label="Play Other Games">
+    <div class="wrap game-page">
+      <h2>Play Other Games</h2>
+      <ul class="related-list">
+      <li><a href="/en/games/flash/baduk/"><img src="/assets/baduk-shot-en.webp" alt="" width="96" height="60" loading="lazy"><span class="related-txt"><b>BADUK</b><span>free Go board game</span></span><em>PLAY ▸</em></a></li>
+      <li><a href="/en/games/flash/alkkagi/"><img src="/assets/alkkagi-shot-en.webp" alt="" width="96" height="60" loading="lazy"><span class="related-txt"><b>ALKKAGI</b><span>stone flicking game</span></span><em>PLAY ▸</em></a></li>
+      <li><a href="/en/games/fingerkick/"><img src="/assets/fingerkick-shot-en.webp" alt="" width="96" height="60" loading="lazy"><span class="related-txt"><b>FINGER KICK</b><span>finger soccer game</span></span><em>PLAY ▸</em></a></li>
+      <li><a href="/en/games/jeju/"><img src="/assets/jeju-shot-en.webp" alt="" width="96" height="60" loading="lazy"><span class="related-txt"><b>BUY JEJU</b><span>open world land-buying game on Jeju</span></span><em>PLAY ▸</em></a></li>
+      <li><a href="/en/games/farmonmars/"><img src="/assets/farmonmars-shot-en.webp" alt="" width="96" height="60" loading="lazy"><span class="related-txt"><b>FARM ON MARS</b><span>idle Mars farming city builder</span></span><em>PLAY ▸</em></a></li>
+      <li><a href="/en/games/flash/bungeoppang/"><img src="/assets/bungeoppang-shot-en.webp" alt="" width="96" height="60" loading="lazy"><span class="related-txt"><b>BUNGEOPPANG</b><span>Korean fish-shaped bread idle game</span></span><em>PLAY ▸</em></a></li>
+      </ul>
+      <p class="related-more"><a href="/en/games/">All free games</a> · <a href="/en/games/mini/">Mini games</a> · <a href="/en/">Oreum Games home</a></p>
+    </div>
+  </section>
+  <!-- related:end -->
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <div class="footer-brand">
+      <img src="/assets/logo-full.webp?v=1" alt="" width="52" height="50">
+      <span>Oreum Games <em>오름게임즈</em></span>
+    </div>
+    <p class="footer-motto">Oreum Games keeps climbing</p>
+    <nav class="footer-nav" aria-label="Footer menu">
+      <a href="/en/support/">Support</a>
+      <a href="/en/privacy/">Privacy Policy</a>
+      <a href="https://www.youtube.com/@Oreumgames" rel="me noopener" target="_blank">YouTube</a>
+      <a href="https://www.tiktok.com/@oreumgames" rel="me noopener" target="_blank">TikTok</a>
+      <button type="button" class="js-mail mailbtn" data-u="cyjcyj27" data-d="gmail.com" data-go="gmail">Send email</button>
+      <button type="button" class="js-install mailbtn" hidden><img src="/assets/logo-symbol.png" alt="" class="install-ico">Install anyway</button>
+    </nav>
+    <p class="copy" id="visitCount" hidden></p>
+    <p class="copy">oreumgames.com · © 2026 Oreum Games. All rights reserved.</p>
+  </div>
+</footer>
+<script src="/assets/visit.js?v=11" defer></script>
+
+<!-- Visit counting (incl. repeat pageviews) — cookie-free, via Abacus -->
+<script>
+(function(){
+  if (/^(localhost|127\.0\.0\.1)$/.test(location.hostname) || location.protocol==='file:') return;
+  var b='https://abacus.jasoncameron.dev/hit/oreumgames/';
+  function h(k){ try{ fetch(b+k,{mode:'cors'}).catch(function(){}); }catch(e){} }
+  h('pageviews'); h('pv_omok_en');
+})();
+</script>
+<script src="/assets/mail.js" defer></script>
+<script src="/assets/install.js?v=2" defer></script>
+</body>
+</html>
