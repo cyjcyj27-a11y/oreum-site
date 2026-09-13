@@ -750,7 +750,7 @@
     E.deal = { p: p, left: dealSec(p), price: Math.max(500, Math.round(p.price / 2 / 500) * 500), was: ACT.dest };
     refresh(p);
     ACT.setDest(p);                                   // 큰 화살표가 그쪽을 가리킨다
-    AUDIO.init(); AUDIO.ring(2);   // 따르릉 두 번 — 이야기 전화와 같은 전화벨(사장님 2026-09-13)
+    AUDIO.init(); AUDIO.ring(1);   // 따르릉 한 번 — 이야기 전화와 같은 전화벨(사장님 2026-09-13)
     const f = DEAL_CALL[Math.floor(Math.random() * DEAL_CALL.length)];
     if (window.PET && PET.say) PET.say('📞 복덕방', f(p.name, lvOf(p).n, fmt(E.deal.price), fmt(p.price)), 6.4, true);
     el('deal').classList.add('show');
