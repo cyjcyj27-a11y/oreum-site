@@ -549,14 +549,16 @@
     const dayMs = (window.SKY ? SKY.dayLen : 480) * 1000;
     const n = Math.min(OFF_DAYS, Math.floor((Date.now() - atMs) / dayMs));
     if (n < 1) return;
-    let paid = 0;
+    let paid = 0, rentIn = 0; const worth0 = estateWorth();
     for (let k = 0; k < n; k++) {
+      rentIn += Math.round(dayIncome());
       E.rent = (E.rent || 0) + Math.round(dayIncome());          // 하루치를 월세 통에
       E.day = (E.day || 1) + 1;
       for (const p of E.list) p.mk = Math.min(12, (p.mk || 1) * (1 + p.rise));   // 땅값도 하루치씩 오른다
       if ((E.day - 1) % MONTH === 0) { const sum = Math.round(E.rent || 0); E.rent = 0; if (sum > 0) { ACT.coins += sum; paid += sum; } }
     }
-    E.awayN = n; E.awayGain = paid;                              // 카드는 게임이 시작된 뒤에 띄운다
+    // 카드는 게임이 시작된 뒤에 띄운다. 가진 땅도 월세도 없으면 바뀐 게 없으니 안 띄운다 — 땅을 다 팔았는데 '월세 0만 정산'이 떴다 (사장님 2026-09-13)
+    E.awayN = (paid > 0 || rentIn > 0 || estateWorth() > worth0) ? n : 0; E.awayGain = paid; E.awayRent = rentIn; E.awayUp = estateWorth() - worth0;
     ACT.save(); ACT.hud();
   }
 
@@ -842,7 +844,7 @@
 
   function update(dt, t) {
     if (E.awayN && window.__jj && __jj.started && __jj.started()) { const n = E.awayN, g = E.awayGain; E.awayN = 0; E.awayGain = 0;
-      card('🗓️', '자리를 비운 사이 ' + n + '일', g > 0 ? '+' + fmt(g) : '월세 ' + fmt(E.rent), '정산'); AUDIO.coin(2); }
+      card('🗓️', '자리를 비운 사이 ' + n + '일', g > 0 ? '+' + fmt(g) : E.awayRent > 0 ? '월세 ' + fmt(E.rent) : '💎 +' + fmt(E.awayUp), '정산'); AUDIO.coin(2); }
     tickHour(); litTick(); clubTick(t); cullTick(dt); popTick(dt);
     dealTick(dt);
     if (E.gainT > 0) { E.gainT -= dt; if (E.gainT <= 0) { const g = el('gain'); if (g) g.classList.remove('on'); } }
