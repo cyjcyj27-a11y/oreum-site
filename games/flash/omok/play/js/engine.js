@@ -214,13 +214,13 @@
   function findVCF(b, col, depth) { vcfNodes = 0; return vcf(b, col, depth || 14); }
 
   // ── 급수별 상대 ──
-  // L 0~10 (10급 → 1단)
+  // L 0~10 (10급 → 1단). 6급·5급이 막기만 해서 판이 꽉 찼다(사장님 2026-09-13) → 욕심쟁이 급수는 막는 점수를 낮춰 공격도 한다
   function Think(board, level) {
     this.b = new Board(); this.b.copyFrom(board);
     this.col = board.turn; this.L = level; this.done = false; this.move = -1; this.depth = 0;
     var L = level;
     this.cfg = L <= 5
-      ? { greedy: true, topk: [8, 5, 4, 3, 2, 1][L], defW: [0.3, 0.5, 0.7, 0.85, 1, 1][L], miss: [0.5, 0.35, 0.2, 0.1, 0, 0][L], noise: [0.3, 0.25, 0.2, 0.15, 0.1, 0.06][L] }
+      ? { greedy: true, topk: [8, 5, 4, 3, 2, 1][L], defW: [0.3, 0.4, 0.5, 0.55, 0.65, 0.75][L], miss: [0.5, 0.35, 0.2, 0.1, 0, 0][L], noise: [0.3, 0.25, 0.2, 0.15, 0.1, 0.06][L] }
       : { greedy: false, maxDepth: [2, 3, 4, 8, 10][L - 6], ms: [300, 500, 800, 1200, 2000][L - 6], beam: [8, 10, 10, 12, 12][L - 6], vcf: L >= 7, guard: L >= 9 };
   }
   Think.prototype.step = function () {
