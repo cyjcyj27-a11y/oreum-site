@@ -214,12 +214,6 @@
       var age = t - placeT[p], sc = age < 0.14 ? 1.35 - 0.35 * (age / 0.14) : 1;
       drawStone(gp(x), gp(y), c, sc, dead ? 0.4 : 1);
     }
-    // 단수 — 내 돌이 잡히기 직전이면 붉게 깜빡
-    if (humanTurn()) {
-      var pulse = 0.35 + 0.35 * Math.sin(glow * 7), me = b.turn;
-      ctx.strokeStyle = 'rgba(235,60,40,' + pulse + ')'; ctx.lineWidth = 4;
-      for (y = 0; y < N; y++) for (x = 0; x < N; x++) { p = P(x, y); if (b.c[p] === me && b.atari(b.hd[p])) { ctx.beginPath(); ctx.arc(gp(x), gp(y), SR + 5, 0, Math.PI * 2); ctx.stroke(); } }
-    }
     // 마지막 수
     if (b.last > 0 && b.c[b.last] !== EMPTY && G.mode !== 'title') {
       ctx.fillStyle = '#e2412f'; dot(gp(PX(b.last)), gp(PY(b.last)), 6.5);
