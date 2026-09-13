@@ -66,7 +66,7 @@
   // 영문판은 억·만 대신 원 단위(₩10B). 사람이 읽는 단위가 다르다
   function fmtEn(v, dec) {
     v = Math.round(v); const s = v < 0 ? '-' : ''; const w = Math.abs(v) * 10000;
-    const cut = (n, d) => n.toFixed(d).replace(/(\.\d*?)0+$/, '$1').replace(/\.$/, '');   // 소수점 뒤 0 만 턴다 — 100 을 1 로 만들면 안 된다
+    const cut = (n, d) => (Math.floor(n * 10 ** d + 1e-9) / 10 ** d).toFixed(d).replace(/(\.\d*?)0+$/, '$1').replace(/\.$/, '');   // 소수점 뒤 0 만 턴다 — 100 을 1 로 만들면 안 된다
     if (w >= 1e9) return s + '₩' + cut(w / 1e9, dec ? 2 : 1) + 'B';
     if (w >= 1e6) return s + '₩' + cut(w / 1e6, dec ? 1 : 0) + 'M';
     return w ? s + '₩' + cut(w / 1e3, 0) + 'K' : '₩0';
@@ -74,8 +74,9 @@
   function fmt(v) {
     if (window.LANG && LANG.en) return fmtEn(v);
     v = Math.round(v); const s = v < 0 ? '-' : ''; v = Math.abs(v);
-    if (v >= 1e8) return s + (v / 1e8).toFixed(2).replace(/\.?0+$/, '') + '조';
-    if (v >= 10000) { const a = v / 10000; return s + (a >= 100 ? Math.round(a) : a.toFixed(1).replace(/\.0$/, '')) + '억'; }
+    if (v >= 1e8) return s + (Math.floor(v / 1e6) / 100).toFixed(2).replace(/\.?0+$/, '') + '조';
+    // 억은 소수 한 자리까지 **내림**. 반올림하면 110억 5천이 '111억', 999.96억이 '1000억'으로 보여 엔딩이 안 뜨는데 1,000억이라고 떴다 (2026-09-13)
+    if (v >= 10000) { const a = Math.floor(v / 1000) / 10; return s + (a >= 1000 ? Math.floor(a) : a.toFixed(1).replace(/\.0$/, '')) + '억'; }
     return s + v.toLocaleString() + '만';
   }
   // 자산 창처럼 자리가 넉넉한 곳에서 쓰는 긴 표기: 365000 → '36억 5천', 1120000 → '112억' (사장님 2026-09-09 "매입가 36억5천")
@@ -94,6 +95,7 @@
     E.day = (E.day || 1) + 1;
     for (const p of E.list) p.mk = Math.min(12, (p.mk || 1) * (1 + p.rise));
     if (E.assetsOpen) openAssets();
+    hud();                                    // 시세가 오르면 상단 총자산도 같이
     if (window.ACT && ACT.save) ACT.save();   // 하루에 한 번 적어 둔다 — 비운 시간을 재는 기준점이다
   }
   // ── 팔 때 굴리는 가챠 (사장님 2026-09-11) ──
@@ -629,6 +631,8 @@
     el('assetSum').innerHTML = '<div>🏝 땅 <b>' + own.length + '</b> / ' + E.list.length + '</div><div>🏗 건물 <b>' + Object.values(kinds).reduce((a, b) => a + b, 0) + '</b></div>' +
       '<div>💼 매입가 <b>' + fmtLong(paid) + '</b></div><div>💎 현재가 <b>' + fmtLong(now) + '</b> <span class="' + (up >= 0 ? 'up' : 'dn') + '">' + (up >= 0 ? '▲' : '▼') + Math.abs(up) + '%</span></div>' +
       '<div>📈 월세 <b>' + fmtLong(day * MONTH) + '</b> <span class="up">' + rentIn() + '일 뒤</span></div><div style="flex:1 0 100%">🏆 총자산 <b>' + fmtLong(netWorth()) + '</b> / 1,000억</div>' + (badge ? '<div style="flex:1 0 100%">' + badge + '</div>' : '');
+    // 제목 옆 빈자리에 현금·부동산을 나눠 보인다 — 총자산이 무엇으로 이뤄졌는지 (사장님 2026-09-13)
+    const split = el('assetSplit'); if (split) split.innerHTML = '<span>💰 현금 <b>' + fmtLong(ACT.coins) + '</b></span><span>🏠 부동산 <b>' + fmtLong(now) + '</b></span>';
     const list = el('assetList'); list.innerHTML = '';
     if (!own.length) list.innerHTML = '<div class="none">아직 산 땅이 없다</div>';
     own.slice().sort((a, b) => sellValue(b) - sellValue(a)).forEach(p => {
@@ -654,7 +658,11 @@
     el('assets').classList.add('show'); E.assetsOpen = true;
   }
   function closeAssets() { el('assets').classList.remove('show'); E.assetsOpen = false; }
-  function hud() { const l = el('land'); if (l) l.textContent = ownedCount() + '/' + E.list.length; }
+  function hud() {
+    const l = el('land'); if (l) l.textContent = ownedCount() + '/' + E.list.length;
+    // 상단바 💰 는 현금이 아니라 총자산(현금 + 부동산 현재가). 현금은 자산 창 제목 옆에 따로 (사장님 2026-09-13)
+    const m = el('money'); if (m && window.ACT) m.textContent = fmt(netWorth());
+  }
 
   // ── 매시간 수입 ──
   function gain(text) { const g = el('gain'); if (!g) return; g.textContent = text; g.classList.remove('on'); void g.offsetWidth; g.classList.add('on'); E.gainT = 1.8; }

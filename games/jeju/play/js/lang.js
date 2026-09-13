@@ -66,7 +66,7 @@
     '주택': 'House', '편의점': 'Convenience Store', '카페': 'Café', '펜션': 'Guest House', '호텔': 'Hotel',
 
     // ── 자산 창 ──
-    '땅 ': 'Land ', '건물 ': 'Buildings ', '매입가 ': 'Paid ', '현재가 ': 'Value ', '부동산 ': 'Property ', '총자산 ': 'Net worth ',
+    '땅 ': 'Land ', '건물 ': 'Buildings ', '매입가 ': 'Paid ', '현재가 ': 'Value ', '부동산 ': 'Property ', '총자산 ': 'Net worth ', '현금 ': 'Cash ',
     '아직 산 땅이 없다': 'No land yet',
     '채<br>하루 수입 ': ' <br>Daily income ', ' · 자산 ': ' · Assets ', ' · 건물 ': ' · Buildings ', '일 뒤': 'd left',
 
