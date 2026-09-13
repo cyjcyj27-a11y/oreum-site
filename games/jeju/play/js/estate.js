@@ -701,6 +701,7 @@
   // — 계산이 곧 속도 제한처럼 굴어 여유가 너무 컸다 (사장님 2026-09-12 "속도제한을 두지 말고 시간을 짧게 잡으라고").
   // 오픈카 최고속도가 198km/h 라 밟으면 닿고, 머뭇거리면 놓친다. 놓친 땅은 되사기(1.5배)로 살 수 있다.
   const DEAL_SPEED = 33, DEAL_MIN = 25, DEAL_MAX = 180, DEAL_PARK = 4;   // m/s · 초
+  const DEAL_SLACK = 1.1;   // 계산된 제한시간에 10% 여유(사장님 2026-09-13)
   // 급매와 '곷 팔림'이 각자 돌아서 급매를 사자마자 또 떴다. 하나가 끝나면 한동안 조용하게 한다 (사장님 2026-09-10)
   const QUIET_SEC = 60;
   // 하르방 전화 대사 — {n} 땅 이름 · {b} 지을 건물 · {v} 급매가 · {p} 정상 시세
@@ -737,7 +738,7 @@
     let L = 0;
     if (rt && rt.length > 1) { for (let i = 1; i < rt.length; i++) L += Math.hypot(rt[i].x - rt[i - 1].x, rt[i].z - rt[i - 1].z); }
     else L = Math.hypot(p.x - PLAYER.x, p.z - PLAYER.z) * 1.3;   // 길을 못 찾으면 직선 거리에 굽이 몫만 얹는다
-    return Math.max(DEAL_MIN, Math.min(DEAL_MAX, Math.round(L / DEAL_SPEED + DEAL_PARK)));
+    return Math.round(Math.max(DEAL_MIN, Math.min(DEAL_MAX, L / DEAL_SPEED + DEAL_PARK)) * DEAL_SLACK);
   }
   function dealSpawn() {
     // 급매는 **1단계부터 순차적으로** 뜨다 (사장님 2026-09-11).
