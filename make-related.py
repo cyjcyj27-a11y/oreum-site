@@ -18,6 +18,7 @@ import io, os, re, sys
 
 # slug, 한국어 경로, 영어 경로, 한국어 이름, 한국어 장르 앵커, 영어 이름, 영어 장르 앵커, 태그
 GAMES = [
+    ("baduk",         "/games/flash/baduk/",         "/en/games/flash/baduk/",         "바둑",            "혼자 두는 바둑게임",          "BADUK",                    "free Go board game",            {"board", "pvp", "strategy"}),
     ("jeju",          "/games/jeju/",               "/en/games/jeju/",               "BUY JEJU",        "제주도 땅 사는 오픈월드게임",   "BUY JEJU",                 "open world land-buying game on Jeju", {"sim", "tycoon", "building", "driving"}),
     ("farmonmars",    "/games/farmonmars/",         "/en/games/farmonmars/",         "팜온마즈",         "화성 농장 건설 방치형게임",     "FARM ON MARS",             "idle Mars farming city builder", {"sim", "idle", "tycoon", "building"}),
     ("bungeoppang",   "/games/flash/bungeoppang/",   "/en/games/flash/bungeoppang/",   "붕어빵",          "겨울 노점 방치형게임",        "BUNGEOPPANG",              "Korean fish-shaped bread idle game", {"sim", "idle", "tycoon", "casual"}),
