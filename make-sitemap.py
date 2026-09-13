@@ -6,10 +6,11 @@
     python make-sitemap.py
 
 폴더 안의 index.html 을 전부 찾아서 sitemap.xml 을 새로 씁니다.
+lastmod 는 페이지마다 깃에 마지막으로 커밋한 날짜입니다(커밋 안 된 새 페이지는 오늘).
 페이지를 추가하거나 지운 뒤 이걸 한 번 돌리고 커밋하면 끝입니다.
 손으로 sitemap.xml 을 고칠 일이 없습니다.
 """
-import os, io, re, datetime
+import os, io, re, datetime, subprocess
 
 BASE = "https://oreumgames.com"
 
@@ -57,6 +58,16 @@ def find_pages(root="."):
         out.append(path)
     return sorted(out)
 
+def lastmod_of(path, fallback):
+    """그 페이지 index.html 을 깃에 마지막으로 커밋한 날짜. 모두 오늘로 찍으면 검색엔진이 날짜를 안 믿는다."""
+    f = ("." + path + "index.html").lstrip("./") or "index.html"
+    try:
+        d = subprocess.run(["git", "log", "-1", "--format=%cs", "--", f],
+                           capture_output=True, text=True, encoding="utf-8").stdout.strip()
+    except Exception:
+        d = ""
+    return d or fallback
+
 def main():
     pages = find_pages()
 
@@ -70,6 +81,7 @@ def main():
         has_en = e in pages and k not in NO_EN
         pri = priority_of(k)
         for loc in ([k, e] if has_en else [k]):
+            mod = lastmod_of(loc, today)
             body.append(
 f"""  <url>
     <loc>{BASE}{loc}</loc>
@@ -78,7 +90,7 @@ f"""  <url>
     <xhtml:link rel="alternate" hreflang="en" href="{BASE}{e}"/>""" if has_en else "")
 + f"""
     <xhtml:link rel="alternate" hreflang="x-default" href="{BASE}{k}"/>
-    <lastmod>{today}</lastmod>
+    <lastmod>{mod}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>{pri}</priority>
   </url>
