@@ -74,7 +74,7 @@
     S.hemi = new THREE.HemisphereLight(0xbfd6f2, 0x4f5a45, 0.6); scene.add(S.hemi);
     S.sun = new THREE.DirectionalLight(0xffe6c4, 3.0);
     S.sun.castShadow = true;
-    const ss = shadowSize || 2048; S.sun.shadow.mapSize.set(ss, ss);
+    const ss = shadowSize || (touch ? 1024 : 2048); S.sun.shadow.mapSize.set(ss, ss);   // 폰은 그림자 판을 4분의 1로 (2026-09-13)
     const sc = S.sun.shadow.camera; sc.left = sc.bottom = -80; sc.right = sc.top = 80; sc.near = 1; sc.far = 600;
     S.sun.shadow.bias = -0.0006; S.sun.shadow.normalBias = 0.2;
     scene.add(S.sun); scene.add(S.sun.target);

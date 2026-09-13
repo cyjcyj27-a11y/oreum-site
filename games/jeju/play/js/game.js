@@ -12,7 +12,7 @@
   if (QS.get('reset')) { try { localStorage.removeItem('jeju.prog'); localStorage.removeItem('jeju.pos'); } catch (e) {} }
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, powerPreference: 'high-performance', preserveDrawingBuffer: SHOT });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, +(QS.get('dpr') || 1.25)));
-  renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.shadowMap.enabled = true; renderer.shadowMap.type = IS_TOUCH ? THREE.PCFShadowMap : THREE.PCFSoftShadowMap;   // 폰은 부드러운 그림자 대신 가벼운 것
   renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.0;
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   const scene = new THREE.Scene();
@@ -45,6 +45,7 @@
     CITY.init(scene); await step(0.82);
     LANDMARKS.init(scene); await step(0.90);
     CITY.finishProps(scene); await step(0.93);
+    CITY.registerFarCull(scene);   // 여기까지가 안 움직이는 세계. 차·사람·고양이는 이 뒤에 붙으니 끊기 목록에 안 들어간다
     // 출발: 공항 렌터카 앞 도로.
     // 공항 자리를 그대로 집으면 터미널(90×26m) 안이라 차가 건물 속에서 깨어난다.
     // 렌터카 줄(landmarks.js 의 x+60, z+26)에 가장 가까운 도로 마디를 쓴다.

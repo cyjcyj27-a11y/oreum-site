@@ -5,7 +5,9 @@
 // 모델은 종류별 한 번씩만 불러 SkeletonUtils.clone 으로 복제 → 기하·텍스처 공유. 파일이 없는 종류는 건너뛴다.
 (function () {
   const P = { pool: [], ready: false, near: 45, every: 0.3, acc: 0, kinds: [], boards: null };
-  const POOL_N = 28;                 // 동시에 보이는 리깅 사람 수(7종 × 4)
+  // 폰은 뼈 움직이는 사람 하나하나가 무겁다 — 폰은 14명(7종 × 2), 그림자도 안 그린다 (사장님 2026-09-13 "모바일에서 좀 버벅거려")
+  const TOUCH = 'ontouchstart' in window;
+  const POOL_N = TOUCH ? 14 : 28;    // 동시에 보이는 리깅 사람 수(7종 × 4)
   const MODELS = [                   // id = assets/models/<id>.glb, h = 키(미터)
     { id: 'man', h: 1.75 }, { id: 'woman', h: 1.65 },
     { id: 'suit', h: 1.78 },         // 정장 남자
@@ -56,7 +58,7 @@
     const s = h / (size.y || h); root.scale.setScalar(s);
     root.updateMatrixWorld(true); const b2 = new THREE.Box3().setFromObject(root, true);
     root.position.y = -b2.min.y;
-    root.traverse(o => { if (o.isMesh || o.isSkinnedMesh) { o.castShadow = true; o.frustumCulled = false; const m = o.material; if (m) { m.roughness = 0.85; m.metalness = 0; } } });
+    root.traverse(o => { if (o.isMesh || o.isSkinnedMesh) { o.castShadow = !TOUCH; o.frustumCulled = false; const m = o.material; if (m) { m.roughness = 0.85; m.metalness = 0; } } });
     return root;
   }
   function makeClone(base, who) {

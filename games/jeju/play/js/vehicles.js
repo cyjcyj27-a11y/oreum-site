@@ -57,8 +57,11 @@
     glider: { mesh: 'glider', fly: true, tint: 0xffffff },
   };
   const mats = [];
+  const TOUCH = 'ontouchstart' in window;
   function material() {
-    const m = new THREE.MeshPhysicalMaterial({ vertexColors: true, roughness: 0.7, metalness: 0.0, clearcoat: 1.0, clearcoatRoughness: 0.08 });
+    // 폰은 클리어코트(겉칠 반사) 계산이 차 수백 대에 붙어 무겁다 — 폰은 보통 재질로 (2026-09-13 "모바일에서 좀 버벅거려")
+    const m = TOUCH ? new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.7, metalness: 0.0 })
+                    : new THREE.MeshPhysicalMaterial({ vertexColors: true, roughness: 0.7, metalness: 0.0, clearcoat: 1.0, clearcoatRoughness: 0.08 });
     m.onBeforeCompile = sh => {
       sh.uniforms.uGlow = { value: 0 }; m.userData.sh = sh;
       sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nattribute vec3 aTint; attribute vec2 aCar; varying float vGlow; varying float vPaint; varying float vKind;').replace('#include <color_vertex>', '#include <color_vertex>\n vColor.rgb *= mix(vec3(1.0), aTint, aCar.x); vGlow = max(aCar.y, 0.0); vPaint = aCar.x; vKind = aCar.y;');
@@ -75,7 +78,7 @@
   function makeMesh(kind, count) {
     const g = geo(kind).clone(); const tint = new Float32Array(count * 3);
     g.setAttribute('aTint', new THREE.InstancedBufferAttribute(tint, 3));
-    const m = new THREE.InstancedMesh(g, material(), count); m.castShadow = true; m.receiveShadow = false; m.frustumCulled = false; m.userData.tint = g.attributes.aTint; return m;
+    const m = new THREE.InstancedMesh(g, material(), count); m.castShadow = !TOUCH;   /* 폰은 섬 전체 차 그림자를 안 그린다 */ m.receiveShadow = false; m.frustumCulled = false; m.userData.tint = g.attributes.aTint; return m;
   }
   const _c = new THREE.Color();
   function setTint(mesh, i, color) { const a = mesh.userData.tint; _c.set(color); a.setXYZ(i, _c.r, _c.g, _c.b); a.needsUpdate = true; }

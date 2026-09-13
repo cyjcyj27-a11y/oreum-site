@@ -56,12 +56,15 @@
     return grp;
   }
   // 카메라 거리로 셀마다 보이기·저폴리 고르기 (매 프레임)
+  // 폰은 작은 소품(간판·가로등·돌담·나무)을 더 가까이서 끊고 저폴리로 일찍 바꾼다. 건물처럼 far 없는 것은 그대로라 멀리 윤곽은 안 빈다
+  // (사장님 2026-09-13 "모바일에서 좀 버벅거려")
+  const DIST_K = ('ontouchstart' in window) ? 0.6 : 1;
   function updateChunks(cam) {
     if (!cam) return;
     for (const c of S.chunks) {
       const d = Math.hypot(c.cx - cam.x, c.cz - cam.z) - c.r;
-      if (c.far && d > c.far) { c.hi.visible = false; if (c.lo) c.lo.visible = false; continue; }
-      if (c.lo) { const hi = d < c.near; c.hi.visible = hi; c.lo.visible = !hi; } else c.hi.visible = true;
+      if (c.far && d > c.far * DIST_K) { c.hi.visible = false; if (c.lo) c.lo.visible = false; continue; }
+      if (c.lo) { const hi = d < c.near * DIST_K; c.hi.visible = hi; c.lo.visible = !hi; } else c.hi.visible = true;
     }
   }
   window.GEO = { mergeGeos, T, inst };
@@ -416,8 +419,40 @@
     for (let i = 0; i < S.lampItems.length; i++) { const it = S.lampItems[i]; let on; if (it.ns) on = st === 0 ? 2 : st === 1 ? 1 : 0; else on = st === 2 ? 2 : st === 3 ? 1 : 0; m.setColorAt(i, COL.set(it.k === on ? LAMPC[on] : OFF)); }
     m.instanceColor.needsUpdate = true;
   }
+  // ── 멀리 있는 낱개 물체 끊기 ──
+  // 명소·건물 받침처럼 따로따로 만든 작은 메시가 섬 전체에 1,500개쯤 있고, 99%가 300m 밖인데도 매 프레임 한 번씩 그려졌다.
+  // 크기에 비례한 거리 밖이면 레이어를 바꿔 카메라·그림자에서 뺀다. visible 은 다른 코드가 쓰니 건드리지 않는다
+  // (사장님 2026-09-13 "모바일에서 좀 버벅거려")
+  const FAR = [];
+  const FAR_BASE = ('ontouchstart' in window) ? 250 : 450, FAR_PER_R = ('ontouchstart' in window) ? 18 : 30;
+  function registerFarCull(scene) {
+    FAR.length = 0; const sp = new THREE.Sphere();
+    scene.updateMatrixWorld(true);
+    scene.traverse(o => {
+      if (!o.isMesh || o.isInstancedMesh || o.isSkinnedMesh || o.frustumCulled === false || !o.geometry) return;
+      const g = o.geometry; if (!g.boundingSphere) g.computeBoundingSphere();
+      sp.copy(g.boundingSphere).applyMatrix4(o.matrixWorld);
+      if (sp.radius > 400) return;                      // 땅·바다·하늘 같은 큰 것은 늘 그린다
+      FAR.push({ o, x: sp.center.x, z: sp.center.z, lim: FAR_BASE + sp.radius * FAR_PER_R });
+    });
+    return FAR.length;
+  }
+  let farI = 0, farX = 0, farZ = 0;
+  function updateFarCull(cam) {
+    if (!FAR.length) return;
+    // 한 프레임에 200개씩 돌아가며 본다. 198km/h·30fps 로 달려도 한 바퀴 동안 11m — 가장 가까운 한계가 250m 라 늦게 뜨는 게 안 보인다.
+    // 리스폰·이어하기처럼 한 번에 멀리 옮겨지면 그 자리에서 전부 다시 본다
+    const jump = Math.abs(cam.x - farX) + Math.abs(cam.z - farZ) > 60; farX = cam.x; farZ = cam.z;
+    const n = jump ? FAR.length : Math.min(FAR.length, 200);
+    for (let k = 0; k < n; k++) {
+      const f = FAR[farI]; farI = (farI + 1) % FAR.length;
+      const far = Math.hypot(f.x - cam.x, f.z - cam.z) > f.lim;
+      if (far) f.o.layers.disableAll(); else f.o.layers.set(0);
+    }
+  }
   function update(dt, t, sky, cam) {
     updateChunks(cam);
+    updateFarCull(cam);
     S.lampT += dt; const DUR = [9, 2.5, 9, 2.5];
     if (S.lampT > DUR[S.lampState]) { S.lampT = 0; S.lampState = (S.lampState + 1) % 4; applyLamps(); }
     const night = sky.night;
@@ -426,5 +461,5 @@
     if (S.orangeMat) S.orangeMat.color.setRGB(0.94 - 0.8 * night, 0.54 - 0.46 * night, 0.12 - 0.08 * night);
     for (const sh of S.palmSh) sh.uniforms.uT.value = t;
   }
-  window.CITY = Object.assign(S, { init, update, orchard, fieldWall, buildPalms, finishProps });
+  window.CITY = Object.assign(S, { init, update, orchard, fieldWall, buildPalms, finishProps, registerFarCull, farList: FAR });
 })();

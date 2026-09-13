@@ -52,7 +52,7 @@
   }
   const KEEP = 26;   // 출발 자리에서 이만큼은 빈다
   function init(scene, keep) {
-    spawn(260, keep);
+    spawn(('ontouchstart' in window) ? 170 : 260, keep);   // 폰은 도는 차를 줄인다 (2026-09-13)
     S.parked = (CITY.parked || []).filter(p => !keep || Math.hypot(p.x - keep.x, p.z - keep.z) >= KEEP);   // 길가에 세워 둔 차도 같이
     const M = new THREE.Matrix4(), Qq = new THREE.Quaternion(), Vv = new THREE.Vector3(), Ss = new THREE.Vector3(1, 1, 1), up = new THREE.Vector3(0, 1, 0);
     for (const kind of ['sedan', 'truck', 'bus']) {
