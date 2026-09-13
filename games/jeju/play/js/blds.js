@@ -603,21 +603,110 @@ window.BLDS = function (H) {
     parkLines(L, 16, 5, 0, 21);
     return L; } };
 
-  // 31 나이트클럽 — 검은 매스에 네온 띠, 옥상 미러볼과 서치라이트 (제일 비싼 함덕 자리)
+  // 31 나이트클럽 — 검은 금속 패널 외벽 + 1층 광택 타일 + 나이트 쿠션 문 + 레드 카펫, 네온 띠, 옥상 미러볼과 서치라이트 (제일 비싼 함덕 자리)
+  // 색만 칠한 상자라 "장난감 같다"(사장님 2026-09-13) → 질감을 코드로 굽는다. 그림 파일은 늘리지 않는다.
+  // TEX(textures.js)가 없는 시험 진열대에서는 예전처럼 색 상자로 그린다.
+  const CLUBTX = {};
+  function clubTex() {
+    const X = window.TEX; if (!X || !X.canvas || !X.normalFrom) return null;
+    if (CLUBTX.ready) return CLUBTX;
+    const S = 512;
+    let seed = 91; const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+    // ① 세로 골 금속 패널: 한 장 = 2m, 골 간격 0.25m
+    {
+      const col = X.canvas(S), g = col.getContext('2d'), hc = X.canvas(S), h = hc.getContext('2d');
+      g.fillStyle = '#1a1a1f'; g.fillRect(0, 0, S, S); h.fillStyle = '#808080'; h.fillRect(0, 0, S, S);
+      const rib = S / 8;
+      for (let i = 0; i < 8; i++) {
+        const x = i * rib, grd = g.createLinearGradient(x, 0, x + rib, 0);
+        grd.addColorStop(0, '#0b0b0e'); grd.addColorStop(0.16, '#4a4a54'); grd.addColorStop(0.3, '#23232a'); grd.addColorStop(0.8, '#2c2c34'); grd.addColorStop(1, '#09090b');
+        g.fillStyle = grd; g.fillRect(x, 0, rib, S);
+        h.fillStyle = '#b8b8b8'; h.fillRect(x + rib * 0.12, 0, rib * 0.18, S);   // 솟은 골
+        h.fillStyle = '#4a4a4a'; h.fillRect(x + rib * 0.78, 0, rib * 0.08, S);
+      }
+      g.fillStyle = 'rgba(0,0,0,0.55)'; h.fillStyle = '#303030';
+      for (const y of [S * 0.5 - 2, S - 3]) { g.fillRect(0, y, S, 3); h.fillRect(0, y, S, 3); }   // 패널 이음매(1m마다)
+      for (let k = 0; k < 90; k++) { g.fillStyle = 'rgba(' + (rnd() < 0.5 ? '255,255,255' : '0,0,0') + ',' + (0.02 + rnd() * 0.05) + ')'; g.fillRect(rnd() * S, rnd() * S, 2 + rnd() * 3, 20 + rnd() * 120); }   // 빗물 자국
+      CLUBTX.metal = new THREE.MeshStandardMaterial({ map: X.tex(col, true), normalMap: X.tex(X.normalFrom(hc, 3.2)), roughness: 0.5, metalness: 0.35, envMapIntensity: 0.9 });
+    }
+    // ② 검은 광택 타일: 한 장 = 1.2m, 타일 0.6m
+    {
+      const col = X.canvas(S), g = col.getContext('2d'), hc = X.canvas(S), h = hc.getContext('2d');
+      h.fillStyle = '#505050'; h.fillRect(0, 0, S, S);
+      const t = S / 2;
+      for (let j = 0; j < 2; j++) for (let i = 0; i < 2; i++) { const v = 10 + Math.floor(rnd() * 9); g.fillStyle = 'rgb(' + v + ',' + v + ',' + (v + 3) + ')'; g.fillRect(i * t, j * t, t, t); h.fillStyle = '#9a9a9a'; h.fillRect(i * t + 4, j * t + 4, t - 8, t - 8); }
+      g.fillStyle = '#3a3a40'; for (let k = 0; k <= 2; k++) { g.fillRect(k * t - 2, 0, 4, S); g.fillRect(0, k * t - 2, S, 4); }   // 줄눈
+      CLUBTX.tile = new THREE.MeshStandardMaterial({ map: X.tex(col, true), normalMap: X.tex(X.normalFrom(hc, 2.4)), roughness: 0.12, metalness: 0.25, envMapIntensity: 1.3 });
+    }
+    // ③ 나이트 쿠션 문: 자주색 가죽 마름모 누빔 + 금색 단추 (문 한 짝에 한 번)
+    {
+      const W = 256, Hh = 512, col = X.canvas(W, Hh), g = col.getContext('2d'), hc = X.canvas(W, Hh), h = hc.getContext('2d');
+      g.fillStyle = '#16020a'; g.fillRect(0, 0, W, Hh); h.fillStyle = '#000'; h.fillRect(0, 0, W, Hh);
+      const cw = W / 4, ch = Hh / 7;
+      for (let j = -1; j <= 7; j++) for (let i = -1; i <= 4; i++) {
+        const cx = (i + (j % 2 ? 0.5 : 0)) * cw + cw / 4, cy = j * ch;
+        const rg = h.createRadialGradient(cx, cy + ch / 2, 2, cx, cy + ch / 2, cw * 0.62); rg.addColorStop(0, '#ffffff'); rg.addColorStop(1, 'rgba(255,255,255,0)');
+        h.fillStyle = rg; h.beginPath(); h.moveTo(cx, cy); h.lineTo(cx + cw / 2, cy + ch / 2); h.lineTo(cx, cy + ch); h.lineTo(cx - cw / 2, cy + ch / 2); h.closePath(); h.fill();
+        const gg = g.createRadialGradient(cx - 6, cy + ch / 2 - 10, 2, cx, cy + ch / 2, cw * 0.6); gg.addColorStop(0, '#5a1026'); gg.addColorStop(1, '#1e030c');
+        g.fillStyle = gg; g.beginPath(); g.moveTo(cx, cy); g.lineTo(cx + cw / 2, cy + ch / 2); g.lineTo(cx, cy + ch); g.lineTo(cx - cw / 2, cy + ch / 2); g.closePath(); g.fill();
+      }
+      for (let j = -1; j <= 7; j++) for (let i = -1; i <= 4; i++) {   // 마름모 꼭짓점마다 누빔 단추
+        const cx = (i + (j % 2 ? 0.5 : 0)) * cw + cw / 4, cy = j * ch;
+        g.fillStyle = '#d8b25a'; g.beginPath(); g.arc(cx, cy, 5, 0, 6.29); g.fill(); g.fillStyle = '#fff2c0'; g.beginPath(); g.arc(cx - 1.5, cy - 1.5, 1.8, 0, 6.29); g.fill();
+      }
+      g.strokeStyle = '#c9a24a'; g.lineWidth = 8; g.strokeRect(4, 4, W - 8, Hh - 8);   // 금테
+      const map = X.tex(col, true); map.wrapS = map.wrapT = THREE.ClampToEdgeWrapping;
+      CLUBTX.door = new THREE.MeshStandardMaterial({ map: map, normalMap: X.tex(X.normalFrom(hc, 5)), roughness: 0.38, metalness: 0.05, envMapIntensity: 0.8 });
+    }
+    // ④ 캐노피 밑면 전구(밤에 밝아진다) · ⑤ 레드 카펫
+    {
+      const col = X.canvas(256), g = col.getContext('2d'); g.fillStyle = '#000'; g.fillRect(0, 0, 256, 256);
+      for (let j = 0; j < 4; j++) for (let i = 0; i < 4; i++) { const cx = 32 + i * 64, cy = 32 + j * 64, rg = g.createRadialGradient(cx, cy, 1, cx, cy, 14); rg.addColorStop(0, '#fff6d8'); rg.addColorStop(0.35, '#ffcf7a'); rg.addColorStop(1, 'rgba(0,0,0,0)'); g.fillStyle = rg; g.fillRect(cx - 16, cy - 16, 32, 32); }
+      const em = X.tex(col, true); em.repeat.set(1.5, 0.85);
+      CLUBTX.bulbs = new THREE.MeshStandardMaterial({ color: 0x111114, emissive: 0xffffff, emissiveMap: em, emissiveIntensity: 0.3, roughness: 0.6 });
+      const cc = X.canvas(128, 512), c2 = cc.getContext('2d'); c2.fillStyle = '#7a0c16'; c2.fillRect(0, 0, 128, 512);
+      for (let k = 0; k < 1400; k++) { c2.fillStyle = 'rgba(' + (rnd() < 0.5 ? '255,80,90' : '30,0,4') + ',0.12)'; c2.fillRect(rnd() * 128, rnd() * 512, 1, 2); }
+      c2.fillStyle = '#c9a24a'; c2.fillRect(0, 0, 9, 512); c2.fillRect(119, 0, 9, 512);
+      CLUBTX.carpet = new THREE.MeshStandardMaterial({ map: X.tex(cc, true), roughness: 0.95 });
+    }
+    CLUBTX.ready = true; return CLUBTX;
+  }
+  // 상자 UV 를 미터 단위로 — 크기가 달라도 질감 눈금이 똑같이 반복된다
+  function meterBox(w, h, d, tile) {
+    const geo = new THREE.BoxGeometry(w, h, d), uv = geo.attributes.uv, dims = [[d, h], [d, h], [w, d], [w, d], [w, h], [w, h]];
+    for (let f = 0; f < 6; f++) for (let v = 0; v < 4; v++) { const i = f * 4 + v; uv.setXY(i, uv.getX(i) * dims[f][0] / tile, uv.getY(i) * dims[f][1] / tile); }
+    return geo;
+  }
   B[31] = { size: [20, 17], build(G) {
-    const NEON_M = H.NEON_M, NEON_C = H.NEON_C;
-    const L = [box(17, 9, 14, 0, 4.5, 0, [0.07, 0.07, 0.09]), box(17.8, 0.7, 14.8, 0, 9.3, 0, [0.14, 0.14, 0.17]), box(17, 0.3, 14, 0, 0.15, 0, C.conc)];
-    L.push(box(3, 3.6, 0.14, 0, 1.8, 7.07, [0.35, 0.05, 0.2]), box(6, 0.5, 3.4, 0, 4.3, 8.4, C.dark));       // 입구·캐노피
+    const NEON_M = H.NEON_M, NEON_C = H.NEON_C, TX = clubTex();
+    const add = (geo, mat, x, y, z, ry, rx) => { const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); m.rotation.set(rx || 0, ry || 0, 0); m.castShadow = true; m.receiveShadow = true; G.add(m); return m; };
+    const L = [box(17, 0.3, 14, 0, 0.15, 0, C.conc)];
+    if (TX) {
+      add(meterBox(17, 9, 14, 2), TX.metal, 0, 4.5, 0);                    // 몸통: 금속 패널
+      add(meterBox(17.8, 0.7, 14.8, 2), TX.metal, 0, 9.3, 0);              // 옥상 난간
+      add(meterBox(17.2, 4.2, 0.12, 1.2), TX.tile, 0, 2.1, 7.06);          // 1층 정면 광택 타일
+      L.push(box(3.3, 3.8, 0.1, 0, 1.95, 7.14, [0.1, 0.08, 0.05]));        // 문틀
+      for (const x of [-0.76, 0.76]) {                                     // 쿠션 문 두 짝 + 금색 손잡이
+        add(new THREE.PlaneGeometry(1.46, 3.5), TX.door, x, 1.9, 7.2);
+        L.push(box(0.08, 1.2, 0.1, x > 0 ? 0.18 : -0.18, 1.9, 7.26, [0.85, 0.68, 0.3]));
+      }
+      const bulb = add(new THREE.PlaneGeometry(6, 3.4), TX.bulbs, 0, 4.04, 8.4, 0, Math.PI / 2); bulb.userData.lit = true;   // 캐노피 밑 전구
+      add(new THREE.PlaneGeometry(2.4, 3.6), TX.carpet, 0, 0.32, 8.9, 0, -Math.PI / 2);   // 레드 카펫
+    } else {
+      L.push(box(17, 9, 14, 0, 4.5, 0, [0.07, 0.07, 0.09]), box(17.8, 0.7, 14.8, 0, 9.3, 0, [0.14, 0.14, 0.17]), box(3, 3.6, 0.14, 0, 1.8, 7.07, [0.35, 0.05, 0.2]));
+    }
+    L.push(box(6, 0.5, 3.4, 0, 4.3, 8.4, C.dark));                         // 캐노피
     for (const x of [-3.6, 3.6]) L.push(cyl(0.3, 0.3, 1.1, x, 0.55, 8.8, [0.7, 0.6, 0.2], 8), box(0.1, 1.6, 0.1, x, 1.4, 8.8, [0.7, 0.6, 0.2]));   // 벨벳 로프 기둥
     const strip = (w, h, x, y, z, ry, mat) => { const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, 0.25), mat); m.position.set(x, y, z); m.rotation.y = ry || 0; G.add(m); };
-    strip(14, 0.4, 0, 7.8, 7.1, 0, NEON_C); strip(14, 0.4, 0, 6.4, 7.1, 0, NEON_M);
-    strip(0.4, 8, -8.1, 4, 7.1, 0, NEON_C); strip(0.4, 8, 8.1, 4, 7.1, 0, NEON_M);
+    strip(14, 0.4, 0, 7.8, 7.15, 0, NEON_C); strip(14, 0.4, 0, 6.4, 7.15, 0, NEON_M);
+    strip(0.4, 8, -8.1, 4.4, 7.15, 0, NEON_C); strip(0.4, 8, 8.1, 4.4, 7.15, 0, NEON_M);
     for (let k = 0; k < 5; k++) strip(0.35, 4.5, -6 + k * 3, 6.5, -7.1, Math.PI, k % 2 ? NEON_C : NEON_M);
     for (let k = 0; k < 4; k++) strip(0.35, 5, 8.6, 5, -4.5 + k * 3, Math.PI / 2, k % 2 ? NEON_M : NEON_C);
     G.add(sign('CLUB', '#14000c', '#ff3fa8', 9, 2.4, 0, 11.4, 0.2, 0, true));
     G.add(sign('CLUB', '#14000c', '#ff3fa8', 9, 2.4, 0, 11.4, -0.2, Math.PI, true));
     L.push(box(9.2, 2.6, 0.35, 0, 11.4, 0, C.dark), cyl(0.14, 0.14, 2.4, 0, 10.6, 0, [0.5, 0.5, 0.55], 8));
-    L.push({ g: new THREE.SphereGeometry(1.3, 14, 12), m: T(0, 13.6, 0), c: [0.86, 0.9, 1.0] }, cyl(0.12, 0.12, 1.4, 0, 12.6, 0, [0.5, 0.5, 0.55], 8));   // 미러볼
+    if (TX) { add(new THREE.SphereGeometry(1.3, 20, 16), new THREE.MeshStandardMaterial({ color: 0xd4dbe6, emissive: 0x2a2f3a, roughness: 0.14, metalness: 0.5, flatShading: true, envMapIntensity: 1.6 }), 0, 13.6, 0); L.push(cyl(0.12, 0.12, 1.4, 0, 12.6, 0, [0.5, 0.5, 0.55], 8)); }   // 미러볼: 거울 조각처럼 각지게
+    else L.push({ g: new THREE.SphereGeometry(1.3, 14, 12), m: T(0, 13.6, 0), c: [0.86, 0.9, 1.0] }, cyl(0.12, 0.12, 1.4, 0, 12.6, 0, [0.5, 0.5, 0.55], 8));
     if (H.beamGeo) for (const [bx, dir] of [[-6.5, 1], [6.5, -1]]) {
       const piv = new THREE.Group(); piv.position.set(bx, 9.6, 0); piv.userData.beam = dir;
       const bm = new THREE.Mesh(H.beamGeo(), dir > 0 ? H.BEAM_M : H.BEAM_C); bm.rotation.z = dir * 0.5; bm.frustumCulled = false; piv.add(bm); G.add(piv);
