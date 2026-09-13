@@ -70,12 +70,21 @@
     for (k = 0; k < mv.length; k++) b.play(P(mv[k][0], mv[k][1]));
     b.last = -1; b.win = null;
   }
+  var DAN = 18;   // 1단
   function start(level) {
     G.gid++; G.level = level; G.b.reset(); placeT.fill(-9); G.result = null; aim = null;
     clearTimeout(overT);
+    // 1단부터는 판마다 흑과 백을 번갈아 잡는다 — 먼저 두는 흑이 크게 유리해서(2026-09-13)
+    G.human = BLACK;
+    if (!G.p2 && level >= DAN) {
+      var side = 0;
+      try { side = (parseInt(localStorage.getItem('omok.side') || '0', 10) || 0) & 1; localStorage.setItem('omok.side', String(side ^ 1)); } catch (e) { side = G.gid & 1; }
+      if (side) G.human = WHITE;
+    }
     G.mode = 'play'; $('title').classList.add('hide'); $('over').classList.remove('show'); document.body.classList.add('playing');
     updHud(); A.stone();
     if (window.OG) OG.start();   // 집계: 한 판 시작
+    if (!G.p2 && G.b.turn !== G.human) { G.mode = 'think'; var id = G.gid; setTimeout(function () { if (id === G.gid) aiThink(); }, 600); updHud(); }
   }
   function doMove(p) {
     var b = G.b, col = b.turn, opp = 3 - col, human = G.p2 || col === G.human;
@@ -145,9 +154,9 @@
   function updHud() {
     var b = G.b, live = G.mode === 'play' || G.mode === 'think';
     $('tmB').classList.toggle('on', live && b.turn === BLACK); $('tmW').classList.toggle('on', live && b.turn === WHITE);
-    $('tmW').classList.toggle('think', G.mode === 'think');
+    $('tmB').classList.toggle('think', G.mode === 'think' && G.human === WHITE); $('tmW').classList.toggle('think', G.mode === 'think' && G.human === BLACK);
     $('rank').textContent = rankName(G.level); $('rank').style.display = G.p2 ? 'none' : '';
-    $('lbB').textContent = G.p2 ? '1P' : 'YOU'; $('lbW').textContent = G.p2 ? '2P' : '';
+    $('lbB').textContent = G.p2 ? '1P' : (G.human === BLACK ? 'YOU' : ''); $('lbW').textContent = G.p2 ? '2P' : (G.human === WHITE ? 'YOU' : '');
   }
   function syncTog() { $('tgSnd').classList.toggle('off', !A.snd); }
 
