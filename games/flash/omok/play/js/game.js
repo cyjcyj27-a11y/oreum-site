@@ -86,7 +86,7 @@
       else if (blocked) { flash('NICE'); A.nice(1); }
     }
     updHud();
-    if (!G.p2 && b.turn !== G.human) { G.mode = 'think'; var id = G.gid; setTimeout(function () { if (id === G.gid) aiThink(); }, 200); updHud(); }
+    if (!G.p2 && b.turn !== G.human) { G.mode = 'think'; var id = G.gid; setTimeout(function () { if (id === G.gid) aiThink(); }, 300); updHud(); }
   }
 
   // ── 상대: 급수가 오를수록 깊이 읽는다. 한 깊이씩 쪼개 화면이 멈추지 않게 ──
@@ -96,7 +96,7 @@
     (function slice() {
       if (id !== G.gid || G.mode !== 'think') return;
       if (!th.step()) { setTimeout(slice, 0); return; }
-      var wait = Math.max(0, 380 - (performance.now() - t0));   // 너무 빨리 두면 정신없다
+      var wait = Math.max(0, 700 + Math.random() * 400 - (performance.now() - t0));   // 내 돌 놓고 1~1.4초 뒤에 둔다 — 너무 빨리 두면 정신없다
       setTimeout(function () {
         if (id !== G.gid || G.mode !== 'think') return;
         G.mode = 'play';

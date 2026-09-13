@@ -84,7 +84,7 @@
     }
     updHud();
     if (b.passes >= 2 || b.moves >= MAXMOVES) { beginCount(); return; }
-    if (!G.p2 && b.turn !== G.human) { G.mode = 'think'; var id = G.gid; setTimeout(function () { if (id === G.gid) aiThink(); }, 260); updHud(); }
+    if (!G.p2 && b.turn !== G.human) { G.mode = 'think'; var id = G.gid; setTimeout(function () { if (id === G.gid) aiThink(); }, 300); updHud(); }
   }
 
   // ── 상대: 수백~수만 판을 끝까지 두어 보고 고른다. 급수가 오를수록 많이 본다 ──
@@ -97,7 +97,7 @@
       var t = performance.now();
       while (performance.now() - t < 14 && s.iters < target) s.run(4);
       if (s.iters < target && performance.now() - t0 < maxMs) { setTimeout(slice, 0); return; }
-      var wait = Math.max(0, 420 - (performance.now() - t0));   // 너무 빨리 두면 정신없다
+      var wait = Math.max(0, 700 + Math.random() * 400 - (performance.now() - t0));   // 내 돌 놓고 1~1.4초 뒤에 둔다 — 너무 빨리 두면 정신없다
       setTimeout(function () { if (id === G.gid) aiDecide(s); }, wait);
     })();
   }
