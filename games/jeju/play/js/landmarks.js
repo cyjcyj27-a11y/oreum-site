@@ -94,7 +94,7 @@
       const cm = put([box(34, 22, 8, 0, 11, -10, [0.2, 0.22, 0.2]), box(36, 6, 12, 0, 3, -12, [0.18, 0.2, 0.18])], x, z, 0); obstBox(x, z - 10, 34, 10);
       // 물낯 높이는 가운데와 안쪽 둘레(9m) 여덟 곳 중 가장 낮은 땅 — 발자국 모서리까지 재면 골짜기에 빠져 소가 통째로 묻힌다
       let py = H(x, z + 6); for (let k = 0; k < 8; k++) py = Math.min(py, H(x + Math.cos(k * 0.785) * 9, z + 6 + Math.sin(k * 0.785) * 9));
-      const pm = put([cyl(14, 14, 0.4, 0, 0.1, 0, [0.15, 0.4, 0.5], 24)], x, z + 6, 0, { noShadow: true, y: Math.max(0.2, py - 0.15) }); obstBox(x, z + 6, 22, 22);
+      const pm = put([cyl(14, 14, 0.4, 0, 0.1, 0, [0.15, 0.4, 0.5], 24)], x, z + 6, 0, { noShadow: true, y: Math.max(0.2, py - 0.15) }); CITY.obst.boxes.push({ x0: x - 11, z0: z - 5, x1: x + 11, z1: z + 17, npcOnly: true });   // 사람만 못 들어가게. 차·주인공까지 막으면 땅에 묻힌 소가 투명 벽이 된다 (2026-09-13)
       const wm = new THREE.MeshStandardMaterial({ color: 0xdff4ff, transparent: true, opacity: 0.85, roughness: 0.3, map: waterTex() }); const fallH = cm.position.y + 21 - pm.position.y; const w = new THREE.Mesh(new THREE.PlaneGeometry(9, fallH, 1, 8), wm); w.position.set(x, pm.position.y + fallH / 2, z - 5.9); scene.add(w); S.anim.push({ t: 'fall', m: w });   // 물줄기는 절벽 꼭대기에서 소 물낯까지
       for (let k = 0; k < 6; k++) { const sm = new THREE.Sprite(new THREE.SpriteMaterial({ map: SKY.puffTex, transparent: true, opacity: 0.35, depthWrite: false })); sm.position.set(x + (R() - 0.5) * 10, pm.position.y + 1 + R() * 3, z - 3 + R() * 3); sm.scale.set(6, 4, 1); scene.add(sm); }
       for (let k = 0; k < 14; k++) { const a = R() * 6.28, d = 18 + R() * 12; tree(x + Math.cos(a) * d, z + Math.sin(a) * d, 2.5 + R() * 2); } },

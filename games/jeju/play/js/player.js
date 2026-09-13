@@ -12,12 +12,27 @@
     for (const b of O.boxes) for (let i = Math.floor(b.x0 / CELL); i <= Math.floor(b.x1 / CELL); i++) for (let j = Math.floor(b.z0 / CELL); j <= Math.floor(b.z1 / CELL); j++) { const k = hk(i, j); let a = hash.get(k); if (!a) { a = { b: [], c: [] }; hash.set(k, a); } a.b.push(b); }
     for (const c of O.circles) { const k = hk(Math.floor(c.x / CELL), Math.floor(c.z / CELL)); let a = hash.get(k); if (!a) { a = { b: [], c: [] }; hash.set(k, a); } a.c.push(c); }
   }
+  // 돌린 상자(b.rot = { cx, cz, c, s, hw, hd })는 건물 발자국 그대로다. x0~z1 은 해시용 감싸기일 뿐이라
+  // 그걸로 부딪치면 비스듬한 건물 모서리 밖 **보이지 않는 삼각형**이 길을 막았다 (사장님 2026-09-13 "잘보이지않는 장애물에 막혔어")
+  function rotHit(b, px, pz, r, out) {
+    const o = b.rot, dx0 = px - o.cx, dz0 = pz - o.cz;
+    const lx = dx0 * o.c - dz0 * o.s, lz = dx0 * o.s + dz0 * o.c;
+    const qx = Math.max(-o.hw, Math.min(o.hw, lx)), qz = Math.max(-o.hd, Math.min(o.hd, lz));
+    let ex = lx - qx, ez = lz - qz, d = Math.hypot(ex, ez);
+    if (d >= r) return false;
+    if (!out) return true;
+    if (d < 1e-4) { const L = lx + o.hw, Rr = o.hw - lx, Tt = lz + o.hd, B = o.hd - lz, m = Math.min(L, Rr, Tt, B); ex = m === L ? -1 : m === Rr ? 1 : 0; ez = m === Tt ? -1 : m === B ? 1 : 0; d = -m; } else { ex /= d; ez /= d; }
+    const nx = ex * o.c + ez * o.s, nz = -ex * o.s + ez * o.c;
+    out.x += nx * (r - d); out.z += nz * (r - d); out.nx += nx; out.nz += nz; out.kind = b.kind || 'building';
+    return true;
+  }
   function pushOut(px, pz, r, out) {
     let hitN = 0; const i0 = Math.floor(px / CELL), j0 = Math.floor(pz / CELL);
     for (let i = i0 - 1; i <= i0 + 1; i++) for (let j = j0 - 1; j <= j0 + 1; j++) {
       const a = hash.get(hk(i, j)); if (!a) continue;
       for (const b of a.b) {
-        if (b.dead) continue;   // 판 건물의 충돌 상자는 무시한다
+        if (b.dead || b.npcOnly) continue;   // 판 건물의 충돌 상자는 무시한다 · 사람만 못 들어가는 곳(폭포 소)은 차·주인공은 지나간다
+        if (b.rot) { if (rotHit(b, px, pz, r, out)) hitN++; continue; }
         const cx = Math.max(b.x0, Math.min(b.x1, px)), cz = Math.max(b.z0, Math.min(b.z1, pz));
         let dx = px - cx, dz = pz - cz, d = Math.hypot(dx, dz); if (d >= r) continue;
         if (d < 1e-4) { const L = px - b.x0, Rr = b.x1 - px, Tt = pz - b.z0, B = b.z1 - pz, m = Math.min(L, Rr, Tt, B); dx = m === L ? -1 : m === Rr ? 1 : 0; dz = m === Tt ? -1 : m === B ? 1 : 0; d = -m; } else { dx /= d; dz /= d; }
@@ -28,7 +43,22 @@
     return hitN;
   }
   // overWall: 뛰어올라 돌담 위를 지나는 중이면 돌담(wall)은 없는 셈 친다 (2026-09-10 점프로 돌담 넘기)
-  function insideBox(px, pz, pad, overWall) { const a = hash.get(hk(Math.floor(px / CELL), Math.floor(pz / CELL))); if (!a) return false; for (const b of a.b) if (!b.dead && !(overWall && b.wall) && px > b.x0 - pad && px < b.x1 + pad && pz > b.z0 - pad && pz < b.z1 + pad) return true; return false; }
+  function insideBox(px, pz, pad, overWall) { const a = hash.get(hk(Math.floor(px / CELL), Math.floor(pz / CELL))); if (!a) return false; for (const b of a.b) if (!b.dead && !(overWall && b.wall) && px > b.x0 - pad && px < b.x1 + pad && pz > b.z0 - pad && pz < b.z1 + pad && (!b.rot || rotHit(b, px, pz, Math.max(pad, 1e-3), null))) return true; return false; }
+  // 차가 이 자리에 설 수 있나(길찾기가 막힌 길을 거르는 데 쓴다). 사람만 막는 곳·판 건물은 뺀다, 굵은 원(차·돌하르방)만 센다
+  function blockedAt(px, pz, r) {
+    const i0 = Math.floor(px / CELL), j0 = Math.floor(pz / CELL);
+    for (let i = i0 - 1; i <= i0 + 1; i++) for (let j = j0 - 1; j <= j0 + 1; j++) {
+      const a = hash.get(hk(i, j)); if (!a) continue;
+      for (const b of a.b) {
+        if (b.dead || b.npcOnly) continue;
+        if (b.rot) { if (rotHit(b, px, pz, r, null)) return true; continue; }
+        const cx = Math.max(b.x0, Math.min(b.x1, px)), cz = Math.max(b.z0, Math.min(b.z1, pz));
+        if (Math.hypot(px - cx, pz - cz) < r) return true;
+      }
+      for (const c of a.c) if (c.r >= 0.8 && Math.hypot(px - c.x, pz - c.z) < r + c.r) return true;
+    }
+    return false;
+  }
 
   let scene = null;
   function init(sc, spawn) {
@@ -284,5 +314,5 @@
     if (Math.abs(cam.fov - fov) > 0.05) { cam.fov = fov; cam.updateProjectionMatrix(); }
     return camPos;
   }
-  window.PLAYER = Object.assign(P, { init, update, camera, respawn, setVehicle, place, insideBox, addObst, dryRoadSpot, setDoor(t) { P.doorT = t; } });
+  window.PLAYER = Object.assign(P, { init, update, camera, respawn, setVehicle, place, insideBox, blockedAt, addObst, dryRoadSpot, setDoor(t) { P.doorT = t; } });
 })();

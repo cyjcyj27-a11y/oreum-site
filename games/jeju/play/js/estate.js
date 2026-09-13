@@ -441,10 +441,12 @@
     // (사장님 2026-09-11 "말도 안되는 경사도"), 부지에 그냥 두면 숲 나무에 막혀 구경하러 못 갔다
     // (같은 날 "접근이 안되네"). 그래서 자리마다 점수를 매겨 제일 나은 곳에 앉힌다.
     let bx = p.x, bz = p.z;
-    if (rs && rs.d > 1) {
-      const want = d / 2 + 3, move = rs.d - want;
-      if (move > 0 && move < 130) {
-        const ux = (rs.x - p.x) / rs.d, uz = (rs.z - p.z) / rs.d;
+    if (rs) {
+      // rs.d 는 **길 한가운데**까지 거리다. 예전엔 여기서 건물 깊이 절반 + 3m 만 떼서, 폭 12m 길이면 건물이 차로를 3m 먹고
+      // 비스듬히 선 모서리는 더 들어가 길을 막았다 (사장님 2026-09-13 "잘보이지않는 장애물에 막혔어"). 이제 길 가장자리에서 뗀다.
+      const want = d / 2 + 3 + (rs.w || 8) / 2, move = rs.d - want;
+      if (move < 130) {
+        const ux = rs.d > 1 ? (rs.x - p.x) / rs.d : Math.sin(ry), uz = rs.d > 1 ? (rs.z - p.z) / rs.d : Math.cos(ry);
         // 길에서 그 자리까지 곧장 갈 때 막히는가. 차를 실제로 막는 건 **소품 충돌상자와 물**이다 —
         // 주행 코드에는 경사 저항이 없어서 어지간한 비탈은 그냥 올라간다. 그래서 steep 은 보지 않는다.
         const reach = (cx, cz) => {
@@ -466,13 +468,24 @@
           }
           return false;
         };
-        // 길 쪽으로 훑으면서 **좌우로도** 본다 — 한 줄만 보면 숲이나 벼랑을 피할 길이 없다
+        // 발자국(돌린 네모 둘레 여덟 점 + 가운데)이 어느 길이든 차로 안에 들어가는가
+        const onRoadFoot = (cx, cz) => {
+          for (const fx of [-0.5, 0, 0.5]) for (const fz of [-0.5, 0, 0.5]) {
+            const lx = fx * w, lz = fz * d, n = ROADS.nearest(cx + lx * cs + lz * sn, cz - lx * sn + lz * cs);
+            if (n.e && n.d < 0.5) return true;
+          }
+          return false;
+        };
+        // 길 쪽으로 훑으면서 **좌우로도** 본다 — 한 줄만 보면 숲이나 벼랑을 피할 길이 없다.
+        // 부지가 이미 길에 너무 붙어 있으면(move < 0) 길에서 멀어지는 쪽으로도 훑는다.
         const px = -uz, pz2 = ux;                       // 길 방향과 직각
+        const ms = []; for (let k = 10; k >= 0; k--) ms.push(Math.max(0, move) * k / 10);
+        if (move < 0) for (let k = 0; k <= 8; k++) ms.push(move - k * 3);
         let pick = null;
-        for (let k = 10; k >= 0; k--) for (let j = -2; j <= 2; j++) {
-          const m = move * k / 10, off = j * 12;
+        for (const m of ms) for (let j = -2; j <= 2; j++) {
+          const off = j * 12;
           const cx = p.x + ux * m + px * off, cz = p.z + uz * m + pz2 * off;
-          const sc = dropAt(cx, cz).gap + (reach(cx, cz) ? 0 : 100) + (overlap(cx, cz) ? 200 : 0) + (move - m) * 0.03 + Math.abs(off) * 0.05;
+          const sc = dropAt(cx, cz).gap + (reach(cx, cz) ? 0 : 100) + (overlap(cx, cz) ? 200 : 0) + (onRoadFoot(cx, cz) ? 150 : 0) + Math.abs(move - m) * 0.03 + Math.abs(off) * 0.05;
           if (!pick || sc < pick.sc) pick = { x: cx, z: cz, sc: sc };
         }
         if (pick) { bx = pick.x; bz = pick.z; }
@@ -492,7 +505,9 @@
     // 길직한 건물 옆으로 길까지 먹어 차가 밀려난다 (사장님 2026-09-11)
     const cs2 = Math.abs(Math.cos(ry)), sn2 = Math.abs(Math.sin(ry));
     const ew = (w * cs2 + d * sn2) / 2, ed = (w * sn2 + d * cs2) / 2;
-    if (PLAYER.addObst) p.ob = PLAYER.addObst({ x0: bx - ew, z0: bz - ed, x1: bx + ew, z1: bz + ed });
+    // x0~z1 은 해시에 넣을 감싸기이고, 실제로 부딪치는 건 rot(돌린 발자국)이다 — 감싸기로 부딪치면 모서리 밖이 투명 벽이 된다 (2026-09-13)
+    if (PLAYER.addObst) p.ob = PLAYER.addObst({ x0: bx - ew, z0: bz - ed, x1: bx + ew, z1: bz + ed, rot: { cx: bx, cz: bz, c: Math.cos(ry), s: Math.sin(ry), hw: w / 2, hd: d / 2 } });
+    if (window.ROADS && ROADS.dirty) ROADS.dirty();   // 새 건물이 길을 막았는지 길찾기가 다시 본다
     p.bx = bx; p.bz = bz; p.byaw = ry; p.bd = d;   // 정문 앞에 차를 세우려면 자리·방향·깊이가 있어야 한다 (사장님 2026-09-11)
   }
   // 건물을 세우면 그 자리에 있던 차·주인공이 상자 안에 갇힐다. 해안 부지에서는 바다 쪽으로 밀려나 절벽에 끼었다.

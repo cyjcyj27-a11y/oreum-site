@@ -477,7 +477,31 @@
   // ── 길찾기(네비) ──
   // 두 자리를 길을 따라 이은 선. 화살표만 가리키면 바다·절벽로 몰고 가게 된다 (사장님 2026-09-11 "네비를 진짜 네비처럼")
   function nearestNode(x, z) { let b = null, bd = 1e18; for (const n of R.nodes) { if (!n.out.length) continue; const d = (n.x - x) * (n.x - x) + (n.z - z) * (n.z - z); if (d < bd) { bd = d; b = n; } } return b; }
+  // 막힌 간선 — 건물·명소 충돌상자가 차로 폭을 통째로 막는 곳이 한 군데라도 있으면 길찾기에서 뺀다.
+  // 예전엔 길 모양만 보고 이어서, 네비가 명소·건물에 막힌 길로 몰고 갔다 (사장님 2026-09-13 "길안내 전체 점검해")
+  // 건물이 새로 서면 dirty() 로 다시 잰다. 결과는 간선마다 적어 두어 매번 새로 재지 않는다.
+  let bver = 1;
+  function dirty() { bver++; }
+  function edgeBlocked(e) {
+    if (e._bv === bver) return e._bl;
+    let bl = false;
+    if (window.PLAYER && PLAYER.blockedAt) {
+      const half = Math.max(1.5, Math.min((e.w || 8) / 2 - 1.2, 6)), n = Math.max(1, Math.ceil((e.len || 1) / 2.5));
+      for (let s = 0; s <= n && !bl; s++) {
+        const t = s / n, cx = e.a.x + (e.b.x - e.a.x) * t, cz = e.a.z + (e.b.z - e.a.z) * t;
+        let open = false;
+        for (let off = -half; off <= half + 1e-6; off += 1.5) if (!PLAYER.blockedAt(cx + e.right.x * off, cz + e.right.z * off, 1.1)) { open = true; break; }
+        if (!open) bl = true;
+      }
+    }
+    e._bv = bver; e._bl = bl;
+    return bl;
+  }
   function route(ax, az, bx, bz) {
+    // 막힌 길을 피해서 먼저 찾고, 그래야만 닿는 곳(목적지 마디가 막힌 길 끝)이면 옛 방식으로 찾는다
+    return routeOn(ax, az, bx, bz, true) || routeOn(ax, az, bx, bz, false);
+  }
+  function routeOn(ax, az, bx, bz, avoid) {
     const s0 = nearestNode(ax, az), t0 = nearestNode(bx, bz);
     if (!s0 || !t0) return null;
     if (s0 === t0) return [{ x: s0.x, z: s0.z }];
@@ -490,6 +514,7 @@
       const du = dist.get(u);
       for (const e of u.out) {
         const v = e.b; if (done.has(v)) continue;
+        if (avoid && edgeBlocked(e)) continue;
         const w = du + (e.len || Math.hypot(v.x - u.x, v.z - u.z));
         if (!dist.has(v) || w < dist.get(v)) { dist.set(v, w); prev.set(v, u); q.push(v); }
       }
@@ -502,5 +527,5 @@
   }
 
   function init(scene) { build(); render(scene); }
-  window.ROADS = Object.assign(R, { init, onRoad, nearest, edgeDist, resample, catmull, smoothPts , surfaceY, surfaceAbs, route, nearestNode });
+  window.ROADS = Object.assign(R, { init, onRoad, nearest, edgeDist, resample, catmull, smoothPts , surfaceY, surfaceAbs, route, nearestNode, dirty, edgeBlocked });
 })();
