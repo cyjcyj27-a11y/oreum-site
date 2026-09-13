@@ -456,13 +456,23 @@
           }
           return true;
         };
+        // 발자국이 명소·다른 건물 충돌상자에 걸리는가. 예전엔 길에서 가는 길만 봐서 학원 건물이
+        // 정방폭포 절벽과 소 위에 겹쳐 앉았다 (사장님 2026-09-13)
+        const overlap = (cx, cz) => {
+          if (!PLAYER.insideBox) return false;
+          for (const fx of [-0.5, 0, 0.5]) for (const fz of [-0.5, 0, 0.5]) {
+            const lx = fx * w, lz = fz * d;
+            if (PLAYER.insideBox(cx + lx * cs + lz * sn, cz - lx * sn + lz * cs, 1, false)) return true;
+          }
+          return false;
+        };
         // 길 쪽으로 훑으면서 **좌우로도** 본다 — 한 줄만 보면 숲이나 벼랑을 피할 길이 없다
         const px = -uz, pz2 = ux;                       // 길 방향과 직각
         let pick = null;
         for (let k = 10; k >= 0; k--) for (let j = -2; j <= 2; j++) {
           const m = move * k / 10, off = j * 12;
           const cx = p.x + ux * m + px * off, cz = p.z + uz * m + pz2 * off;
-          const sc = dropAt(cx, cz).gap + (reach(cx, cz) ? 0 : 100) + (move - m) * 0.03 + Math.abs(off) * 0.05;
+          const sc = dropAt(cx, cz).gap + (reach(cx, cz) ? 0 : 100) + (overlap(cx, cz) ? 200 : 0) + (move - m) * 0.03 + Math.abs(off) * 0.05;
           if (!pick || sc < pick.sc) pick = { x: cx, z: cz, sc: sc };
         }
         if (pick) { bx = pick.x; bz = pick.z; }
