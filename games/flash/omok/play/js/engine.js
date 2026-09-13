@@ -108,6 +108,7 @@
   }
   BP.isDoubleThree = function (p, col) {
     if (this.makesFive(p, col)) return false;
+    if (this.makesFive(p, 3 - col)) return false;   // 상대 4를 막는 자리는 3·3이어도 둘 수 있다(사장님 2026-09-13)
     var n = 0;
     for (var dd = 0; dd < 4; dd++) if (threeDir(this.c, p, col, DIRS[dd][0], DIRS[dd][1]) && ++n >= 2) return true;
     return false;
