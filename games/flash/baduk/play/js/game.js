@@ -13,8 +13,8 @@
   for (r = 18; r >= 1; r--) { RANKS.push(r + '급'); RANKS_EN.push(r + 'K'); }
   for (r = 1; r <= 9; r++) { RANKS.push(r + '단'); RANKS_EN.push(r + 'D'); }   // 2026-09-13 1단 → 9단까지 늘림(27단계)
   var TOP = RANKS.length - 1;
-  // 18급 120판 → 1단 약 1만 3천 → 9단 약 5만 8천(생각 시간이 먼저 차면 거기서 둔다)
-  function playouts(L) { return Math.round(120 * Math.pow(1.3, Math.min(L, 18)) * Math.pow(1.2, Math.max(0, L - 18))); }
+  // 평균적인 사람 기준(2026-09-13): 급 구간은 완만하게 18급 120판 → 1단 약 4천 2백, 단 구간은 가파르게 → 9단 약 8만(생각 시간이 먼저 차면 거기서 둔다)
+  function playouts(L) { return Math.round(120 * Math.pow(1.22, Math.min(L, 18)) * Math.pow(1.45, Math.max(0, L - 18))); }
   function thinkMs(L) { return L <= 18 ? 3500 : 3500 + (L - 18) * 450; }
 
   var cv = document.getElementById('c'), ctx = cv.getContext('2d');

@@ -279,23 +279,24 @@
   // 약함은 사람 초보처럼 — 상대 3을 못 보고 지나치거나 띈 3을 놓치고, 공격을 덜 정교하게 한다
   var LEVELS = 27;
   function lerp(a, b2, t) { return a + (b2 - a) * Math.max(0, Math.min(1, t)); }
+  // 기준은 평균적인 사람(2026-09-13 사장님): 급 구간은 넉넉하고 길게, 단 구간에서 가파르게, 9단은 열어 둔다
   function levelCfg(L) {
-    if (L <= 6) {   // 18급~12급: 눈으로 보고 두는 상대
+    if (L <= 14) {   // 18급~4급: 눈으로 보고 두는 상대 — 3을 알아보는 눈이 조금씩 좋아진다
       return { greedy: true,
-        topk: L < 2 ? 4 : L < 4 ? 3 : 2,
-        noise: lerp(0.3, 0.08, L / 6),
-        defW: lerp(0.35, 0.7, L / 6),
-        miss4: lerp(0.3, 0, L / 4),          // 18급은 상대 4를 가끔 못 본다
-        see3: lerp(0.15, 1, L / 6),          // 곧은 3을 알아보는 확률
-        seeBroken: lerp(0, 0.6, (L - 2) / 4) };
+        topk: L < 3 ? 4 : L < 7 ? 3 : L < 11 ? 2 : 1,
+        noise: lerp(0.32, 0.06, L / 14),
+        defW: lerp(0.3, 0.75, L / 14),
+        miss4: lerp(0.35, 0, L / 6),         // 18급은 상대 4를 가끔 못 본다
+        see3: lerp(0.1, 1, L / 13),          // 곧은 3을 알아보는 확률
+        seeBroken: lerp(0, 0.8, (L - 4) / 10) };
     }
-    var k = L - 7;   // 11급(0) … 9단(19): 수읽기 상대 — 깊이·폭·시간이 오를수록 세진다
+    var k = L - 15;   // 3급(0) … 9단(11): 수읽기 상대 — 깊이·폭·시간이 오를수록 세진다
     return { greedy: false,
-      maxDepth: [1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 6, 6, 7, 8, 9, 10, 11, 12][k],
-      ms: Math.round(lerp(200, 3500, k / 19)),
-      beam: k < 3 ? 5 : k < 6 ? 7 : k < 10 ? 9 : k < 15 ? 11 : 12,
-      slack: lerp(0.35, 0, k / 8),          // 아래쪽은 비슷한 점수의 둘째 수도 가끔 둔다(말이 되는 수만)
-      vcf: k >= 6, guard: k >= 11, vct: k >= 14, vctDepth: k >= 17 ? 6 : 4 };
+      maxDepth: [2, 3, 3, 4, 4, 5, 6, 7, 8, 10, 11, 12][k],
+      ms: Math.round(lerp(400, 3500, k / 11)),
+      beam: k < 3 ? 8 : k < 6 ? 10 : 12,
+      slack: lerp(0.25, 0, k / 4),          // 아래쪽은 비슷한 점수의 둘째 수도 가끔 둔다(말이 되는 수만)
+      vcf: k >= 1, guard: k >= 4, vct: k >= 6, vctDepth: k >= 9 ? 6 : 4 };
   }
   function Think(board, level) {
     this.b = new Board(); this.b.copyFrom(board);
