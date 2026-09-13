@@ -8,9 +8,10 @@
   var BLACK = E.BLACK, WHITE = E.WHITE, EMPTY = E.EMPTY;
   var HOSHI = [[3, 3], [11, 3], [7, 7], [3, 11], [11, 11]];
   // 급수 사다리 — 이기면 한 칸 오르고 지면 그 자리
+  // 18급 … 1급, 1단 … 9단 — 잘게 쪼개 자주 오르게(2026-09-13, 전엔 10급~1단 11단계)
   var RANKS = [], RANKS_EN = [], r;
-  for (r = 10; r >= 1; r--) { RANKS.push(r + '급'); RANKS_EN.push(r + 'K'); }
-  RANKS.push('1단'); RANKS_EN.push('1D');
+  for (r = 18; r >= 1; r--) { RANKS.push(r + '급'); RANKS_EN.push(r + 'K'); }
+  for (r = 1; r <= 9; r++) { RANKS.push(r + '단'); RANKS_EN.push(r + 'D'); }
   var TOP = RANKS.length - 1;
 
   var cv = document.getElementById('c'), ctx = cv.getContext('2d');
@@ -26,13 +27,21 @@
   function rankName(L) { return (EN ? RANKS_EN : RANKS)[L]; }
 
   // ── 기록 — 오른 급수 ──
-  function loadBest() { try { return Math.max(0, Math.min(TOP, parseInt(localStorage.getItem('omok.rank') || '0', 10) || 0)); } catch (e) { return 0; } }
-  function saveBest(n) { try { localStorage.setItem('omok.rank', String(n)); } catch (e) {} }
+  function loadBest() {
+    try {
+      var v = localStorage.getItem('omok.lv');
+      if (v === null && localStorage.getItem('omok.rank') !== null) {   // 옛 11단계(10급=0 … 1단=10) → 같은 이름의 새 단계
+        v = String(8 + (parseInt(localStorage.getItem('omok.rank'), 10) || 0)); localStorage.setItem('omok.lv', v);
+      }
+      return Math.max(0, Math.min(TOP, parseInt(v || '0', 10) || 0));
+    } catch (e) { return 0; }
+  }
+  function saveBest(n) { try { localStorage.setItem('omok.lv', String(n)); } catch (e) {} }
   function showRec() { $('rec').textContent = rankName(loadBest()); }
 
   // ── 화면 맞추기 ──
   function resize() {
-    var dpr = Math.min(2, window.devicePixelRatio || 1), w = innerWidth, h = innerHeight;
+    var dpr = Math.min(/[?&]hires=1/.test(location.search) ? 3 : 2, window.devicePixelRatio || 1), w = innerWidth, h = innerHeight;
     cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); cv.style.width = w + 'px'; cv.style.height = h + 'px';
     view.dpr = dpr; view.w = w; view.h = h;
     var shot = document.body.classList.contains('shot');

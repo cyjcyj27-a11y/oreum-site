@@ -213,36 +213,138 @@
   }
   function findVCF(b, col, depth) { vcfNodes = 0; return vcf(b, col, depth || 14); }
 
+  // ── 열린 3 찾기 — 막을 자리들을 돌려준다 ──
+  // 곧은 3(_XXX_ 에 한쪽 더 빔)과 띈 3(_XX_X_) 을 따로 센다. 곧은 3은 누가 봐도 보이는 수다
+  var PAT = [
+    { s: [0, 1, 1, 1, 0, 0], blk: [0, 4], broken: false },
+    { s: [0, 0, 1, 1, 1, 0], blk: [1, 5], broken: false },
+    { s: [0, 1, 1, 0, 1, 0], blk: [0, 3, 5], broken: true },
+    { s: [0, 1, 0, 1, 1, 0], blk: [0, 2, 5], broken: true }
+  ];
+  BP.openThrees = function (col, wantBroken) {
+    var out = [], xx, yy, dd, k2, q, ok, cellsArr = new Array(6);
+    for (yy = 0; yy < N; yy++) for (xx = 0; xx < N; xx++) for (dd = 0; dd < 4; dd++) {
+      var dx = DIRS[dd][0], dy = DIRS[dd][1], lx = xx + dx * 5, ly = yy + dy * 5;
+      if (lx < 0 || lx >= N || ly < 0 || ly >= N) continue;
+      for (k2 = 0; k2 < 6; k2++) cellsArr[k2] = (yy + dy * k2) * N + xx + dx * k2;
+      for (q = 0; q < PAT.length; q++) {
+        var pt = PAT[q]; if (pt.broken && !wantBroken) continue;
+        ok = true;
+        for (k2 = 0; k2 < 6 && ok; k2++) ok = this.c[cellsArr[k2]] === (pt.s[k2] ? col : EMPTY);
+        if (ok) for (k2 = 0; k2 < pt.blk.length; k2++) if (out.indexOf(cellsArr[pt.blk[k2]]) < 0) out.push(cellsArr[pt.blk[k2]]);
+      }
+    }
+    return out;
+  };
+
+  // ── 연속 3·4 — 3과 4로 몰아붙여 이기는 길(맨 위 급수만) ──
+  var vctNodes = 0, vctDeadline = 0;
+  function vct(b, col, depth) {
+    var opp = 3 - col, j, k2, m;
+    if (b.n4[col]) return b.fiveCells(col)[0];
+    if (b.n4[opp]) return -1;
+    var f = vcf(b, col, 10); if (f >= 0) return f;
+    if (depth <= 0 || ++vctNodes > 6000 || performance.now() > vctDeadline) return -1;
+    // 내 3을 만드는 자리(두 개 있는 창의 빈칸) — 점수 높은 12개만
+    var cm = b.cnt[col], co = b.cnt[opp], seen = [];
+    for (var w = 0; w < NW; w++) if (cm[w] === 2 && co[w] === 0) {
+      for (j = 0; j < 5; j++) { m = WINS[w][j]; if (b.c[m] === EMPTY && seen.indexOf(m) < 0) seen.push(m); }
+    }
+    seen.sort(function (u, v) { return b.pointScore(v, col, 0.5) - b.pointScore(u, col, 0.5); });
+    if (seen.length > 12) seen.length = 12;
+    for (j = 0; j < seen.length; j++) {
+      m = seen[j];
+      if (b.isDoubleThree(m, col)) continue;
+      b.put(m, col);
+      var blocks = b.openThrees(col, true);
+      if (!blocks.length || findVCFquiet(b, opp) >= 0) { b.take(m); continue; }
+      var allLose = true;
+      for (k2 = 0; k2 < blocks.length && allLose; k2++) {
+        var d = blocks[k2];
+        b.put(d, opp);
+        if (vct(b, col, depth - 1) < 0) allLose = false;
+        b.take(d);
+      }
+      b.take(m);
+      if (allLose) return m;
+    }
+    return -1;
+  }
+  function findVCFquiet(b, col) { var save = vcfNodes; vcfNodes = 0; var r = vcf(b, col, 8); vcfNodes = save; return r; }
+  function findVCT(b, col, depth, ms) { vctNodes = 0; vcfNodes = 0; vctDeadline = performance.now() + ms; return vct(b, col, depth); }
+
   // ── 급수별 상대 ──
-  // L 0~10 (10급 → 1단). 6급·5급이 막기만 해서 판이 꽉 찼다(사장님 2026-09-13) → 욕심쟁이 급수는 막는 점수를 낮춰 공격도 한다
+  // L 0~26 = 18급 … 1급(L17), 1단(L18) … 9단(L26). 잘게 쪼개 자주 이기게, 맨 위는 진짜 세게(사장님 2026-09-13).
+  // 약한 급수도 엉뚱한 자리에는 두지 않는다. 늘 돌 둘레의 말이 되는 자리 중에서 고르고,
+  // 약함은 사람 초보처럼 — 상대 3을 못 보고 지나치거나 띈 3을 놓치고, 공격을 덜 정교하게 한다
+  var LEVELS = 27;
+  function lerp(a, b2, t) { return a + (b2 - a) * Math.max(0, Math.min(1, t)); }
+  function levelCfg(L) {
+    if (L <= 6) {   // 18급~12급: 눈으로 보고 두는 상대
+      return { greedy: true,
+        topk: L < 2 ? 4 : L < 4 ? 3 : 2,
+        noise: lerp(0.3, 0.08, L / 6),
+        defW: lerp(0.35, 0.7, L / 6),
+        miss4: lerp(0.3, 0, L / 4),          // 18급은 상대 4를 가끔 못 본다
+        see3: lerp(0.15, 1, L / 6),          // 곧은 3을 알아보는 확률
+        seeBroken: lerp(0, 0.6, (L - 2) / 4) };
+    }
+    var k = L - 7;   // 11급(0) … 9단(19): 수읽기 상대 — 깊이·폭·시간이 오를수록 세진다
+    return { greedy: false,
+      maxDepth: [1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 6, 6, 7, 8, 9, 10, 11, 12][k],
+      ms: Math.round(lerp(200, 3500, k / 19)),
+      beam: k < 3 ? 5 : k < 6 ? 7 : k < 10 ? 9 : k < 15 ? 11 : 12,
+      slack: lerp(0.35, 0, k / 8),          // 아래쪽은 비슷한 점수의 둘째 수도 가끔 둔다(말이 되는 수만)
+      vcf: k >= 6, guard: k >= 11, vct: k >= 14, vctDepth: k >= 17 ? 6 : 4 };
+  }
   function Think(board, level) {
     this.b = new Board(); this.b.copyFrom(board);
     this.col = board.turn; this.L = level; this.done = false; this.move = -1; this.depth = 0;
-    var L = level;
-    this.cfg = L <= 5
-      ? { greedy: true, topk: [8, 5, 4, 3, 2, 1][L], defW: [0.3, 0.4, 0.5, 0.55, 0.65, 0.75][L], miss: [0.5, 0.35, 0.2, 0.1, 0, 0][L], noise: [0.3, 0.25, 0.2, 0.15, 0.1, 0.06][L] }
-      : { greedy: false, maxDepth: [2, 3, 4, 8, 10][L - 6], ms: [300, 500, 800, 1200, 2000][L - 6], beam: [8, 10, 10, 12, 12][L - 6], vcf: L >= 7, guard: L >= 9 };
+    this.cfg = levelCfg(Math.max(0, Math.min(LEVELS - 1, level)));
   }
   Think.prototype.step = function () {
     if (this.done) return true;
     var b = this.b, col = this.col, opp = 3 - col, cfg = this.cfg, f, j;
     if (!this.started) {
       this.started = true;
-      // 이길 자리
+      // 이길 자리 — 늘 둔다
       f = b.fiveCells(col);
-      if (f.length && !(cfg.greedy && Math.random() < cfg.miss * 0.5)) return this.finish(f[0]);
-      // 막을 자리
+      if (f.length) return this.finish(f[0]);
+      // 막을 자리(상대 4)
       f = b.fiveCells(opp);
-      if (f.length && !(cfg.greedy && Math.random() < cfg.miss)) {
+      if (f.length && !(cfg.greedy && Math.random() < cfg.miss4)) {
         for (j = 0; j < f.length; j++) if (!b.isDoubleThree(f[j], col)) return this.finish(f[j]);
       }
       if (cfg.greedy) {
+        // 내 4를 만들 수 있거나 내 열린 3이 있으면 공격이 먼저. 아니면 보이는 상대 3을 막는다
+        var mine = b.openThrees(col, true).length > 0;
+        if (!mine) {
+          var blocks = [];
+          if (Math.random() < cfg.see3) blocks = b.openThrees(opp, false);
+          if (!blocks.length && Math.random() < cfg.seeBroken) blocks = b.openThrees(opp, true);
+          blocks = blocks.filter(function (p) { return !b.isDoubleThree(p, col); });
+          if (blocks.length) {
+            blocks.sort(function (u, v) { return b.pointScore(v, col, 1) - b.pointScore(u, col, 1); });
+            return this.finish(blocks[0]);
+          }
+        }
         var c = b.candidates(col, cfg.topk, cfg.defW, cfg.noise);
         return this.finish(c.length ? c[Math.floor(Math.random() * Math.random() * c.length)] : -1);
       }
       if (cfg.vcf) { var v = findVCF(b, col, 14); if (v >= 0) return this.finish(v); }
+      if (cfg.vct) { var v2 = findVCT(b, col, cfg.vctDepth, Math.min(1200, cfg.ms * 0.4)); if (v2 >= 0) return this.finish(v2); }
       this.root = b.candidates(col, cfg.beam + 4, 1, 0.04);
       if (!this.root.length) return this.finish(-1);
+      // 상대 열린 3이 있고 내 3이 없으면: 막는 자리와 내 4를 만드는 자리만 본다(사람도 그렇게 둔다)
+      if (!b.openThrees(col, true).length) {
+        var must = b.openThrees(opp, true);
+        if (must.length) {
+          var cm = b.cnt[col], co = b.cnt[opp];
+          for (var w = 0; w < NW; w++) if (cm[w] === 3 && co[w] === 0) for (var q = 0; q < 5; q++) { var cc = WINS[w][q]; if (b.c[cc] === EMPTY && must.indexOf(cc) < 0) must.push(cc); }
+          must = must.filter(function (p) { return !b.isDoubleThree(p, col); });
+          if (must.length) this.root = must;
+        }
+      }
       if (cfg.guard) {   // 상대의 연속 넉을 막지 못하는 수는 뺀다
         var safe = [], t0 = performance.now();
         for (j = 0; j < this.root.length; j++) {
@@ -273,13 +375,21 @@
     if (!aborted) {
       this.best = bestM;
       scored.sort(function (u, v) { return v.v - u.v; });
+      this.last2 = scored.slice(0, 2);
       this.root = scored.map(function (e) { return e.m; });
       if (alpha >= WIN - 100 || alpha <= -(WIN - 100) && this.depth > 1) return this.finish(this.best);
     }
-    if (aborted || this.depth >= cfg.maxDepth || performance.now() > this.t0 + cfg.ms) return this.finish(this.best);
+    if (aborted || this.depth >= cfg.maxDepth || performance.now() > this.t0 + cfg.ms) {
+      // 아래쪽 수읽기 급수: 둘째 수 점수가 첫째와 거의 같고 이기고 지는 수가 아니면 가끔 그걸 둔다
+      if (cfg.slack && this.last2 && Math.random() < cfg.slack) {
+        var s0 = this.last2[0], s1 = this.last2[1];
+        if (s1 && Math.abs(s0.v) < WIN / 2 && Math.abs(s1.v) < WIN / 2 && s0.v - s1.v <= Math.abs(s0.v) * 0.25 + 50) return this.finish(s1.m);
+      }
+      return this.finish(this.best);
+    }
     return false;
   };
   Think.prototype.finish = function (m) { this.done = true; this.move = m; return true; };
 
-  window.OmokEngine = { N: N, EMPTY: EMPTY, BLACK: BLACK, WHITE: WHITE, Board: Board, Think: Think, findVCF: findVCF, WINS: WINS };
+  window.OmokEngine = { N: N, EMPTY: EMPTY, BLACK: BLACK, WHITE: WHITE, Board: Board, Think: Think, findVCF: findVCF, findVCT: findVCT, WINS: WINS, LEVELS: LEVELS };
 })();

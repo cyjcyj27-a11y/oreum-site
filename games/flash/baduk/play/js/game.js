@@ -11,9 +11,11 @@
   // 급수 사다리 — 이기면 한 칸 오르고 지면 그 자리
   var RANKS = [], RANKS_EN = [], r;
   for (r = 18; r >= 1; r--) { RANKS.push(r + '급'); RANKS_EN.push(r + 'K'); }
-  RANKS.push('1단'); RANKS_EN.push('1D');
+  for (r = 1; r <= 9; r++) { RANKS.push(r + '단'); RANKS_EN.push(r + 'D'); }   // 2026-09-13 1단 → 9단까지 늘림(27단계)
   var TOP = RANKS.length - 1;
-  function playouts(L) { return Math.round(120 * Math.pow(1.3, L)); }   // 18급 120 → 1단 약 1만 3천
+  // 18급 120판 → 1단 약 1만 3천 → 9단 약 5만 8천(생각 시간이 먼저 차면 거기서 둔다)
+  function playouts(L) { return Math.round(120 * Math.pow(1.3, Math.min(L, 18)) * Math.pow(1.2, Math.max(0, L - 18))); }
+  function thinkMs(L) { return L <= 18 ? 3500 : 3500 + (L - 18) * 450; }
 
   var cv = document.getElementById('c'), ctx = cv.getContext('2d');
   var $ = function (id) { return document.getElementById(id); };
@@ -90,7 +92,7 @@
   // ── 상대: 수백~수만 판을 끝까지 두어 보고 고른다. 급수가 오를수록 많이 본다 ──
   function aiThink() {
     if (G.mode !== 'think') return;
-    var id = G.gid, L = G.level, target = playouts(L), t0 = performance.now(), maxMs = 3500;
+    var id = G.gid, L = G.level, target = playouts(L), t0 = performance.now(), maxMs = thinkMs(L);
     var s = new E.Search(G.b, KOMI);
     (function slice() {
       if (id !== G.gid || G.mode !== 'think') return;
@@ -112,8 +114,8 @@
     var oppPassed = b.passes === 1;
     if (unc === 0 || (oppPassed && (mine > 0 || unc <= 3 || b.moves > 260))) { doMove(PASS); return; }
     pick = list[0].m;
-    if (G.level < 5 && Math.random() < (5 - G.level) * 0.1) {   // 낮은 급수는 가끔 엉뚱한 곳에 둔다
-      var c = list.slice(0, 6).filter(function (e) { return e.n > 0 && e.m !== PASS; });
+    if (G.level < 8 && Math.random() < (8 - G.level) * 0.06) {   // 아래 급수는 비슷하게 좋은 수 가운데 하나를 고른다 — 엉뚱한 자리에는 안 둔다
+      var top = list[0], c = list.slice(1, 5).filter(function (e) { return e.m !== PASS && e.n >= top.n * 0.35 && e.wr >= top.wr - 0.07; });
       if (c.length) pick = c[(Math.random() * c.length) | 0].m;
     }
     doMove(pick);
