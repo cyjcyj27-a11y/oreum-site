@@ -350,6 +350,12 @@
       g.beginPath(); NAV.pts.forEach((p, i) => i ? g.lineTo(X(p.x), Z(p.z)) : g.moveTo(X(p.x), Z(p.z))); g.stroke();
     }
     if (window.ESTATE) ESTATE.drawMap(g, X, Z, sc, fs);   // 매물·내 땅·건물
+    // 내려서 걸어 다니면 세워 둔 차 자리를 따로 찍는다 — 멀리 걸어가면 차를 못 찾았다 (사장님 2026-09-13)
+    if (window.PET && PET.onFoot) {
+      const cx = X(PLAYER.x), cy = Z(PLAYER.z), r = fs * 0.95;
+      g.fillStyle = '#fff'; g.beginPath(); g.arc(cx, cy, r, 0, 6.29); g.fill(); g.strokeStyle = '#1e3a8a'; g.lineWidth = 3; g.stroke();
+      g.font = Math.round(r * 1.25) + 'px "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('🚗', cx, cy + r * 0.06);
+    }
     const hp = HP(); g.save(); g.translate(X(hp.x), Z(hp.z)); g.rotate(-hp.yaw); g.fillStyle = '#ff3b2a'; g.beginPath(); g.moveTo(0, -fs * 0.9); g.lineTo(fs * 0.6, fs * 0.6); g.lineTo(0, fs * 0.25); g.lineTo(-fs * 0.6, fs * 0.6); g.closePath(); g.fill(); g.strokeStyle = '#fff'; g.lineWidth = 2; g.stroke(); g.restore();
     for (const t of ROADS.towns) if (t.big || view.s > 1.8) { g.font = 'bold ' + fs + 'px "Griun", sans-serif'; g.fillStyle = '#1d2a1c'; g.fillText(L(t.name), X(t.cx), Z(t.cz) + fs); }
     el('mapCount').textContent = (A.dest ? A.dest.icon + ' ' + A.dest.name + ' · ' : '') + (window.ESTATE ? '🏝 ' + ESTATE.ownedCount() + '/' + ESTATE.list.length + ' · 💰 ' + ESTATE.fmt(A.coins) : '');
