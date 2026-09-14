@@ -49,6 +49,26 @@
  } catch (e) {}   // 여기서 터져도 아래 방문 집계는 그대로 돌아가야 합니다
 })();
 
+// 네이버 애널리틱스 — 네이버 검색 유입을 봅니다. 숫자는 analytics.naver.com 에서 봅니다.
+// 네이버가 준 코드는 </body> 앞에 두 덩어리를 붙이라지만, 하는 일은 같습니다:
+// wcslog.js 를 받고 → 발급 ID 를 넣고 → wcs_do() 한 번.
+(function () {
+ try {
+  if (/^(localhost|127\.0\.0\.1)$/.test(location.hostname) || location.protocol === 'file:') return;
+  var s = document.createElement('script');
+  s.async = true;
+  s.src = 'https://wcs.pstatic.net/wcslog.js';
+  s.onload = function () {
+    try {
+      window.wcs_add = window.wcs_add || {};
+      window.wcs_add['wa'] = '18c954550cfdae0';
+      if (window.wcs) window.wcs_do();
+    } catch (e) {}
+  };
+  (document.head || document.documentElement).appendChild(s);
+ } catch (e) {}
+})();
+
 // 방문 집계 — 쿠키 없이 Abacus 카운터만 씁니다. IP도 개인정보도 모으지 않습니다.
 // 예전에는 이 코드가 홈에만 있어서, 홍보 링크를 타고 게임이나 커뮤니티로 바로 들어온 사람은
 // 방문 수·유입 경로·국가에서 통째로 빠졌습니다. 이제 두 사이트의 모든 페이지에 함께 넣습니다.
