@@ -162,7 +162,7 @@
   }
   // 자판기: E 로 고르기 창을 열고 딸기우유(둘 다 ❤+80, 🪙30) · 고양이 캔 · 비둘기 모이 · 강아지 간식(각 🪙10)
   const VEND = { milk: 30, can: 10, seed: 10, bone: 10 };
-  const ITEM = { can: ['cans', '🥫'], seed: ['seeds', '🌾'], bone: ['bones', '🦴'] };
+  const ITEM = { can: ['cans', '[can]'], seed: ['seeds', '🌾'], bone: ['bones', '🦴'] };
   function act() {
     if (vendOpen()) { closeVend(); return; }
     if (PUZ.act() || JOY.act() || PETS.act()) return;
@@ -180,6 +180,11 @@
     $('vCan').classList.toggle('dim', T.coins < VEND.can);
     $('vSeed').classList.toggle('dim', T.coins < VEND.seed);
     $('vBone').classList.toggle('dim', T.coins < VEND.bone);
+    // 가진 개수 (칸 오른쪽 위 빨간 동그라미)
+    for (const [id, key] of [['vCan', 'cans'], ['vSeed', 'seeds'], ['vBone', 'bones']]) {
+      const u = $(id).querySelector('u'), n = String(T[key] || 0);
+      if (u.textContent !== n) { u.textContent = n; u.classList.remove('bump'); void u.offsetWidth; u.classList.add('bump'); }
+    }
   }
   function buy(kind) {
     const f = PL.f, al = ALLY.f;

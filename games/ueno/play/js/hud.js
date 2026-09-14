@@ -9,6 +9,7 @@
     const cv = $('c');
     touch = matchMedia('(hover: none)').matches || 'ontouchstart' in window;
     if (touch) document.body.classList.add('touch');
+    $('vMilkIcon').innerHTML = ICON.html('milk'); $('vCanIcon').innerHTML = ICON.html('can'); $('bagCanIcon').innerHTML = ICON.html('can');
 
     addEventListener('keydown', e => {
       if (e.repeat) return;
@@ -60,6 +61,7 @@
     });
 
     if (touch) padSetup();
+    addEventListener('wheel', e => { if (T.mode === 'play' && !e.target.closest('#bigwrap')) CAMERA.zoom(Math.exp(e.deltaY * 0.0012)); }, { passive: true });
     $('tPause').onclick = () => GAME.pause();
     $('tBgm').onclick = () => { T.bgm = !T.bgm; store(); paintTog(); };
     $('tSfx').onclick = () => { T.sfx = !T.sfx; store(); paintTog(); };
@@ -99,19 +101,33 @@
       if (d > 0.001) { dx /= d; dy /= d; }
       knob.style.transform = 'translate(' + (dx * m * 58) + 'px,' + (dy * m * 58) + 'px)';
       if (m < 0.12) { IN.f = 0; IN.r = 0; IN.run = false; return; }
-      IN.r = dx * m; IN.f = -dy * m; IN.run = m > 0.78;
+      // 민 만큼 그대로 속도로 쓰면 반쯤 밀 때 걸음이 절반이라 슬로우처럼 보였다(9/14 사장님) → 조금만 밀어도 제 걸음 속도
+      const mm = Math.min(1, 0.6 + (m - 0.12) * 1.5);
+      IN.r = dx * mm; IN.f = -dy * mm; IN.run = m > 0.78;
     }
+    // 빈 화면 한 손가락 = 시점 돌리기, 두 손가락 벌리기·오므리기 = 확대 (9/14 사장님)
+    const fingers = new Map(); let pinchD = 0;
+    const spread = () => { const [a, b] = [...fingers.values()]; return Math.hypot(a.x - b.x, a.y - b.y); };
     addEventListener('pointerdown', e => {
       if (e.pointerId === padId) return;
       if (e.target.closest && e.target.closest('#pad,.tbtn,.tog,button,#title,#over,#act,#bagPanel')) return;
+      fingers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      if (fingers.size >= 2) { lookId = null; pinchD = spread(); return; }
       lookId = e.pointerId; lookP.x = e.clientX; lookP.y = e.clientY;
     });
     addEventListener('pointermove', e => {
+      const p = fingers.get(e.pointerId);
+      if (p) { p.x = e.clientX; p.y = e.clientY; }
+      if (p && fingers.size >= 2) {
+        const d = spread();
+        if (pinchD > 20 && d > 20 && T.mode === 'play') CAMERA.zoom(pinchD / d);
+        pinchD = d; return;
+      }
       if (e.pointerId !== lookId) return;
       CAMERA.look((e.clientX - lookP.x) * 1.3, (e.clientY - lookP.y) * 1.3);
       lookP.x = e.clientX; lookP.y = e.clientY;
     });
-    const lu = e => { if (e.pointerId === lookId) lookId = null; };
+    const lu = e => { fingers.delete(e.pointerId); if (fingers.size < 2) pinchD = 0; if (e.pointerId === lookId) lookId = null; };
     addEventListener('pointerup', lu); addEventListener('pointercancel', lu);
     tap($('bPunch'), () => PLAYER.press('punch'));
     tap($('bKick'), () => PLAYER.press('kick'));
@@ -179,8 +195,12 @@
     // 자판기 안내
     const act = $('act'), pa = PUZ.nearAct() || JOY.nearAct() || PETS.nearAct(), v = !pa && !PL.ride && GAME.nearVend();
     if ((pa || v) && T.mode === 'play' && !T.paused && !ZONE.active) {
-      const label = (touch ? '' : 'E ') + (pa ? pa.icon : (GAME.vendOpen() ? '✕' : '🍓🥛 · 🥫'));
-      if (act.textContent !== label) act.textContent = label;
+      const label = (touch ? '' : 'E ') + (pa ? pa.icon : (GAME.vendOpen() ? '✕' : '[milk] · [can]'));
+      if (act._label !== label) {
+        act._label = label;
+        act.textContent = label;
+        if (label.includes('[')) act.innerHTML = ICON.fill(act.innerHTML);   // 딸기우유·고양이 캔은 그림으로
+      }
       act.classList.add('show'); act.classList.toggle('dim', pa ? !!pa.dim : false);
     } else act.classList.remove('show');
   }

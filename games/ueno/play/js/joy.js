@@ -374,7 +374,7 @@
   // 캔은 자판기에서 산다 (game.js 자판기 고르기)
   function nearAct() {
     if (!canAct()) return null;
-    const c = nearCat(); if (c) return { icon: '🥫', dim: !(T.cans > 0) };
+    const c = nearCat(); if (c) return { icon: '[can]', dim: !(T.cans > 0) };
     return null;
   }
   function act() {
@@ -416,12 +416,8 @@
   function milkSprite() {
     if (!milkTex) {
       const cv = document.createElement('canvas'); cv.width = cv.height = 128; const g = cv.getContext('2d');
-      g.fillStyle = 'rgba(0,0,0,.25)'; g.beginPath(); g.ellipse(64, 118, 34, 8, 0, 0, 7); g.fill();
-      g.fillStyle = '#ff9ec0'; g.strokeStyle = '#1b1b1f'; g.lineWidth = 5;
-      g.beginPath(); g.moveTo(34, 44); g.lineTo(64, 18); g.lineTo(94, 44); g.lineTo(94, 112); g.lineTo(34, 112); g.closePath(); g.fill(); g.stroke();
-      g.fillStyle = '#fff'; g.fillRect(42, 58, 44, 40);
-      g.fillStyle = '#e0303a'; g.beginPath(); g.moveTo(64, 92); g.bezierCurveTo(46, 80, 48, 62, 64, 64); g.bezierCurveTo(80, 62, 82, 80, 64, 92); g.fill();
-      g.fillStyle = '#3cc464'; g.fillRect(58, 58, 12, 7);
+      g.fillStyle = 'rgba(0,0,0,.25)'; g.beginPath(); g.ellipse(64, 120, 34, 7, 0, 0, 7); g.fill();
+      ICON.draw('milk', g, 8, 2, 112);   // 단추·자판기와 같은 우유갑 그림
       milkTex = new THREE.CanvasTexture(cv); milkTex.colorSpace = THREE.SRGBColorSpace;
     }
     const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: milkTex, transparent: true, depthWrite: false }));

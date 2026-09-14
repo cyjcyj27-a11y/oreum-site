@@ -1,7 +1,13 @@
 // cam.js — 3인칭 카메라. 싸울 땐 조금 물러나 높이 본다
 (function () {
-  const C = { yaw: 0, pitch: 0.3, dist: 6, target: new THREE.Vector3(), shake: 0, auto: 0 };
+  const C = { yaw: 0, pitch: 0.3, dist: 6, target: new THREE.Vector3(), shake: 0, auto: 0, zoom: 1 };
   const MINP = -0.1, MAXP = 1.1;
+  // 확대: 폰은 두 손가락 벌리기·오므리기, PC 는 마우스 휠 (9/14 사장님). k<1 가까이
+  function zoom(k) {
+    const z0 = C.zoom;
+    C.zoom = U.clamp(z0 * k, 0.4, 1.5);
+    C.dist *= C.zoom / z0;
+  }
 
   function look(dx, dy) {
     C.yaw -= dx * 0.0034;
@@ -36,6 +42,7 @@
       if (n) { want.x = U.lerp(want.x, sx / n, 0.22); want.z = U.lerp(want.z, sz / n, 0.22); }
       wantDist = 7.2;
     }
+    if (T.mode === 'play' && !f.dead) wantDist *= C.zoom;
     // WASD 로 시점 돌리기 (대화 중엔 안 돈다)
     if ((C.keyX || C.keyY) && T.mode === 'play' && !T.paused) {
       C.yaw -= C.keyX * 2.4 * dt;
@@ -70,5 +77,5 @@
   function snap() { const f = PL.f; C.target.set(f.pos.x, 1.35, f.pos.z); C.dist = T.mode === 'title' ? 4.6 : 5.6; }
 
   window.CAM = C;
-  window.CAMERA = { look, update, snap };
+  window.CAMERA = { look, update, snap, zoom };
 })();

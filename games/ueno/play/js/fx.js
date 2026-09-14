@@ -136,6 +136,7 @@
     const heal = typeof dmg === 'string' && dmg[0] === '+';
     el.className = 'num' + (big ? ' big' : '') + (heal ? ' heal' : f.team === 'hero' ? ' me' : '');
     el.textContent = dmg;
+    if (typeof dmg === 'string' && dmg.includes('[')) el.innerHTML = ICON.fill(el.innerHTML);   // [can]+1 → 캔 그림
     layer.appendChild(el);
     nums.push({ el, f, t: 0, x: U.rand(-0.3, 0.3) });
   }

@@ -133,7 +133,7 @@
     });
     // 자판기(딸기우유·고양이 캔)
     bg.font = '30px "Segoe UI Emoji","Apple Color Emoji",sans-serif'; bg.textAlign = 'center'; bg.textBaseline = 'middle';
-    for (const s of PARK.C.vend) { const [x, y] = to(s.x, s.z); bg.fillStyle = '#fff'; bg.beginPath(); bg.arc(x, y, 19, 0, 7); bg.fill(); bg.lineWidth = 3; bg.strokeStyle = '#f2a33a'; bg.stroke(); bg.fillText('🥫', x, y + 2); }
+    for (const s of PARK.C.vend) { const [x, y] = to(s.x, s.z); bg.fillStyle = '#fff'; bg.beginPath(); bg.arc(x, y, 19, 0, 7); bg.fill(); bg.lineWidth = 3; bg.strokeStyle = '#f2a33a'; bg.stroke(); ICON.draw('can', bg, x - 14, y - 14, 28); }
     const dd = window.PUZ && PUZ.duckDots();
     if (dd) {
       const dot = (x, z, col, r) => { const [px, py] = to(x, z); bg.fillStyle = col; bg.strokeStyle = '#1b1b1f'; bg.lineWidth = 3; bg.beginPath(); bg.arc(px, py, r, 0, 7); bg.fill(); bg.stroke(); };

@@ -197,6 +197,8 @@
     border: 4px solid #1b1b1f; background: #fff6e4; color: #1b1b1f; font-family: inherit; cursor: pointer; box-shadow: 0 6px 0 #1b1b1f; touch-action: manipulation; }
   #vendMenu button:active { transform: translateY(4px); box-shadow: 0 2px 0 #1b1b1f; }
   #vendMenu .vi { font-size: 56px; line-height: 1.1; }
+  .emi { height: 1.2em; width: auto; vertical-align: -0.25em; }   /* 딸기우유 우유갑·고양이 캔 그림 (이모지 자리) */
+  #act .emi { height: 1.7em; vertical-align: -0.5em; margin: -6px 0; }
   #vendMenu b { font-weight: normal; font-size: 28px; }
   #vendMenu i { font-style: normal; font-size: 30px; padding: 2px 14px; border-radius: 999px; background: #ffe14a; border: 2px solid #1b1b1f; }
   #vendMenu kbd { position: absolute; left: 10px; top: 8px; font-family: inherit; font-size: 18px; padding: 0 7px; border-radius: 6px; border: 2px solid #1b1b1f; background: #fff; }
@@ -205,6 +207,12 @@
   @media (max-width: 820px) { #vendMenu { gap: 10px; } #vendMenu button { min-width: 0; padding: 10px 14px 8px; } #vendMenu .vi { font-size: 40px; } #vendMenu b { font-size: 22px; } #vendMenu i { font-size: 22px; padding: 1px 10px; } }
   @media (max-height: 500px) { #vendMenu { bottom: calc(10vh + 80px); gap: 8px; } #vendMenu button { min-width: 0; padding: 6px 12px 6px; gap: 0; border-width: 3px; } #vendMenu .vi { font-size: 30px; } #vendMenu b { font-size: 17px; } #vendMenu i { font-size: 17px; padding: 0 8px; } #vendMenu kbd { font-size: 13px; left: 6px; top: 4px; } }
   body.talking #vendMenu { display: none !important; }
+  /* 가진 개수: 칸 오른쪽 위 빨간 동그라미 — "+1" 만 있어 사도 안 느는 줄 알았다 (9/14 사장님) */
+  #vendMenu u { position: absolute; right: -10px; top: -12px; min-width: 40px; height: 40px; padding: 0 8px; border-radius: 999px; background: #ff4a5a; color: #fff;
+    border: 3px solid #1b1b1f; font-size: 24px; line-height: 34px; text-decoration: none; text-align: center; box-sizing: border-box; }
+  #vendMenu u.bump { animation: ownBump .35s cubic-bezier(.2,1.8,.4,1); }
+  @keyframes ownBump { 40% { transform: scale(1.5); } }
+  @media (max-height: 500px) { #vendMenu u { min-width: 32px; height: 32px; font-size: 19px; line-height: 27px; right: -8px; top: -10px; } }
 
   #keys { position: fixed; right: 12px; bottom: 10px; z-index: 20; font-size: 13px; color: rgba(255,255,255,.55); text-align: right; line-height: 1.5; pointer-events: none;
     text-shadow: 0 1px 2px rgba(0,0,0,.7); display: none; }
@@ -287,7 +295,7 @@
 <canvas id="mini" width="200" height="200"></canvas>
 <div id="bigwrap"><canvas id="bigmap" width="1000" height="1200"></canvas><div id="coll"></div></div>
 <div id="stampCard"></div>
-<div id="bagPanel"><div class="it"><i>🥫</i><span>고양이 캔</span><b id="sCan">0</b></div><div class="it"><i>🌾</i><span>비둘기 모이</span><b id="sSeed">0</b></div><div class="it"><i>🦴</i><span>강아지 간식</span><b id="sBone">0</b></div></div>
+<div id="bagPanel"><div class="it"><i id="bagCanIcon"></i><span>고양이 캔</span><b id="sCan">0</b></div><div class="it"><i>🌾</i><span>비둘기 모이</span><b id="sSeed">0</b></div><div class="it"><i>🦴</i><span>강아지 간식</span><b id="sBone">0</b></div></div>
 <div id="bars"></div>
 <div id="talk"><span id="talkWho"></span><div id="talkLine"></div><span class="nx">▼</span><button id="talkSkip">SKIP ▶▶</button></div>
 <div id="banner"></div>
@@ -295,10 +303,10 @@
 <div id="combo"></div>
 <button id="act"></button>
 <div id="vendMenu">
-  <button id="vMilk"><kbd>1</kbd><span class="vi">🍓🥛</span><b>❤+80</b><i>🪙30</i></button>
-  <button id="vCan"><kbd>2</kbd><span class="vi">🥫</span><b>+1</b><i>🪙10</i></button>
-  <button id="vSeed"><kbd>3</kbd><span class="vi">🌾</span><b>+1</b><i>🪙10</i></button>
-  <button id="vBone"><kbd>4</kbd><span class="vi">🦴</span><b>+1</b><i>🪙10</i></button>
+  <button id="vMilk"><kbd>1</kbd><span class="vi" id="vMilkIcon"></span><b>❤+80</b><i>🪙30</i></button>
+  <button id="vCan"><kbd>2</kbd><span class="vi" id="vCanIcon"></span><b>+1</b><i>🪙10</i><u>0</u></button>
+  <button id="vSeed"><kbd>3</kbd><span class="vi">🌾</span><b>+1</b><i>🪙10</i><u>0</u></button>
+  <button id="vBone"><kbd>4</kbd><span class="vi">🦴</span><b>+1</b><i>🪙10</i><u>0</u></button>
 </div>
 <div id="keys">↑↓←→ 이동 · Shift 달리기 · 좌클릭/J 펀치 · 우클릭/K 킥 · Q 필살기<br>Tab 체인지 · T 지도 · 마우스/WASD 시점 · E 자판기 · M 음악 · N 효과음 · Esc 일시정지</div>
 
@@ -340,7 +348,7 @@
 </div>
 
 <script>
-  window.__V = '126';
+  window.__V = '131';
   // 영문판: 로딩 화면 제목은 lang.js 가 불리기 전에 보이므로 여기서 먼저 바꾼다
   if (/[?&]lang=en(&|$)/i.test(location.search)) { document.querySelector('#load .ttl').textContent = 'UENO ZZANG'; document.title = 'UENO ZZANG'; }
   window.__LOAD = (function () {

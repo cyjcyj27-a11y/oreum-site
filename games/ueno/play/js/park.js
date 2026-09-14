@@ -665,16 +665,9 @@
     _heal = signTex(128, 128, (g) => {
       g.fillStyle = 'rgba(255,255,255,0.97)'; g.beginPath(); g.arc(64, 64, 58, 0, 7); g.fill();
       g.lineWidth = 6; g.strokeStyle = '#d23a3a'; g.stroke();
-      // 딸기우유는 싸울 때 떨어지는 우유갑 그림 그대로 (9/14 사장님) — joy.js milkSprite 와 같은 모양을 작게
-      g.save(); g.translate(14, 22); g.scale(0.62, 0.62);
-      g.fillStyle = '#ff9ec0'; g.strokeStyle = '#1b1b1f'; g.lineWidth = 5;
-      g.beginPath(); g.moveTo(34, 44); g.lineTo(64, 18); g.lineTo(94, 44); g.lineTo(94, 112); g.lineTo(34, 112); g.closePath(); g.fill(); g.stroke();
-      g.fillStyle = '#fff'; g.fillRect(42, 58, 44, 40);
-      g.fillStyle = '#e0303a'; g.beginPath(); g.moveTo(64, 92); g.bezierCurveTo(46, 80, 48, 62, 64, 64); g.bezierCurveTo(80, 62, 82, 80, 64, 92); g.fill();
-      g.fillStyle = '#3cc464'; g.fillRect(58, 58, 12, 7);
-      g.restore();
-      g.font = '46px "Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
-      g.fillText('🥫', 86, 74);
+      // 딸기우유 우유갑 + 생선 그림 고양이 캔 (core.js ICON, 단추·자판기 창과 같은 그림)
+      ICON.draw('milk', g, 6, 18, 74);
+      ICON.draw('can', g, 56, 42, 60);
     });
     return _heal;
   }
