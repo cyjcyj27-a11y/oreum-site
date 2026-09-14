@@ -18,6 +18,7 @@ import io, os, re, sys
 
 # slug, 한국어 경로, 영어 경로, 한국어 이름, 한국어 장르 앵커, 영어 이름, 영어 장르 앵커, 태그
 GAMES = [
+    ("ueno",          "/games/ueno/",                "/en/games/ueno/",                "우에노짱",          "착한 양아치 커플 3D 공원 어드벤처",  "UENO ZZANG",               "3D park adventure brawler",     {"3d", "adventure", "cat", "fight"}),
     ("ttang",         "/games/flash/ttang/",         "/en/games/flash/ttang/",         "땅따먹기",          "1인용·2인용 땅따먹기게임",        "LAND GRAB",                "Korean land-claiming stone flick game", {"board", "pvp", "casual"}),
     ("bangwi",        "/games/flash/bangwi/",        "/en/games/flash/bangwi/",        "방귀 뀌기",        "안 들키게 몰래 뀌는 방귀게임",       "THE FART",                 "sneaky fart game",              {"casual", "arcade", "funny"}),
     ("omok",          "/games/flash/omok/",          "/en/games/flash/omok/",          "오목",            "혼자·2인용 오목게임",         "GOMOKU",                   "free Gomoku five in a row game", {"board", "pvp", "strategy"}),
