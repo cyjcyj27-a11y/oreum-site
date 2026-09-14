@@ -51,11 +51,9 @@
     }
     C.target.lerp(want, 1 - Math.exp(-rate * dt));
     C.dist = U.damp(C.dist, wantDist, 2.5, dt);
-    // 마우스를 안 만지면 달리는 방향 뒤로 천천히 돈다 (싸울 땐 안 돈다)
+    // 카메라는 저절로 돌지 않는다 — 사람이 끌거나 WASD 로만 돈다 (유니티·언리얼 3인칭 템플릿과 같게).
+    //   예전엔 걷는 방향 뒤로 따라 돌았는데, 폰 패드로 옆으로 걸으면 카메라가 돌고 → 방향이 또 바뀌어 빙빙 돌았다 (9/14 사장님 "정신없이 좌우로 회전")
     if (C.auto > 0) C.auto -= dt;
-    else if (!zn && T.mode === 'play' && f.moveSpeed > 1.0 && f.state === 'free') {
-      C.yaw = U.angTo(C.yaw, f.yaw + Math.PI, dt * 0.9 * (f.moveSpeed / 6));
-    }
     const cy = Math.cos(C.pitch), sy = Math.sin(C.pitch);
     let d = C.dist;
     for (let i = 1; i <= 12; i++) {

@@ -124,7 +124,9 @@
   #bigwrap { position: fixed; inset: 0; z-index: 55; background: rgba(8,10,14,.72); display: none; align-items: center; justify-content: center; cursor: pointer; }
   #bigwrap.show { display: flex; }
   /* 모음판: 큰 지도 옆. 찾은 것은 색, 못 찾은 것은 그림자 */
-  #coll { display: flex; flex-direction: column; gap: 18px; margin-left: 3vw; }
+  #coll { display: flex; flex-direction: column; gap: 18px; margin-left: 3vw; max-height: 94vh; overflow-y: auto; touch-action: pan-y; overscroll-behavior: contain; cursor: default;
+    scrollbar-width: thin; scrollbar-color: rgba(255,255,255,.35) transparent; }
+  #bigmap { cursor: default; }
   #coll .crow { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; padding: 12px; border-radius: 16px; background: rgba(0,0,0,.45); }
   #coll .ci { font-size: clamp(24px, 2.6vw, 38px); text-align: center; filter: grayscale(1) brightness(.35); opacity: .6; }
   #coll .ci.got { filter: none; opacity: 1; }
@@ -348,7 +350,7 @@
 </div>
 
 <script>
-  window.__V = '131';
+  window.__V = '134';
   // 영문판: 로딩 화면 제목은 lang.js 가 불리기 전에 보이므로 여기서 먼저 바꾼다
   if (/[?&]lang=en(&|$)/i.test(location.search)) { document.querySelector('#load .ttl').textContent = 'UENO ZZANG'; document.title = 'UENO ZZANG'; }
   window.__LOAD = (function () {

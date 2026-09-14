@@ -9,7 +9,8 @@
     big = $('bigmap'); bg = big.getContext('2d');
     base = PARK.groundPaint && PARK.groundPaint.g.canvas;   // 땅 그림(잔디·길·연못·꽃잎)을 그대로 지도로 쓴다
     $('tMap').onclick = () => toggle();
-    $('bigwrap').addEventListener('pointerdown', () => toggle(false));
+    // 바깥(어두운 바탕)을 누를 때만 닫는다 — 모음판을 스크롤하려고 만지면 닫혀 버렸다 (9/14 사장님)
+    $('bigwrap').addEventListener('pointerdown', e => { if (e.target === e.currentTarget) toggle(false); });
     addEventListener('keydown', e => { if (e.code === 'KeyT' && T.mode === 'play') toggle(); if (e.code === 'Escape' && M.big) toggle(false); });
   }
 

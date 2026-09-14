@@ -110,7 +110,7 @@
     const spread = () => { const [a, b] = [...fingers.values()]; return Math.hypot(a.x - b.x, a.y - b.y); };
     addEventListener('pointerdown', e => {
       if (e.pointerId === padId) return;
-      if (e.target.closest && e.target.closest('#pad,.tbtn,.tog,button,#title,#over,#act,#bagPanel')) return;
+      if (e.target.closest && e.target.closest('#pad,.tbtn,.tog,button,#title,#over,#act,#bagPanel,#bigwrap')) return;
       fingers.set(e.pointerId, { x: e.clientX, y: e.clientY });
       if (fingers.size >= 2) { lookId = null; pinchD = spread(); return; }
       lookId = e.pointerId; lookP.x = e.clientX; lookP.y = e.clientY;

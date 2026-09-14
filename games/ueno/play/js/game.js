@@ -80,8 +80,13 @@
       $('btnStart').style.display = ''; $('btnCont').style.display = 'none'; $('btnReset').style.display = 'none';
     } else
     $('btnStart').onclick = () => { U.wipe(); T.coins = 0; T.taken = {}; T.seen = {}; T.puz = {}; T.cans = 0; T.seeds = 0; T.bones = 0; PUZ.refresh(); ZONE.paintFlags(); start(true); };
-    // 진행 없이 모음만 남아 있으면 인트로부터
-    $('btnCont').onclick = () => start(!Object.keys(T.taken).length && !(T.seen && T.seen.pre0));
+    // 이어하기: 인트로를 봤거나 뭐라도 모았으면 인트로를 다시 틀지 않는다 (9/14 사장님 "이어하기했는데 인트로 또나옴")
+    $('btnCont').onclick = () => {
+      const sn = T.seen || {};
+      let others = false; try { others = KEYS.some(k => k !== 'ueno.prog' && localStorage.getItem(k) != null); } catch (e) { }   // 고양이·스탬프 같은 모음 기록
+      const played = sn.intro || sn.pre0 || Object.keys(T.taken).length || T.coins > 0 || T.cans || T.seeds || T.bones || others;
+      start(!played);
+    };
     $('btnRetry').onclick = retry;
     // 엔딩 화면 [처음부터 다시하기]: 타이틀의 것과 같다 — 한 번 더 눌러야 진행·고양이·스탬프·부적·강아지·비둘기 기록을 전부 지우고 새로 시작
     let againT = 0;
@@ -125,6 +130,7 @@
       ALLY.f.pos.set(PL.f.pos.x + 1.3, 0, PL.f.pos.z - 0.9);
       PL.f.yaw = Math.atan2(1.3, -0.9); ALLY.f.yaw = PL.f.yaw + Math.PI;
       STORY.play(STORY.LINES.intro, { ken: T.ken, hiromi: T.hiromi }, () => { PL.f.yaw = st.yaw; });
+      T.seen = T.seen || {}; T.seen.intro = 1; U.save();   // 한 번 봤으면 이어하기에서 다시 안 튼다
     }
   }
 
