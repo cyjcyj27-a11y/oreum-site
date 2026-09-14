@@ -299,9 +299,9 @@
     ctx.restore();
   }
 
-  // ── 입력 ──
+  // ── 입력: PC 마우스는 뒤로 당겼다 놓기, 폰 손가락은 보낼 쪽으로 쓸었다 놓기(땅따먹기처럼 — 구석 돌도 판 안쪽으로 쓸 자리가 있다) ──
   function aimVec(d) {
-    var dx = d.x - drag.x, dy = d.y - drag.y, len = Math.hypot(dx, dy);
+    var dx = drag.swipe ? drag.x - drag.x0 : d.x - drag.x, dy = drag.swipe ? drag.y - drag.y0 : d.y - drag.y, len = Math.hypot(dx, dy);
     if (len < 14) return { pow: 0, ang: 0 };
     return { pow: Math.min(len - 14, MAXD) / MAXD, ang: Math.atan2(dy, dx) };
   }
@@ -311,7 +311,7 @@
     var p = toLogical(e.clientX, e.clientY), best = -1, bd = 1e9, i;
     for (i = 0; i < G.B.length; i++) { var b = G.B[i]; if (b.off || b.t !== G.turn) continue; var d = Math.hypot(b.x - p.x, b.y - p.y); if (d < SR * 2.2 && d < bd) { bd = d; best = i; } }
     if (best < 0) return;
-    drag = { i: best, x: p.x, y: p.y };
+    drag = { i: best, x: p.x, y: p.y, x0: p.x, y0: p.y, swipe: e.pointerType === 'touch' };
     try { cv.setPointerCapture(e.pointerId); } catch (err) {}
     e.preventDefault();
   });
