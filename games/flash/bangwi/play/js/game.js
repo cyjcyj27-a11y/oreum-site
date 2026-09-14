@@ -262,7 +262,8 @@
       var D = S.D;
       S.time += dt;
       var wasFart = S.farting;
-      S.farting = S.holding && S.g > 0.001;
+      // 바닥난 채 누르고 있으면 조금 찰 때까지 쉰다 — 매 프레임 켜졌다 꺼지면 소리가 수십 겹 쌓여 폰 소리가 죽는다
+      S.farting = S.holding && S.g > (wasFart ? 0.001 : 0.06);
       if (S.farting) {
         var dg = Math.min(S.g, dt / D.drain);
         S.g -= dg;

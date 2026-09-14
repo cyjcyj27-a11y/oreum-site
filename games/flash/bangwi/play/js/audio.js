@@ -14,13 +14,17 @@
     ctx = new AC();
     master = ctx.createGain();
     master.gain.value = on ? 0.9 : 0;
-    master.connect(ctx.destination);
+    // 소리가 겹쳐도 1.0 을 넘겨 찢어지지 않게 누른다
+    var lim = ctx.createDynamicsCompressor();
+    lim.threshold.value = -6; lim.knee.value = 4; lim.ratio.value = 12; lim.attack.value = 0.003; lim.release.value = 0.12;
+    master.connect(lim); lim.connect(ctx.destination);
     noiseBuf = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate);
     var d = noiseBuf.getChannelData(0);
     for (var i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
     return ctx;
   }
-  function live() { var c = ensure(); if (!c) return null; if (c.state === 'suspended') c.resume(); return c; }
+  // 폰은 전화·다른 앱 소리로 멈추면 'interrupted' 가 되기도 한다 — running 이 아니면 깨운다
+  function live() { var c = ensure(); if (!c) return null; if (c.state !== 'running' && c.state !== 'closed') { try { c.resume(); } catch (e) {} } return c; }
   function unlock() {
     var c = live(); if (!c) return;
     try { var b = c.createBuffer(1, 1, 22050), s = c.createBufferSource(); s.buffer = b; s.connect(c.destination); s.start(0); } catch (e) {}
@@ -92,10 +96,13 @@
     F = { next: c.currentTime + 0.005, n: 0 };
     fartWobble(0, 1);
   }
+  var lastPop = -1;
   function fartOff() {
     if (!F) return;
     F = null;
     var c = ctx; if (!c || !on) return;
+    if (c.currentTime - lastPop < 0.25) return;                   // 짧게 끊었다 눌렀다 해도 "뽁" 은 한 번만
+    lastPop = c.currentTime;
     toot(c, c.currentTime + 0.01, 0.06, 240, 0.25);             // 끝에 "뽁"
   }
   // 매 프레임 불러 준다: 다음 한 방이 다가오면 미리 예약한다
