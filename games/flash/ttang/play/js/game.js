@@ -465,10 +465,11 @@
     ctx.restore();
   }
 
-  // ── 입력: 아무 데나 누르고 뒤로 당겼다 놓으면 튕긴다. 첫 튕기기 전엔 내 땅을 톡 눌러 돌을 옮긴다 ──
+  // ── 입력: 아무 데나 누르고 보낼 쪽으로 쓸었다 놓으면 튕긴다(손가락으로 미는 진짜 땅따먹기처럼 — 늘 판 안쪽으로 쓸어서 폰 구석에서도 자리가 있다).
+  //    첫 튕기기 전엔 내 땅을 톡 눌러 돌을 옮긴다 ──
   function maxDrag() { return Math.max(140, Math.min(300, 150 / view.s)); }
   function aimVec() {
-    var dx = drag.x0 - drag.x, dy = drag.y0 - drag.y, len = Math.hypot(dx, dy), th = 10 / view.s;
+    var dx = drag.x - drag.x0, dy = drag.y - drag.y0, len = Math.hypot(dx, dy), th = 10 / view.s;
     if (len < th) return { pow: 0, ang: 0 };
     return { pow: Math.min(len - th, maxDrag()) / maxDrag(), ang: Math.atan2(dy, dx) };
   }
