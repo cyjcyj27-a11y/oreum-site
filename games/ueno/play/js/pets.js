@@ -295,7 +295,7 @@
   }
 
   // ── 시작 ────────────────────────────────────────────
-  let dogSave = {}, pigSave = {};
+  let dogSave = {}, pigSave = {}, followSave = {};
   function init(sc) {
     scene = sc;
     dogSave = load('ueno.dogs'); pigSave = load('ueno.pigeons');
@@ -311,9 +311,17 @@
     };
     PE.moms = PE.moms.map((p, i) => mk(i, p, false));
     PE.pups = PE.pups.map((p, i) => mk(i, p, true));
+    followSave = load('ueno.dogsFollow');
+    let fi = 0;
     for (const pu of PE.pups) {
       pu.state = 'lost';
       if (dogSave[pu.id]) home(pu, true);
+      else if (followSave[pu.id]) {
+        // 간식 먹고 따라오던 강아지는 이어하기 뒤에도 주인공(입구) 곁에서 다시 따라온다 (9/14 사장님 "따라다니던 강아지 3마리 없어짐")
+        const st = PARK.start, a = st.yaw + Math.PI + (fi - 1) * 0.5;
+        pu.x = st.x + Math.sin(a) * (1.4 + fi * 0.6); pu.z = st.z + Math.cos(a) * (1.4 + fi * 0.6); fi++;
+        pu.state = 'follow';
+      }
     }
     for (const mo of PE.moms) { mo.state = dogSave[mo.id] ? 'home' : 'wait'; if (mo.state === 'home') mo.anim = 'lie'; }
     // 비둘기
@@ -384,6 +392,7 @@
     const mo = PE.moms[pu.id];
     pu.state = 'reunite'; pu.t = 0; mo.state = 'reunite'; mo.t = 0;
     dogSave[pu.id] = 1; store('ueno.dogs', dogSave);
+    if (followSave[pu.id]) { delete followSave[pu.id]; store('ueno.dogsFollow', followSave); }
     AUD.sfx('bark'); setTimeout(() => AUD.sfx('yip', 0.8), 450);
     // 코인은 주지 않는다 — 간식은 싸움·다른 일로 번 코인으로 산다 (고양이 밥과 같다)
     const n = PE.pups.filter(p => dogSave[p.id]).length;
@@ -567,6 +576,7 @@
   function feedPup(pu) {
     if (!(T.bones > 0)) { AUD.sfx('deny'); return; }
     T.bones--; U.save();
+    followSave[pu.id] = 1; store('ueno.dogsFollow', followSave);   // 간식을 준 순간부터 "따라오는 강아지"로 저장
     if (!bowlGeo) { bowlGeo = new THREE.CylinderGeometry(0.15, 0.11, 0.07, 12); foodGeo = new THREE.CylinderGeometry(0.12, 0.12, 0.03, 12); }
     const f = PL.f, a = Math.atan2(f.pos.x - pu.x, f.pos.z - pu.z);
     pu.yaw = a;

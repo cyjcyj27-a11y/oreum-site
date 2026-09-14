@@ -42,7 +42,7 @@
     PETS.init(scene);
     ZONE.paintFlags();
     // 저장이 있으면 [이어하기] + [처음부터 다시하기], 없으면 [시작]
-    const KEYS = ['ueno.prog', 'ueno.catsFed', 'ueno.cats', 'ueno.stamps', 'ueno.charms', 'ueno.best', 'ueno.cans', 'ueno.trash', 'ueno.dogs', 'ueno.pigeons'];
+    const KEYS = ['ueno.prog', 'ueno.catsFed', 'ueno.cats', 'ueno.stamps', 'ueno.charms', 'ueno.best', 'ueno.cans', 'ueno.trash', 'ueno.dogs', 'ueno.dogsFollow', 'ueno.pigeons'];
     const hasSave = (() => { try { return KEYS.some(k => localStorage.getItem(k) != null); } catch (e) { return false; } })();
     if (hasSave) {
       $('btnStart').style.display = 'none';
