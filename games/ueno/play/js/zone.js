@@ -402,6 +402,8 @@
   function nextTarget() {
     const g = DATA.ZONES.findIndex(z => !T.taken[z.id]);
     if (g < 0) return null;
+    // 마지막 분수 광장은 착한 일을 다 하기 전엔 가리키지 않는다(점선·"분수 광장 ➤" 없음) — 9/14 사장님
+    if (DATA.ZONES[g].final && !allDone()) return null;
     const spot = window.PUZ && PUZ.spotFor(g);
     if (spot) return { zn: spot, d: Math.hypot(spot.x - PL.f.pos.x, spot.z - PL.f.pos.z), puz: spot.puz };
     // 착한 일(고양이·강아지·줍기…)의 자리는 가리키지 않는다 — 너무 힌트라서 (9/14 사장님). 화살표는 분수 광장까지만, 남은 개수는 광장에서 🔒 로 보여 준다

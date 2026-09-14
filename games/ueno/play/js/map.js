@@ -77,13 +77,7 @@
       dot(dd.mom.x, dd.mom.z, '#8a6a48', 6);
       for (const k of dd.kids) if (!k.follow) dot(k.x, k.z, '#ffd23a', 5);
     }
-    // 풀어야 할 퍼즐 자리
-    if (nt && nt.puz) {
-      let [px, py] = toScr(nt.zn.x, nt.zn.z);
-      const d = Math.hypot(px - R, py - R), lim = R - 14;
-      if (d > lim) { px = R + (px - R) / d * lim; py = R + (py - R) / d * lim; }
-      marker(mg, px, py, '★', 'next', 13);
-    }
+    // 퍼즐 자리 ★ 는 작은 지도에서 뺐다 (9/14 사장님) — 점선과 큰 지도에만
     // 짝꿍
     const [ax, ay] = toScr(ALLY.f.pos.x, ALLY.f.pos.z);
     mg.fillStyle = ALLY.f === T.hiromi ? '#ff8fc0' : '#ffd24a'; mg.beginPath(); mg.arc(ax, ay, 4, 0, 7); mg.fill();
