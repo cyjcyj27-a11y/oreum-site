@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#e9efd9">
+<title>방귀 뀌기</title>
+<style>
+@font-face{font-family:'Dongle';src:url('fonts/Dongle-title.woff2?v=2') format('woff2');font-display:swap}   /* Dongle Bold (OFL) — 제목·큰 글자 부분집합 */
+@font-face{font-family:'Ria';src:url('fonts/RiaSans-ExtraBold.woff2') format('woff2');font-display:swap}
+
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{width:100%;height:100%;overflow:hidden;background:#e9efd9;
+  font-family:'Ria',-apple-system,'Malgun Gothic',sans-serif;color:#fff;
+  user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:none;overscroll-behavior:none}
+#cv{display:block;position:fixed;inset:0;width:100%;height:100%;touch-action:none}
+
+/* ---------- 상단바 (스카이라이더 배치) ---------- */
+#topbar{position:fixed;top:0;left:0;right:0;z-index:20;display:flex;align-items:center;
+  gap:8px;flex-wrap:wrap;pointer-events:none;
+  padding:6px 8px 20px calc(104px + env(safe-area-inset-left));
+  background:linear-gradient(180deg,rgba(0,0,0,.42),rgba(0,0,0,0))}
+.stat{display:flex;align-items:center;gap:6px;background:rgba(0,0,0,.35);
+  border-radius:999px;padding:5px 10px;font-size:15px}
+.stat i{font-style:normal;font-size:13px}
+.stat b{font-size:17px;font-weight:400;letter-spacing:.3px}
+.bar{width:64px;height:6px;border-radius:3px;background:rgba(255,255,255,.25);overflow:hidden}
+.bar>span{display:block;height:100%;width:0;border-radius:3px}
+#gbar{width:96px;height:9px;border-radius:5px}
+#gbar>span{background:#7ed957}
+#tbar>span{background:#8fd3ff}
+#gstat.hot{animation:hot .35s ease-in-out infinite alternate}
+@keyframes hot{from{background:rgba(0,0,0,.35)}to{background:rgba(200,30,30,.75)}}
+.spacer{flex:1 1 20px}
+.tog{pointer-events:auto;width:36px;height:36px;border-radius:50%;border:0;
+  background:rgba(0,0,0,.4);color:#fff;font-size:15px;cursor:pointer;
+  display:grid;place-items:center;position:relative;font-family:inherit;touch-action:manipulation}
+.tog.off{opacity:.4}
+.tog.off::after{content:'';position:absolute;left:6px;right:6px;top:50%;height:2px;
+  background:#fff;transform:rotate(-45deg);border-radius:1px}
+@media (max-width:700px){.stat b{font-size:15px}.stat{padding:5px 8px;gap:5px}.bar{width:40px}#gbar{width:64px}#topbar{gap:5px}}
+
+/* ---------- 폰 행동 단추 (오른쪽 아래) ---------- */
+#fart{position:fixed;z-index:25;right:calc(18px + env(safe-area-inset-right));bottom:18px;
+  width:96px;height:96px;border-radius:50%;border:3px solid rgba(255,255,255,.6);
+  background:rgba(0,0,0,.32);font-size:44px;display:none;place-items:center;
+  pointer-events:auto;touch-action:none;color:#fff}
+#fart.on{background:#b6e35a;border-color:#fff;transform:scale(.93)}
+body.touch #fart{display:grid}
+body.touch #keys{display:none}
+#keys{position:fixed;right:12px;bottom:10px;z-index:20;font-size:13px;color:rgba(0,0,0,.45);pointer-events:none}
+
+/* ---------- 큰 글자 판 ---------- */
+.panel{position:fixed;inset:0;z-index:40;display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;pointer-events:none}
+.panel.on{display:flex}
+.panel h1{font-family:'Dongle','Ria',sans-serif;font-weight:400;line-height:.8;text-align:center;
+  color:#fff;-webkit-text-stroke:3px #3a2a10;text-shadow:0 7px 0 #3a2a10,0 12px 30px rgba(0,0,0,.35)}
+.panel .num{font-size:30px;color:#fff;text-shadow:0 3px 0 rgba(0,0,0,.45),0 0 18px rgba(0,0,0,.35)}
+.btn{pointer-events:auto;border:0;cursor:pointer;font-family:inherit;font-size:30px;color:#fff;
+  background:#ff8a1f;padding:12px 46px;border-radius:999px;letter-spacing:.06em;
+  box-shadow:0 7px 0 #b35600,0 14px 30px rgba(0,0,0,.25);touch-action:manipulation}
+.btn:active{transform:translateY(5px);box-shadow:0 2px 0 #b35600}
+.btn.sub{font-size:20px;padding:9px 30px;background:#6b7a52;box-shadow:0 5px 0 #3d4a2a,0 10px 24px rgba(0,0,0,.2)}
+.btn.sub:active{box-shadow:0 1px 0 #3d4a2a}
+
+#title h1{font-size:clamp(96px,24vw,210px);color:#9be15d;-webkit-text-stroke:4px #3b5a12;
+  text-shadow:0 9px 0 #3b5a12,0 16px 34px rgba(0,0,0,.3);transform:rotate(-3deg);animation:bob 2.2s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:rotate(-3deg) translateY(0)}50%{transform:rotate(-1deg) translateY(-10px)}}
+#title .best{font-size:18px;color:#3b5a12;opacity:.8}
+#title{justify-content:flex-start;padding-top:14vh;background:linear-gradient(180deg,rgba(255,255,255,.35),rgba(255,255,255,0) 60%)}
+
+#stage h1{font-size:clamp(90px,20vw,170px);color:#ffe066;animation:pop .35s ease-out}
+#clear h1{font-size:clamp(100px,22vw,190px);color:#ffe066;animation:pop .35s ease-out}
+#over h1{font-size:clamp(96px,21vw,180px);color:#ff6b6b;animation:pop .35s ease-out}
+#over, #clear{background:rgba(20,20,10,.28)}
+#pause{background:rgba(20,20,10,.45)}
+#pause .btn{font-size:40px;padding:10px 40px}
+@keyframes pop{0%{transform:scale(.4);opacity:0}70%{transform:scale(1.12);opacity:1}100%{transform:scale(1)}}
+
+/* ---------- 떠오르는 글 ---------- */
+#pops{position:fixed;inset:0;z-index:15;pointer-events:none;overflow:hidden}
+.pop{position:absolute;font-size:24px;color:#fff;-webkit-text-stroke:1px #3b5a12;text-shadow:0 3px 0 #3b5a12;
+  animation:up .9s ease-out forwards;white-space:nowrap}
+.pop.big{font-family:'Dongle','Ria',sans-serif;font-size:74px;line-height:.8;color:#ffe066;-webkit-text-stroke:2px #6b4a00;text-shadow:0 5px 0 #6b4a00;animation-duration:1.2s}
+@keyframes up{0%{opacity:0;transform:translate(-50%,6px) scale(.7)}
+  20%{opacity:1;transform:translate(-50%,-8px) scale(1.1)}
+  100%{opacity:0;transform:translate(-50%,-70px) scale(1)}}
+
+/* ---------- 가로로 돌리기 (폰 세로일 때만) ---------- */
+#rotate{position:fixed;inset:0;z-index:90;display:none;place-items:center;text-align:center;
+  background:#27331c;color:#f2ede4;font-size:17px;line-height:1.8;padding:8vw;pointer-events:auto}
+body.touch.portrait #rotate{display:grid}
+#rotate button{margin:22px 0 16px;padding:15px 32px;border:0;border-radius:99px;cursor:pointer;
+  font-family:inherit;font-size:17px;color:#1d2a0c;background:#9be15d}
+#rotate .sub{font-size:14px;color:#b9c4a8;line-height:1.7}
+#rotate .sub a{color:#dfe8d0}
+</style>
+</head>
+<body>
+
+<canvas id="cv"></canvas>
+
+<div id="topbar">
+  <div class="stat"><b id="stg">STAGE 1</b></div>
+  <div class="stat" id="gstat"><i>💨</i><span class="bar" id="gbar"><span></span></span></div>
+  <div class="stat"><i>⏱</i><span class="bar" id="tbar"><span></span></span></div>
+  <div class="stat"><i>⭐</i><b id="score">0</b></div>
+  <div class="spacer"></div>
+  <button class="tog" id="tPause" title="일시정지">❚❚</button>
+  <button class="tog" id="tSnd" title="효과음">🔊</button>
+</div>
+
+<div id="pops"></div>
+<button id="fart">💨</button>
+<div id="keys">SPACE</div>
+
+<div class="panel" id="title">
+  <h1 id="h1">방귀뀌기</h1>
+  <button class="btn" id="start">START</button>
+  <button class="btn sub" id="newgame" hidden>NEW GAME</button>
+  <div class="best" id="best"></div>
+</div>
+<div class="panel" id="stage"><h1 id="stageT">STAGE 1</h1></div>
+<div class="panel" id="clear"><h1>CLEAR</h1><div class="num" id="clearN"></div><button class="btn" id="next">NEXT</button></div>
+<div class="panel" id="over"><h1>GAME OVER</h1><div class="num" id="overN"></div><button class="btn" id="retry">RETRY</button><button class="btn sub" id="newgame2">NEW GAME</button></div>
+<div class="panel" id="pause"><button class="btn" id="resume">▶</button></div>
+
+<div id="rotate">
+  <div>
+    <p id="rotTitle">가로 화면에서 하는 게임입니다</p>
+    <button type="button" id="rotGo">가로로 돌리기</button>
+    <p class="sub"><span id="rotHelp">단추가 안 먹으면 폰의 화면 회전 잠금을 풀고 눕혀 주세요</span><br>
+      <a href="#" id="rotSkip">그래도 세로로 하기</a></p>
+  </div>
+</div>
+
+<script src="assets/game-home.js" data-top="6" data-left="6" data-fullscreen="1" defer></script>
+<script src="assets/landscape.js?v=4"></script>
+<script src="js/audio.js?v=6"></script>
+<script src="js/art.js?v=14"></script>
+<script src="js/game.js?v=9"></script>
+<script src="/assets/visit.js?v=11" defer></script>
+<script src="/assets/game-events.js?v=2" defer></script>
+</body>
+</html>

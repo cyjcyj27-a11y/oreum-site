@@ -18,6 +18,7 @@ import io, os, re, sys
 
 # slug, 한국어 경로, 영어 경로, 한국어 이름, 한국어 장르 앵커, 영어 이름, 영어 장르 앵커, 태그
 GAMES = [
+    ("bangwi",        "/games/flash/bangwi/",        "/en/games/flash/bangwi/",        "방귀 뀌기",        "안 들키게 몰래 뀌는 방귀게임",       "THE FART",                 "sneaky fart game",              {"casual", "arcade", "funny"}),
     ("omok",          "/games/flash/omok/",          "/en/games/flash/omok/",          "오목",            "혼자·2인용 오목게임",         "GOMOKU",                   "free Gomoku five in a row game", {"board", "pvp", "strategy"}),
     ("baduk",         "/games/flash/baduk/",         "/en/games/flash/baduk/",         "바둑",            "혼자 두는 바둑게임",          "BADUK",                    "free Go board game",            {"board", "pvp", "strategy"}),
     ("jeju",          "/games/jeju/",               "/en/games/jeju/",               "BUY JEJU",        "제주도 땅 사는 오픈월드게임",   "BUY JEJU",                 "open world land-buying game on Jeju", {"sim", "tycoon", "building", "driving"}),
