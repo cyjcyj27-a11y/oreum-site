@@ -365,7 +365,7 @@
   }
 
   function hitDamage() { return G.stage <= 10 ? 1 : G.stage <= 20 ? 1.5 : 3; }
-  function hurt() {
+  function hurt(ram) {
     if (P.inv > 0 || !P.alive || S.mode === 'clear' || GOD) return;
     if (P.shield > 0) {
       P.shield--; P.inv = 1.0; AU.block();
@@ -379,7 +379,7 @@
       explode(w.x, w.y, false); P.inv = 1.6; AU.hurt(); return;
     }
     // 목숨 하나 = 3칸. 뒤로 갈수록 한 번에 많이 깎인다(1~10: 3번, 11~20: 2번, 21~: 1번 맞으면 목숨 하나)
-    var dmg = hitDamage();
+    var dmg = ram ? 3 : hitDamage();                       // 박치기는 목숨 하나를 통째로
     P.hp -= dmg; S.hitFx = 0.4;
     if (P.hp > 0.01) {
       AU.hurt(); P.inv = 1.0; S.shake = 0.35;
@@ -759,9 +759,10 @@
           if (!e.slot) { S.en.splice(i, 1); continue; }
           var s3 = slotPos(e.slot.c, e.slot.r); e.x = s3.x; e.y = -50; e.state = 'join';
         }
-        if (P.alive && Math.hypot(e.x - P.x, e.y - P.y) < e.r + 16) { hurt(); kill(e, false); continue; }
       }
       e.vx = (e.x - ox) / Math.max(dt, 0.001);
+      // 부딪힘: 날아 들어오는 중·대형·급강하 모두. 무적(깜빡임) 중에는 그냥 지나간다
+      if (P.alive && P.inv <= 0 && !GOD && S.mode !== 'clear' && e.y > 0 && Math.hypot(e.x - P.x, e.y - P.y) < e.r + 18) { hurt(true); kill(e, false); }
     }
   }
 
@@ -770,6 +771,10 @@
     if (b.dead) return;
     var emp = b.type === 'emperor', phase = b.hp < b.max * 0.5 ? 1 : 0;
     if (emp && b.hp < b.max * 0.25) phase = 2;
+    if (P.alive && P.inv <= 0 && !GOD && S.mode !== 'clear') {      // 보스 몸체에 박으면 맞고 튕겨 나간다
+      var bx = (P.x - b.x) / (b.rx + 14), by = (P.y - b.y) / (b.ry + 26);
+      if (bx * bx + by * by < 1) { hurt(true); P.ty = Math.min(H - 60, P.ty + 170); P.y = Math.min(H - 60, P.y + 60); S.shake = 0.7; }
+    }
     if (b.entering) { b.y += (b.ty - b.y) * Math.min(1, dt * 1.6); if (Math.abs(b.y - b.ty) < 3) { b.entering = false; b.t = 0; } return; }
     b.x = W / 2 + Math.sin(b.t * (0.45 + phase * 0.15)) * (W * 0.24);
     b.y = b.ty + Math.sin(b.t * 0.9) * 14;
