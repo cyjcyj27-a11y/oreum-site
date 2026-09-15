@@ -20,8 +20,6 @@
   #hp b { color: #ff5a6e; letter-spacing: 1px; font-size: 16px; }
   #hp i { font-style: normal; color: #ffd24a; font-size: 13px; margin-left: 2px; }
   #hp i:empty { display: none; }
-  #pipv { display: inline-flex; gap: 2px; margin-left: 3px; } #pipv:empty { display: none; }
-  .pip { width: 5px; height: 13px; border-radius: 2px; background: #ff6a7a; box-shadow: 0 0 4px rgba(255,90,110,.7); } .pip.off { background: rgba(255,255,255,.22); box-shadow: none; }
   #stage { font-family: Arial, sans-serif; font-weight: 700; font-size: 13px; letter-spacing: 2px; }
   body:not(.playing) #topbar .stat { display: none; }
   .spacer { flex: 1; }
@@ -144,7 +142,7 @@
 <canvas id="c"></canvas>
 
 <div id="topbar">
-  <span class="stat" id="hp"><b id="hpv">♥♥♥</b><span id="pipv"></span><i id="shv"></i></span>
+  <span class="stat" id="hp"><b id="hpv">♥♥♥</b><i id="shv"></i></span>
   <span class="stat"><span class="ic">🪙</span><b id="coinv">0</b></span>
   <span class="stat" id="stage">STAGE 1</span>
   <span class="stat" id="bombStat"><span class="ic">💣</span><b id="bombv">1</b></span>
@@ -214,7 +212,7 @@
 <script src="assets/game-home.js" data-top="6" data-left="6" data-fullscreen="1" defer></script>
 <script src="js/art.js?v=3"></script>
 <script src="js/audio.js?v=2"></script>
-<script src="js/game.js?v=21"></script>
+<script src="js/game.js?v=22"></script>
 <script src="/assets/visit.js?v=12" defer></script>
 <script src="/assets/game-events.js?v=2" defer></script>
 </body>

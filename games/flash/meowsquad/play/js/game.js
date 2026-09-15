@@ -295,9 +295,6 @@
   function hud() {
     var h = ''; if (innerWidth <= 480) h = '♥' + G.lives; else for (var i = 0; i < G.lives; i++) h += '♥';
     $('hpv').textContent = h;
-    var per = Math.round(3 / hitDamage()), left = Math.ceil(P.hp / hitDamage() - 0.01), pv = '';
-    if (per > 1) for (var k = 0; k < per; k++) pv += '<span class="pip' + (k < left ? '' : ' off') + '"></span>';
-    $('pipv').innerHTML = pv;
     $('shv').textContent = P.shield ? '🛡' + (P.shield > 1 ? P.shield : '') : '';
     $('bombv').textContent = G.bombs; $('bombN').textContent = G.bombs; $('bombBtn').classList.toggle('empty', !G.bombs);
     $('coinv').textContent = G.coins;
