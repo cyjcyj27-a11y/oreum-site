@@ -361,7 +361,7 @@
     else if (S.combo === 16) { flash('EXCELLENT'); addCoins(15); AU.fanfare(); }
   }
 
-  function hitDamage() { return G.stage <= 5 ? 1 : G.stage <= 15 ? 1.5 : 3; }   // 1~5: 3번, 6~15: 2번, 16~: 1번 맞으면 목숨 하나
+  function hitDamage() { return G.stage <= 15 ? 1.5 : 3; }   // 1~15: 2번, 16~: 1번 맞으면 목숨 하나
   function hurt(ram) {
     if (P.inv > 0 || !P.alive || S.mode === 'clear' || GOD) return;
     if (P.shield > 0) {
@@ -371,7 +371,7 @@
     }
     S.shake = 0.5;
     // 호위기는 대신 맞지 않는다(목숨이 너무 안 준다, 2026-09-15). 목숨 하나 = 3칸
-    var dmg = ram ? (G.stage <= 5 ? 2 : 3) : hitDamage();  // 박치기는 목숨 하나를 통째로(1~5 스테이지는 2칸)
+    var dmg = ram ? (G.stage <= 5 ? 1.5 : 3) : hitDamage(); // 박치기는 목숨 하나를 통째로(1~5 스테이지는 탄 한 방과 같게)
     P.hp -= dmg; G.hp = P.hp; S.hitFx = 0.4;
     if (P.hp > 0.01) {
       AU.hurt(); P.inv = 1.0; S.shake = 0.35;
