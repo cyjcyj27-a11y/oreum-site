@@ -196,7 +196,7 @@
     if ((S.mode === 'race' || S.mode === 'count') && document.activeElement !== inp && !e.ctrlKey && !e.metaKey) inp.focus();
     var go2 = e.key === 'Enter' || e.key === ' ';
     if (!go2) return;
-    if (S.mode === 'title') { e.preventDefault(); goSelect(); }
+    if (S.mode === 'title') { e.preventDefault(); if (hasSave()) startRace(nowStage()); else goSelect(); }
     else if (S.mode === 'select') { e.preventDefault(); startRace(nowStage()); }
     else if (S.mode === 'result' && S.T - S.resT > 0.8) { e.preventDefault(); var nb = $('btnNext'); if (nb.style.display !== 'none') nb.onclick(); else startRace(R.si); }
     else if (S.mode === 'ending' && S.endT > 3.5) { e.preventDefault(); goSelect(); }
@@ -213,11 +213,25 @@
   function setBody(cls) { document.body.classList.toggle('racing', cls === 'racing'); document.body.classList.toggle('counting', cls === 'counting'); layout(); }
 
   function goTitle() { S.mode = 'title'; R = null; show('title'); setBody(''); showRec(); A.music(true, false); }
-  function showRec() { $('rec').textContent = P.top ? L('최고 기록 ', 'BEST ') + speedLabel(P.top) + unitLabel() : ''; }
+  function showRec() {
+    $('rec').textContent = P.top ? L('최고 기록 ', 'BEST ') + speedLabel(P.top) + unitLabel() : '';
+  }
+  function hasSave() { return P.races > 0 || P.medal.some(function (m) { return m > 0; }); }
 
   function goSelect() {
     A.init(); A.click(); S.mode = 'select'; R = null; show('select'); setBody(''); inp.blur();
     buildSelect(); A.music(true, false);
+    // 기록이 있으면 이어하기(금메달 아직인 첫 판) · 처음부터 하기
+    var has = hasSave();
+    $('btnCont').hidden = !has; $('btnNew').hidden = !has; newArmed(false);
+    if (has) $('btnCont').textContent = L('이어하기 · ' + (nowStage() + 1) + '판', 'CONTINUE · STAGE ' + (nowStage() + 1));
+  }
+  // 처음부터 하기: 한 번 누르면 빨갛게 바뀌고, 3초 안에 또 누르면 달리기 기록을 지운다
+  var newT = 0;
+  function newArmed(on) { var b = $('btnNew'); clearTimeout(newT); b.classList.toggle('warn', on); b.textContent = on ? L('정말 처음부터 하기', 'REALLY START OVER') : L('처음부터 하기', 'NEW GAME'); if (on) newT = setTimeout(function () { newArmed(false); }, 3000); }
+  function resetRace() {
+    for (var i = 0; i < NS; i++) { P.medal[i] = 0; P.best[i] = 0; }
+    P.top = 0; P.races = 0; P.runner = 'dog'; P.last = 0; P.ending = 0; persist();
   }
   var thumbs = [];
   function thumb(i) {
@@ -320,6 +334,11 @@
   $('btnRetry').onclick = function () { startRace(R ? R.si : 0); };
   $('btnCourses').onclick = goSelect;
   $('btnStart').onclick = goSelect;
+  $('btnCont').onclick = function () { startRace(nowStage()); };
+  $('btnNew').onclick = function () {
+    if (!$('btnNew').classList.contains('warn')) { A.click(); newArmed(true); return; }
+    newArmed(false); resetRace(); A.click(); startRace(0);
+  };
   $('btnPrac').onclick = function () { A.init(); A.click(); S.mode = 'practice'; R = null; show(''); setBody(''); A.music(true, false); window.TJPractice.open(); };
   window.TJGame = { title: goTitle };
   $('selBack').onclick = function () { A.click(); goTitle(); };
