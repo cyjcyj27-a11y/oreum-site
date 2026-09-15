@@ -173,9 +173,9 @@
   function divePath(e) {
     var s = e.x < W / 2 ? -1 : 1, px = P.x;
     var pts;
-    if (e.type === 'armor') pts = [[e.x, e.y], [e.x + s * 30, e.y - 34], [e.x + s * 10, e.y + 40], [(e.x + px) / 2, H * 0.5], [px, H * 0.8], [px, H + 80]];
+    if (e.type === 'armor') pts = [[e.x, e.y], [e.x + s * 30, e.y - 34], [e.x + s * 10, e.y + 40], [(e.x + px) / 2, H * 0.5], [px, P.y], [px, H + 80]];
     else if (e.type === 'bomber') pts = [[e.x, e.y], [e.x + s * 40, e.y - 34], [e.x + s * 60, e.y + 30], [W / 2 - s * 190, H * 0.42], [W / 2 + s * 190, H * 0.52], [W / 2 - s * 150, H * 0.64], [W / 2 + s * 240, H + 80]];
-    else pts = [[e.x, e.y], [e.x + s * 45, e.y - 40], [e.x + s * 85, e.y + 22], [(e.x + px) / 2, H * 0.45], [px - s * 70, H * 0.68], [px + s * 40, H * 0.86], [px - s * 20, H + 80]];
+    else pts = [[e.x, e.y], [e.x + s * 45, e.y - 40], [e.x + s * 85, e.y + 22], [(e.x + px) / 2, H * 0.45], [px - s * 50, P.y - 170], [px, P.y], [px + s * 30, H + 80]];
     return spline(pts);
   }
 
@@ -371,7 +371,7 @@
     }
     S.shake = 0.5;
     // 호위기는 대신 맞지 않는다(목숨이 너무 안 준다, 2026-09-15). 목숨 하나 = 3칸
-    var dmg = ram ? 3 : hitDamage();                       // 박치기는 목숨 하나를 통째로
+    var dmg = ram ? (G.stage <= 5 ? 2 : 3) : hitDamage();  // 박치기는 목숨 하나를 통째로(1~5 스테이지는 2칸)
     P.hp -= dmg; G.hp = P.hp; S.hitFx = 0.4;
     if (P.hp > 0.01) {
       AU.hurt(); P.inv = 1.0; S.shake = 0.35;
@@ -716,7 +716,7 @@
       if (S.ffAcc >= 1) {
         S.ffAcc -= 1;
         var sh = form[Math.floor(Math.random() * form.length)];
-        eShoot(sh.x, sh.y + 16, aim(sh.x, sh.y) + (Math.random() - 0.5) * 0.25, D.bspd * 0.9);
+        eShoot(sh.x, sh.y + 16, aim(sh.x, sh.y) + (Math.random() - 0.5) * 0.04, D.bspd * 0.9);
       }
     }
   }
@@ -745,7 +745,7 @@
         var p2 = along(e.path, e.d); e.x = p2[0]; e.y = p2[1];
         if (e.shots > 0 && e.y > H * 0.22 && e.y < H * 0.62) {
           e.fireT -= dt;
-          if (e.fireT <= 0) { e.shots--; e.fireT = 0.4; eShoot(e.x, e.y + 16, aim(e.x, e.y) + (Math.random() - 0.5) * 0.18, D.bspd); }
+          if (e.fireT <= 0) { e.shots--; e.fireT = 0.4; eShoot(e.x, e.y + 16, aim(e.x, e.y) + (Math.random() - 0.5) * 0.04, D.bspd); }
         }
         if (e.type === 'bomber' && e.y > H * 0.3 && e.y < H * 0.7) {
           e.bombT -= dt;
@@ -792,7 +792,7 @@
     if (atk === 'fan') {
       var n = emp ? 8 + phase : Math.round(4 + lvl * 4) + phase;
       var spread = 0.9 + lvl * 0.6;
-      [-1, 1].forEach(function (s) { var c = cannon(s); for (var i = 0; i < n; i++) eShoot(c.x, c.y, Math.PI / 2 + (i / (n - 1) - 0.5) * spread, bs * 0.85); });
+      [-1, 1].forEach(function (s) { var c = cannon(s), base = Math.max(Math.PI * 0.2, Math.min(Math.PI * 0.8, aim(c.x, c.y))); for (var i = 0; i < n; i++) eShoot(c.x, c.y, base + (i / (n - 1) - 0.5) * spread, bs * 0.85); });
       AU.hit();
     } else if (atk === 'aim') {
       var bursts = emp ? 3 : 1 + Math.round(lvl * 2), fan3 = emp || bi >= 3;
@@ -901,7 +901,7 @@
       var q = S.eb[i]; q.x += q.vx * dt; q.y += q.vy * dt; q.rot += dt * 4;
       if (q.y > H + 40 || q.y < -260 || q.x < -40 || q.x > W + 40) { S.eb.splice(i, 1); continue; }
       if (P.alive && S.mode !== 'clear') {
-        var r = q.r + 6;
+        var r = q.r + 9;
         if ((q.x - P.x) * (q.x - P.x) + (q.y - P.y) * (q.y - P.y) < r * r) { S.eb.splice(i, 1); hurt(); }
       }
     }
