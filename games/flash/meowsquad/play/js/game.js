@@ -91,7 +91,7 @@
     S = { mode: S ? S.mode : 'title', t: S ? S.t : 0, st: 0, scroll: S ? S.scroll : 0, world: 0, shake: 0, kind: 'normal',
       pb: [], eb: [], en: [], drops: [], parts: [], texts: [], spawnQ: [], timers: [], wings: [], puffs: S ? S.puffs : [],
       form: { t: 0 }, diveT: 2.5, ffAcc: 0, boss: null, bonus: null, clearT: 0, overT: 0, combo: 0, comboT: 0, carried: [], vacuum: false, hitFx: 0, spawned: 0, total: 0, bombFx: null };
-    P = { x: W / 2, y: H - 150, tx: W / 2, ty: H - 150, inv: 0, shield: 0, fireT: 0, spreadT: 0, alive: true, vx: 0, hp: (G && G.hp > 0) ? G.hp : 3 };   // 맞은 횟수는 스테이지를 넘어가도 이어진다
+    P = { x: W / 2, y: H - 150, tx: W / 2, ty: H - 150, inv: 0, shield: 0, fireT: 0, spreadT: 0, alive: true, vx: 0, hp: 3 };   // 맞은 횟수는 스테이지마다 새로 센다(이어지게 했다가 사장님 "좀 아닌듯")
   }
   G = newRun(); resetStage();
 
