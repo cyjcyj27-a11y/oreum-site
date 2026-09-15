@@ -194,7 +194,7 @@
     P.shield = G.up.shield; P.inv = 1.2;
     var last = G.cats.slice(-2);
     for (var w = 0; w < last.length; w++) S.wings.push({ coat: last[w], x: W / 2, y: H + 60 });
-    if (S.kind === 'bonus') { S.bonus = { t: 0, dur: 24, got: 0, total: 0, spawnT: 1.2, wave: 0 }; return; }
+    if (S.kind === 'bonus') { S.bonus = { t: 0, dur: 12, got: 0, total: 0, spawnT: 1.2, wave: 0 }; return; }
     if (S.kind === 'boss') {
       var emp = G.cats.length >= 12 && !G.emperorDone;
       S.timers.push({ t: 2.4, fn: function () { spawnBoss(emp); } });
@@ -237,7 +237,7 @@
   function spawnBoss(emp) {
     var n = G.stage;
     var bi = Math.max(1, Math.round(n / 5));            // 몇 번째 보스인가(첫 보스는 순하게)
-    S.boss = { type: emp ? 'emperor' : 'boss', bi: emp ? 6 : bi, x: W / 2, y: -140, ty: TOPY + (emp ? 90 : 70), hp: emp ? 2000 : 100 + (bi - 1) * 140 + Math.max(0, bi - 5) * 80, t: 0, atkT: 2.8, atk: 0, flash: 0, entering: true, dead: false, spiral: 0 };
+    S.boss = { type: emp ? 'emperor' : 'boss', bi: emp ? 6 : bi, x: W / 2, y: -140, ty: TOPY + (emp ? 90 : 70), hp: Math.round((emp ? 2000 : 100 + (bi - 1) * 140 + Math.max(0, bi - 5) * 80) * 1.5), t: 0, atkT: 2.8, atk: 0, flash: 0, entering: true, dead: false, spiral: 0 };
     S.boss.max = S.boss.hp;
     S.boss.rx = emp ? 165 : 138; S.boss.ry = emp ? 62 : 50;
   }
@@ -781,14 +781,14 @@
       if (b.spT <= 0) { b.spT = emp ? 0.075 : 0.09; b.spA = (b.spA || 0) + 0.42; for (var k = 0; k < 1; k++) eShoot(b.x, b.y + 20, b.spA + k * Math.PI, D.bspd * 0.75); }
     }
     if (b.atkT > 0) return;
-    if (S.eb.length > (emp ? 20 : 8 + b.bi * 2)) { b.atkT = 0.4; return; }     // 화면에 탄이 많으면 쉬었다 쏜다
+    if (S.eb.length > Math.round((emp ? 20 : 8 + b.bi * 2) * 1.5)) { b.atkT = 0.3; return; }     // 화면에 탄이 많으면 쉬었다 쏜다
     // 보스 차례(bi)에 따라 세기를 나눈다: 1번째는 탄 적고 느리게, 뒤로 갈수록 촘촘하게
     var bi = b.bi, lvl = Math.min(1, (bi - 1) / 4);      // 0(첫 보스) ~ 1(다섯 번째부터)
     var bs = D.bspd * (0.7 + 0.3 * lvl);
     var seq = emp ? ['fan', 'aim', 'summon', 'cheese', 'spiral', 'fan', 'aim']
       : bi === 1 ? ['fan', 'summon', 'aim'] : (phase && bi >= 3) ? ['fan', 'aim', 'spiral', 'summon'] : ['fan', 'aim', 'summon'];
     var atk = seq[b.atk++ % seq.length];
-    b.atkT = emp ? 2.0 - phase * 0.3 : (3.2 - lvl * 0.9) - phase * (0.2 + lvl * 0.2);
+    b.atkT = (emp ? 2.0 - phase * 0.3 : (3.2 - lvl * 0.9) - phase * (0.2 + lvl * 0.2)) / 1.5;   // 공격도 1.5배 자주
     if (atk === 'fan') {
       var n = emp ? 8 + phase : Math.round(4 + lvl * 4) + phase;
       var spread = 0.9 + lvl * 0.6;
