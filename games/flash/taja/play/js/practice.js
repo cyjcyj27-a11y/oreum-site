@@ -193,7 +193,8 @@
     for (var i = 0; i < t.length; i++) {
       if (i < v.length) {
         if (v[i] === t[i]) { cls.push('d'); ok++; okKeys += HG.count(t[i]); }
-        else if (i === v.length - 1 && HG.match(t[i], v[i]).wrong === 0) cls.push('c');
+        // 치는 중인 마지막 글자: "가방"을 치다 "갑"이 된 것처럼 받침이 다음 글자 첫소리일 수 있어 두 글자치로 견준다
+        else if (i === v.length - 1 && HG.match(t.substr(i, 2), v[i]).wrong === 0) cls.push('c');
         else { cls.push('x'); bad++; }
       } else cls.push(i === v.length ? 'c' : '');
     }
