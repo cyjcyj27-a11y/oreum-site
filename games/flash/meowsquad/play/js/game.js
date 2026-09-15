@@ -130,7 +130,7 @@
     { id: 'magnet', ko: '자석', en: 'MAGNET', max: 3, cost: [25, 60, 110] },
     { id: 'bombs', ko: '폭탄', en: 'BOMB', max: 5, cost: [40] },
     { id: 'bomb', ko: '폭탄 강화', en: 'BOMB UP', max: 4, cost: [50, 120, 220, 350] },
-    { id: 'life', ko: '목숨', en: 'LIFE', max: 5, cost: [70] }
+    { id: 'life', ko: '목숨', en: 'LIFE', max: 3, cost: [70] }
   ];
 
   // ── 곡선 길 ──
