@@ -30,7 +30,8 @@
   // ── 기록 (브라우저에 저장) — 가장 멀리 간 스테이지 ──
   function loadBest() { try { return Math.max(1, parseInt(localStorage.getItem('alkkagi.best') || '1', 10) || 1); } catch (e) { return 1; } }
   function saveBest(n) { try { localStorage.setItem('alkkagi.best', String(n)); } catch (e) {} }
-  function showRec() { var b = loadBest(), t = b > 1 ? 'BEST STAGE ' + b : ''; $('rec').textContent = t; }
+  // 이어하기: 깬 곳 다음 스테이지부터 (사장님 2026-09-15 "이어하기가 안 되고 1스테이지부터 시작하네")
+  function showRec() { var b = loadBest(), t = b > 1 ? 'BEST STAGE ' + b : ''; $('rec').textContent = t; $('btnCont').hidden = !(b > 1); }
 
   // ── 화면 맞추기 (판이 정사각형이라 가로·세로 다 그대로) ──
   function resize() {
@@ -327,6 +328,7 @@
   cv.addEventListener('contextmenu', function (e) { e.preventDefault(); });
 
   $('btnStart').addEventListener('click', function () { A.init(); G.p2 = false; start(1); });
+  $('btnCont').addEventListener('click', function () { A.init(); G.p2 = false; start(loadBest()); });
   $('btn2p').addEventListener('click', function () { A.init(); G.p2 = true; start(1); });
   $('btnRetry').addEventListener('click', function () { A.init(); if (G.p2) start(1); else start(G.result === HUMAN ? G.stage + 1 : 1); });
   $('btnHome').addEventListener('click', function () { G.mode = 'title'; G.B = setup(1, true); $('over').classList.remove('show'); $('title').classList.remove('hide'); showRec(); updHud(); });

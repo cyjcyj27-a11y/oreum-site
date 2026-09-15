@@ -49,6 +49,8 @@
   .rec:empty { display: none; }
   #title .go, #over .again { pointer-events: auto; display: inline-block; padding: 14px 54px; border-radius: 999px; border: 2px solid #fff; background: rgba(40,24,10,.78); color: #fff; font-size: 24px; letter-spacing: 3px; cursor: pointer; box-shadow: 0 6px 20px rgba(0,0,0,.35); touch-action: manipulation; }
   #title .go:active, #over .again:active { transform: scale(.96); }
+  #title .go[hidden] { display: none; }
+  #btnCont:not([hidden]) + #btnStart { display: block; width: fit-content; margin: 14px auto 0; padding: 10px 40px; font-size: 18px; background: rgba(40,24,10,.55); }   /* 이어하기가 있으면 시작은 작게 아래로 */
   #title .p2 { pointer-events: auto; margin-top: 14px; padding: 8px 26px; border-radius: 999px; border: 1px solid rgba(255,255,255,.6); background: rgba(40,24,10,.55); color: #fff; font-family: Arial, sans-serif; font-weight: 700; font-size: 14px; letter-spacing: 3px; cursor: pointer; touch-action: manipulation; }
   #title .p2:active { transform: scale(.96); }
   #title.hide { display: none; }
@@ -98,6 +100,7 @@
     <div class="rec" id="rec"></div>
   </div>
   <div class="bot">
+    <div class="go" id="btnCont" data-en="CONTINUE" hidden>이어하기</div>
     <div class="go" id="btnStart" data-en="START">시작</div>
     <div class="p2" id="btn2p">2 PLAYERS</div>
   </div>
@@ -105,7 +108,7 @@
 
 <script src="assets/game-home.js" data-top="6" data-left="6" data-fullscreen="1" defer></script>
 <script src="js/audio.js?v=1"></script>
-<script src="js/game.js?v=3"></script>
+<script src="js/game.js?v=4"></script>
 <script src="/assets/visit.js?v=12" defer></script>
 <script src="/assets/game-events.js?v=2" defer></script>
 </body>
