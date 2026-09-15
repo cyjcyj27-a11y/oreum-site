@@ -594,6 +594,9 @@
     for (const p of genParcels()) { p.y = Math.max(0, H(p.x, p.z)); p.own = false; p.b = null; p.ph = R() * 6; p.icon = '🏷'; p.mk = 1; p.rise = 0.004 + R() * 0.028; /* 하루 0.4~3.2% 오른다 */ addMarker(p); E.list.push(p); }
     E.total = E.list.reduce((a, p) => a + p.price, 0);
     let j = {}; try { j = JSON.parse(localStorage.getItem('jeju.prog') || '{}'); } catch (e) {}
+    E.ready = true;   // 이제부터 ACT.save 가 땅 기록을 적어도 된다
+    // 이미 덮어써진 저장 되살리기: 돈 0 · 산 땅 0 · 판 땅 0 은 정상 진행으로는 나올 수 없다 → 100억을 다시 준다
+    if (j.est && j.est.v === 2 && !(ACT.coins > 0) && !(j.est.own || []).length && !(j.est.sold || []).length) { ACT.coins = START; ACT.save(); }
     if (j.est && j.est.v === 2) {
       const own = new Set(j.est.own || []), sold = new Set(j.est.sold || []), rv = new Set(j.est.rv || []); E.end = !!j.est.end; E.day = j.est.day || 1; E.rent = j.est.rent || 0;
       for (const p of E.list) { if (own.has(p.id)) p.own = true; if (sold.has(p.id)) p.sold = true; if (rv.has(p.id)) p.rival = true; if (j.est.mk && j.est.mk[p.id]) p.mk = j.est.mk[p.id]; if (j.est.bd && j.est.bd[p.id]) p.buyDay = j.est.bd[p.id]; if (j.est.pd && j.est.pd[p.id] != null) p.paid = j.est.pd[p.id]; if (j.est.ap && j.est.ap[p.id]) p.apr = { day: j.est.ap[p.id][0], m: j.est.ap[p.id][1] }; const b = j.est.b && j.est.b[p.id]; if (b && BK[b]) { p.b = b; addBuilding(p); } if (p.sold) signAt(p); refresh(p); }

@@ -30,8 +30,9 @@
   const el = id => document.getElementById(id);
 
   // ── 저장 ──
-  function load() { try { const j = JSON.parse(localStorage.getItem('jeju.prog') || '{}'); A.coins = j.coins || 0; A.done = new Set(j.done || []); A.owned = j.owned || ['open']; if (!A.owned.includes('open')) A.owned.unshift('open'); A.hold = j.hold || {}; A.calls = j.calls || {}; A.introDone = !!j.intro; if (j.car && A.owned.includes(j.car)) PLAYER.car = j.car; } catch (e) {} }
-  function save() { try { localStorage.setItem('jeju.prog', JSON.stringify({ coins: A.coins, done: [...A.done], owned: A.owned, car: PLAYER.car, hold: A.hold, calls: A.calls, intro: !!A.introDone, est: window.ESTATE ? ESTATE.state() : undefined })); } catch (e) {} }
+  // 불러오기 전에는 저장하지 않는다 — 로딩 중에 창을 닫거나 새로고침하면 pagehide 가 0원·빈 땅 기록으로 진행을 덮어썼다 (사장님 2026-09-15 "이어하기 했는데 0원")
+  function load() { A.loaded = true; try { const j = JSON.parse(localStorage.getItem('jeju.prog') || '{}'); A.coins = j.coins || 0; A.done = new Set(j.done || []); A.owned = j.owned || ['open']; if (!A.owned.includes('open')) A.owned.unshift('open'); A.hold = j.hold || {}; A.calls = j.calls || {}; A.introDone = !!j.intro; if (j.car && A.owned.includes(j.car)) PLAYER.car = j.car; } catch (e) {} }
+  function save() { if (!A.loaded || (window.ESTATE && !ESTATE.ready)) return; try { localStorage.setItem('jeju.prog', JSON.stringify({ coins: A.coins, done: [...A.done], owned: A.owned, car: PLAYER.car, hold: A.hold, calls: A.calls, intro: !!A.introDone, est: window.ESTATE ? ESTATE.state() : undefined })); } catch (e) {} }
 
   // ── 표식 (이모지 스프라이트 + 바닥 고리) ──
   function emojiTex(icon, done) {
