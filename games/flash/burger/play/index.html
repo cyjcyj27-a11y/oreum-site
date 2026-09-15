@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>킹왕짱버거</title>
+<style>
+@font-face{font-family:'YeonSung';src:url('fonts/YeonSung-title.woff2') format('woff2');font-display:swap}
+@font-face{font-family:'Gaegu';src:url('fonts/Gaegu-title.woff2') format('woff2');font-display:swap}
+@font-face{font-family:'Ria';src:url('fonts/RiaSans-ExtraBold.woff2') format('woff2');font-display:swap}
+
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+html,body{width:100%;height:100%;overflow:hidden;background:#2b2622;
+  font-family:'Ria',-apple-system,'Malgun Gothic',sans-serif;color:#fff;
+  user-select:none;-webkit-user-select:none;touch-action:none}
+#cv{display:block;position:fixed;inset:0;width:100%;height:100%}
+
+/* ---------- 상단바 (스카이라이더 배치) ---------- */
+#topbar{position:fixed;top:0;left:0;right:0;z-index:20;display:flex;align-items:flex-start;
+  gap:6px;flex-wrap:wrap;pointer-events:none;
+  padding:6px 8px 20px calc(104px + env(safe-area-inset-left));
+  background:linear-gradient(180deg,rgba(0,0,0,.45),rgba(0,0,0,0))}
+body:not(.playing) #topbar{visibility:hidden}
+.stat{display:flex;align-items:center;gap:6px;background:rgba(0,0,0,.35);
+  border-radius:15px;padding:5px 10px;backdrop-filter:blur(4px)}
+.stat i{font-style:normal;font-size:13px;opacity:.9}
+.stat b{font-size:17px;font-weight:400;letter-spacing:.3px}
+.spacer{flex:1 1 20px}
+.pill{pointer-events:auto;height:36px;border-radius:18px;border:0;padding:0 13px;
+  background:rgba(0,0,0,.42);color:#fff;font-family:inherit;font-size:15px;cursor:pointer;
+  display:flex;align-items:center;gap:5px;position:relative}
+.pill:active{transform:scale(.95)}
+.pill .dot{position:absolute;top:-2px;right:-2px;width:11px;height:11px;border-radius:50%;
+  background:#ffd23f;box-shadow:0 0 0 2px rgba(0,0,0,.45)}
+.tog{pointer-events:auto;width:36px;height:36px;border-radius:50%;border:0;
+  background:rgba(0,0,0,.4);color:#fff;font-size:15px;cursor:pointer;
+  display:grid;place-items:center;position:relative;font-family:inherit}
+.tog.off{opacity:.4}
+.tog.off::after{content:'';position:absolute;left:6px;right:6px;top:50%;height:2px;
+  background:#fff;transform:rotate(-45deg);border-radius:1px}
+#tPause.off{opacity:1;background:#e8a33d}
+#tPause.off::after{display:none}
+@media (max-width:700px){.stat b{font-size:15px}.stat{padding:5px 8px;gap:5px}#topbar{gap:5px}
+  .pill{padding:0 10px;font-size:14px}.pill span{display:none}}
+
+#pauseCover{position:fixed;inset:0;z-index:18;background:rgba(10,8,6,.55);display:grid;place-items:center;
+  font-size:64px;color:#fff;cursor:pointer}
+
+/* ---------- 패널 ---------- */
+#sheet{position:fixed;inset:0;z-index:50;display:none;background:rgba(14,10,6,.86);
+  backdrop-filter:blur(6px);overflow-y:auto;overscroll-behavior:contain;touch-action:pan-y;
+  padding:calc(14px + env(safe-area-inset-top)) 14px calc(40px + env(safe-area-inset-bottom))}
+#sheet.on{display:block}
+.wrap{max-width:640px;margin:0 auto}
+.shead{display:flex;align-items:center;gap:10px;margin:38px 2px 14px}
+.shead h2{font-size:24px;font-weight:400;letter-spacing:.5px;flex:1}
+.shead .stat{background:rgba(255,255,255,.12)}
+.x{width:40px;height:40px;border-radius:50%;border:0;background:rgba(255,255,255,.13);
+  color:#fff;font-size:19px;cursor:pointer;font-family:inherit}
+.row{display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.07);
+  border:1.5px solid rgba(255,255,255,.09);border-radius:16px;padding:11px 13px;margin-bottom:9px}
+.row .ic{width:44px;height:44px;border-radius:12px;background:rgba(0,0,0,.3);
+  display:grid;place-items:center;font-size:23px;flex:none}
+.row .tx{flex:1;min-width:0}
+.row .tx .nm{font-size:17px}
+.row .tx .lv{font-size:13px;opacity:.62;margin-top:2px}
+.buy{border:0;border-radius:13px;padding:10px 14px;background:#e8a33d;color:#2a1a06;
+  font-family:inherit;font-size:15px;cursor:pointer;white-space:nowrap;min-width:96px}
+.buy:disabled{background:rgba(255,255,255,.12);color:rgba(255,255,255,.42)}
+.buy:active:not(:disabled){transform:scale(.95)}
+.row.goal{border-color:rgba(255,210,63,.34);background:rgba(255,210,63,.08)}
+.row.goal .nm{color:#ffd98a}
+.gbar{height:7px;border-radius:4px;background:rgba(255,255,255,.18);overflow:hidden;margin-top:7px}
+.gbar>span{display:block;height:100%;border-radius:4px;background:#ffd23f}
+.gnum{font-size:14px;opacity:.82;white-space:nowrap;align-self:flex-end}
+
+.dexg{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.dex{background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.09);
+  border-radius:15px;padding:8px 6px 11px;text-align:center}
+.dex.lock{opacity:.45}
+.dex.gold{border-color:#ffd23f;background:rgba(255,210,63,.12)}
+.dex canvas{width:136px;height:172px;display:block;margin:0 auto 4px}
+.dex .nm{font-size:15px}
+.dex .pr{font-size:12px;opacity:.66;margin-top:2px}
+.dex .st{font-size:14px;color:#ffc93a;letter-spacing:1px;margin-top:2px}
+
+/* ---------- 하루 끝 ---------- */
+#end{position:fixed;inset:0;z-index:45;display:none;align-items:center;justify-content:center;
+  background:rgba(14,10,6,.72);backdrop-filter:blur(4px)}
+#end.on{display:flex}
+#end .card{display:flex;flex-direction:column;align-items:center;gap:10px;padding:26px 34px;
+  background:linear-gradient(180deg,#fffaf0,#efe4cc);color:#3a2a1c;border-radius:22px;
+  box-shadow:0 18px 50px rgba(0,0,0,.55);min-width:min(86vw,360px)}
+#endTitle{font-family:'YeonSung','Ria',serif;font-size:clamp(34px,7vw,52px);color:#c4501f;line-height:1.1}
+#endStars{font-size:clamp(30px,6vw,44px);color:#f2a91a;letter-spacing:4px;text-shadow:0 2px 0 #b07a10}
+#endStars .dim,.dex .st .dim{color:rgba(0,0,0,.18);text-shadow:none}
+.dex .st .dim{color:rgba(255,255,255,.18)}
+#endCoin{font-size:28px}
+#endCoin::before{content:'🪙 '}
+#endRank{font-family:'YeonSung','Ria',serif;font-size:30px;color:#fff;background:#d8452f;
+  padding:4px 20px;border-radius:14px}
+#end .btns{display:flex;gap:10px;margin-top:8px}
+#end button{border:0;border-radius:16px;padding:13px 22px;font-family:inherit;font-size:19px;cursor:pointer}
+#endShop{background:#e2d6bd;color:#3a2a1c}
+#endNext{background:#e8a33d;color:#2a1a06;min-width:130px}
+#end button:active{transform:scale(.96)}
+
+/* ---------- 타이틀 ---------- */
+#title{position:fixed;inset:0;z-index:40;display:flex;flex-direction:column;
+  align-items:center;justify-content:flex-start;gap:18px;padding-top:5vh;
+  background:linear-gradient(180deg,rgba(20,12,6,.35) 20%,rgba(20,12,6,0) 60%)}
+#title h1{position:relative;font-family:'Gaegu','YeonSung',serif;font-size:min(23vw,52vh);font-weight:400;
+  color:#ffe1a8;line-height:1.05;letter-spacing:0;
+  -webkit-text-stroke:.045em #ffe1a8;paint-order:stroke fill;          /* 같은 색 테로 획을 통통하게 */
+  filter:drop-shadow(0 12px 16px rgba(0,0,0,.45))}
+#title h1.en{font-size:min(12vw,30vh)}
+#title h1::before{content:attr(data-txt);position:absolute;left:0;top:.06em;z-index:-1;
+  color:#9a3d12;-webkit-text-stroke:.09em #9a3d12;paint-order:stroke fill}   /* 뒤에 깔린 갈색 두께 */
+#title.off{display:none}
+#start{border:0;border-radius:30px;padding:15px 52px;background:#e8a33d;color:#2a1a06;
+  font-family:inherit;font-size:23px;cursor:pointer;box-shadow:0 6px 22px rgba(0,0,0,.45)}
+#start:active{transform:scale(.96)}
+#reset{border:0;border-radius:24px;padding:10px 30px;background:rgba(20,12,6,.55);color:#f2e6d0;
+  font-family:inherit;font-size:18px;cursor:pointer;margin-top:-6px}
+#reset.arm{background:#c9432b;color:#fff}
+#reset:active{transform:scale(.96)}
+#endingGo{position:fixed;left:50%;bottom:calc(6vh + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:42;
+  border:0;border-radius:30px;padding:15px 48px;background:#e8a33d;color:#2a1a06;font-family:inherit;font-size:23px;
+  cursor:pointer;box-shadow:0 6px 22px rgba(0,0,0,.5)}
+
+/* ---------- 가로로 돌리기 ---------- */
+#rotate{position:fixed;inset:0;z-index:90;display:none;place-items:center;text-align:center;
+  background:#2b2622;color:#f2ede4;font-size:17px;line-height:1.8;padding:8vw}
+body.touch.portrait #rotate{display:grid}
+#rotate button{margin:22px 0 16px;padding:15px 32px;border:0;border-radius:99px;cursor:pointer;
+  font-family:inherit;font-size:17px;font-weight:800;color:#2a1a06;background:#e8a33d;pointer-events:auto}
+#rotate .sub{font-size:14px;color:#b0a797;line-height:1.7}
+#rotate .sub a{color:#d8cfbf}
+</style>
+</head>
+<body>
+
+<canvas id="cv"></canvas>
+
+<div id="topbar">
+  <div class="stat"><i>🪙</i><b id="coin">0</b></div>
+  <div class="stat"><b id="day">1일차</b></div>
+  <div class="stat"><i>👥</i><b id="cust">0/3</b></div>
+  <div class="spacer"></div>
+  <button class="pill" id="bShop">🛒 <span data-t="shop">상점</span><i class="dot" id="shopDot" hidden></i></button>
+  <button class="pill" id="bBook">📖 <span data-t="book">메뉴</span></button>
+  <button class="tog" id="tPause" title="일시정지">❚❚</button>
+  <button class="tog" id="tMus" title="음악">♪</button>
+  <button class="tog" id="tSnd" title="효과음">🔊</button>
+</div>
+<div id="pauseCover" hidden>❚❚</div>
+
+<div id="sheet"><div class="wrap">
+  <div class="shead"><h2 id="sTitle">상점</h2>
+    <div class="stat"><i>🪙</i><b id="sCoin">0</b></div>
+    <button class="x" id="bClose">✕</button></div>
+  <div id="sBody"></div>
+</div></div>
+
+<div id="end"><div class="card">
+  <div id="endTitle"></div>
+  <div id="endStars">★★★★★</div>
+  <div id="endCoin">+0</div>
+  <div id="endRank" hidden></div>
+  <div class="btns"><button id="endShop">🛒 <span data-t="shop">상점</span></button><button id="endNext" data-t="next">다음 날</button></div>
+</div></div>
+
+<div id="rotate">
+  <div>
+    <p data-t="rotTitle">가로 화면에서 하는 게임입니다</p>
+    <button type="button" id="rotGo" data-t="rotGo">가로로 돌리기</button>
+    <p class="sub"><span data-t="rotHelp">단추가 안 먹으면 폰의 화면 회전 잠금을 풀고 눕혀 주세요</span><br>
+      <a href="#" id="rotSkip" data-t="rotSkip">그래도 세로로 하기</a></p>
+  </div>
+</div>
+
+<button id="endingGo" data-t="fresh" hidden>새로 하기</button>
+
+<div id="title">
+  <h1 data-txt="킹왕짱버거">킹왕짱버거</h1>
+  <button id="start" data-t="start">시작</button>
+  <button id="reset" data-t="fresh" hidden>새로 하기</button>
+</div>
+
+<script src="assets/game-home.js" data-top="6" data-left="6" data-fullscreen="1" defer></script>
+<script src="assets/landscape.js?v=1"></script>
+<script src="js/i18n.js?v=15"></script>
+<script src="js/audio.js?v=5"></script>
+<script src="js/art.js?v=31"></script>
+<script src="js/game.js?v=25"></script>
+<script src="/assets/visit.js?v=12" defer></script>
+<script src="/assets/game-events.js?v=2" defer></script>
+</body>
+</html>
