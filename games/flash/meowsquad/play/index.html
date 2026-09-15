@@ -42,6 +42,7 @@
 
   .ovl { position: fixed; inset: 0; display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 10; text-align: center; padding: calc(56px + env(safe-area-inset-top)) 16px calc(20px + env(safe-area-inset-bottom)); }
   .ovl.show { display: flex; }
+  .ovl { overflow-y: auto; justify-content: safe center; -webkit-overflow-scrolling: touch; }   /* 화면보다 길면 스크롤(상점이 넘쳐 NEXT 가 안 보였다) */
   .btn { pointer-events: auto; display: inline-block; padding: 14px 54px; border-radius: 999px; border: 2px solid #fff; background: rgba(40,20,70,.8); color: #fff; font-family: 'Ria', Arial, sans-serif; font-size: 24px; letter-spacing: 3px; cursor: pointer; box-shadow: 0 6px 20px rgba(0,0,0,.35); touch-action: manipulation; }
   .btn:active { transform: scale(.96); }
   .btn.sub { margin-top: 14px; padding: 9px 30px; font-size: 16px; border-width: 1px; background: rgba(40,20,70,.6); }
@@ -69,7 +70,6 @@
   #shop .coins { font-size: 24px; margin-bottom: 14px; }
   #cards { display: grid; grid-template-columns: repeat(4, 118px); gap: 10px; margin-bottom: 20px; }
   @media (max-width: 560px) { #cards { grid-template-columns: repeat(3, 112px); } }
-  @media (max-width: 380px) { #cards { grid-template-columns: repeat(2, 130px); } }
   .card { pointer-events: auto; border-radius: 16px; border: 2px solid rgba(255,255,255,.35); background: linear-gradient(#3a2a66, #221640); padding: 10px 6px 9px; cursor: pointer; touch-action: manipulation; box-shadow: 0 6px 16px rgba(0,0,0,.35); }
   .card:active { transform: scale(.96); }
   .card canvas { width: 64px; height: 64px; display: block; margin: 0 auto 4px; }
@@ -82,6 +82,16 @@
   .card.buy { animation: pop .3s; }
   @keyframes pop { 50% { transform: scale(1.1); border-color: #ffe066; } }
 
+  @media (max-width: 480px) {
+    #shop { padding-top: calc(48px + env(safe-area-inset-top)); }
+    #shop h2 { font-size: 24px; margin-bottom: 8px; } #shop .coins { font-size: 20px; margin-bottom: 10px; }
+    #cards { grid-template-columns: repeat(3, minmax(0, 106px)); gap: 7px; margin-bottom: 14px; }
+    .card { padding: 7px 3px 7px; border-radius: 13px; }
+    .card canvas { width: 44px; height: 44px; margin-bottom: 2px; }
+    .card .nm { font-size: 14px; } .card .lv { font-size: 10px; letter-spacing: 1px; margin: 2px 0 5px; }
+    .card .pr { font-size: 13px; padding: 2px 9px; }
+    #btnNext { padding: 11px 44px; font-size: 20px; }
+  }
   #dex { background: rgba(10,4,24,.93); }
   #dexGrid { display: grid; grid-template-columns: repeat(4, 96px); gap: 10px; margin-bottom: 18px; }
   @media (max-width: 440px) { #dexGrid { grid-template-columns: repeat(3, 96px); } }
