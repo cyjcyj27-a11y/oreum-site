@@ -90,8 +90,8 @@
   function resetStage() {
     S = { mode: S ? S.mode : 'title', t: S ? S.t : 0, st: 0, scroll: S ? S.scroll : 0, world: 0, shake: 0, kind: 'normal',
       pb: [], eb: [], en: [], drops: [], parts: [], texts: [], spawnQ: [], timers: [], wings: [], puffs: S ? S.puffs : [],
-      form: { t: 0 }, diveT: 2.5, ffAcc: 0, boss: null, bonus: null, clearT: 0, overT: 0, combo: 0, comboT: 0, carried: [], vacuum: false, spawned: 0, total: 0, bombFx: null };
-    P = { x: W / 2, y: H - 150, tx: W / 2, ty: H - 150, inv: 0, shield: 0, fireT: 0, spreadT: 0, alive: true, vx: 0 };
+      form: { t: 0 }, diveT: 2.5, ffAcc: 0, boss: null, bonus: null, clearT: 0, overT: 0, combo: 0, comboT: 0, carried: [], vacuum: false, hitFx: 0, spawned: 0, total: 0, bombFx: null };
+    P = { x: W / 2, y: H - 150, tx: W / 2, ty: H - 150, inv: 0, shield: 0, fireT: 0, spreadT: 0, alive: true, vx: 0, hp: 3 };
   }
   G = newRun(); resetStage();
 
@@ -201,7 +201,7 @@
       return;
     }
     // 적 목록
-    var list = [], cnt = D.count, cage = nextCageCoat() >= 0 || G.cats.length >= 12;
+    var list = [], cnt = D.count, cage = (nextCageCoat() >= 0 && n >= 2 + G.cats.length * 4) || (G.cats.length >= 12 && n % 3 === 0);   // 고양이는 4스테이지에 한 마리꼴(몇 분 만에 도감이 차서, 2026-09-15)
     if (cage) list.push('cage');
     var nArmor = Math.round(cnt * D.armor), nBomb = Math.round(cnt * D.bomber);
     for (var i = 0; i < nArmor; i++) list.push('armor');
@@ -295,6 +295,9 @@
   function hud() {
     var h = ''; if (innerWidth <= 480) h = '♥' + G.lives; else for (var i = 0; i < G.lives; i++) h += '♥';
     $('hpv').textContent = h;
+    var per = Math.round(3 / hitDamage()), left = Math.ceil(P.hp / hitDamage() - 0.01), pv = '';
+    if (per > 1) for (var k = 0; k < per; k++) pv += '<span class="pip' + (k < left ? '' : ' off') + '"></span>';
+    $('pipv').innerHTML = pv;
     $('shv').textContent = P.shield ? '🛡' + (P.shield > 1 ? P.shield : '') : '';
     $('bombv').textContent = G.bombs; $('bombN').textContent = G.bombs; $('bombBtn').classList.toggle('empty', !G.bombs);
     $('coinv').textContent = G.coins;
@@ -361,6 +364,7 @@
     else if (S.combo === 16) { flash('EXCELLENT'); addCoins(15); AU.fanfare(); }
   }
 
+  function hitDamage() { return G.stage <= 10 ? 1 : G.stage <= 20 ? 1.5 : 3; }
   function hurt() {
     if (P.inv > 0 || !P.alive || S.mode === 'clear' || GOD) return;
     if (P.shield > 0) {
@@ -374,6 +378,15 @@
       S.parts.push({ k: 'wingaway', x: w.x, y: w.y, vx: (w.x < P.x ? -1 : 1) * 160, vy: -260, life: 0, max: 1.4, size: 1, coat: w.coat, rot: 0, vr: (w.x < P.x ? -1 : 1) * 5 });
       explode(w.x, w.y, false); P.inv = 1.6; AU.hurt(); return;
     }
+    // 목숨 하나 = 3칸. 뒤로 갈수록 한 번에 많이 깎인다(1~10: 3번, 11~20: 2번, 21~: 1번 맞으면 목숨 하나)
+    var dmg = hitDamage();
+    P.hp -= dmg; S.hitFx = 0.4;
+    if (P.hp > 0.01) {
+      AU.hurt(); P.inv = 1.0; S.shake = 0.35;
+      parts(P.x, P.y, 10, { k: 'spark', spd: 220, life: 0.4, size: 3, col: ['#ff8a70', '#ffd27a'] });
+      hud(); return;
+    }
+    P.hp = 3;
     G.lives--; AU.hurt(); explode(P.x, P.y, true); hud();
     if (G.lives <= 0) { P.alive = false; setMode('dying'); S.overT = 1.8; AU.boom(true); }
     else P.inv = 2.4;
@@ -597,6 +610,7 @@
     if (m === 'pause') return;
     S.form.t += dt;
     S.shake = Math.max(0, S.shake - dt * 1.6);
+    if (S.hitFx > 0) S.hitFx -= dt;
 
     if (m === 'title') { S.en.forEach(function (e) { var p = slotPos(e.slot.c, e.slot.r); e.x = p.x; e.y = p.y; e.t += dt; }); P.x = W / 2 + Math.sin(S.t * 0.8) * 40; updateParts(dt); return; }
     if (m === 'shop' || m === 'over' || m === 'ending') { updateParts(dt); if (m === 'ending') updateEnding(dt); return; }
@@ -1113,6 +1127,11 @@
       ctx.font = '900 30px Arial, sans-serif'; ctx.lineWidth = 6; ctx.strokeStyle = 'rgba(20,10,40,.8)'; ctx.fillStyle = left <= 5 ? '#ff8a9a' : '#fff';
       var ty = topBelow() + 34; ctx.strokeText(left, W / 2, ty); ctx.fillText(left, W / 2, ty);
       ctx.font = '900 18px Arial, sans-serif'; ctx.fillStyle = '#aef'; ctx.lineWidth = 4; ctx.strokeText('🐟 ' + S.bonus.got, W / 2, ty + 28); ctx.fillText('🐟 ' + S.bonus.got, W / 2, ty + 28);
+    }
+    if (S.hitFx > 0) {                                     // 맞으면 가장자리가 빨갛게
+      var hg = ctx.createRadialGradient(cw / 2, ch / 2, Math.min(cw, ch) * 0.3, cw / 2, ch / 2, Math.max(cw, ch) * 0.7);
+      hg.addColorStop(0, 'rgba(255,40,40,0)'); hg.addColorStop(1, 'rgba(255,40,40,' + (S.hitFx * 1.2).toFixed(3) + ')');
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.fillStyle = hg; ctx.fillRect(0, 0, cw, ch);
     }
     // 테두리 어둡게
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
