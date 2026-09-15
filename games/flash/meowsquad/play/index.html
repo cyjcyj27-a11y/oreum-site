@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, viewport-fit=cover">
+<title>야옹 편대</title>
+<style>
+  @font-face { font-family: 'SingleDay'; src: url('fonts/SingleDay-title.woff2') format('woff2'); font-display: block; }
+  @font-face { font-family: 'Ria'; src: url('fonts/RiaSans-ExtraBold.woff2') format('woff2'); font-display: swap; }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #140e2a; font-family: 'Ria', 'Noto Sans KR', 'Malgun Gothic', sans-serif; color: #fff; user-select: none; -webkit-user-select: none; }
+  #c { display: block; position: fixed; inset: 0; width: 100vw; height: 100vh; touch-action: none; }
+
+  /* 상단 바 — 스카이라이더 배치 */
+  #topbar { position: fixed; left: 0; right: 0; top: 0; height: calc(46px + env(safe-area-inset-top)); padding: env(safe-area-inset-top) calc(10px + env(safe-area-inset-right)) 0 calc(104px + env(safe-area-inset-left)); display: flex; align-items: center; gap: 8px; pointer-events: none; z-index: 5; background: linear-gradient(rgba(8,6,20,.55), rgba(8,6,20,0)); }
+  .stat { display: inline-flex; align-items: center; gap: 5px; padding: 5px 10px; border-radius: 999px; background: rgba(0,0,0,.35); border: 1px solid rgba(255,255,255,.14); font-size: 15px; white-space: nowrap; text-shadow: 0 1px 2px rgba(0,0,0,.6); }
+  .stat b { font-weight: normal; font-size: 17px; } .stat .ic { font-size: 13px; }
+  .stat.dim { opacity: .8; font-size: 13px; } .stat.dim b { font-size: 15px; }
+  #hp b { color: #ff5a6e; letter-spacing: 1px; font-size: 16px; }
+  #hp i { font-style: normal; color: #ffd24a; font-size: 13px; margin-left: 2px; }
+  #hp i:empty { display: none; }
+  #stage { font-family: Arial, sans-serif; font-weight: 700; font-size: 13px; letter-spacing: 2px; }
+  body:not(.playing) #topbar .stat { display: none; }
+  .spacer { flex: 1; }
+  .tog { pointer-events: auto; width: 36px; height: 36px; border-radius: 50%; border: 1px solid rgba(255,255,255,.3); background: rgba(0,0,0,.4); color: #fff; font-family: inherit; font-size: 17px; line-height: 1; padding: 0; touch-action: manipulation; cursor: pointer; }
+  .tog.off { opacity: .4; text-decoration: line-through; }
+  body:not(.playing) #tgPause { display: none; }
+  @media (max-width: 700px) {
+    #topbar { flex-wrap: wrap; height: auto; padding: calc(6px + env(safe-area-inset-top)) 8px 4px calc(100px + env(safe-area-inset-left)); gap: 5px; row-gap: 6px; }
+    .stat { padding: 4px 8px; font-size: 13px; gap: 4px; } .stat b { font-size: 15px; } .stat.dim { display: none; }
+    .tog { width: 32px; height: 32px; font-size: 15px; }
+  }
+
+  #flash { position: fixed; left: 50%; top: 40%; transform: translate(-50%, -50%) scale(.6); font-family: Arial Black, Arial, sans-serif; font-weight: 900; font-size: min(13vw, 72px, 9vh); letter-spacing: 4px; color: #ffe066; -webkit-text-stroke: 3px #2a1440; paint-order: stroke fill; text-shadow: 0 6px 24px rgba(0,0,0,.55); opacity: 0; pointer-events: none; z-index: 8; transition: opacity .2s, transform .35s cubic-bezier(.2,1.6,.4,1); white-space: nowrap; }
+  #flash.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  #flash.bad { color: #ff6a7a; }
+  #flash.cyan { color: #7ff4ff; }
+
+  #keys { position: fixed; right: 12px; bottom: calc(10px + env(safe-area-inset-bottom)); font-size: 11px; opacity: .45; text-align: right; line-height: 1.5; pointer-events: none; z-index: 5; font-family: Arial, sans-serif; }
+  body.touch #keys { display: none; }
+
+  .ovl { position: fixed; inset: 0; display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 10; text-align: center; padding: calc(56px + env(safe-area-inset-top)) 16px calc(20px + env(safe-area-inset-bottom)); }
+  .ovl.show { display: flex; }
+  .btn { pointer-events: auto; display: inline-block; padding: 14px 54px; border-radius: 999px; border: 2px solid #fff; background: rgba(40,20,70,.8); color: #fff; font-family: 'Ria', Arial, sans-serif; font-size: 24px; letter-spacing: 3px; cursor: pointer; box-shadow: 0 6px 20px rgba(0,0,0,.35); touch-action: manipulation; }
+  .btn:active { transform: scale(.96); }
+  .btn.sub { margin-top: 14px; padding: 9px 30px; font-size: 16px; border-width: 1px; background: rgba(40,20,70,.6); }
+  .link { pointer-events: auto; margin-top: 16px; font-family: Arial, sans-serif; font-weight: 700; font-size: 13px; letter-spacing: 3px; opacity: .75; cursor: pointer; padding: 6px 14px; }
+
+  #title { pointer-events: none; justify-content: space-between; padding-top: calc(12vh + env(safe-area-inset-top)); padding-bottom: calc(9vh + env(safe-area-inset-bottom)); }
+  #title h1 { font-family: 'SingleDay', 'Ria', sans-serif; font-weight: 400; font-size: min(26vw, 150px, 17vh); margin: 0; line-height: 1.05; color: #fff6e0; -webkit-text-stroke: 10px #3a1a52; paint-order: stroke fill; text-shadow: 0 8px 0 #ff9a3a, 0 12px 30px rgba(0,0,0,.5); letter-spacing: 2px; }
+  body.en #title h1 { font-family: 'Arial Black', Arial, sans-serif; font-size: min(14vw, 84px, 10vh); letter-spacing: 1px; -webkit-text-stroke: 8px #3a1a52; }
+  .rec { font-family: Arial, sans-serif; font-weight: 700; font-size: 14px; letter-spacing: 3px; color: #ffe066; text-shadow: 0 1px 4px rgba(0,0,0,.7); margin: 14px 0 0; min-height: 18px; }
+  .rec:empty { display: none; }
+  #title .bot { display: flex; flex-direction: column; align-items: center; }
+  #title .row { display: flex; gap: 10px; margin-top: 14px; }
+  #title .row .btn.sub { margin-top: 0; }
+  #title [hidden] { display: none !important; }
+
+  #over { background: rgba(10,4,24,.6); }
+  #over h2 { font-family: 'Arial Black', Arial, sans-serif; font-size: min(12vw, 64px); margin: 0 0 14px; color: #ff6a7a; -webkit-text-stroke: 3px #2a0a20; paint-order: stroke fill; letter-spacing: 3px; }
+  .line { font-family: 'Ria', Arial, sans-serif; font-size: 22px; margin: 4px 0; text-shadow: 0 2px 6px rgba(0,0,0,.6); }
+  .line small { font-family: Arial, sans-serif; font-weight: 700; font-size: 12px; letter-spacing: 3px; opacity: .7; margin-right: 8px; }
+
+  #pause { background: rgba(10,4,24,.6); }
+  #pause h2, #shop h2, #dex h2, #ending h2 { font-family: 'Arial Black', Arial, sans-serif; font-size: 30px; letter-spacing: 6px; margin: 0 0 18px; }
+
+  #shop { background: rgba(10,4,24,.72); }
+  #shop .coins { font-size: 24px; margin-bottom: 14px; }
+  #cards { display: grid; grid-template-columns: repeat(4, 118px); gap: 10px; margin-bottom: 20px; }
+  @media (max-width: 560px) { #cards { grid-template-columns: repeat(3, 112px); } }
+  @media (max-width: 380px) { #cards { grid-template-columns: repeat(2, 130px); } }
+  .card { pointer-events: auto; border-radius: 16px; border: 2px solid rgba(255,255,255,.35); background: linear-gradient(#3a2a66, #221640); padding: 10px 6px 9px; cursor: pointer; touch-action: manipulation; box-shadow: 0 6px 16px rgba(0,0,0,.35); }
+  .card:active { transform: scale(.96); }
+  .card canvas { width: 64px; height: 64px; display: block; margin: 0 auto 4px; }
+  .card .nm { font-size: 17px; }
+  .card .lv { font-family: Arial, sans-serif; font-weight: 700; font-size: 11px; letter-spacing: 2px; opacity: .7; margin: 3px 0 6px; }
+  .card .pr { display: inline-block; font-size: 16px; padding: 3px 12px; border-radius: 999px; background: rgba(255,210,74,.2); color: #ffe066; }
+  .card.no .pr { color: #aaa; background: rgba(255,255,255,.08); }
+  .card.max { opacity: .5; pointer-events: none; }
+  .card.max .pr { color: #fff; }
+  .card.buy { animation: pop .3s; }
+  @keyframes pop { 50% { transform: scale(1.1); border-color: #ffe066; } }
+
+  #dex { background: rgba(10,4,24,.93); }
+  #dexGrid { display: grid; grid-template-columns: repeat(4, 96px); gap: 10px; margin-bottom: 18px; }
+  @media (max-width: 440px) { #dexGrid { grid-template-columns: repeat(3, 96px); } }
+  #dexGrid > div { border-radius: 14px; background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.14); padding: 6px 2px; font-size: 13px; }
+  #dexGrid canvas { width: 72px; height: 72px; display: block; margin: 0 auto 2px; }
+
+  #ending { justify-content: flex-start; padding-top: calc(12vh + env(safe-area-inset-top)); background: linear-gradient(rgba(10,4,24,.6), rgba(10,4,24,0) 50%); }
+  #ending h2 { font-size: min(14vw, 72px); color: #ffe066; -webkit-text-stroke: 3px #3a1a52; paint-order: stroke fill; }
+
+  /* 이동 패드: 스카이라이더와 같은 왼쪽 아래 둥근 패드(전체화면 알약 위) */
+  #pad { display: none; position: fixed; left: calc(14px + env(safe-area-inset-left)); bottom: calc(48px + env(safe-area-inset-bottom)); width: 186px; height: 186px; border-radius: 50%; border: 2px solid rgba(255,255,255,.45); background: rgba(20,24,30,.38); touch-action: none; -webkit-user-select: none; user-select: none; z-index: 6; }
+  #knob { position: absolute; left: 50%; top: 50%; width: 72px; height: 72px; margin: -36px 0 0 -36px; border-radius: 50%; border: 2px solid rgba(255,255,255,.75); background: rgba(255,255,255,.3); pointer-events: none; }
+  #pad.on #knob { background: rgba(255,255,255,.5); }
+  body.touch.playing #pad { display: block; }
+  @media (max-height: 760px), (max-width: 400px) {
+    #pad { width: 160px; height: 160px; left: calc(10px + env(safe-area-inset-left)); bottom: calc(44px + env(safe-area-inset-bottom)); }
+    #knob { width: 62px; height: 62px; margin: -31px 0 0 -31px; }
+  }
+  /* 폭탄 단추: 오른쪽 아래 주 행동 자리 */
+  #bombBtn { position: fixed; right: calc(16px + env(safe-area-inset-right)); bottom: calc(60px + env(safe-area-inset-bottom)); width: 88px; height: 88px; border-radius: 50%; border: 2px solid rgba(255,255,255,.55); background: radial-gradient(rgba(255,120,80,.35), rgba(0,0,0,.32) 70%); padding: 0; z-index: 6; touch-action: none; cursor: pointer; display: none; }
+  body.playing #bombBtn { display: block; }
+  #bombBtn canvas { width: 56px; height: 62px; display: block; margin: 8px auto 0; pointer-events: none; }
+  #bombBtn b { position: absolute; right: -2px; top: -2px; min-width: 28px; height: 28px; border-radius: 14px; background: #ff5a4a; border: 2px solid #fff; color: #fff; font: 900 16px/24px Arial, sans-serif; pointer-events: none; }
+  #bombBtn:active { transform: scale(.94); }
+  #bombBtn.empty { opacity: .35; }
+  #bombBtn.empty b { background: #666; }
+  @media (min-width: 900px) and (pointer: fine) { #bombBtn { right: calc(50% - 260px); width: 72px; height: 72px; } #bombBtn canvas { width: 46px; height: 51px; margin-top: 7px; } }
+  /* 폰 폭: 상단바를 한 줄로 — 하트는 숫자로, 폭탄 칸은 단추 숫자로 대신, 음악·효과음은 일시정지 창 안에 */
+  #pauseTogs { display: none; gap: 14px; margin: 4px 0 22px; }
+  #pauseTogs .tog { width: 52px; height: 52px; font-size: 22px; }
+  @media (max-width: 480px) {
+    #topbar { flex-wrap: nowrap; gap: 4px; padding-left: calc(96px + env(safe-area-inset-left)); padding-right: 6px; }
+    .stat { padding: 3px 7px; font-size: 12px; gap: 3px; } .stat b { font-size: 14px; } #hp b { font-size: 14px; letter-spacing: 0; }
+    #stage { font-size: 11px; letter-spacing: 0; }
+    #bombStat, #tgBgm, #tgSnd { display: none; }
+    body:not(.playing) #tgBgm, body:not(.playing) #tgSnd { display: inline-block; }
+    #pauseTogs { display: flex; }
+    #title h1 { font-size: min(19vw, 150px, 15vh); white-space: nowrap; -webkit-text-stroke: 8px #3a1a52; }
+  }
+  @media (max-width: 480px) { #topbar .tog { width: 30px; height: 30px; font-size: 13px; flex: none; } }
+  @media (max-width: 420px) { #catStat { display: none; } }
+  @media (max-width: 340px) { #stage { display: none; } }
+  #rotate { display: none; }
+  body.shot #topbar, body.shot #keys, body.shot #oreumHome, body.shot #oreumFs, body.shot .bot, body.shot .rec { display: none !important; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+
+<div id="topbar">
+  <span class="stat" id="hp"><b id="hpv">♥♥♥</b><i id="shv"></i></span>
+  <span class="stat"><span class="ic">🪙</span><b id="coinv">0</b></span>
+  <span class="stat" id="stage">STAGE 1</span>
+  <span class="stat" id="bombStat"><span class="ic">💣</span><b id="bombv">1</b></span>
+  <span class="stat" id="catStat"><span class="ic">🐱</span><b id="catv">0/12</b></span>
+  <span class="stat dim" id="scorev">0</span>
+  <span class="spacer"></span>
+  <button class="tog" id="tgPause" title="P">❚❚</button>
+  <button class="tog" id="tgBgm" title="M">♪</button>
+  <button class="tog" id="tgSnd" title="K">🔊</button>
+</div>
+
+<div id="pad"><div id="knob"></div></div>
+<button id="bombBtn" title="B"><b id="bombN">1</b></button>
+<div id="flash"></div>
+<div id="keys" data-en="←→↑↓ move · B bomb · P pause · M music · K sound">←→↑↓ 이동 · B 폭탄 · P 일시정지 · M 음악 · K 효과음</div>
+
+<div class="ovl show" id="title">
+  <div class="top">
+    <h1 data-en="MEOWSQUAD">야옹 편대</h1>
+    <div class="rec" id="rec"></div>
+  </div>
+  <div class="bot">
+    <div class="btn" id="btnStart" data-en="START">시작</div>
+    <div class="row">
+      <div class="btn sub" id="btnCont" data-en="CONTINUE" hidden>이어하기</div>
+      <div class="btn sub" id="btnDex" data-en="CATS">🐱 도감</div>
+    </div>
+  </div>
+</div>
+
+<div class="ovl" id="dex">
+  <h2 id="dexTitle">🐱 0/12</h2>
+  <div id="dexGrid"></div>
+  <div class="btn sub" id="btnDexClose">OK</div>
+</div>
+
+<div class="ovl" id="shop">
+  <h2 data-en="SHOP">상점</h2>
+  <div class="coins">🪙 <b id="shopCoin">0</b></div>
+  <div id="cards"></div>
+  <div class="btn" id="btnNext">NEXT</div>
+</div>
+
+<div class="ovl" id="pause">
+  <h2>PAUSE</h2>
+  <div id="pauseTogs"><button class="tog" id="pBgm">♪</button><button class="tog" id="pSnd">🔊</button></div>
+  <div class="btn" id="btnResume" data-en="RESUME">계속</div>
+  <div class="link" id="btnPauseTitle">TITLE</div>
+</div>
+
+<div class="ovl" id="over">
+  <h2>GAME OVER</h2>
+  <div class="line"><small>STAGE</small><span id="oStage">1</span></div>
+  <div class="line"><small>SCORE</small><span id="oScore">0</span></div>
+  <div class="rec" id="oRec"></div>
+  <div class="btn" id="btnRetry" style="margin-top:22px">RETRY</div>
+  <div class="link" id="btnOverTitle">TITLE</div>
+</div>
+
+<div class="ovl" id="ending">
+  <h2>ALL CLEAR</h2>
+  <div class="line"><small>SCORE</small><span id="eScore">0</span></div>
+  <div class="btn" id="btnEndNext" style="margin-top:22px">NEXT</div>
+  <div class="link" id="btnEndTitle">TITLE</div>
+</div>
+
+<script src="assets/game-home.js" data-top="6" data-left="6" data-fullscreen="1" defer></script>
+<script src="js/art.js?v=3"></script>
+<script src="js/audio.js?v=2"></script>
+<script src="js/game.js?v=18"></script>
+<script src="/assets/visit.js?v=12" defer></script>
+<script src="/assets/game-events.js?v=2" defer></script>
+</body>
+</html>
