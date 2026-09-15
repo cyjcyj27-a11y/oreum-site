@@ -86,12 +86,12 @@
 
   // ── 상태 ──
   var G, S, P, GOD = false;
-  function newRun() { return { stage: 1, score: 0, coins: 0, lives: 3, up: { rate: 0, spread: 0, shield: 0, magnet: 0, bomb: 0 }, bombs: 0, cats: [], emperorDone: false }; }
+  function newRun() { return { stage: 1, score: 0, coins: 0, lives: 3, up: { rate: 0, spread: 0, shield: 0, magnet: 0, bomb: 0 }, bombs: 0, hp: 3, cats: [], emperorDone: false }; }
   function resetStage() {
     S = { mode: S ? S.mode : 'title', t: S ? S.t : 0, st: 0, scroll: S ? S.scroll : 0, world: 0, shake: 0, kind: 'normal',
       pb: [], eb: [], en: [], drops: [], parts: [], texts: [], spawnQ: [], timers: [], wings: [], puffs: S ? S.puffs : [],
       form: { t: 0 }, diveT: 2.5, ffAcc: 0, boss: null, bonus: null, clearT: 0, overT: 0, combo: 0, comboT: 0, carried: [], vacuum: false, hitFx: 0, spawned: 0, total: 0, bombFx: null };
-    P = { x: W / 2, y: H - 150, tx: W / 2, ty: H - 150, inv: 0, shield: 0, fireT: 0, spreadT: 0, alive: true, vx: 0, hp: 3 };
+    P = { x: W / 2, y: H - 150, tx: W / 2, ty: H - 150, inv: 0, shield: 0, fireT: 0, spreadT: 0, alive: true, vx: 0, hp: (G && G.hp > 0) ? G.hp : 3 };   // 맞은 횟수는 스테이지를 넘어가도 이어진다
   }
   G = newRun(); resetStage();
 
@@ -250,7 +250,7 @@
   function show(id, on) { $(id).classList.toggle('show', !!on); }
   function hideAll() { ['title', 'shop', 'over', 'pause', 'dex', 'ending'].forEach(function (id) { show(id, false); }); }
 
-  function saveProgress() { store.set('save', { stage: G.stage, score: G.score, coins: G.coins, lives: G.lives, up: G.up, bombs: G.bombs, cats: G.cats, emperorDone: G.emperorDone }); }
+  function saveProgress() { store.set('save', { stage: G.stage, score: G.score, coins: G.coins, lives: G.lives, hp: G.hp, up: G.up, bombs: G.bombs, cats: G.cats, emperorDone: G.emperorDone }); }
   function startStage() {
     hideAll();
     buildStage(G.stage);
@@ -361,7 +361,7 @@
     else if (S.combo === 16) { flash('EXCELLENT'); addCoins(15); AU.fanfare(); }
   }
 
-  function hitDamage() { return G.stage <= 10 ? 1 : G.stage <= 20 ? 1.5 : 3; }
+  function hitDamage() { return G.stage <= 5 ? 1 : G.stage <= 15 ? 1.5 : 3; }   // 1~5: 3번, 6~15: 2번, 16~: 1번 맞으면 목숨 하나
   function hurt(ram) {
     if (P.inv > 0 || !P.alive || S.mode === 'clear' || GOD) return;
     if (P.shield > 0) {
@@ -370,20 +370,19 @@
       hud(); return;
     }
     S.shake = 0.5;
-    if (S.wings.length) {
-      var w = S.wings.pop();
-      S.parts.push({ k: 'wingaway', x: w.x, y: w.y, vx: (w.x < P.x ? -1 : 1) * 160, vy: -260, life: 0, max: 1.4, size: 1, coat: w.coat, rot: 0, vr: (w.x < P.x ? -1 : 1) * 5 });
-      explode(w.x, w.y, false); P.inv = 1.6; AU.hurt(); return;
-    }
-    // 목숨 하나 = 3칸. 뒤로 갈수록 한 번에 많이 깎인다(1~10: 3번, 11~20: 2번, 21~: 1번 맞으면 목숨 하나)
+    // 호위기는 대신 맞지 않는다(목숨이 너무 안 준다, 2026-09-15). 목숨 하나 = 3칸
     var dmg = ram ? 3 : hitDamage();                       // 박치기는 목숨 하나를 통째로
-    P.hp -= dmg; S.hitFx = 0.4;
+    P.hp -= dmg; G.hp = P.hp; S.hitFx = 0.4;
     if (P.hp > 0.01) {
       AU.hurt(); P.inv = 1.0; S.shake = 0.35;
       parts(P.x, P.y, 10, { k: 'spark', spd: 220, life: 0.4, size: 3, col: ['#ff8a70', '#ffd27a'] });
       hud(); return;
     }
-    P.hp = 3;
+    P.hp = G.hp = 3;
+    while (S.wings.length) {                                // 목숨이 줄면 호위기는 흩어졌다가 다음 스테이지에 다시 붙는다
+      var w = S.wings.pop();
+      S.parts.push({ k: 'wingaway', x: w.x, y: w.y, vx: (w.x < P.x ? -1 : 1) * 160, vy: -260, life: 0, max: 1.4, size: 1, coat: w.coat, rot: 0, vr: (w.x < P.x ? -1 : 1) * 5 });
+    }
     G.lives--; AU.hurt(); explode(P.x, P.y, true); hud();
     if (G.lives <= 0) { P.alive = false; setMode('dying'); S.overT = 1.8; AU.boom(true); }
     else P.inv = 2.4;
