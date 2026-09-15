@@ -18,6 +18,7 @@ import io, os, re, sys
 
 # slug, 한국어 경로, 영어 경로, 한국어 이름, 한국어 장르 앵커, 영어 이름, 영어 장르 앵커, 태그
 GAMES = [
+    ("taja",          "/games/flash/taja/",          "/en/games/flash/taja/",          "타자연습 달리기",    "한글·영어 타자연습 게임",        "Typing Race",          "free typing practice game", {"casual", "kids", "animal", "educational"}),
     ("burger",        "/games/flash/burger/",        "/en/games/flash/burger/",        "킹왕짱버거",        "햄버거 만들기 요리게임",          "KINGWANGZZANG",        "burger cooking game", {"sim", "cooking", "casual"}),
     ("meowsquad",     "/games/flash/meowsquad/",     "/en/games/flash/meowsquad/",     "야옹 편대",         "고양이 비행기 슈팅게임",          "MEOWSQUAD",            "cat fighter shoot 'em up game", {"arcade", "cat", "casual"}),
     ("ueno",          "/games/ueno/",                "/en/games/ueno/",                "우에노짱",          "착한 양아치 커플 3D 공원 어드벤처",  "UENO ZZANG",               "3D park adventure brawler",     {"3d", "adventure", "cat", "fight"}),

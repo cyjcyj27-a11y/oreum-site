@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
+<title>타자연습 달리기</title>
+<style>
+  @font-face { font-family: 'Poor'; src: url('fonts/PoorStory-title.woff2?v=2') format('woff2'); font-display: block; }
+  @font-face { font-family: 'Ria'; src: url('fonts/RiaSans-ExtraBold.woff2') format('woff2'); font-display: swap; }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #1d2a44; font-family: 'Ria', 'Noto Sans KR', 'Malgun Gothic', sans-serif; color: #fff; user-select: none; }
+  #c { position: fixed; left: 0; top: 0; display: block; touch-action: manipulation; }
+
+  /* 상단 바 */
+  #topbar { position: fixed; left: 0; right: 0; top: 0; height: calc(46px + env(safe-area-inset-top)); padding: env(safe-area-inset-top) calc(10px + env(safe-area-inset-right)) 0 calc(104px + env(safe-area-inset-left)); display: flex; align-items: center; gap: 8px; pointer-events: none; z-index: 5; background: linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,0)); }
+  .stat { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 999px; background: rgba(0,0,0,.38); border: 1px solid rgba(255,255,255,.14); font-size: 15px; white-space: nowrap; text-shadow: 0 1px 2px rgba(0,0,0,.6); }
+  .stat b { font-weight: normal; font-size: 19px; min-width: 30px; text-align: center; }
+  .stat small { font-size: 12px; opacity: .8; }
+  body:not(.racing) #topbar .stat { visibility: hidden; }
+  .spacer { flex: 1; }
+  .tog { pointer-events: auto; width: 36px; height: 36px; border-radius: 50%; border: 1px solid rgba(255,255,255,.3); background: rgba(0,0,0,.4); color: #fff; font-family: inherit; font-size: 16px; line-height: 1; padding: 0; cursor: pointer; touch-action: manipulation; }
+  .tog.off { opacity: .4; text-decoration: line-through; }
+  body:not(.racing) #tgPause { display: none; }
+  @media (max-width: 440px) { #stAcc { display: none; } }
+  @media (max-width: 560px) {
+    #topbar { padding-left: calc(96px + env(safe-area-inset-left)); padding-right: 6px; gap: 4px; }
+    .stat { padding: 4px 7px; font-size: 12px; gap: 3px; } .stat b { font-size: 15px; min-width: 24px; }
+    .tog { width: 30px; height: 30px; font-size: 13px; }
+  }
+
+  /* 낱말 판 */
+  #panel { position: fixed; left: 0; right: 0; bottom: 0; z-index: 6; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 10px 16px calc(12px + env(safe-area-inset-bottom)); background: linear-gradient(#2b3a5c, #1a2440); border-top: 3px solid #0e1528; box-shadow: 0 -6px 18px rgba(0,0,0,.35); }
+  body.racing #panel, body.counting #panel { display: flex; }
+  #next { font-size: 18px; color: rgba(255,255,255,.4); min-height: 22px; white-space: nowrap; overflow: hidden; max-width: 100%; text-overflow: ellipsis; }
+  #word { font-size: 52px; line-height: 1.15; letter-spacing: 1px; white-space: nowrap; text-shadow: 0 3px 0 rgba(0,0,0,.35); }
+  #word span { color: #fff; transition: color .08s; }
+  #word span.d { color: #7ee08a; }
+  #word span.c { color: #ffe066; border-bottom: 4px solid #ffe066; }
+  #word span.x { color: #ff7a6a; border-bottom-color: #ff7a6a; }
+  #word span.sp { display: inline-block; width: .32em; }
+  #word span.sp.c { border-bottom: 4px solid #ffe066; }
+  #inp { width: min(560px, 92vw); font-family: 'Ria', 'Malgun Gothic', sans-serif; font-size: 30px; padding: 8px 18px; border-radius: 14px; border: 3px solid #0e1528; background: #fbf8ef; color: #1d2a44; text-align: center; outline: none; box-shadow: inset 0 3px 0 rgba(0,0,0,.12); user-select: text; }
+  #inp.bad { background: #ffe1dc; color: #b8321e; animation: shake .22s; }
+  #inp:disabled { opacity: .6; }
+  @keyframes shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
+  @media (max-height: 520px) { #word { font-size: 36px; } #inp { font-size: 22px; padding: 4px 14px; } #next { font-size: 14px; min-height: 16px; } #panel { gap: 3px; padding-top: 6px; } }
+
+  #flash { position: fixed; left: 50%; top: 34%; transform: translate(-50%, -50%) scale(.6); font-family: 'Ria', Arial, sans-serif; font-size: min(16vw, 96px); letter-spacing: 4px; color: #ffe066; -webkit-text-stroke: 4px #1d2a44; paint-order: stroke fill; text-shadow: 0 6px 24px rgba(0,0,0,.45); opacity: 0; pointer-events: none; z-index: 8; transition: opacity .18s, transform .3s cubic-bezier(.2,1.6,.4,1); white-space: nowrap; }
+  #flash.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  #flash.small { font-size: min(9vw, 54px); top: 30%; }
+  #flash.go { color: #7ee08a; }
+
+  /* 타이틀 */
+  .scr { position: fixed; inset: 0; z-index: 10; display: none; }
+  .scr.show { display: flex; }
+  #title { flex-direction: column; align-items: center; justify-content: space-between; padding: calc(64px + env(safe-area-inset-top)) 16px calc(70px + env(safe-area-inset-bottom)); pointer-events: none; }
+  #title h1 { font-family: 'Poor', 'Ria', sans-serif; font-weight: 400; font-size: min(17vw, 150px, 24vh); margin: 0; line-height: 1; color: #fff; -webkit-text-stroke: 14px #1d2a44; paint-order: stroke fill; text-shadow: 0 10px 0 #1d2a44, 0 16px 30px rgba(0,0,0,.35); letter-spacing: -2px; text-align: center; }
+  #title h1 em { font-style: normal; color: #ffd84a; }
+  body.en #title h1 { font-size: min(14vw, 130px, 22vh); }
+  .rec { font-family: 'Ria', Arial, sans-serif; font-size: 20px; letter-spacing: 1px; color: #ffe066; text-shadow: 0 2px 4px rgba(0,0,0,.7); margin-top: 16px; min-height: 22px; text-align: center; }
+  .btn { pointer-events: auto; display: inline-block; padding: 16px 70px; border-radius: 999px; border: 3px solid #fff; background: #e8483c; color: #fff; font-family: 'Ria', sans-serif; font-size: 30px; letter-spacing: 3px; cursor: pointer; box-shadow: 0 6px 0 #8a2418, 0 10px 24px rgba(0,0,0,.35); touch-action: manipulation; text-shadow: 0 2px 0 rgba(0,0,0,.25); }
+  .btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #8a2418; }
+  .btn.sub { background: rgba(20,30,55,.85); box-shadow: 0 5px 0 #0a1020; font-size: 20px; padding: 10px 30px; border-width: 2px; }
+  .btn.sub:active { box-shadow: 0 1px 0 #0a1020; }
+
+  /* 코스 고르기 */
+  #select { flex-direction: column; align-items: center; background: rgba(12,20,40,.72); overflow-y: auto; padding: calc(58px + env(safe-area-inset-top)) 16px calc(24px + env(safe-area-inset-bottom)); -webkit-overflow-scrolling: touch; }
+  #grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; width: min(1080px, 100%); }
+  @media (min-width: 821px) and (min-height: 560px) { #grid { width: min(1080px, 100%, calc((100vh - 250px) * 2.03 + 42px)); } }
+  .card { position: relative; border-radius: 16px; overflow: hidden; background: #0e1528; border: 3px solid rgba(255,255,255,.2); cursor: pointer; aspect-ratio: 16/10.5; touch-action: manipulation; transition: transform .12s, border-color .12s; }
+  .card:hover { transform: translateY(-3px); border-color: #fff; }
+  .card canvas.bg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .card .num { position: absolute; left: 8px; top: 4px; font-size: 32px; color: #fff; -webkit-text-stroke: 5px #1d2a44; paint-order: stroke fill; }
+  .card .boss { position: absolute; right: 6px; bottom: 6px; width: 38%; max-width: 76px; border-radius: 50%; border: 3px solid #fff; box-shadow: 0 3px 8px rgba(0,0,0,.4); }
+  .card .medal { position: absolute; left: 8px; bottom: 8px; width: 34px; height: 34px; border-radius: 50%; border: 3px solid rgba(255,255,255,.9); box-shadow: 0 2px 6px rgba(0,0,0,.4); display: flex; align-items: center; justify-content: center; font-size: 15px; color: #5a3a00; }
+  .card .medal.m1 { background: radial-gradient(circle at 35% 30%, #f5c89a, #b8743a); }
+  .card .medal.m2 { background: radial-gradient(circle at 35% 30%, #ffffff, #9aa4b4); }
+  .card .medal.m3 { background: radial-gradient(circle at 35% 30%, #fff6b0, #e0a820); }
+  .card .medal.m0 { display: none; }
+  .card .best { position: absolute; left: 50px; bottom: 10px; font-size: 21px; color: #fff; text-shadow: 0 0 4px #0e1528, 0 0 2px #0e1528, 0 2px 3px #0e1528; }
+  .card.lock { cursor: default; filter: grayscale(1) brightness(.5); }
+  .card.lock:hover { transform: none; border-color: rgba(255,255,255,.2); }
+  .card.lock::after { content: '🔒'; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); font-size: 34px; }
+  .card.now { border-color: #ffd84a; box-shadow: 0 0 0 3px rgba(255,216,74,.35); }
+  .chips { position: absolute; left: 6px; right: 6px; bottom: 6px; display: flex; gap: 4px; justify-content: space-between; }
+  .chip { position: relative; flex: 1; max-width: 46px; aspect-ratio: 1; border-radius: 50%; border: 2px solid rgba(255,255,255,.85); background: rgba(14,21,40,.78); display: flex; align-items: center; justify-content: center; cursor: pointer; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,.4); touch-action: manipulation; }
+  .chip b { position: relative; font-weight: normal; font-size: 15px; color: #fff; text-shadow: 0 0 3px #0e1528, 0 1px 2px #0e1528; }
+  .chip img { position: absolute; inset: 0; width: 100%; height: 100%; opacity: .85; }
+  .chip.bs { border-color: #ff8a70; }
+  .chip.m1 { background: radial-gradient(circle at 35% 30%, #f5c89a, #b8743a); }
+  .chip.m2 { background: radial-gradient(circle at 35% 30%, #ffffff, #9aa4b4); }
+  .chip.m3 { background: radial-gradient(circle at 35% 30%, #fff6b0, #e0a820); }
+  .chip.m1 img, .chip.m2 img, .chip.m3 img { opacity: .55; }
+  .chip.off { filter: grayscale(1) brightness(.55); cursor: default; }
+  .chip.cur { border-color: #ffd84a; box-shadow: 0 0 0 3px rgba(255,216,74,.55); animation: chipPulse 1.2s ease-in-out infinite; }
+  @keyframes chipPulse { 50% { transform: scale(1.1); } }
+  @media (max-width: 520px) { .chip b { font-size: 12px; } .chips { gap: 2px; left: 4px; right: 4px; bottom: 4px; } }
+  #roster { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin: 18px 0 4px; width: min(1080px, 100%); }
+  .rp { width: 56px; height: 56px; border-radius: 50%; border: 3px solid rgba(255,255,255,.25); cursor: pointer; overflow: hidden; background: #0e1528; touch-action: manipulation; }
+  .rp canvas { width: 100%; height: 100%; display: block; }
+  .rp.on { border-color: #ffd84a; box-shadow: 0 0 0 3px rgba(255,216,74,.4); transform: scale(1.08); }
+  .rp.lock { cursor: default; background: #2a3450; } .rp.lock canvas { filter: grayscale(1) brightness(.3) contrast(1.2); }
+  @media (max-width: 820px) { #grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; } }
+  @media (max-width: 520px) { #grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .rp { width: 46px; height: 46px; } }
+  #selBack { margin-top: 16px; }
+
+  /* 결과 */
+  #result { flex-direction: column; align-items: center; justify-content: center; background: rgba(10,16,34,.55); text-align: center; padding: 60px 16px 20px; }
+  #rRank { font-family: 'Ria', sans-serif; font-size: min(26vw, 170px, 30vh); line-height: 1; color: #ffd84a; -webkit-text-stroke: 8px #1d2a44; paint-order: stroke fill; text-shadow: 0 8px 0 #1d2a44; }
+  #rRank.r4 { color: #c8d0e0; } #rRank.r3 { color: #f0b48a; } #rRank.r2 { color: #f4f6fa; }
+  #rStats { display: flex; gap: 26px; justify-content: center; margin: 14px 0 6px; font-size: min(8vw, 40px); text-shadow: 0 3px 6px rgba(0,0,0,.6); }
+  #rStats span small { font-size: .5em; opacity: .8; margin-left: 3px; }
+  #rNew { color: #7ee08a; font-size: 22px; min-height: 28px; letter-spacing: 1px; text-shadow: 0 2px 4px rgba(0,0,0,.6); }
+  #rUnlock { display: flex; gap: 10px; justify-content: center; min-height: 10px; margin: 4px 0 12px; }
+  #rUnlock canvas { width: 72px; height: 72px; border-radius: 50%; border: 3px solid #ffd84a; box-shadow: 0 0 20px rgba(255,216,74,.6); animation: pop .5s cubic-bezier(.2,1.6,.4,1); }
+  @keyframes pop { from { transform: scale(0); } to { transform: scale(1); } }
+  #rBtns { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+  #rBtns .row { display: flex; gap: 10px; }
+
+  @media (max-height: 600px) { #result { padding-top: 44px; } #rRank { font-size: 22vh; -webkit-text-stroke-width: 6px; text-shadow: 0 5px 0 #1d2a44; } #rStats { font-size: 30px; margin: 6px 0 2px; } #rNew { font-size: 18px; min-height: 22px; } #rUnlock { margin: 2px 0 6px; } #rUnlock canvas { width: 50px; height: 50px; } #rBtns { gap: 10px; } #rBtns .btn { font-size: 22px; padding: 10px 44px; } #rBtns .btn.sub { font-size: 17px; padding: 7px 24px; } }
+  /* 일시정지 */
+  #pause { flex-direction: column; align-items: center; justify-content: center; gap: 16px; background: rgba(10,16,34,.7); }
+  #pause h2 { font-family: Arial, sans-serif; font-weight: 900; letter-spacing: 6px; margin: 0 0 8px; }
+
+  /* 엔딩 */
+  #ending { flex-direction: column; align-items: flex-end; justify-content: flex-end; padding: 0 calc(18px + env(safe-area-inset-right)) calc(18px + env(safe-area-inset-bottom)) 0; pointer-events: none; }
+  #ending .btn { opacity: 0; transition: opacity 1s; }
+  #ending.ready .btn { opacity: 1; }
+
+  body.racing #oreumFs, body.counting #oreumFs { display: none !important; }
+  /* 첫 화면 모드 고르기 */
+  .modes { display: flex; gap: 22px; pointer-events: auto; }
+  .mode { width: min(40vw, 230px); padding: 18px 10px 16px; border-radius: 26px; border: 4px solid #fff; background: linear-gradient(#3f8fe0, #2566b8); box-shadow: 0 7px 0 #173f78, 0 12px 26px rgba(0,0,0,.35); cursor: pointer; text-align: center; touch-action: manipulation; }
+  .mode.run { background: linear-gradient(#f2604e, #c8321e); box-shadow: 0 7px 0 #7a1e12, 0 12px 26px rgba(0,0,0,.35); }
+  .mode i { display: block; font-style: normal; font-size: min(12vw, 64px); line-height: 1.1; }
+  .mode b { display: block; font-weight: normal; font-size: min(8vw, 38px); color: #fff; text-shadow: 0 3px 0 rgba(0,0,0,.25); margin-top: 4px; }
+  .mode:active { transform: translateY(5px); box-shadow: 0 2px 0 #173f78; }
+  .mode:hover { filter: brightness(1.08); }
+  @media (max-height: 520px) { .mode { padding: 8px 10px; } .mode i { font-size: 40px; } .mode b { font-size: 26px; } }
+
+  /* 연습 메뉴 */
+  body.practicing #topbar .stat { display: none; }
+  #pmenu { flex-direction: column; align-items: center; justify-content: center; gap: 22px; background: rgba(12,20,40,.72); padding: 60px 16px 24px; overflow-y: auto; }
+  .plang { display: flex; background: rgba(0,0,0,.35); border-radius: 999px; padding: 5px; }
+  .plang span { padding: 10px 30px; border-radius: 999px; font-size: 24px; cursor: pointer; opacity: .6; }
+  .plang span.on { background: #ffd84a; color: #1d2a44; opacity: 1; }
+  #pmGrid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; width: min(960px, 100%); }
+  .pm { border-radius: 22px; border: 4px solid #fff; background: linear-gradient(#fdfbf4, #e8e2d0); color: #1d2a44; text-align: center; padding: 22px 8px; cursor: pointer; box-shadow: 0 6px 0 #9a9280, 0 10px 22px rgba(0,0,0,.3); }
+  .pm:hover { transform: translateY(-3px); }
+  .pm i { display: block; font-style: normal; font-size: 58px; }
+  .pm b { display: block; font-weight: normal; font-size: 28px; margin-top: 8px; }
+  @media (max-width: 760px) { #pmGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .pm { padding: 14px 6px; } .pm i { font-size: 44px; } .pm b { font-size: 22px; } }
+
+  /* 연습 화면 */
+  #prac { flex-direction: column; align-items: center; background: linear-gradient(rgba(12,20,40,.82), rgba(12,20,40,.9)); padding: calc(52px + env(safe-area-inset-top)) 16px 12px; gap: 10px; overflow-y: auto; }
+  #prac > * { flex-shrink: 0; }
+  #pHead { width: min(1000px, 100%); display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+  #pLv { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; flex: 1; }
+  #pLv b { font-weight: normal; font-size: 24px; margin-right: 6px; color: #ffd84a; }
+  .plv { padding: 6px 14px; border-radius: 999px; border: 2px solid rgba(255,255,255,.35); font-size: 17px; cursor: pointer; background: rgba(0,0,0,.25); }
+  .plv.on { background: #ffd84a; color: #1d2a44; border-color: #ffd84a; }
+  .pst { display: flex; gap: 8px; }
+  .pst span { padding: 6px 14px; border-radius: 999px; background: rgba(0,0,0,.4); font-size: 16px; white-space: nowrap; }
+  .pst b { font-weight: normal; font-size: 24px; }
+  .pst small { font-size: 13px; opacity: .8; margin-left: 2px; }
+  #pQuit { padding: 7px 20px; font-size: 18px; }
+  #pBar { width: min(1000px, 100%); height: 10px; border-radius: 5px; background: rgba(255,255,255,.15); overflow: hidden; }
+  #pBar i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #7ee08a, #ffd84a); transition: width .2s; }
+  #pText { width: min(1000px, 100%); min-height: 140px; border-radius: 22px; background: #fdfbf4; color: #1d2a44; display: flex; align-items: center; justify-content: center; padding: 14px 12px; box-shadow: inset 0 -5px 0 rgba(0,0,0,.08); }
+  #pSeatWrap, #pLineWrap { display: none; text-align: center; width: 100%; }
+  body.pseat #pSeatWrap { display: block; } body:not(.pseat) #pLineWrap { display: block; }
+  #pSeat { font-size: 88px; line-height: 1; color: #1d2a44; }
+  #pSeat.bad { color: #e8483c; animation: shake .22s; }
+  #pSeatNext { font-size: 30px; letter-spacing: 6px; color: #9aa0ae; min-height: 36px; }
+  #pPrev { font-size: 20px; color: #9aa0ae; min-height: 26px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #pLine { font-size: 50px; line-height: 1.25; white-space: nowrap; }
+  #pLine span.d { color: #2f9a4a; } #pLine span.x { color: #e8483c; background: rgba(232,72,60,.12); } #pLine span.c { color: #1d2a44; border-bottom: 5px solid #ffb020; }
+  #pLine span.sp { display: inline-block; width: .3em; } #pLine span.sp.x { background: rgba(232,72,60,.35); }
+  #pinp { width: min(1000px, 100%); font-family: 'Ria', 'Malgun Gothic', sans-serif; font-size: 34px; padding: 10px 18px; border-radius: 16px; border: 3px solid #ffd84a; background: #fffdf5; color: #1d2a44; text-align: center; outline: none; user-select: text; }
+  body.pseat #pinp { position: absolute; opacity: 0; width: 10px; height: 10px; left: 50%; pointer-events: none; }
+  #pNext { width: min(1000px, 100%); font-size: 22px; color: rgba(255,255,255,.55); text-align: center; line-height: 1.5; min-height: 34px; }
+  body.pseat #pNext { display: none; }
+  #kbWrap { width: min(900px, 100%); display: flex; flex-direction: column; align-items: center; gap: 10px; }
+  #kb { width: 100%; display: flex; flex-direction: column; gap: 5px; padding: 10px; border-radius: 16px; background: rgba(0,0,0,.35); }
+  .kr { display: flex; gap: 5px; }
+  .ky { flex: 1 1 0; height: 42px; border-radius: 8px; background: #f4f1e8; color: #1d2a44; border-bottom: 5px solid var(--fc); position: relative; display: flex; align-items: center; justify-content: center; font-size: 20px; transition: transform .06s; }
+  .ky span { position: relative; } .ky small { position: absolute; left: 5px; top: 1px; font-size: 12px; opacity: .55; }
+  .ky.bump::after { content: ''; position: absolute; bottom: 6px; width: 12px; height: 2px; border-radius: 1px; background: #1d2a44; opacity: .5; }
+  .ky.hl { background: var(--fc); color: #1d2a44; transform: translateY(-2px); box-shadow: 0 0 0 3px #fff, 0 0 18px var(--fc); z-index: 1; }
+  .ky.hls { background: var(--fc); box-shadow: 0 0 0 2px #fff; }
+  .ky.okf { animation: okf .25s; } .ky.badf { animation: badf .3s; }
+  @keyframes okf { 0% { transform: translateY(3px); filter: brightness(.85); } }
+  @keyframes badf { 0%, 60% { background: #ff7a6a; } }
+  #hands { display: flex; align-items: flex-end; gap: 7px; height: 70px; }
+  .fg { width: 26px; border-radius: 13px 13px 8px 8px; background: var(--fc); opacity: .28; transition: opacity .1s, transform .1s; }
+  .fg.gapL { margin-left: 26px; } .fg.gapR { margin-right: 26px; }
+  .fg.on { opacity: 1; transform: translateY(-8px); box-shadow: 0 0 14px var(--fc); }
+  @media (max-width: 700px), (max-height: 560px) { #kbWrap { display: none; } #pLine { font-size: 34px; } #pSeat { font-size: 80px; } #pText { min-height: 110px; } }
+  body.touch #kbWrap { display: none; }
+
+  @media (max-height: 780px) { #hands { display: none; } .ky { height: 34px; font-size: 17px; border-bottom-width: 4px; } #pText { min-height: 100px; padding: 8px 12px; } #pSeat { font-size: 72px; } #pLine { font-size: 42px; } #pinp { font-size: 28px; padding: 6px 16px; } #pNext { font-size: 19px; min-height: 26px; max-height: 29px; overflow: hidden; } #prac { gap: 6px; padding-top: calc(46px + env(safe-area-inset-top)); } .plv { padding: 3px 10px; font-size: 15px; } #pLv b { font-size: 20px; } .pst span { padding: 3px 10px; } .pst b { font-size: 20px; } #pQuit { padding: 4px 16px; font-size: 16px; } #kb { padding: 7px; gap: 4px; } .kr { gap: 4px; } }
+  .plv, #pLv b { white-space: nowrap; }
+  @media (max-width: 700px) { #pLv { flex-basis: 100%; } .pst { flex: 1; } .pst span { padding: 3px 9px; font-size: 14px; } .pst b { font-size: 19px; } }
+  /* 연습 결과 */
+  #pres { flex-direction: column; align-items: center; justify-content: center; gap: 12px; background: rgba(10,16,34,.8); text-align: center; }
+  .prBig b { font-weight: normal; font-size: min(30vw, 160px); line-height: 1; color: #ffd84a; -webkit-text-stroke: 7px #1d2a44; paint-order: stroke fill; }
+  .prBig small { font-size: 40px; margin-left: 8px; }
+  .prRow { display: flex; gap: 30px; font-size: 36px; }
+  .prRow b { font-weight: normal; }
+  #prNew { color: #7ee08a; font-size: 24px; min-height: 30px; }
+  .prBtns { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+  .prBtns .row { display: flex; gap: 10px; }
+  body.shot #topbar, body.shot #oreumHome, body.shot #oreumFs, body.shot #title .btn, body.shot .rec { display: none !important; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+
+<div id="topbar">
+  <span class="stat" id="stCourse">🏁 <b id="vCourse">1</b></span>
+  <span class="stat">⌨ <b id="vCpm">0</b><small id="uCpm">타</small></span>
+  <span class="stat" id="stAcc">🎯 <b id="vAcc">100</b><small>%</small></span>
+  <span class="spacer"></span>
+  <button class="tog" id="tgPause">❚❚</button>
+  <button class="tog" id="tgBgm">♪</button>
+  <button class="tog" id="tgSnd">🔊</button>
+</div>
+
+<div id="panel">
+  <div id="next"></div>
+  <div id="word"></div>
+  <input id="inp" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="next" inputmode="text">
+</div>
+
+<div id="flash"></div>
+
+<div class="scr show" id="title">
+  <div>
+    <h1 data-en="TYPING RACE">타자연습<br><em>달리기</em></h1>
+    <div class="rec" id="rec"></div>
+  </div>
+  <div class="modes">
+    <div class="mode" id="btnPrac"><i>⌨️</i><b data-en="PRACTICE">타자연습</b></div>
+    <div class="mode run" id="btnStart"><i>🏃</i><b data-en="RACE">달리기</b></div>
+  </div>
+</div>
+
+<div class="scr" id="select">
+  <div id="grid"></div>
+  <div id="roster"></div>
+  <div class="btn sub" id="selBack" data-en="TITLE">처음으로</div>
+</div>
+
+<div class="scr" id="result">
+  <div id="rRank">1등</div>
+  <div id="rStats"><span>⌨ <b id="rCpm">0</b><small id="rUnit">타</small></span><span>🎯 <b id="rAcc">0</b><small>%</small></span></div>
+  <div id="rNew"></div>
+  <div id="rUnlock"></div>
+  <div id="rBtns">
+    <div class="btn" id="btnNext" data-en="NEXT">다음 코스</div>
+    <div class="row"><div class="btn sub" id="btnRetry" data-en="RETRY">다시</div><div class="btn sub" id="btnCourses" data-en="COURSES">코스</div></div>
+  </div>
+</div>
+
+<div class="scr" id="pause">
+  <h2>PAUSE</h2>
+  <div class="btn" id="btnResume" data-en="RESUME">계속</div>
+  <div class="btn sub" id="btnQuit" data-en="COURSES">코스</div>
+</div>
+
+<div class="scr" id="pmenu">
+  <div class="plang"><span id="plKo">한글</span><span id="plEn" data-en="English">영어</span></div>
+  <div id="pmGrid">
+    <div class="pm" data-m="seat"><i>⌨️</i><b data-en="Keys">자리 연습</b></div>
+    <div class="pm" data-m="word"><i>🍎</i><b data-en="Words">낱말 연습</b></div>
+    <div class="pm" data-m="short"><i>✏️</i><b data-en="Sentences">짧은 글 연습</b></div>
+    <div class="pm" data-m="long"><i>📖</i><b data-en="Stories">긴 글 연습</b></div>
+  </div>
+  <div class="btn sub" id="pmBack" data-en="TITLE">처음으로</div>
+</div>
+
+<div class="scr" id="prac">
+  <div id="pHead">
+    <div id="pLv"></div>
+    <div class="pst"><span>⌨ <b id="pCpm">0</b><small id="pUnit">타</small></span><span>🎯 <b id="pAcc">100</b><small>%</small></span><span><b id="pProg">0/0</b></span></div>
+    <div class="btn sub" id="pQuit" data-en="MENU">연습</div>
+  </div>
+  <div id="pBar"><i id="pBarFill"></i></div>
+  <div id="pText">
+    <div id="pSeatWrap"><div id="pSeat"></div><div id="pSeatNext"></div></div>
+    <div id="pLineWrap"><div id="pPrev"></div><div id="pLine"></div></div>
+  </div>
+  <input id="pinp" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="next">
+  <div id="pNext"></div>
+  <div id="kbWrap"><div id="kb"></div><div id="hands"></div></div>
+</div>
+
+<div class="scr" id="pres">
+  <div class="prBig"><b id="prSpeed">0</b><small id="prUnit">타</small></div>
+  <div class="prRow"><span>🎯 <b id="prAcc">0</b>%</span><span>⏱ <b id="prTime">0:00</b></span></div>
+  <div id="prNew"></div>
+  <div class="prBtns">
+    <div class="btn" id="prNext" data-en="NEXT">다음 단계</div>
+    <div class="row"><div class="btn sub" id="prRetry" data-en="RETRY">다시</div><div class="btn sub" id="prMenu" data-en="MENU">연습</div></div>
+  </div>
+</div>
+
+<div class="scr" id="ending">
+  <div class="btn sub" id="btnEndOk" data-en="COURSES">코스</div>
+</div>
+
+<script src="assets/game-home.js" data-top="6" data-left="6" data-fullscreen="1" defer></script>
+<script src="js/hangul.js?v=1"></script>
+<script src="js/words.js?v=3"></script>
+<script src="js/art.js?v=2"></script>
+<script src="js/audio.js?v=1"></script>
+<script src="js/game.js?v=4"></script>
+<script src="js/practice.js?v=1"></script>
+<script src="/assets/visit.js?v=12" defer></script>
+<script src="/assets/game-events.js?v=2" defer></script>
+</body>
+</html>
