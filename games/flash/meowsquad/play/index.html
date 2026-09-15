@@ -95,20 +95,20 @@
   #pad { display: none; position: fixed; left: calc(14px + env(safe-area-inset-left)); bottom: calc(48px + env(safe-area-inset-bottom)); width: 186px; height: 186px; border-radius: 50%; border: 2px solid rgba(255,255,255,.45); background: rgba(20,24,30,.38); touch-action: none; -webkit-user-select: none; user-select: none; z-index: 6; }
   #knob { position: absolute; left: 50%; top: 50%; width: 72px; height: 72px; margin: -36px 0 0 -36px; border-radius: 50%; border: 2px solid rgba(255,255,255,.75); background: rgba(255,255,255,.3); pointer-events: none; }
   #pad.on #knob { background: rgba(255,255,255,.5); }
-  body.touch.playing #pad { display: block; }
+  /* 폰도 화면 끌기로 움직인다(2026-09-15 사장님: 패드면 비행기가 너무 위에 뜬다). 패드는 숨겨 둔다 */
   @media (max-height: 760px), (max-width: 400px) {
     #pad { width: 160px; height: 160px; left: calc(10px + env(safe-area-inset-left)); bottom: calc(44px + env(safe-area-inset-bottom)); }
     #knob { width: 62px; height: 62px; margin: -31px 0 0 -31px; }
   }
   /* 폭탄 단추: 오른쪽 아래 주 행동 자리 */
-  #bombBtn { position: fixed; right: calc(16px + env(safe-area-inset-right)); bottom: calc(60px + env(safe-area-inset-bottom)); width: 88px; height: 88px; border-radius: 50%; border: 2px solid rgba(255,255,255,.55); background: radial-gradient(rgba(255,120,80,.35), rgba(0,0,0,.32) 70%); padding: 0; z-index: 6; touch-action: none; cursor: pointer; display: none; }
+  #bombBtn { position: fixed; right: calc(16px + env(safe-area-inset-right)); bottom: calc(12px + env(safe-area-inset-bottom)); width: 62px; height: 62px; border-radius: 50%; border: 2px solid rgba(255,255,255,.55); background: radial-gradient(rgba(255,120,80,.35), rgba(0,0,0,.32) 70%); padding: 0; z-index: 6; touch-action: none; cursor: pointer; display: none; }
   body.playing #bombBtn { display: block; }
-  #bombBtn canvas { width: 56px; height: 62px; display: block; margin: 8px auto 0; pointer-events: none; }
-  #bombBtn b { position: absolute; right: -2px; top: -2px; min-width: 28px; height: 28px; border-radius: 14px; background: #ff5a4a; border: 2px solid #fff; color: #fff; font: 900 16px/24px Arial, sans-serif; pointer-events: none; }
+  #bombBtn canvas { width: 40px; height: 44px; display: block; margin: 5px auto 0; pointer-events: none; }
+  #bombBtn b { position: absolute; right: -2px; top: -2px; min-width: 22px; height: 22px; border-radius: 11px; background: #ff5a4a; border: 2px solid #fff; color: #fff; font: 900 12px/18px Arial, sans-serif; pointer-events: none; }
   #bombBtn:active { transform: scale(.94); }
   #bombBtn.empty { opacity: .35; }
   #bombBtn.empty b { background: #666; }
-  @media (min-width: 900px) and (pointer: fine) { #bombBtn { right: calc(50% - 260px); width: 72px; height: 72px; } #bombBtn canvas { width: 46px; height: 51px; margin-top: 7px; } }
+  @media (min-width: 900px) and (pointer: fine) { #bombBtn { right: calc(50% - 260px); width: 56px; height: 56px; } #bombBtn canvas { width: 36px; height: 40px; margin-top: 5px; } }
   /* 폰 폭: 상단바를 한 줄로 — 하트는 숫자로, 폭탄 칸은 단추 숫자로 대신, 음악·효과음은 일시정지 창 안에 */
   #pauseTogs { display: none; gap: 14px; margin: 4px 0 22px; }
   #pauseTogs .tog { width: 52px; height: 52px; font-size: 22px; }
@@ -202,7 +202,7 @@
 <script src="assets/game-home.js" data-top="6" data-left="6" data-fullscreen="1" defer></script>
 <script src="js/art.js?v=3"></script>
 <script src="js/audio.js?v=2"></script>
-<script src="js/game.js?v=18"></script>
+<script src="js/game.js?v=19"></script>
 <script src="/assets/visit.js?v=12" defer></script>
 <script src="/assets/game-events.js?v=2" defer></script>
 </body>

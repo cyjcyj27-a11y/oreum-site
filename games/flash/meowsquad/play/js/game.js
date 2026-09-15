@@ -528,7 +528,7 @@
   });
   addEventListener('keyup', function (ev) { var k = ev.key; keys[k.length === 1 ? k.toLowerCase() : k] = false; });
   var drag = null;
-  // 폰은 왼쪽 아래 패드로 움직인다(표준). 화면 끌기는 PC 마우스만
+  // 폰·PC 모두 화면 끌기로 움직인다. 패드 코드는 남겨 두되 화면에는 안 띄운다
   var PAD = { x: 0, y: 0, id: null };
   (function () {
     var pad = $('pad'), knob = $('knob');
@@ -547,7 +547,6 @@
   })();
   cv.addEventListener('pointerdown', function (ev) {
     AU.init();
-    if (ev.pointerType !== 'mouse') return;
     if (!(S.mode === 'play' || S.mode === 'intro' || S.mode === 'clear')) return;
     drag = { id: ev.pointerId, px: ev.clientX, py: ev.clientY, sx: P.tx, sy: P.ty };
     try { cv.setPointerCapture(ev.pointerId); } catch (e) {}
@@ -659,7 +658,6 @@
     if (kx || ky) { P.tx += kx * sp * dt; P.ty += ky * sp * dt; }
     if (PAD.x || PAD.y) { P.tx += PAD.x * sp * 1.15 * dt; P.ty += PAD.y * sp * dt; }
     var maxY = H - 60;
-    if (body.classList.contains('touch')) { var pr = $('pad').getBoundingClientRect(); if (pr.height) maxY = Math.min(maxY, (pr.top - offY) / scale - 50); }   // 폰은 패드 윗선 위에서만
     P.tx = Math.max(30, Math.min(W - 30, P.tx)); P.ty = Math.max(H * 0.42, Math.min(maxY, P.ty));
     if (S.mode === 'ending') { P.tx = W / 2; P.ty = H * 0.6; }
     var ox = P.x;
