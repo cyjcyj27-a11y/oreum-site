@@ -16,6 +16,7 @@
   #topbar { position: fixed; left: 0; right: 0; top: 0; height: calc(46px + env(safe-area-inset-top)); padding: env(safe-area-inset-top) calc(10px + env(safe-area-inset-right)) 0 calc(104px + env(safe-area-inset-left)); display: flex; align-items: center; gap: 8px; pointer-events: none; z-index: 5; background: linear-gradient(rgba(8,6,20,.55), rgba(8,6,20,0)); }
   .stat { display: inline-flex; align-items: center; gap: 5px; padding: 5px 10px; border-radius: 999px; background: rgba(0,0,0,.35); border: 1px solid rgba(255,255,255,.14); font-size: 15px; white-space: nowrap; text-shadow: 0 1px 2px rgba(0,0,0,.6); }
   .stat b { font-weight: normal; font-size: 17px; } .stat .ic { font-size: 13px; }
+  .stat.bump { animation: coinbump .25s; } @keyframes coinbump { 40% { transform: scale(1.22); border-color: #ffe066; } }
   .stat.dim { opacity: .8; font-size: 13px; } .stat.dim b { font-size: 15px; }
   #hp b { color: #ff5a6e; letter-spacing: 1px; font-size: 16px; }
   #hp i { font-style: normal; color: #ffd24a; font-size: 13px; margin-left: 2px; }
@@ -32,7 +33,7 @@
     .tog { width: 32px; height: 32px; font-size: 15px; }
   }
 
-  #flash { position: fixed; left: 50%; top: 40%; transform: translate(-50%, -50%) scale(.6); font-family: Arial Black, Arial, sans-serif; font-weight: 900; font-size: min(13vw, 72px, 9vh); letter-spacing: 4px; color: #ffe066; -webkit-text-stroke: 3px #2a1440; paint-order: stroke fill; text-shadow: 0 6px 24px rgba(0,0,0,.55); opacity: 0; pointer-events: none; z-index: 8; transition: opacity .2s, transform .35s cubic-bezier(.2,1.6,.4,1); white-space: nowrap; }
+  #flash { position: fixed; left: 50%; top: 40%; transform: translate(-50%, -50%) scale(.6); font-family: Arial Black, Arial, sans-serif; font-weight: 900; font-size: min(10.5vw, 72px, 9vh); letter-spacing: 2px; color: #ffe066; -webkit-text-stroke: 3px #2a1440; paint-order: stroke fill; text-shadow: 0 6px 24px rgba(0,0,0,.55); opacity: 0; pointer-events: none; z-index: 8; transition: opacity .2s, transform .35s cubic-bezier(.2,1.6,.4,1); white-space: nowrap; }
   #flash.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
   #flash.bad { color: #ff6a7a; }
   #flash.cyan { color: #7ff4ff; }
@@ -212,7 +213,7 @@
 <script src="assets/game-home.js" data-top="6" data-left="6" data-fullscreen="1" defer></script>
 <script src="js/art.js?v=3"></script>
 <script src="js/audio.js?v=2"></script>
-<script src="js/game.js?v=28"></script>
+<script src="js/game.js?v=30"></script>
 <script src="/assets/visit.js?v=12" defer></script>
 <script src="/assets/game-events.js?v=2" defer></script>
 </body>

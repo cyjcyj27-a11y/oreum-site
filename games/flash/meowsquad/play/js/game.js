@@ -349,7 +349,6 @@
     for (var i = 0; i < coinN; i++) S.drops.push({ k: e.type === 'armor' && i === 0 ? 'big' : 'coin', x: e.x + (Math.random() - 0.5) * 30, y: e.y, vx: (Math.random() - 0.5) * 120, vy: -80 - Math.random() * 90, t: Math.random() * 6 });
     var rnd = Math.random();
     if (rnd < 0.035) S.drops.push({ k: 'power', x: e.x, y: e.y, vx: 0, vy: 40, t: 0 });
-    else if (rnd < 0.06) S.drops.push({ k: 'bubble', x: e.x, y: e.y, vx: 0, vy: 40, t: 0 });
     if (e.type === 'cage') {
       if (e.coat >= 0) S.drops.push({ k: 'cage', coat: e.coat, x: e.x, y: e.y + 30, vx: 0, vy: 30, t: 0 });
       else S.drops.push({ k: 'chest', x: e.x, y: e.y + 20, vx: 0, vy: 50, t: 0 });
@@ -911,8 +910,13 @@
     addCoins(1); AU.fish(); if (S.bonus) S.bonus.got++;
     parts(d.x, d.y, 10, { k: 'spark', spd: 180, life: 0.4, size: 3, col: ['#bff4ff', '#fff', '#7fd8ff'] });
     S.parts.push({ k: 'ring', x: d.x, y: d.y, life: 0, max: 0.3, size: 40, col: '#bff4ff' });
-    S.texts.push({ x: d.x, y: d.y - 14, s: '+1', t: 0, col: '#bff4ff' });
+    S.texts.push({ x: d.x, y: d.y - 14, s: '+1', t: 0, col: '#ffe066' });
+    // 생선이 코인으로 바뀌어 상단바 코인 숫자로 날아간다
+    var cr = $('coinv').getBoundingClientRect();
+    var tx = cr.width ? (cr.left + cr.width / 2 - offX) / scale : W / 2, ty = cr.height ? (cr.top + cr.height / 2 - offY) / scale : 40;
+    S.parts.push({ k: 'coinfly', x0: d.x, y0: d.y, x: d.x, y: d.y, tx: tx, ty: ty, life: 0, max: 0.55 + Math.random() * 0.1, size: 1 });
   }
+  function bumpCoin() { var el = $('coinv').parentNode; el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump'); }
   function updateDrops(dt) {
     var mag = MAG[G.up.magnet];
     for (var i = S.drops.length - 1; i >= 0; i--) {
@@ -954,7 +958,7 @@
   function updateParts(dt) {
     for (var i = S.parts.length - 1; i >= 0; i--) {
       var p = S.parts[i]; p.life += dt;
-      if (p.life >= p.max) { S.parts.splice(i, 1); continue; }
+      if (p.life >= p.max) { if (p.k === 'coinfly') bumpCoin(); S.parts.splice(i, 1); continue; }
       if (p.vx !== undefined) {
         p.x += p.vx * dt; p.y += p.vy * dt;
         if (p.k === 'smoke') { p.vx *= 0.94; p.vy = p.vy * 0.94 - 10 * dt; }
@@ -1107,6 +1111,10 @@
       else if (p.k === 'debris') { ctx.globalAlpha = 1 - k; ctx.fillStyle = p.col; ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot); ctx.fillRect(-p.size, -p.size * 0.5, p.size * 2, p.size); ctx.restore(); }
       else if (p.k === 'heart') { ctx.globalAlpha = 1 - k; ctx.fillStyle = p.col; var hs = p.size; ctx.beginPath(); ctx.moveTo(p.x, p.y + hs * 0.8); ctx.bezierCurveTo(p.x - hs * 1.3, p.y, p.x - hs * 0.6, p.y - hs, p.x, p.y - hs * 0.35); ctx.bezierCurveTo(p.x + hs * 0.6, p.y - hs, p.x + hs * 1.3, p.y, p.x, p.y + hs * 0.8); ctx.fill(); }
       else if (p.k === 'wingaway') { ctx.globalAlpha = 1 - k; spr(ART.wing[p.coat], p.x, p.y, p.rot, 1 - k * 0.4); }
+      else if (p.k === 'coinfly') {                              // 위로 살짝 튀었다가 코인 숫자로 빨려 들어간다
+        var e2 = k * k, cxp = p.x0 + (p.tx - p.x0) * e2, cyp = p.y0 + (p.ty - p.y0) * e2 - Math.sin(k * Math.PI) * 60;
+        spr(ART.coin, cxp, cyp, 0, 1.3 - k * 0.5);
+      }
       ctx.globalAlpha = 1;
     }
     // 점수 글자
