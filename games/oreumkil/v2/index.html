@@ -1,0 +1,2456 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>OREUMKIL 2 — 오름길</title>
+<meta name="robots" content="noindex">
+<meta name="description" content="물리엔진으로 움직이는 2D 횡스크롤 어드벤처 오름길 버전 2. 사다리·손잡이·밧줄·바위벽을 타고 위로 오릅니다. 설치 없이 브라우저에서 바로 하는 어려운 게임, 폰은 가로로 합니다.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="오름게임즈">
+<meta property="og:title" content="OREUMKIL 2 — 오름길">
+<meta property="og:image" content="https://oreumgames.com/assets/oreumkil-shot.webp?v=1">
+<meta name="twitter:card" content="summary_large_image">
+<style>
+/* ⚠ 게임 화면에서 단추를 꾹 누르면 안드로이드가 그 글자를 '선택'해서
+   복사·공유·번역 메뉴를 띄운다(2026-08-23 신고). 게임에서는 글자를 잡을 일이 없다 */
+html,body{margin:0;height:100%;background:#000;display:grid;place-items:center;overflow:hidden;touch-action:none;
+ -webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+/* 폰을 가로로 눕히면 폭보다 높이가 먼저 모자란다. 16:9 를 높이에도 맞춰 잘리지 않게 한다 */
+canvas{width:min(100vw, calc(100vh * 16 / 9), 1280px);height:auto;display:block}
+@supports (height:100svh){ canvas{width:min(100vw, calc(100svh * 16 / 9), 1280px)} }
+video{display:none}
+#hint{position:fixed;bottom:14px;left:0;right:0;text-align:center;z-index:2;pointer-events:none;
+ font:500 17px/1.7 system-ui,'Malgun Gothic',sans-serif;letter-spacing:.05em;
+ color:rgba(240,236,224,.42);transition:opacity 1.2s}
+#hint.gone{opacity:0}
+/* 이 게임은 흑백 화면이다. 알약·색깔이 있으면 그림 위에서 튄다(2026-08-23 사용자).
+   바탕을 없애고 흰 기호만 남긴다. 하늘이 하얗게 밝은 구간에서도 읽히도록
+   글자·그림에 어두운 그림자를 깔아 준다 */
+#snd{position:fixed;top:calc(10px + env(safe-area-inset-top));right:calc(12px + env(safe-area-inset-right));
+ z-index:2;display:flex;align-items:center;justify-content:center;
+ width:40px;height:40px;padding:0;margin:0;border:0;background:none;
+ font:600 21px/1 system-ui,'Malgun Gothic',sans-serif;
+ color:rgba(255,255,255,.92);cursor:pointer;
+ text-shadow:0 1px 3px rgba(0,0,0,.9), 0 0 10px rgba(0,0,0,.55);
+ -webkit-tap-highlight-color:transparent;touch-action:manipulation}
+#snd.off{color:rgba(255,255,255,.42);text-decoration:line-through;text-decoration-thickness:2px}
+#skip{position:fixed;bottom:14px;right:16px;z-index:2;
+ margin:0;box-sizing:border-box;display:flex;align-items:center;
+ bottom:calc(16px + env(safe-area-inset-bottom));right:calc(16px + env(safe-area-inset-right));
+ min-height:46px;padding:0 20px;-webkit-appearance:none;appearance:none;
+ font:600 17px/1 system-ui,'Malgun Gothic',sans-serif;letter-spacing:.02em;color:#f0ece0;
+ background:rgba(16,18,22,.72);border:1px solid rgba(232,228,216,.55);border-radius:999px;
+ box-shadow:0 2px 10px rgba(0,0,0,.5);cursor:pointer;
+ opacity:0;transition:opacity .6s;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+#skip.on{opacity:1}
+#skip:not(.on){pointer-events:none}   /* 안 보이는 동안엔 눌리지도 않게 */
+#skip:hover,#skip:active{background:rgba(40,44,50,.9)}
+
+/* ══════ 손으로 하는 조작 ══════
+   기본은 전부 숨긴다. 손대는 화면에서만 꺼낸다 */
+#pad,#fist,#rotate{display:none}
+#pad,#fist{opacity:0;pointer-events:none;transition:opacity .25s}
+#pad.use,#fist.use{opacity:1;pointer-events:auto}
+
+@media (hover:none) and (pointer:coarse){
+  #hint{display:none}                      /* 키 안내는 폰에서 쓸모가 없다 */
+
+  /* 왼쪽이 조이스틱 자리다. 링은 한가운데 높이에 고정돼 있고, 이 넓은 자리 안이면
+     어디를 짚어도 그 방향으로 민 것으로 친다 — 엄지가 빗나가도 먹힌다 */
+  /* ⚠ 가장자리 72px 은 조이스틱이 생기지 않는 자리다(2026-08-23 사용자).
+     링 반지름이 66px 이라, 화면 맨 끝에 손을 대면 링이 밖으로 반쯤 잘려 나갔다.
+     아래쪽은 왼쪽 아래 전체화면 표시와도 겹쳤다. 왼쪽·아래를 그만큼 안으로 들인다 */
+  #pad{display:block;position:fixed;z-index:3;
+   left:calc(72px + env(safe-area-inset-left));bottom:calc(72px + env(safe-area-inset-bottom));
+   width:calc(50% - 72px);height:60%;   /* 위쪽도 링 반지름만큼 물러나 있어야 안 잘린다 */
+   touch-action:none;-webkit-tap-highlight-color:transparent}
+  #ring,#knob{position:absolute;border-radius:50%;pointer-events:none;
+   transform:translate(-50%,-50%);opacity:0;transition:opacity .12s}
+  #ring{width:132px;height:132px;background:rgba(16,18,22,.3);
+   border:2px solid rgba(232,228,216,.34)}
+  #knob{width:58px;height:58px;background:rgba(232,228,216,.6);
+   box-shadow:0 2px 12px rgba(0,0,0,.55)}
+  /* 처음부터 눈에 보인다(2026-08-23 사용자). 안 만지는 동안엔 옅게 떠 있고,
+     손을 대면 그 자리로 옮겨 오면서 진해진다. 떼면 다시 제자리로 */
+  #pad.use #ring{opacity:.5}
+  #pad.use #knob{opacity:.45}
+  #pad.live #ring,#pad.live #knob{opacity:1}
+
+  /* 오른쪽 — 잡기 / 놓기 하나. 엄지가 닿는 자리라 68px 은 남긴다(권고 44px 이상).
+     ⚠ 이모지(✊)는 노란색이고 크기를 못 줄인다 — 흰 그림으로 그려 넣는다 */
+  #fist{display:flex;align-items:center;justify-content:center;position:fixed;z-index:3;
+   right:calc(98px + env(safe-area-inset-right));bottom:calc(97px + env(safe-area-inset-bottom));
+   width:68px;height:68px;padding:0;margin:0;border-radius:50%;
+   color:rgba(255,255,255,.9);
+   background:rgba(16,18,22,.42);border:1.5px solid rgba(255,255,255,.34);
+   box-shadow:0 2px 12px rgba(0,0,0,.45);
+   -webkit-tap-highlight-color:transparent;touch-action:manipulation}
+  #fist svg{width:28px;height:28px;display:block;fill:currentColor;pointer-events:none}
+  #fist:active{background:rgba(255,255,255,.26);transform:scale(.94)}
+}
+
+/* ══════ 공용 알약을 이 게임 화면에 맞춘다 ══════
+   game-home.js 가 붙이는 흰 알약 + 초록 글씨는 밝은 게임에서는 어울리지만
+   여기(흑백)에서는 초록이 튄다(2026-08-23 사용자). 바탕을 지우고 흰색으로 바꾼다.
+   ⚠ 공용 스크립트의 style 은 이 문서의 style 보다 나중에 붙으므로 !important 가 필요하다 */
+#oreumHome, #oreumFs{
+  background:none !important; border-color:transparent !important; box-shadow:none !important;
+  opacity:1 !important; color:rgba(255,255,255,.92) !important;
+  text-shadow:0 1px 3px rgba(0,0,0,.9), 0 0 10px rgba(0,0,0,.55) !important}
+#oreumHome svg{fill:rgba(255,255,255,.92) !important;
+  filter:drop-shadow(0 1px 2px rgba(0,0,0,.9))}
+#oreumFs svg{stroke:rgba(255,255,255,.92) !important; width:19px !important; height:19px !important;
+  filter:drop-shadow(0 1px 2px rgba(0,0,0,.9))}
+#oreumFs span{display:none !important}          /* 전체화면도 기호 하나만 */
+#oreumFs{padding:8px !important}
+
+/* 세로로 들고 있으면 16:9 가 손톱만 해진다 — 돌려 달라고 하고 그동안은 가린다 */
+@media (hover:none) and (pointer:coarse) and (orientation:portrait){
+  #rotate{display:grid;place-items:center;position:fixed;inset:0;z-index:9;
+   background:rgba(7,7,10,.95);text-align:center;
+   font:600 19px/1.8 system-ui,'Malgun Gothic',sans-serif;letter-spacing:.04em;
+   color:rgba(240,236,224,.9)}
+  #rotate b{display:block;font-size:52px;line-height:1.6;font-weight:400}
+  #rotate i{display:block;margin-top:10px;font-size:15px;font-style:normal;
+   color:rgba(240,236,224,.55);letter-spacing:.02em}
+  #pad,#fist,#skip{display:none}
+  /* 전체화면 알약은 그대로 둔다(z-index 가 훨씬 커서 안내문 위로 뜬다) —
+     안드로이드에선 이걸 누르면 가로로 잠기니 폰을 안 돌려도 한 번에 해결된다 */
+}
+</style></head><body>
+<h1 style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap">OREUMKIL 2 — 오름길</h1>
+<canvas id="c" width="1280" height="720"></canvas>
+<div id="hint">← → 걷기 · ↑ 뛰기 · ↓ 앉기 · 사다리 앞에서 ↑↓ 오르내리기 · E 잡기 / 놓기</div>
+<button id="snd" type="button" aria-label="음악 켜짐">♪</button>
+<button id="skip" type="button">▶ 건너뛰기</button>
+<div id="pad"><span id="ring"></span><span id="knob"></span></div>
+<button id="fist" type="button" aria-label="잡기 / 놓기"><svg viewBox="0 0 24 24" aria-hidden="true">
+ <rect x="4.9" y="8.2" width="13.6" height="11" rx="3.9"/>
+ <rect x="6.5" y="6.4" width="3" height="4.4" rx="1.5"/>
+ <rect x="9.7" y="5.7" width="3" height="5" rx="1.5"/>
+ <rect x="12.9" y="5.9" width="3" height="4.9" rx="1.5"/>
+ <rect x="16.1" y="6.9" width="2.8" height="4.2" rx="1.4"/>
+ <rect x="2.6" y="11.1" width="5" height="3.2" rx="1.6"/>
+</svg></button>
+<div id="rotate"><p><b>↻</b>화면을 가로로 돌려주세요<i>왼쪽 아래 ‘전체화면’ 을 누르면 가로로 고정됩니다</i></p></div>
+<!-- 음악은 영상보다 먼저 줄을 세운다. src를 여기 박아야 문서 첫 줄부터 받기 시작한다 -->
+<audio id="bgm" src="../test/audio/bgm1.mp3" preload="auto"></audio>
+<video id="v1" src="../test/video/walk1.mp4"     muted playsinline preload="metadata"></video>
+<video id="v2" src="../test/video/attack.mp4"     muted playsinline preload="metadata"></video>
+<video id="v3" src="../test/video/walk2.mp4" muted playsinline preload="metadata"></video>
+<script src="../test/lib/matter.min.js"></script>
+<script>
+const c=document.getElementById('c'),W=1280,H=720;
+let x=c.getContext('2d');
+const rnd=s=>{let v=Math.sin(s*127.1)*43758.5453;return v-Math.floor(v)};
+const lerp=(a,b,k)=>a+(b-a)*(k<0?0:k>1?1:k);
+const ease=k=>{k=k<0?0:k>1?1:k; return k*k*(3-2*k);};
+const clamp=(v,a,b)=>v<a?a:v>b?b:v;
+const OC=document.createElement('canvas'); OC.width=W; OC.height=H;
+const OX=OC.getContext('2d');
+let cam=0, shake=0, NOW=0;
+/* 세로 카메라 — 1편은 좌우로만 흘렀다. 2편은 위아래로도 따라간다.
+   EYE 는 화면에서 사람이 서 있길 바라는 높이(땅 y=600 에 섰을 때의 몸 중심).
+   위아래 BAND 안에서는 화면이 가만히 있는다 — 조금 뛴다고 화면이 출렁이면 멀미가 난다 */
+let camY=0;
+/* 개발용 손잡이 — ?test=1 로 바로 들어가고, ?band=0 이면 화면이 바로바로 따라온다.
+   ?x= ?y= 로 시작 자리도 정한다. 아무것도 안 붙이면 평소와 똑같다 */
+const DEV=new URLSearchParams(location.search);
+const EYE=565, DEVBAND=DEV.has('band')?+DEV.get('band'):null;   // BAND 는 구역 섞는 데 이미 쓴다
+const BAND_UP=DEVBAND===null?150:DEVBAND, BAND_DN=DEVBAND===null?120:DEVBAND;
+let zoom=1, zx=W*.44, zy=560;      // 눈뜨는 장면에서만 화면을 당긴다
+
+/*═══════════════════════════════════════════════════════════════════════
+  PHYSICS LAYER — Matter.js 위에 얇게 얹은 층.
+  여기서는 몸체·충돌·관절·힘만 다룬다. 게임 규칙은 한 줄도 넣지 않는다.
+═══════════════════════════════════════════════════════════════════════*/
+const {Engine,Composite,Bodies,Body,Constraint,Query,Vector,Events,Sleeping}=Matter;
+
+const DT=1000/60, DT2=DT*DT;              // 한 걸음 = 16.7ms
+const engine=Engine.create();
+engine.gravity.y=2.232;                    // 0.62 px/걸음² — 손으로 만들던 그 무게
+engine.positionIterations=8;
+engine.velocityIterations=6;                // 마찰 impulse가 반복마다 쌓인다 — 많이 돌리면 끈적해진다
+engine.constraintIterations=4;
+const world=engine.world;
+
+/* 부딪히는 편 가르기 */
+const CAT={TERRAIN:0x0001, PLAYER:0x0002, PROP:0x0004, ROPE:0x0008, GHOST:0x0010, DECK:0x0020};
+
+/* 재질 — 밀도가 곧 무게다. 데이터로만 바꾼다 */
+/* ⚠ Matter의 마찰은 힘이 아니라 속도에서 깎아내는 impulse이고, 그걸 velocityIterations
+   횟수만큼 반복한다. 그래서 현실의 마찰계수(0.6 같은)를 그대로 넣으면 물체가 붙박이가 된다.
+   여기 값은 전부 실제로 재 보고 맞춘 것이다 */
+/* 무게 비율이 곧 체감이다. 사람 70을 기준으로 잡았다 —
+   나무 상자 13, 큰 상자 17, 현무암 85~145, 널판 15.
+   ⚠ 사람과 물체 무게가 비슷하면 Matter의 접촉 해결기가 둘을 반씩 나눠 세워 버려서
+   가벼운 상자조차 기어가듯 밀린다. 비율을 벌려야 밀리는 맛이 산다 */
+const MAT={
+  stone :{density:.030, friction:.08, frictionStatic:.11, restitution:.02, frictionAir:.010, mu:.30},
+  wood  :{density:.006, friction:.06, frictionStatic:.09, restitution:.08, frictionAir:.008, mu:.28},
+  /* 널판 — 2026-08-22 무게를 2.5배로. .004 는 널판이 깃털 같아 툭 치면 구덩이로 미끄러졌다.
+     .010 이면 다리널판(520x18)이 94, 사람(70)보다 무겁다. 들면 느려지고 놓으면 눌러앉는다.
+     마찰도 올려서 걸쳐 둔 다리가 안 밀린다 */
+  plank :{density:.010, friction:.14, frictionStatic:.20, restitution:.02, frictionAir:.008, mu:.34},
+  rope  :{density:.030, friction:.06, frictionStatic:.09, restitution:.00, frictionAir:.020, mu:.20},
+  land  :{friction:.30, frictionStatic:.42, restitution:0},
+  person:{density:.042, friction:.006, frictionStatic:0, restitution:0, frictionAir:0}
+};
+const G=0.62;                        // 중력 가속(px/걸음²)
+/* Matter가 아니라 우리가 직접 재우는 마찰·완력.
+   ⚠ Matter의 마찰은 무게와 무관한 '속도 깎기'라서, 그대로 두면 100kg 바위가
+   10kg 상자만큼 쉽게 밀린다. 그래서 쿨롱 마찰(F=μmg)을 손으로 얹는다 */
+function mu(b){ return b.plugin&&b.plugin.mu||.3; }
+function coulomb(){
+  for(const e of ENTS){
+    if(!has(e,'weigh')) continue;
+    for(const b of e.bodies){
+      if(b.isStatic) continue;
+      if(!rayDown({x:b.position.x,y:b.bounds.max.y-2},7,b)) continue;   // 땅에 닿아 있을 때만
+      const a=mu(b)*G, v=b.velocity.x;
+      if(!v) continue;
+      accel(b,-Math.sign(v)*Math.min(Math.abs(v),a));
+    }
+  }
+}
+/* ⚠ Matter는 isStatic 을 켤 때 friction을 1, restitution을 0으로 되돌린다.
+   그래서 고정 물체는 만든 뒤에 재질을 다시 입혀야 한다 */
+function mat(b,m){ for(const k in m) if(k!=='density'&&k!=='mu') b[k]=m[k]; return b; }
+function tag(b,m){ b.plugin.mu=m.mu; return b; }
+
+/* px/걸음² 단위로 가속시킨다 — Matter의 힘 단위를 매번 계산하지 않으려고 */
+function accel(b,ax,ay){ b.force.x+=ax*b.mass/DT2; if(ay) b.force.y+=ay*b.mass/DT2; }
+/* 힘에 한계를 두고 목표 속도로 밀어붙인다. 한계가 있어야 무거운 걸 못 민다 */
+function driveX(b,targetVx,gain,maxAccel){
+  const a=clamp((targetVx-b.velocity.x)*gain,-maxAccel,maxAccel);
+  accel(b,a);
+  return Math.abs(a)>=maxAccel-1e-6;       // 한계까지 썼다 = 버겁다
+}
+function addBody(b){ Composite.add(world,b); return b; }
+function addJoint(j){ Composite.add(world,j); return j; }
+function dropJoint(j){ if(j) Composite.remove(world,j); }
+function jointLen(j){
+  const a=j.bodyA?Vector.add(j.bodyA.position,j.pointA||{x:0,y:0}):j.pointA;
+  const b=j.bodyB?Vector.add(j.bodyB.position,j.pointB||{x:0,y:0}):j.pointB;
+  return Vector.magnitude(Vector.sub(a,b));
+}
+/* 발밑에 무엇이 있는지 — 짧은 광선 셋 */
+function rayDown(from,len,skip){
+  const hits=Query.ray(Composite.allBodies(world),from,{x:from.x,y:from.y+len},2);
+  for(const h of hits){ const b=h.body;
+    if(b===skip||b.isSensor||b.plugin.noStand) continue;
+    return b; }
+  return null;
+}
+/* 위에 올라타 있는 것들의 무게 합 — 발판·저울이 쓴다 */
+function loadOn(body,pad){
+  let m=0; const seen=new Set();
+  for(const p of engine.pairs.list){
+    if(!p.isActive) continue;
+    const other = p.bodyA===body?p.bodyB : p.bodyB===body?p.bodyA : null;
+    if(!other||other.isStatic||seen.has(other.id)) continue;
+    if(other.position.y > body.position.y) continue;      // 위에 있는 것만
+    seen.add(other.id); m+=other.mass;
+  }
+  return m;
+}
+
+/*═══════════════════════════════════════════════════════════════════════
+  GAMEPLAY LAYER — 물체는 전부 데이터로 정의한다.
+  새 물체를 넣을 때 아래 FACTORY 에 한 종류를 더할 뿐, 나머지는 손대지 않는다.
+═══════════════════════════════════════════════════════════════════════*/
+const ENTS=[];                       // 살아 있는 모든 물체
+const BYID={};
+let SEQ=0;
+
+function ent(o){ o.id=o.id||('e'+(++SEQ)); ENTS.push(o); BYID[o.id]=o;
+  /* 빠뜨렸을 때 돌아올 자리. 몸체마다 하나씩이라 배열이다.
+     ⚠ 무게판·돌문은 제 자리를 {x,y} 로 직접 들고 온다(눌리고 올라가는 기준점이다).
+        여기서 배열로 덮어쓰면 e.home.x 가 undefined 가 돼 Body.setPosition 이 NaN 을 받고,
+        무게판도 돌문도 좌표가 NaN 이 돼 안 그려지고 아무것과도 부딪히지 않았다
+        (=2500 무게판과 2680 돌문이 통째로 없었다). 오름길.html 은 이미 고쳐 둔 것을 옮겼다 */
+  if(!o.home) o.home=o.bodies.map(b=>({x:b.position.x,y:b.position.y}));
+  return o; }
+function has(e,tag){ return e.tags&&e.tags.indexOf(tag)>=0; }
+
+const FACTORY={
+  /* 땅 — 움직이지 않는다 */
+  land(d){
+    const b=mat(addBody(Bodies.rectangle(d.x+d.w/2, d.y+d.h/2, d.w, d.h,
+      {isStatic:true, collisionFilter:{category:CAT.TERRAIN}})), MAT.land);
+    return ent({type:'land', tags:[], bodies:[b], box:d, draw:drawLand});
+  },
+  /* 나무 상자 — 가볍다. 밀리고, 끌리고, 쌓인다 */
+  crate(d){
+    const s=d.s||46;
+    const b=addBody(Bodies.rectangle(d.x,d.y,s,s,Object.assign({
+      collisionFilter:{category:CAT.PROP,mask:0xffff}, chamfer:{radius:3}},MAT.wood)));
+    tag(b,MAT.wood);
+    return ent({type:'crate', tags:['grab','weigh','link'], bodies:[b], s:s, draw:drawCrate});
+  },
+  /* 현무암 — 무겁다. 밀리긴 하는데 힘들다 */
+  boulder(d){
+    const r=d.r||30;
+    const b=addBody(Bodies.polygon(d.x,d.y,9,r,Object.assign({
+      collisionFilter:{category:CAT.PROP,mask:0xffff}},MAT.stone)));
+    Body.setInertia(b,Infinity);                   // 울퉁불퉁한 바위는 구르지 않는다
+    tag(b,MAT.stone);
+    return ent({type:'boulder', tags:['grab','weigh','link'], bodies:[b], r:r, seed:d.x, draw:drawBoulder});
+  },
+  /* 널판 — 다리도 되고 지렛대도 된다 */
+  plank(d){
+    const b=addBody(Bodies.rectangle(d.x,d.y,d.w||240,d.h||16,Object.assign({
+      collisionFilter:{category:CAT.PROP,mask:0xffff}},MAT.plank)));
+    tag(b,MAT.plank); b.plugin.carry=true;          // 긴 널판은 수평으로 든다
+    const e=ent({type:'plank', tags:['grab','weigh','link'], bodies:[b], w:d.w||240, h:d.h||16, draw:drawPlank});
+    if(d.pivot){                                     // 가운데를 박아 두면 시소가 된다
+      e.joints=[addJoint(Constraint.create({
+        pointA:{x:d.x,y:d.y}, bodyB:b, pointB:{x:0,y:0}, length:0, stiffness:1, damping:.06}))];
+      e.pivot={x:d.x,y:d.y};
+    }
+    return e;
+  },
+  /* 밧줄 — 마디를 이어 붙인다. 매달리면 실제로 흔들린다 */
+  rope(d){
+    const n=d.links||14, seg=d.seg||18, bodies=[], joints=[];
+    for(let i=0;i<n;i++){
+      const b=addBody(Bodies.rectangle(d.x, d.y+i*seg, 6, seg-3, Object.assign({
+        collisionFilter:{category:CAT.ROPE, mask:CAT.PLAYER|CAT.PROP},
+        slop:.02},MAT.rope)));
+      b.plugin.noStand=true;
+      bodies.push(b);
+      joints.push(addJoint(Constraint.create(
+        i===0 ? {pointA:{x:d.x,y:d.y-seg/2}, bodyB:b, pointB:{x:0,y:-seg/2}, length:0, stiffness:1, damping:.1}
+              : {bodyA:bodies[i-1], pointA:{x:0,y:seg/2}, bodyB:b, pointB:{x:0,y:-seg/2}, length:0, stiffness:.98, damping:.08})));
+    }
+    return ent({type:'rope', tags:['hang','ropeEnd'], bodies:bodies, joints:joints,
+                anchor:{x:d.x,y:d.y-seg/2}, seg:seg, draw:drawRope});
+  },
+  /* 줄에 매달린 널판 — 올라타면 무게로 기울고 흔들린다 */
+  swing(d){
+    const w=d.w||210;
+    const p=addBody(Bodies.rectangle(d.x,d.y,w,14,Object.assign({
+      collisionFilter:{category:CAT.PROP,mask:0xffff}},MAT.plank)));
+    const j=[];
+    for(const s of[-1,1]) j.push(addJoint(Constraint.create({
+      pointA:{x:d.x+s*(w/2-10), y:d.y-(d.len||150)}, bodyB:p, pointB:{x:s*(w/2-10),y:0},
+      length:d.len||150, stiffness:.9, damping:.04})));
+    return ent({type:'swing', tags:['weigh'], bodies:[p], joints:j, w:w, len:d.len||150, draw:drawSwing});
+  },
+  /* 한 방향 발판 — 아래에서 뛰어 올라오면 통과하고, 위에 서면 딛는다. ↓ 로 내려간다.
+     물건(상자·돌)에게는 그냥 단단한 발판이다 — 사람만 통과시킨다 */
+  deck(d){
+    const b=mat(addBody(Bodies.rectangle(d.x+ (d.w||160)/2, d.y+7, d.w||160, 14,
+      {isStatic:true, collisionFilter:{category:CAT.DECK}})), MAT.land);
+    b.plugin.oneway=true;
+    return ent({type:'deck', tags:[], bodies:[b], box:{x:d.x,y:d.y,w:d.w||160,h:14}, draw:drawDeck});
+  },
+  /* 사다리 — 몸체가 없다. 지나가는 물건은 그냥 통과하고, 사람만 붙잡고 오르내린다 */
+  ladder(d){
+    return ent({type:'ladder', tags:[], bodies:[], x:d.x, y:d.y, h:d.h||200, w:d.w||34, draw:drawLadder});
+  },
+  /* 무게판 — 위에 올라온 것들의 무게를 잰다. 사람이 올라서도 눌린다 */
+  /* 손잡이 — 바위벽에서 튀어나온 턱. 여기 매달렸다가 다음 손잡이로 뛰어 옮긴다(2026-08-27).
+     몸체가 없다 — 잡히는 자리 하나일 뿐이다.
+     crumble 을 주면 잡고 있는 동안 부스러진다 — 오래 매달리지 못한다 */
+  grip(d){
+    return ent({type:'grip', tags:[], bodies:[], x:d.x, y:d.y, w:d.w||30,
+                crumble:d.crumble||0, life:0, gone:0, draw:drawGrip});
+  },
+  /* 벽 — 손잡이가 박힌 암벽. 붙으면 상하좌우로 기어간다(2026-08-27).
+     몸체가 없다 — 사다리처럼 '사람만 아는 자리'다.
+     그려지는 건 배경보다 진한 회색 바위면이라 검은 사람이 그 앞에서 뚜렷하다 */
+  wall(d){
+    return ent({type:'wall', tags:[], bodies:[], x:d.x, y:d.y, w:d.w||60, h:d.h||300, draw:drawWall});
+  },
+  plate(d){
+    const b=mat(addBody(Bodies.rectangle(d.x,d.y,d.w||96,10,{
+      isStatic:true, collisionFilter:{category:CAT.TERRAIN}})), MAT.land);
+    return ent({type:'plate', tags:[], bodies:[b], need:d.need||8, w:d.w||96,
+                home:{x:d.x,y:d.y}, sink:0, load:0, on:false, sig:d.sig,
+                update:updPlate, draw:drawPlate});
+  },
+  /* 돌문 — 신호를 받으면 올라간다. 올라가며 물체를 밀어 올린다 */
+  gate(d){
+    const b=mat(addBody(Bodies.rectangle(d.x,d.y,d.w||44,d.h||150,{
+      isStatic:true, collisionFilter:{category:CAT.TERRAIN}})), MAT.land);
+    return ent({type:'gate', tags:[], bodies:[b], w:d.w||44, h:d.h||150,
+                home:{x:d.x,y:d.y}, lift:d.lift||150, open:0, by:d.by,
+                update:updGate, draw:drawGate});
+  }
+};
+function spawn(d){ return FACTORY[d.t](d); }
+
+/* ── 신호: 무게판이 눌리면 문이 열린다. 관계는 문자열로만 이어 둔다 ── */
+const SIG={};
+function updPlate(e,dt){
+  const b=e.bodies[0];
+  e.load=loadOn(b);
+  const want=clamp(e.load/e.need,0,1)*9;              // 무거울수록 더 내려앉는다
+  e.sink=lerp(e.sink,want,.18);
+  Body.setPosition(b,{x:e.home.x, y:e.home.y+e.sink});
+  e.on = e.load>=e.need;
+  if(e.sig) SIG[e.sig]=e.on;
+}
+function updGate(e,dt){
+  const want=(e.by&&SIG[e.by])?1:0;
+  e.open=lerp(e.open,want,.055);
+  const b=e.bodies[0];
+  Body.setPosition(b,{x:e.home.x, y:e.home.y-e.lift*e.open});
+}
+
+/*═══════════════════════════════════════════════════════════════════════
+  주인공 — 강체다. 몸으로 밀고, 손으로 잡는다.
+═══════════════════════════════════════════════════════════════════════*/
+const P={body:null, grounded:null, coyote:0, buf:0, face:1, ph:0, st:'idle',
+         hold:null, holdJoint:null, hang:null, hangJoint:null, dead:0, spawn:{x:0,y:0}};
+/* JUMP 8.3 = 55px 뜬다. 키 108px 를 170cm 로 치면 87cm — 사람이 뛸 수 있는 높이다.
+   (예전 11.6 은 103px = 163cm 였다. 자기 키만큼 뛰었으니 공처럼 보일 수밖에)
+   ⚠ 이 높이로는 상자(83px) 위에 못 올라간다. 손으로 기어오르는 tryLedge 가 그 몫을 한다 */
+const SPEED=2.95, JUMP=8.3;
+const GRAV=.62;                      // engine.gravity.y=2.232 를 px/걸음² 로 환산한 값
+/* 인물 크기 — LIMBO 10.4% · INSIDE 9.6% · 예전 오름길 20.4%(화면 높이 대비).
+   작아야 같은 움직임이 차분해 보인다. 1.5로 낮추니 12.6%가 되고,
+   덤으로 그린 발끝이 물리 몸체 바닥과 맞아떨어진다(2.1일 땐 13px 파묻혔다) */
+const FIG=1.5, FEET=23*FIG;
+const PUSH_MAX=1.55;                 // 제 몸을 움직이는 힘의 한계(px/걸음²)
+/* ⚠ Matter의 접촉 해결기는 밀어 옮기는 힘을 잘 전달하지 못한다(반복 횟수를 아무리 올려도
+   0.5px/걸음에서 막힌다). 그래서 닿아 있는 물체에는 사람의 완력을 직접 실어 준다.
+   힘이지 속도가 아니므로 무거운 물체일수록 느리게 움직인다 — 원하던 그대로다 */
+const STRENGTH=0.55;                 // 제 몸무게의 55%까지 밀 수 있다. 그 이상은 안 밀린다
+const REACH=104;
+
+function makePlayer(px,py){
+  P.body=addBody(Bodies.rectangle(px,py,24,70,Object.assign({
+    chamfer:{radius:9}, collisionFilter:{category:CAT.PLAYER,mask:0xffff}},MAT.person)));
+  Body.setInertia(P.body,Infinity);                   // 넘어지지는 않는다
+  P.spawn={x:px,y:py};
+}
+function handPoint(){
+  const b=P.body;
+  return {x:b.position.x+P.face*17, y:b.position.y+(P.crouch?22:-4)};   // 앉으면 손이 내려간다
+}
+function grabbables(){
+  const out=[];
+  for(const e of ENTS) if(has(e,'grab')) for(const b of e.bodies) out.push({e:e,b:b});
+  return out;
+}
+function nearestGrab(){
+  const h=handPoint(); let best=null,bd=REACH;
+  for(const g of grabbables()){
+    /* ⚠ 물체의 '중심'까지 재면 290짜리 널판은 한가운데 서야만 잡힌다.
+       끝자락에 앉아서 아무리 눌러도 안 잡혔다(2026-08-23 신고).
+       몸통에서 손에 가장 가까운 점까지 잰다 */
+    const bb=g.b.bounds;
+    const cx=clamp(h.x,bb.min.x,bb.max.x), cy=clamp(h.y,bb.min.y,bb.max.y);
+    const d=Math.hypot(h.x-cx,h.y-cy);
+    if(d<bd){bd=d;best=g;}
+  }
+  return best;
+}
+function grab(){
+  const g=nearestGrab(); if(!g) return;
+  const b=g.b, h=handPoint();
+  /* 긴 널판은 몸을 숙여야 든다(사용자 지시 2026-08-23).
+     서서 툭 집어드는 것보다 무게가 실려 보이고, 실수로 집는 일도 없다 */
+  if(b.plugin.carry&&!P.crouch) return;
+  if(b.isStatic){ Body.setStatic(b,false); mat(b,MAT.plank); tag(b,MAT.plank); b.plugin.bridged=0; }   // 굳은 다리를 도로 뜯어낸다
+  /* 긴 널판은 한쪽 끝을 잡으면 대롱대롱 돌아 다리로 못 놓는다.
+     가운데 근처를 잡되 몸 쪽으로 조금 치우쳐 잡아 널판이 앞으로 뻗게 한다
+     (정가운데를 잡으면 널판이 몸을 관통해 보인다) */
+  const local = b.plugin.carry
+    ? {x:-P.face*(g.e.w||220)*0.30, y:0}
+    : Vector.rotate(Vector.sub(h,b.position), -b.angle);
+  /* 손과 물체를 용수철로 잇는다. 순간이동시키지 않는다.
+     같은 뻣뻣함이라도 무거운 물체는 덜 끌려온다 — 그게 무게의 체감이다 */
+  P.holdJoint=addJoint(Constraint.create({
+    bodyA:P.body, pointA:{x:P.face*13, y: b.plugin.carry?-20:(P.crouch?10:-20)},   // 앉았으면 낮게 잡는다(널판은 늘 손 높이)
+    bodyB:b, pointB:local,
+    length: b.plugin.carry?8:12,          // 널판은 손 높이에 붙여 든다(26이면 발치에 끌듯 보였다)
+    /* 널판을 들 때 물렁하면 앞끝이 처져 구덩이로 처박힌다(2026-08-22 영상으로 확인).
+       .06 → .16 으로 단단히 쥔다 */
+    /* 널판은 용수철로 매달지 않는다. 아래 playerStep 에서 손 위치에 그대로 박아 넣는다.
+       이 관절은 '들고 있다'는 표시일 뿐이다.
+       ⚠ 그렇다고 stiffness 를 0 으로 주면 안 된다 — Matter 는 `stiffness || 기본값` 으로 읽어서
+         0 을 주면 오히려 1(꽉 묶인 막대)이 된다. 그 바람에 앉아서 집은 뒤 일어서면
+         손 높이가 34 어깼나면서 막대가 사람을 계속 잡아채고,
+         널판을 들면 사람이 하늘로 솔아올랐다(2026-08-27 신고 · 봇으로 재현).
+         아주 작은 값을 줘서 힘을 안 쓰는 관절로 만든다 */
+    stiffness: b.plugin.carry?1e-6:.035, damping: b.plugin.carry?0:.10}));
+  P.hold=g.e; P.holdBody=b;
+  /* ⚠ 긴 널판을 들고 걸으면 앞에 있던 상자·현무암을 죄다 밀어 구덩이로 쓸어 넣었다
+     (2026-08-22 영상). 들고 있는 동안은 물건·사람을 통과하고, 땅에만 걸린다 */
+  if(b.plugin.carry){
+    b.collisionFilter.mask = CAT.TERRAIN|CAT.DECK;
+    /* 무거운 널판은 용수철만으론 못 들어올려 땅에 끌린다. 집는 순간 들어 올린다 —
+       사람도 각목을 끌고 가지 않고 한 번에 든다 */
+    Body.setAngle(b,0); Body.setAngularVelocity(b,0); Body.setVelocity(b,{x:0,y:0});
+    Body.setPosition(b,{ x:P.body.position.x+P.face*(13+(g.e.w||240)*.30),
+                         y:P.body.position.y-20+8 });
+  }
+}
+/* 발끝에 걸린 낮은 턱(널판 끝·돌부리)은 걸음으로 넘는다.
+   ⚠ 이게 없으면 걸쳐 놓은 널판의 17px 모서리에 막혀 다리를 못 건넌다.
+     사람은 그 정도 턱에서 멈춰 서지 않는다 */
+const STEP_MAX=24;
+function stepUp(dir){
+  const b=P.body;
+  if(!dir||!P.grounded||P.onLadder||P.ledge) return;
+  /* '속도'가 아니라 '실제로 나아갔는지'로 본다 — 모서리에 붙어 헛도는 동안에도
+     속도는 0.6 씩 찍혀서 속도로 재면 영영 못 넘는다 */
+  const prog=(b.position.x-(P.lastX===undefined?b.position.x:P.lastX))*dir;
+  P.lastX=b.position.x;
+  if(prog>.45){ P.blockT=0; return; }
+  const feet=b.bounds.max.y, fx=b.position.x+dir*16;
+  /* ⚠ 첫 번째로 맞는 것만 보면 안 된다 — 널판 밑의 땅이 먼저 잡혀서 늘 퇴짜였다.
+     걸린 것들 중 '가장 높은 윗면'을 골라야 널판 모서리를 넘는다 */
+  const hits=Query.ray(Composite.allBodies(world), {x:fx,y:feet-STEP_MAX-2}, {x:fx,y:feet+4}, 2);
+  let top=null;
+  for(const h of hits){
+    const q=h.body;
+    if(q===b||q.isSensor||q.plugin.noStand) continue;
+    const t=q.bounds.min.y;
+    if(t>feet-3||t<feet-STEP_MAX) continue;              // 넘을 만한 높이만
+    if(top===null||t<top) top=t;
+  }
+  if(top===null){ P.blockT=0; return; }
+  if(rayDown({x:fx,y:top-66}, 44, b)) return;            // 머리 위가 막혔으면 못 넘는다
+  /* ⚠ 조금씩 밀어올리면 모서리에 낀 채 위아래로 떨린다.
+     몇 칸 막혀 있으면 한 번에 올라선다 — 사람이 턱을 넘는 것도 한 걸음이다 */
+  P.blockT=(P.blockT||0)+1;
+  if(P.blockT<5) return;
+  P.blockT=0;
+  Body.setPosition(b,{x:b.position.x+dir*13, y:top-36});
+  Body.setVelocity(b,{x:dir*1.2, y:0});
+}
+
+/* 구덩이 목록 — 땅 사이의 빈 곳 */
+function gaps(){
+  const L=ENTS.filter(e=>e.type==='land').map(e=>e.box).sort((a,b)=>a.x-b.x), out=[];
+  for(let i=0;i<L.length-1;i++){
+    const a=L[i], b=L[i+1], g=b.x-(a.x+a.w);
+    if(g>40&&Math.abs(a.y-b.y)<8) out.push({L:a.x+a.w, R:b.x, y:a.y, w:g});
+  }
+  return out;
+}
+/* 널판을 놓을 때, 구덩이에 걸칠 만하면 걸쳐 준다.
+   ⚠ 물리에만 맡기면 손에서 미끄러져 구덩이로 빠진다 — 사람은 그렇게 다리를 놓지 않는다.
+     "걸칠 만한 자리"에서 놓았을 때만 도와주고, 엉뚱한 데서 놓으면 그냥 떨어진다 */
+function snapBridge(e,q,auto){
+  if(!q||!e||e.pivot) return;
+  for(const g of gaps()){
+    if(e.w < g.w+24) continue;                       // 널판이 구덩이보다 짧으면 못 놓는다
+    const px=P.body.position.x;
+    if(px < g.L-190 || px > g.R+190) continue;       // 구덩이 근처에서만 도와준다
+    if(Math.abs(q.position.y-g.y) > 130) continue;
+    /* 양쪽에 12씩 걸치는 자리의 범위. 지금 자리에서 제일 가까운 데로 붙인다 —
+       가운데로 순간이동시키면 손에서 튀어나간 것처럼 보인다 */
+    const lo=g.R-(e.w/2-12), hi=g.L+(e.w/2-12);
+    const slack = auto ? 46 : e.w*.55;               // 들고 대면 바짝, 던져 놓으면 넉넉히
+    if(q.position.x < lo-slack || q.position.x > hi+slack) continue;
+    /* 윗면을 지면 높이에 맞춘다. 위에 얹으면 양끝에 17px 턱과 낙차가 생겨 오르내릴 때 걸린다 */
+    const at={x:clamp(q.position.x,lo,hi), y:g.y+(e.h||16)/2};
+    Body.setAngle(q,0); Body.setAngularVelocity(q,0); Body.setVelocity(q,{x:0,y:0});
+    Body.setPosition(q,at);
+    /* 굳혀서 땅으로 만든다. ⚠ Matter 는 isStatic 을 켤 때 friction 을 1,
+       restitution 을 0 으로 되돌린다 — 재질을 다시 입혀야 한다 */
+    Body.setStatic(q,true); mat(q,MAT.plank); tag(q,MAT.plank);
+    q.plugin.bridged=1; q.plugin.bridgeAt=at;
+    return true;
+  }
+}
+/* 잡기 / 놓기 — 키보드도 손가락도 봇도 이 하나를 쓴다 */
+function useHand(){
+  if(P.grip){ P.gripFrom=P.grip; P.grip=null; P.gripCool=10; return; }   // 손잡이를 잡고 있으면 E 는 '손 놓기'다
+  if(P.holdJoint) letGo();
+  else if(P.hangJoint) letGoRope();
+  else if(!tryTie()) if(!hangOn()) grab();
+}
+function letGo(){
+  const e=P.hold, q=P.holdBody;
+  dropJoint(P.holdJoint); P.holdJoint=null; P.hold=null; P.holdBody=null;
+  const bridged = q && (q.plugin.bridged || (e&&e.type==='plank'&&snapBridge(e,q)));
+  if(!q) return;
+  if(q.plugin.carry&&!bridged){
+    /* 들고 있는 널판은 절반이 몸 속에 걸쳐 있다.
+       놓는 순간 충돌을 되살리면 파묻힌 둘이 서로를 밀어낸다 —
+       몸에서 빠져나올 때까지는 땅과만 부딪히고 사람은 그냥 통과시킨다 */
+    q.collisionFilter.mask = CAT.TERRAIN|CAT.DECK|CAT.PROP;
+    q.plugin.ghost = 1;
+  } else q.collisionFilter.mask=0xffff;
+}
+/* 놓은 널판이 몸에서 완전히 빠져나오면 그제서야 사람과도 부딪힌다 */
+function clearGhost(){
+  const B=P.body.bounds;
+  for(const e of ENTS) for(const q of e.bodies){
+    if(!q.plugin.ghost) continue;
+    const A=q.bounds;
+    if(A.min.x<B.max.x&&A.max.x>B.min.x&&A.min.y<B.max.y&&A.max.y>B.min.y) continue;
+    q.plugin.ghost=0; q.collisionFilter.mask=0xffff;
+  }
+}
+/* 널판은 '가만히 놓인 것'과 '든 것' 둘뿐이다.
+   ⚠ 바닥에 누운 널판을 물렁하게 두면 몸으로 밀려 구덩이에 빠진다(2026-08-23 영상).
+     널판은 무거워서 사람이 걷다 밀 수 있는 물건이 아니다 — 멈춰 서면 그 자리에 굳는다.
+     들려면 앉아서(↓) E. 그때만 풀린다 */
+function holdBridges(){
+  for(const e of ENTS){
+    if(e.type!=='plank'||e.pivot) continue;
+    const q=e.bodies[0];
+    if(P.holdBody===q){ q.plugin.bridged=0; continue; }
+    if(q.isStatic) continue;
+    if(Math.abs(q.velocity.x)+Math.abs(q.velocity.y)+Math.abs(q.angularVelocity)*24 > .5) continue;
+    if(!rayDown({x:q.position.x, y:q.bounds.max.y-2}, 10, q)) continue;   // 땅에 닿아 멈췄을 때만
+    Body.setStatic(q,true); mat(q,MAT.plank); tag(q,MAT.plank);
+  }
+}
+function hangOn(){
+  let best=null,bd=REACH*.8; const h={x:P.body.position.x,y:P.body.position.y-30};
+  for(const e of ENTS) if(has(e,'hang')) for(const b of e.bodies){
+    const d=Vector.magnitude(Vector.sub(b.position,h));
+    if(d<bd){bd=d;best=b;}
+  }
+  if(!best) return false;
+  P.hangJoint=addJoint(Constraint.create({
+    bodyA:P.body, pointA:{x:0,y:-32}, bodyB:best, pointB:{x:0,y:0},
+    length:6, stiffness:.85, damping:.12}));
+  P.hang=best; return true;
+}
+function letGoRope(){ dropJoint(P.hangJoint); P.hangJoint=null; P.hang=null; }
+
+let TIE=null;
+/* 밧줄 끝을 물체에 묶는다 — 이것도 E 하나로 한다(사용자 지시 2026-08-27. 예전엔 F 였다).
+   손이 밧줄 끝에 닿고, 그 끝 곁(70)에 상자·돌 같은 게 있을 때만 묶인다.
+   그 외엔 예전처럼 매달리거나 집는다 — 묶을 자리가 아니면 E 는 아무것도 달라지지 않는다 */
+function tryTie(){
+  const h=handPoint();
+  if(TIE){
+    const p=TIE.bodyA.position;
+    if(Math.hypot(h.x-p.x,h.y-p.y)>REACH) return false;      // 멀리서는 안 풀린다
+    dropJoint(TIE); TIE=null; return true;
+  }
+  /* ⚠ 예전엔 세상의 첫 번째 밧줄을 집었다 — 밧줄이 둘이 되면서
+     멀리 떨어진 2막 밧줄이 묶였다. 손에서 가까운 끝을 고른다 */
+  /* 묶는 건 집는 것보다 팔을 더 뻗는다 — 물건을 밀고 있으면 사람은 그것만큼 뒤에 있다.
+     REACH 그대로는 벼랑 끝에서 104.3 이 나와 간신하게 안 닿았다(봇으로 확인) */
+  let end=null,bd=REACH*1.5;
+  for(const e of ENTS){
+    if(e.type!=='rope') continue;
+    const q=e.bodies[e.bodies.length-1];
+    const d=Math.hypot(h.x-q.position.x, h.y-q.position.y);
+    if(d<bd){ bd=d; end=q; }
+  }
+  if(!end) return false;
+  /* 끝과 물건이 얼마나 가까워야 묶이는가 — 70 은 너무 빡빡해서
+     벼랑 끝까지 밀고 와도 안 묶이고 대신 들려 버렸다(봇으로 확인). 100 으로 늘렸다 */
+  let link=null;
+  for(const e of ENTS) if(has(e,'link')) for(const b of e.bodies){
+    if(Vector.magnitude(Vector.sub(b.position,end.position))<100){ link=b; break; }
+  }
+  if(!link) return false;
+  TIE=addJoint(Constraint.create({bodyA:end,pointA:{x:0,y:8},bodyB:link,pointB:{x:0,y:0},
+    length:14, stiffness:.9, damping:.1}));
+  return true;
+}
+
+
+const DEAD=980;
+function respawn(){
+  /* 처음부터 다시가 아니라 마지막으로 발 붙였던 자리에서 다시 시작한다.
+     아직 한 번도 땅을 밟은 적이 없으면(시작하자마자 죽으면) 원래 시작 자리로 */
+  const at = P.safe || P.spawn;
+  Body.setPosition(P.body, at); Body.setVelocity(P.body,{x:0,y:0});
+  Body.setAngle(P.body,0); Body.setAngularVelocity(P.body,0);
+  letGo(); letGoRope(); P.ledge=null; P.climb=0; P.grip=null; P.gripFrom=null; P.onLadder=null; P.dead=0;
+  for(const e of ENTS) if(e.type==='grip'){ e.gone=0; e.life=0; }   // 부서졌던 손잡이도 돌아온다
+  cam=P.body.position.x-W*.42;                       // 화면도 그 자리로 — 옆으로 주욱 흐르지 않게
+}
+function playerStep(){
+  PHYS++;
+  const b=P.body;
+  if(P.dead){ P.dead++; if(P.dead>34) respawn(); return; }
+
+  const dir=(RIGHT()?1:0)-(LEFT()?1:0);
+  /* 무언가를 잡고 있으면 그걸 계속 마주 본다.
+     손으로 잡은 채 등을 돌리면 팔이 물건에서 떨어져 보인다 — 사람은 그렇게 안 든다.
+     멀어지는 쪽으로 가면 마주 본 채 뒷걸음질로 끌고 온다.
+     (널판처럼 앞으로 안고 가는 물건은 예외 — 그건 몸을 돌려야 방향을 바꾼다) */
+  const dragging = P.holdJoint&&P.holdBody&&!P.holdBody.plugin.carry;
+  if(dragging){
+    const dx=P.holdBody.position.x-b.position.x;
+    if(Math.abs(dx)>6) P.face = dx>0?1:-1;          // 바로 옆에서 떨릴 땐 그대로 둔다
+    P.turn=0;
+  }
+  else if(dir&&dir!==P.face){ P.turn=(P.turn||0)+1; if(P.turn>3){ P.face=dir; P.turn=0; } }
+  else P.turn=0;
+
+  /* 사다리 — 오르내리는 동안은 중력도 걸음도 멈춘다.
+     ↑ 가 뛰기와 겹치므로, 사다리에 몸이 닿아 있으면 뛰기 대신 오르기가 된다.
+     내리려면 ↓, 벗어나려면 ← → 를 누른다 */
+  b.collisionFilter.mask = deckPass(b) ? (0xffff & ~CAT.DECK) : 0xffff;   // 한 방향 발판 통과 여부
+  /* ── 손잡이 매달리기(2026-08-27) ──
+     예전엔 범 칸 안을 상하좌우 자유롭게 기어다녔다 — 사용자 말대로 벌레처럼 보였다.
+     이젠 바위벽에서 튀어나온 손잡이에만 매달린다.
+     ← → ↑ 을 누르면 그쪽 손잡이로 **뛰어** 오른다 — 난간난간 건너가는 그 맛이다.
+     매달릴 수 있는 범위 밖이면 그쪽으로는 못 간다(헛발 디딛고 떨어지지는 않는다) */
+  if(P.gripCool>0) P.gripCool--;
+  if(P.grip && P.grip.gone) P.grip=null;
+  /* 공중에서 손이 닿는 손잡이가 있으면 저절로 잡는다 */
+  if(!P.grip && !P.grounded && !P.holdJoint && !P.hangJoint && !P.ledge && !P.onLadder && !(P.gripCool>0)){   /* ⚠ P.gripCool<=0 으로 쓰면 안 된다 — 아직 없는 값(undefined)과의 비교는 항상 거짓이라 영영 안 잡혔다 */
+    const g=gripNear(b.position.x, b.position.y-30, GRIP_R, P.gripFrom);
+    if(g){ P.grip=g; P.gripFrom=null; g.life=0; }
+  }
+  if(P.grip){
+    const g=P.grip;
+    Body.setVelocity(b,{x:0,y:0});
+    Body.setPosition(b,{x:g.x, y:g.y+30});
+    Body.setAngle(b,0); Body.setAngularVelocity(b,0);
+    P.grounded=null; P.st='grip'; P.wasAir=0; P.landT=0;
+    P.gripT=(P.gripT||0)+1;
+    if(g.crumble){                                   // 부스러지는 손잡이
+      g.life++;
+      if(g.life>g.crumble){ g.gone=1; P.grip=null; P.gripFrom=null; shake=8;
+        Body.setVelocity(b,{x:0,y:1}); }
+    }
+    if(P.grip){
+      if(DOWN()){ P.grip=null; P.gripFrom=g; P.gripCool=10; Body.setVelocity(b,{x:0,y:1.5}); }
+      else if(dir||UP()){
+        const t=gripTarget(g, dir, UP());
+        if(t) leapTo(g, t);
+        else if(UP()){                          // 더 잡을 게 없으면 그냥 몸을 끌어올린다 — 꾭대기 발판으로
+          P.grip=null; P.gripFrom=g; P.gripCool=14; P.leapT=8;
+          Body.setVelocity(b,{x:(dir||P.face)*2.0, y:-JUMP*1.02});
+        }
+      }
+      if(P.grip||P.gripFrom){ if(b.position.y>DEAD) die(); return; }
+    }
+  }
+
+  const lad=ladderAt(b);
+  if(P.onLadder&&(!lad||P.holdJoint)) P.onLadder=null;
+  if(lad&&!P.holdJoint&&!P.hangJoint&&!P.ledge&&(UP()||DOWN())) P.onLadder=lad;
+  if(P.onLadder&&dir) P.onLadder=null;                   // 옆으로 가면 손을 놓는다
+  if(P.onLadder){
+    const L=P.onLadder, top=L.y+18, bot=L.y+L.h+10;
+    let vy=UP()?-2.3:DOWN()?2.6:0;
+    if(b.position.y<=top&&vy<0) vy=0;                    // 꼭대기에서 더 안 올라간다
+    if(b.position.y>=bot&&vy>0) vy=0;
+    Body.setVelocity(b,{x:0,y:vy});
+    Body.setPosition(b,{x:lerp(b.position.x,L.x,.35), y:clamp(b.position.y,top,bot)});
+    Body.setAngle(b,0); Body.setAngularVelocity(b,0);
+    P.lph=(P.lph||0)+Math.abs(vy)*.10;                   // 오른 만큼 팔다리가 바뀐다
+    P.grounded=null; P.st='ladder'; P.wasAir=0; P.landT=0;
+    if(b.position.y>DEAD) die();
+    return;
+  }
+
+  /* 밧줄에 매달렸을 때 — 발은 땅에 없고, 좌우로 힘을 주면 그네가 된다 */
+  if(P.hangJoint){
+    P.grounded=null;
+    if(dir) accel(b,dir*.42);                  // 몸을 흔들어 그네를 키운다
+    if(UP()&&P.buf===0){ letGoRope(); Body.setVelocity(b,{x:b.velocity.x,y:-JUMP*.78}); P.buf=12; }
+    if(P.buf>0)P.buf--;
+    P.st='hang';
+    if(b.position.y>DEAD) die();
+    return;
+  }
+
+  /* 모서리에 매달렸을 때 */
+  if(P.ledge){
+    const L=P.ledge;
+    if(L.body){                                      // 상자에 매달렸다 — 오르는 동안 상자를 붙잡아 둔다
+      Body.setVelocity(L.body,{x:0,y:0}); Body.setAngularVelocity(L.body,0);
+      L.x = L.side>0 ? L.body.bounds.min.x : L.body.bounds.max.x;
+      L.y = L.body.bounds.min.y;
+    }
+    Body.setVelocity(b,{x:0,y:0}); Body.setAngle(b,0);
+    if(P.climb>0){
+      P.climb+=1/LEDGE_UP;
+      const k=Math.min(1,P.climb), c=ease(clamp((k-.30)/.70,0,1));
+      Body.setPosition(b,{ x:lerp(L.x-L.side*14, L.x+L.side*22, c),
+                           y:lerp(L.y+34, L.y-35, c) });
+      if(k>=1){ P.ledge=null; P.climb=0; }
+    } else {
+      Body.setPosition(b,{x:L.x-L.side*14, y:L.y+34});
+      if(UP()) P.climb=.001;
+      else if(DOWN()){ P.ledge=null; Body.setVelocity(b,{x:0,y:1.5}); }
+    }
+    P.grounded=null; P.st='ledge';
+    return;
+  }
+
+  const gC=rayDown({x:b.position.x,    y:b.bounds.max.y-3}, 8, b),
+        gL=rayDown({x:b.position.x-8,  y:b.bounds.max.y-3}, 8, b),
+        gR=rayDown({x:b.position.x+8,  y:b.bounds.max.y-3}, 8, b);
+  P.grounded = gC||gL||gR;
+
+  /* 죽은 자리 근처에서 다시 시작하려고, 마지막으로 발 붙였던 자리를 적어 둔다(2026-08-27).
+     ⚠ 움직이는 것 위는 안 적는다 — 그네 널판이나 밀리는 상자 자리에 되살아나면 또 떨어진다.
+       굳지 않은 물건도 마찬가지다. 땅·발판·걸쳐 굳은 널판(전부 isStatic)만 인정한다.
+     들고 있던 널판은 죽을 때 놓게 되므로, 되살아나면 널판은 제 자리에 남아 있다 */
+  /* ⚠ 발 한쪽만 걸쳐도 '땅을 밟았다'가 되기 때문에, 벼랑 밖으로 10쯤 나간 자리가
+     안전한 자리로 적혔 되살아나자마자 또 떨어졌다(봇으로 확인).
+     세 줄기 전부 땅에 닿을 때만 — 즉 몸 양쪽으로 땅이 있을 때만 적는다 */
+  if(gC&&gL&&gR && gC.isStatic&&gL.isStatic&&gR.isStatic && !P.dead && Math.abs(b.velocity.y)<4)
+    P.safe={x:b.position.x, y:b.position.y-2};
+
+  /* 걷기 — 목표 속도로 밀어붙이되 완력에 한계가 있다.
+     무거운 걸 밀고 있으면 그 한계에 먼저 걸려서 느려진다 */
+  /* 미는 힘을 먼저 셈한다 — 버거운 만큼 내 걸음도 느려져야 하니까 */
+  const pushedMass=bodyPush(dir);
+  coulomb();
+  const carry=P.holdBody?P.holdBody.mass:0;
+  const load=clamp(P.strain,0,1.5);
+  const want = P.strain>=1 ? 0                          // 꿈쩍도 안 하는 걸 밀 때는 제자리
+             : dir*SPEED*(1-load*.9)*(carry>40?.62:1);
+  const gain=P.grounded?.20:.10;                        // 천천히 붙고
+  /* 널판을 들면 제 몸 + 널판을 함께 움직여야 한다. 힘의 한계를 늘려 주지 않으면
+     목표 속도(이미 0.62배로 줄여 둔)에 영영 못 닿아 진창을 걷는 것처럼 느리다 */
+  const cap =P.grounded?(P.holdBody&&P.holdBody.plugin.carry?PUSH_MAX*2.4:PUSH_MAX):PUSH_MAX*.34;
+  const strained=driveX(b,want,gain,cap);
+  if(!dir&&P.grounded) driveX(b,0,.10,.28);             // 미끄러지듯 선다
+
+  /* 뛰기 — 코요테 시간과 선입력은 그대로.
+     ⚠ 예전엔 ↑ 를 누르고만 있어도 딛는 즉시 다시 떴다. 공처럼 통통 튀었다.
+       사람은 착지를 한 번 받아내고 다시 뛴다 — 새로 누른 순간에만 받고, 딛고 나서 잠깐 못 뛴다 */
+  const upNow=UP()?1:0;
+  if(upNow&&!P.upWas) P.buf=8; else if(P.buf>0) P.buf--;
+  P.upWas=upNow;
+  if(P.grounded) P.coyote=7; else if(P.coyote>0) P.coyote--;
+  // landT 는 처음엔 없다 — (P.landT||0) 으로 읽어야 첫 점프가 막히지 않는다
+  if(P.buf>0&&P.coyote>0&&(P.landT||0)<5){ Body.setVelocity(b,{x:b.velocity.x,y:-JUMP}); P.buf=0; P.coyote=0; P.grounded=null; }
+  if(!upNow&&b.velocity.y<-4) accel(b,0,.55);           // 짧게 누르면 낮게 뛴다
+
+  /* 오를 때보다 내릴 때가 무겁다. 정점 높이는 그대로라 오르던 지형은 그대로 오른다 */
+  if(!P.grounded&&b.velocity.y>0){
+    accel(b,0,GRAV*.5);
+    if(b.velocity.y>20) Body.setVelocity(b,{x:b.velocity.x,y:20});   // 얇은 널판을 뚫지 않게
+  }
+
+  /* 널판을 들고 있으면 **아예 안 기운다**.
+     용수철로 수평을 잡아 봤지만 앞끝이 구덩이 위로 나가는 순간 기울어 처박혔다(사용자 영상).
+     사람이 각목을 들면 각목은 사람 손에서 안 돈다 — 각도를 그냥 0 으로 못 박는다 */
+  if(P.holdBody&&P.holdBody.plugin.carry){
+    const q=P.holdBody, w=(P.hold&&P.hold.w)||240;
+    /* 손 위치에 그대로 박아 넣는다 — 흔들림도 처짐도 없다.
+       앉으면 같이 내려온다(앉아서 드는데 널판만 가슴 높이면 몸을 뚫은 것처럼 보인다) */
+    Body.setAngle(q,0); Body.setAngularVelocity(q,0);
+    Body.setPosition(q,{ x:b.position.x+P.face*(13+w*.30),
+                         y:b.position.y+(P.crouch?14:-20)+8 });
+    Body.setVelocity(q,{x:b.velocity.x, y:b.velocity.y});
+    /* 구덩이에 갖다 대면 저절로 걸쳐지고 손에서 놓인다 */
+    if(P.grounded&&snapBridge(P.hold,q,true)) letGo();
+  }
+
+  /* 안전장치 — 사람이 제 달려드는 힘보다 빨리 위로 솔는 일은 없다.
+     물리가 터져도 하늘로 날아가지만은 않게 받친다 */
+  if(b.velocity.y < -JUMP*1.3) Body.setVelocity(b,{x:b.velocity.x, y:-JUMP*1.3});
+
+  stepUp(dir);                                     // 낮은 턱은 걸음으로 넘는다
+  holdBridges();                                   // 걸쳐 둔 널판은 자리를 지킨다
+  clearGhost();                                    // 놓은 널판은 몸에서 빠진 뒤에 부딪힌다
+  if(!P.grounded) tryLedge();
+
+  /* 잡고 있던 게 너무 멀어지면 놓친다 */
+  if(P.holdJoint&&jointLen(P.holdJoint)>128) letGo();
+
+  Body.setAngle(b,0); Body.setAngularVelocity(b,0);
+
+  /* 구덩이에 빠뜨린 물건은 제자리로 돌려놓는다.
+     널판을 빠뜨리면 길이 영영 막혀 버린다 */
+  for(const e of ENTS){
+    if(e.type==='land'||e.type==='rope'||e.type==='swing'||e.type==='gate'||e.type==='plate') continue;
+    for(let i=0;i<e.bodies.length;i++){
+      const q=e.bodies[i];
+      if(q.isStatic||q.position.y<=760) continue;      // 땅(600)보다 한참 아래면 이미 구덩이 — 바로 돌려놓는다
+      if(P.holdBody===q) letGo();
+      Body.setPosition(q, e.home[i]); Body.setAngle(q,0);
+      Body.setVelocity(q,{x:0,y:0}); Body.setAngularVelocity(q,0);
+    }
+  }
+
+  /* ⚠ 예전엔 .034 였다 — 한 주기(두 걸음)에 185px 를 가는 셈인데,
+     다리 길이(31px)로 뻗을 수 있는 보폭은 한 걸음에 33px 뿐이다.
+     모자란 거리의 절반을 발이 미끄러져 메웠다 — 이게 ‘사람 같지 않다’의 정체였다(2026-08-27).
+     주기를 보폭에 맞춘다: 2π / (2×33px) = 0.095 */
+  P.ph+=Math.abs(b.velocity.x)*.095;                   // 보폭 33px 에 맞춘 걸음 주기
+  P.sp=lerp(P.sp||0, Math.min(1,Math.abs(b.velocity.x)/3.2), .10);
+  /* 착지 — 세게 떨어질수록 깊이 주저앉고 오래 추스른다.
+     예전엔 1cm 를 내려오나 3층에서 떨어지나 똑같은 착지였다(2026-08-27) */
+  if(P.grounded&&P.wasAir>4){
+    const hit=clamp((P.vyPrev||0)/13,0,1.6);       // 떨어지던 속도
+    P.impact=hit;
+    P.landT=Math.round(9+hit*13);
+    P.landMax=P.landT;
+    if(hit>.95){ P.stumble=Math.round(10+hit*8); shake=Math.max(shake,3+hit*4); }
+  }
+  P.vyPrev=b.velocity.y;
+  if(P.stumble>0){ P.stumble--; }
+  if(P.leapT>0){ P.leapT--; }
+  P.wasAir = P.grounded ? 0 : (P.wasAir||0)+1;
+  if(P.landT>0) P.landT--;
+
+  /* 한 방향 발판 위에서 ↓ 를 누르면 내려간다(앉지 않는다) */
+  if(P.dropT>0) P.dropT--;
+  if(DOWN()&&P.grounded&&P.grounded.plugin.oneway&&!P.holdJoint&&(P.dropT||0)===0){
+    P.dropT=16; P.grounded=null; Body.setVelocity(b,{x:b.velocity.x,y:1.6});
+  }
+  P.crouch = (DOWN()&&P.grounded&&!P.grounded.plugin.oneway&&!P.hangJoint&&!P.ledge) ? 1 : 0;
+  P.st = P.crouch&&Math.abs(b.velocity.x)<1.2 ? 'crouch'
+       : P.leapT>0 ? 'reach'
+       : P.stumble>0&&P.grounded ? 'stumble'
+       : P.landT>0&&P.grounded ? 'land'
+       : !P.grounded ? (b.velocity.y<0?'jump':'fall')
+       : P.strain>.35||(P.holdJoint&&strained) ? 'push'
+       : Math.abs(b.velocity.x)>(P.st==='walk'?.18:.5) ? 'walk' : 'idle';
+  if(b.position.y>DEAD) die();
+}
+function die(){ P.dead=1; shake=14; }
+
+/* 한 방향 발판 — 사람이 아래에서 올라올 때(또는 ↓ 로 내려갈 때)만 충돌을 끈다.
+   ⚠ 물건까지 통과시키면 그 위에 상자를 못 쌓는다. 사람만 봐준다 */
+/* 한 방향 발판은 '충돌 편'을 갈라서 처리한다.
+   ⚠ 충돌 이벤트에서 pair.isActive=false 로 끄는 흔한 수법은 여기선 안 먹었다(막힌 채였다).
+     사람 쪽 마스크에서 발판 편을 빼는 게 확실하다.
+   끄는 때: 사다리를 타는 중 · ↓ 로 내려가는 중 · 솟아오르는 중 · 몸이 발판에 걸쳐 있을 때 */
+function deckPass(b){
+  if(P.onLadder||(P.dropT||0)>0||b.velocity.y<-.05) return true;
+  for(const e of ENTS){
+    if(e.type!=='deck') continue;
+    const g=e.box;
+    if(b.position.x<g.x-12||b.position.x>g.x+g.w+12) continue;
+    if(b.bounds.max.y>g.y+10&&b.bounds.min.y<g.y+14) return true;   // 몸이 발판에 걸쳐 있다
+  }
+  return false;
+}
+
+/* 사다리에 몸이 닿아 있나 — 가로로 22 안쪽, 세로로 사다리 구간 안 */
+/* 손잡이 — 잡힐 수 있는 거리와 뛰어서 닿는 거리 */
+const GRIP_R=58;            // 손끝이 이만큼 안으로 오면 잡힌다
+const LEAP_X=190, LEAP_UP=150, LEAP_DN=90;   // 한 번에 건너뛸 수 있는 거리
+function gripNear(px,py,r,skip){
+  let best=null,bd=r;
+  for(const e of ENTS){
+    if(e.type!=='grip'||e.gone||e===skip) continue;
+    const d=Math.hypot(px-e.x, py-e.y);
+    if(d<bd){ bd=d; best=e; }
+  }
+  return best;
+}
+/* 지금 잡은 손잡이에서 그쪽으로 건너뛸 수 있는 다음 손잡이.
+   옆으로 누르면 옆을, ↑ 만 누르면 위를 본다. 가까운 것 하나만 고른다 */
+function gripTarget(from, dir, up){
+  let best=null,bs=1e9;
+  for(const e of ENTS){
+    if(e.type!=='grip'||e.gone||e===from) continue;
+    const dx=e.x-from.x, dy=e.y-from.y;
+    if(dir){ if(Math.sign(dx)!==dir||Math.abs(dx)<10) continue; }
+    else   { if(Math.abs(dx)>70) continue; }        // ↑ 만 누를 땐 거의 바로 위
+    if(dx*dx>LEAP_X*LEAP_X) continue;
+    if(dy<-LEAP_UP||dy>LEAP_DN) continue;
+    if(up&&dy>-10) continue;                        // ↑ 을 누르면 위쪽만 본다(←↑ = 왼위 대각선)
+    if(!up&&dy<-LEAP_UP*.62) continue;              // ↑ 없이는 너무 높은 건 안 잡는다
+    let s=Math.abs(dx)+Math.abs(dy)*1.3;
+    if(dy>0) s+=150;                                /* ⬇ 내려가는 손잡이는 마지막 선택 —
+       앞서는 옆으로 누를 때마다 방금 올라온 아래 손잡이로 다시 내려갔다(봇으로 확인) */
+    if(s<bs){ bs=s; best=e; }
+  }
+  return best;
+}
+/* 손을 놓고 포물선을 그리며 날아간다 — 순간이동이 아니다.
+   닿는 순간 위에서 저절로 잡는다(gripNear) */
+function leapTo(from, to){
+  const b=P.body, T=16;
+  const dx=to.x-from.x, dy=(to.y+30)-(from.y+30);
+  P.grip=null; P.gripFrom=from; P.gripCool=6;
+  P.face = dx>=0?1:-1;
+  Body.setVelocity(b,{ x:dx/T, y:dy/T - .5*GRAV*T });
+  P.leapT=10;
+}
+function ladderAt(b){
+  for(const e of ENTS){
+    if(e.type!=='ladder') continue;
+    if(Math.abs(b.position.x-e.x)>32) continue;      // 22 는 너무 좁았다 — 앞에 서도 안 잡혀 뛰기만 했다
+    if(b.bounds.max.y<e.y-6||b.bounds.min.y>e.y+e.h+6) continue;
+    return e;
+  }
+  return null;
+}
+
+/* 턱 모서리를 손으로 잡는다.
+   떨어지는 중에 손끝이 모서리 높이에 걸리면 붙잡고, 위를 누르면 팔로 몸을 끌어올린다 */
+const LEDGE_UP=26;                                   // 오르는 데 걸리는 칸 수
+/* 오를 수 있는 모서리를 모은다.
+   땅뿐 아니라 상자 위도 손으로 잡고 오른다 — 사람은 1m 짜리 궤짝을 뛰어서 올라가지 않는다.
+   상자는 굴러다니므로 똑바로 놓여 있고 잠잠할 때만 잡힌다 */
+function edges(){
+  const out=[];
+  for(const e of ENTS){
+    if(e.type==='land'||e.type==='deck'){ const g=e.box; out.push({L:g.x, R:g.x+g.w, top:g.y, body:null}); }
+    else if(e.type==='crate'){
+      for(const q of e.bodies){
+        if(Math.abs(q.angle)>.3) continue;                       // 기울어진 건 못 잡는다
+        if(Math.abs(q.velocity.x)+Math.abs(q.velocity.y)>1.5) continue;   // 구르는 중엔 못 잡는다
+        out.push({L:q.bounds.min.x, R:q.bounds.max.x, top:q.bounds.min.y, body:q});
+      }
+    }
+  }
+  return out;
+}
+function tryLedge(){
+  if(P.ledge||P.hangJoint||P.grounded||P.holdJoint) return;
+  const b=P.body;
+  if(b.velocity.y<-1.2) return;                      // 솟아오르는 중엔 안 잡힌다
+  const hx=b.position.x+P.face*15, hy=b.bounds.min.y+5;
+  for(const g of edges()){
+    const ex = P.face>0 ? g.L : g.R;
+    if(Math.abs(hx-ex)>24) continue;
+    if(hy<g.top-34||hy>g.top+22) continue;
+    if(solidAt2(ex+P.face*20, g.top-40)) continue;    // 위가 막혔으면 못 오른다
+    P.ledge={x:ex, y:g.top, side:P.face, body:g.body}; P.climb=0;
+    Body.setVelocity(b,{x:0,y:0});
+    return;
+  }
+}
+function solidAt2(px,py){
+  for(const g of edges())
+    if(px>g.L&&px<g.R&&py>g.top&&py<g.top+460) return true;
+  return false;
+}
+/* 매달린 자세 → 손을 턱에 얹고 → 몸이 올라온다 */
+function ledgePose(k){
+  const po={};
+  if(k<=0){ po.ar1=2.66; po.ar2=2.74; po.el1=.16; po.el2=.12;
+            po.th1=.16; po.th2=-.14; po.kn1=-.58; po.kn2=-.32; po.rot=-.06; po.hd=2; return po; }
+  const a=ease(clamp(k/.42,0,1));                    // 손이 턱을 넘어간다
+  const c=ease(clamp((k-.30)/.70,0,1));              // 몸이 따라 올라온다
+  po.ar1=lerp(2.66,1.05,a);  po.el1=lerp(.16,.55,a);
+  po.ar2=lerp(2.74,2.05,a*.5+c*.5); po.el2=lerp(.12,.32,c);
+  po.th1=lerp(.16,.95,c);    po.kn1=-lerp(.58,1.25,Math.sin(c*Math.PI))-c*.05;
+  po.th2=lerp(-.14,-.30,c);  po.kn2=-lerp(.32,.95,c);
+  po.rot=lerp(-.06,0,c);     po.hd=lerp(2,1,c);
+  return po;
+}
+
+/* 몸으로 미는 힘.
+   낼 수 있는 힘은 정해져 있고(제 몸무게의 STRENGTH 배), 빨리 걸을수록 줄어든다.
+   그 힘에서 물체의 마찰(μmg)을 뺀 나머지가 물체를 움직인다.
+   → 가벼운 건 걷는 속도까지 밀리고, 무거운 건 기어가듯 밀리고, 더 무거우면 꿈쩍도 안 한다 */
+function bodyPush(dir){
+  P.strain=0;
+  if(!dir||!P.grounded) return 0;
+  const v=P.body.velocity.x*dir;
+  const budget=STRENGTH*P.body.mass*G*clamp(1-v/SPEED,0,1);
+  let heaviest=0;
+  for(const pr of engine.pairs.list){
+    if(!pr.isActive) continue;
+    const o = pr.bodyA===P.body?pr.bodyB : pr.bodyB===P.body?pr.bodyA : null;
+    if(!o||o.isStatic||o.plugin.noStand) continue;
+    if(o===P.holdBody) continue;                                    // 들고 있는 건 '미는 것'이 아니다 — 이게 없으면 기어간다
+    if(o.plugin.bridged) continue;                                  // 걸쳐 놓은 다리는 이제 땅이다
+    if(Math.abs(o.position.y-P.body.position.y)>46) continue;      // 밟고 선 게 아니라 옆에 닿은 것
+    if(Math.sign(o.position.x-P.body.position.x)!==dir) continue;
+    heaviest=Math.max(heaviest,o.mass);
+    const need=mu(o)*o.mass*G;
+    P.strain=Math.max(P.strain,clamp(need/(STRENGTH*P.body.mass*G),0,1.4));
+    const net=budget-need;
+    if(net<=0) continue;                                            // 꿈쩍도 안 한다
+    accel(o,dir*net/o.mass);
+    accel(P.body,-dir*net/P.body.mass*.5);                          // 반작용
+  }
+  return heaviest;
+}
+
+/*═══════════════════════════════════════════════════════════════════════
+  판 — 데이터 한 줄이 물체 하나다
+═══════════════════════════════════════════════════════════════════════*/
+const LEVEL=[
+  /* ── 1막 · 벌판 ── 시작하자마자 만질 것들을 깔아 둔다 ── */
+  /* 첫 구간은 비워 뒀다(사용자 지시 2026-08-23) — 상자·현무암이 널판에 얹혀
+     같이 구덩이로 쓸려 들어갔다. 여기서 배우는 건 '앉아서 널판을 들어 다리를 놓는다' 하나뿐이다 */
+  {t:'land', x:-400, y:600, w:900, h:460},           // -400 ~ 500
+
+  {t:'land', x:500, y:600, w:520, h:460},            // 500 ~ 1020
+  {t:'plank',   x:700, y:575, w:290, h:16},          // ★ 앉아서(↓) 이 널판을 잡아 구덩이에 걸친다
+
+  /* 1020 ~ 1250 구덩이(230) — 뛰어서 반대편 모서리를 잡아도 못 닿는다.
+     널판(290)을 끌어와 걸쳐야 건넌다 */
+
+  {t:'land', x:1250, y:600, w:550, h:460},           // 1250 ~ 1800
+  {t:'crate',   x:1320, y:540},
+  {t:'crate',   x:1384, y:540},
+  {t:'boulder', x:1560, y:548, r:26},
+
+  {t:'land', x:1800, y:450, w:420, h:610},           // ★ 150 위 — 손을 뻗어 잡고 오른다
+  {t:'crate',   x:1900, y:390},
+  {t:'boulder', x:2080, y:398, r:30},                // 밀어 떨어뜨려 무게판까지 굴린다
+
+  {t:'land', x:2220, y:600, w:700, h:460},           // 2220 ~ 2920
+  {t:'plate', x:2500, y:596, need:55, sig:'문1'},    // 상자로는 모자라고 현무암은 된다
+  {t:'gate',  x:2680, y:520, w:44, h:160, lift:158, by:'문1'},
+  {t:'crate',   x:2360, y:540},
+  {t:'land', x:2920, y:600, w:200, h:460},           // 2920 ~ 3120
+
+  /* ── 2막 · 곶자왈 ── */
+  /* 3120 ~ 3520 넓은 구덩이 — 밧줄을 잡고 건너거나, 널판을 걸쳐 건넌다.
+     널판 길이 520 : 들면 손에서 앞으로 0.8×520 = 416 뻗는다.
+     구덩이 끝(3120)에 서서 놓으면 3553 에 닿아 건너편(3520)에 30 넘게 걸친다.
+     구덩이 앞 발판(2920~3120)에 눕혀 뒀다 — 문(2680)에는 안 걸린다 */
+  {t:'plank', x:3020, y:582, w:520, h:18},
+  {t:'rope', x:3300, y:170, links:17, seg:20},
+  {t:'land', x:3520, y:600, w:760, h:460},           // 3520 ~ 4280
+  {t:'crate',   x:3660, y:540},
+  {t:'boulder', x:3820, y:548, r:26},                // 시소에 올려 보라고 둔 돌
+  {t:'plank',   x:4000, y:545, w:300, h:18, pivot:true},
+  {t:'land', x:4280, y:600, w:520, h:460},           // 4280 ~ 4800
+  {t:'crate',   x:4420, y:540},
+  {t:'crate',   x:4484, y:540},
+  {t:'plank',   x:4650, y:575, w:210, h:16},         // 여기도 널판 하나
+
+  /* ── 3막 · 한라산 ── */
+  /* 4800 ~ 5220 구덩이 — 매달린 널판을 타고 건넌다 */
+  /* 그네 널판 — 예전엔 x5010 y520 w230 이었다. 점프를 사람 크기로 낮추자
+     ① 바닥에서 87px 떠야 올라설 수 있고 ② 발판 끝에서 95px 날아야 닿아서 아예 못 건넜다.
+     낮추고(565) 길게(380) 바꿔 30px만 뛰어 올라타고 흔들리는 널판 위를 걸어 건너게 했다.
+     매다는 지점 높이(330)는 그대로 — len 도 같이 235 로 늘렸다 */
+  {t:'swing', x:5020, y:565, w:380, len:235},
+  {t:'land', x:5220, y:600, w:1100, h:460},          // 5220 ~ 6320
+  {t:'boulder', x:5460, y:543, r:44},                // 168 — 꿈쩍도 안 한다
+  {t:'crate',   x:5680, y:540},
+  {t:'crate',   x:5744, y:540},
+  {t:'boulder', x:5980, y:548, r:30},
+
+  /* ── 세로 구간(2편에서 새로) ──
+     여기서부터는 앞으로가 아니라 위로 간다. 세로 카메라가 따라 올라간다.
+     길: 사다리 → 발판 → 사다리 → 발판 → 상자 밟고 선반 턱 잡기.
+     발판은 한 방향이라 아래에서 뛰어 올라올 수 있고 ↓ 로 내려간다.
+     ⚠ 사다리 y 는 '발판 윗면 - 53' 이다. 그래야 꼭대기에서 발이 발판 위로 올라선다 */
+  {t:'land',   x:6320, y:600, w:480, h:460},          // 6320 ~ 6800 바닥
+  {t:'deck',   x:6400, y:440, w:200},                 // 1층
+  {t:'ladder', x:6420, y:387, h:225},                 // 바닥 → 1층
+  {t:'deck',   x:6520, y:290, w:260},                 // 2층 — 오른쪽 끝이 선반 벽에 닿는다(상자가 안 떨어지게)
+  {t:'ladder', x:6540, y:237, h:205},                 // 1층 → 2층
+  {t:'crate',  x:6660, y:250},                        // 2층에 놓인 상자 — 밀어서 밟고 오른다
+  /* 선반 윗면 130 — 상자 없이 2층에서 뛰면 손이 170 까지밖에 안 올라가 못 잡는다.
+     상자(윗면 243) 위에서 뛰면 손이 123 까지 올라가 잡힌다. 그래서 상자가 꼭 필요하다 */
+  {t:'land',   x:6780, y:130, w:440, h:930},
+
+  /* ── 4막 · 능선(2026-08-27 추가) ── 선반 윗면(130)에서 오른쪽으로 이어진다.
+     여기서부터는 발밑이 계속 낭떠러지다 — 떨어지면 980 아래로 지나 죽는다 ── */
+  {t:'plank',  x:7010, y:105, w:300, h:16},           // 선반 위에 놓인 널판 — 앉아서(↓) E 로 들어 옮긴다
+  /* 7220 ~ 7460 벼랑 틈(240) — 뛰어야 80 밖에 못 가고, 모서리를 잡기엔 너무 멀다.
+     널판(300)을 걸치면 양쪽에 30 씩 물린다. 1막에서 배운 그 한 가지를 여기서 다시 쓴다 */
+  {t:'land',   x:7460, y:130, w:560, h:930},          // 7460 ~ 8020 능선
+
+  /* 능선 앞쪽엔 상자를 두지 않는다 — 밀다 보면 현무암 앞에 껴서 길을 막는다(봇으로 확인) */
+  {t:'boulder', x:7660, y:78, r:30},                  // 무게 78 — 밀린다. 무게판까지 밀고 간다
+  {t:'plate',  x:7760, y:126, need:55, sig:'문2'},    // 상자(13)로는 모자라고 현무암(78)이면 눌린다
+  {t:'gate',   x:7880, y:50, w:44, h:160, lift:158, by:'문2'},
+  /* 문 너머에 상자를 하나 둔다. 무게판을 누른 현무암이 길을 막고 있어서
+     이 상자를 저쪽에서 밀고 오게 하면 낀다 — 애초에 문 너머에 있어야 한다 */
+  {t:'crate',   x:7960, y:70},
+
+  /* 정상 턱 — 능선(130)에서 150 위. 맨몸으로 뛰면 손끝이 '발판-120' 까지밖에 안 올라가
+     9 가 모자란다. 상자(윗면 84)를 벽까지 밀고 올라서면 손이 턱 위로 넘어간다.
+     1800 턱과 같은 요령이다 */
+  {t:'land',   x:8020, y:-20, w:520, h:1080},         // 8020 ~ 8540
+
+  /* ── 5막 · 분화구 ── 정상 닱은 다음은 내려가는 길이다 ── */
+  /* 8540 ~ 8960 버려진 틈(420) — 5020 과 같은 요령이다.
+     35 만 뛰어 올라타면 흔들리는 널판이 건네준다 */
+  {t:'swing',  x:8750, y:-55, w:380, len:235},        // 매다는 점은 -290
+  {t:'land',   x:8960, y:-20, w:600, h:1080},         // 8960 ~ 9560 정상 능선
+  {t:'crate',   x:9080, y:-80},
+  {t:'boulder', x:9240, y:-72, r:26},
+
+  /* 분화구로 내려가는 발판 세 장. 한 칸이 110 이라
+     내려갈 땐 뛰어내리고(↓ 로 뒤개 빠지고) 올라올 땐 모서리를 잡는다(142 까지 잡힌다).
+     그냥 바닥까지 뛰어내려도 안 죽는다 — 되돌아올 땐 이 계단이 필요하다 */
+  {t:'deck',   x:9560, y:90,  w:170},
+  {t:'deck',   x:9660, y:200, w:170},
+  {t:'deck',   x:9560, y:310, w:170},
+  {t:'land',   x:9560, y:420, w:420, h:640},          // 9560 ~ 9980 분화구 바닥
+  {t:'boulder', x:9620, y:368, r:30},
+  /* 현무암(9590~9650)과 떨어뜨려 둔다 — 겹쳐서 생기면 서로 튀어내며 상자가 비스듬히 눌다 */
+  {t:'crate',   x:9700, y:360},
+  {t:'crate',   x:9764, y:360},
+  {t:'plank',   x:9840, y:395, w:260, h:16},          // 갈라진 틈에 걸칠 널판
+  /* 9980 ~ 10160 갈라진 틈(180) — 밑이 보이지 않는다.
+     널판(260)을 걸치면 양쪽에 40 씩 물린다 */
+  {t:'land',   x:10160, y:420, w:240, h:640},         // 10160 ~ 10400 분화구 건너편
+
+  /* 반대편 벽 — 사다리·발판으로 두 번 올라간다.
+     ⚠ 사다리 y 는 '발판 윗면 - 53' 이다 */
+  {t:'ladder', x:10180, y:217, h:215},                // 바닥(420) → 1층(270)
+  {t:'deck',   x:10160, y:270, w:180},                // 10160 ~ 10340
+  {t:'ladder', x:10240, y:67,  h:215},                // 1층 → 2층(120)
+  {t:'deck',   x:10220, y:120, w:180},                // 10220 ~ 10400 — 오른쪽 끝이 벽에 닿는다
+  /* 벽 윗면 0 — 2층(120)에서 120 위라 맨몸으로 뿐리 잡힌다 */
+  {t:'land',   x:10400, y:0, w:600, h:1060},          // 10400 ~ 11000
+  {t:'crate',   x:10560, y:-60},
+  {t:'boulder', x:10740, y:-52, r:44},                // 168 — 꿈꿍도 안 한다
+
+  /* ── 6막 · 내리막 ── 꾭대기(0)에서 한 단씩 내려간다.
+     한 칸을 130 으로 맞췄다 — 뛰어내리고, 다시 모서리를 잡고 올라올 수 있다(142 까지 잡힌다).
+     이게 150 이면 아래로 내려간 순간 되돌아올 수 없어 갇힌다 ── */
+  {t:'land',   x:11000, y:130, w:560, h:930},         // 11000 ~ 11560  두 번째 단
+  /* ⚠ 밀고 갈 현무암 앞뒤로는 상자를 두지 않는다 — 둘이 맞붙으면 거기서 껴서 안 밀린다 */
+  {t:'boulder', x:11140, y:78, r:30},                 // ★ 이걸 밀어 떨어뜨려야 아래 문이 열린다
+
+  /* 세 번째 단 — 가운데가 60 깊게 파여 있고 그 밑바닥에 무게판이 깔려 있다.
+     위에서 밀어 떨어뜨린 현무암(지름 60)이 이 홈에 딱 빠져 다시 못 나온다 —
+     판은 계속 눌려 있고, 사람은 그 돌 위를 밟고 건너간다.
+     상자로 굴려 밀어 넣으면 판이 막혀 일이 지저분해지므로 이 단엔 상자를 두지 않는다 */
+  {t:'land',   x:11560, y:260, w:200, h:800},         // 11560 ~ 11760
+  /* 홈은 120 으로 파 둔다. 100 이면 지름 60 짜리 현무암이 양쪽 벽에 끼어
+     무게가 벽으로 빠져나가고 판이 절밖에 안 눌렸다(봇으로 확인) */
+  /* 깊이는 80 — 60(돌 지름)으로 파면 돌 꼭대기가 땅 높이에 걸쳐 무게가 모서리로 새고
+     무게판이 절밖에 안 눌려 문이 반만 열렸다(봇으로 확인) */
+  {t:'land',   x:11760, y:340, w:120, h:720},         // 11760 ~ 11880  홈 바닥(80 아래)
+  {t:'plate',  x:11815, y:336, w:90, need:55, sig:'문3'},
+  {t:'land',   x:11880, y:260, w:320, h:800},         // 11880 ~ 12200
+  {t:'gate',   x:12000, y:180, w:44, h:160, lift:158, by:'문3'},
+
+  {t:'land',   x:12200, y:390, w:600, h:670},         // 12200 ~ 12800  네 번째 단
+  {t:'crate',   x:12300, y:330},
+  {t:'boulder', x:12460, y:338, r:26},
+  /* 긴 널판(520) — 들면 손에서 앞으로 416 뿗어 나간다. 2막과 같은 짝이다 */
+  {t:'plank',  x:12680, y:372, w:520, h:18},
+
+  /* 12800 ~ 13220 마지막 구덩이(420).
+     건너는 길은 널판 하나다. 밧줄은 2막의 그것처럼 구덩이의 깊이를 보여 주는 것이지
+     잡고 건너라고 둔 게 아니다 — 몸을 던져도 80 밖에 못 가서 손이 닿지 않는다 */
+  /* ⚠ 밧줄 끝은 다리보다 높이 끝나야 한다. 19칸(끝 410)으로 둔 대로 널판을 걸쳐보니
+     다리가 줄을 관통해 물리가 터졌다(사람이 하늘로 날아갔다). 2막 밧줄도 땅에서 100 위에서 끝난다 */
+  {t:'rope',   x:13010, y:30, links:14, seg:20},
+  {t:'land',   x:13220, y:390, w:780, h:670},         // 13220 ~ 14000  마지막 땅
+  {t:'crate',   x:13380, y:330},
+  {t:'crate',   x:13444, y:330},
+  {t:'boulder', x:13900, y:338, r:30},                // ★ 이걸 벼랑 끝까지 밀고 가서 뱧줄에 묶는다
+
+  /* ── 7막 · 묶어서 건넘다 ──
+     14000 ~ 14140 틈(140). 널판도 없고 뛰어도 못 간다(뛰면 14060 에서 떨어진다 — 봇으로 확인).
+     뱧줄은 땅을 무시하고 곱바로 드리워져서, 끝이 벼랑 끝 바깥쪽 허리 높이에 온다.
+     현무암을 벼랑 끝까지 밀고 와 E 로 묶고, 한 번 더 밀어 떨굴이면
+     뱧줄에 매달린 채 14018~14078 에 멈춰 디딘돌이 된다(윗면 399 — 땅보다 9 아래).
+     거기서 건너편까지는 62 라 한 번에 뛰어오른다.
+     안 묶고 밀면 그냥 떨어져 제자리(13900)로 돌아온다 — 몇 번이든 다시 해 볼 수 있다 */
+  {t:'rope',   x:14050, y:-120, links:25, seg:20},
+  {t:'land',   x:14140, y:390, w:600, h:670},         // 14140 ~ 14740
+
+  /* ── 8막 · 바위벽 ── 줄을 타고 날아가 벽에 붙고, 벽을 기어 꾭대기로 ── */
+  /* 14740 ~ 15000 낭떠러지. 뛰면서 E 로 뱧줄을 잡고, ←→ 로 그네를 키우고, ↑ 로 놓는다 */
+  {t:'rope',   x:14800, y:-160, links:22, seg:20},
+  /* 바위벽 — 솔기는 없고 손잡이만 있는 면이다.
+     날아와 닿기만 하면 붙는다 → 위로 올라(A) → 오른쪽으로 건너서(B) → 다시 위로(C) */
+  /* 바위벽은 그림일 뿐이다 — 붙지는 않는다. 붙는 건 손잡이뿐이다(2026-08-27 개편) */
+  {t:'wall',   x:14900, y:-40,  w:200, h:1100},
+  {t:'wall',   x:15050, y:-40,  w:380, h:120},
+  {t:'wall',   x:15350, y:-260, w:150, h:360},
+  /* 손잡이 길 — 줄을 타고 날아와 첫 개를 잡고, 거기서부터 하나씩 뛰어 올라간다.
+     한 번에 건너뛸 수 있는 거리는 옆으로 190 · 위로 150 이다 — 그 안에 놓는다.
+     ☆ 표는 부스러지는 손잡이 — 매달린 채 머물면 금이 가고 무너진다 */
+  {t:'grip', x:15040, y:285},
+  {t:'grip', x:15065, y:215},
+  {t:'grip', x:14985, y:130},
+  {t:'grip', x:15080, y:60},
+  {t:'grip', x:15190, y:15, crumble:95},              // ☆
+  {t:'grip', x:15295, y:-30},
+  {t:'grip', x:15380, y:-95, crumble:80},             // ☆
+  {t:'grip', x:15455, y:-160},
+  {t:'grip', x:15515, y:-225},
+  {t:'land',   x:15500, y:-260, w:700, h:1320},       // 15550 ~ 16200 꾭대기(벽 윗면과 높이가 같다)
+  {t:'crate',   x:15700, y:-320},
+  {t:'boulder', x:15880, y:-312, r:30}
+];
+LEVEL.forEach(spawn);
+makePlayer(135,540);
+
+/*═══════════════════════════════════════════════════════════════════════
+  조작
+═══════════════════════════════════════════════════════════════════════*/
+const K={};
+addEventListener('keydown',e=>{
+  if(SC.now==='ready'){ beginOpening(); K[e.key]=1; return; }  // 시작 화면 — 여기서 음악이 함께 나간다
+  if(SC.now==='title'){ toPlay(); K[e.key]=1; return; }     // 제목 화면에서 아무 키나
+  /* 키는 이동(←→↑↓ · A D W X)과 잡기(E) 둘뿐이다(사용자 지시 2026-08-27).
+     음악과 오프닝 건너뛰기는 화면 단추로 누른다 */
+  if(!K[e.key]){
+    if(e.key==='e'||e.key==='E') useHand();
+  }
+  K[e.key]=1;
+  if(e.key.indexOf('Arrow')===0||e.key===' ')e.preventDefault();
+});
+addEventListener('keyup',e=>K[e.key]=0);
+let tX=0,tJ=0,tE=0,tD=0;
+const TOUCH=matchMedia('(hover:none) and (pointer:coarse)').matches;
+
+/*═══ 폰 조작 ═══
+  예전엔 화면을 구역으로 나눠서 "위쪽을 누르면 잡기, 가운데를 누르면 점프"였다.
+  어디를 눌러야 하는지 눈에 보이지 않아 손이 헤맸다. 지금은 보이는 물건 두 개다.
+
+    왼쪽        조이스틱 — 제자리에 고정. 좌우=걷기, 위=뛰기·오르기, 아래=앉기·내려가기
+    오른쪽      주먹 단추 하나 — 잡기 / 놓기 (키보드 E 와 같다)
+    왼쪽 위    오름게임즈 링크 · 왼쪽 아래 전체화면
+               — 둘 다 공용 스크립트(game-home.js)가 붙인다. 페어붐·오름냥과 같은 모양이다 */
+const PAD=document.getElementById('pad'), RING=document.getElementById('ring'),
+      KNOB=document.getElementById('knob'), FIST=document.getElementById('fist');
+const STICK_R=54;    // 손가락이 이만큼 벗어나면 끝까지 민 것으로 본다
+const STICK_DEAD=13;       // 이 안쪽은 안 민 것으로 본다 — 엄지 떨림을 무시한다
+
+let padId=null, padX=0, padY=0;
+const padPos=e=>{ const r=PAD.getBoundingClientRect(); return [e.clientX-r.left, e.clientY-r.top]; };
+function padDraw(el,x,y){ el.style.left=x+'px'; el.style.top=y+'px'; }
+function padAim(x,y){
+  let dx=x-padX, dy=y-padY;
+  const d=Math.hypot(dx,dy); if(d>STICK_R){ dx*=STICK_R/d; dy*=STICK_R/d; }
+  padDraw(KNOB,padX+dx,padY+dy);
+  tX = dx<-STICK_DEAD ? -1 : dx>STICK_DEAD ? 1 : 0;
+  tJ = dy<-STICK_DEAD*1.5 ? 1 : 0;
+  tD = dy> STICK_DEAD*1.5 ? 1 : 0;
+}
+/* 조이스틱의 '제자리' — 왼쪽 자리의 한가운데 높이(2026-08-23 사용자 "가운데로 더 위로").
+   위아래 72px 씩 물러난 자리의 절반이니 화면 높이의 한가운데다.
+   손을 떼면 여기로 돌아와 계속 보인다 */
+function padHome(){
+  const r=PAD.getBoundingClientRect();
+  if(!r.width) return;                       // 데스크톱에서는 숨어 있으니 할 일 없다
+  padX=Math.round(r.width*.28); padY=Math.round(r.height*.5);
+  padDraw(RING,padX,padY); padDraw(KNOB,padX,padY);
+}
+function padOff(){ padId=null; tX=0; tJ=0; tD=0; PAD.classList.remove('live'); padHome(); }
+addEventListener('resize',padHome);
+addEventListener('orientationchange',()=>setTimeout(padHome,120));
+/* ⚠ 링은 제자리에 못 박혀 있다. 예전엔 손 댄 자리로 옮겨 다녔는데,
+   "누르기 전엔 가운데 있다가 누르면 밑으로 간다"고 했다(2026-08-23).
+   지금은 링은 그대로 있고 손잡이만 손을 따라간다 — 민 방향이 곧 가는 방향이다 */
+PAD.addEventListener('pointerdown',e=>{
+  if(padId!==null) return;
+  padId=e.pointerId;
+  PAD.classList.add('live');
+  const p=padPos(e); padAim(p[0],p[1]);
+  try{ PAD.setPointerCapture(e.pointerId); }catch(err){}
+  e.preventDefault();
+});
+PAD.addEventListener('pointermove',e=>{ if(e.pointerId===padId){ const p=padPos(e); padAim(p[0],p[1]); } });
+['pointerup','pointercancel','lostpointercapture'].forEach(ev=>
+  PAD.addEventListener(ev,e=>{ if(e.pointerId===padId) padOff(); }));
+
+/* 주먹 = 키보드 E. 누르는 순간 반응해야 손맛이 난다 */
+FIST.addEventListener('pointerdown',e=>{
+  e.preventDefault();
+  useHand();
+});
+
+/* 전체화면 알약 자체는 공용 스크립트가 만든다(페어붐과 같은 것).
+   다만 이 게임은 가로로 눕혀야 제대로 보이니, 전체화면에 들어가는 순간
+   화면을 가로로 잠가 준다 — 안드로이드에서만 먹고 아이폰은 조용히 무시한다 */
+document.addEventListener('fullscreenchange',()=>{
+  if(!document.fullscreenElement) return;
+  try{ screen.orientation.lock('landscape').catch(()=>{}); }catch(err){}
+});
+
+/* 조이스틱과 주먹은 실제로 노는 동안에만 꺼낸다 */
+function touchUI(){
+  const on = (SC.now==='play');
+  PAD.classList.toggle('use',on); FIST.classList.toggle('use',on);
+  padOff();                       // 꺼낼 때도 제자리에 그려 둔다 — 처음부터 보이게
+}
+
+/* 시작 화면·제목 화면은 화면 아무 데나 눌러도 넘어간다 (단추 위는 뺀다) */
+addEventListener('pointerdown',e=>{
+  if(e.target.closest&&e.target.closest('button,a')) return;
+  if(SC.now==='ready') beginOpening(); else if(SC.now==='title') toPlay();
+});
+const LEFT =()=>K.ArrowLeft ||K.a||K.A||tX<0;
+const RIGHT=()=>K.ArrowRight||K.d||K.D||tX>0;
+const UP   =()=>K.ArrowUp   ||K.w||K.W||tJ;
+/* ⚠ 예전엔 DOWN 이 아예 없었다. 모서리에 매달려 위를 안 누르면 그때 터졌다 */
+const DOWN =()=>K.ArrowDown ||K.x||K.X||tD;
+
+/* 개발용 — ?test=1&dump=1 이면 화면 대신 글로 상태를 뽑아 준다.
+   헤드리스 크롬 --dump-dom 으로 읽으면 눈으로 못 재는 걸 정확히 볼 수 있다 */
+let dumped=0, PHYS=0;
+/* 개발용 봇 — 키를 정해진 칸에서 눌렀다 뗐다 하며 물리를 한 번에 쭉 돌린다.
+   헤드리스 크롬은 그림을 초당 몇 장밖에 못 그려서 실시간으로는 검증이 안 된다.
+   보기:  ?test=1&x=6420&y=560&steps=200&bot=0:ArrowUp;160:-ArrowUp
+          (0칸에서 ↑ 누르고 160칸에서 뗀 뒤 200칸까지 돌린 상태를 제목에 찍는다) */
+function runBot(){
+  const plan={};
+  (DEV.get('bot')||'').split(';').filter(Boolean).forEach(seg=>{
+    const i=seg.indexOf(':'); plan[+seg.slice(0,i)]=seg.slice(i+1).split(',');
+  });
+  const n=+DEV.get('steps')||300;
+  for(let i=0;i<n;i++){
+    /* ⚠ 주소에서 + 는 공백으로 풀린다. 누르기는 그냥 이름, 떼기는 앞에 - */
+    if(plan[i]) plan[i].forEach(a=>{
+      if(a==='E'){ useHand(); return; }                            // 봇도 E 를 누른다
+      const off=a[0]==='-'; K[off?a.slice(1):a]= off?0:1; });
+    playerStep();
+    for(const e of ENTS) if(e.update) e.update(e,DT);
+    Engine.update(engine,DT);
+  }
+  cam=P.body.position.x-W*.42;                     // 카메라도 바로 제자리에
+  const ty=P.body.position.y;
+  camY = ty<EYE-BAND_UP ? ty-(EYE-BAND_UP) : ty>EYE+BAND_DN ? ty-(EYE+BAND_DN) : 0;
+  dumpNow();
+}
+function dump(){
+  /* 그림 장수는 컴퓨터마다 들쭉날쭉하다. 물리 칸 수로 세야 늘 같은 시점이 찍힌다 */
+  const at=+(DEV.get('dump'))||60;                // ?dump=120 이면 물리 120칸(2초) 뒤
+  if(PHYS<at||dumped++) return;
+  dumpNow();
+}
+function dumpNow(){
+  const b=P.body, L=[];
+  L.push('사람  x '+b.position.x.toFixed(0)+'  y '+b.position.y.toFixed(0)
+        +'  vx '+b.velocity.x.toFixed(2)+'  힘겨움 '+(P.strain||0).toFixed(2)
+        +(P.holdBody?('  든것 무게 '+P.holdBody.mass.toFixed(0)+' 기울기 '+(P.holdBody.angle*57.3).toFixed(0)+'도'):'')
+        +'  상태 '+P.st
+        +'  발밑 '+(P.grounded?'있음':'없음')+(P.onLadder?'  사다리 탐':'')+(P.grip?('  손잡이 '+P.grip.x.toFixed(0)):'')+'  cool'+(P.gripCool||0));
+  L.push('카메라 cam '+cam.toFixed(0)+'  camY '+camY.toFixed(0)+'   발판통과 '+(deckPass(b)?'켜짐':'꺼짐'));
+  const near=ENTS.filter(e=>{
+    const g=e.box||(e.type==='ladder'?{x:e.x-e.w/2,y:e.y,w:e.w,h:e.h}:null)
+          ||(e.type==='grip'?{x:e.x-e.w/2,y:e.y,w:e.w,h:6}:null)
+          ||(e.bodies[0]?{x:e.bodies[0].position.x-10,y:e.bodies[0].position.y-10,w:20,h:20}:null);
+    return g && Math.abs(g.x-b.position.x)<700;
+  });
+  for(const e of near){
+    const g=e.box||(e.type==='ladder'?{x:e.x-e.w/2,y:e.y,w:e.w,h:e.h}:null)
+          ||(e.type==='grip'?{x:e.x-e.w/2,y:e.y,w:e.w,h:6}:null);
+    if(e.type==='plank'){ const q=e.bodies[0];
+      L.push('  plank  x '+q.position.x.toFixed(0)+' y '+q.position.y.toFixed(0)
+            +(q.isStatic?' [굳음]':' [물렁]')+(q.plugin.bridged?' [다리]':'')
+            +' 기울기 '+(q.angle*57.3).toFixed(0)+'도'); continue; }
+    L.push('  '+e.type.padEnd(7)+(g?('x '+g.x.toFixed(0)+'~'+(g.x+g.w).toFixed(0)+'  윗면 y '+g.y.toFixed(0))
+          :('x '+e.bodies[0].position.x.toFixed(0)+'  y '+e.bodies[0].position.y.toFixed(0))));
+  }
+  document.title='DUMP// '+L.join(' // ');        // 제목에 실어 보낸다 — 헤드리스에서 읽기 쉽다
+}
+
+/* 물리 퍼즐은 되돌릴 수 있어야 한다 — 물체를 엉뚱한 데 빠뜨렸을 때 */
+function reset(){
+  for(const e of ENTS){ if(e.joints) e.joints.forEach(dropJoint); e.bodies.forEach(b=>Composite.remove(world,b)); }
+  ENTS.length=0; for(const k in BYID) delete BYID[k];
+  dropJoint(TIE); TIE=null; letGo(); letGoRope();
+  Composite.remove(world,P.body);
+  LEVEL.forEach(spawn); makePlayer(P.spawn.x,P.spawn.y); P.safe=null;
+}
+
+/* ═══════════ 사람 그리기 ═══════════ */
+function segl(x0,y0,a,l,w){const x1=x0+Math.sin(a)*l,y1=y0+Math.cos(a)*l;
+  x.lineWidth=w;x.beginPath();x.moveTo(x0,y0);x.lineTo(x1,y1);x.stroke();return[x1,y1];}
+function figure(sx,hipY,sc,face,po,t){
+  x.save(); x.translate(sx,hipY); x.scale(sc*face,sc); x.rotate(po.rot||0);
+  x.fillStyle='#000'; x.strokeStyle='#000'; x.lineCap='round';
+  /* 골반이 (0,0) 이다. 어깨는 그 위 27, 머리 중심은 42 */
+  const hy=-13, SH=-27, HC=-42;
+  /* 웅크리면 등이 말려 상체가 짧아지고(curl), 그래도 얼굴은 앞을 본다(neck) */
+  const sq=1-(po.curl||0)*.18, nk=po.neck||0;
+  const th1=po.th1||0,th2=po.th2||0,kn1=po.kn1||0,kn2=po.kn2||0;
+  const ar1=po.ar1||0,ar2=po.ar2||0,el1=po.el1||0,el2=po.el2||0;
+  const HEAD=f=>{ x.save(); x.translate(0,HC*sq); x.rotate(-nk); x.translate(0,-HC); f(); x.restore(); };
+
+  x.globalAlpha*=.8;
+  let r=segl(0,hy+13,th2,10.5,5.4); segl(r[0],r[1],th2+kn2,10.5,4.4);
+  r=segl(-1.5,SH*sq,ar2,9.5,4.6); segl(r[0],r[1],ar2+el2,8.5,3.8);
+  x.globalAlpha/=.8;
+
+  if(!po.bald) HEAD(()=>{
+    /* 머리카락 — 예전엔 머리의 두 배라 실루엣을 통째로 잡아먹었다. 좁게 붙인다 */
+    const df=(po.hd||0)*.7+Math.sin(t*.0013)*1.2;
+    x.beginPath(); x.moveTo(-1,hy-37.5);
+    x.quadraticCurveTo(-9.6,hy-35,-10.2-df*.35,hy-22);
+    x.quadraticCurveTo(-11.2-df*.8,hy-10,-7.6-df*1.2,hy-1);
+    x.quadraticCurveTo(-5.4-df*.8,hy-7,-5.8,hy-19);
+    x.quadraticCurveTo(-7,hy-28,-1,hy-31.5); x.closePath(); x.fill();
+  });
+  x.save(); x.scale(1,sq);                       // 상체만 줄인다 — 다리 길이는 그대로
+  if(po.pack){ x.beginPath(); x.ellipse(-9.5,hy-9,7.6,11.5,-.12,0,7); x.fill(); }
+  const bw=po.bald?1.25:1;
+  x.beginPath(); x.moveTo(-3*bw,hy-24); x.lineTo(-7.6*bw,hy-16);
+  x.quadraticCurveTo(-4.9*bw,hy-1,-6.9*bw,hy+14); x.lineTo(6.9*bw,hy+14);
+  x.quadraticCurveTo(4.9*bw,hy-1,7.6*bw,hy-16); x.lineTo(3*bw,hy-24);
+  x.closePath(); x.fill();
+  x.restore();
+
+  r=segl(0,hy+13,th1,10.5,5.6); segl(r[0],r[1],th1+kn1,10.5,4.6);
+  r=segl(1.5,SH*sq,ar1,9.5,4.8); const h1=segl(r[0],r[1],ar1+el1,8.5,4);
+
+  HEAD(()=>{
+    x.beginPath(); x.arc(0,hy-29,po.bald?9.8:9.2,0,7); x.fill();
+    if(!po.bald){ x.beginPath(); x.moveTo(-3,hy-38.4);
+      x.quadraticCurveTo(7,hy-37,9.4,hy-30.5);
+      x.quadraticCurveTo(6,hy-33,-3,hy-33.5); x.closePath(); x.fill(); }
+  });
+  if(po.club){ x.lineWidth=4.6; x.beginPath(); x.moveTo(h1[0],h1[1]);
+    x.lineTo(h1[0]+Math.sin(ar1+el1+po.club)*26, h1[1]+Math.cos(ar1+el1+po.club)*26); x.stroke(); }
+  x.restore();
+}
+
+/* ═══════════ 제주 사물 ═══════════ */
+function basalt(bx,by,w,h,seed){          // 현무암 덩이
+  x.fillStyle='#000'; x.beginPath();
+  const n=13;
+  for(let a=0;a<n;a++){ const th=a/n*6.283, j=.74+rnd(seed+a*2.7)*.5;
+    const qx=bx+w/2+Math.cos(th)*w/2*j, qy=by+h/2+Math.sin(th)*h/2*j;
+    a?x.lineTo(qx,qy):x.moveTo(qx,qy); }
+  x.closePath(); x.fill();
+  x.fillStyle='#1a1a17';
+  for(let k=0;k<5;k++){ x.beginPath();
+    x.arc(bx+w*(.2+rnd(seed+k*5)*.6), by+h*(.2+rnd(seed+k*9)*.6), 1.6+rnd(seed+k)*2.6,0,7); x.fill(); }
+}
+function choga(bx,by,w,h,fill,rope){       // 초가 — 지붕을 집줄로 묶는다
+  x.fillStyle=fill;
+  x.beginPath(); x.moveTo(bx,by);
+  x.quadraticCurveTo(bx+w*.06,by-h*.86,bx+w*.5,by-h);
+  x.quadraticCurveTo(bx+w*.94,by-h*.86,bx+w,by);
+  x.closePath(); x.fill();
+  x.fillRect(bx+w*.10,by,w*.80,h*.44);
+  if(rope){ x.strokeStyle=rope; x.lineWidth=1.5;
+    for(let i=1;i<6;i++){ const u=i/6;
+      x.beginPath(); x.moveTo(bx+w*u*.9+w*.05, by);
+      x.quadraticCurveTo(bx+w*.5, by-h*(1-Math.abs(u-.5)*.5)*.92, bx+w*u*.9+w*.05, by); x.stroke(); }
+    for(let i=1;i<4;i++){ const v=i/4;
+      x.beginPath(); x.ellipse(bx+w*.5, by-h*v*.82, w*.5*(1-v*.72), h*.09*(1-v*.4), 0, Math.PI, 0); x.stroke(); } }
+}
+function harbang(bx,by,s,fill){            // 돌하르방
+  x.fillStyle=fill; x.save(); x.translate(bx,by); x.scale(s,s);
+  x.beginPath(); x.moveTo(-19,0);
+  x.quadraticCurveTo(-16,-20,-14,-33); x.lineTo(14,-33);
+  x.quadraticCurveTo(16,-20,19,0); x.closePath(); x.fill();
+  x.beginPath(); x.ellipse(0,-45,14.5,15,0,0,7); x.fill();
+  x.beginPath(); x.moveTo(-17,-54);
+  x.quadraticCurveTo(-15,-74,0,-76); x.quadraticCurveTo(15,-74,17,-54);
+  x.quadraticCurveTo(0,-60,-17,-54); x.closePath(); x.fill();
+  x.restore();
+}
+function jeongnang(bx,by,s,fill){          // 정낭 — 대문 대신 걸친 나무 막대 셋
+  x.fillStyle=fill; x.save(); x.translate(bx,by); x.scale(s,s);
+  x.fillRect(-42,-46,7,46); x.fillRect(35,-46,7,46);
+  for(let i=0;i<3;i++){ const y=-12-i*13;
+    x.beginPath(); x.moveTo(-40,y); x.quadraticCurveTo(0,y-2.5,40,y);
+    x.lineTo(40,y+4); x.quadraticCurveTo(0,y+1.5,-40,y+4); x.closePath(); x.fill(); }
+  x.restore();
+}
+function sandam(bx,by,s,fill){             // 산담 — 무덤을 두른 낮은 돌담
+  x.fillStyle=fill; x.save(); x.translate(bx,by); x.scale(s,s);
+  x.beginPath(); x.ellipse(0,0,46,17,0,Math.PI,0); x.fill();       // 봉분
+  x.fillRect(-62,-3,124,7);
+  x.fillRect(-64,-16,8,16); x.fillRect(56,-16,8,16);
+  x.restore();
+}
+
+/* ═══════════ 풀·나무 ═══════════ */
+function blade(sx,by,h,lean,seed,t,dark,light,lw){       // 억새
+  const wd=Math.sin(t*.0013+seed)*.55+Math.sin(t*.0034+seed*1.7)*.2;
+  const tx=sx+lean+wd*h*.3, ty=by-h;
+  x.lineCap='round'; x.strokeStyle=dark; x.lineWidth=lw;
+  x.beginPath(); x.moveTo(sx,by);
+  x.quadraticCurveTo(sx+lean*.25+wd*h*.09,by-h*.6,tx,ty); x.stroke();
+  const ang=Math.atan2(tx-sx,-h)+wd*.1, L=h*.44;
+  x.strokeStyle=light; x.lineWidth=lw*.5;
+  for(let k=0;k<13;k++){ const sp=(k/12-.5)*.34, ll=L*(.72+rnd(seed+k*1.7)*.45);
+    x.beginPath(); x.moveTo(tx,ty);
+    x.quadraticCurveTo(tx+Math.sin(ang+sp*.35)*ll*.45,ty-Math.cos(ang)*ll*.55,
+                       tx+Math.sin(ang+sp)*ll*1.02,ty-Math.cos(ang+sp*.25)*ll*.8); x.stroke(); }
+}
+function gfield(t,rate,by,gap,hmin,hmax,dark,light,lw,spread){
+  const off=cam*rate, i0=Math.floor((off-160)/gap), i1=Math.ceil((off+W+160)/gap);
+  for(let i=i0;i<=i1;i++){ const r=rnd(i*1.7), r2=rnd(i*3.3);
+    blade(i*gap+r*gap-off, by+r2*(spread||12), hmin+r2*(hmax-hmin), (r-.5)*26, i*2.3, t, dark, light, lw); }
+}
+function fern(bx,by,h,ph,t,fill){          // 고사리 — 잎이 부챗살로 퍼진다
+  const wd=Math.sin(t*.0016+ph)*.4;
+  x.fillStyle=fill;
+  for(let k=0;k<7;k++){
+    const a=(k-3)*.34+wd*.3, L=h*(.6+rnd(ph+k)*.55);
+    const tx=bx+Math.sin(a)*L, ty=by-Math.cos(a)*L;
+    x.beginPath(); x.moveTo(bx-1.4,by);
+    x.quadraticCurveTo(bx+Math.sin(a)*L*.4-2.2, by-Math.cos(a)*L*.55, tx,ty);
+    x.quadraticCurveTo(bx+Math.sin(a)*L*.4+2.2, by-Math.cos(a)*L*.55, bx+1.4,by);
+    x.closePath(); x.fill(); }
+}
+function bamboo(bx,by,h,ph,t,fill){        // 조릿대 — 넓고 뾰족한 잎
+  const wd=Math.sin(t*.0016+ph)*.45;
+  x.fillStyle=fill;
+  for(let k=0;k<5;k++){
+    const a=(k-2)*.42+wd*.3, L=h*(.65+rnd(ph+k)*.5);
+    const tx=bx+Math.sin(a)*L, ty=by-Math.cos(a)*L;
+    x.beginPath(); x.moveTo(bx-1.6,by);
+    x.quadraticCurveTo(bx+Math.sin(a)*L*.4-2.6, by-Math.cos(a)*L*.55, tx,ty);
+    x.quadraticCurveTo(bx+Math.sin(a)*L*.4+2.6, by-Math.cos(a)*L*.55, bx+1.6,by);
+    x.closePath(); x.fill(); }
+}
+function lowRow(fn,t,rate,by,gap,hmin,hmax,fill,spread){
+  const off=cam*rate, i0=Math.floor((off-120)/gap), i1=Math.ceil((off+W+120)/gap);
+  for(let i=i0;i<=i1;i++){ const r=rnd(i*1.7), r2=rnd(i*3.3);
+    fn(i*gap+r*gap-off, by+r2*(spread||10), hmin+r2*(hmax-hmin), r*90, t, fill); }
+}
+function fir(bx,by,h,fill,seed,t,lw){      // 구상나무 고사목 — 곧은 줄기, 앙상한 가지
+  const sway=Math.sin(t*.0009+seed)*.5;
+  x.strokeStyle=fill; x.lineCap='round';
+  x.lineWidth=lw; x.beginPath(); x.moveTo(bx,by);
+  x.quadraticCurveTo(bx+sway*h*.03, by-h*.5, bx+sway*h*.06, by-h); x.stroke();
+  const n=Math.floor(7+rnd(seed)*5);
+  for(let i=0;i<n;i++){
+    const f=.16+i/n*.78, y=by-h*f, tw=lw*(1-f*.75);
+    const len=h*(.30-f*.23)*(.6+rnd(seed+i)*.8);
+    for(const d of[-1,1]){
+      if(rnd(seed+i*3+(d>0?1:0))<.16) continue;
+      x.lineWidth=Math.max(.6,tw); x.beginPath();
+      x.moveTo(bx+sway*h*.06*f, y);
+      x.quadraticCurveTo(bx+d*len*.6, y-len*.10, bx+d*len, y-len*(.22+rnd(seed+i)*.3));
+      x.stroke();
+    }
+  }
+}
+function tree(bx,by,h,fill,seed,t,lw){     // 곶자왈 — 낮게 뒤틀리며 갈라지는 활엽수
+  const sway=Math.sin(t*.0008+seed)*.6;
+  x.strokeStyle=fill; x.lineCap='round';
+  const limb=(px,py,ang,len,w,d)=>{
+    const ex=px+Math.sin(ang)*len, ey=py-Math.cos(ang)*len;
+    x.lineWidth=Math.max(.7,w); x.beginPath(); x.moveTo(px,py);
+    x.quadraticCurveTo(px+Math.sin(ang+.3)*len*.5, py-Math.cos(ang)*len*.55, ex,ey); x.stroke();
+    if(d<=0) return;
+    const s=rnd(seed+d*7+len);
+    limb(ex,ey,ang-.42-s*.3+sway*.05,len*(.62+s*.16),w*.62,d-1);
+    limb(ex,ey,ang+.40+rnd(seed+d*3)*.3+sway*.05,len*(.58+s*.2),w*.6,d-1);
+    if(d===3&&s>.55) limb(ex,ey,ang+(s-.5)*.5,len*.5,w*.5,d-1);
+  };
+  limb(bx,by,sway*.06,h*.44,lw,3);
+}
+function treeRow(fn,t,rate,by,gap,hmin,hmax,fill,lw,spread){
+  const off=cam*rate, i0=Math.floor((off-260)/gap), i1=Math.ceil((off+W+260)/gap);
+  for(let i=i0;i<=i1;i++){ const r=rnd(i*1.7), r2=rnd(i*3.3);
+    fn(i*gap+r*gap-off, by+r2*(spread||14), hmin+r2*(hmax-hmin), fill, i*1.3, t, lw); }
+}
+function crow(cx,cy,s,t,ph,perch){
+  x.save(); x.translate(cx,cy); x.scale(s,s); x.fillStyle='#000';
+  if(perch){
+    x.beginPath(); x.ellipse(0,0,8.5,5.4,-.18,0,7); x.fill();
+    x.beginPath(); x.arc(7,-5.6,3.6,0,7); x.fill();
+    x.beginPath(); x.moveTo(9.6,-6.2); x.lineTo(15,-5.2); x.lineTo(9.6,-4); x.fill();
+    x.beginPath(); x.moveTo(-6,1); x.quadraticCurveTo(-15,3,-18,7);
+    x.quadraticCurveTo(-11,3.5,-5,3.4); x.fill();
+  }else{ const f=Math.sin(t*.009+ph);
+    x.beginPath(); x.ellipse(0,0,7.5,3,0,0,7); x.fill();
+    for(const d of[-1,1]){ x.beginPath(); x.moveTo(d,-1);
+      x.quadraticCurveTo(d*12,-6-f*10,d*21,2-f*6.5); x.quadraticCurveTo(d*11,1,d,3); x.fill(); } }
+  x.restore();
+}
+function stonewall(rate,y,sc,fill){        // 밭담
+  const off=cam*rate; x.fillStyle=fill;
+  for(let row=0;row<3;row++){ const ry=y-row*13*sc, g=17*sc;
+    const i0=Math.floor((off-70)/g), i1=Math.ceil((off+W+70)/g);
+    for(let i=i0;i<=i1;i++){ const sd=i*7+row*31;
+      const sx=i*g-off+(rnd(sd)-.5)*9*sc, rw=(9+rnd(sd+1)*7)*sc, rh=(7+rnd(sd+2)*5)*sc;
+      x.beginPath();
+      for(let a=0;a<9;a++){ const th=a/9*6.283, j=.72+rnd(sd+a*3)*.5;
+        const qx=sx+Math.cos(th)*rw*j, qy=ry+Math.sin(th)*rh*j; a?x.lineTo(qx,qy):x.moveTo(qx,qy); }
+      x.closePath(); x.fill(); } }
+}
+function ridge(rate,P2,h,base,fill,crater){
+  x.beginPath(); x.moveTo(-60,H);
+  for(let s=-60;s<=W+60;s+=5){ const wx=s+cam*rate, i=Math.floor(wx/P2), u=(wx/P2-i)*2-1;
+    let y=base-h*(.6+rnd(i*1.7)*.8)*Math.exp(-u*u*6);
+    if(crater&&Math.abs(u)<.28&&rnd(i*3.1)>.45) y+=48*Math.pow(Math.cos(u/.28*Math.PI/2),2);
+    x.lineTo(s,y); }
+  x.lineTo(W+60,H); x.closePath(); x.fillStyle=fill; x.fill();
+}
+function halla(rate,anchor,fill){          // 한라산 — 세계 저 끝에 서 있다
+  const cx=anchor-cam*rate;
+  x.beginPath(); x.moveTo(-60,H);
+  for(let px=-60;px<=W+60;px+=4){
+    const u=(px-cx)/640;
+    let y=452-262*Math.exp(-u*u*1.05)+Math.sin(px*.009)*4;
+    if(Math.abs(u)<.17) y+=32*Math.pow(Math.cos(u/.17*Math.PI/2),2);   // 백록담
+    x.lineTo(px,y); }
+  x.lineTo(W+60,H); x.closePath(); x.fillStyle=fill; x.fill();
+}
+function fog(y,h,a){const g=x.createLinearGradient(0,y-h,0,y+h);
+  g.addColorStop(0,'rgba(252,252,250,0)');g.addColorStop(.5,'rgba(252,252,250,'+a+')');
+  g.addColorStop(1,'rgba(252,252,250,0)');x.fillStyle=g;x.fillRect(0,y-h,W,h*2);}
+function sky(a,b,cc,gx,gy,gr){
+  const sk=x.createLinearGradient(0,0,0,H*.8);
+  sk.addColorStop(0,a);sk.addColorStop(.75,b);sk.addColorStop(1,cc);
+  x.fillStyle=sk;x.fillRect(0,0,W,H);
+  if(gr){ const gl=x.createRadialGradient(gx,gy,20,gx,gy,gr);
+    gl.addColorStop(0,'rgba(255,255,255,.9)');gl.addColorStop(1,'rgba(255,255,255,0)');
+    x.fillStyle=gl;x.fillRect(0,0,W,H); }
+}
+
+/* ═══════════ 배경 세 곳 ═══════════
+   ⚠ 2편은 화면이 위아래로도 흐른다. 배경을 두 켜로 나눠 그린다.
+     · 하늘·먼 산·안개·까마귀 → 화면에 못 박아 둔다 (세로로 안 움직임)
+     · 땅·잔디·돌담·하르방   → ground() 로 감싸 세계와 같이 오르내린다
+     이걸 안 나누면 올라갈 때 땅 그림만 제자리에 남아 지형과 어긋난다 */
+function ground(f){ x.save(); x.translate(0,-camY); f(); x.restore(); }
+function bgField(t){                       // 1막 · 벌판
+  sky('#c9c9c5','#f4f4f1','#fbfbf8',900,330,420);
+  ridge(.05,1700,150,432,'#cbcbc7');            fog(426,44,.6);
+  ridge(.11,1150,190,482,'#9d9d99',1);          fog(478,34,.48);
+  ridge(.20,2100,92,536,'#6c6c68');             fog(530,26,.32);
+  ground(()=>{
+    choga(700-cam*.32,560,240,132,'#5c5c56','#7f7f77');    // 집은 땅에 붙어 있다
+    choga(2100-cam*.32,560,180,100,'#5c5c56','#7f7f77');
+    choga(3600-cam*.32,560,210,118,'#5c5c56','#7f7f77');
+    gfield(t,.42,584,26,20,40,'#6d6d64','#c9c9c0',0.9,10);
+    x.fillStyle='#43433b'; x.fillRect(0,592,W,H);
+    gfield(t,.60,616,22,26,58,'#3b3b33','#ddddd3',1.1,12);
+    stonewall(.74,632,1.05,'#1e1e19');
+    harbang(1380-cam,450,1.5,'#000');
+    jeongnang(700-cam,576,1.0,'#000');
+    harbang(2260-cam,470,1.2,'#000');
+    sandam(3300-cam,560,1.0,'#000');
+  });
+}
+function fgField(t){ ground(()=>{
+  gfield(t,1.0,668,26,30,62,'#131310','#ededdf',1.2,10);
+  gfield(t,1.35,742,34,54,116,'#000','#fbfbf2',1.7,10);
+}); }
+function bgWood(t){                        // 2막 · 곶자왈
+  sky('#b9b9b6','#e9e9e5','#f2f2ee',760,300,380);
+  ridge(.06,1900,120,448,'#c2c2be');            fog(444,46,.66);
+  treeRow(tree,t,.16,506,150,120,190,'#a9a9a5',3.0,10);   fog(500,40,.6);
+  treeRow(tree,t,.30,548,180,150,240,'#8b8b87',4.2,12);   fog(542,32,.46);
+  ground(()=>{
+    x.fillStyle='#3d3d38'; x.fillRect(0,566,W,H);         // 이끼 낀 바닥
+    lowRow(fern,t,.50,584,30,18,34,'#5e5e57',10);
+    treeRow(tree,t,.62,606,230,190,300,'#4a4a45',5.4,14);
+    lowRow(fern,t,.78,624,26,26,48,'#2b2b26',12);
+    stonewall(.86,640,1.0,'#191915');                      // 무너진 돌담
+  });
+}
+function fgWood(t){ ground(()=>{
+  lowRow(fern,t,1.0,672,28,34,64,'#101010',10);
+  treeRow(tree,t,1.18,742,340,300,430,'#000',8.5,10);
+  lowRow(fern,t,1.35,748,34,54,104,'#000',10);
+}); }
+function bgHalla(t){                       // 3막 · 한라산
+  sky('#c2c2bf','#eeeeeb','#dededa',640,300,400);
+  halla(.09,1560,'#c6c6c3');                    fog(408,72,.8);
+  treeRow(fir,t,.15,486,120,60,130,'#b0b0ad',2.2,14);      fog(478,42,.7);
+  treeRow(fir,t,.28,552,190,110,230,'#7c7c78',3.4,18);
+  lowRow(bamboo,t,.44,564,26,16,32,'#6a6a64',10);          fog(556,30,.4);
+  ground(()=>{
+    x.fillStyle='#4a4a44'; x.fillRect(0,572,W,H);
+    lowRow(bamboo,t,.66,614,24,24,48,'#2c2c27',12);
+    treeRow(fir,t,.80,648,300,200,340,'#0d0d0b',6.0,16);
+  });
+  for(let i=0;i<3;i++){                       // 까마귀 — 능선 위를 맴돈다
+    const gp=1500, off=cam*.5, i0=Math.floor((off-200)/gp);
+    for(let k=i0;k<=i0+2;k++){
+      const sx=k*gp+rnd(k*2.3+i)*gp-off;
+      if(sx<-40||sx>W+40) continue;
+      crow(sx, 210+rnd(k*1.7+i)*130+Math.sin(t*.0011+k+i)*18, .8+rnd(k+i)*.5, t, k*1.3+i*2.1); } }
+}
+function fgHalla(t){ ground(()=>{
+  lowRow(bamboo,t,1.0,668,28,34,66,'#0d0d0b',10);
+  treeRow(fir,t,1.2,720,420,260,400,'#000',7.5,10);
+  lowRow(bamboo,t,1.35,742,34,44,92,'#000',10);
+}); }
+const ZONES=[{bg:bgField,fg:fgField},{bg:bgWood,fg:fgWood},{bg:bgHalla,fg:fgHalla}];
+
+/*═══════════════════════════════════════════════════════════════════════
+  물체 그리기 — 전부 검은 실루엣. 몸체가 도는 대로 같이 돈다
+═══════════════════════════════════════════════════════════════════════*/
+function onBody(b,fn){ x.save(); x.translate(b.position.x-cam,b.position.y); x.rotate(b.angle); fn(); x.restore(); }
+function drawLand(e){
+  const g=e.box;
+  if(g.x-cam>W+60||g.x+g.w-cam<-60) return;
+  x.fillStyle='#000'; x.fillRect(g.x-cam,g.y,g.w,g.h);
+  const st=13, i0=Math.floor(g.x/st), i1=Math.ceil((g.x+g.w)/st);
+  for(let i=i0;i<i1;i++){
+    const sx=i*st+rnd(i*2.1)*st-cam;
+    if(sx<-40||sx>W+40) continue;
+    const rw=4+rnd(i*1.7)*7, rh=3+rnd(i*3.3)*5;
+    x.beginPath();
+    for(let a=0;a<8;a++){ const th=a/8*6.283, j=.7+rnd(i+a*2.3)*.55;
+      const qx=sx+Math.cos(th)*rw*j, qy=g.y+1+Math.sin(th)*rh*j;
+      a?x.lineTo(qx,qy):x.moveTo(qx,qy); }
+    x.closePath(); x.fill();
+  }
+}
+function drawCrate(e){ const b=e.bodies[0], s=e.s;
+  onBody(b,()=>{ x.fillStyle='#000'; x.fillRect(-s/2,-s/2,s,s);
+    x.strokeStyle='#20201c'; x.lineWidth=2;
+    x.beginPath(); x.moveTo(-s/2+3,-s/2+3); x.lineTo(s/2-3,s/2-3);
+    x.moveTo(s/2-3,-s/2+3); x.lineTo(-s/2+3,s/2-3); x.stroke(); }); }
+function drawBoulder(e){ const b=e.bodies[0], r=e.r;
+  onBody(b,()=>{ x.fillStyle='#000'; x.beginPath();
+    for(let a=0;a<13;a++){ const th=a/13*6.283, j=.78+rnd(e.seed+a*2.7)*.42;
+      const qx=Math.cos(th)*r*j, qy=Math.sin(th)*r*j; a?x.lineTo(qx,qy):x.moveTo(qx,qy); }
+    x.closePath(); x.fill();
+    x.fillStyle='#1a1a17';
+    for(let k=0;k<5;k++){ x.beginPath();
+      x.arc((rnd(e.seed+k*5)-.5)*r*1.1,(rnd(e.seed+k*9)-.5)*r*1.1,1.6+rnd(e.seed+k)*2.4,0,7); x.fill(); } }); }
+function drawPlank(e){ const b=e.bodies[0];
+  onBody(b,()=>{ x.fillStyle='#000'; x.fillRect(-e.w/2,-e.h/2,e.w,e.h);
+    x.fillStyle='#17170f';
+    for(let i=1;i<6;i++) x.fillRect(-e.w/2+e.w*i/6,-e.h/2+2,1.5,e.h-4); });
+  if(e.pivot){ x.fillStyle='#000'; x.beginPath();
+    x.moveTo(e.pivot.x-cam-16,e.pivot.y+26); x.lineTo(e.pivot.x-cam,e.pivot.y-2);
+    x.lineTo(e.pivot.x-cam+16,e.pivot.y+26); x.closePath(); x.fill(); } }
+function drawRope(e){
+  x.strokeStyle='#000'; x.lineWidth=4.2; x.lineCap='round';
+  x.beginPath(); x.moveTo(e.anchor.x-cam,e.anchor.y);
+  for(const b of e.bodies) x.lineTo(b.position.x-cam,b.position.y);
+  x.stroke();
+  const t=e.bodies[e.bodies.length-1];
+  x.fillStyle='#000'; x.beginPath(); x.arc(t.position.x-cam,t.position.y+7,5,0,7); x.fill(); }
+function drawDeck(e){
+  const g=e.box, sx=g.x-cam;
+  if(sx>W+60||sx+g.w<-60) return;
+  x.fillStyle='#000'; x.fillRect(sx,g.y,g.w,10);
+  x.fillStyle='#000';                                   // 아래로 늘어진 결 — 얇은 발판인 걸 알려 준다
+  for(let i=8;i<g.w-6;i+=22){ x.fillRect(sx+i,g.y+10,3,5); }
+}
+/* 벽 — 배경보다 진한 바위면을 깔고 손잡이를 엇갈리게 박는다.
+   사람이 검은색이라 바위가 검으면 서로 묻힌다 — 그래서 중간 회색이다 */
+function drawWall(e){
+  const sx=e.x-cam;
+  if(sx+e.w<-40||sx>W+40) return;
+  /* 칸마다 따로 그리면 여러 장을 이어 붙인 티가 난다 —
+     결은 세상 좌표 기준으로 깔고 테두리를 안 그려야 한 덩어리로 보인다 */
+  const g=x.createLinearGradient(0,-400,0,760);
+  g.addColorStop(0,'#63666c'); g.addColorStop(1,'#3c3f44');
+  x.fillStyle=g; x.fillRect(sx,e.y,e.w,e.h);
+  x.fillStyle='rgba(0,0,0,.28)';                        // 손잡이
+  for(let yy=e.y+18, r=0; yy<e.y+e.h-8; yy+=36, r++)
+    for(let xx=e.x+((r%2)?28:8); xx<e.x+e.w-8; xx+=46){
+      const w2=14+((xx*7+yy*3)%10), h2=5+((xx*3+yy*5)%4);
+      x.fillRect(xx-cam, yy, w2, h2);
+    }
+  x.fillStyle='rgba(0,0,0,.22)'; x.fillRect(sx,e.y,e.w,5);   // 윗면 턱
+}
+
+/* 손잡이 — 바위벽에서 튀어나온 턱. 검은 바위 앞에서도 보이게 윗면을 밝게 둔다 */
+function drawGrip(e){
+  const sx=e.x-cam;
+  if(sx<-40||sx>W+40) return;
+  if(e.gone) return;
+  const w=e.w, h=13;
+  x.fillStyle='#20232a';                                  // 몸통
+  x.beginPath();
+  x.moveTo(sx-w/2, e.y+h); x.lineTo(sx-w/2+4, e.y);
+  x.lineTo(sx+w/2-4, e.y); x.lineTo(sx+w/2, e.y+h);
+  x.closePath(); x.fill();
+  x.fillStyle='#8d9299';                                  // 손이 걸리는 윗면
+  x.fillRect(sx-w/2+3, e.y-3, w-6, 4);
+  if(e.crumble){                                          // 부스러질 것은 금이 가 있다
+    x.strokeStyle='rgba(0,0,0,.55)'; x.lineWidth=2;
+    x.beginPath(); x.moveTo(sx-4,e.y-1); x.lineTo(sx+2,e.y+7); x.lineTo(sx-1,e.y+12); x.stroke();
+    if(e.life){                                           // 잡고 있는 동안 버석버석
+      const k=e.life/e.crumble;
+      x.fillStyle='rgba(0,0,0,'+(.25*k).toFixed(2)+')';
+      x.fillRect(sx-w/2, e.y-3, w*k, 4);
+    }
+  }
+}
+function drawLadder(e){
+  const sx=e.x-cam;
+  if(sx<-60||sx>W+60) return;
+  x.strokeStyle='#000'; x.lineCap='round';
+  x.lineWidth=6;                                   // 양쪽 기둥
+  x.beginPath(); x.moveTo(sx-e.w/2,e.y); x.lineTo(sx-e.w/2,e.y+e.h);
+  x.moveTo(sx+e.w/2,e.y); x.lineTo(sx+e.w/2,e.y+e.h); x.stroke();
+  x.lineWidth=5;                                   // 발 딛는 가로대
+  for(let yy=e.y+13; yy<e.y+e.h-4; yy+=26){
+    x.beginPath(); x.moveTo(sx-e.w/2,yy); x.lineTo(sx+e.w/2,yy); x.stroke(); }
+}
+function drawSwing(e){ const b=e.bodies[0];
+  x.strokeStyle='#000'; x.lineWidth=3;
+  for(const j of e.joints){
+    const a=j.pointA, p=Vector.add(b.position,Vector.rotate(j.pointB,b.angle));
+    x.beginPath(); x.moveTo(a.x-cam,a.y); x.lineTo(p.x-cam,p.y); x.stroke(); }
+  onBody(b,()=>{ x.fillStyle='#000'; x.fillRect(-e.w/2,-7,e.w,14); }); }
+function drawPlate(e){ const b=e.bodies[0];
+  x.fillStyle='#000';
+  x.fillRect(b.position.x-cam-e.w/2, b.position.y-5, e.w, 10);
+  x.fillRect(b.position.x-cam-e.w/2-4, e.home.y+9, 6, 26);
+  x.fillRect(b.position.x-cam+e.w/2-2, e.home.y+9, 6, 26); }
+function drawGate(e){ const b=e.bodies[0];
+  x.fillStyle='#000'; x.fillRect(b.position.x-cam-e.w/2, b.position.y-e.h/2, e.w, e.h);
+  x.fillStyle='#1a1a17';
+  for(let i=1;i<5;i++) x.fillRect(b.position.x-cam-e.w/2+3, b.position.y-e.h/2+e.h*i/5, e.w-6, 2);
+  x.fillStyle='#000'; x.fillRect(e.home.x-cam-e.w/2-7, e.home.y-e.h/2-6, e.w+14, 12); }
+
+/* 잡을 수 있는 게 손 닿는 데 있으면 옅게 둘러 준다 — 글자 대신 */
+/* 사다리 앞에 서면 가로대가 밝아진다 — 여기서 ↑ 를 누르면 오른다는 신호 */
+function drawLadderCue(){
+  if(P.onLadder||P.holdJoint||P.hangJoint||P.ledge) return;
+  const e=ladderAt(P.body); if(!e) return;
+  const sx=e.x-cam, py=P.body.position.y;
+  x.strokeStyle='rgba(244,241,232,.85)'; x.lineWidth=4;            // 가로대가 하얗게 밝아진다
+  for(let yy=e.y+13; yy<e.y+e.h-4; yy+=26){
+    if(Math.abs(yy-py)>150) continue;                              // 눈높이 근처만
+    x.beginPath(); x.moveTo(sx-e.w/2+3,yy); x.lineTo(sx+e.w/2-3,yy); x.stroke(); }
+  /* 머리 위에 ↑↓ 를 띄운다 — 사다리 꼭대기에 두면 화면 밖으로 나가 안 보인다 */
+  const my=py-84+Math.sin(NOW*.005)*3;                              // 머리보다 확실히 위로
+  x.fillStyle='rgba(250,248,242,.92)'; x.font='bold 26px sans-serif'; x.textAlign='center';
+  x.fillText('↑', sx, my);
+  x.font='bold 15px sans-serif'; x.fillStyle='rgba(250,248,242,.65)';
+  x.fillText('오르기', sx, my+16);
+}
+function drawReach(){
+  if(P.holdJoint||P.hangJoint) return;
+  const g=nearestGrab(); if(!g) return;
+  const b=g.b, r=(b.bounds.max.x-b.bounds.min.x+b.bounds.max.y-b.bounds.min.y)/3.4;
+  x.strokeStyle='rgba(236,232,220,.30)'; x.lineWidth=1.4;
+  x.setLineDash([4,7]); x.beginPath();
+  x.arc(b.position.x-cam,b.position.y,r+10,0,7); x.stroke(); x.setLineDash([]);
+}
+/* 예전엔 허리에서 물체까지 선을 그었다. 그 선이 다리 높이에 가로로 남았다.
+   이제 팔이 실제로 물체를 향해 뻗으므로 선이 필요 없다 */
+function holdTarget(){
+  if(!P.holdJoint||!P.holdBody) return null;
+  const b=P.holdBody;
+  return Vector.add(b.position, Vector.rotate(P.holdJoint.pointB, b.angle));
+}
+function drawTie(){
+  if(!TIE) return;
+  const a=Vector.add(TIE.bodyA.position,Vector.rotate(TIE.pointA,TIE.bodyA.angle));
+  const b=Vector.add(TIE.bodyB.position,Vector.rotate(TIE.pointB,TIE.bodyB.angle));
+  x.strokeStyle='#000'; x.lineWidth=3.4;
+  x.beginPath(); x.moveTo(a.x-cam,a.y); x.lineTo(b.x-cam,b.y); x.stroke();
+}
+
+/* 주인공 — 물리 몸체의 상태를 그림 자세로 옮긴다 */
+/* 자세를 매 칸 바로 갈아끼우면 팔다리가 툭툭 튄다.
+   지금 자세에서 목표 자세로 이어 붙인다 — 걷다 서고, 뛰고 내리는 사이가 이어진다 */
+const POSE={};
+const LIMBS=['rot','th1','th2','kn1','kn2','ar1','ar2','el1','el2','hd','neck','curl'];
+function easePose(target,k){
+  for(const q of LIMBS){ const v=target[q]||0;
+    POSE[q] = POSE[q]===undefined ? v : POSE[q]+(v-POSE[q])*k; }
+  POSE.pack=target.pack; POSE.bald=target.bald; POSE.club=target.club;
+  return POSE;
+}
+/* ⚠⚠ 관절은 한 방향으로만 접힌다. 이걸 뒤집으면 새 다리처럼 꺾여서 사람으로 안 보인다.
+      무릎 : 정강이는 넓적다리보다 **뒤로만** 간다  →  kn ≤ 0
+      팔꿈치: 아래팔은 위팔보다 **앞으로만** 간다  →  el ≥ 0
+   (2026-08-22, 사용자가 "이게 사람 움직임이냐" 하고 지적. 전부 부호가 반대였다)
+   ⚠ rot 은 **양수가 앞으로 숙임**, 음수면 뒤로 자빠진다. 그리고 골반이 회전축이라
+      rot 을 바꾸면 다리까지 같이 돌아간다 — 발을 땅에 붙여 두려면 th1·th2 에서 바뀐 만큼 빼라 */
+function drawPlayer(t){
+  const b=P.body, p=P.ph, st=P.st, spd=P.sp||0;
+  const po={};
+  if(st==='ledge'){ Object.assign(po, ledgePose(P.climb)); }
+  else if(st==='hang'){
+    /* LIMBO 를 보면 매달린 몸이 줄 방향으로 통째로 눕고,
+       다리는 흔들리는 반대쪽으로 끌려간다. 뻣뻣하게 매달려 있지 않다 */
+    let lean=0;
+    if(P.hang){ const dx=b.position.x-P.hang.position.x, dy=Math.max(8,b.position.y-P.hang.position.y);
+      lean=clamp(-P.face*Math.atan2(dx,dy),-1.0,1.0); }
+    const sw=clamp(b.velocity.x*P.face*.11,-.85,.85);          // 흔들리는 세기
+    po.rot=lean;
+    po.th1=.10-sw;            po.th2=-.16-sw*.75;
+    po.kn1=-(.45+Math.abs(sw)*.55); po.kn2=-(.28+Math.abs(sw)*.45);
+    po.ar1=2.70; po.ar2=2.78; po.el1=.10; po.el2=.07;
+    po.hd=3+Math.abs(sw)*5; }
+  else if(st==='grip'){                       /* 손잡이에 매달렸다 — 한 팔로 버티고 몸이 천천히 흔린다 */
+    const sw=Math.sin(t*.0032)*.10 + Math.sin(t*.0011)*.05;   // 매달린 몸은 가만히 안 있다
+    const gr=P.grip&&P.grip.crumble ? (P.grip.life/P.grip.crumble) : 0;
+    const sh=gr*Math.sin(t*.02)*.06;                           // 부서질 손잡이면 버섭버섭
+    po.ar1=2.86+sw*.5+sh; po.el1=.06; po.ar2=2.74-sw*.5-sh; po.el2=.10;
+    po.rot=-sw*.5;
+    po.th1=.16+sw*.9; po.kn1=-(.55+Math.abs(sw)*1.1);
+    po.th2=-.12+sw*.7; po.kn2=-(.38+Math.abs(sw)*.9);
+    po.curl=.06; po.hd=2+Math.abs(sw)*8; }
+  else if(st==='reach'){                      /* 다음 손잡이로 날아간다 — 한 팔이 먼저 나간다 */
+    po.ar1=2.30; po.el1=.10; po.ar2=1.05; po.el2=.34;
+    po.th1=.92; po.kn1=-1.05; po.th2=-.52; po.kn2=-.86;
+    po.rot=.14; po.curl=.10; po.hd=6; }
+  else if(st==='jump'){                       /* 솔는다 — 앞무릎을 끌어올리고 팔을 앞으로 뻗는다 */                       /* 솟는다 — 앞무릎을 끌어올리고 팔을 앞으로 뻗는다 */
+    po.th1=.85; po.kn1=-1.30; po.th2=-.70; po.kn2=-.95;
+    /* 팔은 앞으로. 위로 올리면 경박해 보인다.
+       두 팔을 반걸음 어긋나게 둬야 겹쳐 보이지 않고 깊이가 산다 */
+    po.ar1=1.12; po.el1=.24;  po.ar2=.60; po.el2=.40;
+    po.rot=.10; po.hd=4; }
+  else if(st==='fall'){                       /* 내린다 — 다리를 뻗어 땅을 찾고 팔이 벌어진다 */
+    po.th1=.46; po.kn1=-.30; po.th2=-.34; po.kn2=-.62;
+    po.ar1=-.26; po.el1=.62;  po.ar2=-.18; po.el2=.56;   // 팔은 내린 채
+    po.rot=.05; po.hd=5; }
+  else if(st==='land'){                       /* 디딘다 — 세게 떨어졌으면 그만큼 깊이 앉는다 */
+    const k=clamp(P.impact||.3,.15,1.6), q=(P.landT/(P.landMax||11));
+    po.th1=.22+.55*k*q; po.kn1=-(.55+.85*k*q);
+    po.th2=-.40-.30*k*q; po.kn2=-(.45+.75*k*q);
+    po.ar1=-.50-.35*k*q; po.el1=.62; po.ar2=-.38-.28*k*q; po.el2=.55;
+    po.rot=.06+.22*k*q; po.curl=.35*k*q; po.hd=2+k*3; }
+  else if(st==='stumble'){                    /* 휘청 — 크게 떨어지면 한 발 앞으로 쏠린다 */
+    const q=P.stumble/14, sw=Math.sin(P.stumble*.55);
+    po.rot=.34*q; po.curl=.5*q; po.neck=.3*q;
+    po.th1=1.02*q+.15; po.kn1=-(1.15*q+.15);
+    po.th2=-.72*q-.10; po.kn2=-(.95*q+.12);
+    po.ar1=-1.15*q+sw*.2; po.el1=.55; po.ar2=-.95*q-sw*.2; po.el2=.5;
+    po.hd=6*q; }
+  else if(st==='ladder'){                     /* 오른다 — 손발이 번갈아 간다 */
+    const ph=P.lph||0, sn=Math.sin(ph);
+    po.ar1=2.55+sn*.42; po.el1=.20; po.ar2=2.55-sn*.42; po.el2=.18;
+    po.th1=.40+sn*.34; po.kn1=-(.70+Math.max(0, sn)*.55);
+    po.th2=.40-sn*.34; po.kn2=-(.70+Math.max(0,-sn)*.55);
+    po.rot=.06; po.hd=1; }
+  else if(st==='push'){                       /* 민다 — 몸을 기울이고 두 팔을 앞으로 뻗는다 */
+    po.rot=.17; po.th1=.08; po.kn1=-.22; po.th2=-.80; po.kn2=-.40;
+    po.ar1=.96; po.el1=.18; po.ar2=.84; po.el2=.16; po.hd=1; }
+  else if(st==='walk'){
+    const sn=Math.sin(p), cs=Math.cos(p);
+    po.th1=sn*.86*spd; po.th2=-po.th1;                        // 넓적다리가 앞뒤로
+    // 무릎은 뒤로만 접힌다. 다리를 들어 옮길 때 많이 접고, 딛을 땐 곧게 편다
+    po.kn1=-(.10+Math.max(0,-cs)*1.05)*spd;
+    po.kn2=-(.10+Math.max(0, cs)*1.05)*spd;
+    /* 팔은 다리와 엇갈리되 **반 박자 늦게** 따라온다. 딱 맞아 흔들리면 인형처럼 보인다 */
+    const sa=Math.sin(p-.55);
+    po.ar1=-sa*.62*spd; po.ar2=-po.ar1;
+    po.el1=(.22+Math.max(0, sa)*.35)*spd+.10;                 // 팔꿈치는 앞으로만
+    po.el2=(.22+Math.max(0,-sa)*.35)*spd+.10;
+    po.th1-=.10*spd; po.th2-=.10*spd;                        // 몸을 기울인 만큼 다리를 되돌려 발을 땅에 붙인다
+    po.rot=.05*spd; po.hd=spd*6; }
+  else if(st==='crouch'){                     /* 쪼그려 앉는다 — 사람 뼈대대로 */
+    /* rot 은 골반을 축으로 몸 전체를 돌린다. 다리 각도는 숙인 만큼 미리 빼 두었다.
+       발은 골반보다 앞(11.5)·아래(8.5)에 놓여 정강이와 몸통 사이가 벌어진다 */
+    po.rot=.30;                                // 앞으로 숙인다 (음수면 뒤로 자빠진다)
+    po.curl=1; po.neck=.34;                    // 등이 말리고, 얼굴은 앞을 본다
+    po.th1=1.46; po.kn1=-1.64;                 // 앞다리 — 무릎이 골반보다 높이 올라온다
+    po.th2=1.31; po.kn2=-2.16;                 // 뒷다리는 반걸음 뒤
+    po.ar1=.28; po.el1=.62; po.ar2=.06; po.el2=.54; po.hd=1; }   // 손을 앞으로 — 집으러 간다
+  else {                                      /* 서 있다 — 가만히 있는 게 아니라 숨을 쉰다 */
+    const br=Math.sin(t*.0021), br2=Math.sin(t*.0021-.7);     // 느린 호흡
+    const sh=Math.sin(t*.00042);                              // 아주 느린 무게 옮기기
+    po.kn1=-.07-Math.max(0,sh)*.10; po.kn2=-.07-Math.max(0,-sh)*.10;
+    po.th1=sh*.06; po.th2=-sh*.05;
+    po.ar1=-.06+br*.035; po.ar2=-.06+br2*.035;
+    po.el1=.20+br*.05; po.el2=.20+br2*.05;
+    po.curl=.02+br*.02; po.rot=sh*.02;
+    po.hd=1+Math.abs(sh)*2; }
+  /* 잡은 손이 물체에 닿게 — 어깨·팔꿈치 각도를 거꾸로 풀어 준다.
+     닿지 않는 거리면 그쪽으로 쭉 뻗은 채로 둔다 */
+  const tgt=holdTarget();
+  if(tgt){
+    const sx0=b.position.x-cam, hip0=b.position.y+35-FEET+(P.bob||0);
+    const lx=((tgt.x-cam)-sx0)/(FIG*P.face), ly=(tgt.y-hip0)/FIG;
+    /* 어깨 높이는 웅크린 만큼 내려온다 — figure() 의 SH*sq 와 같은 값을 써야 손이 안 뜬다 */
+    const shy=27*(1-(po.curl||0)*.18);
+    const vx=lx-1.5, vy=ly+shy;                                  // 어깨(1.5,-shy) 기준
+    const L1=9.5, L2=8.5;
+    let d=Math.hypot(vx,vy); d=clamp(d, Math.abs(L1-L2)+.4, L1+L2-.15);
+    const th=Math.atan2(vx,vy);
+    const a1=Math.acos(clamp((L1*L1+d*d-L2*L2)/(2*L1*d),-1,1));
+    const b1=Math.acos(clamp((L1*L1+L2*L2-d*d)/(2*L1*L2),-1,1));
+    po.ar1=th-a1; po.el1=Math.PI-b1;
+  }
+  if(st==='jump'||st==='fall'){                                  // 공중에선 다리가 뒤로 끌린다
+    const drag=clamp(b.velocity.x*P.face*.055,-.45,.45);
+    po.th1-=drag; po.th2-=drag*.7; }
+  /* 속도만큼 기울고, **속도가 변하는 만큼 한 번 더** 기운다.
+     출발할 땐 앞으로 쏠리고 멈출 땐 뒤로 남는다 — 이게 있어야 무게가 느껴진다 */
+  const acc=(b.velocity.x-(P.vxPrev||0))*P.face;
+  P.vxPrev=b.velocity.x;
+  P.accS=lerp(P.accS||0, clamp(acc,-1.2,1.2), .18);
+  const vlean=b.velocity.x*P.face*.010 + P.accS*.10;
+  po.rot=(po.rot||0)+vlean; po.th1=(po.th1||0)-vlean; po.th2=(po.th2||0)-vlean;
+  const sm=easePose(po, st==='walk'?.26:st==='ledge'?.45:st==='land'?.55:.24);
+  /* ── 발 고정(2026-08-27) ──
+     지금까지 걷기는 다리를 사인파로 흔들기만 해서, 딛은 발이 땅 위를 **미끄러졌다**.
+     사람은 딛는 순간부터 그 발이 땅에 붙어 있고, 몸이 그 위를 지나간다.
+     딛는 발의 세계 좌표를 적어 두고, 무릎·넓적다리를 거꾸로 풀어(2관절 IK) 그 자리에 붙인다.
+     ⚠ 부드럽게 하는 easePose 뒤에 걸어야 한다 — 앞에 걸면 보간되면서 발이 다시 미끄러진다.
+     팔에 쓰던 것과 같은 계산이다. ⚠ 무릎은 뒤로만 접히므로 부호가 팔과 반대다 */
+  if(st==='walk'&&P.grounded&&spd>.12){
+    const L=10.5, reach=L*2*.97, stance=Math.cos(p)<0?1:2;
+    const th0=stance===1?(sm.th1||0):(sm.th2||0), kn0=stance===1?(sm.kn1||0):(sm.kn2||0);
+    const fx0=Math.sin(th0)*L+Math.sin(th0+kn0)*L;
+    if(P.stance!==stance){ P.stance=stance; P.plantX=b.position.x+P.face*FIG*fx0; }
+    let fx=(P.plantX-b.position.x)/(FIG*P.face);
+    if(Math.abs(fx)>reach*.92){                      // 더는 못 버틴다 — 발을 떼고 새로 딛는다
+      P.plantX=b.position.x+P.face*FIG*fx0; fx=fx0;
+    }
+    /* 발이 앞뒤로 나갈수록 다리는 짧아진다 → 그만큼 골반이 내려앉아야 발이 땅에 붙는다.
+       사람이 걸을 때 몸이 위아래로 흔들리는 이유가 이것이다(2026-08-27) */
+    const fy=Math.sqrt(Math.max(1, reach*reach - fx*fx));
+    P.dip=(reach-fy)*FIG;
+    const d=clamp(Math.hypot(fx,fy),.4,reach);
+    const a1=Math.acos(clamp((L*L+d*d-L*L)/(2*L*d),-1,1));
+    const b1=Math.acos(clamp((L*L+L*L-d*d)/(2*L*L),-1,1));
+    const th=Math.atan2(fx,fy)+a1, kn=-(Math.PI-b1);
+    if(stance===1){ sm.th1=th; sm.kn1=kn; } else { sm.th2=th; sm.kn2=kn; }
+  } else { if(st!=='walk') P.stance=0; P.dip=lerp(P.dip||0,0,.25); }
+
+
+  const bob = (P.dip||0) + Math.sin(t*.0016)*.32*(1-spd)
+            + (st==='land'?(P.landT/11)*3.2:0) + (P.sit||0)*18.8;      // 앉은 자세의 발높이(골반 아래 8.5)에 맞춘 값
+  P.sit=lerp(P.sit||0, st==='crouch'?1:0, .22);
+  P.bob=lerp(P.bob||0,bob,.35);
+  figure(b.position.x-cam, b.position.y+35-FEET+P.bob, FIG, P.face, sm, t);
+}
+
+/*═══════════════════════════════════════════════════════════════════════
+  화면
+═══════════════════════════════════════════════════════════════════════*/
+const ZB=[3120,4800], BAND=760;
+function zoneMix(wx){
+  const w=[0,0,0];
+  for(let i=0;i<2;i++){
+    if(wx>=ZB[i]+BAND/2){ w[i]=0; w[i+1]=1; continue; }
+    if(wx> ZB[i]-BAND/2){ const k=ease((wx-(ZB[i]-BAND/2))/BAND); w[i]=1-k; w[i+1]=k;
+      for(let j=0;j<i;j++) w[j]=0; return w; }
+    if(i===0) w[0]=1;
+    return w;
+  }
+  return w;
+}
+function blend(pick,t){
+  const ws=zoneMix(cam+W*.42);
+  let base=-1,over=-1,k=0;
+  for(let i=0;i<3;i++){ if(ws[i]<=.002) continue;
+    if(base<0) base=i; else { over=i; k=ws[i]; } }
+  ZONES[base][pick](t);
+  if(over>=0){ const M=x; OX.setTransform(1,0,0,1,0,0); OX.clearRect(0,0,W,H);
+    x=OX; ZONES[over][pick](t); x=M;
+    x.globalAlpha=k; x.drawImage(OC,0,0); x.globalAlpha=1; }
+}
+function vignette(a){
+  const v=x.createRadialGradient(W/2,H*.44,H*.32,W/2,H*.5,H);
+  v.addColorStop(0,'rgba(0,0,0,0)');v.addColorStop(1,'rgba(0,0,0,'+a+')');
+  x.fillStyle=v;x.fillRect(0,0,W,H);
+}
+function draw(t){
+  x.save();
+  if(zoom!==1){ x.translate(zx,zy); x.scale(zoom,zoom); x.translate(-zx,-zy); }
+  if(shake>0){ x.translate((Math.random()-.5)*shake,(Math.random()-.5)*shake); shake*=.86; if(shake<.4)shake=0; }
+  blend('bg',t);                              // 배경은 제 안에서 먼 켜/땅 켜를 나눈다
+  x.translate(0,-camY);                       // 여기서부터가 실제 세계
+  for(const e of ENTS) if(e.type==='land') e.draw(e,t);
+  drawTie();
+  for(const e of ENTS) if(e.type!=='land') e.draw(e,t);
+  if(SC.now==='wake'){ if(SC.her) figure(SC.her.x-cam,SC.her.hip,FIG,SC.her.face,SC.her.po,t); }
+  else { drawReach(); if(!P.dead) drawPlayer(t); drawLadderCue(); }   // 표시는 사람 뒤에 가리지 않게 나중에
+  x.restore();
+  blend('fg',t);
+  if(dark>0){ x.fillStyle='rgba(0,0,0,'+dark+')'; x.fillRect(0,0,W,H); }
+  if(lid>0){ const e=lid*H*.52; x.fillStyle='#000'; x.fillRect(0,0,W,e); x.fillRect(0,H-e,W,e); }
+  if(P.dead){ x.fillStyle='rgba(0,0,0,'+Math.min(.85,P.dead/14)+')'; x.fillRect(0,0,W,H); }
+  vignette(.5);
+}
+
+/*═══════════════════════════════════════════════════════════════════════
+  한 바퀴 — 물리는 고정 간격으로, 그림은 화면 속도로
+═══════════════════════════════════════════════════════════════════════*/
+/* ═══════════ 오프닝 ═══════════
+   ① 여자 혼자 걷는다 → ② 계속 걷는다 → ③ 뒤에서 가격당한다 → ④ 암전
+   → ⑤ 눈을 뜬다, 둘러보니 아무도 없다 → 그대로 게임 시작
+   맞는 순간(hit)은 화면이 살아 있는 채로 하얗게 먹혔다가 검게 가라앉는다 */
+const V1=document.getElementById('v1'),V2=document.getElementById('v2'),V3=document.getElementById('v3');
+const SK=document.getElementById('skip');
+let SKIP=0;
+/* 폰에는 키보드가 없다 — 오른쪽 아래 단추를 누르면 S 키를 누른 것과 똑같이 동작한다.
+   눌리는 건 손대는 화면에서만이다(위 @media). 데스크톱에선 그냥 안내 글씨로 남는다 */
+SK.addEventListener('click',()=>{ SKIP=1; });
+/* ⚠ 브라우저는 사람이 화면을 한 번 건드리기 전엔 소리를 못 내게 막는다. 코드로는 못 뚫는다.
+   그래서 오프닝을 바로 틀면 음악만 빠진 채 시작되고, 나중에 키를 눌렀을 때
+   이미 20초쯤 지나간 자리에서 소리가 켜진다 — "앞부분이 날아간" 것처럼 들린 게 이거다.
+   지금은 시작 화면('ready')에서 한 번 기다렸다가, 그 손짓에 음악을 0초부터 틀면서
+   오프닝을 함께 시작한다. 첫 프레임부터 소리가 같이 간다 */
+const SC={now:'ready',f:0,her:null};
+function go(s){ SC.now=s; SC.f=0; vlast=-1; vstill=0; touchUI(); }
+function beginOpening(){
+  if(SC.now!=='ready') return;
+  musicFromTop();          // 사람이 방금 건드렸다 — 지금이라야 소리를 낼 수 있다
+  go('v1');
+}
+
+const blur=document.createElement('canvas'); blur.width=30; blur.height=40;
+const bx2=blur.getContext('2d');
+/* ③ 다시 걷기 — 영상 속 돌담이 군데군데 끊겨 허공을 딛는 것처럼 보인다.
+   걷는 선 아래를 캔버스로 덮어 바닥을 만들어 준다. 영상이 옆으로 흘러가는
+   속도(재서 맞춘 값)에 맞춰 같이 흘러야 붙어 있는 것처럼 보인다 */
+function floorV3(t){
+  const X0=(W-540)/2, gy=526;
+  const u=Math.max(0,(V3.currentTime||0)-0.3), off=27.6*u+4.76*u*u;
+  x.save(); x.beginPath(); x.rect(X0,0,540,H); x.clip();
+  x.fillStyle='#000'; x.fillRect(X0,gy,540,H-gy);
+  const st=13, i0=Math.floor((off-30)/st), i1=Math.ceil((off+570)/st);
+  for(let i=i0;i<=i1;i++){                       // 윗면에 걸터앉은 돌들
+    const sx=X0+i*st+rnd(i*2.1)*st-off;
+    const rw=4+rnd(i*1.7)*7, rh=3+rnd(i*3.3)*5;
+    x.beginPath();
+    for(let a=0;a<8;a++){ const th=a/8*6.283, j=.7+rnd(i+a*2.3)*.55;
+      const qx=sx+Math.cos(th)*rw*j, qy=gy+1+Math.sin(th)*rh*j;
+      a?x.lineTo(qx,qy):x.moveTo(qx,qy); }
+    x.closePath(); x.fill(); }
+  const row=(rate,by,gp,hmin,hmax,dk,lt,lw)=>{
+    const o=off*rate, j0=Math.floor((o-40)/gp), j1=Math.ceil((o+580)/gp);
+    for(let j=j0;j<=j1;j++){ const r=rnd(j*1.7), r2=rnd(j*3.3);
+      blade(X0+j*gp+r*gp-o, by+r2*10, hmin+r2*(hmax-hmin), (r-.5)*22, j*2.3, t, dk, lt, lw); } };
+  row(1.00, gy+22, 20, 16, 34, '#131310', '#ededdf', 0.95);
+  row(1.26, gy+84, 26, 44, 92, '#0a0a09', '#f2f2e6', 1.5);
+  row(1.60, gy+168, 34, 66, 140,'#000',    '#fbfbf2', 2.0);
+  x.restore();
+}
+function drawShot(vid,dark){
+  x.fillStyle='#0a0a09'; x.fillRect(0,0,W,H);
+  if(vid.readyState>=2){
+    try{ bx2.drawImage(vid,0,0,30,40); }catch(e){}
+    x.globalAlpha=.5; x.imageSmoothingEnabled=true;
+    x.drawImage(blur,0,0,30,40,-60,-60,W+120,H+120);            // 뿌연 배경
+    x.globalAlpha=1;
+    x.fillStyle='rgba(6,6,6,.32)'; x.fillRect(0,0,W,H);
+    /* 영상마다 잘린 높이가 조금씩 다르다 — 제 크기 그대로 읽어 높이에 맞춘다 */
+    const vw=vid.videoWidth||810, vh=vid.videoHeight||1080;
+    const dw=Math.round(720*vw/vh);
+    x.drawImage(vid,0,0,vw,vh,Math.round((W-dw)/2),0,dw,720);    // 본 화면
+    if(vid===V3) floorV3(NOW);
+  }
+  vignette(.55);
+  if(dark>0){ x.fillStyle='rgba(0,0,0,'+dark+')'; x.fillRect(0,0,W,H); }
+}
+function shotFade(vid,inF,hold){
+  let a=0;
+  if(SC.f<inF) a=1-SC.f/inF;
+  if(!hold&&vid.duration&&vid.duration-vid.currentTime<.55)
+    a=Math.max(a,1-(vid.duration-vid.currentTime)/.55);
+  return a;
+}
+function playSafe(v,next){
+  const p=v.play();
+  if(p&&p.catch) p.catch(()=>{});
+  v.onerror=()=>go(next);
+  setTimeout(()=>{ if(v.readyState<2&&SC.now!=='play') go(next); },4000);
+}
+/* 브라우저가 자동재생을 막으면 영상이 첫 칸에서 멈춘다.
+   두 번 더 틀어 보고, 그래도 안 움직이면 다음 장면으로 넘긴다 */
+let vlast=-1, vstill=0;
+function stalled(v){
+  if(v.currentTime!==vlast){ vlast=v.currentTime; vstill=0; return false; }
+  vstill++;
+  if(vstill===90||vstill===240){ const p=v.play(); if(p&&p.catch) p.catch(()=>{}); }
+  return vstill>420;
+}
+
+/* ── 눈을 뜨는 장면 (그림) — 이미 서 있다. 누웠다 일어서는 동작은 뺐다 ── */
+const GY0=600, HIP_ST=GY0-FEET;      // 인물이 작아진 만큼 골반 높이도 맞춘다
+const STND={rot:0,th1:0,kn1:-.07,th2:0,kn2:-.07,ar1:-.06,el1:.20,ar2:-.06,el2:.20,hd:1};
+let dark=0, lid=0;
+function wake(){
+  const f=SC.f, herX=148, po=Object.assign({},STND); let face=1;
+  if(f<40)       { lid=lerp(1,.52,f/40);        dark=lerp(1,.25,f/40); }   // 실눈이 뜨인다
+  else if(f<55)  { lid=lerp(.52,.88,(f-40)/15); }                          // 한 번 다시 감긴다
+  else if(f<115) { lid=lerp(.88,0,(f-55)/60);   dark=lerp(.25,0,(f-55)/60); }
+  else           { lid=0; dark=0; }
+  if(f>=150&&f<234){                                                       // 둘러본다 — 아무도 없다
+    face=(f<174||f>=214)?1:-1;
+    po.hd=lerp(1,6,Math.sin((f%24)/24*Math.PI));
+    po.rot=Math.sin((f-150)*.09)*.05; }
+  zoom = f<234 ? 2.9 : lerp(2.9,1,ease((f-234)/60));   // 인물이 작아져 더 당긴다
+  zx=herX-cam; zy=HIP_ST-14;
+  SC.her={x:herX,hip:HIP_ST,po:po,face:face};
+  if(f>=300) go('title');       // 오프닝이 끝나면 제목이 뜬다
+}
+let flash=0;
+function opening(){
+  SC.f++;
+  if(SC.f%30===0) tryMusic();                       // 막혔으면 계속 다시 시도한다
+  if(DEV.get('test')){ toPlay(); return; }                    // 개발용 바로 진입
+  if(SKIP){ SKIP=0; if(SC.now!=='play'&&SC.now!=='title'){ go('title'); return; } }
+  switch(SC.now){
+    case 'v1':
+      if(SC.f===1) playSafe(V1,'v3');
+      if(V1.ended||(V1.duration&&V1.currentTime>=V1.duration-.03)||stalled(V1)) go('v3');
+      break;
+    case 'v3':
+      if(SC.f===1) playSafe(V3,'v2');
+      if(V3.ended||(V3.duration&&V3.currentTime>=V3.duration-.03)||stalled(V3)) go('v2');
+      break;
+    case 'v2':
+      if(SC.f===1) playSafe(V2,'blackout');
+      if(V2.ended||(V2.duration&&V2.currentTime>=V2.duration-.03)||stalled(V2)){ flash=1; go('hit'); }
+      break;
+    case 'hit': {                      /* 맞았다 — 번쩍 · 한 박자 · 완전히 먹힌다 */
+      const f=SC.f;
+      flash = f<5 ? 1 : f<9 ? 0 : 1;
+      if(f>=36) flash=1-(f-36)*.28;    // 흰빛이 툭 꺼지면 그 밑은 이미 캄캄하다
+      if(f>=42){ flash=0; go('blackout'); }
+      break; }
+    case 'blackout':                                   // 맞았다 — 섬광, 그리고 캄캄해진다
+      flash=Math.max(0,flash-.075); dark=1;
+      if(SC.f>=110){ lid=1; go('wake'); }   // 얼마쯤 시간이 흘렀다
+      break;
+    case 'wake': wake(); break;
+    case 'title':                 // 아무 키나 누를 때까지 기다린다
+      if(SC.f%30===0) tryMusic();
+      break;
+  }
+}
+function toPlay(){
+  V1.pause(); V2.pause(); V3.pause();
+  zoom=1; dark=0; lid=0; flash=0;
+  P.spawn={x:+(DEV.get('x')||135), y:+(DEV.get('y')||(GY0-35))};
+  Body.setPosition(P.body,P.spawn); Body.setVelocity(P.body,{x:0,y:0});
+  cam=P.spawn.x-W*.42; camY=0;                    // 카메라를 바로 제자리에 — 시작할 때 옆으로 흐르지 않는다
+  if(DEV.get('hold')) DEV.get('hold').split(',').forEach(k=>K[k]=1);   // 개발용 — 키를 누른 채 시작
+  if(DEV.get('steps')) setTimeout(runBot,0);                           // 개발용 봇
+  SK.classList.remove('on');
+  HINT.classList.remove('gone'); setTimeout(()=>HINT.classList.add('gone'),9000);
+  go('play');
+}
+
+/* ═══════════ 소리 ═══════════
+   배경음악 출처: Pixabay (Pixabay Content License — 무료·상업적 이용 가능·출처 표기 불필요) */
+const BGM=document.getElementById('bgm'), SND=document.getElementById('snd');
+/* 지금은 숲(30초·474KB) 하나만 돌린다. 다음 씬을 만들면 나머지 둘을 쓴다 */
+const TRACKS=['../test/audio/bgm1.mp3','../test/audio/bgm2.mp3','../test/audio/bgm3.mp3'];
+const ORDER=[0];
+/* 2026-08-23 사용자 지시 — 문을 열면 언제나 음악이 켜진 채로 시작한다.
+   M · ♪ 로 끄는 것은 그 판 동안만이고, 다음에 열면 다시 켜져 있다
+   (예전엔 localStorage 'oreumkil_mute' 를 읽어 지난번 선택을 이어받았다) */
+let ti=0, mute=false, fade=null;
+BGM.loop=true;                               // 끝나면 다시 처음으로
+/* src는 HTML <audio> 태그에 직접 박아 뒀다 — 문서를 읽는 첫 줄부터 받기 시작한다.
+   여기서 다시 넣거나 load()를 부르면 받던 걸 버리고 처음부터 다시 받는다. 부르지 말 것 */
+/* 기호 하나만 남긴다(2026-08-23 사용자). 꺼진 것은 빗금과 흐린 색으로 알린다 */
+function sndFace(){ SND.textContent='♪';
+  SND.classList.toggle('off',mute);
+  SND.title=mute?'음악 켜기':'음악 끄기';
+  SND.setAttribute('aria-label', mute?'음악 꺼짐':'음악 켜짐'); }
+function bgmGo(){ if(mute) return;
+  if(!BGM.src) BGM.src=TRACKS[ORDER[ti]];
+  BGM.play().then(()=>{ clearInterval(fade); let v=BGM.volume;
+    fade=setInterval(()=>{ v=Math.min(1,v+.05); BGM.volume=v; if(v>=1)clearInterval(fade); },60);
+  }).catch(()=>{});
+}
+function bgmNext(){ ti=(ti+1)%ORDER.length; BGM.volume=0; BGM.src=TRACKS[ORDER[ti]]; bgmGo(); }
+function bgmMute(){ mute=!mute; sndFace();
+  if(!mute) BGM.muted=false;
+  if(mute){ BGM.pause(); clearInterval(fade); BGM.volume=0; } else bgmGo(); }
+BGM.volume=0; sndFace();
+/* 음악은 시작 화면에서 손이 닿는 그 순간, 0초부터 오프닝과 함께 나간다(beginOpening).
+   ⚠ 예전엔 '소리를 죽인 채 t=0부터 틀어 두고 나중에 소리만 켜는' 꼼수를 썼다.
+   그러면 켜는 시점이 늦을수록 곡 중간부터 들려서 앞부분을 통째로 잃는다. 버렸다 */
+function musicFromTop(){
+  if(mute) return;
+  BGM.muted=false; BGM.volume=1;
+  try{ BGM.currentTime=0; }catch(e){}
+  tryMusic(true);
+}
+/* ⚠ 예전엔 canplaythrough(readyState 4)를 기다렸다. 그건 "파일을 사실상 다 받았다"는 뜻이라
+   30초짜리 곡을 끝까지 내려받을 때까지 음악이 안 나왔다 — 이게 "로딩이 느리다"의 정체다.
+   지금은 canplay(readyState 3, 앞부분만 받아도 재생 가능)에서 바로 튼다. 나머지는 틀면서 받는다.
+   그래도 안 걸리면 2초 뒤엔 그냥 튼다 — 모자라면 브라우저가 알아서 기다렸다 이어 낸다 */
+let musicKick=0;
+function tryMusic(force){
+  if(mute||!BGM.paused) return;
+  if(force!==true && BGM.readyState<3){
+    BGM.addEventListener('canplay',()=>tryMusic(),{once:true});
+    if(!musicKick) musicKick=setTimeout(()=>tryMusic(true),2000);
+    return;
+  }
+  clearTimeout(musicKick); musicKick=0;
+  BGM.volume=1;
+  const pr=BGM.play(); if(pr&&pr.catch) pr.catch(()=>{});
+}
+/* 어쩌다 재생이 막혔을 때만 되살리는 안전줄.
+   시작 화면에선 musicFromTop 이 맡으므로 비켜 있는다 */
+function unlockSound(){
+  if(mute||SC.now==='ready') return;
+  BGM.muted=false; BGM.volume=1; tryMusic();
+}
+['keydown','pointerdown','touchstart'].forEach(ev=>addEventListener(ev,unlockSound,{passive:true}));
+/* 오프닝을 처음부터 다시 — 녹화할 때 쓴다 (O) */
+function replayOpening(){
+  V1.pause(); V2.pause(); V3.pause();
+  try{ V1.currentTime=0; V2.currentTime=0; V3.currentTime=0; }catch(e){}
+  zoom=1; lid=0; dark=0; flash=0;
+  musicFromTop();
+  HINT.classList.add('gone');
+  go('v1');
+}
+BGM.addEventListener('ended',bgmNext);
+BGM.addEventListener('error',()=>{ if(BGM.src) bgmNext(); });
+SND.addEventListener('click',e=>{e.stopPropagation();bgmMute()});
+
+
+document.addEventListener('visibilitychange',()=>{ if(document.hidden) BGM.pause(); else bgmGo(); });
+
+/* ═══════════ 한 바퀴 ═══════════ */
+
+/* 첫 화면 — 음악을 켤 수 있을 때까지 여기서 기다린다 */
+function titleCard(t,withName){
+  x.fillStyle='#07070a'; x.fillRect(0,0,W,H);
+  if(withName){
+    const g=x.createRadialGradient(W/2,H*.42,20,W/2,H*.42,560);
+    g.addColorStop(0,'rgba(62,62,58,.58)'); g.addColorStop(1,'rgba(0,0,0,0)');
+    x.fillStyle=g; x.fillRect(0,0,W,H);
+  }
+  x.textAlign='center';
+  if(withName){
+    try{ x.letterSpacing='0.30em'; }catch(e){}
+    x.fillStyle='rgba(240,236,224,.94)';
+    x.font='300 84px system-ui,Helvetica,Arial,sans-serif';
+    x.fillText('OREUMKIL', W/2+18, H*.45);
+  }
+  try{ x.letterSpacing='0.12em'; }catch(e){}
+  x.fillStyle='rgba(240,236,224,'+(.52+Math.sin(t*.0024)*.20)+')';
+  x.font='400 22px "Malgun Gothic",system-ui,sans-serif';
+  x.fillText(TOUCH?'화면을 누르세요':'아무 키나 누르세요', W/2, withName?H*.45+62:H*.5);
+  x.textAlign='left'; try{ x.letterSpacing='0px'; }catch(e){}
+  vignette(.55);
+}
+const HINT=document.getElementById('hint');
+HINT.classList.add('gone');
+let acc=0,last=0;
+function loop(t){
+  NOW=t;
+  const dt=Math.min(50,t-last)||16; last=t; acc+=dt;
+  let n=0;
+
+  if(SC.now==='ready'){                         // 문 열었다 — 손이 닿기를 기다린다
+    acc=0; SC.f++;
+    HINT.classList.add('gone'); SK.classList.remove('on');
+    titleCard(t,true); requestAnimationFrame(loop); return;
+  }
+  if(SC.now==='title'){                         // 오프닝이 끝났다 — 제목을 띄우고 기다린다
+    acc=0; SC.f++; if(SC.f%30===0) tryMusic();
+    HINT.classList.add('gone'); SK.classList.remove('on');
+    titleCard(t,true); requestAnimationFrame(loop); return;
+  }
+  while(acc>=DT&&n<5){
+    if(SC.now==='play') playerStep(); else opening();
+    for(const e of ENTS) if(e.update) e.update(e,DT);
+    Engine.update(engine,DT);
+    acc-=DT; n++;
+  }
+  if(acc>DT*5) acc=0;
+
+  if(SC.now==='v1'||SC.now==='v2'||SC.now==='v3'||SC.now==='hit'){
+    const vid=SC.now==='v1'?V1:SC.now==='v3'?V3:V2;
+    drawShot(vid, SC.now==='hit'
+      ? clamp((SC.f-9)/12,0,1)
+      : shotFade(vid,SC.now==='v1'?45:20,SC.now==='v2'));
+    if(flash>0){ x.fillStyle='rgba(255,255,255,'+Math.min(1,flash)+')'; x.fillRect(0,0,W,H); }
+    SK.classList.add('on');
+  } else if(SC.now==='blackout'){
+    x.fillStyle='#000'; x.fillRect(0,0,W,H);
+    if(flash>0){ x.fillStyle='rgba(255,255,255,'+Math.min(1,flash)+')'; x.fillRect(0,0,W,H); }
+    SK.classList.add('on');
+  } else {
+    const tx = SC.now==='wake' ? 148 : P.body.position.x;
+    cam += ((tx-W*.42)-cam)*.065;
+    const ty = SC.now==='wake' ? EYE : P.body.position.y;
+    let wantY=0;
+    if(ty<EYE-BAND_UP) wantY=ty-(EYE-BAND_UP);        // 높이 올라가면 따라 올라간다
+    else if(ty>EYE+BAND_DN) wantY=ty-(EYE+BAND_DN);   // 아래로 떨어져도 놓치지 않는다
+    camY += (wantY-camY)*.055;                        // 좌우(.065)보다 조금 느리게 — 덜 어지럽다
+    draw(t);
+    if(DEV.get('dump')) dump();                     // 개발용 — 지금 상태를 글로 찍는다
+    if(SC.now==='wake') SK.classList.add('on'); else SK.classList.remove('on');
+  }
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+</script>
+<!-- 왼쪽 위 '오름게임즈' 링크 + 왼쪽 아래 '전체화면' 알약.
+     ⚠ 오름게임즈의 모든 게임이 이 한 줄을 그대로 쓴다(페어붐·오름냥·돌담과 같은 모양·같은 자리).
+     새 게임을 만들면 이 줄을 반드시 넣을 것 -->
+<script src="/assets/game-home.js?v=7" data-top="4" data-left="4" data-fullscreen="1" defer></script>
+<script src="/assets/visit.js?v=12" defer></script>
+<script src="/assets/game-events.js?v=2" defer></script>
+</body></html>
