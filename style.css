@@ -951,7 +951,11 @@ body{ font-size:19px; }
 .more-card .mc b{ display:block; font-size:21px; line-height:1.4; color:var(--ink); }
 .more-card .mc i{ display:block; font-style:normal; font-size:15px; margin-top:8px; color:var(--muted); }
 
-@media (max-width:1180px){ .showcase .grid{ grid-template-columns:repeat(2,1fr); } }
+/* 화면 폭에 따라 네 칸 → 세 칸 → 두 칸.
+   ⚠ 예전에는 1180px 아래가 곧바로 두 칸이었다. 그래서 '굳이 설치하기'로 띄운 창(1000~1150px)에서
+   카드가 손바닥만큼 커져 보였다(사장님 2026-09-16). 가운데 단계를 넣는다 */
+@media (max-width:1180px){ .showcase .grid{ grid-template-columns:repeat(3,1fr); } }
+@media (max-width:900px){ .showcase .grid{ grid-template-columns:repeat(2,1fr); } }
 /* 2026-08-31 — 폰에서 카드가 한 칸씩만 나와 화면 하나에 게임 하나만 보였다.
    대문에 들어온 사람이 게임까지 못 가고 나가는 원인이라 두 칸으로 바꾼다.
    여백을 먼저 줄이고 글씨는 칸에 들어갈 만큼만 줄였다.
