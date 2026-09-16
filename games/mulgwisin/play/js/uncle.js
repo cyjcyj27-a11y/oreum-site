@@ -40,7 +40,6 @@
     ['이 강이 데려간 사람들 이름을 나는 다 안다', '다음 이름은 네 것이다'],
     ['돌아보지 마라', '방금 네 뒤에 서 있던 건 내가 아니다'],
   ];
-  const MEET = EN ? ['You came… I was waiting for you.', "Sit by the fire. Don't look at the water."] : ['왔구나… 기다리고 있었다', '불 가까이 앉아라, 물 쪽은 보지 말고'];
 
   // ── 모델 ──
   U.init = function (scene) {
@@ -128,12 +127,7 @@
     U.t += dt;
     const dCamp = Math.hypot(P.x - U.CAMP.x, P.z - U.CAMP.z);
     if (U.state === 'camp') {
-      // 처음 야영지에 오면 — 돌아보며 불을 쬐고 가라 한다. 소금 한 줌
-      if (!W.used.has('UNCLE') && !G.hidden && Math.hypot(P.x - U.holder.position.x, P.z - U.holder.position.z) < 4.5 && G.ghost === 'away') {   // 아저씨 곁에 다가가야 말을 건다(2026-09-16 사장님)
-        W.used.add('UNCLE'); U.state = 'meet'; U.t = 0; play('crazy');
-        U.holder.rotation.y = Math.atan2(P.x - U.holder.position.x, P.z - U.holder.position.z);
-        c.say(MEET); setTimeout(() => { c.addSalt(2); c.toast('🧂 +2'); }, 1800); c.save();
-      } else if (U.t > 18) { U.t = 0; U.pose = U.pose === 'fishing' ? 'pray' : 'fishing';   // 낚시하다가 십자가 앞에 무릎 꿇는다
+      if (U.t > 18) { U.t = 0;   /* 야영지 만남(대사·소금 +2)은 뺐다 — 2026-09-17 사장님 "야영지에서 만나는거 빼자" */ U.pose = U.pose === 'fishing' ? 'pray' : 'fishing';   // 낚시하다가 십자가 앞에 무릎 꿇는다
         if (U.pose === 'pray') { placeAt(U.CROSS.x - CAMP_S * .9, U.CROSS.z + .2, Math.atan2(U.CROSS.x - (U.CROSS.x - CAMP_S * .9), -.2)); play('pray'); }
         else { placeAt(U.FISH.x, U.FISH.z, Math.atan2(-CAMP_S, 0)); play('fishing'); } }
       // 야영지에서 멀어지면 — 앞길 자리에 먼저 가 서 있는다
@@ -144,9 +138,6 @@
       if (P.z > s.z + 14) { W.used.add('UNC' + U.spot); lurk(P); return; }   // 멀찍이 비켜 지나갔다 — 다음 자리로
       const calm = G.ghost === 'away' && G.strike < 0 && !G.holy && !G.hidden && !(G.busy > 0);
       if (P.z > s.z - 3 && calm) scare(c);   // 그 자리에 닿으면 — 물길 어느 쪽으로 걷든 눈앞에
-    } else if (U.state === 'meet') {
-      U.holder.rotation.y = Math.atan2(P.x - U.holder.position.x, P.z - U.holder.position.z);
-      if (U.t > 6) U.goCamp();
     } else if (U.state === 'scare') {
       const done = () => { U.holder.visible = false; U.state = 'gone'; };
       if (G.ghost !== 'away' || (G.strike >= 0 && U.t > 2.5)) { done(); return; }   // 물귀신이 오면 온데간데없다 — 오기 직전이면 얼굴은 보여 주고 사라진다
