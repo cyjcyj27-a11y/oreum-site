@@ -585,7 +585,10 @@
   });
   addEventListener('keyup', e => { keys[e.code] = false; });
   $('btnSfx').addEventListener('click', () => { const on = A.toggle(); $('btnSfx').classList.toggle('off', !on); }); if (!A.on) $('btnSfx').classList.add('off');
-  canvas.addEventListener('pointerdown', () => { A.unlock(); if (G.state !== 'play') return; if (G.ghost === 'grab') struggle(); else crank(); });   // 붙잡혔을 땐 화면 어디를 눌러도 발버둥 · 수문 앞에서는 바퀴를 돌린다
+  const camDrag = { id: null, x: 0, end: -9 };   // 화면 끌기로 시점 돌리기 — 폰 표준(2026-09-16 사장님 "모바일에서 시점돌리기가 안되네")
+  canvas.addEventListener('pointerdown', e => { A.unlock(); if (G.state !== 'play') return; if (camDrag.id === null) { camDrag.id = e.pointerId; camDrag.x = e.clientX; } if (G.ghost === 'grab') struggle(); else crank(); });
+  addEventListener('pointermove', e => { if (camDrag.id !== e.pointerId) return; const dx = e.clientX - camDrag.x; camDrag.x = e.clientX; if (G.state === 'play' && !G.menu) camYaw -= dx * .0065; });
+  { const up = e => { if (camDrag.id !== e.pointerId) return; camDrag.id = null; camDrag.end = G.t; }; addEventListener('pointerup', up); addEventListener('pointercancel', up); }   // 붙잡혔을 땐 화면 어디를 눌러도 발버둥 · 수문 앞에서는 바퀴를 돌린다
   el.btnSalt.addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); A.unlock(); action(); });
   const joy = { dx: 0, dy: 0, id: null };
   { const pad = $('pad'), knob = $('knob'); let padId = null;
@@ -1168,7 +1171,7 @@
     }
     // 카메라 — 등 뒤에서 따라온다
     { let d = P.yaw - camYaw; d = Math.atan2(Math.sin(d), Math.cos(d));
-      if (iz > -.2) camYaw += d * Math.min(1, dt * 2.0 * (iz < .2 && Math.abs(ix) > .2 ? .35 : 1));   // 뒤로 걸을 땐 카메라가 따라 돌지 않는다 (돌면 S 방향이 뒤집혀 제자리에서 빙빙 돈다)
+      if (iz > -.2 && len > 0 && camDrag.id === null && t - camDrag.end > 1.2) camYaw += d * Math.min(1, dt * 2.0 * (iz < .2 && Math.abs(ix) > .2 ? .35 : 1));   // 화면을 끄는 중·끈 직후·서 있을 땐 저절로 돌지 않는다   // 뒤로 걸을 땐 카메라가 따라 돌지 않는다 (돌면 S 방향이 뒤집혀 제자리에서 빙빙 돈다)   // 뒤로 걸을 땐 카메라가 따라 돌지 않는다 (돌면 S 방향이 뒤집혀 제자리에서 빙빙 돈다)
       let tx, ty, tz, lx, ly, lz, duck = 0;
       if (G.state === 'title') { camYaw = 0; const sw = Math.sin(t * .12) * .35; tx = P.x + 3.2 + sw * 2; ty = P.y + 2.6; tz = P.z + 8.5; lx = P.x - .6; ly = P.y + 1.5; lz = P.z - 4; }   // 타이틀 — 물가에서 불 켜진 집과 마당의 아이를 올려다본다
       else if (G.state === 'clear' && G.endT < 5.2) {   // 동생을 향해 천천히 돌아본다 — 동생이 달려온다

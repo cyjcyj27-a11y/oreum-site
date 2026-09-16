@@ -116,6 +116,12 @@
   #over.clear h2 { color: #dfe9ea; -webkit-text-stroke: 2px #1f4a4a; text-shadow: 0 0 22px rgba(120,200,190,.5); }
   #over p { font-size: 26px; margin: 4px 0; font-family: 'Ria', sans-serif; letter-spacing: 1px; } #over p small { font-size: 15px; opacity: .7; margin-right: 8px; font-family: 'Griun', sans-serif; }
   #over .again { margin-top: 36px; opacity: .6; animation: blink 2.4s infinite; font-family: 'Ria', sans-serif; letter-spacing: 6px; font-size: 24px; cursor: pointer; }
+  @media (max-height: 520px) {   /* 폰 가로 — 기록을 한 줄로 모아 RETRY 가 잘리지 않게(2026-09-16 사장님 "모바일화면에서 리트라이가 짤림") */
+    #over { flex-direction: row; flex-wrap: wrap; align-content: center; column-gap: 26px; row-gap: 2px; padding: 0 6vw; }
+    #over h2 { flex-basis: 100%; font-size: min(11vh, 44px); margin: 0 0 8px; }
+    #over p { font-size: 20px; margin: 0; }
+    #over .again { flex-basis: 100%; margin-top: 16px; padding: 8px 0; font-size: 22px; }
+  }
   /* 음산한 이모지 — 색을 빼고 누렇게 바랜 뼈빛, 검붉은 그늘 */
   .emo, .stat .ic, .tog, #over small, #mapCnt { filter: grayscale(.8) sepia(.55) hue-rotate(-12deg) saturate(1.25) brightness(.78) contrast(1.25) drop-shadow(0 0 3px rgba(110,0,0,.85)); }
   #mapCnt .emo, .stat .ic .emo { filter: none; }
@@ -222,7 +228,7 @@
 <script src="js/omen.js?v=23"></script>
 <script src="js/acts.js?v=6"></script>
 <script src="js/uncle.js?v=18"></script>
-<script src="js/game.js?v=102"></script>
+<script src="js/game.js?v=103"></script>
 <script src="js/mapui.js?v=8"></script>
 <script src="/assets/visit.js?v=12" defer></script>
 <script src="/assets/game-events.js?v=2" defer></script>
