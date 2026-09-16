@@ -6,6 +6,10 @@
   "start_url": "/?src=app",
   "scope": "/",
   "display": "standalone",
+  "related_applications": [
+    { "platform": "webapp", "url": "https://oreumgames.com/manifest.webmanifest" }
+  ],
+  "prefer_related_applications": false,
   "background_color": "#f8f5ec",
   "theme_color": "#f8f5ec",
   "icons": [

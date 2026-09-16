@@ -90,9 +90,28 @@
       : ['오른쪽 위 ⋮ 메뉴를 누르세요', '‘캐스트, 저장 및 공유’ → ‘페이지를 앱으로 설치’', '‘설치’를 누르세요'];
   }
 
+  /* 이 브라우저에 이미 깔려 있는가 — 크롬이 알려준다(관련 앱 확인).
+     윈도우에서 "지웠는데도 설치가 안 된다"는 말의 대부분은 크롬에 아직 남아 있는 경우다 */
+  var installed = false;
+  if (navigator.getInstalledRelatedApps) {
+    try {
+      navigator.getInstalledRelatedApps().then(function (apps) {
+        installed = !!(apps && apps.length);
+      }).catch(function () {});
+    } catch (e) {}
+  }
+
   btn.addEventListener('click', function () {
-    count('install_click', { method: deferred ? 'prompt' : 'hint' });
+    count('install_click', { method: deferred ? 'prompt' : installed ? 'already' : 'hint' });
     if (deferred) { deferred.prompt(); deferred = null; return; }
+    if (installed) {
+      return how(en ? 'Already added' : '이미 만들어져 있어요',
+        en ? ['It is on your desktop or Start menu', 'To remove it: chrome://apps → right-click → Remove',
+              'After removing, reload this page to add it again']
+           : ['바탕화면과 시작 메뉴에 있습니다',
+              '지우려면 주소창에 chrome://apps → 오름게임즈 오른쪽 클릭 → ‘Chrome에서 삭제’',
+              '지운 뒤 이 페이지를 새로고침하면 다시 만들 수 있습니다'], '');
+    }
     how(en ? 'How to add a shortcut' : '바로가기 만드는 법', steps(),
         en ? 'If you already added it, look on your desktop or home screen.'
            : '이미 만들었다면 바탕화면에 있습니다.');
