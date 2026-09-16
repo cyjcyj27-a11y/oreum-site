@@ -313,7 +313,7 @@
                ['야간자율학습', 'night-study'], ['냥 결투', 'nyang-duel'], ['오름냥', 'oreumnyang'], ['페어붐', 'pairboom'], ['픽셀', 'pixl'], ['극성 뒤집기', 'polarity-flip'], ['미끄럼 고양이', 'slip-cat']];
   function renderGames(vals) {
       var rows = GAMES.map(function (g, i) { return { name: g[0], pv: vals[i * 3], r: vals[i * 3 + 1], m: vals[i * 3 + 2] }; });
-      rows.sort(function (a, b) { return b.pv - a.pv || b.m - a.m; });
+      rows.sort(function (a, b) { return a.name.localeCompare(b.name, 'ko'); });   // 가나다순 (사장님 2026-09-17)
       var maxMin = 0; rows.forEach(function (r) { if (r.pv) maxMin = Math.max(maxMin, r.m / r.pv); });
       document.getElementById('games-table').innerHTML = '<table class="gt"><tr><th>게임</th><th>접속</th><th>판</th><th>판/접속</th><th>플레이</th><th>분/접속</th></tr>' +
         rows.map(function (r) {
