@@ -87,7 +87,10 @@
   addEventListener('resize', () => { if (st.mode !== 'title') sizeCanvases(); else drawTitle(); });
 
   // ── 판 시작
+  let overT = 0;
   function startStage(s) {
+    clearTimeout(overT);   // 앞 판 GAME OVER 창이 새 판 위에 늦게 뜨지 않게
+    st.over = true;        // 판을 짓는 동안은 시계를 멈춘다 — 남은 시간이 아직 0이라 곧장 GAME OVER 가 났다(2026-09-17 사장님 "접속하면 리트라이 뜨고 힌트버튼도 안먹힘")
     st.mode = 'play';
     st.stage = s;
     prog.last = s;
@@ -331,7 +334,7 @@
     if (window.OG) OG.over({ result: 'GAME OVER', stage: st.stage, score: st.found.filter(Boolean).length });
     AU.play('over');
     drawFx();
-    setTimeout(() => {
+    overT = setTimeout(() => {
       $('endTitle').textContent = 'GAME OVER';
       $('endStars').innerHTML = '';
       $('endSub').textContent = st.found.filter(Boolean).length + ' / ' + st.diffs.length;
