@@ -65,33 +65,66 @@
   var safariMac = !ios && /safari/i.test(ua) && !/chrome|chromium|edg\//i.test(ua);
 
   function msg(kind) {
-    if (en) {
-      return {
-        ios:     'Share → Add to Home Screen',
-        android: 'Browser menu → Add to Home screen',
-        desktop: 'Click the install icon at the right of the address bar',
-        none:    'This browser cannot add a shortcut. Try Chrome or Edge.',
-        done:    'Added. Look on your desktop or home screen.'
-      }[kind];
-    }
-    return {
-      ios:     '공유 → 홈 화면에 추가',
-      android: '브라우저 메뉴 → 홈 화면에 추가',
-      desktop: '주소창 오른쪽 설치 아이콘을 누르세요. 이미 만들었다면 바탕화면에 있습니다',
-      none:    '이 브라우저는 바로가기를 만들 수 없어요. 크롬·엣지에서 열어 주세요',
-      done:    '만들었어요. 바탕화면을 보세요'
-    }[kind];
+    if (en) return { done: 'Added. Look on your desktop or home screen.' }[kind];
+    return { done: '만들었어요. 바탕화면을 보세요' }[kind];
+  }
+
+  /* 크롬이 설치 창을 안 줄 때 — 어디를 눌러야 하는지 차례대로 보여준다.
+     ⚠ 예전에는 "주소창 오른쪽 설치 아이콘"이라고만 알려 줬는데, 그 아이콘은 안 보일 때가 많아
+        무엇을 눌러야 할지 알 수 없었다(2026-09-16 사장님). 메뉴를 따라가는 길로 바꾼다 */
+  function steps() {
+    if (ios) return en
+      ? ['Tap the Share button at the bottom', 'Choose "Add to Home Screen"', 'Tap Add']
+      : ['아래 공유 단추(↑)를 누르세요', '‘홈 화면에 추가’를 고르세요', '오른쪽 위 ‘추가’를 누르세요'];
+    if (android || samsung) return en
+      ? ['Tap the ⋮ menu at the top right', 'Choose "Add to Home screen"', 'Tap Install or Add']
+      : ['오른쪽 위 ⋮ 메뉴를 누르세요', '‘홈 화면에 추가’를 고르세요', '‘설치’ 또는 ‘추가’를 누르세요'];
+    if (edge) return en
+      ? ['Click the ⋯ menu at the top right', 'Apps → Install this site as an app', 'Click Install']
+      : ['오른쪽 위 ⋯ 메뉴를 누르세요', '‘앱’ → ‘이 사이트를 앱으로 설치’', '‘설치’를 누르세요'];
+    if (firefox || safariMac) return en
+      ? ['This browser cannot add a shortcut', 'Open oreumgames.com in Chrome or Edge', 'Press this button again there']
+      : ['이 브라우저는 바로가기를 못 만들어요', '크롬이나 엣지에서 oreumgames.com 을 여세요', '거기서 이 단추를 다시 누르세요'];
+    return en
+      ? ['Click the ⋮ menu at the top right', 'Cast, save and share → Install page as app', 'Click Install']
+      : ['오른쪽 위 ⋮ 메뉴를 누르세요', '‘캐스트, 저장 및 공유’ → ‘페이지를 앱으로 설치’', '‘설치’를 누르세요'];
   }
 
   btn.addEventListener('click', function () {
     count('install_click', { method: deferred ? 'prompt' : 'hint' });
     if (deferred) { deferred.prompt(); deferred = null; return; }
-    if (ios) return toast(msg('ios'));
-    if (android || samsung) return toast(msg('android'));
-    if (chrome || edge) return toast(msg('desktop'));
-    if (firefox || safariMac) return toast(msg('none'));
-    toast(msg('desktop'));
+    how(en ? 'How to add a shortcut' : '바로가기 만드는 법', steps(),
+        en ? 'If you already added it, look on your desktop or home screen.'
+           : '이미 만들었다면 바탕화면에 있습니다.');
   });
+
+  /* 차례를 보여주는 작은 창 — 게시판의 숫자 입력 창과 같은 모양 */
+  function how(title, list, note) {
+    var old = document.getElementById('howBox'); if (old) old.remove();
+    var box = document.createElement('div');
+    box.id = 'howBox';
+    box.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(20,20,15,.45);display:flex;' +
+      'align-items:center;justify-content:center;padding:20px';
+    var card = document.createElement('div');
+    card.style.cssText = 'width:min(380px,100%);background:#fffdf7;border:1px solid #e6dfcd;border-radius:16px;' +
+      'box-shadow:0 14px 34px rgba(60,55,35,.18);padding:22px;font-size:16px;line-height:1.7;color:#1b2a1f;' +
+      'font-family:inherit;text-align:left';
+    var li = list.map(function (s, i) {
+      return '<li style="margin:0 0 8px;padding-left:28px;position:relative">' +
+        '<b style="position:absolute;left:0;top:0;width:20px;height:20px;border-radius:50%;background:#1b2a1f;' +
+        'color:#fff;font-size:12px;line-height:20px;text-align:center">' + (i + 1) + '</b>' + s + '</li>';
+    }).join('');
+    card.innerHTML = '<p style="margin:0 0 14px;font-weight:800;font-size:18px">' + title + '</p>' +
+      '<ol style="margin:0;padding:0;list-style:none">' + li + '</ol>' +
+      (note ? '<p style="margin:14px 0 0;font-size:14px;color:#7d8a76">' + note + '</p>' : '') +
+      '<p style="margin:18px 0 0;text-align:right"><button type="button" id="howOk" ' +
+      'style="font:inherit;font-weight:700;background:#1b2a1f;color:#fff;border:0;border-radius:999px;' +
+      'padding:9px 20px;cursor:pointer">' + (en ? 'OK' : '확인') + '</button></p>';
+    box.appendChild(card);
+    document.body.appendChild(box);
+    box.addEventListener('click', function (e) { if (e.target === box) box.remove(); });
+    card.querySelector('#howOk').addEventListener('click', function () { box.remove(); });
+  }
 
   function toast(text) {
     var old = document.getElementById('installToast'); if (old) old.remove();
