@@ -27,7 +27,7 @@
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="ko_KR">
 
-<link rel="stylesheet" href="/style.css?v=37">
+<link rel="stylesheet" href="/style.css?v=38">
 </head>
 <body>
 
@@ -366,12 +366,16 @@
   window.addEventListener('load', flushExtra);
 
   function remove(id, el) {
-    var pw = prompt('글을 올릴 때 넣은 숫자 4자리를 입력하세요');
+    /* 숫자가 화면에 그대로 보이지 않게 가려서 받는다(askpin.js). 그 파일이 아직이면 옛 방식 */
+    var ask = window.askPin ? askPin('글을 올릴 때 넣은 숫자 4자리를 입력하세요')
+                            : Promise.resolve(prompt('글을 올릴 때 넣은 숫자 4자리를 입력하세요'));
+    ask.then(function (pw) {
     if (pw === null) return;
     db.rpc('delete_post', { p_id: id, p_pw: String(pw).trim() }).then(function (r) {
       if (r.error) { alert('지우지 못했어요'); return; }
       if (r.data === true) { el.remove(); }
       else { alert('숫자가 맞지 않아요'); }
+    });
     });
   }
 
@@ -428,7 +432,8 @@
   h('pageviews'); h('pv_board');
 })();
 </script>
-<script src="/assets/board-extra.js?v=3" defer></script>
+<script src="/assets/board-extra.js?v=4" defer></script>
+<script src="/assets/askpin.js?v=1" defer></script>
 <script src="/assets/mail.js" defer></script>
 <script src="/assets/install.js?v=2" defer></script>
 </body>

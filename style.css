@@ -418,6 +418,27 @@ h1, h2, h3 { line-height: 1.3; letter-spacing: -.02em; margin: 0; }
 .formmsg { margin: 10px 0 0; font-size:17px; color: var(--green-lit); min-height: 1.2em; }
 .formmsg.bad { color: var(--ember-ink); }
 
+/* ── 숫자 4자리를 가려서 받는 창 (askpin.js) ── */
+.pinbox {
+  display: none; position: fixed; inset: 0; z-index: 60;
+  background: rgba(20, 20, 15, .45); align-items: center; justify-content: center; padding: 20px;
+}
+.pinbox.on { display: flex; }
+.pin-card {
+  width: min(360px, 100%); background: var(--panel);
+  border: 1px solid var(--line); border-radius: 16px; box-shadow: var(--shadow);
+  padding: 22px 22px 18px;
+}
+.pin-title { margin: 0 0 14px; font-size: 17px; line-height: 1.6; color: var(--ink); }
+.pin-input {
+  width: 100%; font-family: inherit; font-size: 22px; letter-spacing: .4em; text-align: center;
+  color: var(--ink); background: #fff; border: 1px solid var(--line-2); border-radius: 12px;
+  padding: 11px 14px;
+}
+.pin-input:focus { outline: 2px solid var(--green-edge); border-color: var(--green); }
+.pin-btns { display: flex; gap: 8px; justify-content: flex-end; margin: 16px 0 0; }
+.pin-btns .btn { padding: 9px 18px; font-size: 16px; }
+
 .postlist { display: grid; gap: 8px; }
 /* ── 목록형 글 목록 — 제목 줄만 보이고 누르면 펼쳐진다 (2026-09-16) ── */
 .post .row-head {

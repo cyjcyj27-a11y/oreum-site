@@ -123,14 +123,17 @@
       '</div><p class="cmt-body">' + esc(c.body) + '</p>';
     var d = el.querySelector('.cmt-del');
     if (d) d.addEventListener('click', function () {
-      var pw = prompt(T.askPw);
-      if (pw === null) return;
-      db().rpc('delete_post_comment', { p_id: c.id, p_pw: String(pw).trim() })
-        .then(function (r) {
-          if (r.error) { alert(T.noDel); return; }
-          if (r.data === true) { el.remove(); onGone(); }
-          else alert(T.badPw);
-        });
+      /* 숫자가 화면에 그대로 보이지 않게 가려서 받는다(askpin.js). 없으면 옛 방식 */
+      var ask = window.askPin ? window.askPin(T.askPw) : Promise.resolve(prompt(T.askPw));
+      ask.then(function (pw) {
+        if (pw === null) return;
+        db().rpc('delete_post_comment', { p_id: c.id, p_pw: String(pw).trim() })
+          .then(function (r) {
+            if (r.error) { alert(T.noDel); return; }
+            if (r.data === true) { el.remove(); onGone(); }
+            else alert(T.badPw);
+          });
+      });
     });
     return el;
   }

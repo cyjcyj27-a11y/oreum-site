@@ -27,7 +27,7 @@
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="en_US">
 
-<link rel="stylesheet" href="/style.css?v=37">
+<link rel="stylesheet" href="/style.css?v=38">
 </head>
 <body>
 
@@ -332,12 +332,16 @@
   }
 
   function remove(id, el) {
-    var pw = prompt('Enter the 4 digits you used when posting');
-    if (pw === null) return;
-    db.rpc('delete_post', { p_id: id, p_pw: String(pw).trim() }).then(function (r) {
-      if (r.error) { alert('Could not delete'); return; }
-      if (r.data === true) { el.remove(); }
-      else { alert('Those digits do not match'); }
+    /* 숫자가 화면에 그대로 보이지 않게 가려서 받는다(askpin.js) */
+    var ask = window.askPin ? askPin('Enter the 4 digits you used when posting')
+                            : Promise.resolve(prompt('Enter the 4 digits you used when posting'));
+    ask.then(function (pw) {
+      if (pw === null) return;
+      db.rpc('delete_post', { p_id: id, p_pw: String(pw).trim() }).then(function (r) {
+        if (r.error) { alert('Could not delete'); return; }
+        if (r.data === true) { el.remove(); }
+        else { alert('Those digits do not match'); }
+      });
     });
   }
 
@@ -393,7 +397,8 @@
   h('pageviews'); h('pv_board_en');
 })();
 </script>
-<script src="/assets/board-extra.js?v=3" defer></script>
+<script src="/assets/board-extra.js?v=4" defer></script>
+<script src="/assets/askpin.js?v=1" defer></script>
 <script src="/assets/mail.js" defer></script>
 <script src="/assets/install.js?v=2" defer></script>
 </body>
