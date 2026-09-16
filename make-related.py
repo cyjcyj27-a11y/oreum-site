@@ -114,7 +114,7 @@ def apply(path, html_block):
     else:
         assert s.count("</main>") == 1, path
         s = s.replace("</main>", html_block + "\n</main>")
-    s = re.sub(r"style\.css\?v=\d+", "style.css?v=38", s)
+    s = re.sub(r"style\.css\?v=\d+", "style.css?v=39", s)
     io.open(path, "w", encoding="utf-8", newline="\n").write(s)
     return "OK"
 

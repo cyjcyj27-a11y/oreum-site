@@ -872,8 +872,9 @@ a:hover{ color:var(--ink); }
 .state{ background:var(--green-soft); color:var(--ink-2); border:1px solid var(--line); }
 .tags li{ background:var(--panel); border:1px solid var(--line); color:var(--muted); }
 .footer-motto{ color:var(--muted); }
-.footer-nav a{ color:var(--muted); }
-.footer-nav a:hover{ color:var(--ink); }
+/* 푸터 줄은 링크든 단추든 글씨색을 하나로 맞춘다(사장님 2026-09-16 "글씨색을 통일하자") */
+.footer-nav a, .footer-nav .mailbtn{ color:var(--muted); font-weight:inherit; }
+.footer-nav a:hover, .footer-nav .mailbtn:hover{ color:var(--ink); }
 
 @media (max-width:1180px){ .wrap{ width:min(1760px, 100% - 40px); } }
 @media (max-width:760px){
