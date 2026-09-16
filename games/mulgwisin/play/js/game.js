@@ -639,7 +639,7 @@
   }
   function ghostAppear(x, z) {
     G.gx = x; G.gz = z; G.gy = footY(x, z);
-    G.ghost = 'stalk'; G.gT = 0; G.stare = 0; G.glim = 0;
+    G.ghost = 'stalk'; G.gT = 0; G.stare = 0; G.glim = 0; G.close = false; G.bx = P.x; G.bz = P.z;
     ghost.showFar(G.gx, G.gz, P.x, P.z, true, G.gy);
   }
   function strikeEnd(quiet) { G.strike = -1; G.kind = ''; G.cool = 0; G.hushed = false; G.omenT = quiet + Math.random() * 10; A.unhush(); }
@@ -677,8 +677,10 @@
   function blinkStep() {
     const d = Math.hypot(P.x - G.gx, P.z - G.gz);
     G.blackT = .17; el.flash.style.opacity = .97; setTimeout(() => el.flash.style.opacity = 0, 160);
-    if (d < 5.4 && !G.hidden) { ghostTake(); return; }
-    const nd = Math.max(3.8, d * .56), sd = (Math.random() - .5) * 1.2;
+    if ((d < 5.4 || G.close) && !G.hidden) { G.close = false; ghostTake(); return; }   // 코앞까지 왔으면 다음 깜빡임에 덮친다 — 그 사이 달아나도 못 벗어난다(2026-09-17 사장님 "달리면 귀신이 못 쫓아옴")
+    const ran = Math.hypot(P.x - G.bx, P.z - G.bz);   // 지난 깜빡임 뒤로 아이가 옮겨 간 거리
+    const nd = Math.max(3.8, Math.min(d * .56, d - 8, d - ran - 3)), sd = (Math.random() - .5) * 1.2;   // 깜빡일 때마다 적어도 8m, 달아난 만큼 + 3m — 뛰어도, 쳐다보며 뒷걸음쳐도 좁혀진다
+    G.close = nd <= 5.4; G.bx = P.x; G.bz = P.z;
     const ux = (G.gx - P.x) / d, uz = (G.gz - P.z) / d;
     G.gx = P.x + ux * nd - uz * sd; G.gz = P.z + uz * nd + ux * sd; G.gy = footY(G.gx, G.gz);
     ghost.moveFar(G.gx, G.gz, P.x, P.z, G.gy);
