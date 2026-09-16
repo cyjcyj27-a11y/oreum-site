@@ -72,12 +72,12 @@
       <textarea id="body" maxlength="200" rows="3"
         placeholder="한마디 남겨주세요 (200자까지)"></textarea>
       <label class="pickfile" for="photo">
-        <span id="pickLabel">📷 사진 고르기</span>
+        <span id="pickLabel">📷 이미지 첨부하기</span>
         <input type="file" id="photo" accept="image/*">
       </label>
       <div id="preview" class="preview" hidden>
         <img id="previewImg" alt="고른 사진 미리보기">
-        <button type="button" id="removePhoto" class="rm">사진 빼기</button>
+        <button type="button" id="removePhoto" class="rm">이미지 빼기</button>
       </div>
       <div class="row">
         <input type="text" id="nick" maxlength="12" placeholder="이름 (안 써도 됩니다)">
@@ -149,7 +149,7 @@
     $('count').textContent = this.value.length;
   });
 
-  // ── 사진 고르기 ──
+  // ── 이미지 첨부하기 ──
   $('photo').addEventListener('change', function () {
     var f = this.files && this.files[0];
     if (!f) return;
@@ -164,14 +164,14 @@
     previewUrl = URL.createObjectURL(f);
     $('previewImg').src = previewUrl;
     $('preview').hidden = false;
-    $('pickLabel').textContent = '📷 다른 사진으로';
+    $('pickLabel').textContent = '📷 다른 이미지로';
     say('');
   });
   $('removePhoto').addEventListener('click', function () {
     picked = null; $('photo').value = '';
     if (previewUrl) { URL.revokeObjectURL(previewUrl); previewUrl = null; }
     $('preview').hidden = true;
-    $('pickLabel').textContent = '📷 사진 고르기';
+    $('pickLabel').textContent = '📷 이미지 첨부하기';
   });
 
   // ── 사진 줄이기 — 큰 사진을 그대로 올리면 저장공간이 금방 찹니다 ──
@@ -254,7 +254,7 @@
       })
       .catch(function (err) {
         if (err && err.message === 'badimage') {
-          say('이 사진은 열 수 없는 형식이에요. 다른 사진으로 해주세요.', true);
+          say('이 사진은 열 수 없는 형식이에요. 다른 이미지로 해주세요.', true);
         } else {
           say('올리지 못했어요. 잠시 뒤 다시 해주세요.', true);
         }

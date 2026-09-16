@@ -72,12 +72,12 @@
       <textarea id="body" maxlength="200" rows="3"
         placeholder="Say something (up to 200 characters)"></textarea>
       <label class="pickfile" for="photo">
-        <span id="pickLabel">📷 Choose a photo</span>
+        <span id="pickLabel">📷 Attach an image</span>
         <input type="file" id="photo" accept="image/*">
       </label>
       <div id="preview" class="preview" hidden>
         <img id="previewImg" alt="Preview of the photo you chose">
-        <button type="button" id="removePhoto" class="rm">Remove photo</button>
+        <button type="button" id="removePhoto" class="rm">Remove image</button>
       </div>
       <div class="row">
         <input type="text" id="nick" maxlength="12" placeholder="Name (optional)">
@@ -164,14 +164,14 @@
     previewUrl = URL.createObjectURL(f);
     $('previewImg').src = previewUrl;
     $('preview').hidden = false;
-    $('pickLabel').textContent = '📷 Choose another';
+    $('pickLabel').textContent = '📷 Attach another image';
     say('');
   });
   $('removePhoto').addEventListener('click', function () {
     picked = null; $('photo').value = '';
     if (previewUrl) { URL.revokeObjectURL(previewUrl); previewUrl = null; }
     $('preview').hidden = true;
-    $('pickLabel').textContent = '📷 Choose a photo';
+    $('pickLabel').textContent = '📷 Attach an image';
   });
 
   // ── 사진 줄이기 — 큰 사진을 그대로 올리면 저장공간이 금방 찹니다 ──
