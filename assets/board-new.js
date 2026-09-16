@@ -13,16 +13,29 @@
   var URL_ = 'https://yefzzvtipsygqlvkaesx.supabase.co';
   var KEY = 'sb_publishable_qERx6ADFGxFDCjwc0O2cUg_b5EE6WPR';
   var CACHE = 'oreum_board_last';     // {at: 물어본 시각, iso: 마지막 글 시각}
+  var SEEN = 'oreum_board_seen';      // 이 브라우저가 게시판을 마지막으로 본 시각
   var KEEP = 10 * 60 * 1000;          // 10분 동안은 다시 안 묻습니다
   var DAY = 24 * 60 * 60 * 1000;
 
+  var onBoard = /^\/(en\/)?board\/?$/.test(location.pathname);
+
+  /* 게시판에 들어오면 "봤다"고 적어 둔다 — 다음부터 그 글에는 NEW 를 안 붙인다
+     (사장님 2026-09-16 "커뮤니티 가기 누르면 new표시가 없어지게"). 브라우저마다 따로 기억한다 */
+  if (onBoard) {
+    try { window.localStorage.setItem(SEEN, String(Date.now())); } catch (e) {}
+    return;
+  }
+
   var links = [].slice.call(document.querySelectorAll('.nav a[href$="/board/"]'));
   if (!links.length) return;
-  if (/^\/(en\/)?board\/?$/.test(location.pathname)) return;   // 게시판 안에서는 안 붙입니다
 
   function mark(iso) {
     if (!iso) return;
-    if (Date.now() - new Date(iso).getTime() > DAY) return;
+    var t = new Date(iso).getTime();
+    if (Date.now() - t > DAY) return;
+    var seen = 0;
+    try { seen = +(window.localStorage.getItem(SEEN) || 0); } catch (e) {}
+    if (seen && t <= seen) return;        // 그 글이 올라온 뒤로 이미 게시판에 다녀왔다
     links.forEach(function (a) {
       if (a.querySelector('.navnew')) return;
       var b = document.createElement('span');
