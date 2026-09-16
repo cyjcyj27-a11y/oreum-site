@@ -69,6 +69,8 @@
 
     <!-- ── 글쓰기 ── -->
     <form id="writeBox" class="writebox">
+      <textarea id="body" maxlength="200" rows="3"
+        placeholder="한마디 남겨주세요 (200자까지)"></textarea>
       <label class="pickfile" for="photo">
         <span id="pickLabel">📷 사진 고르기</span>
         <input type="file" id="photo" accept="image/*">
@@ -77,9 +79,6 @@
         <img id="previewImg" alt="고른 사진 미리보기">
         <button type="button" id="removePhoto" class="rm">사진 빼기</button>
       </div>
-
-      <textarea id="body" maxlength="200" rows="3"
-        placeholder="한마디 남겨주세요 (200자까지)"></textarea>
       <div class="row">
         <input type="text" id="nick" maxlength="12" placeholder="이름 (안 써도 됩니다)">
         <input type="password" id="pw" inputmode="numeric" maxlength="4" placeholder="숫자 4자리">
