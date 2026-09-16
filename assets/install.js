@@ -18,13 +18,34 @@
     try { if (!/^(localhost|127\.0\.0\.1)$/.test(location.hostname) && location.protocol !== 'file:') fetch('https://abacus.jasoncameron.dev/hit/oreumgames/' + name).catch(function () {}); } catch (e) {}
   }
 
+  var en = (document.documentElement.lang || '').slice(0, 2) === 'en';
+
+  /* 바로가기로 연 창에서는 같은 자리에서 "지우는 법"을 알려준다 —
+     언제든 만들었다 지웠다 할 수 있게(사장님 2026-09-16 "언제든지 깔았다 지웠다할수있께 만들어") */
   var standalone = (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
   if (standalone) {
     try { var k = 'oreum_app_open_' + new Date(Date.now() + 9 * 3600 * 1000).toISOString().slice(0, 10); if (!localStorage.getItem(k)) { localStorage.setItem(k, '1'); count('app_open'); } } catch (e) { count('app_open'); }
+    setLabel(en ? 'Remove this shortcut' : '바로가기 지우기');
+    btn.hidden = false;
+    btn.addEventListener('click', function () {
+      count('uninstall_hint');
+      var touch = /android|iphone|ipad|ipod/i.test(navigator.userAgent);
+      if (en) return toast(touch ? 'Press and hold the icon on your home screen → Remove'
+                                 : 'Top right ⋮ menu → Uninstall Oreum Games');
+      toast(touch ? '홈 화면 아이콘을 길게 누르고 삭제를 고르세요'
+                  : '창 오른쪽 위 ⋮ 메뉴 → ‘오름게임즈 제거’');
+    });
     return;
   }
 
-  var en = (document.documentElement.lang || '').slice(0, 2) === 'en';
+  /* 단추 글자만 바꾼다 — 앞의 로고 그림은 그대로 둔다 */
+  function setLabel(text) {
+    for (var i = btn.childNodes.length - 1; i >= 0; i--) {
+      var n = btn.childNodes[i];
+      if (n.nodeType === 3 && n.nodeValue.trim()) { n.nodeValue = text; return; }
+    }
+    btn.appendChild(document.createTextNode(text));
+  }
   if ('serviceWorker' in navigator && location.protocol === 'https:') {
     navigator.serviceWorker.register('/sw.js').catch(function () {});
   }
