@@ -114,7 +114,7 @@
       col = mix(col, uFogCol, clamp(fog, 0.0, 1.0));
       float a = 0.9;
       if (!gl_FrontFacing || uUnder > 0.5) { col = mix(uDeep*0.6, vec3(0.05,0.14,0.13), pow(1.0-ndv, 2.0)); col += vec3(0.08,0.16,0.14)*pow(md, 8.0); a = 0.85; }
-      gl_FragColor = vec4(col, a);
+      gl_FragColor = vec4(col * 0.6, a);   // 물도 어둡게 — 직접 짠 셰이더라 노출이 안 먹는다(2026-09-16)
     }`;
 
   // ── 물감 ──
@@ -223,7 +223,7 @@
     scene.add(sky); W.sky = sky;
     { const n = 1400, pos = new Float32Array(n * 3); for (let i = 0; i < n; i++) { const th = Math.random() * 6.283, ph = Math.acos(Math.random() * .9 + .08); pos[i * 3] = 850 * Math.sin(ph) * Math.cos(th); pos[i * 3 + 1] = 850 * Math.cos(ph); pos[i * 3 + 2] = 850 * Math.sin(ph) * Math.sin(th); } const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(pos, 3)); const st = new THREE.Points(g, new THREE.PointsMaterial({ color: 0xcfd8e2, size: 2.2, sizeAttenuation: false, fog: false, transparent: true, opacity: .8 })); scene.add(st); W.stars = st; }
     { const cv = document.createElement('canvas'); cv.width = cv.height = 128; const c = cv.getContext('2d'); const gr = c.createRadialGradient(64, 64, 10, 64, 64, 64); gr.addColorStop(0, 'rgba(240,244,250,1)'); gr.addColorStop(.35, 'rgba(225,232,240,.95)'); gr.addColorStop(.42, 'rgba(180,200,215,.25)'); gr.addColorStop(1, 'rgba(120,150,170,0)'); c.fillStyle = gr; c.fillRect(0, 0, 128, 128); const tex = new THREE.CanvasTexture(cv); const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, fog: false, transparent: true, depthWrite: false })); sp.scale.set(120, 120, 1); scene.add(sp); W.moon = sp; }
-    W.DARK = .6;   // 밤 밝기 — 등불은 그대로 두고 하늘빛·달빛·주변광만 줄인다(2026-09-16 사장님 "오름게임즈에 올라간거 어둡게")
+    W.DARK = .45;   // 밤 밝기 — 등불은 그대로 두고 하늘빛·달빛·주변광만 줄인다(2026-09-16 사장님 "오름게임즈에 올라간거 어둡게")
     W.HEMI = 1.45 * W.DARK; W.MOONI = 1.7 * W.DARK; W.AMBI = 1.55 * W.DARK;
     const hemi = new THREE.HemisphereLight(0x4c6b84, 0x1a2a24, W.HEMI); scene.add(hemi);
     const moonL = new THREE.DirectionalLight(0xc4dcf2, W.MOONI); moonL.position.set(MOON[0] * 100, MOON[1] * 100, MOON[2] * 100); scene.add(moonL);
@@ -750,7 +750,7 @@
 
   // 날이 밝는다 — 진엔딩. k 0 밤 · 1 새벽
   const NIGHT = { top: new THREE.Color(0x101c30), hor: new THREE.Color(0x3a5062), fog: new THREE.Color(0x162834), hemiS: new THREE.Color(0x4c6b84), hemiG: new THREE.Color(0x1a2a24), amb: new THREE.Color(0x33495a) };
-  ['top', 'hor', 'fog'].forEach(k => NIGHT[k].multiplyScalar(.6));   // 밤하늘·안개도 같이 어둡게 — 먼 산은 조명보다 안개색이 밝기를 정한다(2026-09-16)
+  ['top', 'hor', 'fog'].forEach(k => NIGHT[k].multiplyScalar(.45));   // 밤하늘·안개도 같이 어둡게 — 먼 산은 조명보다 안개색이 밝기를 정한다(2026-09-16)
   const DAWN = { top: new THREE.Color(0x587aa6), hor: new THREE.Color(0xe6b08a), fog: new THREE.Color(0x9aa2a8), hemiS: new THREE.Color(0xc8d6e6), hemiG: new THREE.Color(0x4a5a48), amb: new THREE.Color(0x8a8a90) };
   const _c = new THREE.Color();
   W.dawn = 0;

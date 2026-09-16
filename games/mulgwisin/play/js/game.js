@@ -14,7 +14,7 @@
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
   renderer.setPixelRatio(Math.min(devicePixelRatio, isTouch ? 1.5 : 2));
   const vw = () => Math.max(1, innerWidth || 1), vh = () => Math.max(1, innerHeight || 1);   // 창이 0 일 때 화면 계산이 깨지지 않게
-  renderer.setSize(vw(), vh()); renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.0;   /* 1.5 → 1.0 어둡게, 등불·아이 빛은 그만큼 올림(2026-09-16 사장님 "오름게임즈에 올라간거 어둡게") */
+  renderer.setSize(vw(), vh()); renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = .75;   /* 1.5 → .75 어둡게(두 번째 "아직 너무 환해"), 등불·아이 빛은 그만큼 올림(2026-09-16 사장님 "오름게임즈에 올라간거 어둡게") */
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(58, vw() / vh(), .08, 1500);
   W.build(scene);
