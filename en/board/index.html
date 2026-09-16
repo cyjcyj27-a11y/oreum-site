@@ -27,7 +27,7 @@
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="en_US">
 
-<link rel="stylesheet" href="/style.css?v=40">
+<link rel="stylesheet" href="/style.css?v=41">
 </head>
 <body>
 
@@ -309,6 +309,7 @@
           (isNew(p.created_at) ? '<span class="new24">NEW</span>' : '') +
         '</button>' +
         '<div class="row-body" hidden>' +
+          '<p class="byline">' + (p.nick ? esc(p.nick) : 'Lulu') + '</p>' +
           (p.image_path ? '<img class="shot" loading="lazy" alt="Screenshot" src="' + esc(imgUrl(p.image_path)) + '">' : '') +
           (p.body ? '<p class="text">' + bodyHtml(p.body) + '</p>' : '') +
           '<p class="rowfoot"><button class="del" type="button">Delete</button></p>' +

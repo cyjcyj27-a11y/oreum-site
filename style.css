@@ -455,12 +455,19 @@ h1, h2, h3 { line-height: 1.3; letter-spacing: -.02em; margin: 0; }
 .post .row-head .by { flex: none; color: var(--ink-2); font-size: 15px; }
 .post .row-head .ago { flex: none; color: var(--muted); font-size: 14px; }
 .post.open .row-head { border-bottom: 1px solid var(--line); }
+.post .row-body .byline {
+  display: none;                                        /* 넓은 화면은 제목 줄에 이미 글쓴이가 있다 */
+  margin: 0; padding: 13px 16px 0;
+  color: var(--ink-2); font-size: 15px; font-weight: 700;
+}
 .post .row-body .text { padding-top: 14px; }
 .post .rowfoot { margin: 0; padding: 0 16px 12px; text-align: right; }
 .post .rowfoot .del { margin: 0; }
 @media (max-width: 560px) {
   .post .row-head { gap: 7px; padding: 12px 13px; font-size: 16px; }
-  .post .row-head .by { display: none; }     /* 좁은 화면에서는 제목이 먼저다 */
+  .post .row-head .by { display: none; }     /* 좁은 화면에서는 제목이 먼저다 — 대신 펼치면 아래에 나온다 */
+  .post .row-body .byline { display: block; }
+  .post .row-body .byline + .text { padding-top: 6px; }
 }
 .post {
   background: var(--panel); border: 1px solid var(--line);

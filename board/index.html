@@ -27,7 +27,7 @@
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="ko_KR">
 
-<link rel="stylesheet" href="/style.css?v=40">
+<link rel="stylesheet" href="/style.css?v=41">
 </head>
 <body>
 
@@ -314,6 +314,7 @@
           (isNew(p.created_at) ? '<span class="new24">NEW</span>' : '') +
         '</button>' +
         '<div class="row-body" hidden>' +
+          '<p class="byline">' + (p.nick ? esc(p.nick) : '루루') + '</p>' +
           (p.image_path ? '<img class="shot" loading="lazy" alt="플레이 화면" src="' + esc(imgUrl(p.image_path)) + '">' : '') +
           (p.body ? '<p class="text">' + bodyHtml(p.body) + '</p>' : '') +
           '<p class="rowfoot"><button class="del" type="button">지우기</button></p>' +
