@@ -76,6 +76,15 @@ h1, h2, h3 { line-height: 1.3; letter-spacing: -.02em; margin: 0; }
   color: var(--ink-2); text-decoration: none; white-space: nowrap;
 }
 .nav a:hover { background: var(--green-soft); color: var(--green-lit); }
+/* 커뮤니티에 24시간 안에 올라온 글이 있으면 board-new.js 가 이 표시를 붙입니다.
+   ⚠ 색은 변수로 쓰지 않는다 — 게시판 페이지는 --ember·--ink 를 제 색으로 덮어써서
+   변수를 쓰면 표시가 까맣게 나온다(2026-09-16 확인). 카드의 .isnew 와도 이름을 겹치지 않게 한다 */
+.navnew, .post .new24 {
+  display: inline-block; background: #e4572e; color: #fff;
+  border-radius: 999px; font-weight: 800; letter-spacing: .04em; line-height: 1.6;
+}
+.navnew { margin-left: 5px; vertical-align: 2px; padding: 1px 6px; font-size: 11px; }
+.post .new24 { margin-left: 2px; padding: 1px 8px; font-size: 12px; }
 
 /* ── 히어로 — 아침의 오름 ─────────────── */
 .hero { position: relative; overflow: hidden; }

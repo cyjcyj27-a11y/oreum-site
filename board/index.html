@@ -27,7 +27,7 @@
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="ko_KR">
 
-<link rel="stylesheet" href="/style.css?v=33">
+<link rel="stylesheet" href="/style.css?v=35">
 </head>
 <body>
 
@@ -286,6 +286,9 @@
     return (t.getMonth() + 1) + '월 ' + t.getDate() + '일';
   }
 
+  /* 24시간 안에 올라온 글에만 NEW 를 붙인다(사장님 2026-09-16 "24시간이내 새글한정") */
+  function isNew(iso) { return Date.now() - new Date(iso).getTime() < 24 * 60 * 60 * 1000; }
+
   function imgUrl(path) {
     return db.storage.from('board').getPublicUrl(path).data.publicUrl;
   }
@@ -299,6 +302,7 @@
         (p.image_path ? '<img class="shot" loading="lazy" alt="플레이 화면" src="' + esc(imgUrl(p.image_path)) + '">' : '') +
         '<div class="meta"><b>' + (p.nick ? esc(p.nick) : '루루') + '</b>' +
         '<span class="ago">' + when(p.created_at) + '</span>' +
+        (isNew(p.created_at) ? '<span class="new24">NEW</span>' : '') +
         '<button class="del" type="button">지우기</button></div>' +
         (p.body ? '<p class="text">' + bodyHtml(p.body) + '</p>' : '');
       el.querySelector('.del').addEventListener('click', function () { remove(p.id, el); });
