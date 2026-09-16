@@ -27,7 +27,7 @@
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="en_US">
 
-<link rel="stylesheet" href="/style.css?v=36">
+<link rel="stylesheet" href="/style.css?v=37">
 </head>
 <body>
 
@@ -290,20 +290,39 @@
     return db.storage.from('board').getPublicUrl(path).data.publicUrl;
   }
 
+  /* 목록형 — 제목 줄만 보이고 누르면 펼쳐진다. 글에 제목 칸이 없어 본문 첫 줄을 쓴다 */
+  function titleOf(p) {
+    var t = String(p.body || '').split(String.fromCharCode(10))[0].trim();
+    return t || (p.image_path ? 'Photo' : '');
+  }
+
   function render(rows) {
     var frag = document.createDocumentFragment();
     rows.forEach(function (p) {
       var el = document.createElement('article');
       el.className = 'post';
       el.innerHTML =
-        (p.image_path ? '<img class="shot" loading="lazy" alt="Screenshot" src="' + esc(imgUrl(p.image_path)) + '">' : '') +
-        '<div class="meta"><b>' + (p.nick ? esc(p.nick) : 'Lulu') + '</b>' +
-        '<span class="ago">' + when(p.created_at) + '</span>' +
-        (isNew(p.created_at) ? '<span class="new24">NEW</span>' : '') +
-        '<button class="del" type="button">Delete</button></div>' +
-        (p.body ? '<p class="text">' + bodyHtml(p.body) + '</p>' : '');
+        '<button class="row-head" type="button" aria-expanded="false">' +
+          '<span class="ttl">' + esc(titleOf(p)) + '</span>' +
+          (p.image_path ? '<span class="pic" aria-hidden="true">📷</span>' : '') +
+          '<span class="by">' + (p.nick ? esc(p.nick) : 'Lulu') + '</span>' +
+          '<span class="ago">' + when(p.created_at) + '</span>' +
+          (isNew(p.created_at) ? '<span class="new24">NEW</span>' : '') +
+        '</button>' +
+        '<div class="row-body" hidden>' +
+          (p.image_path ? '<img class="shot" loading="lazy" alt="Screenshot" src="' + esc(imgUrl(p.image_path)) + '">' : '') +
+          (p.body ? '<p class="text">' + bodyHtml(p.body) + '</p>' : '') +
+          '<p class="rowfoot"><button class="del" type="button">Delete</button></p>' +
+        '</div>';
+      var head = el.querySelector('.row-head'), body = el.querySelector('.row-body');
+      head.addEventListener('click', function () {
+        var open = body.hidden;
+        body.hidden = !open;
+        el.classList.toggle('open', open);
+        head.setAttribute('aria-expanded', open ? 'true' : 'false');
+      });
       el.querySelector('.del').addEventListener('click', function () { remove(p.id, el); });
-      if (window.BoardExtra) BoardExtra.attach(el, p.id);   // 사진 확대 + 댓글
+      if (window.BoardExtra) BoardExtra.attach(body, p.id);   // 사진 확대 + 댓글
       frag.appendChild(el);
     });
     $('list').appendChild(frag);

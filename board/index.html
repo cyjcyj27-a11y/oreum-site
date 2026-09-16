@@ -27,7 +27,7 @@
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="ko_KR">
 
-<link rel="stylesheet" href="/style.css?v=36">
+<link rel="stylesheet" href="/style.css?v=37">
 </head>
 <body>
 
@@ -293,20 +293,41 @@
     return db.storage.from('board').getPublicUrl(path).data.publicUrl;
   }
 
+  /* 목록형 — 제목 줄만 보이고, 누르면 그 자리에서 펼쳐진다(사장님 2026-09-16
+     "커뮤니티 글목록을 목록형으로 바꿔줘 제목만 보이게").
+     글에는 제목 칸이 따로 없다 — 본문 첫 줄을 제목으로 쓰고, 사진만 있는 글은 '사진'. */
+  function titleOf(p) {
+    var t = String(p.body || '').split(String.fromCharCode(10))[0].trim();
+    return t || (p.image_path ? '사진' : '');
+  }
+
   function render(rows) {
     var frag = document.createDocumentFragment();
     rows.forEach(function (p) {
       var el = document.createElement('article');
       el.className = 'post';
       el.innerHTML =
-        (p.image_path ? '<img class="shot" loading="lazy" alt="플레이 화면" src="' + esc(imgUrl(p.image_path)) + '">' : '') +
-        '<div class="meta"><b>' + (p.nick ? esc(p.nick) : '루루') + '</b>' +
-        '<span class="ago">' + when(p.created_at) + '</span>' +
-        (isNew(p.created_at) ? '<span class="new24">NEW</span>' : '') +
-        '<button class="del" type="button">지우기</button></div>' +
-        (p.body ? '<p class="text">' + bodyHtml(p.body) + '</p>' : '');
+        '<button class="row-head" type="button" aria-expanded="false">' +
+          '<span class="ttl">' + esc(titleOf(p)) + '</span>' +
+          (p.image_path ? '<span class="pic" aria-hidden="true">📷</span>' : '') +
+          '<span class="by">' + (p.nick ? esc(p.nick) : '루루') + '</span>' +
+          '<span class="ago">' + when(p.created_at) + '</span>' +
+          (isNew(p.created_at) ? '<span class="new24">NEW</span>' : '') +
+        '</button>' +
+        '<div class="row-body" hidden>' +
+          (p.image_path ? '<img class="shot" loading="lazy" alt="플레이 화면" src="' + esc(imgUrl(p.image_path)) + '">' : '') +
+          (p.body ? '<p class="text">' + bodyHtml(p.body) + '</p>' : '') +
+          '<p class="rowfoot"><button class="del" type="button">지우기</button></p>' +
+        '</div>';
+      var head = el.querySelector('.row-head'), body = el.querySelector('.row-body');
+      head.addEventListener('click', function () {
+        var open = body.hidden;
+        body.hidden = !open;
+        el.classList.toggle('open', open);
+        head.setAttribute('aria-expanded', open ? 'true' : 'false');
+      });
       el.querySelector('.del').addEventListener('click', function () { remove(p.id, el); });
-      addExtra(el, p.id);                                   // 사진 확대 + 댓글
+      addExtra(body, p.id);                                 // 사진 확대 + 댓글 (펼친 칸 안에)
       frag.appendChild(el);
     });
     $('list').appendChild(frag);
