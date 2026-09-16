@@ -750,11 +750,11 @@ h1,h2,h3,h4,b,strong,.btn,button{ font-weight:400; }
 .talk-go a {
   display: inline-flex; align-items: center; gap: 6px;
   padding: 9px 16px; border-radius: 999px;
-  background: var(--green-soft); border: 1px solid var(--green-edge);
-  color: var(--green-lit); font-size: 14px; font-weight: 700; text-decoration: none;
+  background: var(--ink); border: 1px solid var(--ink);
+  color: #fff; font-size: 14px; font-weight: 700; text-decoration: none;
   transition: background .15s ease, color .15s ease, border-color .15s ease;
 }
-.talk-go a:hover { background: var(--green-lit); border-color: var(--green-lit); color: #fff; }
+.talk-go a:hover { background: #2c2c24; border-color: #2c2c24; color: #fff; }
 
 
 a{ color:var(--ink); }
