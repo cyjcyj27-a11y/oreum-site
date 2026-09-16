@@ -38,6 +38,14 @@
     '서울 집값에 밀려 제주로 온 고양이': 'A cat priced out of Seoul moves to Jeju',
     '낡은 빈집에서 시작하는 두 번째 인생': 'A second life begins in a run-down empty house',
     '숨': 'Air',
+    // 폰 가로 안내·조작 안내 (2026-09-16)
+    '가로 화면에서 하는 게임입니다': 'This game plays in landscape',
+    '가로로 돌리기': 'Turn to landscape',
+    '단추가 안 먹으면 폰의 화면 회전 잠금을 풀고 눕혀 주세요': "If the button does nothing, turn off your phone's rotation lock and lay it sideways",
+    '그래도 세로로 하기': 'Play in portrait anyway',
+    '📦 상자에 가까이 가면 F로 잡을 수 있어요': '📦 Get close to the box and press F to grab it',
+    '왼쪽 아래 패드': 'Pad, bottom left',
+    '밀면 루루가 걸어갑니다': 'Push it to walk',
     '농사짓기': 'Farming',
     '해녀 물질': 'Haenyeo diving',
     '조랑말 경마': 'Pony racing',
@@ -875,6 +883,8 @@
     for (const c of node.childNodes) trNode(c);
   }
   addEventListener('DOMContentLoaded', () => {
+    const fw = document.getElementById('fileWarn');
+    if (fw && location.protocol !== 'file:') fw.remove();
     trNode(document.body);
     new MutationObserver((muts) => {
       for (const m of muts) {

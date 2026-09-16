@@ -5,7 +5,7 @@
   const $ = id => document.getElementById(id);
   const canvas = $('c'), ctx = canvas.getContext('2d');
   const EN = (() => { try { return new URLSearchParams(location.search).get('lang') === 'en'; } catch (_) { return false; } })();
-  if (EN) { document.documentElement.lang = 'en'; document.title = '팜온마즈 — Oreum Games'; document.querySelectorAll('[data-en]').forEach(e => { e.innerHTML = e.getAttribute('data-en'); }); }
+  if (EN) { document.documentElement.lang = 'en'; document.title = 'FARM ON MARS — Oreum Games'; document.querySelectorAll('[data-en]').forEach(e => { e.innerHTML = e.getAttribute('data-en'); }); var sb = document.querySelector('#title .sub'); if (sb) sb.hidden = true; }
   const T = (ko, en) => EN ? en : ko;
   const isTouch = ('ontouchstart' in window) && matchMedia('(pointer: coarse)').matches;
   if (isTouch) document.body.classList.add('touch');

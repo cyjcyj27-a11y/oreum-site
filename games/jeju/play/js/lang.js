@@ -22,6 +22,7 @@
     '단추가 안 먹으면 폰의 화면 회전 잠금을 풀고 눕혀 주세요': 'If the button does nothing, turn off rotation lock and lay the phone down',
     '그래도 세로로 하기': 'Play in portrait anyway',
     '건너뛰기': 'Skip',
+    '오전 9시': '9 AM',   // 불러오는 동안 보이는 상단 시계 첫 값 (2026-09-16)
     '자산': 'ASSETS', '짓기': 'BUILD', '렌터카': 'RENTAL CARS', '전체화면': 'Fullscreen',
 
     // ── 조작 안내 ──
