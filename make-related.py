@@ -18,6 +18,7 @@ import io, os, re, sys
 
 # slug, 한국어 경로, 영어 경로, 한국어 이름, 한국어 장르 앵커, 영어 이름, 영어 장르 앵커, 태그
 GAMES = [
+    ("mulgwisin",     "/games/mulgwisin/",           "/en/games/mulgwisin/",           "물귀신",            "밤 계곡 3D 공포게임",              "Mulgwisin",            "3D water ghost horror game", {"horror", "3d", "adventure", "puzzle"}),
     ("spotdiff",      "/games/flash/spotdiff/",      "/en/games/flash/spotdiff/",      "틀린그림찾기",      "두 그림 비교 틀린그림찾기 게임",     "Spot the Difference",  "spot the difference game", {"puzzle", "casual", "kids"}),
     ("taja",          "/games/flash/taja/",          "/en/games/flash/taja/",          "타자연습 달리기",    "한글·영어 타자연습 게임",        "Typing Race",          "free typing practice game", {"casual", "kids", "animal", "educational"}),
     ("burger",        "/games/flash/burger/",        "/en/games/flash/burger/",        "킹왕짱버거",        "햄버거 만들기 요리게임",          "KINGWANGZZANG",        "burger cooking game", {"sim", "cooking", "casual"}),

@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, viewport-fit=cover">
+<title>물귀신 — 오름게임즈</title>
+<meta name="robots" content="noindex">
+<style>
+  @font-face { font-family: 'Griun'; src: url('fonts/Griun_Fromsol-Rg.ttf') format('truetype'); font-display: block; }
+  @font-face { font-family: 'Ria'; src: url('fonts/RiaSans-ExtraBold.woff2') format('woff2'); font-display: block; }
+  @font-face { font-family: 'Dokdo'; src: url('fonts/Dokdo-title.woff2') format('woff2'); font-display: block; }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #060a10; font-family: 'Griun', 'Noto Sans KR', 'Malgun Gothic', sans-serif; color: #e8ecf0; user-select: none; }
+  #c { display: block; width: 100vw; height: 100vh; touch-action: none; }
+  #vig { position: fixed; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 50% 50%, rgba(0,0,0,0) 56%, rgba(0,4,8,.34) 100%); z-index: 2; }
+  /* 물속 — 카메라가 수면 아래로 들어가면 초록빛 덮개 */
+  #uw { position: fixed; inset: 0; pointer-events: none; opacity: 0; transition: opacity .25s; z-index: 2; background: radial-gradient(ellipse at 50% 30%, rgba(30,70,60,.25), rgba(2,10,12,.75) 80%); }
+  #uw.on { opacity: 1; }
+  #flash { position: fixed; inset: 0; pointer-events: none; opacity: 0; background: #000; z-index: 3; }
+  /* 물귀신을 쳐다보는 동안 — 화면이 지직거리고 가장자리가 어두워진다 */
+  #grain { position: fixed; inset: 0; pointer-events: none; opacity: 0; z-index: 3; background-repeat: repeat; background-size: 200px 200px; mix-blend-mode: screen; }
+  #dread { position: fixed; inset: 0; pointer-events: none; opacity: 0; z-index: 2; background: radial-gradient(ellipse at 50% 50%, rgba(0,0,0,0) 22%, rgba(26,2,2,.92) 100%); transition: opacity .3s; }
+  @keyframes blink { 0%,100%{opacity:.35} 50%{opacity:1} }
+  @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.12)} }
+  @keyframes pulseC { 0%,100%{transform:translate(-50%,-50%) scale(1)} 50%{transform:translate(-50%,-50%) scale(1.12)} }
+  [hidden] { display: none !important; }
+
+  #rotate { position: fixed; inset: 0; z-index: 90; display: none; place-items: center; text-align: center; background: #0a0f14; color: #e8ecf0; font-size: 17px; line-height: 1.8; padding: 8vw; }
+  body.touch.portrait #rotate { display: grid; }
+  #rotate button { margin: 22px 0 16px; padding: 15px 32px; border: 0; border-radius: 99px; cursor: pointer; font-family: inherit; font-size: 17px; font-weight: 800; color: #08121a; background: #9fd8c8; }
+  #rotate .sub { font-size: 14px; color: #8a96a0; line-height: 1.7; } #rotate .sub a { color: #b8c2ca; }
+  body.shot #topbar, body.shot #oreumHome, body.shot #oreumFs, body.shot #title .goRow, body.shot #title .best, body.shot #keys { display: none !important; }
+
+  /* ── HUD — 스카이라이더 기본 UI ── */
+  #topbar { position: fixed; left: 0; right: 0; top: 0; min-height: calc(44px + env(safe-area-inset-top)); padding: calc(6px + env(safe-area-inset-top)) calc(10px + env(safe-area-inset-right)) 6px calc(112px + env(safe-area-inset-left)); display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; background: linear-gradient(180deg, rgba(4,8,12,.6), rgba(4,8,12,0)); pointer-events: none; z-index: 5; opacity: 0; transition: opacity .8s; }
+  #topbar.show { opacity: 1; }
+  .stat { display: inline-flex; align-items: center; gap: 5px; padding: 5px 10px; border-radius: 999px; background: rgba(0,0,0,.35); border: 1px solid rgba(255,255,255,.12); font-size: 15px; color: #fff; white-space: nowrap; }
+  .stat b { font-weight: normal; font-size: 17px; font-family: 'Ria', 'Griun', sans-serif; letter-spacing: 1px; } .stat .ic { font-size: 13px; }
+  .stat .bar { width: 64px; height: 6px; background: rgba(255,255,255,.18); border-radius: 3px; overflow: hidden; }
+  #stBar { height: 100%; width: 100%; background: #9fd8c8; border-radius: 3px; transition: width .1s; }
+  #st.low #stBar { background: #e05a3a; animation: blink .4s infinite; } #st.low { border-color: rgba(224,90,58,.7); }
+  #oilBar { height: 100%; width: 100%; background: #ffa858; border-radius: 3px; transition: width .2s; }
+  #oil.low #oilBar { background: #e05a3a; animation: blink .5s infinite; } #oil.low { border-color: rgba(224,90,58,.7); }
+  #oil.off { opacity: .45; } #oil.off #oilBar { background: #6a747c; }
+  #charm.hot { border-color: rgba(255,216,154,.8); background: rgba(120,84,20,.45); }
+  .spacer { flex: 1; }
+  .tog { pointer-events: auto; width: 36px; height: 36px; border-radius: 50%; border: 1px solid rgba(255,255,255,.3); background: rgba(0,0,0,.4); color: #fff; font-family: inherit; font-size: 17px; line-height: 1; padding: 0; touch-action: manipulation; }
+  .tog.off { opacity: .4; text-decoration: line-through; }
+  @media (max-width: 700px) { #topbar { padding-left: calc(104px + env(safe-area-inset-left)); gap: 4px 5px; } .stat { font-size: 13px; padding: 3px 7px; gap: 4px; } .stat b { font-size: 15px; } .stat .bar { width: 56px; } .tog { width: 32px; height: 32px; font-size: 15px; } }
+
+  /* 폰: 왼쪽 아래 이동 패드, 오른쪽 아래 행동 단추 */
+  #pad { display: none; position: fixed; left: calc(14px + env(safe-area-inset-left)); bottom: calc(50px + env(safe-area-inset-bottom)); width: 186px; height: 186px; border-radius: 50%; border: 2px solid rgba(255,255,255,.45); background: rgba(20,24,30,.38); touch-action: none; -webkit-user-select: none; user-select: none; z-index: 6; }
+  #knob { position: absolute; left: 50%; top: 50%; width: 72px; height: 72px; margin: -36px 0 0 -36px; border-radius: 50%; border: 2px solid rgba(255,255,255,.75); background: rgba(255,255,255,.3); pointer-events: none; }
+  #pad.on #knob { background: rgba(255,255,255,.5); }
+  .tbtn { display: none; position: fixed; width: 76px; height: 76px; border-radius: 50%; border: 2px solid rgba(255,255,255,.55); background: rgba(0,0,0,.32); color: #fff; font-family: inherit; font-size: 15px; letter-spacing: 1px; touch-action: none; z-index: 6; text-shadow: 0 1px 2px rgba(0,0,0,.6); padding: 0; }
+  .tbtn.on { background: rgba(159,216,200,.75); color: #08121a; border-color: #9fd8c8; }
+  body.touch.playing .tbtn, body.touch.playing #pad { display: block; }
+  #btnLamp { right: calc(14px + env(safe-area-inset-right)); bottom: calc(24px + env(safe-area-inset-bottom)); width: 88px; height: 88px; font-size: 17px; }
+  #btnLamp.on { background: rgba(255,176,96,.8); color: #241203; border-color: #ffc070; }
+  #btnRun { right: calc(20px + env(safe-area-inset-right)); bottom: calc(126px + env(safe-area-inset-bottom)); }
+  #btnSalt { right: calc(116px + env(safe-area-inset-right)); bottom: calc(30px + env(safe-area-inset-bottom)); background: rgba(230,236,244,.28); }
+  #btnJump { right: calc(116px + env(safe-area-inset-right)); bottom: calc(126px + env(safe-area-inset-bottom)); }
+  #btnSalt:active { background: rgba(240,246,255,.75); color: #08121a; }
+  #trace.hot { border-color: rgba(159,212,255,.9); background: rgba(60,110,160,.45); }
+  #over.true h2 { color: #ffe2b0; -webkit-text-stroke: 2px #6a4418; text-shadow: 0 0 26px rgba(255,210,140,.6); }
+  #mis.hot { border-color: rgba(255,214,150,.9); background: rgba(120,70,20,.45); }
+  #salt.hot { border-color: rgba(235,242,255,.9); background: rgba(160,180,210,.4); }
+  @keyframes saltCue { 0%,100% { box-shadow: 0 0 0 0 rgba(235,242,255,0); border-color: rgba(255,255,255,.25); } 50% { box-shadow: 0 0 18px 4px rgba(235,242,255,.85); border-color: #fff; } }
+  #salt.cue, #btnSalt.cue { animation: saltCue .6s ease-in-out infinite; }
+  #salt.low b { color: #e07a60; }
+  @keyframes shakeX { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-5px)} 75%{transform:translateX(5px)} }
+  #salt.empty { animation: shakeX .25s 2; border-color: rgba(224,90,58,.8); }
+  /* 붙잡혔을 때 — 가운데 아래 연타 표시. 링이 차오르면 뿌리친다 */
+  #mash { position: fixed; left: 50%; bottom: 17vh; width: 132px; height: 132px; margin-left: -66px; display: grid; place-items: center; opacity: 0; transform: scale(.6); transition: opacity .15s, transform .15s; pointer-events: none; z-index: 6; }
+  #mash.show { opacity: 1; transform: scale(1); }
+  #mash .ring { position: absolute; inset: 0; border-radius: 50%; background: conic-gradient(#eef4ff var(--p, 0%), rgba(255,255,255,.14) 0); -webkit-mask: radial-gradient(circle, transparent 54%, #000 56%); mask: radial-gradient(circle, transparent 54%, #000 56%); filter: drop-shadow(0 0 12px rgba(200,225,255,.6)); }
+  #mash .k { font-family: 'Ria', sans-serif; font-weight: normal; font-size: 24px; letter-spacing: 2px; color: #fff; text-shadow: 0 2px 8px rgba(0,0,0,.9); animation: pulse .32s infinite; }
+  @keyframes mashHit { 0%{transform:scale(1.18)} 100%{transform:scale(1)} }
+  #mash.hit .ring { animation: mashHit .12s; }
+  body.touch #mash .k { font-size: 0; } body.touch #mash .k::after { content: 'TAP'; font-size: 26px; }
+  @media (max-height: 520px) {
+    .tbtn { width: 60px; height: 60px; font-size: 13px; }
+    #btnLamp { width: 72px; height: 72px; font-size: 15px; bottom: calc(16px + env(safe-area-inset-bottom)); } #btnRun { bottom: calc(100px + env(safe-area-inset-bottom)); }
+    #btnSalt { right: calc(96px + env(safe-area-inset-right)); bottom: calc(20px + env(safe-area-inset-bottom)); }
+    #btnJump { right: calc(96px + env(safe-area-inset-right)); bottom: calc(100px + env(safe-area-inset-bottom)); }
+    #pad { width: 160px; height: 160px; left: calc(10px + env(safe-area-inset-left)); bottom: calc(46px + env(safe-area-inset-bottom)); } #knob { width: 62px; height: 62px; margin: -31px 0 0 -31px; }
+  }
+  #keys { position: fixed; right: 22px; bottom: 20px; font-size: 13px; opacity: 0; text-align: right; line-height: 1.7; pointer-events: none; text-shadow: 0 1px 2px rgba(0,0,0,.7); transition: opacity .8s; z-index: 5; }
+  #keys.show { opacity: .6; } body.touch #keys { display: none; }
+  /* 붙잡혔을 때 — 연타 표시 */
+  #toast { position: fixed; left: 50%; top: 30%; transform: translateX(-50%); font-family: 'Ria', sans-serif; font-size: 30px; letter-spacing: 4px; color: #fff4dc; text-shadow: 0 2px 10px rgba(0,0,0,.8); opacity: 0; transition: opacity .3s; pointer-events: none; z-index: 5; }
+  #toast.show { opacity: 1; }
+  /* 줍기 자막 — 아래 가운데, 두 줄까지 */
+  #sub { position: fixed; left: 50%; bottom: 12vh; transform: translateX(-50%); width: min(92vw, 1100px); text-align: center; font-family: 'Griun', 'Noto Sans KR', sans-serif; font-size: clamp(24px, 3.6vw, 44px); line-height: 1.55; color: #eef2f4; text-shadow: 0 2px 10px rgba(0,0,0,.95), 0 0 24px rgba(0,0,0,.7); opacity: 0; transition: opacity .6s; pointer-events: none; z-index: 6; word-break: keep-all; }
+  #sub.show { opacity: 1; }
+  #sub span { display: block; white-space: nowrap; }
+
+  /* 타이틀 */
+  #title { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding-top: 7vh; background: linear-gradient(180deg, rgba(4,8,12,.2), rgba(4,8,12,0) 45%, rgba(4,8,12,0) 70%, rgba(4,8,12,.55)); transition: opacity 1s; text-align: center; z-index: 10; }
+  #title.hide { opacity: 0; pointer-events: none; }
+  html:not(.fontok) #title .brand, html:not(.fontok) #title h1, html:not(.fontok) #title .tag, html:not(.fontok) #title .goRow, html:not(.fontok) #title .best { visibility: hidden; }   /* 글꼴을 받기 전엔 고딕체로 먼저 보이지 않게 */
+  #title h1 { font-family: 'Dokdo', 'Ria', sans-serif; font-weight: 400; font-size: clamp(76px, 17vw, 190px); margin: 4px 0 0; letter-spacing: 6px; color: #dfe9ea; text-shadow: 0 0 22px rgba(120,200,190,.45), 0 6px 26px rgba(0,0,0,.8); line-height: 1; }
+  #title .tag { font-family: 'Ria', sans-serif; letter-spacing: 8px; font-size: 17px; opacity: .85; margin-top: 4px; text-shadow: 0 1px 3px rgba(0,0,0,.6); }
+  #title .brand { display: flex; align-items: center; gap: 8px; padding: 6px 14px 6px 8px; border-radius: 999px; background: rgba(255,253,247,.92); color: #2e6b39; font-size: 14px; letter-spacing: 1px; }
+  #title .brand img { width: 30px; height: 15px; }
+  #title .goRow { position: absolute; left: 50%; transform: translateX(-50%); bottom: 12vh; display: flex; gap: 14px; align-items: center; }
+  #title .go { margin: 0; font-family: 'Ria', sans-serif; font-size: 28px; letter-spacing: 8px; text-indent: 8px; padding: 12px 40px 14px; border-radius: 20px; background: rgba(8,14,20,.75); border: 1px solid rgba(255,255,255,.16); box-shadow: 0 8px 26px rgba(0,0,0,.45); animation: blink 2.4s infinite; cursor: pointer; white-space: nowrap; }
+  #title .go.cont { animation: none; opacity: .85; font-size: 22px; letter-spacing: 4px; text-indent: 4px; padding: 14px 28px; }
+  #title .best { position: absolute; left: 50%; transform: translateX(-50%); bottom: calc(12vh + 84px); font-size: 16px; opacity: .85; text-shadow: 0 1px 3px rgba(0,0,0,.6); font-family: 'Ria', sans-serif; letter-spacing: 3px; }
+  @media (max-height: 460px) { #title { padding-top: 3vh; } #title h1 { font-size: clamp(60px, 14vh, 120px); } #title .goRow { bottom: 8vh; } #title .go { font-size: 22px; padding: 8px 28px 10px; } #title .best { bottom: calc(8vh + 66px); } }
+
+  /* 게임오버 · 클리어 */
+  #over { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(2,6,10,.55); opacity: 0; pointer-events: none; transition: opacity 1.4s; text-align: center; text-shadow: 0 2px 12px rgba(0,0,0,.7); z-index: 10; }
+  #over.show { opacity: 1; pointer-events: auto; }
+  #over h2 { font-family: 'Ria', sans-serif; font-size: min(7vw, 64px); font-weight: 900; margin: 0 0 10px; letter-spacing: 4px; color: #ff5a3a; -webkit-text-stroke: 2px #3a0a06; paint-order: stroke fill; }
+  #over.clear h2 { color: #dfe9ea; -webkit-text-stroke: 2px #1f4a4a; text-shadow: 0 0 22px rgba(120,200,190,.5); }
+  #over p { font-size: 26px; margin: 4px 0; font-family: 'Ria', sans-serif; letter-spacing: 1px; } #over p small { font-size: 15px; opacity: .7; margin-right: 8px; font-family: 'Griun', sans-serif; }
+  #over .again { margin-top: 36px; opacity: .6; animation: blink 2.4s infinite; font-family: 'Ria', sans-serif; letter-spacing: 6px; font-size: 24px; cursor: pointer; }
+  /* 음산한 이모지 — 색을 빼고 누렇게 바랜 뼈빛, 검붉은 그늘 */
+  .emo, .stat .ic, .tog, #over small, #mapCnt { filter: grayscale(.8) sepia(.55) hue-rotate(-12deg) saturate(1.25) brightness(.78) contrast(1.25) drop-shadow(0 0 3px rgba(110,0,0,.85)); }
+  #mapCnt .emo, .stat .ic .emo { filter: none; }
+  /* 지도·인벤토리 — M / I */
+  #menu { position: fixed; inset: 0; z-index: 30; display: none; flex-direction: column; background: rgba(3,5,8,.9); padding: calc(10px + env(safe-area-inset-top)) calc(14px + env(safe-area-inset-right)) calc(12px + env(safe-area-inset-bottom)) calc(14px + env(safe-area-inset-left)); }
+  #menu.show { display: flex; }
+  #menu .tabs { display: flex; align-items: center; gap: 8px; margin: 0 0 10px; padding-left: 96px; }
+  #menu .tab { font-family: 'Ria', sans-serif; font-size: 22px; letter-spacing: 3px; color: #fff; opacity: .5; padding: 7px 16px; border-radius: 999px; border: 1px solid rgba(255,255,255,.25); background: rgba(0,0,0,.4); cursor: pointer; }
+  #menu .tab.on { opacity: 1; background: rgba(110,30,24,.35); border-color: rgba(170,72,56,.75); }
+  #menu .cnt { font-family: 'Ria', sans-serif; font-size: 20px; letter-spacing: 1px; opacity: .85; margin-left: 10px; white-space: nowrap; }
+  #menuX { margin-left: auto; width: 40px; height: 40px; border-radius: 50%; border: 1px solid rgba(255,255,255,.3); background: rgba(0,0,0,.4); color: #fff; font-size: 20px; cursor: pointer; }
+  #mapCv { flex: 1; width: 100%; min-height: 0; border-radius: 10px; border: 1px solid rgba(236,210,160,.18); }
+  #invBox { flex: 1; min-height: 0; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+  #menu[data-tab="map"] #invBox, #menu[data-tab="inv"] #mapCv { display: none; }
+  #invBox .grid { display: grid; grid-template-columns: repeat(var(--cols), var(--cell)); grid-auto-rows: var(--cell); gap: 6px; }
+  .slot { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4%; border-radius: 6px; background: linear-gradient(180deg, rgba(38,38,40,.85), rgba(22,22,24,.9)); border: 1px solid rgba(150,150,150,.28); box-shadow: inset 0 0 12px rgba(0,0,0,.6); overflow: hidden; }
+  .slot img { width: 52%; height: 52%; opacity: .8; }
+  .slot span { font-size: calc(var(--cell) * .15); color: rgba(200,200,200,.5); white-space: nowrap; }
+  .slot.on { background: linear-gradient(180deg, rgba(90,26,20,.55), rgba(40,12,10,.7)); border-color: rgba(170,72,56,.75); } .slot.on img { opacity: 1; } .slot.on span { color: #ead8c2; }
+  .slot.empty { background: rgba(14,14,16,.7); border-color: rgba(120,120,120,.14); }
+  /* 프롤로그 — 비 오는 밤, 이야기가 한 장씩 떠오른다 */
+  #story { position: fixed; inset: 0; z-index: 40; display: grid; place-items: center; background: rgba(1,3,6,.86); opacity: 0; pointer-events: none; transition: opacity 1.2s; cursor: pointer; }
+  #story.show { opacity: 1; pointer-events: auto; }
+  #rain { position: absolute; inset: 0; width: 100%; height: 100%; }
+  #storyFlash { position: absolute; inset: 0; background: #dfe8f0; opacity: 0; pointer-events: none; }
+  #storyText { position: relative; padding: 0 7vw; text-align: center; font-family: 'Griun', 'Noto Sans KR', sans-serif; font-size: clamp(26px, 4.6vw, 54px); line-height: 1.7; letter-spacing: 1px; color: #dfe6ea; text-shadow: 0 2px 18px rgba(0,0,0,.95), 0 0 30px rgba(120,170,200,.18); word-break: keep-all; }
+  #storyText span { display: block; white-space: nowrap; opacity: 0; filter: blur(6px); transform: translateY(10px); transition: opacity 1.4s, filter 1.4s, transform 1.4s; }
+  #storyText span.on { opacity: 1; filter: blur(0); transform: none; }
+  #storyText.out span { opacity: 0; filter: blur(4px); transition: opacity .9s, filter .9s; }
+  #storySkip { position: absolute; right: calc(22px + env(safe-area-inset-right)); bottom: calc(20px + env(safe-area-inset-bottom)); font-family: 'Ria', sans-serif; font-size: 20px; letter-spacing: 4px; color: #fff; opacity: .55; padding: 10px 16px; border: 1px solid rgba(255,255,255,.3); border-radius: 999px; background: rgba(0,0,0,.35); }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="vig"></div>
+<div id="uw"></div>
+<div id="dread"></div>
+<div id="grain"></div>
+<div id="flash"></div>
+
+<div id="topbar">
+  <div class="stat"><span class="ic">📍</span><b id="dist">0m</b></div>
+  <div class="stat" id="st"><span class="ic">💪</span><div class="bar"><div id="stBar"></div></div></div>
+  <div class="stat" id="oil"><span class="ic">🏮</span><div class="bar"><div id="oilBar"></div></div></div>
+  <div class="stat" id="charm"><span class="ic">📜</span><b id="item">0/8</b></div>
+  <div class="stat" id="trace"><span class="ic">👣</span><b id="traceN">0/5</b></div>
+  <div class="stat" id="salt"><span class="ic">🧂</span><b id="saltN">3</b></div>
+  <div class="stat" id="mis" hidden><span class="ic">⛩</span><span class="ic" id="misIc"></span><b id="misN">0/3</b></div>
+  <div class="spacer"></div>
+  <button id="btnMap" class="tog" title="지도">M</button>
+  <button id="btnInv" class="tog" title="인벤토리">🎒</button>
+  <button id="btnSfx" class="tog" title="효과음">🔊</button>
+</div>
+<div id="menu" data-tab="map"><div class="tabs"><div class="tab" id="tabMap" data-en="MAP">지도</div><div class="tab" id="tabInv" data-en="INVENTORY">인벤토리</div><span class="cnt" id="mapCnt"></span><button id="menuX">✕</button></div><canvas id="mapCv"></canvas><div id="invBox"></div></div>
+<div id="toast"></div>
+<div id="sub"></div>
+<div id="keys" data-en="WASD / arrows move · Shift sprint<br>Space jump · F salt · E lamp on/off · M map · I inventory · K sound">WASD / 방향키 이동 · Shift 전력<br>Space 점프 · F 소금 · E 등불 켜기·끄기 · M 지도 · I 인벤토리 · K 효과음</div>
+<div id="mash"><div class="ring"></div><b class="k" data-en="SPACE">SPACE</b></div>
+<button id="btnRun" class="tbtn" data-en="SPRINT">전력</button>
+<button id="btnSalt" class="tbtn" data-en="SALT">소금</button>
+<button id="btnJump" class="tbtn" data-en="JUMP">점프</button>
+<button id="btnLamp" class="tbtn" data-en="LAMP">등불</button>
+<div id="pad"><div id="knob"></div></div>
+<div id="rotate">
+  <div>
+    <p data-en="This game plays in landscape">가로 화면에서 하는 게임입니다</p>
+    <button type="button" id="rotGo" data-en="Turn to landscape">가로로 돌리기</button>
+    <p class="sub"><span data-en="If the button does nothing, turn off the rotation lock and lay the phone sideways">단추가 안 먹으면 폰의 화면 회전 잠금을 풀고 눕혀 주세요</span><br>
+      <a href="#" id="rotSkip" data-en="Play in portrait anyway">그래도 세로로 하기</a></p>
+  </div>
+</div>
+
+<div id="title">
+  <div class="brand"><img src="assets/logo-oreum.svg" alt="">OREUM GAMES</div>
+  <h1 data-en="MULGWISIN">물귀신</h1>
+  <div class="tag" data-en="WATER GHOST">WATER GHOST</div>
+  <div class="best" id="titleBest"></div>
+  <div class="goRow"><div class="go cont" id="goCont" data-en="CONTINUE" hidden>이어하기</div><div class="go start" id="goStart" data-en="START">시작</div></div>
+</div>
+
+<div id="story"><canvas id="rain"></canvas><div id="storyFlash"></div><div id="storyText"></div><div id="storySkip">SKIP ▸▸</div></div>
+<div id="over">
+  <h2 id="overH">GAME OVER</h2>
+  <p><small>📍</small><span id="overDist">0m</span></p>
+  <p><small>📜</small><span id="overItem">0/8</span></p>
+  <p><small>👣</small><span id="overTrace">0/5</span></p>
+  <p><small>💍</small><span id="overRelic">0/28</span></p>
+  <p><small data-en="BEST">최고</small><span id="overBest">0m</span></p>
+  <p class="again" id="overBtn">RETRY</p>
+</div>
+
+<script src="assets/game-home.js" data-top="6" data-left="6" data-fullscreen="1" defer></script>
+<script src="assets/landscape.js?v=1"></script>
+<script>(function(){var d=document.documentElement,ok=function(){d.classList.add('fontok')};if(!document.fonts||!document.fonts.load){ok();return}Promise.all(['40px Dokdo','20px Ria','20px Griun'].map(function(f){return document.fonts.load(f,'물귀신 시작')})).then(ok,ok);setTimeout(ok,4000)})();</script>
+<script>window.EMO=function(t){var e=String(t).replace(/[&<>]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;'}[c]});try{return e.replace(/(\p{Extended_Pictographic}️?)/gu,'<span class="emo">$1</span>')}catch(x){return e}};</script>
+<script src="lib/three.min.js"></script>
+<script src="lib/GLTFLoader.global.js"></script>
+<script src="js/audio.js?v=37"></script>
+<script src="js/world.js?v=50"></script>
+<script src="js/props.js?v=34"></script>
+<script src="js/hair.js?v=5"></script>
+<script src="js/puzzles.js?v=22"></script>
+<script src="js/ghost.js?v=45"></script>
+<script src="js/omen.js?v=23"></script>
+<script src="js/acts.js?v=6"></script>
+<script src="js/uncle.js?v=18"></script>
+<script src="js/game.js?v=102"></script>
+<script src="js/mapui.js?v=8"></script>
+<script src="/assets/visit.js?v=12" defer></script>
+<script src="/assets/game-events.js?v=2" defer></script>
+</body>
+</html>
