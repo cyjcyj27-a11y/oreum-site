@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>틀린그림찾기</title>
+<style>
+@font-face{font-family:'Sunflower';src:url('fonts/sunflower-title.woff2') format('woff2');font-display:swap}
+@font-face{font-family:'Ria';src:url('fonts/RiaSans-ExtraBold.woff2') format('woff2');font-display:swap}
+
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+html,body{width:100%;height:100%;overflow:hidden;background:#2a2433;
+  font-family:'Ria',-apple-system,'Malgun Gothic',sans-serif;color:#fff;
+  user-select:none;-webkit-user-select:none;touch-action:none}
+
+/* ---------- 상단바 (스카이라이더 배치) ---------- */
+#topbar{position:fixed;top:0;left:0;right:0;z-index:20;display:flex;align-items:center;
+  gap:6px;flex-wrap:wrap;pointer-events:none;
+  padding:6px calc(8px + env(safe-area-inset-right)) 8px calc(104px + env(safe-area-inset-left));
+  background:linear-gradient(180deg,rgba(0,0,0,.45),rgba(0,0,0,0))}
+body:not(.playing) #topbar{visibility:hidden}
+.stat{display:flex;align-items:center;gap:6px;background:rgba(0,0,0,.35);
+  border-radius:15px;padding:5px 10px;backdrop-filter:blur(4px)}
+.stat i{font-style:normal;font-size:13px;opacity:.9}
+.stat b{font-size:17px;font-weight:400;letter-spacing:.3px}
+.bar{width:64px;height:6px;border-radius:3px;background:rgba(255,255,255,.22);overflow:hidden}
+.bar>span{display:block;height:100%;width:100%;background:#7ee08a;border-radius:3px}
+.bar.low>span{background:#ff5a4e}
+#dots{display:flex;gap:4px}
+#dots span{width:12px;height:12px;border-radius:50%;border:2px solid rgba(255,255,255,.7)}
+#dots span.on{background:#ffd23f;border-color:#ffd23f}
+.spacer{flex:1 1 10px}
+.pill{pointer-events:auto;height:36px;border-radius:18px;border:0;padding:0 13px;
+  background:rgba(0,0,0,.42);color:#fff;font-family:inherit;font-size:16px;cursor:pointer;
+  display:flex;align-items:center;gap:5px}
+.pill:active{transform:scale(.95)}
+.pill:disabled{opacity:.4}
+.tog{pointer-events:auto;width:36px;height:36px;border-radius:50%;border:0;
+  background:rgba(0,0,0,.4);color:#fff;font-size:15px;cursor:pointer;
+  display:grid;place-items:center;position:relative;font-family:inherit}
+.tog.off{opacity:.4}
+.tog.off::after{content:'';position:absolute;left:6px;right:6px;top:50%;height:2px;
+  background:#fff;transform:rotate(-45deg);border-radius:1px}
+@media (max-width:700px){.stat b{font-size:15px}.stat{padding:5px 8px;gap:5px}#topbar{gap:5px}
+  .bar{width:44px}#dots span{width:10px;height:10px}
+  #topbar{padding-left:calc(8px + env(safe-area-inset-left))}
+  #topbar>.stat:first-child{margin-left:96px}
+  .tog{width:34px;height:34px}.pill{height:34px;padding:0 11px}}
+
+/* ---------- 두 그림 ---------- */
+#board{position:fixed;left:0;right:0;bottom:0;display:flex;gap:10px;align-items:center;justify-content:center;
+  padding:0 calc(8px + env(safe-area-inset-right)) calc(8px + env(safe-area-inset-bottom)) calc(8px + env(safe-area-inset-left))}
+#board.col{flex-direction:column;gap:8px}
+.pic{position:relative;border-radius:14px;overflow:hidden;box-shadow:0 6px 22px rgba(0,0,0,.45);
+  background:#3a3346;cursor:pointer;touch-action:none}
+.pic canvas{display:block;width:100%;height:100%}
+.pic .fx{position:absolute;inset:0;pointer-events:none}
+.pic.shake{animation:shake .3s}
+@keyframes shake{20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(3px)}}
+#pen{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:25;pointer-events:none;
+  font-size:34px;color:#ff5a4e;text-shadow:0 2px 8px rgba(0,0,0,.6);opacity:0;transition:opacity .2s}
+#pen.on{opacity:1}
+#word{position:fixed;left:50%;top:44%;transform:translate(-50%,-50%) scale(.6);z-index:26;pointer-events:none;
+  font-family:'Sunflower','Ria',sans-serif;font-size:clamp(40px,9vw,84px);color:#ffe066;opacity:0;
+  -webkit-text-stroke:.05em #b8541a;paint-order:stroke fill;filter:drop-shadow(0 6px 10px rgba(0,0,0,.45));
+  transition:transform .25s cubic-bezier(.3,1.6,.5,1),opacity .2s}
+#word.on{opacity:1;transform:translate(-50%,-50%) scale(1)}
+
+#loading{position:fixed;inset:0;z-index:30;display:grid;place-items:center;background:rgba(20,16,28,.55);font-size:20px;letter-spacing:2px}
+#pauseCover{position:fixed;inset:0;z-index:18;background:rgba(18,14,26,.92);display:grid;place-items:center;
+  font-size:64px;color:#fff;cursor:pointer}
+
+/* ---------- 끝 카드 ---------- */
+#end{position:fixed;inset:0;z-index:45;display:none;align-items:center;justify-content:center;
+  background:rgba(18,14,26,.6);backdrop-filter:blur(3px)}
+#end.on{display:flex}
+#end .card{display:flex;flex-direction:column;align-items:center;gap:10px;padding:26px 34px;
+  background:linear-gradient(180deg,#fffaf2,#f1e3d3);color:#3a2a2c;border-radius:22px;
+  box-shadow:0 18px 50px rgba(0,0,0,.55);min-width:min(86vw,360px)}
+#endTitle{font-family:'Sunflower','Ria',sans-serif;font-size:clamp(38px,8vw,60px);color:#e0503a;line-height:1.1}
+#endStars{font-size:clamp(36px,7vw,52px);color:#f2a91a;letter-spacing:6px;text-shadow:0 2px 0 #b07a10}
+#endStars .dim{color:rgba(0,0,0,.14);text-shadow:none}
+#endSub{font-size:22px;color:#7a5a4a}
+#end .btns{display:flex;gap:10px;margin-top:8px}
+#end button{border:0;border-radius:16px;padding:13px 22px;font-family:inherit;font-size:20px;cursor:pointer}
+.b2{background:#e7dccd;color:#3a2a2c}
+.b1{background:#ff7a59;color:#fff;min-width:130px}
+#end button:active{transform:scale(.96)}
+
+/* ---------- 스테이지 목록 ---------- */
+#sheet{position:fixed;inset:0;z-index:50;display:none;background:rgba(22,18,30,.94);
+  overflow-y:auto;overscroll-behavior:contain;touch-action:pan-y;
+  padding:calc(14px + env(safe-area-inset-top)) 14px calc(40px + env(safe-area-inset-bottom))}
+#sheet.on{display:block}
+.wrap{max-width:900px;margin:0 auto}
+.shead{display:flex;align-items:center;gap:10px;margin:38px 2px 14px}
+.shead h2{font-size:26px;font-weight:400;flex:1}
+.shead .stat{background:rgba(255,255,255,.12)}
+.x{width:40px;height:40px;border-radius:50%;border:0;background:rgba(255,255,255,.13);
+  color:#fff;font-size:19px;cursor:pointer;font-family:inherit}
+.room{margin:18px 0 8px;display:flex;align-items:center;gap:10px;font-size:19px}
+.room img{width:84px;height:63px;border-radius:10px;object-fit:cover;background:#3a3346}
+.room .st{font-size:15px;color:#ffc93a;margin-left:auto}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:8px}
+.cell{border:0;border-radius:12px;padding:8px 0 6px;background:rgba(255,255,255,.1);color:#fff;
+  font-family:inherit;font-size:20px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px}
+.cell small{font-size:11px;color:#ffc93a;letter-spacing:1px;min-height:13px}
+.cell.lock{opacity:.3;cursor:default}
+.cell.cur{background:#ff7a59}
+.cell:active:not(.lock){transform:scale(.95)}
+
+/* ---------- 타이틀 ---------- */
+#titleBg{position:fixed;inset:0;z-index:39;display:grid;place-items:center;background:#f3dccb}
+#titleBg canvas{width:100%;height:100%;object-fit:cover}
+#title{position:fixed;inset:0;z-index:40;display:flex;flex-direction:column;
+  align-items:center;justify-content:flex-start;gap:16px;padding-top:6vh;
+  background:linear-gradient(180deg,rgba(40,24,30,.3) 10%,rgba(40,24,30,0) 50%,rgba(40,24,30,.25))}
+#title h1{position:relative;font-family:'Sunflower','Ria',sans-serif;font-size:min(15vw,24vh);font-weight:700;
+  color:#fff6e4;line-height:1.05;white-space:nowrap;
+  -webkit-text-stroke:.03em #fff6e4;paint-order:stroke fill;
+  filter:drop-shadow(0 10px 14px rgba(60,20,20,.35))}
+#title h1::before{content:attr(data-txt);position:absolute;left:0;top:.07em;z-index:-1;
+  color:#e0503a;-webkit-text-stroke:.09em #e0503a;paint-order:stroke fill}
+#title h1.en{font-size:min(8.5vw,16vh)}
+#title .btns{margin-top:auto;margin-bottom:calc(9vh + env(safe-area-inset-bottom));display:flex;flex-direction:column;align-items:center;gap:12px}
+#title.off,#titleBg.off{display:none}
+.big{border:0;border-radius:30px;padding:15px 56px;background:#ff7a59;color:#fff;
+  font-family:inherit;font-size:24px;cursor:pointer;box-shadow:0 6px 22px rgba(0,0,0,.35)}
+.mid{border:0;border-radius:24px;padding:10px 30px;background:rgba(40,24,30,.6);color:#fff3e6;
+  font-family:inherit;font-size:18px;cursor:pointer}
+.big:active,.mid:active{transform:scale(.96)}
+</style>
+</head>
+<body>
+
+<div id="board">
+  <div class="pic" id="picA"><canvas id="cvA"></canvas><canvas class="fx" id="fxA"></canvas></div>
+  <div class="pic" id="picB"><canvas id="cvB"></canvas><canvas class="fx" id="fxB"></canvas></div>
+</div>
+
+<div id="topbar">
+  <div class="stat"><b id="stage">STAGE 1</b></div>
+  <div class="stat"><i>⏱</i><div class="bar" id="tbar"><span id="tfill"></span></div><b id="tnum">0</b></div>
+  <div class="stat"><div id="dots"></div></div>
+  <div class="spacer"></div>
+  <button class="pill" id="bHint">🔍 <b id="hints">2</b></button>
+  <button class="pill" id="bList">▦</button>
+  <button class="tog" id="tPause" title="일시정지">❚❚</button>
+  <button class="tog" id="tMus" title="음악">♪</button>
+  <button class="tog" id="tSnd" title="효과음">🔊</button>
+</div>
+<div id="pauseCover" hidden>▶</div>
+<div id="word"></div>
+<div id="loading" hidden>LOADING</div>
+
+<div id="end"><div class="card">
+  <div id="endTitle">CLEAR</div>
+  <div id="endStars"></div>
+  <div id="endSub"></div>
+  <div class="btns"><button class="b2" id="endList">▦</button><button class="b2" id="endRetry">RETRY</button><button class="b1" id="endNext">NEXT</button></div>
+</div></div>
+
+<div id="sheet"><div class="wrap">
+  <div class="shead"><h2>STAGE</h2><div class="stat"><i>⭐</i><b id="starSum">0</b></div><button class="x" id="bClose">✕</button></div>
+  <div id="list"></div>
+</div></div>
+
+<div id="titleBg"><canvas id="cvT"></canvas></div>
+<div id="title">
+  <h1 data-txt="틀린그림찾기">틀린그림찾기</h1>
+  <div class="btns">
+    <button class="big" id="start">시작</button>
+    <button class="mid" id="toList" hidden>STAGE</button>
+  </div>
+</div>
+
+<script src="assets/game-home.js" data-top="6" data-left="6" data-fullscreen="1" defer></script>
+<script src="lib/three.min.js"></script>
+<script src="js/kit.js?v=1"></script>
+<script src="js/props.js?v=1"></script>
+<script src="js/stage.js?v=1"></script>
+<script src="js/scn_bedroom.js?v=1"></script>
+<script src="js/scn_kitchen.js?v=1"></script>
+<script src="js/scn_cafe.js?v=1"></script>
+<script src="js/scn_school.js?v=1"></script>
+<script src="js/outdoor.js?v=1"></script>
+<script src="js/scn_camp.js?v=1"></script>
+<script src="js/scn_beach.js?v=1"></script>
+<script src="js/audio.js?v=1"></script>
+<script src="js/game.js?v=3"></script>
+<script src="/assets/visit.js?v=12" defer></script>
+<script src="/assets/game-events.js?v=2" defer></script>
+</body>
+</html>
