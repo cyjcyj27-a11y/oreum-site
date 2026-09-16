@@ -223,9 +223,11 @@
     scene.add(sky); W.sky = sky;
     { const n = 1400, pos = new Float32Array(n * 3); for (let i = 0; i < n; i++) { const th = Math.random() * 6.283, ph = Math.acos(Math.random() * .9 + .08); pos[i * 3] = 850 * Math.sin(ph) * Math.cos(th); pos[i * 3 + 1] = 850 * Math.cos(ph); pos[i * 3 + 2] = 850 * Math.sin(ph) * Math.sin(th); } const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(pos, 3)); const st = new THREE.Points(g, new THREE.PointsMaterial({ color: 0xcfd8e2, size: 2.2, sizeAttenuation: false, fog: false, transparent: true, opacity: .8 })); scene.add(st); W.stars = st; }
     { const cv = document.createElement('canvas'); cv.width = cv.height = 128; const c = cv.getContext('2d'); const gr = c.createRadialGradient(64, 64, 10, 64, 64, 64); gr.addColorStop(0, 'rgba(240,244,250,1)'); gr.addColorStop(.35, 'rgba(225,232,240,.95)'); gr.addColorStop(.42, 'rgba(180,200,215,.25)'); gr.addColorStop(1, 'rgba(120,150,170,0)'); c.fillStyle = gr; c.fillRect(0, 0, 128, 128); const tex = new THREE.CanvasTexture(cv); const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, fog: false, transparent: true, depthWrite: false })); sp.scale.set(120, 120, 1); scene.add(sp); W.moon = sp; }
-    const hemi = new THREE.HemisphereLight(0x4c6b84, 0x1a2a24, 1.45); scene.add(hemi);
-    const moonL = new THREE.DirectionalLight(0xc4dcf2, 1.7); moonL.position.set(MOON[0] * 100, MOON[1] * 100, MOON[2] * 100); scene.add(moonL);
-    const amb = new THREE.AmbientLight(0x33495a, 1.55); scene.add(amb);
+    W.DARK = .6;   // 밤 밝기 — 등불은 그대로 두고 하늘빛·달빛·주변광만 줄인다(2026-09-16 사장님 "오름게임즈에 올라간거 어둡게")
+    W.HEMI = 1.45 * W.DARK; W.MOONI = 1.7 * W.DARK; W.AMBI = 1.55 * W.DARK;
+    const hemi = new THREE.HemisphereLight(0x4c6b84, 0x1a2a24, W.HEMI); scene.add(hemi);
+    const moonL = new THREE.DirectionalLight(0xc4dcf2, W.MOONI); moonL.position.set(MOON[0] * 100, MOON[1] * 100, MOON[2] * 100); scene.add(moonL);
+    const amb = new THREE.AmbientLight(0x33495a, W.AMBI); scene.add(amb);
     W.lights = { hemi, moonL, amb };
     scene.fog = new THREE.FogExp2(0x162834, .0104);
     W.fogAir = { col: new THREE.Color(0x162834), d: .0104 }; W.fogWater = { col: new THREE.Color(0x072220), d: .13 };
@@ -748,6 +750,7 @@
 
   // 날이 밝는다 — 진엔딩. k 0 밤 · 1 새벽
   const NIGHT = { top: new THREE.Color(0x101c30), hor: new THREE.Color(0x3a5062), fog: new THREE.Color(0x162834), hemiS: new THREE.Color(0x4c6b84), hemiG: new THREE.Color(0x1a2a24), amb: new THREE.Color(0x33495a) };
+  ['top', 'hor', 'fog'].forEach(k => NIGHT[k].multiplyScalar(.6));   // 밤하늘·안개도 같이 어둡게 — 먼 산은 조명보다 안개색이 밝기를 정한다(2026-09-16)
   const DAWN = { top: new THREE.Color(0x587aa6), hor: new THREE.Color(0xe6b08a), fog: new THREE.Color(0x9aa2a8), hemiS: new THREE.Color(0xc8d6e6), hemiG: new THREE.Color(0x4a5a48), amb: new THREE.Color(0x8a8a90) };
   const _c = new THREE.Color();
   W.dawn = 0;
@@ -757,7 +760,7 @@
     sky.uTop.value.copy(NIGHT.top).lerp(DAWN.top, k); sky.uHor.value.copy(NIGHT.hor).lerp(DAWN.hor, k);
     wu.uSkyTop.value.copy(sky.uTop.value); wu.uSkyHor.value.copy(sky.uHor.value);
     W.fogAir.col.copy(NIGHT.fog).lerp(DAWN.fog, k); W.fogAir.d = .0104 - k * .004;
-    L.hemi.color.copy(NIGHT.hemiS).lerp(DAWN.hemiS, k); L.hemi.groundColor.copy(NIGHT.hemiG).lerp(DAWN.hemiG, k); L.hemi.intensity = 1.45 + k * .6;
+    L.hemi.color.copy(NIGHT.hemiS).lerp(DAWN.hemiS, k); L.hemi.groundColor.copy(NIGHT.hemiG).lerp(DAWN.hemiG, k); L.hemi.intensity = W.HEMI + k * (2.05 - W.HEMI); L.amb.intensity = W.AMBI + k * (1.55 - W.AMBI); L.moonL.intensity = W.MOONI + k * (1.7 - W.MOONI);   // 새벽엔 옛 밝기까지
     L.amb.color.copy(NIGHT.amb).lerp(DAWN.amb, k); L.moonL.color.copy(_c.setHex(0xc4dcf2)).lerp(_c.setHex(0xffd2a8), k);
     W.stars.material.opacity = .8 * (1 - k); W.moon.material.opacity = 1 - k * .85;
   };

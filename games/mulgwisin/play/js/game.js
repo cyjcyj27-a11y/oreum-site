@@ -14,7 +14,7 @@
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
   renderer.setPixelRatio(Math.min(devicePixelRatio, isTouch ? 1.5 : 2));
   const vw = () => Math.max(1, innerWidth || 1), vh = () => Math.max(1, innerHeight || 1);   // 창이 0 일 때 화면 계산이 깨지지 않게
-  renderer.setSize(vw(), vh()); renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.5;
+  renderer.setSize(vw(), vh()); renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.0;   /* 1.5 → 1.0 어둡게, 등불·아이 빛은 그만큼 올림(2026-09-16 사장님 "오름게임즈에 올라간거 어둡게") */
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(58, vw() / vh(), .08, 1500);
   W.build(scene);
@@ -53,13 +53,13 @@
     // 등에 진 등불 — 기름이 있는 동안 켜져 있다
     const lamp = new THREE.Group(); lamp.position.set(0, .34, -.42);   // 씬에 따로 두고 손 뼈를 따라간다
     const paper = new THREE.Mesh(new THREE.CylinderGeometry(.13, .15, .3, 9, 1, true), new THREE.MeshLambertMaterial({ color: 0xffb060, emissive: 0xff8c30, emissiveIntensity: 1.3, side: THREE.DoubleSide, transparent: true, opacity: .92 })); lamp.add(paper);
-    const lampL = new THREE.PointLight(0xffc890, 19, 26, 1.8); lamp.add(lampL);
+    const lampL = new THREE.PointLight(0xffc890, 26, 26, 1.8); lamp.add(lampL);
     const lampG = new THREE.Sprite(new THREE.SpriteMaterial({ map: W.glowTex(), color: 0xffb478, transparent: true, opacity: .32, depthWrite: false })); lampG.scale.set(1.9, 1.9, 1); lamp.add(lampG);
     return { g, body, head, arms, legs, lamp, paper, lampL, lampG };
   }
   const pl = buildSwimmer(); scene.add(pl.g); scene.add(pl.lamp);
   // 카메라 쪽에서 아이만 은은히 비추는 달빛 — 뒷모습이 실루엣으로 묻히지 않게
-  { const hl = new THREE.PointLight(0xa8c2dc, 12, 7, 2); hl.position.set(0, 1.5, -1.5); pl.g.add(hl); }
+  { const hl = new THREE.PointLight(0xa8c2dc, 16, 7, 2); hl.position.set(0, 1.5, -1.5); pl.g.add(hl); }
   const STAND = 1.02;   // 코드 모형이 곧게 섰을 때 몸 원점에서 발까지
   const HAND_Y = .55;   // 팔을 내리고 섰을 때 발에서 주먹까지
 
@@ -382,8 +382,8 @@
     if (E.boltT > 0) {   // 번개 — 번쩍·꺼짐·번쩍 뒤 스러진다. 하늘빛을 잠깐 크게 올린다
       E.boltT -= dt; const u = .7 - E.boltT;
       const f = u < .07 ? 1 : u < .15 ? .15 : u < .24 ? .85 : Math.max(0, 1 - (u - .24) / .46) * .5;
-      boltEl.style.opacity = (f * .75).toFixed(3); W.lights.hemi.intensity = 1.45 + f * 7;
-      if (E.boltT <= 0) { boltEl.style.opacity = 0; if (!(G.trueEnd && E.stage >= 4)) W.lights.hemi.intensity = 1.45; }
+      boltEl.style.opacity = (f * .75).toFixed(3); W.lights.hemi.intensity = W.HEMI + f * 7;
+      if (E.boltT <= 0) { boltEl.style.opacity = 0; if (!(G.trueEnd && E.stage >= 4)) W.lights.hemi.intensity = W.HEMI; }
     }
     const gy = W.groundH(E.kx, E.kz);
     // 5.4초 — 고요. 풀벌레도 물소리도 끊기고, 동생 얼굴빛이 조금씩 물빛으로 식는다
@@ -1166,7 +1166,7 @@
       const lit = G.lamp && G.oil > 0; let flick = lit ? (G.oil < 20 ? .45 + Math.random() * .55 : .85 + Math.sin(t * 11) * .15) : 0;
       if (G.blackT > 0) flick = 0; else if (G.flickT > 0 && Math.sin(G.flickT * 29) < -.15) flick *= .04;   // 물귀신이 오면 등불이 꺼졌다 켜진다
       pl.lamp.visible = pl.g.visible && lit;
-      pl.lampL.intensity = 19 * flick * (G.hidden ? .3 : 1);   // 돌탑 안에선 불빛이 돌벽에 막혀 어둑하다 pl.paper.visible = pl.lampG.visible = lit; pl.lampG.material.opacity = .32 * flick;
+      pl.lampL.intensity = 26 * flick * (G.hidden ? .3 : 1);   // 돌탑 안에선 불빛이 돌벽에 막혀 어둑하다 pl.paper.visible = pl.lampG.visible = lit; pl.lampG.material.opacity = .32 * flick;
       lampPos.copy(pl.lamp.position);
     }
     // 카메라 — 등 뒤에서 따라온다
