@@ -107,6 +107,11 @@
   #title .go { margin: 0; font-family: 'Ria', sans-serif; font-size: 28px; letter-spacing: 8px; text-indent: 8px; padding: 12px 40px 14px; border-radius: 20px; background: rgba(8,14,20,.75); border: 1px solid rgba(255,255,255,.16); box-shadow: 0 8px 26px rgba(0,0,0,.45); animation: blink 2.4s infinite; cursor: pointer; white-space: nowrap; }
   #title .go.cont { animation: none; opacity: .85; font-size: 22px; letter-spacing: 4px; text-indent: 4px; padding: 14px 28px; }
   #title .best { position: absolute; left: 50%; transform: translateX(-50%); bottom: calc(12vh + 84px); font-size: 16px; opacity: .85; text-shadow: 0 1px 3px rgba(0,0,0,.6); font-family: 'Ria', sans-serif; letter-spacing: 3px; }
+  #title .tRow { display: contents; }
+  /* 폰 가로: 시작·이어하기를 제목 옆으로 — 아래쪽은 안드로이드 알림에 가려진다(2026-09-17 사장님) */
+  body.touch:not(.portrait) #title .tRow { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 12px 5vw; margin-top: 14px; }
+  body.touch:not(.portrait) #title .goRow { position: static; transform: none; gap: 12px; }
+  body.touch:not(.portrait) #title .best { position: static; transform: none; margin-top: 10px; }
   @media (max-height: 460px) { #title { padding-top: 3vh; } #title h1 { font-size: clamp(60px, 14vh, 120px); } #title .goRow { bottom: 8vh; } #title .go { font-size: 22px; padding: 8px 28px 10px; } #title .best { bottom: calc(8vh + 66px); } }
 
   /* 게임오버 · 클리어 */
@@ -196,10 +201,12 @@
 
 <div id="title">
   <div class="brand"><img src="assets/logo-oreum.svg" alt="">OREUM GAMES</div>
+  <div class="tRow">
   <h1 data-en="MULGWISIN">물귀신</h1>
+  <div class="goRow"><div class="go cont" id="goCont" data-en="CONTINUE" hidden>이어하기</div><div class="go start" id="goStart" data-en="START">시작</div></div>
+  </div>
   <div class="tag" data-en="WATER GHOST">WATER GHOST</div>
   <div class="best" id="titleBest"></div>
-  <div class="goRow"><div class="go cont" id="goCont" data-en="CONTINUE" hidden>이어하기</div><div class="go start" id="goStart" data-en="START">시작</div></div>
 </div>
 
 <div id="story"><canvas id="rain"></canvas><div id="storyFlash"></div><div id="storyText"></div><div id="storySkip">SKIP ▸▸</div></div>
