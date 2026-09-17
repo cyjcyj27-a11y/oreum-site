@@ -161,7 +161,7 @@
     $('tbar').classList.toggle('low', r < 0.25);
     $('tnum').textContent = Math.ceil(Math.max(0, st.left));
     $('hints').textContent = st.hints;
-    $('bHint').disabled = st.hints <= 0;
+    $('bHint').classList.toggle('empty', st.hints <= 0);   /* disabled 면 눌러도 소리가 안 난다 */
   }
 
   // ── 시간
@@ -301,9 +301,10 @@
 
   // ── 힌트
   function useHint() {
-    if (st.mode !== 'play' || st.paused || st.over || st.hints <= 0) return;
+    AU.unlock();
+    if (st.mode !== 'play' || st.paused || st.over) return;
     const left = st.diffs.map((d, i) => i).filter((i) => !st.found[i]);
-    if (!left.length) return;
+    if (st.hints <= 0 || !left.length) { AU.play('nohint'); return; }   // 눌렀는데 조용하면 안 먹힌 줄 안다
     st.hints--;
     AU.play('hint');
     st.hintOn = { i: left[Math.floor(Math.random() * left.length)], until: performance.now() + 3500 };

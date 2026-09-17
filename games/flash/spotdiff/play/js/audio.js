@@ -62,8 +62,14 @@
       case 'click':
         tone(900, t, 0.05, 'sine', 0.15);
         break;
-      case 'hint':
-        [880, 1175, 1568].forEach((f, i) => tone(f, t + i * 0.06, 0.25, 'sine', 0.15));
+      case 'hint':   // 돋보기 반짝 — 배경음에 묻히지 않게 크게(2026-09-17 사장님 "힌트버튼 누를때 소리나게")
+        tone(420, t, 0.22, 'triangle', 0.22, null, 1400);
+        [1047, 1319, 1568, 2093].forEach((f, i) => tone(f, t + 0.08 + i * 0.07, 0.4, 'triangle', 0.32));
+        [3136, 4186].forEach((f, i) => tone(f, t + 0.3 + i * 0.08, 0.35, 'sine', 0.12));
+        break;
+      case 'nohint':   // 힌트가 없다
+        tone(330, t, 0.12, 'square', 0.1);
+        tone(247, t + 0.13, 0.18, 'square', 0.1);
         break;
       case 'clear':
         [523, 659, 784, 1047].forEach((f, i) => tone(f, t + i * 0.1, 0.35, 'triangle', 0.3));
