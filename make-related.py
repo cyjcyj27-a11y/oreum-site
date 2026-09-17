@@ -86,11 +86,13 @@ def pick(i):
     return _PICKS[i]
 
 SHOT_ALIAS = {"knife-duel-v7": "knife-duel"}
+SHOT_VER = {"bowling": "2"}   # 그림을 다시 뜬 게임 — 주소 뒤 ?v= 로 캐시를 넘긴다
 def thumb(slug, en):
     """assets/<slug>-shot(-en).webp 가 있으면 그 주소, 없으면 None"""
     root = os.path.dirname(os.path.abspath(__file__)); base = SHOT_ALIAS.get(slug, slug)
     for name in ([f"{base}-shot-en.webp"] if en else []) + [f"{base}-shot.webp", f"{base}-teaser.webp"]:
-        if os.path.exists(os.path.join(root, "assets", name)): return "/assets/" + name
+        if os.path.exists(os.path.join(root, "assets", name)):
+            return "/assets/" + name + (f"?v={SHOT_VER[slug]}" if slug in SHOT_VER else "")
     return None
 
 def block(i, en):
