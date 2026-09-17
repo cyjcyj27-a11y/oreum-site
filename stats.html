@@ -169,6 +169,7 @@
               'pv_baduk', 'pv_baduk_en',   // 바둑(2026-09-13) 소개 페이지
               'pv_ueno', 'pv_ueno_en',   // 우에노짱(2026-09-14) 소개 페이지
               'pv_mulgwisin', 'pv_mulgwisin_en',   // 물귀신(2026-09-16) 소개 페이지
+              'pv_bowling', 'pv_bowling_en',   // 볼링게임(2026-09-17) 소개 페이지
               'pv_spotdiff', 'pv_spotdiff_en',   // 틀린그림찾기(2026-09-16) 소개 페이지
               'pv_taja', 'pv_taja_en',   // 타자연습 달리기(2026-09-15) 소개 페이지
               'pv_burger', 'pv_burger_en',   // 킹왕짱버거(2026-09-15) 소개 페이지
@@ -249,7 +250,7 @@
     var pvIntro = d.pv_intro + d.pv_intro_en + d.pv_games + d.pv_games_en + d.pv_mini + d.pv_mini_en
                 + d.pv_fingerkick + d.pv_fingerkick_en + d.pv_skyrider + d.pv_skyrider_en
                 + d.pv_shibavet + d.pv_shibavet_en + d.pv_castaway + d.pv_castaway_en + d.pv_alkkagi + d.pv_alkkagi_en
-                + d.pv_coinwash + d.pv_coinwash_en + d.pv_boyband + d.pv_boyband_en + d.pv_boa + d.pv_boa_en + d.pv_baduk + d.pv_baduk_en + d.pv_ueno + d.pv_ueno_en + d.pv_mulgwisin + d.pv_mulgwisin_en + d.pv_spotdiff + d.pv_spotdiff_en + d.pv_taja + d.pv_taja_en + d.pv_burger + d.pv_burger_en + d.pv_meowsquad + d.pv_meowsquad_en + d.pv_ttang + d.pv_ttang_en + d.pv_bangwi + d.pv_bangwi_en + d.pv_omok + d.pv_omok_en + d.pv_catmobile + d.pv_catmobile_en + d.pv_farmonmars + d.pv_farmonmars_en
+                + d.pv_coinwash + d.pv_coinwash_en + d.pv_boyband + d.pv_boyband_en + d.pv_boa + d.pv_boa_en + d.pv_baduk + d.pv_baduk_en + d.pv_ueno + d.pv_ueno_en + d.pv_mulgwisin + d.pv_mulgwisin_en + d.pv_bowling + d.pv_bowling_en + d.pv_spotdiff + d.pv_spotdiff_en + d.pv_taja + d.pv_taja_en + d.pv_burger + d.pv_burger_en + d.pv_meowsquad + d.pv_meowsquad_en + d.pv_ttang + d.pv_ttang_en + d.pv_bangwi + d.pv_bangwi_en + d.pv_omok + d.pv_omok_en + d.pv_catmobile + d.pv_catmobile_en + d.pv_farmonmars + d.pv_farmonmars_en
                 + d.pv_bungeoppang + d.pv_bungeoppang_en + d.pv_jeju + d.pv_jeju_en;
     var pvAll = pvHome + pvBoard + pvGame + pvSaju + pvImmo + pvIntro;
     document.getElementById('pv-total').innerHTML = fmt(pvAll) + '<small>회</small>';
@@ -308,7 +309,7 @@
     }).join('');
   }
 
-  var GAMES = [['물귀신', 'mulgwisin'], ['틀린그림찾기', 'spotdiff'], ['타자연습 달리기', 'taja'], ['킹왕짱버거', 'burger'], ['야옹 편대', 'meowsquad'], ['우에노짱', 'ueno'], ['땅따먹기', 'ttang'], ['방귀 뀌기', 'bangwi'], ['오목', 'omok'], ['바둑', 'baduk'], ['BUY JEJU', 'jeju'], ['붕어빵 장사', 'bungeoppang'], ['팜온마즈', 'farmonmars'], ['고양이용 게임', 'catmobile'], ['보아뱀', 'boa'], ['알까기', 'alkkagi'], ['코인빨래방', 'coinwash'], ['제발 데뷔해줘', 'boyband'], ['망망대해', 'castaway'], ['시바 병원 가는 날', 'shibavet'], ['핑거킥', 'fingerkick'], ['루루냥', 'lulu'], ['영생의 가격', 'immortality'], ['김치 담그기', 'making-kimchi'], ['S.A.A.B.', 'saab'], ['스카이 라이더', 'skyrider'],
+  var GAMES = [['볼링게임', 'bowling'], ['물귀신', 'mulgwisin'], ['틀린그림찾기', 'spotdiff'], ['타자연습 달리기', 'taja'], ['킹왕짱버거', 'burger'], ['야옹 편대', 'meowsquad'], ['우에노짱', 'ueno'], ['땅따먹기', 'ttang'], ['방귀 뀌기', 'bangwi'], ['오목', 'omok'], ['바둑', 'baduk'], ['BUY JEJU', 'jeju'], ['붕어빵 장사', 'bungeoppang'], ['팜온마즈', 'farmonmars'], ['고양이용 게임', 'catmobile'], ['보아뱀', 'boa'], ['알까기', 'alkkagi'], ['코인빨래방', 'coinwash'], ['제발 데뷔해줘', 'boyband'], ['망망대해', 'castaway'], ['시바 병원 가는 날', 'shibavet'], ['핑거킥', 'fingerkick'], ['루루냥', 'lulu'], ['영생의 가격', 'immortality'], ['김치 담그기', 'making-kimchi'], ['S.A.A.B.', 'saab'], ['스카이 라이더', 'skyrider'],
                ['스키점프', 'skijump'], ['다 부숴', 'break-it-all'], ['크리스피', 'crispy'], ['돌담', 'doldam'], ['칼 결투', 'knife-duel-v7'], ['인생 물류', 'life-logistics'],
                ['야간자율학습', 'night-study'], ['냥 결투', 'nyang-duel'], ['오름냥', 'oreumnyang'], ['페어붐', 'pairboom'], ['픽셀', 'pixl'], ['극성 뒤집기', 'polarity-flip'], ['미끄럼 고양이', 'slip-cat']];
   function renderGames(vals) {
