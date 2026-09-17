@@ -127,6 +127,30 @@
     cam.updateProjectionMatrix();
   }
 
+  // WebGL 캔버스를 drawImage 로 옮기면 폰에서 예전 그림이 나왔다(2026-09-17 사장님 폰: 두 장이 똑같음)
+  // → 방금 그린 픽셀을 직접 읽어 옮긴다. 위아래 뒤집고, 알파가 곱해진 색을 되돌린다
+  let rpCv = null, rpBuf = null;
+  function readGL(w, h) {
+    const gl = renderer.getContext();
+    if (!rpCv) rpCv = document.createElement('canvas');
+    if (rpCv.width !== w || rpCv.height !== h) { rpCv.width = w; rpCv.height = h; rpBuf = new Uint8Array(w * h * 4); }
+    gl.readPixels(0, 0, w, h, gl.RGBA, gl.UNSIGNED_BYTE, rpBuf);
+    const g = rpCv.getContext('2d');
+    const img = g.createImageData(w, h), o = img.data, row = w * 4;
+    for (let y = 0; y < h; y++) {
+      const si = (h - 1 - y) * row, di = y * row;
+      for (let x = 0; x < row; x += 4) {
+        const a = rpBuf[si + x + 3];
+        if (!a) { o[di + x + 3] = 0; continue; }
+        const k = a === 255 ? 1 : 255 / a;
+        o[di + x] = rpBuf[si + x] * k; o[di + x + 1] = rpBuf[si + x + 1] * k; o[di + x + 2] = rpBuf[si + x + 2] * k; o[di + x + 3] = a;
+      }
+    }
+    g.putImageData(img, 0, 0);
+    return rpCv;
+  }
+  S.readGL = true;
+
   // 한 장 그려서 2D 캔버스에 옮긴다
   function draw(canvas) {
     const w = canvas.width, h = canvas.height;
@@ -141,7 +165,7 @@
     gr.addColorStop(1, bgBot);
     g.fillStyle = gr;
     g.fillRect(0, 0, w, h);
-    g.drawImage(renderer.domElement, 0, 0);
+    g.drawImage(S.readGL ? readGL(w, h) : renderer.domElement, 0, 0);
     const v = g.createRadialGradient(w / 2, h * 0.48, h * 0.35, w / 2, h / 2, h * 0.95);
     v.addColorStop(0, 'rgba(40,20,20,0)');
     v.addColorStop(1, 'rgba(40,20,20,0.28)');
