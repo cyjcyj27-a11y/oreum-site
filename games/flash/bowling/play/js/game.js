@@ -144,7 +144,7 @@
     $('#coins').textContent = SV.coins.toLocaleString();
   }
   function stageUI() {
-    $('#stageN').textContent = G.mode === 'duo' ? '2P' : SV.stage;
+    $('#stageN').textContent = G.mode === 'duo' ? G.np + 'P' : SV.stage;
     $('#goalN').textContent = targetFor(SV.stage);
     $('#goal').hidden = G.mode !== 'tour';
     $('#turnPill').hidden = G.mode !== 'duo';
@@ -207,18 +207,18 @@
   }
 
   // ---------- 경기 ----------
-  function newMatch(mode) {
+  const PCOL = ['🔴', '🔵', '🟢'];
+  function newMatch(mode, np) {
     G.mode = mode;
     if (mode === 'duo') {
-      G.players = [
-        { name: 'P1', em: '🔴', rolls: [], ball: SV.ball },
-        { name: 'P2', em: '🔵', rolls: [], ball: SV.ball },
-      ];
+      G.np = np || G.np || 2;
+      G.players = [];
+      for (let i = 0; i < G.np; i++) G.players.push({ name: 'P' + (i + 1), em: PCOL[i], rolls: [], ball: SV.ball });
     } else {
       G.players = [{ name: '나', em: '🙂', rolls: [], ball: SV.ball }];
     }
     G.cur = 0;
-    G.streak = [0, 0];
+    G.streak = G.players.map(() => 0);
     G.flags = { open: false, split: false };
     G.left = null;
     AL.setTheme(mode === 'duo' ? 1 : themeFor(SV.stage));
@@ -230,9 +230,9 @@
     save();
   }
 
-  function startGame(mode, resume) {
+  function startGame(mode, resume, np) {
     AU.unlock();
-    newMatch(mode);
+    newMatch(mode, np);
     if (resume && SV.match && SV.match.stage === SV.stage && SV.match.players.length === G.players.length) {
       const m = SV.match;
       m.players.forEach((p, i) => { G.players[i].rolls = p.rolls.slice(); });
@@ -386,12 +386,15 @@
   function endMatch() {
     G.phase = 'over';
     renderBoard();
-    const [a, b] = G.players.map((p) => total(p.rolls));
+    const scores = G.players.map((p) => total(p.rolls));
+    const a = scores[0];
     const goal = targetFor(SV.stage);
     const card = $('#end');
     let title, sub = '', coins = 0, win = false;
     if (G.mode === 'duo') {
-      title = a === b ? '무승부' : a > b ? 'P1 WIN' : 'P2 WIN';
+      const top = Math.max(...scores);
+      const winners = scores.map((v, i) => (v === top ? i : -1)).filter((i) => i >= 0);
+      title = winners.length > 1 ? '무승부' : 'P' + (winners[0] + 1) + ' WIN';
       AU.play('win');
     } else {
       SV.games++;
@@ -677,7 +680,8 @@
   const tap = (id, fn) => $(id).addEventListener('click', (e) => { AU.unlock(); AU.play('tap'); fn(e); });
   tap('#bStart', () => { SV.match = null; startGame('tour'); });
   tap('#bContinue', () => startGame('tour', true));
-  tap('#bDuo', () => startGame('duo'));
+  tap('#bDuo', () => startGame('duo', false, 2));
+  tap('#bTrio', () => startGame('duo', false, 3));
   tap('#bShop', () => openShop());
   tap('#bMis', () => openMissions());
   tap('#vs', () => { if (G.phase === 'vs') G.pt = 99; });

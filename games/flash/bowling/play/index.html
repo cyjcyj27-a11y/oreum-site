@@ -118,7 +118,7 @@ body:not(.playing) #pinmap{display:none}
 @media (max-aspect-ratio:3/4){
   #title{justify-content:space-between;padding-top:calc(70px + env(safe-area-inset-top));padding-bottom:calc(70px + env(safe-area-inset-bottom))}}
 .duo{display:flex;gap:10px}
-.duo .btn{flex:1;font-size:18px}
+.duo .btn{flex:1;font-size:18px;white-space:nowrap;padding:13px 6px}
 
 /* ---------- 스테이지 소개 ---------- */
 #vs{position:fixed;inset:0;z-index:28;display:flex;align-items:center;justify-content:center;
@@ -136,8 +136,9 @@ body:not(.playing) #pinmap{display:none}
 #eTitle{font-family:'Orbit','Ria',sans-serif;font-size:60px;line-height:1}
 #eTitle.win{color:#ffe14d;text-shadow:0 0 20px #ff3df2}
 #eTitle.lose{color:#b9c2ff;text-shadow:0 0 16px #3d5bff}
-#eScore{display:flex;gap:14px;align-items:center;font-size:26px}
-#eScore b{font-family:'Orbit','Ria',sans-serif;font-weight:400;font-size:36px}
+#eScore{display:flex;gap:10px;align-items:center;font-size:26px}
+#eScore span{display:flex;align-items:center;gap:6px;white-space:nowrap}
+#eScore b{font-family:'Orbit','Ria',sans-serif;font-weight:400;font-size:clamp(28px,8vw,36px)}
 #eScore i{font-style:normal;opacity:.5}
 #eCoins{font-size:22px;color:#ffe14d;min-height:1px}
 #end .btns{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;width:100%}
@@ -216,7 +217,10 @@ body:not(.playing) #pinmap{display:none}
   <div class="menu">
     <button class="btn cont" id="bContinue" hidden>이어하기</button>
     <button class="btn main" id="bStart">START <small id="tStage">STAGE 1</small></button>
-    <button class="btn" id="bDuo">2 PLAYERS</button>
+    <div class="duo">
+      <button class="btn" id="bDuo">2 PLAYERS</button>
+      <button class="btn" id="bTrio">3 PLAYERS</button>
+    </div>
     <div class="duo">
       <button class="btn" id="bShop">🎳 상점</button>
       <button class="btn" id="bMis">🏅 미션</button>
@@ -272,7 +276,7 @@ body:not(.playing) #pinmap{display:none}
 <script src="js/phys.js?v=2"></script>
 <script src="js/audio.js?v=2"></script>
 <script src="js/alley.js?v=3"></script>
-<script src="js/game.js?v=7"></script>
+<script src="js/game.js?v=8"></script>
 <script src="/assets/visit.js?v=12" defer></script>
 <script src="/assets/game-events.js?v=2" defer></script>
 </body>
