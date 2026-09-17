@@ -1,17 +1,16 @@
 // props.js — 부딪히면 세상이 반응한다 (후기 2026-09-17 "상호작용이 너무 없다 · 염소시뮬레이터 같은 병맛 연출")
 //   · 돌담: 세게 들이받으면 무너지고 현무암 돌이 튀어 구른다. 차는 속도만 조금 잃고 뚫고 간다. 떠나면 다시 쌓인다
 //   · 가로등·신호등: 들이받으면 달리던 쪽으로 넘어간다
-//   · 나무: 흔들리고 잎이 흩날린다. 귤나무면 귤이 떨어져 구른다
+//   · 나무: 흔들린다. 귤나무면 귤이 떨어져 구른다 (잎은 뺐다 — 밤에 돌처럼 보였다)
 //   · 세워 둔 차: 경보가 삐용삐용
 //   · 흩어진 돌·귤은 걸어가며 차고, 차로 밀면 튀어 나간다
-//   그리기는 종류마다 InstancedMesh 하나(돌·귤·잎) — 조각이 늘어도 그리기 명령은 셋
+//   그리기는 종류마다 InstancedMesh 하나(돌·귤) — 조각이 늘어도 그리기 명령은 둘
 (function () {
   const I = ISLAND, H = I.H;
   const G = 9.8;
   const KINDS = {
     stone:  { max: 220, e: 0.25, fric: 2.4, life: 70, kick: 0.9 },
     orange: { max: 60, e: 0.45, fric: 0.9, life: 60, kick: 1.6 },
-    leaf:   { max: 160, e: 0, fric: 0, life: 4.5, kick: 0 },
   };
   const P = { meshes: {}, free: {}, bodies: [], falls: [], shakes: [], broken: [], alarmT: 0, sayT: 0, ready: false };
   const M4 = new THREE.Matrix4(), Q = new THREE.Quaternion(), Q2 = new THREE.Quaternion(), V = new THREE.Vector3(), SC = new THREE.Vector3(), AX = new THREE.Vector3(), YUP = new THREE.Vector3(0, 1, 0), ZERO = new THREE.Matrix4().makeScale(0, 0, 0);
@@ -27,9 +26,7 @@
     const orangeG = GEO.mergeGeos([{ g: peel, c: [1, 0.52, 0.08] }, { g: stem, m: GEO.T(0, 0.86, 0), c: [0.25, 0.45, 0.12] }, { g: leafT, m: GEO.T(0.28, 0.9, 0, 0, 0, 0.3), c: [0.2, 0.5, 0.15] }]);
     const orangeM = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.5, emissive: 0x5a2600, emissiveIntensity: 0.9 });
     // 잎: 뾰족한 잎 모양, 밝은 초록에 은은한 빛 — 네모판일 땐 밤에 까만 돌처럼 보였다(9/17 사장님 "떨어지기 전엔 돌")
-    const leafG = new THREE.ShapeGeometry(new THREE.Shape().moveTo(0, -0.5).quadraticCurveTo(0.42, 0, 0, 0.5).quadraticCurveTo(-0.42, 0, 0, -0.5));
-    const leafM = new THREE.MeshStandardMaterial({ color: 0x6fae3c, roughness: 0.8, side: THREE.DoubleSide, emissive: 0x1e3a0e, emissiveIntensity: 1 });
-    for (const [k, g, m] of [['stone', stoneG, stoneM], ['orange', orangeG, orangeM], ['leaf', leafG, leafM]]) {
+    for (const [k, g, m] of [['stone', stoneG, stoneM], ['orange', orangeG, orangeM]]) {
       const n = KINDS[k].max, mesh = new THREE.InstancedMesh(g, m, n);
       for (let i = 0; i < n; i++) mesh.setMatrixAt(i, ZERO);
       mesh.frustumCulled = false; mesh.castShadow = k === 'stone'; mesh.receiveShadow = true;
@@ -48,7 +45,6 @@
       if (old < 0) return null; idx = P.bodies[old].idx; P.bodies.splice(old, 1);
     }
     const b = { kind, idx, x, y, z, vx, vy, vz, r, t: 0, q: new THREE.Quaternion().setFromEuler(new THREE.Euler(Math.random() * 6, Math.random() * 6, Math.random() * 6)), ax: Math.random() - 0.5, ay: Math.random() - 0.5, az: Math.random() - 0.5, spin: 0, rest: 0 };
-    if (kind === 'leaf') b.spin = 4 + Math.random() * 6;
     P.bodies.push(b); return b;
   }
 
@@ -98,8 +94,7 @@
     const it = c.item; if (P.shakes.some(s => s.it === it)) return;
     const sp = Math.hypot(vx, vz) || 1;
     P.shakes.push({ it, ax: new THREE.Vector3(vz / sp, 0, -vx / sp), amp: Math.min(0.28, 0.05 + speed * 0.025), t: 0 });
-    const s = it.sx || 1, n = Math.min(14, 4 + Math.round(speed));
-    for (let k = 0; k < n; k++) { const a = Math.random() * 6.28, r = Math.random() * s; spawn('leaf', it.x + Math.cos(a) * r, it.y + s * (1.4 + Math.random() * 0.9), it.z + Math.sin(a) * r, (Math.random() - 0.5) * 2, Math.random() * 1.5, (Math.random() - 0.5) * 2, 0.09 + Math.random() * 0.04); }
+    const s = it.sx || 1;   // 잎은 안 뿌린다 — 밤에 까만 돌처럼 보였다 (사장님 2026-09-18 "잎사귀를 빼버려")
     if (c.orch && speed > 3) for (let k = 0; k < 3 + Math.round(Math.random() * 3); k++) { const a = Math.random() * 6.28, r = s * 0.6; spawn('orange', it.x + Math.cos(a) * r, it.y + s * 1.6, it.z + Math.sin(a) * r, (Math.random() - 0.5) * 1.5, 0.5, (Math.random() - 0.5) * 1.5, 0.15); }
   }
 
@@ -131,14 +126,10 @@
     // ── 조각들 ──
     for (let i = P.bodies.length - 1; i >= 0; i--) {
       const b = P.bodies[i], K = KINDS[b.kind]; b.t += dt;
-      if (b.kind === 'leaf') {   // 잎: 천천히 팔랑이며 내려앉는다
-        b.vy = Math.max(b.vy - G * 0.5 * dt, -1.2); b.vx *= 1 - 1.2 * dt; b.vz *= 1 - 1.2 * dt;
-        b.x += (b.vx + Math.sin(b.t * 3 + b.idx) * 0.6) * dt; b.y += b.vy * dt; b.z += (b.vz + Math.cos(b.t * 2.6 + b.idx) * 0.6) * dt;
-        const g = ground(b.x, b.z) + 0.03; if (b.y < g) { b.y = g; b.vx = b.vz = b.vy = 0; b.spin = 0; }
-        b.q.multiply(Q2.setFromAxisAngle(AX.set(b.ax, b.ay, b.az).normalize(), b.spin * dt));
-      } else {
+      {
+
         // 걷는 주인공·달리는 차가 건드리면 튄다
-        if (hero && b.kind !== 'leaf') { const dx = b.x - hero.x, dz = b.z - hero.z, d = Math.hypot(dx, dz); if (d < 0.45 + b.r && Math.abs(b.y - hero.y) < 1.2) { const s = Math.max(1.2, Math.abs(hero.spd)) * K.kick, fy = -Math.sin(hero.yaw), fz = -Math.cos(hero.yaw); b.vx = (dx / (d || 1) * 0.5 + fy) * s; b.vz = (dz / (d || 1) * 0.5 + fz) * s; b.vy = 1.2 + s * 0.35; b.rest = 0; if (b.t > 0.3 && s > 2) AUDIO.tone(b.kind === 'stone' ? 180 : 320, 0.08, 'triangle', 0.06); } }
+        if (hero) { const dx = b.x - hero.x, dz = b.z - hero.z, d = Math.hypot(dx, dz); if (d < 0.45 + b.r && Math.abs(b.y - hero.y) < 1.2) { const s = Math.max(1.2, Math.abs(hero.spd)) * K.kick, fy = -Math.sin(hero.yaw), fz = -Math.cos(hero.yaw); b.vx = (dx / (d || 1) * 0.5 + fy) * s; b.vz = (dz / (d || 1) * 0.5 + fz) * s; b.vy = 1.2 + s * 0.35; b.rest = 0; if (b.t > 0.3 && s > 2) AUDIO.tone(b.kind === 'stone' ? 180 : 320, 0.08, 'triangle', 0.06); } }
         if (!(window.PET && PET.onFoot) && Math.abs(car.long) > 2) { const dx = b.x - car.x, dz = b.z - car.z, d = Math.hypot(dx, dz); if (d < 1.9 && Math.abs(b.y - car.y) < 1.5) { b.vx = cvx * 1.1 + dx / (d || 1) * 2; b.vz = cvz * 1.1 + dz / (d || 1) * 2; b.vy = 2 + Math.abs(car.long) * 0.12; b.rest = 0; } }
         if (!(b.rest > 1.2 && b.t > 2)) {   // 멈춘 조각은 건드릴 때까지 쉰다
           b.vy -= G * dt; b.x += b.vx * dt; b.y += b.vy * dt; b.z += b.vz * dt;
