@@ -87,7 +87,7 @@
   addEventListener('resize', () => { if (st.mode !== 'title') sizeCanvases(); else drawTitle(); });
 
   // ── 판 시작
-  let overT = 0;
+  let overT = 0, gpuSent = false;
   function startStage(s) {
     clearTimeout(overT);   // 앞 판 GAME OVER 창이 새 판 위에 늦게 뜨지 않게
     st.over = true;        // 판을 짓는 동안은 시계를 멈춘다 — 남은 시간이 아직 0이라 곧장 GAME OVER 가 났다(2026-09-17 사장님 "접속하면 리트라이 뜨고 힌트버튼도 안먹힘")
@@ -109,6 +109,19 @@
     setTimeout(() => {
       S.build(I.scene, I.seed, { night: I.night });
       st.diffs = S.pick(I.count, I.lv, I.seed);
+      // 폰에서 3D 가 안 그려져 두 장이 배경만 똑같이 나왔다(2026-09-17 사장님 "여전히 똑같음") — 그러면 가벼운 판으로 다시
+      const ga = (n, p) => { try { if (window.gtag) gtag('event', n, p); } catch (e) {} };
+      const cov = Math.round((S.cover || 0) * 100);
+      if (!gpuSent) { gpuSent = true; ga('spotdiff_gpu', { stage: s, gpu: S.gpu(), cover: cov, n: st.diffs.length, need: I.count }); }
+      if (st.diffs.length < Math.min(3, I.count) || cov < 5 || S.lost) {
+        const was = { stage: s, gpu: S.gpu(), cover: cov, n: st.diffs.length, lost: S.lost ? 1 : 0 };
+        if (S.goSafe()) {
+          S.build(I.scene, I.seed, { night: I.night });
+          st.diffs = S.pick(I.count, I.lv, I.seed);
+          was.safe_n = st.diffs.length; was.safe_cover = Math.round((S.cover || 0) * 100);
+        }
+        ga('spotdiff_blank', was);
+      }
       st.found = st.diffs.map(() => false);
       st.total = I.time;
       st.left = I.time;

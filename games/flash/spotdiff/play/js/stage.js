@@ -10,12 +10,14 @@
 
   function init() {
     if (renderer) return;
-    renderer = new T.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
+    const SAFE = S.SAFE;   // 폰에서 3D 가 안 그려질 때 쓰는 가벼운 판 — 그림자·환경광·계단 다듬기 없음(2026-09-17)
+    renderer = new T.WebGLRenderer({ antialias: !SAFE, alpha: true, preserveDrawingBuffer: true, powerPreference: SAFE ? 'low-power' : 'default' });
+    renderer.domElement.addEventListener('webglcontextlost', (e) => { e.preventDefault(); S.lost = true; });
     renderer.setPixelRatio(1);
     renderer.outputColorSpace = T.SRGBColorSpace;
     renderer.toneMapping = T.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.0;
-    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.enabled = !SAFE;
     renderer.shadowMap.type = T.PCFSoftShadowMap;
     renderer.setClearColor(0x000000, 0);
     scene = new T.Scene();
@@ -23,8 +25,8 @@
     hemi = new T.HemisphereLight(0xfff4e6, 0x8a6a58, 0.5);
     scene.add(hemi);
     sun = new T.DirectionalLight(0xfff0dc, 2.6);
-    sun.castShadow = true;
-    sun.shadow.mapSize.set(2048, 2048);
+    sun.castShadow = !SAFE;
+    sun.shadow.mapSize.set(SAFE ? 512 : 2048, SAFE ? 512 : 2048);
     sun.shadow.bias = -0.0004;
     sun.shadow.normalBias = 0.02;
     sun.shadow.radius = 4;
@@ -48,9 +50,11 @@
     panel.position.set(6, 6, 4);
     panel.lookAt(0, 0, 0);
     es.add(panel);
-    const pm = new T.PMREMGenerator(renderer);
-    envRT = pm.fromScene(es, 0.02);
-    scene.environment = envRT.texture;
+    if (!SAFE) {
+      const pm = new T.PMREMGenerator(renderer);
+      envRT = pm.fromScene(es, 0.02);
+      scene.environment = envRT.texture;
+    } else hemi.intensity = 1.1;
     root = new T.Group();
     scene.add(root);
   }
@@ -94,7 +98,7 @@
     sun.target.position.set(0, 0, 0);
     sun.intensity = 3.4;
     sun.color.set(0xfff0dc);
-    hemi.intensity = 0.5;
+    hemi.intensity = S.SAFE ? 1.1 : 0.5;
     renderer.toneMappingExposure = 0.95;
     sun.position.set(10, 13, 5);
     const info = SCN[name](ctx);
@@ -146,6 +150,7 @@
         o[di + x] = rpBuf[si + x] * k; o[di + x + 1] = rpBuf[si + x + 1] * k; o[di + x + 2] = rpBuf[si + x + 2] * k; o[di + x + 3] = a;
       }
     }
+    if (w * h <= 320 * 240) { let n = 0; for (let i = 3; i < rpBuf.length; i += 16) if (rpBuf[i]) n++; S.cover = n / (w * h / 4); }   // 3D 가 그림을 얼마나 덮었나(0이면 아무것도 안 그려진 것)
     g.putImageData(img, 0, 0);
     return rpCv;
   }
@@ -343,6 +348,19 @@
         }
       return Math.round(n * sc);
     });
+  };
+
+  S.gpu = function () {
+    try { const gl = renderer.getContext(), e = gl.getExtension('WEBGL_debug_renderer_info'); return String(e ? gl.getParameter(e.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER)).slice(0, 90); } catch (err) { return '?'; }
+  };
+  // 가벼운 판으로 갈아탄다 — 이미 가벼운 판이면 false
+  S.goSafe = function () {
+    if (S.SAFE) return false;
+    S.SAFE = true;
+    try { renderer.dispose(); renderer.forceContextLoss(); } catch (e) {}
+    renderer = null; S.lost = false;
+    init();
+    return true;
   };
 
   S.candCount = () => cands.length;
