@@ -111,19 +111,27 @@
   const TRACE_IC = { shoe: '👟', bag: '🎒', tie: '🎀', torch: '🔦', coat: '🧥' };
   const RELIC_IC = { RING: '💍', COIN: '🪙', HAIRPIN: '📌', WATCH: '⌚', GLASSES: '👓', WHISTLE: '📣', KEY: '🔑', MARBLE: '🔮' };
   function slot(ch, name, on) { return '<div class="slot' + (on ? ' on' : '') + '"><img src="' + (on ? icon(ch).on : icon(ch).off).toDataURL() + '" alt=""><span>' + name + '</span></div>'; }
-  // 인벤토리 — 네모 칸을 행·열 맞춰 화면에 꽉 채운다(2026-09-16 사장님). 부적 → 흔적 → 유품 순, 남는 칸은 빈칸
+  // 인벤토리 — 부적 8(윗줄)·흔적 5(둘째 줄)는 큰 칸, 유품 28 은 아래 작은 칸(2026-09-17 사장님). 화면에 꽉 차게 칸 크기를 고른다
   function drawInv() {
-    const PR = window.PROPS, cells = [];
+    const PR = window.PROPS, charms = [], traces = [], relics = [];
     const charmName = EN ? 'TALISMAN' : '부적';
-    for (let i = 0; i < W.CHARM_N; i++) cells.push(slot('📜', charmName, W.charmTaken.has(i)));
-    for (const m of W.MARKS) if (m.item) cells.push(slot(TRACE_IC[m.item.k] || '👣', EN ? m.item.en.replace(/^A /, '') : m.item.ko, W.taken.has(m.i)));
-    for (const r of PR.RELICS) cells.push(slot(RELIC_IC[r.kind.en] || '💍', EN ? r.kind.en : r.kind.ko, W.used.has(r.id)));
-    const R = inv.getBoundingClientRect(), bw = Math.max(200, R.width), bh = Math.max(150, R.height), gap = 6;
+    for (let i = 0; i < W.CHARM_N; i++) charms.push(slot('📜', charmName, W.charmTaken.has(i)));
+    for (const m of W.MARKS) if (m.item) traces.push(slot(TRACE_IC[m.item.k] || '👣', EN ? m.item.en.replace(/^A /, '') : m.item.ko, W.taken.has(m.i)));
+    for (const r of PR.RELICS) relics.push(slot(RELIC_IC[r.kind.en] || '💍', EN ? r.kind.en : r.kind.ko, W.used.has(r.id)));
+    const R = inv.getBoundingClientRect(), bw = Math.max(200, R.width), bh = Math.max(150, R.height), gap = 6, sep = 22, K = .5;
+    const bc = Math.max(charms.length, traces.length);
+    // 큰 칸 두 줄 + 작은 칸 n 줄이 높이에 들어가게 — 작은 칸은 큰 칸의 절반까지
     let best = null;
-    for (let cols = 4; cols <= 16; cols++) { const rows = Math.ceil(cells.length / cols), s = Math.min((bw - gap * (cols - 1)) / cols, (bh - gap * (rows - 1)) / rows); if (!best || s > best.s) best = { cols, rows, s }; }
-    while (cells.length < best.cols * best.rows) cells.push('<div class="slot empty"></div>');
-    inv.style.setProperty('--cols', best.cols); inv.style.setProperty('--rows', best.rows); inv.style.setProperty('--cell', Math.floor(best.s) + 'px');
-    inv.innerHTML = '<div class="grid">' + cells.join('') + '</div>';
+    for (const sc of [14, 10, 7]) {
+      const sr = Math.ceil(relics.length / sc);
+      const big = Math.min((bw - gap * (bc - 1)) / bc, (bh - gap * (1 + sr - 1) - sep) / (2 + sr * K));
+      const small = Math.min((bw - gap * (sc - 1)) / sc, big * K);
+      if (!best || big + small > best.big + best.small) best = { sc, big, small };
+    }
+    const row = (cells, cell) => '<div class="row" style="--cell:' + Math.floor(cell) + 'px">' + cells.join('') + '</div>';
+    let smallRows = '';
+    for (let i = 0; i < relics.length; i += best.sc) smallRows += row(relics.slice(i, i + best.sc), best.small);
+    inv.innerHTML = '<div class="inv"><div class="sec">' + row(charms, best.big) + row(traces, best.big) + '</div><div class="sec small">' + smallRows + '</div></div>';
     $('mapCnt').innerHTML = EMO('📜 ' + W.charmTaken.size + '/' + W.CHARM_N + '   👣 ' + W.taken.size + '/' + W.TRACE_N + '   💍 ' + PR.relicCount() + '/' + PR.RELIC_N);
   }
 
