@@ -473,12 +473,12 @@
     const disc = (x, z, r, yOff, col, S) => { for (let i = 0; i < S; i++) { const a0 = i / S * Math.PI * 2, a1 = (i + 1) / S * Math.PI * 2; quadPts([[x, z], [x + Math.cos(a0) * r, z + Math.sin(a0) * r], [x + Math.cos(a1) * r, z + Math.sin(a1) * r], [x + Math.cos(a1) * r, z + Math.sin(a1) * r]], yOff, col); } };
     for (const nd of R.nodes) {
       if (nd.light || !nd.out.length) continue;
-      let w = 0, sx = 0, sz = 0, townish = false, dirt = true;
-      for (const e of nd.out) { w = Math.max(w, e.w); sx += e.dir.x; sz += e.dir.z; if (e.type === 'city' || e.type === 'town') townish = true; if (e.type !== 'access') dirt = false; }
+      let w = 0, sx = 0, sz = 0, dirt = true;
+      for (const e of nd.out) { w = Math.max(w, e.w); sx += e.dir.x; sz += e.dir.z; if (e.type !== 'access') dirt = false; }
       const dead = Math.hypot(sx, sz) > 0.8;                      // 길이 한쪽으로만 이어진다 = 여기서 끊긴다
-      const r = dead ? Math.max(w * 0.75, w / 2 + 2.5) : w / 2 + (nd.deg >= 3 ? 1 : 0.4);
-      if (!townish) { Q = QD; disc(nd.x, nd.z, r + 1.6, 0.03, SHOULDER, 12); }   // 갓길도 마디에서 이어지게
-      Q = dirt ? QD : QA; disc(nd.x, nd.z, r, dead ? 0.07 : 0.062, dirt ? DIRT : ASPHALT, dead ? 16 : 12);
+      const r = dead ? Math.max(w * 0.75, w / 2 + 2.5) : w / 2 + (nd.deg >= 3 ? 1 : 0.2);   // 굽이는 띠가 못 덮는 바깥쪽만
+      // 덮개는 띠(0.06)보다 5cm 위에 얹는다 — 2mm 만 띄웠더니 두 면이 서로 깜빡여 길이 얼룩덜룩했다 (사장님 2026-09-18 "도로가 왜 이렇게 지저분해졌지")
+      Q = dirt ? QD : QA; disc(nd.x, nd.z, r, 0.11, dirt ? DIRT : ASPHALT, dead ? 16 : 12);
     }
     const P = TEX.P;
     function mesh(q, mat) {
