@@ -114,6 +114,19 @@
     '허허허, 다음엔 조금 일찍 움직이게. 좋은 땅은 기다려주질 않아.': 'Move sooner next time. Good land does not wait.',
 
     // ── 여자친구 ──
+    // 부수고 다닐 때 (props.js, 2026-09-17)
+    '오빠!! 남의 돌담을 왜 부숴?!': 'Babe!! Why are you smashing their stone wall?!',
+    '방금 그거 일부러 그런 거지?': 'You did that on purpose, right?',
+    '돌담 다시 쌓으려면 하르방들 고생하신다…': 'The grandpas will have to stack that wall all over again…',
+    '와… 돌이 다 날아갔어 ㅋㅋㅋ': 'Wow… the stones went flying lol',
+    '이 동네에서 우리 얼굴 팔리겠다': 'This whole village is going to know our faces',
+    '가로등!! 오빠 미쳤어?': 'The street lamp!! Are you crazy?',
+    '가로등이 누웠어… 오늘 밤 이 길 깜깜하겠다': 'The lamp is lying down… this road will be pitch dark tonight',
+    '보험 되는 거 맞지?': 'We are insured, right?',
+    '100억 있다고 막 사는 거 아니야': 'Having 10 billion won is no excuse to live like this',
+    '경보 울린다! 빨리 가!': 'The alarm is going off! Go, go!',
+    '주인 나오기 전에 튀어!': 'Floor it before the owner comes out!',
+    '삐용삐용… 창피해 죽겠네': 'Wee-woo… I could die of embarrassment',
     '오빠, 제주도 진짜 재미없다. 우리 서울 가자.': 'Jeju is so boring. Can we go back to Seoul?',
     '여기 또 땅 보러 온 거야? 난 카페나 가고 싶은데.': 'Looking at land again? I just want a café.',
     '100억이나 있는데 왜 맨날 이런 데를 돌아다녀?': 'We have 10 billion won and we drive around fields all day?',

@@ -28,6 +28,7 @@
     for (let i = 0; i < n; i++) {
       const it = items[i]; Q.setFromAxisAngle(YUP, it.yaw || 0); V.set(it.x, it.y, it.z); SC.set(it.sx || 1, it.sy || 1, it.sz || 1);
       Mtx.compose(V, Q, SC); m.setMatrixAt(i, Mtx); if (it.color != null) m.setColorAt(i, COL.set(it.color));
+      (it._ms || (it._ms = [])).push(m, i);   // 부서지는 소품(props.js)이 제 인스턴스를 찾아 움직인다
       cx += it.x; cy += it.y; cz += it.z; ms = Math.max(ms, SC.x, SC.y, SC.z);
     }
     m.instanceMatrix.needsUpdate = true; if (m.instanceColor) m.instanceColor.needsUpdate = true;
@@ -273,8 +274,8 @@
       const x = nd.x, z = nd.z, y = H(x, z);
       const ps = [{ x: x - wx / 2 - 1.5, z: z + wz / 2 + 1.5, yaw: 0, ns: true }, { x: x + wx / 2 + 1.5, z: z - wz / 2 - 1.5, yaw: Math.PI, ns: true }, { x: x + wx / 2 + 1.5, z: z + wz / 2 + 1.5, yaw: Math.PI / 2, ns: false }, { x: x - wx / 2 - 1.5, z: z - wz / 2 - 1.5, yaw: -Math.PI / 2, ns: false }];
       for (const p of ps) {
-        p.y = y; poleItems.push(p); S.obst.circles.push({ x: p.x, z: p.z, r: 0.3, kind: 'pole' });
-        for (let k = 0; k < 3; k++) { const lx = 4.2 + (k - 1) * 0.6, lz = 0.22; lampItems.push({ x: p.x + Math.cos(p.yaw) * lx + Math.sin(p.yaw) * lz, y: y + 5.5, z: p.z - Math.sin(p.yaw) * lx + Math.cos(p.yaw) * lz, sx: 0.2, sy: 0.2, sz: 0.2, color: 0x222222, ns: p.ns, k }); }
+        p.y = y; poleItems.push(p); const pc = { x: p.x, z: p.z, r: 0.3, kind: 'pole', item: p, extra: [] }; S.obst.circles.push(pc);
+        for (let k = 0; k < 3; k++) { const lx = 4.2 + (k - 1) * 0.6, lz = 0.22; lampItems.push({ x: p.x + Math.cos(p.yaw) * lx + Math.sin(p.yaw) * lz, y: y + 5.5, z: p.z - Math.sin(p.yaw) * lx + Math.cos(p.yaw) * lz, sx: 0.2, sy: 0.2, sz: 0.2, color: 0x222222, ns: p.ns, k }); pc.extra.push(lampItems[lampItems.length - 1]); }
       }
     }
     if (poleItems.length) { scene.add(inst(poleG, new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.6, metalness: 0.4 }), poleItems, { noShadow: true, chunk: 500, far: 900 })); S.lampMesh = inst(new THREE.SphereGeometry(1, 6, 4), new THREE.MeshBasicMaterial({ color: 0xffffff }), lampItems, { noShadow: true }); S.lampItems = lampItems; scene.add(S.lampMesh); applyLamps(); }
@@ -282,7 +283,7 @@
     // ── 가로등 ──
     const slG = mergeGeos([{ g: new THREE.CylinderGeometry(0.1, 0.16, 9, 8), m: T(0, 4.5, 0), c: [0.4, 0.42, 0.45] }, { g: new THREE.CylinderGeometry(0.07, 0.09, 2.6, 6), m: T(1.2, 8.9, 0, 0, 0, Math.PI / 2 - 0.25), c: [0.4, 0.42, 0.45] }]);
     const headItems = [];
-    function lampPost(x, z, yaw) { if (I.coastDist(x, z) < 8) return; const y = H(x, z); lamps.push({ x, y, z, yaw }); S.obst.circles.push({ x, z, r: 0.25, kind: 'pole' }); headItems.push({ x: x + Math.cos(yaw) * 2.35, y: y + 9.15, z: z - Math.sin(yaw) * 2.35, sx: 0.7, sy: 0.25, sz: 0.35, yaw }); }
+    function lampPost(x, z, yaw) { if (I.coastDist(x, z) < 8) return; const y = H(x, z); const lp = { x, y, z, yaw }; lamps.push(lp); const lc = { x, z, r: 0.25, kind: 'pole', item: lp, extra: [] }; S.obst.circles.push(lc); const hd = { x: x + Math.cos(yaw) * 2.35, y: y + 9.15, z: z - Math.sin(yaw) * 2.35, sx: 0.7, sy: 0.25, sz: 0.35, yaw }; headItems.push(hd); lc.extra.push(hd); }
     for (const e of ROADS.edges) {
       if (!(e.type === 'city' || e.type === 'town') || e.a.id > e.b.id) continue;
       if (e.lanes !== 2 && !(e.type === 'town' && !e.ns)) continue;
@@ -292,7 +293,7 @@
 
     // ── 야자수 ──
     for (const s of SPOTS.list) if (s.palms) { for (let k = 0; k < 24; k++) { const a = R() * 6.28, d = 20 + R() * 120; const x = s.x + Math.cos(a) * d, z = s.z + Math.sin(a) * d; const cd = I.coastDist(x, z); if (cd > 12 && cd < 90) palms.push({ x, z }); } }
-    for (const e of ROADS.edges) { if (e.lanes === 2 && e.a.id < e.b.id) { const n = Math.floor(e.len / 14); for (let i = 1; i < n; i++) { const t = i / n; palms.push({ x: e.a.x + (e.b.x - e.a.x) * t + (R() - 0.5) * 0.6, z: e.a.z + (e.b.z - e.a.z) * t }); } } }
+    for (const e of ROADS.edges) { if (e.lanes === 2 && e.a.id < e.b.id) { const n = Math.floor(e.len / 14); for (let i = 1; i < n; i++) { const t = i / n; palms.push({ x: e.a.x + (e.b.x - e.a.x) * t + (R() - 0.5) * 0.6, z: e.a.z + (e.b.z - e.a.z) * t, median: true }); } } }
     S.palms = palms;
 
     // ── 시골: 돌담 밭·감귤밭·숲 ──
@@ -326,7 +327,18 @@
     const wallMat2 = rk && rk.map ? new THREE.MeshStandardMaterial({ color: 0x5a5a5e, roughness: 1, map: TEX.rep(rk.map, 1.2, 0.35), normalMap: TEX.rep(rk.normal, 1.2, 0.35), normalScale: new THREE.Vector2(1.2, 1.2) }) : new THREE.MeshStandardMaterial({ color: 0x232325, roughness: 1 });
     wallMat2.onBeforeCompile = sh => { sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nvarying float vAO;').replace('#include <begin_vertex>', '#include <begin_vertex>\nvAO = 0.45 + 0.55 * smoothstep(0.0, 0.7, position.y);'); sh.fragmentShader = sh.fragmentShader.replace('#include <common>', '#include <common>\nvarying float vAO;').replace('#include <color_fragment>', '#include <color_fragment>\ndiffuseColor.rgb *= vAO;'); };
     if (walls.length) scene.add(inst(wallG, wallMat2, walls, { noShadow: true, chunk: 250, far: 1100 }));
-    for (const t of trees) S.obst.circles.push({ x: t.x, z: t.z, r: 0.25 * t.sc, kind: 'tree' });
+    // 길 위 나무·야자수 걷어내기 — 마을 블록·공원·명소 둘레는 길을 안 보고 심어서 차로 한가운데 줄기가 섰다
+    // (후기 2026-09-17 "도로에 가로수가 꽂혀있다"). 도로망이 다 깔린 뒤라 여기서 한 번에 거른다. 가지가 차 위로 덮이는 큰 나무는 더 멀리 뗀다
+    // 큰길 중앙분리대 야자수(median)는 분리대 위라 남긴다
+    const roadHit = (x, z, pad, median) => {
+      const i0 = Math.floor(x / ROADS.ECELL), j0 = Math.floor(z / ROADS.ECELL);
+      for (let i = i0 - 1; i <= i0 + 1; i++) for (let j = j0 - 1; j <= j0 + 1; j++) { const a = ROADS.ehash.get(i * 100003 + j); if (!a) continue;
+        for (const e of a) { const c = ROADS.edgeDist(e, x, z); if (median && e.lanes === 2 && c < 1) continue; if (c - e.w / 2 < pad) return true; } }
+      return false;
+    };
+    for (let i = trees.length - 1; i >= 0; i--) { const t = trees[i]; if (roadHit(t.x, t.z, Math.max(0.5, 0.55 * t.sc - 1))) trees.splice(i, 1); }
+    for (let i = S.palms.length - 1; i >= 0; i--) { const p = S.palms[i]; if (roadHit(p.x, p.z, p.median ? -0.5 : 0.8, p.median)) S.palms.splice(i, 1); }
+    for (const t of trees) { t.circle = { x: t.x, z: t.z, r: 0.25 * t.sc, kind: 'tree', orch: t.orch }; S.obst.circles.push(t.circle); }
     const Nn = NOISE.makeNoise(99);
     function lump(r, ox, oy, oz, seed) { const g = new THREE.SphereGeometry(r, 9, 7); const p = g.attributes.position; for (let i = 0; i < p.count; i++) { const x = p.getX(i), y = p.getY(i), z = p.getZ(i); const k = 1 + 0.38 * Nn.fbm3(x * 2.1 + seed, y * 2.1, z * 2.1, 4, 2, 0.5) - 0.1 * Math.max(0, -y / r); p.setXYZ(i, x * k, y * k * 0.85, z * k); } g.computeVertexNormals(); return { g, m: T(ox, oy, oz), c: [1, 1, 1] }; }
     const parts = [{ g: new THREE.CylinderGeometry(0.11, 0.2, 1.5, 7), m: T(0, 0.7, 0), c: [0.26, 0.19, 0.12] }, { g: new THREE.CylinderGeometry(0.05, 0.08, 0.9, 5), m: T(0.25, 1.6, 0.1, 0, 0, -0.5), c: [0.26, 0.19, 0.12] },
@@ -337,9 +349,14 @@
     for (const gg of [treeG, treeLoG]) { const p = gg.attributes.position, c = gg.attributes.color; for (let i = 0; i < p.count; i++) { const y = p.getY(i); if (y < 1.05 && c.getX(i) > 0.9) continue; if (c.getX(i) < 0.9) continue; const t = Math.min(1, Math.max(0, (y - 0.9) / 2.1)); const s = 0.42 + 0.58 * t; c.setXYZ(i, s, s, s); } }
     const tCol = new THREE.Color();
     const treeItems = trees.map(t => { const base = t.color != null ? t.color : (t.dark ? (R() < 0.5 ? 0x22401a : 0x2b4f22) : (R() < 0.5 ? 0x3d6b2a : 0x4a7a31)); tCol.set(base); const v = 0.8 + R() * 0.4; tCol.multiplyScalar(v); tCol.r *= 0.9 + R() * 0.25; return { x: t.x, y: t.y, z: t.z, yaw: R() * 6.28, sx: t.sc, sy: t.sc, sz: t.sc, color: tCol.getHex() }; });
+    trees.forEach((t, i) => { if (t.circle) t.circle.item = treeItems[i]; });
     scene.add(inst(treeG, new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.92, map: TEX.leaf, normalMap: TEX.leafN, normalScale: new THREE.Vector2(1.1, 1.1) }), treeItems, { chunk: 220, lod: treeLoG, lodDist: 300, far: 2300 }));
     buildTufts(scene);
-    for (const red of [false, true]) { const list = oranges.filter(o => !!o.red === red); if (!list.length) continue; const og = new THREE.BufferGeometry(); const arr = new Float32Array(list.length * 3); list.forEach((o, i) => { arr[i * 3] = o.x; arr[i * 3 + 1] = o.y; arr[i * 3 + 2] = o.z; }); og.setAttribute('position', new THREE.BufferAttribute(arr, 3)); const mat = new THREE.PointsMaterial({ color: red ? 0xd8202a : 0xf08a1e, size: red ? 0.5 : 0.42, sizeAttenuation: true }); if (!red) S.orangeMat = mat; const pts = new THREE.Points(og, mat); pts.frustumCulled = false; scene.add(pts); }
+    // 귤·동백꽃: 점(Points)은 가까이 가면 누런 네모판으로 보였다(2026-09-17 사장님 "걍 네모자나") → 작은 공 인스턴스. 60m 밖은 면 적은 모양
+    { const hiG = new THREE.IcosahedronGeometry(1, 1), loG = new THREE.OctahedronGeometry(1); hiG.scale(1, 0.85, 1); loG.scale(1, 0.85, 1);
+      const items = oranges.map(o => ({ x: o.x, y: o.y, z: o.z, sx: o.red ? 0.2 : 0.14, sy: o.red ? 0.2 : 0.14, sz: o.red ? 0.2 : 0.14, color: o.red ? 0xd8202a : 0xf08a1e }));
+      const mat = new THREE.MeshStandardMaterial({ roughness: 0.5, emissive: 0x3a1800, emissiveIntensity: 0.6 });
+      if (items.length) scene.add(inst(hiG, mat, items, { noShadow: true, chunk: 220, lod: loG, lodDist: 60, far: 700 })); }
     const hb = S.harubang; for (const h of hb) S.obst.circles.push({ x: h.x, z: h.z, r: 0.9, kind: 'stone' });
     if (hb.length) scene.add(inst(S.hbG, new THREE.MeshStandardMaterial({ color: 0x3a3a3c, roughness: 1 }), hb.map(h => ({ x: h.x, y: H(h.x, h.z), z: h.z, yaw: h.yaw, sx: 1.1, sy: 1.1, sz: 1.1 })), { chunk: 400, far: 600 }));
     buildPalms(scene, S.palms);
@@ -377,18 +394,19 @@
       if (rural && R() < 0.1) continue;
       if (onRoadish(x, z, 3)) continue;                 // 길 위에 귀나무를 심지 않는다
       const y = H(x, z), sc = 1.1 + R() * 0.5;
-      trees.push({ x: x + (R() - 0.5), y, z: z + (R() - 0.5), sc, dark: true });
-      if (R() < 0.7) for (let k = 0; k < 4; k++) { const a = R() * 6.28, rr = sc * (0.6 + R() * 0.4); oranges.push({ x: x + Math.cos(a) * rr, y: y + sc * 1.6 + (R() - 0.5) * sc * 0.9, z: z + Math.sin(a) * rr }); }
+      trees.push({ x: x + (R() - 0.5), y, z: z + (R() - 0.5), sc, dark: true, orch: true });
+      if (R() < 0.7) for (let k = 0; k < 4; k++) { const a = R() * 6.28, rr = sc * (0.6 + R() * 0.35); oranges.push({ x: x + Math.cos(a) * rr, y: y + sc * 1.6 + (R() - 0.5) * sc * 0.45,   // 잎 덩어리 겉에 붙게(아래로 처지면 허공에 떴다)
+        z: z + Math.sin(a) * rr }); }
     }
   }
   function fieldWall(x0, z0, x1, z1, walls) {
     const seg = 4; const push = (x, z, yaw) => {
       if (onRoadish(x, z, 2.5)) return;                  // 길과 겹치는 토막은 아예 안 놓는다
-      walls.push({ x, y: H(x, z) - 0.2, z, yaw, sx: seg + 0.2, sy: 1.2 + R() * 0.3, sz: 0.55 });
+      const it = { x, y: H(x, z) - 0.2, z, yaw, sx: seg + 0.2, sy: 1.2 + R() * 0.3, sz: 0.55 }; walls.push(it);
       // 돌담 충돌(사장님 2026-09-09 "차로 다 통과되네"): 토막마다 상자 하나. 길과 겹치는 토막은 빼서 도로를 막지 않는다
       const rn = window.ROADS && ROADS.nearest ? ROADS.nearest(x, z) : null; if (rn && rn.e && rn.d < 7) return;
       const hx = yaw ? 0.3 : seg / 2 + 0.1, hz = yaw ? seg / 2 + 0.1 : 0.3;
-      S.obst.boxes.push({ x0: x - hx, z0: z - hz, x1: x + hx, z1: z + hz, wall: true, kind: 'stone' });
+      S.obst.boxes.push({ x0: x - hx, z0: z - hz, x1: x + hx, z1: z + hz, wall: true, kind: 'stone', item: it });
     };
     // 밭마다 입구를 하나 낸다(토막 둘, 8m). 사방이 다 막혀 있어서 안으로 들어간 차가 갇혔다 (사장님 2026-09-10)
     const nX = Math.max(1, Math.round((x1 - x0) / seg)), nZ = Math.max(1, Math.round((z1 - z0) / seg));

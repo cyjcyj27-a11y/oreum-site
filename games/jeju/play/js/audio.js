@@ -136,6 +136,24 @@
   function tone(f, dur, type, vol, when) { if (!A.ctx) return; const ctx = A.ctx, t = ctx.currentTime + (when || 0); const o = ctx.createOscillator(); o.type = type || 'sine'; o.frequency.value = f; const g = ctx.createGain(); g.gain.setValueAtTime(vol || 0.15, t); g.gain.exponentialRampToValueAtTime(0.001, t + dur); o.connect(g); g.connect(A.master); o.start(t); o.stop(t + dur + 0.05); }
   function shutter() { if (!A.ctx) return; const ctx = A.ctx, s = ctx.createBufferSource(); s.buffer = A.noise; const hp = ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 2500; const g = ctx.createGain(); g.gain.setValueAtTime(0.35, ctx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08); s.connect(hp); hp.connect(g); g.connect(A.master); s.start(); s.stop(ctx.currentTime + 0.1); tone(1800, 0.05, 'square', 0.05, 0.09); }
   function stamp() { tone(220, 0.12, 'square', 0.12); tone(110, 0.2, 'triangle', 0.2, 0.02); }
+  // 자동차 도난 경보 — 위이잉(빠르게 오르내리는 사이렌) → 뺑뺑(두 음 번갈아) → 삐삐삐(빠른 짧은 음). 작은 경보 스피커처럼 대역만 남긴다
+  // (2026-09-17 사장님 "삐삐 경보음이 이상함" — 네모파 두 음만 번갈아 게임 효과음 같았다)
+  function alarm(dur) {
+    if (!A.ctx) return;
+    const ctx = A.ctx, t0 = ctx.currentTime, T = dur || 4.2;
+    const o = ctx.createOscillator(); o.type = 'sawtooth';
+    const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 1500; bp.Q.value = 0.9;
+    const sh = ctx.createWaveShaper(); { const c = new Float32Array(256); for (let i = 0; i < 256; i++) { const x = i / 127.5 - 1; c[i] = Math.tanh(x * 2.5); } sh.curve = c; }
+    const g = ctx.createGain(); g.gain.setValueAtTime(0, t0); g.gain.linearRampToValueAtTime(0.09, t0 + 0.03);
+    const f = o.frequency; let t = t0;
+    f.setValueAtTime(700, t);
+    const wail = 1.4, yelp = 1.2;
+    for (let k = 0; k < 7; k++) { f.linearRampToValueAtTime(1500, t + 0.1); f.linearRampToValueAtTime(700, t + 0.2); t += 0.2; }   // 위이잉
+    for (let k = 0; k < 6 && t < t0 + wail + yelp; k++) { f.setValueAtTime(k % 2 ? 1250 : 850, t); t += 0.2; }                           // 뺑뺑
+    while (t < t0 + T - 0.1) { f.setValueAtTime(1800, t); g.gain.setValueAtTime(0.09, t); g.gain.setValueAtTime(0.0, t + 0.07); t += 0.12; }   // 삐삐삐
+    g.gain.setValueAtTime(0.09, t); g.gain.linearRampToValueAtTime(0, t + 0.05);
+    o.connect(sh); sh.connect(bp); bp.connect(g); g.connect(A.master); o.start(t0); o.stop(t0 + T + 0.1);
+  }
   function ping(f) { tone(f || 880, 0.18, 'sine', 0.12); tone((f || 880) * 1.5, 0.25, 'sine', 0.06, 0.05); }
   function fanfare() { [523, 659, 784, 1047].forEach((f, i) => tone(f, 0.35, 'triangle', 0.14, i * 0.12)); }
   // 라디오 속보 신호음 — 짧은 세 음. 급매가 뜰 때 (2026-09-10)
@@ -172,6 +190,6 @@
   }
   function toggle() { A.on = !A.on; try { localStorage.setItem('jeju.snd', A.on ? '1' : '0'); } catch (e) {} if (A.master) A.master.gain.setTargetAtTime(A.on ? 1 : 0, A.ctx.currentTime, 0.05); return A.on; }
   function pause(p) { if (p && RD.el && !RD.el.paused) RD.el.pause(); if (!A.ctx) return; if (p) A.ctx.suspend(); else A.ctx.resume(); }
-  window.AUDIO = Object.assign(A, { init, engine, ambient, skid, horn, crash, splash, toggle, pause, radio, radioToggle, radioNext, nowPlaying, set onTrack(f) { RD.onTrack = f; }, radioVol(v) { RD.el && (RD.el.volume = v); }, shutter, stamp, ping, fanfare, coin, news, ring, tone });
+  window.AUDIO = Object.assign(A, { init, engine, ambient, skid, horn, crash, splash, toggle, pause, radio, radioToggle, radioNext, nowPlaying, set onTrack(f) { RD.onTrack = f; }, radioVol(v) { RD.el && (RD.el.volume = v); }, shutter, stamp, alarm, ping, fanfare, coin, news, ring, tone });
   Object.defineProperty(window.AUDIO, 'radioOn', { get() { return RD.on; } });
 })();

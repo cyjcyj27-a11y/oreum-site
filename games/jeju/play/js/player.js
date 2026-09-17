@@ -36,9 +36,9 @@
         const cx = Math.max(b.x0, Math.min(b.x1, px)), cz = Math.max(b.z0, Math.min(b.z1, pz));
         let dx = px - cx, dz = pz - cz, d = Math.hypot(dx, dz); if (d >= r) continue;
         if (d < 1e-4) { const L = px - b.x0, Rr = b.x1 - px, Tt = pz - b.z0, B = b.z1 - pz, m = Math.min(L, Rr, Tt, B); dx = m === L ? -1 : m === Rr ? 1 : 0; dz = m === Tt ? -1 : m === B ? 1 : 0; d = -m; } else { dx /= d; dz /= d; }
-        out.x += dx * (r - d); out.z += dz * (r - d); out.nx += dx; out.nz += dz; hitN++; out.kind = b.kind || 'building';
+        out.x += dx * (r - d); out.z += dz * (r - d); out.nx += dx; out.nz += dz; hitN++; out.kind = b.kind || 'building'; out.obj = b;
       }
-      for (const c of a.c) { let dx = px - c.x, dz = pz - c.z; const d = Math.hypot(dx, dz), rr = r + c.r; if (d >= rr || d < 1e-4) continue; dx /= d; dz /= d; out.x += dx * (rr - d); out.z += dz * (rr - d); out.nx += dx; out.nz += dz; hitN++; out.kind = c.kind || 'tree'; }
+      for (const c of a.c) { if (c.dead) continue; let dx = px - c.x, dz = pz - c.z; const d = Math.hypot(dx, dz), rr = r + c.r; if (d >= rr || d < 1e-4) continue; dx /= d; dz /= d; out.x += dx * (rr - d); out.z += dz * (rr - d); out.nx += dx; out.nz += dz; hitN++; out.kind = c.kind || 'tree'; out.obj = c; }
     }
     return hitN;
   }
@@ -180,6 +180,7 @@
   }
 
   // inp: { steer, throttle, brake, hb, up, dn }
+  const OFF_MAX = 14;   // m/s — 길 밖 최고속도(50km/h)
   function update(dt, inp) {
     doorTick(dt); headlightTick();
     P.crash = 0;
@@ -198,6 +199,8 @@
     P.onRoad = water ? false : ROADS.onRoad(P.x, P.z);
     const rollR = water ? 0.4 : (P.onRoad || pr.offroad) ? 0.5 : 2.2, drag = water ? 0.01 : (P.onRoad || pr.offroad) ? 0.004 : 0.012;
     P.long -= Math.sign(P.long) * Math.min(spd, rollR * dt) + P.long * spd * drag * dt;
+    // 풀밭·흙에선 50km/h 안팎에서 더 안 나간다 — 예전엔 85km/h 까지 나와 네비 길보다 화살표 보고 곧게 가로지르는 게 빨랐다(후기 2026-09-17)
+    if (!water && !P.onRoad && !pr.offroad && P.long > OFF_MAX) P.long -= Math.min(P.long - OFF_MAX, (P.long - OFF_MAX) * 1.8 * dt + 2 * dt);
     P.long = Math.max(-pr.rev, Math.min(pr.max, P.long));
     const grip = inp.hb ? Math.min(pr.grip, 1.6) : (water ? pr.grip : (P.onRoad || pr.offroad) ? pr.grip : pr.grip * 0.6);
     // 느린 탈것(말·자전거·수레·카약)은 거의 서 있어도 제자리에서 돈다 — 벽에 막혀도 빠져나온다
@@ -215,7 +218,7 @@
     P.x = Math.max(I.BOUNDS.x0 + 40, Math.min(I.BOUNDS.x1 - 40, P.x)); P.z = Math.max(I.BOUNDS.z0 + 40, Math.min(I.BOUNDS.z1 - 40, P.z));
     P.bob += dt * (2 + spd * 0.6);
     if (!water) {
-      push.x = push.z = push.nx = push.nz = 0; push.kind = null; let n = 0;
+      push.x = push.z = push.nx = push.nz = 0; push.kind = null; push.obj = null; let n = 0;
       const rad = pr.low ? 0.7 : 1.05;
       for (const o of [1.35, -1.35]) n += pushOut(P.x + fx * o, P.z + fz * o, rad, push);
       for (const c of TRAFFIC.cars) {
@@ -224,16 +227,19 @@
         for (const a of [1.35, -1.35]) for (const b of [half, -half]) {
           const px = P.x + fx * a, pz = P.z + fz * a, qx = c.x + cfx * b, qz = c.z + cfz * b;
           let dx = px - qx, dz = pz - qz; const d = Math.hypot(dx, dz), rr = 2.05; if (d >= rr || d < 1e-4) continue;
-          dx /= d; dz /= d; push.x += dx * (rr - d) * 0.8; push.z += dz * (rr - d) * 0.8; push.nx += dx; push.nz += dz; n++; push.kind = 'car'; TRAFFIC.hit(c);
+          dx /= d; dz /= d; push.x += dx * (rr - d) * 0.8; push.z += dz * (rr - d) * 0.8; push.nx += dx; push.nz += dz; n++; push.kind = 'car'; push.obj = null; TRAFFIC.hit(c);
         }
       }
       if (n) {
         const k = pr.max < 16 ? 1.5 : 1; P.x += push.x * k; P.z += push.z * k;
         const L = Math.hypot(push.nx, push.nz) || 1, nnx = push.nx / L, nnz = push.nz / L;
         const vx = fx * P.long + rx * P.lat, vz = fz * P.long + rz * P.lat, into = vx * nnx + vz * nnz;
-        if (into < 0) { P.crash = -into; P.crashKind = push.kind || 'building'; const nvx = vx - nnx * into * 1.35, nvz = vz - nnz * into * 1.35; P.long = (nvx * fx + nvz * fz) * 0.85; P.lat = (nvx * rx + nvz * rz) * 0.85; }
+        // 돌담·가로등처럼 부서지는 것은 뚫고 지나간다 — PROPS.hit 가 남길 속도 비율을 돌려준다(후기 2026-09-17 "상호작용이 없다")
+        const smash = into < 0 && window.PROPS && push.obj ? PROPS.hit(push.obj, -into, vx, vz) : 0;
+        if (smash) { P.long *= smash; P.lat *= smash; }
+        else if (into < 0) { P.crash = -into; P.crashKind = push.kind || 'building'; const nvx = vx - nnx * into * 1.35, nvz = vz - nnz * into * 1.35; P.long = (nvx * fx + nvz * fz) * 0.85; P.lat = (nvx * rx + nvz * rz) * 0.85; }
       }
-      if (H(P.x, P.z) < -0.6) P.sink = 0.001;
+      if (H(P.x, P.z) < -0.6 && !(window.ROADS && ROADS.surfaceAbs(P.x, P.z) > 0)) P.sink = 0.001;   // 다리 위는 물이 아니다
       P.safeT += dt;
       if (P.safeT > 0.7 && !n && H(P.x, P.z) > 0.4 && P.onRoad && P.veh === P.car) { P.safeT = 0; P.safe.x = P.x; P.safe.z = P.z; P.safe.yaw = P.yaw; }
     }

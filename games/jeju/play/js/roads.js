@@ -377,15 +377,52 @@
   function onRoad(x, z) { const n = nearest(x, z); return n.e && n.d < 1.5; }
   // 그려진 띠(아스팔트·갓길·인도)의 실제 높이 — seg()/quadPts() 와 똑같이 12m 조각 네 귀퉁이 땅높이+yOff 를 두 삼각형으로 보간한다
   // (땅+0.2 같은 어림값은 비탈에서 그려진 인도와 어긋나 발이 뜨거나 묻힌다)
-  function stripY(a, b, w, yOff, x, z, off) {
+  // 길 띠는 길이 12m · 폭 4m 안팎 격자로 깔고 격자점마다 땅높이를 따른다. 단 길 가운데보다 XK 기울기 넘게 낮아지지는 않는다.
+  // 예전엔 폭 방향으로 안 나눠 한쪽 가장자리가 절벽·골짜기로 떨어지면 조각 전체가 옆으로 25m 기울어 길 가운데가 땅속에 묻혔고,
+  // 가운데가 볼록한 비탈에서도 가운데가 묻혔다(후기 2026-09-17 "경사로에서 길 텍스처가 땅에 묻힌다"). 인도·갓길·차선도 같은 높이 규칙을 쓴다
+  const XK = 0.25;
+  // 길 방향 앞뒤 6m 안에서 가장 높은 땅 — 높이점이 12m 간격이라 그 사이 볼록한 땅이 길을 뚫고 올라왔다
+  const Hmax = (x, z, ux, uz) => Math.max(H(x - ux * 6, z - uz * 6), H(x - ux * 3, z - uz * 3), H(x, z), H(x + ux * 3, z + uz * 3), H(x + ux * 6, z + uz * 6));
+  // 쇠소깍 물길을 건너는 길은 다리로 — 물길이 60m 협곡이라 일주도로가 바닥까지 내려갔다 올라왔다(2026-09-17)
+  const RV = I.RIVER, BR_HALF = 26;
+  function riverCross(ax, az, ux, uz) {   // 길 줄이 물길과 만나는 곳까지의 거리와 다리 반길이. 없으면 null
+    const rx = RV.b.x - RV.a.x, rz = RV.b.z - RV.a.z, den = ux * rz - uz * rx; if (Math.abs(den) < 1e-6) return null;
+    const qx = RV.a.x - ax, qz = RV.a.z - az, s = (qx * rz - qz * rx) / den, r = (qx * uz - qz * ux) / den;
+    if (r < -0.1 || r > 1.1) return null;
+    const sin = Math.abs(den) / Math.hypot(rx, rz);
+    return { s, D: BR_HALF / Math.max(0.35, sin) };
+  }
+  // 길 가운데 줄 (ax,az)-(bx,bz) 위에 얹힌 점 (px,pz) 의 띠 높이
+  function roadY(ax, az, bx, bz, px, pz) {
+    const dx = bx - ax, dz = bz - az, L = Math.hypot(dx, dz) || 1, ux = dx / L, uz = dz / L;
+    const along = (px - ax) * ux + (pz - az) * uz;
+    const rc = riverCross(ax, az, ux, uz);
+    if (rc && rc.s > -rc.D && rc.s < L + rc.D && Math.abs(along - rc.s) < rc.D) {   // 다리 위: 양쪽 둑 높이를 곧게 잇는다
+      const s0 = rc.s - rc.D, s1 = rc.s + rc.D, h0 = Hmax(ax + ux * s0, az + uz * s0, ux, uz), h1 = Hmax(ax + ux * s1, az + uz * s1, ux, uz);
+      return h0 + (h1 - h0) * (along - s0) / (s1 - s0);
+    }
+    const t = Math.max(0, Math.min(L, along)), cx = ax + ux * t, cz = az + uz * t;
+    const sd = Math.abs((px - cx) * -uz + (pz - cz) * ux);
+    return Math.max(Hmax(px, pz, ux, uz), Hmax(cx, cz, ux, uz) - XK * sd);
+  }
+  const cols = w => Math.max(1, Math.round(w / 4));
+  // 격자점 높이는 안 바뀌므로 간선마다 한 번만 잰다 (roadY 가 땅높이를 수십 번 읽어 매 프레임 900번 부르면 2.7ms 였다)
+  function stripY(e, w, yOff, x, z, off) {
+    const a = e.a, b = e.b;
     const dx = b.x - a.x, dz = b.z - a.z, L = Math.hypot(dx, dz) || 1, ux = dx / L, uz = dz / L, nx = -uz, nz = ux;
     const ax = a.x + nx * off, az = a.z + nz * off;
     const px = x - ax, pz = z - az, t = (px * ux + pz * uz) / L, sd = px * nx + pz * nz, hw = w / 2;
     if (t < 0 || t > 1 || Math.abs(sd) > hw) return null;
     const n = Math.max(1, Math.round(L / 12)), i = Math.min(n - 1, Math.floor(t * n)), t0 = i / n, t1 = (i + 1) / n;
-    const c = (tt, sg) => H(ax + dx * tt + nx * hw * sg, az + dz * tt + nz * hw * sg) + yOff;
-    const u = (t - t0) / (t1 - t0), v = (hw - sd) / w;   // 귀퉁이 P0(t0,+) P1(t0,-) P2(t1,+) P3(t1,-), 삼각형 (P0,P2,P1) (P1,P2,P3)
-    const y0 = c(t0, 1), y1 = c(t0, -1), y2 = c(t1, 1), y3 = c(t1, -1);
+    const m = cols(w), cw = w / m, j = Math.min(m - 1, Math.floor((hw - sd) / cw)), s0 = hw - j * cw, s1 = s0 - cw;
+    const yc = e._yc || (e._yc = new Map()), base = ((Math.round(off * 10) + 2000) * 4096 + Math.round(w * 10)) * 4096;
+    const c = (ii, jj) => {
+      const k = (base + ii) * 64 + jj; let y = yc.get(k);
+      if (y === undefined) { const tt = ii / n, ss = hw - jj * cw; y = roadY(a.x, a.z, b.x, b.z, ax + dx * tt + nx * ss, az + dz * tt + nz * ss); yc.set(k, y); }
+      return y + yOff;
+    };
+    const u = (t - t0) / (t1 - t0), v = (s0 - sd) / cw;   // 귀퉁이 P0(t0,s0) P1(t0,s1) P2(t1,s0) P3(t1,s1), 삼각형 (P0,P2,P1) (P1,P2,P3)
+    const y0 = c(i, j), y1 = c(i, j + 1), y2 = c(i + 1, j), y3 = c(i + 1, j + 1);
     if (u + v <= 1) return y0 + (y2 - y0) * u + (y1 - y0) * v;
     return y3 + (y1 - y3) * (1 - u) + (y2 - y3) * (1 - v);
   }
@@ -393,9 +430,9 @@
   function surfaceAbs(x, z) {
     const n = nearest(x, z); if (!n.e || n.d > 5) return null; const e = n.e; let best = null;
     const take = y => { if (y != null && (best == null || y > best)) best = y; };
-    take(stripY(e.a, e.b, e.w, 0.06, x, z, 0));
-    if (e.type !== 'access' && e.type !== 'city' && e.type !== 'town') take(stripY(e.a, e.b, e.w + 3.2, 0.035, x, z, 0));
-    if (e.type === 'city' || e.type === 'town') { const o = e.w / 2 + 1.5; take(stripY(e.a, e.b, 3, 0.2, x, z, o)); take(stripY(e.a, e.b, 3, 0.2, x, z, -o)); }
+    take(stripY(e, e.w, 0.06, x, z, 0));
+    if (e.type !== 'access' && e.type !== 'city' && e.type !== 'town') { const o = e.w / 2 + 0.8; take(stripY(e, 1.6, 0, x, z, o)); take(stripY(e, 1.6, 0, x, z, -o)); }
+    if (e.type === 'city' || e.type === 'town') { const o = e.w / 2 + 1.5; take(stripY(e, 3, 0.2, x, z, o)); take(stripY(e, 3, 0.2, x, z, -o)); }
     return best;
   }
   function surfaceY(x, z) { const y = surfaceAbs(x, z); return y == null ? 0 : Math.max(0, y - H(x, z)); }
@@ -404,19 +441,27 @@
   const mkQ = uvScale => ({ p: [], n: [], c: [], u: [], uv: uvScale });
   const QA = mkQ(1 / 4), QW = mkQ(1 / 2.2), QD = mkQ(1 / 4), QM = mkQ(1 / 5);
   let Q = QA;
-  function quadPts(P, yOff, col) {
-    const y = P.map(p => H(p[0], p[1]) + yOff);
+  let YF = null;   // 교차로 덮개 높이 = 만나는 길들의 띠 높이 중 가장 높은 것
+  const nodeY = nd => (x, z) => { let y = -1e9; for (const e of nd.out) y = Math.max(y, roadY(e.a.x, e.a.z, e.b.x, e.b.z, x, z)); return y; };
+  function quadPts(P, yOff, col, ys) {
+    const y = ys || P.map(p => (YF ? YF(p[0], p[1]) : H(p[0], p[1])) + yOff);
     Q.p.push(P[0][0], y[0], P[0][1], P[2][0], y[2], P[2][1], P[1][0], y[1], P[1][1], P[1][0], y[1], P[1][1], P[2][0], y[2], P[2][1], P[3][0], y[3], P[3][1]);
     for (const k of [0, 2, 1, 1, 2, 3]) Q.u.push(P[k][0] * Q.uv, P[k][1] * Q.uv);
     for (let k = 0; k < 6; k++) { Q.n.push(0, 1, 0); Q.c.push(col[0], col[1], col[2]); }
   }
   // 선분 띠 (양끝 점, 폭, 세분)
-  function seg(a, b, w, yOff, col, sub) {
-    const dx = b[0] - a[0], dz = b[1] - a[1], L = Math.hypot(dx, dz) || 1, nx = -dz / L * w / 2, nz = dx / L * w / 2;
-    const n = Math.max(1, Math.round(L / (sub || 12)));
+  // 선분 띠 (양끝 점, 폭, 세분, 얹히는 길의 가운데 줄 rd={a,b} — 없으면 띠 자신)
+  function seg(a, b, w, yOff, col, sub, rd) {
+    const dx = b[0] - a[0], dz = b[1] - a[1], L = Math.hypot(dx, dz) || 1, nx = -dz / L, nz = dx / L;
+    const n = Math.max(1, Math.round(L / (sub || 12))), m = cols(w), cw = w / m, hw = w / 2;
+    const r = rd || { a, b }, yAt = (px, pz) => roadY(r.a[0], r.a[1], r.b[0], r.b[1], px, pz) + yOff;
     for (let i = 0; i < n; i++) {
       const t0 = i / n, t1 = (i + 1) / n; const ax = a[0] + dx * t0, az = a[1] + dz * t0, bx = a[0] + dx * t1, bz = a[1] + dz * t1;
-      quadPts([[ax + nx, az + nz], [ax - nx, az - nz], [bx + nx, bz + nz], [bx - nx, bz - nz]], yOff, col);
+      for (let j = 0; j < m; j++) {
+        const s0 = hw - j * cw, s1 = s0 - cw;
+        const P = [[ax + nx * s0, az + nz * s0], [ax + nx * s1, az + nz * s1], [bx + nx * s0, bz + nz * s0], [bx + nx * s1, bz + nz * s1]];
+        quadPts(P, yOff, col, P.map(p => yAt(p[0], p[1])));
+      }
     }
   }
   // 사진 위에 곱하는 색이라 1 근처가 사진 그대로. 차선·분리대는 사진 없이 민색
@@ -426,25 +471,29 @@
     const done = new Set();
     for (const e of R.edges) {
       const k = e.a.id < e.b.id ? e.a.id + '_' + e.b.id : e.b.id + '_' + e.a.id; if (done.has(k)) continue; done.add(k);
-      const a = [e.a.x, e.a.z], b = [e.b.x, e.b.z];
-      if (e.type !== 'access' && e.type !== 'city' && e.type !== 'town') { Q = QD; seg(a, b, e.w + 3.2, 0.035, SHOULDER, 12); }
-      if (e.type === 'access') { Q = QD; seg(a, b, e.w, 0.06, DIRT, 12); } else { Q = QA; seg(a, b, e.w, 0.06, ASPHALT, 12); }
+      const a = [e.a.x, e.a.z], b = [e.b.x, e.b.z], rd = { a, b };
+      if (e.type !== 'access' && e.type !== 'city' && e.type !== 'town') {   // 갓길은 양옆에만 — 아스팔트 밑에 통째로 깔면 격자가 달라 아스팔트 위로 비쳤다
+        Q = QD; const dx = b[0] - a[0], dz = b[1] - a[1], L = Math.hypot(dx, dz) || 1, nx = -dz / L, nz = dx / L, o = e.w / 2 + 0.8;
+        for (const sg of [1, -1]) seg([a[0] + nx * o * sg, a[1] + nz * o * sg], [b[0] + nx * o * sg, b[1] + nz * o * sg], 1.6, 0, SHOULDER, 12, rd);
+      }
+      if (e.type === 'access') { Q = QD; seg(a, b, e.w, 0.06, DIRT, 12, rd); } else { Q = QA; seg(a, b, e.w, 0.06, ASPHALT, 12, rd); }
       const townish = e.type === 'city' || e.type === 'town';
       if (townish) {   // 인도
         Q = QW;
         const dx = b[0] - a[0], dz = b[1] - a[1], L = Math.hypot(dx, dz) || 1, nx = -dz / L, nz = dx / L, o = e.w / 2 + 1.5;
-        seg([a[0] + nx * o, a[1] + nz * o], [b[0] + nx * o, b[1] + nz * o], 3, 0.2, WALK, 12);
-        seg([a[0] - nx * o, a[1] - nz * o], [b[0] - nx * o, b[1] - nz * o], 3, 0.2, WALK, 12);
+        seg([a[0] + nx * o, a[1] + nz * o], [b[0] + nx * o, b[1] + nz * o], 3, 0.2, WALK, 12, rd);
+        seg([a[0] - nx * o, a[1] - nz * o], [b[0] - nx * o, b[1] - nz * o], 3, 0.2, WALK, 12, rd);
       }
       Q = QM;
-      if (e.lanes === 2) seg(a, b, 2.4, 0.32, MEDIAN, 12);
+      if (e.lanes === 2) seg(a, b, 2.4, 0.32, MEDIAN, 12, rd);
       else if (e.type !== 'access') {   // 중앙선 점선 (교차로 안은 비운다)
         const dx = b[0] - a[0], dz = b[1] - a[1], L = Math.hypot(dx, dz);
-        for (let s = e.inA + 2; s < L - e.inB - 4; s += 8) { const t0 = s / L, t1 = (s + 4) / L; seg([a[0] + dx * t0, a[1] + dz * t0], [a[0] + dx * t1, a[1] + dz * t1], 0.25, 0.09, YELLOW, 8); }
+        for (let s = e.inA + 2; s < L - e.inB - 4; s += 8) { const t0 = s / L, t1 = (s + 4) / L; seg([a[0] + dx * t0, a[1] + dz * t0], [a[0] + dx * t1, a[1] + dz * t1], 0.25, 0.09, YELLOW, 8, rd); }
       }
     }
     // 교차로: 신호등 교차로는 아스팔트 덮개 + 횡단보도
     for (const nd of R.lightNodes) {
+      YF = nodeY(nd);
       let wx = 12, wz = 12; for (const e of nd.out) { if (e.ns) wx = Math.max(wx, e.w); else wz = Math.max(wz, e.w); }
       const x = nd.x, z = nd.z;
       Q = QA; quadPts([[x - wx / 2 - 3, z - wz / 2 - 3], [x - wx / 2 - 3, z + wz / 2 + 3], [x + wx / 2 + 3, z - wz / 2 - 3], [x + wx / 2 + 3, z + wz / 2 + 3]], 0.12, ASPHALT);
@@ -455,11 +504,13 @@
     // 그 밖의 갈림길: 둥근 덮개
     for (const nd of R.nodes) {
       if (nd.light || nd.deg < 3) continue;
+      YF = nodeY(nd);
       let w = 0; for (const e of nd.out) w = Math.max(w, e.w);
       const r = w / 2 + 1, S = 10; const dirt = nd.out.some(e => e.type === 'access') && nd.out.every(e => e.type === 'access');
       Q = dirt ? QD : QA;
       for (let i = 0; i < S; i++) { const a0 = i / S * Math.PI * 2, a1 = (i + 1) / S * Math.PI * 2; quadPts([[nd.x, nd.z], [nd.x + Math.cos(a0) * r, nd.z + Math.sin(a0) * r], [nd.x + Math.cos(a1) * r, nd.z + Math.sin(a1) * r], [nd.x + Math.cos(a1) * r, nd.z + Math.sin(a1) * r]], 0.11, dirt ? DIRT : ASPHALT); }
     }
+    YF = null;
     const P = TEX.P;
     function mesh(q, mat) {
       if (!q.p.length) return;
@@ -472,6 +523,33 @@
     mesh(QW, pbr(P.pavement_02, TEX.concrete, TEX.concreteN, 0.8));
     mesh(QD, pbr(P.forrest_ground_01, TEX.concrete, TEX.concreteN, 0.6));
     mesh(QM, new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.75 }));
+    bridges(scene);
+  }
+  // 물길을 건너는 간선마다 콘크리트 상판·난간·교각
+  function bridges(scene) {
+    const parts = [], done = new Set(), mat = new THREE.MeshStandardMaterial({ color: 0x9a9892, roughness: 0.9 });
+    const box = (w, h, d, x, y, z, yaw, pitch) => { const g = new THREE.BoxGeometry(w, h, d); if (pitch) g.rotateZ(pitch); g.rotateY(yaw); g.translate(x, y, z); parts.push(g); };
+    for (const e of R.edges) {
+      const k = e.a.id < e.b.id ? e.a.id + '_' + e.b.id : e.b.id + '_' + e.a.id; if (done.has(k)) continue; done.add(k);
+      const L = e.len, ux = e.dir.x, uz = e.dir.z, rc = riverCross(e.a.x, e.a.z, ux, uz);
+      if (!rc || rc.s < 0 || rc.s > L) continue;
+      const yaw = Math.atan2(-uz, ux), nx = -uz, nz = ux, hw = e.w / 2 + 0.6, span = rc.D * 2;
+      const n = Math.ceil(span / 6);
+      for (let i = 0; i < n; i++) {
+        const s = rc.s - rc.D + (i + 0.5) * span / n, x = e.a.x + ux * s, z = e.a.z + uz * s;
+        const y = roadY(e.a.x, e.a.z, e.b.x, e.b.z, x, z), q = span / n / 2;
+        const pt = Math.atan2(roadY(e.a.x, e.a.z, e.b.x, e.b.z, x + ux * q, z + uz * q) - roadY(e.a.x, e.a.z, e.b.x, e.b.z, x - ux * q, z - uz * q), 2 * q);   // 오르막대로 눕힌다(계단처럼 보였다)
+        box(span / n + 0.1, 1.0, hw * 2, x, y - 0.46, z, yaw, pt);                                   // 상판
+        for (const sg of [1, -1]) box(span / n + 0.1, 0.9, 0.35, x + nx * hw * sg, y + 0.4, z + nz * hw * sg, yaw, pt);   // 난간
+      }
+      for (const f of [-0.25, 0.25]) {   // 교각
+        const s = rc.s + f * rc.D, x = e.a.x + ux * s, z = e.a.z + uz * s, y = roadY(e.a.x, e.a.z, e.b.x, e.b.z, x, z), g = H(x, z) - 1;
+        if (y - g > 2) box(2.2, y - g, e.w * 0.6, x, (y + g) / 2 - 0.5, z, yaw);
+      }
+    }
+    if (!parts.length) return;
+    const grp = new THREE.Group(); for (const g of parts) { const m = new THREE.Mesh(g, mat); m.castShadow = m.receiveShadow = true; grp.add(m); } scene.add(grp);
+    R.bridgeCount = parts.length;
   }
 
   // ── 길찾기(네비) ──

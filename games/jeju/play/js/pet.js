@@ -756,9 +756,13 @@
       if (Math.abs(a) > 0.05 || Math.abs(st) > 0.05) {
         // 기준 방향은 키를 처음 누른 순간의 카메라 방향으로 고정 — 걷는 동안 카메라가 따라 돌아도 '앞'이 바뀌지 않아 빙글 돌지 않는다
         if (S.refYaw == null) S.refYaw = Math.atan2(-(S.x - camPos.x), -(S.z - camPos.z));
+        // 키보드로 ↑ 를 누른 채 ←→ 면 차처럼 돌며 걷는다 — 방향키만 쓰는 사람이 시점을 돌릴 길이 없었다(후기 2026-09-17 "걸을 때 카메라 고정")
+        //   조이스틱은 그대로 카메라 기준 방향(비스듬히 밀면 비스듬히 곧게)
+        let sx = st;
+        if (!c.pad && a > 0.05 && Math.abs(st) > 0.05) { S.refYaw += st * 2.2 * dt; sx = 0; }
         const cy = S.refYaw;
         const fx = -Math.sin(cy), fz = -Math.cos(cy), rx = Math.cos(cy), rz = -Math.sin(cy);
-        const mx = fx * a - rx * st, mz = fz * a - rz * st, L = Math.hypot(mx, mz) || 1;
+        const mx = fx * a - rx * sx, mz = fz * a - rz * sx, L = Math.hypot(mx, mz) || 1;
         const ty = Math.atan2(-mx, -mz); let da = ty - S.yaw; da = Math.atan2(Math.sin(da), Math.cos(da)); S.yaw += da * Math.min(1, dt * 10);
         want = Math.min(1, L) * (c.run ? 6.2 : 3.0) * Math.max(0.2, Math.cos(da));   // 몸이 덜 돌았으면 천천히
       }
@@ -767,7 +771,8 @@
       const fx2 = -Math.sin(S.yaw), fz2 = -Math.cos(S.yaw), nx = S.x + fx2 * S.spd * dt, nz = S.z + fz2 * S.spd * dt;
       // 돌담은 1.2~1.5m 라, 0.8m 넘게 떠 있으면 그 위를 지나간다 (사장님 2026-09-10 "돌담 뛰어넘게")
       const overWall = S.jy > 0.8;
-      if (H(nx, nz) > 0.15 && !steep(nx, nz) && !(PLAYER.insideBox && PLAYER.insideBox(nx, nz, .3, overWall))) { S.x = nx; S.z = nz; } else S.spd *= .5;   // 바다·건물·절벽은 못 간다
+      const onDeck = window.ROADS && ROADS.surfaceAbs(nx, nz) > 0.15;   // 길 위(다리 포함)는 물·절벽이어도 걷는다
+      if ((onDeck || (H(nx, nz) > 0.15 && !steep(nx, nz))) && !(PLAYER.insideBox && PLAYER.insideBox(nx, nz, .3, overWall))) { S.x = nx; S.z = nz; } else S.spd *= .5;   // 바다·건물·절벽은 못 간다
       if (pushOutCar(S, 0.4)) S.spd *= .3;   // 차 몸체도 못 뚫는다
       if (pushOutTraffic(S, 0.4)) S.spd *= .3;   // 지나가는 차도
       if (window.NPC && NPC.solid && NPC.solid(S, 0.42, 0.3)) S.spd *= .85;   // 사람도 못 뚫는다. 사람이 먼저 비키므로(npc.js) 주인공은 조금만 밀린다 — 사이에 갇히지 않게(사장님 2026-09-10)

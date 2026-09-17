@@ -56,7 +56,7 @@
     TRAFFIC.init(scene, spawn); await step(0.95);
     PLAYER.init(scene, spawn); ACT.init(scene); await step(0.97);
     ESTATE.init(scene); await step(0.99);
-    NPC.init(scene); PEOPLE.init(scene, renderer); PET.init(scene);
+    NPC.init(scene); PEOPLE.init(scene, renderer); PET.init(scene); PROPS.init(scene);
     LOAD.set(1);
     ready = true; document.body.classList.add('ready');
     // 막 지우고 들어온 판(?reset=1)에서는 이어하기를 숨긴다 — 지웠는데 이어하기가 보이면 헷갈린다
@@ -395,19 +395,29 @@
     if (ready) {
       const paused = ACT.shopOpen || ACT.mapOpen || ESTATE.open || ESTATE.assetsOpen || CALL.open || $('ending').classList.contains('show');
       const raw = started && !paused ? readInput() : { throttle: 0, brake: 0, steer: 0, hb: true, horn: false, up: false, dn: false };
-      const onFoot = PET.onFoot; if (onFoot) { const k = input.keys; PET.control({ throttle: raw.throttle, brake: raw.brake, steer: raw.steer, run: !!(k.ShiftLeft || k.ShiftRight || input.horn), jump: !!(k.Space || input.brake) }); }
+      const onFoot = PET.onFoot; if (onFoot) { const k = input.keys; PET.control({ throttle: raw.throttle, brake: raw.brake, steer: raw.steer, pad: !!(input.padF || input.padS), run: !!(k.ShiftLeft || k.ShiftRight || input.horn), jump: !!(k.Space || input.brake) }); }
       const inp = onFoot ? { throttle: 0, brake: 0, steer: 0, hb: true, horn: false, up: false, dn: false } : raw;
       if (INTRO.on) introTick(dt);
       else if (!paused) { PLAYER.update(dt, inp); ACT.update(dt, elapsed); ESTATE.update(dt, elapsed); }
       posT += dt; if (posT > 2) { posT = 0; savePos(); }
       checkCalls();
-      TRAFFIC.update(paused ? 0 : dt, PLAYER, camera.position); NPC.update(paused ? 0 : dt, elapsed, PLAYER, camera.position); PEOPLE.update(paused ? 0 : dt, elapsed, camera.position); PET.update(paused ? 0 : dt, elapsed);
+      TRAFFIC.update(paused ? 0 : dt, PLAYER, camera.position); NPC.update(paused ? 0 : dt, elapsed, PLAYER, camera.position); PEOPLE.update(paused ? 0 : dt, elapsed, camera.position); PET.update(paused ? 0 : dt, elapsed); PROPS.update(paused ? 0 : dt);
       if (started) {
         orbit.idle += dt;
         // 돌린 카메라는 그대로 둔다. 달릴 때(8km/h 넘게)만 2초 뒤 천천히 뒤로 돌아간다(사장님 "카메라가 자꾸 뒤로 돌아간다", 2026-09-08)
         // 카메라: 서 있을 땐 돌려 놓은 그대로(내 맘대로). 달리거나 걸으면 천천히 뒤로 따라붙는다(옆모습만 비추지 않게) — 사장님, 2026-09-08
-        { const moving = PET.onFoot ? (PET.state.spd > 0.6 && raw.throttle > 0.1 && raw.steer === 0) : (PLAYER.kmh > 6 && raw.throttle > 0.1);   // 걸을 땐 ↑로 멀어질 때만 뒤따른다(↓로 다가오면 정면 그대로)
-          if (moving && !look) { const k = 1 - Math.exp(-1.6 * dt); if (PET.onFoot) { let da = PET.state.yaw - orbit.yaw; da = Math.atan2(Math.sin(da), Math.cos(da)); orbit.yaw += da * k; } else orbit.yaw *= 1 - k; orbit.pitch *= 1 - k * 0.5; } }
+        // 걸을 때(2026-09-17 후기 "카메라 고정 때문에 불편"): ↑·←→ 로 걸으면 등 뒤로 따라붙는다.
+        //   ↓(카메라 쪽으로 걷기)·등 뒤와 110° 넘게 어긋남·마우스로 돌린 뒤 1.2초 안은 안 돈다.
+        //   걷는 방향 기준(PET refYaw)은 키를 뗄 때까지 고정이라 따라 돌아도 빙빙 돌지 않는다
+        if (PET.onFoot) {
+          const S = PET.state, go = S.spd > 0.6 && raw.brake < 0.1 && (raw.throttle > 0.1 || Math.abs(raw.steer) > 0.1);
+          let da = S.yaw - orbit.yaw; da = Math.atan2(Math.sin(da), Math.cos(da));
+          if (go && !look && orbit.idle > 1.2 && Math.abs(da) < 1.9) {
+            const curve = raw.throttle > 0.1 && Math.abs(raw.steer) > 0.1 && !(input.padF || input.padS);
+            const k = 1 - Math.exp(-(curve ? 5 : 2) * dt); orbit.yaw += da * k; orbit.pitch *= 1 - k * 0.3;
+          }
+        } else { const moving = PLAYER.kmh > 6 && raw.throttle > 0.1;
+          if (moving && !look) { const k = 1 - Math.exp(-1.6 * dt); orbit.yaw *= 1 - k; orbit.pitch *= 1 - k * 0.5; } }
         if (!ACT.rideCam(camera, dt)) { if (onFoot) PET.camera(dt, camera, orbit); else PLAYER.camera(dt, camera, orbit); }
         { const fb = $('foot'); if (fb) { const can = PET.canToggle(); fb.classList.toggle('show', can); fb.textContent = onFoot ? '타기' : '내리기'; } }
         syncButtons();

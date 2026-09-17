@@ -725,11 +725,13 @@
   // 라디오 속보를 전화로 바꿈 — 소식을 전해 주는 사람이 있어야 달려갈 맛이 난다 (사장님 2026-09-10)
   // 넓은 섬을 달릴 이유를 만들고, 비어 있던 1분 간격에 긴장과 해소를 넣는다 (사장님 2026-09-10)
   const DEAL_SEC = 75, DEAL_GAP = [210, 420];   // 못 잴 때 쓰는 기본값, 다음 속보까지(3분30초~7분). 자주 뜨면 속보가 아니라 평상시
-  // 제한시간은 **길 거리 ÷ 119km/h + 4초** 뿐이다. 코너 한계속도까지 재던 물리 모형을 뺐다
-  // — 계산이 곧 속도 제한처럼 굴어 여유가 너무 컸다 (사장님 2026-09-12 "속도제한을 두지 말고 시간을 짧게 잡으라고").
-  // 오픈카 최고속도가 198km/h 라 밟으면 닿고, 머뭇거리면 놓친다. 놓친 땅은 되사기(1.5배)로 살 수 있다.
-  const DEAL_SPEED = 33, DEAL_MIN = 25, DEAL_MAX = 180, DEAL_PARK = 4;   // m/s · 초
-  const DEAL_SLACK = 1.1;   // 계산된 제한시간에 10% 여유(사장님 2026-09-13)
+  // 제한시간 = 그 길을 잘 모는 사람이 걸리는 시간 × DEAL_SLACK (+주차 몫).
+  // 2026-09-12 '길 거리 ÷ 119km/h' 로 짧게 잡았는데, 2026-09-17 봇으로 공항→매물 16곳을 풀악셀로 달려 보니
+  // 한 곳 빼고 전부 못 닿았다(오픈카 실제 최고속도는 142km/h, 굽은 길·산길 평균은 70~90km/h). 후기 "급매가 도달 가능한 시간인지 의문".
+  // 그래서 길 굽이마다 코너 속도를 넣은 주행 어림(routeTime)을 쓴다 — 봇 주행 시간과 맞춰 둔 값이다.
+  const DEAL_MIN = 25, DEAL_MAX = 180, DEAL_PARK = 4;   // 초
+  const DEAL_CUT = 5;   // 2026-09-17 사장님 "5초만 더 줄여" — 곱한 뒤 5초를 뺀다(최소 20초)
+  const DEAL_SLACK = 0.95;   // 2026-09-13 1.1 → 09-17 사장님이 비자림을 20초 남기고 도착해 0.95 (봇보다 사람이 빠르다)
   // 급매와 '곷 팔림'이 각자 돌아서 급매를 사자마자 또 떴다. 하나가 끝나면 한동안 조용하게 한다 (사장님 2026-09-10)
   const QUIET_SEC = 60;
   // 하르방 전화 대사 — {n} 땅 이름 · {b} 지을 건물 · {v} 급매가 · {p} 정상 시세
@@ -759,14 +761,35 @@
     'Telling you first. {n} {b} site, {v}. Come before Tamna Development smells it.',
   ];
   const DEAL_CALL = (window.LANG && LANG.en ? DEAL_LINES_EN : DEAL_LINES).map(function (t) { return function (n, b, v, p) { return t.replace('{n}', n).replace('{b}', b).replace('{v}', v).replace('{p}', p); }; });
-  // 제한시간 = 그 땅까지 **길 거리** ÷ DEAL_SPEED + 주차 몫. 75초 고정이던 때는 거리를 안 봐서
+  // 제한시간 = 그 땅까지 길을 따라 달리는 어림 시간 + 주차 몫. 75초 고정이던 때는 거리를 안 봐서
   // 먼 곳이 아무리 밟아도 못 닿았다(사장님 2026-09-11). 거리로 재면 멀수록 길게, 가까우면 짧게 잡힌다.
+  const CAR_TOP = 39.6, CAR_LAT = 6.5, CAR_BRAKE = 10;   // 오픈카 끝속도(m/s)·코너 옆가속·브레이크 — player.js 물리에서 잰 값
+  // offLast: 마지막 한 칸(길 끝 → 매물)은 풀밭이라 길 밖 최고속도(player.js OFF_MAX 14m/s)로 친다
+  function routeTime(rt, offLast) {
+    const n = rt.length; if (n < 2) return 0;
+    const d = [0]; for (let i = 1; i < n; i++) d.push(Math.hypot(rt[i].x - rt[i - 1].x, rt[i].z - rt[i - 1].z));
+    const cap = rt.map(function (q, i) {
+      if (i === 0 || i === n - 1) return CAR_TOP;
+      const a = Math.atan2(q.x - rt[i - 1].x, q.z - rt[i - 1].z), b = Math.atan2(rt[i + 1].x - q.x, rt[i + 1].z - q.z);
+      const th = Math.abs(Math.atan2(Math.sin(b - a), Math.cos(b - a))); if (th < 0.05) return CAR_TOP;
+      let R = Math.max(4, Math.min(d[i], d[i + 1]) / th * 0.9); if (th > 0.9) R = Math.min(R, 12);   // 시내 직각 모퉁이는 30km/h 남짓
+      return Math.min(CAR_TOP, Math.sqrt(CAR_LAT * R));
+    });
+    const v = [0];
+    for (let i = 1; i < n; i++) {   // 밟아서 오르는 속도 (player.js 의 가속·구름저항·공기저항)
+      let u = v[i - 1]; for (let s = 0; s < d[i]; s += 2) { const acc = 12 - 0.132 * u - 0.5 - 0.004 * u * u; u = Math.sqrt(Math.max(1, u * u + 2 * acc * Math.min(2, d[i] - s))); }
+      v.push(Math.min(cap[i], u, offLast && i === n - 1 ? 14 : 1e9));
+    }
+    for (let i = n - 2; i >= 0; i--) v[i] = Math.min(v[i], Math.sqrt(v[i + 1] * v[i + 1] + 2 * CAR_BRAKE * d[i + 1]));
+    let t = 0; for (let i = 1; i < n; i++) t += d[i] / Math.max(3, Math.min((v[i - 1] + v[i]) / 2, offLast && i === n - 1 ? 14 : 1e9));
+    return t;
+  }
   function dealSec(p) {
     const R = window.ROADS, rt = R && R.route && R.route(PLAYER.x, PLAYER.z, p.x, p.z);
-    let L = 0;
-    if (rt && rt.length > 1) { for (let i = 1; i < rt.length; i++) L += Math.hypot(rt[i].x - rt[i - 1].x, rt[i].z - rt[i - 1].z); }
-    else L = Math.hypot(p.x - PLAYER.x, p.z - PLAYER.z) * 1.3;   // 길을 못 찾으면 직선 거리에 굽이 몫만 얹는다
-    return Math.round(Math.max(DEAL_MIN, Math.min(DEAL_MAX, L / DEAL_SPEED + DEAL_PARK)) * DEAL_SLACK);
+    let t;
+    if (rt && rt.length > 1) t = routeTime(rt.concat([{ x: p.x, z: p.z }]), true);
+    else t = Math.hypot(p.x - PLAYER.x, p.z - PLAYER.z) * 1.3 / 22;   // 길을 못 찾으면 직선 거리에 굽이 몫만 얹는다
+    return Math.max(20, Math.round(Math.max(DEAL_MIN, Math.min(DEAL_MAX, t + DEAL_PARK)) * DEAL_SLACK) - DEAL_CUT);
   }
   function dealSpawn() {
     // 급매는 **1단계부터 순차적으로** 뜨다 (사장님 2026-09-11).
@@ -1058,5 +1081,5 @@
     card(p.b ? lvOf(p).ic : '🏷', p.name, '매입 ' + fmt(put) + ' → ' + fmt(v), (gap >= 0 ? '+' : '') + gap + '%');
     setTimeout(function () { if (E.askSell === p.id) { E.askSell = null; s2.classList.remove('ask'); s2.textContent = '💸 팔기'; } }, 9000);
   }
-  window.ESTATE = Object.assign(E, { monthDay, monthNo, rentIn, openAssets, closeAssets, netWorth, init, update, act, sellNear, close, hud, fmt, state, drawMap, parcelAt, estateWorth, dayIncome, ownedCount, BUILD, income });
+  window.ESTATE = Object.assign(E, { dealSec, monthDay, monthNo, rentIn, openAssets, closeAssets, netWorth, init, update, act, sellNear, close, hud, fmt, state, drawMap, parcelAt, estateWorth, dayIncome, ownedCount, BUILD, income });
 })();
