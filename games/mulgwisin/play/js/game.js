@@ -1103,9 +1103,12 @@
       // 명소
       G.holy = false;
       for (const m of W.marks) {
-        const d = m.cp ? Math.max(Math.abs(P.z - m.z) * 1.3, Math.hypot(P.x - m.x, P.z - m.z) - 8) : Math.hypot(P.x - m.x, P.z - m.z);
+        // 서낭당은 강 이쪽 절반에서만 (사장님 2026-09-17 "건너편인데도 서낭당이라고 나온다")
+        const far = m.cp && (P.x - W.cx(P.z)) * Math.sign(m.x - W.cx(m.z)) < 0;
+        const d = m.cp ? (far ? 1e9 : Math.max(Math.abs(P.z - m.z) * 1.3, Math.hypot(P.x - m.x, P.z - m.z) - 8)) : Math.hypot(P.x - m.x, P.z - m.z);
         if (m.cp && d < m.r) G.holy = true;   // 서낭당 불빛 안 — 물귀신이 물러나고 정신이 돌아온다
-        if (d < m.r && !W.found.has(m.i)) { W.found.add(m.i); A.clear(); toast(NM(m)); if (m.cp) { G.cpX = W.cx(m.z) + (m.x - W.cx(m.z)) * .5; G.cpZ = m.z; setTimeout(() => subtitle('shrine', 5200), 600); addSalt(2); setTimeout(() => toast('🧂 +2'), 1300); startMission(m); } saveRun(); }
+        const reach = m.cp ? Math.hypot(P.x - m.x, P.z - m.z) < 7 : d < m.r;   // 서낭당 안내는 돌탑 바로 곁(7m)에 가야 (사장님 2026-09-17)
+        if (reach && !W.found.has(m.i)) { W.found.add(m.i); A.clear(); toast(NM(m)); if (m.cp) { G.cpX = W.cx(m.z) + (m.x - W.cx(m.z)) * .5; G.cpZ = m.z; setTimeout(() => subtitle('shrine', 5200), 600); addSalt(2); setTimeout(() => toast('🧂 +2'), 1300); startMission(m); } saveRun(); }
         if (m.t === 'spring' && d < 8 && G.state === 'play') {
           if (G.charms >= W.CHARM_N && G.items >= W.TRACE_N) beginEnding();
           else if (!G.shortT || G.t - G.shortT > 4) { G.shortT = G.t; toast('📜 ' + G.charms + '/' + W.CHARM_N + '   👣 ' + G.items + '/' + W.TRACE_N); }
