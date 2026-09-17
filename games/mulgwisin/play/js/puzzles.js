@@ -114,7 +114,7 @@
     makeHands('Z7', 7, Math.round(1486 * W.ZS), -1, 7707),
     { id: 'H0', type: 'hair', mark: 'bridge' },
     { id: 'H1', type: 'hair', mark: 'falls' },
-    { id: 'M0', type: 'mill', mark: 'mill' },
+    // 물레방아 통나무 퍼즐은 뺐다 — 머리끈은 처음부터 바퀴 옆 바위에 있다(2026-09-17 사장님 "처음부터 보이게"). id 'M0' 은 서낭당 미션과도 겹쳤다
     { id: 'B0', type: 'boat', mark: 'boat' },
   ];
   PZ.DEF = DEF;
