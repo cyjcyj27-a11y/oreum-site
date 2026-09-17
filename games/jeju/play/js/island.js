@@ -265,7 +265,20 @@
     const m = new THREE.Mesh(g, seaMat); m.renderOrder = 1; return m;
   }
 
-  function init(scene) { scene.add(buildGround()); scene.add(buildSea()); }
+  // 땅 깎기 — 길이 깔린 뒤 도로 밑 땅을 내려 준다 (roads.js 가 부른다).
+  // 비탈에서 길이 땅에 묻혀 "도로가 끊긴" 것처럼 보였다 (사장님 2026-09-18). 길을 올리면 허공에 뜨므로 땅을 판다.
+  let groundMesh = null;
+  function carve(fn) {
+    if (!groundMesh || !mesh) return 0;
+    const g = groundMesh.geometry, pos = g.attributes.position, m = mesh; let n = 0;
+    for (let i = 0; i < pos.count; i++) {
+      const x = pos.getX(i), z = pos.getZ(i), h = m.h[i], nh = fn(x, z, h);
+      if (nh != null && nh < h - 0.001) { pos.setY(i, nh); m.h[i] = nh; n++; }
+    }
+    if (n) { pos.needsUpdate = true; g.computeVertexNormals(); g.attributes.normal.needsUpdate = true; }
+    return n;
+  }
+  function init(scene) { groundMesh = buildGround(); scene.add(groundMesh); scene.add(buildSea()); }
   function update(dt, t, sky) {
     if (!seaMat) return;
     seaMat.uniforms.uT.value = t; seaMat.uniforms.sunDir.value.copy(sky.sunDir); seaMat.uniforms.sunCol.value.copy(sky.sunColor);
@@ -274,5 +287,5 @@
   }
 
   __i('end');
-  window.ISLAND = { H, geo, coastDist, inIslet, coast, OREUMS, ISLETS, TOWNS, BOUNDS, HC, RIVER, init, update, smooth, hash2, rng, N, beaches };
+  window.ISLAND = { H, carve, geo, coastDist, inIslet, coast, OREUMS, ISLETS, TOWNS, BOUNDS, HC, RIVER, init, update, smooth, hash2, rng, N, beaches };
 })();

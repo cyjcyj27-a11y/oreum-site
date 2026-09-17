@@ -377,15 +377,25 @@
   function onRoad(x, z) { const n = nearest(x, z); return n.e && n.d < 1.5; }
   // 그려진 띠(아스팔트·갓길·인도)의 실제 높이 — seg()/quadPts() 와 똑같이 12m 조각 네 귀퉁이 땅높이+yOff 를 두 삼각형으로 보간한다
   // (땅+0.2 같은 어림값은 비탈에서 그려진 인도와 어긋나 발이 뜨거나 묻힌다)
-  function stripY(a, b, w, yOff, x, z, off) {
+  // 길 띠 격자 — 세로 SUB m, 가로 4m 안팎. 예전엔 폭을 안 나누고 세로 12m 라 비탈에서 땅에 묻히거나 떴다(2026-09-18)
+  const SUB = 6, cols = w => Math.max(1, Math.round(w / 4));
+  function stripY(a, b, w, yOff, x, z, off, e) {
     const dx = b.x - a.x, dz = b.z - a.z, L = Math.hypot(dx, dz) || 1, ux = dx / L, uz = dz / L, nx = -uz, nz = ux;
     const ax = a.x + nx * off, az = a.z + nz * off;
     const px = x - ax, pz = z - az, t = (px * ux + pz * uz) / L, sd = px * nx + pz * nz, hw = w / 2;
     if (t < 0 || t > 1 || Math.abs(sd) > hw) return null;
-    const n = Math.max(1, Math.round(L / 12)), i = Math.min(n - 1, Math.floor(t * n)), t0 = i / n, t1 = (i + 1) / n;
-    const c = (tt, sg) => H(ax + dx * tt + nx * hw * sg, az + dz * tt + nz * hw * sg) + yOff;
-    const u = (t - t0) / (t1 - t0), v = (hw - sd) / w;   // 귀퉁이 P0(t0,+) P1(t0,-) P2(t1,+) P3(t1,-), 삼각형 (P0,P2,P1) (P1,P2,P3)
-    const y0 = c(t0, 1), y1 = c(t0, -1), y2 = c(t1, 1), y3 = c(t1, -1);
+    const n = Math.max(1, Math.round(L / SUB)), i = Math.min(n - 1, Math.floor(t * n)), t0 = i / n, t1 = (i + 1) / n;
+    const m = cols(w), cw = w / m, j = Math.min(m - 1, Math.floor((hw - sd) / cw)), s0 = hw - j * cw, s1 = s0 - cw;
+    // 그려 놓은 높이를 그대로 기억해 둔다 — 나중에 땅을 깎아도(carveTerrain) 길 높이는 안 내려간다
+    const yc = e ? (e._yc || (e._yc = new Map())) : null, key0 = ((Math.round(off * 10) + 2000) * 4096 + Math.round(w * 10)) * 4096;
+    const c = (tt, ss) => {
+      const ii = Math.round(tt * n), jj = Math.round((hw - ss) / cw), k = yc ? ((key0 + ii) * 64 + jj) : 0;
+      let y = yc ? yc.get(k) : undefined;
+      if (y === undefined) { y = H(ax + dx * tt + nx * ss, az + dz * tt + nz * ss); if (yc) yc.set(k, y); }
+      return y + yOff;
+    };
+    const u = (t - t0) / (t1 - t0), v = (s0 - sd) / cw;   // 귀퉁이 P0(t0,s0) P1(t0,s1) P2(t1,s0) P3(t1,s1), 삼각형 (P0,P2,P1) (P1,P2,P3)
+    const y0 = c(t0, s0), y1 = c(t0, s1), y2 = c(t1, s0), y3 = c(t1, s1);
     if (u + v <= 1) return y0 + (y2 - y0) * u + (y1 - y0) * v;
     return y3 + (y1 - y3) * (1 - u) + (y2 - y3) * (1 - v);
   }
@@ -393,9 +403,9 @@
   function surfaceAbs(x, z) {
     const n = nearest(x, z); if (!n.e || n.d > 5) return null; const e = n.e; let best = null;
     const take = y => { if (y != null && (best == null || y > best)) best = y; };
-    take(stripY(e.a, e.b, e.w, 0.06, x, z, 0));
-    if (e.type !== 'access' && e.type !== 'city' && e.type !== 'town') take(stripY(e.a, e.b, e.w + 3.2, 0.035, x, z, 0));
-    if (e.type === 'city' || e.type === 'town') { const o = e.w / 2 + 1.5; take(stripY(e.a, e.b, 3, 0.2, x, z, o)); take(stripY(e.a, e.b, 3, 0.2, x, z, -o)); }
+    take(stripY(e.a, e.b, e.w, 0.06, x, z, 0, e));
+    if (e.type !== 'access' && e.type !== 'city' && e.type !== 'town') { const so = e.w / 2 + 0.8; take(stripY(e.a, e.b, 1.6, 0.02, x, z, so, e)); take(stripY(e.a, e.b, 1.6, 0.02, x, z, -so, e)); }
+    if (e.type === 'city' || e.type === 'town') { const o = e.w / 2 + 1.5; take(stripY(e.a, e.b, 3, 0.2, x, z, o, e)); take(stripY(e.a, e.b, 3, 0.2, x, z, -o, e)); }
     return best;
   }
   function surfaceY(x, z) { const y = surfaceAbs(x, z); return y == null ? 0 : Math.max(0, y - H(x, z)); }
@@ -412,11 +422,14 @@
   }
   // 선분 띠 (양끝 점, 폭, 세분)
   function seg(a, b, w, yOff, col, sub) {
-    const dx = b[0] - a[0], dz = b[1] - a[1], L = Math.hypot(dx, dz) || 1, nx = -dz / L * w / 2, nz = dx / L * w / 2;
-    const n = Math.max(1, Math.round(L / (sub || 12)));
+    const dx = b[0] - a[0], dz = b[1] - a[1], L = Math.hypot(dx, dz) || 1, ux = -dz / L, uz = dx / L;
+    const n = Math.max(1, Math.round(L / (sub || SUB))), m = cols(w), cw = w / m, hw = w / 2;
     for (let i = 0; i < n; i++) {
-      const t0 = i / n, t1 = (i + 1) / n; const ax = a[0] + dx * t0, az = a[1] + dz * t0, bx = a[0] + dx * t1, bz = a[1] + dz * t1;
-      quadPts([[ax + nx, az + nz], [ax - nx, az - nz], [bx + nx, bz + nz], [bx - nx, bz - nz]], yOff, col);
+      const t0 = i / n, t1 = (i + 1) / n, ax = a[0] + dx * t0, az = a[1] + dz * t0, bx = a[0] + dx * t1, bz = a[1] + dz * t1;
+      for (let j = 0; j < m; j++) {
+        const s0 = hw - j * cw, s1 = s0 - cw;
+        quadPts([[ax + ux * s0, az + uz * s0], [ax + ux * s1, az + uz * s1], [bx + ux * s0, bz + uz * s0], [bx + ux * s1, bz + uz * s1]], yOff, col);
+      }
     }
   }
   // 사진 위에 곱하는 색이라 1 근처가 사진 그대로. 차선·분리대는 사진 없이 민색
@@ -427,7 +440,10 @@
     for (const e of R.edges) {
       const k = e.a.id < e.b.id ? e.a.id + '_' + e.b.id : e.b.id + '_' + e.a.id; if (done.has(k)) continue; done.add(k);
       const a = [e.a.x, e.a.z], b = [e.b.x, e.b.z];
-      if (e.type !== 'access' && e.type !== 'city' && e.type !== 'town') { Q = QD; seg(a, b, e.w + 3.2, 0.035, SHOULDER, 12); }
+      if (e.type !== 'access' && e.type !== 'city' && e.type !== 'town') {   // 갓길은 양옆에만
+        Q = QD; const ddx = b[0] - a[0], ddz = b[1] - a[1], LL = Math.hypot(ddx, ddz) || 1, snx = -ddz / LL, snz = ddx / LL, so = e.w / 2 + 0.8;
+        for (const sg of [1, -1]) seg([a[0] + snx * so * sg, a[1] + snz * so * sg], [b[0] + snx * so * sg, b[1] + snz * so * sg], 1.6, 0.02, SHOULDER);
+      }
       if (e.type === 'access') { Q = QD; seg(a, b, e.w, 0.06, DIRT, 12); } else { Q = QA; seg(a, b, e.w, 0.06, ASPHALT, 12); }
       const townish = e.type === 'city' || e.type === 'town';
       if (townish) {   // 인도
@@ -452,13 +468,17 @@
       for (let k = -wx / 2 + 1; k < wx / 2 - 0.5; k += 1.6) { quadPts([[x + k, z - wz / 2 - 3], [x + k, z - wz / 2], [x + k + 0.8, z - wz / 2 - 3], [x + k + 0.8, z - wz / 2]], 0.14, WHITE); quadPts([[x + k, z + wz / 2], [x + k, z + wz / 2 + 3], [x + k + 0.8, z + wz / 2], [x + k + 0.8, z + wz / 2 + 3]], 0.14, WHITE); }
       for (let k = -wz / 2 + 1; k < wz / 2 - 0.5; k += 1.6) { quadPts([[x - wx / 2 - 3, z + k], [x - wx / 2 - 3, z + k + 0.8], [x - wx / 2, z + k], [x - wx / 2, z + k + 0.8]], 0.14, WHITE); quadPts([[x + wx / 2, z + k], [x + wx / 2, z + k + 0.8], [x + wx / 2 + 3, z + k], [x + wx / 2 + 3, z + k + 0.8]], 0.14, WHITE); }
     }
-    // 그 밖의 갈림길: 둥근 덮개
+    // 마디 덮개 — 예전엔 세 갈래 이상에만 깔아서 굽은 마디(876곳)마다 바깥쪽에 삼각형 구멍이 남았다.
+    // 이제 두 갈래(굽이)도 덮고, 길이 끊기는 끝은 차 돌리는 원형 회차로로 마무리한다 (사장님 2026-09-18 "도로포장이 끊긴 곳이 많은데 예쁘게 포장해")
+    const disc = (x, z, r, yOff, col, S) => { for (let i = 0; i < S; i++) { const a0 = i / S * Math.PI * 2, a1 = (i + 1) / S * Math.PI * 2; quadPts([[x, z], [x + Math.cos(a0) * r, z + Math.sin(a0) * r], [x + Math.cos(a1) * r, z + Math.sin(a1) * r], [x + Math.cos(a1) * r, z + Math.sin(a1) * r]], yOff, col); } };
     for (const nd of R.nodes) {
-      if (nd.light || nd.deg < 3) continue;
-      let w = 0; for (const e of nd.out) w = Math.max(w, e.w);
-      const r = w / 2 + 1, S = 10; const dirt = nd.out.some(e => e.type === 'access') && nd.out.every(e => e.type === 'access');
-      Q = dirt ? QD : QA;
-      for (let i = 0; i < S; i++) { const a0 = i / S * Math.PI * 2, a1 = (i + 1) / S * Math.PI * 2; quadPts([[nd.x, nd.z], [nd.x + Math.cos(a0) * r, nd.z + Math.sin(a0) * r], [nd.x + Math.cos(a1) * r, nd.z + Math.sin(a1) * r], [nd.x + Math.cos(a1) * r, nd.z + Math.sin(a1) * r]], 0.11, dirt ? DIRT : ASPHALT); }
+      if (nd.light || !nd.out.length) continue;
+      let w = 0, sx = 0, sz = 0, townish = false, dirt = true;
+      for (const e of nd.out) { w = Math.max(w, e.w); sx += e.dir.x; sz += e.dir.z; if (e.type === 'city' || e.type === 'town') townish = true; if (e.type !== 'access') dirt = false; }
+      const dead = Math.hypot(sx, sz) > 0.8;                      // 길이 한쪽으로만 이어진다 = 여기서 끊긴다
+      const r = dead ? Math.max(w * 0.75, w / 2 + 2.5) : w / 2 + (nd.deg >= 3 ? 1 : 0.4);
+      if (!townish) { Q = QD; disc(nd.x, nd.z, r + 1.6, 0.03, SHOULDER, 12); }   // 갓길도 마디에서 이어지게
+      Q = dirt ? QD : QA; disc(nd.x, nd.z, r, dead ? 0.07 : 0.062, dirt ? DIRT : ASPHALT, dead ? 16 : 12);
     }
     const P = TEX.P;
     function mesh(q, mat) {
@@ -526,6 +546,40 @@
     return out.length > 1 ? out : null;
   }
 
-  function init(scene) { build(); render(scene); }
-  window.ROADS = Object.assign(R, { init, onRoad, nearest, edgeDist, resample, catmull, smoothPts , surfaceY, surfaceAbs, route, nearestNode, dirty, edgeBlocked });
+  // 길 위 한 점의 띠 높이와, 띠 밖이면 얼마나 벗어났는지
+  function surfaceNear(x, z) {
+    const n = nearest(x, z); if (!n.e) return null;
+    const e = n.e, dx = e.b.x - e.a.x, dz = e.b.z - e.a.z, L = e.len || 1, ux = dx / L, uz = dz / L;
+    const t = Math.max(0.001, Math.min(0.999, ((x - e.a.x) * ux + (z - e.a.z) * uz) / L));
+    const hw = e.w / 2 - 0.05, sd = Math.max(-hw, Math.min(hw, (x - e.a.x) * -uz + (z - e.a.z) * ux));
+    const y = surfaceAbs(e.a.x + dx * t + -uz * sd, e.a.z + dz * t + ux * sd);
+    return y == null ? null : { y, d: Math.max(0, n.d) };
+  }
+  // 땅을 길에 맞춰 깎는다 — 비탈에서 길이 땅에 묻혀 끊긴 것처럼 보이던 것(사장님 2026-09-18 "높은 곳에 도로가 많이 끊겨 있어").
+  // 길에서 멀어질수록 다시 솟게 둬서(1m 당 0.5m) 길가에 벽이 서지 않는다. 길 높이는 이미 stripY 에 굳혀 둬서 안 따라 내려간다
+  function warmStrips() {
+    for (const e of R.edges) {
+      const mid = 0.5, x = (e.a.x + e.b.x) / 2, z = (e.a.z + e.b.z) / 2;
+      surfaceAbs(x, z);   // 모서리 높이를 채운다(게으른 저장이라 한 번 훑으면 그 간선 전체가 굳는다)
+      const n = Math.max(1, Math.round(e.len / 12));
+      for (let i = 0; i <= n; i++) { const t = Math.min(0.999, i / n); for (const o of [-0.4, 0, 0.4]) {
+        const px = e.a.x + (e.b.x - e.a.x) * t + -(e.b.z - e.a.z) / e.len * o * e.w, pz = e.a.z + (e.b.z - e.a.z) * t + (e.b.x - e.a.x) / e.len * o * e.w;
+        surfaceAbs(px, pz); } }
+    }
+  }
+  function carveTerrain() {
+    if (!ISLAND.carve) return 0;
+    const CELL = 20, cells = new Set();
+    for (const e of R.edges) { const n = Math.ceil(e.len / 6); for (let i = 0; i <= n; i++) { const t = i / n, x = e.a.x + (e.b.x - e.a.x) * t, z = e.a.z + (e.b.z - e.a.z) * t;
+      const i0 = Math.floor(x / CELL), j0 = Math.floor(z / CELL);
+      for (let ii = i0 - 1; ii <= i0 + 1; ii++) for (let jj = j0 - 1; jj <= j0 + 1; jj++) cells.add(ii * 100003 + jj); } }
+    return ISLAND.carve((x, z, h) => {
+      if (!cells.has(Math.floor(x / CELL) * 100003 + Math.floor(z / CELL))) return null;
+      const s = surfaceNear(x, z); if (!s) return null;
+      const lim = s.y - 0.12 + s.d * (window.__skirt || 0.5);
+      return h > lim ? lim : null;
+    });
+  }
+  function init(scene) { build(); render(scene); }   // 땅 깎기(carveTerrain)는 안 쓴다 — 격자를 촘촘히 해 길이 땅을 그대로 따라간다
+  window.ROADS = Object.assign(R, { init, onRoad, nearest, edgeDist, resample, catmull, smoothPts , surfaceY, surfaceAbs, surfaceNear, carveTerrain, route, nearestNode, dirty, edgeBlocked });
 })();
