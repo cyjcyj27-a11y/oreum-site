@@ -772,7 +772,9 @@
       // 돌담은 1.2~1.5m 라, 0.8m 넘게 떠 있으면 그 위를 지나간다 (사장님 2026-09-10 "돌담 뛰어넘게")
       const overWall = S.jy > 0.8;
       const onDeck = window.ROADS && ROADS.surfaceAbs(nx, nz) > 0.15;   // 길 위(다리 포함)는 물·절벽이어도 걷는다
-      if ((onDeck || (H(nx, nz) > 0.15 && !steep(nx, nz))) && !(PLAYER.insideBox && PLAYER.insideBox(nx, nz, .3, overWall))) { S.x = nx; S.z = nz; } else S.spd *= .5;   // 바다·건물·절벽은 못 간다
+      // 가파른 비탈은 오르지만 못 한다 — 내려가는 쪽은 걷는다. 절벽 비탈에서 내리면 사방이 막혀 한 발짝도 못 걸었다(2026-09-18 폰 시험)
+      const slopeOk = !steep(nx, nz) || H(nx, nz) <= H(S.x, S.z);
+      if ((onDeck || (H(nx, nz) > 0.15 && slopeOk)) && !(PLAYER.insideBox && PLAYER.insideBox(nx, nz, .3, overWall))) { S.x = nx; S.z = nz; } else S.spd *= .5;   // 바다·건물·절벽은 못 간다
       if (pushOutCar(S, 0.4)) S.spd *= .3;   // 차 몸체도 못 뚫는다
       if (pushOutTraffic(S, 0.4)) S.spd *= .3;   // 지나가는 차도
       if (window.NPC && NPC.solid && NPC.solid(S, 0.42, 0.3)) S.spd *= .85;   // 사람도 못 뚫는다. 사람이 먼저 비키므로(npc.js) 주인공은 조금만 밀린다 — 사이에 갇히지 않게(사장님 2026-09-10)
