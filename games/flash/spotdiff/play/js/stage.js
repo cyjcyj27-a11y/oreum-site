@@ -133,6 +133,8 @@
     if (!w || !h) return;
     if (renderer.domElement.width !== w || renderer.domElement.height !== h) setSize(w, h);
     renderer.render(scene, cam);
+    if (S.twice) renderer.render(scene, cam);   // 폰에서 한 박자 늦게 옮겨지는 경우 대비(2026-09-17)
+    { const gl = renderer.getContext(); if (gl.finish) gl.finish(); }   // 다 그린 뒤에 옮긴다
     const g = canvas.getContext('2d');
     const gr = g.createLinearGradient(0, 0, 0, h);
     gr.addColorStop(0, bgTop);
@@ -300,6 +302,23 @@
     diffs.forEach((d) => apply(d.c, d));
     draw(canvasB);
     diffs.slice().reverse().forEach((d) => revert(d.c, d));
+  };
+
+  // 이 기기에서 두 장이 틀린 곳마다 정말 다른지 — 바뀐 픽셀 수(그림 크기와 상관없이 320x240 기준으로 환산)
+  S.visible = function (canvasA, canvasB, diffs) {
+    const w = canvasA.width, h = canvasA.height;
+    if (!w || !h) return diffs.map(() => 999);
+    const A = canvasA.getContext('2d').getImageData(0, 0, w, h).data, B = canvasB.getContext('2d').getImageData(0, 0, w, h).data;
+    const sc = (320 * 240) / (w * h);
+    return diffs.map((d) => {
+      const b = d.box; let n = 0;
+      for (let y = Math.floor(b.y0 * h); y < Math.ceil(b.y1 * h); y++)
+        for (let x = Math.floor(b.x0 * w); x < Math.ceil(b.x1 * w); x++) {
+          const i = (y * w + x) * 4;
+          if (Math.abs(A[i] - B[i]) + Math.abs(A[i + 1] - B[i + 1]) + Math.abs(A[i + 2] - B[i + 2]) > 36) n++;
+        }
+      return Math.round(n * sc);
+    });
   };
 
   S.candCount = () => cands.length;

@@ -121,6 +121,21 @@
       cvA.width = cvB.width = L.pw;
       cvA.height = cvB.height = L.ph;
       S.paint(cvA, cvB, st.diffs);
+      // 폰에서 두 그림이 똑같이 나온 일이 있었다(2026-09-17 사장님 "첫판인데 틀린그림이 없어") — 이 기기에서 틀린 곳마다 확인한다
+      let vis = S.visible(cvA, cvB, st.diffs);
+      if (vis.some((n) => n < 20)) {
+        const bad = vis.filter((n) => n < 20).length;
+        S.twice = true;
+        S.paint(cvA, cvB, st.diffs);
+        vis = S.visible(cvA, cvB, st.diffs);
+        const still = vis.filter((n) => n < 20).length;
+        try { if (window.gtag) gtag('event', 'spotdiff_invisible', { stage: s, bad: bad, still: still, total: st.diffs.length }); } catch (e) {}
+        if (still && still < st.diffs.length) {   // 그래도 안 보이는 곳은 뺀다
+          st.diffs = st.diffs.filter((d, i) => vis[i] >= 20);
+          st.found = st.diffs.map(() => false);
+          S.paint(cvA, cvB, st.diffs);
+        }
+      }
       lastSize = L.pw + 'x' + L.ph;
       sizeCanvases();
       makeDots();
