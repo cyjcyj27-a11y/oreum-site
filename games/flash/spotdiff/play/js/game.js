@@ -233,12 +233,12 @@
     setTimeout(drawFx, 450);
   }
 
-  function ring(g, W, H, d, color, k, dash) {
+  function ring(g, W, H, d, color, k, dash, thick, minR) {
     const b = d.box;
     const cx = ((b.x0 + b.x1) / 2) * W, cy = ((b.y0 + b.y1) / 2) * H;
-    const rx = Math.max(((b.x1 - b.x0) / 2) * W * 1.25, W * 0.035) * k;
-    const ry = Math.max(((b.y1 - b.y0) / 2) * H * 1.25, W * 0.035) * k;
-    const lw = Math.max(3, W * 0.007);
+    const rx = Math.max(((b.x1 - b.x0) / 2) * W * 1.25, W * (minR || 0.035)) * k;
+    const ry = Math.max(((b.y1 - b.y0) / 2) * H * 1.25, W * (minR || 0.035)) * k;
+    const lw = Math.max(3, W * 0.007) * (thick || 1);
     g.setLineDash(dash ? [lw * 2.5, lw * 1.8] : []);
     g.lineWidth = lw * 2.2;
     g.strokeStyle = 'rgba(0,0,0,0.35)';
@@ -265,9 +265,9 @@
           ring(g, W, H, d, '#ff4d4d', 1);
         }
       });
-      if (st.hintOn) {
-        const blink = Math.floor(now / 250) % 2 === 0;
-        if (blink) ring(g, W, H, st.diffs[st.hintOn.i], '#ffd23f', 1.2, true);
+      if (st.hintOn) {   // 폰에서 안 보였다(가는 점선이 깜빡여 꺼진 때가 반) — 굵은 실선이 꺼지지 않고 맥박 친다(2026-09-17 사장님 "힌트버튼 안먹히고")
+        const p = (Math.sin(now / 110) + 1) / 2;
+        ring(g, W, H, st.diffs[st.hintOn.i], '#ffd23f', 1.15 + p * 0.35, false, 2.4, 0.07);
       }
       (st.marks || []).forEach((m) => {
         if (m.until < now) return;
@@ -291,9 +291,11 @@
     if (!left.length) return;
     st.hints--;
     AU.play('hint');
-    st.hintOn = { i: left[Math.floor(Math.random() * left.length)], until: performance.now() + 3000 };
+    st.hintOn = { i: left[Math.floor(Math.random() * left.length)], until: performance.now() + 3500 };
     hud();
     drawFx();
+    const pulse = () => { if (!st.hintOn) return drawFx(); drawFx(); requestAnimationFrame(pulse); };   // 시계(0.1초)보다 부드럽게
+    requestAnimationFrame(pulse);
   }
   $('bHint').onclick = useHint;
 

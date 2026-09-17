@@ -18,7 +18,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#2a2433;
 /* ---------- 상단바 (스카이라이더 배치) ---------- */
 #topbar{position:fixed;top:0;left:0;right:0;z-index:20;display:flex;align-items:center;
   gap:6px;flex-wrap:wrap;pointer-events:none;
-  padding:6px calc(8px + env(safe-area-inset-right)) 8px calc(104px + env(safe-area-inset-left));
+  padding:calc(6px + env(safe-area-inset-top)) calc(8px + env(safe-area-inset-right)) 8px calc(104px + env(safe-area-inset-left));   /* 전체화면에서 홈 알약만 노치만큼 내려와 단추와 겹쳤다(2026-09-17) */
   background:linear-gradient(180deg,rgba(0,0,0,.45),rgba(0,0,0,0))}
 body:not(.playing) #topbar{visibility:hidden}
 .stat{display:flex;align-items:center;gap:6px;background:rgba(0,0,0,.35);
@@ -189,7 +189,7 @@ body:not(.playing) #topbar{visibility:hidden}
 <script src="js/scn_camp.js?v=1"></script>
 <script src="js/scn_beach.js?v=1"></script>
 <script src="js/audio.js?v=1"></script>
-<script src="js/game.js?v=4"></script>
+<script src="js/game.js?v=5"></script>
 <script src="/assets/visit.js?v=12" defer></script>
 <script src="/assets/game-events.js?v=2" defer></script>
 </body>
