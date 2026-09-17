@@ -729,6 +729,9 @@
       for (let i = 0; i < 8; i++) { const a = (i / 8) * 6.283, r = 7.5, size = 1.6 + (i % 3) * .6; const s = new THREE.Mesh(new THREE.DodecahedronGeometry(size, 0), rockMat); s.position.set(Math.cos(a) * r, .2, Math.sin(a) * r * .8 + 2); s.rotation.set(i, i * 2, i); grp.add(s);
         g.userData.rocks.push({ x: c + s.position.x, z: m.z + s.position.z, r: size * .9 + 1.7 }); }
       for (const [dx, rr] of [[-4, 3], [0, 4.4], [4, 3]]) g.userData.rocks.push({ x: c + dx, z: m.z + 9, r: rr + 1.7 });   // 동굴 바위
+      // 골짜기를 가로막는 바위 둑 — 여기가 물길의 끝이다(2026-09-17). 실제로 막는 건 game.js 의 END+10 선
+      for (let i = 0; i < 14; i++) { const dx = (i - 6.5) * 4.2, size = 2.6 + ((i * 7) % 5) * .5; if (Math.abs(dx) < 6) continue;
+        const s = new THREE.Mesh(new THREE.DodecahedronGeometry(size, 0), rockMat); const dz = 11 + (i % 3) * 1.2; s.position.set(dx, rawH(c + dx, m.z + dz) + size * .3, dz); s.rotation.set(i * 1.3, i * .7, i * 2.1); s.scale.y = 1.3; grp.add(s); }
       // 동생 — 물가 바위에 앉아 있다
       const kid = new THREE.Group(); kid.position.set(1.1, .35, 2.6); kid.rotation.y = -.4; grp.add(kid);
       const body = new THREE.Mesh(new THREE.CapsuleGeometry(.26, .5, 5, 10), new THREE.MeshLambertMaterial({ color: 0xd8dde0 })); body.position.y = .45; kid.add(body);

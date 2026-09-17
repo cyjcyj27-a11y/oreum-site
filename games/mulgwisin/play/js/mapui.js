@@ -46,7 +46,8 @@
   }
 
   // ── 지도 ──
-  const Z0 = -48, Z1 = W.END + 14;
+  const Z0 = -48, Z1 = W.END + 16;
+  const mhw = z => z <= W.END ? W.hw(z) : W.hw(W.END) * Math.max(0, 1 - (z - W.END) / 12);   // 지도에선 물길이 발원지에서 닫힌다
   function drawMap() {
     const g = MG(); if (!g) return;
     const dpr = Math.min(2, window.devicePixelRatio || 1), R = cv.getBoundingClientRect();
@@ -55,7 +56,7 @@
     const c = cv.getContext('2d'); c.setTransform(dpr, 0, 0, dpr, 0, 0);
     const mx = 34, sx = (w - mx * 2) / (Z1 - Z0);
     let lo = 1e9, hi = -1e9;
-    for (let z = Z0; z <= Z1; z += 10) { const cx = W.cx(z), hw = W.hw(z) + 9; lo = Math.min(lo, cx - hw); hi = Math.max(hi, cx + hw); }
+    for (let z = Z0; z <= Z1; z += 10) { const cx = W.cx(z), hw = mhw(z) + 9; lo = Math.min(lo, cx - hw); hi = Math.max(hi, cx + hw); }
     const sy = Math.min((h - 70) / (hi - lo), sx * 3.2), xm = (lo + hi) / 2, cy = h / 2 - 6;
     const X = z => mx + (z - Z0) * sx, Y = x => cy - (x - xm) * sy;   // 위에서 내려다보면 +z 가 오른쪽일 때 +x 는 위
 
@@ -65,16 +66,16 @@
     for (let i = 0; i < 700; i++) { c.fillStyle = 'rgba(' + (90 + rn() * 40 | 0) + ',' + (80 + rn() * 30 | 0) + ',60,' + (rn() * .05) + ')'; c.fillRect(rn() * w, rn() * h, 2 + rn() * 14, 1 + rn() * 5); }
     // 둔치(걸을 수 있는 뭍)
     const band = (off, fill) => { c.beginPath();
-      for (let z = Z0; z <= Z1; z += 6) c.lineTo(X(z), Y(W.cx(z) + W.hw(z) + off));
-      for (let z = Z1; z >= Z0; z -= 6) c.lineTo(X(z), Y(W.cx(z) - W.hw(z) - off));
+      for (let z = Z0; z <= Z1; z += 6) c.lineTo(X(z), Y(W.cx(z) + mhw(z) + off * Math.min(1, mhw(z) / 4 + .2)));
+      for (let z = Z1; z >= Z0; z -= 6) c.lineTo(X(z), Y(W.cx(z) - mhw(z) - off * Math.min(1, mhw(z) / 4 + .2)));
       c.closePath(); c.fillStyle = fill; c.fill(); };
     band(6.5, '#2a2a20');
     band(0, '#0f2226');
     // 물 결 — 흐름 방향으로 짧은 획
     c.strokeStyle = 'rgba(120,160,165,.14)'; c.lineWidth = 1;
-    for (let z = Z0 + 8; z < Z1; z += 14) for (const f of [-.45, 0, .45]) { const x = W.cx(z) + f * W.hw(z); c.beginPath(); c.moveTo(X(z) - 4, Y(x)); c.lineTo(X(z) + 4, Y(x)); c.stroke(); }
+    for (let z = Z0 + 8; z < Z1; z += 14) for (const f of [-.45, 0, .45]) { const x = W.cx(z) + f * mhw(z); c.beginPath(); c.moveTo(X(z) - 4, Y(x)); c.lineTo(X(z) + 4, Y(x)); c.stroke(); }
     // 물가 선
-    for (const s of [1, -1]) { c.beginPath(); for (let z = Z0; z <= Z1; z += 6) c.lineTo(X(z), Y(W.cx(z) + s * W.hw(z))); c.strokeStyle = 'rgba(160,190,185,.35)'; c.lineWidth = 1.2; c.stroke(); }
+    for (const s of [1, -1]) { c.beginPath(); for (let z = Z0; z <= Z1; z += 6) c.lineTo(X(z), Y(W.cx(z) + s * mhw(z))); c.strokeStyle = 'rgba(160,190,185,.35)'; c.lineWidth = 1.2; c.stroke(); }
     // 거리 눈금
     c.font = '15px Ria, sans-serif'; c.textAlign = 'center'; c.fillStyle = 'rgba(210,200,180,.55)';
     for (let m = 0; m <= W.END; m += 300) { c.fillRect(X(m), h - 24, 1, 6); c.fillText(m + 'm', X(m), h - 8); }
@@ -96,11 +97,11 @@
       put(t.ic, x, t.z, t.done, 9);
     }
     // 나
-    { const P = g.P, px = X(P.z), py = Y(P.x), a = Math.atan2(-Math.sin(P.yaw), Math.cos(P.yaw));   // 화면 방향: dz → 오른쪽, dx → 위
+    { const P = g.P, px = Math.max(mx, Math.min(w - mx, X(P.z))), py = Math.max(20, Math.min(h - 30, Y(P.x))), a = Math.atan2(-Math.sin(P.yaw), Math.cos(P.yaw));   // 화면 방향: dz → 오른쪽, dx → 위
       const gl = c.createRadialGradient(px, py, 1, px, py, 22); gl.addColorStop(0, 'rgba(255,220,150,.55)'); gl.addColorStop(1, 'rgba(255,220,150,0)'); c.fillStyle = gl; c.fillRect(px - 22, py - 22, 44, 44);
       c.save(); c.translate(px, py); c.rotate(a);
-      c.beginPath(); c.moveTo(11, 0); c.lineTo(-6, -7); c.lineTo(-3, 0); c.lineTo(-6, 7); c.closePath();
-      c.fillStyle = '#fff'; c.fill(); c.strokeStyle = '#000'; c.lineWidth = 1.5; c.stroke(); c.restore(); }
+      c.beginPath(); c.moveTo(17, 0); c.lineTo(-9, -11); c.lineTo(-4, 0); c.lineTo(-9, 11); c.closePath();   // 발원지·할 일 아이콘 위에서도 보이게 크게(2026-09-17)
+      c.fillStyle = '#fff'; c.fill(); c.strokeStyle = '#000'; c.lineWidth = 2.5; c.stroke(); c.restore(); }
     // 위 줄 — 개수
     const cnt = ic => { const l = list.filter(t => t.ic === ic); return l.filter(t => t.done).length + '/' + l.length; };
     $('mapCnt').innerHTML = EMO('📜 ' + cnt('📜') + '   👣 ' + cnt('👣') + '   ⛩ ' + cnt('⛩') + '   🔧 ' + cnt('🔧'));

@@ -1048,6 +1048,7 @@
         else { nx = P.x - ux * .07; nz = P.z - uz * .07; P.speed *= .6; }   // 구석에 몰리면 낮은 쪽으로 밀려난다
       }
       for (const r of W.rocks) { if (r.pass) continue; const d = Math.hypot(nx - r.x, nz - r.z), rr = r.r - 1.7; if (d < rr && d > .001) { nx = r.x + (nx - r.x) / d * rr; nz = r.z + (nz - r.z) / d * rr; } }   // pass 는 카메라만 막는 처마
+      nz = Math.min(nz, W.END + 10);   // 발원지 동굴 뒤로는 못 간다(사장님 2026-09-17 "발원지에서 더 못 올라가야")
       P.x = nx; P.z = nz;
       P.adv = Math.hypot(P.x - ox, P.z - oz) / Math.max(1e-4, dt);   // 실제로 나아간 빠르기 — 벽·바퀴에 막혀 제자리면 0 에 가깝다
     } else P.adv = 0;
