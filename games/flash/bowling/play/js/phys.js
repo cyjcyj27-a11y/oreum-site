@@ -139,8 +139,10 @@
     out[2] = p.vz + d * (ca * sf * p.ar + sa * cf * p.fr);
   }
   const LIN0 = 0.45;
-  let PIN_E = 0.8, PIN_FLY = 0.9;
-  P.tune = function (e, f) { PIN_E = e; PIN_FLY = f; };
+  // 핀 튀는 정도 (T.e 핀끼리 반발, T.fly 핀끼리 날려 넘기는 문턱, T.bfly 공이 날려 넘기는 문턱, T.blift 공에 맞아 뜨는 힘)
+  const T = { e: 0.6, fly: 2.0, plift: 0.12, bfly: 4.2, blift: 0.12, bmax: 0.9, spin: 6 };
+  P.T = T;
+  P.tune = function (o) { Object.assign(T, o); };
   function pinInvMass(p, k, nx, ny, nz) {
     const s = SPH[k][0];
     if (p.st === 0) {
@@ -330,10 +332,10 @@
       b.vx += jx * invB; b.vz += jz * invB;
       const wasUp = p.st === 0;
       pinApply(p, k, -jx, 0, -jz);
-      if (wasUp && j > 3.2) {
+      if (wasUp && j > T.bfly) {
         // 세게 맞은 핀은 튕겨 날아간다
-        topple(p, Math.min(2.6, (j - 3.2) * 0.35 + Math.random() * 0.5));
-        p.fr += (Math.random() - 0.5) * 14;
+        topple(p, Math.min(T.bmax, (j - T.bfly) * T.blift + Math.random() * T.blift * 1.4));
+        p.fr += (Math.random() - 0.5) * T.spin;
       }
       S.events.push({ t: 'hit', v: j, x: p.x, z: p.z, ball: true });
       return;
@@ -374,13 +376,13 @@
     const rv = (VA[0] - VB[0]) * nx + (VA[1] - VB[1]) * ny + (VA[2] - VB[2]) * nz;
     if (rv >= 0) return;
     const inv = pinInvMass(p, k, nx, ny, nz) + pinInvMass(q, m, nx, ny, nz);
-    const j = (-(1 + PIN_E) * rv) / inv;
+    const j = (-(1 + T.e) * rv) / inv;
     const pUp = p.st === 0, qUp = q.st === 0;
     pinApply(p, k, nx * j, ny * j, nz * j);
     pinApply(q, m, -nx * j, -ny * j, -nz * j);
     // 날아온 핀에 세게 맞으면 같이 튄다
-    if (pUp && j > PIN_FLY) topple(p, Math.min(1.2, (j - PIN_FLY) * 0.3));
-    if (qUp && j > PIN_FLY) topple(q, Math.min(1.2, (j - PIN_FLY) * 0.3));
+    if (pUp && j > T.fly) topple(p, Math.min(1.2, (j - T.fly) * T.plift));
+    if (qUp && j > T.fly) topple(q, Math.min(1.2, (j - T.fly) * T.plift));
     if (j > 0.6) S.events.push({ t: 'hit', v: j, x: (px + qx) / 2, z: (pz + qz) / 2 });
   }
 
