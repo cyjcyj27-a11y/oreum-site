@@ -20,7 +20,7 @@
     { id: 'camp', ko: '캠핑장', en: 'Campsite' },
     { id: 'beach', ko: '바닷가', en: 'Beach' },
   ];
-  const PER = 10;
+  const PER = 5;   // 방마다 5판(2026-09-17 사장님 "방마다 5판으로 줄여줘", 옛 10판)
   const TOTAL = SCENES.length * PER;
   const KEY = 'spotdiff.prog';
 
@@ -35,11 +35,11 @@
     const si = endless ? (s * 7) % SCENES.length : Math.floor((s - 1) / PER) % SCENES.length;
     const k = (s - 1) % PER; // 방 안에서 몇 번째
     const round = Math.floor((s - 1) / PER); // 몇 번째 방
-    let count = 5 + (k >= 5 ? 1 : 0) + Math.min(2, Math.floor(round / 2));
-    let lv = Math.min(5, Math.floor(round * 0.8 + k / 5));
+    let count = 5 + (k >= 3 ? 1 : 0) + Math.min(2, Math.floor(round / 2));
+    let lv = Math.min(5, Math.floor(round * 0.8 + k / 2.5));
     if (endless) { count = 8; lv = 5; }
     const time = 60;
-    return { s, scene: SCENES[si].id, room: si, night: k >= 7, count, lv, time, seed: s * 7919 + 13 };
+    return { s, scene: SCENES[si].id, room: si, night: k >= 3, count, lv, time, seed: s * 7919 + 13 };
   }
 
   // ── 상태
