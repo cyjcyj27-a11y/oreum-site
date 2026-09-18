@@ -291,6 +291,7 @@ const L = (ko, en) => EN_MODE ? en : ko;
 </script>
 <script type="module">
 import * as THREE from 'three';
+import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/jsm/loaders/GLTFLoader.js';
 
 /* ══════════════════════════════════════════════════════════════
    NIGHT STUDY — 야간자율학습
@@ -1054,6 +1055,56 @@ ghost.renderOrder = 3;
 ghost.visible = false;
 scene.add(ghost);
 
+/* 물귀신 모델 — 2026-09-18 사장님 "야간자율학습의 귀신을 물귀신의 귀신으로 교체해".
+   물귀신(games/mulgwisin)과 같은 리깅 GLB(좀비팩 동작 든 것)를 쓴다. 모델이 오기 전까지만 위의 그림 판이 대신 선다. */
+const GM = { H:1.95, root:null, mixer:null, act:{}, cur:'',
+             holder:new THREE.Group(), inner:new THREE.Group() };
+GM.holder.add(GM.inner); GM.holder.visible=false; scene.add(GM.holder);
+new GLTFLoader().load('ghost.glb?v=1', gl=>{
+  const root = gl.scene;
+  root.traverse(o=>{
+    if(!o.isMesh) return;
+    o.frustumCulled = false;
+    const src = [].concat(o.material)[0] || {};
+    if(src.map) src.map.anisotropy = 4;
+    // 어두운 복도에서도 희끄무레하게 떠 보이도록 제 빛을 조금 준다(옛 그림 판은 빛을 안 받는 판이었다)
+    o.material = new THREE.MeshLambertMaterial({ map:src.map||null, color:0xa9b5b5,
+      emissive:0x5e6a6a, emissiveMap:src.map||null, skinning:true, fog:true });
+  });
+  // 원점이 허리께라 발바닥을 원점으로 내리고 키를 맞춘다 — 붙이기 전에 잰다
+  root.updateMatrixWorld(true);
+  const bb = new THREE.Box3().setFromObject(root), h = Math.max(.01, bb.max.y-bb.min.y);
+  root.position.y -= bb.min.y; GM.inner.scale.setScalar(GM.H/h);
+  GM.inner.add(root);
+  GM.mixer = new THREE.AnimationMixer(root);
+  (gl.animations||[]).forEach(c=>{
+    c.tracks = c.tracks.filter(t=>!/hips\.position$/i.test(t.name.replace(/[:_]/g,'')));   // 제자리 동작 — 몸은 G 가 옮긴다
+    GM.act[c.name] = GM.mixer.clipAction(c);
+  });
+  GM.root = root;
+  ghostAnim('zwalk');
+  if(ghost.visible){ ghost.visible=false; GM.holder.visible=true; }
+}, undefined, e=>console.warn('귀신 모델', e));
+// 비명 동작은 몸이 기울어 얼굴이 화면 구석으로 빠진다 — 머리 뼈가 늘 눈앞 한가운데 오도록 몸을 통째로 옮긴다
+const _hd = new THREE.Vector3();
+function faceLock(){
+  if(!GM.root || !GM.faceAt) return;
+  if(!GM.head) GM.root.traverse(o=>{ if(!GM.head && o.isBone && /head$/i.test(o.name.replace(/[:_]/g,''))) GM.head=o; });
+  if(!GM.head) return;
+  GM.holder.updateMatrixWorld(true);
+  GM.head.getWorldPosition(_hd);
+  GM.holder.position.add(_hd.subVectors(GM.faceAt, _hd));
+}
+function ghostAnim(name, speed){
+  const a = GM.act[name]; if(!a) return;
+  a.timeScale = speed || 1;
+  if(GM.cur===name) return;
+  const old = GM.act[GM.cur];
+  a.reset(); a.setLoop(THREE.LoopRepeat, Infinity); a.enabled=true; a.setEffectiveWeight(1); a.play();
+  if(old && old!==a) old.crossFadeTo(a, .28, false);
+  GM.cur = name;
+}
+
 const G = {
   x:0, z:0, dirX:0, dirZ:1,
   state:'patrol',          // patrol | suspect | chase | check
@@ -1261,7 +1312,9 @@ function startGame(){
   G.lastSeen=99; G.lostFor=0; G.lookT=0; G.checkT=0; G.bob=0;
   ghost.scale.setScalar(1); ghost.renderOrder=3; ghostMat.opacity=0.9;
   setGoal(...randomFloorCell(P.x,P.z,26));
-  ghost.visible=true;
+  ghost.visible=!GM.root; GM.holder.visible=!!GM.root;
+  GM.faceAt=null;
+  if(GM.root){ GM.cur=''; GM.mixer.stopAllAction(); ghostAnim('zwalk'); }
 
   el.title.style.display='none'; el.dead.style.display='none';
   el.win.style.display='none'; el.pause.style.display='none';
@@ -1294,6 +1347,14 @@ function die(msg){
   const fwd = new THREE.Vector3();
   camera.getWorldDirection(fwd); fwd.y=0; fwd.normalize();
   camera.getWorldPosition(camWorld);
+  if(GM.root){   // 물귀신이 코앞에서 비명을 지른다 — 얼굴이 눈높이에 오게
+    ghost.visible=false; GM.holder.visible=true;
+    GM.holder.position.set(camWorld.x + fwd.x*0.62, camWorld.y - GM.H*0.92, camWorld.z + fwd.z*0.62);
+    GM.holder.rotation.y = Math.atan2(camWorld.x-GM.holder.position.x, camWorld.z-GM.holder.position.z);
+    ghostAnim('scream', 1.15);
+    GM.faceAt = new THREE.Vector3(camWorld.x + fwd.x*0.55, camWorld.y - 0.06, camWorld.z + fwd.z*0.55);
+    faceLock();
+  }
   ghost.position.set(camWorld.x + fwd.x*0.42, camWorld.y - 0.40, camWorld.z + fwd.z*0.42);
   ghost.rotation.y = Math.atan2(camWorld.x-ghost.position.x, camWorld.z-ghost.position.z);
   ghost.scale.setScalar(1.12);
@@ -1469,6 +1530,19 @@ function updateGhost(dt){
   }
   ghostMat.opacity = clamp(angry?1.0:0.86 - dist*0.006, 0.35, 1);
   ghost.scale.setScalar(angry ? 1.06+Math.sin(G.bob*3)*0.015 : 1);
+  if(GM.root){   // 물귀신 모델 — 걸을 땐 가는 쪽을, 쫓을 땐 나를 본다
+    ghost.visible=false; GM.holder.visible=true;
+    GM.holder.position.set(G.x, 0, G.z);
+    let ry = angry ? Math.atan2(dx, dz) : Math.atan2(G.dirX, G.dirZ);
+    let d = ry - GM.holder.rotation.y; d = Math.atan2(Math.sin(d), Math.cos(d));
+    GM.holder.rotation.y += d * (1-Math.pow(0.002, dt));
+    const moving = G.path && G.pathT<G.path.length;
+    if(G.state==='chase') ghostAnim('zrun', speed/4.3);
+    else if(G.state==='check') ghostAnim(dist<1.8 ? 'attack' : 'zrun', dist<1.8 ? 1 : speed/4.3);
+    else if(moving) ghostAnim('zwalk', speed/1.6);
+    else ghostAnim('zidle');
+    GM.mixer.update(dt);
+  }
 
   // 무서움 — 가까울수록, 쫓길수록
   const near = clamp(1 - dist/17, 0, 1);
@@ -1549,6 +1623,7 @@ function frame(now){
   requestAnimationFrame(frame);
   const dt = Math.min(0.05, (now-last)/1000); last=now;
   if(RUN_STATE==='play') tick(dt);
+  else if(RUN_STATE==='dead' && GM.mixer){ GM.mixer.update(dt); faceLock(); }   // 코앞 비명은 죽은 뒤에도 움직인다
   renderer.render(scene, camera);
 }
 
@@ -1684,7 +1759,7 @@ if(TOUCH){
 
 /* 만드는 사람이 화면 밖에서 상태를 들여다보는 통로 (게임에는 영향 없음) */
 window.__ns = {
-  P, G, S, ROOMS, hideSpots, pickups,
+  P, G, S, GM, ROOMS, hideSpots, pickups,
   start: startGame,
   mute: v=>Snd.mute(v),
   sfx: ()=>Snd.stepInfo(),
