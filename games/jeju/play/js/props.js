@@ -4,6 +4,7 @@
 //   · 나무: 흔들린다. 귤나무면 귤이 떨어져 구른다 (잎은 뺐다 — 밤에 돌처럼 보였다)
 //   · 세워 둔 차: 경보가 삐용삐용
 //   · 흩어진 돌·귤은 걸어가며 차고, 차로 밀면 튀어 나간다
+//   · 부순 만큼 벌금(수리비)이 현금에서 바로 빠지고, 옆자리 여친이 금액을 짚어 잔소리한다 (사장님 2026-09-18)
 //   그리기는 종류마다 InstancedMesh 하나(돌·귤) — 조각이 늘어도 그리기 명령은 둘
 (function () {
   const I = ISLAND, H = I.H;
@@ -12,7 +13,14 @@
     stone:  { max: 220, e: 0.25, fric: 2.4, life: 70, kick: 0.9 },
     orange: { max: 60, e: 0.45, fric: 0.9, life: 60, kick: 1.6 },
   };
-  const P = { meshes: {}, free: {}, bodies: [], falls: [], shakes: [], broken: [], alarmT: 0, sayT: 0, ready: false };
+  const P = { meshes: {}, free: {}, bodies: [], falls: [], shakes: [], broken: [], alarmT: 0, ready: false, bill: null, paid: 0 };
+  // ── 수리비 (단위: 만원 — ACT.coins 와 같다. 1억 = 10000) ── 사장님 2026-09-18 "돌담 m당 백만원"
+  //   돌담: m당 100만원 (토막 하나 4m = 400만원)
+  //   가로등 1기 400만원 · 신호등(기둥+신호기) 1,500만원 — 실제 교체 공사비 어림
+  //   가로수 300만원 — 시속 18km 넘게 들이받았을 때만
+  //   귤나무는 따로(사장님): 나무 80만원 + 떨어뜨린 귤 한 알 1만원
+  //   세워 둔 차: 100만원 + 속도(m/s)²×4만원, 최대 3,000만원. 부딪는 힘이 속도 제곱이라 50km/h 약 880만 · 100km/h 3,000만
+  const FINE = { wallM: 100, lamp: 400, signal: 1500, street: 300, orch: 80, orange: 1, carBase: 100, carK: 4, carMax: 3000 };
   const M4 = new THREE.Matrix4(), Q = new THREE.Quaternion(), Q2 = new THREE.Quaternion(), V = new THREE.Vector3(), SC = new THREE.Vector3(), AX = new THREE.Vector3(), YUP = new THREE.Vector3(0, 1, 0), ZERO = new THREE.Matrix4().makeScale(0, 0, 0);
 
   function init(scene) {
@@ -57,8 +65,8 @@
     if (!P.ready || !obj) return 0;
     if (obj.kind === 'stone' && obj.item && !obj.dead && speed > 3.5) return breakWall(obj, speed, vx, vz);
     if (obj.kind === 'pole' && obj.item && !obj.dead && speed > 3) return knockPole(obj, speed, vx, vz);
-    if (obj.kind === 'tree' && obj.item && speed > 2) shakeTree(obj, speed, vx, vz);
-    if (obj.kind === 'car' && speed > 1.5) alarm();
+    if (obj.kind === 'tree' && obj.item && speed > 2) { const drop = shakeTree(obj, speed, vx, vz); if (speed > 5) fineOnce(obj, obj.orch ? 'orch' : 'street', obj.orch ? FINE.orch + drop * FINE.orange : FINE.street, drop); }
+    if (obj.kind === 'car' && speed > 1.5) { alarm(); fineOnce(obj, 'car', Math.min(FINE.carMax, Math.round((FINE.carBase + FINE.carK * speed * speed) / 10) * 10)); }
     return 0;
   }
 
@@ -73,7 +81,7 @@
     }
     P.broken.push({ b, it, t: 0 });
     AUDIO.crash(Math.min(12, speed + 4), 'stone');
-    react('wall');
+    const m = Math.max(1, Math.round(L - 0.2)); fine('wall', m * FINE.wallM, m);
     return Math.max(0.55, 1 - speed * 0.02);   // 빠를수록 조금 더 잃는다
   }
 
@@ -86,41 +94,100 @@
     if (f.extra.length) { const e = f.extra[0], q = new THREE.Quaternion().setFromAxisAngle(f.ax, 1.48); const up = new THREE.Vector3(e.x - f.it.x, e.y - f.it.y, e.z - f.it.z).applyQuaternion(q).y; f.flip = up < 1; }
     P.falls.push(f);
     AUDIO.crash(Math.min(10, speed + 2), 'pole'); AUDIO.tone(520, 0.5, 'triangle', 0.08); AUDIO.tone(760, 0.7, 'sine', 0.05, 0.03);
-    react('pole');
+    const sig = c.item.ns !== undefined;   // 신호등 기둥에는 ns(남북) 표시가 있다
+    fine(sig ? 'signal' : 'lamp', sig ? FINE.signal : FINE.lamp, 1);
     return Math.max(0.6, 1 - speed * 0.015);
   }
 
   function shakeTree(c, speed, vx, vz) {
-    const it = c.item; if (P.shakes.some(s => s.it === it)) return;
+    const it = c.item; if (P.shakes.some(s => s.it === it)) return 0;
     const sp = Math.hypot(vx, vz) || 1;
     P.shakes.push({ it, ax: new THREE.Vector3(vz / sp, 0, -vx / sp), amp: Math.min(0.28, 0.05 + speed * 0.025), t: 0 });
     const s = it.sx || 1;   // 잎은 안 뿌린다 — 밤에 까만 돌처럼 보였다 (사장님 2026-09-18 "잎사귀를 빼버려")
-    if (c.orch && speed > 3) for (let k = 0; k < 3 + Math.round(Math.random() * 3); k++) { const a = Math.random() * 6.28, r = s * 0.6; spawn('orange', it.x + Math.cos(a) * r, it.y + s * 1.6, it.z + Math.sin(a) * r, (Math.random() - 0.5) * 1.5, 0.5, (Math.random() - 0.5) * 1.5, 0.15); }
+    let drop = 0;
+    if (c.orch && speed > 3) for (let k = 0, nk = 3 + Math.round(Math.random() * 3); k < nk; k++) { drop++; const a = Math.random() * 6.28, r = s * 0.6; spawn('orange', it.x + Math.cos(a) * r, it.y + s * 1.6, it.z + Math.sin(a) * r, (Math.random() - 0.5) * 1.5, 0.5, (Math.random() - 0.5) * 1.5, 0.15); }
+    return drop;
   }
 
   function alarm() {
     if (P.alarmT > 0) return; P.alarmT = 4.6;
     if (AUDIO.alarm) AUDIO.alarm(4.2);
-    react('car');
   }
+  // 같은 차·나무에 비비고 있으면 매 프레임 물리지 않게 한 물건당 3초에 한 번
+  function fineOnce(obj, k, v, extra) { const now = performance.now(); if (obj._fineAt && now - obj._fineAt < 3000) return; obj._fineAt = now; fine(k, v, 1, extra); }
 
-  // 옆자리 여자친구 한마디 (연달아 부수면 가끔만)
-  const SAY = {
-    wall: ['오빠!! 남의 돌담을 왜 부숴?!', '방금 그거 일부러 그런 거지?', '돌담 다시 쌓으려면 하르방들 고생하신다…', '와… 돌이 다 날아갔어 ㅋㅋㅋ', '이 동네에서 우리 얼굴 팔리겠다'],
-    pole: ['가로등!! 오빠 미쳤어?', '가로등이 누웠어… 오늘 밤 이 길 깜깜하겠다', '보험 되는 거 맞지?', '100억 있다고 막 사는 거 아니야'],
-    car: ['경보 울린다! 빨리 가!', '주인 나오기 전에 튀어!', '삐용삐용… 창피해 죽겠네'],
+  // ── 벌금 ── 부술 때마다 현금에서 바로 빠지고, 여친이 그 자리에서 금액을 말한다 (사장님 2026-09-18)
+  //   연달아 부수면 한 묶음(bill)으로 모아 대사 속 숫자가 실시간으로 늘어난다. 3.5초 조용하면 묶음을 닫는다
+  const NAG = {
+    wall: ['오빠!! 남의 돌담을 왜 부숴?!', '방금 그거 일부러 그런 거지?', '돌담 다시 쌓으려면 하르방들 고생하신다…', '이 동네에서 우리 얼굴 팔리겠다'],
+    lamp: ['가로등!! 오빠 미쳤어?', '가로등이 누웠어… 오늘 밤 이 길 깜깜하겠다', '보험 되는 거 맞지?'],
+    signal: ['신호등을 박으면 어떡해!!', '오빠 이거 경찰 와…', '교차로 한가운데서 뭐 하는 거야!'],
+    car: ['남의 차를 박았어!!', '주인 나오기 전에 튀자고? 돈은 내야지!', '삐용삐용… 창피해 죽겠네'],
+    street: ['가로수를 왜 들이받아!', '나무가 무슨 죄야…'],
+    orch: ['귤나무!! 농사 망치겠다', '할망 귤밭이잖아!', '귤 다 떨어졌어…'],
+    many: ['100억 있다고 막 사는 거 아니야', '오빠 이러다 땅 살 돈 다 날리겠다', '이 돈이면 땅을 샀지!', '오빠 운전면허 어디서 땄어?'],
   };
-  function react(k) {
-    if (P.sayT > 0 || !window.PET || !PET.say || PET.onFoot) return;
-    const a = SAY[k]; if (!a) return;
-    if (PET.say('여친', a[Math.floor(Math.random() * a.length)], 3.4, false)) P.sayT = 14;
+  const NAG_EN = {
+    wall: ['Babe!! Why are you smashing their stone wall?!', 'You did that on purpose, right?', 'The grandpas will have to stack that wall all over again…', 'This whole village is going to know our faces'],
+    lamp: ['The street lamp!! Are you crazy?', 'The lamp is lying down… this road will be pitch dark tonight', 'We are insured, right?'],
+    signal: ['You hit a traffic light!!', 'Babe, the police are coming…', 'In the middle of the intersection?!'],
+    car: ['You hit someone\'s car!!', 'Run before the owner comes out? No, we pay!', 'Wee-woo… I could die of embarrassment'],
+    street: ['Why would you ram a roadside tree?!', 'What did that tree ever do to you…'],
+    orch: ['A tangerine tree!! You ruined their harvest', 'That is grandma\'s orchard!', 'All the tangerines fell off…'],
+    many: ['Having 10 billion won is no excuse to live like this', 'At this rate we will not have money for land', 'We could have bought land with that!', 'Where did you even get your license?'],
+  };
+  const pick = a => a[Math.floor(Math.random() * a.length)];
+  const EN = () => !!(window.LANG && LANG.en);
+  // 만원 단위 → '400만원', '1,200만원', '1억 2,000만원' / 영문 '₩4M'
+  function won(v) {
+    v = Math.round(v);
+    if (EN() && window.ESTATE && ESTATE.fmt) return ESTATE.fmt(v);
+    const eok = Math.floor(v / 10000), man = v % 10000;
+    return (eok ? eok + '억' + (man ? ' ' : '') : '') + (man || !eok ? man.toLocaleString() + '만' : '') + '원';
+  }
+  function fine(k, v, n, extra) {
+    if (!window.ACT || !(v > 0)) return;
+    const take = Math.min(v, Math.max(0, ACT.coins || 0));   // 현금이 모자라면 있는 만큼만(빚은 안 진다)
+    ACT.coins = (ACT.coins || 0) - take; P.paid += v;
+    let B = P.bill;
+    if (!B) B = P.bill = { t: 0, sum: 0, wallM: 0, lamp: 0, signal: 0, car: 0, street: 0, orch: 0, orange: 0, nag: null, hits: 0, said: false };
+    B.t = 0; B.sum += v; B.hits++;
+    if (k === 'wall') B.wallM += n; else B[k] += n;
+    if (k === 'orch' && extra) B.orange += extra;
+    if (!B.nag || B.hits === 4) B.nag = pick((EN() ? NAG_EN : NAG)[B.hits >= 4 ? 'many' : k]);   // 넷째부터는 돈 걱정
+    if (window.ESTATE && ESTATE.hud) ESTATE.hud();
+    minus(B.sum);
+    speak();
+  }
+  // 상단바 자산 밑에 빨간 '-1,200만' — 묶음 합계가 실시간으로 늘어난다
+  function minus(sum) {
+    const g = document.getElementById('gain'); if (!g) return;
+    g.textContent = '-' + (window.ESTATE && ESTATE.fmt ? ESTATE.fmt(sum) : sum + '만');
+    g.classList.add('fine'); if (!g.classList.contains('on')) { void g.offsetWidth; g.classList.add('on'); }
+    if (window.ESTATE) ESTATE.gainT = 3;
+  }
+  function billText(B) {
+    const parts = [];
+    if (EN()) {
+      const pl = (n, w) => n + ' ' + w + (n > 1 ? 's' : '');
+      if (B.wallM) parts.push(B.wallM + 'm of wall'); if (B.lamp) parts.push(pl(B.lamp, 'lamp')); if (B.signal) parts.push(pl(B.signal, 'traffic light'));
+      if (B.car) parts.push(pl(B.car, 'car')); if (B.street) parts.push(pl(B.street, 'tree')); if (B.orch) parts.push(pl(B.orch, 'tangerine tree') + (B.orange ? ' + ' + pl(B.orange, 'tangerine') : ''));
+      return B.nag + ' Babe, the repair bill is ' + won(B.sum) + '! (' + parts.join(' · ') + ')';
+    }
+    if (B.wallM) parts.push('돌담 ' + B.wallM + 'm'); if (B.lamp) parts.push('가로등 ' + B.lamp + '개'); if (B.signal) parts.push('신호등 ' + B.signal + '개');
+    if (B.car) parts.push('차 ' + B.car + '대'); if (B.street) parts.push('가로수 ' + B.street + '그루'); if (B.orch) parts.push('귤나무 ' + B.orch + '그루' + (B.orange ? '·귤 ' + B.orange + '알' : ''));
+    return B.nag + ' 오빠 수리비 ' + won(B.sum) + ' 나왔어! (' + parts.join(' · ') + ')';
+  }
+  function speak() {
+    const B = P.bill; if (!B || !window.PET || !PET.say) return;
+    if (PET.say('여친', billText(B), 4.2, false)) B.said = true;   // 전화 중이면 못 한다 — 묶음이 닫힐 때 다시 해 본다
   }
 
   function update(dt) {
     if (!P.ready || dt <= 0) return;
     dt = Math.min(dt, 0.05);
     if (P.alarmT > 0) P.alarmT -= dt;
-    if (P.sayT > 0) P.sayT -= dt;
+    if (P.bill) { P.bill.t += dt; if (P.bill.t > 3.5) { if (!P.bill.said) speak(); P.bill = null; if (window.ACT && ACT.save) ACT.save(); } }
     const hero = window.PET && PET.onFoot ? PET.state : null;
     const car = PLAYER, cvx = -Math.sin(car.yaw) * car.long, cvz = -Math.cos(car.yaw) * car.long;
     // ── 조각들 ──
@@ -178,5 +245,5 @@
     for (let i = P.falls.length - 1; i >= 0; i--) { const f = P.falls[i]; if (f.t > 60 && Math.hypot(f.it.x - hx, f.it.z - hz) > 60) { f.c.dead = false; for (const it of [f.it].concat(f.extra)) setInst(it, baseMat(it, M4)); P.falls.splice(i, 1); } }
   }
 
-  window.PROPS = { init, update, hit, spawn, state: P };
+  window.PROPS = { init, update, hit, spawn, state: P, FINE, fine, won };
 })();

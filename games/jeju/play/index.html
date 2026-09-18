@@ -27,6 +27,7 @@
   .stat { position: relative; }
   #gain { position: absolute; left: 50%; top: 100%; transform: translate(-50%, 2px); font-style: normal; color: #ffd24a; font-size: 22px; opacity: 0; transition: opacity .25s, transform .9s ease-out; pointer-events: none; white-space: nowrap; text-shadow: 0 1px 3px rgba(0,0,0,.7); }
   #gain.on { opacity: 1; transform: translate(-50%, 12px); }
+  #gain.fine { color: #ff5a4a; }
   /* 말풍선은 화면 위쪽에. 가운데 두면 차와 주인공을 가린다 (사장님 2026-09-10) */
   #call { position: fixed; inset: 0; display: none; align-items: flex-start; justify-content: center; background: rgba(0,0,0,.28); z-index: 30; }
   #call.show { display: flex; }
@@ -349,7 +350,7 @@ body.shot #introv { display: none !important; }
   window.THREE = THREE;
   window.GLTFLoaderClass = GLTFLoader;
   window.SkeletonClone = skeletonClone;
-  const V = '441';
+  const V = '442';
   const names = ['lang','noise','textures','spots','island','sky','post','roads','city','glb','vehicles','landmarks','traffic','player','audio','activity','blds','estate','npc','people','pet','props','game'];
   (async () => {
     let done = 0;
