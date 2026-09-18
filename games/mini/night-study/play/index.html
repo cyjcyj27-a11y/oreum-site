@@ -214,8 +214,8 @@
     <b data-en="II, top left">왼쪽 위 II</b><span data-en="pause">잠깐 멈추기</span>
   </div>
   <div class="keys forPc">
-    <b>W A S D</b><span data-en="walk">걷기</span>
-    <b data-en="Mouse">마우스</b><span data-en="look around">둘러보기</span>
+    <b data-en="Arrow keys">방향키</b><span data-en="walk">걷기</span>
+    <b data-en="W A S D · Mouse">W A S D · 마우스</b><span data-en="look around">둘러보기</span>
     <b>Shift</b><span data-en="run (you lose your breath)">달리기 (숨이 찬다)</span>
     <b>F</b><span data-en="flashlight — bright, but easy to spot">손전등 — 밝지만 들키기 쉽다</span>
     <b>E</b><span data-en="take · hide in a locker">줍기 · 사물함에 숨기</span>
@@ -1382,6 +1382,11 @@ const camWorld = new THREE.Vector3();
 let last = performance.now();
 
 function updatePlayer(dt){
+  // W A S D 는 시점, 방향키는 걷기 — 2026-09-18 사장님 "WASD를 시점 화살표를 이동으로"
+  if(keys.KeyA) P.yaw += 2.3*dt;
+  if(keys.KeyD) P.yaw -= 2.3*dt;
+  if(keys.KeyW) P.pitch = clamp(P.pitch + 1.5*dt, -1.35, 1.35);
+  if(keys.KeyS) P.pitch = clamp(P.pitch - 1.5*dt, -1.35, 1.35);
   const spot = P.hideSpot;
   if(P.hidden && spot){
     P.hideT += dt; Snd.walk(false);
@@ -1393,10 +1398,10 @@ function updatePlayer(dt){
     return;
   }
   let fx=0, fz=0;
-  if(keys.KeyW||keys.ArrowUp) fz-=1;
-  if(keys.KeyS||keys.ArrowDown) fz+=1;
-  if(keys.KeyA||keys.ArrowLeft) fx-=1;
-  if(keys.KeyD||keys.ArrowRight) fx+=1;
+  if(keys.ArrowUp) fz-=1;
+  if(keys.ArrowDown) fz+=1;
+  if(keys.ArrowLeft) fx-=1;
+  if(keys.ArrowRight) fx+=1;
   const mag=Math.hypot(fx,fz);
   if(mag>0){ fx/=mag; fz/=mag; }
 
@@ -1504,8 +1509,16 @@ function updateGhost(dt){
     if(G.pathT>=G.path.length) setGoal(...randomFloorCell(G.x,G.z,16));
   }
 
+  // 코앞까지 쫓아왔으면 칸 가운데가 아니라 나한테 곧장 온다.
+  // 칸 가운데만 노리면 구석(가운데서 1m 넘게)에 붙은 사람을 못 잡았다 — 2026-09-18 사장님 "구석에 있으니까 나를 못 잡네"
+  if(G.state==='chase' && !P.hidden && dist<CELL*1.8 && dist>0.05 && los(G.x,G.z,P.x,P.z)){
+    const ax=dx/dist, az=dz/dist;
+    G.x+=ax*speed*dt; G.z+=az*speed*dt;
+    const k=1-Math.pow(0.0001,dt);
+    G.dirX=lerp(G.dirX,ax,k); G.dirZ=lerp(G.dirZ,az,k);
+  }
   // 길을 따라 미끄러지듯 움직인다
-  if(G.path && G.pathT<G.path.length){
+  else if(G.path && G.pathT<G.path.length){
     const t=G.path[G.pathT];
     const tx=cx2wx(t[0]), tz=cy2wz(t[1]);
     let ax=tx-G.x, az=tz-G.z;
@@ -1677,13 +1690,13 @@ if(TOUCH){
 
   const setKeys=(dx,dy,r)=>{
     const n=Math.hypot(dx,dy), on=n>r*0.22;
-    keys.KeyW = on && dy<-r*0.12;  keys.KeyS = on && dy>r*0.12;
-    keys.KeyA = on && dx<-r*0.12;  keys.KeyD = on && dx>r*0.12;
+    keys.ArrowUp = on && dy<-r*0.12;    keys.ArrowDown = on && dy>r*0.12;
+    keys.ArrowLeft = on && dx<-r*0.12;  keys.ArrowRight = on && dx>r*0.12;
     keys.ShiftLeft = n>r*0.78;                       // 끝까지 밀면 달린다
     knob.style.transform = on ? 'translate('+(dx*0.55)+'px,'+(dy*0.55)+'px)' : '';
   };
   const clearKeys=()=>{
-    keys.KeyW=keys.KeyS=keys.KeyA=keys.KeyD=keys.ShiftLeft=false;
+    keys.ArrowUp=keys.ArrowDown=keys.ArrowLeft=keys.ArrowRight=keys.ShiftLeft=false;
     knob.style.transform='';
   };
   stick.addEventListener('touchstart',e=>{
