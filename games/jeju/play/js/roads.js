@@ -405,7 +405,11 @@
     const take = y => { if (y != null && (best == null || y > best)) best = y; };
     take(stripY(e.a, e.b, e.w, 0.06, x, z, 0, e));
     if (e.type !== 'access' && e.type !== 'city' && e.type !== 'town') { const so = e.w / 2 + 0.8; take(stripY(e.a, e.b, 1.6, 0.02, x, z, so, e)); take(stripY(e.a, e.b, 1.6, 0.02, x, z, -so, e)); }
-    if (e.type === 'city' || e.type === 'town') { const o = e.w / 2 + 1.5; take(stripY(e.a, e.b, 3, 0.2, x, z, o, e)); take(stripY(e.a, e.b, 3, 0.2, x, z, -o, e)); }
+    if (e.type === 'city' || e.type === 'town') {   // 인도는 교차로 앞에서 끊긴다(그린 것과 같게)
+      const o = e.w / 2 + 1.5, L = e.len, ta = Math.min(0.45, (e.inA + 2.5) / L), tb = Math.max(0.55, 1 - (e.inB + 2.5) / L);
+      const ux = (e.b.x - e.a.x) / L, uz = (e.b.z - e.a.z) / L, t = ((x - e.a.x) * ux + (z - e.a.z) * uz) / L;
+      if (t > ta && t < tb) { take(stripY(e.a, e.b, 3, 0.2, x, z, o, e)); take(stripY(e.a, e.b, 3, 0.2, x, z, -o, e)); }
+    }
     return best;
   }
   function surfaceY(x, z) { const y = surfaceAbs(x, z); return y == null ? 0 : Math.max(0, y - H(x, z)); }
@@ -448,9 +452,12 @@
       const townish = e.type === 'city' || e.type === 'town';
       if (townish) {   // 인도
         Q = QW;
+        // 인도는 교차로 앞에서 끊는다 — 예전엔 마디까지 이어 그려서 **다른 길 차로 위로 보도블록이 올라탔다**(도로가 얼룩덜룩, 2026-09-18)
         const dx = b[0] - a[0], dz = b[1] - a[1], L = Math.hypot(dx, dz) || 1, nx = -dz / L, nz = dx / L, o = e.w / 2 + 1.5;
-        seg([a[0] + nx * o, a[1] + nz * o], [b[0] + nx * o, b[1] + nz * o], 3, 0.2, WALK, 12);
-        seg([a[0] - nx * o, a[1] - nz * o], [b[0] - nx * o, b[1] - nz * o], 3, 0.2, WALK, 12);
+        const t0 = Math.min(0.45, (e.inA + 2.5) / L), t1 = Math.max(0.55, 1 - (e.inB + 2.5) / L);
+        const A0 = [a[0] + dx * t0, a[1] + dz * t0], B0 = [a[0] + dx * t1, a[1] + dz * t1];
+        seg([A0[0] + nx * o, A0[1] + nz * o], [B0[0] + nx * o, B0[1] + nz * o], 3, 0.2, WALK, 12);
+        seg([A0[0] - nx * o, A0[1] - nz * o], [B0[0] - nx * o, B0[1] - nz * o], 3, 0.2, WALK, 12);
       }
       Q = QM;
       if (e.lanes === 2) seg(a, b, 2.4, 0.32, MEDIAN, 12);

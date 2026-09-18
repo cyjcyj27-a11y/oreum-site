@@ -160,6 +160,12 @@
       if (window.ROADS) { const hw = w / 2, hd = d / 2;
         for (const [sx, sz] of [[0, 0], [-1, -1], [1, -1], [-1, 1], [1, 1], [-1, 0], [1, 0], [0, -1], [0, 1]]) {
           const n = ROADS.nearest(x + sx * hw, z + sz * hd); if (n.e && n.d < 1) return; } }
+      // 비탈에는 안 짓는다 — 가운데 높이로만 앉혀서 언덕에서는 집이 공중에 떠 있었다 (사장님 2026-09-18 "이 집 뭐냐 ㅋㅋ", "언덕에 있는 집은 빼버려")
+      // 산 위에는 안 짓는다 — 마을은 제일 높은 서귀포가 65m 다 (사장님 2026-09-18 "산꼭대기에 있는 건물들은 다 빼버려")
+      if (H(x, z) > 100) { S.skippedHigh = (S.skippedHigh || 0) + 1; return; }
+      { const hw2 = w / 2, hd2 = d / 2; let lo = 1e9, hi = -1e9;
+        for (const [sx, sz] of [[0, 0], [-1, -1], [1, -1], [-1, 1], [1, 1]]) { const hh = H(x + sx * hw2, z + sz * hd2); if (hh < lo) lo = hh; if (hh > hi) hi = hh; }
+        if (hi - lo > Math.max(1.2, 0.09 * Math.max(w, d))) { S.skippedSlope = (S.skippedSlope || 0) + 1; return; } }
       const y = H(x, z) - 0.4, h = floors * 3.2 + 0.4;
       S.obst.boxes.push({ x0: x - w / 2, z0: z - d / 2, x1: x + w / 2, z1: z + d / 2 });
       Q.identity(); V.set(x, y, z); SC.set(w, h, d); Mtx.compose(V, Q, SC); bld.setMatrixAt(bi, Mtx); bld.setColorAt(bi, COL.set(opts.color));
