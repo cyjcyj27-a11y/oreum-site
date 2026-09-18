@@ -225,8 +225,9 @@
     var e = P.grabbed; P.grabbed = null;
     if (!e) return;
     P.ik = null;
-    e.state = 'air'; e.vh = 80; e.vx = P.face * 700; e.thrown = true; e.face = -P.face; e.spin = -5; e.hitList = []; e.liftSnd = false;
-    hurtEnemy(e, 8, 0, 0, 0, true);
+    e.state = 'air';
+    hurtEnemy(e, 8, 0, 0, 0, true);      // 피해를 먼저 — hurtEnemy 가 공중 몸의 속도를 덮어쓰므로 속도는 그 뒤에 넣는다
+    e.state = 'air'; e.vh = 80; e.vx = P.face * 700; e.thrown = true; e.face = -P.face; e.spin = e.lie === 'prone' ? 5 : -5; e.hitList = []; e.liftSnd = false;
     SND.whoosh(1.4);
   }
 
@@ -541,7 +542,7 @@
 
   // 날아가는 몸이 서 있는 놈을 쓰러뜨린다
   function domino(e) {
-    if (Math.abs(e.vx) < 220 || e.h > 110) return;
+    if (Math.abs(e.vx) < 220 || e.h > (e.thrown ? 245 : 110)) return;   // 머리 위에서 던진 몸은 사람 키 높이까지 부딪힌다
     G.enemies.forEach(function (o) {
       if (o === e || !standing(o) || (e.hitList && e.hitList.indexOf(o) >= 0)) return;
       if (Math.abs(o.x - e.x) > 34 * o.st.girth) return;
