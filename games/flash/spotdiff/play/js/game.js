@@ -53,7 +53,10 @@
   function layout() {
     const tb = $('topbar').getBoundingClientRect();
     const top = st.mode === 'play' ? Math.max(48, tb.height) : 48;
-    const W = innerWidth - 16, H = innerHeight - top - 10;
+    // 왼쪽 아래 전체화면 알약(안드로이드에만 나온다)이 그림 구석을 가리지 않게 그만큼 비운다 (2026-09-19 점검)
+    const fs = document.getElementById('oreumFs');
+    const bottom = fs && fs.offsetParent ? 44 : 10;
+    const W = innerWidth - 16, H = innerHeight - top - bottom;
     const gap = 10;
     const rowW = Math.min((W - gap) / 2, (H * 4) / 3);
     const colW = Math.min(W, ((H - gap) / 2) * (4 / 3));

@@ -89,6 +89,8 @@
   }
   /* 왼쪽 아래 전체화면 알약 자리 (알약은 fixed 라 스스로는 자리를 안 차지한다) */
   .shell{padding-bottom:calc(46px + env(safe-area-inset-bottom))}
+  /* 노치 폰: 오름 알약은 노치만큼 내려오므로 윗줄(단추 줄)도 같이 내린다 — 안 그러면 알약이 점수 줄을 덮는다(2026-09-19 점검) */
+  .shell{padding-top:calc(10px + env(safe-area-inset-top))}
 
   header.bar{display:flex; align-items:center; gap:8px; flex:0 0 auto}
   .logo{font-weight:900; letter-spacing:.10em; font-size:clamp(26px,5vw,36px); color:#fff; line-height:1;

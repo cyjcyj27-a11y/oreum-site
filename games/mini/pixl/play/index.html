@@ -83,7 +83,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;touch-
 .lev[aria-pressed=true] b,.lev[aria-pressed=true] span,.lev[aria-pressed=true] em{color:#221a0d}
 .lev[aria-pressed=true] em{opacity:.72}
 
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:11px;margin:16px 0 0;padding:0;list-style:none}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:11px;margin:16px 0 calc(56px + env(safe-area-inset-bottom));padding:0;list-style:none} /* 끝 줄이 왼쪽 아래 전체화면 알약 위로 올라오게 (2026-09-19 점검) */
 @media(max-width:420px){.grid{grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:8px}}
 .pic{position:relative;display:block;width:100%;padding:0;border-radius:12px;overflow:hidden;
   border:1px solid var(--line);background:var(--panel);line-height:0;transition:.14s}

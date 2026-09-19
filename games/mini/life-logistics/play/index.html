@@ -93,7 +93,7 @@
   }
 
   /* ── 하단: 손에 든 것 / 안내 ── */
-  #hand { position:absolute; bottom:16px; left:16px; display:flex; align-items:center;
+  #hand { position:absolute; bottom:calc(46px + env(safe-area-inset-bottom)); left:calc(16px + env(safe-area-inset-left)); /* 왼쪽 아래 전체화면 알약 위로 (2026-09-19 점검) */ display:flex; align-items:center;
     gap:9px; background:rgba(12,18,28,.78); border:1px solid rgba(255,255,255,.14);
     border-radius:10px; padding:8px 13px; font-size:14px; }
   #prompt { position:absolute; bottom:120px; left:50%; transform:translateX(-50%);

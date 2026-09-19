@@ -48,6 +48,8 @@
     flex-direction: column;
     align-items: center;
     padding: 24px 12px 60px;
+    /* 노치 폰: 오름 알약이 노치만큼 내려와 제목을 덮지 않게 (2026-09-19 점검) */
+    padding-top: calc(24px + env(safe-area-inset-top));
   }
   h1 { font-size: 1.4rem; margin: 4px 0 2px; letter-spacing: 0.5px; }
   .subtitle { color: var(--muted); font-size: 0.85rem; margin-bottom: 18px; text-align: center; }

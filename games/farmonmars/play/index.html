@@ -45,7 +45,7 @@
   @media (max-height: 520px) { .tbtn { width: 72px; height: 72px; font-size: 15px; bottom: calc(16px + env(safe-area-inset-bottom)); } }
 
   /* 타이틀 */
-  #title { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding-top: 7vh; background: linear-gradient(180deg, rgba(20,8,10,.3), rgba(20,8,10,0) 45%, rgba(20,8,10,0) 70%, rgba(20,8,10,.5)); transition: opacity 1s; text-align: center; z-index: 10; }
+  #title { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding-top: calc(7vh + env(safe-area-inset-top)); background: linear-gradient(180deg, rgba(20,8,10,.3), rgba(20,8,10,0) 45%, rgba(20,8,10,0) 70%, rgba(20,8,10,.5)); transition: opacity 1s; text-align: center; z-index: 10; }
   #title.hide { opacity: 0; pointer-events: none; }
   #title .brand { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; letter-spacing: 4px; opacity: .8; } #title .brand img { height: 18px; }
   #title h1 { font-family: 'Bagel', 'Ria', 'Griun', sans-serif; font-weight: 400; font-size: clamp(48px, 11vw, 116px); margin: 8px 0 0; letter-spacing: clamp(8px, 1.6vw, 18px); text-indent: clamp(8px, 1.6vw, 18px); color: #b8ff5a; text-shadow: 0 5px 0 #2e6a1e, 0 12px 30px rgba(0,0,0,.45); -webkit-text-stroke: 3px #1f4a14; paint-order: stroke fill; line-height: 1.05; }
