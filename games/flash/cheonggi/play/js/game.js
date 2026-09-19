@@ -341,6 +341,29 @@
       top: tbBottom ? tbBottom + 10 + Math.min(110, appW() * 0.27) : 0,   // 세로: 말풍선(두 줄) 아래부터 아이를 그린다
     }, dpr);
     placeFlagButtons();
+    fitTitle();
+  }
+  // 첫 화면 제목 묶음(제목·START·NEW GAME·별)이 아이 머리를 덮지 않게, 넘치면 묶음을 통째로 줄인다(사장님 9/19)
+  // 폰 글자 크기 설정으로 글자가 커져도 버틴다
+  let fitKey = '';
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { fitKey = ''; });
+  function fitTitle() {
+    const P = $('title');
+    if (!L || !P.classList.contains('on')) { fitKey = ''; return; }
+    const kidTop = L.fy - L.u * 112 - 6;
+    // 글자 크기·글꼴이 늦게 바뀌어도 따라가게 0.3초마다 다시 잰다
+    const key = Math.round(kidTop) + ',' + appW() + ',' + Math.floor(S.clock * 3);
+    if (key === fitKey) return;
+    fitKey = key;
+    P.style.transform = '';
+    let top = Infinity, bot = 0;
+    for (const el of P.children) { if (el.hidden) continue; const r = el.getBoundingClientRect(); if (!r.height) continue; top = Math.min(top, r.top); bot = Math.max(bot, r.bottom); }
+    if (L.portrait && bot > kidTop && bot > top) {
+      const pt = P.getBoundingClientRect().top + parseFloat(getComputedStyle(P).paddingTop);
+      const k = Math.max(0.45, (kidTop - pt) / (bot - pt));
+      P.style.transformOrigin = '50% ' + Math.round(pt - P.getBoundingClientRect().top) + 'px';
+      P.style.transform = 'scale(' + k.toFixed(3) + ')';
+    }
   }
   // 가로(PC) 화면: 깃발 단추를 화면 양 끝이 아니라 아이 양옆, 내린 깃발 끝 바로 바깥에 붙인다(사장님 9/19 "가리지만 않게")
   let fbKey = '';
