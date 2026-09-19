@@ -69,6 +69,10 @@ body.touch .fb small{display:none}
 #fbW .fb{background:#f6f6f1;color:#2a3a5a;border-color:#2a3a5a}
 .fb.on{transform:translateY(4px) scale(.95);box-shadow:0 1px 0 rgba(0,0,0,.25);filter:brightness(1.15)}
 body:not(.touch) .fb{width:62px;height:62px;font-size:24px}
+@media (orientation:portrait){   /* 세로: 청기 ▲▼·백기 ▲▼ 두 줄 — 자리는 game.js 가 아이 다리 양옆으로 잡는다(사장님 9/19) */
+  .fbtns{flex-direction:column;gap:8px;bottom:calc(50px + env(safe-area-inset-bottom))}
+  .fb,body:not(.touch) .fb{width:68px;height:68px;font-size:27px}
+}
 
 /* ---------- 큰 글자 판 ---------- */
 .panel{position:fixed;inset:0;z-index:40;display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;pointer-events:none}
@@ -84,6 +88,7 @@ body:not(.touch) .fb{width:62px;height:62px;font-size:24px}
 .btn.sub:active{box-shadow:0 1px 0 #9aa3b5}
 
 #title{justify-content:flex-start;padding-top:7vh;gap:6px}
+@media (orientation:portrait){#title{padding-top:calc(var(--tb,100px) + 14px)}}   /* 세로: 제목을 메뉴 아래로 */
 #title h1{font-size:clamp(72px,min(16vw,21vh),170px);letter-spacing:.02em;transform:rotate(-3deg);animation:bob 2.2s ease-in-out infinite;-webkit-text-stroke:5px #1d2c55}
 #title h1 .t1{color:#2d63c8}
 #title h1 .t2{color:#fff}
@@ -115,8 +120,13 @@ body:not(.touch) .fb{width:62px;height:62px;font-size:24px}
 @keyframes up{0%{opacity:0;transform:translate(-50%,6px) scale(.6)}
   18%{opacity:1;transform:translate(-50%,-8px) scale(1.12)}
   100%{opacity:0;transform:translate(-50%,-80px) scale(1)}}
-</style>
-</head>
+/* ---------- 세로로 돌리기 (폰을 가로로 눕혔을 때만 — 폰은 세로 전용, 사장님 9/19) ---------- */
+#rotate{position:fixed;inset:0;z-index:90;display:none;place-items:center;text-align:center;
+  background:#1d2c55;color:#f2ede4;font-size:30px;line-height:1.6;padding:6vw}
+#rotate .ph{display:inline-block;width:48px;height:80px;border:5px solid #f2ede4;border-radius:10px;margin-bottom:18px;animation:turn 1.8s ease-in-out infinite}
+@keyframes turn{0%,20%{transform:rotate(-90deg)}60%,100%{transform:rotate(0)}}
+@media (orientation:landscape) and (max-height:540px){body.touch #rotate{display:grid}}
+</style></head>
 <body>
 
 <canvas id="cv"></canvas>
@@ -156,11 +166,13 @@ body:not(.touch) .fb{width:62px;height:62px;font-size:24px}
 <div class="panel" id="over"><h1>GAME OVER</h1><div class="num" id="overN"></div><button class="btn" id="retry">RETRY</button><button class="btn sub" id="home2">HOME</button></div>
 <div class="panel" id="pause"><button class="btn" id="resume">▶</button></div>
 
+<div id="rotate"><div><span class="ph"></span><p>세로 화면에서 하는 게임입니다</p></div></div>
+
 <script src="assets/game-home.js" data-top="6" data-left="6" data-fullscreen="1" defer></script>
 <script src="voice/voice.js?v=4"></script>
 <script src="js/audio.js?v=3"></script>
-<script src="js/art.js?v=6"></script>
-<script src="js/game.js?v=9"></script>
+<script src="js/art.js?v=11"></script>
+<script src="js/game.js?v=11"></script>
 <script src="/assets/visit.js?v=12" defer></script>
 <script src="/assets/game-events.js?v=2" defer></script>
 </body>

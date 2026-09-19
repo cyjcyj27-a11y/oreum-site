@@ -3,6 +3,9 @@
 (function () {
   'use strict';
   const $ = id => document.getElementById(id);
+  // 세로 전용: 게임은 #app 세로 틀 안에서 돈다(PC 는 가운데 기둥). 크기는 창이 아니라 틀에서 잰다
+  const APP = document.getElementById('app');
+  const appW = () => (APP ? APP.clientWidth : innerWidth), appH = () => (APP ? APP.clientHeight : innerHeight);
   const K = 'cheonggi.';
   const AU = window.CGAudio, ART = window.CGArt, VD = window.CG_VOICE || {};
   const LAST = 30;                                   // 30스테이지 통과 = 엔딩(THE END), 게임 끝
@@ -120,7 +123,7 @@
 
   // ---------------------------------------------------------------- 흐름
   let L = null;
-  function kidHead() { return L ? [L.cx, L.fy - (L.u * 128)] : [innerWidth / 2, innerHeight / 3]; }
+  function kidHead() { return L ? [L.cx, L.fy - (L.u * 128)] : [appW() / 2, appH() / 3]; }
 
   function startStage(s) {
     S.stage = s; S.hearts = 3; S.idx = 0; S.N = countOf(s); S.combo = 0;
@@ -264,10 +267,10 @@
   }
 
   function burst(n) {
-    const W = innerWidth;
+    const W = appW();
     for (let i = 0; i < n; i++) {
       S.confetti.push({
-        x: Math.random() * W, y: -20 - Math.random() * innerHeight * 0.5, vx: (Math.random() - 0.5) * 60, vy: 60 + Math.random() * 120,
+        x: Math.random() * W, y: -20 - Math.random() * appH() * 0.5, vx: (Math.random() - 0.5) * 60, vy: 60 + Math.random() * 120,
         r: Math.random() * 6, vr: (Math.random() - 0.5) * 8, f: Math.random() * 6, s: 4 + Math.random() * 4,
         c: ART.FLAGC[i % ART.FLAGC.length],
       });
@@ -290,7 +293,7 @@
     if (S.teacherT > 0) { S.teacherT -= dt; if (S.teacherT <= 0) S.teacher = ''; }
     S.cheer = Math.max(0, S.cheer - dt * 0.9);
     for (const p of S.confetti) { p.x += p.vx * dt; p.y += p.vy * dt; p.r += p.vr * dt; p.f += dt * 9; }
-    S.confetti = S.confetti.filter(p => p.y < innerHeight + 30);
+    S.confetti = S.confetti.filter(p => p.y < appH() + 30);
 
     if (S.mode === 'intro') {
       S.introT -= dt;
@@ -326,17 +329,30 @@
   let dpr = 1;
   function resize() {
     dpr = Math.min(2, window.devicePixelRatio || 1);
-    cv.width = Math.round(innerWidth * dpr); cv.height = Math.round(innerHeight * dpr);
+    cv.width = Math.round(appW() * dpr); cv.height = Math.round(appH() * dpr);
   }
   addEventListener('resize', resize); resize();
   function render() {
     g.setTransform(dpr, 0, 0, dpr, 0, 0);
-    L = ART.draw(g, innerWidth, innerHeight, S.clock, {
+    L = ART.draw(g, appW(), appH(), S.clock, {
       aB: S.ang.b, aW: S.ang.w, mood: S.mood, moodT: S.moodT, hop: S.hop,
       teacher: S.teacher, talk: S.talk || 0, cheer: S.cheer,
       confetti: S.confetti.length ? S.confetti : null, touch: document.body.classList.contains('touch'),
-      top: tbBottom ? tbBottom + 10 + Math.min(110, innerWidth * 0.27) : 0,   // 세로: 말풍선(두 줄) 아래부터 아이를 그린다
+      top: tbBottom ? tbBottom + 10 + Math.min(110, appW() * 0.27) : 0,   // 세로: 말풍선(두 줄) 아래부터 아이를 그린다
     }, dpr);
+    placeFlagButtons();
+  }
+  // 가로(PC) 화면: 깃발 단추를 화면 양 끝이 아니라 아이 양옆, 내린 깃발 끝 바로 바깥에 붙인다(사장님 9/19 "가리지만 않게")
+  let fbKey = '';
+  function placeFlagButtons() {
+    const B = $('fbB'), Wb = $('fbW'), bw = B.offsetWidth || 62;
+    const key = L ? Math.round(L.cx) + ',' + L.u.toFixed(3) + ',' + bw : '';
+    if (!L || key === fbKey) return;
+    fbKey = key;
+    // 원래 단추(한쪽에 ▲▼ 두 개)를 가운데로 모아 아이 다리 바로 옆에(사장님 9/19). 신발 바깥 끝이 15u
+    const gap = L.u * 15 + 8, W = appW();
+    B.style.right = 'auto'; B.style.left = Math.max(8, L.cx - gap - bw) + 'px';
+    Wb.style.right = 'auto'; Wb.style.left = Math.min(W - 8 - bw, L.cx + gap) + 'px';
   }
   let lastT = performance.now();
   function frame(t) {

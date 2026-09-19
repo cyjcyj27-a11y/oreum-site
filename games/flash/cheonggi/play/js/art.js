@@ -25,6 +25,12 @@
     L.fy = H - bottomRoom;                                  // 아이 발끝
     const topRoom = (portrait && top) ? top : portrait ? 172 : 62 + Math.max(52, Math.min(124, H * 0.16)); // 상단바 + 말풍선 자리
     L.u = Math.max(0.6, Math.min((L.fy - topRoom) / 178, W / (portrait ? 150 : 175)));
+    if (portrait && top) {
+      // 세로: 단추가 아래 가운데 두 줄(아래에서 50~194px)이라 아이는 그 바로 위에 세운다(사장님 9/19 "애를 조금만 내리면").
+      // 위는 말풍선 아래부터. 가로 폭은 내린 깃발 천 끝(몸 가운데서 약 92u)이 화면 밖으로 안 잘리게 W/185.
+      L.fy = H - 122;                                     // 발끝 = 다리 옆 단추 두 줄(아래 50~194px)의 가운데
+      L.u = Math.max(0.6, Math.min(W / 200, (L.fy - top) / 178));
+    }
     L.cx = W / 2;
     L.tx = portrait ? W * 0.5 : W * 0.80;                   // 선생님(구령대) — 세로 화면에선 아이 머리 위 가운데
     L.tu = L.u * (portrait ? 0.34 : 0.40);
@@ -560,9 +566,10 @@
   // side -1 = 화면 왼쪽(아이의 오른손, 청기) / +1 = 화면 오른쪽(백기)
   function drawArm(g, P, u, t, side, a, color, ph, lw) {
     a = Math.max(-0.15, Math.min(1.15, a));
-    const th = (26 + 134 * a) * D2R;                  // 위팔: 아래 0° → 위 180°
-    const tf = (38 + 132 * a) * D2R;                  // 아래팔
-    const tp = (52 + 122 * a) * D2R;                  // 깃대
+    // 내린 자세는 팔을 벌려 깃발이 다리 옆 단추 위 바깥으로 가게 한다(사장님 9/19 단추를 다리 옆으로)
+    const th = (40 + 120 * a) * D2R;                  // 위팔: 아래 0° → 위 180°
+    const tf = (55 + 115 * a) * D2R;                  // 아래팔
+    const tp = (70 + 104 * a) * D2R;                  // 깃대
     const sh = P(side * 14, 76.5);
     const dir = ang => [side * Math.sin(ang), Math.cos(ang)];
     const d1 = dir(th), d2 = dir(tf), dp = dir(tp);
