@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>한자 검색 필기 입력기 — 무료 한자찾기, 그려서 바로 검색</title>
+<meta name="description" content="모르는 한자를 마우스나 손가락으로 그리면 닮은 한자를 찾아 주는 무료 한자 검색 도구. 설치와 회원가입 없이 바로 쓰고, 음·뜻·부수로도 한자찾기가 됩니다. 훈음·부수·총획·획순까지 보여 줍니다.">
+<meta name="keywords" content="한자찾기, 한자 검색, 한자 검색 필기 입력기, 한자검색필기입력기, 한자 필기 입력기, 한문검색, 부수로 한자찾기, 한자 획순, handwriting hanja search, draw chinese character lookup, hanja dictionary online, kanji handwriting input">
+<link rel="canonical" href="https://oreumgames.com/apps/hanja-search/">
+<link rel="alternate" hreflang="ko" href="https://oreumgames.com/apps/hanja-search/">
+<link rel="alternate" hreflang="x-default" href="https://oreumgames.com/apps/hanja-search/">
+<!-- 검색엔진 사이트 소유 확인 -->
+<meta name="naver-site-verification" content="4ecba4003fbcbe564918ffd2c33d606f1eaae11a" />
+<meta name="google-site-verification" content="BG736F-J65BHS-viz8rkCjKJ53pxgIhSlPpzVnpGlt4" />
+<meta name="theme-color" content="#f8f5ec">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" href="/assets/icon-512.png" type="image/png" sizes="512x512">
+<link rel="apple-touch-icon" href="/assets/icon-180.png">
+<link rel="manifest" href="/manifest.webmanifest">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="오름게임즈">
+<meta property="og:title" content="한자 검색 필기 입력기 — 무료 한자찾기, 그려서 바로 검색">
+<meta property="og:description" content="모르는 한자를 마우스나 손가락으로 그리면 닮은 한자를 찾아 주는 무료 한자 검색 도구. 음·뜻·부수로도 한자찾기가 됩니다.">
+<meta property="og:url" content="https://oreumgames.com/apps/hanja-search/">
+<meta property="og:image" content="https://oreumgames.com/assets/hanja-og.webp?v=1">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="ko_KR">
+<meta name="twitter:card" content="summary_large_image">
+
+<link rel="stylesheet" href="/style.css?v=40">
+<link rel="stylesheet" href="/apps/tools.css?v=2">
+<link rel="stylesheet" href="/apps/hanja-search/hanja.css?v=1">
+<style>
+  .pm-panel { background: #fff; border: 1px solid #ececec; border-radius: 22px; padding: 28px 22px 24px; box-shadow: 0 1px 2px rgba(20,20,30,.04), 0 18px 40px rgba(20,20,30,.06); }
+  .pm-panel + .gp-line { margin-top: 28px; }
+  .game-page > h2 { margin: 40px 0 10px; }
+  .pm-howto { margin: 0; padding-left: 1.3em; line-height: 1.75; }
+  .pm-howto li { margin: 4px 0; }
+  @media (max-width: 520px) { .pm-panel { padding: 22px 14px 18px; border-radius: 18px; } }
+</style>
+
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": "WebApplication",
+ "name": "한자 검색 필기 입력기",
+ "alternateName": [
+  "한자찾기",
+  "한자 필기 입력기",
+  "한자 검색",
+  "Hanja Handwriting Search"
+ ],
+ "url": "https://oreumgames.com/apps/hanja-search/",
+ "image": "https://oreumgames.com/assets/hanja-og.webp?v=1",
+ "description": "모르는 한자를 마우스나 손가락으로 그리면 닮은 한자를 찾아 주는 무료 웹 도구. 필기 말고도 음·뜻·부수로 한자를 찾을 수 있고, 고른 한자의 훈음·부수·총획·급수와 획순을 보여 줍니다. 사전에 5,978자가 있고 그 가운데 4,893자는 그려서 찾을 수 있습니다. 그린 획은 서버로 보내지 않고 브라우저 안에서만 다룹니다.",
+ "applicationCategory": "UtilitiesApplication",
+ "operatingSystem": "Web browser",
+ "browserRequirements": "Requires JavaScript",
+ "isAccessibleForFree": true,
+ "featureList": [
+  "한자를 그려서 찾기(필기 인식 4,893자)",
+  "음으로 한자 찾기",
+  "뜻으로 한자 찾기",
+  "부수로 한자 찾기(부수 213개)",
+  "훈음·부수·총획·급수 보기",
+  "획순 애니메이션",
+  "찾은 한자 모아 복사",
+  "서버 저장 없음"
+ ],
+ "datePublished": "2026-09-20",
+ "dateModified": "2026-09-20",
+ "inLanguage": "ko",
+ "offers": {
+  "@type": "Offer",
+  "price": "0",
+  "priceCurrency": "KRW"
+ },
+ "isPartOf": {
+  "@type": "CollectionPage",
+  "name": "앱스",
+  "url": "https://oreumgames.com/apps/"
+ },
+ "publisher": {
+  "@type": "Organization",
+  "name": "오름게임즈",
+  "url": "https://oreumgames.com/"
+ }
+}
+</script>
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": "FAQPage",
+ "mainEntity": [
+  {
+   "@type": "Question",
+   "name": "한자 검색 필기 입력기는 무료인가요? 회원가입이 필요한가요?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "전부 무료입니다. 설치도 회원가입도 없고, 찾는 횟수에 제한도 없습니다."
+   }
+  },
+  {
+   "@type": "Question",
+   "name": "획순을 몰라도 한자를 찾을 수 있나요?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "네. 획 순서대로 맞춰 보는 방법과 순서를 무시하고 맞춰 보는 방법을 같이 써서, 획순이 달라도 후보에 나옵니다. 두 획을 이어 그었거나 한 획을 빠뜨려도 찾습니다."
+   }
+  },
+  {
+   "@type": "Question",
+   "name": "휴대폰에서도 되나요?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "네. 폰에서는 손가락으로, PC에서는 마우스로 네모 칸에 한 획씩 그으면 됩니다."
+   }
+  },
+  {
+   "@type": "Question",
+   "name": "찾은 한자를 복사할 수 있나요?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "네. 후보를 골라 입력창에 넣으면 위 칸에 쌓이고, 복사 단추로 한꺼번에 복사해 다른 곳에 붙여 넣을 수 있습니다."
+   }
+  },
+  {
+   "@type": "Question",
+   "name": "몇 자까지 찾을 수 있나요?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "사전에 한자 5,978자가 들어 있고, 그 가운데 4,893자는 그려서 찾을 수 있습니다. 획 모양 자료가 없는 나머지 글자는 음·뜻·부수로 찾습니다."
+   }
+  },
+  {
+   "@type": "Question",
+   "name": "한자의 뜻과 음, 획순도 볼 수 있나요?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "한자를 고르면 훈음(집 가처럼 뜻과 음), 부수, 총획, 급수가 나오고 획순이 순서대로 그려집니다. 네이버 한자사전으로 바로 가는 링크도 있습니다."
+   }
+  },
+  {
+   "@type": "Question",
+   "name": "쓴 글씨가 서버로 보내지나요?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "아니요. 그린 획은 이 기기의 브라우저 안에서만 한자와 견줍니다. 서버로 보내지 않습니다."
+   }
+  }
+ ]
+}
+</script>
+</head>
+
+<body>
+
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="/">
+      <img src="/assets/logo-full.webp?v=1" alt="오름게임즈" width="78" height="74">
+    </a>
+    <div class="brand-copy">
+      <p class="brandname">오름게임즈</p>
+      <p class="factory">인디게임팩토리</p>
+    </div>
+    <ul class="values">
+      <li><span>설치 없이</span> 링크 하나로 바로 시작</li>
+      <li><span>회원가입 없이</span> 기록은 브라우저에 저장</li>
+    </ul>
+    <nav class="nav" aria-label="주요 메뉴">
+      <a href="/games/">GAMES</a>
+      <a href="/apps/">APPS</a>
+      <a href="/board/">COMMUNITY</a>
+      <a href="/en/" lang="en" hreflang="en">EN</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+  <section class="showcase">
+    <div class="wrap game-page">
+      <a class="backlink" href="/apps/">← 앱스 목록</a>
+
+<div class="pm hj pm-panel" id="hj">
+  <header class="top">
+    <h1>한자 검색 필기 입력기</h1>
+    <ul class="promise"><li>설치 없이</li><li>그려서 찾기</li><li>한자 5,978자</li></ul>
+  </header>
+
+  <div class="tray">
+    <output class="trayline" id="hjTray" aria-live="polite"><i>찾은 한자가 여기에 쌓입니다</i></output>
+    <div class="traybtns">
+      <button type="button" class="ghost" id="hjCopy">복사</button>
+      <button type="button" class="ghost" id="hjBack">한 자 지우기</button>
+      <button type="button" class="ghost" id="hjClear">모두 지우기</button>
+    </div>
+  </div>
+
+  <div class="tabs" role="tablist">
+    <button type="button" class="on" data-tab="write">필기로 찾기</button>
+    <button type="button" data-tab="eum">음으로 찾기</button>
+    <button type="button" data-tab="rad">부수로 찾기</button>
+  </div>
+
+  <section id="tabWrite">
+    <div class="padwrap">
+      <canvas id="hjPad" width="760" height="760" aria-label="한자 그리는 곳"></canvas>
+      <div class="padtip" id="hjPadTip">여기에 한 획씩 그으세요</div>
+    </div>
+    <div class="padbar">
+      <span class="cnt" id="hjCnt">0획</span>
+      <button type="button" class="ghost" id="hjUndo" disabled>한 획 지우기</button>
+      <button type="button" class="ghost" id="hjErase" disabled>다 지우기</button>
+    </div>
+    <div class="cands" id="hjCands"></div>
+    <p class="loadnote" id="hjLoad">한자 자료 받는 중…</p>
+  </section>
+
+  <section id="tabEum" hidden>
+    <div class="fld">
+      <input type="text" id="hjEumInput" inputmode="text" placeholder="음이나 뜻을 적으세요 (보기: 가, 강, 나무)" autocomplete="off">
+    </div>
+    <div class="chips" id="hjEumChips"></div>
+    <div class="cands" id="hjEumCands"></div>
+  </section>
+
+  <section id="tabRad" hidden>
+    <div class="radlist" id="hjRadList"></div>
+    <div class="cands" id="hjRadCands"></div>
+  </section>
+
+  <div class="sheet" id="hjSheet" hidden>
+    <div class="sheetbox">
+      <button type="button" class="sheetx" id="hjSheetX" aria-label="닫기">✕</button>
+      <div class="sheethead">
+        <div class="bigchar" id="hjBigChar">家</div>
+        <canvas class="order" id="hjOrder" width="360" height="360" aria-label="획순"></canvas>
+      </div>
+      <div class="sheetmeta">
+        <b class="hun" id="hjHun">집 가</b>
+        <div class="meta" id="hjMeta"></div>
+      </div>
+      <div class="acts">
+        <button type="button" class="big go" id="hjPick">입력창에 넣기</button>
+        <button type="button" class="big line" id="hjCopy1">이 한자 복사</button>
+      </div>
+      <div class="acts small">
+        <button type="button" class="ghost" id="hjReplay">획순 다시 보기</button>
+        <a class="ghost" id="hjNaver" href="#" target="_blank" rel="noopener nofollow">네이버 한자사전에서 보기</a>
+      </div>
+    </div>
+  </div>
+
+  <p class="safe">🔒 쓴 글씨와 찾은 한자는 이 기기의 브라우저 안에서만 다뤄집니다. 한자 모양·훈음 자료는 한 번 받아 두면 다음부터 바로 열립니다.<br>
+  한자 획 자료 Make Me a Hanzi(Arphic Public License) · 훈음·급수 한국어문회 급수 한자 · 음 Unihan(유니코드)</p>
+
+  <div class="toast" id="hjToast"></div>
+</div>
+
+      <p class="gp-line">한자 검색 필기 입력기는 모르는 한자를 그려서 찾는 무료 웹 도구입니다. 설치 없이 브라우저에서 바로 시작하고, 음·뜻·부수로도 한자찾기가 됩니다.</p>
+
+      <h2>한자 찾는 방법</h2>
+      <ol class="pm-howto">
+        <li>네모 칸에 한자를 <b>한 획씩</b> 긋습니다. 폰은 손가락, PC는 마우스입니다.</li>
+        <li>획을 그을 때마다 아래에 <b>닮은 한자 후보</b>가 바뀌며 나옵니다. 획순이 달라도 찾습니다.</li>
+        <li>후보를 누르면 <b>훈음·부수·총획·급수</b>와 <b>획순</b>이 나옵니다.</li>
+        <li><b>입력창에 넣기</b>를 누르면 위 칸에 쌓이고, <b>복사</b>로 한꺼번에 가져갑니다.</li>
+      </ol>
+
+      <h2>음·뜻·부수로 한자찾기</h2>
+      <p class="gp-body">모양이 헷갈리면 다른 길로도 찾습니다. <b>음으로 찾기</b>에 "강"을 치면 江·強·康·講처럼 그 음을 가진 한자가 나오고, 같은 칸에 <b>뜻</b>을 쳐도 됩니다. "나무"를 치면 木·樹·松이, "임금"을 치면 王·君·帝가 나옵니다. <b>부수로 찾기</b>에서는 부수 213개를 획수별로 늘어놓아, 삼수변(水)을 고르면 그 부수를 쓰는 한자가 흔한 것부터 나옵니다.</p>
+
+      <h2>어떤 한자가 들어 있나</h2>
+      <p class="gp-body">한국에서 쓰는 한자 5,978자가 들어 있습니다. 8급부터 특급까지 한국어문회 급수 한자 전체이고, 그 가운데 4,893자는 획 모양 자료가 있어 그려서 찾을 수 있습니다. 획 자료가 없는 나머지(대부분 아주 드문 글자와 한국에서 만든 한자)는 음·뜻·부수로 찾습니다.</p>
+      <p class="gp-body">한자 획 모양은 Make Me a Hanzi(Arphic Public License), 훈음·부수·총획·급수는 한국어문회 급수 한자 자료, 음과 이체자 정보는 유니코드 Unihan을 씁니다.</p>
+
+      <dl class="spec"><dt>분류</dt><dd>한자 사전 도구 · 무료 도구</dd>
+              <dt>찾는 방법</dt><dd>필기(그리기) · 음 · 뜻 · 부수</dd>
+              <dt>수록 한자</dt><dd>5,978자 (그려서 찾기 4,893자)</dd>
+              <dt>보여 주는 것</dt><dd>훈음 · 음 · 부수 · 총획 · 급수 · 획순</dd>
+              <dt>처리 위치</dt><dd>내 기기의 브라우저 (서버 저장 없음)</dd>
+              <dt>제작일</dt><dd>2026-09-20</dd>
+              <dt>최종 업데이트</dt><dd>2026-09-20</dd></dl>
+      <p class="gp-for">이런 분께 — 책·비문·족보에서 읽을 수 없는 한자를 만난 분, 이름에 쓸 한자의 뜻과 획수를 확인하려는 분, 한자 급수 공부를 하며 획순을 보고 싶은 분.</p>
+
+      <section class="faq">
+        <h2>자주 묻는 질문</h2>
+        <details><summary>한자 검색 필기 입력기는 무료인가요? 회원가입이 필요한가요?</summary><p>전부 무료입니다. 설치도 회원가입도 없고, 찾는 횟수에 제한도 없습니다.</p></details>
+        <details><summary>획순을 몰라도 한자를 찾을 수 있나요?</summary><p>네. 획 순서대로 맞춰 보는 방법과 순서를 무시하고 맞춰 보는 방법을 같이 써서, 획순이 달라도 후보에 나옵니다. 두 획을 이어 그었거나 한 획을 빠뜨려도 찾습니다.</p></details>
+        <details><summary>휴대폰에서도 되나요?</summary><p>네. 폰에서는 손가락으로, PC에서는 마우스로 네모 칸에 한 획씩 그으면 됩니다.</p></details>
+        <details><summary>찾은 한자를 복사할 수 있나요?</summary><p>네. 후보를 골라 입력창에 넣으면 위 칸에 쌓이고, 복사 단추로 한꺼번에 복사해 다른 곳에 붙여 넣을 수 있습니다.</p></details>
+        <details><summary>몇 자까지 찾을 수 있나요?</summary><p>사전에 한자 5,978자가 들어 있고, 그 가운데 4,893자는 그려서 찾을 수 있습니다. 획 모양 자료가 없는 나머지 글자는 음·뜻·부수로 찾습니다.</p></details>
+        <details><summary>한자의 뜻과 음, 획순도 볼 수 있나요?</summary><p>한자를 고르면 훈음(집 가처럼 뜻과 음), 부수, 총획, 급수가 나오고 획순이 순서대로 그려집니다. 네이버 한자사전으로 바로 가는 링크도 있습니다.</p></details>
+        <details><summary>쓴 글씨가 서버로 보내지나요?</summary><p>아니요. 그린 획은 이 기기의 브라우저 안에서만 한자와 견줍니다. 서버로 보내지 않습니다.</p></details>
+      </section>
+    </div>
+  </section>
+  <section class="related" aria-label="다른 도구 · 쉬는 시간에 한 판">
+    <div class="wrap game-page">
+      <h2>다른 도구 · 쉬는 시간에 한 판</h2>
+      <ul class="related-list">
+      <li><a href="/apps/qr-maker/"><img src="/assets/qrmake-cover.webp?v=2" alt="" width="96" height="60" loading="lazy"><span class="related-txt"><b>QR코드 만들기</b><span>와이파이·링크 QR코드 생성</span></span><em>사용 ▸</em></a></li>
+      <li><a href="/apps/pdf-merge/"><img src="/assets/pdfmerge-cover.webp?v=2" alt="" width="96" height="60" loading="lazy"><span class="related-txt"><b>PDF 합치기</b><span>무료 PDF 병합</span></span><em>사용 ▸</em></a></li>
+      <li><a href="/apps/qr-scan/"><img src="/assets/qrscan-cover.webp?v=2" alt="" width="96" height="60" loading="lazy"><span class="related-txt"><b>QR코드 스캔</b><span>사진 속 QR 읽기·큐싱 검사</span></span><em>사용 ▸</em></a></li>
+      <li><a href="/games/flash/taja/"><img src="/assets/taja-shot.webp" alt="" width="96" height="60" loading="lazy"><span class="related-txt"><b>타자연습 달리기</b><span>한글·영어 타자연습</span></span><em>플레이 ▸</em></a></li>
+      <li><a href="/games/flash/baduk/"><img src="/assets/baduk-shot.webp" alt="" width="96" height="60" loading="lazy"><span class="related-txt"><b>바둑</b><span>급수로 두는 바둑게임</span></span><em>플레이 ▸</em></a></li>
+      <li><a href="/games/flash/spotdiff/"><img src="/assets/spotdiff-shot.webp" alt="" width="96" height="60" loading="lazy"><span class="related-txt"><b>틀린그림찾기</b><span>두 그림 비교 게임</span></span><em>플레이 ▸</em></a></li>
+      </ul>
+      <p class="related-more"><a href="/apps/">앱스 전체 목록</a> · <a href="/games/">무료게임 전체 목록</a> · <a href="/">오름게임즈 홈</a></p>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <div class="footer-brand">
+      <img src="/assets/logo-full.webp?v=1" alt="" width="52" height="50">
+      <span>오름게임즈 <em>Oreum Games</em></span>
+    </div>
+    <p class="footer-motto">오름게임즈는 오릅니다</p>
+    <nav class="footer-nav" aria-label="푸터 메뉴">
+      <a href="/support/">고객지원</a>
+      <a href="/privacy/">개인정보처리방침</a>
+      <a href="https://www.youtube.com/@Oreumgames" rel="me noopener" target="_blank">유튜브</a>
+      <a href="https://www.tiktok.com/@oreumgames" rel="me noopener" target="_blank">틱톡</a>
+      <button type="button" class="js-mail mailbtn" data-u="cyjcyj27" data-d="gmail.com" data-go="gmail">협업 문의</button>
+      <button type="button" class="js-install mailbtn" hidden><img src="/assets/logo-symbol.png" alt="" class="install-ico">바탕화면에 바로가기 만들기</button>
+    </nav>
+    <p class="copy" id="visitCount" hidden></p>
+    <p class="copy">oreumgames.com · © 2026 오름게임즈. All rights reserved.</p>
+  </div>
+</footer>
+
+<!-- 도구: 그린 획은 브라우저 밖으로 나가지 않는다. 한자 자료는 data/ 의 사본을 쓴다 -->
+<script src="/apps/hanja-search/recog.js?v=1"></script>
+<script src="/apps/hanja-search/hanja.js?v=1"></script>
+
+<script src="/assets/visit.js?v=12" defer></script>
+
+<!-- 방문 집계 — 쿠키 없이, 페이지뷰(반복 방문 포함)까지 Abacus로 셉니다 -->
+<script>
+(function(){
+  if (/^(localhost|127\.0\.0\.1)$/.test(location.hostname) || location.protocol==='file:') return;
+  var b='https://abacus.jasoncameron.dev/hit/oreumgames/';
+  function h(k){ try{ fetch(b+k,{mode:'cors'}).catch(function(){}); }catch(e){} }
+  h('pageviews'); h('pv_app'); h('pv_hanja');
+})();
+</script>
+<script src="/assets/board-new.js?v=3" defer></script>
+<script src="/assets/mail.js" defer></script>
+<script src="/assets/install.js?v=7" defer></script>
+</body>
+</html>
