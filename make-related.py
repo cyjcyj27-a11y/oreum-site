@@ -18,6 +18,7 @@ import io, os, re, sys
 
 # slug, 한국어 경로, 영어 경로, 한국어 이름, 한국어 장르 앵커, 영어 이름, 영어 장르 앵커, 태그
 GAMES = [
+    ("cheonggi",      "/games/flash/cheonggi/",      None,                              "청기백기",          "순발력게임 청기백기",              None,                   None, {"arcade", "casual", "rhythm"}),
     ("woodenblock",   "/games/flash/woodenblock/",   "/en/games/flash/woodenblock/",   "나무블럭쌓기",      "젠가게임과 비슷한 블럭쌓기게임",   "WOODEN BLOCK",         "block tower game like Jenga", {"physics", "pvp", "3d", "casual", "board"}),
     ("odaesu",        "/games/mini/odaesu/",        "/en/games/mini/odaesu/",        "오대수게임",        "복도 망치 격투 액션게임",          "Odaesu Game",          "hammer beat em up game", {"action", "arcade"}),
     ("bowling",       "/games/flash/bowling/",       "/en/games/flash/bowling/",       "볼링게임",          "3D 볼링게임",                   "3D Bowling",           "3D bowling game online", {"sport", "physics", "pvp", "3d", "casual"}),
@@ -69,14 +70,14 @@ N_SIMILAR = 4      # 그중 태그가 겹치는 것 수 (나머지는 돌림 순
 
 MARK_S, MARK_E = "<!-- related:start -->", "<!-- related:end -->"
 
-_PICKS = None
-def pick(i):
-    """전부 한 번에 정한다: 태그 겹치는 것 먼저, 나머지는 지금까지 들어오는 링크가 가장 적은 게임부터 채운다"""
-    global _PICKS
-    if _PICKS is None:
-        n = len(GAMES); inbound = [0] * n; _PICKS = [None] * n
+_PICKS = {}
+def pick(i, en=False):
+    """전부 한 번에 정한다: 태그 겹치는 것 먼저, 나머지는 지금까지 들어오는 링크가 가장 적은 게임부터 채운다.
+    영문판이 없는 게임(영문 주소 None, 청기백기 2026-09-19)은 영어 페이지에서 추천하지 않는다"""
+    if en not in _PICKS:
+        n = len(GAMES); inbound = [0] * n; _PICKS[en] = [None] * n
         for a in range(n):
-            me = GAMES[a]; others = [k for k in range(n) if k != a and GAMES[k][0] not in EXPERIMENTAL]
+            me = GAMES[a]; others = [k for k in range(n) if k != a and GAMES[k][0] not in EXPERIMENTAL and (not en or GAMES[k][2])]
             sim = sorted([k for k in others if me[7] & GAMES[k][7]], key=lambda k: (-len(me[7] & GAMES[k][7]), (k - a) % n))[:N_SIMILAR]
             out = list(sim)
             while len(out) < N_RELATED:
@@ -84,8 +85,8 @@ def pick(i):
                 k = min(rest, key=lambda k: (inbound[k], (k - a) % n))
                 out.append(k)
             for k in out: inbound[k] += 1
-            _PICKS[a] = out
-    return _PICKS[i]
+            _PICKS[en][a] = out
+    return _PICKS[en][i]
 
 SHOT_ALIAS = {"knife-duel-v7": "knife-duel"}
 SHOT_VER = {"bowling": "2"}   # 그림을 다시 뜬 게임 — 주소 뒤 ?v= 로 캐시를 넘긴다
@@ -99,7 +100,7 @@ def thumb(slug, en):
 
 def block(i, en):
     items = []
-    for k in pick(i):
+    for k in pick(i, en):
         g = GAMES[k]
         href, name, genre = (g[2], g[5], g[6]) if en else (g[1], g[3], g[4])
         shot = thumb(g[0], en)
@@ -131,7 +132,7 @@ def main():
     for i, g in enumerate(GAMES):
         for k in pick(i): inbound[GAMES[k][0]] += 1
         r1 = apply(os.path.join(root, g[1].strip("/"), "index.html"), block(i, False))
-        r2 = apply(os.path.join(root, g[2].strip("/"), "index.html"), block(i, True))
+        r2 = apply(os.path.join(root, g[2].strip("/"), "index.html"), block(i, True)) if g[2] else "영문판 없음"
         print(f"{g[0]:<15} ko={r1:<10} en={r2:<10} → " + ", ".join(GAMES[k][0] for k in pick(i)))
     print("\n들어오는 링크 수:", ", ".join(f"{k}={v}" for k, v in inbound.items()))
     low = [k for k, v in inbound.items() if v < 3 and k not in EXPERIMENTAL]
