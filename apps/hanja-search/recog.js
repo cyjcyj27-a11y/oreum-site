@@ -113,10 +113,15 @@ var HJ = (function () {
       });
   }
 
+  // 사전은 json 으로 받고(서버가 압축해 준다), 획 자료는 script 로 받는다
+  // — 바이너리(.bin)는 서버가 압축해 주지 않아 오히려 250KB 더 받는다
   function loadByFetch(base) {
     return Promise.all([
       fetch(base + 'dict.json').then(function (r) { return r.json(); }),
-      fetch(base + 'strokes.bin').then(function (r) { return r.arrayBuffer(); })
+      loadScript(base + 'strokes.bin.js').then(function () {
+        if (!window.__HJ_STROKES) throw new Error('획 자료가 비었음');
+        return b64buf(window.__HJ_STROKES);
+      })
     ]);
   }
 
