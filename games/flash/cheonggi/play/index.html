@@ -39,6 +39,7 @@ body.hit #cv{animation:hit .35s}
 .tog.off::after{content:'';position:absolute;left:6px;right:6px;top:50%;height:2px;
   background:#fff;transform:rotate(-45deg);border-radius:1px}
 @media (max-width:700px){.stat b{font-size:15px}.stat{padding:5px 8px;gap:5px}.bar{width:48px}#topbar{gap:5px}}
+@media (orientation:portrait){#topbar{padding-top:calc(30px + env(safe-area-inset-top))}}   /* 폰 세로: 전면 카메라 구멍을 피해 메뉴를 내린다 */
 
 /* ---------- 선생님 말풍선 ---------- */
 #bubble{position:fixed;z-index:18;left:50%;top:calc(52px + env(safe-area-inset-top));transform:translateX(-50%) scale(.85);
@@ -51,7 +52,7 @@ body.hit #cv{animation:hit .35s}
 #btxt .cw{color:#fff;-webkit-text-stroke:.07em #2a2a2a;paint-order:stroke fill}
 #btxt .hid{opacity:0}
 #btxt .pbr{display:none}
-@media (orientation:portrait){#btxt .pbr{display:inline}#bubble{white-space:normal;width:max-content;max-width:92vw;text-align:center;top:calc(92px + env(safe-area-inset-top));font-size:clamp(28px,8.6vw,48px)}}
+@media (orientation:portrait){#btxt .pbr{display:inline}#bubble{white-space:normal;width:max-content;max-width:92vw;text-align:center;top:calc(116px + env(safe-area-inset-top));font-size:clamp(28px,8.6vw,48px)}}
 
 /* ---------- 깃발 단추(왼쪽 청기, 오른쪽 백기) ---------- */
 .fbtns{position:fixed;z-index:25;bottom:calc(54px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:12px}
@@ -157,7 +158,7 @@ body:not(.touch) .fb{width:62px;height:62px;font-size:24px}
 <script src="assets/game-home.js" data-top="6" data-left="6" data-fullscreen="1" defer></script>
 <script src="voice/voice.js?v=4"></script>
 <script src="js/audio.js?v=3"></script>
-<script src="js/art.js?v=4"></script>
+<script src="js/art.js?v=5"></script>
 <script src="js/game.js?v=7"></script>
 <script src="/assets/visit.js?v=12" defer></script>
 <script src="/assets/game-events.js?v=2" defer></script>

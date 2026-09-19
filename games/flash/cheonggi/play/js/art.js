@@ -23,7 +23,7 @@
     L.hy = portrait ? H * 0.40 : H * 0.47;                 // 지평선(운동장 끝)
     const bottomRoom = touch ? (portrait ? 226 : 40) : 46;
     L.fy = H - bottomRoom;                                  // 아이 발끝
-    const topRoom = portrait ? 150 : 62 + Math.max(52, Math.min(124, H * 0.16)); // 상단바 + 말풍선 자리
+    const topRoom = portrait ? 172 : 62 + Math.max(52, Math.min(124, H * 0.16)); // 상단바 + 말풍선 자리
     L.u = Math.max(0.6, Math.min((L.fy - topRoom) / 178, W / (portrait ? 150 : 175)));
     L.cx = W / 2;
     L.tx = portrait ? W * 0.5 : W * 0.80;                   // 선생님(구령대) — 세로 화면에선 아이 머리 위 가운데
