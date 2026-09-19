@@ -21,7 +21,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#1c120c;
 /* ---------- 상단바 (스카이라이더 배치) ---------- */
 #topbar{position:fixed;top:0;left:0;right:0;z-index:20;display:flex;align-items:center;
   gap:6px;flex-wrap:wrap;pointer-events:none;
-  padding:6px calc(8px + env(safe-area-inset-right)) 8px calc(104px + env(safe-area-inset-left));
+  padding:calc(6px + env(safe-area-inset-top)) calc(8px + env(safe-area-inset-right)) 8px calc(104px + env(safe-area-inset-left));
   background:linear-gradient(180deg,rgba(0,0,0,.5),rgba(0,0,0,0))}
 body:not(.playing) #topbar .game{display:none}
 .stat{display:flex;align-items:center;gap:6px;background:rgba(0,0,0,.35);
@@ -33,6 +33,7 @@ body:not(.playing) #topbar .game{display:none}
 #turnPill .t.on{opacity:1;transform:scale(1.18)}
 #turnPill .vs{font-size:12px;opacity:.5}
 .spacer{flex:1 1 10px}
+#topbar .brk{display:none;flex-basis:100%;height:0}
 .tog{pointer-events:auto;width:36px;height:36px;border-radius:50%;border:0;
   background:rgba(0,0,0,.4);color:#fff;font-size:15px;cursor:pointer;
   display:grid;place-items:center;position:relative;font-family:inherit}
@@ -42,6 +43,9 @@ body:not(.playing) #topbar .game{display:none}
 @media (max-width:700px){.stat b{font-size:15px}.stat{padding:5px 8px;gap:5px}#topbar{gap:5px}
   #topbar{padding-left:calc(8px + env(safe-area-inset-left))}
   #topbar>.stat:first-child{margin-left:96px}
+  /* 폰: 둘째 줄(차례 알약)도 오름 알약 오른쪽에서 시작한다 — 겹치지 않게 */
+  #topbar .brk{display:block}
+  #turnPill{margin-left:96px}
   body:not(.playing) #topbar{padding-left:calc(104px + env(safe-area-inset-left))}
   .tog{width:34px;height:34px}}
 
@@ -166,6 +170,7 @@ body:not(.playing) #topbar .game{display:none}
   <div class="stat game" id="stagePill"><i>STAGE</i><b id="stageN">1</b></div>
   <div class="stat"><i>🪙</i><b id="coins">0</b></div>
   <div class="stat game"><i>🧱</i><b id="lvN">18</b></div>
+  <div class="brk game"></div>
   <div class="stat game" id="turnPill"><span class="t" id="tA">🙂</span><span class="vs">VS</span><span class="t" id="tB">🐱</span></div>
   <div class="spacer"></div>
   <button class="tog game" id="tPause" aria-label="pause">❚❚</button>
