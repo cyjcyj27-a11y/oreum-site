@@ -87,12 +87,13 @@ body:not(.playing) #topbar .game{display:none}
 .duo{display:flex;gap:10px}
 .duo .btn{flex:1;font-size:18px;white-space:nowrap;padding:13px 6px}
 @media (min-aspect-ratio:1/1){
-  #title{align-items:flex-start;padding-left:calc(7vw + env(safe-area-inset-left))}
+  #title{align-items:flex-start;padding-left:calc(7vw + env(safe-area-inset-left));padding-bottom:calc(52px + env(safe-area-inset-bottom))}
   #title .menu{align-self:flex-start;margin-left:calc((min(38vw,560px) - min(80vw,300px)) / 2)}
   #logo{width:min(38vw,560px);font-size:clamp(70px,10vw,170px)}}
 @media (max-aspect-ratio:3/4){
   #title{justify-content:space-between;padding-top:calc(76px + env(safe-area-inset-top));padding-bottom:calc(60px + env(safe-area-inset-bottom))}}
-@media (max-height:520px){#logo{font-size:clamp(60px,13vh,110px)}.btn{padding:9px 14px;font-size:18px}.btn.main{font-size:24px}#title{gap:8px;padding-top:40px}}
+@media (max-height:520px){#logo{font-size:clamp(44px,15vh,78px)}.btn{padding:7px 12px;font-size:16px}.btn.main{font-size:20px}.duo .btn{padding:7px 6px;font-size:15px}
+  .menu{gap:6px}#title{gap:6px;padding-top:calc(34px + env(safe-area-inset-top));padding-bottom:calc(48px + env(safe-area-inset-bottom))}}
 
 /* ---------- 스테이지 소개 ---------- */
 #vs{position:fixed;inset:0;z-index:28;display:flex;align-items:center;justify-content:center;
