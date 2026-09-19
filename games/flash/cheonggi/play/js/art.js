@@ -17,13 +17,13 @@
   function rnd() { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; }
 
   // ---------------------------------------------------------------- 배치
-  function layout(W, H, touch) {
+  function layout(W, H, touch, top) {
     const portrait = H > W * 1.05;
     const L = { W, H, portrait };
     L.hy = portrait ? H * 0.40 : H * 0.47;                 // 지평선(운동장 끝)
     const bottomRoom = touch ? (portrait ? 226 : 40) : 46;
     L.fy = H - bottomRoom;                                  // 아이 발끝
-    const topRoom = portrait ? 172 : 62 + Math.max(52, Math.min(124, H * 0.16)); // 상단바 + 말풍선 자리
+    const topRoom = (portrait && top) ? top : portrait ? 172 : 62 + Math.max(52, Math.min(124, H * 0.16)); // 상단바 + 말풍선 자리
     L.u = Math.max(0.6, Math.min((L.fy - topRoom) / 178, W / (portrait ? 150 : 175)));
     L.cx = W / 2;
     L.tx = portrait ? W * 0.5 : W * 0.80;                   // 선생님(구령대) — 세로 화면에선 아이 머리 위 가운데
@@ -629,9 +629,9 @@
   let bgCache = null, bgKey = '';
   function draw(g, W, H, t, st, dpr) {
     dpr = dpr || 1;
-    if (W < 40 || H < 40) return layout(Math.max(W, 40), Math.max(H, 40), st.touch);   // 창이 숨겨져 크기가 0일 때
-    const L = layout(W, H, st.touch);
-    const key = W + 'x' + H + 'x' + dpr + (st.touch ? 't' : '');
+    if (W < 40 || H < 40) return layout(Math.max(W, 40), Math.max(H, 40), st.touch, st.top);   // 창이 숨겨져 크기가 0일 때
+    const L = layout(W, H, st.touch, st.top);
+    const key = W + 'x' + H + 'x' + dpr + (st.touch ? 't' : '') + (st.top || '');
     if (key !== bgKey) {
       bgCache = document.createElement('canvas'); bgCache.width = Math.round(W * dpr); bgCache.height = Math.round(H * dpr);
       const bg = bgCache.getContext('2d'); bg.scale(dpr, dpr);

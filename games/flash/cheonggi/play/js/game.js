@@ -99,11 +99,20 @@
     d.style.left = x + 'px'; d.style.top = y + 'px';
     $('pops').appendChild(d); setTimeout(() => d.remove(), 1300);
   }
+  // 말풍선을 메뉴 바로 아래에 둔다 — 좁은 폰에서 메뉴가 여러 줄로 접혀도 겹치지 않게
+  let tbBottom = 0;
+  function placeBubble() {
+    let b = 0;
+    for (const el of document.querySelectorAll('#topbar > *')) { const r = el.getBoundingClientRect(); if (r.height) b = Math.max(b, r.bottom); }
+    if (b) { tbBottom = Math.round(b); document.documentElement.style.setProperty('--tb', tbBottom + 'px'); }
+  }
+  addEventListener('resize', placeBubble);
   function hud() {
     $('stg').textContent = 'STAGE ' + S.stage;
     $('hearts').innerHTML = [0, 1, 2].map(i => '<span class="' + (i < S.hearts ? '' : 'lost') + '">❤</span>').join('');
     $('pbar').firstElementChild.style.width = (100 * S.idx / S.N) + '%';
     $('score').textContent = S.score.toLocaleString();
+    placeBubble();
   }
   function panel(id) {
     for (const p of document.querySelectorAll('.panel')) p.classList.toggle('on', p.id === id);
@@ -326,6 +335,7 @@
       aB: S.ang.b, aW: S.ang.w, mood: S.mood, moodT: S.moodT, hop: S.hop,
       teacher: S.teacher, talk: S.talk || 0, cheer: S.cheer,
       confetti: S.confetti.length ? S.confetti : null, touch: document.body.classList.contains('touch'),
+      top: tbBottom ? tbBottom + 10 + Math.min(110, innerWidth * 0.27) : 0,   // 세로: 말풍선(두 줄) 아래부터 아이를 그린다
     }, dpr);
   }
   let lastT = performance.now();
