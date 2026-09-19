@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>나무블럭쌓기</title>
+<style>
+@font-face{font-family:'Cute';src:url('fonts/cute-title.woff2?v=2') format('woff2');font-display:block}
+@font-face{font-family:'Ria';src:url('fonts/RiaSans-ExtraBold.woff2') format('woff2');font-display:swap}
+
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+html,body{width:100%;height:100%;overflow:hidden;background:#1c120c;
+  font-family:'Ria',-apple-system,'Malgun Gothic',sans-serif;color:#fff;
+  user-select:none;-webkit-user-select:none;touch-action:none}
+#cv{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
+#vig{position:fixed;inset:0;pointer-events:none;z-index:5;
+  background:radial-gradient(ellipse at 50% 45%,rgba(0,0,0,0) 55%,rgba(10,5,2,.55) 100%)}
+
+/* ---------- 상단바 (스카이라이더 배치) ---------- */
+#topbar{position:fixed;top:0;left:0;right:0;z-index:20;display:flex;align-items:center;
+  gap:6px;flex-wrap:wrap;pointer-events:none;
+  padding:6px calc(8px + env(safe-area-inset-right)) 8px calc(104px + env(safe-area-inset-left));
+  background:linear-gradient(180deg,rgba(0,0,0,.5),rgba(0,0,0,0))}
+body:not(.playing) #topbar .game{display:none}
+.stat{display:flex;align-items:center;gap:6px;background:rgba(0,0,0,.35);
+  border-radius:15px;padding:5px 10px;backdrop-filter:blur(4px)}
+.stat i{font-style:normal;font-size:13px;opacity:.9}
+.stat b{font-size:17px;font-weight:400;letter-spacing:.3px}
+#turnPill{gap:4px;transition:background .2s}
+#turnPill .t{font-size:20px;line-height:1;opacity:.35;transition:opacity .2s,transform .2s}
+#turnPill .t.on{opacity:1;transform:scale(1.18)}
+#turnPill .vs{font-size:12px;opacity:.5}
+.spacer{flex:1 1 10px}
+.tog{pointer-events:auto;width:36px;height:36px;border-radius:50%;border:0;
+  background:rgba(0,0,0,.4);color:#fff;font-size:15px;cursor:pointer;
+  display:grid;place-items:center;position:relative;font-family:inherit}
+.tog.off{opacity:.4}
+.tog.off::after{content:'';position:absolute;left:6px;right:6px;top:50%;height:2px;
+  background:#fff;transform:rotate(-45deg);border-radius:1px}
+@media (max-width:700px){.stat b{font-size:15px}.stat{padding:5px 8px;gap:5px}#topbar{gap:5px}
+  #topbar{padding-left:calc(8px + env(safe-area-inset-left))}
+  #topbar>.stat:first-child{margin-left:96px}
+  body:not(.playing) #topbar{padding-left:calc(104px + env(safe-area-inset-left))}
+  .tog{width:34px;height:34px}}
+
+/* ---------- 차례 알림 ---------- */
+#word{position:fixed;left:50%;top:40%;transform:translate(-50%,-50%) scale(.5);z-index:26;pointer-events:none;
+  font-size:clamp(40px,9vw,88px);color:#fff;opacity:0;white-space:nowrap;
+  -webkit-text-stroke:.05em #3a1c08;paint-order:stroke fill;
+  text-shadow:0 6px 0 rgba(58,28,8,.55),0 0 24px rgba(255,200,120,.45);
+  transition:transform .28s cubic-bezier(.3,1.7,.5,1),opacity .25s}
+#word.on{opacity:1;transform:translate(-50%,-50%) scale(1)}
+#word.gold{color:#ffd65a}
+
+#toasts{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(22px + env(safe-area-inset-bottom));z-index:40;
+  display:flex;flex-direction:column;gap:6px;align-items:center;pointer-events:none}
+.toast{background:linear-gradient(90deg,#6a3a14,#a8622a);padding:9px 18px;border-radius:20px;font-size:17px;
+  box-shadow:0 6px 20px rgba(0,0,0,.4);animation:toast 2.6s forwards;white-space:nowrap}
+@keyframes toast{0%{opacity:0;transform:translateY(20px)}10%{opacity:1;transform:none}85%{opacity:1}100%{opacity:0}}
+
+#hand{position:fixed;z-index:22;pointer-events:none;font-size:46px;margin:-8px 0 0 -18px;
+  filter:drop-shadow(0 4px 6px rgba(0,0,0,.5));left:0;top:0}
+
+/* ---------- 타이틀 ---------- */
+#title{position:fixed;inset:0;z-index:30;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;
+  padding:60px 16px calc(20px + env(safe-area-inset-bottom))}
+#logo{font-family:'Cute','Ria',sans-serif;font-size:clamp(84px,19vw,190px);line-height:.86;text-align:center;
+  color:#ffe2a8;letter-spacing:.02em;
+  -webkit-text-stroke:.05em #4a2408;paint-order:stroke fill;
+  text-shadow:0 .06em 0 #2a1204,0 .1em .2em rgba(0,0,0,.5)}
+#logo span{display:block;color:#fff3d6;font-size:1.18em}
+.menu{display:flex;flex-direction:column;gap:10px;align-items:stretch;width:min(80vw,300px)}
+.btn{pointer-events:auto;border:0;cursor:pointer;font-family:inherit;color:#fff;border-radius:16px;
+  font-size:22px;padding:13px 18px;background:rgba(40,22,10,.72);border:2px solid rgba(255,220,170,.28);
+  backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;gap:8px}
+.btn:active{transform:scale(.96)}
+.btn.main{font-size:30px;background:linear-gradient(180deg,#f0a64a,#b8621c);border-color:#ffe0b0;
+  box-shadow:0 0 22px rgba(240,166,74,.45),inset 0 2px 0 rgba(255,255,255,.3)}
+.btn.cont{background:linear-gradient(180deg,#6fbf6a,#2f8a3a);border-color:#d4ffd0;box-shadow:0 0 18px rgba(111,191,106,.4)}
+.btn small{font-size:14px;opacity:.85}
+.duo{display:flex;gap:10px}
+.duo .btn{flex:1;font-size:18px;white-space:nowrap;padding:13px 6px}
+@media (min-aspect-ratio:1/1){
+  #title{align-items:flex-start;padding-left:calc(7vw + env(safe-area-inset-left))}
+  #title .menu{align-self:flex-start;margin-left:calc((min(38vw,560px) - min(80vw,300px)) / 2)}
+  #logo{width:min(38vw,560px);font-size:clamp(70px,10vw,170px)}}
+@media (max-aspect-ratio:3/4){
+  #title{justify-content:space-between;padding-top:calc(76px + env(safe-area-inset-top));padding-bottom:calc(60px + env(safe-area-inset-bottom))}}
+@media (max-height:520px){#logo{font-size:clamp(60px,13vh,110px)}.btn{padding:9px 14px;font-size:18px}.btn.main{font-size:24px}#title{gap:8px;padding-top:40px}}
+
+/* ---------- 스테이지 소개 ---------- */
+#vs{position:fixed;inset:0;z-index:28;display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(ellipse at center,rgba(60,30,10,.5),rgba(0,0,0,.2));cursor:pointer}
+#vs .mid{display:flex;flex-direction:column;align-items:center;gap:8px;animation:pop .45s cubic-bezier(.2,1.5,.5,1)}
+#vsS{font-size:clamp(34px,7vw,60px);letter-spacing:2px;text-shadow:0 4px 0 rgba(0,0,0,.4)}
+#vs .v{font-size:clamp(60px,14vw,120px);display:flex;align-items:center;gap:.2em}
+#vs .v i{font-style:normal;font-size:.4em;opacity:.7}
+@keyframes pop{from{transform:scale(.4);opacity:0}}
+
+/* ---------- 끝 카드 ---------- */
+#end{position:fixed;inset:0;z-index:45;display:flex;align-items:center;justify-content:center;background:rgba(20,10,4,.45);backdrop-filter:blur(2px)}
+#end .ecard{display:flex;flex-direction:column;align-items:center;gap:12px;padding:24px 28px;min-width:min(88vw,360px);
+  background:linear-gradient(180deg,rgba(84,48,22,.96),rgba(40,22,10,.96));border:2px solid rgba(255,210,150,.45);border-radius:24px;
+  box-shadow:0 18px 50px rgba(0,0,0,.6)}
+#eFace{font-size:64px;line-height:1}
+#eTitle{font-size:52px;line-height:1;white-space:nowrap}
+#eTitle.win{color:#ffd65a;text-shadow:0 0 20px rgba(255,180,60,.6)}
+#eTitle.lose{color:#d8c8b8}
+#eStats{display:flex;gap:10px;font-size:20px}
+#eCoins{font-size:22px;color:#ffd65a;min-height:1px}
+#end .btns{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;width:100%}
+#end .btn{flex:1 1 40%;font-size:19px;padding:11px 12px}
+
+/* ---------- 상점·미션 ---------- */
+.sheet{position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;align-items:center;
+  background:rgba(24,13,6,.92);backdrop-filter:blur(6px);padding:calc(14px + env(safe-area-inset-top)) 12px calc(14px + env(safe-area-inset-bottom))}
+.sheet .hd{display:flex;align-items:center;gap:10px;width:min(100%,860px);margin-bottom:10px;padding-left:96px}
+.sheet h2{font-weight:400;font-size:30px;flex:1;color:#ffe2a8}
+.close{width:44px;height:44px;border-radius:50%;border:0;background:rgba(255,255,255,.14);color:#fff;font-size:22px;cursor:pointer}
+.body{overflow-y:auto;width:min(100%,860px);flex:1;touch-action:pan-y;-webkit-overflow-scrolling:touch}
+#shopGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;padding-bottom:10px}
+.card{background:linear-gradient(180deg,rgba(110,64,30,.55),rgba(45,25,12,.7));border:2px solid rgba(255,255,255,.1);border-radius:16px;
+  padding:10px;display:flex;flex-direction:column;align-items:center;gap:4px}
+.card.on{border-color:#ffc46a;box-shadow:0 0 16px rgba(255,196,106,.4)}
+.card img{width:112px;height:84px;object-fit:contain;filter:drop-shadow(0 6px 8px rgba(0,0,0,.45))}
+.card.lock img{filter:saturate(.5) brightness(.75) drop-shadow(0 6px 8px rgba(0,0,0,.45))}
+.bn{font-size:19px}
+.card button{margin-top:6px;width:100%;border:0;border-radius:11px;padding:8px;font-family:inherit;font-size:16px;color:#fff;cursor:pointer;
+  background:linear-gradient(180deg,#f0a64a,#b8621c)}
+.card.on button{background:rgba(255,255,255,.15)}
+.card button:disabled{background:rgba(255,255,255,.1);color:rgba(255,255,255,.45);cursor:default}
+#misList{display:flex;flex-direction:column;gap:7px;max-width:520px;margin:0 auto}
+.mis{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.07);border-radius:13px;padding:11px 14px;font-size:19px}
+.mis .ck{width:26px;height:26px;border-radius:50%;border:2px solid rgba(255,255,255,.35);display:grid;place-items:center;font-size:15px;flex:0 0 26px}
+.mis.ok .ck{background:#e0913a;border-color:#e0913a}
+.mis .mn{flex:1}
+.mis.ok .mn{opacity:.6}
+.mis .pg{font-size:14px;opacity:.6}
+.mis .mr{color:#ffd65a;font-size:16px;white-space:nowrap}
+.misTop{display:flex;justify-content:center;gap:10px;margin-bottom:10px}
+
+/* ---------- 엔딩 ---------- */
+#ending{position:fixed;inset:0;z-index:60;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;
+  background:radial-gradient(ellipse at center,rgba(120,70,20,.8),rgba(12,6,2,.95));overflow:hidden}
+#ending .cup{font-size:clamp(90px,22vw,180px);animation:bob 2s ease-in-out infinite;filter:drop-shadow(0 0 30px #ffd65a)}
+#ending h1{font-weight:400;font-size:clamp(44px,10vw,96px);color:#ffd65a;text-shadow:0 0 24px rgba(255,160,40,.8)}
+#ending .row2{font-size:clamp(28px,7vw,44px);letter-spacing:4px;white-space:nowrap}
+@keyframes bob{50%{transform:translateY(-14px) rotate(-4deg)}}
+#confetti{position:absolute;inset:0;pointer-events:none}
+#confetti i{position:absolute;top:-20px;width:10px;height:16px;border-radius:2px;animation:fall 3s linear infinite}
+@keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+
+#pauseCover{position:fixed;inset:0;z-index:35;background:rgba(20,10,4,.82);display:flex;flex-direction:column;gap:22px;align-items:center;justify-content:center;
+  font-size:70px;cursor:pointer}
+#pauseCover .btn{font-size:20px}
+#loading{position:fixed;inset:0;z-index:100;background:#1c120c;display:grid;place-items:center;font-size:18px;color:rgba(255,226,168,.6)}
+</style>
+</head>
+<body>
+<canvas id="cv"></canvas>
+<div id="vig"></div>
+
+<div id="topbar">
+  <div class="stat game" id="stagePill"><i>STAGE</i><b id="stageN">1</b></div>
+  <div class="stat"><i>🪙</i><b id="coins">0</b></div>
+  <div class="stat game"><i>🧱</i><b id="lvN">18</b></div>
+  <div class="stat game" id="turnPill"><span class="t" id="tA">🙂</span><span class="vs">VS</span><span class="t" id="tB">🐱</span></div>
+  <div class="spacer"></div>
+  <button class="tog game" id="tPause" aria-label="pause">❚❚</button>
+  <button class="tog" id="tBgm" aria-label="music">♪</button>
+  <button class="tog" id="tSnd" aria-label="sound">🔊</button>
+</div>
+
+<div id="word"></div>
+<div id="toasts"></div>
+<div id="hand" hidden>👆</div>
+
+<div id="title" hidden>
+  <div id="logo">나무블럭<span>쌓기</span></div>
+  <div class="menu">
+    <button class="btn cont" id="bContinue" hidden>이어하기</button>
+    <button class="btn main" id="bStart">START <small id="tStage"></small></button>
+    <button class="btn" id="bDuo">2 PLAYERS</button>
+    <div class="duo">
+      <button class="btn" id="bShop">🧱 상점</button>
+      <button class="btn" id="bMis">🏅 미션</button>
+    </div>
+  </div>
+</div>
+
+<div id="vs" hidden>
+  <div class="mid"><div id="vsS">STAGE 1</div><div class="v"><span id="vsA">🙂</span><i>VS</i><span id="vsB">🐱</span></div></div>
+</div>
+
+<div id="end" hidden>
+  <div class="ecard">
+    <div id="eFace">😹</div>
+    <div id="eTitle">WIN</div>
+    <div id="eStats"></div>
+    <div id="eCoins"></div>
+    <div class="btns">
+      <button class="btn main" id="eNext">NEXT</button>
+      <button class="btn main" id="eRetry">RETRY</button>
+      <button class="btn" id="eShop">🧱 상점</button>
+      <button class="btn" id="eHome">홈</button>
+    </div>
+  </div>
+</div>
+
+<div id="shop" class="sheet" hidden>
+  <div class="hd"><h2>상점</h2><div class="stat"><i>🪙</i><b id="shopCoins">0</b></div><button class="close" aria-label="close">✕</button></div>
+  <div class="body"><div id="shopGrid"></div></div>
+</div>
+
+<div id="missions" class="sheet" hidden>
+  <div class="hd"><h2>미션</h2><button class="close" aria-label="close">✕</button></div>
+  <div class="body">
+    <div class="misTop"><div class="stat"><i>✔</i><b id="misCount">0 / 12</b></div><div class="stat"><i>🧱 BEST</i><b id="misBest">0</b></div></div>
+    <div id="misList"></div>
+  </div>
+</div>
+
+<div id="ending" hidden>
+  <div id="confetti"></div>
+  <div class="cup">🏆</div>
+  <h1>CHAMPION</h1>
+  <div class="row2">🧱🐱🧱</div>
+  <button class="btn main" id="endOk">계속</button>
+</div>
+
+<div id="pauseCover" hidden>❚❚<button class="btn" id="pHome">홈</button></div>
+<div id="loading">LOADING</div>
+
+<script src="js/lang.js?v=2"></script>
+<script src="assets/game-home.js" data-top="6" data-left="6" data-fullscreen="1" defer></script>
+<script src="lib/three.min.js"></script>
+<script src="lib/rapier.js"></script>
+<script src="js/audio.js?v=1"></script>
+<script src="js/scene.js?v=4"></script>
+<script src="js/game.js?v=6"></script>
+<script src="/assets/visit.js?v=12" defer></script>
+<script src="/assets/game-events.js?v=2" defer></script>
+</body>
+</html>
