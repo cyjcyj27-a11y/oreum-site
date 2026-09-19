@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>QR Code Scanner — Scan QR Codes from Photos, No App</title>
+<meta name="description" content="Free online QR code scanner. Scan with your camera or read QR codes from photos and screenshots, and see whether a link looks like phishing before you open it. No app, no sign-up, and your photos are never uploaded.">
+<meta name="keywords" content="qr code scanner, scan qr code from image, qr code reader online, scan qr code from screenshot, qr code scanner without app, qr phishing check, Oreum Games">
+<link rel="canonical" href="https://oreumgames.com/en/apps/qr-scan/">
+<link rel="alternate" hreflang="ko" href="https://oreumgames.com/apps/qr-scan/">
+<link rel="alternate" hreflang="en" href="https://oreumgames.com/en/apps/qr-scan/">
+<link rel="alternate" hreflang="x-default" href="https://oreumgames.com/apps/qr-scan/">
+<meta name="theme-color" content="#f8f5ec">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" href="/assets/icon-512.png" type="image/png" sizes="512x512">
+<link rel="apple-touch-icon" href="/assets/icon-180.png">
+<link rel="manifest" href="/manifest.webmanifest">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Oreum Games">
+<meta property="og:title" content="QR Code Scanner — Scan QR Codes from Photos, No App">
+<meta property="og:description" content="Free online QR code scanner. Scan with your camera or read QR codes from photos and screenshots, and see whether a link looks like phishing before you open it. No app, no sign-up, and your photos are never uploaded.">
+<meta property="og:url" content="https://oreumgames.com/en/apps/qr-scan/">
+<meta property="og:image" content="https://oreumgames.com/assets/qrscan-og-en.webp?v=1">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="en_US">
+<meta name="twitter:card" content="summary_large_image">
+
+<link rel="stylesheet" href="/style.css?v=40">
+<link rel="stylesheet" href="/apps/tools.css?v=2">
+<style>
+  .pm-panel { background: #fff; border: 1px solid #ececec; border-radius: 22px; padding: 28px 22px 24px; box-shadow: 0 1px 2px rgba(20,20,30,.04), 0 18px 40px rgba(20,20,30,.06); }
+  .pm-panel + .gp-line { margin-top: 28px; }
+  .game-page > h2 { margin: 40px 0 10px; }
+  .pm-howto { margin: 0; padding-left: 1.3em; line-height: 1.75; }
+  .pm-howto li { margin: 4px 0; }
+  @media (max-width: 520px) { .pm-panel { padding: 22px 14px 18px; border-radius: 18px; } }
+</style>
+
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": "WebApplication",
+ "name": "QR Code Scanner",
+ "alternateName": [
+  "QR Code Reader",
+  "Scan QR code from image",
+  "QR코드 스캔"
+ ],
+ "url": "https://oreumgames.com/en/apps/qr-scan/",
+ "image": "https://oreumgames.com/assets/qrscan-og-en.webp?v=1",
+ "description": "A free web tool that reads QR codes from the camera, photos, screenshots or pasted images. Links are not opened right away: it shows the real domain and phishing warning signs first. It also reads Wi-Fi, contact, phone and text QR codes. Everything is processed inside the browser on your device.",
+ "applicationCategory": "UtilitiesApplication",
+ "operatingSystem": "Web browser",
+ "browserRequirements": "Requires JavaScript",
+ "isAccessibleForFree": true,
+ "featureList": [
+  "Scan with camera",
+  "Read QR codes from photos and screenshots",
+  "Phishing (quishing) warning signs",
+  "Copy Wi-Fi passwords",
+  "Recent scans kept on this device only",
+  "No upload"
+ ],
+ "datePublished": "2026-09-19",
+ "dateModified": "2026-09-19",
+ "inLanguage": [
+  "en",
+  "ko"
+ ],
+ "offers": {
+  "@type": "Offer",
+  "price": "0",
+  "priceCurrency": "USD"
+ },
+ "isPartOf": {
+  "@type": "CollectionPage",
+  "name": "Apps",
+  "url": "https://oreumgames.com/en/apps/"
+ },
+ "publisher": {
+  "@type": "Organization",
+  "name": "Oreum Games",
+  "url": "https://oreumgames.com/en/"
+ }
+}
+</script>
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": "FAQPage",
+ "mainEntity": [
+  {
+   "@type": "Question",
+   "name": "Is the QR code scanner free? Do I need an app?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "It is free. No app to install and no sign-up: it works right in your browser."
+   }
+  },
+  {
+   "@type": "Question",
+   "name": "Can it read QR codes from photos or screenshots?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "Yes. Click Scan from photo and choose a photo or screenshot from your gallery. On a computer you can also drag and drop the image or paste it with Ctrl+V."
+   }
+  },
+  {
+   "@type": "Question",
+   "name": "Are my photos uploaded to a server?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "No. Photos and camera images are read only inside the browser on your device. Recent scans are kept on this device only, and you can clear them at any time."
+   }
+  },
+  {
+   "@type": "Question",
+   "name": "Does it warn about QR code phishing?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "For QR codes with links, it does not open them right away. It first shows the real domain and warning signs such as insecure addresses, short links, numeric addresses and addresses imitating well-known companies. It cannot catch every scam, so do not enter personal details on sites you do not know even without a warning."
+   }
+  },
+  {
+   "@type": "Question",
+   "name": "The camera does not start.",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "Allow camera access when your browser asks. Browsers inside apps like KakaoTalk may block the camera; use Scan from photo to take a picture instead, or open the page in Chrome or Safari."
+   }
+  },
+  {
+   "@type": "Question",
+   "name": "Can it read Wi-Fi QR codes?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "Yes. It shows the Wi-Fi name, password and security type, and you can copy the password with one tap."
+   }
+  }
+ ]
+}
+</script>
+</head>
+
+<body>
+
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="/en/">
+      <img src="/assets/logo-full.webp?v=1" alt="Oreum Games" width="78" height="74">
+    </a>
+    <div class="brand-copy">
+      <p class="brandname">Oreum Games</p>
+      <p class="factory">INDIE GAME FACTORY</p>
+    </div>
+    <ul class="values">
+      <li><span>No install</span> one link and you are in</li>
+      <li><span>No sign-up</span> saves stay in your browser</li>
+    </ul>
+    <nav class="nav" aria-label="Main menu">
+      <a href="/en/games/">GAMES</a>
+      <a href="/en/apps/">APPS</a>
+      <a href="/en/board/">COMMUNITY</a>
+      <a href="/apps/qr-scan/" lang="ko" hreflang="ko">한국어</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+  <section class="showcase">
+    <div class="wrap game-page">
+      <a class="backlink" href="/en/apps/">← All apps</a>
+
+<div class="pm pm-panel">
+  <header class="top">
+    <h1 data-t="h1">QR Code Scanner</h1>
+    <ul class="promise">
+      <li data-t="p1">No install</li>
+      <li data-t="p2">No sign-up</li>
+      <li data-t="p3">Photos never uploaded</li>
+      <li data-t="p4">Phishing check</li>
+    </ul>
+  </header>
+  <section id="drop" class="drop" aria-label="Read a QR code">
+    <input id="pick" type="file" accept="image/*" hidden>
+    <div class="twin">
+      <button id="photoBtn" class="big" type="button" data-t="photo">🖼️ Scan from photo</button>
+      <button id="camBtn" class="big dark" type="button" data-t="cam">📷 Scan with camera</button>
+    </div>
+    <p class="hint"><span data-t="hint">Works with screenshots and saved photos</span><span class="pc" data-t="hintPc"> · drag &amp; drop · Ctrl+V</span></p>
+  </section>
+  <div id="cam" class="cam" hidden><video id="video" playsinline muted></video><div class="aim"></div><button id="camX" class="camx" type="button" aria-label="Close">✕</button></div>
+  <p id="note" class="note" hidden></p>
+  <div id="result" class="result" hidden aria-live="polite"></div>
+  <section class="hist">
+    <h2><span data-t="hist">Recent scans</span><button id="histClear" class="ghost" type="button" data-t="clearHist" hidden>Clear history</button></h2>
+    <p id="histEmpty" class="hint" data-t="noHist">Nothing yet</p>
+    <ol id="histList"></ol>
+  </section>
+  <p class="safe" data-t="safe">🔒 Photos and camera images are read only inside this browser on your device. Nothing is uploaded, and recent scans stay on this device only.</p>
+</div>
+
+      <p class="gp-line">QR Code Scanner is a free web tool that reads QR codes with your camera or from photos. When it finds a link, it first shows where the link really goes and any phishing warning signs.</p>
+
+      <h2>How to scan a QR code</h2>
+      <ol class="pm-howto">
+        <li>If you have a photo or screenshot of a QR code, click <b>Scan from photo</b> and choose it. On a computer you can also drag and drop the image or paste it with Ctrl+V.</li>
+        <li>For a QR code on paper or another screen, click <b>Scan with camera</b>, allow camera access and fit the code inside the square.</li>
+        <li>For a link, check <b>Really goes to</b> and the warnings, then click <b>Open</b>. For Wi-Fi you can copy the password, and for text you can copy the content.</li>
+      </ol>
+
+      <h2>It checks for phishing before you open anything</h2>
+      <p class="gp-body">Quishing is phishing through QR codes: a code sends you to a fake site to steal your details or money. This scanner never opens a link right away. It shows the real domain in large type and points out insecure addresses (http), short links, numeric IP addresses, addresses imitating well-known companies and banks, and addresses with an @ inside.</p>
+      <p class="gp-body">No warning does not guarantee a site is safe. Do not enter passwords or card numbers on sites you do not know.</p>
+
+      <dl class="spec"><dt>Type</dt><dd>QR code scanner · Phishing check · Free tool</dd>
+              <dt>Reads from</dt><dd>Camera · Photos · Screenshots · Paste</dd>
+              <dt>Understands</dt><dd>Links · Wi-Fi · Contacts · Phone · Text</dd>
+              <dt>Processing</dt><dd>In your browser (no upload)</dd>
+              <dt>Works on</dt><dd>Desktop and mobile browsers</dd>
+              <dt>Released</dt><dd>2026-09-19</dd>
+              <dt>Last updated</dt><dd>2026-09-19</dd></dl>
+      <p class="gp-for">Good for — reading a QR code someone sent you as a photo, scanning a QR code shown on your computer screen, and checking a suspicious QR link before you open it.</p>
+
+      <section class="faq">
+        <h2>FAQ</h2>
+        <details><summary>Is the QR code scanner free? Do I need an app?</summary><p>It is free. No app to install and no sign-up: it works right in your browser.</p></details>
+        <details><summary>Can it read QR codes from photos or screenshots?</summary><p>Yes. Click Scan from photo and choose a photo or screenshot from your gallery. On a computer you can also drag and drop the image or paste it with Ctrl+V.</p></details>
+        <details><summary>Are my photos uploaded to a server?</summary><p>No. Photos and camera images are read only inside the browser on your device. Recent scans are kept on this device only, and you can clear them at any time.</p></details>
+        <details><summary>Does it warn about QR code phishing?</summary><p>For QR codes with links, it does not open them right away. It first shows the real domain and warning signs such as insecure addresses, short links, numeric addresses and addresses imitating well-known companies. It cannot catch every scam, so do not enter personal details on sites you do not know even without a warning.</p></details>
+        <details><summary>The camera does not start.</summary><p>Allow camera access when your browser asks. Browsers inside apps like KakaoTalk may block the camera; use Scan from photo to take a picture instead, or open the page in Chrome or Safari.</p></details>
+        <details><summary>Can it read Wi-Fi QR codes?</summary><p>Yes. It shows the Wi-Fi name, password and security type, and you can copy the password with one tap.</p></details>
+      </section>
+    </div>
+  </section>
+  <section class="related" aria-label="More tools · Take a quick break">
+    <div class="wrap game-page">
+      <h2>More tools · Take a quick break</h2>
+      <ul class="related-list">
+      <li><a href="/en/apps/pdf-merge/"><img src="/assets/pdfmerge-cover-en.webp?v=1" alt="" width="96" height="60" loading="lazy"><span class="related-txt"><b>Merge PDF</b><span>free PDF combiner</span></span><em>Open ▸</em></a></li>
+      <li><a href="/en/apps/qr-maker/"><img src="/assets/qrmake-cover-en.webp?v=1" alt="" width="96" height="60" loading="lazy"><span class="related-txt"><b>QR Code Generator</b><span>Wi-Fi and link QR codes</span></span><em>Open ▸</em></a></li>
+      <li><a href="/en/games/flash/alkkagi/"><img src="/assets/alkkagi-shot.webp" alt="" width="96" height="60" loading="lazy"><span class="related-txt"><b>Alkkagi</b><span>flick checkers game</span></span><em>Play ▸</em></a></li>
+      <li><a href="/en/games/flash/taja/"><img src="/assets/taja-shot.webp" alt="" width="96" height="60" loading="lazy"><span class="related-txt"><b>Typing Race</b><span>typing practice game</span></span><em>Play ▸</em></a></li>
+      <li><a href="/en/games/flash/omok/"><img src="/assets/omok-shot.webp" alt="" width="96" height="60" loading="lazy"><span class="related-txt"><b>Gomoku</b><span>five in a row game</span></span><em>Play ▸</em></a></li>
+      <li><a href="/en/games/flash/spotdiff/"><img src="/assets/spotdiff-shot.webp" alt="" width="96" height="60" loading="lazy"><span class="related-txt"><b>Spot the Difference</b><span>find the differences game</span></span><em>Play ▸</em></a></li>
+      </ul>
+      <p class="related-more"><a href="/en/apps/">All apps</a> · <a href="/en/games/">All free games</a> · <a href="/en/">Oreum Games home</a></p>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <div class="footer-brand">
+      <img src="/assets/logo-full.webp?v=1" alt="" width="52" height="50">
+      <span>Oreum Games <em>오름게임즈</em></span>
+    </div>
+    <p class="footer-motto">Oreum Games keeps climbing</p>
+    <nav class="footer-nav" aria-label="Footer menu">
+      <a href="/en/support/">Support</a>
+      <a href="/en/privacy/">Privacy Policy</a>
+      <a href="https://www.youtube.com/@Oreumgames" rel="me noopener" target="_blank">YouTube</a>
+      <a href="https://www.tiktok.com/@oreumgames" rel="me noopener" target="_blank">TikTok</a>
+      <button type="button" class="js-mail mailbtn" data-u="cyjcyj27" data-d="gmail.com" data-go="gmail">Ads &amp; partnerships</button>
+      <button type="button" class="js-install mailbtn" hidden><img src="/assets/logo-symbol.png" alt="" class="install-ico">Add a shortcut</button>
+    </nav>
+    <p class="copy" id="visitCount" hidden></p>
+    <p class="copy">oreumgames.com · © 2026 Oreum Games. All rights reserved.</p>
+  </div>
+</footer>
+
+<!-- 도구: 사진·입력 내용은 브라우저 밖으로 나가지 않는다. 부품(jsQR Apache-2.0, qrcode-generator MIT)은 이 사이트의 사본을 쓴다 -->
+<script src="/apps/qr-scan/jsQR.js"></script>
+<script src="/apps/qr-scan/qrscan.js?v=2"></script>
+
+<script src="/assets/visit.js?v=12" defer></script>
+
+<!-- 방문 집계 — 쿠키 없이, 페이지뷰(반복 방문 포함)까지 Abacus로 셉니다 -->
+<script>
+(function(){
+  if (/^(localhost|127\.0\.0\.1)$/.test(location.hostname) || location.protocol==='file:') return;
+  var b='https://abacus.jasoncameron.dev/hit/oreumgames/';
+  function h(k){ try{ fetch(b+k,{mode:'cors'}).catch(function(){}); }catch(e){} }
+  h('pageviews'); h('pv_app'); h('pv_qrscan');
+})();
+</script>
+<script src="/assets/board-new.js?v=2" defer></script>
+<script src="/assets/mail.js" defer></script>
+<script src="/assets/install.js?v=7" defer></script>
+</body>
+</html>

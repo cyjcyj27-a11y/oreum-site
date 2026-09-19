@@ -56,6 +56,42 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://oreumgames.com/apps/qr-maker/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/apps/qr-maker/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/apps/qr-maker/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/apps/qr-maker/"/>
+    <lastmod>2026-09-19</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://oreumgames.com/en/apps/qr-maker/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/apps/qr-maker/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/apps/qr-maker/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/apps/qr-maker/"/>
+    <lastmod>2026-09-19</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://oreumgames.com/apps/qr-scan/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/apps/qr-scan/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/apps/qr-scan/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/apps/qr-scan/"/>
+    <lastmod>2026-09-19</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://oreumgames.com/en/apps/qr-scan/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/apps/qr-scan/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/apps/qr-scan/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/apps/qr-scan/"/>
+    <lastmod>2026-09-19</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://oreumgames.com/games/</loc>
     <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/games/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/games/"/>
@@ -946,7 +982,7 @@
     <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/saju/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/apps/saju/"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/saju/"/>
-    <lastmod>2026-09-17</lastmod>
+    <lastmod>2026-09-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
