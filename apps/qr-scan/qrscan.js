@@ -19,7 +19,7 @@
       at: '주소 안에 @ 가 있어 앞부분은 가짜일 수 있습니다. 실제로 가는 곳은 {h} 입니다.',
       brand: '{b} 처럼 보이지만 실제 주소는 {h} 입니다. 피싱일 수 있습니다.',
       scheme: '웹 주소가 아닌 명령({s})입니다. 열지 마세요.',
-      realHost: '실제로 가는 곳', hist: '최근 스캔', clearHist: '기록 지우기', noHist: '아직 없습니다'
+      realHost: '실제로 가는 곳'
     },
     en: {
       link: 'Link', text: 'Text', wifi: 'Wi-Fi', contact: 'Contact', tel: 'Phone', mail: 'Email', sms: 'SMS',
@@ -37,7 +37,7 @@
       at: 'There is an @ in the address, so the first part may be fake. It really goes to {h}.',
       brand: 'Looks like {b}, but the real address is {h}. It may be phishing.',
       scheme: 'This is not a web address but a command ({s}). Do not open it.',
-      realHost: 'Really goes to', hist: 'Recent scans', clearHist: 'Clear history', noHist: 'Nothing yet'
+      realHost: 'Really goes to'
     }
   };
   function t(k, v) {
@@ -179,7 +179,7 @@
   }
   function btn(label, cls, fn) { var b = el('button', 'big ' + (cls || ''), label); b.type = 'button'; b.onclick = fn; return b; }
 
-  function show(raw, fromHist) {
+  function show(raw, again) {
     var box = $('result'); box.textContent = ''; box.hidden = false; $('note').hidden = true;
     var c = classify(raw), acts = el('div', 'acts');
     box.appendChild(el('span', 'qkind', t(c.kind)));
@@ -227,30 +227,16 @@
       acts.appendChild(btn(t('copy'), 'dark', function () { copy(raw); }));
     }
     box.appendChild(acts);
-    if (!fromHist) { addHist(raw); try { navigator.vibrate && navigator.vibrate(60); } catch (e) {} }
+    if (!again) { try { navigator.vibrate && navigator.vibrate(60); } catch (e) {} }
     box.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     api.last = { raw: raw, kind: c.kind, checks: c.url ? checkUrl(c.url).map(function (k) { return k[0]; }) : null };
-    try { if (!fromHist && window.gtag) gtag('event', 'tool_use', { tool: 'qr_scan', kind: c.kind }); } catch (e) {}
+    try { if (!again && window.gtag) gtag('event', 'tool_use', { tool: 'qr_scan', kind: c.kind }); } catch (e) {}
   }
   function note(msg) { var n = $('note'); n.textContent = msg; n.hidden = false; }
 
-  // ---------- 최근 기록 (이 기기에만) ----------
-  var KEY = 'oreum.qrscan.hist';
-  function getHist() { try { return JSON.parse(localStorage.getItem(KEY) || '[]'); } catch (e) { return []; } }
-  function setHist(a) { try { localStorage.setItem(KEY, JSON.stringify(a)); } catch (e) {} }
-  function addHist(raw) { var a = getHist().filter(function (x) { return x.r !== raw; }); a.unshift({ r: raw, at: Date.now() }); setHist(a.slice(0, 20)); renderHist(); }
-  function renderHist() {
-    var a = getHist(), ol = $('histList'); ol.textContent = '';
-    $('histEmpty').hidden = a.length > 0; $('histClear').hidden = !a.length;
-    a.forEach(function (x) {
-      var li = el('li'), b = el('button'); b.type = 'button';
-      b.appendChild(el('b', null, x.r.replace(/\s+/g, ' ')));
-      b.appendChild(el('small', null, t(classify(x.r).kind) + ' · ' + new Date(x.at).toLocaleString(L === 'en' ? 'en-US' : 'ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })));
-      b.onclick = function () { show(x.r, true); };
-      li.appendChild(b); ol.appendChild(li);
-    });
-  }
-  $('histClear').onclick = function () { setHist([]); renderHist(); };
+  // 최근 기록은 두지 않는다 — 남의 손에 폰이 갔을 때 앞서 읽은 주소가 보이면 안 된다(사장님 2026-09-20).
+  // 옛 판에서 저장해 둔 기록이 남아 있으면 지운다.
+  try { localStorage.removeItem('oreum.qrscan.hist'); } catch (e) {}
 
   // ---------- 사진에서 읽기 ----------
   function handleFiles(files) {
@@ -306,6 +292,5 @@
     var fs = e.clipboardData && e.clipboardData.files; if (fs && fs.length) { e.preventDefault(); handleFiles(fs); }
   });
 
-  renderHist();
   var api = window.__qs = { handleFiles: handleFiles, classify: classify, checkUrl: function (s) { return checkUrl(new URL(s)); }, show: show, last: null };
 })();
