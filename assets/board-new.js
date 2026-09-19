@@ -9,6 +9,35 @@
 // 페이지를 열 때마다 게시판을 두드리지 않습니다 — 한 번 물어본 답을 브라우저에 10분 담아 둡니다.
 // 게시판(/board/, /en/board/)에서는 이미 글이 보이므로 붙이지 않습니다.
 // ─────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────
+// APPS 메뉴 NEW — 새 앱·도구를 낸 뒤 2주 동안 붙입니다 (사장님 2026-09-19 "앱스에 뉴띄워줘").
+// 앱스(/apps/…, /en/apps/…)에 한 번 들어오면 그 브라우저에서는 떼어 냅니다(커뮤니티 NEW 와 같은 규칙).
+// 새 앱을 올릴 때 APPS_NEW 날짜만 그날로 바꾸면 됩니다.
+// ─────────────────────────────────────────────────────────────
+(function () {
+  var APPS_NEW = '2026-09-19T22:00:00+09:00';   // 마지막으로 앱을 낸 시각 (QR코드 스캔·만들기)
+  var SHOW = 14 * 24 * 60 * 60 * 1000;
+  var SEEN = 'oreum_apps_seen';
+  var t = new Date(APPS_NEW).getTime();
+  var store = null;
+  try { store = window.localStorage; } catch (e) {}
+  if (/^\/(en\/)?apps\//.test(location.pathname)) {
+    if (store) { try { store.setItem(SEEN, String(Date.now())); } catch (e) {} }
+    return;
+  }
+  if (Date.now() - t > SHOW) return;
+  var seen = 0;
+  if (store) { try { seen = +(store.getItem(SEEN) || 0); } catch (e) {} }
+  if (seen && seen >= t) return;
+  [].slice.call(document.querySelectorAll('.nav a[href$="/apps/"]')).forEach(function (a) {
+    if (a.querySelector('.navnew')) return;
+    var b = document.createElement('span');
+    b.className = 'navnew';
+    b.textContent = 'NEW';
+    a.appendChild(b);
+  });
+})();
+
 (function () {
   var URL_ = 'https://yefzzvtipsygqlvkaesx.supabase.co';
   var KEY = 'sb_publishable_qERx6ADFGxFDCjwc0O2cUg_b5EE6WPR';
