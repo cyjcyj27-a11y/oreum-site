@@ -18,6 +18,7 @@ import io, os, re, sys
 
 # slug, 한국어 경로, 영어 경로, 한국어 이름, 한국어 장르 앵커, 영어 이름, 영어 장르 앵커, 태그
 GAMES = [
+    ("foosball",      "/games/mini/foosball/",       "/en/games/mini/foosball/",       "테이블축구게임",    "3D 테이블 축구게임",              "FOOSBALL",             "free online foosball game", {"sport", "physics", "pvp", "3d", "casual"}),
     ("cheonggi",      "/games/flash/cheonggi/",      None,                              "청기백기",          "순발력게임 청기백기",              None,                   None, {"arcade", "casual", "rhythm"}),
     ("woodenblock",   "/games/flash/woodenblock/",   "/en/games/flash/woodenblock/",   "나무블럭쌓기",      "젠가게임과 비슷한 블럭쌓기게임",   "WOODEN BLOCK",         "block tower game like Jenga", {"physics", "pvp", "3d", "casual", "board"}),
     ("odaesu",        "/games/mini/odaesu/",        "/en/games/mini/odaesu/",        "오대수게임",        "복도 망치 격투 액션게임",          "Odaesu Game",          "hammer beat em up game", {"action", "arcade"}),
