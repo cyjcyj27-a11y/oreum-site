@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>윷놀이</title>
+<style>
+@font-face{font-family:'Song';src:url('fonts/title.woff2?v=1') format('woff2');font-display:block}
+@font-face{font-family:'Ria';src:url('fonts/RiaSans-ExtraBold.woff2') format('woff2');font-display:swap}
+
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+html,body{width:100%;height:100%;overflow:hidden;background:#0d1630;
+  font-family:'Ria',-apple-system,'Malgun Gothic',sans-serif;color:#fff;
+  user-select:none;-webkit-user-select:none;touch-action:none;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+#cv{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
+#vig{position:fixed;inset:0;pointer-events:none;z-index:5;
+  background:radial-gradient(ellipse at 50% 45%,rgba(0,0,0,0) 55%,rgba(4,6,16,.55) 100%)}
+
+/* ---------- 상단바 (스카이라이더 배치) ---------- */
+#topbar{position:fixed;top:0;left:0;right:0;z-index:20;display:flex;align-items:center;
+  gap:6px;flex-wrap:wrap;pointer-events:none;
+  padding:calc(6px + env(safe-area-inset-top)) calc(8px + env(safe-area-inset-right)) 8px calc(104px + env(safe-area-inset-left));
+  background:linear-gradient(180deg,rgba(0,0,0,.5),rgba(0,0,0,0))}
+body:not(.playing) #topbar .game{display:none}
+.stat{display:flex;align-items:center;gap:6px;background:rgba(0,0,0,.35);
+  border-radius:15px;padding:5px 10px;backdrop-filter:blur(4px)}
+.stat i{font-style:normal;font-size:13px;opacity:.9}
+.stat b{font-size:17px;font-weight:400;letter-spacing:.3px}
+#turnPill{gap:8px}
+#turnPill .t{font-size:20px;line-height:1;opacity:.4;transition:opacity .2s,transform .2s;display:inline-flex;align-items:center;gap:2px}
+#turnPill .t b{font-size:14px;opacity:.9}
+#turnPill .t.on{opacity:1;transform:scale(1.2)}
+#turnPill .t.taunt{animation:taunt .7s}
+@keyframes taunt{20%{transform:scale(1.6) rotate(-14deg)}40%{transform:scale(1.5) rotate(12deg)}60%{transform:scale(1.55) rotate(-8deg)}100%{transform:scale(1.2)}}
+.spacer{flex:1 1 10px}
+#topbar .brk{display:none;flex-basis:100%;height:0}
+.tog{pointer-events:auto;width:36px;height:36px;border-radius:50%;border:0;
+  background:rgba(0,0,0,.4);color:#fff;font-size:15px;cursor:pointer;
+  display:grid;place-items:center;position:relative;font-family:inherit}
+.tog.off{opacity:.4}
+.tog.off::after{content:'';position:absolute;left:6px;right:6px;top:50%;height:2px;
+  background:#fff;transform:rotate(-45deg);border-radius:1px}
+@media (max-width:700px){.stat b{font-size:15px}.stat{padding:5px 8px;gap:5px}#topbar{gap:5px}
+  #topbar{padding-left:calc(8px + env(safe-area-inset-left))}
+  #topbar>.stat:first-child{margin-left:96px}
+  #topbar .brk{display:block}
+  #turnPill{margin-left:96px}
+  body:not(.playing) #topbar{padding-left:calc(104px + env(safe-area-inset-left))}
+  .tog{width:34px;height:34px}}
+
+/* ---------- 큰 글자(도·개·걸·윷·모) ---------- */
+#word{position:fixed;left:50%;top:38%;transform:translate(-50%,-50%) scale(.4);z-index:26;pointer-events:none;
+  font-family:'Song','Ria',serif;font-size:clamp(96px,22vw,220px);line-height:1;color:#fff4d6;
+  -webkit-text-stroke:.03em #4a1c10;paint-order:stroke fill;text-shadow:0 .05em 0 #2a0c06,0 .12em .3em rgba(0,0,0,.6);
+  opacity:0;transition:opacity .12s,transform .25s cubic-bezier(.2,1.6,.4,1);white-space:nowrap}
+#word.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
+#word.big{color:#ffd65a;transform:translate(-50%,-50%) scale(1.25)}
+#word.catch{color:#ff6a4a;font-size:clamp(64px,14vw,140px)}
+#word.out{color:#8affa0;font-size:clamp(64px,14vw,140px)}
+#word.again{color:#fff;font-size:clamp(40px,9vw,90px);font-family:'Ria',sans-serif;-webkit-text-stroke:0;top:52%}
+#toasts{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(22px + env(safe-area-inset-bottom));z-index:40;
+  display:flex;flex-direction:column;gap:6px;align-items:center;pointer-events:none}
+.toast{background:linear-gradient(90deg,#6a2a14,#b0562a);padding:9px 18px;border-radius:20px;font-size:17px;
+  box-shadow:0 6px 20px rgba(0,0,0,.4);animation:toast 2.6s forwards;white-space:nowrap}
+@keyframes toast{0%{opacity:0;transform:translateY(20px)}10%{opacity:1;transform:none}85%{opacity:1}100%{opacity:0}}
+
+/* 던지기 단추(오른쪽 아래) */
+#throwBtn{position:fixed;right:calc(18px + env(safe-area-inset-right));bottom:calc(18px + env(safe-area-inset-bottom));z-index:24;
+  width:96px;height:96px;border-radius:50%;border:3px solid rgba(255,230,180,.7);cursor:pointer;font-family:inherit;color:#fff;
+  background:radial-gradient(circle at 40% 35%,#f0a64a,#a8481c);font-size:22px;box-shadow:0 8px 24px rgba(0,0,0,.5),0 0 22px rgba(240,166,74,.45);
+  animation:pulse 1.4s ease-in-out infinite}
+#throwBtn:active{transform:scale(.94)}
+@keyframes pulse{50%{box-shadow:0 8px 24px rgba(0,0,0,.5),0 0 40px rgba(255,200,100,.8)}}
+@media (max-height:520px){#throwBtn{width:72px;height:72px;font-size:17px}}
+
+/* ---------- 타이틀 ---------- */
+#title{position:fixed;inset:0;z-index:30;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;
+  padding:60px 16px calc(20px + env(safe-area-inset-bottom))}
+#logo{font-family:'Song','Ria',serif;font-size:clamp(96px,26vw,230px);line-height:1;text-align:center;
+  color:#fff4d6;letter-spacing:.04em;
+  -webkit-text-stroke:.035em #4a1c10;paint-order:stroke fill;
+  text-shadow:0 .05em 0 #2a0c06,0 .1em .25em rgba(0,0,0,.55)}
+#logo small{display:block;font-family:'Ria',sans-serif;font-size:.14em;letter-spacing:.3em;color:#ffd65a;-webkit-text-stroke:0;text-shadow:0 2px 6px rgba(0,0,0,.6);margin-top:.1em}
+.menu{display:flex;flex-direction:column;gap:10px;align-items:stretch;width:min(92vw,340px)}
+.btn{pointer-events:auto;border:0;cursor:pointer;font-family:inherit;color:#fff;border-radius:16px;
+  font-size:22px;padding:13px 18px;background:rgba(20,16,40,.72);border:2px solid rgba(255,220,170,.28);
+  backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;gap:8px}
+.btn:active{transform:scale(.96)}
+.btn.main{font-size:30px;background:linear-gradient(180deg,#f0a64a,#b8621c);border-color:#ffe0b0;
+  box-shadow:0 0 22px rgba(240,166,74,.45),inset 0 2px 0 rgba(255,255,255,.3)}
+.btn small{font-size:14px;opacity:.85}
+.duo{display:flex;gap:8px}
+.duo .btn{flex:1;font-size:16px;white-space:nowrap;padding:12px 4px}
+@media (max-width:420px){.duo .btn{font-size:14px;padding:12px 2px}}
+@media (min-aspect-ratio:1/1){
+  #title{align-items:flex-start;padding-left:calc(7vw + env(safe-area-inset-left));padding-bottom:calc(52px + env(safe-area-inset-bottom))}
+  #title .menu{align-self:flex-start;margin-left:calc((min(38vw,560px) - min(92vw,340px)) / 2)}
+  #logo{width:min(38vw,560px);font-size:clamp(80px,12vw,200px)}}
+@media (max-aspect-ratio:3/4){
+  #title{justify-content:space-between;padding-top:calc(90px + env(safe-area-inset-top));padding-bottom:calc(60px + env(safe-area-inset-bottom))}}
+@media (max-height:520px){#logo{font-size:clamp(50px,16vh,84px)}.btn{padding:7px 12px;font-size:16px}.btn.main{font-size:20px}.duo .btn{padding:7px 4px;font-size:14px}
+  .menu{gap:6px}#title{gap:6px;padding-top:calc(34px + env(safe-area-inset-top));padding-bottom:calc(48px + env(safe-area-inset-bottom))}}
+
+/* ---------- 스테이지 소개 ---------- */
+#vs{position:fixed;inset:0;z-index:28;display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(ellipse at center,rgba(20,20,60,.5),rgba(0,0,0,.25));cursor:pointer}
+#vs .mid{display:flex;flex-direction:column;align-items:center;gap:8px;animation:pop .45s cubic-bezier(.2,1.5,.5,1)}
+#vsS{font-size:clamp(34px,7vw,60px);letter-spacing:2px;text-shadow:0 4px 0 rgba(0,0,0,.4)}
+#vsRow{font-size:clamp(56px,13vw,110px);display:flex;align-items:center;gap:.15em;white-space:nowrap}
+#vsRow i{font-style:normal;font-size:.36em;opacity:.7}
+#vsName{font-size:clamp(20px,4.5vw,32px);color:#ffd65a;text-shadow:0 2px 6px rgba(0,0,0,.6)}
+@keyframes pop{from{transform:scale(.4);opacity:0}}
+
+/* ---------- 끝 카드 ---------- */
+#end{position:fixed;inset:0;z-index:45;display:flex;align-items:center;justify-content:center;background:rgba(6,8,20,.45);backdrop-filter:blur(2px)}
+#end .ecard{display:flex;flex-direction:column;align-items:center;gap:12px;padding:24px 28px;min-width:min(88vw,360px);
+  background:linear-gradient(180deg,rgba(60,34,22,.96),rgba(26,16,12,.96));border:2px solid rgba(255,210,150,.45);border-radius:24px;
+  box-shadow:0 18px 50px rgba(0,0,0,.6)}
+#eFace{font-size:64px;line-height:1}
+#eTitle{font-size:52px;line-height:1;white-space:nowrap}
+#eTitle.win{color:#ffd65a;text-shadow:0 0 20px rgba(255,180,60,.6)}
+#eTitle.lose{color:#d8c8b8}
+#eStats{display:flex;gap:10px;font-size:20px;white-space:pre}
+#eCoins{font-size:22px;color:#ffd65a;min-height:1px}
+#end .btns{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;width:100%}
+#end .btn{flex:1 1 40%;font-size:19px;padding:11px 12px}
+
+/* ---------- 상점·미션 ---------- */
+.sheet{position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;align-items:center;
+  background:rgba(10,12,30,.94);backdrop-filter:blur(6px);padding:calc(14px + env(safe-area-inset-top)) 12px calc(14px + env(safe-area-inset-bottom))}
+.sheet .hd{display:flex;align-items:center;gap:10px;width:min(100%,860px);margin-bottom:10px;padding-left:96px}
+.sheet h2{font-weight:400;font-size:30px;flex:1;color:#ffe2a8}
+.close{width:44px;height:44px;border-radius:50%;border:0;background:rgba(255,255,255,.14);color:#fff;font-size:22px;cursor:pointer}
+.body{overflow-y:auto;width:min(100%,860px);flex:1;touch-action:pan-y;-webkit-overflow-scrolling:touch}
+#shopGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;padding-bottom:10px}
+.card{background:linear-gradient(180deg,rgba(90,60,40,.55),rgba(40,25,18,.7));border:2px solid rgba(255,255,255,.1);border-radius:16px;
+  padding:10px;display:flex;flex-direction:column;align-items:center;gap:4px}
+.card.on{border-color:#ffc46a;box-shadow:0 0 16px rgba(255,196,106,.4)}
+.card canvas{width:120px;height:60px;filter:drop-shadow(0 6px 8px rgba(0,0,0,.45))}
+.card.lock canvas{filter:saturate(.5) brightness(.7)}
+.bn{font-size:19px}
+.card button{margin-top:6px;width:100%;border:0;border-radius:11px;padding:8px;font-family:inherit;font-size:16px;color:#fff;cursor:pointer;
+  background:linear-gradient(180deg,#f0a64a,#b8621c)}
+.card.on button{background:rgba(255,255,255,.15)}
+.card button:disabled{background:rgba(255,255,255,.1);color:rgba(255,255,255,.45);cursor:default}
+#misList{display:flex;flex-direction:column;gap:7px;max-width:520px;margin:0 auto}
+.mis{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.07);border-radius:13px;padding:11px 14px;font-size:19px}
+.mis .ck{width:26px;height:26px;border-radius:50%;border:2px solid rgba(255,255,255,.35);display:grid;place-items:center;font-size:15px;flex:0 0 26px}
+.mis.ok .ck{background:#e0913a;border-color:#e0913a}
+.mis .mn{flex:1}
+.mis.ok .mn{opacity:.6}
+.mis .pg{font-size:14px;opacity:.6}
+.mis .mr{color:#ffd65a;font-size:16px;white-space:nowrap}
+.misTop{display:flex;justify-content:center;gap:10px;margin-bottom:10px}
+
+/* ---------- 엔딩 ---------- */
+#ending{position:fixed;inset:0;z-index:60;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;
+  background:radial-gradient(ellipse at center,rgba(40,30,90,.85),rgba(4,6,18,.97));overflow:hidden}
+#ending .moon{width:clamp(120px,28vw,220px);height:clamp(120px,28vw,220px);border-radius:50%;background:radial-gradient(circle at 40% 35%,#fffbe6,#ffe9a0 60%,#e8c060);
+  box-shadow:0 0 60px 20px rgba(255,230,160,.45);animation:bob 3s ease-in-out infinite;display:grid;place-items:center;font-size:clamp(60px,14vw,110px)}
+#ending h1{font-weight:400;font-family:'Song','Ria',serif;font-size:clamp(60px,14vw,130px);color:#ffd65a;text-shadow:0 0 24px rgba(255,160,40,.8);line-height:1}
+#ending .row2{font-size:clamp(24px,6vw,40px);letter-spacing:6px;white-space:nowrap}
+@keyframes bob{50%{transform:translateY(-14px) rotate(-4deg)}}
+#confetti{position:absolute;inset:0;pointer-events:none}
+#confetti i{position:absolute;top:-20px;width:10px;height:16px;border-radius:2px;animation:fall 3s linear infinite}
+@keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+
+#pauseCover{position:fixed;inset:0;z-index:35;background:rgba(6,8,20,.82);display:flex;flex-direction:column;gap:22px;align-items:center;justify-content:center;
+  font-size:70px;cursor:pointer}
+#pauseCover .btn{font-size:20px}
+#loading{position:fixed;inset:0;z-index:100;background:#0d1630;display:grid;place-items:center;font-size:18px;color:rgba(255,226,168,.6)}
+</style>
+</head>
+<body>
+<canvas id="cv"></canvas>
+<div id="vig"></div>
+
+<div id="topbar">
+  <div class="stat game" id="stagePill"><i>STAGE</i><b id="stageN">1</b></div>
+  <div class="stat"><i>🪙</i><b id="coins">0</b></div>
+  <div class="brk game"></div>
+  <div class="stat game" id="turnPill"></div>
+  <div class="spacer"></div>
+  <button class="tog game" id="tPause" aria-label="pause">❚❚</button>
+  <button class="tog" id="tBgm" aria-label="music">♪</button>
+  <button class="tog" id="tSnd" aria-label="sound">🔊</button>
+</div>
+
+<div id="word"></div>
+<div id="toasts"></div>
+<button id="throwBtn" hidden>던지기</button>
+
+<div id="title" hidden>
+  <div id="logo">윷놀이<small>YUT NORI</small></div>
+  <div class="menu">
+    <button class="btn main" id="bStart">START <small id="tStage"></small></button>
+    <div class="duo">
+      <button class="btn" id="bDuo">2 PLAYERS</button>
+      <button class="btn" id="bTrio">3 PLAYERS</button>
+      <button class="btn" id="bQuad">4 PLAYERS</button>
+    </div>
+    <div class="duo">
+      <button class="btn" id="bShop">🪵 상점</button>
+      <button class="btn" id="bMis">🏅 미션</button>
+    </div>
+  </div>
+</div>
+
+<div id="vs" hidden>
+  <div class="mid"><div id="vsS">STAGE 1</div><div id="vsRow"></div><div id="vsName"></div></div>
+</div>
+
+<div id="end" hidden>
+  <div class="ecard">
+    <div id="eFace">🙂</div>
+    <div id="eTitle">WIN</div>
+    <div id="eStats"></div>
+    <div id="eCoins"></div>
+    <div class="btns">
+      <button class="btn main" id="eNext">NEXT</button>
+      <button class="btn main" id="eRetry">RETRY</button>
+      <button class="btn" id="eShop">🪵 상점</button>
+      <button class="btn" id="eHome">홈</button>
+    </div>
+  </div>
+</div>
+
+<div id="shop" class="sheet" hidden>
+  <div class="hd"><h2>상점</h2><div class="stat"><i>🪙</i><b id="shopCoins">0</b></div><button class="close" aria-label="close">✕</button></div>
+  <div class="body"><div id="shopGrid"></div></div>
+</div>
+
+<div id="missions" class="sheet" hidden>
+  <div class="hd"><h2>미션</h2><button class="close" aria-label="close">✕</button></div>
+  <div class="body">
+    <div class="misTop"><div class="stat"><i>✔</i><b id="misCount">0 / 12</b></div><div class="stat"><i>🏆 WIN</i><b id="misWins">0</b></div></div>
+    <div id="misList"></div>
+  </div>
+</div>
+
+<div id="ending" hidden>
+  <div id="confetti"></div>
+  <div class="moon">🐶</div>
+  <h1>장원</h1>
+  <div class="row2">🐥🐰🐱🐷🐸🦊🐻🐯👵👴🐲🧙</div>
+  <button class="btn main" id="endOk">계속</button>
+</div>
+
+<div id="pauseCover" hidden>❚❚<button class="btn" id="pHome">홈</button></div>
+<div id="loading">LOADING</div>
+
+<script src="js/lang.js?v=1"></script>
+<script src="assets/game-home.js" data-top="6" data-left="6" data-fullscreen="1" defer></script>
+<script src="lib/three.min.js"></script>
+<script src="lib/rapier.js"></script>
+<script src="js/rules.js?v=2"></script>
+<script src="js/audio.js?v=1"></script>
+<script src="js/scene.js?v=6"></script>
+<script src="js/game.js?v=4"></script>
+<script src="/assets/visit.js" defer></script>
+<script src="/assets/game-events.js" defer></script>
+</body>
+</html>
