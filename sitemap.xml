@@ -24,7 +24,7 @@
     <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/apps/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/apps/"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/apps/"/>
-    <lastmod>2026-09-19</lastmod>
+    <lastmod>2026-09-20</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -46,11 +46,29 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://oreumgames.com/apps/kana/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/apps/kana/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/apps/kana/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/apps/kana/"/>
+    <lastmod>2026-09-20</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://oreumgames.com/en/apps/kana/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/apps/kana/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/apps/kana/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/apps/kana/"/>
+    <lastmod>2026-09-20</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://oreumgames.com/apps/pdf-merge/</loc>
     <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/apps/pdf-merge/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/apps/pdf-merge/"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/apps/pdf-merge/"/>
-    <lastmod>2026-09-19</lastmod>
+    <lastmod>2026-09-20</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>

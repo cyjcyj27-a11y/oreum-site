@@ -1,0 +1,152 @@
+/* 히라가나·가타카나 연습 — .pm(도구 공통 틀) 안에서만 먹는다 */
+.kana { --jp: "Hiragino Kaku Gothic ProN", "Yu Gothic", "YuGothic", "Meiryo", "Noto Sans JP", "Noto Sans CJK JP", "MS PGothic", sans-serif; }
+.kana .pm-page { max-width: 720px; }
+
+/* 글자 고르기 / 표 갈래 */
+.kana .kset, .kana .ktabs { display: flex; gap: 8px; margin: 0 0 18px; }
+.kana .ktabs { margin: 16px 0 14px; }
+.kana .kseg { flex: 1; border: 1px solid var(--line-2); background: #fff; border-radius: 12px;
+  padding: 13px 8px; font-size: 17px; font-weight: 800; color: var(--ink-2); cursor: pointer; }
+.kana .kseg.on { background: var(--green); border-color: var(--green); color: #fff; box-shadow: 0 6px 16px rgba(215,38,30,.22); }
+
+/* 홈 — 가나표 / 낱말 */
+.kana .kmodes { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 26px; }
+.kana .kmode { display: grid; gap: 4px; text-align: left; background: #fff; border: 2px solid var(--green-edge);
+  border-radius: var(--radius); padding: 20px 18px; cursor: pointer; box-shadow: var(--shadow); }
+.kana .kmode:hover { border-color: var(--green); }
+.kana .kmode b { font-size: 24px; letter-spacing: -.02em; }
+.kana .kmode i { font-style: normal; color: var(--ink-2); font-size: 15px; font-weight: 600; }
+
+/* 스테이지 사다리 */
+.kana .kladhead { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 10px; }
+.kana .kladhead b { font-size: 19px; }
+.kana .kprog { color: var(--muted); font-size: 15px; font-weight: 700; }
+.kana .kgrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.kana .kstage { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 12px 6px 10px;
+  display: grid; gap: 4px; justify-items: center; cursor: pointer; box-shadow: var(--shadow); min-height: 96px; }
+.kana .kstage:hover { border-color: var(--green); }
+.kana .kstage .n { font-size: 15px; font-weight: 800; color: var(--muted); }
+.kana .kstage .t { font-size: 19px; font-weight: 800; font-family: var(--jp); line-height: 1.15; text-align: center; }
+.kana .kstage .st { font-size: 15px; color: #e0b400; letter-spacing: 1px; height: 18px; }
+.kana .kstage.clear { border-color: var(--green-edge); background: var(--green-soft); }
+.kana .kstage.lock { opacity: .45; cursor: default; box-shadow: none; }
+.kana .kstage.lock:hover { border-color: var(--line); }
+
+/* 머리줄 */
+.kana .kbar { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 14px; }
+.kana .kbar b { font-size: 19px; font-family: var(--jp); }
+.kana .kback { border: 0; background: none; color: var(--muted); font-size: 16px; font-weight: 700; cursor: pointer; padding: 4px 0; }
+.kana .kback:hover { color: var(--green); }
+.kana .kcount { color: var(--muted); font-size: 16px; font-weight: 800; min-width: 3.4em; text-align: right; }
+
+/* 배우기 카드 */
+.kana .kcard { background: #fff; border: 2px solid var(--green-edge); border-radius: 24px; box-shadow: var(--shadow);
+  padding: 26px 16px 22px; display: grid; justify-items: center; gap: 6px; }
+.kana .kglyph { font-family: var(--jp); font-size: clamp(110px, 34vw, 190px); line-height: 1; font-weight: 700; }
+.kana .ksound { font-size: clamp(30px, 8vw, 44px); font-weight: 800; color: var(--green); }
+.kana .kroma { font-size: 20px; font-weight: 700; color: var(--muted); letter-spacing: .04em; }
+.kana.noroma .kroma { visibility: hidden; }
+
+.kana .kacts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px; }
+.kana .kacts .big { width: 100%; text-align: center; }
+
+/* 퀴즈 */
+.kana .bar { height: 10px; background: var(--panel-2); border-radius: 99px; overflow: hidden; margin-bottom: 18px; }
+.kana .bar span { display: block; height: 100%; width: 0; background: var(--green); transition: width .2s; }
+.kana .kask { background: #fff; border: 1px solid var(--line); border-radius: 24px; box-shadow: var(--shadow);
+  min-height: 210px; display: grid; place-content: center; justify-items: center; gap: 8px; padding: 18px 16px; }
+.kana .kask .q { font-family: var(--jp); font-size: clamp(96px, 30vw, 150px); line-height: 1.05; font-weight: 700; }
+.kana .kask .q.ko { font-family: var(--font); font-size: clamp(64px, 20vw, 104px); color: var(--green); }
+.kana .kask .q.word { font-size: clamp(54px, 16vw, 86px); letter-spacing: .02em; }
+.kana .kask .sub { font-size: 17px; color: var(--muted); font-weight: 700; }
+.kana .kask .spk { border: 0; background: var(--green); color: #fff; width: 128px; height: 128px; border-radius: 50%;
+  cursor: pointer; box-shadow: 0 10px 24px rgba(215,38,30,.28); display: grid; place-items: center; padding: 0; }
+.kana .kask .spk svg { width: 58px; height: 58px; display: block; }
+.kana .kask .spk:hover { background: var(--green-lit); }
+.kana .spklabel { margin-top: 12px; font-size: 17px; font-weight: 700; color: var(--muted); }
+.kana .kask .spk:active { transform: translateY(2px); }
+
+.kana .kopts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
+.kana .kopt { background: #fff; border: 2px solid var(--line-2); border-radius: 18px; padding: 18px 8px;
+  font-size: clamp(30px, 8vw, 40px); font-weight: 800; cursor: pointer; line-height: 1.15; min-height: 88px; }
+.kana .kopt.jp { font-family: var(--jp); }
+.kana .kopt.word { font-size: clamp(19px, 5vw, 25px); }
+.kana .kopt:hover { border-color: var(--green); }
+.kana .kopt.ok { background: #ecfdf3; border-color: #12b76a; color: #067647; animation: kpop .28s; }
+.kana .kopt.no { background: #fee4e2; border-color: #f04438; color: #b42318; animation: kshake .3s; }
+.kana .kopt.dim { opacity: .45; }
+@keyframes kpop { 0% { transform: scale(1); } 45% { transform: scale(1.08); } 100% { transform: scale(1); } }
+@keyframes kshake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-7px); } 75% { transform: translateX(7px); } }
+
+/* 결과 */
+.kana .kresult { background: #fff; border: 2px solid var(--green); border-radius: 24px; box-shadow: var(--shadow);
+  padding: 30px 16px; display: grid; justify-items: center; gap: 8px; text-align: center; }
+.kana .kstars { font-size: 56px; color: #f2c200; letter-spacing: 6px; line-height: 1; }
+.kana .kstars i { color: #e6e6e6; font-style: normal; }
+.kana .kresult b { font-size: 34px; }
+.kana .kresult span { color: var(--muted); font-size: 16px; font-family: var(--jp); }
+
+/* 가나표 */
+.kana .ktable { display: grid; gap: 8px; }
+.kana .krow { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+.kana .kcell { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 10px 2px 8px;
+  display: grid; justify-items: center; gap: 1px; cursor: pointer; box-shadow: var(--shadow); }
+.kana .kcell:hover { border-color: var(--green); }
+.kana .kcell.hit { background: var(--green-soft); border-color: var(--green); }
+.kana .kcell .g { font-family: var(--jp); font-size: clamp(28px, 8vw, 38px); line-height: 1.1; font-weight: 700; }
+.kana .kcell .s { font-size: 15px; font-weight: 800; color: var(--green); }
+.kana .kcell .r { font-size: 12px; color: var(--muted); }
+.kana.noroma .kcell .r { visibility: hidden; }
+.kana .kcell.empty { background: transparent; border: 0; box-shadow: none; cursor: default; }
+
+/* 토글 */
+.kana .ktoggles { display: flex; gap: 8px; margin-top: 26px; }
+.kana .ktoggles .ghost.off { opacity: .5; text-decoration: line-through; }
+
+@media (max-width: 520px) {
+  .kana .kgrid { grid-template-columns: repeat(3, 1fr); }
+  .kana .kmodes { grid-template-columns: 1fr; }
+  .kana .kmode { padding: 16px 18px; }
+  .kana .kmode b { font-size: 22px; }
+  .kana .kcell .r { display: none; }
+}
+
+/* 쓰기 연습 */
+.kana .kpadwrap { display: flex; align-items: flex-start; gap: 14px; justify-content: center; }
+.kana #kPad { background: #fff; border: 1px solid var(--line); border-radius: 18px; box-shadow: var(--shadow);
+  touch-action: none; cursor: crosshair; max-width: 100%; }
+.kana #kPad.shake { animation: kshake .3s; }
+.kana .kpadside { display: grid; gap: 2px; padding-top: 10px; }
+.kana .kpadsound { font-size: clamp(30px, 8vw, 40px); font-weight: 800; color: var(--green); line-height: 1.1; }
+.kana .kpadroma { font-size: 17px; font-weight: 700; color: var(--muted); }
+.kana.noroma .kpadroma { visibility: hidden; }
+.kana #kWriteList .kstage { min-height: 92px; }
+.kana #kWriteList .kstage .n { font-size: 20px; font-family: var(--jp); color: var(--ink); font-weight: 700; line-height: 1.2; }
+.kana #kWriteList .kstage .t { font-size: 14px; color: var(--muted); font-weight: 700; }
+@media (max-width: 520px) {
+  .kana .kpadwrap { flex-direction: column; align-items: center; gap: 6px; }
+  .kana .kpadside { display: flex; gap: 10px; align-items: baseline; padding-top: 0; }
+  .kana #kWriteList .kstage .n { font-size: 17px; }
+}
+
+/* 문장 학습 */
+.kana .ksent { font-family: var(--jp); font-size: clamp(26px, 6.4vw, 38px); line-height: 2.1; font-weight: 700;
+  text-align: center; word-break: keep-all; }
+.kana .ksent rt { font-size: .42em; font-weight: 700; color: var(--green); }
+.kana .kblank { display: inline-block; min-width: 2.2em; border-bottom: 3px solid var(--green);
+  color: var(--green-edge); }
+.kana .kbuild { min-height: 2.4em; border-bottom: 2px dashed var(--line-2); width: 100%; }
+.kana .kopt.sent { font-size: clamp(22px, 5.4vw, 30px); min-height: 72px; }
+.kana .kopt.card { font-size: clamp(22px, 5.4vw, 30px); min-height: 72px; }
+.kana .kopt.card.used { opacity: .28; }
+.kana #kSentAsk { min-height: 200px; }
+.kana #kSentOpts .ghost.wide { grid-column: 1 / -1; margin-top: 0; }
+
+.kana .kopt.card ruby, .kana .kopt.sent ruby { pointer-events: none; }
+.kana .kopt.card rt, .kana .kopt.sent rt { font-size: .44em; color: var(--green); font-weight: 700; }
+.kana .kopt.card, .kana .kopt.sent { line-height: 2; padding-top: 10px; }
+
+.kana .ksent.right { color: #067647; }
+.kana .ksent.right rt { color: #12b76a; }
+.kana .ksent.wrongline { color: var(--ink); }
+.kana .sub.mean { color: var(--ink-2); font-weight: 700; font-size: 18px; }
