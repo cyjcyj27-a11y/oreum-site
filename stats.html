@@ -193,7 +193,8 @@
               'pv_bungeoppang', 'pv_bungeoppang_en',   // 붕어빵 장사(2026-09-11) 소개 페이지
               'pv_jeju', 'pv_jeju_en',   // BUY JEJU(2026-09-11) 소개 페이지
               // 앱스(도구) — 2026-09-19~20 (pv_app 은 도구 페이지 공통, 아래는 도구별)
-              'pv_app', 'pv_apps', 'pv_sajuintro', 'pv_pdfmerge', 'pv_qrscan', 'pv_qrmake'];
+              'pv_app', 'pv_apps', 'pv_sajuintro', 'pv_pdfmerge', 'pv_qrscan', 'pv_qrmake',
+              'pv_hanja', 'pv_kana'];   // 한자 검색(2026-09-20)·가나 연습(2026-09-20)
   // 한꺼번에 많이 부르면 속도 제한에 걸리므로 나눠 부르고 사이에 잠깐 쉽니다.
   // 3개씩 260ms로는 화면이 뜨기까지 30초가 걸려서 멈춘 것처럼 보였습니다.
   // 막히면 위 get()이 알아서 쉬었다 다시 부르므로, 여기서는 조금 넉넉하게 갑니다.
@@ -265,7 +266,7 @@
                 + d.pv_shibavet + d.pv_shibavet_en + d.pv_castaway + d.pv_castaway_en + d.pv_alkkagi + d.pv_alkkagi_en
                 + d.pv_coinwash + d.pv_coinwash_en + d.pv_boyband + d.pv_boyband_en + d.pv_boa + d.pv_boa_en + d.pv_baduk + d.pv_baduk_en + d.pv_ueno + d.pv_ueno_en + d.pv_mulgwisin + d.pv_mulgwisin_en + d.pv_cheonggi + d.pv_woodenblock + d.pv_woodenblock_en + d.pv_bowling + d.pv_bowling_en + d.pv_odaesu + d.pv_odaesu_en + d.pv_spotdiff + d.pv_spotdiff_en + d.pv_taja + d.pv_taja_en + d.pv_burger + d.pv_burger_en + d.pv_meowsquad + d.pv_meowsquad_en + d.pv_ttang + d.pv_ttang_en + d.pv_bangwi + d.pv_bangwi_en + d.pv_omok + d.pv_omok_en + d.pv_catmobile + d.pv_catmobile_en + d.pv_farmonmars + d.pv_farmonmars_en
                 + d.pv_bungeoppang + d.pv_bungeoppang_en + d.pv_jeju + d.pv_jeju_en;
-    var pvApps = d.pv_app + d.pv_apps + d.pv_sajuintro;   // 도구 페이지·앱스 목록·사주 소개 (pv_saju 는 사주 앱, 위에서 따로 셈)
+    var pvApps = d.pv_app + d.pv_apps + d.pv_sajuintro;   // pv_app 에 도구별이 모두 들어 있다   // 도구 페이지·앱스 목록·사주 소개 (pv_saju 는 사주 앱, 위에서 따로 셈)
     var pvAll = pvHome + pvBoard + pvGame + pvSaju + pvImmo + pvIntro + pvApps;
     renderApps(d);
     document.getElementById('pv-total').innerHTML = fmt(pvAll) + '<small>회</small>';
@@ -330,6 +331,8 @@
   // 앱스(도구) 표 — 게임과 달리 판·시간이 없으니 열어본 횟수만 본다
   var APPS = [
     ['MBTI사주', function (d) { return d.pv_saju + d.pv_sajuintro; }, '/saju/'],
+    ['한자 검색 필기 입력기', function (d) { return d.pv_hanja; }, '/apps/hanja-search/'],
+    ['히라가나 가타카나 연습', function (d) { return d.pv_kana; }, '/apps/kana/'],
     ['PDF 합치기', function (d) { return d.pv_pdfmerge; }, '/apps/pdf-merge/'],
     ['QR코드 스캔', function (d) { return d.pv_qrscan; }, '/apps/qr-scan/'],
     ['QR코드 만들기', function (d) { return d.pv_qrmake; }, '/apps/qr-maker/'],
@@ -348,7 +351,8 @@
       rows.sort(function (a, b) { return b.pv - a.pv; }).map(function (r) {
         var pct = max ? Math.max(4, Math.round(r.pv / max * 100)) : 0;
         return '<tr' + (r.pv ? '' : ' class="zero"') + '><td><a href="' + r.href + '">' + r.name + '</a></td><td>' + fmt(r.pv) + '</td>' +
-               '<td style="width:45%"><div class="track" style="height:10px"><div class="fill" style="width:' + pct + '%;background:var(--green)"></div></div></td></tr>';
+               '<td style="width:45%"><div style="height:10px;border-radius:99px;background:rgba(0,0,0,.08)">' +
+               '<div style="height:10px;border-radius:99px;width:' + pct + '%;background:var(--green)"></div></div></td></tr>';
       }).join('') + '</table>';
   }
 
@@ -381,6 +385,14 @@
         renderGames(vals);
         var ago = Math.max(0, Math.round((Date.now() - Date.parse(j.at)) / 60000));
         note('자동 집계 ' + (ago < 60 ? ago + '분' : Math.round(ago / 60) + '시간') + ' 전 기준 · 방문 수와 오늘은 지금 값으로 맞춥니다…');
+        // 스냅샷에 아직 없는 앱스 칸은 지금 값으로 덧읽는다 (새 도구를 올린 날 0 으로 보이지 않게)
+        var appKeys = ['pv_saju', 'pv_sajuintro', 'pv_hanja', 'pv_kana', 'pv_pdfmerge', 'pv_qrscan', 'pv_qrmake', 'pv_apps', 'pv_app'];
+        if (appKeys.some(function (k) { return !(k in v); })) {
+          fetchChunked(appKeys, 4, 1200).then(function (vs) {
+            appKeys.forEach(function (k, i) { if (!(k in v)) d[k] = vs[i] || 0; });
+            renderApps(d);
+          });
+        }
         // 머릿수 세 칸만 실시간으로 덧읽는다 (요청 3번)
         return Promise.all([get('total'), get('returning'), get('day_' + today)]).then(function (vs) {
           d.total = vs[0]; d.returning = vs[1]; d['day_' + today] = vs[2];
