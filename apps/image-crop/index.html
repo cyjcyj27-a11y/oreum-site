@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>이미지 자르기 — 사진 자르기, 1:1 · 4:5 비율 무료 크롭</title>
+<meta name="description" content="네모를 끌어 사진을 자르는 무료 이미지 자르기 도구. 1:1, 4:5, 16:9 같은 비율에 맞춰 자르고 바로 받습니다. 설치·회원가입 없이, 사진은 서버로 올라가지 않습니다.">
+<meta name="keywords" content="이미지 자르기, 사진 자르기, 사진 크롭, 이미지 크롭, 그림 자르기, 프로필 사진 자르기, 1:1 자르기, 인스타 비율 자르기, 무료 이미지 자르기, 온라인 사진 자르기, 오름게임즈, crop image, image cropper">
+<link rel="canonical" href="https://oreumgames.com/apps/image-crop/">
+<link rel="alternate" hreflang="ko" href="https://oreumgames.com/apps/image-crop/">
+<link rel="alternate" hreflang="en" href="https://oreumgames.com/en/apps/image-crop/">
+<link rel="alternate" hreflang="x-default" href="https://oreumgames.com/apps/image-crop/">
+<!-- 검색엔진 사이트 소유 확인 -->
+<meta name="naver-site-verification" content="4ecba4003fbcbe564918ffd2c33d606f1eaae11a" />
+<meta name="google-site-verification" content="BG736F-J65BHS-viz8rkCjKJ53pxgIhSlPpzVnpGlt4" />
+<meta name="theme-color" content="#f8f5ec">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" href="/assets/icon-512.png" type="image/png" sizes="512x512">
+<link rel="apple-touch-icon" href="/assets/icon-180.png">
+<link rel="manifest" href="/manifest.webmanifest">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="오름게임즈">
+<meta property="og:title" content="이미지 자르기 — 사진 자르기, 1:1 · 4:5 비율 무료 크롭">
+<meta property="og:description" content="네모를 끌어 사진을 자르는 무료 이미지 자르기 도구. 1:1, 4:5, 16:9 같은 비율에 맞춰 자르고 바로 받습니다. 설치·회원가입 없이, 사진은 서버로 올라가지 않습니다.">
+<meta property="og:url" content="https://oreumgames.com/apps/image-crop/">
+<meta property="og:image" content="https://oreumgames.com/assets/imgcrop-og.webp?v=1">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="ko_KR">
+<meta name="twitter:card" content="summary_large_image">
+
+<link rel="stylesheet" href="/style.css?v=40">
+<link rel="stylesheet" href="/apps/tools.css?v=1">
+<style>
+  .pm-panel { background: #fff; border: 1px solid #ececec; border-radius: 22px; padding: 28px 22px 24px; box-shadow: 0 1px 2px rgba(20,20,30,.04), 0 18px 40px rgba(20,20,30,.06); }
+  .pm-panel + .gp-line { margin-top: 28px; }
+  .game-page > h2 { margin: 40px 0 10px; }
+  .pm-howto { margin: 0; padding-left: 1.3em; line-height: 1.75; }
+  .pm-howto li { margin: 4px 0; }
+  @media (max-width: 520px) { .pm-panel { padding: 22px 14px 18px; border-radius: 18px; } }
+</style>
+
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": "WebApplication",
+ "name": "이미지 자르기",
+ "alternateName": [
+  "사진 자르기",
+  "이미지 크롭",
+  "사진 크롭",
+  "Crop Image"
+ ],
+ "url": "https://oreumgames.com/apps/image-crop/",
+ "image": "https://oreumgames.com/assets/imgcrop-og.webp?v=1",
+ "description": "사진의 필요한 부분만 네모로 골라 자르는 무료 웹 도구. 자유 비율과 1:1, 4:5, 4:3, 3:4, 16:9, 9:16 비율을 고를 수 있고, 잘린 크기를 픽셀로 보여 준다. 여러 장을 넣어 한 장씩 자르고 각각 받을 수 있으며, 자른 사진은 JPG·PNG·WEBP로 저장한다. 사진은 사용자 기기의 브라우저 안에서만 처리되고 서버로 올라가지 않는다.",
+ "applicationCategory": "UtilitiesApplication",
+ "operatingSystem": "Web browser",
+ "browserRequirements": "Requires JavaScript",
+ "isAccessibleForFree": true,
+ "featureList": [
+  "네모를 끌어 자르기",
+  "1:1 · 4:5 · 16:9 비율 맞추기",
+  "잘린 크기 픽셀 표시",
+  "여러 장 넣고 한 장씩 자르기",
+  "촬영 위치 정보 제거",
+  "서버 업로드 없음"
+ ],
+ "datePublished": "2026-09-20",
+ "dateModified": "2026-09-20",
+ "inLanguage": [
+  "ko",
+  "en"
+ ],
+ "offers": {
+  "@type": "Offer",
+  "price": "0",
+  "priceCurrency": "KRW"
+ },
+ "isPartOf": {
+  "@type": "CollectionPage",
+  "name": "앱스",
+  "url": "https://oreumgames.com/apps/"
+ },
+ "publisher": {
+  "@type": "Organization",
+  "name": "오름게임즈",
+  "url": "https://oreumgames.com/"
+ }
+}
+</script>
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": "FAQPage",
+ "mainEntity": [
+  {
+   "@type": "Question",
+   "name": "이미지 자르기는 무료인가요?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "무료입니다. 설치도 회원가입도 없이 브라우저에서 바로 자르고 받습니다."
+   }
+  },
+  {
+   "@type": "Question",
+   "name": "사진이 서버에 올라가나요?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "아니요. 사진은 이 기기의 브라우저 안에서만 잘립니다. 어디로도 올라가지 않아서 인터넷이 끊겨도 동작합니다."
+   }
+  },
+  {
+   "@type": "Question",
+   "name": "정해진 비율로 자를 수 있나요?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "네. 1:1(프로필·정사각), 4:5(인스타 세로), 4:3, 3:4, 16:9(유튜브·가로), 9:16(쇼츠·릴스) 단추가 있습니다. 누르면 네모가 그 비율을 지킵니다."
+   }
+  },
+  {
+   "@type": "Question",
+   "name": "폰에서도 손가락으로 자를 수 있나요?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "네. 네모를 눌러 끌어 옮기고, 모서리의 빨간 손잡이를 끌어 크기를 맞추면 됩니다."
+   }
+  },
+  {
+   "@type": "Question",
+   "name": "자르면 화질이 떨어지나요?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "자르는 것만으로는 떨어지지 않습니다. 원본 크기 그대로 필요한 부분만 잘라 냅니다. 저장 형식을 JPG로 바꿀 때만 저장 과정에서 약간 달라집니다."
+   }
+  },
+  {
+   "@type": "Question",
+   "name": "여러 장을 자를 수 있나요?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "여러 장을 넣어 두고 목록에서 한 장씩 골라 자릅니다. 사진마다 자를 곳이 다르기 때문에 한 장씩 확인하며 자르는 편이 안전합니다."
+   }
+  },
+  {
+   "@type": "Question",
+   "name": "자른 다음에 용량도 줄이고 싶어요.",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "자른 사진을 받아서 이미지 용량 줄이기에 넣으면 목표 용량에 맞춰 줄일 수 있습니다."
+   }
+  }
+ ]
+}
+</script>
+</head>
+
+<body>
+
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="/">
+      <img src="/assets/logo-full.webp?v=1" alt="오름게임즈" width="78" height="74">
+    </a>
+    <div class="brand-copy">
+      <p class="brandname">오름게임즈</p>
+      <p class="factory">인디게임팩토리</p>
+    </div>
+    <ul class="values">
+      <li><span>설치 없이</span> 링크 하나로 바로 시작</li>
+      <li><span>회원가입 없이</span> 기록은 브라우저에 저장</li>
+    </ul>
+    <nav class="nav" aria-label="주요 메뉴">
+      <a href="/games/">GAMES</a>
+      <a href="/apps/">APPS</a>
+      <a href="/board/">COMMUNITY</a>
+      <a href="/en/apps/image-crop/" lang="en" hreflang="en">EN</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+  <section class="showcase">
+    <div class="wrap game-page">
+      <a class="backlink" href="/apps/">← 앱스 목록</a>
+
+<div class="pm im pm-panel" data-mode="crop">
+  <header class="top">
+    <h1 data-t="h1">이미지 자르기</h1>
+    <ul class="promise">
+      <li data-t="p1">설치 없음</li>
+      <li data-t="p2">회원가입 없음</li>
+      <li data-t="p3">비율 맞춰 자르기</li>
+      <li data-t="p4">사진이 서버로 안 감</li>
+    </ul>
+  </header>
+  <nav class="tabs" aria-label="이미지 도구">
+    <a href="/apps/image-convert/" data-t="tConv">포맷 변환</a>
+    <a href="/apps/image-compress/" data-t="tComp">용량 줄이기</a>
+    <a href="/apps/image-crop/" class="on" data-t="tCrop">자르기</a>
+  </nav>
+  <section id="drop" class="drop" aria-label="사진 넣기">
+    <input id="pick" type="file" accept="image/*" multiple hidden>
+    <button id="pickBtn" class="big" type="button" data-t="pickBtn">🖼️ 사진 고르기</button>
+    <p class="hint"><span data-t="hint">네모를 끌어 자를 곳을 고릅니다</span><span class="pc" data-t="hintPc"> · 끌어다 놓기 · Ctrl+V</span></p>
+  </section>
+  <p id="note" class="note" hidden></p>
+  <div id="cropWrap" hidden>
+    <div class="croptop">
+      <div class="seg" role="group" aria-label="자르는 비율">
+        <button type="button" data-ratio="free" class="on" data-t="rFree">자유</button>
+        <button type="button" data-ratio="1:1">1:1</button>
+        <button type="button" data-ratio="4:5">4:5</button>
+        <button type="button" data-ratio="4:3">4:3</button>
+        <button type="button" data-ratio="3:4">3:4</button>
+        <button type="button" data-ratio="16:9">16:9</button>
+        <button type="button" data-ratio="9:16">9:16</button>
+      </div>
+      <span class="cropinfo" id="cropInfo"></span>
+    </div>
+    <div class="stage" id="cropStage">
+      <canvas id="cropCv"></canvas>
+      <div class="cropbox" id="cropBox" hidden>
+        <i data-h="nw"></i><i data-h="n"></i><i data-h="ne"></i><i data-h="e"></i><i data-h="se"></i><i data-h="s"></i><i data-h="sw"></i><i data-h="w"></i>
+      </div>
+    </div>
+    <div class="croptop">
+      <button id="allBtn" class="ghost" type="button" data-t="rAll">사진 전체</button>
+      <label class="fld"><select id="fmtSel">
+        <option value="auto" data-t="oKeep">형식 그대로</option>
+        <option value="image/jpeg">JPG</option>
+        <option value="image/png">PNG</option>
+        <option value="image/webp">WEBP</option>
+      </select></label>
+    </div>
+  </div>
+  <div id="listwrap" class="listwrap" hidden>
+    <div class="listhead"><b id="cnt"></b><div class="tools"><button id="clrBtn" class="ghost" type="button" data-t="clr">모두 지우기</button></div></div>
+    <ul id="list" class="list"></ul>
+  </div>
+  <div id="out" class="out" hidden>
+    <button id="goBtn" class="big go" type="button" data-t="go">자르고 받기</button>
+    <div id="busy" class="busy" hidden><div class="bar"><span id="barIn"></span></div><em id="busyTxt"></em></div>
+    <div id="done" class="done" hidden></div>
+  </div>
+  <p class="safe" data-t="safe">🔒 사진은 이 기기의 브라우저 안에서만 잘립니다. 어디에도 올라가지 않고, 자른 사진에는 촬영 위치 같은 정보가 남지 않습니다.</p>
+</div>
+
+      <p class="gp-line">이미지 자르기는 사진에서 필요한 부분만 골라 자르는 무료 웹 도구입니다. 비율을 고르면 그 비율을 지키면서 네모를 끌 수 있습니다.</p>
+
+      <h2>사진 자르는 방법</h2>
+      <ol class="pm-howto">
+        <li><b>사진 고르기</b>를 눌러 자를 사진을 고릅니다. 여러 장을 넣으면 목록에서 한 장씩 골라 자를 수 있습니다.</li>
+        <li>비율이 필요하면 <b>1:1 · 4:5 · 16:9</b> 같은 단추를 먼저 누릅니다. 아무 모양으로 자르려면 <b>자유</b>로 둡니다.</li>
+        <li>사진 위의 네모를 끌어 옮기고, 모서리 손잡이를 끌어 크기를 맞춥니다. 아래에 잘린 크기가 픽셀로 나옵니다.</li>
+        <li><b>자르고 받기</b>를 누릅니다. 사진 전체로 되돌리려면 <b>사진 전체</b>를 누르세요.</li>
+      </ol>
+
+      <h2>비율을 맞춰 자르면 잘릴 일이 없습니다</h2>
+      <p class="gp-body">프로필 사진은 1:1, 인스타그램 세로는 4:5, 유튜브 섬네일은 16:9처럼 올리는 곳마다 정해진 비율이 있습니다. 비율을 고르지 않고 대충 자르면 올린 뒤에 위아래나 좌우가 잘려 나가 얼굴이 반쯤 사라지기도 합니다. 여기서 비율 단추를 먼저 누르면 네모가 그 비율을 지켜서, 올린 그대로 보입니다.</p>
+      <p class="gp-body">자를 때 화질을 다시 떨어뜨리지 않고 원본 크기 그대로 잘라 냅니다. 잘린 사진에는 촬영 위치·기기 정보가 남지 않습니다.</p>
+
+      <dl class="spec"><dt>분류</dt><dd>이미지 자르기 · 무료 도구</dd>
+              <dt>비율</dt><dd>자유 · 1:1 · 4:5 · 4:3 · 3:4 · 16:9 · 9:16</dd>
+              <dt>저장 형식</dt><dd>형식 그대로 · JPG · PNG · WEBP</dd>
+              <dt>여러 장</dt><dd>넣어 두고 한 장씩 자르기</dd>
+              <dt>처리 위치</dt><dd>내 기기의 브라우저 (업로드·저장 없음)</dd>
+              <dt>사용 환경</dt><dd>PC · 모바일 브라우저 (손가락으로도 끌기)</dd>
+              <dt>제작일</dt><dd>2026-09-20</dd>
+              <dt>최종 업데이트</dt><dd>2026-09-20</dd></dl>
+      <p class="gp-for">이런 분께 — 프로필 사진을 1:1로 맞춰야 하는 분, 인스타·유튜브 비율에 맞춰 올리려는 분, 사진에서 필요한 부분만 잘라 쓰려는 분.</p>
+
+      <section class="faq">
+        <h2>자주 묻는 질문</h2>
+        <details><summary>이미지 자르기는 무료인가요?</summary><p>무료입니다. 설치도 회원가입도 없이 브라우저에서 바로 자르고 받습니다.</p></details>
+        <details><summary>사진이 서버에 올라가나요?</summary><p>아니요. 사진은 이 기기의 브라우저 안에서만 잘립니다. 어디로도 올라가지 않아서 인터넷이 끊겨도 동작합니다.</p></details>
+        <details><summary>정해진 비율로 자를 수 있나요?</summary><p>네. 1:1(프로필·정사각), 4:5(인스타 세로), 4:3, 3:4, 16:9(유튜브·가로), 9:16(쇼츠·릴스) 단추가 있습니다. 누르면 네모가 그 비율을 지킵니다.</p></details>
+        <details><summary>폰에서도 손가락으로 자를 수 있나요?</summary><p>네. 네모를 눌러 끌어 옮기고, 모서리의 빨간 손잡이를 끌어 크기를 맞추면 됩니다.</p></details>
+        <details><summary>자르면 화질이 떨어지나요?</summary><p>자르는 것만으로는 떨어지지 않습니다. 원본 크기 그대로 필요한 부분만 잘라 냅니다. 저장 형식을 JPG로 바꿀 때만 저장 과정에서 약간 달라집니다.</p></details>
+        <details><summary>여러 장을 자를 수 있나요?</summary><p>여러 장을 넣어 두고 목록에서 한 장씩 골라 자릅니다. 사진마다 자를 곳이 다르기 때문에 한 장씩 확인하며 자르는 편이 안전합니다.</p></details>
+        <details><summary>자른 다음에 용량도 줄이고 싶어요.</summary><p>자른 사진을 받아서 <a href="/apps/image-compress/">이미지 용량 줄이기</a>에 넣으면 목표 용량에 맞춰 줄일 수 있습니다.</p></details>
+      </section>
+    </div>
+  </section>
+  <section class="related" aria-label="다른 도구 · 쉬는 시간에 한 판">
+    <div class="wrap game-page">
+      <h2>다른 도구 · 쉬는 시간에 한 판</h2>
+      <ul class="related-list">
+      <li><a href="/apps/image-convert/"><img src="/assets/imgconvert-cover.webp?v=1" alt="" width="96" height="60" loading="lazy"><span class="related-txt"><b>이미지 변환</b><span>JPG·PNG·WEBP 변환</span></span><em>사용 ▸</em></a></li>
+      <li><a href="/apps/image-compress/"><img src="/assets/imgcompress-cover.webp?v=1" alt="" width="96" height="60" loading="lazy"><span class="related-txt"><b>이미지 용량 줄이기</b><span>목표 용량에 맞춰 압축</span></span><em>사용 ▸</em></a></li>
+      <li><a href="/apps/pdf-merge/"><img src="/assets/pdfmerge-cover.webp?v=1" alt="" width="96" height="60" loading="lazy"><span class="related-txt"><b>PDF 합치기</b><span>무료 PDF 병합</span></span><em>사용 ▸</em></a></li>
+      <li><a href="/apps/qr-scan/"><img src="/assets/qrscan-cover.webp?v=1" alt="" width="96" height="60" loading="lazy"><span class="related-txt"><b>QR코드 스캔</b><span>사진 속 QR 읽기·큐싱 검사</span></span><em>사용 ▸</em></a></li>
+      <li><a href="/apps/qr-maker/"><img src="/assets/qrmake-cover.webp?v=1" alt="" width="96" height="60" loading="lazy"><span class="related-txt"><b>QR코드 만들기</b><span>와이파이·링크 QR 생성</span></span><em>사용 ▸</em></a></li>
+      <li><a href="/games/flash/alkkagi/"><img src="/assets/alkkagi-shot.webp" alt="" width="96" height="60" loading="lazy"><span class="related-txt"><b>알까기</b><span>바둑알 튕기기 무료게임</span></span><em>플레이 ▸</em></a></li>
+      <li><a href="/games/flash/spotdiff/"><img src="/assets/spotdiff-shot.webp" alt="" width="96" height="60" loading="lazy"><span class="related-txt"><b>틀린그림찾기</b><span>두 그림 비교 게임</span></span><em>플레이 ▸</em></a></li>
+      </ul>
+      <p class="related-more"><a href="/apps/">앱스 전체 목록</a> · <a href="/games/">무료게임 전체 목록</a> · <a href="/">오름게임즈 홈</a></p>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <div class="footer-brand">
+      <img src="/assets/logo-full.webp?v=1" alt="" width="52" height="50">
+      <span>오름게임즈 <em>Oreum Games</em></span>
+    </div>
+    <p class="footer-motto">오름게임즈는 오릅니다</p>
+    <nav class="footer-nav" aria-label="푸터 메뉴">
+      <a href="/support/">고객지원</a>
+      <a href="/privacy/">개인정보처리방침</a>
+      <a href="https://www.youtube.com/@Oreumgames" rel="me noopener" target="_blank">유튜브</a>
+      <a href="https://www.tiktok.com/@oreumgames" rel="me noopener" target="_blank">틱톡</a>
+      <button type="button" class="js-mail mailbtn" data-u="cyjcyj27" data-d="gmail.com" data-go="gmail">협업 문의</button>
+      <button type="button" class="js-install mailbtn" hidden><img src="/assets/logo-symbol.png" alt="" class="install-ico">바탕화면에 바로가기 만들기</button>
+    </nav>
+    <p class="copy" id="visitCount" hidden></p>
+    <p class="copy">oreumgames.com · © 2026 오름게임즈. All rights reserved.</p>
+  </div>
+</footer>
+
+<!-- 도구: 사진은 브라우저 밖으로 나가지 않는다. 바깥 부품 없이 이 사이트의 스크립트만 쓴다 -->
+<script src="/apps/image-convert/zip.js?v=1"></script>
+<script src="/apps/image-convert/imagetool.js?v=1"></script>
+
+<script src="/assets/app-time.js?v=1" data-app="imgcrop" defer></script>
+<script src="/assets/visit.js?v=12" defer></script>
+
+<!-- 방문 집계 — 쿠키 없이, 페이지뷰(반복 방문 포함)까지 Abacus로 셉니다 -->
+<script>
+(function(){
+  if (/^(localhost|127\.0\.0\.1)$/.test(location.hostname) || location.protocol==='file:') return;
+  var b='https://abacus.jasoncameron.dev/hit/oreumgames/';
+  function h(k){ try{ fetch(b+k,{mode:'cors'}).catch(function(){}); }catch(e){} }
+  h('pageviews'); h('pv_app'); h('pv_imgcrop');
+})();
+</script>
+<script src="/assets/board-new.js?v=3" defer></script>
+<script src="/assets/mail.js" defer></script>
+<script src="/assets/install.js?v=7" defer></script>
+</body>
+</html>
