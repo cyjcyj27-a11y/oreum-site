@@ -28,7 +28,7 @@
 <meta name="twitter:card" content="summary_large_image">
 
 <link rel="stylesheet" href="/style.css?v=40">
-<link rel="stylesheet" href="/apps/tools.css?v=1">
+<link rel="stylesheet" href="/apps/tools.css?v=4">
 <style>
   .pm-panel { background: #fff; border: 1px solid #ececec; border-radius: 22px; padding: 28px 22px 24px; box-shadow: 0 1px 2px rgba(20,20,30,.04), 0 18px 40px rgba(20,20,30,.06); }
   .pm-panel + .gp-line { margin-top: 28px; }
@@ -176,26 +176,73 @@
 
 <div class="pm im pm-panel" data-mode="compress">
   <header class="top">
-    <h1 data-t="h1">Compress Image</h1>
-    <ul class="promise">
-      <li data-t="p1">No install</li>
-      <li data-t="p2">No sign-up</li>
-      <li data-t="p3">Hits your target size</li>
-      <li data-t="p4">Photos never uploaded</li>
+    <p class="h1alt" data-for="convert" hidden data-t="h1_convert">Image Converter</p>
+    <h1 data-for="compress" data-t="h1_compress">Compress Image</h1>
+    <p class="h1alt" data-for="crop" hidden data-t="h1_crop">Crop Image</p>
+    <ul class="promise" data-for="convert" hidden>
+      <li data-t="p1_convert">No install</li>
+      <li data-t="p2_convert">No sign-up</li>
+      <li data-t="p3_convert">Batch convert</li>
+      <li data-t="p4_convert">Photos never uploaded</li>
+    </ul>
+    <ul class="promise" data-for="compress">
+      <li data-t="p1_compress">No install</li>
+      <li data-t="p2_compress">No sign-up</li>
+      <li data-t="p3_compress">Hits your target size</li>
+      <li data-t="p4_compress">Photos never uploaded</li>
+    </ul>
+    <ul class="promise" data-for="crop" hidden>
+      <li data-t="p1_crop">No install</li>
+      <li data-t="p2_crop">No sign-up</li>
+      <li data-t="p3_crop">Fixed aspect ratios</li>
+      <li data-t="p4_crop">Photos never uploaded</li>
     </ul>
   </header>
-  <nav class="tabs" aria-label="Image tools">
-    <a href="/en/apps/image-convert/" data-t="tConv">Convert</a>
-    <a href="/en/apps/image-compress/" class="on" data-t="tComp">Compress</a>
-    <a href="/en/apps/image-crop/" data-t="tCrop">Crop</a>
+  <nav class="tabs" aria-label="Image tools" role="tablist">
+    <button type="button" data-mode="convert" aria-selected="false" role="tab" data-t="tConv">Convert</button>
+    <button type="button" data-mode="compress" class="on" aria-selected="true" role="tab" data-t="tComp">Compress</button>
+    <button type="button" data-mode="crop" aria-selected="false" role="tab" data-t="tCrop">Crop</button>
   </nav>
   <section id="drop" class="drop" aria-label="Add photos">
     <input id="pick" type="file" accept="image/*" multiple hidden>
     <button id="pickBtn" class="big" type="button" data-t="pickBtn">🖼️ Choose photos</button>
-    <p class="hint"><span data-t="hint">Squeeze photos down to an upload limit</span><span class="pc" data-t="hintPc"> · drag &amp; drop · Ctrl+V</span></p>
+    <p class="hint"><span data-t="hint">
+      <span data-for="convert" hidden data-t="hint_convert">JPG, PNG and WEBP, many at once</span>
+      <span data-for="compress" data-t="hint_compress">Squeeze photos down to an upload limit</span>
+      <span data-for="crop" hidden data-t="hint_crop">Drag the box over the part you want</span>
+    </span><span class="pc" data-t="hintPc"> · drag &amp; drop · Ctrl+V</span></p>
   </section>
   <p id="note" class="note" hidden></p>
-  <div id="opts" class="im-opts" hidden>
+  <div class="im-opts pane" data-pane="convert" hidden>
+    <div class="fld">
+      <span class="lbl" data-t="lFmt">Convert to</span>
+      <div class="seg">
+        <button type="button" data-seg="fmt" data-v="image/jpeg" class="on" aria-pressed="true">JPG</button>
+        <button type="button" data-seg="fmt" data-v="image/png" aria-pressed="false">PNG</button>
+        <button type="button" data-seg="fmt" data-v="image/webp" aria-pressed="false">WEBP</button>
+      </div>
+    </div>
+    <label class="fld">
+      <span class="lbl" data-t="lQ">Quality</span>
+      <span class="qrow"><input id="q" type="range" min="40" max="100" step="1" value="90"><b id="qv">90%</b></span>
+    </label>
+    <div class="two">
+      <label class="fld"><span class="lbl" data-t="lMax">Longest side</span>
+        <select id="maxw">
+          <option value="0" data-t="oOrig">Original size</option>
+          <option value="4096">4096 px</option>
+          <option value="2560">2560 px</option>
+          <option value="1920">1920 px</option>
+          <option value="1280">1280 px</option>
+          <option value="800">800 px</option>
+        </select>
+      </label>
+      <label class="fld" id="bgWrap"><span class="lbl" data-t="lBg">Fill transparent areas with</span>
+        <select id="bg"><option value="white" data-t="oWhite">White</option><option value="black" data-t="oBlack">Black</option></select>
+      </label>
+    </div>
+  </div>
+  <div class="im-opts pane" data-pane="compress" hidden>
     <div class="fld">
       <span class="lbl" data-t="lTarget">Target size</span>
       <div class="seg">
@@ -212,7 +259,7 @@
     </div>
     <div class="two">
       <label class="fld"><span class="lbl" data-t="lFmt2">Save as</span>
-        <select id="fmtSel">
+        <select id="kfmt">
           <option value="auto" data-t="oAuto">Automatic (smallest)</option>
           <option value="image/jpeg">JPG</option>
           <option value="image/webp">WEBP</option>
@@ -220,7 +267,7 @@
         </select>
       </label>
       <label class="fld"><span class="lbl" data-t="lMax">Longest side</span>
-        <select id="maxw">
+        <select id="kmaxw">
           <option value="0" data-t="oOrig">Original size</option>
           <option value="2560">2560 px</option>
           <option value="1920">1920 px</option>
@@ -231,16 +278,51 @@
     </div>
     <label class="chk"><input id="scaleChk" type="checkbox" checked> <span data-t="lScale">Shrink width and height too if needed</span></label>
   </div>
+  <div id="cropWrap" class="pane" data-pane="crop" hidden>
+    <div class="croptop">
+      <div class="seg" role="group" aria-label="Aspect ratio">
+        <button type="button" data-ratio="free" class="on" data-t="rFree">Free</button>
+        <button type="button" data-ratio="1:1">1:1</button>
+        <button type="button" data-ratio="4:5">4:5</button>
+        <button type="button" data-ratio="4:3">4:3</button>
+        <button type="button" data-ratio="3:4">3:4</button>
+        <button type="button" data-ratio="16:9">16:9</button>
+        <button type="button" data-ratio="9:16">9:16</button>
+      </div>
+      <span class="cropinfo" id="cropInfo"></span>
+    </div>
+    <div class="stage" id="cropStage">
+      <canvas id="cropCv"></canvas>
+      <div class="cropbox" id="cropBox" hidden>
+        <i data-h="nw"></i><i data-h="n"></i><i data-h="ne"></i><i data-h="e"></i><i data-h="se"></i><i data-h="s"></i><i data-h="sw"></i><i data-h="w"></i>
+      </div>
+    </div>
+    <div class="croptop">
+      <button id="allBtn" class="ghost" type="button" data-t="rAll">Whole photo</button>
+      <label class="fld"><select id="xfmt">
+        <option value="auto" data-t="oKeep">Keep format</option>
+        <option value="image/jpeg">JPG</option>
+        <option value="image/png">PNG</option>
+        <option value="image/webp">WEBP</option>
+      </select></label>
+    </div>
+  </div>
   <div id="listwrap" class="listwrap" hidden>
     <div class="listhead"><b id="cnt"></b><div class="tools"><button id="clrBtn" class="ghost" type="button" data-t="clr">Clear all</button></div></div>
     <ul id="list" class="list"></ul>
   </div>
   <div id="out" class="out" hidden>
-    <button id="goBtn" class="big go" type="button" data-t="go">Compress and download</button>
+    <button id="goBtn" class="big go" type="button" data-t="go">
+      <span data-for="convert" hidden data-t="go_convert">Convert and download</span>
+      <span data-for="compress" data-t="go_compress">Compress and download</span>
+      <span data-for="crop" hidden data-t="go_crop">Crop and download</span>
+    </button>
     <div id="busy" class="busy" hidden><div class="bar"><span id="barIn"></span></div><em id="busyTxt"></em></div>
     <div id="done" class="done" hidden></div>
   </div>
-  <p class="safe" data-t="safe">🔒 Photos are compressed only inside this browser on your device. Nothing is uploaded, and the smaller file carries no location or camera data.</p>
+  <p class="safe" data-for="convert" hidden data-t="safe_convert">🔒 Photos are converted only inside this browser on your device. Nothing is uploaded, and the converted file carries no location or camera data.</p>
+  <p class="safe" data-for="compress" data-t="safe_compress">🔒 Photos are compressed only inside this browser on your device. Nothing is uploaded, and the smaller file carries no location or camera data.</p>
+  <p class="safe" data-for="crop" hidden data-t="safe_crop">🔒 Photos are cropped only inside this browser on your device. Nothing is uploaded, and the cropped file carries no location or camera data.</p>
 </div>
 
       <p class="gp-line">Compress Image is a free web tool that brings photos under a file size you choose — handy when a form says “1MB maximum”.</p>
@@ -317,8 +399,8 @@
 </footer>
 
 <!-- 도구: 사진은 브라우저 밖으로 나가지 않는다. 바깥 부품 없이 이 사이트의 스크립트만 쓴다 -->
-<script src="/apps/image-convert/zip.js?v=1"></script>
-<script src="/apps/image-convert/imagetool.js?v=1"></script>
+<script src="/apps/image-convert/zip.js?v=4"></script>
+<script src="/apps/image-convert/imagetool.js?v=4"></script>
 
 <script src="/assets/app-time.js?v=1" data-app="imgcompress" defer></script>
 <script src="/assets/visit.js?v=12" defer></script>

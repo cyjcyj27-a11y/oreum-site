@@ -7,14 +7,14 @@
 
   var root = document.querySelector('.im');
   if (!root) return;
-  var MODE = root.getAttribute('data-mode') || 'convert';
+  var MODE = root.getAttribute('data-mode') || 'convert';   // 탭으로 바뀐다 (setMode)
   var EN = (document.documentElement.lang || 'ko').slice(0, 2) === 'en';
   function T(ko, en) { return EN ? en : ko; }
 
   var $ = function (id) { return document.getElementById(id); };
   var drop = $('drop'), pick = $('pick'), pickBtn = $('pickBtn');
   var listwrap = $('listwrap'), list = $('list'), cnt = $('cnt'), clrBtn = $('clrBtn');
-  var opts = $('opts'), out = $('out'), goBtn = $('goBtn'), note = $('note');
+  var out = $('out'), goBtn = $('goBtn'), note = $('note');
   var busy = $('busy'), barIn = $('barIn'), busyTxt = $('busyTxt'), done = $('done');
   var cropWrap = $('cropWrap');
 
@@ -110,8 +110,11 @@
     var n = recs.length;
     listwrap.hidden = !n; out.hidden = !n;
     root.classList.toggle('has', !!n);
-    if (cropWrap) cropWrap.hidden = !(n && cur >= 0);
-    if (opts) opts.hidden = !n;
+    // 지금 칸만 보여 준다 (자르기 칸은 고른 사진이 있어야 나온다)
+    [].forEach.call(root.querySelectorAll('.pane'), function (el) {
+      var m = el.getAttribute('data-pane');
+      el.hidden = m !== MODE || !n || (m === 'crop' && cur < 0);
+    });
     cnt.textContent = EN ? (n + (n === 1 ? ' image' : ' images')) : (n + '장');
     list.innerHTML = '';
     recs.forEach(function (r, i) {
@@ -353,8 +356,11 @@
     };
   });
 
-  var q = $('q'), qv = $('qv'), maxw = $('maxw'), bgSel = $('bg'), bgWrap = $('bgWrap');
-  var kbInp = $('kb'), kbWrap = $('kbWrap'), scaleChk = $('scaleChk'), fmtSel = $('fmtSel');
+  var q = $('q'), qv = $('qv'), bgSel = $('bg'), bgWrap = $('bgWrap');
+  var kbInp = $('kb'), kbWrap = $('kbWrap'), scaleChk = $('scaleChk');
+  // 변환·용량 칸이 한 화면에 같이 있어서 id 를 나눴다
+  function maxwEl() { return MODE === 'compress' ? $('kmaxw') : $('maxw'); }
+  function fmtEl() { return MODE === 'crop' ? $('xfmt') : $('kfmt'); }
 
   function onOpt(name, v) {
     if (name === 'fmt') {
@@ -369,7 +375,7 @@
     var showQ = function () { qv.textContent = q.value + '%'; };
     q.oninput = showQ; showQ();
   }
-  [maxw, bgSel, kbInp, scaleChk, fmtSel].forEach(function (el) {
+  [$('maxw'), $('kmaxw'), bgSel, kbInp, scaleChk, $('kfmt'), $('xfmt')].forEach(function (el) {
     if (el) el.addEventListener('change', function () { done.hidden = true; });
   });
   if (root.querySelector('[data-seg="fmt"].on')) onOpt('fmt', segVal('fmt', 'image/jpeg'));
@@ -380,7 +386,7 @@
     var kb = v === 'custom' ? Math.max(20, +((kbInp && kbInp.value) || 500)) : +v;
     return Math.round(kb * 1024);
   }
-  function longEdge() { return maxw ? +maxw.value || 0 : 0; }
+  function longEdge() { var m = maxwEl(); return m ? +m.value || 0 : 0; }
 
   /* ------------------------------------------------------------- 만들기 */
   function fitSize(rec, crop) {
@@ -395,11 +401,11 @@
   function pickType(rec) {
     if (MODE === 'convert') return segVal('fmt', 'image/jpeg');
     if (MODE === 'crop') {
-      var v = fmtSel ? fmtSel.value : 'auto';
+      var v = fmtEl() ? fmtEl().value : 'auto';
       if (v !== 'auto') return v;
       return rec.type === 'image/png' ? 'image/png' : (rec.type === 'image/webp' && canWebp ? 'image/webp' : 'image/jpeg');
     }
-    var w = fmtSel ? fmtSel.value : 'auto';
+    var w = fmtEl() ? fmtEl().value : 'auto';
     if (w !== 'auto') return w;
     return canWebp ? 'image/webp' : 'image/jpeg';   // 용량 줄이기는 가장 잘 줄는 형식
   }
@@ -614,15 +620,46 @@
     setTimeout(function () { URL.revokeObjectURL(url); a.remove(); }, 4000);
   }
 
+  /* ------------------------------------------------------------- 탭(칸 바꾸기)
+     페이지를 옮기지 않고 칸만 바꾼다. 넣어 둔 사진은 그대로 두고, 주소만 그 도구 주소로 바꿔 둔다. */
+  var PATHS = { convert: 'image-convert', compress: 'image-compress', crop: 'image-crop' };
+  function setMode(m, push) {
+    if (!PATHS[m] || m === MODE) return;
+    MODE = m;
+    root.setAttribute('data-mode', m);
+    [].forEach.call(root.querySelectorAll('[data-for]'), function (el) { el.hidden = el.getAttribute('data-for') !== m; });
+    [].forEach.call(root.querySelectorAll('.pane'), function (el) { el.hidden = el.getAttribute('data-pane') !== m || !recs.length; });
+    [].forEach.call(root.querySelectorAll('[data-mode]'), function (b) {
+      var on = b.getAttribute('data-mode') === m;
+      b.classList.toggle('on', on); b.setAttribute('aria-selected', on ? 'true' : 'false');
+    });
+    if (m === 'crop') {
+      if (cur < 0) { var k = recs.findIndex(function (r) { return !r.bad; }); if (k >= 0) cur = k; }
+      if (curRec()) { drawCrop(); paintBox(); }
+    }
+    done.hidden = true; say('');
+    render(); updateGo();
+    if (push) {
+      try {
+        var en = location.pathname.indexOf('/en/') === 0 ? '/en' : '';
+        history.replaceState(null, '', en + '/apps/' + PATHS[m] + '/');
+      } catch (e) {}
+    }
+  }
+  [].forEach.call(root.querySelectorAll('[data-mode]'), function (b) {
+    b.onclick = function () { setMode(b.getAttribute('data-mode'), true); };
+  });
+
   goBtn.onclick = function () { run(); };
 
   /* ------------------------------------------------------------- 시험 손잡이 */
   api.addFiles = addFiles;
   api.run = run;
+  api.setMode = function (m) { setMode(m, false); };
+  api.mode = function () { return MODE; };
   api.recs = function () { return recs; };
   api.crop = function (c) { var r = curRec(); if (r) { r.crop = c; clampCrop(r); paintBox(); } return r && r.crop; };
   api.select = select;
-  api.mode = MODE;
   api.log = function () { return encLog; };
   window.__im = api;
 })();

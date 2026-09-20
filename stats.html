@@ -195,6 +195,8 @@
               // 앱스(도구) — 2026-09-19~20 (pv_app 은 도구 페이지 공통, 아래는 도구별)
               'pv_app', 'pv_apps', 'pv_sajuintro', 'pv_pdfmerge', 'pv_qrscan', 'pv_qrmake',
               'pv_hanja', 'pv_kana',   // 한자 검색(2026-09-20)·가나 연습(2026-09-20)
+              'pv_imgconvert', 'pv_imgcompress', 'pv_imgcrop',   // 이미지 도구 세 칸(한 앱, 2026-09-20)
+              'appmin_imgconvert', 'appmin_imgcompress', 'appmin_imgcrop',
               // 도구 체류 시간 — assets/app-time.js 가 화면을 보고 있는 1분마다 1씩 (2026-09-20)
               'app_minutes', 'appmin_saju', 'appmin_sajuintro', 'appmin_hanja', 'appmin_kana',
               'appmin_pdfmerge', 'appmin_qrscan', 'appmin_qrmake'];
@@ -334,6 +336,8 @@
   // 앱스(도구) 표 — 게임과 달리 판·시간이 없으니 열어본 횟수만 본다
   var APPS = [
     ['MBTI사주', function (d) { return d.pv_saju + d.pv_sajuintro; }, function (d) { return d.appmin_saju + d.appmin_sajuintro; }, '/saju/'],
+    ['이미지 도구(변환·용량·자르기)', function (d) { return d.pv_imgconvert + d.pv_imgcompress + d.pv_imgcrop; },
+      function (d) { return d.appmin_imgconvert + d.appmin_imgcompress + d.appmin_imgcrop; }, '/apps/image-convert/'],
     ['한자 검색 필기 입력기', function (d) { return d.pv_hanja; }, function (d) { return d.appmin_hanja; }, '/apps/hanja-search/'],
     ['히라가나 가타카나 연습', function (d) { return d.pv_kana; }, function (d) { return d.appmin_kana; }, '/apps/kana/'],
     ['PDF 합치기', function (d) { return d.pv_pdfmerge; }, function (d) { return d.appmin_pdfmerge; }, '/apps/pdf-merge/'],
@@ -393,7 +397,8 @@
         note('자동 집계 ' + (ago < 60 ? ago + '분' : Math.round(ago / 60) + '시간') + ' 전 기준 · 방문 수와 오늘은 지금 값으로 맞춥니다…');
         // 스냅샷에 아직 없는 앱스 칸은 지금 값으로 덧읽는다 (새 도구를 올린 날 0 으로 보이지 않게)
         var appKeys = ['pv_saju', 'pv_sajuintro', 'pv_hanja', 'pv_kana', 'pv_pdfmerge', 'pv_qrscan', 'pv_qrmake', 'pv_apps', 'pv_app',
-                       'appmin_saju', 'appmin_sajuintro', 'appmin_hanja', 'appmin_kana', 'appmin_pdfmerge', 'appmin_qrscan', 'appmin_qrmake'];
+                       'appmin_saju', 'appmin_sajuintro', 'appmin_hanja', 'appmin_kana', 'appmin_pdfmerge', 'appmin_qrscan', 'appmin_qrmake',
+                       'pv_imgconvert', 'pv_imgcompress', 'pv_imgcrop', 'appmin_imgconvert', 'appmin_imgcompress', 'appmin_imgcrop'];
         if (appKeys.some(function (k) { return !(k in v); })) {
           fetchChunked(appKeys, 4, 1200).then(function (vs) {
             appKeys.forEach(function (k, i) { if (!(k in v)) d[k] = vs[i] || 0; });
