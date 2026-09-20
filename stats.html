@@ -194,7 +194,10 @@
               'pv_jeju', 'pv_jeju_en',   // BUY JEJU(2026-09-11) 소개 페이지
               // 앱스(도구) — 2026-09-19~20 (pv_app 은 도구 페이지 공통, 아래는 도구별)
               'pv_app', 'pv_apps', 'pv_sajuintro', 'pv_pdfmerge', 'pv_qrscan', 'pv_qrmake',
-              'pv_hanja', 'pv_kana'];   // 한자 검색(2026-09-20)·가나 연습(2026-09-20)
+              'pv_hanja', 'pv_kana',   // 한자 검색(2026-09-20)·가나 연습(2026-09-20)
+              // 도구 체류 시간 — assets/app-time.js 가 화면을 보고 있는 1분마다 1씩 (2026-09-20)
+              'app_minutes', 'appmin_saju', 'appmin_sajuintro', 'appmin_hanja', 'appmin_kana',
+              'appmin_pdfmerge', 'appmin_qrscan', 'appmin_qrmake'];
   // 한꺼번에 많이 부르면 속도 제한에 걸리므로 나눠 부르고 사이에 잠깐 쉽니다.
   // 3개씩 260ms로는 화면이 뜨기까지 30초가 걸려서 멈춘 것처럼 보였습니다.
   // 막히면 위 get()이 알아서 쉬었다 다시 부르므로, 여기서는 조금 넉넉하게 갑니다.
@@ -330,29 +333,32 @@
                ['야간자율학습', 'night-study'], ['냥 결투', 'nyang-duel'], ['오름냥', 'oreumnyang'], ['페어붐', 'pairboom'], ['픽셀', 'pixl'], ['극성 뒤집기', 'polarity-flip'], ['미끄럼 고양이', 'slip-cat']];
   // 앱스(도구) 표 — 게임과 달리 판·시간이 없으니 열어본 횟수만 본다
   var APPS = [
-    ['MBTI사주', function (d) { return d.pv_saju + d.pv_sajuintro; }, '/saju/'],
-    ['한자 검색 필기 입력기', function (d) { return d.pv_hanja; }, '/apps/hanja-search/'],
-    ['히라가나 가타카나 연습', function (d) { return d.pv_kana; }, '/apps/kana/'],
-    ['PDF 합치기', function (d) { return d.pv_pdfmerge; }, '/apps/pdf-merge/'],
-    ['QR코드 스캔', function (d) { return d.pv_qrscan; }, '/apps/qr-scan/'],
-    ['QR코드 만들기', function (d) { return d.pv_qrmake; }, '/apps/qr-maker/'],
-    ['앱스 목록', function (d) { return d.pv_apps; }, '/apps/']
+    ['MBTI사주', function (d) { return d.pv_saju + d.pv_sajuintro; }, function (d) { return d.appmin_saju + d.appmin_sajuintro; }, '/saju/'],
+    ['한자 검색 필기 입력기', function (d) { return d.pv_hanja; }, function (d) { return d.appmin_hanja; }, '/apps/hanja-search/'],
+    ['히라가나 가타카나 연습', function (d) { return d.pv_kana; }, function (d) { return d.appmin_kana; }, '/apps/kana/'],
+    ['PDF 합치기', function (d) { return d.pv_pdfmerge; }, function (d) { return d.appmin_pdfmerge; }, '/apps/pdf-merge/'],
+    ['QR코드 스캔', function (d) { return d.pv_qrscan; }, function (d) { return d.appmin_qrscan; }, '/apps/qr-scan/'],
+    ['QR코드 만들기', function (d) { return d.pv_qrmake; }, function (d) { return d.appmin_qrmake; }, '/apps/qr-maker/'],
+    ['앱스 목록', function (d) { return d.pv_apps; }, function () { return 0; }, '/apps/']
   ];
   function renderApps(d) {
     var fmt = function (n) { return n.toLocaleString('ko-KR'); };
-    var rows = APPS.map(function (a) { return { name: a[0], pv: a[1](d), href: a[2] }; });
+    var rows = APPS.map(function (a) { return { name: a[0], pv: a[1](d), m: a[2](d), href: a[3] }; });
     var sum = rows.reduce(function (t, r) { return t + r.pv; }, 0);
+    var sumMin = rows.reduce(function (t, r) { return t + r.m; }, 0);
     document.getElementById('app-total').innerHTML = fmt(sum) + '<small>회</small>';
     document.getElementById('app-note').textContent = sum === 0
-      ? '아직 도구를 연 사람이 없어요. PDF 합치기·QR코드·사주를 열 때마다 여기 숫자가 오릅니다.'
-      : '도구는 판 수·플레이 시간이 없어서 열어본 횟수만 셉니다. 도구로 들어온 사람이 게임으로 넘어가는지는 구글 애널리틱스에서 봅니다.';
-    var max = 0; rows.forEach(function (r) { max = Math.max(max, r.pv); });
-    document.getElementById('apps-table').innerHTML = '<table class="gt"><tr><th>앱</th><th>접속</th><th></th></tr>' +
+      ? '아직 도구를 연 사람이 없어요. PDF 합치기·QR코드·사주·한자·가나를 열 때마다 여기 숫자가 오릅니다.'
+      : '체류는 화면을 보고 있는 동안만 1분씩 셉니다(2026-09-20부터). "분/접속"이 곧 한 번 왔을 때 머문 시간이에요. 지금까지 모두 '
+        + (sumMin >= 120 ? Math.round(sumMin / 60) + '시간' : fmt(sumMin) + '분') + ' 머물렀어요.';
+    var maxMp = 0; rows.forEach(function (r) { if (r.pv) maxMp = Math.max(maxMp, r.m / r.pv); });
+    document.getElementById('apps-table').innerHTML = '<table class="gt"><tr><th>앱</th><th>접속</th><th>체류</th><th>분/접속</th></tr>' +
       rows.sort(function (a, b) { return b.pv - a.pv; }).map(function (r) {
-        var pct = max ? Math.max(4, Math.round(r.pv / max * 100)) : 0;
+        var mp = r.pv ? (r.m / r.pv).toFixed(1) : '–';
+        var stay = r.m >= 120 ? Math.round(r.m / 60) + '시간' : fmt(r.m) + '분';
+        var hot = r.pv && maxMp && r.m / r.pv >= maxMp * 0.999 && r.m > 0;
         return '<tr' + (r.pv ? '' : ' class="zero"') + '><td><a href="' + r.href + '">' + r.name + '</a></td><td>' + fmt(r.pv) + '</td>' +
-               '<td style="width:45%"><div style="height:10px;border-radius:99px;background:rgba(0,0,0,.08)">' +
-               '<div style="height:10px;border-radius:99px;width:' + pct + '%;background:var(--green)"></div></div></td></tr>';
+               '<td>' + stay + '</td><td' + (hot ? ' style="color:var(--green);font-weight:700"' : '') + '>' + mp + '</td></tr>';
       }).join('') + '</table>';
   }
 
@@ -386,7 +392,8 @@
         var ago = Math.max(0, Math.round((Date.now() - Date.parse(j.at)) / 60000));
         note('자동 집계 ' + (ago < 60 ? ago + '분' : Math.round(ago / 60) + '시간') + ' 전 기준 · 방문 수와 오늘은 지금 값으로 맞춥니다…');
         // 스냅샷에 아직 없는 앱스 칸은 지금 값으로 덧읽는다 (새 도구를 올린 날 0 으로 보이지 않게)
-        var appKeys = ['pv_saju', 'pv_sajuintro', 'pv_hanja', 'pv_kana', 'pv_pdfmerge', 'pv_qrscan', 'pv_qrmake', 'pv_apps', 'pv_app'];
+        var appKeys = ['pv_saju', 'pv_sajuintro', 'pv_hanja', 'pv_kana', 'pv_pdfmerge', 'pv_qrscan', 'pv_qrmake', 'pv_apps', 'pv_app',
+                       'appmin_saju', 'appmin_sajuintro', 'appmin_hanja', 'appmin_kana', 'appmin_pdfmerge', 'appmin_qrscan', 'appmin_qrmake'];
         if (appKeys.some(function (k) { return !(k in v); })) {
           fetchChunked(appKeys, 4, 1200).then(function (vs) {
             appKeys.forEach(function (k, i) { if (!(k in v)) d[k] = vs[i] || 0; });
