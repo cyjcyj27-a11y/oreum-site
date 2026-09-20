@@ -29,6 +29,26 @@
 
 <link rel="stylesheet" href="/style.css?v=40">
 
+<style>
+.shelf-head{display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap;margin:44px 0 16px;padding-bottom:10px;border-bottom:2px solid var(--line)}
+.shelf-head:first-of-type{margin-top:8px}
+.shelf-head h2{margin:0;font-size:26px;letter-spacing:.02em;color:var(--ink)}
+.shelf-head h2 small{font-size:15px;font-weight:700;color:var(--muted);margin-left:8px;vertical-align:2px}
+.shelf-head p{margin:0 0 3px;font-size:15px;color:var(--muted);flex:1 1 auto}
+.shelf-more{font-size:15px;font-weight:800;color:var(--ink);text-decoration:none;margin-bottom:3px}
+.shelf-more:hover{text-decoration:underline}
+@media (max-width:760px){.shelf-head{margin-top:34px}.shelf-head h2{font-size:22px}.shelf-head p{flex-basis:100%;order:3}}
+/* GAMES 는 그대로(4칸), 플래시·미니는 반 크기(8칸) */
+.showcase .grid.g-small{grid-template-columns:repeat(8,1fr);gap:10px}
+.showcase .grid.g-small .mbody{padding:7px 8px 9px}
+.showcase .grid.g-small .mbody b{font-size:13px;line-height:1.25}
+.showcase .grid.g-small .mbody i{font-size:11px;margin-top:2px}
+.showcase .grid.g-small .kind{font-size:9px;padding:2px 6px;left:6px;top:6px;letter-spacing:.08em}
+.showcase .grid.g-small a.mini:nth-child(-n+2) .shot::after{font-size:9px;padding:2px 6px;right:6px;top:6px}
+@media (max-width:1180px){.showcase .grid.g-small{grid-template-columns:repeat(6,1fr)}}
+@media (max-width:900px){.showcase .grid.g-small{grid-template-columns:repeat(4,1fr)}}
+@media (max-width:760px){.showcase .grid.g-small{grid-template-columns:repeat(4,1fr);gap:6px}.showcase .grid.g-small .mbody{padding:5px 6px 7px}.showcase .grid.g-small .mbody b{font-size:11.5px}.showcase .grid.g-small .mbody i{display:none}.showcase .grid.g-small .kind{display:none}}
+</style>
 </head>
 <body>
 
@@ -58,31 +78,81 @@
   <section class="showcase">
     <div class="wrap">
       <div class="list-head"><h1>GAMES</h1></div>
+      <div class="shelf-head"><h2>GAMES<small>14</small></h2><p>Bigger games to sink into</p></div>
       <div class="grid">
         <!-- CARDS:start -->
+        <a class="mini" href="/en/games/mulgwisin/">
+          <span class="shot"><img src="/assets/mulgwisin-shot-en.webp?v=1" alt="A thatched house with glowing paper doors beside a river valley at night, a white dress hanging on the clothesline, under the title MULGWISIN and the words WATER GHOST" width="800" height="500" loading="lazy"><span class="kind">GAME</span></span>
+          <span class="mbody"><b>Mulgwisin</b><i>free 3D horror game</i></span>
+        </a>
+        <a class="mini" href="/en/games/ueno/">
+          <span class="shot"><img src="/assets/ueno-shot-en.webp?v=1" alt="Ken in a black school uniform and Hiromi, a gyaru schoolgirl, standing side by side on a cherry blossom path in the park under the title UENO ZZANG" width="800" height="500" loading="lazy"></span>
+          <span class="mbody"><b>UENO ZZANG</b><i>3D park adventure brawler</i></span>
+        </a>
+        <a class="mini" href="/en/games/jeju/">
+          <span class="shot"><img src="/assets/jeju-shot-en.webp?v=1" alt="A navy convertible parked on a rocky Jeju hilltop with a couple and a cat looking out over fields and the sea, under the white title BUY JEJU" width="800" height="500" loading="lazy"></span>
+          <span class="mbody"><b>BUY JEJU</b><i>open world land-buying game</i></span>
+        </a>
+        <a class="mini" href="/en/games/farmonmars/">
+          <span class="shot"><img src="/assets/farmonmars-shot-en.webp?v=1" alt="A teddy-bear robot, farm domes, a base and a rocket on yellow Martian ground with a green city in the top right, under the green title 팜온마즈 and FARM ON MARS" width="800" height="500" loading="lazy"></span>
+          <span class="mbody"><b>FARM ON MARS</b><i>idle Mars farming city builder</i></span>
+        </a>
+        <a class="mini" href="/en/games/coinwash/">
+          <span class="shot"><img src="/assets/coinwash-shot-en.webp?v=2" alt="A night laundromat with tiled floor, three washers, a green coin changer and blue chairs, an aproned owner standing in the middle, under the title COIN LAUNDRY 24 and the line OPEN 24 HOURS" width="800" height="500" loading="lazy"></span>
+          <span class="mbody"><b>COIN LAUNDRY 24</b><i>idle laundromat tycoon</i></span>
+        </a>
+        <a class="mini" href="/en/games/boyband/">
+          <span class="shot"><img src="/assets/boyband-shot-en.webp?v=1" alt="A 50-year-old producer in a suit and four young indie band members stand on a purple-lit stage under the title HOTSHOT INDIE" width="800" height="500" loading="lazy"></span>
+          <span class="mbody"><b>HOTSHOT INDIE</b><i>indie band manager sim</i></span>
+        </a>
+        <a class="mini" href="/en/games/castaway/">
+          <span class="shot"><img src="/assets/castaway-shot-en.webp?v=1" alt="A bearded man in torn clothes stands on a raft in the middle of a blue sea holding a fishing rod, with the title OPEN SEA below" width="800" height="500" loading="lazy"><span class="kind">GAME</span></span>
+          <span class="mbody"><b>OPEN SEA</b><i>raft fishing survival game</i></span>
+        </a>
+        <a class="mini" href="/en/games/fingerkick/">
+          <span class="shot"><img src="/assets/fingerkick-shot-en.webp?v=3" alt="A green table-top soccer pitch with red and blue player discs and a ball, with the title FINGER KICK in the middle" width="800" height="500" loading="lazy"></span>
+          <span class="mbody"><b>FINGER KICK</b><i>finger soccer game</i></span>
+        </a>
+        <a class="mini" href="/en/games/skyrider/">
+          <span class="shot"><img src="/assets/skyrider-shot-en.webp?v=1" alt="A red-roofed diner with a DELIVERY sign on top of a stone pillar above the clouds, a delivery motorbike parked in front and the title SKY RIDER above" width="800" height="500" loading="lazy"></span>
+          <span class="mbody"><b>SKY RIDER</b><i>sky motorbike · food delivery</i></span>
+        </a>
+        <a class="mini" href="/en/games/saab/">
+          <span class="shot"><img src="/assets/saab-shot.webp?v=1" alt="Night square in New Manhattan. A stealth jet hovers overhead while drones, humanoid robots and a six-wheel armoured car close in" width="800" height="500" loading="lazy"><span class="kind">GAME</span></span>
+          <span class="mbody"><b>S.A.A.B.</b><i>FPS · 3D shooter</i></span>
+        </a>
+        <a class="mini" href="/en/games/making-kimchi/">
+          <span class="shot"><img src="/assets/making-kimchi-shot.webp?v=2" alt="Inside a Manhattan kimchi shop with onggi crocks, a red basin of kimchi and customers at the counter" width="800" height="500" loading="lazy"><span class="kind">GAME</span></span>
+          <span class="mbody"><b>MAKING KIMCHI</b><i>kimchi shop cooking sim</i></span>
+        </a>
+        <a class="mini" href="/en/games/oreumkil/">
+          <span class="shot"><img src="/assets/oreumkil-shot.webp" alt="" width="800" height="500" loading="lazy"><span class="kind">GAME</span></span>
+          <span class="mbody"><b>OREUMKIL</b><i>a broken physics engine</i></span>
+        </a>
+        <a class="mini" href="/en/games/immortality/">
+          <span class="shot"><img src="/assets/teaser-immortality.webp?v=3" alt="" width="800" height="500" loading="lazy"><span class="kind">GAME</span></span>
+          <span class="mbody"><b>The Price of Immortality</b><i>Narrative survival adventure</i></span>
+        </a>
+        <a class="mini" href="/en/games/lulu/">
+          <span class="shot"><img src="/assets/lulu-shot.webp?v=3" alt="" width="800" height="500" loading="lazy"><span class="kind">GAME</span></span>
+          <span class="mbody"><b>Lulu the Cat's Jeju Life</b><i>3D life simulation</i></span>
+        </a>
+      <!-- CARDS:end -->
+      </div>
+      <div class="shelf-head"><h2>Flash Games<small>15</small></h2><p>Quick rounds, easy to start, no download</p></div>
+      <div class="grid g-small">
+        <!-- FLASH:start -->
         <a class="mini" href="/en/games/flash/yut/">
           <span class="shot"><img src="/assets/yut-shot-en.webp?v=1" alt="A Yut Nori board on a straw mat with animal pieces and four wooden sticks, under the title YUT NORI" width="800" height="500" loading="lazy"><span class="kind">FLASH</span></span>
           <span class="mbody"><b>YUT NORI</b><i>Korean board game · 1-4 players</i></span>
-        </a>
-        <a class="mini" href="/en/games/mini/foosball/">
-          <span class="shot"><img src="/assets/foosball-shot-en.webp?v=1" alt="A green foosball table with blue and yellow men on silver rods and a white ball, under the title FOOSBALL" width="800" height="500" loading="lazy"><span class="kind">MINI</span></span>
-          <span class="mbody"><b>FOOSBALL</b><i>3D table soccer · 1-2 players</i></span>
         </a>
         <a class="mini" href="/en/games/flash/woodenblock/">
           <span class="shot"><img src="/assets/woodenblock-shot-en.webp?v=1" alt="A wooden block tower on a round table with one block halfway pulled out, under the title WOODEN BLOCK" width="800" height="500" loading="lazy"><span class="kind">FLASH</span></span>
           <span class="mbody"><b>WOODEN BLOCK</b><i>block tower game · 1-2 players</i></span>
         </a>
-        <a class="mini" href="/en/games/mini/odaesu/">
-          <span class="shot"><img src="/assets/odaesu-shot-en.webp?v=1" alt="In a green fluorescent-lit hallway a man with curly hair and a hammer faces six thugs coming at him, under the brush-lettered title ODAESU GAME" width="800" height="500" loading="lazy"><span class="kind">MINI</span></span>
-          <span class="mbody"><b>Odaesu Game</b><i>beat em up · fighting game</i></span>
-        </a>
         <a class="mini" href="/en/games/flash/bowling/">
           <span class="shot"><img src="/assets/bowling-shot-en.webp?v=2" alt="At the end of a neon-lit bowling lane, a pink and purple swirl ball crashes into the pins and sends them flying, under the glowing title BOWLING" width="800" height="500" loading="lazy"><span class="kind">FLASH</span></span>
           <span class="mbody"><b>3D Bowling</b><i>3D bowling game · 1-2 players</i></span>
-        </a>
-        <a class="mini" href="/en/games/mulgwisin/">
-          <span class="shot"><img src="/assets/mulgwisin-shot-en.webp?v=1" alt="A thatched house with glowing paper doors beside a river valley at night, a white dress hanging on the clothesline, under the title MULGWISIN and the words WATER GHOST" width="800" height="500" loading="lazy"><span class="kind">GAME</span></span>
-          <span class="mbody"><b>Mulgwisin</b><i>free 3D horror game</i></span>
         </a>
         <a class="mini" href="/en/games/flash/spotdiff/">
           <span class="shot"><img src="/assets/spotdiff-shot-en.webp?v=1" alt="The title SPOT THE DIFFERENCE above two kitchen pictures side by side. In the right picture the window frame is pink and an item on the table has changed, and both spots are circled in green" width="800" height="500" loading="lazy"><span class="kind">FLASH</span></span>
@@ -100,10 +170,6 @@
           <span class="shot"><img src="/assets/meowsquad-shot-en.webp?v=1" alt="Four rows of mouse flying saucers in formation against a sunset sky, a cage floating down on a parachute from the middle, and a cat fighter jet with two green wingmen firing from below, with the title MEOWSQUAD on the left" width="800" height="500" loading="lazy"><span class="kind">FLASH</span></span>
           <span class="mbody"><b>MEOWSQUAD</b><i>free cat fighter shoot 'em up</i></span>
         </a>
-        <a class="mini" href="/en/games/ueno/">
-          <span class="shot"><img src="/assets/ueno-shot-en.webp?v=1" alt="Ken in a black school uniform and Hiromi, a gyaru schoolgirl, standing side by side on a cherry blossom path in the park under the title UENO ZZANG" width="800" height="500" loading="lazy"></span>
-          <span class="mbody"><b>UENO ZZANG</b><i>3D park adventure brawler</i></span>
-        </a>
         <a class="mini" href="/en/games/flash/ttang/">
           <span class="shot"><img src="/assets/ttang-shot-en.webp?v=2" alt="A square drawn in the dirt with blue and red territories spreading from opposite corners and a blue stone heading home along a dashed line, with the title LAND GRAB" width="800" height="500" loading="lazy"><span class="kind">FLASH</span></span>
           <span class="mbody"><b>LAND GRAB</b><i>free Korean land-claiming game</i></span>
@@ -120,17 +186,9 @@
           <span class="shot"><img src="/assets/baduk-shot-en.webp?v=1" alt="A wooden 13x13 Go board with a few black and white stones near the edges and the title BADUK in the middle" width="800" height="500" loading="lazy"><span class="kind">FLASH</span></span>
           <span class="mbody"><b>BADUK</b><i>free Go game</i></span>
         </a>
-        <a class="mini" href="/en/games/jeju/">
-          <span class="shot"><img src="/assets/jeju-shot-en.webp?v=1" alt="A navy convertible parked on a rocky Jeju hilltop with a couple and a cat looking out over fields and the sea, under the white title BUY JEJU" width="800" height="500" loading="lazy"></span>
-          <span class="mbody"><b>BUY JEJU</b><i>open world land-buying game</i></span>
-        </a>
         <a class="mini" href="/en/games/flash/bungeoppang/">
           <span class="shot"><img src="/assets/bungeoppang-shot-en.webp?v=1" alt="A snowy night street food tent: four fish-shaped breads baking in a cast iron mould, fish cake skewers lying in a steel basin, and the title BUNGEOPPANG in the middle" width="800" height="500" loading="lazy"><span class="kind">FLASH</span></span>
           <span class="mbody"><b>BUNGEOPPANG</b><i>Korean fish-shaped bread idle game</i></span>
-        </a>
-        <a class="mini" href="/en/games/farmonmars/">
-          <span class="shot"><img src="/assets/farmonmars-shot-en.webp?v=1" alt="A teddy-bear robot, farm domes, a base and a rocket on yellow Martian ground with a green city in the top right, under the green title 팜온마즈 and FARM ON MARS" width="800" height="500" loading="lazy"></span>
-          <span class="mbody"><b>FARM ON MARS</b><i>idle Mars farming city builder</i></span>
         </a>
         <a class="mini" href="/en/games/flash/catmobile/">
           <span class="shot"><img src="/assets/catmobile-shot-en.webp?v=1" alt="A pale yellow sky with a green fish, a blue ball, a yellow star, a butterfly, a mouse and a red dot around the title GAME FOR CAT" width="800" height="500" loading="lazy"><span class="kind">FLASH</span></span>
@@ -140,49 +198,34 @@
           <span class="shot"><img src="/assets/boa-shot-en.webp?v=1" alt="A pale green jungle floor scattered with leaves, a green boa snake crawling toward a frog, a grey elephant in the top right, and the title BOA in the middle" width="800" height="500" loading="lazy"><span class="kind">FLASH</span></span>
           <span class="mbody"><b>BOA</b><i>elephant-swallowing snake game</i></span>
         </a>
-        <a class="mini" href="/en/games/coinwash/">
-          <span class="shot"><img src="/assets/coinwash-shot-en.webp?v=2" alt="A night laundromat with tiled floor, three washers, a green coin changer and blue chairs, an aproned owner standing in the middle, under the title COIN LAUNDRY 24 and the line OPEN 24 HOURS" width="800" height="500" loading="lazy"></span>
-          <span class="mbody"><b>COIN LAUNDRY 24</b><i>idle laundromat tycoon</i></span>
-        </a>
-        <a class="mini" href="/en/games/boyband/">
-          <span class="shot"><img src="/assets/boyband-shot-en.webp?v=1" alt="A 50-year-old producer in a suit and four young indie band members stand on a purple-lit stage under the title HOTSHOT INDIE" width="800" height="500" loading="lazy"></span>
-          <span class="mbody"><b>HOTSHOT INDIE</b><i>indie band manager sim</i></span>
-        </a>
         <a class="mini" href="/en/games/flash/alkkagi/">
           <span class="shot"><img src="/assets/alkkagi-shot-en.webp?v=1" alt="A wooden Go board with five white stones and five black stones facing each other and the title ALKKAGI in the middle" width="800" height="500" loading="lazy"><span class="kind">FLASH</span></span>
           <span class="mbody"><b>ALKKAGI</b><i>stone flicking game</i></span>
         </a>
-        <a class="mini" href="/en/games/castaway/">
-          <span class="shot"><img src="/assets/castaway-shot-en.webp?v=1" alt="A bearded man in torn clothes stands on a raft in the middle of a blue sea holding a fishing rod, with the title OPEN SEA below" width="800" height="500" loading="lazy"><span class="kind">GAME</span></span>
-          <span class="mbody"><b>OPEN SEA</b><i>raft fishing survival game</i></span>
+      <!-- FLASH:end -->
+      </div>
+      <div class="shelf-head"><h2>Mini Games<small>18</small></h2><p>Small experiments, one idea each</p><a class="shelf-more" href="/en/games/mini/">All mini games →</a></div>
+      <div class="grid g-small">
+        <!-- MINI:start -->
+        <a class="mini" href="/en/games/mini/foosball/">
+          <span class="shot"><img src="/assets/foosball-shot-en.webp?v=1" alt="A green foosball table with blue and yellow men on silver rods and a white ball, under the title FOOSBALL" width="800" height="500" loading="lazy"><span class="kind">MINI</span></span>
+          <span class="mbody"><b>FOOSBALL</b><i>3D table soccer · 1-2 players</i></span>
+        </a>
+        <a class="mini" href="/en/games/mini/odaesu/">
+          <span class="shot"><img src="/assets/odaesu-shot-en.webp?v=1" alt="In a green fluorescent-lit hallway a man with curly hair and a hammer faces six thugs coming at him, under the brush-lettered title ODAESU GAME" width="800" height="500" loading="lazy"><span class="kind">MINI</span></span>
+          <span class="mbody"><b>Odaesu Game</b><i>beat em up · fighting game</i></span>
         </a>
         <a class="mini" href="/en/games/mini/shibavet/">
           <span class="shot"><img src="/assets/shibavet-shot-en.webp?v=1" alt="A wooden two-storey house on a green lawn under a blue sky, with a white fence and a blue car, and the title SHIBA VET DAY in the middle" width="800" height="500" loading="lazy"><span class="kind">MINI</span></span>
           <span class="mbody"><b>SHIBA VET DAY</b><i>shiba dog catching game</i></span>
         </a>
-        <a class="mini" href="/en/games/fingerkick/">
-          <span class="shot"><img src="/assets/fingerkick-shot-en.webp?v=3" alt="A green table-top soccer pitch with red and blue player discs and a ball, with the title FINGER KICK in the middle" width="800" height="500" loading="lazy"></span>
-          <span class="mbody"><b>FINGER KICK</b><i>finger soccer game</i></span>
-        </a>
-        <a class="mini" href="/en/games/skyrider/">
-          <span class="shot"><img src="/assets/skyrider-shot-en.webp?v=1" alt="A red-roofed diner with a DELIVERY sign on top of a stone pillar above the clouds, a delivery motorbike parked in front and the title SKY RIDER above" width="800" height="500" loading="lazy"></span>
-          <span class="mbody"><b>SKY RIDER</b><i>sky motorbike · food delivery</i></span>
-        </a>
         <a class="mini" href="/en/games/mini/skijump/">
           <span class="shot"><img src="/assets/skijump-shot.webp?v=1" alt="A quokka on skis stands in the middle of a snowy slope with the title SKI JUMP below" width="800" height="500" loading="lazy"><span class="kind">MINI</span></span>
           <span class="mbody"><b>SKI JUMP</b><i>ski jump · 100 stages</i></span>
         </a>
-        <a class="mini" href="/en/games/saab/">
-          <span class="shot"><img src="/assets/saab-shot.webp?v=1" alt="Night square in New Manhattan. A stealth jet hovers overhead while drones, humanoid robots and a six-wheel armoured car close in" width="800" height="500" loading="lazy"><span class="kind">GAME</span></span>
-          <span class="mbody"><b>S.A.A.B.</b><i>FPS · 3D shooter</i></span>
-        </a>
         <a class="mini" href="/en/games/mini/night-study/">
           <span class="shot"><img src="/assets/night-study-shot.webp?v=2" alt="A dark corridor of an abandoned school lined with old lockers, a flashlight beam on the floor and pitch black at the far end" width="800" height="500" loading="lazy"><span class="kind">MINI</span></span>
           <span class="mbody"><b>NIGHT STUDY</b><i>horror · school escape</i></span>
-        </a>
-        <a class="mini" href="/en/games/making-kimchi/">
-          <span class="shot"><img src="/assets/making-kimchi-shot.webp?v=2" alt="Inside a Manhattan kimchi shop with onggi crocks, a red basin of kimchi and customers at the counter" width="800" height="500" loading="lazy"><span class="kind">GAME</span></span>
-          <span class="mbody"><b>MAKING KIMCHI</b><i>kimchi shop cooking sim</i></span>
         </a>
         <a class="mini" href="/en/games/mini/break-it-all/">
           <span class="shot"><img src="/assets/break-it-all-shot-en.webp?v=5" alt="A steel apartment block standing under a night sky, with a neon yellow paddle and pink balls below" width="800" height="500" loading="lazy"><span class="kind">MINI</span></span>
@@ -195,10 +238,6 @@
         <a class="mini" href="/en/games/mini/pixl/">
           <span class="shot"><img src="/assets/pixl-shot-en.webp?v=2" alt="" width="800" height="500" loading="lazy"><span class="kind">MINI</span></span>
           <span class="mbody"><b>PIXL</b><i>Jigsaw puzzle · 128 boards</i></span>
-        </a>
-        <a class="mini" href="/en/games/oreumkil/">
-          <span class="shot"><img src="/assets/oreumkil-shot.webp" alt="" width="800" height="500" loading="lazy"><span class="kind">GAME</span></span>
-          <span class="mbody"><b>OREUMKIL</b><i>a broken physics engine</i></span>
         </a>
         <a class="mini" href="/en/games/mini/doldam/">
           <span class="shot"><img src="/assets/doldam-shot-en.webp?v=4" alt="" width="800" height="500" loading="lazy"><span class="kind">MINI</span></span>
@@ -232,14 +271,6 @@
           <span class="shot"><img src="/assets/polarity-flip-shot-en.webp" alt="" width="800" height="500" loading="lazy"><span class="kind">MINI</span></span>
           <span class="mbody"><b>Polarity Flip</b><i>Board game</i></span>
         </a>
-        <a class="mini" href="/en/games/immortality/">
-          <span class="shot"><img src="/assets/teaser-immortality.webp?v=3" alt="" width="800" height="500" loading="lazy"><span class="kind">GAME</span></span>
-          <span class="mbody"><b>The Price of Immortality</b><i>Narrative survival adventure</i></span>
-        </a>
-        <a class="mini" href="/en/games/lulu/">
-          <span class="shot"><img src="/assets/lulu-shot.webp?v=3" alt="" width="800" height="500" loading="lazy"><span class="kind">GAME</span></span>
-          <span class="mbody"><b>Lulu the Cat's Jeju Life</b><i>3D life simulation</i></span>
-        </a>
         <a class="mini" href="/games/mini/character-lab/?lang=en">
           <span class="shot"><img src="/assets/character-lab-shot-en.webp" alt="" width="800" height="500" loading="lazy"><span class="kind">MINI</span></span>
           <span class="mbody"><b>Character Lab</b><i>3D character experiment</i></span>
@@ -248,7 +279,7 @@
           <span class="shot"><img src="/assets/character-maker-shot.webp" alt="" width="800" height="500" loading="lazy"><span class="kind">MINI</span></span>
           <span class="mbody"><b>Character Bench</b><i>3D character builder</i></span>
         </a>
-      <!-- CARDS:end -->
+      <!-- MINI:end -->
       </div>
     </div>
   </section>
