@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, viewport-fit=cover">
+<title>모에모에 메이드카페 — 오름게임즈</title>
+<style>
+  @font-face { font-family: 'Griun'; src: url('fonts/Griun_Fromsol-Rg.ttf') format('truetype'); font-display: swap; }
+  @font-face { font-family: 'Ria'; src: url('fonts/RiaSans-ExtraBold.woff2') format('woff2'); font-display: swap; }
+  @font-face { font-family: 'SingleDay'; src: url('fonts/SingleDay-title.woff2?v=1') format('woff2'); font-display: swap; }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #2a1a28; font-family: 'Griun', 'Noto Sans KR', 'Malgun Gothic', sans-serif; color: #fff8fb; user-select: none; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+  #wrap { position: fixed; inset: 0; display: grid; place-items: center; }
+  #c { display: block; touch-action: none; background: #2a1a28; }
+  @keyframes blink { 0%,100%{opacity:.4} 50%{opacity:1} }
+  @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.06)} }
+  [hidden] { display: none !important; }
+  #rotate { position: fixed; inset: 0; z-index: 90; display: none; place-items: center; text-align: center; background: #2a1a28; color: #ffeef4; font-size: 17px; line-height: 1.8; padding: 8vw; }
+  body.touch.portrait #rotate { display: grid; }
+  #rotate button { margin: 22px 0 16px; padding: 15px 32px; border: 0; border-radius: 99px; cursor: pointer; font-family: inherit; font-size: 17px; font-weight: 800; color: #4a1a30; background: #ff9ac0; }
+  #rotate .sub { font-size: 14px; color: #c8a8b8; line-height: 1.7; } #rotate .sub a { color: #e8c8d8; }
+
+  /* ── HUD — 스카이라이더 기본 UI ── */
+  #topbar { position: fixed; left: 0; right: 0; top: 0; min-height: calc(44px + env(safe-area-inset-top)); padding: calc(6px + env(safe-area-inset-top)) calc(112px + env(safe-area-inset-right)) 6px calc(112px + env(safe-area-inset-left)); display: flex; flex-wrap: nowrap; align-items: center; justify-content: center; gap: 6px 8px; background: linear-gradient(180deg, rgba(40,10,30,.45), rgba(40,10,30,0)); pointer-events: none; z-index: 5; opacity: 0; transition: opacity .8s; }
+  #topbar.show { opacity: 1; }
+  .stat { display: inline-flex; align-items: center; gap: 5px; padding: 5px 10px; border-radius: 999px; background: rgba(0,0,0,.35); border: 1px solid rgba(255,255,255,.14); font-size: 15px; white-space: nowrap; text-shadow: 0 1px 2px rgba(0,0,0,.6); min-width: 0; }
+  .stat b { font-weight: normal; font-size: 17px; font-family: 'Ria', 'Griun', sans-serif; letter-spacing: 1px; font-variant-numeric: tabular-nums; } .stat .ic { font-size: 13px; }
+  .stat .bar { width: 64px; height: 6px; border-radius: 3px; background: rgba(255,255,255,.2); overflow: hidden; flex: 0 1 auto; min-width: 14px; } .stat .bar i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #ff7ab0, #ffc0d8); transition: width .3s; }
+  #rankH b { color: #ffd0e0; } #rankT { font-family: 'Ria', sans-serif; font-size: 14px; color: #ffd0e0; font-variant-numeric: tabular-nums; letter-spacing: .5px; }
+  .tog { position: absolute; top: calc(4px + env(safe-area-inset-top)); right: calc(10px + env(safe-area-inset-right)); pointer-events: auto; width: 36px; height: 36px; border-radius: 50%; border: 1px solid rgba(255,255,255,.3); background: rgba(0,0,0,.4); color: #fff; font-family: inherit; font-size: 17px; line-height: 1; padding: 0; touch-action: manipulation; cursor: pointer; }
+  #btnBgm { right: calc(52px + env(safe-area-inset-right)); }
+  .tog.off { opacity: .4; text-decoration: line-through; }
+  @media (max-width: 700px) { #topbar { padding-left: calc(104px + env(safe-area-inset-left)); padding-right: calc(92px + env(safe-area-inset-right)); gap: 4px 5px; } .stat { font-size: 13px; padding: 3px 7px; gap: 4px; } .stat b { font-size: 15px; } .stat .bar { width: 40px; } .tog { width: 32px; height: 32px; font-size: 15px; } #btnBgm { right: calc(46px + env(safe-area-inset-right)); } }
+
+  #toast { position: fixed; left: 50%; top: 30%; transform: translate(-50%, -50%) scale(.6); font-family: 'Ria', sans-serif; font-size: clamp(34px, 7vw, 76px); letter-spacing: 4px; color: #ffd0e0; -webkit-text-stroke: 2px #5a1a3a; paint-order: stroke fill; text-shadow: 0 6px 24px rgba(0,0,0,.5); opacity: 0; pointer-events: none; z-index: 8; text-align: center; white-space: nowrap; transition: opacity .25s, transform .25s; }
+  #toast.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  #toast.gold { color: #ffe08a; } #toast.pink { color: #ff8ab8; }
+  #toast small { display: block; font-size: .42em; letter-spacing: 2px; -webkit-text-stroke: 1px #5a1a3a; }
+  #keys { position: fixed; right: 22px; bottom: 20px; font-size: 13px; opacity: 0; text-align: right; line-height: 1.7; pointer-events: none; text-shadow: 0 1px 2px rgba(0,0,0,.7); transition: opacity .8s; z-index: 5; }
+  #keys.show { opacity: .6; } body.touch #keys { display: none; } body.playing #keys { right: 124px; bottom: 120px; }
+
+  /* 오른쪽 아래 단추: 주 행동(스카우트) 88px 구석, 나머지 60px 왼쪽으로 */
+  .tbtn { display: none; position: fixed; border-radius: 50%; border: 2px solid rgba(255,255,255,.55); background: rgba(0,0,0,.32); color: #fff; font-family: inherit; letter-spacing: 1px; touch-action: manipulation; z-index: 6; text-shadow: 0 1px 2px rgba(0,0,0,.6); padding: 0; cursor: pointer; bottom: calc(24px + env(safe-area-inset-bottom)); }
+  #btnScout { width: 88px; height: 88px; font-size: 17px; right: calc(14px + env(safe-area-inset-right)); background: rgba(255,90,150,.55); border-color: #ff9ac0; }
+  #btnScout.on { background: rgba(255,120,180,.92); color: #fff; border-color: #ffd0e0; animation: pulse 1.6s infinite; }
+  #btnScout.done { opacity: .55; }
+  #btnScout small { display: block; font-family: 'Ria', sans-serif; font-size: 12px; letter-spacing: 0; opacity: .9; margin-top: 2px; }
+  #btnShop { width: 60px; height: 60px; font-size: 14px; right: calc(112px + env(safe-area-inset-right)); bottom: calc(38px + env(safe-area-inset-bottom)); }
+  #btnAlbum { width: 60px; height: 60px; font-size: 14px; right: calc(180px + env(safe-area-inset-right)); bottom: calc(38px + env(safe-area-inset-bottom)); }
+  #btnMission { width: 60px; height: 60px; font-size: 14px; right: calc(248px + env(safe-area-inset-right)); bottom: calc(38px + env(safe-area-inset-bottom)); }
+  #btnShift { width: 60px; height: 60px; font-size: 14px; right: calc(316px + env(safe-area-inset-right)); bottom: calc(38px + env(safe-area-inset-bottom)); }
+  .tbtn.on { background: rgba(255,210,74,.8); color: #4a2a10; border-color: #ffd24a; text-shadow: none; animation: blink 2.4s infinite; }
+  .tbtn .dot { position: absolute; top: -2px; right: -2px; width: 16px; height: 16px; border-radius: 50%; background: #ff3a6a; border: 2px solid #fff; display: none; }
+  .tbtn.new .dot { display: block; }
+  body.playing .tbtn { display: block; }
+  @media (max-height: 520px) { #btnScout { width: 72px; height: 72px; font-size: 14px; bottom: calc(16px + env(safe-area-inset-bottom)); } #btnShop, #btnAlbum, #btnMission, #btnShift { width: 50px; height: 50px; font-size: 12px; bottom: calc(27px + env(safe-area-inset-bottom)); } #btnShop { right: calc(94px + env(safe-area-inset-right)); } #btnAlbum { right: calc(150px + env(safe-area-inset-right)); } #btnMission { right: calc(206px + env(safe-area-inset-right)); } #btnShift { right: calc(262px + env(safe-area-inset-right)); } }
+  #fade { position: fixed; inset: 0; background: #000; opacity: 0; pointer-events: none; transition: opacity 1.2s; z-index: 9; } #fade.show { opacity: .7; }
+
+  /* 타이틀 */
+  #title { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding-top: 6vh; background: linear-gradient(180deg, rgba(60,10,40,.62), rgba(60,10,40,.35) 30%, rgba(60,10,40,0) 48%, rgba(60,10,40,0) 72%, rgba(60,10,40,.5)); transition: opacity 1s; text-align: center; z-index: 10; }
+  #title.hide { opacity: 0; pointer-events: none; }
+  #title h1 { font-family: 'SingleDay', 'Ria', sans-serif; font-weight: 900; font-size: clamp(42px, 8.6vw, 96px); margin: 10px 0 0; letter-spacing: 0; color: #fff4f8; font-weight: 900; text-shadow: 0 3px 0 #d0508a, 0 6px 0 #7a2050, 0 12px 28px rgba(60,0,40,.6); -webkit-text-stroke: 2.5px #7a2050; paint-order: stroke fill; line-height: 1.05; }
+  #title h1 { position: relative; display: inline-block; }
+  #title h1 b { font-weight: 900; }
+  #title h1 i { font-style: normal; color: #ff5a8a; font-size: .78em; margin: 0 .06em; vertical-align: .04em; text-shadow: 0 3px 0 #b02050, 0 6px 0 #6a1030, 0 12px 28px rgba(60,0,40,.6); -webkit-text-stroke: 1.5px #7a2050; animation: beat 1.2s ease-in-out infinite; display: inline-block; }
+  @keyframes beat { 0%,100%{transform:scale(1)} 30%{transform:scale(1.18)} 45%{transform:scale(1)} 60%{transform:scale(1.1)} }
+  #title h1 .hd { position: absolute; color: #ff8ab8; -webkit-text-stroke: 1px #7a2050; text-shadow: 0 2px 0 #b02050; font-size: .32em; line-height: 1; pointer-events: none; animation: float 2.6s ease-in-out infinite; }
+  #title h1 .hd.h1 { left: -.35em; top: -.25em; } #title h1 .hd.h2 { right: -.3em; top: -.05em; font-size: .42em; animation-delay: .6s; } #title h1 .hd.h3 { left: .95em; top: -.5em; font-size: .24em; animation-delay: 1.2s; } #title h1 .hd.h4 { right: 1.2em; bottom: -.35em; font-size: .28em; animation-delay: 1.8s; }
+  @keyframes float { 0%,100%{transform:translateY(0) rotate(-8deg)} 50%{transform:translateY(-.25em) rotate(8deg)} }
+  html[lang="en"] #title h1 { font-size: clamp(34px, 7.6vw, 88px); letter-spacing: 3px; white-space: nowrap; }
+  #title .brand { display: flex; align-items: center; gap: 8px; padding: 6px 14px 6px 8px; border-radius: 999px; background: rgba(255,253,247,.92); color: #2e6b39; font-size: 14px; letter-spacing: 1px; }
+  #title .brand img { width: 30px; height: 15px; }
+  #title .btns { position: absolute; left: 50%; transform: translateX(-50%); bottom: 9vh; display: flex; gap: 14px; }
+  #title .go { font-family: 'Ria', sans-serif; font-size: 26px; letter-spacing: 6px; text-indent: 6px; padding: 12px 36px 14px; border-radius: 20px; background: rgba(70,15,45,.75); border: 1px solid rgba(255,255,255,.18); box-shadow: 0 8px 26px rgba(0,0,0,.35); cursor: pointer; white-space: nowrap; }
+  #title .go.main { animation: blink 2.4s infinite; }
+  #title .go small { display: block; font-family: 'Griun', sans-serif; font-size: 13px; letter-spacing: 1px; text-indent: 0; opacity: .75; margin-top: 2px; }
+  @media (max-width: 700px) { #title .go { font-size: 20px; padding: 10px 22px 12px; letter-spacing: 3px; } }
+
+  /* 창(상점·스카우트·도감·미션) */
+  #panel { position: fixed; inset: 0; z-index: 30; display: grid; place-items: center; background: rgba(40,10,30,.55); opacity: 0; pointer-events: none; transition: opacity .3s; padding: calc(10px + env(safe-area-inset-top)) calc(10px + env(safe-area-inset-right)) calc(10px + env(safe-area-inset-bottom)) calc(10px + env(safe-area-inset-left)); }
+  #panel.show { opacity: 1; pointer-events: auto; }
+  #panel .box { width: min(980px, 100%); max-height: 100%; display: flex; flex-direction: column; border-radius: 20px; background: rgba(48,16,40,.95); border: 1px solid rgba(255,180,210,.25); box-shadow: 0 16px 48px rgba(0,0,0,.5); overflow: hidden; }
+  #panel .head { display: flex; align-items: center; gap: 10px; padding: 10px 14px 8px 18px; border-bottom: 1px solid rgba(255,255,255,.1); }
+  #panel .head h2 { font-family: 'Ria', sans-serif; font-size: 22px; letter-spacing: 2px; color: #ffb0d0; margin: 0; flex: 1; }
+  #panel .tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+  #panel .tabs button { font-family: inherit; font-size: 15px; padding: 7px 14px; border-radius: 999px; border: 1px solid rgba(255,255,255,.2); background: rgba(0,0,0,.3); color: #fff; cursor: pointer; touch-action: manipulation; position: relative; }
+  #panel .tabs button.on { background: #ff8ab8; color: #4a1030; border-color: #ff8ab8; }
+  #panel .tabs button.new::after { content: ''; position: absolute; top: -3px; right: -3px; width: 12px; height: 12px; border-radius: 50%; background: #ff3a6a; border: 2px solid #fff; }
+  #panel .body { padding: 14px 18px; overflow-y: auto; -webkit-overflow-scrolling: touch; min-height: 220px; }
+  #panel .foot { display: flex; align-items: center; gap: 14px; padding: 10px 18px 12px; border-top: 1px solid rgba(255,255,255,.1); }
+  #panel .foot .money { font-family: 'Ria', sans-serif; font-size: 22px; letter-spacing: 1px; flex: 1; } #panel .foot .money small { font-family: 'Griun', sans-serif; font-size: 14px; opacity: .8; margin-left: 12px; }
+  #panel .close { font-family: 'Ria', sans-serif; font-size: 20px; letter-spacing: 4px; text-indent: 4px; padding: 10px 28px 12px; border-radius: 16px; background: #ff8ab8; color: #4a1030; border: 0; cursor: pointer; touch-action: manipulation; }
+  .shop { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+  .shop .item { display: flex; align-items: center; gap: 10px; border-radius: 14px; background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.1); padding: 10px 12px; cursor: pointer; touch-action: manipulation; }
+  .shop .item.no { opacity: .45; cursor: default; } .shop .item.max { border-color: rgba(255,180,210,.5); cursor: default; }
+  .shop .item .ic { font-size: 28px; width: 44px; text-align: center; }
+  .shop .item .n { flex: 1; font-size: 15px; } .shop .item .n small { display: block; font-size: 12px; opacity: .65; margin-top: 2px; }
+  .shop .item .lv { font-family: 'Ria', sans-serif; font-size: 12px; color: #ffb0d0; letter-spacing: 1px; }
+  .shop .item .p { font-family: 'Ria', sans-serif; font-size: 17px; color: #ffd24a; white-space: nowrap; } .shop .item.max .p { color: #ffb0d0; }
+  /* 스카우트 */
+  .scout { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 6px 0; }
+  .scout .poster { width: min(100%, 560px); border-radius: 16px; background: linear-gradient(160deg, #ff9ac0, #c86aa8 60%, #7a3a8a); padding: 16px; display: flex; align-items: center; gap: 14px; box-shadow: 0 10px 30px rgba(0,0,0,.35); }
+  .scout .poster canvas { width: 120px; height: 140px; border-radius: 12px; background: rgba(255,255,255,.25); }
+  .scout .poster .txt { flex: 1; } .scout .poster .txt b { display: block; font-family: 'Ria', sans-serif; font-size: 24px; letter-spacing: 2px; color: #fff; } .scout .poster .txt span { font-size: 14px; opacity: .9; display: block; margin-top: 4px; line-height: 1.5; }
+  .scout .rates { display: flex; gap: 12px; font-size: 13px; opacity: .85; } .scout .rates i { font-style: normal; } .scout .rates .r1 { color: #b8c8ff; } .scout .rates .r2 { color: #d8a8ff; } .scout .rates .r3 { color: #ffd24a; }
+  .scout .pull { font-family: 'Ria', sans-serif; font-size: 22px; letter-spacing: 3px; padding: 14px 44px 16px; border-radius: 999px; border: 0; background: linear-gradient(180deg, #ffb0d0, #ff6aa0); color: #4a1030; cursor: pointer; touch-action: manipulation; box-shadow: 0 6px 0 #a83a6a, 0 12px 24px rgba(0,0,0,.35); }
+  .scout .pull:disabled { opacity: .45; cursor: default; box-shadow: none; }
+  .scout .pull b { font-weight: normal; margin-left: 10px; color: #7a1a40; }
+  .scout .team { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin-top: 6px; } .scout .team canvas { width: 54px; height: 62px; border-radius: 8px; background: rgba(255,255,255,.12); } .scout .team canvas.none { opacity: .18; filter: grayscale(1); }
+  /* 도감 */
+  .album { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+  .album .card { border-radius: 14px; background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.1); padding: 8px 8px 10px; text-align: center; position: relative; }
+  .album .card.r3 { border-color: rgba(255,210,74,.5); background: linear-gradient(180deg, rgba(255,210,74,.12), rgba(255,255,255,.05)); }
+  .album .card.r2 { border-color: rgba(200,150,255,.45); }
+  .album .card canvas { width: 100%; aspect-ratio: 5/6; border-radius: 10px; background: linear-gradient(180deg, #ffe0ea, #ffc0d4); }
+  .album .card.none canvas { filter: brightness(0) opacity(.25); background: rgba(255,255,255,.08); }
+  .album .card .nm { font-size: 16px; margin-top: 6px; } .album .card .st { color: #ffd24a; letter-spacing: 1px; font-size: 13px; }
+  .album .card .lv { font-family: 'Ria', sans-serif; font-size: 12px; color: #ffb0d0; letter-spacing: 1px; margin-top: 2px; }
+  .album .card .pf { font-size: 12px; opacity: .75; line-height: 1.55; margin-top: 4px; }
+  .album .card .up { margin-top: 6px; font-family: 'Ria', sans-serif; font-size: 13px; padding: 6px 12px; border-radius: 999px; border: 1px solid rgba(255,255,255,.25); background: rgba(0,0,0,.3); color: #ffd24a; cursor: pointer; touch-action: manipulation; }
+  .album .card .up:disabled { opacity: .4; cursor: default; } .album .card .up.max { color: #ffb0d0; }
+  .album .card .q { font-family: 'Ria', sans-serif; font-size: 40px; color: rgba(255,255,255,.35); position: absolute; left: 50%; top: 34%; transform: translate(-50%, -50%); }
+  /* 근무 고르기 */
+  .shift .info { font-family: 'Ria', sans-serif; font-size: 20px; letter-spacing: 2px; color: #ffb0d0; text-align: center; margin-bottom: 10px; }
+  .shift .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; }
+  .shift .pick { border-radius: 14px; background: rgba(255,255,255,.07); border: 2px solid rgba(255,255,255,.12); padding: 6px 6px 8px; text-align: center; cursor: pointer; touch-action: manipulation; opacity: .55; }
+  .shift .pick.on { opacity: 1; border-color: #7fe08a; background: rgba(127,224,138,.14); box-shadow: 0 0 0 2px rgba(127,224,138,.35); }
+  .shift .pick canvas { width: 100%; aspect-ratio: 6/7; border-radius: 10px; }
+  .shift .pick .sk, .album .card .sk { font-size: 12px; color: #ffe08a; margin-top: 3px; letter-spacing: .5px; } .sk .moe { color: #ff8ac0; font-size: 14px; font-weight: 700; }
+  .shift .pick .nm { font-size: 15px; margin-top: 4px; } .shift .pick .lv { font-family: 'Ria', sans-serif; font-size: 12px; color: #ffb0d0; letter-spacing: 1px; }
+  /* 미션 */
+  .missions { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 8px; }
+  .missions .m { display: flex; align-items: center; gap: 10px; border-radius: 12px; background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.1); padding: 9px 12px; }
+  .missions .m.done { opacity: .5; } .missions .m.done .t { text-decoration: line-through; }
+  .missions .m .ic { font-size: 22px; width: 32px; text-align: center; } .missions .m .t { flex: 1; font-size: 14px; } .missions .m .t small { display: block; opacity: .7; font-size: 12px; margin-top: 2px; }
+  .missions .m .rw { font-family: 'Ria', sans-serif; font-size: 15px; color: #ffd24a; white-space: nowrap; }
+  @media (max-width: 700px) { #panel .body { padding: 10px; } #panel .head h2 { font-size: 18px; } #panel .tabs button { font-size: 13px; padding: 5px 10px; } .album { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); } .scout .poster canvas { width: 90px; height: 105px; } .scout .pull { font-size: 18px; padding: 10px 28px 12px; } }
+
+  /* 스카우트 연출 */
+  #gacha { position: fixed; inset: 0; z-index: 40; display: grid; place-items: center; background: radial-gradient(circle at 50% 45%, rgba(120,30,90,.92), rgba(20,5,20,.96)); opacity: 0; pointer-events: none; transition: opacity .3s; }
+  #gacha.show { opacity: 1; pointer-events: auto; }
+  #gacha .rays { position: absolute; left: 50%; top: 45%; width: 1400px; height: 1400px; transform: translate(-50%, -50%); background: repeating-conic-gradient(rgba(255,255,255,.08) 0 8deg, rgba(255,255,255,0) 8deg 16deg); border-radius: 50%; animation: spin 14s linear infinite; opacity: 0; transition: opacity .6s; }
+  #gacha.open .rays { opacity: 1; } #gacha.ssr .rays { background: repeating-conic-gradient(rgba(255,220,120,.16) 0 8deg, rgba(255,120,200,0) 8deg 16deg); }
+  @keyframes spin { to { transform: translate(-50%, -50%) rotate(360deg); } }
+  #gacha .card { position: relative; width: min(300px, 60vw); aspect-ratio: 5/7; perspective: 1200px; }
+  #gacha .card .face { position: absolute; inset: 0; border-radius: 18px; backface-visibility: hidden; transition: transform .9s cubic-bezier(.2,.8,.2,1); box-shadow: 0 20px 60px rgba(0,0,0,.5); }
+  #gacha .card .back { background: linear-gradient(160deg, #ff8ab8, #b04a90 55%, #5a2060); display: grid; place-items: center; font-family: 'Ria', sans-serif; font-size: 44px; color: rgba(255,255,255,.85); letter-spacing: 2px; border: 4px solid rgba(255,255,255,.5); }
+  #gacha .card .front { transform: rotateY(180deg); background: linear-gradient(180deg, #fff0f6, #ffd0e0); border: 4px solid #fff; overflow: hidden; display: flex; flex-direction: column; align-items: center; color: #4a1030; }
+  #gacha.open .card .back { transform: rotateY(180deg); } #gacha.open .card .front { transform: rotateY(360deg); }
+  #gacha.r3 .card .front { border-color: #ffd24a; box-shadow: 0 0 40px #ffd24a, 0 20px 60px rgba(0,0,0,.5); }
+  #gacha.r2 .card .front { border-color: #d8a8ff; box-shadow: 0 0 30px #c88aff, 0 20px 60px rgba(0,0,0,.5); }
+  #gacha .card canvas { width: 100%; flex: 1; min-height: 0; }
+  #gacha .card .nm { font-family: 'Ria', sans-serif; font-size: 26px; letter-spacing: 3px; margin-top: 2px; }
+  #gacha .card .st { color: #d8a020; letter-spacing: 2px; font-size: 16px; margin-bottom: 8px; }
+  #gacha .card .tag { position: absolute; top: 10px; left: 10px; font-family: 'Ria', sans-serif; font-size: 16px; letter-spacing: 2px; padding: 4px 10px; border-radius: 999px; background: #ff3a6a; color: #fff; transform: rotate(-8deg); }
+  #gacha .card .tag.dup { background: #7a5aff; }
+  #gacha .msg { position: absolute; left: 50%; bottom: 12vh; transform: translateX(-50%); font-family: 'Ria', sans-serif; font-size: 22px; letter-spacing: 4px; color: #fff; opacity: 0; transition: opacity .5s; text-shadow: 0 2px 8px rgba(0,0,0,.6); white-space: nowrap; }
+  #gacha.open .msg { opacity: .9; animation: blink 2s infinite 1s; }
+  #gacha .spk { position: absolute; width: 10px; height: 10px; border-radius: 50%; background: #fff; pointer-events: none; animation: spk 1.4s ease-out forwards; }
+  @keyframes spk { 0% { transform: translate(0,0) scale(1); opacity: 1; } 100% { transform: translate(var(--dx), var(--dy)) scale(0); opacity: 0; } }
+
+  /* 엔딩 */
+  #ending { position: fixed; inset: 0; z-index: 20; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(40,5,30,.45); opacity: 0; pointer-events: none; transition: opacity .8s; text-align: center; }
+  #ending.show { opacity: 1; pointer-events: auto; }
+  #ending h2 { font-family: 'Ria', sans-serif; font-size: min(9vw, 80px); font-weight: 900; margin: 0 0 6px; letter-spacing: 4px; color: #ffd24a; -webkit-text-stroke: 2px #5a1a3a; paint-order: stroke fill; }
+  #ending p { font-size: 22px; margin: 4px 0; font-family: 'Ria', sans-serif; letter-spacing: 1px; } #ending p small { font-size: 14px; opacity: .7; margin-right: 8px; font-family: 'Griun', sans-serif; }
+  #ending .again { margin-top: 26px; opacity: .85; animation: blink 2.4s infinite; font-family: 'Ria', sans-serif; letter-spacing: 6px; font-size: 22px; cursor: pointer; }
+</style>
+</head>
+<body>
+<div id="wrap"><canvas id="c" width="1280" height="720"></canvas></div>
+
+<div id="topbar">
+  <div class="stat" id="dayH"><b id="dayN">DAY 1</b></div>
+  <div class="stat"><span class="ic">🪙</span><b id="coinN">0</b></div>
+  <div class="stat" id="rankH"><span class="ic">💗</span><b id="rankN">12</b><span class="bar"><i id="rankBar"></i></span><small id="rankT"></small></div>
+  <div class="stat" id="maidH"><span class="ic">🎀</span><b id="maidN">1/12</b></div>
+  <button id="btnBgm" class="tog" title="음악">♪</button>
+  <button id="btnSfx" class="tog" title="효과음">🔊</button>
+</div>
+<div id="toast"></div>
+<div id="keys" data-en="Click act · G scout · B shop · W shift<br>A album · Q mission · M music · K sound">클릭 행동 · G 스카우트 · B 상점 · W 근무<br>A 도감 · Q 미션 · M 음악 · K 효과음</div>
+<button id="btnScout" class="tbtn"><span data-en="SCOUT">스카우트</span><small id="scoutCost">🪙 300</small><i class="dot"></i></button>
+<button id="btnShop" class="tbtn"><span data-en="SHOP">상점</span><i class="dot"></i></button>
+<button id="btnAlbum" class="tbtn"><span data-en="ALBUM">도감</span><i class="dot"></i></button>
+<button id="btnMission" class="tbtn"><span data-en="MISSION">미션</span><i class="dot"></i></button>
+<button id="btnShift" class="tbtn"><span data-en="SHIFT">근무</span><i class="dot"></i></button>
+<div id="rotate">
+  <div>
+    <p data-en="This game plays in landscape">가로 화면에서 하는 게임입니다</p>
+    <button type="button" id="rotGo" data-en="Turn to landscape">가로로 돌리기</button>
+    <p class="sub"><span data-en="If the button does nothing, turn off your phone's rotation lock and lay it sideways">단추가 안 먹으면 폰의 화면 회전 잠금을 풀고 눕혀 주세요</span><br>
+      <a href="#" id="rotSkip" data-en="Play in portrait anyway">그래도 세로로 하기</a></p>
+  </div>
+</div>
+<div id="fade"></div>
+
+<div id="title">
+  <div class="brand"><img src="assets/logo-oreum.svg" alt="">OREUM GAMES</div>
+  <h1 data-en="MOE MOE <i>♥</i> MAID CAFE"><b class="h1a">모에모에</b><i>♥</i><b class="h1b">메이드카페</b><span class="hd h1">♥</span><span class="hd h2">♥</span><span class="hd h3">♥</span><span class="hd h4">♥</span></h1>
+  <div class="btns">
+    <div class="go main" id="btnCont" hidden><span data-en="CONTINUE">계속하기</span><small id="contInfo"></small></div>
+    <div class="go" id="btnNew"><span data-en="NEW GAME">새로 시작</span></div>
+  </div>
+</div>
+
+<div id="panel">
+  <div class="box">
+    <div class="head"><h2 id="pHead">SHOP</h2>
+      <div class="tabs" id="tabs"><button data-tab="shop" data-en="SHOP">상점</button><button data-tab="scout" data-en="SCOUT">스카우트</button><button data-tab="album" data-en="ALBUM">도감</button><button data-tab="mission" data-en="MISSION">미션</button><button data-tab="shift" data-en="SHIFT">근무</button></div>
+    </div>
+    <div class="body" id="pBody"></div>
+    <div class="foot"><div class="money">🪙 <span id="pMoney">0</span><small>🎀 <span id="pMaids">1</span>/12</small></div><button class="close" id="btnClose" data-en="CLOSE">닫기</button></div>
+  </div>
+</div>
+
+<div id="gacha">
+  <div class="rays"></div>
+  <div class="card"><div class="face back">?</div><div class="face front"><span class="tag" id="gTag">NEW</span><canvas id="gCv" width="300" height="300"></canvas><div class="nm" id="gName"></div><div class="st" id="gStar"></div></div></div>
+  <div class="msg" id="gMsg" data-en="TAP">터치</div>
+</div>
+
+<div id="ending">
+  <h2>AKIBA No.1</h2>
+  <p><small>DAY</small><span id="endDay">1</span></p>
+  <p><small>🪙</small><span id="endCoin">0</span></p>
+  <p class="again" id="endGo" data-en="CONTINUE">계속하기</p>
+</div>
+
+<script src="assets/game-home.js" data-top="6" data-left="6" data-fullscreen="1" defer></script>
+<script src="assets/landscape.js?v=48"></script>
+<script src="js/art.js?v=4"></script>
+<script src="img/maids/meta.js?v=6"></script>
+<script src="img/custs/meta.js?v=5"></script>
+<script src="js/sprites.js?v=6"></script>
+<script src="js/scene.js?v=8"></script>
+<script src="js/audio.js?v=1"></script>
+<script src="js/game.js?v=35"></script>
+<script src="/assets/visit.js?v=17" defer></script>
+<script src="/assets/game-events.js?v=2" defer></script>
+</body>
+</html>

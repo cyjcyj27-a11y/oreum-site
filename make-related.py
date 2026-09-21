@@ -18,6 +18,7 @@ import io, os, re, sys
 
 # slug, 한국어 경로, 영어 경로, 한국어 이름, 한국어 장르 앵커, 영어 이름, 영어 장르 앵커, 태그
 GAMES = [
+    ("maidcafe",      "/games/maidcafe/",           "/en/games/maidcafe/",           "모에모에 메이드카페", "메이드카페 방치형 경영게임",   "MOE MOE MAID CAFE",        "idle maid cafe tycoon",         {"sim", "tycoon", "idle"}),
     ("fullbrain",     "/games/mini/fullbrain/",      "/en/games/mini/fullbrain/",      "두뇌풀가동",        "사칙연산 퀴즈 두뇌게임",           "FULL BRAIN",           "mental math quiz game", {"puzzle", "casual", "quiz", "brain"}),
     ("yut",           "/games/flash/yut/",           "/en/games/flash/yut/",           "윷놀이",           "윷가락 던지는 윷놀이 게임",        "YUT NORI",             "Korean board game yut nori", {"physics", "pvp", "3d", "casual", "board", "korean"}),
     ("foosball",      "/games/mini/foosball/",       "/en/games/mini/foosball/",       "테이블축구게임",    "3D 테이블 축구게임",              "FOOSBALL",             "free online foosball game", {"sport", "physics", "pvp", "3d", "casual"}),
