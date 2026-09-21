@@ -54,20 +54,21 @@
   }
   const bandSyms = s => { const k = s > LAST ? 'all' : bandOf(s).kind; return { add: '+', sub: '−', addsub: '+ −', mul: '×', div: '÷', mix: '+ − × ÷', blank: '□', three: '+ ×', big: '× −', ox: '○ ×', all: '+ − × ÷', hard: '⚡' }[k]; };
 
-  // 기본 연산 하나: 스테이지 s 의 전체 진행도 g(0~1, 60판이 1)로 숫자 범위가 계속 커진다 — 뒤 판에서 5−2 같은 게 나오지 않게(사장님 9/21)
+  // 기본 연산 하나. 숫자는 그 판 최대치의 55~100% 띠 안에서만 뽑는다 — "1부터 최대까지"로 뽑으면 한 판 안에서 27−17 다음에 8−3 이 나온다(사장님 9/21)
   function basic(kind, s, d) {
     const g = Math.pow(Math.min(1.6, (s - 1) / 59), 0.7);
-    const lo = 1 + Math.floor(g * 25), hi = 9 + Math.round(g * 120);     // 1판 1~9 → 6판 5~30 → 10판 7~41 → 30판 16~82 → 60판 26~129 (사장님 9/21 "6판에 7−2 가 나온다" → 앞쪽부터 빨리 커지게 g^0.7)
+    const hi = 9 + Math.round(g * 120), lo = Math.max(1, Math.round(hi * 0.55));     // 1판 5~9 → 6판 17~30 → 10판 23~41 → 30판 45~82 → 60판 71~129
     let a, b, op;
     if (kind === 'add') { a = ri(lo, hi); b = ri(lo, hi); op = '+'; }
-    else if (kind === 'sub') { a = ri(lo * 2 + 2, hi); b = ri(lo, a - lo); op = '-'; }   // 차가 lo 아래로 안 떨어지게
-    else if (kind === 'mul') { const mh = 9 + Math.round(g * 15), bh = g > 0.55 ? 12 : 9; a = ri(2 + Math.floor(g * 8), mh); b = ri(2 + Math.floor(g * 7), bh); op = '×'; }   // 60판 24×12 까지
-    else if (kind === 'div') { const qh = 9 + Math.round(g * 15), bh = g > 0.55 ? 12 : 9; b = ri(2 + Math.floor(g * 7), bh); const q = ri(2 + Math.floor(g * 8), qh); a = b * q; op = '÷'; }
-    else if (kind === 'div2') { b = ri(3, 12); const q = ri(11, 25 + Math.round(g * 20)); a = b * q; op = '÷'; }
+    else if (kind === 'sub') { a = ri(Math.max(lo + 2, Math.round(hi * 0.75)), hi); b = ri(Math.round(hi * 0.3), a - Math.max(2, Math.round(hi * 0.25))); op = '-'; }   // 차이가 최대의 25% 아래로 안 떨어지게
+    else if (kind === 'mul') { const mh = 9 + Math.round(g * 15), bh = g > 0.55 ? 12 : 9; a = ri(Math.max(2, Math.round(mh * 0.6)), mh); b = ri(Math.max(2, Math.round(bh * 0.5)), bh); op = '×'; }
+    else if (kind === 'div') { const qh = 9 + Math.round(g * 15), bh = g > 0.55 ? 12 : 9; b = ri(Math.max(2, Math.round(bh * 0.5)), bh); const q = ri(Math.max(2, Math.round(qh * 0.6)), qh); a = b * q; op = '÷'; }
+    else if (kind === 'div2') { b = ri(6, 12); const q = ri(15, 25 + Math.round(g * 20)); a = b * q; op = '÷'; }
     return { a, b, op, ans: OPS[op](a, b) };
   }
-  function makeQ(s) {
-    const { kind, d } = kindOf(s);
+  function makeQ(s, u) {
+    s = s + (u || 0) * 0.8;                                   // 한 판 안에서 문제 순서대로 0.8판만큼 미끄러져 오른다(뒤로 갈수록 조금씩 어렵게)
+    const { kind, d } = kindOf(Math.floor(s));
     let q;
     if (kind === 'blank') {
       const k = pick(['add', 'sub', 'mul', 'div']), e = basic(k, s, d), hide = Math.random() < 0.5 ? 'a' : 'b';
@@ -77,17 +78,17 @@
     } else if (kind === 'three') {
       const g = Math.pow(Math.min(1.6, (s - 1) / 59), 0.7), f = pick(['a+b×c', 'a×b+c', 'a×b−c', 'a+b−c', 'a−b+c']), hi = 4 + Math.round(g * 8);
       let a, b, c, ans, l2r;
-      if (f === 'a+b×c') { a = ri(1 + Math.floor(g * 10), 9 + g * 40); b = ri(2, hi); c = ri(2, hi); ans = a + b * c; l2r = (a + b) * c; q = { html: n(a) + op('+') + n(b) + op('×') + n(c) }; }
-      else if (f === 'a×b+c') { a = ri(2, hi); b = ri(2, hi); c = ri(1 + Math.floor(g * 10), 9 + g * 40); ans = a * b + c; l2r = ans; q = { html: n(a) + op('×') + n(b) + op('+') + n(c) }; }
-      else if (f === 'a×b−c') { a = ri(2, hi); b = ri(2, hi); c = ri(1, a * b - 1); ans = a * b - c; l2r = ans; q = { html: n(a) + op('×') + n(b) + op('-') + n(c) }; }
-      else if (f === 'a+b−c') { a = ri(5 + Math.floor(g * 20), 20 + g * 60); b = ri(5 + Math.floor(g * 20), 20 + g * 60); c = ri(1, a + b - 1); ans = a + b - c; l2r = ans; q = { html: n(a) + op('+') + n(b) + op('-') + n(c) }; }
+      if (f === 'a+b×c') { a = ri(5 + Math.floor(g * 20), 9 + g * 40); b = ri(Math.max(2, Math.round(hi * 0.5)), hi); c = ri(Math.max(2, Math.round(hi * 0.5)), hi); ans = a + b * c; l2r = (a + b) * c; q = { html: n(a) + op('+') + n(b) + op('×') + n(c) }; }
+      else if (f === 'a×b+c') { a = ri(Math.max(2, Math.round(hi * 0.5)), hi); b = ri(Math.max(2, Math.round(hi * 0.5)), hi); c = ri(5 + Math.floor(g * 20), 9 + g * 40); ans = a * b + c; l2r = ans; q = { html: n(a) + op('×') + n(b) + op('+') + n(c) }; }
+      else if (f === 'a×b−c') { a = ri(Math.max(2, Math.round(hi * 0.5)), hi); b = ri(Math.max(2, Math.round(hi * 0.5)), hi); c = ri(Math.round(a * b * 0.2), Math.round(a * b * 0.7)); ans = a * b - c; l2r = ans; q = { html: n(a) + op('×') + n(b) + op('-') + n(c) }; }
+      else if (f === 'a+b−c') { a = ri(10 + Math.floor(g * 30), 20 + g * 60); b = ri(10 + Math.floor(g * 30), 20 + g * 60); c = ri(Math.round((a + b) * 0.25), Math.round((a + b) * 0.75)); ans = a + b - c; l2r = ans; q = { html: n(a) + op('+') + n(b) + op('-') + n(c) }; }
       else { a = ri(10 + Math.floor(g * 30), 30 + g * 60); b = ri(1 + Math.floor(g * 10), a - 1); c = ri(1 + Math.floor(g * 10), 20 + g * 40); ans = a - b + c; l2r = a - (b + c); q = { html: n(a) + op('-') + n(b) + op('+') + n(c) }; }
       q.kind = kind; q.ans = ans; q.html += eq() + n('?', true); q.near = [l2r];
     } else if (kind === 'big') {
       const g = Math.pow(Math.min(1.6, (s - 1) / 59), 0.7), f = pick(['mul', 'add3', 'sub3']);
-      if (f === 'mul') { const a = ri(12, 20 + Math.round(g * 40)), b = ri(2, g > 0.75 ? 12 : 9); q = { kind, ans: a * b, html: n(a) + op('×') + n(b) + eq() + n('?', true), near: [a * (b + 1), a * (b - 1), a * b + 10, a * b - 10] }; }
-      else if (f === 'add3') { const a = ri(100 + g * 200, 400 + g * 600), b = ri(100 + g * 200, 400 + g * 600); q = { kind, ans: a + b, html: n(a) + op('+') + n(b) + eq() + n('?', true), near: [a + b + 100, a + b - 100, a + b + 10, a + b - 10] }; }
-      else { const a = ri(300 + g * 200, 500 + g * 600), b = ri(100 + g * 100, a - 50); q = { kind, ans: a - b, html: n(a) + op('-') + n(b) + eq() + n('?', true), near: [a - b + 100, a - b - 100, a - b + 10, a - b - 10] }; }
+      if (f === 'mul') { const a = ri(12 + Math.round(g * 20), 20 + Math.round(g * 40)), b = ri(g > 0.75 ? 6 : 4, g > 0.75 ? 12 : 9); q = { kind, ans: a * b, html: n(a) + op('×') + n(b) + eq() + n('?', true), near: [a * (b + 1), a * (b - 1), a * b + 10, a * b - 10] }; }
+      else if (f === 'add3') { const a = ri(200 + g * 300, 400 + g * 600), b = ri(200 + g * 300, 400 + g * 600); q = { kind, ans: a + b, html: n(a) + op('+') + n(b) + eq() + n('?', true), near: [a + b + 100, a + b - 100, a + b + 10, a + b - 10] }; }
+      else { const a = ri(400 + g * 300, 500 + g * 600), b = ri(Math.round(a * 0.3), a - 120); q = { kind, ans: a - b, html: n(a) + op('-') + n(b) + eq() + n('?', true), near: [a - b + 100, a - b - 100, a - b + 10, a - b - 10] }; }
     } else if (kind === 'ox') {
       const k = pick(['add', 'sub', 'mul', 'div']), e = basic(k, s, d), truth = Math.random() < 0.5;
       let shown = e.ans;
@@ -185,7 +186,7 @@
   }
   function nextQ() {
     const s = (S.inf ? LAST + 1 + Math.floor(S.idx / 4) : S.stage) + (S.fullLeft ? 6 : 0);   // 풀가동 중엔 여섯 판 앞선 문제
-    S.q = makeQ(s); S.tMax = S.tLeft = timeFor(s, S.q); S.lock = 0; S.mode = 'play';
+    S.q = makeQ(s, S.inf ? 0 : S.idx / S.N); S.tMax = S.tLeft = timeFor(s, S.q); S.lock = 0; S.mode = 'play';
     S.mood = S.fullLeft ? 'full' : 'think'; S.moodT = 0; S.tickT = 0;
     qt.innerHTML = S.q.html; qEl.classList.remove('qp'); void qEl.offsetWidth; qEl.classList.add('qp');
     qEl.classList.toggle('full', S.fullLeft > 0);
