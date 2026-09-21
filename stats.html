@@ -409,11 +409,14 @@
             renderApps(d);
           });
         }
-        // 머릿수 세 칸만 실시간으로 덧읽는다 (요청 4번)
-        return Promise.all([get('total'), get('returning'), get('day_' + today), get('pvday_' + today)]).then(function (vs) {
+        // 머릿수 세 칸만 실시간으로 덧읽는다 (요청 5번)
+        // 페이지뷰 총계도 실시간으로 — 꼬리말 "N visits" 와 같은 값(PV_BASE + pvall). 스냅샷 합은 2시간마다라 사장님이 "왜 그대로지" 물었다(2026-09-21)
+        var PV_BASE = 16199;   // assets/visit.js 의 PV_BASE 와 같은 수(2026-09-21 09:50 페이지별 pv_* 합)
+        return Promise.all([get('total'), get('returning'), get('day_' + today), get('pvday_' + today), get('pvall')]).then(function (vs) {
           d.total = vs[0]; d.returning = vs[1]; d['day_' + today] = vs[2]; d['pvday_' + today] = vs[3];
           renderVisits(d);
           document.getElementById('pv-today').textContent = fmt(vs[3]);
+          if (vs[4]) document.getElementById('pv-total').innerHTML = fmt(PV_BASE + vs[4]) + '<small>회</small>';
           note(ago > 300 ? '자동 집계가 ' + Math.round(ago / 60) + '시간 전에 멈춰 있어요. 방문 수와 오늘만 지금 값입니다.' : '', ago > 300 ? '#a35c10' : '#6b7280');
         });
       });
