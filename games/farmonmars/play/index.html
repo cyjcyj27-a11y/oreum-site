@@ -53,6 +53,7 @@
   #title .tag { font-family: 'Ria', sans-serif; font-size: 16px; letter-spacing: 6px; color: #ffd24a; margin-top: 6px; }
   #title .btns { margin-top: auto; margin-bottom: 9vh; display: flex; flex-direction: row; flex-wrap: nowrap; justify-content: center; gap: 12px 16px; align-items: stretch; width: 100%; max-width: 640px; box-sizing: border-box; padding: 0 8px; }   /* 계속하기 옆에 새로 시작, 폰도 한 줄 — 밑에 안드로이드 알림창이 떠서. 두 단추는 같은 크기(사장님 2026-09-21) */
   #title .btns .go { flex: 1 1 0; min-width: 0; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+  @media (max-height: 480px) { #title .btns { margin-bottom: 26vh; } }   /* 폰 가로: 안드로이드 전체화면 알림이 아래 1/5 을 덮어서 그 위로(사장님 2026-09-21) */
   @media (max-width: 480px) { #title .btns { gap: 10px; } #title .btns .go { font-size: 17px; letter-spacing: 2px; text-indent: 2px; padding: 10px 14px 12px; white-space: nowrap; } #title .btns .go small { font-size: 11px; } }
   #title .go { font-family: 'Ria', sans-serif; font-size: 22px; letter-spacing: 6px; text-indent: 6px; padding: 12px 40px 14px; border-radius: 999px; background: rgba(0,0,0,.35); border: 2px solid rgba(255,255,255,.5); cursor: pointer; touch-action: manipulation; }
   #title .go.main { background: #ffd24a; color: #2a1c08; border-color: #ffd24a; animation: blink 2.4s infinite; }
