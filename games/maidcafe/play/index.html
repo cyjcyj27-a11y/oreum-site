@@ -72,6 +72,7 @@
   #title .brand { display: flex; align-items: center; gap: 8px; padding: 6px 14px 6px 8px; border-radius: 999px; background: rgba(255,253,247,.92); color: #2e6b39; font-size: 14px; letter-spacing: 1px; }
   #title .brand img { width: 30px; height: 15px; }
   #title .btns { position: absolute; left: 50%; transform: translateX(-50%); bottom: 9vh; display: flex; gap: 14px; }
+  @media (max-height: 480px) { #title .btns { bottom: 26vh; } }   /* 폰 가로: 안드로이드 전체화면 알림이 아래 1/5 을 덮어서 그 위로(사장님 2026-09-22) */
   #title .go { font-family: 'Ria', sans-serif; font-size: 26px; letter-spacing: 6px; text-indent: 6px; padding: 12px 36px 14px; border-radius: 20px; background: rgba(70,15,45,.75); border: 1px solid rgba(255,255,255,.18); box-shadow: 0 8px 26px rgba(0,0,0,.35); cursor: pointer; white-space: nowrap; }
   #title .go.main { animation: blink 2.4s infinite; }
   #title .go small { display: block; font-family: 'Griun', sans-serif; font-size: 13px; letter-spacing: 1px; text-indent: 0; opacity: .75; margin-top: 2px; }
