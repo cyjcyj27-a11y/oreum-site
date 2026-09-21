@@ -173,7 +173,7 @@
   // 👣 누적 페이지뷰를 꼬리말에 보여 줍니다(2026-09-21 사장님 "투데이는 빼고 누적만 올리자", 8/27 숨겼던 자리를 되살림).
   // 첫 방문자가 '사람 없는 사이트'로 보고 나가지 않게, 열 때마다 진짜로 1 오르는 숫자를 보여 줍니다.
   // pvall 은 오늘부터 세는 칸이라, 그 전까지의 누적(페이지별 pv_* 칸의 합, 2026-09-21 기준)을 PV_BASE 로 더합니다.
-  // 열 때마다 hit 응답의 값을 받아 그 자리에서 숫자가 올라가는 연출(1.2초)을 합니다. 남이 연 것까지 살아서 오르는 건 아닙니다(카운터 서비스 10초 30번 제한).
+  // 열 때마다 hit 응답의 값을 그대로 씁니다. 남이 연 것까지 살아서 오르는 건 아닙니다(카운터 서비스 10초 30번 제한).
   var PV_BASE = 16199;
   (function () {
     var el = document.getElementById('visitCount');
@@ -187,20 +187,7 @@
       if (en) { el.appendChild(num); el.appendChild(document.createTextNode(' page views')); }
       else { el.appendChild(document.createTextNode('누적 페이지뷰 ')); el.appendChild(num); }
       el.hidden = false;
-      // 숫자를 먼저 써 두고 올라가는 연출은 덤으로 — 뒤쪽 탭(rAF 가 안 도는 곳)에서 빈칸으로 남지 않게.
-      // 1.6초가 지나도 연출이 못 끝났으면(탭이 숨겨진 채 열림) 최종값을 그냥 씁니다.
-      var from = Math.max(0, n - 40), t0 = null, done = false;
-      var show = function (v) { num.textContent = Math.round(v).toLocaleString('ko-KR'); };
-      show(from);
-      function step(t) {
-        if (done) return;
-        if (t0 === null) t0 = t;
-        var k = Math.min(1, (t - t0) / 1200); k = 1 - Math.pow(1 - k, 3);
-        show(from + (n - from) * k);
-        if (k < 1) requestAnimationFrame(step); else done = true;
-      }
-      if (window.requestAnimationFrame) requestAnimationFrame(step);
-      setTimeout(function () { if (!done) { done = true; show(n); } }, 1600);
+      num.textContent = n.toLocaleString('ko-KR');   // 올라가는 연출 없이 숫자만(사장님 2026-09-21 "슬롯처럼 올라가는 애니는 빼")
     });
   })();
 
