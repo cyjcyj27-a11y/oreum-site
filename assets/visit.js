@@ -170,14 +170,40 @@
   // 페이지마다 따로 세는 pv_* 칸의 합과 같은 성격이고, 날짜별로만 나눈 것입니다. stats.html 의 페이지뷰 카드 '오늘'이 이 값을 읽습니다.
   if (!local) { try { fetch(base + 'hit/oreumgames/pvday_' + today, { mode: 'cors' }).catch(function () {}); } catch (e) {} }
 
+  // 👣 누적 페이지뷰를 꼬리말에 보여 줍니다(2026-09-21 사장님 "투데이는 빼고 누적만 올리자", 8/27 숨겼던 자리를 되살림).
+  // 첫 방문자가 '사람 없는 사이트'로 보고 나가지 않게, 열 때마다 진짜로 1 오르는 숫자를 보여 줍니다.
+  // pvall 은 오늘부터 세는 칸이라, 그 전까지의 누적(페이지별 pv_* 칸의 합, 2026-09-21 기준)을 PV_BASE 로 더합니다.
+  // 열 때마다 hit 응답의 값을 받아 그 자리에서 숫자가 올라가는 연출(1.2초)을 합니다. 남이 연 것까지 살아서 오르는 건 아닙니다(카운터 서비스 10초 30번 제한).
+  var PV_BASE = 16199;
+  (function () {
+    var el = document.getElementById('visitCount');
+    var url = base + (local ? 'get' : 'hit') + '/oreumgames/pvall';
+    if (!el && local) return;
+    get(url).then(function (v) {
+      if (!el || !v || typeof v.value !== 'number') return;
+      var n = PV_BASE + v.value, en = document.documentElement.lang === 'en';
+      var num = document.createElement('strong');
+      el.textContent = '';
+      if (en) { el.appendChild(num); el.appendChild(document.createTextNode(' page views')); }
+      else { el.appendChild(document.createTextNode('누적 페이지뷰 ')); el.appendChild(num); }
+      el.hidden = false;
+      var from = Math.max(0, n - 40), t0 = null;
+      function step(t) {
+        if (t0 === null) t0 = t;
+        var k = Math.min(1, (t - t0) / 1200); k = 1 - Math.pow(1 - k, 3);
+        num.textContent = Math.round(from + (n - from) * k).toLocaleString('ko-KR');
+        if (k < 1) requestAnimationFrame(step);
+      }
+      if (window.requestAnimationFrame) requestAnimationFrame(step); else num.textContent = n.toLocaleString('ko-KR');
+    });
+  })();
+
   Promise.all([
     countOnce('oreum_counted', 'total'),
     countOnce('oreum_day', 'day_' + today)
   ]).then(function (res) {
-    /* 방문자 수를 화면에 안 보이게 했습니다(2026-08-27 사용자 지시).
-       세는 건 그대로입니다 — 숫자는 stats.html 에서 봅니다.
-       꼬리말의 <p id="visitCount" hidden> 은 그대로 두었습니다 —
-       다시 보이게 하려면 이 자리만 되돌리면 됩니다 */
+    /* 방문자 수(하루 1회 집계)는 화면에 안 보여 줍니다(2026-08-27 사용자 지시).
+       꼬리말 #visitCount 에는 2026-09-21부터 위의 누적 페이지뷰가 들어갑니다. */
     if (!res[0]) return;
   });
 
