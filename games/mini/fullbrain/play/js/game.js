@@ -56,8 +56,8 @@
 
   // 기본 연산 하나: 스테이지 s 의 전체 진행도 g(0~1, 60판이 1)로 숫자 범위가 계속 커진다 — 뒤 판에서 5−2 같은 게 나오지 않게(사장님 9/21)
   function basic(kind, s, d) {
-    const g = Math.min(1.6, (s - 1) / 59);
-    const lo = 1 + Math.floor(g * 18), hi = 9 + Math.round(g * 90);      // 1판 1~9 → 30판 10~54 → 60판 19~99
+    const g = Math.pow(Math.min(1.6, (s - 1) / 59), 0.7);
+    const lo = 1 + Math.floor(g * 25), hi = 9 + Math.round(g * 120);     // 1판 1~9 → 6판 5~30 → 10판 7~41 → 30판 16~82 → 60판 26~129 (사장님 9/21 "6판에 7−2 가 나온다" → 앞쪽부터 빨리 커지게 g^0.7)
     let a, b, op;
     if (kind === 'add') { a = ri(lo, hi); b = ri(lo, hi); op = '+'; }
     else if (kind === 'sub') { a = ri(lo * 2 + 2, hi); b = ri(lo, a - lo); op = '-'; }   // 차가 lo 아래로 안 떨어지게
@@ -75,7 +75,7 @@
       q = { kind, ans, html: n(hide === 'a' ? '□' : e.a, hide === 'a') + op(e.op) + n(hide === 'b' ? '□' : e.b, hide === 'b') + eq() + n(e.ans),
             near: [e.ans, e.a, e.b] };
     } else if (kind === 'three') {
-      const g = Math.min(1.6, (s - 1) / 59), f = pick(['a+b×c', 'a×b+c', 'a×b−c', 'a+b−c', 'a−b+c']), hi = 4 + Math.round(g * 8);
+      const g = Math.pow(Math.min(1.6, (s - 1) / 59), 0.7), f = pick(['a+b×c', 'a×b+c', 'a×b−c', 'a+b−c', 'a−b+c']), hi = 4 + Math.round(g * 8);
       let a, b, c, ans, l2r;
       if (f === 'a+b×c') { a = ri(1 + Math.floor(g * 10), 9 + g * 40); b = ri(2, hi); c = ri(2, hi); ans = a + b * c; l2r = (a + b) * c; q = { html: n(a) + op('+') + n(b) + op('×') + n(c) }; }
       else if (f === 'a×b+c') { a = ri(2, hi); b = ri(2, hi); c = ri(1 + Math.floor(g * 10), 9 + g * 40); ans = a * b + c; l2r = ans; q = { html: n(a) + op('×') + n(b) + op('+') + n(c) }; }
@@ -84,7 +84,7 @@
       else { a = ri(10 + Math.floor(g * 30), 30 + g * 60); b = ri(1 + Math.floor(g * 10), a - 1); c = ri(1 + Math.floor(g * 10), 20 + g * 40); ans = a - b + c; l2r = a - (b + c); q = { html: n(a) + op('-') + n(b) + op('+') + n(c) }; }
       q.kind = kind; q.ans = ans; q.html += eq() + n('?', true); q.near = [l2r];
     } else if (kind === 'big') {
-      const g = Math.min(1.6, (s - 1) / 59), f = pick(['mul', 'add3', 'sub3']);
+      const g = Math.pow(Math.min(1.6, (s - 1) / 59), 0.7), f = pick(['mul', 'add3', 'sub3']);
       if (f === 'mul') { const a = ri(12, 20 + Math.round(g * 40)), b = ri(2, g > 0.75 ? 12 : 9); q = { kind, ans: a * b, html: n(a) + op('×') + n(b) + eq() + n('?', true), near: [a * (b + 1), a * (b - 1), a * b + 10, a * b - 10] }; }
       else if (f === 'add3') { const a = ri(100 + g * 200, 400 + g * 600), b = ri(100 + g * 200, 400 + g * 600); q = { kind, ans: a + b, html: n(a) + op('+') + n(b) + eq() + n('?', true), near: [a + b + 100, a + b - 100, a + b + 10, a + b - 10] }; }
       else { const a = ri(300 + g * 200, 500 + g * 600), b = ri(100 + g * 100, a - 50); q = { kind, ans: a - b, html: n(a) + op('-') + n(b) + eq() + n('?', true), near: [a - b + 100, a - b - 100, a - b + 10, a - b - 10] }; }
