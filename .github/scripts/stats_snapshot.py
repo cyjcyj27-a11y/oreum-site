@@ -38,8 +38,9 @@ def keys_from_html():
     html = open(os.path.join(ROOT, "stats.html"), encoding="utf-8").read()
     m = re.search(r"var keys = \[(.*?)\];", html, re.S)
     keys = re.findall(r"'([a-z0-9_]+)'", m.group(1))
-    keys = [k for k in keys if k != "day_"]          # 'day_' + today 는 따로 넣는다
+    keys = [k for k in keys if k not in ("day_", "pvday_")]   # 'day_'/'pvday_' + today 는 따로 넣는다
     keys.append("day_" + kst_today())
+    keys.append("pvday_" + kst_today())   # 페이지뷰 오늘 칸(2026-09-21)
     g = re.search(r"var GAMES = \[(.*?)\];", html, re.S)
     slugs = re.findall(r"\['[^']*',\s*'([a-z0-9-]+)'\]", g.group(1))
     for s in slugs:

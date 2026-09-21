@@ -165,6 +165,11 @@
     } catch (e) {}
   }
 
+  // 👣 페이지뷰 오늘 칸(2026-09-21 사장님 "페이지뷰도 오늘 칸 만들어서 지표에 붙여").
+  // 방문 수와 달리 하루 한 번이 아니라 열 때마다 셉니다 — 새로고침·재방문·사이트 안 이동 전부.
+  // 페이지마다 따로 세는 pv_* 칸의 합과 같은 성격이고, 날짜별로만 나눈 것입니다. stats.html 의 페이지뷰 카드 '오늘'이 이 값을 읽습니다.
+  if (!local) { try { fetch(base + 'hit/oreumgames/pvday_' + today, { mode: 'cors' }).catch(function () {}); } catch (e) {} }
+
   Promise.all([
     countOnce('oreum_counted', 'total'),
     countOnce('oreum_day', 'day_' + today)
