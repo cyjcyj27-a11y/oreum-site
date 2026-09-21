@@ -144,7 +144,8 @@
     const x0 = cx - w * 0.5, x1 = cx + w * 0.5, r = w * 0.02;
     const rr = (x, y, ww, hh, rad) => { c.beginPath(); c.moveTo(x + rad, y); c.arcTo(x + ww, y, x + ww, y + hh, rad); c.arcTo(x + ww, y + hh, x, y + hh, rad); c.arcTo(x, y + hh, x, y, rad); c.arcTo(x, y, x + ww, y, rad); c.closePath(); };
     c.save();
-    c.lineJoin = 'round'; c.lineWidth = lw; c.strokeStyle = '#4a3222';
+    c.filter = 'blur(' + Math.max(0.8, w * 0.0035).toFixed(2) + 'px)';           // 살짝 흐리게 — 선생님 그림의 부드러운 선과 맞춤(사장님 9/21 "너무 선명해")
+    c.lineJoin = 'round'; c.lineWidth = lw; c.strokeStyle = 'rgba(74,50,34,.82)';
     // 몸통(단색)
     c.fillStyle = '#cfae82'; rr(x0, top, w, h, r); c.fill();
     // 윗띠(단색, 몸통과 같은 폭)
@@ -197,7 +198,7 @@
     c.restore();
     // 교탁: 얼굴 아래 2.2배 높이(허리)부터 칸 바닥까지, 너비는 얼굴의 3.2배
     const lb = Math.min(S.H - 8, rc.y + rc.h + FW * 0.2);
-    drawLectern(c, cx, Math.min(fyPos + FW * 1.82, lb - FW * 0.75), lb, FW * 2.5);   // 사장님 9/21 "더 아래로"   // 칸이 낮아도(폰 세로) 교탁 높이는 얼굴 너비만큼은 된다
+    drawLectern(c, cx, Math.min(fyPos + FW * 1.48, lb - FW * 0.75), lb, FW * 2.5);   // 사장님 9/21 "더 아래로"   // 칸이 낮아도(폰 세로) 교탁 높이는 얼굴 너비만큼은 된다
     return { cx, cy: fyPos + bob - FW * 0.6, r: FW * 0.6 };
   }
 
