@@ -187,14 +187,20 @@
       if (en) { el.appendChild(num); el.appendChild(document.createTextNode(' page views')); }
       else { el.appendChild(document.createTextNode('누적 페이지뷰 ')); el.appendChild(num); }
       el.hidden = false;
-      var from = Math.max(0, n - 40), t0 = null;
+      // 숫자를 먼저 써 두고 올라가는 연출은 덤으로 — 뒤쪽 탭(rAF 가 안 도는 곳)에서 빈칸으로 남지 않게.
+      // 1.6초가 지나도 연출이 못 끝났으면(탭이 숨겨진 채 열림) 최종값을 그냥 씁니다.
+      var from = Math.max(0, n - 40), t0 = null, done = false;
+      var show = function (v) { num.textContent = Math.round(v).toLocaleString('ko-KR'); };
+      show(from);
       function step(t) {
+        if (done) return;
         if (t0 === null) t0 = t;
         var k = Math.min(1, (t - t0) / 1200); k = 1 - Math.pow(1 - k, 3);
-        num.textContent = Math.round(from + (n - from) * k).toLocaleString('ko-KR');
-        if (k < 1) requestAnimationFrame(step);
+        show(from + (n - from) * k);
+        if (k < 1) requestAnimationFrame(step); else done = true;
       }
-      if (window.requestAnimationFrame) requestAnimationFrame(step); else num.textContent = n.toLocaleString('ko-KR');
+      if (window.requestAnimationFrame) requestAnimationFrame(step);
+      setTimeout(function () { if (!done) { done = true; show(n); } }, 1600);
     });
   })();
 
