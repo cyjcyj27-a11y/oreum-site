@@ -298,9 +298,10 @@
   function mascotRect() {
     const tb = $('topbar').getBoundingClientRect().bottom, portrait = H > W;
     if (portrait) {
-      if (S.mode === 'title' || S.mode === 'ending') return { x: 0, y: H * 0.50, w: W, h: H * 0.40 };   // 제목·START 아래에 선다
+      if (S.mode === 'title' || S.mode === 'ending') return { x: 0, y: H * 0.48, w: W, h: H * 0.42 };   // 제목·START 아래에 선다
       const qr = qEl.getBoundingClientRect(); return { x: 0, y: tb - 6, w: W, h: Math.max(80, qr.top - tb + 6) };
     }
+    if (S.mode === 'title' || S.mode === 'ending') return { x: 0, y: tb, w: W * 0.42, h: H - tb - 20 };
     return { x: 0, y: tb - 10, w: W * 0.36, h: H - tb - 30 };
   }
   function render() {

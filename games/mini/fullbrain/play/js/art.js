@@ -115,14 +115,14 @@
   }
 
   // ---------------------------------------------------------------- 선생님(스프라이트 시트 assets/teacher.png, 좌표는 js/teacher.js)
-  const TIMG = new Image(); TIMG.src = 'assets/teacher.webp';
+  const TIMG = new Image(); TIMG.src = 'assets/teacher.webp?v=3';
   const TF = (window.FB_TEACHER && window.FB_TEACHER.frames) || {};
   const BUST_H = 250;                                             // 상반신 칸들의 기준 높이 — 칸마다 크기가 달라도 같은 배율로 그린다
   let prevName = '', curName = '', fadeT = 1;
   // 표정은 세 가지만 바뀐다(사장님 9/21 "정신없다"): 문제 낼 때 point(지시봉) · 맞췄을 때 cheer · 틀렸을 때 wrong
   function frameFor(S) {
     const m = S.mood, mode = S.mode;
-    if (mode === 'title') return 'big';
+    if (mode === 'title') return 'idle';                         // 제목도 반신(사장님 9/21)
     if (mode === 'ending') return 'cheer';
     if (mode === 'over') return 'sad';
     if (mode === 'clear') return 'smile';
@@ -158,8 +158,8 @@
       return { cx, cy: by + bob - h * 0.8, r: w * 0.25 };
     }
     // 상반신: 얼굴 너비를 같게(칸마다 같은 크기), 얼굴 가운데를 칸의 38% 높이에. 쓰는 칸들 전부가 칸 안에 들어가는 얼굴 크기를 고른다
-    let FW = Math.min(rc.h * 0.30, rc.w * 0.30);
-    for (const nm of ['point', 'cheer', 'wrong', 'smile', 'sad']) {
+    let FW = Math.min(rc.h * (S.mode === 'title' ? 0.34 : 0.30), rc.w * 0.30);
+    for (const nm of (S.mode === 'title' ? ['idle'] : ['point', 'cheer', 'wrong', 'smile', 'sad'])) {   // 제목 화면은 idle 한 칸만 맞추면 되니 더 크게
       const g = TF[nm]; if (!g) continue;
       FW = Math.min(FW, rc.h * 0.60 * g[6] / Math.max(1, g[3] - g[5]),                       // 얼굴 아래로 칸 높이의 60% 안
                        rc.w * 0.48 * g[6] / Math.max(1, Math.max(g[4], g[2] - g[4])));       // 좌우로 칸 너비의 절반 안
