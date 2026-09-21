@@ -115,17 +115,17 @@
   }
 
   // ---------------------------------------------------------------- 선생님(스프라이트 시트 assets/teacher.png, 좌표는 js/teacher.js)
-  const TIMG = new Image(); TIMG.src = 'assets/teacher.webp?v=3';
+  const TIMG = new Image(); TIMG.src = 'assets/teacher.webp?v=4';
   const TF = (window.FB_TEACHER && window.FB_TEACHER.frames) || {};
   const BUST_H = 250;                                             // 상반신 칸들의 기준 높이 — 칸마다 크기가 달라도 같은 배율로 그린다
   let prevName = '', curName = '', fadeT = 1;
   // 표정은 세 가지만 바뀐다(사장님 9/21 "정신없다"): 문제 낼 때 point(지시봉) · 맞췄을 때 cheer · 틀렸을 때 wrong
   function frameFor(S) {
     const m = S.mood, mode = S.mode;
-    if (mode === 'title') return 'idle';                         // 제목도 반신(사장님 9/21)
+    if (mode === 'title') return 'explain';                      // 제목: 클립보드 든 상반신. 얼굴만 있는 칸은 교탁 위로 목만 나와 무섭다(사장님 9/21)
     if (mode === 'ending') return 'cheer';
-    if (mode === 'over') return 'sad';
-    if (mode === 'clear') return 'smile';
+    if (mode === 'over') return 'wrong';
+    if (mode === 'clear') return 'cheer';
     if (m === 'happy') return 'cheer';
     if (m === 'dizzy') return 'wrong';
     return 'point';
@@ -180,7 +180,7 @@
     }
     // 상반신: 얼굴 너비를 같게(칸마다 같은 크기), 얼굴 가운데를 칸의 38% 높이에. 쓰는 칸들 전부가 칸 안에 들어가는 얼굴 크기를 고른다
     let FW = Math.min(rc.h * (S.mode === 'title' ? 0.34 : 0.30), rc.w * 0.30);
-    for (const nm of (S.mode === 'title' ? ['idle'] : ['point', 'cheer', 'wrong', 'smile', 'sad'])) {   // 제목 화면은 idle 한 칸만 맞추면 되니 더 크게
+    for (const nm of ['point', 'cheer', 'wrong', 'explain']) {   // 제목 화면은 idle 한 칸만 맞추면 되니 더 크게
       const g = TF[nm]; if (!g) continue;
       FW = Math.min(FW, rc.h * 0.60 * g[6] / Math.max(1, g[3] - g[5]),                       // 얼굴 아래로 칸 높이의 60% 안
                        rc.w * 0.48 * g[6] / Math.max(1, Math.max(g[4], g[2] - g[4])));       // 좌우로 칸 너비의 절반 안
@@ -198,7 +198,11 @@
     c.restore();
     // 교탁: 얼굴 아래 2.2배 높이(허리)부터 칸 바닥까지, 너비는 얼굴의 3.2배
     const lb = Math.min(S.H - 8, rc.y + rc.h + FW * 0.2);
-    drawLectern(c, cx, Math.min(fyPos + FW * 1.48, lb - FW * 0.75), lb, FW * 2.5);   // 사장님 9/21 "더 아래로"   // 칸이 낮아도(폰 세로) 교탁 높이는 얼굴 너비만큼은 된다
+    // 교탁 윗선 = 지금 쓰는 자세들 중 가장 긴 그림의 아래 끝에서 얼굴 너비의 0.32 위(흐려지는 24px 를 덮는다). 제목은 얼굴 칸(idle)이라 더 위로 온다
+    let bodyBot = fyPos;
+    // 제목·클리어·게임오버·엔딩은 그 화면의 그림 하나 기준, 플레이 중엔 세 자세 중 가장 긴 것 기준(교탁이 자세마다 흔들리지 않게)
+    for (const nm of ['point', 'cheer', 'wrong', 'explain']) { const g = TF[nm]; if (g) bodyBot = Math.max(bodyBot, fyPos + (g[3] - g[5]) * FW / g[6]); }
+    drawLectern(c, cx, Math.min(bodyBot - FW * 0.32, lb - FW * 0.75), lb, FW * 2.5);
     return { cx, cy: fyPos + bob - FW * 0.6, r: FW * 0.6 };
   }
 
