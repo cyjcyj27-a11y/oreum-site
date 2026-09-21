@@ -115,7 +115,7 @@
   }
 
   // ---------------------------------------------------------------- 선생님(스프라이트 시트 assets/teacher.png, 좌표는 js/teacher.js)
-  const TIMG = new Image(); TIMG.src = 'assets/teacher.webp?v=6';
+  const TIMG = new Image(); TIMG.src = 'assets/teacher.webp?v=7';
   const TF = (window.FB_TEACHER && window.FB_TEACHER.frames) || {};
   const BUST_H = 250;                                             // 상반신 칸들의 기준 높이 — 칸마다 크기가 달라도 같은 배율로 그린다
   let prevName = '', curName = '', fadeT = 1;
