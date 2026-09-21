@@ -32,7 +32,7 @@
   const dW = d => d.cols * d.cw + Math.floor((d.cols - 1) / 2) * d.rw;
   const lotPosD = (d, k) => ({ x: dcolX(d, k % d.cols) + d.cw / 2, y: drowY(d, Math.floor(k / d.cols)) + d.ch / 2 + 12 });
   const drect = z => { const d = DIST[z]; return { x: d.x - d.rw, y: d.y - d.rw, w: dW(d) + 2 * d.rw, h: zrows(z) * (d.ch + d.rw) + d.rw }; };
-  function zoneFor(type) { const z = zoneOf(type), o = z === 'dt' ? 'res' : 'dt'; if (!zfull(z)) return z; if (!zfull(o)) return o; return null; }   // 둘 다 차면 재개발
+  function zoneFor(type) { const z = zoneOf(type); return zfull(z) ? null : z; }   // 구역이 차면 그 구역 건물은 FULL — 다른 구역으로 넘기지도, 헐고 다시 짓지도 않는다(사장님 2026-09-21 재개발 없앰)
   const MAX_PLOT = 20;
   const plotPos = i => ({ x: FARM.x + 58 + (i % FARM.cols) * FARM.cw, y: FARM.y + 58 + Math.floor(i / FARM.cols) * FARM.ch });
   const lotPos = i => { const c = S.city[i]; return c ? lotPosD(DIST[c.z || 'dt'], c.k || 0) : lotPosD(DIST.dt, 0); };
@@ -111,17 +111,15 @@
     const src = fresh.length ? fresh.slice(0, 5) : pool; return src[Math.floor(Math.random() * src.length)].i;
   }
   const bdOf = c => BL[c.b] || BL[0];
-  function redevTarget(cat) {   // 재개발: 같은 갈래(주거·공원은 주거단지, 나머지는 도심) 중 가장 옛 시대 건물을 헌다
-    let best = -1, be = 99; S.city.forEach((c, i) => { if (!c.done || zoneOf(c.type) !== zoneOf(cat) || S.q.some(q => q.ci === i)) return; const e = BL[c.b] ? BL[c.b].era[0] : 0; if (e < be) { be = e; best = i; } }); return best; }
   const _pv = {}; function pickPreview(cat) { const key = cat + ':' + S.city.length + ':' + S.lv; if (_pv.key !== key) { _pv.key = key; _pv.v = {}; } if (_pv.v[cat] === undefined) _pv.v[cat] = pickBuilding(cat); return _pv.v[cat]; }
   const INFL_MAX = 30;   // 도시 건물 값은 30번째까지만 오르고 그 뒤는 30번째 값 그대로(사장님 2026-09-21 — 화성 인플레)
-  function priceOf(it) { const n = S.bought[it.id] || 0; if (it.price) return n < it.price.length ? it.price[n] : null; if (it.max && n >= it.max) return null; return Math.round(it.base * Math.pow(it.mul, isCity(it) ? Math.min(n, INFL_MAX - 1) : n)); }
+  function priceOf(it) { const n = S.bought[it.id] || 0; if (it.price) return n < it.price.length ? it.price[n] : null; if (it.max && n >= it.max) return null; if (isCity(it) && !zoneFor(it.id)) return null; return Math.round(it.base * Math.pow(it.mul, isCity(it) ? Math.min(n, INFL_MAX - 1) : n)); }
   const wallet = it => it.cur === 'crop' ? S.crop : S.mat;
   const curIc = it => it.cur === 'crop' ? CROPS[S.up.seed][0] : '🧱';
   const canBuy = it => { const p = priceOf(it); return p !== null && wallet(it) >= p && (!it.need || it.need()); };
   const visible = it => !it.need || it.need() || (S.bought[it.id] || 0) > 0;
   function sitePos(it) {
-    if (isCity(it)) { const z = zoneFor(it.id); if (z) return lotPosD(DIST[z], zcount(z)); const r = redevTarget(it.id); return r >= 0 ? lotPos(r) : lotPosD(DIST.dt, 0); }
+    if (isCity(it)) { const z = zoneFor(it.id); return z ? lotPosD(DIST[z], zcount(z)) : lotPosD(DIST.dt, 0); }
     if (it.id === 'plot') return plotPos(Math.min(MAX_PLOT - 1, 2 + (S.bought.plot || 0)));
     return { drill: POS.drill, res: POS.res, dam: POS.dam, solar: POS.solar, cargo: POS.pad, auto: POS.pad, wheels: POS.pod, seed: POS.pod, wall: POS.wall, drone: POS.pod, dish: { x: POS.pod.x + 20, y: POS.pod.y - 10 }, yield: { x: FARM.x + FARM.cols * FARM.cw / 2, y: FARM.y + farmRows() * FARM.ch + 40 }, pine: { x: 300 + (S.bought.pine || 0) * 300, y: 1110 } }[it.id];
   }
@@ -129,7 +127,7 @@
     if (!canBuy(it)) return false;
     const p = priceOf(it); if (it.cur === 'crop') S.crop -= p; else S.mat -= p; const at = sitePos(it);
     let ci = -1;
-    if (isCity(it)) { const z = zoneFor(it.id); if (z) { S.city.push({ type: it.id, done: false, b: pickPreview(it.id), z, k: zcount(z) }); ci = S.city.length - 1; } else { ci = redevTarget(it.id); if (ci < 0) return false; const c = S.city[ci]; c.type = it.id; c.b = pickPreview(it.id); c.done = false; } }
+    if (isCity(it)) { const z = zoneFor(it.id); if (!z) return false; S.city.push({ type: it.id, done: false, b: pickPreview(it.id), z, k: zcount(z) }); ci = S.city.length - 1; }
     S.bought[it.id] = (S.bought[it.id] || 0) + 1;
     S.q.push({ id: it.id, x: at.x, y: at.y, prog: 0, dur: it.dur, ci });   // 망치질이 너무 느려 절반으로(2배 느리게 하던 걸 돌려놓음) — 사장님 2026-09-11
     SND.play('click'); save(); renderShop(); return true;
@@ -153,7 +151,7 @@
   function cityCheck() {
     const n = S.city.filter(b => b.done).length, lv = n >= 40 ? 6 : n >= 25 ? 5 : n >= 15 ? 4 : n >= 8 ? 3 : n >= 4 ? 2 : n >= 1 ? 1 : 0;
     if (lv > S.lv) { S.lv = lv; const at = lotPos(n - 1); setTimeout(() => { toast('CITY LV ' + lv, false, 1800); SND.play('clear'); fireworks(at.x, at.y - 80, 6); }, 500); }
-    // 엔딩: 도심 48칸 + 주거단지 52칸이 다 지어지면 한 번(사장님 문구). '재개발' 을 누르면 그대로 이어서, 다음 건물부터는 옛 건물을 헐고 새로 짓는다
+    // 엔딩: 도심 48칸 + 주거단지 52칸이 다 지어지면 한 번(사장님 문구). 여기서 끝 — 재개발 없음. CLOSE 로 완공된 도시를 둘러보거나 NEW GAME 으로 처음부터(사장님 2026-09-21)
     const full = n >= DIST.dt.maxRows * DIST.dt.cols + DIST.res.maxRows * DIST.res.cols;
     if (full && !S.ended) { S.ended = true; save(); setTimeout(() => { for (let i = 0; i < 6; i++) setTimeout(() => fireworks(rnd(200, 1400), rnd(200, 600), 6), i * 250); SND.play('clear'); document.getElementById('ending').classList.add('show'); }, 900); }
   }
@@ -427,7 +425,8 @@
   function openShop() { if (G.place !== 'play') return; G.place = 'shop'; renderShop(); $('shop').classList.add('show'); SND.play('click'); }
   function closeShop() { if (G.place !== 'shop') return; G.place = 'play'; $('shop').classList.remove('show'); }
   $('tabs').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; G.tab = b.dataset.tab; renderShop(); });
-  document.getElementById('btnRedev').addEventListener('click', () => { document.getElementById('ending').classList.remove('show'); SND.play('click'); });
+  document.getElementById('btnEndClose').addEventListener('click', () => { document.getElementById('ending').classList.remove('show'); SND.play('click'); });
+  document.getElementById('btnEndNew').addEventListener('click', e => { const b = e.currentTarget; if (!b.armed) { b.armed = true; b.textContent = T('지우고 새로', 'ERASE & START'); SND.play('click'); return; } b.armed = false; b.textContent = 'NEW GAME'; document.getElementById('ending').classList.remove('show'); S = fresh(); save(); begin(0); });
   // ── 사면 뭘 얻는지 (사장님 2026-09-10) ──
   // 지금 값 → 사고 난 값을 그대로 보여준다. 말로만 "+15%" 하면 그게 얼마인지 모른다.
   const r1 = v => (Math.round(v * 100) / 100).toString();
@@ -479,7 +478,7 @@
       const cls = max ? 'max' : canBuy(it) ? '' : 'no';
       // 도시는 설명을 안 붙인다 — 작물 팔아 도시를 짓는 것 자체가 목표다 (사장님 2026-09-10)
       const gain = (max || it.tab === 'city') ? '' : gainOf(it);
-      return '<div class="item ' + cls + '" data-id="' + it.id + '"><span class="ic">' + it.ic + '</span>' + '<span class="n">' + T(it.ko, it.en) + '<small>' + lvl + '</small>' + (gain ? '<em>' + gain + '</em>' : '') + '</span>' + '<span class="p">' + (max ? 'MAX' : curIc(it) + ' ' + p) + '</span></div>';
+      return '<div class="item ' + cls + '" data-id="' + it.id + '"><span class="ic">' + it.ic + '</span>' + '<span class="n">' + T(it.ko, it.en) + '<small>' + lvl + '</small>' + (gain ? '<em>' + gain + '</em>' : '') + '</span>' + '<span class="p">' + (max ? (isCity(it) ? 'FULL' : 'MAX') : curIc(it) + ' ' + p) + '</span></div>';
     }).join('') + (list.length ? '' : '<div style="opacity:.5;text-align:center;padding:30px">🔒</div>') + '</div>';
     // 사는 건 오른쪽 값(돈 표시)을 눌러야 된다 — 칸 아무 데나 눌러 잘못 사는 일이 없게 (사장님 2026-09-10)
     $('shopBody').querySelectorAll('.item .p').forEach(el => el.addEventListener('click', e => { e.stopPropagation(); const it = SHOP.find(i => i.id === el.parentNode.dataset.id); if (it) buy(it); }));
