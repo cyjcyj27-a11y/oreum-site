@@ -137,6 +137,26 @@
     c.drawImage(TIMG, f[0], f[1], f[2], f[3], Math.round(-fx), Math.round(-fy), Math.round(w), Math.round(h));
     c.restore();
   }
+  // 교탁: 선생님 앞을 가린다. 2D 그림답게 평면으로 — 그러데이션·두께·튀어나온 윗판 없이 단색 면 + 갈색 윤곽선(사장님 9/21 "입체감 없애")
+  function drawLectern(c, cx, top, bot, w) {
+    const h = bot - top; if (h < 10) return;
+    const lw = Math.max(2, w * 0.011), band = Math.max(8, w * 0.07);         // 윤곽선 굵기·윗띠 높이
+    const x0 = cx - w * 0.5, x1 = cx + w * 0.5, r = w * 0.02;
+    const rr = (x, y, ww, hh, rad) => { c.beginPath(); c.moveTo(x + rad, y); c.arcTo(x + ww, y, x + ww, y + hh, rad); c.arcTo(x + ww, y + hh, x, y + hh, rad); c.arcTo(x, y + hh, x, y, rad); c.arcTo(x, y, x + ww, y, rad); c.closePath(); };
+    c.save();
+    c.lineJoin = 'round'; c.lineWidth = lw; c.strokeStyle = '#4a3222';
+    // 몸통(단색)
+    c.fillStyle = '#cfae82'; rr(x0, top, w, h, r); c.fill();
+    // 윗띠(단색, 몸통과 같은 폭)
+    c.fillStyle = '#e6cba0'; c.fillRect(x0, top, w, band);
+    c.beginPath(); c.moveTo(x0, top + band); c.lineTo(x1, top + band); c.stroke();
+    // 앞판 패널(단색 한 톤 어둡게 + 윤곽선)
+    const px = cx - w * 0.36, py = top + band + h * 0.12, pw = w * 0.72, ph = h - band - h * 0.24;
+    c.fillStyle = '#b8956a'; rr(px, py, pw, ph, w * 0.012); c.fill(); rr(px, py, pw, ph, w * 0.012); c.stroke();
+    // 바깥 윤곽선
+    rr(x0, top, w, h, r); c.stroke();
+    c.restore();
+  }
   function drawTeacher(c, S, rc, t, dt) {
     const name = frameFor(S), mood = S.mood, mt = S.moodT;
     if (name !== curName) { prevName = curName; curName = name; fadeT = 0; }
@@ -175,6 +195,9 @@
       c.globalCompositeOperation = 'lighter'; c.fillStyle = g; c.beginPath(); c.arc(0, FW * 0.8, FW * 2.6, 0, TAU); c.fill();
     }
     c.restore();
+    // 교탁: 얼굴 아래 2.2배 높이(허리)부터 칸 바닥까지, 너비는 얼굴의 3.2배
+    const lb = Math.min(S.H - 8, rc.y + rc.h + FW * 0.2);
+    drawLectern(c, cx, Math.min(fyPos + FW * 1.82, lb - FW * 0.75), lb, FW * 2.5);   // 사장님 9/21 "더 아래로"   // 칸이 낮아도(폰 세로) 교탁 높이는 얼굴 너비만큼은 된다
     return { cx, cy: fyPos + bob - FW * 0.6, r: FW * 0.6 };
   }
 
