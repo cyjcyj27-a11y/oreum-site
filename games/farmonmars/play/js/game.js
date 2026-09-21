@@ -85,13 +85,13 @@
     { id: 'wall', tab: 'farm', ic: '🛡️', ko: '방풍벽', en: 'Wind wall', price: [200], dur: 6, need: () => S.up.res >= 1 },
     { id: 'drone', tab: 'farm', ic: '🛸', ko: '경비 드론', en: 'Guard drone', price: [250], dur: 5, need: () => S.up.res >= 1 },
     { id: 'dam', tab: 'farm', ic: '🏔️', ko: '댐', en: 'Dam', price: [700, 2000, 6000], dur: 14, need: () => S.up.res >= 1 },
-    { id: 'hab', tab: 'city', ic: '🏠', ko: '주거', en: 'Housing', base: 240, mul: 1.35, dur: 6, need: () => S.up.res >= 1 },
-    { id: 'park', tab: 'city', ic: '🌳', ko: '문화·녹지', en: 'Culture & Parks', base: 360, mul: 1.35, dur: 6, need: () => cnt('hab') >= 1 },
-    { id: 'lab', tab: 'city', ic: '🏛️', ko: '공공·연구', en: 'Civic & Research', base: 500, mul: 1.4, dur: 7, need: () => cnt('hab') >= 1 },
-    { id: 'factory', tab: 'city', ic: '🏭', ko: '산업·상업', en: 'Industry & Shops', base: 600, mul: 1.4, dur: 8, need: () => cnt('hab') >= 2 },
-    { id: 'port', tab: 'city', ic: '🚉', ko: '교통', en: 'Transport', base: 1200, mul: 1.6, dur: 9, need: () => cnt('factory') >= 1 },
+    { id: 'hab', tab: 'city', ic: '🏠', ko: '주거', en: 'Housing', base: 240, mul: 1.25, dur: 6, need: () => S.up.res >= 1 },
+    { id: 'park', tab: 'city', ic: '🌳', ko: '문화·녹지', en: 'Culture & Parks', base: 360, mul: 1.25, dur: 6, need: () => cnt('hab') >= 1 },
+    { id: 'lab', tab: 'city', ic: '🏛️', ko: '공공·연구', en: 'Civic & Research', base: 500, mul: 1.25, dur: 7, need: () => cnt('hab') >= 1 },
+    { id: 'factory', tab: 'city', ic: '🏭', ko: '산업·상업', en: 'Industry & Shops', base: 600, mul: 1.25, dur: 8, need: () => cnt('hab') >= 2 },
+    { id: 'port', tab: 'city', ic: '🚉', ko: '교통', en: 'Transport', base: 1200, mul: 1.25, dur: 9, need: () => cnt('factory') >= 1 },
     { id: 'pine', tab: 'city', ic: '🌲', ko: '소나무 숲', en: 'Pine forest', price: [200, 400, 800, 1600, 3200, 6400], dur: 6, need: () => S.up.res >= 1 },
-    { id: 'sky', tab: 'city', ic: '🏙️', ko: '고층', en: 'High-rise', base: 1800, mul: 1.5, dur: 12, need: () => S.up.dam >= 1 },
+    { id: 'sky', tab: 'city', ic: '🏙️', ko: '고층', en: 'High-rise', base: 1800, mul: 1.25, dur: 12, need: () => S.up.dam >= 1 },
   ];
   const isCity = it => it.tab === 'city' && !it.price;   // 도시 탭이라도 단계형(소나무 숲)은 건물이 아니다
   // 건물 116종(buildings.js)을 여섯 갈래로 나눈다. 살 때마다 도시 수준에 맞는 시대의 건물이 하나씩 골라진다
@@ -114,7 +114,8 @@
   function redevTarget(cat) {   // 재개발: 같은 갈래(주거·공원은 주거단지, 나머지는 도심) 중 가장 옛 시대 건물을 헌다
     let best = -1, be = 99; S.city.forEach((c, i) => { if (!c.done || zoneOf(c.type) !== zoneOf(cat) || S.q.some(q => q.ci === i)) return; const e = BL[c.b] ? BL[c.b].era[0] : 0; if (e < be) { be = e; best = i; } }); return best; }
   const _pv = {}; function pickPreview(cat) { const key = cat + ':' + S.city.length + ':' + S.lv; if (_pv.key !== key) { _pv.key = key; _pv.v = {}; } if (_pv.v[cat] === undefined) _pv.v[cat] = pickBuilding(cat); return _pv.v[cat]; }
-  function priceOf(it) { const n = S.bought[it.id] || 0; if (it.price) return n < it.price.length ? it.price[n] : null; if (it.max && n >= it.max) return null; return Math.round(it.base * Math.pow(it.mul, n)); }
+  const INFL_MAX = 30;   // 도시 건물 값은 30번째까지만 오르고 그 뒤는 30번째 값 그대로(사장님 2026-09-21 — 화성 인플레)
+  function priceOf(it) { const n = S.bought[it.id] || 0; if (it.price) return n < it.price.length ? it.price[n] : null; if (it.max && n >= it.max) return null; return Math.round(it.base * Math.pow(it.mul, isCity(it) ? Math.min(n, INFL_MAX - 1) : n)); }
   const wallet = it => it.cur === 'crop' ? S.crop : S.mat;
   const curIc = it => it.cur === 'crop' ? CROPS[S.up.seed][0] : '🧱';
   const canBuy = it => { const p = priceOf(it); return p !== null && wallet(it) >= p && (!it.need || it.need()); };
