@@ -181,11 +181,11 @@
     if (!el && local) return;
     get(url).then(function (v) {
       if (!el || !v || typeof v.value !== 'number') return;
-      var n = PV_BASE + v.value, en = document.documentElement.lang === 'en';
+      var n = PV_BASE + v.value;
       var num = document.createElement('strong');
       el.textContent = '';
-      if (en) { el.appendChild(num); el.appendChild(document.createTextNode(' page views')); }
-      else { el.appendChild(document.createTextNode('누적 페이지뷰 ')); el.appendChild(num); }
+      // 한글판도 영어로 "16,207 visits" (사장님 2026-09-21 "걍 영어로 쓰자")
+      el.appendChild(num); el.appendChild(document.createTextNode(' visits'));
       el.hidden = false;
       num.textContent = n.toLocaleString('ko-KR');   // 올라가는 연출 없이 숫자만(사장님 2026-09-21 "슬롯처럼 올라가는 애니는 빼")
     });
