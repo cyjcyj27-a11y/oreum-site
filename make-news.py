@@ -133,7 +133,7 @@ LIST_STYLE = """.news-h1{ font-size:clamp(30px,5vw,48px); line-height:1.2; font-
 .news-item .note-sub{ margin:8px 0 14px; font-size:17px; line-height:1.6; color:var(--ink-2); }
 .news-item h2:not(.news-title){ font-size:21px; margin:30px 0 4px; }
 .news-item .gp-body a{ text-decoration:underline; text-underline-offset:3px; }
-.news-perma{ margin:18px 0 0; font-size:14px; }"""
+.news-item .gp-cta{ margin-top:26px; }"""
 
 
 def kdate(d):
@@ -176,8 +176,8 @@ def render_list(posts, ch):
     header, footer, scripts, verif, css = ch
     items = []
     for m in posts:   # 목록에도 본문을 다 펼친다(사장님 2026-09-22 "본문 펼쳐놓고")
-        items.append('        <li class="news-item"><time datetime="%s">%s</time><h2 class="news-title"><a href="/news/%s/">%s</a></h2><p class="note-sub">%s</p>\n%s\n        <p class="news-perma"><a href="/news/%s/">이 글 주소 →</a></p></li>' % (
-            m["date"], kdate(m["date"]), m["slug"], html.escape(m["title"], quote=False), inline(m.get("sub", "")), body_html(m["body"]), m["slug"]))
+        items.append('        <li class="news-item"><time datetime="%s">%s</time><h2 class="news-title"><a href="/news/%s/">%s</a></h2><p class="note-sub">%s</p>\n%s\n        <p class="gp-cta"><a class="btn btn-primary" href="/games/">🎮 게임 목록 보기</a></p></li>' % (
+            m["date"], kdate(m["date"]), m["slug"], html.escape(m["title"], quote=False), inline(m.get("sub", "")), body_html(m["body"])))
     desc = "한국의 작은 인디게임 스튜디오 오름게임즈의 개발뉴스. 설치 없이 브라우저에서 바로 하는 인디게임을 어떻게 만들고, 무엇을 배우고, 어디에 내는지 기록합니다."
     head = HEAD.format(title="%s — 설치 없이 하는 인디게임을 만드는 이야기" % SECTION, desc=desc, keywords="인디게임, 인디게임 개발, 인디게임 뉴스, 인디게임 사이트, 웹게임 개발, 오름게임즈",
                        url=SITE + "/news/", verif=verif, ogtype="website", ogtitle=SECTION, SITE=SITE, css=css, style=LIST_STYLE, ld="", header=header)
