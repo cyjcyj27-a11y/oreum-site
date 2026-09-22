@@ -21,6 +21,7 @@ SKIP_DIRS = {".git", "assets", "board-setup", "_new"}
 PRIORITY = [
     ("/games/",   "0.9"),
     ("/apps/",    "0.8"),
+    ("/news/",    "0.7"),
     ("/board/",   "0.6"),
     ("/guide/",   "0.6"),
     ("/support/", "0.4"),
