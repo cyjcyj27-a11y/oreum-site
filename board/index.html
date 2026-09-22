@@ -28,6 +28,7 @@
 <meta property="og:locale" content="ko_KR">
 
 <link rel="stylesheet" href="/style.css?v=41">
+<style>.iptag,.cmt-top .iptag{color:#8a8a80;font-size:.86em;font-weight:400;margin-left:3px}</style>
 </head>
 <body>
 
@@ -265,6 +266,9 @@
   });
 
   // ── 화면에 글자를 그대로 박아 넣습니다 (붙여넣은 주소가 눌리지 않게) ──
+  // 접속 IP 앞 두 자리 — (121.165) 꼴. 옛 글은 없어서 빈칸
+  function ipTag(t) { return t ? '<span class="iptag">(' + esc(t) + ')</span>' : ''; }
+
   function esc(s) {
     return String(s == null ? '' : s)
       .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
@@ -310,12 +314,12 @@
         '<button class="row-head" type="button" aria-expanded="false">' +
           '<span class="ttl">' + esc(titleOf(p)) + '</span>' +
           (p.image_path ? '<span class="pic" aria-hidden="true">📷</span>' : '') +
-          '<span class="by">' + (p.nick ? esc(p.nick) : '루루') + '</span>' +
+          '<span class="by">' + (p.nick ? esc(p.nick) : '루루') + ipTag(p.ip_tag) + '</span>' +
           '<span class="ago">' + when(p.created_at) + '</span>' +
           (isNew(p.created_at) ? '<span class="new24">NEW</span>' : '') +
         '</button>' +
         '<div class="row-body" hidden>' +
-          '<p class="byline">' + (p.nick ? esc(p.nick) : '루루') + '</p>' +
+          '<p class="byline">' + (p.nick ? esc(p.nick) : '루루') + ipTag(p.ip_tag) + '</p>' +
           (p.image_path ? '<img class="shot" loading="lazy" alt="플레이 화면" src="' + esc(imgUrl(p.image_path)) + '">' : '') +
           (p.body ? '<p class="text">' + bodyHtml(p.body) + '</p>' : '') +
           '<p class="rowfoot"><button class="del" type="button">지우기</button></p>' +
@@ -389,7 +393,7 @@
     loading = true;
     var first = cursor === null;
     var myRun = ++runId;              // 이 요청의 순번
-    var q = db.from('posts').select('id,created_at,nick,body,image_path')
+    var q = db.from('posts').select('id,created_at,nick,body,image_path,ip_tag')
       .order('created_at', { ascending: false }).limit(PAGE);
     if (cursor) q = q.lt('created_at', cursor);
     q.then(function (r) {
@@ -434,7 +438,7 @@
   h('pageviews'); h('pv_board');
 })();
 </script>
-<script src="/assets/board-extra.js?v=4" defer></script>
+<script src="/assets/board-extra.js?v=5" defer></script>
 <script src="/assets/askpin.js?v=1" defer></script>
 <script src="/assets/board-new.js?v=3" defer></script>
 <script src="/assets/mail.js" defer></script>

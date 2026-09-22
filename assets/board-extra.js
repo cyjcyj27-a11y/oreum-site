@@ -117,7 +117,7 @@
     var el = document.createElement('div');
     el.className = 'cmt';
     el.innerHTML =
-      '<div class="cmt-top"><b>' + esc(c.nick || T.anon) + '</b>' +
+      '<div class="cmt-top"><b>' + esc(c.nick || T.anon) + '</b>' + (c.ip_tag ? '<span class="iptag">(' + esc(c.ip_tag) + ')</span>' : '') +
       '<span class="cmt-ago">' + when(c.created_at) + '</span>' +
       (c.has_pw ? '<button type="button" class="cmt-del">' + esc(T.del) + '</button>' : '') +
       '</div><p class="cmt-body">' + esc(c.body) + '</p>';
@@ -183,7 +183,7 @@
     function load() {
       if (!db()) { note(T.notReady); return; }
       db().from('post_comments')
-        .select('id,created_at,nick,body,has_pw')
+        .select('id,created_at,nick,body,has_pw,ip_tag')
         .eq('post_id', postId)
         .order('created_at', { ascending: true })
         .limit(100)
