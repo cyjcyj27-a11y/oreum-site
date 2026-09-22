@@ -1122,6 +1122,16 @@
   <url>
     <loc>https://oreumgames.com/news/</loc>
     <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/news/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/news/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/news/"/>
+    <lastmod>2026-09-22</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://oreumgames.com/en/news/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/news/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/news/"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/news/"/>
     <lastmod>2026-09-22</lastmod>
     <changefreq>weekly</changefreq>
@@ -1130,6 +1140,16 @@
   <url>
     <loc>https://oreumgames.com/news/indiegame/</loc>
     <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/news/indiegame/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/news/indiegame/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/news/indiegame/"/>
+    <lastmod>2026-09-22</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://oreumgames.com/en/news/indiegame/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/news/indiegame/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/news/indiegame/"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/news/indiegame/"/>
     <lastmod>2026-09-22</lastmod>
     <changefreq>weekly</changefreq>
