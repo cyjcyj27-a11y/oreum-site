@@ -13,8 +13,8 @@
 // ─────────────────────────────────────────────────────────────
 (function () {
   var EN = /^\/en\//.test(location.pathname);
-  var T = EN ? { ok: 'OK', cancel: 'Cancel', ph: '4 digits' }
-             : { ok: '확인', cancel: '취소', ph: '숫자 4자리' };
+  var T = EN ? { ok: 'OK', cancel: 'Cancel', ph: 'Password' }
+             : { ok: '확인', cancel: '취소', ph: '비밀번호' };
   var box = null, input = null, title = null, done = null;
 
   function build() {
@@ -23,8 +23,8 @@
     box.innerHTML =
       '<div class="pin-card" role="dialog" aria-modal="true">' +
         '<p class="pin-title"></p>' +
-        '<input class="pin-input" type="password" inputmode="numeric" autocomplete="off" ' +
-               'maxlength="4" placeholder="' + T.ph + '">' +
+        '<input class="pin-input" type="password" autocomplete="off" ' +
+               'maxlength="8" placeholder="' + T.ph + '">' +
         '<p class="pin-btns">' +
           '<button type="button" class="btn btn-primary pin-ok">' + T.ok + '</button>' +
           '<button type="button" class="btn btn-ghost pin-cancel">' + T.cancel + '</button>' +

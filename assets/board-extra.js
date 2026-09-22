@@ -18,7 +18,7 @@
     open:    'Comments',
     ph:      'Leave a comment (up to ' + MAX + ' characters)',
     nick:    'Lulu',
-    pw:      '4 digits',
+    pw:      'Password (2+ characters)',
     send:    'Post',
     sending: 'Posting…',
     loading: 'Loading…',
@@ -27,12 +27,12 @@
     failed:  'Could not load the comments.',
     anon:    'Anonymous',
     del:     'delete',
-    askPw:   'Enter the 4 digits you used when posting',
+    askPw:   'Enter the password you used when posting',
     noDel:   'Could not delete',
-    badPw:   'Those digits do not match',
+    badPw:   'That password does not match',
     needBody:'Write a line first',
     tooLong: MAX + ' characters at most',
-    badDigits:'Enter 4 digits — you will need them to delete this comment',
+    badDigits:'Enter a password (2–8 characters) — you will need it to delete this comment',
     failPost:'Could not post. Try again in a moment.',
     close:   'Close',
     justNow: 'just now', mAgo: 'm ago', hAgo: 'h ago'
@@ -40,7 +40,7 @@
     open:    '댓글',
     ph:      '댓글을 남겨주세요 (' + MAX + '자까지)',
     nick:    '루루',
-    pw:      '숫자 4자리',
+    pw:      '비밀번호 (2자 이상)',
     send:    '올리기',
     sending: '올리는 중…',
     loading: '불러오는 중…',
@@ -49,12 +49,12 @@
     failed:  '댓글을 불러오지 못했어요.',
     anon:    '루루',
     del:     '지우기',
-    askPw:   '댓글을 올릴 때 넣은 숫자 4자리를 입력하세요',
+    askPw:   '댓글을 올릴 때 넣은 비밀번호를 입력하세요',
     noDel:   '지우지 못했어요',
-    badPw:   '숫자가 맞지 않아요',
+    badPw:   '비밀번호가 맞지 않아요',
     needBody:'댓글을 적어주세요',
     tooLong: MAX + '자까지만 쓸 수 있어요',
-    badDigits:'지울 때 쓸 숫자 4자리를 넣어주세요',
+    badDigits:'지울 때 쓸 비밀번호를 2자 이상 넣어주세요',
     failPost:'올리지 못했어요. 잠시 뒤 다시 시도해 주세요.',
     close:   '닫기',
     justNow: '방금', mAgo: '분 전', hAgo: '시간 전'
@@ -155,7 +155,7 @@
           '<textarea rows="2" maxlength="' + MAX + '" placeholder="' + esc(T.ph) + '"></textarea>' +
           '<div class="cmt-line">' +
             '<input class="cmt-nick" type="text" maxlength="12" placeholder="' + esc(T.nick) + '">' +
-            '<input class="cmt-pw" type="password" inputmode="numeric" maxlength="4" placeholder="' + esc(T.pw) + '">' +
+            '<input class="cmt-pw" type="password" maxlength="8" autocomplete="off" placeholder="' + esc(T.pw) + '">' +
             '<button type="submit" class="btn btn-primary cmt-send">' + esc(T.send) + '</button>' +
           '</div>' +
           '<p class="cmt-msg"></p>' +
@@ -216,7 +216,7 @@
       function bad(t) { msg.textContent = t; msg.className = 'cmt-msg bad'; }
       if (!body) return bad(T.needBody);
       if (body.length > MAX) return bad(T.tooLong);
-      if (!/^[0-9]{4}$/.test(pw)) return bad(T.badDigits);
+      if (pw.length < 2 || pw.length > 8) return bad(T.badDigits);
       if (!db()) return bad(T.notReady);
 
       var send = form.querySelector('.cmt-send');

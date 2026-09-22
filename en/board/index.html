@@ -83,11 +83,11 @@
       </div>
       <div class="row">
         <input type="text" id="nick" maxlength="12" placeholder="Lulu">
-        <input type="password" id="pw" inputmode="numeric" maxlength="4" placeholder="4 digits">
+        <input type="password" id="pw" maxlength="8" autocomplete="off" placeholder="Password (2+ characters)">
         <span class="count"><b id="count">0</b>/200</span>
       </div>
       <p class="tip">
-        The 4 digits let you delete your own post later. Forget them and it cannot be deleted.<br>
+        The password lets you delete your own post later. Forget it and the post cannot be deleted.<br>
         Ads will be removed.<br>
         Everything you post is public, so please do not upload faces or personal details.
         (<a href="/en/privacy/">Privacy Policy</a>)
@@ -216,10 +216,10 @@
       return;
     }
     if (body.length > 200) { say('200 characters maximum', true); return; }
-    if (!/^\d{4}$/.test(pw)) {
+    if (pw.length < 2 || pw.length > 8) {
       /* 한국어판과 같은 이유 — 단추 아래 안내글은 폰에서 안 보인다 */
-      alert('Please enter a password');
-      say('Enter 4 digits so you can delete this later', true);
+      alert('Enter a password of at least 2 characters');
+      say('Enter a password (2–8 characters) so you can delete this later', true);
       try { $('pw').focus(); } catch (e) {}
       return;
     }
@@ -339,14 +339,14 @@
 
   function remove(id, el) {
     /* 숫자가 화면에 그대로 보이지 않게 가려서 받는다(askpin.js) */
-    var ask = window.askPin ? askPin('Enter the 4 digits you used when posting')
-                            : Promise.resolve(prompt('Enter the 4 digits you used when posting'));
+    var ask = window.askPin ? askPin('Enter the password you used when posting')
+                            : Promise.resolve(prompt('Enter the password you used when posting'));
     ask.then(function (pw) {
       if (pw === null) return;
       db.rpc('delete_post', { p_id: id, p_pw: String(pw).trim() }).then(function (r) {
         if (r.error) { alert('Could not delete'); return; }
         if (r.data === true) { el.remove(); }
-        else { alert('Those digits do not match'); }
+        else { alert('That password does not match'); }
       });
     });
   }
@@ -403,8 +403,8 @@
   h('pageviews'); h('pv_board_en');
 })();
 </script>
-<script src="/assets/board-extra.js?v=7" defer></script>
-<script src="/assets/askpin.js?v=1" defer></script>
+<script src="/assets/board-extra.js?v=8" defer></script>
+<script src="/assets/askpin.js?v=2" defer></script>
 <script src="/assets/board-new.js?v=3" defer></script>
 <script src="/assets/mail.js" defer></script>
 <script src="/assets/install.js?v=7" defer></script>
