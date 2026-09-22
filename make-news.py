@@ -183,7 +183,6 @@ def render_list(posts, ch):
     <div class="wrap game-page">
       <a class="backlink" href="/games/">← 게임 목록</a>
       <h1 class="news-h1">%s</h1>
-      <p class="gp-line">설치 없이 브라우저에서 바로 하는 인디게임을 만드는 이야기. 무엇을 만들었고, 어디서 막혔고, 어디에 냈는지 적습니다.</p>
       <ul class="news-list">
 %s
       </ul>
