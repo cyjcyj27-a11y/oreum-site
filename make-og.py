@@ -35,10 +35,15 @@ def cards_after(html, marker, n):
 
 
 def main():
+    # 카톡 등은 1200×630 을 가운데 정사각형으로 잘라 보이기도 한다(사장님 2026-09-22 "카드가 잘려 보인다")
+    # → 카드 6장을 가운데 630×630 안에 2열×3줄로 넣어, 정사각형으로 잘려도 여섯 장이 다 보이게 한다. 양옆은 로고.
     hub = io.open(os.path.join(ROOT, "games", "index.html"), encoding="utf-8").read()
     names = cards_after(hub, "<!-- CARDS:start -->", 3) + cards_after(hub, "<!-- FLASH:start -->", 3)
-    cw = (W - GAP * (COLS + 1)) // COLS
-    ch = (H - GAP * (ROWS + 1)) // ROWS
+    S = H                      # 가운데 정사각형 한 변 630
+    cols, rows, gap = 2, 3, 10
+    cw = (S - gap * (cols + 1)) // cols          # 300
+    ch = (S - gap * (rows + 1)) // rows          # 196
+    x0 = (W - S) // 2
     bg = Image.new("RGB", (W, H), (248, 245, 236))
     for i, n in enumerate(names[:6]):
         im = Image.open(os.path.join(ROOT, "assets", n)).convert("RGB")
@@ -50,11 +55,19 @@ def main():
             th = int(w * ch / cw)
             im = im.crop((0, (h - th) // 2, w, (h - th) // 2 + th))
         im = im.resize((cw, ch), Image.LANCZOS)
-        x = GAP + (i % COLS) * (cw + GAP)
-        y = GAP + (i // COLS) * (ch + GAP)
+        x = x0 + gap + (i % cols) * (cw + gap)
+        y = gap + (i // cols) * (ch + gap)
         mask = Image.new("L", (cw, ch), 0)
-        ImageDraw.Draw(mask).rounded_rectangle((0, 0, cw - 1, ch - 1), radius=18, fill=255)
+        ImageDraw.Draw(mask).rounded_rectangle((0, 0, cw - 1, ch - 1), radius=16, fill=255)
         bg.paste(im, (x, y), mask)
+    # 양옆 여백에 로고
+    try:
+        logo = Image.open(os.path.join(ROOT, "assets", "logo-full.webp")).convert("RGBA")
+        lw = 150; lh = int(logo.size[1] * lw / logo.size[0]); logo = logo.resize((lw, lh), Image.LANCZOS)
+        for lx in ((x0 - lw) // 2, x0 + S + (x0 - lw) // 2):
+            bg.paste(logo, (lx, (H - lh) // 2), logo)
+    except Exception as e:
+        print("logo skip:", e)
     tmp = OUT + ".tmp"
     bg.save(tmp, "JPEG", quality=86, optimize=True)
     os.replace(tmp, OUT)
