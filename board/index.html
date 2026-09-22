@@ -83,11 +83,11 @@
       </div>
       <div class="row">
         <input type="text" id="nick" maxlength="12" placeholder="루루">
-        <input type="password" id="pw" maxlength="8" autocomplete="off" placeholder="비밀번호 (2자 이상)">
+        <input type="password" id="pw" maxlength="8" autocomplete="off" placeholder="비밀번호">
         <span class="count"><b id="count">0</b>/200</span>
       </div>
       <p class="tip">
-        비밀번호는 나중에 내 글을 지울 때 씁니다. 잊으면 지울 수 없어요.<br>
+        비밀번호(2~8자)는 나중에 내 글을 지울 때 씁니다. 잊으면 지울 수 없어요.<br>
         광고 글은 지워집니다.<br>
         올린 사진과 글은 누구나 볼 수 있으니, 얼굴이나 개인정보가 담긴 사진은 올리지 말아 주세요.
         (<a href="/privacy/">개인정보처리방침</a>)
@@ -282,12 +282,11 @@
       .replace(URLISH, '<span class="deadlink" title="이 게시판에서는 주소가 눌리지 않습니다">$1</span>')
       .replace(/\n/g, '<br>');
   }
+  /* 디시처럼 올린 시각을 그대로: 09.22 11:38:30 (올해가 아니면 2025.09.22 11:38:30) (사장님 2026-09-23) */
   function when(iso) {
-    var t = new Date(iso), m = Math.floor((Date.now() - t) / 60000);
-    if (m < 1) return '방금';
-    if (m < 60) return m + '분 전';
-    if (m < 1440) return Math.floor(m / 60) + '시간 전';
-    return (t.getMonth() + 1) + '월 ' + t.getDate() + '일';
+    var t = new Date(iso), p = function (n) { return (n < 10 ? '0' : '') + n; };
+    var d = p(t.getMonth() + 1) + '.' + p(t.getDate()) + ' ' + p(t.getHours()) + ':' + p(t.getMinutes()) + ':' + p(t.getSeconds());
+    return (t.getFullYear() === new Date().getFullYear() ? '' : t.getFullYear() + '.') + d;
   }
 
   /* 24시간 안에 올라온 글에만 NEW 를 붙인다(사장님 2026-09-16 "24시간이내 새글한정") */
@@ -438,7 +437,7 @@
   h('pageviews'); h('pv_board');
 })();
 </script>
-<script src="/assets/board-extra.js?v=8" defer></script>
+<script src="/assets/board-extra.js?v=9" defer></script>
 <script src="/assets/askpin.js?v=2" defer></script>
 <script src="/assets/board-new.js?v=3" defer></script>
 <script src="/assets/mail.js" defer></script>

@@ -18,7 +18,7 @@
     open:    'Comments',
     ph:      'Leave a comment (up to ' + MAX + ' characters)',
     nick:    'Lulu',
-    pw:      'Password (2+ characters)',
+    pw:      'Password',
     send:    'Post',
     sending: 'Posting…',
     loading: 'Loading…',
@@ -40,7 +40,7 @@
     open:    '댓글',
     ph:      '댓글을 남겨주세요 (' + MAX + '자까지)',
     nick:    '루루',
-    pw:      '비밀번호 (2자 이상)',
+    pw:      '비밀번호',
     send:    '올리기',
     sending: '올리는 중…',
     loading: '불러오는 중…',
@@ -66,13 +66,11 @@
     });
   }
 
+  /* 디시처럼 올린 시각을 그대로: 09.22 11:38:30 (올해가 아니면 2025.09.22 11:38:30) (사장님 2026-09-23) */
   function when(iso) {
-    var t = new Date(iso), m = (Date.now() - t.getTime()) / 60000;
-    if (m < 1) return T.justNow;
-    if (m < 60) return Math.floor(m) + T.mAgo;
-    if (m < 1440) return Math.floor(m / 60) + T.hAgo;
-    return EN ? (t.getMonth() + 1) + '/' + t.getDate()
-              : (t.getMonth() + 1) + '월 ' + t.getDate() + '일';
+    var t = new Date(iso), p = function (n) { return (n < 10 ? '0' : '') + n; };
+    var d = p(t.getMonth() + 1) + '.' + p(t.getDate()) + ' ' + p(t.getHours()) + ':' + p(t.getMinutes()) + ':' + p(t.getSeconds());
+    return (t.getFullYear() === new Date().getFullYear() ? '' : t.getFullYear() + '.') + d;
   }
 
   /* ══════════ 사진 크게 보기 ══════════
