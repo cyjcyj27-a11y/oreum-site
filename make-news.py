@@ -124,12 +124,16 @@ ARTICLE_STYLE = """.note-page h1{ font-size:clamp(18px,2.4vw,24px); line-height:
 .note-page .gp-body a{ text-decoration:underline; text-underline-offset:3px; }
 .note-page .gp-cta{ margin-top:30px; }"""
 
-LIST_STYLE = """.news-h1{ font-size:clamp(30px,5vw,48px); line-height:1.2; font-weight:900; }
-.news-list{ list-style:none; margin:18px 0 0; padding:0; }
-.news-list li{ border-top:1px solid var(--line); padding:16px 0; }
-.news-list a{ font-size:24px; font-weight:800; color:var(--ink); line-height:1.4; }
-.news-list p{ margin:6px 0 0; font-size:15px; line-height:1.7; color:var(--ink-2); }
-.news-list time{ font-size:13px; color:var(--muted); }"""
+LIST_STYLE = """.news-h1{ font-size:clamp(30px,5vw,48px); line-height:1.2; font-weight:900; padding-bottom:12px; border-bottom:3px solid var(--ink); }
+.news-list{ list-style:none; margin:0; padding:0; }
+.news-item{ padding:26px 0 34px; border-bottom:1px solid var(--line); }
+.news-item time{ font-size:13px; color:var(--muted); }
+.news-title{ font-size:clamp(18px,2.4vw,24px); line-height:1.4; margin:6px 0 0; letter-spacing:-.02em; }
+.news-title a{ color:var(--ink); text-decoration:none; }
+.news-item .note-sub{ margin:8px 0 14px; font-size:17px; line-height:1.6; color:var(--ink-2); }
+.news-item h2:not(.news-title){ font-size:21px; margin:30px 0 4px; }
+.news-item .gp-body a{ text-decoration:underline; text-underline-offset:3px; }
+.news-perma{ margin:18px 0 0; font-size:14px; }"""
 
 
 def kdate(d):
@@ -171,9 +175,9 @@ def render_article(meta, ch):
 def render_list(posts, ch):
     header, footer, scripts, verif, css = ch
     items = []
-    for m in posts:
-        items.append('        <li><time datetime="%s">%s</time><br><a href="/news/%s/">%s</a><p>%s</p></li>' % (
-            m["date"], m["date"], m["slug"], html.escape(m["title"], quote=False), inline(m.get("sub", ""))))
+    for m in posts:   # 목록에도 본문을 다 펼친다(사장님 2026-09-22 "본문 펼쳐놓고")
+        items.append('        <li class="news-item"><time datetime="%s">%s</time><h2 class="news-title"><a href="/news/%s/">%s</a></h2><p class="note-sub">%s</p>\n%s\n        <p class="news-perma"><a href="/news/%s/">이 글 주소 →</a></p></li>' % (
+            m["date"], kdate(m["date"]), m["slug"], html.escape(m["title"], quote=False), inline(m.get("sub", "")), body_html(m["body"]), m["slug"]))
     desc = "한국의 작은 인디게임 스튜디오 오름게임즈의 개발뉴스. 설치 없이 브라우저에서 바로 하는 인디게임을 어떻게 만들고, 무엇을 배우고, 어디에 내는지 기록합니다."
     head = HEAD.format(title="%s — 설치 없이 하는 인디게임을 만드는 이야기" % SECTION, desc=desc, keywords="인디게임, 인디게임 개발, 인디게임 뉴스, 인디게임 사이트, 웹게임 개발, 오름게임즈",
                        url=SITE + "/news/", verif=verif, ogtype="website", ogtitle=SECTION, SITE=SITE, css=css, style=LIST_STYLE, ld="", header=header)
