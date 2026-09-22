@@ -17,7 +17,7 @@
   var T = EN ? {
     open:    'Comments',
     ph:      'Leave a comment (up to ' + MAX + ' characters)',
-    nick:    'Name (optional)',
+    nick:    'Lulu',
     pw:      '4 digits',
     send:    'Post',
     sending: 'Posting…',
@@ -39,7 +39,7 @@
   } : {
     open:    '댓글',
     ph:      '댓글을 남겨주세요 (' + MAX + '자까지)',
-    nick:    '이름 (안 써도 돼요)',
+    nick:    '루루',
     pw:      '숫자 4자리',
     send:    '올리기',
     sending: '올리는 중…',
