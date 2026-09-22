@@ -232,8 +232,16 @@
         var fresh = { id: r.data, created_at: new Date().toISOString(),
                       nick: nick, body: body, has_pw: true };
         if (list.querySelector('.cmt-note')) list.innerHTML = '';
-        list.appendChild(commentRow(fresh, function () { setCount(Math.max(0, n - 1)); }));
+        var row = commentRow(fresh, function () { setCount(Math.max(0, n - 1)); });
+        list.appendChild(row);
         setCount(n + 1);
+        /* 접속 IP 앞자리는 서버가 넣으므로 저장된 줄을 다시 읽어 바꿔 끼운다 */
+        db().from('post_comments').select('id,created_at,nick,body,has_pw,ip_tag')
+          .eq('id', r.data).maybeSingle().then(function (q) {
+            if (q.error || !q.data || !row.parentNode) return;
+            var real = commentRow(q.data, function () { setCount(Math.max(0, n - 1)); });
+            list.replaceChild(real, row);
+          });
       });
     });
   }
