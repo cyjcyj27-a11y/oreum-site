@@ -82,9 +82,10 @@ body.title #keys, body.title #pad, body.title .tbtn{visibility:hidden}
 #title .row{display:flex;gap:12px;align-items:center;flex-wrap:wrap;justify-content:center}
 #title .best{font-size:17px;color:#ffe9c2;opacity:.9;text-shadow:0 2px 0 #000}
 
-#stage h1{font-size:clamp(70px,14vw,130px);color:#fff7e6;animation:pop .35s ease-out}
-#clear h1{font-size:clamp(80px,16vw,150px);color:#ffe066;animation:pop .35s ease-out}
-#over h1{font-size:clamp(80px,16vw,150px);color:#ff5a3a;animation:pop .35s ease-out}
+/* 폰 가로는 화면이 낮다 — 높이 기준(vh)을 같이 걸어 한 줄에 들어오게 (2026-09-23 사장님 "글씨좀 줄이지") */
+#stage h1{font-size:min(11vw,20vh,130px);white-space:nowrap;color:#fff7e6;animation:pop .35s ease-out}
+#clear h1{font-size:min(16vw,22vh,150px);white-space:nowrap;color:#ffe066;animation:pop .35s ease-out}
+#over h1{font-size:min(10vw,22vh,150px);white-space:nowrap;color:#ff5a3a;animation:pop .35s ease-out}
 #ending h1{font-family:'Melody','Ria',sans-serif;font-size:clamp(80px,14vw,170px);color:#fff7e6;-webkit-text-stroke:9px #7a2e12;paint-order:stroke fill;text-shadow:0 6px 0 #7a2e12}
 #over,#clear{background:rgba(10,8,4,.4)}
 #ending{justify-content:flex-start;padding-top:6vh;background:linear-gradient(180deg,rgba(10,6,20,.3),rgba(0,0,0,0) 45%,rgba(0,0,0,.3));animation:fadein 1.6s ease-out}
