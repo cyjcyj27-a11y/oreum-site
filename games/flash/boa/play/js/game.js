@@ -19,12 +19,14 @@
   function save(k, v) { try { localStorage.setItem(KEY + '.' + k, String(v)); } catch (e) {} }
 
   // ── 별(스테이지) ──
+  // 2026-09-24 사장님 "규칙도 게임 전체적으로 완화해": 바오밥 9→14초·새싹 간격 넓힘, 왕 명령 7→10초·틀리면 -3→-2, 술 4→2.5초,
+  //   사업가 40→50초, 점등인 밤낮 최소 주기 1.5→2.5초·밤 시야 130→170, 지구 노란 뱀 속도 0.72→0.6
   var STAGES = [
     { id: 'jungle', ic: '🌿', ko: '정글', en: 'JUNGLE', food: '🐸', quota: 8, eles: 1 },
     { id: 'b612', ic: '🌋', ko: 'B-612', en: 'B-612', food: '🌱', quota: 10, eles: 3 },   // 둥근 판 제한은 뺐다(2026-09-23 사장님 "동그라미판제한설정을 빼")
     { id: 'king', ic: '👑', ko: '왕의 별', en: "KING'S STAR", food: '🐀', quota: 8, eles: 1 },
     { id: 'drunk', ic: '🍾', ko: '술꾼의 별', en: "TIPPLER'S STAR", food: '🍾', quota: 8, eles: 1 },
-    { id: 'biz', ic: '⭐', ko: '사업가의 별', en: "BUSINESSMAN'S STAR", food: '⭐', quota: 30, eles: 1, timer: 40 },
+    { id: 'biz', ic: '⭐', ko: '사업가의 별', en: "BUSINESSMAN'S STAR", food: '⭐', quota: 30, eles: 1, timer: 50 },
     { id: 'lamp', ic: '🏮', ko: '점등인의 별', en: "LAMPLIGHTER'S STAR", food: '✨', quota: 10, eles: 1 },
     { id: 'earth', ic: '🌍', ko: '지구', en: 'EARTH', food: '💧', quota: 10, eles: 1 }
   ];
@@ -217,7 +219,7 @@
   // ── 노랑 뱀(지구) ──
   function newSnake() {
     var p = randPt(60, 300);
-    snake = { x: p.x, y: p.y, ang: Math.random() * TAU, sp: speedBase * 0.72, trail: [], ph: 0 };
+    snake = { x: p.x, y: p.y, ang: Math.random() * TAU, sp: speedBase * 0.6, trail: [], ph: 0 };
   }
   function snakeStep(dt) {
     var s = snake; s.ph += dt * 6;
@@ -242,7 +244,7 @@
     foods = []; eles = []; obs = []; bits = []; ate = 0; elesEaten = 0; combo = 0; comboT = 0;
     drunkT = 0; bizT = S.timer || 0; night = false; nightA = 0; lampT = 0; lampP = 4; snake = null; fox = null; trees = 0; crackLines = []; planetBreak = 0; starT = 0; sproutT = 0;
     dash = 0; dashCd = 0; shake = 0; deadEyes = false; paused = false; hatPh = -1; hatOn = false;
-    king = { order: Math.floor(Math.random() * 3), T: 7, shake: 0 };
+    king = { order: Math.floor(Math.random() * 3), T: 10, shake: 0 };
     stageScore0 = score;
     newBoa();
     if (S.id === 'b612') {
@@ -279,7 +281,7 @@
     var good = true;
     if (S.id === 'king') {
       good = f.ch === KING_FOODS[king.order];
-      if (!good) { boa.len = Math.max(START_LEN, boa.len - 3); king.shake = 0.6; A.wrong(); flash('✗', true); combo = 0; addFood(); return; }
+      if (!good) { boa.len = Math.max(START_LEN, boa.len - 2); king.shake = 0.6; A.wrong(); flash('✗', true); combo = 0; addFood(); return; }
       newOrder(); score += 20;
     } else score += 10;
     ate++; combo++; comboT = 1.6;
@@ -287,13 +289,13 @@
     bulges.push({ d: 0, s: 0.5, w: 13 });
     A.eat(combo);
     spawnBits(f.x, f.y, S.id === 'biz' ? '#ffd35a' : S.id === 'earth' ? '#5ab0ff' : '#8bc34a');
-    if (S.id === 'drunk') { drunkT = 4; A.hic(); }
-    if (S.id === 'biz') bizT = Math.min((S.timer || 40), bizT + 0.6);
+    if (S.id === 'drunk') { drunkT = 2.5; A.hic(); }
+    if (S.id === 'biz') bizT = Math.min((S.timer || 50), bizT + 0.6);
     if (ate >= S.quota && !eles.length && !elesEaten) spawnEles(S.eles, (S.eles > 1 ? 26 : 34) * (Math.min(ARENA.w, ARENA.h) < 420 ? 0.8 : 1));
     else if (S.id !== 'biz' && S.id !== 'b612') addFood();
     hud();
   }
-  function newOrder() { var o; do { o = Math.floor(Math.random() * 3); } while (o === king.order); king.order = o; king.T = 7; A.order(); }
+  function newOrder() { var o; do { o = Math.floor(Math.random() * 3); } while (o === king.order); king.order = o; king.T = 10; A.order(); }
   function eatEle(e) {
     e.eaten = 1; elesEaten++; score += 100; A.gulp(); shake = 0.35;
     bulges.push({ d: -e.r * 0.5, s: 1.35, w: e.r * 1.05 });
@@ -483,10 +485,10 @@
       }
     } else if (S.id === 'b612') {
       sproutT -= dt;
-      if (sproutT <= 0 && foods.length < (ARENA.r > 220 ? 6 : 4) && ate < S.quota) { addFood('🌱'); sproutT = rnd(1.6, 2.6); }
+      if (sproutT <= 0 && foods.length < (ARENA.r > 220 ? 6 : 4) && ate < S.quota) { addFood('🌱'); sproutT = rnd(2.4, 3.6); }
       for (i = foods.length - 1; i >= 0; i--) {
         f = foods[i]; f.age += dt;
-        if (f.age > 9) { foods.splice(i, 1); obs.push({ type: 'tree', x: f.x, y: f.y, r: 22, born: t }); trees++; A.crack(); shake = Math.max(shake, 0.3); if (trees === 2) makeCracks(); if (trees >= 4) die('break'); }
+        if (f.age > 14) { foods.splice(i, 1); obs.push({ type: 'tree', x: f.x, y: f.y, r: 22, born: t }); trees++; A.crack(); shake = Math.max(shake, 0.3); if (trees === 2) makeCracks(); if (trees >= 4) die('break'); }
       }
     } else if (S.id === 'king') {
       king.T -= dt; if (king.T <= 0) newOrder();
@@ -496,7 +498,7 @@
       for (i = foods.length - 1; i >= 0; i--) { f = foods[i]; f.age += dt; f.y += f.vy * dt; f.x += Math.sin(f.age * 2 * f.sw + f.seed) * 30 * dt; if (f.y > ARENA.y + ARENA.h - 14) foods.splice(i, 1); }
       if (ate < S.quota) { var before = Math.ceil(bizT); bizT -= dt; if (bizT <= 10 && Math.ceil(bizT) !== before) A.tick(); if (bizT <= 0) { bizT = 0; return die('time'); } }
     } else if (S.id === 'lamp') {
-      lampT += dt; if (lampT >= lampP) { lampT = 0; night = !night; lampP = Math.max(1.5, lampP * 0.88); A.lamp(night); }
+      lampT += dt; if (lampT >= lampP) { lampT = 0; night = !night; lampP = Math.max(2.5, lampP * 0.92); A.lamp(night); }
       nightA = clamp(nightA + (night ? dt * 2.5 : -dt * 2.5), 0, 1);
     } else if (S.id === 'earth') {
       snakeStep(dt);
@@ -518,6 +520,7 @@
     setT('fdN', String(eleP ? elesEaten : ate)); setT('fdQ', '/' + (eleP ? S.eles : S.quota));
     setT('scN', String(score));
     var tm = $('tm'); tm.classList.toggle('show', S.id === 'biz'); if (S.id === 'biz') { setT('tmN', String(Math.ceil(bizT))); tm.classList.toggle('hot', bizT <= 10 && ate < S.quota); }
+    var tr = $('tr'); tr.classList.toggle('show', S.id === 'b612'); if (S.id === 'b612') { setT('trN', String(trees)); tr.classList.toggle('hot', trees >= 3); }
     var bd = $('btnDash'); bd.classList.toggle('on', dash > 0); bd.classList.toggle('cd', dash <= 0 && dashCd > 0);
   }
   var flashT = null;
@@ -569,7 +572,7 @@
   function drawFoods(g) {
     for (var i = 0; i < foods.length; i++) {
       var f = foods[i], bob = Math.sin(tt * 3 + f.seed) * 2, size = 26;
-      if (S.id === 'b612') { size = 18 + f.age * 1.6; if (f.age > 7) bob += Math.sin(tt * 30) * 2; }
+      if (S.id === 'b612') { size = 18 + f.age * 1.03; if (f.age > 12) bob += Math.sin(tt * 30) * 2; }
       if (S.id === 'lamp' && nightA > 0) { g.fillStyle = 'rgba(255,235,150,' + 0.35 * nightA + ')'; circle(g, f.x, f.y, 16); }
       g.fillStyle = 'rgba(0,0,0,.12)'; g.beginPath(); g.ellipse(f.x + 2, f.y + size * 0.62, size * 0.5, size * 0.16, 0, 0, TAU); g.fill();
       g.fillStyle = 'rgba(255,255,255,.72)'; g.strokeStyle = 'rgba(43,36,24,.55)'; g.lineWidth = 1.5; g.beginPath(); g.arc(f.x, f.y + bob, size * 0.66, 0, TAU); g.fill(); g.stroke();
@@ -587,7 +590,7 @@
         g.fillStyle = '#6a3b8a'; g.strokeStyle = INK; g.lineWidth = 3; rrect(g, kx - 34, ky - 40, 68, 74, 10); g.fill(); g.stroke(); g.fillStyle = '#e0b04a'; rrect(g, kx - 34, ky - 40, 68, 10, 5); g.fill();
         emoji(g, '🤴', kx, ky + 2, 52);
         // 명령 말풍선
-        var bx = kx + 62, by = ky - 30, rem = clamp(king.T / 7, 0, 1);
+        var bx = kx + 62, by = ky - 30, rem = clamp(king.T / 10, 0, 1);
         g.fillStyle = '#fff'; g.strokeStyle = INK; g.lineWidth = 2.5; rrect(g, bx - 26, by - 24, 52, 48, 12); g.fill(); g.stroke();
         g.beginPath(); g.moveTo(bx - 26, by + 6); g.lineTo(bx - 38, by + 14); g.lineTo(bx - 26, by + 16); g.closePath(); g.fillStyle = '#fff'; g.fill(); g.stroke();
         g.strokeStyle = '#fff'; g.lineWidth = 3; g.beginPath(); g.moveTo(bx - 26, by + 6); g.lineTo(bx - 26, by + 16); g.stroke();
@@ -617,7 +620,7 @@
     ncx.fillStyle = 'rgba(12,10,42,' + (0.9 * nightA) + ')'; ncx.fillRect(0, 0, W, H);
     ncx.globalCompositeOperation = 'destination-out';
     function hole(x, y, r) { var rg = ncx.createRadialGradient(x, y, r * 0.3, x, y, r); rg.addColorStop(0, 'rgba(0,0,0,1)'); rg.addColorStop(1, 'rgba(0,0,0,0)'); ncx.fillStyle = rg; circle(ncx, x, y, r); }
-    hole(boa.x, boa.y, 130);
+    hole(boa.x, boa.y, 170);
     obs.forEach(function (o) { if (o.type === 'lamp') hole(o.x, o.y - 26, 120); });
     ctx.drawImage(nc, 0, 0, W, H);
   }

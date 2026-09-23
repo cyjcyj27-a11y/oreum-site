@@ -21,6 +21,10 @@
   #stg { font-family: Arial, sans-serif; font-weight: 700; font-size: 13px; letter-spacing: 1px; }
   #stg .nm { font-family: 'Griun', sans-serif; font-weight: normal; font-size: 15px; letter-spacing: 0; }
   #tm { display: none; } #tm.show { display: inline-flex; }
+  /* B-612 바오밥 나무 수 — 4그루면 별이 쪼개진다. 3그루부터 빨갛게 깜빡 (2026-09-24 사장님 "길가다가 죽는건 좀 아니지않냐" → 나무 수 표시) */
+  #tr { display: none; } #tr.show { display: inline-flex; }
+  #tr.hot { animation: trBlink .5s steps(2, jump-none) infinite alternate; }
+  @keyframes trBlink { from { background: rgba(190,40,30,.85); } to { background: rgba(0,0,0,.42); } }
   .spacer { flex: 1; }
   .tog { pointer-events: auto; width: 36px; height: 36px; border-radius: 50%; border: 1px solid rgba(255,255,255,.3); background: rgba(0,0,0,.4); color: #fff; font-family: inherit; font-size: 17px; line-height: 1; padding: 0; touch-action: manipulation; }
   .tog.off { opacity: .4; text-decoration: line-through; }
@@ -96,6 +100,7 @@
   <span class="stat" id="stg"><span class="ic" id="stgIc">🌿</span><span class="nm" id="stgNm" data-en="JUNGLE">정글</span></span>
   <span class="stat" id="fd"><span class="ic" id="fdIc">🐸</span><b id="fdN">0</b><span id="fdQ">/8</span></span>
   <span class="stat" id="tm"><span class="ic">⏱</span><b id="tmN">40</b></span>
+  <span class="stat" id="tr"><span class="ic">🌳</span><b id="trN">0</b><span>/4</span></span>
   <span class="stat" id="sc"><span class="ic">⭐</span><b id="scN">0</b></span>
   <span class="spacer"></span>
   <button class="tog" id="tgPause" title="P">❚❚</button>
@@ -141,7 +146,7 @@
 <script src="assets/game-home.js" data-top="6" data-left="6" data-fullscreen="1" defer></script>
 <script src="assets/landscape.js?v=1"></script>
 <script src="js/audio.js?v=1"></script>
-<script src="js/game.js?v=17"></script>
+<script src="js/game.js?v=19"></script>
 <script src="/assets/visit.js?v=17" defer></script>
 <script src="/assets/game-events.js?v=2" defer></script>
 </body>
