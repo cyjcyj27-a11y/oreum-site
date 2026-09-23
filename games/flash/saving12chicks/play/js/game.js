@@ -580,7 +580,7 @@
     var home = G.props.filter(function (p) { return p.k === 'home'; })[0];
     G.hen = { x: home.x + 130, y: FY, t: 0 }; G.zone = 6;
     for (var i = 0; i < 4; i++) G.enemies = [];
-    setTimeout(SND.crow, 600);
+    setTimeout(SND.cluck2, 600);   // 집에 닿으면 암탉이 반긴다(사장님 2026-09-23)
     $('endN').textContent = '🐥 ' + save.chicks.length + '/' + TOTAL;
     setTimeout(function () { showPanel('ending'); }, 2500);
   }

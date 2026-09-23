@@ -71,31 +71,41 @@
   // ── 닭 ──
   function cluck() { var c = live(); if (!c) return; var t = c.currentTime; voice(520, 380, 0.09, 0.35, t, 30); voice(600, 420, 0.07, 0.25, t + 0.11, 30); }
   // 꼬끼오: 마디마다 음높이 곡선을 따로 그리고, 목 떨림은 30Hz 크기 떨림(트레몰로)로. 콧소리는 두 대역 필터.
-  function syl(f0, f1, f2, dur, vol, t0) {
+  // 꼬끼오 한 마디. 목청 떨림은 느리고 얕게(5.5Hz), 갈라지는 소리는 마지막 마디에만 조금.
+  function syl(f0, f1, f2, dur, vol, t0, rasp) {
     var c = live(); if (!c || !on) return;
     var t = t0;
     var o = c.createOscillator(); o.type = 'sawtooth';
-    o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(f1, t + dur * 0.35); o.frequency.exponentialRampToValueAtTime(f2, t + dur);
-    var b1 = c.createBiquadFilter(); b1.type = 'bandpass'; b1.frequency.value = 1900; b1.Q.value = 1.2;
-    var b2 = c.createBiquadFilter(); b2.type = 'peaking'; b2.frequency.value = 3000; b2.Q.value = 2; b2.gain.value = 8;
-    var lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 4200;
-    var trem = c.createGain(); trem.gain.value = 0.7;
-    var lfo = c.createOscillator(), lg = c.createGain(); lfo.type = 'sine'; lfo.frequency.value = 31; lg.gain.value = 0.3;
-    lfo.connect(lg); lg.connect(trem.gain); lfo.start(t); lfo.stop(t + dur + 0.05);
-    var g = c.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.035);
-    g.gain.setValueAtTime(vol, t + dur * 0.7); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(f1, t + dur * 0.3); o.frequency.exponentialRampToValueAtTime(f2, t + dur);
+    var vib = c.createOscillator(), vg = c.createGain(); vib.frequency.value = 5.5; vg.gain.value = f1 * 0.012;
+    vib.connect(vg); vg.connect(o.frequency); vib.start(t); vib.stop(t + dur + 0.05);
+    var b1 = c.createBiquadFilter(); b1.type = 'bandpass'; b1.frequency.value = 1500; b1.Q.value = 0.9;
+    var b2 = c.createBiquadFilter(); b2.type = 'peaking'; b2.frequency.value = 2600; b2.Q.value = 1.6; b2.gain.value = 6;
+    var lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.setValueAtTime(5200, t); lp.frequency.exponentialRampToValueAtTime(2600, t + dur);
+    var trem = c.createGain(); trem.gain.value = 1;
+    if (rasp) { var lfo = c.createOscillator(), lg = c.createGain(); lfo.type = 'sine'; lfo.frequency.value = 19; lg.gain.value = rasp; lfo.connect(lg); lg.connect(trem.gain); lfo.start(t); lfo.stop(t + dur + 0.05); }
+    var g = c.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.04);
+    g.gain.setValueAtTime(vol, t + dur * 0.72); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
     o.connect(b1); b1.connect(b2); b2.connect(lp); lp.connect(trem); trem.connect(g); g.connect(sfx);
     o.start(t); o.stop(t + dur + 0.05);
-    noise('bandpass', 2600, 1.5, dur, vol * 0.12, t);   // 숨소리
+    noise('bandpass', 2400, 1.2, dur * 0.5, vol * 0.1, t);   // 숨소리
   }
   function crow() {   // 꼬 - 끼 - 오 - 오(내려감)
     var c = live(); if (!c) return; var t = c.currentTime + 0.02;
-    syl(520, 640, 600, 0.2, 0.32, t);
-    syl(700, 860, 820, 0.2, 0.36, t + 0.23);
-    syl(880, 1040, 960, 0.5, 0.4, t + 0.46);
-    syl(900, 720, 380, 0.55, 0.3, t + 1.0);
+    syl(480, 620, 580, 0.18, 0.3, t);
+    syl(660, 830, 790, 0.2, 0.34, t + 0.22);
+    syl(860, 1000, 930, 0.46, 0.38, t + 0.45, 0.06);
+    syl(880, 700, 420, 0.62, 0.26, t + 0.95, 0.1);
   }
-  function cluck2() { var c = live(); if (!c) return; var t = c.currentTime; voice(560, 420, 0.08, 0.3, t, 30); voice(620, 440, 0.07, 0.25, t + 0.13, 30); voice(500, 380, 0.09, 0.2, t + 0.27, 30); }
+  // 암탉: 사장님이 고른 옛 소리 그대로, 마디만 다섯으로 늘리고 크기를 올렸다(2026-09-23)
+  function cluck2() {
+    var c = live(); if (!c) return; var t = c.currentTime;
+    voice(560, 420, 0.08, 0.99, t, 30);
+    voice(620, 440, 0.07, 0.88, t + 0.13, 30);
+    voice(500, 380, 0.09, 0.79, t + 0.27, 30);
+    voice(580, 430, 0.08, 0.66, t + 0.43, 30);
+    voice(520, 390, 0.10, 0.53, t + 0.58, 30);
+  }
   function peck() { var c = live(); if (!c) return; var t = c.currentTime; noise('bandpass', 2600, 6, 0.04, 0.45, t); tone('square', 900, 500, 0.03, 0.12, t); }
   function hop() { var c = live(); if (!c) return; var t = c.currentTime; noise('bandpass', 900, 2, 0.12, 0.25, t, 1800); voice(480, 640, 0.08, 0.2, t, 26); }
   function squawk() { var c = live(); if (!c) return; var t = c.currentTime; voice(900, 400, 0.28, 0.6, t, 40); voice(700, 300, 0.22, 0.4, t + 0.2, 40); noise('highpass', 2000, 1, 0.2, 0.2, t); }
