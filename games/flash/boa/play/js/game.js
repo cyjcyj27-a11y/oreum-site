@@ -453,7 +453,8 @@
     t += dt;
     // 조종
     var kt = keyTgt();
-    if (kt !== null) boa.tgt = kt;
+    if (joyAng !== null) boa.tgt = joyAng;
+    else if (kt !== null) boa.tgt = kt;
     else if (mouse && !isTouch) boa.tgt = Math.atan2(mouse.y - boa.y, mouse.x - boa.x);
     if (drunkT > 0) drunkT -= dt;
     boaStep(dt, false);
@@ -638,16 +639,22 @@
     if (e.pointerType === 'touch') { if (!isTouch) { isTouch = true; document.body.classList.add('touch'); } return; }
     mouse = { x: e.clientX, y: e.clientY }; if (state === 'play') doDash();
   });
-  // 폰 화살표 조이스틱 — 단추마다 자기 손가락만 잡고 keys 를 켜고 끈다(방향키와 같은 통로)
-  function bindPadBtn(id, key) {
-    var el = $(id), pid = null;
-    el.addEventListener('pointerdown', function (e) { pid = e.pointerId; try { el.setPointerCapture(pid); } catch (err) {} keys[key] = true; mouse = null; el.classList.add('on'); e.preventDefault(); });
-    function release(e) { if (e.pointerId !== pid) return; pid = null; keys[key] = false; el.classList.remove('on'); }
-    el.addEventListener('pointerup', release);
-    el.addEventListener('pointercancel', release);
-    el.addEventListener('lostpointercapture', release);
-  }
-  bindPadBtn('padUp', 'up'); bindPadBtn('padDown', 'down'); bindPadBtn('padLeft', 'left'); bindPadBtn('padRight', 'right');
+  // 폰 조이스틱 — snake.io 처럼 둥근 판을 밀면 그 방향으로 머리가 향한다. 손을 떼면 손잡이는 가운데로, 뱀은 마지막 방향 그대로
+  var joyAng = null;
+  (function () {
+    var el = $('pad'), kn = $('knob'), pid = null;
+    function move(e) {
+      var r = el.getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+      var dx = e.clientX - cx, dy = e.clientY - cy, d = Math.hypot(dx, dy), R = r.width / 2 - kn.offsetWidth / 2;
+      if (d > R) { dx *= R / d; dy *= R / d; }
+      kn.style.transform = 'translate(' + dx + 'px,' + dy + 'px)';
+      if (d > 8) joyAng = Math.atan2(dy, dx);
+    }
+    el.addEventListener('pointerdown', function (e) { pid = e.pointerId; mouse = null; move(e); try { el.setPointerCapture(pid); } catch (err) {} e.preventDefault(); });
+    el.addEventListener('pointermove', function (e) { if (e.pointerId === pid) move(e); });
+    function release(e) { if (e.pointerId !== pid) return; pid = null; joyAng = null; kn.style.transform = ''; }
+    el.addEventListener('pointerup', release); el.addEventListener('pointercancel', release); el.addEventListener('lostpointercapture', release);
+  })();
   $('btnDash').addEventListener('pointerdown', function (e) { e.preventDefault(); doDash(); });
 
   // 폰 세로 → 가로로 돌리기 안내
