@@ -39,11 +39,14 @@
   #keys { position: fixed; right: 12px; bottom: calc(10px + env(safe-area-inset-bottom)); font-size: 11px; color: #3a2810; opacity: .55; text-align: right; line-height: 1.5; pointer-events: none; z-index: 5; }
   body.touch #keys { display: none; }
 
-  /* 폰: 화면을 대거나 끌면 머리가 손가락 쪽으로, 오른쪽 아래 DASH */
+  /* 폰: 왼쪽 아래 화살표 조이스틱, 오른쪽 아래 돌진 단추 */
+  /* 폰 조이스틱 — snake.io 처럼 둥근 판 + 흰 손잡이, 미는 방향 그대로 머리가 향한다 (2026-09-23 사장님 "저 사이트랑 똑같이 바꿔") */
+  #pad { display: none; position: fixed; left: calc(24px + env(safe-area-inset-left)); top: calc(50% - 45px); width: 90px; height: 90px; border-radius: 50%; background: rgba(20,30,45,.35); z-index: 6; touch-action: none; }   /* 판 90px·손잡이 33px(snake.io 에서 잰 크기), 자리는 왼쪽 가운데(사장님 2026-09-23) */
+  #knob { position: absolute; left: 50%; top: 50%; width: 33px; height: 33px; margin: -16.5px 0 0 -16.5px; border-radius: 50%; background: #fff; pointer-events: none; }
   #btnDash { display: none; position: fixed; right: calc(16px + env(safe-area-inset-right)); bottom: calc(24px + env(safe-area-inset-bottom)); width: 88px; height: 88px; border-radius: 50%; background: rgba(0,0,0,.32); border: 2px solid rgba(255,255,255,.55); color: #fff; font-family: Arial, sans-serif; font-weight: 700; font-size: 13px; letter-spacing: 2px; z-index: 6; touch-action: none; }
   #btnDash.on { background: rgba(255,224,102,.7); color: #3a2810; }
   #btnDash.cd { opacity: .45; }
-  body.touch.play #btnDash { display: block; }
+  body.touch.play #pad, body.touch.play #btnDash { display: block; }
 
   /* 폰 세로일 때 가로로 돌리기 안내 */
   #rotate { position: fixed; inset: 0; z-index: 90; display: none; place-items: center; text-align: center; background: #241708; color: #f2ede4; font-family: Arial, sans-serif; font-size: 16px; line-height: 1.8; padding: 8vw; pointer-events: auto; }
@@ -102,6 +105,9 @@
 <div id="flash">GULP</div>
 <div id="keys" data-en="↑↓←→ move · SPACE dash · P pause · K sound">↑↓←→ 이동 · 스페이스 돌진 · P 일시정지 · K 효과음</div>
 
+<div id="pad">
+  <div id="knob"></div>
+</div>
 <button id="btnDash">DASH</button>
 
 <div id="card"><div class="em" id="cardEm">🌿</div><div class="nm" id="cardNm" data-en="JUNGLE">정글</div><div class="no" id="cardNo">STAGE 1</div></div>
@@ -135,7 +141,7 @@
 <script src="assets/game-home.js" data-top="6" data-left="6" data-fullscreen="1" defer></script>
 <script src="assets/landscape.js?v=1"></script>
 <script src="js/audio.js?v=1"></script>
-<script src="js/game.js?v=18"></script>
+<script src="js/game.js?v=17"></script>
 <script src="/assets/visit.js?v=17" defer></script>
 <script src="/assets/game-events.js?v=2" defer></script>
 </body>
