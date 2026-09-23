@@ -1,0 +1,2 @@
+/* 수탉 스프라이트 시트 칸 정보 — tools/slice.py 가 만든 rooster.json 과 같다 */
+window.SHEET={"cell": [184, 194], "anims": {"idle": {"row": 0, "frames": 4, "fps": 6}, "walk": {"row": 1, "frames": 6, "fps": 10}, "run": {"row": 2, "frames": 5, "fps": 14}, "peck": {"row": 3, "frames": 6, "fps": 12}, "jump": {"row": 4, "frames": 5, "fps": 10}, "hit": {"row": 5, "frames": 5, "fps": 10}, "turn": {"row": 6, "frames": 2, "fps": 8}}};
