@@ -53,7 +53,7 @@
   var snake = null, fox = null, trees = 0, crackLines = [], planetBreak = 0, starT = 0, sproutT = 0;
   var dash = 0, dashCd = 0, paused = false, shake = 0, deadEyes = false;
   var aiT = 0, aiPt = null, hatPh = -1, hatOn = false;
-  var isTouch = false, keys = {}, mouse = null, padVec = null, padId = null;
+  var isTouch = false, keys = {}, mouse = null;
   var speedBase = 150;
   var ARENA = { x: 0, y: 0, w: 0, h: 0, cx: 0, cy: 0, r: 0, circle: false };
 
@@ -454,7 +454,6 @@
     // 조종
     var kt = keyTgt();
     if (kt !== null) boa.tgt = kt;
-    else if (padVec) boa.tgt = Math.atan2(padVec.y, padVec.x);
     else if (mouse && !isTouch) boa.tgt = Math.atan2(mouse.y - boa.y, mouse.x - boa.x);
     if (drunkT > 0) drunkT -= dt;
     boaStep(dt, false);
@@ -633,26 +632,28 @@
     if (e.key === 'k' || e.key === 'K') toggleSnd();
   });
   window.addEventListener('keyup', function (e) { var n = keyName(e); if (n) keys[n] = false; });
-  window.addEventListener('blur', function () { keys = {}; padVec = null; });
+  window.addEventListener('blur', function () { keys = {}; });
   cv.addEventListener('pointermove', function (e) { if (e.pointerType === 'mouse') mouse = { x: e.clientX, y: e.clientY }; });
   cv.addEventListener('pointerdown', function (e) {
     if (e.pointerType === 'touch') { if (!isTouch) { isTouch = true; document.body.classList.add('touch'); } return; }
     mouse = { x: e.clientX, y: e.clientY }; if (state === 'play') doDash();
   });
-  // 폰 패드
-  var pad = $('pad'), knob = $('knob');
-  pad.addEventListener('pointerdown', function (e) { padId = e.pointerId; pad.setPointerCapture(padId); padMove(e); e.preventDefault(); });
-  pad.addEventListener('pointermove', function (e) { if (e.pointerId === padId) padMove(e); });
-  function padEnd(e) { if (e.pointerId !== padId) return; padId = null; padVec = null; knob.style.transform = ''; }
-  pad.addEventListener('pointerup', padEnd); pad.addEventListener('pointercancel', padEnd);
-  function padMove(e) {
-    var r = pad.getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2, R = r.width / 2;
-    var dx = e.clientX - cx, dy = e.clientY - cy, d = Math.hypot(dx, dy);
-    if (d > R) { dx *= R / d; dy *= R / d; }
-    knob.style.transform = 'translate(' + dx + 'px,' + dy + 'px)';
-    padVec = d > R * 0.08 ? { x: dx, y: dy } : null;
+  // 폰 화살표 조이스틱 — 단추마다 자기 손가락만 잡고 keys 를 켜고 끈다(방향키와 같은 통로)
+  function bindPadBtn(id, key) {
+    var el = $(id), pid = null;
+    el.addEventListener('pointerdown', function (e) { pid = e.pointerId; try { el.setPointerCapture(pid); } catch (err) {} keys[key] = true; mouse = null; el.classList.add('on'); e.preventDefault(); });
+    function release(e) { if (e.pointerId !== pid) return; pid = null; keys[key] = false; el.classList.remove('on'); }
+    el.addEventListener('pointerup', release);
+    el.addEventListener('pointercancel', release);
+    el.addEventListener('lostpointercapture', release);
   }
+  bindPadBtn('padUp', 'up'); bindPadBtn('padDown', 'down'); bindPadBtn('padLeft', 'left'); bindPadBtn('padRight', 'right');
   $('btnDash').addEventListener('pointerdown', function (e) { e.preventDefault(); doDash(); });
+
+  // 폰 세로 → 가로로 돌리기 안내
+  var rotGoBtn = $('rotGo'), rotSkipBtn = $('rotSkip');
+  if (rotGoBtn) rotGoBtn.addEventListener('click', function () { if (window.OL) OL.go(); });
+  if (rotSkipBtn) rotSkipBtn.addEventListener('click', function (e) { e.preventDefault(); document.body.classList.remove('portrait'); });
 
   function togglePause() { if (state !== 'play') return; paused = !paused; $('tgPause').textContent = paused ? '▶' : '❚❚'; $('tgPause').classList.toggle('off', paused); }
   function toggleSnd() { var on = A.toggleSnd(); $('tgSnd').classList.toggle('off', !on); }
@@ -687,6 +688,7 @@
     var v = vsize(); if (!v[0] || !v[1]) return;
     DPR = Math.min(2, window.devicePixelRatio || 1); W = v[0]; H = v[1];
     cv.width = Math.round(W * DPR); cv.height = Math.round(H * DPR);
+    document.body.classList.toggle('portrait', H > W && !document.documentElement.classList.contains('ol-land'));
     setArena(); buildBg();
     if (boa && state === 'title') newBoa(18);
   }
