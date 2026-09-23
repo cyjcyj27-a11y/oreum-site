@@ -79,14 +79,16 @@
 
   #over { display: none; background: rgba(30,18,6,.45); }
   #over.show { display: flex; }
-  #over h2 { font-family: Arial, sans-serif; font-weight: 900; font-size: min(6vw, 22px); letter-spacing: 6px; margin: 0 0 8px; opacity: .9; }
-  #over .res { font-family: 'Ria', Arial, sans-serif; font-weight: 900; font-size: min(16vw, 88px); line-height: 1; letter-spacing: 6px; -webkit-text-stroke: 3px #3a2810; paint-order: stroke fill; margin-bottom: 10px; }
+  #over h2 { font-family: Arial, sans-serif; font-weight: 900; font-size: min(6vw, 22px, 5vh); letter-spacing: 6px; margin: 0 0 8px; opacity: .9; }
+  #over .res { font-family: 'Ria', Arial, sans-serif; font-weight: 900; font-size: min(16vw, 88px, 15vh); line-height: 1; letter-spacing: 6px; -webkit-text-stroke: 3px #3a2810; paint-order: stroke fill; margin-bottom: 10px; }
   #over .res.win { color: #ffe066; } #over .res.lose { color: #ff7a6a; }
-  #hat { display: none; width: min(70vw, 420px); height: auto; margin: 4px 0 10px; border-radius: 10px; }
+  #hat { display: none; width: min(70vw, 420px, 70vh); height: auto; margin: 4px 0 10px; border-radius: 10px; }
   #hat.show { display: block; }
   #over .sc { font-family: 'Ria', Arial, sans-serif; font-size: 26px; color: #fff; text-shadow: 0 1px 4px rgba(0,0,0,.6); margin-bottom: 16px; }
   #over .again { font-family: Arial, sans-serif; letter-spacing: 4px; font-size: 20px; }
   #over .home { pointer-events: auto; margin-top: 16px; font-family: Arial, sans-serif; font-weight: 700; font-size: 13px; letter-spacing: 3px; opacity: .8; cursor: pointer; padding: 6px 14px; }
+  /* 폰 가로처럼 낮은 화면: CLEAR 판(글씨+그림+점수+단추)이 화면 위로 잘리지 않게 높이 기준으로 줄인다 (2026-09-23 사장님 캡처) */
+  @media (max-height: 520px) { #over h2 { margin-bottom: 2px; } #over .res { margin-bottom: 4px; } #hat { margin: 2px 0 4px; } #over .sc { font-size: min(26px, 6vh); margin-bottom: 6px; } #over .again { padding: 8px 40px; font-size: 18px; } #over .home { margin-top: 4px; padding: 4px 14px; } }
 </style>
 </head>
 <body>
