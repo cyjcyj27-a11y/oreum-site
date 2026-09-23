@@ -41,7 +41,7 @@
 
   /* 폰: 왼쪽 아래 화살표 조이스틱, 오른쪽 아래 돌진 단추 */
   /* 폰 조이스틱 — snake.io 처럼 둥근 판 + 흰 손잡이, 미는 방향 그대로 머리가 향한다 (2026-09-23 사장님 "저 사이트랑 똑같이 바꿔") */
-  #pad { display: none; position: fixed; left: calc(95px + env(safe-area-inset-left)); bottom: calc(61px + env(safe-area-inset-bottom)); width: 90px; height: 90px; border-radius: 50%; background: rgba(20,30,45,.35); z-index: 6; touch-action: none; }   /* snake.io 화면에서 잰 치수: 판 90px, 손잡이 33px, 판 중심 왼쪽 140px·아래 106px */
+  #pad { display: none; position: fixed; left: calc(24px + env(safe-area-inset-left)); top: calc(50% - 45px); width: 90px; height: 90px; border-radius: 50%; background: rgba(20,30,45,.35); z-index: 6; touch-action: none; }   /* 판 90px·손잡이 33px(snake.io 에서 잰 크기), 자리는 왼쪽 가운데(사장님 2026-09-23) */
   #knob { position: absolute; left: 50%; top: 50%; width: 33px; height: 33px; margin: -16.5px 0 0 -16.5px; border-radius: 50%; background: #fff; pointer-events: none; }
   #btnDash { display: none; position: fixed; right: calc(16px + env(safe-area-inset-right)); bottom: calc(24px + env(safe-area-inset-bottom)); width: 88px; height: 88px; border-radius: 50%; background: rgba(0,0,0,.32); border: 2px solid rgba(255,255,255,.55); color: #fff; font-family: Arial, sans-serif; font-weight: 700; font-size: 13px; letter-spacing: 2px; z-index: 6; touch-action: none; }
   #btnDash.on { background: rgba(255,224,102,.7); color: #3a2810; }
