@@ -126,15 +126,15 @@
   addEventListener('keyup', function (e) { var k = KEYMAP[e.code]; if (k) press(k, false); });
   addEventListener('blur', function () { keys = {}; btn = { jump: false, peck: false }; });
   var padEl = $('pad'), knob = $('knob'), padId = null;
-  function padMove(e) {
-    var r = padEl.getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2;
-    var dx = e.clientX - cx, dy = e.clientY - cy, R = r.width / 2, d = Math.hypot(dx, dy);
-    if (d > R) { dx *= R / d; dy *= R / d; }
-    knob.style.transform = 'translate(' + dx + 'px,' + dy + 'px)';
+  function padMove(e) {   // 좌우 스크롤 스틱 — 가로로만 움직인다
+    var r = padEl.getBoundingClientRect(), cx = r.left + r.width / 2;
+    var R = (r.width - r.height) / 2;                          // 손잡이가 갈 수 있는 좌우 거리
+    var dx = Math.max(-R, Math.min(R, e.clientX - cx));
+    knob.style.transform = 'translateX(' + dx + 'px)';
     var k = dx / R;
     pad.x = Math.abs(k) > 0.22 ? Math.sign(k) : 0; pad.run = Math.abs(k) > 0.78;
   }
-  padEl.addEventListener('pointerdown', function (e) { padId = e.pointerId; padEl.setPointerCapture(e.pointerId); padMove(e); e.preventDefault(); });
+  padEl.addEventListener('pointerdown', function (e) { padId = e.pointerId; padMove(e); try { padEl.setPointerCapture(e.pointerId); } catch (x) {} e.preventDefault(); });   // 첫 터치를 먼저 반영하고 캡처(캡처가 막혀도 움직이게)
   padEl.addEventListener('pointermove', function (e) { if (e.pointerId === padId) padMove(e); });
   function padEnd(e) { if (e.pointerId !== padId) return; padId = null; pad.x = 0; pad.run = false; knob.style.transform = ''; }
   padEl.addEventListener('pointerup', padEnd); padEl.addEventListener('pointercancel', padEnd);

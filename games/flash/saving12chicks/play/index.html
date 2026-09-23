@@ -42,12 +42,17 @@ body.title #topbar .stat{visibility:hidden}
 @media (max-width:700px){.stat b{font-size:15px}.stat{padding:5px 8px;gap:5px}#topbar{gap:5px}}
 
 /* ---------- 폰 조작: 왼쪽 패드 · 오른쪽 단추 ---------- */
-#pad{position:fixed;z-index:25;left:calc(18px + env(safe-area-inset-left));bottom:64px;width:186px;height:186px;border-radius:50%;
+/* 좌우 스크롤 스틱 — 가로로만 미는 막대 (2026-09-23 사장님 "좌우스크롤스틱으로 하고 위로") */
+#pad{position:fixed;z-index:25;left:calc(18px + env(safe-area-inset-left));bottom:190px;width:210px;height:74px;border-radius:999px;
   background:rgba(0,0,0,.38);display:none;touch-action:none;pointer-events:auto}
-#knob{position:absolute;left:50%;top:50%;width:72px;height:72px;margin:-36px 0 0 -36px;border-radius:50%;
+#pad::before,#pad::after{content:'';position:absolute;top:50%;margin-top:-7px;width:0;height:0;
+  border-top:7px solid transparent;border-bottom:7px solid transparent;opacity:.45}
+#pad::before{left:13px;border-right:10px solid #fff}
+#pad::after{right:13px;border-left:10px solid #fff}
+#knob{position:absolute;left:50%;top:50%;width:66px;height:66px;margin:-33px 0 0 -33px;border-radius:50%;
   background:rgba(255,255,255,.35);border:2px solid rgba(255,255,255,.55)}
 body.touch #pad{display:block}
-@media (max-height:420px){#pad{width:160px;height:160px;bottom:56px}}
+@media (max-height:420px){#pad{width:186px;height:66px;bottom:170px}#knob{width:58px;height:58px;margin:-29px 0 0 -29px}}
 .tbtn{position:fixed;z-index:25;border-radius:50%;border:3px solid rgba(255,255,255,.55);background:rgba(0,0,0,.32);
   display:none;place-items:center;color:#fff;touch-action:none;pointer-events:auto;font-family:inherit}
 .tbtn.on{background:#ffd35a;border-color:#fff;color:#000}
@@ -173,7 +178,7 @@ body.touch.portrait #rotate{display:grid}
 <script src="js/sheet.js?v=1"></script>
 <script src="js/audio.js?v=2"></script>
 <script src="js/art.js?v=11"></script>
-<script src="js/game.js?v=26"></script>
+<script src="js/game.js?v=28"></script>
 <script src="/assets/visit.js?v=17" defer></script>
 <script src="/assets/game-events.js?v=2" defer></script>
 </body>
