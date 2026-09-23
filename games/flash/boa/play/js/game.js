@@ -628,7 +628,7 @@
   // ── 입력 ──
   function keyTgt() { var dx = (keys.right ? 1 : 0) - (keys.left ? 1 : 0), dy = (keys.down ? 1 : 0) - (keys.up ? 1 : 0); if (!dx && !dy) return null; return Math.atan2(dy, dx); }
   function keyName(e) { var k = e.key; if (k === 'ArrowLeft' || k === 'a' || k === 'A') return 'left'; if (k === 'ArrowRight' || k === 'd' || k === 'D') return 'right'; if (k === 'ArrowUp' || k === 'w' || k === 'W') return 'up'; if (k === 'ArrowDown' || k === 's' || k === 'S') return 'down'; return null; }
-  function doDash() { if (state !== 'play' || dashCd > 0) return; dash = 0.9; dashCd = 2.6; A.dash(); }
+  function doDash() { if (state !== 'play' || dashCd > 0) return; dash = 0.9; dashCd = 1.2; A.dash(); }   // 재사용 대기 2.6→1.2초 (2026-09-24 사장님 "대쉬기능을 스페이스로 해줘" → 대기 줄이기 선택)
   window.addEventListener('keydown', function (e) {
     var n = keyName(e); if (n) { keys[n] = true; mouse = null; e.preventDefault(); return; }
     if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); if (state === 'title') begin(0); else if (state === 'play') doDash(); else if ($('over').classList.contains('show')) retry(); }
