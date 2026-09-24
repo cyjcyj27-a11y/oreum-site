@@ -52,7 +52,7 @@
     '누르면 조준(← → 과녁 바꾸기), 떼면 발사': 'hold to AIM (← → switch target), release to FIRE',
     '급출발': 'DASH',
     '이어하기': 'CONTINUE', '새로하기': 'NEW GAME',
-    '처음부터 다시 할까요?': 'Start over?', '코인·카트·미션·기록이 모두 지워져요': 'All coins, karts, missions and records will be erased.', '확인': 'OK', '취소': 'CANCEL',
+    '처음부터 다시 할까요?': 'Start over?', '미션·기록이 모두 지워져요': 'All missions and records will be erased.', '확인': 'OK', '취소': 'CANCEL',
     '캐릭터': 'RACERS',
     '드리프트 달인': 'Drift Master', '번개 뒷발': 'Lightning Hops', '튼튼한 몸': 'Tough Body', '꼬리 바람': 'Tail Wind',
     '드리프트 부스트가 1.5배 빨리 모여요': 'Drift boosts charge 1.5x faster',

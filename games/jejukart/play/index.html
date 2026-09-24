@@ -163,6 +163,15 @@ body:not(.playing) #aimTag,body:not(.playing) #aimEdge{display:none}
 .btn:active{transform:translateY(2px)}
 .duo{display:flex;gap:9px}
 .duo .btn{flex:1;font-size:19px;padding:12px 8px}
+/* 타이틀 단추 배치 — 모든 화면 크기에서 같게: 주 단추(START·이어하기) 하나만 가운데 반 폭, 나머지는 아래 한 줄 (2026-09-24 사장님 "이 좃같은 디자인은 뭐지") */
+#title .menu{display:grid;grid-template-columns:repeat(12,1fr);gap:12px;width:min(92vw,600px)}
+#title .menu>.btn.main{grid-column:4 / 10;white-space:nowrap}
+#title .duo{display:contents}
+#title .duo .btn{grid-column:span 4;white-space:nowrap}
+#bCont small{display:none}
+/* 이어하기가 있으면: 첫 줄에 이어하기(주황) + 새로하기(파랑, 조금 작게) 나란히, 아래 줄은 코스·2P·미션 */
+#title .menu:has(#bCont:not([hidden]))>#bCont{grid-column:3 / 8}
+#title .menu:has(#bCont:not([hidden]))>#bStart{grid-row:1;grid-column:8 / 11;align-self:stretch;font-size:19px;padding:12px 6px;white-space:nowrap}
 @media (max-height:520px){#logo{font-size:clamp(34px,9vw,64px)}.btn{font-size:18px;padding:10px 14px}.btn.main{font-size:21px}.menu{gap:7px}}
 
 /* ---------- HUD 입체 (등수·LAP·시간·코인·부스터 막대, 2026-09-24 "이것도 입체로") ---------- */
@@ -367,8 +376,16 @@ body:has(#missions:not([hidden])) #title,body:has(#courses:not([hidden])) #title
   #logo .b{font-size:18.5vh;margin-top:.05em}
   #title .menu{display:grid;grid-template-columns:repeat(12,1fr);gap:1.8vh 10px;width:min(60vw,560px)}   /* 제목 폭 정도로 (사장님 "이렇게 바가 길 필요가 있니") */
   #title .menu>.btn.main{grid-column:4 / 10;font-size:6.4vh;padding:1.6vh 14px}
-  #title .menu:has(#bCont:not([hidden]))>#bCont{grid-column:2 / 7}
-  #title .menu:has(#bCont:not([hidden]))>#bStart{grid-column:7 / 12}
+  /* 이어하기가 있으면: 이어하기 + 새로하기 나란히(새로하기는 조금 작게), 아래 줄 코스·2P·미션 */
+  #title .menu:has(#bCont:not([hidden]))>#bCont{grid-column:3 / 8;white-space:nowrap}
+  #bCont small{display:none}
+  #title .menu:has(#bCont:not([hidden]))>#bStart{grid-row:1;grid-column:8 / 11;align-self:stretch;font-size:4.8vh;padding:1.6vh 4px;white-space:nowrap}
+  /* 확인 창: 작게, 단추도 짧게 */
+  .askBox{width:min(100%,460px);padding:3vh 22px}
+  .askBox b{font-size:8vh}
+  .askBox p{font-size:4.4vh;margin:1.5vh 0 3vh}
+  .askRow{justify-content:center}
+  .askRow .btn{flex:none;width:150px;font-size:5vh !important;padding:1.2vh 10px}
   #title .duo{display:contents}
   #title .duo .btn{grid-column:span 4;font-size:4.6vh;padding:1.8vh 4px;white-space:nowrap}
   #bStart.sub{font-size:6.4vh}
@@ -537,7 +554,7 @@ body:has(#missions:not([hidden])) #title,body:has(#courses:not([hidden])) #title
 <div id="rotate" hidden><div>가로로 돌려 주세요</div><button class="btn" id="rotBtn">전체화면보기</button></div>
 <div id="loading">LOADING…</div>
 
-<script src="js/lang.js?v=19"></script>
+<script src="js/lang.js?v=20"></script>
 <script src="assets/game-home.js" data-top="6" data-left="6" data-fullscreen="1" defer></script>
 <script src="assets/landscape.js"></script>
 <script src="lib/three.min.js"></script>
@@ -551,7 +568,7 @@ body:has(#missions:not([hidden])) #title,body:has(#courses:not([hidden])) #title
 <script src="assets/sfx/engine.mp3.js?v=2"></script>
 <script src="js/audio.js?v=5"></script>
 <script src="js/game.js?v=31"></script>
-<script src="js/ui.js?v=55"></script>
+<script src="js/ui.js?v=56"></script>
 <script src="/assets/visit.js?v=17" defer></script>
 <script src="/assets/game-events.js?v=2" defer></script>
 </body>
