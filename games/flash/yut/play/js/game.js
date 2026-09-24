@@ -712,7 +712,7 @@
   }
   function startMulti(n) {
     const seats = [];
-    for (let i = 0; i < n; i++) seats.push({ human: true, face: HUMAN_FACES[i], name: (i + 1) + 'P', team: i });
+    for (let i = 0; i < n; i++) seats.push({ human: true, face: SC.TEAMS[i].face, name: (i + 1) + 'P', team: i }); // 점수표 얼굴 = 자기 말 동물
     G.mode = 'multi';
     $('title').hidden = true;
     document.body.classList.add('playing');
