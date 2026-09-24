@@ -264,8 +264,8 @@
         const m = SC.makePiece(M.seats[s].team);
         const b = new T.Mesh(SC.blobGeo, SC.blobMat); b.renderOrder = 1;
         SC.scene.add(m); SC.scene.add(b);
-        // 상대 자리의 말은 플레이어 쪽을 본다
-        m.rotation.y = Math.atan2(-corner(s)[0], -corner(s)[1]);
+        // 모든 말은 화면 정면(카메라 쪽 +Z)을 본다
+        m.rotation.y = 0;
         row.push({ mesh: m, blob: b, team: M.seats[s].team, anim: null });
       }
       pieces.push(row);
@@ -282,7 +282,7 @@
         if (st.pos === Y.OUT) { p.mesh.visible = false; p.blob.visible = false; continue; }
         p.mesh.visible = true; p.blob.visible = true;
         let v;
-        if (st.pos === Y.HAND) { v = pilePos(s, i); p.mesh.rotation.y = Math.atan2(-corner(s)[0], -corner(s)[1]); }
+        if (st.pos === Y.HAND) { v = pilePos(s, i); p.mesh.rotation.y = 0; }
         else {
           v = SC.node(st.pos);
           const rank = T_.pieces.filter((q, j) => q.pos === st.pos && j < i).length;
@@ -320,7 +320,7 @@
         p.mesh.visible = true; p.blob.visible = true;
         p.mesh.position.lerpVectors(A, B, f);
         p.mesh.position.y += Math.sin(f * Math.PI) * 0.7 + r * 0.46;
-        p.mesh.rotation.y = Math.atan2(B.x - A.x, B.z - A.z);
+        p.mesh.rotation.y = 0;
         p.mesh.scale.setScalar(1 + Math.sin(f * Math.PI) * 0.08);
         p.blob.position.set(p.mesh.position.x, 0.152, p.mesh.position.z);
         const h = p.mesh.position.y - r * 0.46;
