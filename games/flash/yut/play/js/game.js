@@ -514,7 +514,7 @@
     const c = new T.Vector3(HAND.x, HAND.y + 0.35, HAND.z);
     hold.off.copy(c).sub(tmpV); hold.off.y = 0;
     hold.off.clampLength(0, 1.2);
-    hold.on = true; hold.cur.copy(c); hold.tgt.copy(clampHold(tmpV.clone().add(hold.off)));
+    hopOn = false; hold.on = true; hold.cur.copy(c); hold.tgt.copy(clampHold(tmpV.clone().add(hold.off)));
     hold.trail = [{ p: hold.tgt.clone(), t: performance.now() }]; hold.rat = 0;
     try { cv.setPointerCapture(e.pointerId); } catch (_) {}
     AU.clack(0.25);
@@ -550,9 +550,24 @@
     AU.unlock();
     if (G.state === 'pick' && isHuman()) pickAt(e.clientX, e.clientY);
   });
+  // 내 차례: 손에 놓인 윷가락이 1.4초마다 톡톡 들썩인다(잡으라는 신호)
+  let hopOn = false;
+  function idleHop() {
+    const on = canGrab();
+    if (!on) { if (hopOn && !hold.on && !flight && !sticks.some((q) => q.body || q.anim)) restSticks(true); hopOn = false; return; }
+    hopOn = true;
+    const ph = (G.t % 1.4) / 1.4;
+    for (let i = 0; i < 4; i++) {
+      const h = handPose(i), s = sticks[i];
+      const k = Math.max(0, Math.min(1, (ph - i * 0.05) / 0.16));
+      const up = k > 0 && k < 1 ? Math.sin(k * Math.PI) : 0;
+      s.mesh.position.copy(h.p); s.mesh.position.y += up * 0.22;
+      s.mesh.quaternion.copy(h.q).premultiply(new T.Quaternion().setFromEuler(new T.Euler(up * 0.12 * (i % 2 ? 1 : -1), 0, 0)));
+    }
+  }
   // 손에 든 윷: 손가락을 살짝 늦게 따라오고, 흔들면 가락끼리 달그락거린다
   function updateHold(dt) {
-    if (!hold.on) return;
+    if (!hold.on) { idleHop(); return; }
     const prev = hold.cur.clone();
     hold.cur.lerp(hold.tgt, 1 - Math.exp(-dt * 22));
     const mv = prev.distanceTo(hold.cur) / Math.max(dt, 1e-3);
