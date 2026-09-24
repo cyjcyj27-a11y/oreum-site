@@ -439,6 +439,10 @@ body:has(#missions:not([hidden])) #title,body:has(#courses:not([hidden])) #title
 #oreumHome{padding:5px 11px !important;font-size:12px !important;font-weight:800 !important;letter-spacing:.02em}
 #oreumFs svg{stroke:#1b2a5a !important}
 #oreumHome:active,#oreumFs:active{transform:translateY(3px);box-shadow:inset 0 3px 0 rgba(255,255,255,.9),0 1px 0 #1b2a5a !important}
+/* 폰에서는 2 PLAYERS 숨김, 코스·미션 두 개를 가운데로 (2026-09-25 사장님) */
+body.touch #title #bDuo{display:none}
+body.touch #title #bCourse{grid-column:3 / 7}
+body.touch #title #bMis{grid-column:7 / 11}
 </style>
 </head>
 <body>
