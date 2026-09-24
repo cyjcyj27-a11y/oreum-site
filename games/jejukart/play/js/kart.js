@@ -83,6 +83,10 @@
   const DRV_FIT = { scale: 0.74, x: 0, y: 0.7, z: -0.36 };
   const MODELS = {}, seats = [];
   let drvWaiting = 0;
+  // 동물을 먼저 받는다 (2026-09-24 사장님 "캐릭터가 안보임" — 처음 들어온 사람은 모델 12개를 한꺼번에 받느라 동물이 늦게 와서
+  // 캐릭터 고르기 화면에 빈 좌석만 보였다). 카트·아이템 모델은 동물이 다 온 뒤에 받는다
+  const afterDrv = [];
+  function afterDrivers(fn) { if (drvWaiting > 0) afterDrv.push(fn); else fn(); }
   function glbBuf(url) {
     if (location.protocol !== 'file:') return fetch(url).then((r) => { if (!r.ok) throw new Error(url + ' ' + r.status); return r.arrayBuffer(); });
     return new Promise((res, rej) => {
@@ -137,7 +141,7 @@
             if (!seats[i].parent) { seats.splice(i, 1); continue; }   // 치운 카트는 명단에서 뺀다
             seatFill(seats[i]);
           }
-          if (--drvWaiting === 0 && KART.onDrivers) KART.onDrivers();
+          if (--drvWaiting === 0) { if (KART.onDrivers) KART.onDrivers(); afterDrv.splice(0).forEach((f) => f()); }
         });
     });
   }
@@ -635,9 +639,10 @@
     sd.rotation.x = -Math.PI / 2 - S.pitch;
   }
 
-  const KART = window.KART = { KARTS, DRIVERS, make, State, step, bump, pose, TOP, R, DRV_FIT, glbBuf, dressKart, SKILLS,
+  const KART = window.KART = { KARTS, DRIVERS, make, State, step, bump, pose, TOP, R, DRV_FIT, glbBuf, dressKart, SKILLS, afterDrivers,
     // 동물만 따로 (캐릭터 보기 창): 엉덩이 관절이 원점, 크기는 카트에 앉힐 때와 같다
     driverModel: (n) => { const m = MODELS[n]; if (!m) return null; const c = m.clone(); c.position.set(0, 0, 0); return c; }, onDrivers: null, onKarts: null };
+  kartsPending = KARTS.filter((k) => k.glb).length;   // 받기 전에 만든 카트도 기다렸다가 갈아 끼우게
   loadDrivers();
-  loadKarts();
+  afterDrivers(loadKarts);
 })();

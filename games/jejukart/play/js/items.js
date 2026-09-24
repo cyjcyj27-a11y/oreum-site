@@ -184,5 +184,5 @@
   }
 
   window.ITEMS = { KIND, roll, init, boxMesh, dress, FIT, ICON };
-  loadModels();
+  if (window.KART && KART.afterDrivers) KART.afterDrivers(loadModels); else loadModels();   // 동물 모델이 먼저
 })();
