@@ -93,16 +93,17 @@ body:not(.playing) #slot{display:none}
 .tbtn{position:fixed;z-index:22;border-radius:50%;border:2px solid rgba(255,255,255,.55);background:rgba(0,0,0,.32);
   color:#fff;font-size:26px;display:none;place-items:center;font-family:inherit;touch-action:none}
 .tbtn.hit{background:rgba(255,225,74,.55)}
-#bDrift{right:calc(12px + env(safe-area-inset-right));bottom:calc(14px + env(safe-area-inset-bottom));width:92px;height:92px;font-size:20px;-webkit-text-stroke:4px #1b2a5a;paint-order:stroke fill}
-#bItem{right:calc(112px + env(safe-area-inset-right));bottom:calc(22px + env(safe-area-inset-bottom));width:68px;height:68px}
+/* 이 게임은 아이템이 핵심 — 아이템 단추가 구석의 큰 단추, 드리프트는 옆 작은 단추 (사장님 2026-09-24) */
+#bItem{right:calc(12px + env(safe-area-inset-right));bottom:calc(14px + env(safe-area-inset-bottom));width:92px;height:92px;font-size:40px}
+#bDrift{right:calc(112px + env(safe-area-inset-right));bottom:calc(22px + env(safe-area-inset-bottom));width:68px;height:68px;font-size:15px;-webkit-text-stroke:4px #1b2a5a;paint-order:stroke fill}
 #bGas{right:calc(24px + env(safe-area-inset-right));bottom:calc(114px + env(safe-area-inset-bottom));width:62px;height:62px;font-size:22px}
 body.touch.playing #pad,body.touch.playing .tbtn{display:grid}
 body.touch.playing #pad{display:block}
 @media (max-height:460px){
   #pad{width:132px;height:132px;bottom:calc(10px + env(safe-area-inset-bottom))}
   #knob{width:56px;height:56px;margin:-28px 0 0 -28px}
-  #bDrift{width:76px;height:76px;font-size:28px;bottom:calc(10px + env(safe-area-inset-bottom))}
-  #bItem{width:58px;height:58px;right:calc(96px + env(safe-area-inset-right));bottom:calc(16px + env(safe-area-inset-bottom))}
+  #bItem{width:76px;height:76px;font-size:34px;bottom:calc(10px + env(safe-area-inset-bottom))}
+  #bDrift{width:58px;height:58px;right:calc(96px + env(safe-area-inset-right));bottom:calc(16px + env(safe-area-inset-bottom))}
   #bGas{width:52px;height:52px;right:calc(18px + env(safe-area-inset-right));bottom:calc(94px + env(safe-area-inset-bottom));font-size:18px}
   #map{width:86px;height:86px;top:calc(46px + env(safe-area-inset-top))}
   #slot{width:52px;height:52px;font-size:28px;top:calc(90px + env(safe-area-inset-top))}
@@ -376,7 +377,7 @@ body:has(#missions:not([hidden])) #title,body:has(#courses:not([hidden])) #title
   #grid .card .nm{font-size:5vh}
   #grid .card .sub{font-size:3.6vh}
   .mis{padding:1.2vh 12px;font-size:4.6vh}
-  #bDrift{font-size:17px !important;letter-spacing:.02em;-webkit-text-stroke:4px #1b2a5a;paint-order:stroke fill}   /* 💨 가 방귀 같아 글자로 (2026-09-24) */
+  #bDrift{font-size:13px !important;letter-spacing:.02em;-webkit-text-stroke:4px #1b2a5a;paint-order:stroke fill}   /* 💨 가 방귀 같아 글자로 (2026-09-24) */
   /* 결과: 왼쪽 WIN·단추 세 개(세로), 오른쪽 순위표 — 아래 전체화면 단추와 겹치지 않게 */
   #result{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);grid-template-rows:auto 1fr;align-content:center;column-gap:18px;row-gap:1.5vh;
     padding:calc(40px + env(safe-area-inset-top)) 16px calc(48px + env(safe-area-inset-bottom))}
