@@ -1,0 +1,6 @@
+픽사베이 무료 효과음(Pixabay Content License: 상업 이용 OK, 출처 표기 불필요).
+engine: freesound_community-rally-car-idle-loop-17-84405 — BUY JEJU(jeju/assets/sfx/engine.mp3)에서 가져온 같은 소리.
+  사장님 지시 2026-09-20 "자동차소리를 바이제주 차소리로 가져와".
+  더블클릭(file://)으로 열어도 나게 하려고 mp3 대신 base64 사본 engine.mp3.js 로 넣었다(fetch 를 쓰면 file:// 에서 막힌다).
+  게임 코드에서는 이음매 없이 반복(loopBuffer)하고 속도에 따라 재생 속도·크기만 바꾼다.
+나머지 소리(부스터·아이템·충돌·경음·배경음악)는 전부 코드로 만든 합성음이다.

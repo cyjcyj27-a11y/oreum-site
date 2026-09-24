@@ -18,6 +18,7 @@ import io, os, re, sys
 
 # slug, 한국어 경로, 영어 경로, 한국어 이름, 한국어 장르 앵커, 영어 이름, 영어 장르 앵커, 태그
 GAMES = [
+    ("jejukart",      "/games/jejukart/",            "/en/games/jejukart/",            "제주카트레이싱",     "3D 카트레이싱게임",               "JEJU KART RACING",     "3D kart racing game", {"racing", "driving", "3d", "pvp", "arcade"}),
     ("checkers",      "/games/flash/checkers/",      "/en/games/flash/checkers/",      "체커게임",          "혼자·2인용 체커 보드게임",          "Checkers",             "checkers board game vs computer", {"board", "pvp", "strategy"}),
     ("chwigwon",      "/games/mini/chwigwon/",       "/en/games/mini/chwigwon/",       "취권소찬",          "취권 격투 액션게임",               "Drunken Fist: Sochan", "drunken fist beat 'em up game", {"action", "fighting", "arcade"}),
     ("saving12chicks", "/games/flash/saving12chicks/", "/en/games/flash/saving12chicks/", "병아리 일이병구하기", "수탉 횡스크롤 액션게임", "Saving 12 Chicks", "rooster side-scroller game", {"arcade", "casual", "animal", "kids"}),
