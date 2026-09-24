@@ -235,7 +235,7 @@
     x.fillStyle = '#fff';
     x.beginPath(); x.moveTo(40, 6); x.lineTo(88, 6); x.lineTo(88, 82); x.lineTo(122, 82); x.lineTo(64, 154); x.lineTo(6, 82); x.lineTo(40, 82); x.closePath(); x.fill();
     const tex = new T.CanvasTexture(c); tex.colorSpace = T.SRGBColorSpace;
-    const sp = new T.Sprite(new T.SpriteMaterial({ map: tex, alphaTest: 0.5, transparent: false, toneMapped: false, fog: false, depthTest: false, depthWrite: false }));
+    const sp = new T.Sprite(new T.SpriteMaterial({ map: tex, alphaTest: 0.2, transparent: true, opacity: 0.6, toneMapped: false, fog: false, depthTest: false, depthWrite: false }));
     sp.center.set(0.5, 0); sp.scale.set(0.8, 1.0, 1); sp.renderOrder = 50;
     sp.visible = false; SC.scene.add(sp);
     return sp;
