@@ -358,11 +358,12 @@ body:has(#missions:not([hidden])) #title,body:has(#courses:not([hidden])) #title
   #title{justify-content:flex-start;gap:2.6vh;padding:calc(3vh + env(safe-area-inset-top)) 16px calc(26vh + env(safe-area-inset-bottom))}
   #logo .a{font-size:12.5vh}
   #logo .b{font-size:18.5vh;margin-top:.05em}
-  #title .menu{display:grid;grid-template-columns:repeat(6,1fr);gap:1.8vh 10px;width:min(60vw,560px)}   /* 제목 폭 정도로 (사장님 "이렇게 바가 길 필요가 있니") */
-  #title .menu>.btn.main{grid-column:span 6;font-size:6.4vh;padding:1.6vh 14px}
-  #title .menu:has(#bCont:not([hidden]))>.btn.main{grid-column:span 3}
+  #title .menu{display:grid;grid-template-columns:repeat(12,1fr);gap:1.8vh 10px;width:min(60vw,560px)}   /* 제목 폭 정도로 (사장님 "이렇게 바가 길 필요가 있니") */
+  #title .menu>.btn.main{grid-column:4 / 10;font-size:6.4vh;padding:1.6vh 14px}
+  #title .menu:has(#bCont:not([hidden]))>#bCont{grid-column:2 / 7}
+  #title .menu:has(#bCont:not([hidden]))>#bStart{grid-column:7 / 12}
   #title .duo{display:contents}
-  #title .duo .btn{grid-column:span 2;font-size:4.6vh;padding:1.8vh 4px;white-space:nowrap}
+  #title .duo .btn{grid-column:span 4;font-size:4.6vh;padding:1.8vh 4px;white-space:nowrap}
   #bStart.sub{font-size:6.4vh}
   /* 창(코스·미션): 제목은 알약 오른쪽 한 줄, 코스는 세 칸 */
   .sheet{padding-top:calc(4vh + env(safe-area-inset-top))}
