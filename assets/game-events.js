@@ -5,6 +5,7 @@
 //   <script src="/assets/game-events.js?v=1" defer></script>
 // 옵션(script 태그 속성):
 //   data-abacus="0"  이 페이지가 이미 자체적으로 페이지뷰·세션을 세면(루루냥) 그 둘만 끕니다 (판 수는 셉니다)
+//   data-game="이름" 주소 대신 이 이름으로 셉니다 (한 게임에 버전이 둘일 때, 오름길 1 = oreumkil1)
 //   data-auto="0"    단추 글자·게임오버 창을 보고 자동으로 짐작하는 기능을 끕니다
 //
 // 게임 코드에서 직접 부르면 가장 정확합니다 (없으면 아래 자동 감지가 대신 짐작):
@@ -19,9 +20,9 @@
 // ─────────────────────────────────────────────────────────────
 (function () {
   var local = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) || location.protocol === 'file:';
-  var mm = location.pathname.match(/\/games\/(?:mini\/|flash\/)?([^\/]+)/);   // 미니·플래시 루트 아래 게임 이름
-  var game = mm ? mm[1] : location.pathname.replace(/^\/|\/$/g, '').replace(/[^\w-]+/g, '_') || 'home';
   var me = document.currentScript || {}; var ds = me.dataset || {};
+  var mm = location.pathname.match(/\/games\/(?:mini\/|flash\/)?([^\/]+)/);   // 미니·플래시 루트 아래 게임 이름
+  var game = ds.game || (mm ? mm[1] : location.pathname.replace(/^\/|\/$/g, '').replace(/[^\w-]+/g, '_') || 'home');   // data-game: 한 게임에 실행 화면이 여럿일 때(오름길 1·2)
   var useAbacus = ds.abacus !== '0', useAuto = ds.auto !== '0';
   var base = 'https://abacus.jasoncameron.dev/hit/oreumgames/';
   function hit(k) { if (local) return; try { fetch(base + k, { mode: 'cors' }).catch(function () {}); } catch (e) {} }
