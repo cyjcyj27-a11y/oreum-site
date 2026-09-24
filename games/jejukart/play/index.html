@@ -93,7 +93,7 @@ body:not(.playing) #slot{display:none}
 .tbtn{position:fixed;z-index:22;border-radius:50%;border:2px solid rgba(255,255,255,.55);background:rgba(0,0,0,.32);
   color:#fff;font-size:26px;display:none;place-items:center;font-family:inherit;touch-action:none}
 .tbtn.hit{background:rgba(255,225,74,.55)}
-#bDrift{right:calc(12px + env(safe-area-inset-right));bottom:calc(14px + env(safe-area-inset-bottom));width:92px;height:92px;font-size:34px}
+#bDrift{right:calc(12px + env(safe-area-inset-right));bottom:calc(14px + env(safe-area-inset-bottom));width:92px;height:92px;font-size:20px;-webkit-text-stroke:4px #1b2a5a;paint-order:stroke fill}
 #bItem{right:calc(112px + env(safe-area-inset-right));bottom:calc(22px + env(safe-area-inset-bottom));width:68px;height:68px}
 #bGas{right:calc(24px + env(safe-area-inset-right));bottom:calc(114px + env(safe-area-inset-bottom));width:62px;height:62px;font-size:22px}
 body.touch.playing #pad,body.touch.playing .tbtn{display:grid}
@@ -375,6 +375,7 @@ body:has(#missions:not([hidden])) #title,body:has(#courses:not([hidden])) #title
   #grid .card .nm{font-size:5vh}
   #grid .card .sub{font-size:3.6vh}
   .mis{padding:1.2vh 12px;font-size:4.6vh}
+  #bDrift{font-size:17px !important;letter-spacing:.02em;-webkit-text-stroke:4px #1b2a5a;paint-order:stroke fill}   /* 💨 가 방귀 같아 글자로 (2026-09-24) */
   /* 결과: 왼쪽 WIN·단추 세 개(세로), 오른쪽 순위표 — 아래 전체화면 단추와 겹치지 않게 */
   #result{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);grid-template-rows:auto 1fr;align-content:center;column-gap:18px;row-gap:1.5vh;
     padding:calc(40px + env(safe-area-inset-top)) 16px calc(48px + env(safe-area-inset-bottom))}
@@ -444,7 +445,7 @@ body:has(#missions:not([hidden])) #title,body:has(#courses:not([hidden])) #title
 
 <div id="pad"><div id="knob"></div></div>
 <button class="tbtn" id="bGas">■</button>
-<button class="tbtn" id="bDrift">💨</button>
+<button class="tbtn" id="bDrift">DRIFT</button>
 <button class="tbtn" id="bItem">🎁</button>
 <div id="pip"></div>
 <div id="keys">← → 조향 · ↑ 가속 · ↑↑ 급출발 · ↓ 브레이크<br>SHIFT 드리프트 · SPACE 누르면 조준(← → 과녁 바꾸기), 떼면 발사</div>
