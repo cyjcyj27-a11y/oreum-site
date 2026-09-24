@@ -38,14 +38,13 @@
 .shelf-more{font-size:15px;font-weight:800;color:var(--ink);text-decoration:none;margin-bottom:3px}
 .shelf-more:hover{text-decoration:underline}
 @media (max-width:760px){.shelf-head{margin-top:34px}.shelf-head h2{font-size:22px}.shelf-head p{flex-basis:100%;order:3}}
-/* GAMES 는 그대로(4칸), 플래시·미니는 반 크기(8칸) */
-.showcase .grid.g-small{grid-template-columns:repeat(8,1fr);gap:10px}
+/* GAMES 는 그대로(4칸), 플래시·미니는 6칸 */
+.showcase .grid.g-small{grid-template-columns:repeat(6,1fr);gap:10px}
 .showcase .grid.g-small .mbody{padding:7px 8px 9px}
 .showcase .grid.g-small .mbody b{font-size:13px;line-height:1.25}
 .showcase .grid.g-small .mbody i{font-size:11px;margin-top:2px}
 .showcase .grid.g-small .kind{font-size:9px;padding:2px 6px;left:6px;top:6px;letter-spacing:.08em}
 .showcase .grid.g-small a.mini:nth-child(-n+2) .shot::after{font-size:9px;padding:2px 6px;right:6px;top:6px}
-@media (max-width:1180px){.showcase .grid.g-small{grid-template-columns:repeat(6,1fr)}}
 @media (max-width:900px){.showcase .grid.g-small{grid-template-columns:repeat(4,1fr)}}
 @media (max-width:760px){.showcase .grid.g-small{grid-template-columns:repeat(4,1fr);gap:6px}.showcase .grid.g-small .mbody{padding:5px 6px 7px}.showcase .grid.g-small .mbody b{font-size:11.5px}.showcase .grid.g-small .mbody i{display:none}.showcase .grid.g-small .kind{display:none}}
 </style>
