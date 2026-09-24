@@ -94,15 +94,17 @@ body:not(.playing) #slot{display:none}
   color:#fff;font-size:26px;display:none;place-items:center;font-family:inherit;touch-action:none}
 .tbtn.hit{background:rgba(255,225,74,.55)}
 /* 이 게임은 아이템이 핵심 — 아이템 단추가 구석의 큰 단추, 드리프트는 옆 작은 단추 (사장님 2026-09-24) */
-#bItem{right:calc(12px + env(safe-area-inset-right));bottom:calc(14px + env(safe-area-inset-bottom));width:92px;height:92px;font-size:40px}
+#bItem{right:calc(12px + env(safe-area-inset-right));bottom:calc(14px + env(safe-area-inset-bottom));width:92px;height:92px;font-size:22px;-webkit-text-stroke:4px #1b2a5a;paint-order:stroke fill}
 #bDrift{right:calc(112px + env(safe-area-inset-right));bottom:calc(22px + env(safe-area-inset-bottom));width:68px;height:68px;font-size:15px;-webkit-text-stroke:4px #1b2a5a;paint-order:stroke fill}
-#bGas{right:calc(24px + env(safe-area-inset-right));bottom:calc(114px + env(safe-area-inset-bottom));width:62px;height:62px;font-size:22px}
+/* 단추·HUD 에 이모지 아이콘을 넣지 않는다 — 글자로 (사장님 2026-09-24 "아이콘 넣지마라 싸구려 같으니까") */
+#bGas{right:calc(24px + env(safe-area-inset-right));bottom:calc(114px + env(safe-area-inset-bottom));width:62px;height:62px;font-size:13px;-webkit-text-stroke:3px #1b2a5a;paint-order:stroke fill}
+.tog.txt{font-size:12px;font-weight:400;letter-spacing:.02em;-webkit-text-stroke:3px #1b2a5a;paint-order:stroke fill}
 body.touch.playing #pad,body.touch.playing .tbtn{display:grid}
 body.touch.playing #pad{display:block}
 @media (max-height:460px){
   #pad{width:132px;height:132px;bottom:calc(10px + env(safe-area-inset-bottom))}
   #knob{width:56px;height:56px;margin:-28px 0 0 -28px}
-  #bItem{width:76px;height:76px;font-size:34px;bottom:calc(10px + env(safe-area-inset-bottom))}
+  #bItem{width:76px;height:76px;font-size:18px;bottom:calc(10px + env(safe-area-inset-bottom))}
   #bDrift{width:58px;height:58px;right:calc(96px + env(safe-area-inset-right));bottom:calc(16px + env(safe-area-inset-bottom))}
   #bGas{width:52px;height:52px;right:calc(18px + env(safe-area-inset-right));bottom:calc(94px + env(safe-area-inset-bottom));font-size:18px}
   #map{width:86px;height:86px;top:calc(46px + env(safe-area-inset-top))}
@@ -377,6 +379,8 @@ body:has(#missions:not([hidden])) #title,body:has(#courses:not([hidden])) #title
   #grid .card .nm{font-size:5vh}
   #grid .card .sub{font-size:3.6vh}
   .mis{padding:1.2vh 12px;font-size:4.6vh}
+  .tog.txt{font-size:11px !important;letter-spacing:0;-webkit-text-stroke:3px #1b2a5a;paint-order:stroke fill}
+  #bGas{font-size:11px !important;-webkit-text-stroke:3px #1b2a5a;paint-order:stroke fill}
   #bDrift{font-size:13px !important;letter-spacing:.02em;-webkit-text-stroke:4px #1b2a5a;paint-order:stroke fill}   /* 💨 가 방귀 같아 글자로 (2026-09-24) */
   /* 결과: 왼쪽 WIN·단추 세 개(세로), 오른쪽 순위표 — 아래 전체화면 단추와 겹치지 않게 */
   #result{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);grid-template-rows:auto 1fr;align-content:center;column-gap:18px;row-gap:1.5vh;
@@ -421,14 +425,14 @@ body:has(#missions:not([hidden])) #title,body:has(#courses:not([hidden])) #title
 
 <div id="topbar">
   <div id="hudMid">
-  <div class="stat game"><i>🏁</i><b id="place">1<small>/8</small></b></div>
+  <div class="stat game"><b id="place">1<small>/8</small></b></div>
   <div class="stat game"><i>LAP</i><b id="lap">1<small>/3</small></b></div>
-  <div class="stat game"><i>⏱</i><b id="time">0:00.0</b></div>
+  <div class="stat game"><b id="time">0:00.0</b></div>
   </div>
   <div class="spacer"></div>
   <button class="tog game" id="tPause" aria-label="pause">❚❚</button>
-  <button class="tog" id="tBgm" aria-label="music">♪</button>
-  <button class="tog" id="tSnd" aria-label="sound">🔊</button>
+  <button class="tog txt" id="tBgm" aria-label="music">BGM</button>
+  <button class="tog txt" id="tSnd" aria-label="sound">SFX</button>
 </div>
 
 <div id="topbar2" hidden>
@@ -446,9 +450,9 @@ body:has(#missions:not([hidden])) #title,body:has(#courses:not([hidden])) #title
 <div id="count" hidden></div>
 
 <div id="pad"><div id="knob"></div></div>
-<button class="tbtn" id="bGas">■</button>
+<button class="tbtn" id="bGas">BRAKE</button>
 <button class="tbtn" id="bDrift">DRIFT</button>
-<button class="tbtn" id="bItem">🎁</button>
+<button class="tbtn" id="bItem">ITEM</button>
 <div id="pip"></div>
 <div id="keys">← → 조향 · ↑ 가속 · ↑↑ 급출발 · ↓ 브레이크<br>SHIFT 드리프트 · SPACE 누르면 조준(← → 과녁 바꾸기), 떼면 발사</div>
 
@@ -462,7 +466,7 @@ body:has(#missions:not([hidden])) #title,body:has(#courses:not([hidden])) #title
       <button class="btn" id="bDuo">2 PLAYERS</button>
     </div>
     <div class="duo">
-      <button class="btn" id="bMis">🏅 미션</button>
+      <button class="btn" id="bMis">미션</button>
     </div>
   </div>
 </div>
@@ -511,7 +515,7 @@ body:has(#missions:not([hidden])) #title,body:has(#courses:not([hidden])) #title
   <div class="hd"><h2>미션</h2><button class="close" aria-label="close">✕</button></div>
   <div class="body">
     <div style="display:flex;justify-content:center;gap:10px;margin-bottom:10px">
-      <div class="stat"><i>✔</i><b id="misCount">0 / 12</b></div>
+      <div class="stat"><b id="misCount">0 / 12</b></div>
     </div>
     <div id="misList"></div>
   </div>
@@ -519,9 +523,9 @@ body:has(#missions:not([hidden])) #title,body:has(#courses:not([hidden])) #title
 
 <div id="ending" hidden>
   <div id="confetti"></div>
-  <div class="cup">🏆</div>
+  
   <h1>제주카트레이싱</h1>
-  <div class="row2">🏁 CHAMPION 🏁</div>
+  <div class="row2">CHAMPION</div>
   <button class="btn main" id="endOk">계속</button>
 </div>
 
@@ -537,13 +541,13 @@ body:has(#missions:not([hidden])) #title,body:has(#courses:not([hidden])) #title
 <script src="js/scenery.js?v=12"></script>
 <script src="js/phys.js?v=5"></script>
 <script src="lib/GLTFLoader.global.js"></script>
-<script src="js/kart.js?v=18"></script>
+<script src="js/kart.js?v=19"></script>
 <script src="js/ai.js?v=3"></script>
 <script src="js/items.js?v=12"></script>
 <script src="assets/sfx/engine.mp3.js?v=2"></script>
 <script src="js/audio.js?v=5"></script>
 <script src="js/game.js?v=31"></script>
-<script src="js/ui.js?v=54"></script>
+<script src="js/ui.js?v=55"></script>
 <script src="/assets/visit.js?v=17" defer></script>
 <script src="/assets/game-events.js?v=2" defer></script>
 </body>

@@ -605,8 +605,12 @@
     a.pos.x -= nx * push; a.pos.z -= nz * push;
     b.pos.x += nx * push; b.pos.z += nz * push;
     const va = a.vel, vb = b.vel;
-    a.vel = va * 0.92 + (vb - va) * 0.1;
-    b.vel = vb * 0.92 + (va - vb) * 0.1;
+    // 서로 다가갈 때만 속도를 깎는다 — 붙어 있다가 후진·출발로 떨어지려는 카트까지 묶어 두던 것 (2026-09-24 "후진이 안되더라")
+    const closing = (Math.sin(a.yaw) * va - Math.sin(b.yaw) * vb) * nx + (Math.cos(a.yaw) * va - Math.cos(b.yaw) * vb) * nz;
+    if (closing > 0) {
+      a.vel = va * 0.92 + (vb - va) * 0.1;
+      b.vel = vb * 0.92 + (va - vb) * 0.1;
+    }
     // 옆에서 맞으면 머리가 조금 돌아간다
     const side = Math.cos(a.yaw) * nx - Math.sin(a.yaw) * nz;
     a.yaw -= side * 0.03; b.yaw += side * 0.03;

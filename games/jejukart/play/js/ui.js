@@ -52,7 +52,7 @@
     MIS.forEach((m, i) => {
       if (SV.mis.indexOf(i) < 0 && m.f()) {
         SV.mis.push(i);
-        toast('🏅 ' + m.n);   // 코인 없음 (2026-09-24 "코인도 빼")
+        toast(m.n);   // 코인 없음 (2026-09-24 "코인도 빼")
         AUD.sfx('coin');
       }
     });
@@ -154,7 +154,8 @@
       const side = padV.x > 0.5 ? 1 : padV.x < -0.5 ? -1 : 0;
       const aimDir = aim && side !== (k.aimSide || 0) ? side : 0;   // 조준 중 패드를 밀면 운전도 하고 과녁도 바뀐다
       k.aimSide = side;
-      return { thr: btn.brake ? -1 : 1, steer: SCR(padV.x), drift: btn.drift, aim, use, aimDir };
+      // 패드를 아래로 당겨도 후진 (2026-09-24 사장님 "후진이 안되더라" — BRAKE 단추로만 됐다)
+      return { thr: btn.brake || padV.y > 0.6 ? -1 : 1, steer: SCR(padV.x), drift: btn.drift, aim, use, aimDir };
     }
     const K = p2
       ? { up: 'ArrowUp', dn: 'ArrowDown', l: 'ArrowLeft', r: 'ArrowRight', d: 'ShiftRight', i: 'Enter' }
@@ -340,7 +341,7 @@
     tag.hidden = !tg;
     if (!tg) { edge.hidden = true; return; }
     const d = Math.max(0, Math.round(tg.S.prog - p.S.prog));
-    tag.textContent = '🎯 ' + tg.name + ' · ' + tg.S.place + '등 · ' + d + 'm';
+    tag.textContent = tg.name + ' · ' + tg.S.place + '등 · ' + d + 'm';
     const cam = RACE.camera;
     aimV.set(tg.S.pos.x, tg.S.pos.y + 1.2, tg.S.pos.z).project(cam);
     let x = aimV.x, y = aimV.y;
@@ -507,7 +508,7 @@
       d.innerHTML = '<div class="thumb"><img alt="" src="assets/courses/c' + i + '.jpg"></div>' +
         '<div class="nm">' + c.name + '</div>' +
         '<div class="sub"><span>' + c.laps + ' LAP</span><em>' + (SV.best[i] ? fmt(SV.best[i]) : '-') + '</em></div>' +
-        (SV.done.indexOf(i) >= 0 ? '<div class="sub"><span>🏆 1등</span></div>' : '');
+        (SV.done.indexOf(i) >= 0 ? '<div class="sub"><span>1등</span></div>' : '');
       if (!lock) d.onclick = () => { show(E.courses, false); startRace(i, 'single'); };
       E.grid.appendChild(d);
     });
