@@ -48,7 +48,7 @@
     '4컵 모두 우승': 'Win all 4 cups',
     '계속': 'CONTINUE',
     '가로로 돌려 주세요': 'Rotate your phone',
-    '가로 보기': 'LANDSCAPE',
+    '전체화면보기': 'FULLSCREEN',
     '누르면 조준(← → 과녁 바꾸기), 떼면 발사': 'hold to AIM (← → switch target), release to FIRE',
     '급출발': 'DASH',
     '이어하기': 'CONTINUE', '새로하기': 'NEW GAME',
