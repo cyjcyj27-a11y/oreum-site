@@ -18,6 +18,7 @@ import io, os, re, sys
 
 # slug, 한국어 경로, 영어 경로, 한국어 이름, 한국어 장르 앵커, 영어 이름, 영어 장르 앵커, 태그
 GAMES = [
+    ("checkers",      "/games/flash/checkers/",      "/en/games/flash/checkers/",      "체커게임",          "혼자·2인용 체커 보드게임",          "Checkers",             "checkers board game vs computer", {"board", "pvp", "strategy"}),
     ("chwigwon",      "/games/mini/chwigwon/",       "/en/games/mini/chwigwon/",       "취권소찬",          "취권 격투 액션게임",               "Drunken Fist: Sochan", "drunken fist beat 'em up game", {"action", "fighting", "arcade"}),
     ("saving12chicks", "/games/flash/saving12chicks/", "/en/games/flash/saving12chicks/", "병아리 일이병구하기", "수탉 횡스크롤 액션게임", "Saving 12 Chicks", "rooster side-scroller game", {"arcade", "casual", "animal", "kids"}),
     ("maidcafe",      "/games/maidcafe/",           "/en/games/maidcafe/",           "모에모에 메이드카페", "메이드카페 방치형 경영게임",   "MOE MOE MAID CAFE",        "idle maid cafe tycoon",         {"sim", "tycoon", "idle"}),
