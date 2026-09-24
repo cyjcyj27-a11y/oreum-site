@@ -386,9 +386,9 @@ body:has(#missions:not([hidden])) #title,body:has(#courses:not([hidden])) #title
   #result{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);grid-template-rows:auto 1fr;align-content:center;column-gap:18px;row-gap:1.5vh;
     padding:calc(40px + env(safe-area-inset-top)) 16px calc(48px + env(safe-area-inset-bottom))}
   #rTitle{grid-column:1;grid-row:1;font-size:15vh;text-align:center;line-height:1}
-  #result .btns{grid-column:1;grid-row:2;flex-direction:column;flex-wrap:nowrap !important;width:100% !important;gap:1.6vh !important;align-self:start}
+  #result .btns{grid-column:1;grid-row:2;flex-direction:column;flex-wrap:nowrap !important;width:min(100%,250px) !important;justify-self:center;gap:1.6vh !important;align-self:start}   /* 단추는 짧게 (사장님 "역시나 바가 길어") */
   #result .btns .btn{flex:none !important;font-size:5.6vh;padding:1.3vh 10px}
-  #rList{grid-column:2;grid-row:1 / 3;width:100%;max-height:calc(100vh - 100px);align-self:center}
+  #rList{grid-column:2;grid-row:1 / 3;width:min(100%,400px);justify-self:center;max-height:calc(100vh - 100px);align-self:center}
   .rrow{padding:1vh 14px !important;font-size:4.6vh}
   body.playing #oreumFs{display:none}   /* 달리는 중엔 왼쪽 아래 패드와 겹친다 */
   /* 캐릭터 고르기: 카드 4장을 한 줄로 낮게, START 는 위쪽에 */
