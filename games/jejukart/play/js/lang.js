@@ -56,7 +56,7 @@
     '캐릭터': 'RACERS',
     '드리프트 달인': 'Drift Master', '번개 뒷발': 'Lightning Hops', '튼튼한 몸': 'Tough Body', '꼬리 바람': 'Tail Wind',
     '드리프트 부스트가 1.5배 빨리 모여요': 'Drift boosts charge 1.5x faster',
-    '↑↑ 부스터를 18초마다 쓸 수 있어요 (다른 선수는 30초)': '↑↑ boost every 18 seconds (others: 30)',
+    '↑↑ 부스터를 6초마다 쓸 수 있어요 (다른 선수는 10초)': '↑↑ boost every 6 seconds (others: 10)',
     '아이템에 맞아도 금방 털고 일어나요 (도는 시간·느려지는 시간 절반)': 'Shakes off hits fast (half spin & slow time)',
     '최고 속도가 6% 더 빨라요': 'Top speed +6%',
     '무한 모드': 'ENDLESS',

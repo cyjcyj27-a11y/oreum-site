@@ -282,7 +282,7 @@
       S.prog = -(T.total - gp[i].s);
       S.hint = TRACK.locate(T, S.pos, null).i;
       S.skill = KART.DRIVERS[e.driver].glb;   // 동물 스킬 (kart.js SKILLS)
-      S.dashMax = S.skill === 'bunny' ? 18 : 30;   // 부스터 간격 30초 (2026-09-24 사장님), 토리는 같은 비율로 18초
+      S.dashMax = S.skill === 'bunny' ? 6 : 10;   // 부스터 간격 10초 (2026-09-25 사장님), 토리는 같은 비율로 6초
       return {
         g, S, human: !!e.human, pad: e.pad || 0,
         brain: e.human ? null : AI.brain(e.skill || 1),
@@ -482,7 +482,7 @@
       k.S.dashCd = Math.max(0, (k.S.dashCd || 0) - dt);
       if (c.dash && k.S.dashCd <= 0 && !(k.S.spin > 0) && !(k.S.hydro > 0) && !k.S.finished) {
         const start = c.dash === 2;   // 출발 급발진: 바로 최고 속도 가까이 + 부스트 길게
-        k.S.dashCd = k.S.dashMax || 30;   // 부스터는 30초에 한 번, 토리는 18초 (출발 급발진도 같이 센다)
+        k.S.dashCd = k.S.dashMax || 10;   // 부스터는 10초에 한 번, 토리는 6초 (출발 급발진도 같이 센다)
         k.S.vel = start ? Math.max(k.S.vel, KART.TOP * 0.9) : Math.max(k.S.vel, Math.min(KART.TOP * 0.8, k.S.vel + 11));
         k.S.boost = Math.max(k.S.boost, start ? 1.3 : 0.7);
         AUD.sfx('boost');

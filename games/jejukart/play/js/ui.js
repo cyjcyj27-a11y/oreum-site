@@ -386,7 +386,7 @@
     aimHud(p);
     // 부스터 게이지 (5초에 한 번)
     const cd = S.dashCd || 0, bg = document.getElementById('boostG');
-    if (bg) { bg.classList.toggle('on', cd <= 0); bg.firstChild.style.width = Math.round((1 - cd / (S.dashMax || 30)) * 100) + '%'; }
+    if (bg) { bg.classList.toggle('on', cd <= 0); bg.firstChild.style.width = Math.round((1 - cd / (S.dashMax || 10)) * 100) + '%'; }
     // 부스트 칸 길이 = 윗줄 칸(등수·LAP·시간)을 합친 길이 (2026-09-24 사장님)
     if (bg) {
       const st = [...document.querySelectorAll('#topbar .stat.game')].filter((e) => e.offsetParent);
