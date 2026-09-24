@@ -90,6 +90,7 @@
     '태어난 시간을 넣으면 추정이 훨씬 정확해집니다.': 'Adding your birth time makes the estimate much more accurate.',
     '재미와 자기 이해를 위한 서비스입니다. 미래를 단정하지 않으며,\n        의료 · 법률 · 투자 판단의 근거로 쓰지 마세요.': 'This service is for fun and self-understanding. It does not predict the future. Do not use it for medical, legal, or investment decisions.',
     '오름게임즈 홈페이지 →': 'Oreum Games homepage →',
+    '사주분석 후기 남기기': 'Leave a review of your reading',
     '최근 분석': 'Recent readings',
     '결과 복사하기': 'Copy my results',
     '비견형': 'Bigyeon type', '겁재형': 'Geopjae type', '식신형': 'Siksin type', '상관형': 'Sanggwan type',
@@ -1289,6 +1290,7 @@
     if (mbtiHint && mbtiHint.classList.contains('hint')) {
       mbtiHint.innerHTML = '<b style="color:var(--gold)">Leave it empty and we will estimate your MBTI from your saju.</b><br>Already know yours? Pick it, and we will show how closely the saju estimate matches.';
     }
+    document.querySelectorAll('a.board-btn').forEach(a => { a.href = '/en/board/'; });   // 영문은 영어 커뮤니티로
     trNode(document.body);
     new MutationObserver((muts) => {
       for (const m of muts) {

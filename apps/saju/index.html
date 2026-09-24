@@ -134,6 +134,14 @@ body {
   color: var(--tx3); text-decoration: none; font-size: 13px; letter-spacing: .02em;
 }
 .home-link:hover { color: var(--gold); }
+/* 커뮤니티로 가는 후기 단추 — 결과 단추 줄 아래, 홈 링크 위 (사장님 2026-09-24) */
+.board-btn {
+  display: block; text-align: center; margin-top: 12px;
+  background: var(--card2); border: 1px solid var(--gold); border-radius: 14px;
+  color: var(--gold); text-decoration: none;
+  font-size: 14.5px; font-weight: 700; padding: 15px; transition: .2s;
+}
+.board-btn:hover { filter: brightness(1.12); }
 
 /* ── 카드 / 폼 ─────────────────────────── */
 .card {
@@ -948,6 +956,7 @@ html[lang="en"] .zw-top { padding-right: 22px; }
       <button type="button" class="btn-sub" id="relCopyBtn">결과 복사하기</button>
       <button type="button" class="btn-sub" id="relAgainBtn">다시 하기</button>
     </div>
+    <a class="board-btn" href="/board/">사주분석 후기 남기기</a>
     <a class="home-link" href="https://oreumgames.com">오름게임즈 홈페이지 →</a>
   </section>
 
@@ -960,13 +969,14 @@ html[lang="en"] .zw-top { padding-right: 22px; }
       <button type="button" class="btn-sub" id="copyBtn">결과 복사하기</button>
       <button type="button" class="btn-sub" id="againBtn">다시 하기</button>
     </div>
+    <a class="board-btn" href="/board/">사주분석 후기 남기기</a>
     <a class="home-link" href="https://oreumgames.com">오름게임즈 홈페이지 →</a>
   </section>
 
 </div>
 
 <script src="i18n_content.js?v=19"></script>
-<script src="i18n.js?v=36"></script>
+<script src="i18n.js?v=37"></script>
 <script>
 /* =========================================================
    data-core.js
