@@ -679,7 +679,7 @@
   function seatsFor(stage) {
     const idx = Math.min(stage, LAST) - 1;
     const o = OPP[idx];
-    const seats = [{ human: true, face: HUMAN_FACES[0], name: 'ME', team: 0 }];
+    const seats = [{ human: true, face: SC.TEAMS[0].face, name: 'ME', team: 0 }];
     let n = stage > LAST ? 2 + ((stage * 7) % 3) : o.n;
     const main = stage > LAST ? OPP[(stage * 5) % LAST] : o;
     const lv = stage > LAST ? 12 : o.lv;
