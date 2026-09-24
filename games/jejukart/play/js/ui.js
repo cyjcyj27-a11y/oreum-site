@@ -669,7 +669,7 @@
     PV.obj.userData.shadow.visible = false;
     PV.obj.traverse((c) => { if (c.isMesh) c.castShadow = true; });
     PV.scene.add(PV.obj);
-    PV.yaw = 0.6; PV.pitch = 0.22; PV.dist = 7.2; PV.idle = 0;
+    PV.yaw = 0.6; PV.pitch = 0.22; PV.dist = innerHeight <= 480 ? 5.4 : 7.2; PV.idle = 0;   // 폰 가로는 창이 낮아 조금 당겨 찍는다
     viewDraw(performance.now());
     if (!PV.raf) PV.raf = requestAnimationFrame(viewLoop);
   }

@@ -395,15 +395,15 @@ body:has(#missions:not([hidden])) #title,body:has(#courses:not([hidden])) #title
   #pickGrid .sk{font-size:4.2vh !important}
   #pickGrid .ds{font-size:3.6vh !important;line-height:1.25}
   #pickGo{position:absolute;top:calc(3vh + env(safe-area-inset-top));right:calc(64px + env(safe-area-inset-right));width:min(36vw,320px);margin:0 !important;font-size:6.4vh;padding:1.2vh 14px}   /* 제목 줄 오른쪽(✕ 옆) */
-  /* 캐릭터 보기 창: 왼쪽 큰 그림, 오른쪽에 이름·스킬·START (아래로 밀리지 않게) */
-  #pickView{padding:calc(38px + env(safe-area-inset-top)) 12px 6px}   /* 위 OREUM GAMES 알약 밑으로 */
-  #pickView .pv{width:min(100%,860px);display:grid;grid-template-columns:1.35fr 1fr;grid-template-rows:auto auto 1fr;column-gap:14px;align-items:start}
-  #pickView #pvCv{grid-column:1;grid-row:1 / 4;height:calc(100vh - 80px)}
-  #pickView .pvHd{grid-column:2;grid-row:1}
+  /* 캐릭터 보기 창: 왼쪽 그림, 오른쪽 이름·스킬·START 를 세로 가운데로. 위 알약·아래 전체화면 단추와 안 겹치게 (2026-09-24 "개판") */
+  #pickView{padding:calc(40px + env(safe-area-inset-top)) 16px calc(50px + env(safe-area-inset-bottom))}
+  #pickView .pv{width:min(94vw,820px);max-height:100%;display:grid;grid-template-columns:1.1fr 1fr;grid-template-rows:1fr auto auto auto 1fr;column-gap:16px;row-gap:1.2vh;padding:10px 14px}
+  #pickView #pvCv{grid-column:1;grid-row:1 / 6;height:calc(100vh - 118px);width:100%}
+  #pickView .pvHd{grid-column:2;grid-row:2}
   #pickView .pvHd b{font-size:11vh}
-  #pickView .pvSk{grid-column:2;grid-row:2;font-size:4.2vh}
+  #pickView .pvSk{grid-column:2;grid-row:3;font-size:4.2vh}
   #pickView .pvSk em{font-size:5vh}
-  #pickView #pvGo{grid-column:2;grid-row:3;align-self:start;margin-top:2vh;font-size:6.4vh;padding:1.4vh 14px}
+  #pickView #pvGo{grid-column:2;grid-row:4;margin-top:1vh;font-size:6.4vh;padding:1.4vh 14px}
 }
 /* 왼쪽 위 OREUM GAMES 알약·왼쪽 아래 전체화면 단추도 입체로 (2026-09-24 "이것도 입체로") — 이 게임에서만 덮어쓴다 */
 #oreumHome,#oreumFs{border:3px solid #1b2a5a !important;background:linear-gradient(180deg,#ffffff 0%,#fff6d8 55%,#ffe7a6 100%) !important;
@@ -523,7 +523,7 @@ body:has(#missions:not([hidden])) #title,body:has(#courses:not([hidden])) #title
 </div>
 
 <div id="pauseCover" hidden>❚❚<button class="btn" id="pHome">홈</button></div>
-<div id="rotate" hidden>📱<div>가로로 돌려 주세요</div><button class="btn" id="rotBtn">전체화면보기</button></div>
+<div id="rotate" hidden><div>가로로 돌려 주세요</div><button class="btn" id="rotBtn">전체화면보기</button></div>
 <div id="loading">LOADING…</div>
 
 <script src="js/lang.js?v=19"></script>
@@ -540,7 +540,7 @@ body:has(#missions:not([hidden])) #title,body:has(#courses:not([hidden])) #title
 <script src="assets/sfx/engine.mp3.js?v=2"></script>
 <script src="js/audio.js?v=5"></script>
 <script src="js/game.js?v=31"></script>
-<script src="js/ui.js?v=53"></script>
+<script src="js/ui.js?v=54"></script>
 <script src="/assets/visit.js?v=17" defer></script>
 <script src="/assets/game-events.js?v=2" defer></script>
 </body>
