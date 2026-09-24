@@ -622,18 +622,37 @@
     // 머리
     const head = new T.SphereGeometry(0.235, 18, 12); head.translate(0, 0.6, 0.02); gs.push(colored(head, t.color));
     // 얼굴 밝은 부분(주둥이)
-    const muz = new T.SphereGeometry(0.12, 12, 8); muz.scale(1.2, 0.8, 0.8); muz.translate(0, 0.53, 0.2); gs.push(colored(muz, t.light));
+    if (team !== 1) { const muz = new T.SphereGeometry(0.12, 12, 8); muz.scale(1.2, 0.8, 0.8); muz.translate(0, 0.53, 0.2); gs.push(colored(muz, t.light)); }
     // 눈
     for (const s of [-1, 1]) { const e = new T.SphereGeometry(0.035, 8, 6); e.translate(s * 0.095, 0.64, 0.2); gs.push(colored(e, 0x1a1210)); }
     // 코
-    const nose = new T.SphereGeometry(0.035, 8, 6); nose.scale(1.3, 0.8, 1); nose.translate(0, 0.575, 0.285); gs.push(colored(nose, team === 3 ? 0xff8a2a : 0x2a1a14));
+    if (team !== 1) { const nose = new T.SphereGeometry(0.035, 8, 6); nose.scale(1.3, 0.8, 1); nose.translate(0, 0.575, 0.285); gs.push(colored(nose, team === 3 ? 0xff8a2a : 0x2a1a14)); }
     if (team === 0) { // 강아지: 늘어진 귀
       for (const s of [-1, 1]) { const e = new T.SphereGeometry(0.09, 10, 8); e.scale(0.7, 1.5, 0.5); e.translate(s * 0.24, 0.6, -0.02); gs.push(colored(e, t.dark)); }
       const tail = new T.SphereGeometry(0.07, 8, 6); tail.scale(0.8, 1.6, 0.8); tail.translate(0, 0.35, -0.3); gs.push(colored(tail, t.dark));
-    } else if (team === 1) { // 고양이: 세모 귀 + 줄무늬
-      for (const s of [-1, 1]) { const e = new T.ConeGeometry(0.09, 0.18, 4); e.rotateY(Math.PI / 4); e.translate(s * 0.16, 0.82, 0); gs.push(colored(e, t.dark)); }
-      for (let i = 0; i < 3; i++) { const st = new T.TorusGeometry(0.235, 0.02, 6, 16, 0.9); st.rotateY(-Math.PI / 2 + 0.45 - i * 0.45); st.rotateZ(Math.PI / 2); st.translate(0, 0.7 - i * 0.02, -0.06 + i * 0.04); gs.push(colored(st, t.dark)); }
-      const tail = new T.TorusGeometry(0.16, 0.035, 6, 12, Math.PI); tail.rotateY(Math.PI / 2); tail.translate(0.15, 0.25, -0.3); gs.push(colored(tail, t.dark));
+    } else if (team === 1) { // 고양이: 쫑긋 세모 귀(속 분홍) + 볼 두 개 + 분홍 코 + 수염 + 이마 줄무늬
+      for (const sd of [-1, 1]) {
+        const e = new T.ConeGeometry(0.1, 0.24, 3); e.rotateY(Math.PI); e.rotateZ(sd * -0.32); e.translate(sd * 0.14, 0.8, 0); gs.push(colored(e, t.color));
+        const inr = new T.ConeGeometry(0.06, 0.15, 3); inr.rotateY(Math.PI); inr.rotateZ(sd * -0.32); inr.translate(sd * 0.137, 0.78, 0.035); gs.push(colored(inr, 0xf2a6b4));
+        // 볼(주둥이 양쪽 불룩)
+        const ch = new T.SphereGeometry(0.068, 10, 8); ch.scale(1.1, 0.85, 0.8); ch.translate(sd * 0.055, 0.535, 0.195); gs.push(colored(ch, t.light));
+        // 수염 셋
+        // 볼에서 바깥으로 부채처럼 퍼진다
+        for (let k = 0; k < 3; k++) {
+          const a = (1 - k) * 0.2, dx = sd * Math.cos(a), dy = Math.sin(a), L = 0.17;
+          const w = new T.CylinderGeometry(0.006, 0.003, L, 4); w.rotateZ(Math.atan2(-dx, dy));
+          w.translate(sd * 0.1 + dx * L / 2, 0.54 + (1 - k) * 0.012 + dy * L / 2, 0.215); gs.push(colored(w, 0xf4f4f8));
+        }
+      }
+      const nose = new T.ConeGeometry(0.03, 0.035, 3); nose.rotateX(Math.PI); nose.rotateY(Math.PI); nose.translate(0, 0.585, 0.255); gs.push(colored(nose, 0xe07a8c));
+      // 이마에서 정수리로 넘어가는 줄무늬 셋(머리 곡면을 따라 휜 띠)
+      for (let k = -1; k <= 1; k++) {
+        const st = new T.TorusGeometry(0.237, 0.012, 6, 14, k ? 0.5 : 0.7);
+        st.rotateY(-Math.PI / 2); st.rotateX(-0.5); st.rotateZ(-k * 0.28);
+        st.translate(k * 0.02, 0.6, 0.02); gs.push(colored(st, t.dark));
+      }
+      // 꼬리: 몸 아랫단을 뒤에서 옆으로 감싼다(위에서 봐도 머리 뒤로 솟지 않게)
+      const tail = new T.TorusGeometry(0.31, 0.04, 6, 16, Math.PI * 0.55); tail.rotateX(Math.PI / 2); tail.rotateY(Math.PI * 0.15); tail.translate(0, 0.1, 0); gs.push(colored(tail, t.dark));
     } else if (team === 2) { // 토끼: 긴 귀
       for (const s of [-1, 1]) {
         const e = new T.SphereGeometry(0.075, 10, 8); e.scale(0.8, 2.4, 0.6); e.rotateZ(s * -0.18); e.translate(s * 0.12, 0.95, -0.02); gs.push(colored(e, t.color));
