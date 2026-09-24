@@ -228,6 +228,26 @@
   const pathDots = [];
   for (let i = 0; i < 6; i++) { const d = new T.Mesh(new T.CircleGeometry(0.11, 12), SC.ringMatDst); d.rotation.x = -Math.PI / 2; d.visible = false; d.renderOrder = 3; SC.scene.add(d); pathDots.push(d); }
 
+  // 2~4인: 지금 던질 사람의 말 자리 위에 아래를 가리키는 화살표
+  const turnArrow = (() => {
+    const c = document.createElement('canvas'); c.width = 128; c.height = 160;
+    const x = c.getContext('2d');
+    x.fillStyle = '#fff';
+    x.beginPath(); x.moveTo(40, 6); x.lineTo(88, 6); x.lineTo(88, 82); x.lineTo(122, 82); x.lineTo(64, 154); x.lineTo(6, 82); x.lineTo(40, 82); x.closePath(); x.fill();
+    const tex = new T.CanvasTexture(c); tex.colorSpace = T.SRGBColorSpace;
+    const sp = new T.Sprite(new T.SpriteMaterial({ map: tex, alphaTest: 0.5, transparent: false, toneMapped: false }));
+    sp.center.set(0.5, 0); sp.scale.set(0.8, 1.0, 1); sp.renderOrder = 5;
+    sp.visible = false; SC.scene.add(sp);
+    return sp;
+  })();
+  function updateArrow() {
+    const on = M && M.mode === 'multi' && M.winner < 0 && G.state !== 'over';
+    // 0.35초 켜짐·0.35초 꺼짐으로 깜빡인다
+    turnArrow.visible = !!on && G.t % 0.7 < 0.35;
+    if (!on) return;
+    const [x, z] = corner(M.cur);
+    turnArrow.position.set(x, 1.1 + Math.abs(Math.sin(G.t * 4)) * 0.3, z);
+  }
   function pilePos(seat, i) {
     const [x, z] = corner(seat);
     const sx = Math.sign(x), sz = Math.sign(z);
@@ -380,6 +400,7 @@
     SC.breathe(G.t);
     animSticks(dt);
     updateHold(dt);
+    updateArrow();
     updateSparks(dt);
     if (!M || G.paused) return;
     stepPhysics(dt);
