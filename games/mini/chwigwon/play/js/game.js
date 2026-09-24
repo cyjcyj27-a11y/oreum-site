@@ -144,7 +144,7 @@
   function gruntSheet(k) { return KINDS[k].sheet + '_c' + (((G.stage - 1) % 8) + 1); }
 
   // ── 입력 ──
-  var keys = {}, pad = { x: 0 }, btn = { atk: false, kick: false, drink: false, guard: false };
+  var keys = {}, pad = { x: 0, down: false }, btn = { atk: false, kick: false, drink: false, guard: false };
   var KEYMAP = { ArrowLeft: 'L', KeyA: 'L', ArrowRight: 'R', KeyD: 'R', KeyJ: 'atk', KeyZ: 'atk', KeyK: 'kick', KeyX: 'kick', KeyL: 'drink', KeyC: 'drink', KeyS: 'guard', ArrowDown: 'guard' };
   var tapT = { L: 0, R: 0 }, atkDownT = 0, kickDownT = 0;
   function trySpray() {          // J+K 를 거의 같이 누르면 방금 시작한 잽·발차기를 끊고 술 뿜기
@@ -180,13 +180,14 @@
     if (d > R) { dx *= R / d; dy *= R / d; }
     knob.style.transform = 'translate(' + dx + 'px,' + dy + 'px)';
     var k = dx / R;
-    pad.x = Math.abs(k) > 0.22 ? Math.sign(k) : 0;
+    pad.down = dy / R > 0.45 && dy > Math.abs(dx);              // 패드를 아래로 당기면 앉아서 막기(9/24 사장님 "모바일에서도 아래키로 방어", 방패 단추 뺌)
+    pad.x = !pad.down && Math.abs(k) > 0.22 ? Math.sign(k) : 0;
   }
-  padEl.addEventListener('pointerdown', function (e) { padId = e.pointerId; padEl.setPointerCapture(e.pointerId); padMove(e); e.preventDefault(); });
+  padEl.addEventListener('pointerdown', function (e) { padId = e.pointerId; padMove(e); try { padEl.setPointerCapture(e.pointerId); } catch (er) {} e.preventDefault(); });
   padEl.addEventListener('pointermove', function (e) { if (e.pointerId === padId) padMove(e); });
-  function padEnd(e) { if (e.pointerId !== padId) return; padId = null; pad.x = 0; knob.style.transform = ''; }
+  function padEnd(e) { if (e.pointerId !== padId) return; padId = null; pad.x = 0; pad.down = false; knob.style.transform = ''; }
   padEl.addEventListener('pointerup', padEnd); padEl.addEventListener('pointercancel', padEnd);
-  [['bAtk', 'atk'], ['bKick', 'kick'], ['bDrink', 'drink'], ['bGuard', 'guard']].forEach(function (b) {
+  [['bAtk', 'atk'], ['bKick', 'kick'], ['bDrink', 'drink']].forEach(function (b) {
     var el = $(b[0]);
     el.addEventListener('pointerdown', function (e) { e.preventDefault(); el.setPointerCapture(e.pointerId); el.classList.add('on'); SND.unlock(); press(b[1], true); });
     var up = function () { el.classList.remove('on'); press(b[1], false); };
@@ -327,7 +328,7 @@
           if (P.buf) { var bb = P.buf; P.buf = null; doMove(bb); }
         }
       }
-    } else if (btn.guard && G.intro <= 0 && G.exitT <= 0) {      // 앉아서 막기: 제자리, 가까운 적 쪽을 본다
+    } else if ((btn.guard || pad.down) && G.intro <= 0 && G.exitT <= 0) {      // 앉아서 막기: 제자리, 가까운 적 쪽을 본다
       P.guard = true; P.vx = 0; P.h = 0; P.sheet = 'hero5'; P.cell = 2; P.bob = 0; P.lean = 0;
       if (dir) P.face = dir;
       else { var ne = null, nd = 260; G.enemies.forEach(function (e) { if (standing(e) && Math.abs(e.x - P.x) < nd) { nd = Math.abs(e.x - P.x); ne = e; } }); if (ne) P.face = ne.x > P.x ? 1 : -1; }
