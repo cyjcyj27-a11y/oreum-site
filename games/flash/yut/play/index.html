@@ -66,15 +66,6 @@ body:not(.playing) #topbar .game{display:none}
   box-shadow:0 6px 20px rgba(0,0,0,.4);animation:toast 2.6s forwards;white-space:nowrap}
 @keyframes toast{0%{opacity:0;transform:translateY(20px)}10%{opacity:1;transform:none}85%{opacity:1}100%{opacity:0}}
 
-/* 던지기 단추(오른쪽 아래) */
-#throwBtn{position:fixed;right:calc(18px + env(safe-area-inset-right));bottom:calc(18px + env(safe-area-inset-bottom));z-index:24;
-  width:96px;height:96px;border-radius:50%;border:3px solid rgba(255,230,180,.7);cursor:pointer;font-family:inherit;color:#fff;
-  background:radial-gradient(circle at 40% 35%,#f0a64a,#a8481c);font-size:22px;box-shadow:0 8px 24px rgba(0,0,0,.5),0 0 22px rgba(240,166,74,.45);
-  animation:pulse 1.4s ease-in-out infinite}
-#throwBtn:active{transform:scale(.94)}
-@keyframes pulse{50%{box-shadow:0 8px 24px rgba(0,0,0,.5),0 0 40px rgba(255,200,100,.8)}}
-@media (max-height:520px){#throwBtn{width:72px;height:72px;font-size:17px}}
-
 /* ---------- 타이틀 ---------- */
 #title{position:fixed;inset:0;z-index:30;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;
   padding:60px 16px calc(20px + env(safe-area-inset-bottom))}
@@ -190,7 +181,6 @@ body:not(.playing) #topbar .game{display:none}
 
 <div id="word"></div>
 <div id="toasts"></div>
-<button id="throwBtn" hidden>던지기</button>
 
 <div id="title" hidden>
   <div id="logo">윷놀이<small>YUT NORI</small></div>
@@ -258,7 +248,7 @@ body:not(.playing) #topbar .game{display:none}
 <script src="js/rules.js?v=2"></script>
 <script src="js/audio.js?v=1"></script>
 <script src="js/scene.js?v=6"></script>
-<script src="js/game.js?v=4"></script>
+<script src="js/game.js?v=5"></script>
 <script src="/assets/visit.js" defer></script>
 <script src="/assets/game-events.js" defer></script>
 </body>

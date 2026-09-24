@@ -143,6 +143,31 @@
     flight = { t: 0, still: 0 };
     AU.whoosh();
   }
+  // 손으로 잡아 던지기: 지금 손에 든 자리에서, 놓는 순간의 손 속도로
+  function throwFromHand(v) {
+    const sp = Math.hypot(v.x, v.z);
+    const k = Math.min(1, sp / 14);
+    const vx = Math.max(-5, Math.min(5, v.x * 0.55));
+    const vz = Math.min(-1.2, Math.max(-9.5, v.z * 0.6));
+    const vy = 3.2 + k * 5.2 + Math.max(0, v.y) * 0.25;
+    for (let i = 0; i < 4; i++) {
+      const s = sticks[i];
+      if (s.body) world.removeRigidBody(s.body);
+      const p = s.mesh.position, q = s.mesh.quaternion;
+      const bd = RP.RigidBodyDesc.dynamic().setTranslation(p.x, p.y, p.z).setRotation({ x: q.x, y: q.y, z: q.z, w: q.w })
+        .setLinearDamping(0.3).setAngularDamping(1.7).setCcdEnabled(true);
+      const b = world.createRigidBody(bd);
+      world.createCollider(RP.ColliderDesc.convexHull(hullPts).setDensity(1.0).setFriction(0.85).setRestitution(0.22), b);
+      const jit = () => (Math.random() - 0.5);
+      // 가락마다 손을 떠나는 속도가 조금씩 다르다(손아귀에서 먼저·나중에 빠진다)
+      const f = 0.85 + Math.random() * 0.3;
+      b.setLinvel({ x: vx * f + jit() * 0.8, y: vy * f + jit() * 0.6, z: vz * f + jit() * 0.8 }, true);
+      b.setAngvel({ x: 3 + k * 16 + Math.random() * 6, y: jit() * 4 + vx * 0.6, z: jit() * 8 - vx * 1.4 }, true);
+      s.body = b; s.pv = 0;
+    }
+    flight = { t: 0, still: 0 };
+    AU.whoosh();
+  }
   function readSticks() {
     let flats = 0, backOnly = false;
     const up = new T.Vector3();
@@ -354,6 +379,7 @@
     G.t += dt;
     SC.breathe(G.t);
     animSticks(dt);
+    updateHold(dt);
     updateSparks(dt);
     if (!M || G.paused) return;
     stepPhysics(dt);
@@ -362,7 +388,6 @@
     if (G.timer > 0) { G.timer -= dt; if (G.timer > 0) return; }
     if (G.state === 'throw') {
       if (!isHuman()) { throwSticks(0.75 + Math.random() * 0.45, (Math.random() - 0.5) * 0.6); G.state = 'fly'; }
-      else { $('throwBtn').hidden = false; }
     } else if (G.state === 'result') {
       G.state = 'move';
       beginMove();
@@ -423,7 +448,6 @@
   function doMove(m) {
     hideRings();
     G.state = 'anim';
-    $('throwBtn').hidden = true;
     const seat = M.cur, name = M.name;
     const g = M.g;
     // 잡힐 말들(적용 전에 기록)
@@ -465,29 +489,90 @@
   const ray = new T.Raycaster(), ndc = new T.Vector2();
   let pdown = null;
   const cv = document.getElementById('cv');
-  cv.addEventListener('pointerdown', (e) => { pdown = { x: e.clientX, y: e.clientY, t: performance.now() }; });
+  // 잡은 윷가락: 손 높이의 수평면 위를 손가락 따라 움직인다
+  const holdPlane = new T.Plane(new T.Vector3(0, 1, 0), -(HAND.y + 0.35));
+  const hold = { on: false, off: new T.Vector3(), tgt: new T.Vector3(), cur: new T.Vector3(), trail: [], rat: 0 };
+  function planeAt(x, y, out) {
+    ndc.set((x / innerWidth) * 2 - 1, -(y / innerHeight) * 2 + 1);
+    ray.setFromCamera(ndc, SC.camera);
+    return ray.ray.intersectPlane(holdPlane, out);
+  }
+  function clampHold(v) {
+    v.x = Math.max(-2.6, Math.min(2.6, v.x));
+    v.z = Math.max(-0.5, Math.min(4.0, v.z));
+    v.y = HAND.y + 0.35;
+    return v;
+  }
+  function canGrab() { return M && !G.paused && G.state === 'throw' && isHuman() && G.timer <= 0 && !flight && !sticks.some((s) => s.anim); }
+  const tmpV = new T.Vector3();
+  cv.addEventListener('pointerdown', (e) => {
+    pdown = { x: e.clientX, y: e.clientY, t: performance.now() };
+    if (!canGrab()) return;
+    AU.unlock();
+    if (!planeAt(e.clientX, e.clientY, tmpV)) return;
+    // 잡은 곳과 윷 묶음 가운데 사이 거리를 기억(손 안의 자리 그대로 따라오게)
+    const c = new T.Vector3(HAND.x, HAND.y + 0.35, HAND.z);
+    hold.off.copy(c).sub(tmpV); hold.off.y = 0;
+    hold.off.clampLength(0, 1.2);
+    hold.on = true; hold.cur.copy(c); hold.tgt.copy(clampHold(tmpV.clone().add(hold.off)));
+    hold.trail = [{ p: hold.tgt.clone(), t: performance.now() }]; hold.rat = 0;
+    try { cv.setPointerCapture(e.pointerId); } catch (_) {}
+    AU.clack(0.25);
+  });
+  cv.addEventListener('pointermove', (e) => {
+    if (!hold.on) return;
+    if (!planeAt(e.clientX, e.clientY, tmpV)) return;
+    hold.tgt.copy(clampHold(tmpV.add(hold.off)));
+    const now = performance.now();
+    hold.trail.push({ p: hold.tgt.clone(), t: now });
+    while (hold.trail.length > 2 && now - hold.trail[0].t > 110) hold.trail.shift();
+  });
+  function releaseHold() {
+    if (!hold.on) return;
+    hold.on = false;
+    const now = performance.now(), tr = hold.trail.filter((q) => now - q.t < 140);
+    const v = new T.Vector3();
+    if (tr.length >= 2) {
+      const a = tr[0], b = tr[tr.length - 1], dt = Math.max(0.016, (b.t - a.t) / 1000);
+      v.subVectors(b.p, a.p).divideScalar(dt);
+    }
+    if (G.state !== 'throw' || !M || G.paused) { restSticks(false); return; }
+    // 빠르게 튕길수록 위로도 더 뜬다
+    v.y = Math.hypot(v.x, v.z) * 0.3;
+    throwFromHand(v);
+    G.state = 'fly';
+  }
+  cv.addEventListener('pointercancel', () => { pdown = null; releaseHold(); });
   cv.addEventListener('pointerup', (e) => {
+    if (hold.on) { pdown = null; releaseHold(); return; }
     if (!pdown || !M || G.paused) { pdown = null; return; }
-    const dx = e.clientX - pdown.x, dy = e.clientY - pdown.y, dt = (performance.now() - pdown.t) / 1000;
     pdown = null;
     AU.unlock();
-    if (G.state === 'throw' && isHuman() && G.timer <= 0) {
-      const len = Math.hypot(dx, dy);
-      if (len < 18) { humanThrow(1.0, 0); return; }
-      if (dy > 20) return; // 아래로 끌면 안 던진다
-      const speed = Math.min(1.6, Math.max(0.7, (len / Math.max(0.08, dt)) / 900)); // 빠르게 튕기면 더 멀리
-      const p = 0.6 + Math.min(1, len / 360) * 0.45 * speed;
-      humanThrow(Math.min(1.3, p), Math.max(-1, Math.min(1, dx / 240)));
-      return;
-    }
     if (G.state === 'pick' && isHuman()) pickAt(e.clientX, e.clientY);
   });
+  // 손에 든 윷: 손가락을 살짝 늦게 따라오고, 흔들면 가락끼리 달그락거린다
+  function updateHold(dt) {
+    if (!hold.on) return;
+    const prev = hold.cur.clone();
+    hold.cur.lerp(hold.tgt, 1 - Math.exp(-dt * 22));
+    const mv = prev.distanceTo(hold.cur) / Math.max(dt, 1e-3);
+    hold.rat -= dt;
+    if (mv > 6 && hold.rat <= 0) { AU.clack(Math.min(0.5, mv / 40)); hold.rat = 0.09 + Math.random() * 0.08; }
+    const lean = Math.max(-0.5, Math.min(0.5, (hold.tgt.x - hold.cur.x) * 0.8));
+    const tip = Math.max(-0.5, Math.min(0.5, (hold.tgt.z - hold.cur.z) * 0.8));
+    for (let i = 0; i < 4; i++) {
+      const h = handPose(i), s = sticks[i];
+      const loc = h.p.clone().sub(HAND);
+      const wob = Math.min(0.12, mv * 0.008);
+      s.mesh.position.copy(hold.cur).add(loc);
+      s.mesh.position.y += Math.sin(G.t * 40 + i * 1.7) * wob;
+      s.mesh.quaternion.copy(h.q).premultiply(new T.Quaternion().setFromEuler(new T.Euler(tip, 0, -lean)));
+    }
+  }
   function humanThrow(p, side) {
-    $('throwBtn').hidden = true;
     throwSticks(p, side);
     G.state = 'fly';
   }
-  $('throwBtn').onclick = () => { if (G.state === 'throw' && isHuman() && M && !G.paused) { AU.unlock(); humanThrow(0.8 + Math.random() * 0.4, (Math.random() - 0.5) * 0.4); } };
   function pickAt(x, y) {
     ndc.set((x / innerWidth) * 2 - 1, -(y / innerHeight) * 2 + 1);
     ray.setFromCamera(ndc, SC.camera);
@@ -638,7 +723,6 @@
   }
   function goHome() {
     $('end').hidden = true; $('vs').hidden = true; $('pauseCover').hidden = true; $('ending').hidden = true;
-    $('throwBtn').hidden = true;
     G.paused = false;
     document.body.classList.remove('playing');
     if (M) { clearPieces(); M = null; }
