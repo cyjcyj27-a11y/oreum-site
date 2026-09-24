@@ -122,7 +122,7 @@ body:not(.playing) #keys,body.touch #keys{display:none}
 #boostG.on i{background:linear-gradient(90deg,#ffd23a,#fff08a)}
 #boostG.on b{color:#1a1408;text-shadow:none}
 @keyframes boostOn{50%{box-shadow:0 0 24px rgba(255,225,74,.95)}}
-body:not(.playing) #boostG,body.touch #boostG{display:none}
+body:not(.playing) #boostG{display:none}   /* 폰에서도 패드 ↑↑ 로 부스터를 쓰니 막대도 보인다 */
 @media (max-width:700px){#boostG{width:180px}}
 /* 조준 중 표시: 과녁 이름·등수·거리. 화면에 보이면 빨갛게(지금 쏘면 됨) */
 #aimTag{position:fixed;z-index:19;left:50%;transform:translateX(-50%);bottom:calc(90px + env(safe-area-inset-bottom));padding:6px 16px;border-radius:16px;
@@ -568,7 +568,7 @@ body:has(#missions:not([hidden])) #title,body:has(#courses:not([hidden])) #title
 <script src="assets/sfx/engine.mp3.js?v=2"></script>
 <script src="js/audio.js?v=5"></script>
 <script src="js/game.js?v=31"></script>
-<script src="js/ui.js?v=56"></script>
+<script src="js/ui.js?v=57"></script>
 <script src="/assets/visit.js?v=17" defer></script>
 <script src="/assets/game-events.js?v=2" defer></script>
 </body>

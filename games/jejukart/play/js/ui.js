@@ -105,10 +105,15 @@
   addEventListener('blur', () => { for (const k in key) key[k] = false; });
 
   const padV = { x: 0, y: 0, on: false };
-  let padId = null;
+  let padId = null, padUp = false;
+  // 폰 급출발: 패드를 위로 두 번 톡톡(0.4초 안) — 키보드 ↑↑ 와 같다 (2026-09-24 사장님)
+  function padTapUp() {
+    const now = performance.now();
+    if (now - lastUp[1] < 400) { dashReq[1] = true; lastUp[1] = 0; } else lastUp[1] = now;
+  }
   E.pad.addEventListener('pointerdown', (e) => { padId = e.pointerId; E.pad.setPointerCapture(e.pointerId); padMove(e); });
   E.pad.addEventListener('pointermove', (e) => { if (e.pointerId === padId) padMove(e); });
-  const padEnd = (e) => { if (e.pointerId === padId) { padId = null; padV.x = padV.y = 0; padV.on = false; E.knob.style.transform = ''; } };
+  const padEnd = (e) => { if (e.pointerId === padId) { padId = null; padV.x = padV.y = 0; padV.on = false; padUp = false; E.knob.style.transform = ''; } };
   E.pad.addEventListener('pointerup', padEnd);
   E.pad.addEventListener('pointercancel', padEnd);
   function padMove(e) {
@@ -120,6 +125,8 @@
     padV.x = Math.abs(dx) < 0.08 ? 0 : dx;
     padV.y = Math.abs(dy) < 0.08 ? 0 : dy;
     padV.on = true;
+    if (dy < -0.55 && !padUp) { padUp = true; padTapUp(); }   // 위로 밀 때마다 한 번
+    else if (dy > -0.3) padUp = false;
     E.knob.style.transform = 'translate(' + dx * 52 + 'px,' + dy * 52 + 'px)';
   }
   const btn = { drift: false, item: false, brake: false };
@@ -155,7 +162,9 @@
       const aimDir = aim && side !== (k.aimSide || 0) ? side : 0;   // 조준 중 패드를 밀면 운전도 하고 과녁도 바뀐다
       k.aimSide = side;
       // 패드를 아래로 당겨도 후진 (2026-09-24 사장님 "후진이 안되더라" — BRAKE 단추로만 됐다)
-      return { thr: btn.brake || padV.y > 0.6 ? -1 : 1, steer: SCR(padV.x), drift: btn.drift, aim, use, aimDir };
+      const dash = dashReq[1] ? (raceTime < 0.8 ? 2 : 1) : 0;
+      dashReq[1] = false;
+      return { thr: btn.brake || padV.y > 0.6 ? -1 : 1, steer: SCR(padV.x), drift: btn.drift, aim, use, aimDir, dash };
     }
     const K = p2
       ? { up: 'ArrowUp', dn: 'ArrowDown', l: 'ArrowLeft', r: 'ArrowRight', d: 'ShiftRight', i: 'Enter' }
