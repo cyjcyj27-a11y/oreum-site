@@ -39,10 +39,19 @@
 .news-item h2:not(.news-title){ font-size:21px; margin:30px 0 4px; }
 .news-item .gp-body a{ text-decoration:underline; text-underline-offset:3px; }
 .news-item .gp-cta{ margin-top:26px; }
+.news-lead{ margin:14px 0 6px; font-size:16px; line-height:1.7; color:var(--ink-2); }
+.news-item{ display:flex; gap:22px; align-items:flex-start; }
+.news-txt{ flex:1; min-width:0; }
+.news-pic{ flex:0 0 200px; margin-top:26px; }
+.news-pic img{ display:block; width:200px; height:150px; object-fit:cover; border-radius:10px; }
+.news-ex{ margin:0; font-size:16px; line-height:1.75; color:var(--ink-2); }
+.news-more{ margin:10px 0 0; font-weight:700; }
+.news-more a{ color:var(--ink); text-underline-offset:3px; }
+@media (max-width:640px){ .news-item{ flex-direction:column; gap:0; } .news-pic{ flex-basis:auto; width:100%; margin-top:22px; } .news-pic img{ width:100%; height:auto; aspect-ratio:4/3; } }
 .note-fig{ margin:18px 0 4px; }
 .note-fig img{ display:block; width:auto; max-width:100%; max-height:560px; height:auto; border-radius:12px; }
 </style>
-
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "CollectionPage", "name": "Oreum Games Indie Dev News", "description": "Dev news from Oreum Games, a very small indie studio in Korea: how we make browser games that start with no install, what we learn, and where we put them.", "url": "https://oreumgames.com/en/news/", "mainEntity": {"@type": "ItemList", "itemListElement": [{"@type": "ListItem", "position": 1, "url": "https://oreumgames.com/en/news/new-games-0925/", "name": "Three new free browser games: a drunken fist brawler, kart racing on Jeju, and checkers"}, {"@type": "ListItem", "position": 2, "url": "https://oreumgames.com/en/news/indiegame/", "name": "Indie games with no install: why a small Korean studio put 50 of them on the web"}]}}</script>
 </head>
 
 <body>
@@ -75,56 +84,12 @@
     <div class="wrap game-page">
       <a class="backlink" href="/en/games/">← All games</a>
       <h1 class="news-h1">Oreum Games Indie Dev News</h1>
+      <p class="news-lead">Dev news from Oreum Games, a very small indie studio in Korea: how we make browser games that start with no install, what we learn, and where we put them.</p>
       <ul class="news-list">
-        <li class="news-item"><time datetime="2026-09-25">September 25, 2026</time><h2 class="news-title"><a href="/en/news/new-games-0925/">Three new free browser games: a drunken fist brawler, kart racing on Jeju, and checkers</a></h2><p class="note-sub">New games this week from Oreum Games, no download, right in your browser</p>
-      <p class="gp-body">Oreum Games, a very small indie studio in Korea, put out three new games this week. They have nothing in common except that they are free and start in your browser with no download and no sign-up: an arcade-style brawler, a 3D kart racer set on Jeju Island, and checkers.</p>
-      <h2>Drunken Fist: Sochan, a brawler that gets stronger when you drink</h2>
-      <p class="gp-body"><a href="/en/games/mini/chwigwon/">Drunken Fist: Sochan</a> is a side-scrolling beat 'em up. A young brawler named Sochan fights his way from a mansion gate through a market street, a beggars' alley, a gambling den, a ferry dock, a mountain path and a magistrate's office to a martial arts tournament. Every stage has its own boss, from a bandit chief with a broadsword to a gambling-house owner who throws iron dice.</p>
-      <figure class="note-fig"><img src="/assets/news/0925-chwigwon-en.webp" alt="Sochan in drunken fist mode, floating on his back and knocking thugs away on the market street stage" width="800" height="622" loading="lazy" decoding="async"></figure>
-      <p class="gp-body">The hook is the drinking. One bottle loosens him up and his hits get stronger. Two bottles and he is drunk, hitting more than twice as hard. Fill it to three and the drunken fist comes out: for five seconds he floats on his back and hits every enemy that comes near, and nothing can touch him. It is not a button you press whenever you like. You earn it by smashing jars and knocking down enemies until you have the bottles, which is why it feels so good when it goes off. After a drink, press punch and kick together and he throws up on the enemies in front of him, and he can also land a hard-hitting upside-down kick.</p>
-      <h2>Jeju Kart Racing, where tangerines and stone statues fly</h2>
-      <p class="gp-body"><a href="/en/games/jejukart/">Jeju Kart Racing</a> is a 3D kart racer. A cat, a bunny, a panda and a fox race 12 courses on Jeju Island: a coastal road at sunset, stone-walled tangerine farms, a beach, green tea fields, a silver grass crater, a sunrise peak and a harbor at night.</p>
-      <figure class="note-fig"><img src="/assets/news/0925-jejukart.webp" alt="A hallabong tangerine hits the kart ahead and bursts into orange juice, with the hit racer shown in a small window on the right" width="600" height="800" loading="lazy" decoding="async"></figure>
-      <p class="gp-body">We made it because we missed item races in kart games, but every item comes from Jeju. A hallabong tangerine arcs through the air and bursts into orange juice, a pony bolts out from the roadside into the kart ahead, a red tilefish lands in front of a rival and sprays a puddle, and a stone statue drops from the sky. Hold Space to lock on to the racer ahead, and let go to throw.</p>
-      <p class="gp-body">Win all four cups and you reach the ending. Two players can race on one screen split top and bottom.</p>
-      <h2>Checkers, the classic most Americans already know</h2>
-      <p class="gp-body"><a href="/en/games/flash/checkers/">Checkers</a> is the classic game on an 8x8 board, with American rules. Pieces move one square diagonally, jump to capture, and become kings on the far row. The rule that makes it interesting is the forced jump: if you can take, you must. The computer uses that, giving up one piece so it can take two or three back.</p>
-      <figure class="note-fig"><img src="/assets/news/0925-checkers-en.webp" alt="One red piece jumps three black pieces in a single turn and becomes a king, and GREAT appears" width="600" height="700" loading="lazy" decoding="async"></figure>
-      <p class="gp-body">The computer opponent has 27 ranks, from 18K to 9D. 18K is gentle enough to beat if you know the rules, and every win moves you up one. Two people can also take turns on one phone or PC.</p>
-      <h2>Which one is for you</h2>
-      <p class="gp-body">If you want to knock people down, play Drunken Fist: Sochan. If you want to sit next to a friend and throw tangerines, play Jeju Kart Racing. If you want something quiet that makes you think, play Checkers. All three run on PC and phone at the same address, and your progress stays in your browser.</p>
-      <p class="gp-body">We will keep rounding up new games here as they come out. Everything released so far is on the <a href="/en/games/">games page</a>.</p>
-        <p class="gp-cta"><a class="btn btn-primary" href="/en/games/">🎮 See all games</a></p></li>
-        <li class="news-item"><time datetime="2026-09-22">September 22, 2026</time><h2 class="news-title"><a href="/en/news/indiegame/">Indie games with no install: why a small Korean studio put 50 of them on the web</a></h2><p class="note-sub">"Indie games without a download button" — Oreum Games, from idle tycoons to adventure</p>
-      <p class="gp-body">Say "indie game" and most people picture something on Steam for a few dollars. But there is another way that is slowly growing: games you do not install at all. You click a link, the game starts a few seconds later, and if it is not for you, you close the tab and that is that.</p>
-      <p class="gp-body">Oreum Games, a very small indie studio in Korea, put that idea at the center of everything. In a little over a month it has released close to 50 games on its own website. Traditional board games like <a href="/en/games/flash/alkkagi/">alkkagi</a> and <a href="/en/games/flash/omok/">gomoku</a> sit next to soccer, bowling, idle games and a horror game.</p>
-      <h2>What an indie game is, and why the web</h2>
-      <p class="gp-body">An indie game is one made by a person or a small team without a big publisher's money or a large development staff. The freedom is the good part. The hard part is getting anyone to notice the game once it is finished.</p>
-      <p class="gp-body">Steam gets a flood of new releases every day. On mobile, even after someone finds your game, there is still the download and the install standing between them and the first minute of play.</p>
-      <p class="gp-body">Oreum Games solved this differently. Instead of listing on someone else's platform, it made its own website the first platform.</p>
-      <p class="gp-body">There is no install and no sign-up. Each game is a web page, and the page is the game. Progress is saved in the browser, with no account, and the same address works on a PC and on a phone.</p>
-      <h2>One a day, but days on a single physics problem</h2>
-      <p class="gp-body">Most Oreum games have simple rules and short rounds. That comes from how people arrive at a web game. The studio's view is that the wall around a browser game has to be almost nothing, or people never start.</p>
-      <p class="gp-body">The flip side is that a low wall is easy to walk back out of. That is the weakness of web games.</p>
-      <p class="gp-body">So the goal became a game you open for a quick round and are still playing two hours later.</p>
-      <p class="gp-body">The games that actually did that were, unexpectedly, the traditional board games, alkkagi and gomoku. One player spent tens of minutes on the <a href="/en/games/flash/bangwi/">fart game</a>.</p>
-      <p class="gp-body">Games are a matter of taste, and that is probably all this proves.</p>
-      <p class="gp-body">Oreum Games does not push one genre. It tries to build all of them.</p>
-      <p class="gp-body"><a href="/en/games/fingerkick/">Flick soccer</a>, <a href="/en/games/flash/bowling/">3D bowling</a>, idle games where you run a <a href="/en/games/coinwash/">coin laundry</a> or a <a href="/en/games/flash/bungeoppang/">fish-shaped pastry stand</a>, a <a href="/en/games/mulgwisin/">horror game</a> built around the water ghost of Korean folklore, and <a href="/en/games/jeju/">BUY JEJU</a>, an open world of Jeju island. The range is wide.</p>
-      <p class="gp-body">The developer describes the direction as "a game you can start with no install, but can hold onto for a long time if you want to."</p>
-      <h2>A game site that is also an indie game lab</h2>
-      <p class="gp-body">What makes Oreum Games interesting is that it is not only making a lot of games. It is also experimenting with how indie games get distributed.</p>
-      <p class="gp-body">Every game has its own intro page with a description and a list of common questions. Each one is made in English as well as Korean.</p>
-      <p class="gp-body">Abroad, the studio is putting games on itch.io and Indie DB one at a time. <a href="/en/games/fingerkick/">FINGER KICK</a> was entered in a streamer feedback jam on itch.io and got reviews from developers overseas.</p>
-      <p class="gp-body">Along with praise for how finished the game felt, one note came up more than once: "well made, but hard." Oreum Games is using that outside feedback to set the difficulty of the games that come after.</p>
-      <h2>What do 50 games prove</h2>
-      <p class="gp-body">Not many indie studios ship dozens of games in a month. And the approach starts from a different place than Steam or the app stores.</p>
-      <p class="gp-body">Instead of building a game and then looking for a platform, <strong>the website itself is the platform, and the games keep stacking up inside it</strong>.</p>
-      <p class="gp-body">Where that leads in the long run is not clear yet. More games means more to maintain, and above all it means finding people who come looking for web games and keeping them.</p>
-      <p class="gp-body">One thing is already clear, though. An indie game does not have to have a download button.</p>
-      <p class="gp-body">Whether games that start the moment you open a browser can become a real way to distribute indie games is an open question. Oreum Games is running that experiment fast.</p>
-        <p class="gp-cta"><a class="btn btn-primary" href="/en/games/">🎮 See all games</a></p></li>
+        <li class="news-item"><a class="news-pic" href="/en/news/new-games-0925/"><img src="/assets/news/0925-chwigwon-en.webp" alt="Sochan in drunken fist mode, floating on his back and knocking thugs away on the market street stage" loading="lazy" decoding="async"></a><div class="news-txt"><time datetime="2026-09-25">September 25, 2026</time><h2 class="news-title"><a href="/en/news/new-games-0925/">Three new free browser games: a drunken fist brawler, kart racing on Jeju, and checkers</a></h2><p class="note-sub">New games this week from Oreum Games, no download, right in your browser</p><p class="news-ex">Oreum Games, a very small indie studio in Korea, put out three new games this week. They have nothing in common except that they are free and start in your browser with no download and no sign-up: an arcade-style brawler, a 3D kart racer set on Jeju Island, and checkers.</p><p class="news-more"><a href="/en/news/new-games-0925/">Read more →</a></p></div></li>
+        <li class="news-item"><div class="news-txt"><time datetime="2026-09-22">September 22, 2026</time><h2 class="news-title"><a href="/en/news/indiegame/">Indie games with no install: why a small Korean studio put 50 of them on the web</a></h2><p class="note-sub">"Indie games without a download button" — Oreum Games, from idle tycoons to adventure</p><p class="news-ex">Say "indie game" and most people picture something on Steam for a few dollars. But there is another way that is slowly growing: games you do not install at all. You click a link, the game starts a few seconds later, and if it is not for you, you close the tab and that is that.</p><p class="news-more"><a href="/en/news/indiegame/">Read more →</a></p></div></li>
       </ul>
+      <p class="gp-cta"><a class="btn btn-primary" href="/en/games/">🎮 See all games</a></p>
     </div>
   </section>
 </main>

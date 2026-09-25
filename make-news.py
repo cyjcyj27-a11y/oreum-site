@@ -35,7 +35,7 @@ LANG = {
     "ko": dict(
         posts="posts", out="news", section="오름게임즈 인디게임 개발뉴스", lang="ko", locale="ko_KR",
         template=os.path.join(ROOT, "games", "flash", "yut", "index.html"),
-        back_href="/games/", back="← 게임 목록", cta="🎮 게임 목록 보기", cta_href="/games/", by="오름게임즈",
+        back_href="/games/", back="← 게임 목록", cta="🎮 게임 목록 보기", cta_href="/games/", by="오름게임즈", more="더 읽기 →",
         list_title="오름게임즈 인디게임 개발뉴스 — 설치 없이 하는 인디게임을 만드는 이야기",
         list_desc="한국의 작은 인디게임 스튜디오 오름게임즈의 개발뉴스. 설치 없이 브라우저에서 바로 하는 인디게임을 어떻게 만들고, 무엇을 배우고, 어디에 내는지 기록합니다.",
         list_keywords="인디게임, 인디게임 개발, 인디게임 뉴스, 인디게임 사이트, 웹게임 개발, 오름게임즈",
@@ -44,7 +44,7 @@ LANG = {
     "en": dict(
         posts="posts-en", out="en/news", section="Oreum Games Indie Dev News", lang="en", locale="en_US",
         template=os.path.join(ROOT, "en", "games", "flash", "yut", "index.html"),
-        back_href="/en/games/", back="← All games", cta="🎮 See all games", cta_href="/en/games/", by="Oreum Games",
+        back_href="/en/games/", back="← All games", cta="🎮 See all games", cta_href="/en/games/", by="Oreum Games", more="Read more →",
         list_title="Oreum Games Indie Dev News — making indie games you play with no install",
         list_desc="Dev news from Oreum Games, a very small indie studio in Korea: how we make browser games that start with no install, what we learn, and where we put them.",
         list_keywords="indie game, indie game dev, indie dev news, browser games, web game development, Oreum Games",
@@ -170,6 +170,15 @@ LIST_STYLE = """.news-h1{ font-size:clamp(30px,5vw,48px); line-height:1.2; font-
 .news-item h2:not(.news-title){ font-size:21px; margin:30px 0 4px; }
 .news-item .gp-body a{ text-decoration:underline; text-underline-offset:3px; }
 .news-item .gp-cta{ margin-top:26px; }
+.news-lead{ margin:14px 0 6px; font-size:16px; line-height:1.7; color:var(--ink-2); }
+.news-item{ display:flex; gap:22px; align-items:flex-start; }
+.news-txt{ flex:1; min-width:0; }
+.news-pic{ flex:0 0 200px; margin-top:26px; }
+.news-pic img{ display:block; width:200px; height:150px; object-fit:cover; border-radius:10px; }
+.news-ex{ margin:0; font-size:16px; line-height:1.75; color:var(--ink-2); }
+.news-more{ margin:10px 0 0; font-weight:700; }
+.news-more a{ color:var(--ink); text-underline-offset:3px; }
+@media (max-width:640px){ .news-item{ flex-direction:column; gap:0; } .news-pic{ flex-basis:auto; width:100%; margin-top:22px; } .news-pic img{ width:100%; height:auto; aspect-ratio:4/3; } }
 .note-fig{ margin:18px 0 4px; }
 .note-fig img{ display:block; width:auto; max-width:100%; max-height:560px; height:auto; border-radius:12px; }"""
 
@@ -229,32 +238,58 @@ def render_article(meta, L, ch, pair):
     return head + body + "\n" + footer + "\n\n" + scripts + "\n</body>\n</html>\n"
 
 
+def excerpt(md):
+    # 목록에 보일 첫 문단(사진·소제목은 건너뛴다)과 첫 사진
+    first, img = "", None
+    for block in re.split(r"\n\s*\n", md):
+        b = block.strip()
+        m = re.fullmatch(r"!\[([^\]]*)\]\(([^)]+)\)", b)
+        if m:
+            img = img or (m.group(2), m.group(1))
+        elif b and not b.startswith("## ") and not first:
+            first = " ".join(l.strip() for l in b.splitlines())
+    first = re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", first)   # 목록에서는 링크 없이 글자만
+    first = first.replace("**", "")
+    return first, img
+
+
 def render_list(posts, L, ch, pair_list):
+    # 목록은 제목·날짜·부제·첫 문단·사진 한 장·더 읽기만 — 전문은 글 페이지에만 둔다.
+    # 사장님 2026-09-25 "바꿔": 전문을 목록에도 펼치면 같은 글이 두 곳에 있고 목록 주제가 흐려진다(9/22 에는 전문 펼침이었다).
     header, footer, scripts, verif, css = ch
-    items = []
-    for m in posts:   # 목록에도 본문을 다 펼친다(사장님 2026-09-22 "본문 펼쳐놓고")
-        items.append('        <li class="news-item"><time datetime="%s">%s</time><h2 class="news-title"><a href="/%s/%s/">%s</a></h2><p class="note-sub">%s</p>\n%s\n        <p class="gp-cta"><a class="btn btn-primary" href="%s">%s</a></p></li>' % (
-            m["date"], kdate(m["date"], L["lang"]), L["out"], m["slug"], html.escape(m["title"], quote=False), inline(m.get("sub", "")), body_html(m["body"]), L["cta_href"], L["cta"]))
+    items, ld_items = [], []
+    for i, m in enumerate(posts):
+        href = "/%s/%s/" % (L["out"], m["slug"])
+        first, img = excerpt(m["body"])
+        pic = ('<a class="news-pic" href="%s"><img src="%s" alt="%s" loading="lazy" decoding="async"></a>' % (href, html.escape(img[0]), html.escape(img[1]))) if img else ""
+        items.append('        <li class="news-item">%s<div class="news-txt"><time datetime="%s">%s</time><h2 class="news-title"><a href="%s">%s</a></h2><p class="note-sub">%s</p><p class="news-ex">%s</p><p class="news-more"><a href="%s">%s</a></p></div></li>' % (
+            pic, m["date"], kdate(m["date"], L["lang"]), href, html.escape(m["title"], quote=False), inline(m.get("sub", "")), html.escape(first, quote=False), href, L["more"]))
+        ld_items.append({"@type": "ListItem", "position": i + 1, "url": SITE + href, "name": m["title"]})
     url = "%s/%s/" % (SITE, L["out"])
     ko_url = SITE + "/news/" if (L["lang"] == "ko" or pair_list) else None
     en_url = SITE + "/en/news/" if (L["lang"] == "en" or pair_list) else None
     other = L["other_lang_link"].format(slug="")
+    ld = {"@context": "https://schema.org", "@type": "CollectionPage", "name": L["section"], "description": L["list_desc"], "url": url,
+          "mainEntity": {"@type": "ItemList", "itemListElement": ld_items}}
     head = HEAD.format(lang=L["lang"], title=L["list_title"], desc=L["list_desc"], keywords=L["list_keywords"],
                        url=url, alternates=alternates(ko_url, en_url), verif=verif, ogtype="website", site_name=L["by"], ogtitle=L["section"], SITE=SITE, locale=L["locale"],
-                       css=css, style=LIST_STYLE, ld="", header=header.replace("{OTHER_LANG}", other))
+                       css=css, style=LIST_STYLE, ld='<script type="application/ld+json">%s</script>' % json.dumps(ld, ensure_ascii=False),
+                       header=header.replace("{OTHER_LANG}", other))
     body = """
 <main id="main">
   <section class="showcase">
     <div class="wrap game-page">
       <a class="backlink" href="%s">%s</a>
       <h1 class="news-h1">%s</h1>
+      <p class="news-lead">%s</p>
       <ul class="news-list">
 %s
       </ul>
+      <p class="gp-cta"><a class="btn btn-primary" href="%s">%s</a></p>
     </div>
   </section>
 </main>
-""" % (L["back_href"], L["back"], L["section"], "\n".join(items))
+""" % (L["back_href"], L["back"], L["section"], html.escape(L["list_desc"], quote=False), "\n".join(items), L["cta_href"], L["cta"])
     return head + body + "\n" + footer + "\n\n" + scripts + "\n</body>\n</html>\n"
 
 
