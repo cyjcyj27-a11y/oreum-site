@@ -89,6 +89,29 @@
       }
     }).observe(document.body, { childList: true, subtree: true, characterData: true });
   };
-  if (document.body) start();
-  else addEventListener('DOMContentLoaded', start);
+  // 영어가 한글보다 길어 단추 밖으로 넘치면 글씨를 줄여 맞춘다 (2026-09-25 사장님 "영문판 글씨점검").
+  // 칸을 넓히는 게 먼저고, 이건 화면 크기마다 남는 것을 잡는 안전망이다
+  const fitAll = () => {
+    document.querySelectorAll('.btn,.tog.txt,.tbtn,.cupb,.close').forEach((el) => {
+      el.style.fontSize = '';
+      if (!el.offsetParent) return;
+      const cs = getComputedStyle(el);
+      const avail = el.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight) - (parseFloat(cs.webkitTextStrokeWidth) || 0);
+      const rg = document.createRange();
+      rg.selectNodeContents(el);
+      const tw = rg.getBoundingClientRect().width;
+      if (avail > 0 && tw > avail + 0.5) el.style.fontSize = (parseFloat(cs.fontSize) * avail / tw * 0.97).toFixed(1) + 'px';
+    });
+  };
+  let fitReq = 0;
+  const fitSoon = () => { if (document.body.classList.contains('playing')) return;   // 달리는 중엔 시계 글자가 매 프레임 바뀐다 — 재지 않는다
+    if (!fitReq) fitReq = requestAnimationFrame(() => { fitReq = 0; fitAll(); }); };
+  const start2 = () => {
+    fitSoon();
+    addEventListener('resize', fitSoon);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitSoon);
+    new MutationObserver(fitSoon).observe(document.body, { subtree: true, childList: true, characterData: true, attributes: true, attributeFilter: ['hidden'] });
+  };
+  if (document.body) { start(); start2(); }
+  else addEventListener('DOMContentLoaded', () => { start(); start2(); });
 })();

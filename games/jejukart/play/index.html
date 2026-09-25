@@ -98,7 +98,7 @@ body:not(.playing) #slot{display:none}
 #bDrift{right:calc(112px + env(safe-area-inset-right));bottom:calc(22px + env(safe-area-inset-bottom));width:68px;height:68px;font-size:15px;-webkit-text-stroke:4px #1b2a5a;paint-order:stroke fill}
 /* 단추·HUD 에 이모지 아이콘을 넣지 않는다 — 글자로 (사장님 2026-09-24 "아이콘 넣지마라 싸구려 같으니까") */
 #bGas{right:calc(24px + env(safe-area-inset-right));bottom:calc(114px + env(safe-area-inset-bottom));width:62px;height:62px;font-size:13px;-webkit-text-stroke:3px #1b2a5a;paint-order:stroke fill}
-.tog.txt{font-size:12px;font-weight:400;letter-spacing:.02em;-webkit-text-stroke:3px #1b2a5a;paint-order:stroke fill}
+.tog.txt{width:auto;min-width:36px;padding:0 7px;border-radius:999px;font-size:11px;font-weight:400;letter-spacing:0;-webkit-text-stroke:3px #1b2a5a;paint-order:stroke fill}
 body.touch.playing #pad,body.touch.playing .tbtn{display:grid}
 body.touch.playing #pad{display:block}
 @media (max-height:460px){
@@ -172,6 +172,9 @@ body:not(.playing) #aimTag,body:not(.playing) #aimEdge{display:none}
 /* 이어하기가 있으면: 첫 줄에 이어하기(주황) + 새로하기(파랑, 조금 작게) 나란히, 아래 줄은 코스·2P·미션 */
 #title .menu:has(#bCont:not([hidden]))>#bCont{grid-column:3 / 8}
 #title .menu:has(#bCont:not([hidden]))>#bStart{grid-row:1;grid-column:8 / 11;align-self:stretch;font-size:19px;padding:12px 6px;white-space:nowrap}
+/* 영문판: CONTINUE·NEW GAME 이 한글(이어하기·새로하기)보다 길어 단추 밖으로 넘쳤다 (2026-09-25 사장님 "영문판 글씨점검") — 칸을 넓힌다 */
+html[lang=en] #title .menu:has(#bCont:not([hidden]))>#bCont{grid-column:2 / 8}
+html[lang=en] #title .menu:has(#bCont:not([hidden]))>#bStart{grid-column:8 / 12}
 @media (max-height:520px){#logo{font-size:clamp(34px,9vw,64px)}.btn{font-size:18px;padding:10px 14px}.btn.main{font-size:21px}.menu{gap:7px}}
 
 /* ---------- HUD 입체 (등수·LAP·시간·코인·부스터 막대, 2026-09-24 "이것도 입체로") ---------- */
@@ -380,6 +383,8 @@ body:has(#missions:not([hidden])) #title,body:has(#courses:not([hidden])) #title
   #title .menu:has(#bCont:not([hidden]))>#bCont{grid-column:3 / 8;white-space:nowrap}
   #bCont small{display:none}
   #title .menu:has(#bCont:not([hidden]))>#bStart{grid-row:1;grid-column:8 / 11;align-self:stretch;font-size:4.8vh;padding:1.6vh 4px;white-space:nowrap}
+  html[lang=en] #title .menu:has(#bCont:not([hidden]))>#bCont{grid-column:2 / 8}
+  html[lang=en] #title .menu:has(#bCont:not([hidden]))>#bStart{grid-column:8 / 12}
   /* 확인 창: 작게, 단추도 짧게 */
   .askBox{width:min(100%,460px);padding:3vh 22px}
   .askBox b{font-size:8vh}
@@ -400,8 +405,8 @@ body:has(#missions:not([hidden])) #title,body:has(#courses:not([hidden])) #title
   #grid .card .nm{font-size:5vh}
   #grid .card .sub{font-size:3.6vh}
   .mis{padding:1.2vh 12px;font-size:4.6vh}
-  .tog.txt{font-size:11px !important;letter-spacing:0;-webkit-text-stroke:3px #1b2a5a;paint-order:stroke fill}
-  #bGas{font-size:11px !important;-webkit-text-stroke:3px #1b2a5a;paint-order:stroke fill}
+  .tog.txt{font-size:10.5px !important;letter-spacing:0;padding:0 6px;-webkit-text-stroke:3px #1b2a5a;paint-order:stroke fill}
+  #bGas{font-size:10px !important;letter-spacing:-.02em;padding:0;-webkit-text-stroke:3px #1b2a5a;paint-order:stroke fill}   /* BRAKE 가 동그라미 밖으로 삐졌다 */
   #bDrift{font-size:13px !important;letter-spacing:.02em;-webkit-text-stroke:4px #1b2a5a;paint-order:stroke fill}   /* 💨 가 방귀 같아 글자로 (2026-09-24) */
   /* 결과: 등수 제목은 가운데 위, 그 아래 순위표, 맨 아래 단추 한 줄 (사장님 "경기결과 제목은 화면 가운데가 기본") */
   #result{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.2vh;
@@ -558,7 +563,7 @@ body.touch #title #bMis{grid-column:7 / 11}
 <div id="rotate" hidden><div>가로로 돌려 주세요</div><button class="btn" id="rotBtn">전체화면보기</button></div>
 <div id="loading">LOADING…</div>
 
-<script src="js/lang.js?v=21"></script>
+<script src="js/lang.js?v=22"></script>
 <script src="assets/game-home.js" data-top="6" data-left="6" data-fullscreen="1" defer></script>
 <script src="assets/landscape.js"></script>
 <script src="lib/three.min.js"></script>
