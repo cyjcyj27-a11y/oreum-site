@@ -21,6 +21,7 @@ news/posts-en/*.md   → en/news/<slug>/index.html + en/news/index.html (영어)
     본문. 빈 줄로 문단을 나눈다.
     ## 소제목
     링크는 [알까기](/games/flash/alkkagi/), 굵게는 **이렇게**.
+    사진은 한 줄에 ![설명](/assets/news/파일.webp) — 작게 줄인 webp 를 assets/news/ 에(2026-09-25).
 
 규칙: 제목·본문에 # 기호가 남지 않게 여기서 전부 HTML 로 바꾼다. 꼭지 이름은 "오름게임즈 인디게임 개발뉴스"(사장님 2026-09-22).
 목록 페이지에는 글 본문을 다 펼치고 글 끝에 게임 목록 단추(사장님 2026-09-22).
@@ -92,7 +93,17 @@ def body_html(md):
         b = block.strip()
         if not b:
             continue
-        if b.startswith("## "):
+        m = re.fullmatch(r"!\[([^\]]*)\]\(([^)]+)\)", b)
+        if m:   # 사진 한 장 — 가로세로를 적어 두고 늦게 읽는다(글 첫 화면이 가볍게)
+            src, wh = m.group(2), ""
+            try:
+                from PIL import Image
+                w, h = Image.open(os.path.join(ROOT, src.split("?")[0].lstrip("/"))).size
+                wh = ' width="%d" height="%d"' % (w, h)
+            except Exception:
+                pass
+            out.append('      <figure class="note-fig"><img src="%s" alt="%s"%s loading="lazy" decoding="async"></figure>' % (html.escape(src), html.escape(m.group(1)), wh))
+        elif b.startswith("## "):
             out.append("      <h2>%s</h2>" % inline(b[3:].strip()))
         else:
             out.append('      <p class="gp-body">%s</p>' % inline(" ".join(l.strip() for l in b.splitlines())))
@@ -145,7 +156,9 @@ ARTICLE_STYLE = """.note-page h1{ font-size:clamp(18px,2.4vw,24px); line-height:
 .note-date{ margin:8px 0 22px; font-size:13px; color:var(--muted); }
 .note-page h2{ font-size:21px; margin:30px 0 4px; }
 .note-page .gp-body a{ text-decoration:underline; text-underline-offset:3px; }
-.note-page .gp-cta{ margin-top:30px; }"""
+.note-page .gp-cta{ margin-top:30px; }
+.note-fig{ margin:18px 0 4px; }
+.note-fig img{ display:block; width:auto; max-width:100%; max-height:560px; height:auto; border-radius:12px; }"""
 
 LIST_STYLE = """.news-h1{ font-size:clamp(30px,5vw,48px); line-height:1.2; font-weight:900; padding-bottom:12px; border-bottom:3px solid var(--ink); }
 .news-list{ list-style:none; margin:0; padding:0; }
@@ -156,7 +169,9 @@ LIST_STYLE = """.news-h1{ font-size:clamp(30px,5vw,48px); line-height:1.2; font-
 .news-item .note-sub{ margin:8px 0 14px; font-size:17px; line-height:1.6; color:var(--ink-2); }
 .news-item h2:not(.news-title){ font-size:21px; margin:30px 0 4px; }
 .news-item .gp-body a{ text-decoration:underline; text-underline-offset:3px; }
-.news-item .gp-cta{ margin-top:26px; }"""
+.news-item .gp-cta{ margin-top:26px; }
+.note-fig{ margin:18px 0 4px; }
+.note-fig img{ display:block; width:auto; max-width:100%; max-height:560px; height:auto; border-radius:12px; }"""
 
 MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
 
