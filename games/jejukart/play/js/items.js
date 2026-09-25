@@ -123,6 +123,8 @@
           });
           MODELS[id] = fit(gltf.scene, id);
           ICON[id] = iconOf(MODELS[id]);
+          // 경기 중에 늦게 도착해도 그림을 바로 올려 둔다 (처음 던질 때 멈칫 막기, 2026-09-25)
+          if (window.RACE && RACE.renderer) MODELS[id].traverse((c) => { if (c.isMesh && c.material.map) RACE.renderer.initTexture(c.material.map); });
           for (let i = dressed.length - 1; i >= 0; i--) {
             const h = dressed[i];
             if (h.userData.itemId !== id) continue;

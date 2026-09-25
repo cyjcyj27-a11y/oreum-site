@@ -8,7 +8,7 @@
   let karts = [], players = [], running = false, splitMode = false;
   let pip = null, pipCam = null;   // 맞은 선수 정면 화면 (오른쪽 작은 창)
   let fx = null, proj = [], drops = [], ponies = [], stones = [], effGroup = null;
-  let sunLight = null, hemi = null;
+  let sunLight = null, hemi = null, flashEl = null;
   const tmp = new THREE.Vector3();
 
   // ---------- 처음 한 번 ----------
@@ -28,6 +28,10 @@
     clock = new THREE.Clock();
     addEventListener('resize', resize);
     W.renderer = renderer; W.scene = scene; W.camera = camera;
+    // 내가 맞으면 화면 가장자리가 번쩍 (W.flash 초만큼). 전엔 W.flash 값만 넣고 그리는 곳이 없었다 (2026-09-25)
+    flashEl = document.createElement('div');
+    flashEl.style.cssText = 'position:fixed;left:0;right:0;pointer-events:none;opacity:0;background:radial-gradient(circle,rgba(255,255,255,0) 45%,rgba(255,255,255,.9) 100%)';
+    canvas.after(flashEl);
   }
 
   function resize() {
@@ -206,7 +210,15 @@
     // 로딩 중에 미리 데워 둔다 (첫 프레임 멈칫 막기)
     W.warm = () => {
       try {
+        // 아이템 모델도 미리 올린다: 숨겨 둔 채면 처음 던질 때 그림(텍스처)을 올리느라 아이템마다 0.5초 멈칫했다 (2026-09-25)
+        const hid = [];
+        effGroup.traverse((o) => { if (!o.visible) { hid.push(o); o.visible = true; } });
+        effGroup.traverse((o) => {
+          if (!o.isMesh) return;
+          (Array.isArray(o.material) ? o.material : [o.material]).forEach((m) => { if (m.map) renderer.initTexture(m.map); if (m.emissiveMap) renderer.initTexture(m.emissiveMap); });
+        });
         renderer.compile(scene, camera);
+        hid.forEach((o) => { o.visible = false; });
         renderer.render(scene, camera);
       } catch (e) {}
     };
@@ -473,6 +485,7 @@
 
   // ---------- 한 프레임 ----------
   function stepRace(dt, input) {
+    if (W.flash > 0) W.flash = Math.max(0, W.flash - dt);
     const n = karts.length;
     // 사람 입력
     players.forEach((k) => {
@@ -612,7 +625,7 @@
       for (let i = 0; i < 8; i++) spawn(land.x, land.y + 1.0, land.z,   // 껍질 조각
         (Math.random() - 0.5) * 8, 4 + Math.random() * 4, (Math.random() - 0.5) * 8, 0.8, 0.16, 0.005, 0.45, 1.0, 18);
       AUD.sfx('splash');
-      if (players.indexOf(tg) >= 0) W.flash = 0.2;
+      if (players.indexOf(tg) >= 0) { W.flash = 0.2; W.flashWho = players.indexOf(tg); }
     });
 
     // 옥돔 (과녁 코앞으로 날아가 앉아 과녁 쪽으로 물을 뿜는다. 옥돔이나 웅덩이를 밟으면 미끄러진다)
@@ -747,7 +760,7 @@
             spawn(gx + (Math.random() - 0.5) * 2.5, gy + 0.8 + Math.random() * 1.5, gz + (Math.random() - 0.5) * 2.5, (Math.random() - 0.5) * 2, 0.6 + Math.random() * 0.8, (Math.random() - 0.5) * 2, c, c * 0.97, c * 0.92, 3.4, 1.6);
           }
           AUD.sfx('bolt');
-          if (players.indexOf(st.target) >= 0) W.flash = 0.3;
+          if (players.indexOf(st.target) >= 0) { W.flash = 0.3; W.flashWho = players.indexOf(st.target); }
         }
       }
       if (st.landed && st.t > WARN + FALL + 1.4) { st.on = false; st.g.visible = false; }
@@ -786,6 +799,12 @@
   }
 
   function render() {
+    if (flashEl) {   // 2P 분할이면 맞은 사람 쪽 반만
+      const half = splitMode && players.length > 1;
+      flashEl.style.top = half && W.flashWho === 1 ? '50%' : '0';
+      flashEl.style.bottom = half && W.flashWho === 0 ? '50%' : '0';
+      flashEl.style.opacity = W.flash > 0 ? Math.min(1, W.flash / 0.2) * 0.8 : 0;
+    }
     if (sceneryObj && sceneryObj.update) sceneryObj.update(performance.now() / 1000);
     if (splitMode && players.length > 1) {
       const h = innerHeight / 2, w = innerWidth;
