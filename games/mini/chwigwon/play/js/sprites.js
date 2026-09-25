@@ -5,7 +5,7 @@
  */
 (function () {
   'use strict';
-  var IMGV = 6;   // 그림을 새로 뽑으면 올린다(엣지 캐시)
+  var IMGV = 7;   // 그림을 새로 뽑으면 올린다(엣지 캐시)
   var IMGS = {}, FACE = { hero: 1 };
   var WARM = document.createElement('canvas'); WARM.width = WARM.height = 2;      // 시트 이름 앞머리(숫자 뺀 것) → 원래 보는 방향. 없으면 -1(왼쪽)
   function baseName(n) { return n.replace(/_c\d+$/, '').replace(/\d+$/, ''); }
