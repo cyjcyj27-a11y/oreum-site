@@ -865,7 +865,7 @@
     resetRun(stage);
     if (snap) {
       G.t = snap.t; G.lv = snap.lv; G.xp = snap.xp; G.need = D.need(G.lv); G.foods = snap.foods || {}; G.evos = snap.evos || {}; G.kills = snap.kills; G.coins = snap.coins;
-      G.rerolls = snap.rerolls; G.revives = snap.revives;
+      G.rerolls = snap.rerolls; G.revives = snap.revives; G.pendingLv = snap.pending || 0;   // 레벨업 카드 고르던 중에 나가면 이어할 때 그 카드가 사라지던 것(2026-09-26)
       var sd = stageDef(); while (G.evI < sd.events.length && sd.events[G.evI][0] <= G.t) G.evI++;
       if (G.t >= D.BOSS_T - 3) { G.bossWarned = true; }
       calc(); pl.hp = Math.min(pl.maxhp, snap.hp); pl.belly = snap.belly || 40;
@@ -883,7 +883,7 @@
   function saveRun() {
     if (G.mode !== 'play' && G.mode !== 'lvup' && G.mode !== 'pause') return;
     if (pl.dead || G.clearT != null) return;
-    saveJ('run', { stage: G.stage, t: G.t, lv: G.lv, xp: G.xp, foods: G.foods, evos: G.evos, kills: G.kills, coins: G.coins, hp: pl.hp, belly: pl.belly, rerolls: G.rerolls, revives: G.revives, pending: G.pendingLv });
+    saveJ('run', { stage: G.stage, t: G.t, lv: G.lv, xp: G.xp, foods: G.foods, evos: G.evos, kills: G.kills, coins: G.coins, hp: pl.hp, belly: pl.belly, rerolls: G.rerolls, revives: G.revives, pending: G.pendingLv + (G.mode === 'lvup' ? 1 : 0) });   // 카드 고르던 중이면 그 한 장도 센다
   }
   function gameOver() {
     G.mode = 'over';

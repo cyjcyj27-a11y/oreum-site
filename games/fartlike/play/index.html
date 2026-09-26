@@ -274,7 +274,8 @@ body.touch .ck{display:none}
 .askRow{display:flex;gap:14px}.askRow .btn{flex:1}
 
 #loading{position:fixed;inset:0;z-index:80;display:grid;place-items:center;background:#e8c898;font-size:34px;-webkit-text-stroke:6px #1b2a5a;paint-order:stroke fill}
-@media (max-height:480px){#stgGrid{grid-template-columns:repeat(5,1fr);gap:8px}.stg canvas{aspect-ratio:2/1;object-fit:cover}.stg{padding:6px 6px 8px;border-radius:16px}.stg b{font-size:5.4vh}.stg .sn{font-size:4vh}.stg .chk{font-size:8vh;right:8px;top:6px}.sheet h2{font-size:10vh}.sheet .head{min-height:12vh}#shopGrid{grid-template-columns:repeat(3,1fr);gap:8px}.shopI{padding:6px 8px;gap:6px;flex-wrap:wrap}.shopI>img{width:12vh;height:12vh}.cn{font-size:5.6vh}.cs{font-size:4vh}.buy,.buy.main{font-size:5vh;padding:4px 10px}#dexGrid{grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px}.dexI img{width:15vh;height:15vh}.dexI b{font-size:4.6vh}}
+@media (max-height:480px){.sheet .body{padding-bottom:calc(52px + env(safe-area-inset-bottom))}   /* 폰 가로: 상점 맨 아래 줄에 전체화면 알약이 겹치던 것(2026-09-26) */
+  #stgGrid{grid-template-columns:repeat(5,1fr);gap:8px}.stg canvas{aspect-ratio:2/1;object-fit:cover}.stg{padding:6px 6px 8px;border-radius:16px}.stg b{font-size:5.4vh}.stg .sn{font-size:4vh}.stg .chk{font-size:8vh;right:8px;top:6px}.sheet h2{font-size:10vh}.sheet .head{min-height:12vh}#shopGrid{grid-template-columns:repeat(3,1fr);gap:8px}.shopI{padding:6px 8px;gap:6px;flex-wrap:wrap}.shopI>img{width:12vh;height:12vh}.cn{font-size:5.6vh}.cs{font-size:4vh}.buy,.buy.main{font-size:5vh;padding:4px 10px}#dexGrid{grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px}.dexI img{width:15vh;height:15vh}.dexI b{font-size:4.6vh}}
 @media (max-width:560px){#stgGrid{grid-template-columns:1fr 1fr;gap:10px}.stg b{font-size:22px}#shopGrid{grid-template-columns:1fr}#dexGrid{grid-template-columns:repeat(3,1fr);gap:8px}.dexI img{width:70px;height:70px}.dexI b{font-size:17px}.sheet .head{padding:0 64px 0 116px}.sheet h2{font-size:38px}}
 @media (orientation:portrait){.over .big{font-size:min(11vw,82px)}.row{width:min(92vw,520px)}.row .btn{min-width:0;flex:1}.stats,.stats .cn{font-size:min(7vw,30px)}}
 /* 결과·일시정지 창 단추는 두 개 다 같은 크기로 — "홈" 한 글자가 작아 보이던 것 (2026-09-25) */
@@ -364,7 +365,7 @@ body.touch .ck{display:none}
 <script src="js/enemies.js?v=1"></script>
 <script src="js/art.js?v=6"></script>
 <script src="js/audio.js?v=1"></script>
-<script src="js/game.js?v=19"></script>
+<script src="js/game.js?v=20"></script>
 <script src="assets/game-home.js" data-top="6" data-left="6" data-fullscreen="1" defer></script>
 <script src="/assets/visit.js?v=17" defer></script>
 <script src="/assets/game-events.js?v=2" defer></script>
