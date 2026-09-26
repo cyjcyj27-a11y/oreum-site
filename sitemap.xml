@@ -1232,7 +1232,7 @@
     <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/news/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/news/"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/news/"/>
-    <lastmod>2026-09-25</lastmod>
+    <lastmod>2026-09-27</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1284,6 +1284,16 @@
   <url>
     <loc>https://oreumgames.com/news/wol300/</loc>
     <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/news/wol300/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/news/wol300/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/news/wol300/"/>
+    <lastmod>2026-09-27</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://oreumgames.com/en/news/wol300/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/news/wol300/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/news/wol300/"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/news/wol300/"/>
     <lastmod>2026-09-27</lastmod>
     <changefreq>weekly</changefreq>
