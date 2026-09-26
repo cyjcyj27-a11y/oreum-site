@@ -1479,6 +1479,13 @@
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitMenu);
     $('tBgm').classList.toggle('off', !S.bgm); $('tSfx').classList.toggle('off', !S.snd);
     $('coinIco').src = A.url('coin'); $('shopCoinIco').src = A.url('coin');
+    // 폰에서 전체화면을 켜면 가로로 잠근다 — 끄면 풀림 (사장님 2026-09-26 "전체화면 누르면 가로보기 기본으로")
+    ['fullscreenchange', 'webkitfullscreenchange'].forEach(function (ev) {
+      document.addEventListener(ev, function () {
+        var o = screen.orientation; if (!o || !/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) return;
+        try { if (document.fullscreenElement || document.webkitFullscreenElement) { var p = o.lock('landscape'); if (p && p.catch) p.catch(function () {}); } else if (o.unlock) o.unlock(); } catch (e) {}
+      });
+    });
     toTitle();
     requestAnimationFrame(loop);
     $('loading').hidden = true;
