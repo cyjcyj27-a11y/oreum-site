@@ -1626,6 +1626,7 @@ function startGame(){ if(!TITLE) return; auInit(); SFX.start(); TITLE=false; doc
 document.getElementById('tStart').addEventListener('click',newGame);
 document.getElementById('tCont').addEventListener('click',continueGame);
 if(loadSave()){ document.getElementById('tBtns').classList.add('has'); document.getElementById('tStart').textContent='NEW GAME'; }
+HERO.x=BX+583; HERO.face=-1; HERO.idle=9;   /* 시작 화면 — 주인공은 침대 머리맡에서 폰을 본다(제목 뒤에 가려 안 보이던 것, 사장님 9/26). 시작하면 그 자리에서 움직인다 */
 /* START 는 그림(가로세로 비율 고정) 안의 제목 바로 아래(그림 높이 59%)에 — 창 모양이 달라도 제목과 붙어 있게 */
 function placeStart(){ const b=document.getElementById('tBtns'); if(!b) return;
   const sc=Math.min(innerWidth/W,innerHeight/H), oy=(innerHeight-H*sc)/2;
