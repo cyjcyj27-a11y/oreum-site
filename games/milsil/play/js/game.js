@@ -318,7 +318,7 @@
     });
     $('noteM').classList.add('on');
   });
-  function updStats() { $('stClue').textContent = S.clues.length + '/' + TOTAL_CLUES; $('stRoom').textContent = S.stage + '/' + STAGES; }
+  function updStats() { $('stClue').textContent = S.clues.length + '/' + TOTAL_CLUES; $('stRoom').textContent = S.stage + '/' + STAGES; $('stDone').textContent = S.done || 0; }
 
   // ---------- 방 1 장면 ----------
   var V = {};
@@ -2561,7 +2561,7 @@
 
   function escapeRoom() {
     FX.glow(LAST.x, LAST.y, 700, 'rgba(255,236,190,.7)'); FX.star(LAST.x, LAST.y, 140);
-    S.done = S.stage; save();
+    S.done = Math.max(S.done || 0, S.stage); S.cleared = S.stage; save(); updStats();   // 깬 판을 다시 해도 줄지 않게. cleared = 방금 빠져나온 판(NEXT 전)
     $('fade').style.transition = 'opacity 1.4s'; $('fade').style.opacity = 1;
     setTimeout(roomClear, 1500);
   }
@@ -2583,7 +2583,7 @@
 
   // 다음 스테이지: 방 상태·소지품은 스테이지마다 새로(단서 수첩과 시간은 이어 간다)
   function nextStage() {
-    S.stage++; S.room = Math.ceil(S.stage / 4); S.view = S.room + 'n';
+    S.stage++; S.room = Math.ceil(S.stage / 4); S.view = S.room + 'n'; S.cleared = 0;
     S.inv = []; S.sel = null; S.f = {}; S.books = []; S.dial = [0, 0, 0]; S.dials = {}; S.cards = null; S.wires = null;
     tableSel = -1; wirePick = -1;
     if (STG().init) STG().init();
@@ -2609,8 +2609,34 @@
     $('navB').style.display = v.back ? '' : 'none';
     $('lampdark').style.opacity = S.f.lampOff ? (S.f.fire ? .55 : 1) : 0;
     SND.fire(!!S.f.fire && S.view === '1w');
-    renderInv(); updStats();
+    renderInv(); updStats(); placeNav();
   }
+  // ---------- 화살표 비키기 ----------
+  // 화살표는 픽셀 크기라 폰에서는 그림을 넓게 덮는다. 누를 물건(작은 자리·손가락 그림)과 겹치면 빈 옆자리로 옮긴다
+  // (사장님 9/27 "화살표땜에 편지클릭이 안됨" → "모바일 클릭버튼 다 점검해")
+  var NAV_POS = { navB: ['left', [50, 32, 68, 14, 86]], navL: ['top', [50, 36, 64, 26, 74]], navR: ['top', [50, 36, 64, 26, 74]] };
+  function placeNav() {
+    var R = viewEl.getBoundingClientRect(); if (!R.width) return;
+    var T = [];
+    layer.querySelectorAll('*').forEach(function (e) {
+      if (!(e.classList.contains('spot') || getComputedStyle(e).cursor === 'pointer')) return;
+      var b = e.getBoundingClientRect();
+      if (b.width > 1 && b.width * b.height < R.width * R.height * .12) T.push(b);   // 방 전체를 덮는 큰 자리는 빼고
+    });
+    Object.keys(NAV_POS).forEach(function (id) {
+      var el = $(id), k = NAV_POS[id][0], ps = NAV_POS[id][1];
+      if (el.style.display === 'none') return;
+      for (var i = 0; i < ps.length; i++) {
+        el.style[k] = ps[i] + '%';
+        var b = el.getBoundingClientRect();
+        if (!T.some(function (t) { return b.left < t.right && b.right > t.left && b.top < t.bottom && b.bottom > t.top; })) return;
+      }
+      el.style[k] = ps[0] + '%';
+    });
+  }
+  var navT = 0;
+  new MutationObserver(function () { clearTimeout(navT); navT = setTimeout(placeNav, 30); }).observe(layer, { childList: true, subtree: true });
+  addEventListener('resize', function () { setTimeout(placeNav, 60); });
   $('navL').addEventListener('click', function () { SND.unlock(); go(view(S.view).left); });
   $('navR').addEventListener('click', function () { SND.unlock(); go(view(S.view).right); });
   $('navB').addEventListener('click', function () { SND.unlock(); go(view(S.view).back); });
@@ -2647,6 +2673,27 @@
   function togs() { $('tgBgm').classList.toggle('off', !SND.on.bgm); $('tgSfx').classList.toggle('off', !SND.on.sfx); }
   $('tgBgm').addEventListener('click', function () { SND.unlock(); SND.bgm(!SND.on.bgm); togs(); });
   $('tgSfx').addEventListener('click', function () { SND.unlock(); SND.sfx(!SND.on.sfx); togs(); });
+  // ---------- 판 고르기: 깬 판 수를 보여 주고, 펼치면 깬 판(과 지금 할 판)으로 들어간다(사장님 9/27) ----------
+  $('tgStage').addEventListener('click', function () {
+    SND.unlock(); SND.play('tick');
+    var L = $('stageList'); L.innerHTML = '';
+    var top = Math.min(STAGES, (S.done || 0) + 1);
+    for (var k = 1; k <= STAGES; k++) (function (k) {
+      var b = document.createElement('div');
+      b.className = 'sbtn' + (k === S.stage ? ' cur' : '') + (k > top ? ' lock' : '') + (k <= (S.done || 0) ? ' done' : '');
+      b.textContent = k;
+      if (k <= top) b.addEventListener('click', function () { SND.play('click'); $('stageM').classList.remove('on'); if (k !== S.stage) jumpStage(k); });
+      L.appendChild(b);
+    })(k);
+    $('stageM').classList.add('on');
+  });
+  function jumpStage(k) {
+    var f = $('fade'); f.style.transition = 'opacity .35s'; f.style.opacity = 1;
+    setTimeout(function () {
+      SND.fire(false); S.stage = k - 1; nextStage(); save(); render(); updStats();
+      f.style.transition = 'opacity 1s'; f.style.opacity = 0; SND.play('door');
+    }, 380);
+  }
   togs();
 
   // ---------- 시간 ----------
@@ -2671,7 +2718,8 @@
     S = s;
     if (window.OG) OG.start({ stage: S.stage });   // 사이트 지표(game-events.js)
     // 방을 나간 뒤(NEXT 전에) 껐다 켰으면 다음 방에서 이어 간다
-    if ((S.done || 0) >= S.stage && S.stage < STAGES) nextStage();
+    var esc = S.cleared !== undefined ? S.cleared === S.stage : (S.done || 0) >= S.stage;   // 판 고르기 전 저장은 옛 방식으로
+    if (esc && S.stage < STAGES) nextStage();
     save();
     var t = $('title'); t.style.opacity = 0; setTimeout(function () { t.style.display = 'none'; }, 600);
     fit(); render(); tickShow();

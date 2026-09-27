@@ -46,6 +46,14 @@ html,body{margin:0;height:100%;background:#0b0907;color:#fff;font-family:Ria,sys
 .tog{width:54px;height:34px;border-radius:999px;border:3px solid var(--edge);cursor:pointer;font:20px/1 Dokdo,Ria,sans-serif;color:#fff;
   background:var(--btn);box-shadow:inset 0 3px 0 rgba(255,255,255,.3),0 4px 0 var(--edge);
   -webkit-text-stroke:3px var(--edge);paint-order:stroke fill;display:flex;align-items:center;justify-content:center}
+#topbar>.stat:not(.tap){pointer-events:none}   /* 누르는 단추가 아닌 알약(STAGE·시간)은 손가락을 아래 그림으로 통과 */
+.tog.wide{width:auto;padding:0 12px;white-space:nowrap;display:flex;align-items:center;gap:5px}.tog.wide small{font-size:14px;opacity:.85}.tog.wide b{font-weight:400}
+.stgrid{display:grid;grid-template-columns:repeat(4,68px);gap:10px;justify-content:center;margin:10px 0 4px}
+.sbtn{height:52px;border-radius:14px;border:3px solid var(--edge);cursor:pointer;display:flex;align-items:center;justify-content:center;font:30px/1 Dokdo,Ria,sans-serif;color:#fff;
+  background:var(--btn);box-shadow:inset 0 3px 0 rgba(255,255,255,.3),inset 0 -4px 0 rgba(0,0,0,.25),0 4px 0 var(--edge);-webkit-text-stroke:3px var(--edge);paint-order:stroke fill}
+.sbtn.cur{box-shadow:0 0 0 4px #f0d890,inset 0 3px 0 rgba(255,255,255,.3),0 4px 0 var(--edge)}
+.sbtn.lock{filter:grayscale(1) brightness(.5);opacity:.55;cursor:default}
+@media (max-height:480px){.stgrid{grid-template-columns:repeat(4,54px);gap:6px;margin:4px 0 0}.sbtn{height:34px;font-size:22px;border-radius:10px}}
 .tog.off{filter:grayscale(1) brightness(.6);text-decoration:line-through}
 .tog:active{transform:translateY(3px)}
 /* 소지품 칸 */
@@ -230,6 +238,7 @@ html.ol-land #rotate{display:none!important}
     <div class="stat tap" id="stNote"><small>NOTE</small><b id="stClue">0/12</b></div>
     <div class="stat"><b id="stTime">00:00</b></div>
     <div class="spacer"></div>
+    <div class="tog wide" id="tgStage"><small>CLEAR</small> <b id="stDone">0</b></div>
     <div class="tog" id="tgBgm">BGM</div>
     <div class="tog" id="tgSfx">SFX</div>
   </div>
@@ -237,6 +246,7 @@ html.ol-land #rotate{display:none!important}
 </div>
 
 <div class="modal" id="look"><div class="card" id="lookCard"><div class="x" data-close></div><div class="pic" id="lookPic"></div><h3 id="lookH"></h3><p id="lookP"></p></div></div>
+<div class="modal" id="stageM"><div class="card"><div class="x" data-close></div><h3>STAGE</h3><div class="stgrid" id="stageList"></div></div></div>
 <div class="modal" id="noteM"><div class="card notes"><div class="x" data-close></div><h3>NOTE</h3><div id="noteList"></div></div></div>
 <div class="modal" id="dialM"><div class="card"><div class="x" data-close></div><div class="dial" id="dial"></div></div></div>
 
@@ -256,7 +266,7 @@ html.ol-land #rotate{display:none!important}
 <script src="assets/landscape.js"></script>
 <script src="sounds/door.js?v=1"></script>
 <script src="js/sound.js?v=10"></script>
-<script src="js/game.js?v=49"></script>
+<script src="js/game.js?v=53"></script>
 <script src="/assets/visit.js?v=17" defer></script>
 <script src="/assets/game-events.js?v=2" defer></script>
 </body>
