@@ -24,13 +24,13 @@ html,body{margin:0;height:100%;background:#0b0907;color:#fff;font-family:Ria,sys
 #lampdark{position:absolute;inset:0;background:radial-gradient(ellipse at 60% 40%,rgba(0,0,0,.55),rgba(0,0,0,.82));opacity:0;pointer-events:none;transition:opacity .15s}
 #fade{position:absolute;inset:0;background:#000;opacity:0;pointer-events:none;transition:opacity .18s}
 /* 이동 화살표 */
-.nav{position:absolute;width:54px;height:84px;top:50%;margin-top:-42px;cursor:pointer;z-index:5;display:flex;align-items:center;justify-content:center;opacity:.85}
+.nav{position:absolute;width:54px;height:84px;cursor:pointer;z-index:5;display:flex;align-items:center;justify-content:center;opacity:.85}
 .nav:hover{opacity:1}
 .nav i{display:block;width:26px;height:26px;border-left:7px solid #fff;border-bottom:7px solid #fff;filter:drop-shadow(0 0 0 var(--navy)) drop-shadow(2px 3px 0 rgba(0,0,0,.6))}
-.nav.l{left:6px}.nav.l i{transform:rotate(45deg);margin-left:10px}
-.nav.r{right:6px}.nav.r i{transform:rotate(-135deg);margin-right:10px}
-.nav.b{top:auto;bottom:6px;left:50%;margin:0 0 0 -42px;width:84px;height:50px}
-.nav.b i{transform:rotate(-45deg);margin-top:-12px}
+.nav.l i{transform:rotate(45deg);margin-left:10px}
+.nav.r i{transform:rotate(-135deg);margin-right:10px}
+.nav.b{width:84px;height:50px}
+.nav.b i{transform:rotate(-45deg);margin-top:-8px;width:20px;height:20px;border-width:0 0 6px 6px}
 /* 상단바 */
 #topbar{position:absolute;left:0;right:0;top:0;height:52px;display:flex;align-items:center;gap:8px;z-index:20;
   padding:6px 10px 0 calc(104px + env(safe-area-inset-left));background:linear-gradient(rgba(0,0,0,.55),rgba(0,0,0,0));pointer-events:none}
@@ -54,6 +54,8 @@ html,body{margin:0;height:100%;background:#0b0907;color:#fff;font-family:Ria,sys
 .sbtn.cur{box-shadow:0 0 0 4px #f0d890,inset 0 3px 0 rgba(255,255,255,.3),0 4px 0 var(--edge)}
 .sbtn.lock{filter:grayscale(1) brightness(.5);opacity:.55;cursor:default}
 @media (max-height:480px){.stgrid{grid-template-columns:repeat(4,54px);gap:6px;margin:4px 0 0}.sbtn{height:34px;font-size:22px;border-radius:10px}}
+.tog.ico{position:relative;display:flex;align-items:center;justify-content:center}.tog.ico svg{width:22px;height:22px;filter:drop-shadow(0 1px 0 var(--edge))}
+.tog.ico.off::after{content:'';position:absolute;left:26%;right:26%;top:50%;height:3px;margin-top:-1.5px;background:#fff;border-radius:2px;transform:rotate(-40deg);box-shadow:0 0 0 1.5px var(--edge)}
 .tog.off{filter:grayscale(1) brightness(.6);text-decoration:line-through}
 .tog:active{transform:translateY(3px)}
 /* 소지품 칸 */
@@ -216,7 +218,7 @@ html.ol-land #rotate{display:none!important}
   .card .pic{height:40vh}
   .card h3{font-size:19px;margin:6px 0 2px}.card p{font-size:15px}
   .wheel .num{height:58px;font-size:36px}.wheel button{height:32px}
-  .nav{width:44px;height:64px;margin-top:-32px}
+  .nav i{width:22px;height:22px;border-width:0 0 6px 6px}
 }
 </style>
 </head>
@@ -227,20 +229,21 @@ html.ol-land #rotate{display:none!important}
     <div id="layer"></div>
     <div id="lampdark"></div>
     <div id="dim"></div>
-    <div class="nav l" id="navL"><i></i></div>
-    <div class="nav r" id="navR"><i></i></div>
-    <div class="nav b" id="navB"><i></i></div>
     <div id="toast"></div>
     <div id="fade"></div>
   </div>
+  <!-- 화살표는 그림 밖 전용 칸(양옆·아래 띠)에 둔다 — 그림을 덮지 않게(사장님 2026-09-27) -->
+  <div class="nav l" id="navL"><i></i></div>
+  <div class="nav r" id="navR"><i></i></div>
+  <div class="nav b" id="navB"><i></i></div>
   <div id="topbar">
     <div class="stat"><small>STAGE</small><b id="stRoom">1/20</b></div>
     <div class="stat tap" id="stNote"><small>NOTE</small><b id="stClue">0/12</b></div>
     <div class="stat"><b id="stTime">00:00</b></div>
     <div class="spacer"></div>
     <div class="tog wide" id="tgStage"><small>CLEAR</small> <b id="stDone">0</b></div>
-    <div class="tog" id="tgBgm">BGM</div>
-    <div class="tog" id="tgSfx">SFX</div>
+    <div class="tog ico" id="tgBgm" title="BGM"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 17.5V5.5l11-2.5v12" fill="none" stroke="#fff" stroke-width="2.6" stroke-linejoin="round"/><ellipse cx="6.3" cy="17.8" rx="3.4" ry="2.7" fill="#fff"/><ellipse cx="17.3" cy="15.3" rx="3.4" ry="2.7" fill="#fff"/></svg></div>
+    <div class="tog ico" id="tgSfx" title="SFX"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9h4l5-4.5v15L7 15H3z" fill="#fff"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg></div>
   </div>
   <div id="inv"></div>
 </div>
@@ -266,7 +269,7 @@ html.ol-land #rotate{display:none!important}
 <script src="assets/landscape.js"></script>
 <script src="sounds/door.js?v=1"></script>
 <script src="js/sound.js?v=10"></script>
-<script src="js/game.js?v=53"></script>
+<script src="js/game.js?v=55"></script>
 <script src="/assets/visit.js?v=17" defer></script>
 <script src="/assets/game-events.js?v=2" defer></script>
 </body>

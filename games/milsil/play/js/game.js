@@ -2609,34 +2609,8 @@
     $('navB').style.display = v.back ? '' : 'none';
     $('lampdark').style.opacity = S.f.lampOff ? (S.f.fire ? .55 : 1) : 0;
     SND.fire(!!S.f.fire && S.view === '1w');
-    renderInv(); updStats(); placeNav();
+    renderInv(); updStats();
   }
-  // ---------- 화살표 비키기 ----------
-  // 화살표는 픽셀 크기라 폰에서는 그림을 넓게 덮는다. 누를 물건(작은 자리·손가락 그림)과 겹치면 빈 옆자리로 옮긴다
-  // (사장님 9/27 "화살표땜에 편지클릭이 안됨" → "모바일 클릭버튼 다 점검해")
-  var NAV_POS = { navB: ['left', [50, 32, 68, 14, 86]], navL: ['top', [50, 36, 64, 26, 74]], navR: ['top', [50, 36, 64, 26, 74]] };
-  function placeNav() {
-    var R = viewEl.getBoundingClientRect(); if (!R.width) return;
-    var T = [];
-    layer.querySelectorAll('*').forEach(function (e) {
-      if (!(e.classList.contains('spot') || getComputedStyle(e).cursor === 'pointer')) return;
-      var b = e.getBoundingClientRect();
-      if (b.width > 1 && b.width * b.height < R.width * R.height * .12) T.push(b);   // 방 전체를 덮는 큰 자리는 빼고
-    });
-    Object.keys(NAV_POS).forEach(function (id) {
-      var el = $(id), k = NAV_POS[id][0], ps = NAV_POS[id][1];
-      if (el.style.display === 'none') return;
-      for (var i = 0; i < ps.length; i++) {
-        el.style[k] = ps[i] + '%';
-        var b = el.getBoundingClientRect();
-        if (!T.some(function (t) { return b.left < t.right && b.right > t.left && b.top < t.bottom && b.bottom > t.top; })) return;
-      }
-      el.style[k] = ps[0] + '%';
-    });
-  }
-  var navT = 0;
-  new MutationObserver(function () { clearTimeout(navT); navT = setTimeout(placeNav, 30); }).observe(layer, { childList: true, subtree: true });
-  addEventListener('resize', function () { setTimeout(placeNav, 60); });
   $('navL').addEventListener('click', function () { SND.unlock(); go(view(S.view).left); });
   $('navR').addEventListener('click', function () { SND.unlock(); go(view(S.view).right); });
   $('navB').addEventListener('click', function () { SND.unlock(); go(view(S.view).back); });
@@ -2651,13 +2625,23 @@
   });
 
   // ---------- 화면 맞추기 ----------
+  // 화면 짜임: [왼쪽 화살표 띠][방 그림][오른쪽 화살표 띠][소지품 칸], 그림 아래 띠에 뒤로 화살표 — 화살표가 그림을 덮지 않는다
   function fit() {
     var inv = $('inv').offsetWidth;
-    var aw = innerWidth - inv, ah = innerHeight;
+    var G = Math.round(Math.max(40, Math.min(60, innerWidth * .045)));   // 양옆·아래 띠 두께
+    var aw = innerWidth - inv - G * 2, ah = innerHeight - G;
     var w = aw, h = w * H / W;
     if (h > ah) { h = ah; w = h * W / H; }
+    var x = G + (aw - w) / 2, y = (ah - h) / 2;
     viewEl.style.width = w + 'px'; viewEl.style.height = h + 'px'; viewEl.style.setProperty('--vs', w / W);
-    viewEl.style.left = ((aw - w) / 2) + 'px'; viewEl.style.top = ((ah - h) / 2) + 'px';
+    viewEl.style.left = x + 'px'; viewEl.style.top = y + 'px';
+    var L = $('navL'), R = $('navR'), B = $('navB');
+    var nw = Math.min(54, x), nh = Math.min(84, h * .3);
+    L.style.width = R.style.width = nw + 'px'; L.style.height = R.style.height = nh + 'px';
+    L.style.left = (x - nw) / 2 + 'px'; L.style.top = y + (h - nh) / 2 + 'px';
+    R.style.left = x + w + (x - nw) / 2 + 'px'; R.style.top = y + (h - nh) / 2 + 'px';
+    var bh = Math.min(50, innerHeight - (y + h));
+    B.style.height = bh + 'px'; B.style.left = x + w / 2 - 42 + 'px'; B.style.top = y + h + Math.max(0, (Math.min(G, innerHeight - y - h) - bh) / 2) + 'px';   // 그림 바로 밑 띠 안
   }
   addEventListener('resize', function () { fit(); if (S) renderInv(); });
 
