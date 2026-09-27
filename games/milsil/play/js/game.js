@@ -29,7 +29,9 @@
     note3:   { img: 'img/it_paper.png',   name: '쪽지', desc: '식탁 위 촛불. 식탁 둘레 의자. 식탁 위 접시.' },
     print:   { img: 'img/it_paperw.png',  name: '현상된 사진' },
     note5:   { img: 'img/it_page.png',    name: '쪽지', desc: '이 문은 우산 주인의 머리글자로 열린다.' },
-    umb18:   { img: 'img/it_umbrella.png', name: '검은 장우산', desc: '손잡이 안쪽에 무언가 새겨져 있다. 어두워서 읽을 수 없다.' }
+    umb18:   { img: 'img/it_umbrella.png', name: '검은 장우산', desc: '손잡이 안쪽에 무언가 새겨져 있다. 어두워서 읽을 수 없다.' },
+    // 일기장은 단서(수첩)이면서 번호 1103 을 알려 주니 종이처럼 소지품에도 남긴다(사장님 9/27 "읽고나서 사라지면 1103을 어케 기억하냐")
+    diary:   { img: 'img/it_diary.png',   name: '일기장', desc: '11월 3일. 결혼기념일. 올해도 혼자다. 도현이가 또 원고 이야기를 꺼냈다.' }
   };
   var CLUES = [
     { id: 'page',   img: 'img/it_page.png',   name: '원고 조각', text: '「밀실」 3장 — 그날 밤 서재 문을 두드린 사람은 왼손에 젖은 우산을 들고 있었다.' },
@@ -2416,7 +2418,7 @@
     }
     if (which === 'V' && S.clues.indexOf('diary') < 0) {
       var dy = img('img/it_diary.png', x + w / 2 - 60, cy - 24, 120, 96); dy.style.transform = 'rotate(-4deg)';
-      spot(x + w / 2 - 70, cy - 28, x + w / 2 + 70, cy + 76, function () { dy.remove(); getClue('diary'); });
+      spot(x + w / 2 - 70, cy - 28, x + w / 2 + 70, cy + 76, function () { dy.remove(); give('diary'); getClue('diary'); });
     }
     if (which === 'L') {
       // 빈 서랍: 먼지 낀 바닥만
@@ -2702,6 +2704,8 @@
     S = s;
     if (window.OG) OG.start({ stage: S.stage });   // 사이트 지표(game-events.js)
     // 방을 나간 뒤(NEXT 전에) 껐다 켰으면 다음 방에서 이어 간다
+    // 소지품 일기장이 생기기 전에 5스테이지에서 일기장을 읽은 저장: 소지품에 다시 넣어 준다
+    if (S.stage === 5 && S.clues.indexOf('diary') >= 0 && S.inv.indexOf('diary') < 0 && !S.f.diaryInv) { S.inv.push('diary'); S.f.diaryInv = 1; }
     var esc = S.cleared !== undefined ? S.cleared === S.stage : (S.done || 0) >= S.stage;   // 판 고르기 전 저장은 옛 방식으로
     if (esc && S.stage < STAGES) nextStage();
     save();
