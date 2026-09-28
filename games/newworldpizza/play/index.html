@@ -58,7 +58,8 @@
 
   /* 오른쪽 아래 단추 */
   .tbtn { display: none; position: fixed; bottom: calc(18px + env(safe-area-inset-bottom)); z-index: 6; border-radius: 50%; padding: 0; font-size: 16px; }
-  body.playing .tbtn { display: block; } body.ended .tbtn, body.ended #keys { display: none; }
+  body.playing .tbtn { display: flex; align-items: center; justify-content: center; }   /* 글자는 늘 단추 한가운데(9/28 "앨범글자를 버튼 가운데에") */
+  .tbtn > span { flex: none; } body.ended .tbtn, body.ended #keys { display: none; }
   #btnShop { width: 72px; height: 72px; font-size: 14px; right: calc(12px + env(safe-area-inset-right)); background: linear-gradient(180deg, #ffe066 0%, #ffae2e 42%, #ff8416 70%, #f06a0c 100%); }
   #btnShop.on { animation: pulse 1.6s infinite; }
   #btnAlbum { width: 54px; height: 54px; right: calc(21px + env(safe-area-inset-right)); bottom: calc(100px + env(safe-area-inset-bottom)); font-size: 12px; }   /* 상점 위에 세로로 */
