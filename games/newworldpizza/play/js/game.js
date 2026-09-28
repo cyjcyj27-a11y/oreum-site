@@ -70,7 +70,15 @@
   function load() { try { const j = JSON.parse(localStorage.getItem('newworldpizza.save')); if (j && j.up) return j; } catch (_) { } return null; }
 
   // ── 화면 크기 ──
-  function fit() { const r = Math.min(innerWidth / W, innerHeight / H); c.style.width = Math.round(W * r) + 'px'; c.style.height = Math.round(H * r) + 'px'; }
+  // 화면 맞춤 — 게임 중엔 위쪽 상태바 띠와 오른쪽 단추 칸을 비워 두고 그 안에 그림을 둔다(UI 가 그림을 가리지 않게, mobile-first-ui-layout)
+  function fit() {
+    const vw = innerWidth, vh = innerHeight, on = document.body.classList.contains('playing') && !document.body.classList.contains('ended');
+    const topH = on ? $('topbar').offsetHeight : 0, phone = vh <= 520, side = on ? (phone ? 92 : 112) : 0;
+    const aw = vw - side * 2, ah = vh - topH, r = Math.min(aw / W, ah / H), cw = Math.round(W * r), ch = Math.round(H * r);
+    c.style.position = 'absolute'; c.style.width = cw + 'px'; c.style.height = ch + 'px';
+    c.style.left = Math.round((vw - cw) / 2) + 'px'; c.style.top = Math.round(topH + (ah - ch) / 2) + 'px';
+    const gap = vh - (topH + (ah - ch) / 2 + ch); $('keys').style.visibility = on && gap >= 24 ? 'visible' : 'hidden';   /* 키 안내는 그림 아래 빈 띠가 있을 때만 */
+  }
   addEventListener('resize', fit); fit();
   function toCanvas(e) { const b = c.getBoundingClientRect(); return { x: (e.clientX - b.left) / b.width * W, y: (e.clientY - b.top) / b.height * H }; }
 
@@ -319,7 +327,7 @@
   function g20Done() { if (g20.done) return; g20.done = true; g20.prog = 1; g20.end = 0; SND.play('ding'); sparkle(400, 420, 60); custs.forEach(cu => cu.box = true); fwOn = true; for (let i = 0; i < 6; i++) setTimeout(() => rocket(), i * 160); }
   function ending() {
     S.ended = true; save(); SND.play('ending'); try { if (window.OG) OG.over({ result: 'END', score: S.coins + S.reg }); } catch (_) { }
-    $('endDay').textContent = S.day; $('endCoin').textContent = fmt(S.coins + S.reg); $('ending').classList.add('show'); document.body.classList.add('ended');
+    $('endDay').textContent = S.day; $('endCoin').textContent = fmt(S.coins + S.reg); $('ending').classList.add('show'); document.body.classList.add('ended'); fit();
     for (let i = 0; i < 180; i++) confetti.push({ x: rnd(0, W), y: rnd(-700, -10), vy: rnd(60, 150), r: rnd(0, 6), ph: rnd(0, 6), col: pick(['#ffd24a', '#ff6a5a', '#7fd6ff', '#8ef06a', '#fff', '#b07aff']) });
   }
 
@@ -499,7 +507,7 @@
   // ── 시작·이어하기 ──
   function begin(state) {
     S = state; custs = []; limos = []; anons = []; parts = []; flying = []; orderer = null; g20 = null; initOvens();
-    rebuildBg(); $('title').classList.add('hide'); document.body.classList.add('playing'); $('topbar').classList.add('show'); $('keys').classList.add('show');
+    rebuildBg(); $('title').classList.add('hide'); document.body.classList.add('playing'); $('topbar').classList.add('show'); $('keys').classList.add('show'); fit();
     playing = true; spawnT = 1.5; anonT = 25; SND.init(); hud(); save();
     try { if (window.OG) OG.start(); } catch (_) { }   /* 사이트 지표: 한 판 시작 */
   }

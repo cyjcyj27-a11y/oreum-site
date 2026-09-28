@@ -33,7 +33,7 @@
   .btn small { display: block; font-size: 13px; -webkit-text-stroke: 3px #1b2a5a; letter-spacing: 0; margin-top: 2px; }
 
   /* 상단바 — 스카이라이더 배치 + 입체 알약 */
-  #topbar { position: fixed; left: 0; right: 0; top: 0; padding: calc(6px + env(safe-area-inset-top)) calc(104px + env(safe-area-inset-right)) 6px calc(112px + env(safe-area-inset-left)); display: flex; align-items: center; justify-content: center; gap: 8px; pointer-events: none; z-index: 5; opacity: 0; transition: opacity .8s; background: linear-gradient(180deg, rgba(20,10,5,.4), rgba(20,10,5,0)); }
+  #topbar { position: fixed; left: 0; right: 0; top: 0; padding: calc(6px + env(safe-area-inset-top)) calc(104px + env(safe-area-inset-right)) 6px calc(112px + env(safe-area-inset-left)); display: flex; align-items: center; justify-content: center; gap: 8px; pointer-events: none; z-index: 5; opacity: 0; transition: opacity .8s; background: #1a0f0a; box-shadow: 0 2px 0 rgba(0,0,0,.35); }   /* 상태바는 그림 밖 위쪽 전용 띠(사장님 9/28 "간판이랑 메뉴가 허드에 가려지네") */
   #topbar.show { opacity: 1; }
   .stat { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 999px; font-size: 13px; white-space: nowrap;
     background: linear-gradient(180deg, #5a6fa8 0%, #34457a 50%, #243462 100%); border: 3px solid #1b2a5a; box-shadow: inset 0 3px 0 rgba(255,255,255,.35), inset 0 -3px 0 rgba(0,0,0,.2), 0 4px 0 #1b2a5a; }
@@ -51,18 +51,18 @@
   #toast { position: fixed; left: 50%; top: 28%; transform: translate(-50%, -50%) scale(.6); font-family: 'TitleF', 'Ria', sans-serif; font-weight: 900; font-size: clamp(38px, 7vw, 80px); letter-spacing: 3px; color: #fff; -webkit-text-stroke: 7px #1b2a5a; paint-order: stroke fill; text-shadow: 0 5px 0 #1b2a5a, 0 10px 24px rgba(0,0,0,.4); opacity: 0; pointer-events: none; z-index: 8; text-align: center; white-space: nowrap; transition: opacity .25s, transform .25s; }
   #toast.show { opacity: 1; transform: translate(-50%, -50%) scale(1); } #toast.gold { color: #ffd24a; }
   #toast small { display: block; font-family: 'Ria', sans-serif; font-size: .38em; letter-spacing: 1px; -webkit-text-stroke: 5px #1b2a5a; }
-  #keys { position: fixed; right: 22px; bottom: 116px; font-size: 13px; opacity: 0; text-align: right; line-height: 1.7; pointer-events: none; text-shadow: 0 1px 3px rgba(0,0,0,.9); z-index: 5; transition: opacity .8s; }
+  #keys { position: fixed; left: 0; right: 0; bottom: 6px; text-align: center; font-size: 13px; opacity: 0; line-height: 1.7; pointer-events: none; text-shadow: 0 1px 3px rgba(0,0,0,.9); z-index: 5; transition: opacity .8s; }
   #keys.show { opacity: .7; } body.touch #keys { display: none; }
 
   /* 오른쪽 아래 단추 */
   .tbtn { display: none; position: fixed; bottom: calc(18px + env(safe-area-inset-bottom)); z-index: 6; border-radius: 50%; padding: 0; font-size: 16px; }
   body.playing .tbtn { display: block; } body.ended .tbtn, body.ended #keys { display: none; }
-  #btnShop { width: 88px; height: 88px; right: calc(14px + env(safe-area-inset-right)); background: linear-gradient(180deg, #ffe066 0%, #ffae2e 42%, #ff8416 70%, #f06a0c 100%); }
+  #btnShop { width: 88px; height: 88px; right: calc(12px + env(safe-area-inset-right)); background: linear-gradient(180deg, #ffe066 0%, #ffae2e 42%, #ff8416 70%, #f06a0c 100%); }
   #btnShop.on { animation: pulse 1.6s infinite; }
-  #btnAlbum { width: 64px; height: 64px; right: calc(112px + env(safe-area-inset-right)); bottom: calc(30px + env(safe-area-inset-bottom)); font-size: 14px; }
+  #btnAlbum { width: 64px; height: 64px; right: calc(24px + env(safe-area-inset-right)); bottom: calc(118px + env(safe-area-inset-bottom)); font-size: 14px; }   /* 단추는 오른쪽 전용 칸에 세로로 */
   .tbtn .dot { position: absolute; top: -3px; right: -3px; width: 18px; height: 18px; border-radius: 50%; background: #ff3a3a; border: 3px solid #1b2a5a; display: none; }
   .tbtn.new .dot { display: block; }
-  @media (max-height: 520px) { #btnShop { width: 72px; height: 72px; font-size: 14px; } #btnAlbum { width: 54px; height: 54px; right: calc(94px + env(safe-area-inset-right)); bottom: calc(26px + env(safe-area-inset-bottom)); font-size: 12px; } }
+  @media (max-height: 520px) { #btnShop { width: 72px; height: 72px; font-size: 14px; right: calc(10px + env(safe-area-inset-right)); } #btnAlbum { width: 54px; height: 54px; right: calc(19px + env(safe-area-inset-right)); bottom: calc(100px + env(safe-area-inset-bottom)); font-size: 12px; } }
 
   /* 타이틀 */
   #title { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding-top: 7vh; z-index: 10; transition: opacity .8s; background: linear-gradient(180deg, rgba(20,8,30,.55), rgba(20,8,30,0) 45%); }
@@ -184,7 +184,7 @@
 <script src="assets/landscape.js?v=48"></script>
 <script src="js/art.js?v=4"></script>
 <script src="js/audio.js?v=4"></script>
-<script src="js/game.js?v=21"></script>
+<script src="js/game.js?v=22"></script>
 <script src="/assets/visit.js?v=17" defer></script>
 <script src="/assets/game-events.js?v=2" defer></script>
 </body>
