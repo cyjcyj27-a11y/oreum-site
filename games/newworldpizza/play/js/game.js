@@ -73,7 +73,7 @@
   // 화면 맞춤 — 게임 중엔 위쪽 상태바 띠와 오른쪽 단추 칸을 비워 두고 그 안에 그림을 둔다(UI 가 그림을 가리지 않게, mobile-first-ui-layout)
   function fit() {
     const vw = innerWidth, vh = innerHeight, on = document.body.classList.contains('playing') && !document.body.classList.contains('ended');
-    const topH = on ? $('topbar').offsetHeight : 0, phone = vh <= 520, side = on ? (phone ? 92 : 112) : 0;
+    const topH = 0, side = 0;   /* 그림은 화면 가득(사장님 9/28 "원래화면에서 단추를 줄여봐") — 대신 상태바·단추를 작게 */
     const aw = vw - side * 2, ah = vh - topH, r = Math.min(aw / W, ah / H), cw = Math.round(W * r), ch = Math.round(H * r);
     c.style.position = 'absolute'; c.style.width = cw + 'px'; c.style.height = ch + 'px';
     c.style.left = Math.round((vw - cw) / 2) + 'px'; c.style.top = Math.round(topH + (ah - ch) / 2) + 'px';
@@ -374,7 +374,7 @@
       if (cu.state === 'pay' && cu.wait > .4) bubble(cu.x, cu.y - DH * BYID[cu.id].h - 12, cu.kind, null, true, true);
     } }));
     limos.forEach(lm => items.push({ y: L.ROAD_Y + 2, f: () => { ctx.save(); ctx.beginPath(); ctx.rect(L.DOORX + 12, 0, W, H); ctx.clip(); ART.limo(ctx, lm.x, L.ROAD_Y, .82, lm.door); ctx.restore(); } }));   // 가게 벽 뒤로 사라지게(안을 가로지르지 않게)
-    anons.forEach(a => items.push({ y: a.y, f: () => { person(a.id, a.x, a.y, { pose: a.state === 'run' || a.state === 'in' ? 'walk' : 'front', ph: a.ph, dir: a.dir }); if (a.state !== 'run') nameTag(a.x, a.y - DH * ANON_H[+a.id.slice(4) - 1] - 18, 'Anonymous'); } }));
+    anons.forEach(a => items.push({ y: a.y, f: () => { person(a.id, a.x, a.y, { pose: a.state === 'run' || a.state === 'in' ? 'walk' : 'front', ph: a.ph, dir: a.dir }); if (a.state !== 'run' && a.slot < 3) nameTag(a.x, a.y - DH * ANON_H[+a.id.slice(4) - 1] - 18, 'Anonymous');   /* 명찰은 앞줄 셋만(뒷줄은 겹쳐서) */ } }));
     if (g20 && g20.done) { const k = Math.min(1, (g20.nightT = (g20.nightT || 0) + 1 / 60) / 1.2); ctx.fillStyle = 'rgba(12,10,40,' + (.55 * k) + ')'; ctx.fillRect(0, 0, W, H); }   /* 엔딩 — 가게만 밤처럼 어둡게(사람은 밝게), 폭죽이 보이게 */
     items.sort((a, b) => a.y - b.y).forEach(it => it.f());
     // 입자
