@@ -18,6 +18,7 @@ import io, os, re, sys
 
 # slug, 한국어 경로, 영어 경로, 한국어 이름, 한국어 장르 앵커, 영어 이름, 영어 장르 앵커, 태그
 GAMES = [
+    ("button5",       "/games/mini/button5/",        "/en/games/mini/button5/",        "5억년 버튼",        "5억년 버튼 방치형게임",            "500 Million Year Button", "500 million year button idle game", {"idle", "casual", "clicker"}),
     ("matchtower",    "/games/matchtower/",          "/en/games/matchtower/",          "초원다방",           "성냥쌓기게임",                     "MATCHTOWER",           "matchstick stacking game",      {"physics", "3d", "casual"}),
     ("newworldpizza", "/games/newworldpizza/",       "/en/games/newworldpizza/",       "뉴월드피자",         "방치형 피자가게게임",              "NEW WORLD PIZZA",      "idle pizza shop game",          {"sim", "tycoon", "idle"}),
     ("milsil",        "/games/milsil/",              "/en/games/milsil/",              "밀실",              "추리 방탈출게임",                  "THE LOCKED ROOM",      "escape room mystery game", {"puzzle", "mystery", "adventure"}),
