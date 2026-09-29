@@ -166,20 +166,16 @@
     R.unlocked = ''; fit(); topbar(); buildCards(); A.setMode('void');
     if (!resume) A.SFX.arrive();
   }
-  function rollTrip() { // 그리는 중에 5억 년이 차면 방에 안 가고 그 자리에서 다음 5억 년으로
-    const paid = S.pending || D.offer(S.presses);
-    S.presses++; S.money += paid; S.tripYears -= D.YEARS_PER_TRIP;
-    S.pending = D.offer(S.presses);
-    A.SFX.cash(); A.SFX.milestone(); toast('+' + D.won(paid), true);
-    save();
-  }
   function leaveVoid() {
     if (R.busy) return;
     if (R.drw) closeDraw(); R.mural = null;
     R.busy = true; A.SFX.back();
     fadeTo(1, 900, () => {
-      const paid = S.pending || D.offer(S.presses);
-      S.inVoid = false; S.presses++; S.money += paid; S.pending = 0; S.tripYears = 0; save();
+      // 그리는 동안 5억 년을 여러 번 넘겼으면 그만큼 한꺼번에 받는다(버튼을 그만큼 누른 셈)
+      const k = Math.max(1, Math.floor(S.tripYears / D.YEARS_PER_TRIP));
+      let paid = S.pending || D.offer(S.presses);
+      for (let i = 1; i < k; i++) paid += D.offer(S.presses + i);
+      S.inVoid = false; S.presses += k; S.money += paid; S.pending = 0; S.tripYears = 0; save();
       enterRoom(paid); fadeTo(0, 1200);
     });
   }
@@ -571,7 +567,6 @@
       const before = S.tripYears;
       const dy = R.focus * D.YEARS_PER_TRIP / D.TRIP_SEC * dt;
       S.tripYears = R.drw ? S.tripYears + dy : Math.min(D.YEARS_PER_TRIP, S.tripYears + dy); S.totalYears += S.tripYears - before;
-      if (R.drw && S.tripYears >= D.YEARS_PER_TRIP) rollTrip();
       if (Math.floor(S.tripYears / 1e8) > Math.floor(before / 1e8)) { R.pulse = 1; A.SFX.milestone(); }
     }
     R.pulse = Math.max(0, R.pulse - dt * 2);

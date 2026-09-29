@@ -5,9 +5,7 @@
    코드에서는 T('열쇠말') 로 꺼내 씁니다.
 
    어느 말로 보여줄지는 이 순서로 정합니다.
-     1) 주소에 ?lang=en  또는  ?lang=ko
-     2) 전에 고른 값 (기억해 둡니다)
-     3) 브라우저 언어가 한국어면 한국어, 아니면 영어
+     주소에 ?lang=en 이 있을 때만 영어, 없으면 한국어(기억하지 않는다, 2026-09-29)
    ========================================================= */
 (function (global) {
   'use strict';
@@ -17,12 +15,9 @@
   function pick() {
     try {
       var q = new URLSearchParams(location.search).get('lang');
-      if (q === 'en' || q === 'ko') { localStorage.setItem(KEY, q); return q; }
-      var saved = localStorage.getItem(KEY);
-      if (saved === 'en' || saved === 'ko') return saved;
-    } catch (e) {}
-    var nav = (navigator.language || 'en').toLowerCase();
-    return nav.indexOf('ko') === 0 ? 'ko' : 'en';
+      try { localStorage.removeItem(KEY); } catch (e) {}
+      return q === 'en' ? 'en' : 'ko';
+    } catch (e) { return 'ko'; }
   }
 
   var lang = pick();
@@ -217,8 +212,7 @@
     });
   }
 
-  function setLang(v) {
-    try { localStorage.setItem(KEY, v); } catch (e) {}
+  function setLang(v) {   // 단추로 바꿀 때도 주소만 바꾼다
     var u = new URL(location.href);
     u.searchParams.set('lang', v);
     location.href = u.toString();

@@ -836,12 +836,12 @@ const $ = id => document.getElementById(id);
 
 /* ══ 영어 ══
    한국어가 원본입니다. 주소에 ?lang=en 이 붙으면 화면 글만 갈아 끼웁니다.
-   고른 말은 이 브라우저에 기억해 둡니다. */
+   언어는 주소로만 정한다(?lang=en 일 때만 영어, 없으면 한국어) — 기억하거나 폰 언어를 따르면 한국어 페이지에서 들어와도 영어로 뜬다(2026-09-29) */
 const LANG = (function(){
   try{
     const q = new URLSearchParams(location.search).get('lang');
-    if (q === 'en' || q === 'ko'){ localStorage.setItem('pairboom_lang', q); return q; }
-    return localStorage.getItem('pairboom_lang') || 'ko';
+    try { localStorage.removeItem('pairboom_lang'); } catch (e) {}
+    return q === 'en' ? 'en' : 'ko';   // 언어는 주소로만 정한다(?lang=en 일 때만 영어, 없으면 한국어) — 기억하거나 폰 언어를 따르면 한국어 페이지에서 들어와도 영어로 뜬다(2026-09-29)
   }catch(e){ return 'ko'; }
 })();
 const EN = (LANG === 'en');

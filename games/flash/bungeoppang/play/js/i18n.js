@@ -32,7 +32,7 @@
     rotSkip: 'Play in portrait anyway'
   };
   var q = new URLSearchParams(location.search).get('lang');
-  var en = q ? q === 'en' : !/^ko/i.test(navigator.language || '');
+  var en = q === 'en';   // 언어는 주소로만 정한다(?lang=en 일 때만 영어, 없으면 한국어) — 기억하거나 폰 언어를 따르면 한국어 페이지에서 들어와도 영어로 뜬다(2026-09-29)
   window.T = en ? EN : KO;
   window.T.en = en;
   if (en) {

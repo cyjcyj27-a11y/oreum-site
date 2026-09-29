@@ -249,12 +249,11 @@ const EMPTY = 0, BLACK = 1, WHITE = 2;
 
 /* ── 말 두 벌 ──────────────────────────────────────────────
    주소에 ?lang=en 을 붙이면 영어로 뜹니다. 아무것도 안 붙이면
-   브라우저 언어를 보고 한국어/영어를 고릅니다.
+   한국어로 뜹니다.
    파일을 두 벌로 복사하지 않는 이유: 한쪽만 고쳐져 어긋나는 걸 막으려고. */
 const LANG = (() => {
   const q = new URLSearchParams(location.search).get('lang');
-  if (q === 'en' || q === 'ko') return q;
-  return (navigator.language || '').toLowerCase().startsWith('ko') ? 'ko' : 'en';
+  return q === 'en' ? 'en' : 'ko';   // 언어는 주소로만 정한다(?lang=en 일 때만 영어, 없으면 한국어) — 기억하거나 폰 언어를 따르면 한국어 페이지에서 들어와도 영어로 뜬다(2026-09-29)
 })();
 if (LANG === "en") document.querySelector('meta[name="description"]').setAttribute("content", "A magnet board game where you push, not flip — stones shoved off the board are gone. Play the bot or a friend on one screen.");
 const STR = {

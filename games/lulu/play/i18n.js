@@ -4,17 +4,12 @@
 // 사전에서 영어를 찾아 바꿔치기합니다. 사전에 없는 문구는 한국어로 그대로 나오므로
 // 번역이 덜 된 상태로도 게임은 멀쩡히 돌아갑니다.
 (function () {
-  // ----- 언어 정하기: 주소의 ?lang= > 지난번 선택 > 브라우저 언어 -----
-  let lang = null;
+  // ----- 언어는 주소로만 정한다(?lang=en 일 때만 영어, 없으면 한국어) — 기억하거나 폰 언어를 따르면 한국어 페이지에서 들어와도 영어로 뜬다(2026-09-29) -----
+  let lang = 'ko';
   try {
-    const q = new URLSearchParams(location.search).get('lang');
-    if (q === 'en' || q === 'ko') { lang = q; localStorage.setItem('lulu_lang', q); }
-    if (!lang) {
-      const saved = localStorage.getItem('lulu_lang');
-      if (saved === 'en' || saved === 'ko') lang = saved;
-    }
+    lang = new URLSearchParams(location.search).get('lang') === 'en' ? 'en' : 'ko';
+    localStorage.removeItem('lulu_lang');
   } catch (e) {}
-  if (!lang) lang = ((navigator.language || 'ko').toLowerCase().indexOf('ko') === 0) ? 'ko' : 'en';
   window.GAME_LANG = lang;
   document.documentElement.lang = lang;
   // 아래 바꿔치기는 화면(body) 안에서만 일어납니다. 브라우저 탭 이름과 즐겨찾기에 쓰이는
@@ -904,12 +899,10 @@
       e.stopPropagation();
       e.preventDefault();
       const next = (lang === 'en') ? 'ko' : 'en';
-      try { localStorage.setItem('lulu_lang', next); } catch (err) {}
-      // 주소에 ?lang= 가 붙어 있으면 그것도 새 언어로 바꿔서 이동합니다.
-      // (안 그러면 ?lang=en 같은 게 새로고침 때마다 localStorage를 이겨서 한국어로 못 바꿉니다)
+      // 기억하지 않고 주소의 ?lang= 만 바꿔서 다시 연다
       try {
         const url = new URL(location.href);
-        if (url.searchParams.has('lang')) { url.searchParams.set('lang', next); location.replace(url.toString()); return; }
+        url.searchParams.set('lang', next); location.replace(url.toString()); return;
       } catch (err) {}
       location.reload();
     });
