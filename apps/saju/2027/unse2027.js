@@ -339,13 +339,56 @@ function u27Calc(input) {
   };
 }
 
+/* ── 화면 글자 (영문 페이지는 unse2027-en.js 가 이 표를 통째로 바꾼다) ── */
+var U27_UI = {
+  elNote: {
+    fireMany: '원래 사주에 불(화)이 많은 편인데 2027년에 불이 또 들어옵니다. 열정이 넘치는 만큼 급해지고 지치기 쉬우니, 속도를 한 단계 낮추는 것이 올해의 가장 큰 대비입니다.',
+    fireNone: '사주에 불(화)이 없는데 2027년에 불이 들어옵니다. 평소 드러내지 않던 표현력과 활기가 살아나, 사람들 앞에 나서는 일이 전보다 수월해집니다.',
+    earthMany: '원래 흙(토)이 많은 사주에 흙이 또 쌓입니다. 안정은 커지지만 몸과 결정이 무거워지기 쉬우니 가볍게 움직이는 습관을 들이세요.',
+    earthNone: '사주에 흙(토)이 없는데 2027년에 흙이 들어옵니다. 떠돌던 계획이 자리를 잡고, 기댈 곳이 생기는 해입니다.'
+  },
+  date: function (p) { return (p.y !== 2027 ? p.y + '년 ' : '') + p.m + '월 ' + p.d + '일'; },
+  gj: function (st, br) { return STEMS[st].ko + BRANCHES[br].ko; },          // 간지 읽는 글자
+  animal: function (b) { return BRANCHES[b].animal + '띠'; },
+  god: function (g) { return g; },
+  el: function (k) { return ELEMENTS[k].ko; },
+  pillarNames: { hour: '시주', day: '일주', month: '월주', year: '연주' },
+  mySaju: '내 사주', noHour: '시간 모름',
+  dayLine: function (s, animal) { return '일간 <b>' + u27Esc(s.dayStem.ko + '(' + s.dayStem.han + ')') + '</b> ' + u27Esc(s.dayStem.nick) + ', ' + u27Esc(animal) + ' (입춘 기준)'; },
+  inputLine: function (input) {
+    return '양력 ' + input.year + '년 ' + input.month + '월 ' + input.day + '일' +
+      (input.lunar ? ' (음력 ' + input.lunar.year + '년 ' + (input.lunar.leap ? '윤' : '') + input.lunar.month + '월 ' + input.lunar.day + '일)' : '') +
+      (input.gender === 'm' ? ', 남성' : input.gender === 'f' ? ', 여성' : '');
+  },
+  totalH: function (st) { return '2027년 총운 — ' + st.title; },
+  totalTag: function (s, st) { return '정미년이 ' + s.dayStem.ko + '일간에게 주는 것: ' + st.gods; },
+  fieldsH: '2027년 분야별 운세',
+  fields: ['재물운', '직장과 일', '연애와 관계', '건강'],
+  placeH: '내 자리와 양의 해',
+  zodiacH: function (animal) { return animal + '의 2027년'; },
+  samjaeYes: function (animal) { return animal + '는 2027년이 날삼재입니다. 삼재의 마지막 해입니다.'; },
+  samjaeNo: function (animal) { return animal + '는 2027년 삼재가 아닙니다. 2027년 삼재띠는 돼지띠, 토끼띠, 양띠입니다.'; },
+  monthsH: '2027년 월별 운세',
+  monthsSub: '달은 절기로 나눕니다. 음력 달이나 양력 1일과 다릅니다.',
+  monthName: function (gj) { return gj + '월'; },
+  good: '좋은 달', care: '살필 달',
+  tojH: '2027 토정비결',
+  tojSub: function (t) { return t.yearGanji + '년, ' + t.age + '세 (한국 나이)'; },
+  tojRows: ['한 해의 흐름', '사람과 관계', '재물과 실리'],
+  tojNote: '토정비결은 음력 생일과 한국 나이로 셉니다. 태어난 해는 음력 설을 경계로 잡습니다.',
+  tojLines: null,                                      // 영문은 괘 문장을 따로 준다 { up:[], mid:[], low:[] }
+  luckH: '2027년에 채우면 좋은 기운',
+  luckP: function (elName) { return '사주에서 가장 약한 오행은 <b>' + u27Esc(elName) + '</b>입니다. 전통 오행 배속으로 그 기운을 채우는 것들입니다.'; },
+  luckRows: ['색', '방향', '숫자', '습관']
+};
+
 /* 사주의 화·토 형편 — 2027년은 화와 토가 들어오는 해 */
 function u27ElementNote(s) {
-  var c = s.elementCount, out = [];
-  if (c['화'] >= 3) out.push('원래 사주에 불(화)이 많은 편인데 2027년에 불이 또 들어옵니다. 열정이 넘치는 만큼 급해지고 지치기 쉬우니, 속도를 한 단계 낮추는 것이 올해의 가장 큰 대비입니다.');
-  else if (c['화'] === 0) out.push('사주에 불(화)이 없는데 2027년에 불이 들어옵니다. 평소 드러내지 않던 표현력과 활기가 살아나, 사람들 앞에 나서는 일이 전보다 수월해집니다.');
-  if (c['토'] >= 3) out.push('원래 흙(토)이 많은 사주에 흙이 또 쌓입니다. 안정은 커지지만 몸과 결정이 무거워지기 쉬우니 가볍게 움직이는 습관을 들이세요.');
-  else if (c['토'] === 0) out.push('사주에 흙(토)이 없는데 2027년에 흙이 들어옵니다. 떠돌던 계획이 자리를 잡고, 기댈 곳이 생기는 해입니다.');
+  var c = s.elementCount, out = [], N = U27_UI.elNote;
+  if (c['화'] >= 3) out.push(N.fireMany);
+  else if (c['화'] === 0) out.push(N.fireNone);
+  if (c['토'] >= 3) out.push(N.earthMany);
+  else if (c['토'] === 0) out.push(N.earthNone);
   return out;
 }
 
@@ -353,61 +396,56 @@ function u27ElementNote(s) {
 function u27Esc(t) {
   return String(t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; });
 }
-function u27Date(p) { return (p.y !== 2027 ? p.y + '년 ' : '') + p.m + '월 ' + p.d + '일'; }
 
 function u27Render(input) {
-  var R = u27Calc(input);
+  var R = u27Calc(input), U = U27_UI;
   var s = R.saju, st = R.stem, e = u27Esc;
   var h = [];
-  var ANIMAL = BRANCHES[R.zodiacIdx].animal;
+  var ANIMAL = U.animal(R.zodiacIdx);
 
   // 1. 내 사주
-  var P = ['hour', 'day', 'month', 'year'], PN = { hour: '시주', day: '일주', month: '월주', year: '연주' };
-  h.push('<section class="u-card"><h2 class="u-h">내 사주</h2><div class="u-pillars">');
+  var P = ['hour', 'day', 'month', 'year'];
+  h.push('<section class="u-card"><h2 class="u-h">' + e(U.mySaju) + '</h2><div class="u-pillars">');
   P.forEach(function (k) {
     var p = s.pillars[k];
-    h.push('<div class="u-pil' + (k === 'day' ? ' me' : '') + '"><i>' + PN[k] + '</i>' +
-      (p ? '<b>' + STEMS[p.stem].han + BRANCHES[p.branch].han + '</b><span>' + STEMS[p.stem].ko + BRANCHES[p.branch].ko + '</span>'
-         : '<b>—</b><span>시간 모름</span>') + '</div>');
+    h.push('<div class="u-pil' + (k === 'day' ? ' me' : '') + '"><i>' + e(U.pillarNames[k]) + '</i>' +
+      (p ? '<b>' + STEMS[p.stem].han + BRANCHES[p.branch].han + '</b><span>' + e(U.gj(p.stem, p.branch)) + '</span>'
+         : '<b>—</b><span>' + e(U.noHour) + '</span>') + '</div>');
   });
-  h.push('</div><p class="u-sub">일간 <b>' + e(s.dayStem.ko + '(' + s.dayStem.han + ')') + '</b> ' + e(s.dayStem.nick) +
-    ', ' + e(ANIMAL) + '띠 (입춘 기준)</p>' +
-    '<p class="u-sub">양력 ' + input.year + '년 ' + input.month + '월 ' + input.day + '일' +
-    (input.lunar ? ' (음력 ' + input.lunar.year + '년 ' + (input.lunar.leap ? '윤' : '') + input.lunar.month + '월 ' + input.lunar.day + '일)' : '') +
-    (input.gender === 'm' ? ', 남성' : input.gender === 'f' ? ', 여성' : '') + '</p></section>');
+  h.push('</div><p class="u-sub">' + U.dayLine(s, ANIMAL) + '</p>' +
+    '<p class="u-sub">' + e(U.inputLine(input)) + '</p></section>');
 
   // 2. 총운
-  h.push('<section class="u-card"><h2 class="u-h">2027년 총운 — ' + e(st.title) + '</h2>');
-  h.push('<p class="u-tag">정미년이 ' + e(s.dayStem.ko) + '일간에게 주는 것: ' + e(st.gods) + '</p>');
-  st.total.forEach(function (t) { h.push('<p>' + e(t) + '</p>'); });
-  u27ElementNote(s).forEach(function (t) { h.push('<p class="u-note">' + e(t) + '</p>'); });
+  h.push('<section class="u-card"><h2 class="u-h">' + e(U.totalH(st)) + '</h2>');
+  h.push('<p class="u-tag">' + e(U.totalTag(s, st)) + '</p>');
+  st.total.forEach(function (x) { h.push('<p>' + e(x) + '</p>'); });
+  u27ElementNote(s).forEach(function (x) { h.push('<p class="u-note">' + e(x) + '</p>'); });
   h.push('</section>');
 
   // 3. 분야별
-  h.push('<section class="u-card"><h2 class="u-h">2027년 분야별 운세</h2>');
-  [['재물운', st.money], ['직장과 일', st.work], ['연애와 관계', input.gender === 'm' ? st.loveM : input.gender === 'f' ? st.loveF : st.love], ['건강', st.health]].forEach(function (x) {
-    h.push('<h3 class="u-h3">' + x[0] + '</h3><p>' + e(x[1]) + '</p>');
+  h.push('<section class="u-card"><h2 class="u-h">' + e(U.fieldsH) + '</h2>');
+  var love = input.gender === 'm' ? st.loveM : input.gender === 'f' ? st.loveF : st.love;
+  [st.money, st.work, love, st.health].forEach(function (x, i) {
+    h.push('<h3 class="u-h3">' + e(U.fields[i]) + '</h3><p>' + e(x) + '</p>');
   });
   h.push('</section>');
 
   // 4. 내 자리와 띠, 삼재
-  h.push('<section class="u-card"><h2 class="u-h">내 자리와 양의 해</h2>');
+  h.push('<section class="u-card"><h2 class="u-h">' + e(U.placeH) + '</h2>');
   h.push('<p>' + e(R.dayText) + '</p>');
-  h.push('<h3 class="u-h3">' + e(ANIMAL) + '띠의 2027년</h3><p>' + e(R.zodiac.text) + '</p>');
-  h.push('<p class="u-note">' + (R.samjae
-    ? e(ANIMAL + '띠는 2027년이 날삼재입니다. 삼재의 마지막 해입니다.')
-    : e(ANIMAL + '띠는 2027년 삼재가 아닙니다. 2027년 삼재띠는 돼지띠, 토끼띠, 양띠입니다.')) + '</p>');
+  h.push('<h3 class="u-h3">' + e(U.zodiacH(ANIMAL)) + '</h3><p>' + e(R.zodiac.text) + '</p>');
+  h.push('<p class="u-note">' + e(R.samjae ? U.samjaeYes(ANIMAL) : U.samjaeNo(ANIMAL)) + '</p>');
   h.push('</section>');
 
   // 5. 월별
-  h.push('<section class="u-card"><h2 class="u-h">2027년 월별 운세</h2>');
-  h.push('<p class="u-sub">달은 절기로 나눕니다. 음력 달이나 양력 1일과 다릅니다.</p><ol class="u-months">');
+  h.push('<section class="u-card"><h2 class="u-h">' + e(U.monthsH) + '</h2>');
+  h.push('<p class="u-sub">' + e(U.monthsSub) + '</p><ol class="u-months">');
   R.months.forEach(function (x) {
     var mo = x.mo, rel = x.rel;
     var cls = rel.good > 0 ? ' good' : (rel.good < 0 ? ' care' : '');
-    var badge = rel.good > 0 ? '<em class="u-b good">좋은 달</em>' : (rel.good < 0 ? '<em class="u-b care">살필 달</em>' : '');
-    h.push('<li class="u-mo' + cls + '"><div class="u-mo-h"><b>' + (mo.idx + 1) + '. ' + e(STEMS[mo.stem].ko + BRANCHES[mo.branch].ko) + '월</b>' +
-      '<span>' + e(u27Date(mo.from) + ' ~ ' + u27Date(mo.to)) + '</span><i>' + e(x.god) + '</i>' + badge + '</div>' +
+    var badge = rel.good > 0 ? '<em class="u-b good">' + e(U.good) + '</em>' : (rel.good < 0 ? '<em class="u-b care">' + e(U.care) + '</em>' : '');
+    h.push('<li class="u-mo' + cls + '"><div class="u-mo-h"><b>' + (mo.idx + 1) + '. ' + e(U.monthName(U.gj(mo.stem, mo.branch))) + '</b>' +
+      '<span>' + e(U.date(mo.from) + ' ~ ' + U.date(mo.to)) + '</span><i>' + e(U.god(x.god)) + '</i>' + badge + '</div>' +
       '<p>' + e(U27_MONTH_GOD[x.god][x.variant]) + (rel.kind ? ' ' + e(U27_MONTH_REL[rel.kind]) : '') + '</p></li>');
   });
   h.push('</ol></section>');
@@ -415,20 +453,24 @@ function u27Render(input) {
   // 6. 토정비결
   var t = R.tojeong;
   if (t) {
-    h.push('<section class="u-card"><h2 class="u-h">2027 토정비결</h2>');
-    h.push('<div class="u-toj"><b>' + t.up + ' · ' + t.mid + ' · ' + t.low + '</b><span>' + e(t.yearGanji) + '년, ' + t.age + '세 (한국 나이)</span></div>');
-    [['한 해의 흐름', t.lines.up], ['사람과 관계', t.lines.mid], ['재물과 실리', t.lines.low]].forEach(function (x) {
-      if (x[1]) h.push('<h3 class="u-h3">' + x[0] + '</h3><p>' + e(x[1]) + '</p>');
+    var TL = U.tojLines;
+    var lines = TL ? [TL.up[t.up], TL.mid[t.mid], TL.low[t.low]] : [t.lines.up, t.lines.mid, t.lines.low];
+    h.push('<section class="u-card"><h2 class="u-h">' + e(U.tojH) + '</h2>');
+    h.push('<div class="u-toj"><b>' + t.up + ' · ' + t.mid + ' · ' + t.low + '</b><span>' + e(U.tojSub(t)) + '</span></div>');
+    lines.forEach(function (x, i) {
+      if (x) h.push('<h3 class="u-h3">' + e(U.tojRows[i]) + '</h3><p>' + e(x) + '</p>');
     });
-    h.push('<p class="u-sub">토정비결은 음력 생일과 한국 나이로 셉니다. 태어난 해는 음력 설을 경계로 잡습니다.</p></section>');
+    h.push('<p class="u-sub">' + e(U.tojNote) + '</p></section>');
   }
 
   // 7. 채울 오행
   var L = U27_LUCK[s.weakest];
   if (L) {
-    h.push('<section class="u-card"><h2 class="u-h">2027년에 채우면 좋은 기운</h2>');
-    h.push('<p>사주에서 가장 약한 오행은 <b>' + e(ELEMENTS[s.weakest].ko) + '</b>입니다. 전통 오행 배속으로 그 기운을 채우는 것들입니다.</p>');
-    h.push('<dl class="u-luck"><dt>색</dt><dd>' + e(L.color) + '</dd><dt>방향</dt><dd>' + e(L.dir) + '</dd><dt>숫자</dt><dd>' + e(L.num) + '</dd><dt>습관</dt><dd>' + e(L.act) + '</dd></dl></section>');
+    h.push('<section class="u-card"><h2 class="u-h">' + e(U.luckH) + '</h2>');
+    h.push('<p>' + U.luckP(U.el(s.weakest)) + '</p>');
+    h.push('<dl class="u-luck">' + [L.color, L.dir, L.num, L.act].map(function (x, i) {
+      return '<dt>' + e(U.luckRows[i]) + '</dt><dd>' + e(x) + '</dd>';
+    }).join('') + '</dl></section>');
   }
   return h.join('');
 }

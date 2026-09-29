@@ -769,7 +769,8 @@ html[lang="en"] .zw-top { padding-right: 22px; }
   font-family: var(--serif); font-size: 17px; font-weight: 700; text-decoration: none;
   background: var(--card2); color: var(--gold); border: 1px solid var(--gold);
 }
-html[lang="en"] .yr-next { display: none; }   /* 2027 페이지는 한국어만 있다 */
+/* 언어마다 그 언어의 2027 페이지로 (영문판 2026-09-29) */
+html:not([lang="en"]) .yr-next.en, html[lang="en"] .yr-next.ko { display: none; }
 
 /* 명반 범례에 붙는 두 꼬리표 — 설명 문장 대신 쓴다 */
 .zw-lg-me, .zw-lg-body { font-size: 11.5px; font-weight: 600; }
@@ -9213,7 +9214,8 @@ function renderResult(input, r) {
   h.push(tojeongSection(input));
   h.push(yearSection(input, r));
   /* 2027 운세는 따로 페이지에서 길게 본다 (사장님 2026-09-28) */
-  h.push('<a class="yr-next" href="/apps/saju/2027/">2027년 운세 보기</a>');
+  h.push('<a class="yr-next ko" href="/apps/saju/2027/">2027년 운세 보기</a>' +
+         '<a class="yr-next en" href="/en/apps/saju/2027/">2027 Fire Goat predictions</a>');
 
   $('#result').innerHTML = h.join('');
 
