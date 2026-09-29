@@ -349,17 +349,10 @@
     var hd = document.querySelector('.site-header'), off = 10;
     if (hd && /sticky|fixed/.test(getComputedStyle(hd).position)) off += hd.offsetHeight;
     window.scrollTo({ top: $('u-result').getBoundingClientRect().top + window.scrollY - off, behavior: 'instant' });
-    try { localStorage.setItem('u27-form', JSON.stringify({ cal: cal.get(), y: y, m: m, d: d, leap: leap, h: sel.value, g: gen.get() })); } catch (e) {}
   });
 
-  /* 지난번 넣은 값 다시 채우기 (이 브라우저에만 저장) */
-  try {
-    var last = JSON.parse(localStorage.getItem('u27-form') || 'null');
-    if (last) {
-      cal.set(last.cal); $('u-y').value = last.y; $('u-m').value = last.m; $('u-d').value = last.d;
-      $('u-leap').checked = !!last.leap; sel.value = last.h; gen.set(last.g);
-    }
-  } catch (e) {}
+  /* 생년월일은 남기지 않는다. 예전 판이 저장해 둔 값도 지운다 (사장님 2026-09-29 "다시 접속하니까 입력한 생년월일이 남아있네") */
+  try { localStorage.removeItem('u27-form'); localStorage.removeItem('u27-last'); } catch (e) {}
 })();
 </script>
 <script src="/assets/visit.js?v=17" defer></script>
