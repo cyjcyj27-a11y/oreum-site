@@ -290,19 +290,6 @@ select { appearance: none; background-image: none; }
   font-size: 11.5px; line-height: 1.8; color: var(--tx3); text-align: center;
 }
 
-/* 최근 기록 */
-.recent { margin-top: 30px; }
-.recent-title { font-size: 12px; color: var(--tx3); margin-bottom: 11px; padding-left: 6px; letter-spacing: .08em; }
-.recent-item {
-  display: flex; justify-content: space-between; align-items: center; gap: 10px;
-  background: var(--card); border: 1px solid var(--line); border-radius: 14px;
-  padding: 14px 16px; margin-bottom: 8px;
-  font-size: 13.5px; color: var(--tx2); cursor: pointer;
-  transition: .2s;
-}
-.recent-item:hover { border-color: var(--gold); }
-.recent-item b { color: var(--gold); font-weight: 600; }
-
 /* ── 결과 ─────────────────────────────── */
 .r-head { text-align: center; padding: 50px 0 10px; }
 .r-head .who { font-size: 12px; color: var(--tx3); letter-spacing: .14em; }
@@ -866,10 +853,6 @@ html:not([lang="en"]) .yr-next.en, html[lang="en"] .yr-next.ko { display: none; 
     </form>
     <a class="home-link" href="https://oreumgames.com">오름게임즈 홈페이지 →</a>
 
-    <div id="recentBox" class="recent" hidden>
-      <div class="recent-title">최근 분석</div>
-      <div id="recentList"></div>
-    </div>
   </section>
 
   <!-- ================= 관계역학 입력 화면 ================= -->
@@ -8820,7 +8803,7 @@ var state = { gender: 'none', mbti: null, lastResult: null };
   $('#copyBtn').addEventListener('click', copyResult);
   $('#shareBtn').addEventListener('click', shareResult);
 
-  renderRecent();
+  forgetSaved();
 })();
 
 function showScreen(which) {
@@ -8869,7 +8852,6 @@ function onSubmit(e) {
   var res = buildResult(input);
   state.lastResult = { input: input, res: res };
 
-  saveRecent(input);
   logMbtiPair(input, res);
   renderResult(input, res);
   showScreen('result');
@@ -8913,10 +8895,10 @@ function logMbtiPair(input, res) {
 
     // 같은 짝을 두 번 세지 않습니다 (새로고침·재분석)
     var mark = 'pair:' + input.year + '.' + input.month + '.' + input.day + '.' + input.hourIndex + '.' + t;
-    try {
-      if (localStorage.getItem(mark)) return;
-      localStorage.setItem(mark, '1');
-    } catch (e) { return; }                                   // 저장소가 막히면 중복을 막을 방법이 없으니 세지 않습니다
+    // 생년월일이 든 표시를 기기에 남기지 않으려고 메모리에만 둔다 — 새로고침하면 한 번 더 셀 수 있다 (2026-09-29)
+    window.__sajuCounted = window.__sajuCounted || {};
+    if (window.__sajuCounted[mark]) return;
+    window.__sajuCounted[mark] = 1;
 
     var base = 'https://abacus.jasoncameron.dev/hit/oreumgames/';
     function hit(k) { try { fetch(base + k, { mode: 'cors' }).catch(function () {}); } catch (e) {} }
@@ -9745,51 +9727,17 @@ function shareRelResult() {
     : nA + ' × ' + nB + ' — “' + rel.name + '” · ' + rel.score + '점 나왔어.' + '\n너희도 해봐 👇');
 }
 
-/* ── 최근 기록 (이 기기에만 저장됩니다) ───────────────── */
-var LS_KEY = 'hpe_recent_v1';
-
-function saveRecent(input) {
+/* ── 입력한 생년월일은 이 기기에도 남기지 않는다 (사장님 2026-09-29 "앱도 남지 않게 해") ──
+   예전에는 최근 분석 5개(hpe_recent_v1)와 통계 중복 방지 표시(pair:생년월일…)를 localStorage 에 남겼다.
+   둘 다 없앴고, 예전 판이 남긴 값은 앱을 열 때 지운다. */
+function forgetSaved() {
   try {
-    var list = JSON.parse(localStorage.getItem(LS_KEY) || '[]');
-    list = list.filter(function (x) {
-      return !(x.year === input.year && x.month === input.month && x.day === input.day && x.mbti === input.mbti);
-    });
-    list.unshift({
-      name: input.name, year: input.year, month: input.month, day: input.day,
-      hourIndex: input.hourIndex, gender: input.gender, mbti: input.mbti,
-      at: new Date().toISOString()
-    });
-    localStorage.setItem(LS_KEY, JSON.stringify(list.slice(0, 5)));
-  } catch (e) { /* 저장 실패해도 앱은 그대로 동작 */ }
-}
-
-function renderRecent() {
-  var list = [];
-  try { list = JSON.parse(localStorage.getItem(LS_KEY) || '[]'); } catch (e) { return; }
-  if (!list.length) return;
-
-  $('#recentBox').hidden = false;
-  $('#recentList').innerHTML = list.map(function (x, idx) {
-    return '<div class="recent-item" data-i="' + idx + '">' +
-           '<span>' + esc(x.name || '이름 없음') + ' · ' + x.year + '.' + x.month + '.' + x.day + '</span>' +
-           '<b>' + (x.mbti || '사주 추정') + '</b></div>';
-  }).join('');
-
-  $('#recentList').addEventListener('click', function (e) {
-    var it = e.target.closest('.recent-item');
-    if (!it) return;
-    var x = list[parseInt(it.dataset.i, 10)];
-    $('#name').value = x.name || '';
-    $('#y').value = x.year; $('#m').value = x.month; $('#d').value = x.day;
-    $('#hour').value = x.hourIndex;
-    state.mbti = x.mbti || null;
-    document.querySelectorAll('.mbti-btn').forEach(function (b) {
-      b.classList.toggle('active', !!x.mbti && b.dataset.v === x.mbti);
-    });
-    $('#mbtiHint').textContent = x.mbti ? (x.mbti + ' — ' + MBTI[x.mbti].nick + ' (다시 누르면 선택 해제)')
-                                        : '선택 안 함 — 사주로 추정합니다.';
-    toast('불러왔습니다');
-  });
+    localStorage.removeItem('hpe_recent_v1');
+    for (var i = localStorage.length - 1; i >= 0; i--) {
+      var k = localStorage.key(i);
+      if (k && k.indexOf('pair:') === 0) localStorage.removeItem(k);
+    }
+  } catch (e) {}
 }
 
 /* =========================================================
