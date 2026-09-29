@@ -4,8 +4,9 @@
   const LANG = (function () {
     try {
       const q = new URLSearchParams(location.search).get('lang');
-      if (q === 'en' || q === 'ko') { localStorage.setItem('button5.lang', q); return q; }
-      return localStorage.getItem('button5.lang') || 'ko';
+      // 언어는 주소로만 정한다(?lang=en 일 때만 영어). 기억해 두면 한국어 페이지에서 들어와도 영어로 뜬다(9/29 사장님 폰)
+      try { localStorage.removeItem('button5.lang'); } catch (e) {}
+      return q === 'en' ? 'en' : 'ko';
     } catch (e) { return 'ko'; }
   })();
   const T = (ko, en) => (LANG === 'en' ? en : ko);
