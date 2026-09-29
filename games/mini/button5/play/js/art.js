@@ -882,33 +882,90 @@
     leg(ph + Math.PI, true);   // 먼 다리 먼저
     leg(ph, false);
   }
-  function dogArt(c, x, y, s, t, happy) { // 누워 있는 시바
+  function dogArt(c, x, y, s, t, happy) { // 엎드린 시바(옆모습, 머리는 오른쪽). 주둥이·코·목줄·말린 꼬리로 개로 읽히게
     c.save(); c.translate(x, y);
-    c.fillStyle = 'rgba(50,40,30,.25)'; c.beginPath(); c.ellipse(0, 0, s * 0.55, s * 0.1, 0, 0, TAU); c.fill();
-    const wag = Math.sin(t * (happy ? 18 : 5)) * (happy ? 0.5 : 0.25);
-    // 꼬리
-    c.save(); c.translate(-s * 0.42, -s * 0.2); c.rotate(-0.6 + wag);
-    c.fillStyle = '#d98a3d'; c.strokeStyle = '#8a4f1e'; c.lineWidth = 2; c.beginPath(); c.ellipse(0, -s * 0.12, s * 0.09, s * 0.15, 0.3, 0, TAU); c.fill(); c.stroke();
-    c.fillStyle = '#f6e7cf'; c.beginPath(); c.ellipse(s * 0.01, -s * 0.14, s * 0.05, s * 0.08, 0.3, 0, TAU); c.fill(); c.restore();
-    // 몸
-    let g = c.createLinearGradient(0, -s * 0.4, 0, 0); g.addColorStop(0, '#e79b4c'); g.addColorStop(1, '#b86b2b');
-    c.fillStyle = g; c.strokeStyle = '#7d4519'; c.lineWidth = 2;
-    c.beginPath(); c.ellipse(-s * 0.05, -s * 0.16, s * 0.42, s * 0.17, 0, 0, TAU); c.fill(); c.stroke();
-    c.fillStyle = '#f6e7cf'; c.beginPath(); c.ellipse(0, -s * 0.05, s * 0.3, s * 0.06, 0, 0, TAU); c.fill();
-    // 앞발
-    c.fillStyle = '#f3e1c4'; c.strokeStyle = '#8a5a30'; [0.22, 0.34].forEach(px => { c.beginPath(); c.ellipse(s * px, -s * 0.03, s * 0.07, s * 0.035, 0, 0, TAU); c.fill(); c.stroke(); });
-    // 머리
-    c.save(); c.translate(s * 0.32, -s * 0.3); c.rotate(Math.sin(t * 0.7) * 0.05);
-    [-1, 1].forEach(d => { c.fillStyle = '#d98a3d'; c.strokeStyle = '#7d4519'; c.beginPath(); c.moveTo(d * s * 0.06, -s * 0.1); c.lineTo(d * s * 0.13, -s * 0.24); c.lineTo(d * s * 0.16, -s * 0.07); c.closePath(); c.fill(); c.stroke();
-      c.fillStyle = '#f2c9a0'; c.beginPath(); c.moveTo(d * s * 0.085, -s * 0.11); c.lineTo(d * s * 0.125, -s * 0.2); c.lineTo(d * s * 0.14, -s * 0.09); c.fill(); });
-    g = c.createRadialGradient(-s * 0.04, -s * 0.06, 0, 0, 0, s * 0.17); g.addColorStop(0, '#f0a758'); g.addColorStop(1, '#c1732f');
-    c.fillStyle = g; c.strokeStyle = '#7d4519'; c.beginPath(); c.ellipse(0, 0, s * 0.17, s * 0.14, 0, 0, TAU); c.fill(); c.stroke();
-    c.fillStyle = '#f7ead6'; c.beginPath(); c.ellipse(0, s * 0.06, s * 0.12, s * 0.07, 0, 0, TAU); c.fill();
-    const blink = (t % 4) < 0.12;
-    c.fillStyle = '#1e140e'; [-1, 1].forEach(d => { if (blink) c.fillRect(d * s * 0.065 - s * 0.02, -s * 0.02, s * 0.04, 2); else { c.beginPath(); c.ellipse(d * s * 0.065, -s * 0.02, s * 0.022, s * 0.026, 0, 0, TAU); c.fill(); c.fillStyle = '#fff'; c.fillRect(d * s * 0.065 - 1, -s * 0.035, 2, 2); c.fillStyle = '#1e140e'; } });
-    c.beginPath(); c.ellipse(0, s * 0.035, s * 0.03, s * 0.02, 0, 0, TAU); c.fill();
-    if (happy) { c.fillStyle = '#e0607a'; c.beginPath(); c.ellipse(0, s * 0.09, s * 0.025, s * 0.035, 0, 0, TAU); c.fill(); }
-    c.restore(); c.restore();
+    const O = '#e8973f', O_D = '#b8662a', O_L = '#f6b766', CREAM = '#f8ecd6', LINE = '#7a4518';
+    // 바닥 그림자
+    let g = c.createRadialGradient(0, 0, 0, 0, 0, s * 0.62);
+    g.addColorStop(0, 'rgba(45,32,20,.38)'); g.addColorStop(1, 'rgba(45,32,20,0)');
+    c.fillStyle = g; c.beginPath(); c.ellipse(-s * 0.02, -s * 0.01, s * 0.62, s * 0.1, 0, 0, TAU); c.fill();
+    c.lineJoin = 'round'; c.lineCap = 'round';
+    // 뒷다리(접은 허벅지)
+    g = c.createRadialGradient(-s * 0.36, -s * 0.2, 0, -s * 0.3, -s * 0.12, s * 0.2);
+    g.addColorStop(0, O_L); g.addColorStop(1, O_D);
+    c.fillStyle = g; c.strokeStyle = LINE; c.lineWidth = 1.8;
+    c.beginPath(); c.ellipse(-s * 0.32, -s * 0.13, s * 0.17, s * 0.12, -0.2, 0, TAU); c.fill(); c.stroke();
+    c.fillStyle = CREAM; c.beginPath(); c.ellipse(-s * 0.22, -s * 0.025, s * 0.1, s * 0.035, 0, 0, TAU); c.fill(); c.stroke();
+    // 몸통
+    g = c.createLinearGradient(0, -s * 0.36, 0, 0); g.addColorStop(0, O_L); g.addColorStop(0.55, O); g.addColorStop(1, O_D);
+    c.fillStyle = g;
+    c.beginPath();
+    c.moveTo(-s * 0.46, -s * 0.12);
+    c.bezierCurveTo(-s * 0.46, -s * 0.3, -s * 0.2, -s * 0.33, s * 0.04, -s * 0.31);
+    c.bezierCurveTo(s * 0.18, -s * 0.3, s * 0.26, -s * 0.24, s * 0.28, -s * 0.14);
+    c.lineTo(s * 0.26, -s * 0.03);
+    c.quadraticCurveTo(-s * 0.1, s * 0.01, -s * 0.4, -s * 0.03);
+    c.closePath(); c.fill(); c.stroke();
+    // 배 크림색
+    c.fillStyle = CREAM; c.beginPath(); c.moveTo(-s * 0.3, -s * 0.035); c.quadraticCurveTo(-s * 0.02, -s * 0.1, s * 0.24, -s * 0.06); c.lineTo(s * 0.25, -s * 0.03); c.quadraticCurveTo(-s * 0.05, 0, -s * 0.3, -s * 0.035); c.fill();
+    // 등 털 결
+    c.strokeStyle = 'rgba(122,69,24,.35)'; c.lineWidth = 1.2;
+    for (let i = 0; i < 4; i++) { const bx = -s * 0.3 + i * s * 0.13; c.beginPath(); c.moveTo(bx, -s * 0.27); c.quadraticCurveTo(bx + s * 0.03, -s * 0.24, bx + s * 0.02, -s * 0.2); c.stroke(); }
+    // 말린 꼬리(등 위로 동그랗게) — 기분 좋으면 흔든다
+    const wag = Math.sin(t * (happy ? 16 : 3)) * (happy ? 0.35 : 0.1);
+    c.save(); c.translate(-s * 0.4, -s * 0.28); c.rotate(wag);
+    c.strokeStyle = LINE; c.lineWidth = s * 0.1 + 2; c.beginPath(); c.arc(s * 0.06, -s * 0.03, s * 0.08, Math.PI * 0.95, Math.PI * 2.5); c.stroke();
+    c.strokeStyle = O; c.lineWidth = s * 0.1; c.stroke();
+    c.strokeStyle = CREAM; c.lineWidth = s * 0.04; c.beginPath(); c.arc(s * 0.06, -s * 0.03, s * 0.08, Math.PI * 1.6, Math.PI * 2.4); c.stroke();
+    c.restore();
+    // 앞다리 두 개를 앞으로 쭉
+    [[s * 0.2, 0], [s * 0.3, s * 0.012]].forEach(([px, py], i) => {
+      c.fillStyle = i ? O : O_D; c.strokeStyle = LINE; c.lineWidth = 1.6;
+      c.beginPath(); c.moveTo(px - s * 0.07, py - s * 0.1); c.quadraticCurveTo(px + s * 0.05, py - s * 0.085, px + s * 0.15, py - s * 0.07); c.quadraticCurveTo(px + s * 0.21, py - s * 0.04, px + s * 0.17, py + s * 0.005);
+      c.lineTo(px - s * 0.06, py - s * 0.005); c.closePath(); c.fill(); c.stroke();
+      c.fillStyle = CREAM; c.beginPath(); c.ellipse(px + s * 0.155, py - s * 0.03, s * 0.055, s * 0.035, 0, 0, TAU); c.fill(); c.stroke();
+    });
+    // 머리(앞발 위에 턱을 괴지 않고 들고 있음)
+    const hb = Math.sin(t * 0.8) * 0.04 + (happy ? -0.08 : 0);
+    c.save(); c.translate(s * 0.26, -s * 0.28); c.rotate(hb);
+    // 귀(작은 세모, 머리 뒤쪽)
+    [[-s * 0.07, -1], [s * 0.03, 1]].forEach(([ex, k]) => {
+      c.fillStyle = k < 0 ? O_D : O; c.strokeStyle = LINE; c.lineWidth = 1.6;
+      c.beginPath(); c.moveTo(ex - s * 0.045, -s * 0.07); c.quadraticCurveTo(ex - s * 0.02, -s * 0.2, ex + s * 0.01, -s * 0.2); c.quadraticCurveTo(ex + s * 0.04, -s * 0.13, ex + s * 0.055, -s * 0.07); c.closePath(); c.fill(); c.stroke();
+      if (k > 0) { c.fillStyle = '#f3c9a3'; c.beginPath(); c.moveTo(ex - s * 0.02, -s * 0.08); c.quadraticCurveTo(ex - s * 0.005, -s * 0.16, ex + s * 0.012, -s * 0.16); c.quadraticCurveTo(ex + s * 0.03, -s * 0.12, ex + s * 0.035, -s * 0.08); c.fill(); }
+    });
+    // 머리통 + 앞으로 튀어나온 주둥이
+    g = c.createRadialGradient(-s * 0.03, -s * 0.05, 0, 0, 0, s * 0.18); g.addColorStop(0, O_L); g.addColorStop(1, O_D);
+    c.fillStyle = g; c.strokeStyle = LINE; c.lineWidth = 1.8;
+    c.beginPath();
+    c.moveTo(-s * 0.11, s * 0.04);
+    c.bezierCurveTo(-s * 0.14, -s * 0.08, -s * 0.05, -s * 0.12, s * 0.04, -s * 0.1);
+    c.bezierCurveTo(s * 0.1, -s * 0.09, s * 0.12, -s * 0.05, s * 0.14, -s * 0.03);   // 이마에서 콧등으로 꺾임
+    c.lineTo(s * 0.25, -s * 0.01);                                                     // 콧등
+    c.quadraticCurveTo(s * 0.29, s * 0.01, s * 0.27, s * 0.045);                       // 코끝
+    c.quadraticCurveTo(s * 0.2, s * 0.08, s * 0.1, s * 0.075);                        // 아래턱
+    c.quadraticCurveTo(0, s * 0.1, -s * 0.11, s * 0.04);
+    c.closePath(); c.fill(); c.stroke();
+    // 흰 주둥이·볼(시바 무늬)
+    c.fillStyle = CREAM; c.beginPath(); c.moveTo(s * 0.02, s * 0.01); c.quadraticCurveTo(s * 0.12, -s * 0.02, s * 0.25, s * 0.005); c.quadraticCurveTo(s * 0.28, s * 0.03, s * 0.26, s * 0.05);
+    c.quadraticCurveTo(s * 0.18, s * 0.078, s * 0.08, s * 0.072); c.quadraticCurveTo(-s * 0.02, s * 0.07, s * 0.02, s * 0.01); c.fill();
+    // 코·입
+    c.fillStyle = '#1e140e'; c.beginPath(); c.ellipse(s * 0.262, s * 0.005, s * 0.024, s * 0.018, 0.3, 0, TAU); c.fill();
+    c.fillStyle = 'rgba(255,255,255,.5)'; c.beginPath(); c.arc(s * 0.256, -s * 0.002, s * 0.005, 0, TAU); c.fill();
+    c.strokeStyle = '#3a2412'; c.lineWidth = 1.3; c.beginPath(); c.moveTo(s * 0.26, s * 0.024); c.quadraticCurveTo(s * 0.24, s * 0.05, s * 0.2, s * 0.05); c.stroke();
+    if (happy) { c.fillStyle = '#e0607a'; c.strokeStyle = '#a23a50'; c.beginPath(); c.ellipse(s * 0.2, s * 0.075, s * 0.022, s * 0.035, 0.2, 0, TAU); c.fill(); c.stroke(); }
+    // 눈(아몬드꼴, 눈 위 크림 점)
+    const blink = (t % 4.3) < 0.12;
+    c.fillStyle = '#fbe9cf'; c.beginPath(); c.ellipse(s * 0.075, -s * 0.07, s * 0.018, s * 0.01, -0.2, 0, TAU); c.fill();
+    if (blink) { c.strokeStyle = '#1e140e'; c.lineWidth = 1.6; c.beginPath(); c.moveTo(s * 0.06, -s * 0.035); c.lineTo(s * 0.1, -s * 0.038); c.stroke(); }
+    else { c.fillStyle = '#1e140e'; c.beginPath(); c.ellipse(s * 0.08, -s * 0.036, s * 0.02, s * 0.017, -0.15, 0, TAU); c.fill();
+      c.fillStyle = '#fff'; c.beginPath(); c.arc(s * 0.074, -s * 0.042, s * 0.006, 0, TAU); c.fill(); }
+    c.restore();
+    // 빨간 목줄(머리와 몸 사이)
+    c.strokeStyle = '#6b1414'; c.lineWidth = s * 0.05 + 2; c.beginPath(); c.moveTo(s * 0.16, -s * 0.34); c.quadraticCurveTo(s * 0.19, -s * 0.24, s * 0.2, -s * 0.15); c.stroke();
+    c.strokeStyle = '#d93a3a'; c.lineWidth = s * 0.05; c.stroke();
+    c.fillStyle = '#f2c94c'; c.strokeStyle = '#8a6a14'; c.lineWidth = 1.2; c.beginPath(); c.arc(s * 0.215, -s * 0.16, s * 0.025, 0, TAU); c.fill(); c.stroke();
+    c.restore();
   }
 
   // 버튼 상자(방·타이틀 공용). 돌려주는 값: 누르는 자리 사각형
