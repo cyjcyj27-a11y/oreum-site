@@ -30,7 +30,13 @@
 .u-form{background:#fff;border:2px solid var(--green-lit);border-radius:16px;padding:18px 18px 20px;margin:18px 0 8px}
 .u-form h2{margin:0 0 12px;font-size:20px}
 .u-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 10px}
-.u-row label{font-weight:700;min-width:72px}
+.u-row label,.u-lb{font-weight:700;min-width:72px}
+.u-seg{display:inline-flex;border:1px solid #cfc7b3;border-radius:999px;overflow:hidden}
+.u-seg button{border-radius:0;box-shadow:none;margin:0;font:inherit;font-size:16px;font-weight:700;border:0;background:#fff;color:var(--ink-2);padding:9px 16px;cursor:pointer}
+.u-seg button+button{border-left:1px solid #cfc7b3}
+.u-seg button.on{background:var(--green-lit);color:#fff}
+.u-row label.u-leap{min-width:0;font-weight:700;display:inline-flex;align-items:center;gap:6px}
+.u-row label.u-leap input{width:20px;height:20px}
 .u-row input,.u-row select{font:inherit;font-size:17px;padding:9px 10px;border:1px solid #cfc7b3;border-radius:10px;background:#fff;color:var(--ink)}
 .u-row input{width:84px}
 .u-row input#u-y{width:100px}
@@ -78,7 +84,7 @@
 .cta{display:inline-block;background:var(--green-lit);color:#fff;font-weight:800;padding:13px 26px;border-radius:999px;text-decoration:none;font-size:18px;margin:10px 0}
 .cta.alt{background:#fff;color:var(--green-lit);border:2px solid var(--green-lit)}
 .cta-row{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0}
-@media (max-width:420px){ .u-row label{min-width:100%} .u-pil b{font-size:22px} }
+@media (max-width:420px){ .u-row label,.u-row .u-lb{min-width:100%} .u-row label.u-leap{min-width:0} .u-pil b{font-size:22px} }
 </style>
 <script type="application/ld+json">
 {
@@ -117,7 +123,7 @@
   { "@type": "Question", "name": "월별 운세의 달은 음력 달인가요?",
     "acceptedAnswer": { "@type": "Answer", "text": "아니요. 절기로 나눈 달입니다. 입춘부터 경칩 전까지가 첫째 달(임인월)이고, 이듬해 소한부터 입춘 전까지가 열두째 달(계축월)입니다. 사주의 달은 절기로 바뀌기 때문에 양력 1일이나 음력 초하루와 날짜가 다릅니다." } },
   { "@type": "Question", "name": "2027 토정비결은 어떻게 계산하나요?",
-    "acceptedAnswer": { "@type": "Answer", "text": "음력 생년월일과 2027년의 한국 나이로 셉니다. 나이와 태세수로 상괘, 태어난 달의 월건수와 그 달의 날 수로 중괘, 태어난 날의 일진수와 음력 생일로 하괘를 세워 144괘 가운데 하나를 고릅니다. 양력 생일을 넣으면 음력으로 바꿔 계산합니다." } },
+    "acceptedAnswer": { "@type": "Answer", "text": "음력 생년월일과 2027년의 한국 나이로 셉니다. 나이와 태세수로 상괘, 태어난 달의 월건수와 그 달의 날 수로 중괘, 태어난 날의 일진수와 음력 생일로 하괘를 세워 144괘 가운데 하나를 고릅니다. 음력 생일을 그대로 넣어도 되고, 양력 생일을 넣으면 음력으로 바꿔 계산합니다." } },
   { "@type": "Question", "name": "태어난 시간을 모르면 볼 수 없나요?",
     "acceptedAnswer": { "@type": "Answer", "text": "볼 수 있습니다. 2027 운세의 총운과 월별 운세는 태어난 날의 일간과 일지로 풀기 때문에 생년월일만 있으면 됩니다. 시간을 넣으면 사주 네 기둥이 모두 나오고, 절기가 바뀌는 날 태어난 사람은 달 기둥이 더 정확해집니다." } }
  ]
@@ -155,7 +161,11 @@
     <p class="lead"><b>2027 운세</b>를 생년월일로 봅니다. 2027년 정미년이 내 사주에게 무엇으로 오는지 총운과 재물, 일, 연애, 건강으로 풀고, 절기로 나눈 열두 달 흐름과 2027 토정비결까지 이어서 보여 줍니다. 무료이고 회원가입이 없으며, 생년월일은 서버로 가지 않습니다.</p>
 
     <form class="u-form" id="u-form" autocomplete="off">
-      <h2>생년월일 넣기 (양력)</h2>
+      <h2>생년월일 넣기</h2>
+      <div class="u-row"><span class="u-lb">달력</span>
+        <div class="u-seg" id="u-cal"><button type="button" data-v="solar" class="on">양력</button><button type="button" data-v="lunar">음력</button></div>
+        <label class="u-leap" id="u-leap-w" hidden><input type="checkbox" id="u-leap"> 윤달</label>
+      </div>
       <div class="u-row"><label for="u-y">생년월일</label>
         <input id="u-y" type="number" inputmode="numeric" placeholder="1990" min="1900" max="2026" aria-label="태어난 해">
         <input id="u-m" type="number" inputmode="numeric" placeholder="5" min="1" max="12" aria-label="태어난 달">
@@ -164,9 +174,12 @@
       <div class="u-row"><label for="u-h">태어난 시간</label>
         <select id="u-h"></select>
       </div>
+      <div class="u-row"><span class="u-lb">성별</span>
+        <div class="u-seg" id="u-g"><button type="button" data-v="none" class="on">선택 안 함</button><button type="button" data-v="f">여성</button><button type="button" data-v="m">남성</button></div>
+      </div>
       <button class="u-go" type="submit">2027년 운세 보기</button>
       <p class="u-err" id="u-err" hidden></p>
-      <p class="u-small">음력 생일만 안다면 양력으로 바꿔서 넣어 주세요. 토정비결은 넣은 날짜를 음력으로 바꿔 계산합니다.</p>
+      <p class="u-small">음력 생일은 음력을 누르고 넣어 주세요. 성별을 고르면 연애운을 성별에 맞춰 풀어 줍니다.</p>
     </form>
     <div id="u-result" aria-live="polite"></div>
 
@@ -250,7 +263,7 @@
       <dt>월별 운세의 달은 음력 달인가요?</dt>
       <dd>아니요. 절기로 나눈 달입니다. 입춘부터 경칩 전까지가 첫째 달(임인월)이고, 이듬해 소한부터 입춘 전까지가 열두째 달(계축월)입니다. 사주의 달은 절기로 바뀌기 때문에 양력 1일이나 음력 초하루와 날짜가 다릅니다.</dd>
       <dt>2027 토정비결은 어떻게 계산하나요?</dt>
-      <dd>음력 생년월일과 2027년의 한국 나이로 셉니다. 나이와 태세수로 상괘, 태어난 달의 월건수와 그 달의 날 수로 중괘, 태어난 날의 일진수와 음력 생일로 하괘를 세워 144괘 가운데 하나를 고릅니다. 양력 생일을 넣으면 음력으로 바꿔 계산합니다.</dd>
+      <dd>음력 생년월일과 2027년의 한국 나이로 셉니다. 나이와 태세수로 상괘, 태어난 달의 월건수와 그 달의 날 수로 중괘, 태어난 날의 일진수와 음력 생일로 하괘를 세워 144괘 가운데 하나를 고릅니다. 음력 생일을 그대로 넣어도 되고, 양력 생일을 넣으면 음력으로 바꿔 계산합니다.</dd>
       <dt>태어난 시간을 모르면 볼 수 없나요?</dt>
       <dd>볼 수 있습니다. 2027 운세의 총운과 월별 운세는 태어난 날의 일간과 일지로 풀기 때문에 생년월일만 있으면 됩니다. 시간을 넣으면 사주 네 기둥이 모두 나오고, 절기가 바뀌는 날 태어난 사람은 달 기둥이 더 정확해집니다.</dd>
     </dl>
@@ -277,7 +290,7 @@
   </div>
 </footer>
 <script src="saju-core.js?v=1"></script>
-<script src="unse2027.js?v=1"></script>
+<script src="unse2027.js?v=2"></script>
 <script>
 (function () {
   var $ = function (id) { return document.getElementById(id); };
@@ -288,28 +301,62 @@
     var op = document.createElement('option'); op.value = o.v; op.textContent = o.label; sel.appendChild(op);
   });
 
+  /* 양력·음력, 성별 단추 */
+  function seg(id, onChange) {
+    var box = $(id);
+    box.addEventListener('click', function (e) {
+      var b = e.target.closest('button'); if (!b) return;
+      [].forEach.call(box.children, function (x) { x.classList.toggle('on', x === b); });
+      if (onChange) onChange(b.dataset.v);
+    });
+    return {
+      get: function () { return box.querySelector('.on').dataset.v; },
+      set: function (v) { [].forEach.call(box.children, function (x) { x.classList.toggle('on', x.dataset.v === v); }); if (onChange) onChange(v); }
+    };
+  }
+  var cal = seg('u-cal', function (v) { $('u-leap-w').hidden = v !== 'lunar'; });
+  var gen = seg('u-g');
+
   $('u-form').addEventListener('submit', function (ev) {
     ev.preventDefault();
     var y = parseInt($('u-y').value, 10), m = parseInt($('u-m').value, 10), d = parseInt($('u-d').value, 10);
     var err = $('u-err');
-    var chk = new Date(y, m - 1, d);
-    if (!y || !m || !d || y < 1900 || y > 2026 || chk.getFullYear() !== y || chk.getMonth() !== m - 1 || chk.getDate() !== d) {
-      err.textContent = '1900년부터 2026년 사이의 날짜를 넣어 주세요.'; err.hidden = false; return;
+    var isLunar = cal.get() === 'lunar', leap = isLunar && $('u-leap').checked;
+    var sol = null, lun = null;
+    if (y && m && d && y >= 1900 && y <= 2026 && m >= 1 && m <= 12) {
+      if (isLunar) {
+        sol = u27LunarToSolar(y, m, d, leap);
+        if (sol) lun = { year: y, month: m, day: d, leap: leap };
+      } else {
+        var chk = new Date(y, m - 1, d);
+        if (chk.getFullYear() === y && chk.getMonth() === m - 1 && chk.getDate() === d) sol = { year: y, month: m, day: d };
+      }
+    }
+    if (!sol || sol.year > 2026) {
+      err.textContent = isLunar
+        ? (leap ? '그해 그 달에는 윤달이 없거나 없는 날짜입니다. 음력 날짜를 확인해 주세요.' : '없는 음력 날짜입니다. 음력은 한 달이 29일이나 30일입니다.')
+        : '1900년부터 2026년 사이의 날짜를 넣어 주세요.';
+      err.hidden = false; return;
     }
     err.hidden = true;
-    var input = { year: y, month: m, day: d, hourIndex: parseInt(sel.value, 10), lateNight: false };
+    if (!lun) { var l = solarToLunar(sol.year, sol.month, sol.day); if (l) lun = { year: l.year, month: l.month, day: l.day, leap: l.leap }; }
+    var input = { year: sol.year, month: sol.month, day: sol.day, hourIndex: parseInt(sel.value, 10), lateNight: false,
+                  gender: gen.get(), lunar: lun };
     $('u-result').innerHTML = u27Render(input);
     /* 윗머리가 고정된 화면에서는 그 높이만큼 덜 내려간다 */
     var hd = document.querySelector('.site-header'), off = 10;
     if (hd && /sticky|fixed/.test(getComputedStyle(hd).position)) off += hd.offsetHeight;
     window.scrollTo({ top: $('u-result').getBoundingClientRect().top + window.scrollY - off, behavior: 'instant' });
-    try { localStorage.setItem('u27-last', JSON.stringify(input)); } catch (e) {}
+    try { localStorage.setItem('u27-form', JSON.stringify({ cal: cal.get(), y: y, m: m, d: d, leap: leap, h: sel.value, g: gen.get() })); } catch (e) {}
   });
 
-  /* 지난번 넣은 생년월일 다시 채우기 (이 브라우저에만 저장) */
+  /* 지난번 넣은 값 다시 채우기 (이 브라우저에만 저장) */
   try {
-    var last = JSON.parse(localStorage.getItem('u27-last') || 'null');
-    if (last) { $('u-y').value = last.year; $('u-m').value = last.month; $('u-d').value = last.day; sel.value = last.hourIndex; }
+    var last = JSON.parse(localStorage.getItem('u27-form') || 'null');
+    if (last) {
+      cal.set(last.cal); $('u-y').value = last.y; $('u-m').value = last.m; $('u-d').value = last.d;
+      $('u-leap').checked = !!last.leap; sel.value = last.h; gen.set(last.g);
+    }
   } catch (e) {}
 })();
 </script>
