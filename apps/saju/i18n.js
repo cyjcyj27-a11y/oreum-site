@@ -2,36 +2,13 @@
 // 루루 게임과 같은 방식: 코드는 한국어 그대로 두고, 화면에 글자가 찍히는 순간
 // 사전에서 영어를 찾아 바꿔치기합니다. 사전에 없는 문구는 한국어로 나옵니다(안전).
 (function () {
-  let lang = null;
+  /* 언어는 주소로만 정한다(?lang=en 일 때만 영어, 없으면 한국어). 기억하거나 폰 언어를 따르면
+     한국어 페이지에서 들어와도 영어로 뜬다(2026-09-29 게임 전체와 같이 고침). 옛 저장값은 지운다 */
+  let lang = 'ko';
   try {
-    const q = new URLSearchParams(location.search).get('lang');
-    if (q === 'en' || q === 'ko') { lang = q; localStorage.setItem('saju_lang', q); }
-    if (!lang) {
-      const saved = localStorage.getItem('saju_lang');
-      if (saved === 'en' || saved === 'ko') lang = saved;
-    }
+    lang = new URLSearchParams(location.search).get('lang') === 'en' ? 'en' : 'ko';
+    localStorage.removeItem('saju_lang');
   } catch (e) {}
-  /* 어느 나라 말로 보여줄지 정합니다.
-
-     navigator.language 하나만 보면 안 됩니다. 카카오톡·인스타처럼 앱 안에서 링크를 열면
-     그 값이 'en-US' 로 나오는 경우가 많아, 한국 사람인데 영어판이 뜹니다.
-     그래서 브라우저가 주는 언어 목록 전체와 시간대까지 같이 봅니다.
-     (한국에 사는 외국인은 한국어가 뜰 수 있지만, 오른쪽 위 English 단추로 바꾸면 기억합니다) */
-  function detectLang() {
-    try {
-      const list = [];
-      if (navigator.languages && navigator.languages.length) list.push(...navigator.languages);
-      if (navigator.language) list.push(navigator.language);
-      if (navigator.userLanguage) list.push(navigator.userLanguage);
-      for (const v of list) {
-        if (String(v).toLowerCase().indexOf('ko') === 0) return 'ko';
-      }
-      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
-      if (tz === 'Asia/Seoul') return 'ko';
-    } catch (e) {}
-    return 'en';
-  }
-  if (!lang) lang = detectLang();
   window.SAJU_LANG = lang;
   document.documentElement.lang = lang;
 
@@ -1255,8 +1232,7 @@
       'color:#D9B36A;font-size:12px;font-weight:700;cursor:pointer;backdrop-filter:blur(3px)';
     btn.addEventListener('click', () => {
       const next = lang === 'en' ? 'ko' : 'en';
-      try { localStorage.setItem('saju_lang', next); } catch (e) {}
-      // 주소에 ?lang=이 붙어 있으면 저장값보다 우선하므로, 주소도 같이 바꿔야 한다
+      // 기억하지 않고 주소의 ?lang= 만 바꿔서 다시 연다
       const url = new URL(location.href);
       url.searchParams.set('lang', next);
       location.replace(url.toString());
