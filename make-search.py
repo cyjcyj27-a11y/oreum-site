@@ -26,6 +26,13 @@ CARD = re.compile(
     r'<b>(?P<n>.*?)</b>(?:<i>(?P<t>.*?)</i>)?', re.S)
 
 
+# 카드 이름이 영어뿐이라 한글로 치면 안 나오는 게임에 붙이는 한글 이름. 검색 결과에 이름 옆에 같이 보인다
+# (사장님 2026-09-30 "오름길이 검색에 안나오니까 한글이름 오름길로 붙이자")
+ALIASES = {
+    "/games/oreumkil/": "오름길",
+}
+
+
 def read(path):
     with io.open(os.path.join(HERE, path), encoding="utf-8") as f:
         return f.read()
@@ -53,7 +60,10 @@ def cards(lang):
                 if u in seen:
                     continue
                 seen.add(u)
-                out.append({"u": u, "n": strip(m.group("n")), "t": strip(m.group("t")), "i": m.group("img")})
+                c = {"u": u, "n": strip(m.group("n")), "t": strip(m.group("t")), "i": m.group("img")}
+                if lang == "ko" and u in ALIASES:
+                    c["a"] = ALIASES[u]
+                out.append(c)
     return out
 
 

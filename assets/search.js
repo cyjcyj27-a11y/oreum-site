@@ -2,7 +2,7 @@
 // 목록은 search-index.js (make-search.py 가 목록 페이지 카드에서 만든다). 메뉴를 처음 누를 때 읽는다.
 // 이름·다른 언어 이름·분류 글자로 찾고, 한글은 초성(ㅂㄹ → 볼링)으로도 찾는다.
 (function () {
-  var IDX_V = 1;   // search-index.js 를 새로 만들면 하나 올린다
+  var IDX_V = 2;   // search-index.js 를 새로 만들면 하나 올린다
   var btn = document.querySelector('.nav .navsearch');
   if (!btn) return;
   var EN = (document.documentElement.lang || '').slice(0, 2) === 'en';
@@ -32,8 +32,8 @@
       var d = window.OREUM_SEARCH || {};
       list = (EN ? d.en : d.ko) || [];
       list.forEach(function (c) {
-        c._n = norm(c.n); c._o = norm(c.o); c._t = norm(c.t);
-        c._c = norm(cho(c.n));
+        c._n = norm(c.n); c._o = norm(c.o) + ' ' + norm(c.a); c._a = norm(c.a); c._t = norm(c.t);
+        c._c = norm(cho(c.n)) + ' ' + norm(cho(c.a || ''));
       });
       cb();
     };
@@ -46,7 +46,7 @@
     var ch = isCho(q), out = [];
     list.forEach(function (c, i) {
       var r = -1;
-      if (c._n.indexOf(q) === 0 || c._o.indexOf(q) === 0) r = 0;
+      if (c._n.indexOf(q) === 0 || c._o.indexOf(q) === 0 || (c._a && c._a.indexOf(q) === 0)) r = 0;
       else if (c._n.indexOf(q) >= 0 || c._o.indexOf(q) >= 0) r = 1;
       else if (ch && c._c.indexOf(q) === 0) r = 2;
       else if (ch && c._c.indexOf(q) > 0) r = 3;
@@ -68,7 +68,7 @@
     box.innerHTML = shown.map(function (c, i) {
       return '<a class="gs-item' + (i === sel ? ' on' : '') + '" href="' + esc(c.u) + '">' +
         '<img src="' + esc(c.i) + '" alt="" width="64" height="40" decoding="async">' +
-        '<span><b>' + esc(c.n) + '</b>' + (c.t ? '<i>' + esc(c.t) + '</i>' : '') + '</span></a>';
+        '<span><b>' + esc(c.n) + (c.a ? ' <em>' + esc(c.a) + '</em>' : '') + '</b>' + (c.t ? '<i>' + esc(c.t) + '</i>' : '') + '</span></a>';
     }).join('');
   }
   function mark() {
