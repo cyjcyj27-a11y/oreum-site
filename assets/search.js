@@ -82,7 +82,7 @@
     panel.className = 'gsearch';
     panel.setAttribute('role', 'search');
     panel.innerHTML =
-      '<div class="gs-row"><svg class="gs-ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></svg>' +
+      '<div class="gs-row"><svg class="gs-ico" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7d8a76" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></svg>' +
       '<input type="search" autocomplete="off" spellcheck="false" enterkeyhint="go" placeholder="' + T.ph + '" aria-label="' + T.ph + '">' +
       '<button type="button" class="gs-x" aria-label="' + T.close + '">&times;</button></div>' +
       '<div class="gs-list"></div>';
@@ -108,11 +108,24 @@
   function open() {
     if (!panel) build();
     panel.hidden = false;
+    place();
     btn.setAttribute('aria-expanded', 'true');
     btn.classList.add('on');
     input.focus();
     load(render);
   }
+  // 검색칸은 SEARCH 메뉴 바로 아래, 메뉴 왼쪽 끝에 맞춘다. 폰(720px 이하)은 폭 전체(css)
+  function place() {
+    var host = panel.parentNode;
+    if (innerWidth <= 720) { panel.style.left = ''; panel.style.top = ''; return; }
+    var h = host.getBoundingClientRect(), b = btn.getBoundingClientRect();
+    var left = Math.max(0, Math.min(b.left - h.left, h.width - panel.offsetWidth));
+    panel.style.left = left + 'px';
+    panel.style.top = (b.bottom - h.top + 8) + 'px';
+  }
+  function replace() { if (panel && !panel.hidden) place(); }
+  addEventListener('resize', replace);
+  if (window.ResizeObserver) new ResizeObserver(replace).observe(btn.closest('.header-inner'));
   function close() {
     if (!panel) return;
     panel.hidden = true;

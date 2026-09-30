@@ -1064,7 +1064,7 @@ body{ font-size:19px; }
 .header-inner{ position:relative; }
 .nav a.navsearch.on{ background:var(--green-soft); color:var(--green-lit); }
 .gsearch{
-  position:absolute; right:0; top:calc(100% + 6px); z-index:40;
+  position:absolute; left:auto; right:0; top:calc(100% + 6px); z-index:40;
   width:min(440px, 100%); background:#fff; border:1px solid #e0dccf; border-radius:16px;
   box-shadow:0 14px 36px rgba(30,30,20,.16); padding:10px; box-sizing:border-box;
 }
@@ -1089,7 +1089,7 @@ body{ font-size:19px; }
 .gs-item i{ font-style:normal; font-size:13px; color:#7d8a76; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .gs-none{ margin:4px 0 2px; padding:10px 8px; font-size:16px; color:#7d8a76; }
 @media (max-width:720px){
-  .gsearch{ left:0; right:0; width:auto; top:100%; }
+  .gsearch{ left:0 !important; right:0; width:auto; top:100% !important; }
   /* 폰은 메뉴 한 줄에 여섯 개가 안 들어간다 — SEARCH 글자 대신 돋보기 그림 */
   .nav a.navsearch{ font-size:0; padding:6px 8px; display:flex; align-items:center; }
   .nav a.navsearch::before{
