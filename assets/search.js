@@ -6,8 +6,8 @@
   var btn = document.querySelector('.nav .navsearch');
   if (!btn) return;
   var EN = (document.documentElement.lang || '').slice(0, 2) === 'en';
-  var T = EN ? { ph: 'Search games', none: 'No results', close: 'Close' }
-             : { ph: '게임 검색', none: '검색 결과가 없습니다', close: '닫기' };
+  var T = EN ? { ph: 'Search games', none: 'No results', close: 'Clear' }
+             : { ph: '게임 검색', none: '검색 결과가 없습니다', close: '지우기' };
   var list = null, loading = false, panel, input, box, sel = -1, shown = [];
 
   var CHO = 'ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ';
@@ -96,9 +96,18 @@
       else if (e.key === 'Enter' && sel >= 0) { location.href = shown[sel].u; e.preventDefault(); }
       else if (e.key === 'Escape') { close(); btn.focus(); }
     });
-    panel.querySelector('.gs-x').addEventListener('click', close);
+    // X 는 입력한 글자를 지운다(글자가 없으면 닫기). 누를 때 입력칸 초점을 뺏지 않아
+    // 폰 자판이 내려가며 화면이 밀려 손가락이 빗나가는 일을 막는다 (사장님 2026-09-30 "X눌러도 입력한거 지우기가 안된다")
+    var x = panel.querySelector('.gs-x');
+    x.addEventListener('mousedown', function (e) { e.preventDefault(); });
+    x.addEventListener('touchstart', function (e) { e.preventDefault(); clearOrClose(); }, { passive: false });
+    x.addEventListener('click', clearOrClose);
     document.addEventListener('mousedown', outside);
     document.addEventListener('touchstart', outside, { passive: true });
+  }
+  function clearOrClose() {
+    if (input.value) { input.value = ''; render(); input.focus(); }
+    else close();
   }
   function outside(e) {
     if (!panel || panel.hidden) return;
