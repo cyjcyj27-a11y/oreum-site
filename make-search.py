@@ -37,6 +37,7 @@ ALIASES = {
     "/games/mini/pixl/": "픽셀",
     "/games/mini/crispy/": "크리스피",
     "/games/saab/": "싸브",
+    "/games/mini/skijump/": "스키점프",  # 사장님 2026-09-30 "스키점프만 붙여"
 }
 
 
