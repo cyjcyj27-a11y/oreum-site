@@ -1097,7 +1097,14 @@ body{ font-size:19px; }
 @media (max-width:720px){
   .gsearch{ left:0 !important; right:0; width:auto; top:100% !important; }
   .nav a.navsearch{ padding:6px 8px; }
-  .nav a.navsearch::before{ width:21px; height:21px; }
+  .nav a.navsearch::before{ width:21px; height:21px; transform:scaleX(1.1765); }
+  /* 폰 메뉴 글자는 높이는 그대로, 장평만 85% (사장님 2026-09-30 "글씨를 장평으로 줄여봐").
+     Jua 는 폭 축이 없어서 메뉴 줄을 85% 로 눌러 담는다 — 넓게 깔고(100%/.85) 가운데 기준으로 눌러 제자리 폭에 맞춘다.
+     돋보기 그림만 위에서 1/.85 로 되돌려 동그랗게 둔다 */
+  .header-inner .nav{
+    width:calc(100% / .85); margin-inline:calc((100% - 100% / .85) / 2);
+    transform:scaleX(.85); transform-origin:50% 50%;
+  }
 }
 @media (max-width:380px){
   .nav a{ padding-left:7px; padding-right:7px; }
