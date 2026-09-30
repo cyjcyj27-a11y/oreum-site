@@ -30,6 +30,13 @@ CARD = re.compile(
 # (사장님 2026-09-30 "오름길이 검색에 안나오니까 한글이름 오름길로 붙이자")
 ALIASES = {
     "/games/oreumkil/": "오름길",
+    # 사장님 2026-09-30 "페어붐 슬립캣, 라이프로지스틱스,픽셀,크리스피,싸브도 한글로 소제목에 추가해줘"
+    "/games/mini/pairboom/": "페어붐",
+    "/games/mini/slip-cat/": "슬립캣",
+    "/games/mini/life-logistics/": "라이프로지스틱스",
+    "/games/mini/pixl/": "픽셀",
+    "/games/mini/crispy/": "크리스피",
+    "/games/saab/": "싸브",
 }
 
 
