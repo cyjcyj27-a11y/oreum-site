@@ -238,6 +238,10 @@
       const m = src.root.clone(true);
       m.visible = true; m.position.set(0, -0.62, 0); m.rotation.set(0, 0, 0);   // 배를 목 뒤에 얹고 다리는 앞뒤로 늘어진다
       m.traverse(o => { if (o.isMesh) { o.castShadow = true; o.frustumCulled = false; } });
+      // 복제는 그 순간 모습 그대로다 — 달리던 중이면 들썩인 몸통·벌린 다리·숙인 머리까지 따라와 몸통과 다리가 떨어져 보였다 → 선 자세로 (2026-10-01)
+      { const kids = src.root.children, bi = kids.indexOf(src.body);
+        if (bi >= 0) { if (src.baseY != null) m.children[bi].position.y = src.baseY; const hi = src.body.children.indexOf(src.head); if (hi >= 0) m.children[bi].children[hi].rotation.x = 0.1; }
+        src.legs.forEach(l => { const k = kids.indexOf(l); if (k >= 0) m.children[k].rotation.x = 0; }); }
       carry.add(m); carry.userData.m = m;
       scene.add(carry);
     }
