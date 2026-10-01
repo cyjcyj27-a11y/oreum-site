@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>야시장 사격게임</title>
+<style>
+@font-face{font-family:'Round';src:url('fonts/title.woff2?v=2') format('woff2');font-display:block}
+@font-face{font-family:'Ria';src:url('fonts/RiaSans-ExtraBold.woff2') format('woff2');font-display:swap}
+:root{--wine:#5a0e0a;--ink:#3a0804;--cream:#fff4d8;--paper:#f6dca0;--red:#d8261e;--gold:#e8b848;--night:#1e0c16}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+html,body{width:100%;height:100%;overflow:hidden;background:#0b0a1a;font-family:'Ria',-apple-system,'Malgun Gothic',sans-serif;color:#fff;
+  user-select:none;-webkit-user-select:none;touch-action:none;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+#cv{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
+body.aiming #cv{cursor:none}
+#vig{position:fixed;inset:0;pointer-events:none;z-index:5;background:radial-gradient(ellipse at 50% 48%,rgba(0,0,0,0) 58%,rgba(10,4,12,.55) 100%)}
+
+/* ---------- 표(입장권) 단추: 크림 종이 + 양옆 반달 구멍 + 점선 ---------- */
+.tix{filter:drop-shadow(0 4px 0 var(--ink)) drop-shadow(0 8px 10px rgba(0,0,0,.35))}
+.btn{position:relative;pointer-events:auto;border:0;cursor:pointer;font-family:'Ria',sans-serif;font-size:21px;line-height:1.1;color:#7a1408;
+  padding:12px 26px;min-width:120px;background:linear-gradient(180deg,#fffaea 0%,#f8e4b4 60%,#eecb84 100%);border-radius:6px;
+  -webkit-mask:radial-gradient(circle 10px at 0 50%,#0000 96%,#000) 0 0/51% 100% no-repeat,radial-gradient(circle 10px at 100% 50%,#0000 96%,#000) 100% 0/51% 100% no-repeat;
+  mask:radial-gradient(circle 10px at 0 50%,#0000 96%,#000) 0 0/51% 100% no-repeat,radial-gradient(circle 10px at 100% 50%,#0000 96%,#000) 100% 0/51% 100% no-repeat;
+  box-shadow:inset 0 0 0 3px #7a1408,inset 0 4px 0 rgba(255,255,255,.75),inset 0 -6px 0 rgba(122,20,8,.2);
+  display:flex;align-items:center;justify-content:center;gap:8px;white-space:nowrap;transition:transform .08s}
+.btn::after{content:'';position:absolute;inset:6px 16px;border:2px dashed rgba(122,20,8,.32);border-radius:3px;pointer-events:none}
+.btn:active{transform:translateY(3px)}
+.btn.main{font-family:'Round','Ria',sans-serif;font-size:32px;color:#fff4d6;padding:14px 40px;min-width:220px;
+  background:linear-gradient(180deg,#ff7a52 0%,#e8342a 48%,#b8180e 100%);
+  box-shadow:inset 0 0 0 3px #5a0a04,inset 0 5px 0 rgba(255,220,190,.55),inset 0 -7px 0 rgba(60,0,0,.3);text-shadow:0 3px 0 #6a0a04}
+.btn.main::after{border-color:rgba(255,226,150,.65)}
+.btn small{font-family:'Ria',sans-serif;font-size:14px;opacity:.9}
+.btn:disabled{filter:grayscale(.7) brightness(.85);cursor:default}
+.btn .cn,.cn{display:inline-block;width:.8em;height:.8em;border-radius:50%;vertical-align:-.08em;margin-right:4px;
+  background:radial-gradient(circle at 35% 30%,#fff6b0,#f2c230 45%,#c08a10 100%);box-shadow:inset 0 0 0 2px #a8740a,0 1px 0 rgba(0,0,0,.4)}
+
+/* ---------- 상단바(스카이라이더 배치) ---------- */
+#topbar{position:fixed;top:0;left:0;right:0;z-index:20;display:flex;align-items:center;gap:6px;pointer-events:none;
+  padding:calc(6px + env(safe-area-inset-top)) calc(8px + env(safe-area-inset-right)) 10px calc(104px + env(safe-area-inset-left));
+  background:linear-gradient(180deg,rgba(10,2,8,.55),rgba(10,2,8,0))}
+body:not(.playing) #topbar .game{display:none}
+.stat{display:flex;align-items:center;gap:6px;border-radius:9px;padding:4px 11px;min-height:32px;
+  background:linear-gradient(180deg,#5a1a2a,#2e0c18);border:2px solid var(--gold);box-shadow:0 3px 0 #140408,inset 0 2px 0 rgba(255,220,160,.2)}
+.stat i{font-style:normal;font-size:12px;color:#f6d890;letter-spacing:.5px}
+.stat b{font-size:18px;font-weight:400;color:#fff4d6;text-shadow:0 2px 0 #140408}
+#ammoPill{gap:7px}
+#ammo{display:flex;gap:3px;align-items:center}
+#ammo i{display:block;width:9px;height:15px;border-radius:3px 3px 2px 2px;background:linear-gradient(90deg,#9a6428,#f0c888 45%,#b07838);
+  box-shadow:inset 0 -3px 0 rgba(90,40,10,.35),0 1px 0 rgba(0,0,0,.5);transition:opacity .15s,transform .15s}
+#ammo i.used{opacity:.18;transform:scale(.8)}
+#ammo.many i{display:none}
+#ammo.many i:first-child{display:block}
+#ammoN{display:none}
+body.playing #oreumFs{display:none}
+#ammo.many+#ammoN{display:block}
+#ammoPill.low{border-color:#ff6a4a;animation:low .8s infinite}
+@keyframes low{50%{box-shadow:0 3px 0 #140408,0 0 14px rgba(255,90,60,.8)}}
+.spacer{flex:1 1 10px}
+.tog{pointer-events:auto;width:38px;height:38px;border-radius:50%;border:2px solid var(--gold);cursor:pointer;position:relative;
+  background:linear-gradient(180deg,#5a1a2a,#2e0c18);box-shadow:0 3px 0 #140408;display:grid;place-items:center;color:#fff;font:15px Ria,sans-serif}
+.tog svg{width:20px;height:20px}
+.tog.off{opacity:.6}
+.tog.off::after{content:'';position:absolute;left:24%;right:24%;top:50%;height:2px;margin-top:-1px;background:#fff;border-radius:1px;transform:rotate(-40deg)}
+.tog:active{transform:translateY(2px)}
+@media (max-width:700px){.stat{padding:3px 8px;gap:5px;min-height:30px}.stat b{font-size:16px}#topbar{gap:5px}.tog{width:34px;height:34px}#ammo i{width:7px;height:13px}}
+
+/* ---------- 조준점 ---------- */
+#cross{position:fixed;left:0;top:0;z-index:15;pointer-events:none;width:0;height:0}
+#cross::before{content:'';position:absolute;left:-17px;top:-17px;width:34px;height:34px;border-radius:50%;border:2px solid rgba(255,244,214,.95);box-shadow:0 0 0 1px rgba(60,0,0,.6),inset 0 0 0 1px rgba(60,0,0,.6)}
+#cross::after{content:'';position:absolute;left:-3px;top:-3px;width:6px;height:6px;border-radius:50%;background:#ff4a3a;box-shadow:0 0 0 1px #fff}
+#cross.tap::before,#cross.tap::after{animation:tapk .5s forwards}
+@keyframes tapk{0%{transform:scale(1.5)}25%{transform:scale(1)}100%{opacity:0}}
+
+/* ---------- 큰 글자 ---------- */
+#word{position:fixed;left:50%;top:40%;transform:translate(-50%,-50%) scale(.4);z-index:26;pointer-events:none;
+  font-family:'Round','Ria',sans-serif;font-size:clamp(46px,9vw,92px);line-height:1;color:#ffe066;white-space:nowrap;
+  -webkit-text-stroke:.07em #5a0a04;paint-order:stroke fill;text-shadow:0 .06em 0 #5a0a04,0 .12em 0 #3a0402,0 .2em .3em rgba(0,0,0,.5);
+  opacity:0;transition:opacity .1s,transform .22s cubic-bezier(.2,1.7,.4,1)}
+#word.show{opacity:1;transform:translate(-50%,-50%) scale(1) rotate(-4deg)}
+#word.clear{font-size:clamp(70px,15vw,150px);color:#fff4d6}
+#word.combo{color:#ffb0f0}
+#intro{position:fixed;left:50%;top:44%;z-index:25;pointer-events:none;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center}
+#intro b{font-family:'Round','Ria',sans-serif;font-weight:400;font-size:clamp(40px,8vw,76px);color:#fff4d6;padding:.12em .7em .16em;
+  background:linear-gradient(180deg,#e8342a,#a8140e);border:3px solid #5a0a04;border-radius:8px;box-shadow:0 5px 0 #3a0402,inset 0 3px 0 rgba(255,210,180,.5);text-shadow:0 3px 0 #5a0a04}
+#intro small{margin-top:6px;font-size:22px;color:#ffe066;letter-spacing:4px;text-shadow:0 2px 0 #3a0402}
+#intro.go{animation:intro 1.4s forwards}
+@keyframes intro{0%{opacity:0;transform:translate(-50%,-50%) scale(.5)}12%{opacity:1;transform:translate(-50%,-50%) scale(1.08)}20%{transform:translate(-50%,-50%) scale(1)}80%{opacity:1}100%{opacity:0;transform:translate(-50%,-50%) scale(.96)}}
+#toasts{position:fixed;left:50%;transform:translateX(-50%);top:calc(56px + env(safe-area-inset-top));z-index:40;display:flex;flex-direction:column;gap:6px;align-items:center;pointer-events:none}
+.toast{background:linear-gradient(180deg,#5a1a2a,#2e0c18);border:2px solid var(--gold);padding:8px 18px;border-radius:9px;font-size:17px;color:#fff4d6;box-shadow:0 4px 0 #140408;animation:toast 2.6s forwards;white-space:nowrap}
+@keyframes toast{0%{opacity:0;transform:translateY(-14px)}10%{opacity:1;transform:none}85%{opacity:1}100%{opacity:0}}
+
+/* ---------- 타이틀 ---------- */
+#title{position:fixed;inset:0;z-index:30;display:flex;flex-direction:column;align-items:center;justify-content:space-between;
+  padding:calc(58px + env(safe-area-inset-top)) 16px calc(28px + env(safe-area-inset-bottom));pointer-events:none}
+html[lang=en] #logo{white-space:normal;text-align:center;font-size:clamp(46px,8vw,96px);line-height:.95}
+#logo{font-family:'Round','Ria',sans-serif;font-size:clamp(64px,13vw,150px);line-height:1;color:#fff4d6;letter-spacing:.02em;white-space:nowrap;
+  -webkit-text-stroke:.075em #8a1408;paint-order:stroke fill;transform:rotate(-3deg);
+  text-shadow:0 .05em 0 #8a1408,0 .1em 0 #5a0a04,0 .15em 0 #3a0402,0 .25em .35em rgba(0,0,0,.55)}
+.menu{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;width:min(94vw,640px)}
+.menu #bStart{grid-column:1/-1;justify-self:center}
+.menu .btn:not(.main){min-width:0;padding:11px 8px;font-size:18px}
+html[lang=en] .menu .btn:not(.main){font-size:15px}
+
+/* ---------- 끝 카드(큰 입장권) ---------- */
+#end{position:fixed;inset:0;z-index:45;display:flex;align-items:center;justify-content:center;background:rgba(10,2,8,.35);padding:16px}
+.ecard{position:relative;display:flex;flex-direction:column;align-items:center;gap:10px;padding:22px 40px 20px;min-width:min(90vw,380px);
+  background:linear-gradient(180deg,#fffaea,#f4dcaa);color:#7a1408;border-radius:10px;animation:pop .35s cubic-bezier(.2,1.5,.5,1);
+  -webkit-mask:radial-gradient(circle 16px at 0 50%,#0000 96%,#000) 0 0/51% 100% no-repeat,radial-gradient(circle 16px at 100% 50%,#0000 96%,#000) 100% 0/51% 100% no-repeat;
+  mask:radial-gradient(circle 16px at 0 50%,#0000 96%,#000) 0 0/51% 100% no-repeat,radial-gradient(circle 16px at 100% 50%,#0000 96%,#000) 100% 0/51% 100% no-repeat;
+  box-shadow:inset 0 0 0 4px #7a1408,inset 0 -8px 0 rgba(122,20,8,.15)}
+.ecard::after{content:'';position:absolute;inset:9px 22px;border:2px dashed rgba(122,20,8,.3);border-radius:4px;pointer-events:none}
+@keyframes pop{from{transform:scale(.5) rotate(-6deg);opacity:0}}
+#eTitle{font-family:'Round','Ria',sans-serif;font-size:clamp(44px,8vw,64px);line-height:1;white-space:nowrap;color:#d8261e;text-shadow:0 3px 0 #5a0a04}
+#eTitle.lose{color:#5a3a30;text-shadow:none}
+#eStars{display:flex;gap:8px}
+#eStars i,.st i{display:block;width:38px;height:38px;background:#c8b08a;clip-path:polygon(50% 0,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%)}
+#eStars i.on{background:linear-gradient(180deg,#ffe066,#f0a018);animation:starIn .4s backwards}
+#eStars i:nth-child(2){animation-delay:.15s}#eStars i:nth-child(3){animation-delay:.3s}
+@keyframes starIn{from{transform:scale(2.2) rotate(40deg);opacity:0}}
+#eCoins{font-size:26px;color:#7a1408}
+.btns{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:4px}
+.btns .btn{min-width:110px;font-size:19px;padding:11px 18px}
+.btns .btn.main{font-size:24px;min-width:150px;padding:12px 26px}
+
+/* ---------- 경품 받기 ---------- */
+#prizeWin{position:fixed;inset:0;z-index:46;display:flex;flex-direction:column;align-items:center;justify-content:space-between;background:radial-gradient(ellipse at 50% 50%,rgba(10,2,8,0) 22%,rgba(10,2,8,.72) 70%);
+  padding:calc(64px + env(safe-area-inset-top)) 16px calc(26px + env(safe-area-inset-bottom));pointer-events:none}
+#prizeWin::before{content:'';position:absolute;left:50%;top:52%;width:150vmax;height:150vmax;transform:translate(-50%,-50%);z-index:-1;
+  background:repeating-conic-gradient(rgba(255,230,150,.13) 0 10deg,rgba(255,230,150,0) 10deg 20deg);animation:spin 14s linear infinite;
+  -webkit-mask:radial-gradient(circle,#000 0,#000 18%,transparent 55%);mask:radial-gradient(circle,#000 0,#000 18%,transparent 55%)}
+@keyframes spin{to{transform:translate(-50%,-50%) rotate(360deg)}}
+#pzHead{font-family:'Round','Ria',sans-serif;font-size:clamp(40px,7vw,70px);color:#ffe066;-webkit-text-stroke:.07em #5a0a04;paint-order:stroke fill;
+  text-shadow:0 .06em 0 #5a0a04,0 .12em 0 #3a0402;transform:rotate(-3deg);animation:pop .4s cubic-bezier(.2,1.5,.5,1)}
+#pzFoot{display:flex;flex-direction:column;align-items:center;gap:10px;pointer-events:auto}
+#prizeWin.split{justify-content:center;gap:4vh;padding-left:48vw;background:radial-gradient(ellipse at 27% 50%,rgba(10,2,8,0) 20%,rgba(10,2,8,.72) 62%)}
+#prizeWin.split::before{left:27%}
+#pzName{font-size:clamp(24px,4vw,34px);color:#fff4d6;text-shadow:0 3px 0 #3a0402}
+
+/* ---------- 창(상점·스테이지·경품·미션) ---------- */
+.sheet{position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;align-items:center;
+  background:radial-gradient(ellipse at 50% 0,#4a1424,#1a0610 70%);padding:calc(10px + env(safe-area-inset-top)) 12px calc(12px + env(safe-area-inset-bottom))}
+.sheet .hd{display:flex;align-items:center;gap:10px;width:min(100%,900px);margin-bottom:10px;padding-left:100px}
+.sheet h2{font-family:'Round','Ria',sans-serif;font-weight:400;font-size:30px;flex:1;color:#ffe8a8;text-shadow:0 3px 0 #140408;white-space:nowrap}
+.close{pointer-events:auto;width:44px;height:44px;border-radius:50%;border:2px solid var(--gold);background:linear-gradient(180deg,#e8342a,#a8140e);color:#fff;font-size:20px;cursor:pointer;box-shadow:0 3px 0 #140408}
+.body{overflow-y:auto;width:min(100%,900px);flex:1;touch-action:pan-y;-webkit-overflow-scrolling:touch;padding-bottom:10px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.card,.pcard{position:relative;border-radius:10px;padding:10px 10px 12px;display:flex;flex-direction:column;align-items:center;gap:3px;color:#7a1408;
+  background:linear-gradient(180deg,#fffaea,#f0d49a);box-shadow:inset 0 0 0 3px #7a1408,0 4px 0 #140408}
+.card.on{box-shadow:inset 0 0 0 3px #7a1408,0 0 0 3px var(--gold),0 4px 0 #140408}
+.card canvas{width:100%;max-width:200px;aspect-ratio:240/110;height:auto}
+.card.lock canvas{filter:brightness(.55) saturate(.6)}
+.bn{font-size:19px;white-space:nowrap}
+.spec{font-size:13px;opacity:.75}
+.card button{margin-top:6px;width:100%;border:0;border-radius:7px;padding:8px 6px;font:17px Ria,sans-serif;color:#fff4d6;cursor:pointer;
+  background:linear-gradient(180deg,#ff7a52,#d8261e 55%,#a8140e);box-shadow:inset 0 0 0 2px #5a0a04,0 3px 0 #3a0402;text-shadow:0 2px 0 #5a0a04}
+.card button:disabled{background:linear-gradient(180deg,#b8a890,#8a7a68);box-shadow:inset 0 0 0 2px #5a4a3a,0 3px 0 #2a1a10;cursor:default}
+.card.on button:disabled{background:linear-gradient(180deg,#ffe066,#e0a020);color:#5a2a04;text-shadow:none}
+.bigAmmo{height:80px;display:flex;align-items:center;gap:8px}
+.bigAmmo i{display:block;width:22px;height:38px;border-radius:6px 6px 4px 4px;background:linear-gradient(90deg,#9a6428,#f0c888 45%,#b07838);box-shadow:inset 0 -6px 0 rgba(90,40,10,.35)}
+.bigAmmo b{font-family:'Round','Ria',sans-serif;font-weight:400;font-size:40px}
+.pcard canvas{width:100%;max-width:150px;aspect-ratio:1}
+.pcard:not(.got) canvas{filter:brightness(0) opacity(.35)}
+.pcard.king{grid-column:span 2}
+.pcard.got{background:linear-gradient(180deg,#fff6c8,#ffd878)}
+#stageGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:10px}
+.sbtn{position:relative;border:0;border-radius:8px;padding:8px 4px 8px;cursor:pointer;color:#7a1408;font-family:'Ria',sans-serif;
+  background:linear-gradient(180deg,#fffaea,#f0d49a);box-shadow:inset 0 0 0 3px #7a1408,0 4px 0 #140408;display:flex;flex-direction:column;align-items:center;gap:4px}
+.sbtn b{font-family:'Round','Ria',sans-serif;font-weight:400;font-size:28px;line-height:1}
+.sbtn .st{display:flex;gap:2px}
+.st i{width:16px;height:16px}
+.st i.on{background:linear-gradient(180deg,#ffe066,#f0a018)}
+.sbtn.gift::before{content:'';position:absolute;right:6px;top:6px;width:12px;height:12px;border-radius:2px;background:#d8261e;box-shadow:inset 5px 0 0 -3px #ffe066,inset -5px 0 0 -3px #ffe066}
+.sbtn.lock{filter:brightness(.5);cursor:default}
+.sbtn:active{transform:translateY(3px)}
+.misTop{display:flex;justify-content:center;gap:10px;margin-bottom:10px}
+#misList{display:flex;flex-direction:column;gap:7px;max-width:560px;margin:0 auto}
+.mis{display:flex;align-items:center;gap:10px;border-radius:9px;padding:10px 14px;font-size:18px;color:#7a1408;
+  background:linear-gradient(180deg,#fffaea,#f0d49a);box-shadow:inset 0 0 0 2px #7a1408,0 3px 0 #140408}
+.mis .ck{width:26px;height:26px;border-radius:50%;border:2px solid #7a1408;display:grid;place-items:center;font-size:15px;flex:0 0 26px}
+.mis.ok .ck{background:#ffd24a}
+.mis .mn{flex:1}
+.mis .pg{font-size:14px;opacity:.7}
+.mis .mr{font-size:16px;white-space:nowrap}
+
+
+/* ---------- 확인 창(입장권) ---------- */
+#ask{position:fixed;inset:0;z-index:70;background:rgba(10,2,8,.6);display:flex;align-items:center;justify-content:center;padding:16px}
+#ask .ecard{min-width:min(88vw,400px)}
+#askT{font-family:'Round','Ria',sans-serif;font-size:clamp(30px,5vw,44px);color:#d8261e;text-shadow:0 3px 0 #5a0a04;white-space:nowrap}
+#askP{font-size:clamp(16px,2.2vw,20px);color:#7a1408;margin:2px 0 6px}
+
+/* ---------- 엔딩·일시정지·로딩·세로 안내 ---------- */
+#ending{position:fixed;inset:0;z-index:60;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;
+  background:radial-gradient(ellipse at center,rgba(120,30,40,.85),rgba(12,4,10,.97));overflow:hidden}
+#ending h1{font-family:'Round','Ria',sans-serif;font-weight:400;font-size:clamp(56px,12vw,130px);color:#ffe066;line-height:1;white-space:nowrap;
+  -webkit-text-stroke:.07em #5a0a04;paint-order:stroke fill;text-shadow:0 .06em 0 #5a0a04,0 .12em 0 #3a0402,0 0 30px rgba(255,180,60,.6)}
+#confetti{position:absolute;inset:0;pointer-events:none}
+#confetti i{position:absolute;top:-20px;width:10px;height:16px;border-radius:2px;animation:fall 3s linear infinite}
+@keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+#pauseCover{position:fixed;inset:0;z-index:35;background:rgba(10,2,8,.8);display:flex;gap:14px;align-items:center;justify-content:center}
+#loading{position:fixed;inset:0;z-index:100;background:#0b0a1a;display:grid;place-items:center;font-size:18px;color:rgba(255,232,168,.6);letter-spacing:3px}
+#rotate{position:fixed;inset:0;z-index:90;background:#140610;display:none;flex-direction:column;align-items:center;justify-content:center;gap:20px}
+@media (orientation:portrait) and (max-width:760px){#rotate{display:flex}}
+html.ol-land #rotate{display:none!important}
+
+/* ---------- 폰 가로(높이 480 아래): 글자·단추를 vh 로, 누를 것은 아래 26vh 위에 ---------- */
+@media (max-height:480px){
+  #title{justify-content:flex-start;gap:3vh;padding-top:calc(13vh + env(safe-area-inset-top));padding-bottom:26vh}
+  #logo{font-size:17vh}
+  html[lang=en] #logo{font-size:12vh}
+  .menu{width:min(62vw,470px);gap:2.2vh 8px}
+  .btn{font-size:4.6vh;padding:2vh 10px;min-width:0}
+  .btn.main{font-size:7.4vh;padding:2.2vh 34px;min-width:0}
+  .menu .btn:not(.main){font-size:4.4vh;padding:2vh 4px}
+  html[lang=en] .menu .btn:not(.main){font-size:3.6vh}
+  .btn::after{inset:1.4vh 12px}
+  #end{align-items:flex-start;padding-top:9vh}
+  .ecard{padding:3.5vh 36px 3vh;gap:1.8vh}
+  #eTitle{font-size:12vh}
+  #eStars i{width:9vh;height:9vh}
+  #eCoins{font-size:6vh}
+  #ask{align-items:flex-start;padding-top:9vh}
+  #askT{font-size:9vh}
+  #askP{font-size:5vh}
+  .btns{flex-wrap:nowrap}
+  .btns .btn{font-size:4.8vh;min-width:0;padding:2.2vh 16px}
+  .btns .btn.main{font-size:6vh;padding:2.2vh 24px}
+  #prizeWin{padding-top:calc(12vh + env(safe-area-inset-top));padding-bottom:26vh}
+  #prizeWin.split{padding-top:6vh}
+  #pzHead{font-size:12vh}
+  #pzName{font-size:6.5vh}
+  .sheet .hd{padding-left:104px;margin-bottom:6px}
+  .sheet h2{font-size:7.5vh}
+  .close{width:40px;height:40px}
+  .grid{grid-template-columns:repeat(4,1fr);gap:8px}
+  #shopGrid{grid-template-columns:repeat(4,1fr)}
+  #prizeGrid{grid-template-columns:repeat(6,1fr)}
+  .pcard .bn{font-size:4vh}.pcard .spec{font-size:3.4vh}
+  .bn{font-size:4.6vh}
+  .card button{font-size:4.4vh;padding:1.4vh 4px}
+  #stageGrid{grid-template-columns:repeat(8,1fr);gap:8px}
+  .sbtn b{font-size:7vh}
+  .st i{width:3.6vh;height:3.6vh}
+  .mis{font-size:4.8vh;padding:1.8vh 12px}
+  #word{font-size:13vh}
+  #intro b{font-size:11vh}
+}
+</style>
+</head>
+<body>
+<canvas id="cv"></canvas>
+<div id="vig"></div>
+<div id="cross" hidden></div>
+
+<div id="topbar">
+  <div class="stat game"><i>STAGE</i><b id="stageN">1</b></div>
+  <div class="stat"><span class="cn"></span><b id="coins">0</b></div>
+  <div class="stat game" id="ammoPill"><div id="ammo"></div><b id="ammoN">0</b></div>
+  <div class="spacer"></div>
+  <button class="tog game" id="tPause" aria-label="pause">❚❚</button>
+  <button class="tog" id="tBgm" aria-label="music"><svg viewBox="0 0 24 24"><path d="M9 17.5V5.5l11-2.5v12" fill="none" stroke="#fff" stroke-width="2.6" stroke-linejoin="round"/><ellipse cx="6.3" cy="17.8" rx="3.4" ry="2.7" fill="#fff"/><ellipse cx="17.3" cy="15.3" rx="3.4" ry="2.7" fill="#fff"/></svg></button>
+  <button class="tog" id="tSnd" aria-label="sound"><svg viewBox="0 0 24 24"><path d="M3 9h4l5-4.5v15L7 15H3z" fill="#fff"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg></button>
+</div>
+
+<div id="word"></div>
+<div id="intro" hidden></div>
+<div id="toasts"></div>
+
+<div id="title" hidden>
+  <div id="logo">야시장 사격게임</div>
+  <div class="menu tix">
+    <button class="btn main" id="bStart">START <small id="tStage"></small></button>
+    <button class="btn" id="bStages">STAGE</button>
+    <button class="btn" id="bShop">상점</button>
+    <button class="btn" id="bPrize">경품</button>
+    <button class="btn" id="bMis">미션</button>
+    <button class="btn" id="bReset">처음부터</button>
+  </div>
+</div>
+
+<div id="end" hidden>
+  <div class="tix"><div class="ecard">
+    <div id="eTitle">CLEAR</div>
+    <div id="eStars"></div>
+    <div id="eCoins"></div>
+    <div class="btns">
+      <button class="btn main" id="eNext">NEXT</button>
+      <button class="btn" id="eRetry">RETRY</button>
+      <button class="btn" id="eShop">상점</button>
+      <button class="btn" id="eHome">홈</button>
+    </div>
+  </div></div>
+</div>
+
+<div id="prizeWin" hidden>
+  <div id="pzHead">경품 획득</div>
+  <div id="pzFoot"><div id="pzName"></div><div class="tix"><button class="btn main" id="pzOk">OK</button></div></div>
+</div>
+
+<div id="shop" class="sheet" hidden>
+  <div class="hd"><h2>상점</h2><div class="stat"><span class="cn"></span><b id="shopCoins">0</b></div><button class="close" aria-label="close">✕</button></div>
+  <div class="body"><div id="shopGrid" class="grid"></div></div>
+</div>
+<div id="stages" class="sheet" hidden>
+  <div class="hd"><h2>STAGE</h2><div class="stat"><i>★</i><b id="starSum">0</b></div><button class="close" aria-label="close">✕</button></div>
+  <div class="body"><div id="stageGrid"></div></div>
+</div>
+<div id="prizes" class="sheet" hidden>
+  <div class="hd"><h2>경품</h2><div class="stat"><b id="prizeCount">0</b></div><button class="close" aria-label="close">✕</button></div>
+  <div class="body"><div id="prizeGrid" class="grid"></div></div>
+</div>
+<div id="missions" class="sheet" hidden>
+  <div class="hd"><h2>미션</h2><div class="stat"><i>✔</i><b id="misCount">0</b></div><button class="close" aria-label="close">✕</button></div>
+  <div class="body"><div id="misList"></div></div>
+</div>
+
+<div id="ending" hidden>
+  <div id="confetti"></div>
+  <h1>사격왕</h1>
+  <div class="tix"><button class="btn main" id="endOk">OK</button></div>
+</div>
+
+<div id="ask" hidden>
+  <div class="tix"><div class="ecard">
+    <div id="askT">처음부터</div>
+    <div id="askP">모든 기록이 지워집니다</div>
+    <div class="btns">
+      <button class="btn" id="askNo">취소</button>
+      <button class="btn main" id="askYes">확인</button>
+    </div>
+  </div></div>
+</div>
+
+<div id="pauseCover" hidden><div class="tix" style="display:flex;gap:14px"><button class="btn main" id="pResume">▶</button><button class="btn" id="pHome">홈</button></div></div>
+<div id="rotate"><div class="tix"><button class="btn main" onclick="window.OL&&OL.go()">가로로 보기</button></div></div>
+<div id="loading">LOADING</div>
+
+<script src="js/lang.js?v=3"></script>
+<script src="assets/landscape.js"></script>
+<script src="assets/game-home.js" data-top="6" data-left="6" data-fullscreen="1" defer></script>
+<script src="lib/three.min.js"></script>
+<script src="lib/rapier.js"></script>
+<script src="js/stages.js?v=2"></script>
+<script src="js/sfx.js?v=1"></script>
+<script src="js/audio.js?v=3"></script>
+<script src="js/scene.js?v=1"></script>
+<script src="js/game.js?v=12"></script>
+<script src="/assets/visit.js" defer></script>
+<script src="/assets/game-events.js" defer></script>
+</body>
+</html>

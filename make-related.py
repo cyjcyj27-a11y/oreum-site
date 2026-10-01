@@ -18,6 +18,7 @@ import io, os, re, sys
 
 # slug, 한국어 경로, 영어 경로, 한국어 이름, 한국어 장르 앵커, 영어 이름, 영어 장르 앵커, 태그
 GAMES = [
+    ("shooting",      "/games/flash/shooting/",      "/en/games/flash/shooting/",      "야시장 사격게임",    "코르크총 야시장 사격게임",         "NIGHT MARKET SHOOTING", "carnival shooting gallery game", {"physics", "3d", "casual", "arcade", "korean"}),
     ("controlking",   "/games/controlking/",         "/en/games/controlking/",         "컨트롤킹",           "점프킹 같은 점프게임",             "CONTROL KING",         "Jump King style jump game",     {"action", "arcade", "platformer"}),
     ("button5",       "/games/mini/button5/",        "/en/games/mini/button5/",        "5억년 버튼",        "5억년 버튼 방치형게임",            "500 Million Year Button", "500 million year button idle game", {"idle", "casual", "clicker"}),
     ("matchtower",    "/games/matchtower/",          "/en/games/matchtower/",          "초원다방",           "성냥쌓기게임",                     "MATCHTOWER",           "matchstick stacking game",      {"physics", "3d", "casual"}),
