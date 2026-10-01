@@ -73,6 +73,25 @@ body.playing #oreumFs{display:none}
 #cross.tap::before,#cross.tap::after{animation:tapk .5s forwards}
 @keyframes tapk{0%{transform:scale(1.5)}25%{transform:scale(1)}100%{opacity:0}}
 
+/* ---------- 폰 조작: 왼쪽 놋쇠 조이스틱 + 오른쪽 빨간 쏘기 단추(사격장 계산대 기계) ---------- */
+#pad,#fireBtn{display:none;position:fixed;z-index:22;touch-action:none}
+html.touch body.aiming #pad,html.touch body.aiming #fireBtn{display:block}
+#pad{left:calc(22px + env(safe-area-inset-left));bottom:calc(20px + env(safe-area-inset-bottom));width:150px;height:150px;border-radius:50%;
+  background:radial-gradient(circle at 50% 50%,#2e0c18 0 52%,#5a1a2a 53% 60%,#2e0c18 61% 100%);
+  box-shadow:inset 0 0 0 4px var(--gold),inset 0 0 0 7px #8a5a14,0 5px 0 #140408,0 8px 14px rgba(0,0,0,.45);opacity:.92}
+#pad::before{content:'';position:absolute;inset:14px;border-radius:50%;border:2px dashed rgba(232,184,72,.35)}
+#knob{position:absolute;left:50%;top:50%;width:64px;height:64px;margin:-32px 0 0 -32px;border-radius:50%;pointer-events:none;
+  background:radial-gradient(circle at 36% 30%,#fff2b0 0,#f0c040 28%,#b07810 70%,#6a4006 100%);
+  box-shadow:inset 0 -5px 0 rgba(80,40,0,.45),0 4px 0 #3a1c02,0 6px 10px rgba(0,0,0,.5)}
+#knob::after{content:'';position:absolute;inset:20px;border-radius:50%;background:radial-gradient(circle at 40% 35%,#ff8a6a,#c8180e 60%,#6a0804);box-shadow:inset 0 0 0 2px #5a0a04}
+#fireBtn{right:calc(26px + env(safe-area-inset-right));bottom:calc(24px + env(safe-area-inset-bottom));width:132px;height:132px;border-radius:50%;border:0;cursor:pointer;
+  font-family:'Ria',sans-serif;font-size:30px;color:#fff4d6;text-shadow:0 3px 0 #5a0a04;
+  background:radial-gradient(circle at 50% 38%,#ff8a62 0,#e8342a 42%,#a8140e 74%,#6a0804 100%);
+  box-shadow:0 0 0 7px var(--gold),0 0 0 10px #6a4006,0 9px 0 4px #140408,0 12px 18px rgba(0,0,0,.5),inset 0 6px 0 rgba(255,220,190,.5),inset 0 -8px 0 rgba(60,0,0,.35);
+  transition:transform .06s,box-shadow .06s}
+#fireBtn.on{transform:translateY(6px);box-shadow:0 0 0 7px var(--gold),0 0 0 10px #6a4006,0 3px 0 4px #140408,0 5px 10px rgba(0,0,0,.5),inset 0 4px 0 rgba(255,220,190,.35),inset 0 -4px 0 rgba(60,0,0,.35)}
+html[lang=en] #fireBtn{font-size:26px}
+
 /* ---------- 큰 글자 ---------- */
 #word{position:fixed;left:50%;top:40%;transform:translate(-50%,-50%) scale(.4);z-index:26;pointer-events:none;
   font-family:'Round','Ria',sans-serif;font-size:clamp(46px,9vw,92px);line-height:1;color:#ffe066;white-space:nowrap;
@@ -246,6 +265,12 @@ html.ol-land #rotate{display:none!important}
   .mis{font-size:4.8vh;padding:1.8vh 12px}
   #word{font-size:13vh}
   #intro b{font-size:11vh}
+  #pad{width:36vh;height:36vh;left:calc(4vh + env(safe-area-inset-left));bottom:calc(5vh + env(safe-area-inset-bottom))}
+  #pad::before{inset:3.4vh}
+  #knob{width:15vh;height:15vh;margin:-7.5vh 0 0 -7.5vh}
+  #knob::after{inset:4.8vh}
+  #fireBtn{width:30vh;height:30vh;font-size:7.5vh;right:calc(6vh + env(safe-area-inset-right));bottom:calc(7vh + env(safe-area-inset-bottom))}
+  html[lang=en] #fireBtn{font-size:6.4vh}
 }
 </style>
 </head>
@@ -253,6 +278,8 @@ html.ol-land #rotate{display:none!important}
 <canvas id="cv"></canvas>
 <div id="vig"></div>
 <div id="cross" hidden></div>
+<div id="pad"><div id="knob"></div></div>
+<button id="fireBtn">쏘기</button>
 
 <div id="topbar">
   <div class="stat game"><i>STAGE</i><b id="stageN">1</b></div>
@@ -337,7 +364,7 @@ html.ol-land #rotate{display:none!important}
 <div id="rotate"><div class="tix"><button class="btn main" onclick="window.OL&&OL.go()">가로로 보기</button></div></div>
 <div id="loading">LOADING</div>
 
-<script src="js/lang.js?v=3"></script>
+<script src="js/lang.js?v=4"></script>
 <script src="assets/landscape.js"></script>
 <script src="assets/game-home.js" data-top="6" data-left="6" data-fullscreen="1" defer></script>
 <script src="lib/three.min.js"></script>
@@ -346,8 +373,8 @@ html.ol-land #rotate{display:none!important}
 <script src="js/sfx.js?v=1"></script>
 <script src="js/audio.js?v=3"></script>
 <script src="js/scene.js?v=1"></script>
-<script src="js/game.js?v=12"></script>
-<script src="/assets/visit.js" defer></script>
+<script src="js/game.js?v=13"></script>
+<script src="/assets/visit.js?v=17" defer></script>
 <script src="/assets/game-events.js" defer></script>
 </body>
 </html>

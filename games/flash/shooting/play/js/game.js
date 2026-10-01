@@ -599,6 +599,7 @@
     n = Math.max(1, Math.min(LAST, n));
     if (prizeShow) { SC.gunScene.remove(prizeShow.g); prizeShow = null; $('prizeWin').hidden = true; gunGroup.visible = true; }
     clearAll();
+    if (document.documentElement.classList.contains('touch')) aimNdc.set(0, 0.15); // 폰: 판마다 조준점을 가운데로
     const def = window.STAGES[n - 1];
     const ammo0 = def.ammo + S.ammoLv;
     const bang = Math.random() * 6.283, bmag = 0.5 + Math.random() * 0.5;
@@ -820,6 +821,50 @@
     if (!on) return;
     const a = aimedNdc(aimNdc.x, aimNdc.y);
     cross.style.transform = 'translate(' + ((a.x + 1) / 2) * innerWidth + 'px,' + ((1 - a.y) / 2) * innerHeight + 'px)';
+  }
+
+  // ---------- 폰 조작: 조이스틱으로 조준점을 옮기고 쏘기 단추로 쏜다 ----------
+  const root = document.documentElement;
+  const setTouch = () => { if (!root.classList.contains('touch')) root.classList.add('touch'); };
+  try { if (matchMedia('(pointer:coarse)').matches || 'ontouchstart' in window) setTouch(); } catch (e) {}
+  addEventListener('pointerdown', (e) => { if (e.pointerType === 'touch') setTouch(); }, true);
+  const pad = $('pad'), knob = $('knob'), fireBtn = $('fireBtn');
+  const stick = { id: null, x: 0, y: 0 };
+  const padMove = (e) => {
+    const r = pad.getBoundingClientRect(), R = r.width * 0.36;
+    let dx = e.clientX - (r.left + r.width / 2), dy = e.clientY - (r.top + r.height / 2);
+    const d = Math.hypot(dx, dy); if (d > R) { dx *= R / d; dy *= R / d; }
+    stick.x = dx / R; stick.y = dy / R;
+    knob.style.transform = 'translate(' + dx + 'px,' + dy + 'px)';
+  };
+  const padEnd = (e) => { if (e.pointerId !== stick.id) return; stick.id = null; stick.x = stick.y = 0; knob.style.transform = ''; };
+  pad.addEventListener('pointerdown', (e) => {
+    e.preventDefault(); AU.unlock();
+    stick.id = e.pointerId; try { pad.setPointerCapture(e.pointerId); } catch (er) {}
+    padMove(e);
+  });
+  pad.addEventListener('pointermove', (e) => { if (e.pointerId === stick.id) padMove(e); });
+  pad.addEventListener('pointerup', padEnd);
+  pad.addEventListener('pointercancel', padEnd);
+  fireBtn.addEventListener('pointerdown', (e) => {
+    e.preventDefault(); AU.unlock();
+    fireBtn.classList.add('on');
+    if (G.state === 'play' && !G.paused) fire(aimNdc.x, aimNdc.y);
+  });
+  const fireUp = () => fireBtn.classList.remove('on');
+  fireBtn.addEventListener('pointerup', fireUp);
+  fireBtn.addEventListener('pointercancel', fireUp);
+  fireBtn.addEventListener('pointerleave', fireUp);
+  // 가운데 근처는 천천히(정밀 조준), 끝까지 밀면 빨리. 가로·세로 화면 속도를 같게
+  const STICK_SPEED = 0.95;
+  function stepPad(dt) {
+    if (!root.classList.contains('touch') || !aimingNow) return;
+    showCross = true;
+    if (stick.id === null) return;
+    const m = Math.hypot(stick.x, stick.y); if (m < 0.06) return;
+    const k = STICK_SPEED * Math.pow(m, 1.7) / m * dt;
+    aimNdc.x = Math.max(-0.92, Math.min(0.92, aimNdc.x + stick.x * k));
+    aimNdc.y = Math.max(-0.85, Math.min(0.8, aimNdc.y - stick.y * k * (innerWidth / innerHeight)));
   }
   addEventListener('keydown', (e) => {
     if (e.code === 'Space' && G.state === 'play') { e.preventDefault(); fire(aimNdc.x, aimNdc.y); }
@@ -1048,6 +1093,7 @@
     stepParticles(dt);
     stepLabels(dt);
     stepRaccoon(dt);
+    stepPad(dt);
     stepGun(dt);
     stepCross();
     if (flashT > 0) { flashT -= dt; boomFlash.material.opacity = Math.max(0, flashT / 0.35); boomFlash.scale.multiplyScalar(1 + dt * 2); if (flashT <= 0) boomFlash.visible = false; }

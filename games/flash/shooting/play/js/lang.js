@@ -19,6 +19,7 @@
     '모든 기록이 지워집니다': 'All progress will be erased',
     '취소': 'CANCEL',
     '확인': 'OK',
+    '쏘기': 'FIRE',
     '탄 +1': 'AMMO +1',
     '코르크총': 'Cork Gun', '장총': 'Long Rifle', '쌍발총': 'Twin Gun', '3연발': 'Triple Burst', '산탄총': 'Shotgun', '공 대포': 'Ball Cannon',
     '대왕 곰': 'KING BEAR', '곰': 'Bear', '토끼': 'Bunny', '고양이': 'Kitty', '강아지': 'Puppy', '오리': 'Duckling', '펭귄': 'Penguin', '돼지': 'Piggy', '개구리': 'Froggy', '판다': 'Panda', '여우': 'Fox', '공룡': 'Dino',
