@@ -236,7 +236,7 @@
       windN = { f, g };
     }
     const t = AU.ctx.currentTime, a = Math.min(1, Math.abs(v) / 520);
-    windN.g.gain.setTargetAtTime(a * 0.12, t, 0.2); windN.f.frequency.setTargetAtTime(300 + a * 700, t, 0.2);
+    windN.g.gain.setTargetAtTime(a * 0.05, t, 0.2); windN.f.frequency.setTargetAtTime(300 + a * 700, t, 0.2);   // 크기 0.12→0.05 (9/30 사장님 "대나무숲 바람소리 너무 크니까 좀 줄여줘")
   }
 
   function setSfx(on) { AU.sfxOn = on; try { localStorage.setItem('controlking.snd', on ? '1' : '0'); } catch (e) {} if (AU.sfx) AU.sfx.gain.value = on ? 1 : 0; }
