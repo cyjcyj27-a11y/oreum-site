@@ -232,7 +232,7 @@
     align-items: center; justify-content: center; touch-action: none; }
   .tbtn.on { background: rgba(255,214,110,.75); color: #1b1408; }
   #bAct { right: calc(18px + env(safe-area-inset-right)); bottom: 22px; width: 88px; height: 88px; font-size: 20px; }
-  #bAct img { width: 54px; height: 54px; object-fit: contain; pointer-events: none; }
+  #bAct img { width: 40px; height: 40px; object-fit: contain; pointer-events: none; }
   #bAct.ready { border-color: #ffd46a; box-shadow: 0 0 18px rgba(255,210,100,.6); }
   #bJump { right: calc(116px + env(safe-area-inset-right)); bottom: 34px; width: 76px; height: 76px; font-size: 16px; }   /* 물에서만 뜨는 잠수 단추 — 러시아어 다섯 글자가 읽히게 76px */
   body.touch #pad, body.touch .tbtn { display: flex; }
@@ -332,7 +332,7 @@
 <div id="pad"><div id="knob"></div></div>
 <!-- 행동 단추는 세 언어 모두 주먹 그림 (사장님 2026-10-01 "주먹 이모지 픽사베이에서 찾아서 넣어" → "세판같게")
      그림: Pixabay fist-146668 (OpenClipart-Vectors, Pixabay Content License). 원본 src/pixabay/ -->
-<button class="tbtn" id="bAct"><img src="assets/fist.png?v=1" alt="" draggable="false"></button>
+<button class="tbtn" id="bAct"><img src="assets/fist.png?v=2" alt="" draggable="false"></button>
 <button class="tbtn" id="bJump">점프</button>
 <button class="tbtn gone" id="bBag">🧺</button>
 
