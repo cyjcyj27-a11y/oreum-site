@@ -447,6 +447,7 @@
         b.root.rotation.set(0, b.yaw, k * k * 1.45, 'YXZ');
         b.root.position.set(b.pos.x, b.pos.y + Math.sin(k * Math.PI) * 0.15, b.pos.z);
         b.legs.forEach((l, i) => { l.rotation.x = U.damp(l.rotation.x, (i % 2 ? 0.3 : -0.3), 4, dt); });
+        b.body.position.y = U.damp(b.body.position.y, b.baseY, 14, dt);   // 달리다 맞으면 몸통이 뛰던 높이(최대 0.2m)에 굳어 다리와 떨어져 보였다 (2026-10-01)
         if (b.deadT > 40) b.root.position.y -= Math.min(1, (b.deadT - 40) / 3) * 0.8;
         b.root.visible = b.deadT < 43 && Math.hypot(b.pos.x - px, b.pos.z - pz) < 100;
         if (b.deadT > 150 && Math.hypot(b.home.x - px, b.home.z - pz) > 40) {
