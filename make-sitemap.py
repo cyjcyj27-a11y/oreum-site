@@ -73,15 +73,18 @@ def main():
     pages = find_pages()
 
     # 한국어판 기준으로 짝을 짓습니다 (/games/lulu/ 와 /en/games/lulu/ 는 한 쌍)
-    ko = [p for p in pages if not p.startswith("/en/") and p != "/en/"]
+    #   러시아어판(/ru/…)은 얼음할아버지처럼 있는 게임만 — 한국어 짝에 붙여 세 언어를 한 묶음으로 적습니다 (2026-10-01)
+    ko = [p for p in pages if not p.startswith("/en/") and p != "/en/" and not p.startswith("/ru/")]
     today = datetime.date.today().isoformat()
 
     body = []
     for k in ko:
         e = PAIRS.get(k) or ("/en" + k if k != "/" else "/en/")
         has_en = e in pages and k not in NO_EN
+        r = "/ru" + k
+        has_ru = r in pages
         pri = priority_of(k)
-        for loc in ([k, e] if has_en else [k]):
+        for loc in ([k] + ([e] if has_en else []) + ([r] if has_ru else [])):
             mod = lastmod_of(loc, today)
             body.append(
 f"""  <url>
@@ -89,6 +92,8 @@ f"""  <url>
     <xhtml:link rel="alternate" hreflang="ko" href="{BASE}{k}"/>"""
 + (f"""
     <xhtml:link rel="alternate" hreflang="en" href="{BASE}{e}"/>""" if has_en else "")
++ (f"""
+    <xhtml:link rel="alternate" hreflang="ru" href="{BASE}{r}"/>""" if has_ru else "")
 + f"""
     <xhtml:link rel="alternate" hreflang="x-default" href="{BASE}{k}"/>
     <lastmod>{mod}</lastmod>
