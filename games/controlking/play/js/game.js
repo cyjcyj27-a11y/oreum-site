@@ -249,7 +249,7 @@
       if (f.robo) AU.S.zap(true); AU.S.gold(); sparkle(tng.tx, tng.ty, 26, '#ffd65a'); pop('+1', f.x, f.y + 44, '#ffd65a', true);
       if (goldA() === 12) magicReady(1);
       if (goldB() === 12) magicReady(2);
-    } else { if (f.robo) AU.S.zap(false); else AU.S.eat(); pop('+1', f.x, f.y + 40); }
+    } else { if (f.robo) { AU.S.zap(false); sparkle(f.x, f.y + 22, 6, '#8cffaa'); } else AU.S.eat(); pop('+1', f.x, f.y + 40); }
     anim.mouth = 0.25;
     save();
   }
@@ -378,11 +378,8 @@
     ART.frog(cx, V.X(f.x), V.Y(f.y), sc, F, T);
     if (tng.on) {
       const [mx, my] = mouth(), k = tng.t < 0.09 ? tng.t / 0.09 : 1 - (tng.t - 0.09) / 0.11;
-      if (f.robo) {                                  // 로봇개는 혀 대신 파란 흡입 빛
-        cx.strokeStyle = 'rgba(120,220,255,.75)'; cx.lineWidth = 5 * sc; cx.lineCap = 'round';
-        cx.beginPath(); cx.moveTo(V.X(mx), V.Y(my)); cx.lineTo(V.X(mx + (tng.tx - mx) * k), V.Y(my + (tng.ty - my) * k)); cx.stroke();
-        cx.strokeStyle = 'rgba(255,255,255,.9)'; cx.lineWidth = 2 * sc; cx.stroke(); cx.lineCap = 'butt';
-      } else ART.tongue(cx, V.X(mx), V.Y(my), V.X(mx + (tng.tx - mx) * k), V.Y(my + (tng.ty - my) * k), sc);
+      if (!f.robo)                                   // 로봇개는 혀·빛줄기 없이 배터리가 그냥 들어간다(사장님 9/30 "빼도 될거같은데")
+        ART.tongue(cx, V.X(mx), V.Y(my), V.X(mx + (tng.tx - mx) * k), V.Y(my + (tng.ty - my) * k), sc);
     }
     if (f.charging && mode === 'play') ART.gauge(cx, V.X(f.x), V.Y(f.y + 22), sc, f.charge);
     // 가루
