@@ -286,17 +286,8 @@
       PL.yaw += U.angDiff(PL.yaw, want) * Math.min(1, dt * 11);
     }
 
-    // 점프
-    if (IN.jumpEdge) {
-      IN.jumpEdge = false;
-      if (PL.state === 'ground' && !PL.swim && PL.knockT <= 0 && !PL.wade) {
-        PL.vel.y = JUMPV; PL.state = 'air'; PL.airT = 0;
-        // 달리다 뛰면 도약 동작(믹사모 Standing Jump Running) — 모닥불 뛰어넘기
-        if (Math.hypot(PL.vel.x, PL.vel.z) > 3.4 && CH.acts.leap) { play('leap', 0.08, { restart: true, once: true, speed: 1.1 }); PL.leap = true; }
-        else { play('jump', 0.08, { restart: true, once: true, speed: 1.15 }); PL.leap = false; }
-        if (window.AUD) AUD.sfx('jump');
-      }
-    }
+    // 땅 점프는 뺐다 — 뛸 일이 없다(턱은 걸어서 오른다). 스페이스는 물에서 잠수·떠오르기만 (사장님 2026-10-01)
+    IN.jumpEdge = false;
 
     // 움직이기
     p.x += PL.vel.x * dt; p.z += PL.vel.z * dt;

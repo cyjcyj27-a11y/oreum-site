@@ -414,6 +414,8 @@
     if (m === keyMode) return;
     if (keyMode === '' || keyMode === 'land') keyLand = el.innerHTML;   // 땅 위 안내는 index.html 이 언어별로 채워 둔 것
     keyMode = m;
+    // 폰의 잠수 단추: 땅에서는 숨기고 물에서만 — 땅 점프는 쓸 일이 없어 뺐다 (사장님 2026-10-01 "점프는 쓸일이 없는데 뺄까")
+    { const bj = $('bJump'); if (bj) { bj.style.display = (PL.swim || PL.dive) && !PL.aim ? '' : 'none'; bj.textContent = PL.dive ? L('위로', 'UP') : L('잠수', 'DIVE'); } }
     if (m === 'land') { el.innerHTML = keyLand; return; }
     const pick = a => L(a[0], a[1]);
     if (PL.aim) { el.innerHTML = pick(KEY_AIM); return; }   // 장총을 겨누는 동안
