@@ -239,9 +239,11 @@
   @media (max-height: 460px) { #pad { width: 160px; height: 160px; } #act { bottom: 30vh; } }
 
   #rotate { position: fixed; inset: 0; z-index: 70; display: none; flex-direction: column; align-items: center;
-    justify-content: center; gap: 20px; background: #0e1410; font-size: 26px; letter-spacing: 2px; }
-  #rotate button { pointer-events: auto; padding: 12px 30px; border-radius: 999px; border: 2px solid rgba(240,220,170,.7);
-    background: transparent; color: #f3e6c8; font-family: inherit; font-size: 24px; }
+    justify-content: center; gap: 18px; background: #0e1410; font-size: 20px; letter-spacing: 0; text-align: center; padding: 0 8vw; word-break: keep-all; }
+  #rotate button { pointer-events: auto; padding: 14px 34px; border-radius: 999px; border: 2px solid rgba(255,236,200,.85);
+    background: #e87a4a; color: #fff4dc; font-family: inherit; font-size: 22px; letter-spacing: 1px; white-space: nowrap; box-shadow: 0 0 26px rgba(232,122,74,.45); }
+  #rotate .sub { font-size: 15px; line-height: 1.7; color: #b9b3a0; letter-spacing: 0; max-width: 340px; }
+  #rotate a { color: #e6dcc4; font-size: 16px; }
 </style>
 </head>
 <body>
@@ -330,7 +332,20 @@
 <button class="tbtn" id="bJump">점프</button>
 <button class="tbtn gone" id="bBag">🧺</button>
 
-<div id="rotate">가로로 돌려 주세요<button onclick="window.OL&&OL.go&&OL.go()">가로로 돌리기</button></div>
+<!-- 폰을 세로로 들면 맨 먼저 이 안내가 뜬다 — 전엔 화면을 한 번 만져야 켜져서 세로 타이틀이 먼저 보였다 (사장님 2026-10-01) -->
+<div id="rotate"><div id="rotMsg">가로 화면에서 하는 게임입니다</div><button type="button" id="rotGo">가로로 돌리기</button>
+  <div class="sub" id="rotSub">단추가 안 먹으면 폰의 화면 회전 잠금을 풀고 눕혀 주세요</div><a href="#" id="rotSkip">그래도 세로로 하기</a></div>
+<script>
+  (function () {
+    var el = document.getElementById('rotate'), skip = false;
+    var phone = matchMedia('(hover: none)').matches || /Android|iPhone|iPad/i.test(navigator.userAgent);
+    window.__rot = function () { el.style.display = (phone && !skip && innerHeight > innerWidth * 1.08) ? 'flex' : 'none'; };
+    document.getElementById('rotGo').onclick = function () { if (window.OL && OL.go) OL.go(); };
+    document.getElementById('rotSkip').onclick = function (e) { e.preventDefault(); skip = true; window.__rot(); };
+    addEventListener('resize', window.__rot); addEventListener('orientationchange', function () { setTimeout(window.__rot, 300); });
+    window.__rot();
+  })();
+</script>
 
 <div id="load">
   <div class="ttl" id="ldTtl">얼음할아버지</div>
@@ -365,8 +380,10 @@
     document.getElementById('bAct').textContent = 'ОК';
     document.getElementById('bJump').textContent = 'ПРЫЖОК';
     document.getElementById('keys').innerHTML = '← → ↑ ↓ Идти · Shift Бег · E Действие · взять<br>WASD Камера · B Альбом · I Сумка · T Карта · R(держать) Назад · K Звук';
-    document.getElementById('rotate').firstChild.textContent = 'Поверните телефон горизонтально';
-    document.querySelector('#rotate button').textContent = 'Повернуть';
+    document.getElementById('rotMsg').textContent = 'В эту игру играют горизонтально';
+    document.getElementById('rotGo').textContent = 'Повернуть';
+    document.getElementById('rotSub').textContent = 'Если кнопка не сработала, отключите блокировку поворота и положите телефон набок';
+    document.getElementById('rotSkip').textContent = 'Всё равно играть вертикально';
   }
   if (/[?&]lang=en/.test(location.search)) {
     document.documentElement.lang = 'en';
@@ -381,7 +398,10 @@
     document.getElementById('bAct').textContent = 'ACT';
     document.getElementById('bJump').textContent = 'JUMP';
     document.getElementById('keys').innerHTML = '← → ↑ ↓ Move · Shift Run · E Action · pick up<br>WASD Camera · B Book · I Bag · T Map · R(hold) Respawn · K Sound';
-    document.getElementById('rotate').firstChild.textContent = 'Turn your phone sideways';
+    document.getElementById('rotMsg').textContent = 'This game plays in landscape';
+    document.getElementById('rotGo').textContent = 'Turn to landscape';
+    document.getElementById('rotSub').textContent = 'If the button does nothing, turn off rotation lock and lay your phone sideways';
+    document.getElementById('rotSkip').textContent = 'Play in portrait anyway';
   }
 </script>
 <script src="assets/landscape.js?v=2"></script>
@@ -417,7 +437,7 @@
 <script src="js/audio.js?v=13"></script>
 <script src="js/fx.js?v=2"></script>
 <script src="js/hud.js?v=42"></script>
-<script src="js/game.js?v=52"></script>
+<script src="js/game.js?v=53"></script>
 <script>
   window.__LOAD.set(0.04);
   GAME.boot().catch(function (e) { console.error(e); document.getElementById('ldPct').textContent = 'ERROR ' + e.message; });

@@ -372,8 +372,7 @@
     cam.aspect = innerWidth / Math.max(1, innerHeight);
     cam.updateProjectionMatrix();
     ren.setSize(innerWidth, innerHeight);
-    const port = innerHeight > innerWidth * 1.08;
-    $('rotate').style.display = (HUD.touch && port) ? 'flex' : 'none';
+    if (window.__rot) __rot();   // 가로 보기 안내는 index.html 이 맡는다 (로딩 전부터 떠야 해서)
   }
 
   let clock, saveT = 0, stepT = 0, tTitle = 0;
