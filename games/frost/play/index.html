@@ -330,7 +330,9 @@
 <div id="fade"></div>
 
 <div id="pad"><div id="knob"></div></div>
-<button class="tbtn" id="bAct">행동</button>
+<!-- 행동 단추는 세 언어 모두 주먹 그림 (사장님 2026-10-01 "주먹 이모지 픽사베이에서 찾아서 넣어" → "세판같게")
+     그림: Pixabay fist-146668 (OpenClipart-Vectors, Pixabay Content License). 원본 src/pixabay/ -->
+<button class="tbtn" id="bAct"><img src="assets/fist.png?v=1" alt="" draggable="false"></button>
 <button class="tbtn" id="bJump">점프</button>
 <button class="tbtn gone" id="bBag">🧺</button>
 
@@ -379,9 +381,6 @@
     document.getElementById('btnStart').textContent = 'СТАРТ';
     document.getElementById('btnCont').textContent = 'ПРОДОЛЖИТЬ';
     document.getElementById('btnGo').textContent = 'ПРОДОЛЖИТЬ';
-    // 행동 단추: 'ОК' 는 뜻이 확인이라 맞지 않고 ДЕЙСТВИЕ 는 길다 → 주먹 그림 (사장님 2026-10-01 "주먹 이모지 픽사베이에서 찾아서 넣어")
-    //   그림: Pixabay fist-146668 (OpenClipart-Vectors, Pixabay Content License). 원본 src/pixabay/
-    document.getElementById('bAct').innerHTML = '<img src="assets/fist.png?v=1" alt="" draggable="false">';
     document.getElementById('bJump').textContent = 'ПРЫЖОК';
     document.getElementById('keys').innerHTML = '← → ↑ ↓ Идти · Shift Бег · E Действие · взять<br>WASD Камера · B Альбом · I Сумка · T Карта · R(держать) Назад · K Звук';
     document.getElementById('rotMsg').textContent = 'В эту игру играют горизонтально';
@@ -399,7 +398,6 @@
     le.textContent = 'GRANDFATHER FROST'; le.style.fontSize = 'clamp(26px, 5vw, 56px)'; le.style.letterSpacing = '4px';
     document.getElementById('btnStart').textContent = 'START';
     document.getElementById('btnCont').textContent = 'CONTINUE';
-    document.getElementById('bAct').textContent = 'ACT';
     document.getElementById('bJump').textContent = 'JUMP';
     document.getElementById('keys').innerHTML = '← → ↑ ↓ Move · Shift Run · E Action · pick up<br>WASD Camera · B Book · I Bag · T Map · R(hold) Respawn · K Sound';
     document.getElementById('rotMsg').textContent = 'This game plays in landscape';
