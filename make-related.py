@@ -18,6 +18,7 @@ import io, os, re, sys
 
 # slug, 한국어 경로, 영어 경로, 한국어 이름, 한국어 장르 앵커, 영어 이름, 영어 장르 앵커, 태그
 GAMES = [
+    ("daltteok",      "/games/flash/daltteok/",      "/en/games/flash/daltteok/",      "달떡 합치기",        "수박게임 같은 떡 합치기게임",      "Moon Mochi Merge",      "suika-style merge game",        {"physics", "puzzle", "casual", "arcade", "korean"}),
     ("frost",         "/games/frost/",               "/en/games/frost/",               "얼음할아버지",       "3D 어드벤쳐 사냥게임",             "Grandfather Frost",    "3D adventure and hunting game", {"adventure", "3d", "sim", "story"}),
     ("shooting",      "/games/flash/shooting/",      "/en/games/flash/shooting/",      "야시장 사격게임",    "코르크총 야시장 사격게임",         "NIGHT MARKET SHOOTING", "carnival shooting gallery game", {"physics", "3d", "casual", "arcade", "korean"}),
     ("controlking",   "/games/controlking/",         "/en/games/controlking/",         "컨트롤킹",           "점프킹 같은 점프게임",             "CONTROL KING",         "Jump King style jump game",     {"action", "arcade", "platformer"}),

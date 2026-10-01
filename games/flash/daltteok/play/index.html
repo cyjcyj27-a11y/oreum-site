@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>달떡 합치기</title>
+<!-- 버튼 디자인은 design.md: 청화백자 떡 접시(흰 유약 몸통, 남색 테, 안쪽 청화 줄), 주 단추만 보름달 노랑 -->
+<style>
+@font-face{font-family:'Tokki';src:url('fonts/title.woff2?v=1') format('woff2');font-display:block}
+@font-face{font-family:'Ria';src:url('fonts/RiaSans-ExtraBold.woff2') format('woff2');font-display:swap}
+:root{--navy:#1f3a7a;--deep:#14285a;--col:100vw;--ox:0px;--padl:104px}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+html,body{width:100%;height:100%;overflow:hidden;background:#0f1440;font-family:'Ria',-apple-system,'Malgun Gothic',sans-serif;color:#fff;
+  user-select:none;-webkit-user-select:none;touch-action:none;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+#cv{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
+
+/* ---------- 백자 단추 ---------- */
+.btn{position:relative;pointer-events:auto;cursor:pointer;font-family:'Tokki','Ria',sans-serif;font-size:22px;line-height:1.1;color:var(--navy);
+  padding:13px 24px;min-width:120px;min-height:48px;border:3px solid var(--navy);border-radius:18px;
+  background:linear-gradient(180deg,#ffffff 0%,#f1f5fa 52%,#d6deea 100%);
+  box-shadow:0 5px 0 var(--deep),0 9px 12px rgba(6,10,40,.35),inset 0 3px 0 #fff,inset 0 -5px 0 rgba(31,58,122,.13);
+  display:flex;align-items:center;justify-content:center;gap:8px;white-space:nowrap;
+  transition:transform .22s cubic-bezier(.34,1.56,.64,1),box-shadow .22s,filter .15s}
+.btn::after{content:'';position:absolute;inset:4px;border:1.5px solid rgba(31,58,122,.34);border-radius:12px;pointer-events:none}
+.btn:hover{filter:brightness(1.05)}
+.btn:active{transform:translateY(3px) scale(.97);filter:brightness(1.1);transition-duration:.04s;
+  box-shadow:0 2px 0 var(--deep),0 4px 6px rgba(6,10,40,.35),inset 0 3px 0 #fff,inset 0 -5px 0 rgba(31,58,122,.13)}
+.btn.main{font-size:30px;padding:14px 36px;min-width:190px;color:#4a2a04;
+  background:linear-gradient(180deg,#fff6b8 0%,#ffd84a 50%,#f2ac1c 100%);
+  box-shadow:0 5px 0 var(--deep),0 9px 14px rgba(6,10,40,.4),inset 0 3px 0 rgba(255,255,255,.8),inset 0 -6px 0 rgba(150,80,0,.18)}
+.btn.main:active{box-shadow:0 2px 0 var(--deep),0 4px 6px rgba(6,10,40,.4),inset 0 3px 0 rgba(255,255,255,.8),inset 0 -6px 0 rgba(150,80,0,.18)}
+.btn.main::after{border-color:rgba(120,70,0,.3)}
+
+/* ---------- 상단바 ---------- */
+#topbar{position:fixed;top:0;left:var(--ox);width:var(--col);z-index:20;display:flex;align-items:center;gap:5px;pointer-events:none;
+  padding:calc(6px + env(safe-area-inset-top)) 8px 10px var(--padl)}
+.stat{display:flex;align-items:center;gap:5px;height:38px;padding:0 9px;flex:0 0 auto;border-radius:13px;border:2.5px solid var(--navy);color:var(--navy);
+  background:linear-gradient(180deg,#fff,#eef2f8 55%,#d6deea);box-shadow:0 3px 0 var(--deep),inset 0 2px 0 #fff}
+.stat i{font-style:normal;font-size:11px;letter-spacing:.5px;opacity:.75}
+.stat b{font-family:'Tokki','Ria',sans-serif;font-weight:400;font-size:21px;min-width:22px;text-align:right}
+.stat canvas{width:26px;height:26px;display:block}
+.stat b.sm{font-size:17px}
+#topbar .stat i{font-size:10px}
+body.big #topbar .stat i{display:none}
+.spacer{flex:1 1 4px}
+.tog{pointer-events:auto;position:relative;width:36px;height:36px;flex:0 0 36px;border-radius:50%;border:2.5px solid #fff;cursor:pointer;
+  background:linear-gradient(180deg,#3a5cb0,#1f3a7a 55%,#14285a);box-shadow:0 3px 0 #0a1638,inset 0 2px 0 rgba(255,255,255,.35);
+  display:flex;align-items:center;justify-content:center;transition:transform .2s cubic-bezier(.34,1.56,.64,1)}
+.tog:active{transform:translateY(2px) scale(.94);transition-duration:.04s}
+.tog svg{width:20px;height:20px;display:block}
+.tog.off{opacity:.6}
+.tog.off::after{content:'';position:absolute;left:22%;right:22%;top:50%;height:2.5px;margin-top:-1px;background:#fff;border-radius:1px;transform:rotate(-40deg)}
+body:not(.playing) #topbar .game{display:none}
+
+/* ---------- 하단바: BEST, 떡메 게이지, 떡메 단추 ---------- */
+#bot{position:fixed;left:var(--ox);width:var(--col);bottom:calc(8px + env(safe-area-inset-bottom));z-index:20;display:flex;align-items:center;gap:8px;
+  padding:0 10px;pointer-events:none}
+body:not(.playing) #bot{display:none}
+#gauge{flex:1 1 auto;height:20px;border-radius:10px;border:2.5px solid var(--navy);background:#e4eaf3;box-shadow:0 3px 0 var(--deep),inset 0 3px 4px rgba(20,40,90,.25);overflow:hidden;position:relative}
+#gauge u{position:absolute;left:0;top:0;bottom:0;width:0;display:block;background:linear-gradient(180deg,#fff3a0,#ffd034 55%,#f0a416);transition:width .25s;box-shadow:inset 0 2px 0 rgba(255,255,255,.7)}
+#kung{width:60px;height:60px;flex:0 0 60px;border-radius:50%;padding:0;min-width:0}
+#kung::after{border-radius:50%}
+#kung svg{width:36px;height:36px;display:block}
+#kung:disabled{filter:grayscale(.85) brightness(.82);cursor:default}
+#kung.ready{animation:rdy .7s infinite;background:linear-gradient(180deg,#fff6b8 0%,#ffd84a 50%,#f2ac1c 100%)}
+@keyframes rdy{50%{transform:scale(1.09);box-shadow:0 5px 0 var(--deep),0 0 18px rgba(255,216,74,.9),inset 0 3px 0 #fff}}
+
+/* ---------- 타이틀 ---------- */
+.scr{position:fixed;inset:0;z-index:30;display:flex;flex-direction:column;align-items:center;pointer-events:none}
+#title{justify-content:flex-start;padding-top:9vh;gap:1.9vh}
+#title h1{font-family:'Tokki','Ria',sans-serif;font-weight:400;text-align:center;line-height:1.02;color:#fff3b0;
+  font-size:min(calc(var(--col) * .2),13vh);-webkit-text-stroke:min(calc(var(--col) * .028),12px) var(--deep);paint-order:stroke fill;
+  text-shadow:0 .07em 0 var(--deep),0 .16em .25em rgba(0,0,20,.5)}
+#title h1 span{display:block;color:#fff}
+html[lang=en] #title h1{font-size:min(calc(var(--col) * .165),11vh)}
+#dexWrap{width:calc(var(--col) * .9);padding:8px 8px 6px;border-radius:18px;border:3px solid var(--navy);
+  background:linear-gradient(180deg,#fff,#eef2f8 60%,#d6deea);box-shadow:0 5px 0 var(--deep),0 10px 16px rgba(6,10,40,.4),inset 0 3px 0 #fff;position:relative}
+#dexWrap::after{content:'';position:absolute;inset:4px;border:1.5px solid rgba(31,58,122,.3);border-radius:12px;pointer-events:none}
+#dex{width:100%;display:block}
+#title .btn.main{margin-top:1.4vh}
+
+/* ---------- 게임오버 ---------- */
+#over{justify-content:center;background:rgba(8,10,40,.5)}
+#card{pointer-events:auto;position:relative;width:min(calc(var(--col) * .86),360px);padding:22px 18px 22px;border-radius:24px;border:4px solid var(--navy);text-align:center;color:var(--navy);
+  background:linear-gradient(180deg,#fff,#f1f5fa 55%,#dbe3ee);box-shadow:0 7px 0 var(--deep),0 16px 30px rgba(0,0,30,.5),inset 0 4px 0 #fff;
+  animation:pop .22s cubic-bezier(.34,1.56,.64,1)}
+#card::after{content:'';position:absolute;inset:6px;border:1.5px solid rgba(31,58,122,.3);border-radius:16px;pointer-events:none}
+@keyframes pop{from{transform:scale(.82);opacity:0}}
+#card h2{font-family:'Tokki','Ria',sans-serif;font-weight:400;font-size:34px;letter-spacing:1px}
+#oscore{font-family:'Tokki','Ria',sans-serif;font-size:76px;line-height:1.05;color:#f2b01e;-webkit-text-stroke:7px var(--deep);paint-order:stroke fill;margin:4px 0 2px}
+#orow{display:flex;justify-content:center;gap:26px;font-size:13px;margin-bottom:6px}
+#orow b{display:block;font-family:'Tokki','Ria',sans-serif;font-weight:400;font-size:24px}
+#orow .new b{color:#d6480c}
+#omoon{font-family:'Tokki','Ria',sans-serif;font-size:20px;margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:6px}
+#omoon i{display:inline-block;width:22px;height:22px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff7c0,#ffe36a 55%,#e0a820);box-shadow:0 0 0 2px var(--deep)}
+#obtns{display:flex;gap:10px;justify-content:center;margin-top:8px;position:relative;z-index:1}
+#obtns .btn{flex:0 1 150px;min-width:0;padding-left:10px;padding-right:10px}
+#obtns .btn.main{font-size:26px}
+</style>
+</head>
+<body>
+<canvas id="cv"></canvas>
+
+<div id="topbar">
+  <div class="stat game"><b id="score">0</b></div>
+  <div class="stat game"><i>NEXT</i><canvas id="next" width="56" height="56"></canvas></div>
+  <div class="spacer"></div>
+  <button class="tog" id="tBgm" aria-label="music"><svg viewBox="0 0 24 24"><path d="M9 17.5V5.5l11-2.5v12" fill="none" stroke="#fff" stroke-width="2.6" stroke-linejoin="round"/><ellipse cx="6.3" cy="17.8" rx="3.4" ry="2.7" fill="#fff"/><ellipse cx="17.3" cy="15.3" rx="3.4" ry="2.7" fill="#fff"/></svg></button>
+  <button class="tog" id="tSnd" aria-label="sound"><svg viewBox="0 0 24 24"><path d="M3 9h4l5-4.5v15L7 15H3z" fill="#fff"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg></button>
+</div>
+
+<div id="bot">
+  <div class="stat"><i>BEST</i><b id="best">0</b></div>
+  <div id="gauge"><u id="gfill"></u></div>
+  <button class="btn" id="kung" disabled aria-label="mallet">
+    <svg viewBox="0 0 36 36"><rect x="15.5" y="12" width="5" height="22" rx="2.2" fill="#b07a3c" stroke="#14285a" stroke-width="2"/><rect x="3" y="3" width="30" height="14" rx="5" fill="#d9a35c" stroke="#14285a" stroke-width="2.4"/><path d="M8 7.5h20M8 12.5h14" stroke="#b07a3c" stroke-width="1.6" stroke-linecap="round"/></svg>
+  </button>
+</div>
+
+<div class="scr" id="title">
+  <h1 id="ttl"></h1>
+  <button class="btn main" id="start">START</button>
+  <div class="stat" id="tbest"><i>BEST</i><b id="tbestN">0</b></div>
+  <div id="dexWrap"><canvas id="dex"></canvas></div>
+</div>
+
+<div class="scr" id="over" hidden>
+  <div id="card">
+    <h2>GAME OVER</h2>
+    <div id="oscore">0</div>
+    <div id="orow">
+      <div id="obestW">BEST<b id="obest">0</b></div>
+      <div id="otodayW"><span id="otodayL"></span><b id="otoday">0</b></div>
+    </div>
+    <div id="omoon" hidden><i></i><span id="omoonN"></span></div>
+    <div id="obtns">
+      <button class="btn main" id="retry">RETRY</button>
+      <button class="btn" id="share"></button>
+    </div>
+  </div>
+</div>
+
+<script>window.DT_SHARE_URL="https://oreumgames.com"+(/[?&]lang=en/.test(location.search)?"/en":"")+"/games/flash/daltteok/";</script>
+<script src="js/audio.js?v=1"></script>
+<script src="js/game.js?v=7"></script>
+<script src="assets/game-home.js" data-top="6" data-left="6" defer></script>
+<script src="/assets/visit.js?v=17" defer></script>
+<script src="/assets/game-events.js" defer></script>
+</body>
+</html>
