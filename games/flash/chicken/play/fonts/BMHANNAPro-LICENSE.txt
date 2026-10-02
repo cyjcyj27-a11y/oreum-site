@@ -1,0 +1,4 @@
+한나체Pro (제작 우아한형제들)
+출처: https://noonnu.cc/font_page/216 (2026-09-30 받음, 웹폰트 파일 cdn.jsdelivr.net/gh/projectnoonnu)
+라이선스: OFL — 눈누 요약표 "폰트 파일 수정·복제·배포 가능, 단 폰트 파일의 유료 판매는 금지", 임베딩(웹사이트·프로그램 내 탑재) 사용 가능.
+게임에 쓸 때는 쓰는 글자만 부분집합으로 잘라 넣는다(fonts/README.md).

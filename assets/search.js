@@ -2,7 +2,7 @@
 // 목록은 search-index.js (make-search.py 가 목록 페이지 카드에서 만든다). 메뉴를 처음 누를 때 읽는다.
 // 이름·다른 언어 이름·분류 글자로 찾고, 한글은 초성(ㅂㄹ → 볼링)으로도 찾는다.
 (function () {
-  var IDX_V = 9;   // search-index.js 를 새로 만들면 하나 올린다
+  var IDX_V = 10;   // search-index.js 를 새로 만들면 하나 올린다
   var btn = document.querySelector('.nav .navsearch');
   if (!btn) return;
   var EN = (document.documentElement.lang || '').slice(0, 2) === 'en';

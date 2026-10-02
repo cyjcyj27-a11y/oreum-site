@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>개발자치킨집</title>
+<!-- 버튼 디자인은 design.md: 주 단추는 전구 달린 빨간 치킨집 간판, 보조·알약·창은 치킨 상자 골판지 -->
+<style>
+@font-face{font-family:'Hanna';src:url('fonts/title.woff2?v=2') format('woff2');font-display:block}
+@font-face{font-family:'Ria';src:url('fonts/RiaSans-ExtraBold.woff2') format('woff2');font-display:swap}
+:root{--br:#4a2412;--col:100vw;--ox:0px;--oy:0px;--u:.5px;--ch:100vh;--padl:104px;
+  --kraft:repeating-linear-gradient(180deg,rgba(110,70,30,.11) 0 2px,rgba(0,0,0,0) 2px 7px),linear-gradient(180deg,#e8c08a,#cf9f63 55%,#b6864c);
+  --bulb:radial-gradient(circle at 50% 50%,#fffbd0 0 28%,#f0b020 30% 50%,rgba(0,0,0,0) 53%);
+  --bulbg:radial-gradient(circle at 50% 50%,#f0ffd8 0 28%,#34c23a 30% 50%,rgba(0,0,0,0) 53%)}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+html,body{width:100%;height:100%;overflow:hidden;font-family:'Ria',-apple-system,'Malgun Gothic',sans-serif;color:#fff;
+  background:#2a140c repeating-linear-gradient(90deg,rgba(224,40,30,.2) 0 34px,rgba(255,246,228,.07) 34px 68px);
+  user-select:none;-webkit-user-select:none;touch-action:none;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+#gl,#cv{position:fixed;left:0;top:0;display:block;touch-action:none}
+#gl{box-shadow:0 0 40px rgba(0,0,0,.6)}
+button{font:inherit;color:inherit;border:0;background:none}
+
+/* ---------- 단추: 골판지(보조) / 전구 간판(주) ---------- */
+.btn{position:relative;pointer-events:auto;cursor:pointer;font-family:'Hanna','Ria',sans-serif;font-size:calc(var(--u)*44);line-height:1;color:var(--br);white-space:nowrap;
+  padding:calc(var(--u)*22) calc(var(--u)*50);min-height:46px;min-width:calc(var(--u)*250);border:calc(var(--u)*6) solid var(--br);border-radius:calc(var(--u)*16);
+  background:var(--kraft);text-shadow:0 calc(var(--u)*2) 0 rgba(255,240,210,.55);
+  box-shadow:0 calc(var(--u)*11) 0 var(--br),0 calc(var(--u)*20) calc(var(--u)*22) rgba(40,15,5,.42),inset 0 calc(var(--u)*5) 0 rgba(255,255,255,.4),inset 0 calc(var(--u)*-8) 0 rgba(0,0,0,.13);
+  display:flex;align-items:center;justify-content:center;transition:transform .22s cubic-bezier(.34,1.56,.64,1),box-shadow .22s,filter .15s}
+.btn:hover{filter:brightness(1.08)}
+.btn:active{transform:translateY(calc(var(--u)*7)) scale(.97);filter:brightness(1.16);transition-duration:.04s;
+  box-shadow:0 calc(var(--u)*4) 0 var(--br),0 calc(var(--u)*8) calc(var(--u)*10) rgba(40,15,5,.42),inset 0 calc(var(--u)*5) 0 rgba(255,255,255,.4),inset 0 calc(var(--u)*-8) 0 rgba(0,0,0,.13)}
+.btn.main{font-size:calc(var(--u)*62);color:#ffd23a;text-shadow:none;-webkit-text-stroke:calc(var(--u)*9) #6a0c08;paint-order:stroke fill;
+  padding:calc(var(--u)*34) calc(var(--u)*66);min-width:calc(var(--u)*330);border-radius:calc(var(--u)*20);
+  background:var(--bulb) calc(var(--u)*2) calc(var(--u)*5)/calc(var(--u)*30) calc(var(--u)*15) repeat-x,var(--bulb) calc(var(--u)*2) calc(100% - var(--u)*5)/calc(var(--u)*30) calc(var(--u)*15) repeat-x,linear-gradient(180deg,#f64e3e,#dc281e 55%,#a81810)}
+
+/* ---------- 상단바 ---------- */
+#topbar{position:fixed;top:var(--oy);left:var(--ox);width:var(--col);z-index:20;display:flex;align-items:center;gap:4px;pointer-events:none;
+  padding:calc(7px + env(safe-area-inset-top)) 8px 8px var(--padl)}
+.stat{display:flex;align-items:center;gap:4px;height:38px;padding:0 7px;flex:0 0 auto;border-radius:8px;border:2.5px solid var(--br);color:var(--br);
+  background:var(--kraft);box-shadow:0 3px 0 var(--br),inset 0 2px 0 rgba(255,255,255,.5)}
+.stat b{font-family:'Hanna','Ria',sans-serif;font-weight:400;font-size:22px;min-width:20px}
+.stat canvas{display:block;height:22px}
+#coinI{width:22px;height:23px}
+#coinP.pop{animation:cp .22s}
+@keyframes cp{40%{transform:scale(1.16)}}
+.spacer{flex:1 1 4px}
+.tog{pointer-events:auto;position:relative;width:38px;height:38px;flex:0 0 38px;border-radius:50%;border:2.5px solid var(--br);cursor:pointer;
+  background:linear-gradient(180deg,#f64e3e,#dc281e 55%,#a81810);box-shadow:0 3px 0 var(--br),inset 0 0 0 2px #ffd23a,inset 0 4px 0 rgba(255,255,255,.3);
+  display:flex;align-items:center;justify-content:center;transition:transform .2s cubic-bezier(.34,1.56,.64,1)}
+.tog:active{transform:translateY(2px) scale(.94);transition-duration:.04s}
+.tog svg{width:21px;height:21px;display:block}
+@media (max-width:400px){.tog{width:34px;height:34px;flex-basis:34px}.stat b{font-size:20px}}
+.tog.off{opacity:.6}
+.tog.off::after{content:'';position:absolute;left:22%;right:22%;top:50%;height:2.5px;margin-top:-1px;background:#fff;border-radius:1px;transform:rotate(-40deg)}
+body.m-title #heartsP,body.m-title #coinP,body.m-map #heartsP,body.m-end #heartsP{display:none}
+
+/* ---------- 화면 ---------- */
+.scr{position:fixed;left:var(--ox);top:var(--oy);width:var(--col);height:var(--ch);z-index:30;pointer-events:none}
+/* 제목 간판: 가로로 긴 빨간 판에 노란 글씨, 초록 알전구, 왼쪽에 벼슬 달린 꼬꼬(사장님 10/2) */
+#sign{position:absolute;left:50%;top:calc(var(--u)*150 + env(safe-area-inset-top));transform:translateX(-50%);padding:calc(var(--u)*38) calc(var(--u)*44) calc(var(--u)*42) calc(var(--u)*26);white-space:nowrap;
+  display:flex;align-items:center;gap:calc(var(--u)*16);
+  border:calc(var(--u)*10) solid var(--br);border-radius:calc(var(--u)*30);
+  background:var(--bulbg) calc(var(--u)*4) calc(var(--u)*7)/calc(var(--u)*38) calc(var(--u)*19) repeat-x,var(--bulbg) calc(var(--u)*4) calc(100% - var(--u)*7)/calc(var(--u)*38) calc(var(--u)*19) repeat-x,linear-gradient(180deg,#f64e3e,#dc281e 55%,#a81810);
+  box-shadow:0 calc(var(--u)*16) 0 var(--br),0 calc(var(--u)*34) calc(var(--u)*40) rgba(40,15,5,.5),inset 0 0 0 calc(var(--u)*5) #ffd23a}
+#signC{display:block;flex:0 0 auto;width:calc(var(--u)*128);height:calc(var(--u)*141);margin:calc(var(--u)*-74) 0 calc(var(--u)*-22);filter:drop-shadow(0 calc(var(--u)*5) 0 rgba(74,36,18,.35))}
+#signT{display:block;font-family:'Hanna','Ria',sans-serif;font-size:calc(var(--u)*80);line-height:1;color:#ffd23a;-webkit-text-stroke:calc(var(--u)*13) #5a0c08;paint-order:stroke fill;text-shadow:0 calc(var(--u)*7) 0 #5a0c08}
+body.en #signT{font-size:calc(var(--u)*44)}
+html.wide #sign{padding-left:calc(var(--u)*70);padding-right:calc(var(--u)*120);gap:calc(var(--u)*44)}
+html.wide #signC{width:calc(var(--u)*170);height:calc(var(--u)*187);margin-top:calc(var(--u)*-100)}
+html.wide #signT{font-size:calc(var(--u)*100);letter-spacing:.1em}
+html.wide body.en #signT{font-size:calc(var(--u)*70);letter-spacing:.06em}
+#tbtns{position:absolute;left:0;right:0;top:calc(var(--ch)*.5 + var(--u)*345);display:flex;flex-direction:column;align-items:center;gap:calc(var(--u)*34)}
+#tbtns .row{display:flex;gap:calc(var(--u)*26);align-items:center;flex-direction:column}
+/* 가로 화면: 단추를 위쪽에(폰 가로 전체화면 알림이 아래를 가린다), 상점은 한 줄 여섯 칸 */
+html.wide #tbtns{top:calc(var(--u)*455)}
+html.wide #tbtns .row{flex-direction:row}
+html.wide #sign{top:calc(var(--u)*120)}
+
+/* 창: 치킨 상자 뚜껑(골판지 + 빨간 띠) */
+.card{pointer-events:auto;position:absolute;left:50%;top:50%;width:calc(var(--u)*560);transform:translate(-50%,-50%);padding:calc(var(--u)*34) calc(var(--u)*34) calc(var(--u)*46);text-align:center;color:var(--br);
+  border:calc(var(--u)*7) solid var(--br);border-radius:calc(var(--u)*22);
+  background:linear-gradient(180deg,rgba(0,0,0,0) calc(var(--u)*20),#ffd23a calc(var(--u)*20),#ffd23a calc(var(--u)*27),#dc281e calc(var(--u)*27),#b81c14 calc(var(--u)*128),#ffd23a calc(var(--u)*128),#ffd23a calc(var(--u)*135),rgba(0,0,0,0) calc(var(--u)*135)),var(--kraft);
+  box-shadow:0 calc(var(--u)*14) 0 var(--br),0 calc(var(--u)*30) calc(var(--u)*50) rgba(20,5,0,.55),inset 0 calc(var(--u)*6) 0 rgba(255,255,255,.4);animation:pop .22s cubic-bezier(.34,1.56,.64,1)}
+@keyframes pop{from{transform:translate(-50%,-50%) scale(.82);opacity:0}}
+.dim{background:rgba(30,10,5,.5);pointer-events:auto}
+.card h2{font-family:'Hanna','Ria',sans-serif;font-weight:400;font-size:calc(var(--u)*76);line-height:calc(var(--u)*88);height:calc(var(--u)*100);color:#ffd23a;-webkit-text-stroke:calc(var(--u)*12) #6a0c08;paint-order:stroke fill}
+.card .btn{margin:calc(var(--u)*30) auto 0;display:inline-flex}
+.card .btn + .btn{margin-top:calc(var(--u)*30)}
+#cstars{width:calc(var(--u)*360);height:calc(var(--u)*130);display:block;margin:calc(var(--u)*18) auto 0}
+.earn{display:flex;align-items:center;justify-content:center;gap:calc(var(--u)*12);font-family:'Hanna','Ria',sans-serif;font-size:calc(var(--u)*66);margin-top:calc(var(--u)*6)}
+.earn canvas{width:calc(var(--u)*56);height:calc(var(--u)*58)}
+#cnew{margin-top:calc(var(--u)*14);display:flex;align-items:center;justify-content:center;gap:calc(var(--u)*14)}
+#cnew i{font-style:normal;font-family:'Hanna','Ria',sans-serif;font-size:calc(var(--u)*34);color:#ffd23a;background:#dc281e;border:calc(var(--u)*4) solid var(--br);border-radius:calc(var(--u)*10);padding:calc(var(--u)*8) calc(var(--u)*14);transform:rotate(-6deg)}
+#cnewC{height:calc(var(--u)*112);display:block}
+#end .card{top:calc(var(--ch)*.5 + var(--u)*430)}
+#confirm{z-index:40}
+
+/* ---------- 하루 사이 상점 ---------- */
+#mapScr{background:linear-gradient(180deg,rgba(30,10,5,0) calc(var(--u)*380),rgba(30,10,5,.72) calc(var(--u)*620))}
+#mhead{position:absolute;left:0;right:0;top:calc(var(--u)*566);text-align:center;font-family:'Hanna','Ria',sans-serif;color:#ffd23a;-webkit-text-stroke:calc(var(--u)*12) var(--br);paint-order:stroke fill;line-height:1}
+#mday{font-size:calc(var(--u)*72)}
+#shop{position:absolute;left:calc(var(--u)*24);right:calc(var(--u)*24);top:calc(var(--u)*656);display:grid;grid-template-columns:repeat(3,1fr);gap:calc(var(--u)*22) calc(var(--u)*18)}
+.item{pointer-events:auto;cursor:pointer;position:relative;display:flex;flex-direction:column;align-items:center;padding:calc(var(--u)*4) 0 calc(var(--u)*8);color:var(--br);
+  border:calc(var(--u)*5) solid var(--br);border-radius:calc(var(--u)*14);background:var(--kraft);
+  box-shadow:0 calc(var(--u)*9) 0 var(--br),inset 0 calc(var(--u)*5) 0 rgba(255,255,255,.4);transition:transform .2s cubic-bezier(.34,1.56,.64,1),filter .15s}
+.item:active{transform:translateY(calc(var(--u)*6)) scale(.97);filter:brightness(1.1);transition-duration:.04s}
+.item canvas{width:calc(var(--u)*80);height:calc(var(--u)*80)}
+.item .nm{font-family:'Hanna','Ria',sans-serif;font-size:calc(var(--u)*31);line-height:1.05}
+.item .pips{display:flex;gap:calc(var(--u)*7);margin:calc(var(--u)*5) 0 calc(var(--u)*3)}
+.item .pips i{width:calc(var(--u)*17);height:calc(var(--u)*17);border-radius:50%;border:calc(var(--u)*3) solid var(--br);background:#a87a48}
+.item .pips i.on{background:#ffd23a}
+.item .pr{display:flex;align-items:center;gap:calc(var(--u)*6);font-family:'Hanna','Ria',sans-serif;font-size:calc(var(--u)*34);color:#fff6dc;-webkit-text-stroke:calc(var(--u)*7) var(--br);paint-order:stroke fill}
+.item .pr .ci{width:calc(var(--u)*36);height:calc(var(--u)*38)}
+.item.poor .pr{color:#ff6a5a}
+.item.max .pr{color:#ffd23a}
+.item.no{animation:no .25s}
+@keyframes no{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+#bGo{position:absolute;left:50%;bottom:calc(var(--u)*40 + env(safe-area-inset-bottom));transform:translateX(-50%)}
+#bGo:active{transform:translateX(-50%) translateY(calc(var(--u)*7)) scale(.97)}
+html.wide #mapScr{background:rgba(30,10,5,.62)}
+html.wide #mhead{top:calc(var(--u)*150)}
+html.wide #shop{left:50%;right:auto;width:calc(var(--u)*1240);margin-left:calc(var(--u)*-620);top:calc(var(--u)*270);grid-template-columns:repeat(6,1fr)}
+html.wide #bGo{bottom:auto;top:calc(var(--u)*520)}
+html.wide #end .card{top:58%}
+</style>
+</head>
+<body class="m-title">
+<canvas id="gl"></canvas>
+<canvas id="cv"></canvas>
+
+<div id="topbar">
+  <div class="stat" id="heartsP"><canvas id="hearts" width="132" height="44"></canvas></div>
+  <div class="stat" id="coinP"><canvas id="coinI" width="44" height="46"></canvas><b id="coins">0</b></div>
+  <div class="spacer"></div>
+  <button class="tog" id="tBgm" aria-label="music"><svg viewBox="0 0 24 24"><path d="M9 17.5V5.5l11-2.5v12" fill="none" stroke="#fff" stroke-width="2.6" stroke-linejoin="round"/><ellipse cx="6.3" cy="17.8" rx="3.4" ry="2.7" fill="#fff"/><ellipse cx="17.3" cy="15.3" rx="3.4" ry="2.7" fill="#fff"/></svg></button>
+  <button class="tog" id="tSnd" aria-label="sound"><svg viewBox="0 0 24 24"><path d="M3 9h4l5-4.5v15L7 15H3z" fill="#fff"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg></button>
+</div>
+
+<div class="scr" id="title">
+  <div id="sign"><svg id="signC" viewBox="0 0 120 132" aria-hidden="true"><path d="M40 56V23Q40 18 45 18H53Q58 18 58 23V25H66Q71 25 71 30V32H76Q81 32 81 37V56Z" fill="#e8140c" stroke="#4a2412" stroke-width="5" stroke-linejoin="round"/><ellipse cx="60" cy="82" rx="47" ry="45" fill="#ffffff" stroke="#4a2412" stroke-width="5"/><path d="M19 98Q28 121 60 123Q92 121 101 98Q90 114 60 115Q30 114 19 98Z" fill="#e6dcd8"/><rect x="32" y="64" width="13" height="24" rx="4" fill="#2a1410"/><rect x="77" y="64" width="13" height="24" rx="4" fill="#2a1410"/><rect x="34" y="78" width="9" height="8" rx="2.5" fill="#c8684a"/><rect x="79" y="78" width="9" height="8" rx="2.5" fill="#c8684a"/><path d="M24 63H50M72 61H98" fill="none" stroke="#2a1410" stroke-width="4" stroke-linecap="round"/><rect x="55" y="103" width="9" height="9" rx="2" fill="#d42010"/><path d="M47 96Q60 92 73 96Q72 106 60 106Q48 106 47 96Z" fill="#f08a1c"/><path d="M41 90Q41 83 49 84Q55 80 61 83Q68 80 74 84Q81 84 79 91Q77 96 60 96Q43 96 41 90Z" fill="#ffb21e"/></svg><span id="signT"></span></div>
+  <div id="tbtns">
+    <button class="btn main" id="bStart">START</button>
+    <div class="row"><button class="btn main" id="bCont" hidden>CONTINUE</button><button class="btn" id="bNew" hidden>NEW GAME</button></div>
+  </div>
+</div>
+
+<div class="scr" id="mapScr" hidden>
+  <div id="mhead"><div id="mday"></div></div>
+  <div id="shop"></div>
+  <button class="btn main" id="bGo">GO</button>
+</div>
+
+<div class="scr dim" id="clear" hidden>
+  <div class="card">
+    <h2>CLEAR</h2>
+    <canvas id="cstars" width="360" height="130"></canvas>
+    <div class="earn"><canvas id="cearnI" width="44" height="46"></canvas><span id="cearn">0</span></div>
+    <div id="cnew"><i>NEW</i><canvas id="cnewC"></canvas></div>
+    <button class="btn main" id="bNext">NEXT</button>
+  </div>
+</div>
+
+<div class="scr dim" id="over" hidden>
+  <div class="card"><h2>GAME OVER</h2><button class="btn main" id="bRetry">RETRY</button></div>
+</div>
+
+<div class="scr" id="end" hidden>
+  <div class="card"><h2>THE END</h2><button class="btn main" id="bTitle">TITLE</button></div>
+</div>
+
+<div class="scr dim" id="confirm" hidden>
+  <div class="card"><h2>NEW GAME?</h2><button class="btn main" id="bYes">OK</button><button class="btn" id="bNo">CANCEL</button></div>
+</div>
+
+<script src="js/art.js?v=2"></script>
+<script src="js/people.js?v=1"></script>
+<script src="js/icons.js?v=1"></script>
+<script src="lib/three.min.js"></script>
+<script src="js/ck.js?v=1"></script>
+<script src="js/scene.js?v=8"></script>
+<script src="js/sfx.js?v=1"></script>
+<script src="js/audio.js?v=1"></script>
+<script src="js/game.js?v=11"></script>
+<script src="assets/game-home.js" data-top="6" data-left="6" defer></script>
+<script src="/assets/visit.js?v=17" defer></script>
+<script src="/assets/game-events.js" defer></script>
+</body>
+</html>
