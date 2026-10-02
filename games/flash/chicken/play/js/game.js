@@ -408,7 +408,7 @@ function step(dt) {
     else { p.x = p.sx + (p.x1 - p.sx) * u * u; p.y = p.sy + (p.y1 - p.sy) * u * u - Math.sin(u * Math.PI) * 70; }
   }
   K3.partsStep(dt); K3.O.oilT.offset.set(Math.sin(clock * 0.31) * 0.06, clock * 0.035);
-  if (G.mode === 'end') { G.endT += dt; if (G.endT > 0.4) { G.endT = 0; K3.burst('conf', (Math.random() - 0.5) * 6, 5 + Math.random() * 2, (Math.random() - 0.5) * 5, 26, { v: 2.6, up: 2, cols: CONF, s: 0.13, max: 1.9, g: 7 }); } return; }
+  if (G.mode === 'end') { SND.fry(0); return; }   /* 엔딩은 색종이 없이 조용히(사장님 10/2) */
   if (G.mode !== 'play') { SND.fry(0); return; }
   st = DAYS[G.day];
   if (G.banner > 0) G.banner -= dt;
@@ -529,13 +529,13 @@ function idle(mode) {
   var pc = CK.whole(); pc.dx = pc.dz = pc.tx = pc.tz = 0; K3.pieceMesh(pc); var b = bpos(pc); pc.mesh.position.set(b[0], b[1], b[2]); G.board = [pc];
 }
 function goMap() { idle('map'); buildShop(); ui('map'); SND.music(1); }
-function goTitle() { idle('title'); titleButtons(); ui('title'); }
+function goTitle() { idle('title'); titleButtons(); ui('title'); SND.sad(0); }
 function goEnd() {
   var keep = G; G.mode = 'end'; G.endT = 0;
   /* 엔딩 글을 한 줄씩 띄우고, 다 뜬 뒤에 THE END 카드. 화면을 누르면 한꺼번에 다 보인다 */
   $('end').classList.remove('all');
   $('endStory').innerHTML = TX.end.map(function (q, i) { return '<p style="animation-delay:' + (0.6 + i * 1.3).toFixed(1) + 's">' + L(q) + '</p>'; }).join('');
-  ui('end'); SND.play('clear');
+  ui('end'); SND.sad(1);   /* 색종이·클리어 가락 대신 슬픈 가락 */
 }
 
 /* ---------- 덧그림(2D): 말풍선, 막대, 글자, 동전, 길잡이 ---------- */

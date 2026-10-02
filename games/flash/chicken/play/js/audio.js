@@ -109,9 +109,30 @@ function sched() {
   }
 }
 function startMusic() { if (!ctx || timer) return; nextT = 0; timer = setInterval(sched, 60); }
-function music(v) { musicOn = v; if (v) { if (ctx && !timer) startMusic(); } else if (timer) { clearInterval(timer); timer = null; } }
+function music(v) { musicOn = v; if (v) { sad(0); if (ctx && !timer) startMusic(); } else if (timer) { clearInterval(timer); timer = null; } }
+
+// ---------- 엔딩의 슬픈 가락: 느린 가단조, 피아노풍 (직접 지은 것) ----------
+var SAD = [
+  { b: 45, c: [57, 60, 64], m: [76, 0, 0, 74, 72, 0, 0, 0] }, { b: 41, c: [53, 57, 60], m: [69, 0, 0, 67, 69, 0, 0, 0] },
+  { b: 48, c: [55, 60, 64], m: [67, 0, 0, 76, 74, 0, 0, 0] }, { b: 40, c: [56, 59, 64], m: [71, 0, 0, 0, 68, 0, 0, 0] },
+  { b: 45, c: [57, 60, 64], m: [72, 0, 0, 71, 69, 0, 0, 0] }, { b: 50, c: [57, 62, 65], m: [77, 0, 76, 0, 74, 0, 0, 0] },
+  { b: 40, c: [56, 59, 64], m: [71, 0, 0, 74, 72, 0, 71, 0] }, { b: 45, c: [57, 60, 64], m: [69, 0, 0, 0, 0, 0, 0, 0] }
+], sadT = null, sadNext = 0, sadI = 0;
+function piano(m, t, dur, vol) { [1, 2].forEach(function (h, i) { var o = ctx.createOscillator(), g = ctx.createGain(); o.type = i ? 'sine' : 'triangle'; o.frequency.value = mf(m) * h; g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(vol * (i ? 0.3 : 1), t + 0.008); g.gain.exponentialRampToValueAtTime(0.0001, t + dur); o.connect(g); g.connect(bgmG); o.start(t); o.stop(t + dur + 0.05); }); }
+function sadSched() {
+  if (!ctx || ctx.state !== 'running') return;
+  if (sadNext < ctx.currentTime) sadNext = ctx.currentTime + 0.1;
+  while (sadNext < ctx.currentTime + 0.4) {
+    var e = 0.46, bar = SAD[Math.floor(sadI / 8) % 8], k = sadI % 8, t = sadNext;
+    if (k === 0) piano(bar.b, t, 3.4, 0.5);
+    piano(bar.c[[0, 1, 2, 1, 0, 1, 2, 1][k]], t, 1.4, 0.16);
+    if (bar.m[k]) { var len = 1; while (k + len < 8 && !bar.m[k + len]) len++; piano(bar.m[k], t, Math.max(1.2, len * e * 1.5), 0.42); }
+    sadNext += e; sadI++;
+  }
+}
+function sad(v) { if (v) { if (timer) { clearInterval(timer); timer = null; } musicOn = 0; if (ctx && !sadT) { sadNext = 0; sadI = 0; sadT = setInterval(sadSched, 80); } } else if (sadT) { clearInterval(sadT); sadT = null; } }
 return {
-  unlock: unlock, play: play, fry: fry, music: music, _buf: BUF,
+  unlock: unlock, play: play, fry: fry, music: music, sad: sad, _buf: BUF,
   snd: function (v) { sndOn = v; if (sfxG) sfxG.gain.value = v ? 0.9 : 0; },
   bgm: function (v) { bgmOn = v; if (bgmG) bgmG.gain.value = v ? 0.3 : 0; },
   hide: function (h) { if (!ctx) return; if (h) ctx.suspend(); else ctx.resume(); }
