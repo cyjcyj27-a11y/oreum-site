@@ -534,7 +534,7 @@ function goEnd() {
   var keep = G; G.mode = 'end'; G.endT = 0;
   /* 엔딩 글을 한 줄씩 띄우고, 다 뜬 뒤에 THE END 카드. 화면을 누르면 한꺼번에 다 보인다 */
   $('end').classList.remove('all');
-  $('endStory').innerHTML = TX.end.map(function (q, i) { return '<p style="animation-delay:' + (0.6 + i * 1.3).toFixed(1) + 's">' + L(q) + '</p>'; }).join('');
+  $('endStory').innerHTML = TX.end.map(function (q, i) { return '<p style="animation-delay:' + (0.6 + i * 2.4).toFixed(1) + 's">' + L(q) + '</p>'; }).join('');
   ui('end'); SND.sad(1);   /* 색종이·클리어 가락 대신 슬픈 가락 */
 }
 

@@ -97,10 +97,10 @@ html.wide #sign{top:calc(var(--u)*120)}
 /* 엔딩: 어두운 막 위에 글이 한 줄씩 뜨고 마지막에 THE END 카드 */
 #end{background:rgba(24,8,4,.86);pointer-events:auto;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:calc(var(--u)*30);padding:calc(var(--u)*76) calc(var(--u)*30) calc(var(--u)*30)}
 #endStory{max-width:calc(var(--u)*660);font-size:calc(var(--u)*29);line-height:1.5;color:#fff3dc;text-align:center;word-break:keep-all;overflow-wrap:anywhere;text-shadow:0 calc(var(--u)*3) 0 rgba(0,0,0,.55)}
-#endStory p{margin:calc(var(--u)*5) 0;animation:endin .9s both}
+#endStory p{margin:calc(var(--u)*5) 0;animation:endin 1.2s both}
 #endStory p:last-child{color:#ffd23a}
 @keyframes endin{from{opacity:0;transform:translateY(calc(var(--u)*14))}to{opacity:1;transform:none}}
-#end .card{position:static;transform:none;flex:0 0 auto;width:calc(var(--u)*420);padding:calc(var(--u)*26) calc(var(--u)*26) calc(var(--u)*40);animation:endin .9s 13.8s both}
+#end .card{position:static;transform:none;flex:0 0 auto;width:calc(var(--u)*420);padding:calc(var(--u)*26) calc(var(--u)*26) calc(var(--u)*40);animation:endin .9s 24.6s both}
 #end .card .btn{margin-top:calc(var(--u)*18)}
 #end.all #endStory p,#end.all .card{animation:none}
 html.wide #end{flex-direction:row;gap:calc(var(--u)*56);padding:calc(var(--u)*70) calc(var(--u)*60) calc(var(--u)*40)}
@@ -192,8 +192,8 @@ html.wide #bGo{bottom:auto;top:calc(var(--u)*520)}
 <script src="js/ck.js?v=1"></script>
 <script src="js/scene.js?v=9"></script>
 <script src="js/sfx.js?v=1"></script>
-<script src="js/audio.js?v=2"></script>
-<script src="js/game.js?v=13"></script>
+<script src="js/audio.js?v=3"></script>
+<script src="js/game.js?v=14"></script>
 <script src="assets/game-home.js" data-top="6" data-left="6" defer></script>
 <script src="/assets/visit.js?v=17" defer></script>
 <script src="/assets/game-events.js" defer></script>
