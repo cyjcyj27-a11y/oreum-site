@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, viewport-fit=cover">
+<title>장기</title>
+<!-- 단추·HUD 소재(oreum-game-ui 규칙 7): 장기알 — 모서리를 깎은 팔각 박달나무 알에 음각 글씨.
+     모양 팔각(10px 깎음) · 색 주 단추 = 한(漢) 주사 빨강 음각, 보조 = 초(楚) 초록 음각, 바탕 밝은 나무 · 재질 층 = 짙은 테(바깥 팔각) + 안쪽 나무 결 + 위 반짝 띠 + 아래 그늘 + 음각 글씨(위 밝은 선·아래 그늘)
+     · 누름 = 알을 판에 내려놓듯 3px 내려가고 두께 줄어듦 + '딱' 소리. 상단 알약은 작은 나무 패, 창은 장기판 나무 판자. -->
+<style>
+  @font-face { font-family: 'KDG'; src: url('fonts/KimDaegeon-title.woff2') format('woff2'); font-display: swap; }
+  @font-face { font-family: 'Ria'; src: url('fonts/RiaSans-ExtraBold.woff2') format('woff2'); font-display: swap; }
+  @font-face { font-family: 'Pieces'; src: url('fonts/NotoSerifKR-pieces.woff2') format('woff2'); font-display: block; }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #241709; font-family: 'Ria', 'Noto Sans KR', 'Malgun Gothic', sans-serif; color: #f2e6cc; user-select: none; -webkit-user-select: none; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+  #c { display: block; width: 100vw; height: 100vh; touch-action: none; }
+
+  /* 나무 알·패: 바깥 = 짙은 테, ::before = 안쪽 나무 */
+  .wood { position: relative; isolation: isolate; background: #4e3112; clip-path: polygon(10px 0, calc(100% - 10px) 0, 100% 10px, 100% calc(100% - 10px), calc(100% - 10px) 100%, 10px 100%, 0 calc(100% - 10px), 0 10px); }
+  .wood::before { content: ''; position: absolute; z-index: -1; inset: 3px; clip-path: polygon(8px 0, calc(100% - 8px) 0, 100% 8px, 100% calc(100% - 8px), calc(100% - 8px) 100%, 8px 100%, 0 calc(100% - 8px), 0 8px);
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.42) 0, rgba(255,255,255,0) 22%, rgba(0,0,0,0) 72%, rgba(0,0,0,.16) 100%),
+      repeating-linear-gradient(96deg, rgba(120,70,20,.10) 0 2px, rgba(0,0,0,0) 2px 9px, rgba(120,70,20,.06) 9px 11px, rgba(0,0,0,0) 11px 17px),
+      linear-gradient(160deg, #f3dcab 0%, #e3bf7f 55%, #cfa25c 100%); }
+  .wood > * { position: relative; }
+
+  /* 단추 */
+  .bw { display: inline-block; filter: drop-shadow(0 5px 0 #2d1a07) drop-shadow(0 9px 10px rgba(0,0,0,.45)); transition: filter .22s, transform .22s cubic-bezier(.34,1.56,.64,1); pointer-events: auto; cursor: pointer; touch-action: manipulation; }
+  .bw:hover { filter: drop-shadow(0 5px 0 #2d1a07) drop-shadow(0 9px 10px rgba(0,0,0,.45)) brightness(1.06); }
+  .bw:active { transform: translateY(3px) scale(.97); filter: drop-shadow(0 2px 0 #2d1a07) drop-shadow(0 4px 6px rgba(0,0,0,.4)); transition-duration: .04s; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; min-width: 150px; padding: 13px 34px; font-size: 24px; letter-spacing: 3px; color: #b8321f; text-shadow: 0 1px 0 rgba(255,255,255,.5), 0 -1px 0 rgba(0,0,0,.28); white-space: nowrap; }
+  .btn.sub { color: #1f6b3a; font-size: 16px; padding: 9px 22px; min-width: 120px; letter-spacing: 2px; }
+  .btn.dim { color: #6a5030; }
+  .btn.sm { font-size: 15px; padding: 8px 16px; min-width: 0; letter-spacing: 1px; }
+
+  /* 상단 바 — 오름 알약(왼쪽 위) 오른쪽부터 */
+  #topbar { position: fixed; left: 0; right: 0; top: 0; height: calc(48px + env(safe-area-inset-top)); padding: env(safe-area-inset-top) calc(10px + env(safe-area-inset-right)) 0 calc(104px + env(safe-area-inset-left)); display: flex; align-items: center; gap: 8px; pointer-events: none; z-index: 5; }
+  .stat { display: inline-flex; align-items: center; gap: 10px; padding: 6px 14px; font-size: 15px; white-space: nowrap; color: #3a2410; text-shadow: 0 1px 0 rgba(255,255,255,.45); filter: drop-shadow(0 2px 0 #2d1a07) drop-shadow(0 4px 6px rgba(0,0,0,.4)); }
+  .stat.wood::before { inset: 2px; }
+  .tm { display: inline-flex; align-items: center; gap: 6px; opacity: .45; transition: opacity .25s; }
+  .tm.on { opacity: 1; }
+  .tm i { display: inline-block; width: 15px; height: 15px; border-radius: 2px; transform: rotate(45deg) scale(.8); background: #1f6b3a; box-shadow: 0 1px 1px rgba(0,0,0,.4); }
+  .tm.h i { background: #b8321f; }
+  .tm.on i { box-shadow: 0 0 0 2px rgba(255,255,255,.55), 0 0 8px rgba(255,240,200,.7); }
+  .tm.think i { animation: think .8s ease-in-out infinite; }
+  @keyframes think { 50% { box-shadow: 0 0 0 4px rgba(255,255,255,.2), 0 0 14px rgba(255,240,200,.95); } }
+  .tm b { font-weight: 400; }
+  .you { font-style: normal; font-size: 11px; opacity: .85; margin-left: 4px; letter-spacing: 1px; display: none; }
+  .you.on { display: inline; }
+  .spacer { flex: 1; }
+  .tog { pointer-events: auto; position: relative; width: 36px; height: 36px; border-radius: 50%; border: 2px solid #c9a265; background: radial-gradient(circle at 40% 30%, #6a4418, #3a2309 75%); color: #f2e6cc; font-family: inherit; font-size: 14px; line-height: 1; padding: 0; touch-action: manipulation; cursor: pointer; box-shadow: 0 2px 0 #1a0e03, 0 4px 6px rgba(0,0,0,.4); display: inline-flex; align-items: center; justify-content: center; }
+  .tog svg { width: 20px; height: 20px; display: block; }
+  .tog.off { opacity: .6; }
+  .tog.off::after { content: ''; position: absolute; left: 24%; right: 24%; top: 50%; height: 2px; margin-top: -1px; background: #fff; border-radius: 1px; transform: rotate(-40deg); }
+  .tog:active { transform: translateY(1px); box-shadow: 0 1px 0 #1a0e03; }
+  @media (max-width: 560px) {
+    #topbar { padding-left: calc(96px + env(safe-area-inset-left)); padding-right: 6px; gap: 5px; }
+    .stat { padding: 5px 9px; font-size: 12px; gap: 6px; }
+    .tm i { width: 12px; height: 12px; } .you { display: none !important; }
+    .tog { width: 31px; height: 31px; font-size: 12px; } .tog svg { width: 17px; height: 17px; }
+  }
+
+  /* 한수쉼·기권 — 오른쪽 아래 */
+  #acts { position: fixed; right: calc(12px + env(safe-area-inset-right)); bottom: calc(12px + env(safe-area-inset-bottom)); display: none; gap: 10px; align-items: center; z-index: 6; }
+  body.playing #acts { display: flex; }
+  #acts.hide { display: none !important; }
+
+  #keys { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(6px + env(safe-area-inset-bottom)); font-size: 11px; opacity: .45; pointer-events: none; z-index: 5; display: none; white-space: nowrap; }
+  body.playing #keys { display: block; }
+  body.touch #keys { display: none !important; }
+
+  #flash { position: fixed; left: 50%; top: 44%; transform: translate(-50%, -50%) scale(.6); font-family: 'KDG', 'Ria', serif; font-size: min(24vw, 128px); letter-spacing: 6px; color: #fff3d6; -webkit-text-stroke: 3px #2a1708; paint-order: stroke fill; text-shadow: 0 8px 28px rgba(0,0,0,.6); opacity: 0; pointer-events: none; z-index: 8; transition: opacity .2s, transform .35s cubic-bezier(.2,1.6,.4,1); white-space: nowrap; }
+  #flash.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  #flash.red { color: #ff8a73; }
+  #flash.soft { font-size: min(14vw, 72px); }
+
+  /* 타이틀: 제목은 맨 아래, 단추는 그 위 */
+  #title { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; z-index: 10; text-align: center; pointer-events: none; padding-bottom: calc(10px + env(safe-area-inset-bottom)); }
+  #title.hide { display: none; }
+  #title h1 { font-family: 'KDG', serif; font-weight: 400; font-size: min(34vw, 190px); margin: 6px 0 0; line-height: 1; color: #fff3d6; -webkit-text-stroke: 5px #2a1708; paint-order: stroke fill; text-shadow: 0 10px 30px rgba(0,0,0,.6); letter-spacing: 10px; }
+  body.en #title h1 { font-size: min(21vw, 130px); letter-spacing: 4px; }
+  .rec { font-size: 20px; letter-spacing: 2px; color: #ffe066; text-shadow: 0 1px 4px rgba(0,0,0,.9), 0 0 2px #2a1708; margin: 0 0 16px; min-height: 18px; }
+  .rec:empty { display: none; }
+  .btns { display: flex; gap: 14px; align-items: center; justify-content: center; flex-wrap: wrap; }
+  body.shot #topbar, body.shot #keys, body.shot #oreumHome, body.shot #oreumFs, body.shot .btns, body.shot .rec, body.shot #acts { display: none !important; }
+  body.shot #title { padding-bottom: 16vh; }
+  body.shot #title h1 { font-size: min(30vw, 200px); letter-spacing: 16px; }
+  body.shot.en #title h1 { font-size: min(22vw, 150px); letter-spacing: 6px; }
+
+  /* 차림 고르기·기권 확인 — 장기판 나무 판자 */
+  .sheet { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%) scale(.85); opacity: 0; pointer-events: none; z-index: 11; padding: 18px 20px 20px; width: min(94vw, 560px); max-height: 92vh; overflow: hidden; color: #3a2410; visibility: hidden; transition: transform .18s cubic-bezier(.34,1.56,.64,1), opacity .15s, visibility 0s .18s; filter: drop-shadow(0 8px 0 #2d1a07) drop-shadow(0 16px 24px rgba(0,0,0,.55)); }
+  .sheet.show { transform: translate(-50%, -50%) scale(1); opacity: 1; pointer-events: auto; visibility: visible; transition-delay: 0s; }
+  .sheet h3 { margin: 0 0 14px; font-family: 'KDG', serif; font-weight: 400; font-size: 34px; letter-spacing: 6px; text-align: center; color: #2a1708; text-shadow: 0 1px 0 rgba(255,255,255,.5); }
+  .sheet h3 .side { font-family: 'Ria', sans-serif; font-size: 16px; letter-spacing: 2px; margin-left: 10px; vertical-align: middle; padding: 3px 10px; border-radius: 4px; color: #fff; }
+  .sheet h3 .side.c { background: #1f6b3a; } .sheet h3 .side.h { background: #b8321f; }
+  .sheet h3 .side:empty { display: none; }
+  .opts { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .opt { display: flex; align-items: center; justify-content: center; gap: 5px; padding: 9px 8px; }
+  .opt img { width: 46px; height: 46px; display: block; }
+  .opt .gap { width: 14px; }
+  .sheet .row { display: flex; gap: 14px; justify-content: center; margin-top: 6px; }
+  @media (max-width: 480px) { .opts { grid-template-columns: 1fr; gap: 10px; } .opt img { width: 40px; height: 40px; } #keys { display: none !important; } }
+  @media (min-width: 700px) and (max-height: 480px) { .sheet { width: min(96vw, 760px); top: 42%; padding: 12px 16px 16px; } .opts { grid-template-columns: repeat(4, 1fr); gap: 8px; } .opt { gap: 3px; padding: 7px 6px; } .opt img { width: 30px; height: 30px; } .opt .gap { width: 10px; } .sheet h3 { font-size: 26px; margin-bottom: 10px; } }
+
+  /* 결과 */
+  #over { position: fixed; inset: 0; display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 10; text-align: center; background: rgba(20,10,4,.55); }
+  #over.show { display: flex; }
+  #over h2 { font-weight: 400; font-size: min(7vw, 30px); letter-spacing: 4px; margin: 0 0 10px; opacity: .9; }
+  #over .res { font-family: 'Ria', Arial, sans-serif; font-size: min(16vw, 92px); line-height: 1; letter-spacing: 6px; -webkit-text-stroke: 3px #2a1708; paint-order: stroke fill; margin-bottom: 14px; text-shadow: 0 8px 24px rgba(0,0,0,.5); }
+  #over .res.win { color: #ffe066; } #over .res.lose { color: #ff7a6a; } #over .res.p2 { color: #fff3d6; }
+  #over .pts { font-size: 18px; letter-spacing: 2px; margin-bottom: 14px; color: #f2e6cc; opacity: .85; }
+  #over .home { pointer-events: auto; margin-top: 18px; font-size: 13px; letter-spacing: 3px; opacity: .7; cursor: pointer; padding: 6px 14px; }
+
+  /* 폰 가로: 눌러야 하는 것은 아래 26vh 위에 */
+  @media (max-height: 480px) {
+    #title { padding-bottom: 1vh; }
+    #title h1 { font-size: 15vh; letter-spacing: 6px; margin-top: 0; }
+    body.en #title h1 { font-size: 12vh; }
+    #title .btns { margin-bottom: 11vh; }
+    .rec { font-size: 4.2vh; margin-bottom: 1.5vh; }
+    .btn { font-size: 5.6vh; padding: 1.6vh 26px; min-width: 130px; }
+    .btn.sub { font-size: 4vh; padding: 1.3vh 18px; }
+    #over .res { font-size: 17vh; margin-bottom: 1vh; } #over h2 { font-size: 4.5vh; margin-bottom: 1vh; } #over .pts { font-size: 4vh; margin-bottom: 1.5vh; }
+    #over .home { margin-top: 1.5vh; }
+    #acts .btn { font-size: 13px; padding: 7px 12px; }
+    #keys { display: none !important; }
+  }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+
+<div id="topbar">
+  <span class="stat wood" id="score"><span class="tm c on" id="tmC"><i></i><b id="lbC">초</b><em class="you" id="youC">YOU</em> <span id="pC">72</span></span><span class="tm h" id="tmH"><i></i><b id="lbH">한</b><em class="you" id="youH">YOU</em> <span id="pH">73.5</span></span></span>
+  <span class="stat wood" id="rank" data-en="18K">18급</span>
+  <span class="spacer"></span>
+  <button class="tog" id="tgHj" title="H">한글</button>
+  <button class="tog" id="tgSnd" title="K"><svg viewBox="0 0 24 24"><path d="M3 9h4l5-4.5v15L7 15H3z" fill="#fff"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg></button>
+</div>
+
+<div id="acts">
+  <span class="bw" id="btnResign"><span class="btn wood sm dim" data-en="RESIGN">기권</span></span>
+  <span class="bw" id="btnPass"><span class="btn wood sub" data-en="PASS">한수쉼</span></span>
+</div>
+<div id="keys" data-en="P pass · H hangul · K sound">P 한수쉼 · H 한글 · K 효과음</div>
+<div id="flash">장군</div>
+
+<div id="setup" class="sheet wood">
+  <h3><span data-en="SETUP">차림</span><span class="side" id="setupSide"></span></h3>
+  <div class="opts" id="opts"></div>
+</div>
+
+<div id="confirm" class="sheet wood">
+  <h3 data-en="RESIGN">기권</h3>
+  <div class="row">
+    <span class="bw" id="btnNo"><span class="btn wood sub" style="color:#6a5030">✕</span></span>
+    <span class="bw" id="btnYes"><span class="btn wood" data-en="RESIGN">기권</span></span>
+  </div>
+</div>
+
+<div id="over">
+  <h2 id="oh"></h2>
+  <div class="res win" id="ores">CLEAR</div>
+  <div class="pts" id="opts2"></div>
+  <div class="rec" id="orec"></div>
+  <span class="bw" id="btnRetry"><span class="btn wood" id="btnRetryT">NEXT</span></span>
+  <div class="home" id="btnHome">TITLE</div>
+</div>
+
+<div id="title">
+  <div class="rec" id="rec"></div>
+  <div class="btns">
+    <span class="bw" id="btnStart"><span class="btn wood" data-en="START">시작</span></span>
+    <span class="bw" id="btn2p"><span class="btn wood sub">2 PLAYERS</span></span>
+  </div>
+  <h1 data-en="JANGGI">장기</h1>
+</div>
+
+<script src="assets/game-home.js" data-top="6" data-left="6" data-fullscreen="1" defer></script>
+<script src="js/engine.js?v=20261003"></script>
+<script src="js/audio.js?v=20261003"></script>
+<script src="js/game.js?v=20261003"></script>
+<script src="/assets/visit.js?v=17" defer></script>
+<script src="/assets/game-events.js" defer></script>
+</body>
+</html>

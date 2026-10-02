@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>VIVA 타코스</title>
+<!-- 버튼 디자인은 design.md: 타코 트럭 손칠 나무 간판(삐뚤게 자른 판자, 못 두 개, 나뭇결), 주 단추만 칠리 빨강 -->
+<style>
+@font-face{font-family:'Taco';src:url('fonts/title.woff2?v=2') format('woff2');font-display:block}
+@font-face{font-family:'Ria';src:url('fonts/RiaSans-ExtraBold.woff2') format('woff2');font-display:swap}
+:root{--br:#4a2412;--col:100vw;--ox:0px;--oy:0px;--u:.5px;--ch:100vh;--padl:104px}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+html,body{width:100%;height:100%;overflow:hidden;font-family:'Ria',-apple-system,'Malgun Gothic',sans-serif;color:#fff;
+  background:#2a140c repeating-linear-gradient(90deg,rgba(224,40,30,.16) 0 28px,rgba(255,216,58,.1) 28px 40px,rgba(42,166,160,.14) 40px 68px,rgba(0,0,0,0) 68px 96px);
+  user-select:none;-webkit-user-select:none;touch-action:none;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+#cv{position:fixed;left:0;top:0;display:block;touch-action:none;box-shadow:0 0 40px rgba(0,0,0,.6)}
+button{font:inherit;color:inherit;border:0;background:none}
+
+/* ---------- 나무 간판 단추 ---------- */
+.btn{position:relative;pointer-events:auto;cursor:pointer;font-family:'Taco','Ria',sans-serif;font-size:calc(var(--u)*46);line-height:1;color:#fff6dc;white-space:nowrap;
+  padding:calc(var(--u)*24) calc(var(--u)*56);min-height:46px;min-width:calc(var(--u)*250);border:calc(var(--u)*6) solid var(--br);border-radius:13px 18px 12px 17px;
+  background:repeating-linear-gradient(177deg,rgba(255,255,255,.08) 0 3px,rgba(0,0,0,.05) 3px 8px),linear-gradient(180deg,#52d2c8 0%,#22a39c 52%,#157a78 100%);
+  box-shadow:0 calc(var(--u)*11) 0 var(--br),0 calc(var(--u)*20) calc(var(--u)*22) rgba(40,15,5,.42),inset 0 calc(var(--u)*6) 0 rgba(255,255,255,.42),inset 0 calc(var(--u)*-9) 0 rgba(0,0,0,.17);
+  -webkit-text-stroke:calc(var(--u)*9) var(--br);paint-order:stroke fill;display:flex;align-items:center;justify-content:center;
+  transition:transform .22s cubic-bezier(.34,1.56,.64,1),box-shadow .22s,filter .15s}
+.btn::before,.btn::after{content:'';position:absolute;top:50%;width:calc(var(--u)*14);height:calc(var(--u)*14);margin-top:calc(var(--u)*-7);border-radius:50%;
+  background:radial-gradient(circle at 35% 30%,#fff,#c3cad0 45%,#56606a);box-shadow:0 1px 0 rgba(0,0,0,.55)}
+.btn::before{left:calc(var(--u)*15)}.btn::after{right:calc(var(--u)*15)}
+.btn:hover{filter:brightness(1.08)}
+.btn:active{transform:translateY(calc(var(--u)*7)) scale(.97);filter:brightness(1.14);transition-duration:.04s;
+  box-shadow:0 calc(var(--u)*4) 0 var(--br),0 calc(var(--u)*8) calc(var(--u)*10) rgba(40,15,5,.42),inset 0 calc(var(--u)*6) 0 rgba(255,255,255,.42),inset 0 calc(var(--u)*-9) 0 rgba(0,0,0,.17)}
+.btn.main{font-size:calc(var(--u)*64);padding:calc(var(--u)*26) calc(var(--u)*70);min-width:calc(var(--u)*330);transform:rotate(-1.4deg);
+  background:repeating-linear-gradient(177deg,rgba(255,255,255,.08) 0 3px,rgba(0,0,0,.05) 3px 8px),linear-gradient(180deg,#ff9a5a 0%,#ec4a20 50%,#bd270f 100%)}
+.btn.main:active{transform:translateY(calc(var(--u)*7)) rotate(-1.4deg) scale(.97)}
+
+/* ---------- 상단바 ---------- */
+#topbar{position:fixed;top:var(--oy);left:var(--ox);width:var(--col);z-index:20;display:flex;align-items:center;gap:6px;pointer-events:none;
+  padding:calc(7px + env(safe-area-inset-top)) 8px 8px var(--padl)}
+.stat{display:flex;align-items:center;gap:5px;height:38px;padding:0 10px;flex:0 0 auto;border-radius:9px 12px 8px 11px;border:2.5px solid var(--br);color:var(--br);
+  background:repeating-linear-gradient(177deg,rgba(255,255,255,.12) 0 3px,rgba(120,70,20,.07) 3px 7px),linear-gradient(180deg,#fdebbd,#e6ba74);box-shadow:0 3px 0 var(--br),inset 0 2px 0 rgba(255,255,255,.7)}
+.stat b{font-family:'Taco','Ria',sans-serif;font-weight:400;font-size:21px;min-width:20px}
+.stat canvas{display:block;height:22px}
+#coinI{width:22px;height:23px}
+#coinP.pop{animation:cp .22s}
+@keyframes cp{40%{transform:scale(1.16)}}
+.spacer{flex:1 1 4px}
+.tog{pointer-events:auto;position:relative;width:38px;height:38px;flex:0 0 38px;border-radius:50%;border:2.5px solid var(--br);cursor:pointer;
+  background:repeating-linear-gradient(177deg,rgba(255,255,255,.08) 0 3px,rgba(0,0,0,.05) 3px 7px),linear-gradient(180deg,#52d2c8,#22a39c 55%,#157a78);box-shadow:0 3px 0 var(--br),inset 0 2px 0 rgba(255,255,255,.4);
+  display:flex;align-items:center;justify-content:center;transition:transform .2s cubic-bezier(.34,1.56,.64,1)}
+.tog:active{transform:translateY(2px) scale(.94);transition-duration:.04s}
+.tog svg{width:21px;height:21px;display:block}
+.tog.off{opacity:.6}
+.tog.off::after{content:'';position:absolute;left:22%;right:22%;top:50%;height:2.5px;margin-top:-1px;background:#fff;border-radius:1px;transform:rotate(-40deg)}
+body.m-title #heartsP,body.m-title #coinP,body.m-map #heartsP,body.m-end #heartsP{display:none}
+
+/* ---------- 화면 ---------- */
+.scr{position:fixed;left:var(--ox);top:var(--oy);width:var(--col);height:var(--ch);z-index:30;pointer-events:none}
+#title h1{position:absolute;left:0;right:0;top:calc(var(--ch)*.5 - var(--u)*512);text-align:center;font-family:'Taco','Ria',sans-serif;font-weight:400;line-height:.9;color:#fff6dc;
+  font-size:calc(var(--u)*116);-webkit-text-stroke:calc(var(--u)*20) var(--br);paint-order:stroke fill;text-shadow:0 calc(var(--u)*10) 0 var(--br),0 calc(var(--u)*22) calc(var(--u)*20) rgba(40,15,5,.45);transform:rotate(-2deg)}
+#title h1 span{display:block}
+#title h1 .v{color:#ffd23a;font-size:calc(var(--u)*196);letter-spacing:calc(var(--u)*4)}
+#tbtns{position:absolute;left:0;right:0;top:calc(var(--ch)*.5 + var(--u)*300);display:flex;flex-direction:column;align-items:center;gap:calc(var(--u)*34)}
+#tbtns .row{display:flex;gap:calc(var(--u)*22);align-items:center;flex-direction:column}
+
+.card{pointer-events:auto;position:absolute;left:50%;top:50%;width:calc(var(--u)*560);transform:translate(-50%,-50%);padding:calc(var(--u)*40) calc(var(--u)*34) calc(var(--u)*46);text-align:center;color:var(--br);
+  border:calc(var(--u)*7) solid var(--br);border-radius:22px 28px 20px 26px;
+  background:radial-gradient(circle at calc(var(--u)*26) calc(var(--u)*26),#fff 0,#c3cad0 calc(var(--u)*4),#56606a calc(var(--u)*8),transparent calc(var(--u)*9)),radial-gradient(circle at calc(100% - var(--u)*26) calc(var(--u)*26),#fff 0,#c3cad0 calc(var(--u)*4),#56606a calc(var(--u)*8),transparent calc(var(--u)*9)),
+    repeating-linear-gradient(177deg,rgba(255,255,255,.12) 0 4px,rgba(120,70,20,.07) 4px 11px),linear-gradient(180deg,#fdebbd,#e6ba74);
+  box-shadow:0 calc(var(--u)*14) 0 var(--br),0 calc(var(--u)*30) calc(var(--u)*50) rgba(20,5,0,.55),inset 0 calc(var(--u)*7) 0 rgba(255,255,255,.6);animation:pop .22s cubic-bezier(.34,1.56,.64,1)}
+@keyframes pop{from{transform:translate(-50%,-50%) scale(.82);opacity:0}}
+.dim{background:rgba(30,10,5,.5);pointer-events:auto}
+.card h2{font-family:'Taco','Ria',sans-serif;font-weight:400;font-size:calc(var(--u)*84);line-height:1.05;color:#ff7a3a;-webkit-text-stroke:calc(var(--u)*14) var(--br);paint-order:stroke fill;transform:rotate(-2deg)}
+.card .btn{margin:calc(var(--u)*30) auto 0;display:inline-flex}
+#cstars{width:calc(var(--u)*360);height:calc(var(--u)*130);display:block;margin:calc(var(--u)*10) auto 0}
+.earn{display:flex;align-items:center;justify-content:center;gap:calc(var(--u)*12);font-family:'Taco','Ria',sans-serif;font-size:calc(var(--u)*66);margin-top:calc(var(--u)*6)}
+.earn canvas{width:calc(var(--u)*56);height:calc(var(--u)*58)}
+#cnew{margin-top:calc(var(--u)*14);display:flex;align-items:center;justify-content:center;gap:calc(var(--u)*14)}
+#cnew i{font-style:normal;font-family:'Taco','Ria',sans-serif;font-size:calc(var(--u)*34);color:#fff6dc;background:#e0281e;border:calc(var(--u)*4) solid var(--br);border-radius:10px;padding:calc(var(--u)*8) calc(var(--u)*14);transform:rotate(-6deg)}
+#cnewC{height:calc(var(--u)*112);display:block}
+#end .card{top:calc(var(--u)*490 + (var(--ch) - var(--u)*490)*.45)}
+#confirm{z-index:40}
+
+/* ---------- 지도·상점 ---------- */
+#mhead{position:absolute;left:0;right:0;top:calc(var(--u)*16 + 50px);text-align:center;font-family:'Taco','Ria',sans-serif;color:#fff6dc;-webkit-text-stroke:calc(var(--u)*11) var(--br);paint-order:stroke fill;line-height:1.05}
+#mday{font-size:calc(var(--u)*46);color:#ffd23a}
+#mname{font-size:calc(var(--u)*58)}
+#shop{position:absolute;left:calc(var(--u)*24);right:calc(var(--u)*24);top:calc(var(--u)*676);display:grid;grid-template-columns:repeat(3,1fr);gap:calc(var(--u)*24) calc(var(--u)*18)}
+.item{pointer-events:auto;cursor:pointer;position:relative;display:flex;flex-direction:column;align-items:center;padding:calc(var(--u)*4) 0 calc(var(--u)*8);color:var(--br);
+  border:calc(var(--u)*5) solid var(--br);border-radius:13px 17px 12px 16px;background:repeating-linear-gradient(177deg,rgba(255,255,255,.12) 0 3px,rgba(120,70,20,.07) 3px 8px),linear-gradient(180deg,#fdebbd,#e6ba74);
+  box-shadow:0 calc(var(--u)*9) 0 var(--br),inset 0 calc(var(--u)*5) 0 rgba(255,255,255,.6);transition:transform .2s cubic-bezier(.34,1.56,.64,1),filter .15s}
+.item:active{transform:translateY(calc(var(--u)*6)) scale(.97);filter:brightness(1.1);transition-duration:.04s}
+.item canvas{width:calc(var(--u)*82);height:calc(var(--u)*82)}
+.item .nm{font-family:'Taco','Ria',sans-serif;font-size:calc(var(--u)*30);line-height:1.05}
+.item .pips{display:flex;gap:calc(var(--u)*7);margin:calc(var(--u)*5) 0 calc(var(--u)*3)}
+.item .pips i{width:calc(var(--u)*17);height:calc(var(--u)*17);border-radius:50%;border:calc(var(--u)*3) solid var(--br);background:#c9a468}
+.item .pips i.on{background:#4fc04a}
+.item .pr{display:flex;align-items:center;gap:calc(var(--u)*6);font-family:'Taco','Ria',sans-serif;font-size:calc(var(--u)*34);color:#fff6dc;-webkit-text-stroke:calc(var(--u)*7) var(--br);paint-order:stroke fill}
+.item .pr .ci{width:calc(var(--u)*36);height:calc(var(--u)*38)}
+.item.poor .pr{color:#ff5a4a}
+.item.max{background:repeating-linear-gradient(177deg,rgba(255,255,255,.12) 0 3px,rgba(20,90,20,.07) 3px 8px),linear-gradient(180deg,#d6f0b0,#9acb6a)}
+.item.max .pr{color:#8af06a}
+.item.no{animation:no .25s}
+@keyframes no{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+#bGo{position:absolute;left:50%;bottom:calc(var(--u)*40 + env(safe-area-inset-bottom));margin-left:calc(var(--u)*-165);padding-top:calc(var(--u)*20);padding-bottom:calc(var(--u)*20)}
+</style>
+</head>
+<body class="m-title">
+<canvas id="cv"></canvas>
+
+<div id="topbar">
+  <div class="stat" id="heartsP"><canvas id="hearts" width="132" height="44"></canvas></div>
+  <div class="stat" id="coinP"><canvas id="coinI" width="44" height="46"></canvas><b id="coins">0</b></div>
+  <div class="spacer"></div>
+  <button class="tog" id="tBgm" aria-label="music"><svg viewBox="0 0 24 24"><path d="M9 17.5V5.5l11-2.5v12" fill="none" stroke="#fff" stroke-width="2.6" stroke-linejoin="round"/><ellipse cx="6.3" cy="17.8" rx="3.4" ry="2.7" fill="#fff"/><ellipse cx="17.3" cy="15.3" rx="3.4" ry="2.7" fill="#fff"/></svg></button>
+  <button class="tog" id="tSnd" aria-label="sound"><svg viewBox="0 0 24 24"><path d="M3 9h4l5-4.5v15L7 15H3z" fill="#fff"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg></button>
+</div>
+
+<div class="scr" id="title">
+  <h1 id="ttl"></h1>
+  <div id="tbtns">
+    <button class="btn main" id="bStart">START</button>
+    <div class="row"><button class="btn main" id="bCont" hidden>CONTINUE</button><button class="btn" id="bNew" hidden>NEW GAME</button></div>
+  </div>
+</div>
+
+<div class="scr" id="mapScr" hidden>
+  <div id="mhead"><div id="mday"></div><div id="mname"></div></div>
+  <div id="shop"></div>
+  <button class="btn main" id="bGo">GO</button>
+</div>
+
+<div class="scr dim" id="clear" hidden>
+  <div class="card">
+    <h2>CLEAR</h2>
+    <canvas id="cstars" width="360" height="130"></canvas>
+    <div class="earn"><canvas id="cearnI" width="44" height="46"></canvas><span id="cearn">0</span></div>
+    <div id="cnew"><i>NEW</i><canvas id="cnewC"></canvas></div>
+    <button class="btn main" id="bNext">NEXT</button>
+  </div>
+</div>
+
+<div class="scr dim" id="over" hidden>
+  <div class="card"><h2>GAME OVER</h2><button class="btn main" id="bRetry">RETRY</button></div>
+</div>
+
+<div class="scr" id="end" hidden>
+  <div class="card"><h2>THE END</h2><button class="btn main" id="bTitle">TITLE</button></div>
+</div>
+
+<div class="scr dim" id="confirm" hidden>
+  <div class="card"><h2>NEW GAME?</h2><button class="btn main" id="bYes">OK</button><button class="btn" id="bNo">CANCEL</button></div>
+</div>
+
+<script src="js/art.js?v=2"></script>
+<script src="js/bg.js?v=2"></script>
+<script src="js/audio.js?v=2"></script>
+<script src="js/game.js?v=6"></script>
+<script src="assets/game-home.js" data-top="6" data-left="6" defer></script>
+<script src="/assets/visit.js?v=17" defer></script>
+<script src="/assets/game-events.js" defer></script>
+</body>
+</html>
