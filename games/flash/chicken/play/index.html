@@ -94,7 +94,18 @@ html.wide #sign{top:calc(var(--u)*120)}
 #cnew{margin-top:calc(var(--u)*14);display:flex;align-items:center;justify-content:center;gap:calc(var(--u)*14)}
 #cnew i{font-style:normal;font-family:'Hanna','Ria',sans-serif;font-size:calc(var(--u)*34);color:#ffd23a;background:#dc281e;border:calc(var(--u)*4) solid var(--br);border-radius:calc(var(--u)*10);padding:calc(var(--u)*8) calc(var(--u)*14);transform:rotate(-6deg)}
 #cnewC{height:calc(var(--u)*112);display:block}
-#end .card{top:calc(var(--ch)*.5 + var(--u)*430)}
+/* 엔딩: 어두운 막 위에 글이 한 줄씩 뜨고 마지막에 THE END 카드 */
+#end{background:rgba(24,8,4,.86);pointer-events:auto;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:calc(var(--u)*30);padding:calc(var(--u)*76) calc(var(--u)*30) calc(var(--u)*30)}
+#endStory{max-width:calc(var(--u)*660);font-size:calc(var(--u)*29);line-height:1.5;color:#fff3dc;text-align:center;word-break:keep-all;overflow-wrap:anywhere;text-shadow:0 calc(var(--u)*3) 0 rgba(0,0,0,.55)}
+#endStory p{margin:calc(var(--u)*5) 0;animation:endin .9s both}
+#endStory p:last-child{color:#ffd23a}
+@keyframes endin{from{opacity:0;transform:translateY(calc(var(--u)*14))}to{opacity:1;transform:none}}
+#end .card{position:static;transform:none;flex:0 0 auto;width:calc(var(--u)*420);padding:calc(var(--u)*26) calc(var(--u)*26) calc(var(--u)*40);animation:endin .9s 13.8s both}
+#end .card .btn{margin-top:calc(var(--u)*18)}
+#end.all #endStory p,#end.all .card{animation:none}
+html.wide #end{flex-direction:row;gap:calc(var(--u)*56);padding:calc(var(--u)*70) calc(var(--u)*60) calc(var(--u)*40)}
+html.wide #endStory{flex:0 1 calc(var(--u)*980);max-width:calc(var(--u)*980);font-size:calc(var(--u)*36)}
+html.wide body.en #endStory{font-size:calc(var(--u)*27)}
 #confirm{z-index:40}
 
 /* ---------- 하루 사이 상점 ---------- */
@@ -123,7 +134,6 @@ html.wide #mapScr{background:rgba(30,10,5,.62)}
 html.wide #mhead{top:calc(var(--u)*150)}
 html.wide #shop{left:50%;right:auto;width:calc(var(--u)*1240);margin-left:calc(var(--u)*-620);top:calc(var(--u)*270);grid-template-columns:repeat(6,1fr)}
 html.wide #bGo{bottom:auto;top:calc(var(--u)*520)}
-html.wide #end .card{top:58%}
 </style>
 </head>
 <body class="m-title">
@@ -167,6 +177,7 @@ html.wide #end .card{top:58%}
 </div>
 
 <div class="scr" id="end" hidden>
+  <div id="endStory"></div>
   <div class="card"><h2>THE END</h2><button class="btn main" id="bTitle">TITLE</button></div>
 </div>
 
@@ -182,7 +193,7 @@ html.wide #end .card{top:58%}
 <script src="js/scene.js?v=9"></script>
 <script src="js/sfx.js?v=1"></script>
 <script src="js/audio.js?v=1"></script>
-<script src="js/game.js?v=11"></script>
+<script src="js/game.js?v=12"></script>
 <script src="assets/game-home.js" data-top="6" data-left="6" defer></script>
 <script src="/assets/visit.js?v=17" defer></script>
 <script src="/assets/game-events.js" defer></script>

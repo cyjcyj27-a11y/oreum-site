@@ -7,6 +7,19 @@ var A = ART, TAU = Math.PI * 2, $ = function (id) { return document.getElementBy
 function L(a) { return a[EN ? 1 : 0]; }
 var TX = {
   title: ['개발자치킨집', 'DEV CHICKEN SHOP'],
+  // 엔딩 글: 한글은 사장님이 준 글자 그대로(2026-10-02), 영문은 옮긴 것
+  end: [
+    ['나는 인디게임개발자였다', 'I was an indie game developer.'],
+    ['공대를 졸업하고 게임회사를 다녔는데 회사 게임이 슈퍼 초대박을 터뜨렸음에도', 'I graduated from engineering school and joined a game company. Its game became a monster hit,'],
+    ['인센티브가 제대로 지급되지않아서 회사를 그만두고', 'but the bonuses were never paid properly, so I quit'],
+    ['인디게임개발을 시작했다.', 'and started making indie games.'],
+    ['7년동안 공들여서 폴리싱을 거듭하고 발표한 게임', 'Seven years of polishing went into the game I released.'],
+    ['찜회수 3만2천개', '32,000 wishlists.'],
+    ['그러나 최종판매된건 겨우 300장이었다.', 'But in the end it sold only 300 copies.'],
+    ['결국 어머니는 홧병으로 돌아가시고', 'My mother fell ill from the heartache and passed away,'],
+    ['나는 엄마가 돌아가시며 남긴 보험금으로 치킨집을 차렸다.', 'and with the insurance money she left behind, I opened a chicken shop.'],
+    ['어머니...................................................', 'Mom...................................................']
+  ],
   shop: { fire: ['화력', 'Heat'], fryer: ['튀김기', 'Fryer'], chair: ['의자', 'Chairs'], tip: ['팁 통', 'Tip Jar'], knife: ['식칼', 'Cleaver'], heart: ['하트', 'Heart'] }
 };
 var FONT = "'Hanna','Ria',sans-serif";
@@ -517,7 +530,13 @@ function idle(mode) {
 }
 function goMap() { idle('map'); buildShop(); ui('map'); SND.music(1); }
 function goTitle() { idle('title'); titleButtons(); ui('title'); }
-function goEnd() { var keep = G; G.mode = 'end'; G.endT = 0; ui('end'); SND.play('clear'); }
+function goEnd() {
+  var keep = G; G.mode = 'end'; G.endT = 0;
+  /* 엔딩 글을 한 줄씩 띄우고, 다 뜬 뒤에 THE END 카드. 화면을 누르면 한꺼번에 다 보인다 */
+  $('end').classList.remove('all');
+  $('endStory').innerHTML = TX.end.map(function (q, i) { return '<p style="animation-delay:' + (0.6 + i * 1.3).toFixed(1) + 's">' + L(q) + '</p>'; }).join('');
+  ui('end'); SND.play('clear');
+}
 
 /* ---------- 덧그림(2D): 말풍선, 막대, 글자, 동전, 길잡이 ---------- */
 function otext(s, x, y, size, col, lw) { c.font = size + 'px ' + FONT; c.textAlign = 'center'; c.textBaseline = 'middle'; c.lineJoin = 'round'; c.lineWidth = lw || Math.max(6, size * 0.2); c.strokeStyle = '#4a2412'; c.strokeText(s, x, y); c.fillStyle = col; c.fillText(s, x, y); }
@@ -693,6 +712,7 @@ click('bGo', function () { startDay(S.day); });
 click('bNext', function () { if (G.day >= DAYS.length - 1) goEnd(); else goMap(); });
 click('bRetry', function () { startDay(G.day); });
 click('bTitle', function () { goTitle(); });
+$('end').addEventListener('click', function (e) { if (e.target.id !== 'bTitle') $('end').classList.add('all'); });
 function tog(id, key, set) {
   var el = $(id), v = true; try { v = localStorage.getItem(key) !== '0'; } catch (e) {}
   function ap() { el.classList.toggle('off', !v); set(v ? 1 : 0); }
