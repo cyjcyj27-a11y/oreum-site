@@ -353,7 +353,12 @@ function build() {
       o = add(fu, new T.CylinderGeometry(0.025, 0.025, 0.8, 6), M.steel, 0.3, 0.52, -0.22); o.rotation.set(0.6, 0, -0.75);
       add(fu, new T.SphereGeometry(0.13, 10, 8, 0, TAU, Math.PI / 2, Math.PI / 2), M.steel, 0.06, 0.34, -0.04);
     } else if (id === 'trash') {
-      add(fu, new T.CylinderGeometry(0.44, 0.4, 0.3, 20), std({ color: 0x5a646c, roughness: 0.6 }), 0, 0.15, 0); add(fu, new T.CircleGeometry(0.36, 20).rotateX(-Math.PI / 2), std({ color: 0x0c0e10, roughness: 0.9 }), 0, 0.305, 0, false, false);
+      // 버리는 통: 까만 양념통처럼 보인다는 지적(사장님 10/2) -> 파란 봉지를 씌운 은색 쓰레기통에 뼈와 구겨진 종이
+      add(fu, new T.CylinderGeometry(0.45, 0.38, 0.46, 24), M.steel, 0, 0.23, 0);
+      o = add(fu, new T.TorusGeometry(0.43, 0.055, 8, 24), std({ color: 0x2f7fe0, roughness: 0.45 }), 0, 0.47, 0); o.rotation.x = Math.PI / 2;
+      add(fu, new T.CircleGeometry(0.4, 24).rotateX(-Math.PI / 2), std({ color: 0x17335e, roughness: 0.95, metalness: 0 }), 0, 0.468, 0, false, true);
+      [[-0.14, 0.1, 0xf2ead8, 0.13], [0.15, -0.08, 0xe0d4b8, 0.11], [0.02, -0.2, 0xc9955a, 0.1], [0.18, 0.16, 0xf6f0e2, 0.09], [-0.2, -0.12, 0xb8834a, 0.09]].forEach(function (q, k) { var m2 = add(fu, new T.IcosahedronGeometry(q[3], 0), std({ color: q[2], roughness: 0.9, flatShading: true }), q[0], 0.5, q[1], false); m2.rotation.set(k, k * 2.1, k * 0.7); });
+      o = add(fu, new T.CylinderGeometry(0.035, 0.035, 0.34, 6), std({ color: 0xfff4e0, roughness: 0.6 }), -0.02, 0.52, 0.14, false); o.rotation.set(Math.PI / 2, 0, 0.9);
     } else {
       add(fu, slab(0.86, 0.82, 0.26, 0.1, 0.03), M.steel, 0, 0, 0);
       if (id === 'pa') { add(fu, slab(0.72, 0.68, 0.04, 0.08, 0), std({ color: 0x3e7a22, roughness: 0.8 }), 0, 0.25, 0); for (var q = 0; q < 26; q++) { o = add(fu, new T.TorusGeometry(0.1, 0.024, 5, 8, 2.6), std({ color: ['#58a82e', '#86cc4a', '#dff0b8'][q % 3], roughness: 0.6 }), (Math.random() - 0.5) * 0.56, 0.3 + Math.random() * 0.05, (Math.random() - 0.5) * 0.5, false); o.rotation.set(Math.random() * 3, Math.random() * 6, Math.random() * 3); } }
