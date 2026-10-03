@@ -317,7 +317,7 @@
     if (window.OG) OG.over({ result: G.p2 ? 'p2' : (w === G.human ? 'clear' : w === 0 ? 'draw' : 'lose'), stage: G.level + 1 });
   }
   var flashT = 0;
-  function flash(txt, cls) { var el = $('flash'); el.textContent = txt; el.className = cls || ''; void el.offsetWidth; el.classList.add('show'); clearTimeout(flashT); flashT = setTimeout(function () { el.classList.remove('show'); }, 1000); }
+  function flash(txt, cls) { var el = $('flash'); el.textContent = txt; el.className = (cls || '') + (txt.length >= 8 ? ' long' : ''); void el.offsetWidth; el.classList.add('show'); clearTimeout(flashT); flashT = setTimeout(function () { el.classList.remove('show'); }, 1000); }
 
   // ── HUD ──
   function updHud() {
