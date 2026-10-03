@@ -52,6 +52,37 @@
   body.en #title h1 { font-size: min(14.5vw, 116px); letter-spacing: 2px; }
   .rec { font-family: 'Ria', Arial, sans-serif; font-size: 20px; letter-spacing: 2px; color: #ffe066; text-shadow: 0 1px 4px rgba(0,0,0,.8), 0 0 2px #3a2810; margin: 0 0 22px; min-height: 18px; }
   .rec:empty { display: none; }
+  /* 출발 급수 고르기: ◀ 급수 ▶ 알약(급수 글자를 누르면 27칸 표) */
+  .pick { display: flex; gap: 10px; align-items: center; justify-content: center; margin: 0 0 14px; }
+  .pick > div { pointer-events: auto; cursor: pointer; touch-action: manipulation; border-radius: 999px; border: 1px solid rgba(255,255,255,.7); background: rgba(40,24,10,.72); color: #fff; font-family: 'Ria', Arial, sans-serif; user-select: none; -webkit-user-select: none; }
+  .pick .lv { min-width: 110px; padding: 7px 20px; font-size: 20px; letter-spacing: 2px; color: #ffe066; }
+  .pick .arr { padding: 7px 14px; font-size: 16px; color: rgba(255,255,255,.85); }
+  .pick > div:active { transform: scale(.94); }
+  .rec.best { font-size: 14px; opacity: .85; margin-bottom: 12px; }
+  #ranks { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%) scale(.9); opacity: 0; visibility: hidden; pointer-events: none; z-index: 11; width: min(94vw, 560px); padding: 16px 18px 20px; border-radius: 22px; border: 2px solid rgba(255,255,255,.75); background: rgba(40,24,10,.92); box-shadow: 0 10px 30px rgba(0,0,0,.5); transition: transform .18s cubic-bezier(.34,1.56,.64,1), opacity .15s, visibility 0s .18s; }
+  #ranks.show { transform: translate(-50%, -50%) scale(1); opacity: 1; visibility: visible; pointer-events: auto; transition-delay: 0s; }
+  #ranks h3 { margin: 0 0 12px; font-family: 'WantedT', sans-serif; font-weight: 400; font-size: 30px; letter-spacing: 6px; color: #fff; text-align: center; }
+  .rk { display: grid; grid-template-columns: repeat(9, 1fr); gap: 7px; }
+  .rc { display: flex; align-items: center; justify-content: center; padding: 7px 2px; border-radius: 999px; border: 1px solid rgba(255,255,255,.6); background: rgba(255,255,255,.08); color: #fff; font-family: 'Ria', Arial, sans-serif; font-size: 15px; white-space: nowrap; cursor: pointer; touch-action: manipulation; }
+  .rc.d { color: #ffe066; }
+  .rc.on { background: #fff; color: #3a2810; border-color: #fff; box-shadow: 0 0 10px #ffe066; }
+  .rc.d.on { background: #ffe066; }
+  .rc:active { transform: scale(.94); }
+  @media (max-width: 480px) { .rk { grid-template-columns: repeat(6, 1fr); gap: 6px; } .rc { font-size: 14px; padding: 6px 0; } }
+  /* 폰 가로: 제목+급수는 왼쪽, 단추는 오른쪽 — 눌러야 하는 것은 아래 26vh 위에 */
+  @media (max-height: 480px) {
+    #title { flex-direction: row; justify-content: center; align-items: center; gap: 6vw; padding-top: calc(40px + env(safe-area-inset-top)); }
+    #title h1 { font-size: 17vh; margin-bottom: 1vh; }
+    body.en #title h1 { font-size: 13vh; }
+    .pick { margin-bottom: 1.2vh; gap: 8px; }
+    .pick .lv { font-size: 4.6vh; padding: 1.2vh 16px; min-width: 96px; }
+    .pick .arr { font-size: 3.8vh; padding: 1.2vh 12px; }
+    .rec.best { font-size: 3.6vh; margin-bottom: 0; }
+    #title .go { font-size: 5.6vh; padding: 1.6vh 40px; }
+    #title .p2 { margin-top: 1.4vh; font-size: 3.4vh; padding: 1.2vh 20px; }
+    #ranks { width: min(96vw, 760px); padding: 10px 14px 14px; } #ranks h3 { font-size: 24px; margin-bottom: 8px; }
+    .rc { padding: 1.2vh 2px; font-size: 3.6vh; } .rk { gap: 5px; }
+  }
   #title .go, #over .again { pointer-events: auto; display: inline-block; padding: 14px 54px; border-radius: 999px; border: 2px solid #fff; background: rgba(40,20,10,.8); color: #fff; font-size: 24px; letter-spacing: 3px; cursor: pointer; box-shadow: 0 6px 20px rgba(0,0,0,.35); touch-action: manipulation; }
   #title .go:active, #over .again:active { transform: scale(.96); }
   #title .p2 { pointer-events: auto; margin-top: 14px; padding: 8px 26px; border-radius: 999px; border: 1px solid rgba(255,255,255,.6); background: rgba(40,20,10,.6); color: #fff; font-family: Arial, sans-serif; font-weight: 700; font-size: 14px; letter-spacing: 3px; cursor: pointer; touch-action: manipulation; }
@@ -61,7 +92,7 @@
   @media (max-aspect-ratio: 4/5) {
     #title { justify-content: space-between; padding: calc(56px + env(safe-area-inset-top)) 0 calc(64px + env(safe-area-inset-bottom)); }
   }
-  body.shot #topbar, body.shot #keys, body.shot #oreumHome, body.shot #oreumFs, body.shot #btnStart, body.shot #btn2p, body.shot .rec { display: none !important; }
+  body.shot #topbar, body.shot #keys, body.shot #oreumHome, body.shot #oreumFs, body.shot #btnStart, body.shot #btn2p, body.shot .rec, body.shot .pick { display: none !important; }
 
   #over { display: none; background: rgba(20,10,4,.5); }
   #over.show { display: flex; }
@@ -93,10 +124,20 @@
   <div class="home" id="btnHome">TITLE</div>
 </div>
 
+<div id="ranks">
+  <h3 data-en="RANK">급수</h3>
+  <div class="rk" id="rk"></div>
+</div>
+
 <div id="title">
   <div class="top">
     <h1 data-en="CHECKERS">체커</h1>
-    <div class="rec" id="rec"></div>
+    <div class="pick">
+      <div class="arr" id="lvDn">◀</div>
+      <div class="lv" id="lvBtn"><span id="rec">18급</span></div>
+      <div class="arr" id="lvUp">▶</div>
+    </div>
+    <div class="rec best" id="best"></div>
   </div>
   <div class="bot">
     <div class="go" id="btnStart" data-en="START">시작</div>
@@ -107,7 +148,7 @@
 <script src="assets/game-home.js" data-top="6" data-left="6" data-fullscreen="1" defer></script>
 <script src="js/engine.js?v=1"></script>
 <script src="js/audio.js?v=1"></script>
-<script src="js/game.js?v=1"></script>
+<script src="js/game.js?v=2"></script>
 <script src="/assets/visit.js?v=17" defer></script>
 <script src="/assets/game-events.js?v=2" defer></script>
 </body>

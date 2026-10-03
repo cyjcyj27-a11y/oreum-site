@@ -32,11 +32,29 @@
   // ── 기록 — 오른 급수 ──
   function loadBest() { try { return Math.max(0, Math.min(TOP, parseInt(localStorage.getItem('baduk.rank') || '0', 10) || 0)); } catch (e) { return 0; } }
   function saveBest(n) { try { localStorage.setItem('baduk.rank', String(n)); } catch (e) {} }
-  function showRec() { $('rec').textContent = rankName(loadBest()); }
+  function loadPick() { try { var v = localStorage.getItem('baduk.pick'); return v === null ? loadBest() : Math.max(0, Math.min(TOP, parseInt(v, 10) || 0)); } catch (e) { return loadBest(); } }
+  function savePick(n) { try { localStorage.setItem('baduk.pick', String(n)); } catch (e) {} }
+  function showRec() {
+    $('rec').textContent = rankName(G.level);
+    var b = loadBest(); $('best').textContent = b > 0 ? (EN ? 'BEST ' : '최고 ') + rankName(b) : '';
+    Array.prototype.forEach.call($('rk').children, function (w, i) { w.classList.toggle('on', i === G.level); });
+  }
+  function setLevel(n) { n = Math.max(0, Math.min(TOP, n)); if (n === G.level) return; G.level = n; savePick(n); showRec(); updHud(); A.stone(); }
+  function buildRanks() {
+    var box = $('rk'); box.innerHTML = '';
+    RANKS.forEach(function (_, i) { var c = document.createElement('div'); c.className = 'rc' + (i >= 18 ? ' d' : ''); c.textContent = rankName(i); c.addEventListener('click', function () { setLevel(i); $('ranks').classList.remove('show'); }); box.appendChild(c); });
+  }
+  // ◀ ▶ 는 누르고 있으면 계속 넘어간다
+  function holdStep(id, d) {
+    var el = $(id), t1 = 0, t2 = 0;
+    function stop() { clearTimeout(t1); clearInterval(t2); t1 = t2 = 0; }
+    el.addEventListener('pointerdown', function (e) { if (G.mode !== 'title') return; e.preventDefault(); A.init(); setLevel(G.level + d); stop(); t1 = setTimeout(function () { t2 = setInterval(function () { setLevel(G.level + d); }, 110); }, 420); });
+    ['pointerup', 'pointercancel', 'pointerleave'].forEach(function (ev) { el.addEventListener(ev, stop); });
+  }
 
   // ── 화면 맞추기 ──
   function resize() {
-    var dpr = Math.min(2, window.devicePixelRatio || 1), w = innerWidth, h = innerHeight;
+    var dpr = Math.min(/[?&]hires=1/.test(location.search) ? 3 : 2, window.devicePixelRatio || 1), w = innerWidth, h = innerHeight;
     cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); cv.style.width = w + 'px'; cv.style.height = h + 'px';
     view.dpr = dpr; view.w = w; view.h = h;
     var shot = document.body.classList.contains('shot');
@@ -54,7 +72,8 @@
   function P(x, y) { return (y + 1) * EW + (x + 1); }
   function PX(p) { return p % EW - 1; }
   function PY(p) { return ((p / EW) | 0) - 1; }
-  function now() { return performance.now() / 1000; }
+  var VT = null;   // 영상 촬영용 가짜 시계 — 정해 두면 돌 놓기·따내기 연출이 이 시각을 따른다
+  function now() { return VT != null ? VT : performance.now() / 1000; }
 
   // ── 진행 ──
   function humanTurn() { return G.mode === 'play' && (G.p2 || G.b.turn === G.human); }
@@ -65,7 +84,7 @@
     b.last = -1;
   }
   function start(level) {
-    G.gid++; G.level = level; G.b.reset(); placeT.fill(-9); flies = []; G.owner = null; G.result = null; aim = null;
+    G.gid++; G.level = level; if (!G.p2) savePick(level); G.b.reset(); placeT.fill(-9); flies = []; G.owner = null; G.result = null; aim = null;
     clearTimeout(countT);
     G.mode = 'play'; $('title').classList.add('hide'); $('over').classList.remove('show'); document.body.classList.add('playing');
     updHud(); A.stone();
@@ -298,7 +317,10 @@
 
   function pass() { if (humanTurn()) doMove(PASS); }
   $('btnPass').addEventListener('click', function () { A.init(); pass(); });
-  $('btnStart').addEventListener('click', function () { A.init(); G.p2 = false; start(loadBest()); });
+  $('btnStart').addEventListener('click', function () { A.init(); G.p2 = false; start(G.level); });
+  holdStep('lvDn', -1); holdStep('lvUp', 1);
+  $('lvBtn').addEventListener('click', function () { if (G.mode !== 'title') return; A.init(); A.stone(); showRec(); $('ranks').classList.add('show'); });
+  document.addEventListener('pointerdown', function (e) { if ($('ranks').classList.contains('show') && !$('ranks').contains(e.target) && !$('lvBtn').contains(e.target)) $('ranks').classList.remove('show'); });
   $('btn2p').addEventListener('click', function () { A.init(); G.p2 = true; start(G.level); });
   $('btnRetry').addEventListener('click', function () {
     A.init();
@@ -307,11 +329,14 @@
   });
   $('btnHome').addEventListener('click', function () {
     G.gid++; G.mode = 'title'; titleBoard(); $('over').classList.remove('show'); $('title').classList.remove('hide');
-    document.body.classList.remove('playing'); G.level = loadBest(); showRec(); updHud();
+    document.body.classList.remove('playing'); G.level = loadPick(); showRec(); updHud();
   });
   $('tgSnd').addEventListener('click', function () { A.init(); A.toggleSnd(); syncTog(); });
   addEventListener('keydown', function (e) {
     if (e.key === 'k' || e.key === 'K') { A.init(); A.toggleSnd(); syncTog(); }
+    if (e.key === 'Escape') $('ranks').classList.remove('show');
+    if (G.mode === 'title' && (e.key === 'ArrowLeft' || e.key === 'ArrowDown')) setLevel(G.level - 1);
+    if (G.mode === 'title' && (e.key === 'ArrowRight' || e.key === 'ArrowUp')) setLevel(G.level + 1);
     if (e.key === 'p' || e.key === 'P') { A.init(); pass(); }
   });
   if ('ontouchstart' in window && matchMedia('(pointer: coarse)').matches) { isTouch = true; document.body.classList.add('touch'); }
@@ -327,10 +352,12 @@
   }
 
   if (/[?&]shot=1/.test(location.search)) document.body.classList.add('shot');
-  G.level = loadBest(); titleBoard(); syncTog(); updHud(); showRec(); resize();
+  buildRanks(); G.level = loadPick(); titleBoard(); syncTog(); updHud(); showRec(); resize();
   requestAnimationFrame(loop);
   // 시험용 손잡이 — 멈춘 탭에서 프레임을 손으로 돌린다
   window.__bd = {
+    setClock: function (t) { VT = t; }, updHud: function () { updHud(); }, setGlow: function (g) { glow = g; }, draw: draw, view: view, canvas: cv,
+    setAim: function (p, touch) { aim = p ? { p: p, down: !!touch, touch: !!touch } : null; },
     G: G, E: E, P: P, doMove: doMove, start: start, beginCount: beginCount, showOver: showOver, playouts: playouts,
     toScreen: function (x, y) { return { x: view.ox + gp(x) * view.s, y: view.oy + gp(y) * view.s }; },
     tick: function (n) { for (var k = 0; k < (n || 1); k++) loop(last + 16.7); }

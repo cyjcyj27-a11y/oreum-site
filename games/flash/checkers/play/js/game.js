@@ -24,7 +24,25 @@
 
   function loadBest() { try { return Math.max(0, Math.min(TOP, parseInt(localStorage.getItem('checkers.lv') || '0', 10) || 0)); } catch (e) { return 0; } }
   function saveBest(n) { try { localStorage.setItem('checkers.lv', String(n)); } catch (e) {} }
-  function showRec() { $('rec').textContent = rankName(loadBest()); }
+  function loadPick() { try { var v = localStorage.getItem('checkers.pick'); return v === null ? loadBest() : Math.max(0, Math.min(TOP, parseInt(v, 10) || 0)); } catch (e) { return loadBest(); } }
+  function savePick(n) { try { localStorage.setItem('checkers.pick', String(n)); } catch (e) {} }
+  function showRec() {
+    $('rec').textContent = rankName(G.level);
+    var b = loadBest(); $('best').textContent = b > 0 ? (EN ? 'BEST ' : '최고 ') + rankName(b) : '';
+    Array.prototype.forEach.call($('rk').children, function (w, i) { w.classList.toggle('on', i === G.level); });
+  }
+  function setLevel(n) { n = Math.max(0, Math.min(TOP, n)); if (n === G.level) return; G.level = n; savePick(n); showRec(); updHud(); A.pick(); }
+  function buildRanks() {
+    var box = $('rk'); box.innerHTML = '';
+    RANKS.forEach(function (_, i) { var c = document.createElement('div'); c.className = 'rc' + (i >= 18 ? ' d' : ''); c.textContent = rankName(i); c.addEventListener('click', function () { setLevel(i); $('ranks').classList.remove('show'); }); box.appendChild(c); });
+  }
+  // ◀ ▶ 는 누르고 있으면 계속 넘어간다
+  function holdStep(id, d) {
+    var el = $(id), t1 = 0, t2 = 0;
+    function stop() { clearTimeout(t1); clearInterval(t2); t1 = t2 = 0; }
+    el.addEventListener('pointerdown', function (e) { if (G.mode !== 'title') return; e.preventDefault(); A.init(); setLevel(G.level + d); stop(); t1 = setTimeout(function () { t2 = setInterval(function () { setLevel(G.level + d); }, 110); }, 420); });
+    ['pointerup', 'pointercancel', 'pointerleave'].forEach(function (ev) { el.addEventListener(ev, stop); });
+  }
 
   var VT = null;   // 영상 촬영·시험용 가짜 시계
   function now() { return VT != null ? VT : performance.now() / 1000; }
@@ -87,7 +105,7 @@
     } else G.mode = 'play';
   }
   function start(level) {
-    G.gid++; G.level = level; G.b.reset(); G.result = null; G.quiet = 0; G.hist = {}; G.last = null; G.anim = null; pops = []; must = null;
+    G.gid++; G.level = level; if (!G.p2) savePick(level); G.b.reset(); G.result = null; G.quiet = 0; G.hist = {}; G.last = null; G.anim = null; pops = []; must = null;
     clearTimeout(overT);
     $('title').classList.add('hide'); $('over').classList.remove('show'); document.body.classList.add('playing');
     A.place();
@@ -410,7 +428,10 @@
   cv.addEventListener('contextmenu', function (e) { e.preventDefault(); });
 
   function titleBoard() { G.b.reset(); G.last = null; G.sel = -1; G.partial = []; G.anim = null; }
-  $('btnStart').addEventListener('click', function () { A.init(); G.p2 = false; start(loadBest()); });
+  $('btnStart').addEventListener('click', function () { A.init(); G.p2 = false; start(G.level); });
+  holdStep('lvDn', -1); holdStep('lvUp', 1);
+  $('lvBtn').addEventListener('click', function () { if (G.mode !== 'title') return; A.init(); A.pick(); showRec(); $('ranks').classList.add('show'); });
+  document.addEventListener('pointerdown', function (e) { if ($('ranks').classList.contains('show') && !$('ranks').contains(e.target) && !$('lvBtn').contains(e.target)) $('ranks').classList.remove('show'); });
   $('btn2p').addEventListener('click', function () { A.init(); G.p2 = true; start(G.level); });
   $('btnRetry').addEventListener('click', function () {
     A.init();
@@ -419,11 +440,14 @@
   });
   $('btnHome').addEventListener('click', function () {
     G.gid++; G.mode = 'title'; titleBoard(); $('over').classList.remove('show'); $('title').classList.remove('hide');
-    document.body.classList.remove('playing'); G.level = loadBest(); showRec(); updHud();
+    document.body.classList.remove('playing'); G.level = loadPick(); showRec(); updHud();
   });
   $('tgSnd').addEventListener('click', function () { A.init(); A.toggleSnd(); syncTog(); });
   addEventListener('keydown', function (e) {
     if (e.key === 'k' || e.key === 'K') { A.init(); A.toggleSnd(); syncTog(); }
+    if (e.key === 'Escape') $('ranks').classList.remove('show');
+    if (G.mode === 'title' && (e.key === 'ArrowLeft' || e.key === 'ArrowDown')) setLevel(G.level - 1);
+    if (G.mode === 'title' && (e.key === 'ArrowRight' || e.key === 'ArrowUp')) setLevel(G.level + 1);
   });
   if ('ontouchstart' in window && matchMedia('(pointer: coarse)').matches) document.body.classList.add('touch');
   addEventListener('resize', resize);
@@ -436,7 +460,7 @@
   }
 
   if (/[?&]shot=1/.test(location.search)) document.body.classList.add('shot');
-  G.level = loadBest(); titleBoard(); syncTog(); updHud(); showRec(); resize();
+  buildRanks(); G.level = loadPick(); titleBoard(); syncTog(); updHud(); showRec(); resize();
   requestAnimationFrame(loop);
   // 시험용 손잡이 — 멈춘 탭에서 프레임을 손으로 돌린다
   window.__ck = {

@@ -80,6 +80,17 @@
   body.en #title h1 { font-size: min(24vw, 150px); letter-spacing: 8px; }
   .rec { font-size: 20px; letter-spacing: 2px; color: #ffe066; text-shadow: 0 1px 4px rgba(0,0,0,.9); margin: 0 0 16px; min-height: 18px; }
   .rec:empty { display: none; }
+  /* 출발 급수 고르기: ◀ 급수 ▶ (급수 글자를 누르면 27칸 표) */
+  .pick { display: flex; gap: 10px; align-items: center; justify-content: center; margin: 0 0 14px; }
+  .pick .btn.sub { min-width: 118px; font-size: 20px; color: #ffe066; padding: 8px 18px; }
+  .pick .btn.arr { min-width: 0; padding: 8px 14px; font-size: 18px; color: #d9c48a; letter-spacing: 0; }
+  .rec.best { font-size: 14px; opacity: .85; margin-bottom: 12px; }
+  .rk { display: grid; grid-template-columns: repeat(9, 1fr); gap: 7px; }
+  .rc { display: flex; align-items: center; justify-content: center; padding: 8px 2px; font-size: 15px; letter-spacing: 0; color: #efe6d2; text-shadow: 0 1px 0 rgba(0,0,0,.6); white-space: nowrap; }
+  .rc.d { color: #ffe066; }
+  .rk .bw.on { transform: scale(1.08); filter: drop-shadow(0 4px 0 #0a0806) drop-shadow(0 0 10px #ffe066); }
+  .rk .bw.on .rc { background: linear-gradient(180deg, #f3d98a, #b8902e 60%, #d9b24a); color: #3a2a0c; text-shadow: 0 1px 0 rgba(255,245,210,.6); box-shadow: inset 0 0 0 2px #6e5218; }
+  @media (max-width: 480px) { .rk { grid-template-columns: repeat(6, 1fr); gap: 6px; } .rc { font-size: 14px; padding: 7px 0; } }
   .btns { display: flex; gap: 14px; align-items: center; justify-content: center; flex-wrap: wrap; }
   body.shot #topbar, body.shot #keys, body.shot #oreumHome, body.shot #oreumFs, body.shot .btns, body.shot .rec, body.shot #acts { display: none !important; }
   body.shot #title { padding-bottom: 16vh; }
@@ -112,6 +123,11 @@
     body.en #title h1 { font-size: 13vh; }
     #title .btns { margin-bottom: 11vh; }
     .rec { font-size: 4.2vh; margin-bottom: 1.5vh; }
+    .pick { margin-bottom: 1.5vh; gap: 8px; }
+    .pick .btn.sub { font-size: 4.4vh; padding: 1.2vh 16px; min-width: 100px; }
+    .pick .btn.arr { font-size: 4vh; padding: 1.2vh 12px; }
+    .rc { padding: 1.2vh 2px; font-size: 3.6vh; }
+    .rk { gap: 5px; }
     .btn { font-size: 5.6vh; padding: 1.6vh 28px; min-width: 130px; }
     .btn.sub { font-size: 4vh; padding: 1.3vh 18px; }
     #over .res { font-size: 17vh; margin-bottom: 1vh; } #over h2 { font-size: 4.5vh; margin-bottom: 1vh; } #over .why { font-size: 3.6vh; margin-bottom: 1.5vh; }
@@ -144,6 +160,11 @@
   <div class="pro" id="proOpts"></div>
 </div>
 
+<div id="ranks" class="sheet">
+  <h3 data-en="RANK">급수</h3>
+  <div class="rk" id="rk"></div>
+</div>
+
 <div id="confirm" class="sheet">
   <h3 data-en="RESIGN">기권</h3>
   <div class="row">
@@ -162,7 +183,12 @@
 </div>
 
 <div id="title">
-  <div class="rec" id="rec"></div>
+  <div class="pick">
+    <span class="bw" id="lvDn"><span class="btn ebony arr">◀</span></span>
+    <span class="bw" id="lvBtn"><span class="btn ebony sub" id="rec">18급</span></span>
+    <span class="bw" id="lvUp"><span class="btn ebony arr">▶</span></span>
+  </div>
+  <div class="rec best" id="best"></div>
   <div class="btns">
     <span class="bw" id="btnStart"><span class="btn brass"><span data-en="START">시작</span><i class="sc"></i><i class="sc"></i></span></span>
     <span class="bw" id="btn2p"><span class="btn ebony sub">2 PLAYERS</span></span>
@@ -173,7 +199,7 @@
 <script src="assets/game-home.js" data-top="6" data-left="6" data-fullscreen="1" defer></script>
 <script src="js/engine.js?v=20261003"></script>
 <script src="js/audio.js?v=20261003"></script>
-<script src="js/game.js?v=20261003"></script>
+<script src="js/game.js?v=20261003b"></script>
 <script src="/assets/visit.js?v=17" defer></script>
 <script src="/assets/game-events.js" defer></script>
 </body>

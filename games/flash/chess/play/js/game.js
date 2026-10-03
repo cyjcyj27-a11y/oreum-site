@@ -26,7 +26,25 @@
 
   function loadBest() { try { return Math.max(0, Math.min(TOP, parseInt(localStorage.getItem('chess.lv') || '0', 10) || 0)); } catch (e) { return 0; } }
   function saveBest(n) { try { localStorage.setItem('chess.lv', String(n)); } catch (e) {} }
-  function showRec() { $('rec').textContent = rankName(loadBest()); }
+  function loadPick() { try { var v = localStorage.getItem('chess.pick'); return v === null ? loadBest() : Math.max(0, Math.min(TOP, parseInt(v, 10) || 0)); } catch (e) { return loadBest(); } }
+  function savePick(n) { try { localStorage.setItem('chess.pick', String(n)); } catch (e) {} }
+  function showRec() {
+    $('rec').textContent = rankName(G.level);
+    var b = loadBest(); $('best').textContent = b > 0 ? (EN ? 'BEST ' : '최고 ') + rankName(b) : '';
+    Array.prototype.forEach.call($('rk').children, function (w, i) { w.classList.toggle('on', i === G.level); });
+  }
+  function setLevel(n) { n = Math.max(0, Math.min(TOP, n)); if (n === G.level) return; G.level = n; savePick(n); showRec(); updHud(); A.pick(); }
+  function buildRanks() {
+    var box = $('rk'); box.innerHTML = '';
+    RANKS.forEach(function (_, i) { var w = document.createElement('span'); w.className = 'bw'; var c = document.createElement('span'); c.className = 'rc ebony' + (i >= 18 ? ' d' : ''); c.textContent = rankName(i); w.appendChild(c); w.addEventListener('click', function () { setLevel(i); $('ranks').classList.remove('show'); }); box.appendChild(w); });
+  }
+  // ◀ ▶ 는 누르고 있으면 계속 넘어간다
+  function holdStep(id, d) {
+    var el = $(id), t1 = 0, t2 = 0;
+    function stop() { clearTimeout(t1); clearInterval(t2); t1 = t2 = 0; }
+    el.addEventListener('pointerdown', function (e) { if (G.mode !== 'title') return; e.preventDefault(); A.init(); setLevel(G.level + d); stop(); t1 = setTimeout(function () { t2 = setInterval(function () { setLevel(G.level + d); }, 110); }, 420); });
+    ['pointerup', 'pointercancel', 'pointerleave'].forEach(function (ev) { el.addEventListener(ev, stop); });
+  }
   function now() { return performance.now() / 1000; }
 
   // ── 화면 맞추기 ──
@@ -202,7 +220,7 @@
 
   // 시작. 1단부터는 판마다 백·흑을 번갈아(흑이면 판을 돌려 보여 준다)
   function begin(level, p2) {
-    G.gid++; G.level = level; G.p2 = p2; G.result = null; clearTimeout(overT);
+    G.gid++; G.level = level; G.p2 = p2; G.result = null; clearTimeout(overT); if (!p2) savePick(level);
     G.human = WHITE;
     if (!p2 && level >= DAN) {
       var side = 0;
@@ -354,10 +372,15 @@
   });
   window.addEventListener('keydown', function (e) {
     if (e.key === 'k' || e.key === 'K') { A.init(); A.toggleSnd(); syncTog(); }
-    else if (e.key === 'Escape') { G.sel = -1; dirty = true; }
+    else if (e.key === 'Escape') { G.sel = -1; dirty = true; $('ranks').classList.remove('show'); }
+    else if (G.mode === 'title' && (e.key === 'ArrowLeft' || e.key === 'ArrowDown')) setLevel(G.level - 1);
+    else if (G.mode === 'title' && (e.key === 'ArrowRight' || e.key === 'ArrowUp')) setLevel(G.level + 1);
   });
   $('tgSnd').addEventListener('click', function () { A.init(); A.toggleSnd(); syncTog(); });
-  $('btnStart').addEventListener('click', function () { A.init(); begin(loadBest(), false); });
+  $('btnStart').addEventListener('click', function () { A.init(); begin(G.level, false); });
+  holdStep('lvDn', -1); holdStep('lvUp', 1);
+  $('lvBtn').addEventListener('click', function () { if (G.mode !== 'title') return; A.init(); A.pick(); showRec(); $('ranks').classList.add('show'); });
+  document.addEventListener('pointerdown', function (e) { if ($('ranks').classList.contains('show') && !$('ranks').contains(e.target) && !$('lvBtn').contains(e.target)) $('ranks').classList.remove('show'); });
   $('btn2p').addEventListener('click', function () { A.init(); begin(0, true); });
   $('btnResign').addEventListener('click', function () { if (G.mode === 'play' || G.mode === 'think') { A.pick(); $('confirm').classList.add('show'); } });
   $('btnNo').addEventListener('click', function () { $('confirm').classList.remove('show'); });
@@ -373,7 +396,7 @@
   });
   $('btnHome').addEventListener('click', function () {
     if (G.mode !== 'over') return;
-    $('over').classList.remove('show'); titleBoard(); G.mode = 'title'; G.p2 = false; G.level = loadBest(); showRec(); $('title').classList.remove('hide'); updHud();
+    $('over').classList.remove('show'); titleBoard(); G.mode = 'title'; G.p2 = false; G.level = loadPick(); showRec(); $('title').classList.remove('hide'); updHud();
   });
   window.addEventListener('resize', resize);
   window.addEventListener('orientationchange', function () { setTimeout(resize, 120); });
@@ -384,7 +407,7 @@
   window.__ch = { tick: function (n) { for (var i = 0; i < (n || 1); i++) draw(); }, G: G, E: E, view: view, begin: begin, doMove: doMove, tap: tap, finish: finish, showOver: showOver, flash: flash, askPromo: askPromo };
 
   if (/[?&]shot=1/.test(location.search)) document.body.classList.add('shot');
-  G.level = loadBest(); titleBoard(); showRec(); syncTog(); updHud(); resize();
+  buildRanks(); G.level = loadPick(); titleBoard(); showRec(); syncTog(); updHud(); resize();
   requestAnimationFrame(loop);
   // 화면 검사용: ?view=sel|check|over|win|draw|promo|resign
   var VIEW = (location.search.match(/[?&]view=(\w+)/) || [])[1];
