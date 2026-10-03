@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, viewport-fit=cover">
+<title>체스</title>
+<!-- 단추·HUD 소재(oreum-game-ui 규칙 7): 토너먼트 체스 테이블.
+     주 단추 = 황동 명판(금빛 쇠, 네 귀 나사, 짙은 갈색 음각 글씨) · 보조 단추 = 흑단 명판(검은 옻칠에 상아색 글씨, 황동 가는 테)
+     · 상단 알약 = 체스 시계 창(검은 바탕, 크림색 숫자, 황동 테) · 둥근 단추 = 황동 원형 버튼 · 창 = 초록 펠트 판 + 황동 테
+     · 색: 황동 #c9a24a(주) · 흑단 #1d1a17 + 상아 #efe6d2(보조) · 펠트 #2e6b3c(창)
+     · 재질 층: 황동 = 대각선 반짝 띠 + 짙은 테 + 나사 네 개, 펠트 = 미세 결, 글자는 음각(위 밝은 선·아래 그늘)
+     · 누름: 쇠 단추처럼 2px 딸깍 내려감. 판은 크림·초록 대리석, 말은 상아와 흑단 광택. -->
+<style>
+  @font-face { font-family: 'RIDI'; src: url('fonts/RIDIBatang-title.woff2') format('woff2'); font-display: swap; }
+  @font-face { font-family: 'Ria'; src: url('fonts/RiaSans-ExtraBold.woff2') format('woff2'); font-display: swap; }
+  @font-face { font-family: 'ChessG'; src: url('fonts/ChessGlyphs.woff2') format('woff2'); font-display: block; }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #15110e; font-family: 'Ria', 'Noto Sans KR', 'Malgun Gothic', sans-serif; color: #efe6d2; user-select: none; -webkit-user-select: none; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+  #c { display: block; width: 100vw; height: 100vh; touch-action: none; }
+
+  /* 황동 명판 */
+  .brass { position: relative; isolation: isolate; border-radius: 6px; background: linear-gradient(135deg, #e8cf7e 0%, #c9a24a 35%, #a37d2c 60%, #d9bb63 100%); box-shadow: inset 0 0 0 2px #6e5218, inset 0 2px 0 3px rgba(255,245,200,.45), inset 0 -3px 0 2px rgba(60,40,5,.35); }
+  .brass::before, .brass::after { content: ''; position: absolute; width: 6px; height: 6px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #fff0b8, #7a5a16 70%); box-shadow: 0 0 0 1px rgba(60,40,5,.5); top: 7px; left: 7px; }
+  .brass::after { left: auto; right: 7px; }
+  .brass > i.sc { position: absolute; width: 6px; height: 6px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #fff0b8, #7a5a16 70%); box-shadow: 0 0 0 1px rgba(60,40,5,.5); bottom: 7px; left: 7px; }
+  .brass > i.sc + i.sc { left: auto; right: 7px; }
+  /* 흑단 명판 */
+  .ebony { position: relative; border-radius: 6px; background: linear-gradient(180deg, #2b2621 0%, #17140f 60%, #221d18 100%); box-shadow: inset 0 0 0 2px #8c6f2a, inset 0 0 0 3px #1a1510, inset 0 3px 0 3px rgba(255,255,255,.06); }
+
+  .bw { display: inline-block; filter: drop-shadow(0 4px 0 #0a0806) drop-shadow(0 8px 10px rgba(0,0,0,.55)); transition: filter .22s, transform .22s cubic-bezier(.34,1.56,.64,1); pointer-events: auto; cursor: pointer; touch-action: manipulation; }
+  .bw:hover { filter: drop-shadow(0 4px 0 #0a0806) drop-shadow(0 8px 10px rgba(0,0,0,.55)) brightness(1.07); }
+  .bw:active { transform: translateY(2px) scale(.98); filter: drop-shadow(0 2px 0 #0a0806) drop-shadow(0 4px 6px rgba(0,0,0,.5)); transition-duration: .04s; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; min-width: 160px; padding: 14px 40px; font-size: 24px; letter-spacing: 4px; color: #3a2a0c; text-shadow: 0 1px 0 rgba(255,245,210,.6), 0 -1px 0 rgba(0,0,0,.35); white-space: nowrap; }
+  .btn.sub { color: #efe6d2; font-size: 16px; padding: 10px 24px; min-width: 130px; letter-spacing: 3px; text-shadow: 0 1px 0 rgba(0,0,0,.6), 0 0 6px rgba(255,230,160,.15); }
+  .btn.sm { font-size: 15px; padding: 8px 16px; min-width: 0; letter-spacing: 2px; }
+  .btn.dim { color: #a3957c; }
+
+  /* 상단 바 — 체스 시계 창 */
+  #topbar { position: fixed; left: 0; right: 0; top: 0; height: calc(48px + env(safe-area-inset-top)); padding: env(safe-area-inset-top) calc(10px + env(safe-area-inset-right)) 0 calc(104px + env(safe-area-inset-left)); display: flex; align-items: center; gap: 8px; pointer-events: none; z-index: 5; }
+  .stat { display: inline-flex; align-items: center; gap: 10px; padding: 6px 14px; font-size: 15px; white-space: nowrap; color: #f3e9c9; border-radius: 5px; background: linear-gradient(180deg, #1c1813, #0d0b09); box-shadow: inset 0 0 0 2px #8c6f2a, inset 0 0 0 3px #0d0b09, 0 2px 0 #0a0806, 0 4px 6px rgba(0,0,0,.5); text-shadow: 0 0 6px rgba(255,230,160,.35); }
+  .tm { display: inline-flex; align-items: center; gap: 6px; opacity: .45; transition: opacity .25s; }
+  .tm.on { opacity: 1; }
+  .tm i { display: inline-block; width: 13px; height: 13px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff, #c9bda0 75%); box-shadow: 0 1px 1px rgba(0,0,0,.5); }
+  .tm.b i { background: radial-gradient(circle at 35% 30%, #666, #0a0a0a 75%); }
+  .tm.on i { box-shadow: 0 0 0 2px rgba(255,230,160,.6), 0 0 8px rgba(255,230,160,.6); }
+  .tm.think i { animation: think .8s ease-in-out infinite; }
+  @keyframes think { 50% { box-shadow: 0 0 0 4px rgba(255,230,160,.25), 0 0 14px rgba(255,230,160,.95); } }
+  .tm b { font-weight: 400; }
+  .you { font-style: normal; font-size: 11px; opacity: .85; margin-left: 4px; letter-spacing: 1px; display: none; }
+  .you.on { display: inline; }
+  .spacer { flex: 1; }
+  .tog { pointer-events: auto; position: relative; width: 36px; height: 36px; border-radius: 50%; border: 2px solid #6e5218; background: radial-gradient(circle at 40% 30%, #e8cf7e, #a37d2c 70%); color: #3a2a0c; font-family: inherit; font-size: 14px; line-height: 1; padding: 0; touch-action: manipulation; cursor: pointer; box-shadow: 0 2px 0 #0a0806, 0 4px 6px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,245,200,.6); display: inline-flex; align-items: center; justify-content: center; }
+  .tog svg { width: 20px; height: 20px; display: block; }
+  .tog.off { opacity: .6; }
+  .tog.off::after { content: ''; position: absolute; left: 24%; right: 24%; top: 50%; height: 2px; margin-top: -1px; background: #3a2a0c; border-radius: 1px; transform: rotate(-40deg); }
+  .tog:active { transform: translateY(1px); box-shadow: 0 1px 0 #0a0806; }
+  @media (max-width: 560px) {
+    #topbar { padding-left: calc(96px + env(safe-area-inset-left)); padding-right: 6px; gap: 5px; }
+    .stat { padding: 5px 9px; font-size: 12px; gap: 6px; }
+    .tm i { width: 11px; height: 11px; } .you { display: none !important; }
+    .tog { width: 31px; height: 31px; } .tog svg { width: 17px; height: 17px; }
+  }
+
+  #acts { position: fixed; right: calc(12px + env(safe-area-inset-right)); bottom: calc(12px + env(safe-area-inset-bottom)); display: none; gap: 10px; align-items: center; z-index: 6; }
+  body.playing #acts { display: flex; }
+  #keys { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(6px + env(safe-area-inset-bottom)); font-size: 11px; opacity: .45; pointer-events: none; z-index: 5; display: none; white-space: nowrap; }
+  body.playing #keys { display: block; }
+  body.touch #keys { display: none !important; }
+
+  #flash { position: fixed; left: 50%; top: 44%; transform: translate(-50%, -50%) scale(.6); font-family: 'RIDI', 'Ria', serif; font-size: min(20vw, 112px); letter-spacing: 6px; color: #fff3d0; -webkit-text-stroke: 3px #1a1208; paint-order: stroke fill; text-shadow: 0 8px 28px rgba(0,0,0,.7); opacity: 0; pointer-events: none; z-index: 8; transition: opacity .2s, transform .35s cubic-bezier(.2,1.6,.4,1); white-space: nowrap; }
+  #flash.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  #flash.red { color: #ff8a73; }
+  #flash.soft { font-size: min(13vw, 64px); }
+
+  /* 타이틀: 제목은 맨 아래, 단추는 그 위 */
+  #title { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; z-index: 10; text-align: center; pointer-events: none; padding-bottom: calc(10px + env(safe-area-inset-bottom)); }
+  #title.hide { display: none; }
+  #title h1 { font-family: 'RIDI', serif; font-weight: 400; font-size: min(34vw, 190px); margin: 6px 0 0; line-height: 1; color: #fff3d0; -webkit-text-stroke: 5px #1a1208; paint-order: stroke fill; text-shadow: 0 10px 30px rgba(0,0,0,.7); letter-spacing: 12px; }
+  body.en #title h1 { font-size: min(24vw, 150px); letter-spacing: 8px; }
+  .rec { font-size: 20px; letter-spacing: 2px; color: #ffe066; text-shadow: 0 1px 4px rgba(0,0,0,.9); margin: 0 0 16px; min-height: 18px; }
+  .rec:empty { display: none; }
+  .btns { display: flex; gap: 14px; align-items: center; justify-content: center; flex-wrap: wrap; }
+  body.shot #topbar, body.shot #keys, body.shot #oreumHome, body.shot #oreumFs, body.shot .btns, body.shot .rec, body.shot #acts { display: none !important; }
+  body.shot #title { padding-bottom: 16vh; }
+  body.shot #title h1 { font-size: min(30vw, 200px); letter-spacing: 20px; }
+  body.shot.en #title h1 { font-size: min(22vw, 150px); letter-spacing: 10px; }
+
+  /* 창 — 초록 펠트 판 + 황동 테 */
+  .sheet { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%) scale(.85); opacity: 0; pointer-events: none; visibility: hidden; z-index: 11; padding: 18px 22px 22px; width: min(94vw, 520px); max-height: 92vh; overflow: hidden; color: #efe6d2; border-radius: 8px;
+    background: repeating-linear-gradient(45deg, rgba(255,255,255,.025) 0 2px, rgba(0,0,0,0) 2px 4px), linear-gradient(180deg, #357a45, #2a6338 60%, #245630); box-shadow: inset 0 0 0 3px #8c6f2a, inset 0 0 0 5px #1a1510, inset 0 0 40px rgba(0,0,0,.35), 0 10px 0 #0a0806, 0 20px 30px rgba(0,0,0,.6);
+    transition: transform .18s cubic-bezier(.34,1.56,.64,1), opacity .15s, visibility 0s .18s; }
+  .sheet.show { transform: translate(-50%, -50%) scale(1); opacity: 1; pointer-events: auto; visibility: visible; transition-delay: 0s; }
+  .sheet h3 { margin: 0 0 14px; font-family: 'RIDI', serif; font-weight: 400; font-size: 32px; letter-spacing: 6px; text-align: center; color: #fff3d0; text-shadow: 0 2px 4px rgba(0,0,0,.6); }
+  .sheet .row { display: flex; gap: 14px; justify-content: center; margin-top: 6px; flex-wrap: wrap; }
+  .pro { display: flex; gap: 12px; justify-content: center; }
+  .pro .opt { width: 86px; height: 86px; display: flex; align-items: center; justify-content: center; padding: 0; }
+  .pro .opt img { width: 70px; height: 70px; display: block; }
+  @media (max-width: 420px) { .pro { gap: 8px; } .pro .opt { width: 72px; height: 72px; } .pro .opt img { width: 58px; height: 58px; } }
+
+  #over { position: fixed; inset: 0; display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 10; text-align: center; background: rgba(10,8,6,.6); }
+  #over.show { display: flex; }
+  #over h2 { font-weight: 400; font-size: min(7vw, 30px); letter-spacing: 4px; margin: 0 0 10px; opacity: .9; }
+  #over .res { font-family: 'Ria', Arial, sans-serif; font-size: min(16vw, 92px); line-height: 1; letter-spacing: 6px; -webkit-text-stroke: 3px #1a1208; paint-order: stroke fill; margin-bottom: 10px; text-shadow: 0 8px 24px rgba(0,0,0,.5); }
+  #over .res.win { color: #ffe066; } #over .res.lose { color: #ff7a6a; } #over .res.p2 { color: #fff3d0; }
+  #over .why { font-size: 16px; letter-spacing: 4px; margin-bottom: 16px; opacity: .8; min-height: 16px; }
+  #over .home { pointer-events: auto; margin-top: 18px; font-size: 13px; letter-spacing: 3px; opacity: .7; cursor: pointer; padding: 6px 14px; }
+
+  @media (max-height: 480px) {
+    #title { padding-bottom: 1vh; }
+    #title h1 { font-size: 15vh; letter-spacing: 8px; margin-top: 0; }
+    body.en #title h1 { font-size: 13vh; }
+    #title .btns { margin-bottom: 11vh; }
+    .rec { font-size: 4.2vh; margin-bottom: 1.5vh; }
+    .btn { font-size: 5.6vh; padding: 1.6vh 28px; min-width: 130px; }
+    .btn.sub { font-size: 4vh; padding: 1.3vh 18px; }
+    #over .res { font-size: 17vh; margin-bottom: 1vh; } #over h2 { font-size: 4.5vh; margin-bottom: 1vh; } #over .why { font-size: 3.6vh; margin-bottom: 1.5vh; }
+    #over .home { margin-top: 1.5vh; }
+    #acts .btn { font-size: 13px; padding: 7px 12px; }
+    #keys { display: none !important; }
+    .sheet { top: 42%; padding: 12px 16px 16px; } .sheet h3 { font-size: 24px; margin-bottom: 8px; }
+    .pro .opt { width: 64px; height: 64px; } .pro .opt img { width: 52px; height: 52px; }
+  }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+
+<div id="topbar">
+  <span class="stat" id="score"><span class="tm w on" id="tmW"><i></i><b id="lbW">백</b><em class="you" id="youW">YOU</em></span><span class="tm b" id="tmB"><i></i><b id="lbB">흑</b><em class="you" id="youB">YOU</em></span></span>
+  <span class="stat" id="rank" data-en="18K">18급</span>
+  <span class="spacer"></span>
+  <button class="tog" id="tgSnd" title="K"><svg viewBox="0 0 24 24"><path d="M3 9h4l5-4.5v15L7 15H3z" fill="#3a2a0c"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13" fill="none" stroke="#3a2a0c" stroke-width="2.4" stroke-linecap="round"/></svg></button>
+</div>
+
+<div id="acts">
+  <span class="bw" id="btnResign"><span class="btn ebony sub sm dim" data-en="RESIGN">기권</span></span>
+</div>
+<div id="keys" data-en="K sound">K 효과음</div>
+<div id="flash">체크</div>
+
+<div id="promo" class="sheet">
+  <h3 data-en="PROMOTION">승격</h3>
+  <div class="pro" id="proOpts"></div>
+</div>
+
+<div id="confirm" class="sheet">
+  <h3 data-en="RESIGN">기권</h3>
+  <div class="row">
+    <span class="bw" id="btnNo"><span class="btn ebony sub">✕</span></span>
+    <span class="bw" id="btnYes"><span class="btn brass"><span data-en="RESIGN">기권</span><i class="sc"></i><i class="sc"></i></span></span>
+  </div>
+</div>
+
+<div id="over">
+  <h2 id="oh"></h2>
+  <div class="res win" id="ores">CLEAR</div>
+  <div class="why" id="owhy"></div>
+  <div class="rec" id="orec"></div>
+  <span class="bw" id="btnRetry"><span class="btn brass"><span id="btnRetryT">NEXT</span><i class="sc"></i><i class="sc"></i></span></span>
+  <div class="home" id="btnHome">TITLE</div>
+</div>
+
+<div id="title">
+  <div class="rec" id="rec"></div>
+  <div class="btns">
+    <span class="bw" id="btnStart"><span class="btn brass"><span data-en="START">시작</span><i class="sc"></i><i class="sc"></i></span></span>
+    <span class="bw" id="btn2p"><span class="btn ebony sub">2 PLAYERS</span></span>
+  </div>
+  <h1 data-en="CHESS">체스</h1>
+</div>
+
+<script src="assets/game-home.js" data-top="6" data-left="6" data-fullscreen="1" defer></script>
+<script src="js/engine.js?v=20261003"></script>
+<script src="js/audio.js?v=20261003"></script>
+<script src="js/game.js?v=20261003"></script>
+<script src="/assets/visit.js?v=17" defer></script>
+<script src="/assets/game-events.js" defer></script>
+</body>
+</html>

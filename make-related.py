@@ -18,6 +18,7 @@ import io, os, re, sys
 
 # slug, 한국어 경로, 영어 경로, 한국어 이름, 한국어 장르 앵커, 영어 이름, 영어 장르 앵커, 태그
 GAMES = [
+    ("chess",         "/games/flash/chess/",         "/en/games/flash/chess/",         "체스",              "혼자·2인용 체스 보드게임",          "CHESS",                "chess board game vs computer",  {"board", "pvp", "strategy"}),
     ("taco",          "/games/flash/taco/",          "/en/games/flash/taco/",          "비바타코스",         "타코 만들기 요리게임",              "VIVA TACOS",            "taco maker cooking game",       {"sim", "tycoon", "casual", "food"}),
     ("janggi",        "/games/flash/janggi/",        "/en/games/flash/janggi/",        "장기",              "혼자·2인용 장기 보드게임",          "JANGGI",               "Korean chess board game vs computer", {"board", "pvp", "strategy", "korean"}),
     ("chicken",       "/games/flash/chicken/",       "/en/games/flash/chicken/",       "개발자치킨집",       "생닭을 썰어 튀기는 치킨집 타이쿤게임", "DEV CHICKEN SHOP",      "fried chicken shop tycoon game", {"sim", "tycoon", "3d", "casual", "korean"}),

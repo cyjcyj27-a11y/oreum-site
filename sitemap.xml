@@ -512,6 +512,24 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://oreumgames.com/games/flash/chess/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/games/flash/chess/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/games/flash/chess/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/games/flash/chess/"/>
+    <lastmod>2026-10-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://oreumgames.com/en/games/flash/chess/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/games/flash/chess/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/games/flash/chess/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/games/flash/chess/"/>
+    <lastmod>2026-10-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://oreumgames.com/games/flash/chicken/</loc>
     <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/games/flash/chicken/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/games/flash/chicken/"/>
