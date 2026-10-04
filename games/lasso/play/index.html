@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, viewport-fit=cover">
+<title>올가미 언니</title>
+<!--
+  버튼 디자인(oreum-game-ui 규칙 7)
+  소재: 서부 마을 판자(주 = 밝은 소나무 판에 총알구멍, 보조 = 짙게 바랜 판), 둥근 단추와 상단 알약은 금속. 창은 총알 박힌 나무 판자벽(판자 틈, 못, 총알구멍과 튄 나뭇결)에 붙은 현상수배 전단 종이
+  모양: 양 끝이 거칠게 잘린 판자, 양옆에 못. 둥근 단추는 동전 모양
+  색 하나: 놋쇠 금색. 위험·잡힘 표시는 전단 도장 빨강
+  재질 층: 두께(아래 그림자) → 짙은 테 → 나무 그라데이션 → 위 빛 띠·아래 그늘 → 나뭇결과 못, 총알구멍. 글자는 크림색 페인트에 짙은 테
+  누름: 3px 내려가며 밝아짐 + 딸깍 소리
+-->
+<style>
+  @font-face { font-family: 'BHTitle'; src: url('fonts/title.woff2?v=2') format('woff2'); font-display: block; }
+  @font-face { font-family: 'Ria'; src: url('fonts/RiaSans-ExtraBold.woff2') format('woff2'); font-display: swap; }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #f0c59a; color: #fff;
+    font-family: 'Ria', 'Noto Sans KR', 'Malgun Gothic', sans-serif; user-select: none; -webkit-user-select: none; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+  #c { display: block; width: 100vw; height: 100vh; touch-action: none; }
+  button { font-family: inherit; cursor: pointer; }
+  :root { --ink: #26170c; --brassA: #fbe29a; --brassB: #dfa844; --brassC: #a8721e; --tinA: #eeece6; --tinB: #bdbab1; --tinC: #8c8980; --paperA: #f3e5bf; --paperB: #dcc590; --red: #a8281a;
+    --arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 1.5L21.5 12.5H16V22.5H8V12.5H2.5Z' fill='%23ffd23c' stroke='%231a0f06' stroke-width='2.2' stroke-linejoin='round'/%3E%3Cpath d='M12 5l5.4 6.2H14' fill='none' stroke='%23fff6c8' stroke-width='1.4' stroke-linecap='round' opacity='.8'/%3E%3C/svg%3E");
+    --hole: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cpath d='M20 20L3 7M20 20l16 12M20 20L9 37M20 20l14-15' stroke='%23241106' stroke-width='1.1' opacity='.75'/%3E%3Cpath d='M20 4l3 7 7-4-3 8 9 1-8 5 6 7-9-1 1 9-6-6-5 7-1-8-9 3 6-8-8-4 9-2-4-8 8 4z' fill='%23e6c690'/%3E%3Ccircle cx='20' cy='20' r='8.6' fill='%23583216'/%3E%3Ccircle cx='20' cy='20' r='6.4' fill='%230a0502'/%3E%3Cpath d='M14.6 18.2a6 6 0 0 1 8-4.4' stroke='%23000' stroke-width='2.4' fill='none' opacity='.55'/%3E%3Cpath d='M24.5 23.5a6 6 0 0 1-5 2.6' stroke='%23a87848' stroke-width='1' fill='none' opacity='.7'/%3E%3C/svg%3E"); }
+
+  /* 나무판 버튼: .bw 가 두께(그림자), .btn 이 양 끝이 거칠게 잘린 판자. 양옆에 못, 주 단추에는 총알구멍 */
+  .bw { display: inline-block; filter: drop-shadow(0 5px 0 var(--ink)) drop-shadow(0 9px 8px rgba(0,0,0,.35)); transition: transform .22s cubic-bezier(.34,1.56,.64,1), filter .15s; }
+  .btn { position: relative; display: block; width: 100%; border: 0; font-family: 'BHTitle', 'Ria', serif; font-size: 25px; letter-spacing: 2px; color: #fff1c4; padding: 13px 38px 12px; white-space: nowrap;
+    clip-path: polygon(4px 0, calc(100% - 3px) 0, 100% 22%, calc(100% - 4px) 40%, 100% 63%, calc(100% - 3px) 82%, calc(100% - 1px) 100%, 3px 100%, 0 78%, 4px 58%, 1px 36%, 3px 17%);
+    background:
+      radial-gradient(circle at 16px 50%, #e8e2d4 0 1.4px, #1e1208 2px 4px, transparent 4.6px), radial-gradient(circle at calc(100% - 16px) 50%, #e8e2d4 0 1.4px, #1e1208 2px 4px, transparent 4.6px),
+      repeating-linear-gradient(1deg, rgba(255,225,170,.09) 0 1px, rgba(40,18,4,0) 1px 5px, rgba(40,18,4,.2) 5px 6px, rgba(40,18,4,0) 6px 11px),
+      linear-gradient(180deg, #a87648 0%, #8a5a32 52%, #6e4424 100%);
+    box-shadow: inset 0 0 0 3px var(--ink), inset 0 6px 0 rgba(255,225,170,.22), inset 0 -7px 0 rgba(0,0,0,.2);
+    -webkit-text-stroke: 4px var(--ink); paint-order: stroke fill; text-shadow: 0 2px 0 var(--ink); }
+  .btn.main { font-size: 33px; padding: 15px 48px 14px; -webkit-text-stroke-width: 5px;
+    background: var(--hole) 12% 68% / 22px 22px no-repeat, var(--hole) 87% 26% / 30px 30px no-repeat,
+      radial-gradient(circle at 16px 50%, #e8e2d4 0 1.4px, #1e1208 2px 4px, transparent 4.6px), radial-gradient(circle at calc(100% - 16px) 50%, #e8e2d4 0 1.4px, #1e1208 2px 4px, transparent 4.6px),
+      repeating-linear-gradient(-1deg, rgba(255,240,200,.12) 0 1px, rgba(90,50,10,0) 1px 5px, rgba(90,50,10,.2) 5px 6px, rgba(90,50,10,0) 6px 12px),
+      linear-gradient(180deg, #e9bd7c 0%, #cf9650 52%, #a86e30 100%); }
+  .bw:hover { filter: drop-shadow(0 5px 0 var(--ink)) drop-shadow(0 9px 8px rgba(0,0,0,.35)) brightness(1.08); }
+  .bw:active { transform: translateY(3px) scale(.98); filter: drop-shadow(0 2px 0 var(--ink)) drop-shadow(0 4px 5px rgba(0,0,0,.35)) brightness(1.12); transition-duration: .04s; }
+  .btn.sm { font-size: 19px; padding: 9px 30px 8px; }
+  .bw.off { filter: drop-shadow(0 5px 0 var(--ink)) grayscale(.9) brightness(.8); }
+  /* 둥근 동전 단추 */
+  .tog { position: relative; pointer-events: auto; width: 40px; height: 40px; padding: 0; border-radius: 50%; border: 3px solid var(--ink); color: #3a230e; font-size: 15px; display: inline-flex; align-items: center; justify-content: center;
+    background: radial-gradient(circle at 50% 50%, transparent 0 58%, rgba(60,40,10,.35) 59% 63%, transparent 64%), linear-gradient(180deg, var(--tinA), var(--tinB) 55%, var(--tinC));
+    box-shadow: inset 0 3px 0 rgba(255,255,255,.5), inset 0 -4px 0 rgba(0,0,0,.16), 0 4px 0 var(--ink), 0 7px 7px rgba(0,0,0,.3); transition: transform .2s cubic-bezier(.34,1.56,.64,1); }
+  .tog svg { width: 20px; height: 20px; } .tog svg path, .tog svg ellipse { fill: #3a230e; } .tog svg path[fill="none"] { fill: none; stroke: #3a230e; }
+  .tog:active { transform: translateY(3px); box-shadow: inset 0 3px 0 rgba(255,255,255,.5), 0 1px 0 var(--ink); transition-duration: .04s; }
+  .tog.off { opacity: .62; } .tog.off::after { content: ''; position: absolute; left: 20%; right: 20%; top: 50%; height: 3px; margin-top: -1.5px; background: #3a230e; border-radius: 2px; transform: rotate(-40deg); }
+
+  /* 로딩 */
+  #load { position: fixed; inset: 0; z-index: 80; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px;
+    background: radial-gradient(ellipse at 50% 34%, #ffe6b0, #eeb672 55%, #b8683a); transition: opacity .6s; }
+  #load.gone { opacity: 0; pointer-events: none; }
+  #load .ttl, #title h1, #endCard h2 { margin: 0; font-family: 'BHTitle', serif; font-weight: 400; line-height: 1.05; color: #fff1c4; -webkit-text-stroke: 10px var(--ink); paint-order: stroke fill; text-shadow: 0 7px 0 var(--ink), 0 14px 18px rgba(0,0,0,.35); letter-spacing: 2px; text-align: center; }
+  /* 제목 간판: 총알 박힌 판자(창과 같은 나무), 네 귀에 못, 살짝 기울여 걸었다 */
+  #load .ttl, #title h1, #endCard h2 { padding: .1em .62em .15em; border: 6px solid var(--ink); transform: rotate(-1.5deg);
+    background:
+      var(--hole) 2.2% 24% / .36em .36em no-repeat, var(--hole) 97.6% 70% / .44em .44em no-repeat, var(--hole) 91% 8% / .24em .24em no-repeat, var(--hole) 7.5% 88% / .22em .22em no-repeat,
+      radial-gradient(circle at 13px 13px, #d8d2c4 0 1.4px, #1e1208 2px 4px, transparent 4.6px), radial-gradient(circle at calc(100% - 13px) 13px, #d8d2c4 0 1.4px, #1e1208 2px 4px, transparent 4.6px),
+      radial-gradient(circle at 13px calc(100% - 13px), #d8d2c4 0 1.4px, #1e1208 2px 4px, transparent 4.6px), radial-gradient(circle at calc(100% - 13px) calc(100% - 13px), #d8d2c4 0 1.4px, #1e1208 2px 4px, transparent 4.6px),
+      repeating-linear-gradient(180deg, rgba(255,225,170,.16) 0 2px, rgba(0,0,0,0) 2px .3em, rgba(20,8,2,.35) .3em calc(.3em + 2px), rgba(20,8,2,.8) calc(.3em + 2px) calc(.3em + 5px)),
+      repeating-linear-gradient(90deg, rgba(60,30,10,0) 0 37px, rgba(50,24,8,.16) 37px 38px, rgba(60,30,10,0) 38px 61px, rgba(255,220,170,.07) 61px 63px), repeating-linear-gradient(92deg, rgba(60,30,10,0) 0 13px, rgba(60,30,10,.12) 13px 14px),
+      linear-gradient(90deg, #9a6a40, #7e502c 38%, #8f5f37 62%, #86562f);
+    box-shadow: inset 0 0 0 4px rgba(255,220,170,.2), 0 8px 0 var(--ink), 0 22px 34px rgba(0,0,0,.45); }
+  #load .ttl { font-size: clamp(50px, 10vw, 110px); }
+  #load .bar { width: min(62vw, 420px); height: 18px; background: rgba(38,23,12,.4); border: 3px solid var(--ink); overflow: hidden; }
+  #load .bar i { display: block; height: 100%; width: 0; background: linear-gradient(180deg, var(--brassA), var(--brassB) 55%, var(--brassC)); transition: width .25s; }
+  #load .pct { font-family: 'BHTitle'; font-size: 24px; color: #fff1c4; -webkit-text-stroke: 5px var(--ink); paint-order: stroke fill; }
+
+  /* 타이틀 */
+  #title { position: fixed; inset: 0; z-index: 40; display: none; flex-direction: column; align-items: center; justify-content: flex-end; padding-bottom: 4.5vh; pointer-events: none; }   /* 제목 간판은 아래, 단추는 그 위(사장님 2026-10-02) */
+  #title.show { display: flex; }
+  #title h1 { font-size: clamp(54px, 8.6vw, 120px); order: 2; }
+  #title .btns { margin-bottom: 4vh; display: flex; gap: 22px; pointer-events: auto; }
+  #title .btns .bw { min-width: 230px; }
+
+  /* 상단바: 검은 쇠판에 놋쇠 글자 */
+  #topbar { position: fixed; left: 0; right: 0; top: 0; z-index: 20; min-height: calc(50px + env(safe-area-inset-top));
+    padding: calc(5px + env(safe-area-inset-top)) calc(10px + env(safe-area-inset-right)) 6px calc(104px + env(safe-area-inset-left));
+    display: none; align-items: center; gap: 8px; flex-wrap: wrap; background: linear-gradient(180deg, rgba(38,23,12,.5), rgba(38,23,12,0)); pointer-events: none; }
+  body.playing #topbar { display: flex; }
+  .stat { display: flex; align-items: center; gap: 7px; height: 38px; padding: 0 13px; font-family: 'BHTitle', 'Ria'; font-size: 21px; color: #ffd98a; border: 3px solid var(--ink); border-radius: 5px;
+    background: radial-gradient(circle at 6px 6px, #b9b6ad 0 1.6px, transparent 2.2px), radial-gradient(circle at calc(100% - 6px) calc(100% - 6px), #b9b6ad 0 1.6px, transparent 2.2px), linear-gradient(180deg, #57504a, #3a3531 55%, #26221f);
+    box-shadow: inset 0 2px 0 rgba(255,255,255,.18), 0 4px 0 var(--ink), 0 6px 6px rgba(0,0,0,.3); text-shadow: 0 2px 0 #000; }
+  .stat b { font-weight: 400; } .stat small { font-family: 'Ria'; font-size: 14px; color: #e9dcc0; }
+  #sTarget { display: none; pointer-events: auto; } #sTarget.on { display: flex; }
+  #sTarget img { width: 30px; height: 30px; border: 2px solid #e9dcc0; background: #cdb98a; }
+  /* 방향 화살표: 몸통이 있는 굵은 화살, 밝은 노랑에 짙은 테(세모만 있으면 어느 쪽을 가리키는지 안 읽힌다) */
+  #sTarget i { display: block; width: 32px; height: 32px; margin: 0 1px; filter: drop-shadow(0 2px 0 #000);
+    background: var(--arrow) center / contain no-repeat; }
+  /* 체력: 걸을 땐 하트(내 몸), 탔을 땐 말 머리(말 몸). 총알 3발이면 끝 */
+  #sHp svg { width: 22px; height: 22px; fill: #ffd98a; } #sHp .ih { display: none; } #sHp.ride .ih { display: block; } #sHp.ride .ig { display: none; }
+  #sHp .hp { display: flex; gap: 4px; } #sHp .hp i { width: 18px; height: 11px; border: 2px solid var(--ink); background: rgba(38,23,12,.6); } #sHp .hp i.on { background: linear-gradient(180deg, #ff9a7a, #d8452e 55%, #a8281a); }
+  #sHp.hurt { animation: hurt .5s; } @keyframes hurt { 0%, 100% { transform: none; } 30% { transform: translateX(-4px); } 60% { transform: translateX(4px); } }
+  /* 화면 가장자리 길잡이 화살: 목적지가 화면 밖일 때만 */
+  #way { position: fixed; left: 0; top: 0; z-index: 19; width: 0; height: 0; display: none; pointer-events: none; } #way.on { display: block; } body:not(.playing) #way, body.ending #way { display: none; }
+  #way i { position: absolute; left: -38px; top: -38px; width: 76px; height: 76px; background: var(--arrow) center / contain no-repeat; filter: drop-shadow(0 4px 0 rgba(0,0,0,.55)); animation: way .5s ease-in-out infinite alternate; }
+  @keyframes way { from { transform: translateY(8px); } to { transform: translateY(-12px) scale(1.08); } }
+  .bump { animation: bump .3s; } @keyframes bump { 40% { transform: scale(1.16); } }
+  .spacer { flex: 1; }
+
+  /* 폰 이동 패드 = 수레바퀴, 손잡이 = 놋쇠 동전 */
+  #pad { position: fixed; z-index: 21; left: calc(24px + env(safe-area-inset-left)); bottom: calc(22px + env(safe-area-inset-bottom)); width: 150px; height: 150px; border-radius: 50%; display: none; touch-action: none;
+    background: radial-gradient(circle, rgba(38,23,12,.3) 0 30%, transparent 31%), repeating-conic-gradient(from 0deg, rgba(38,23,12,.55) 0 4deg, rgba(38,23,12,.16) 4deg 45deg);
+    border: 6px solid rgba(38,23,12,.75); box-shadow: inset 0 0 0 3px rgba(255,225,170,.35), 0 5px 10px rgba(0,0,0,.3); }
+  #pad i { position: absolute; left: 50%; top: 50%; width: 64px; height: 64px; margin: -32px 0 0 -32px; border-radius: 50%; border: 3px solid var(--ink);
+    background: radial-gradient(circle at 50% 50%, transparent 0 56%, rgba(90,50,0,.4) 57% 62%, transparent 63%), linear-gradient(180deg, var(--brassA), var(--brassB) 55%, var(--brassC)); box-shadow: inset 0 3px 0 rgba(255,255,255,.5), 0 4px 0 var(--ink); }
+  body.touch.playing #pad { display: block; }
+  /* 오른쪽 아래 단추 */
+  #acts { position: fixed; z-index: 21; right: calc(18px + env(safe-area-inset-right)); bottom: calc(18px + env(safe-area-inset-bottom)); display: none; align-items: flex-end; gap: 14px; }
+  body.playing #acts { display: flex; }
+  #lassoBtn { width: 104px; height: 104px; border-radius: 50%; border: 4px solid var(--ink); touch-action: none; display: none; align-items: center; justify-content: center;
+    background: radial-gradient(circle at 50% 50%, transparent 0 60%, rgba(90,50,0,.4) 61% 65%, transparent 66%), linear-gradient(180deg, var(--brassA), var(--brassB) 55%, var(--brassC));
+    box-shadow: inset 0 4px 0 rgba(255,255,255,.5), inset 0 -6px 0 rgba(0,0,0,.16), 0 6px 0 var(--ink), 0 10px 10px rgba(0,0,0,.35); transition: transform .2s cubic-bezier(.34,1.56,.64,1); }
+  #lassoBtn svg { width: 62px; height: 62px; }
+  #lassoBtn.on { transform: translateY(4px) scale(.96); filter: brightness(1.15); box-shadow: inset 0 4px 0 rgba(255,255,255,.5), 0 2px 0 var(--ink); transition-duration: .04s; }
+  body.touch #lassoBtn { display: flex; }
+  #ctx { display: none; } #ctx.on { display: inline-block; }
+  /* 시설 단추(말 사기·현상수배)는 구석이 아니라 그 시설 위에 뜬다(10/3 "오른쪽 구석에 처박지 말라고"). 아래 꼭지가 그 자리를 가리킨다 */
+  #wctx { position: fixed; left: 0; top: 0; z-index: 21; display: none; pointer-events: none; } #wctx.on { display: block; } #wctx .bw { pointer-events: auto; }
+  #wctx::after { content: ''; position: absolute; left: 50%; bottom: -15px; margin-left: -12px; border: 12px solid transparent; border-top: 14px solid var(--ink); border-bottom: 0; }
+  body.ending #wctx { display: none !important; }
+  #callBtn { display: none; } #callBtn.on { display: inline-flex; width: 60px; height: 60px; } #callBtn svg { width: 34px; height: 34px; }
+  #keys { position: fixed; z-index: 19; right: 14px; bottom: 10px; font-size: 13px; color: rgba(255,244,220,.85); text-shadow: 0 1px 2px #000; text-align: right; line-height: 1.5; display: none; pointer-events: none; }
+  body.playing:not(.touch) #keys { display: block; } body:not(.touch) #acts { bottom: 62px; }
+
+  /* 줄다리기 게이지 */
+  #tug { position: fixed; z-index: 22; left: 50%; bottom: 22vh; transform: translateX(-50%); width: min(60vw, 380px); display: none; flex-direction: column; align-items: center; gap: 8px; pointer-events: none; }
+  #tug.on { display: flex; }
+  #tug b { font-family: 'BHTitle'; font-weight: 400; font-size: 40px; color: #fff1c4; -webkit-text-stroke: 7px var(--ink); paint-order: stroke fill; animation: pull .28s infinite alternate; }
+  @keyframes pull { to { transform: scale(1.14); } }
+  #tug .g { width: 100%; height: 24px; border: 4px solid var(--ink); background: rgba(38,23,12,.6); box-shadow: 0 4px 0 var(--ink); }
+  #tug .g i { display: block; height: 100%; width: 50%; background: repeating-linear-gradient(115deg, #e9c98a 0 7px, #c9a05a 7px 14px); }
+  /* 격투: 위 막대 = 상대 체력(빨강), 아래 네 칸 = 주인공 체력 */
+  #tug.fight .g i { background: repeating-linear-gradient(115deg, #d8452e 0 7px, #a8281a 7px 14px); }
+  #tug .hp { display: none; gap: 6px; } #tug.fight .hp { display: flex; }
+  #tug .hp i { width: 34px; height: 14px; border: 3px solid var(--ink); background: rgba(38,23,12,.6); } #tug .hp i.on { background: linear-gradient(180deg, var(--brassA), var(--brassB) 55%, var(--brassC)); }
+
+  /* 게시판·상점 = 나무판에 못 박은 종이 */
+  .sheet { position: fixed; inset: 0; z-index: 30; display: none; align-items: center; justify-content: center; background: rgba(30,16,6,.5); padding: 50px 14px 12px; }
+  .sheet.show { display: flex; }
+  .board { position: relative; max-width: min(96vw, 1000px); max-height: 100%; padding: 16px 24px 26px; border: 6px solid var(--ink); display: flex; flex-direction: column;
+    background:
+      radial-gradient(circle at 9px 24px, #d8d2c4 0 1.2px, #2a1a0e 1.6px 3px, transparent 3.6px) 0 0 / 100% 49px, radial-gradient(circle at calc(100% - 9px) 24px, #d8d2c4 0 1.2px, #2a1a0e 1.6px 3px, transparent 3.6px) 0 0 / 100% 49px,
+      repeating-linear-gradient(180deg, rgba(255,225,170,.16) 0 2px, rgba(0,0,0,0) 2px 44px, rgba(20,8,2,.35) 44px 46px, rgba(20,8,2,.8) 46px 49px),
+      repeating-linear-gradient(90deg, rgba(60,30,10,0) 0 37px, rgba(50,24,8,.16) 37px 38px, rgba(60,30,10,0) 38px 61px, rgba(255,220,170,.07) 61px 63px), repeating-linear-gradient(92deg, rgba(60,30,10,.0) 0 13px, rgba(60,30,10,.12) 13px 14px),
+      linear-gradient(90deg, #9a6a40, #7e502c 38%, #8f5f37 62%, #86562f);
+    box-shadow: inset 0 0 0 4px rgba(255,220,170,.2), 0 8px 0 var(--ink), 0 22px 44px rgba(0,0,0,.5); animation: pop .18s ease-out; }
+  @keyframes pop { from { transform: scale(.86); opacity: 0; } to { transform: none; opacity: 1; } }
+  .board h3 { position: relative; margin: 0 0 8px; font-family: 'BHTitle'; font-weight: 400; font-size: 34px; letter-spacing: 6px; color: #fff1c4; -webkit-text-stroke: 6px var(--ink); paint-order: stroke fill; text-align: center; }
+  /* 총알구멍: 검은 구멍 + 짙은 테 + 밖으로 튄 밝은 나뭇결과 금 */
+  .board .bh { position: absolute; width: 40px; height: 40px; pointer-events: none; filter: drop-shadow(0 1px 0 rgba(0,0,0,.45));
+    background: var(--hole) center / contain no-repeat; }
+  .board .bh.s { width: 28px; height: 28px; }
+  .board .x { position: absolute; right: -16px; top: -16px; width: 46px; height: 46px; font-size: 20px; }
+  #posters { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px 12px; overflow: auto; padding: 6px 6px 10px; scrollbar-width: none; } #posters::-webkit-scrollbar { display: none; }
+  .poster { position: relative; width: 138px; padding: 8px 6px 6px; border: 0; color: #3a2410; text-align: center; font-family: 'BHTitle', 'Ria';
+    background: radial-gradient(ellipse at 30% 20%, rgba(255,255,255,.35), transparent 60%), linear-gradient(180deg, var(--paperA), var(--paperB)); box-shadow: 0 3px 0 rgba(40,20,6,.6), 0 7px 10px rgba(0,0,0,.35); transition: transform .2s cubic-bezier(.34,1.56,.64,1); }
+  .poster:nth-child(odd) { transform: rotate(-1.3deg); } .poster:nth-child(even) { transform: rotate(1deg); }
+  .poster::before { content: ''; position: absolute; left: 50%; top: 3px; width: 9px; height: 9px; margin-left: -4.5px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #eee, #6b6b6b); box-shadow: 0 2px 2px rgba(0,0,0,.4); }
+  .poster .w { font-size: 20px; letter-spacing: 3px; line-height: 1.1; margin-top: 4px; }
+  .poster img { display: block; width: 64px; height: 64px; margin: 2px auto 3px; border: 3px solid #3a2410; background: #cdb98a; filter: sepia(.75) contrast(1.08); }
+  .poster .n { font-family: 'Ria'; font-size: 15px; line-height: 1.2; white-space: nowrap; } .poster .c { font-family: 'Ria'; font-size: 12px; line-height: 1.2; color: #6a4a2a; white-space: nowrap; }
+  .poster .p { font-size: 24px; color: var(--red); line-height: 1.1; }
+  .poster.lock { filter: brightness(.62) saturate(.5); } .poster.lock img { filter: brightness(0) opacity(.55); }
+  .poster.sel { outline: 4px solid var(--red); outline-offset: 2px; }
+  .poster.done::after { content: 'CAPTURED'; position: absolute; left: 50%; top: 46%; transform: translate(-50%, -50%) rotate(-16deg); font-size: 20px; letter-spacing: 1px; color: var(--red); border: 4px solid var(--red); padding: 1px 7px; background: rgba(243,229,191,.5); }
+  .poster.done img { filter: sepia(1) brightness(.8); }
+  button.poster:not(.lock):not(.done):active { transform: translateY(3px) scale(.97); transition-duration: .04s; }
+  #items { display: flex; justify-content: center; gap: 14px; padding: 6px 4px 8px; }
+  .item { position: relative; width: 170px; padding: 14px 8px 10px; border: 0; color: #3a2410; text-align: center; font-family: 'BHTitle', 'Ria';
+    background: linear-gradient(180deg, var(--paperA), var(--paperB)); box-shadow: 0 3px 0 rgba(40,20,6,.6), 0 7px 10px rgba(0,0,0,.35); clip-path: polygon(18px 0, calc(100% - 18px) 0, 100% 18px, 100% 100%, 0 100%, 0 18px); transition: transform .2s cubic-bezier(.34,1.56,.64,1); }
+  .item::before { content: ''; position: absolute; left: 50%; top: 7px; width: 11px; height: 11px; margin-left: -5.5px; border-radius: 50%; background: #5a3c20; box-shadow: inset 0 2px 2px rgba(0,0,0,.5); }
+  .item svg { display: block; width: 76px; height: 76px; margin: 10px auto 2px; }
+  .item .n { font-size: 22px; letter-spacing: 1px; } .item .lv { display: flex; gap: 4px; justify-content: center; margin: 5px 0 6px; }
+  .item .lv i { width: 15px; height: 9px; border: 2px solid #3a2410; } .item .lv i.on { background: var(--red); }
+  .item .p { font-size: 26px; color: var(--red); } .item.poor .p { color: #8a7a62; } .item.max .p { color: #3a2410; font-size: 20px; }
+  .item:active { transform: translateY(3px) scale(.97); transition-duration: .04s; }
+
+  #fx { position: fixed; inset: 0; z-index: 25; pointer-events: none; overflow: hidden; }
+  .ftxt { position: absolute; left: 0; top: 0; font-family: 'BHTitle'; font-size: 30px; color: #ffd98a; -webkit-text-stroke: 5px var(--ink); paint-order: stroke fill; white-space: nowrap; }
+  .ftxt.bad { color: #ff9a86; } .ftxt.big { font-size: 44px; }
+  /* 올가미가 걸린 순간: 화면 가장자리가 따뜻하게 번쩍 */
+  #snapFx { position: fixed; inset: 0; z-index: 24; pointer-events: none; opacity: 0; background: radial-gradient(ellipse at center, rgba(255,240,200,0) 48%, rgba(255,226,160,.55) 100%); }
+  #snapFx.on { animation: snapfx .45s ease-out; } #snapFx.big.on { animation: snapfx .7s ease-out; background: radial-gradient(ellipse at center, rgba(255,250,220,.18) 30%, rgba(255,214,120,.75) 100%); }
+  @keyframes snapfx { 0% { opacity: 1; } 100% { opacity: 0; } }
+  #banner { position: fixed; z-index: 26; left: 50%; top: 27vh; transform: translate(-50%, -50%) scale(.6); opacity: 0; pointer-events: none; white-space: nowrap;
+    font-family: 'BHTitle'; font-size: clamp(40px, 8vw, 92px); letter-spacing: 4px; color: #fff1c4; -webkit-text-stroke: 9px var(--ink); paint-order: stroke fill; text-shadow: 0 6px 0 var(--ink); }
+  #banner.red { color: #ff7a62; }
+  #banner.show { animation: ban 2.2s ease-out forwards; }
+  @keyframes ban { 0% { opacity: 0; transform: translate(-50%,-50%) scale(1.9) rotate(-8deg); } 12% { opacity: 1; transform: translate(-50%,-50%) scale(.94) rotate(-4deg); } 18% { transform: translate(-50%,-50%) scale(1) rotate(-4deg); } 80% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%,-56%) scale(1) rotate(-4deg); } }
+  #pauseVeil { position: fixed; inset: 0; z-index: 55; display: none; align-items: center; justify-content: center; background: rgba(30,16,6,.5); font-family: 'BHTitle'; font-size: 70px; letter-spacing: 8px; color: #fff1c4; -webkit-text-stroke: 9px var(--ink); paint-order: stroke fill; }
+  #pauseVeil.show { display: flex; }
+  #endCard { position: fixed; inset: 0; z-index: 70; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 22px; background: radial-gradient(ellipse, rgba(255,220,160,.2), rgba(30,14,4,.7)); }
+  #endCard.show { display: flex; animation: pop .8s; }
+  #endCard h2 { font-size: clamp(54px, 10vw, 130px); }
+  #endCard .end { font-family: 'BHTitle'; font-size: clamp(30px, 4vw, 46px); letter-spacing: 10px; color: #fff1c4; -webkit-text-stroke: 7px var(--ink); paint-order: stroke fill; }
+  body.ending #topbar, body.ending #acts, body.ending #pad, body.ending #keys { display: none !important; }
+  body.playing #oreumFs { display: none !important; }
+  #rotate { position: fixed; inset: 0; z-index: 90; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 16px; background: #4a2c16; }
+  @media (orientation: portrait) and (pointer: coarse) { #rotate { display: flex; } }
+  html.ol-land #rotate { display: none !important; }
+
+  /* 엔딩·탈옥 장면(10/4): 전단 13장에 CAPTURED 도장 → ESCAPED 도장 + 현상금 두 배 */
+  #cine { --cw: min(11vw, 17vh); position: fixed; inset: 0; z-index: 60; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 2.2vh; pointer-events: none; background: radial-gradient(ellipse, rgba(30,14,4,.3), rgba(30,14,4,.8)); }
+  #cine.show { display: flex; animation: pop .5s; }
+  #cineP { display: flex; flex-wrap: wrap; justify-content: center; gap: 1.6vh 1vw; max-width: calc(var(--cw) * 7 + 7.5vw); }
+  .cp { position: relative; width: var(--cw); padding: calc(var(--cw) * .06) calc(var(--cw) * .05) calc(var(--cw) * .05); color: #3a2410; text-align: center; font-family: 'BHTitle', 'Ria';
+    background: radial-gradient(ellipse at 30% 20%, rgba(255,255,255,.35), transparent 60%), linear-gradient(180deg, var(--paperA), var(--paperB)); box-shadow: 0 3px 0 rgba(40,20,6,.6), 0 7px 10px rgba(0,0,0,.35); }
+  .cp:nth-child(odd) { transform: rotate(-1.3deg); } .cp:nth-child(even) { transform: rotate(1deg); }
+  .cp .w { font-size: calc(var(--cw) * .16); letter-spacing: 1px; line-height: 1.1; } .cp.esc0 .w { color: var(--red); }
+  .cp img { display: block; width: 62%; aspect-ratio: 1; margin: 2px auto; border: 2px solid #3a2410; background: #cdb98a; filter: sepia(.75) contrast(1.08); }
+  .cp .n { font-family: 'Ria'; font-size: calc(var(--cw) * .11); line-height: 1.25; white-space: nowrap; overflow: hidden; }
+  .cp .p { font-size: calc(var(--cw) * .18); color: var(--red); line-height: 1.1; } .cp.hot .p { color: #d0180a; animation: pop .35s; } .cp.hot .st.cap { opacity: .45; }
+  .cp .st { --r: -16deg; position: absolute; left: 50%; top: 44%; font-style: normal; font-size: calc(var(--cw) * .135); letter-spacing: 1px; padding: 1px 5px; white-space: nowrap; transform: translate(-50%, -50%) rotate(var(--r)); animation: stampIn .22s cubic-bezier(.3,1.4,.5,1) both; }
+  .cp .st.cap { color: var(--red); border: 3px solid var(--red); background: rgba(243,229,191,.55); }
+  .cp .st.esc { --r: 12deg; top: 58%; color: #fff1c4; background: #a8281a; border: 3px solid #5a1208; }
+  .cp .st.still { animation: none; }
+  @keyframes stampIn { 0% { opacity: 0; transform: translate(-50%, -50%) rotate(var(--r)) scale(2.6); } 100% { opacity: 1; transform: translate(-50%, -50%) rotate(var(--r)) scale(1); } }
+  #cineSum { min-height: 1.1em; font-family: 'BHTitle'; font-size: calc(var(--cw) * .42); line-height: 1.1; letter-spacing: 3px; color: #ffd98a; -webkit-text-stroke: 7px var(--ink); paint-order: stroke fill; }
+  #cineSkipW { position: fixed; z-index: 62; top: calc(12px + env(safe-area-inset-top)); right: calc(14px + env(safe-area-inset-right)); display: none; }
+  body.cine #cineSkipW { display: inline-block; } body.ending #cineSkipW { display: none !important; }
+  body.cine #topbar, body.cine #acts, body.cine #pad, body.cine #keys, body.cine #way, body.cine #wctx, body.cine #tug, body.cine #ctx { display: none !important; }
+  .poster .w.esc { color: var(--red); letter-spacing: 1px; }
+
+  /* 폰 가로 */
+  @media (max-height: 480px) {
+    #title { padding-bottom: 3vh; } #title h1 { font-size: min(15vh, 7.4vw); -webkit-text-stroke-width: 6px; border-width: 4px; }
+    #title .btns { margin-bottom: 3.5vh; gap: 4vw; } #title .btns .bw { min-width: 0; width: 26vw; } #title .btns .btn, #title .btns .btn.main { font-size: 6.6vh; padding: 2vh 1vw 1.8vh; }
+    #topbar { min-height: 40px; gap: 6px; } .stat { height: 31px; font-size: 17px; padding: 0 9px; } #sHp svg { width: 18px; height: 18px; } #sHp .hp i { width: 14px; height: 9px; } .stat small { font-size: 12px; } #sTarget img { width: 23px; height: 23px; } #sTarget i { width: 26px; height: 26px; } #way i { left: -27px; top: -27px; width: 54px; height: 54px; }
+    .tog { width: 33px; height: 33px; } .tog svg { width: 17px; height: 17px; }
+    #pad { width: 122px; height: 122px; left: calc(18px + env(safe-area-inset-left)); bottom: calc(14px + env(safe-area-inset-bottom)); } #pad i { width: 52px; height: 52px; margin: -26px 0 0 -26px; }
+    #lassoBtn { width: 88px; height: 88px; } #lassoBtn svg { width: 52px; height: 52px; } #callBtn.on { width: 50px; height: 50px; } .btn.sm { font-size: 16px; padding: 7px 24px 6px; }
+    #tug { bottom: 30vh; } #tug b { font-size: 9vh; } #tug .g { height: 5vh; }
+    .sheet { padding: 44px 10px 8px; } .board { padding: 8px 14px 12px; } .board .bh { width: 26px; height: 26px; } .board .bh.s { width: 18px; height: 18px; } .board .bh.lo { display: none; } .board h3 { font-size: 7vh; margin-bottom: 1.5vh; -webkit-text-stroke-width: 4px; }
+    #posters { display: flex; gap: 12px; padding: 6px 8px 10px; } .poster { flex: 0 0 31vh; width: 31vh; padding: 2vh 1.4vh 1.6vh; } .poster .w { font-size: 5.6vh; } .poster img { width: 21vh; height: 21vh; } .poster .n { font-size: 4.3vh; } .poster .c { font-size: 3.5vh; } .poster .p { font-size: 6.4vh; } .poster.done::after { font-size: 5vh; }
+    #items { gap: 10px; } .item { width: 20vw; padding: 3vh 1vw 2vh; } .item svg { width: 17vh; height: 17vh; margin-top: 2vh; } .item .n { font-size: 5.4vh; } .item .p { font-size: 6.4vh; } .item.max .p { font-size: 5vh; }
+    #banner { top: 30vh; font-size: 15vh; -webkit-text-stroke-width: 6px; }
+    .ftxt { font-size: 22px; } .ftxt.big { font-size: 30px; }
+  }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="fx"></div>
+<div id="snapFx"></div>
+<div id="banner"></div>
+
+<div id="load"><div class="ttl">올가미 언니</div><div class="bar"><i></i></div><div class="pct">0%</div></div>
+
+<div id="title">
+  <h1>올가미 언니</h1>
+  <div class="btns"><span class="bw" id="bwCont"><button class="btn" id="btnCont">이어하기</button></span><span class="bw"><button class="btn main" id="btnNew">START</button></span></div>
+</div>
+
+<div id="topbar">
+  <div class="stat" id="sMoney"><b>$0</b></div>
+  <div class="stat" id="sTarget"><img alt=""><small></small><i></i><b></b></div>
+  <div class="stat" id="sHp"><svg class="ig" viewBox="0 0 24 24"><path d="M12 21s-8-5.2-8-11a4.3 4.3 0 0 1 8-2 4.3 4.3 0 0 1 8 2c0 5.8-8 11-8 11z"/></svg><svg class="ih" viewBox="0 0 24 24"><path d="M5 20c0-6 2-9 5-11l-1-4 3 2c4 0 7 3 8 7l-3 2-3-2-2 2 1 4z"/></svg><div class="hp"><i></i><i></i><i></i></div></div>
+  <div class="spacer"></div>
+  <button class="tog" id="tgPause">❚❚</button>
+  <button class="tog" id="tgBgm"><svg viewBox="0 0 24 24"><path d="M9 17.5V5.5l11-2.5v12" fill="none" stroke-width="2.6" stroke-linejoin="round"/><ellipse cx="6.3" cy="17.8" rx="3.4" ry="2.7"/><ellipse cx="17.3" cy="15.3" rx="3.4" ry="2.7"/></svg></button>
+  <button class="tog" id="tgSfx"><svg viewBox="0 0 24 24"><path d="M3 9h4l5-4.5v15L7 15H3z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13" fill="none" stroke-width="2.4" stroke-linecap="round"/></svg></button>
+</div>
+
+<div id="pad"><i></i></div>
+<div id="acts">
+  <button class="tog" id="callBtn"><svg viewBox="0 0 24 24"><path d="M5 20c0-6 2-9 5-11l-1-4 3 2c4 0 7 3 8 7l-3 2-3-2-2 2 1 4z"/></svg></button>
+  <span class="bw" id="ctx"><button class="btn sm" id="ctxBtn"></button></span>
+  <button id="lassoBtn"><svg viewBox="0 0 64 64"><ellipse cx="34" cy="22" rx="20" ry="12" fill="none" stroke="#3a230e" stroke-width="5"/><path d="M19 30C12 40 22 46 16 58" fill="none" stroke="#3a230e" stroke-width="5" stroke-linecap="round"/></svg></button>
+</div>
+<div id="wctx"><span class="bw"><button class="btn" id="wctxBtn"></button></span></div>
+<div id="way"><i></i></div>
+<div id="keys"></div>
+<div id="tug"><b>PULL</b><div class="g"><i></i></div><div class="hp"><i></i><i></i><i></i><i></i></div></div>
+
+<div class="sheet" id="boardUI"><div class="board"><button class="tog x" id="boardX">✕</button><i class="bh" style="left:3.5%;top:8px;transform:rotate(18deg)"></i><i class="bh s" style="left:15%;top:24px;transform:rotate(-40deg)"></i><i class="bh" style="right:13%;top:6px;transform:rotate(95deg)"></i><i class="bh s" style="right:24%;top:20px;transform:rotate(200deg)"></i><i class="bh s lo" style="left:22%;bottom:-2px;transform:rotate(60deg)"></i><i class="bh s lo" style="right:7%;bottom:-1px;transform:rotate(-25deg)"></i><h3>WANTED</h3><div id="posters"></div></div></div>
+<div class="sheet" id="shopUI"><div class="board"><button class="tog x" id="shopX">✕</button><i class="bh" style="left:3%;top:12px;transform:rotate(-30deg)"></i><i class="bh s" style="left:13%;top:5px;transform:rotate(70deg)"></i><i class="bh s" style="right:8%;top:24px;transform:rotate(140deg)"></i><i class="bh" style="right:13%;top:3px;transform:rotate(15deg)"></i><i class="bh s lo" style="left:40%;bottom:-2px;transform:rotate(-80deg)"></i><i class="bh s lo" style="left:9%;bottom:-1px;transform:rotate(30deg)"></i><h3>GENERAL STORE</h3><div id="items"></div></div></div>
+
+<div id="pauseVeil">PAUSE</div>
+<div id="endCard"><h2>올가미 언니</h2><div class="end">THE END</div><span class="bw"><button class="btn main" id="btnTitle">TITLE</button></span></div>
+<div id="cine"><div id="cineP"></div><div id="cineSum"></div></div>
+<span class="bw" id="cineSkipW"><button class="btn sm" id="cineSkip">SKIP</button></span>
+<div id="rotate"><span class="bw"><button class="btn main" id="btnLand">가로로 보기</button></span></div>
+
+<script src="assets/landscape.js?v=1"></script>
+<script src="assets/game-home.js?v=1" data-top="6" data-left="6" data-fullscreen="1" defer></script>
+<script src="lib/three.min.js"></script>
+<script src="lib/GLTFLoader.global.js"></script>
+<script src="js/sfx.js?v=1"></script>
+<script src="js/core.js?v=4"></script>
+<script src="js/world.js?v=4"></script>
+<script src="js/land.js?v=5"></script>
+<script src="js/town.js?v=1"></script>
+<script src="js/sites.js?v=5"></script>
+<script src="js/actors.js?v=13"></script>
+<script src="assets/wanted.js?v=1"></script>
+<script src="js/data.js?v=14"></script>
+<script src="js/music.js?v=1"></script>
+<script src="js/game.js?v=51"></script>
+<script src="/assets/visit.js?v=17" defer></script>
+<script src="/assets/game-events.js?v=2" defer></script>
+</body>
+</html>
