@@ -637,7 +637,7 @@ function doLeft() { if (G.lane > 0) { G.lane--; SFX.swoosh(); spray(10, 0, G.x, 
 function doRight() { if (G.lane < 2) { G.lane++; SFX.swoosh(); spray(10, 0, G.x, 0.1, -G.z); } }
 function doJump() { if (!G.air && G.duck <= 0) { G.air = true; G.jv = 10; G.jy = 0.001; SFX.jump(); G.R.jumps = (G.R.jumps || 0) + 1; spray(18, 1, G.x, 0.1, -G.z); } else if (G.air && G.jv < 2) G.jv = -16; }
 function doDuck() { if (G.air) { G.jv = -16; } else if (G.duck <= 0) { G.duck = 0.8; SFX.duck(); G.R.ducks = (G.R.ducks || 0) + 1; spray(26, 2, G.x, 0.1, -G.z); } }
-function input(k) { if (G.mode !== 'play' || G.dead) return; if (k === 'L') doLeft(); else if (k === 'R') doRight(); else if (k === 'U') doJump(); else if (k === 'D') doDuck(); }
+function input(k) { if (G.mode !== 'play' || G.dead) return; if (k === 'L') doLeft(); else if (k === 'R') doRight(); else if (k === 'U') doJump(); else if (k === 'D') doDuck(); if (!G.bot) tutDo(k); }
 var overAt = 0;
 window.addEventListener('keydown', function (e) {
   var k = e.key, m = { ArrowLeft: 'L', a: 'L', A: 'L', ArrowRight: 'R', d: 'R', D: 'R', ArrowUp: 'U', w: 'U', W: 'U', ' ': 'U', ArrowDown: 'D', s: 'D', S: 'D' };
@@ -654,14 +654,23 @@ cv.addEventListener('pointermove', function (e) {
 });
 cv.addEventListener('pointerup', function () { swp = null; });
 cv.addEventListener('pointercancel', function () { swp = null; });
-/* 폰 점프 단추(스와이프 위와 같은 일) */
-(function () {
-  var jb = $('jumpB'), H5 = document.documentElement;
-  try { if (matchMedia('(pointer:coarse)').matches) H5.classList.add('touch'); } catch (er) {}
-  window.addEventListener('pointerdown', function (e) { if (e.pointerType === 'touch') H5.classList.add('touch'); }, true);
-  jb.addEventListener('pointerdown', function (e) { e.preventDefault(); e.stopPropagation(); jb.classList.add('on'); input('U'); });
-  ['pointerup', 'pointercancel', 'pointerleave'].forEach(function (t) { jb.addEventListener(t, function () { jb.classList.remove('on'); }); });
-})();
+/* 튜토리얼(첫 판): 1단계 좌우로 밀기, 2단계 위로 밀기(JUMP). 해 보면 넘어가고 둘 다 끝나면 다시 안 뜬다. PC 는 글자만 화살표 키로 */
+var TUT = { step: 0 };
+try { if (localStorage.getItem('surf.tut') === '1') TUT.step = 3; } catch (er) {}
+try { if (matchMedia('(pointer:coarse)').matches) document.documentElement.classList.add('touch'); } catch (er) {}
+window.addEventListener('pointerdown', function (e) { if (e.pointerType === 'touch') document.documentElement.classList.add('touch'); }, true);
+function tutShow() {
+  var el = $('tut'); if (!el) return;
+  var touch = document.documentElement.classList.contains('touch');
+  if (G.mode !== 'play' || G.bot || TUT.step >= 3) { el.className = ''; return; }
+  if (TUT.step === 0) TUT.step = 1;
+  el.className = 'on ' + (TUT.step === 1 ? 'lane' : 'jump');
+  el.querySelector('.lbl').textContent = TUT.step === 1 ? (touch ? 'SWIPE' : '←  →') : (touch ? 'JUMP' : '↑  JUMP');
+}
+function tutDo(k) {
+  if (TUT.step === 1 && (k === 'L' || k === 'R')) { TUT.step = 2; setTimeout(tutShow, 450); $('tut').className = ''; }
+  else if (TUT.step === 2 && k === 'U') { TUT.step = 3; $('tut').className = ''; try { localStorage.setItem('surf.tut', '1'); } catch (er) {} }
+}
 
 /* ====================================================================== 미션: 셋씩, 끝내면 배수 +1(영구) */
 var MIS_ORDER = { c50: 1, m500: 1, j10: 2, d8: 2, cl5: 3, o5: 3, c150: 4, m1200: 4, dol1: 5, mg1: 5, sd1: 5, j25: 6, d20: 6, c300: 7, m2500: 7, cl15: 7, o15: 7, dol2: 8, m4000: 9 };
@@ -977,7 +986,7 @@ function resetRun(demo) {
   for (var i = 0; i < PART_N; i++) parts[i].life = 0;
   hudCache = {}; hud();
 }
-function setMode(m) { G.mode = m; document.body.className = (EN ? 'en ' : '') + 'm-' + m; $('title').hidden = m !== 'title'; $('shop').hidden = m !== 'shop'; $('pause').hidden = m !== 'pause'; $('over').hidden = m !== 'over'; $('loading').hidden = m !== 'load'; }
+function setMode(m) { G.mode = m; setTimeout(function () { if (typeof tutShow === 'function') tutShow(); }, m === 'play' ? 600 : 0); document.body.className = (EN ? 'en ' : '') + 'm-' + m; $('title').hidden = m !== 'title'; $('shop').hidden = m !== 'shop'; $('pause').hidden = m !== 'pause'; $('over').hidden = m !== 'over'; $('loading').hidden = m !== 'load'; }
 function toTitle() { resetRun(true); setMode('title'); $('best').textContent = TX.best[0] + Math.floor(G.best); }
 function startRun() { SFX.unlock(); resetRun(false); misLoad(); setMode('play');
   /* 산 시작 아이템은 한 판에 하나씩 저절로 쓴다 */

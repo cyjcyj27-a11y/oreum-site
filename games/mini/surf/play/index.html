@@ -74,16 +74,26 @@ body.m-title #distP,body.m-title #multP,body.m-title #coinP,body.m-title #pauseB
   .spacer{order:2;flex:0 0 100%;height:0}
   .stat{order:3}
 }
-/* 폰 점프 단추: 오른쪽 아래, 산호 보드 원(10/4 사장님 "점프버튼이 없고") */
-#jumpB{display:none;position:fixed;z-index:21;right:calc(18px + env(safe-area-inset-right));bottom:calc(28px + env(safe-area-inset-bottom));
-  width:88px;height:88px;border-radius:50%;border:4px solid var(--teal);align-items:center;justify-content:center;cursor:pointer;
-  font-family:'Plg',sans-serif;font-weight:900;font-size:21px;color:#fff;-webkit-text-stroke:5px var(--teal);paint-order:stroke fill;letter-spacing:.5px;
-  background:radial-gradient(circle at 36% 28%,#ffb39c 0 16%,#ff8a6a 30%,var(--coral) 58%,var(--coralD) 100%);
-  box-shadow:inset 0 4px 0 rgba(255,255,255,.5),inset 0 -6px 0 rgba(0,0,0,.16),0 6px 0 var(--teal);
-  transition:transform .22s cubic-bezier(.34,1.56,.64,1),box-shadow .22s;touch-action:none}
-#jumpB:active,#jumpB.on{transform:translateY(4px) scale(.96);box-shadow:inset 0 4px 0 rgba(255,255,255,.5),inset 0 -6px 0 rgba(0,0,0,.16),0 2px 0 var(--teal);transition-duration:.04s}
-html.touch body.m-play #jumpB{display:flex}
-@media (max-height:480px){#jumpB{width:76px;height:76px;font-size:18px;bottom:calc(20px + env(safe-area-inset-bottom))}}
+/* 튜토리얼: 첫 판에 손가락 점이 밀리는 모습으로 — 1단계 좌우, 2단계 위로(JUMP). 해 보면 다음으로, 둘 다 하면 다시 안 뜸(10/4 사장님 "좌우 스와이프 점프는 위로 스와이프란걸 알려주면") */
+#tut{position:fixed;left:50%;top:50%;z-index:22;pointer-events:none;width:220px;height:200px;margin:-100px 0 0 -110px;opacity:0;transition:opacity .35s}
+#tut.on{opacity:1}
+#tut .lbl{position:absolute;left:0;right:0;bottom:0;text-align:center;font-family:'Plg',sans-serif;font-weight:900;font-size:26px;letter-spacing:1px;color:#fff;
+  -webkit-text-stroke:6px var(--teal);paint-order:stroke fill}
+#tut .trk{position:absolute;left:50%;top:70px;width:180px;height:14px;margin:-7px 0 0 -90px;border-radius:999px;background:rgba(255,255,255,.28);box-shadow:0 0 0 2.5px rgba(11,58,69,.35)}
+#tut .dot{position:absolute;left:50%;top:70px;width:44px;height:44px;margin:-22px 0 0 -22px;border-radius:50%;background:rgba(255,255,255,.95);
+  box-shadow:0 0 0 4px var(--teal),0 0 0 12px rgba(255,255,255,.3),0 6px 14px rgba(0,0,0,.25)}
+#tut .ar{position:absolute;top:70px;width:0;height:0;margin-top:-13px;border:13px solid transparent}
+#tut .ar.l{left:-6px;border-right:20px solid #fff;border-left:0;filter:drop-shadow(0 0 0 var(--teal)) drop-shadow(2px 0 0 var(--teal)) drop-shadow(-2px 0 0 var(--teal))}
+#tut .ar.r{right:-6px;border-left:20px solid #fff;border-right:0;filter:drop-shadow(2px 0 0 var(--teal)) drop-shadow(-2px 0 0 var(--teal))}
+#tut .ar.u{left:50%;top:-4px;margin:0 0 0 -13px;border:13px solid transparent;border-bottom:20px solid #fff;border-top:0;display:none;filter:drop-shadow(0 2px 0 var(--teal)) drop-shadow(0 -2px 0 var(--teal))}
+#tut.lane .dot{animation:tutLR 1.6s ease-in-out infinite}
+#tut.jump .trk{left:50%;top:20px;width:14px;height:110px;margin:0 0 0 -7px}
+#tut.jump .ar.l,#tut.jump .ar.r{display:none}
+#tut.jump .ar.u{display:block}
+#tut.jump .dot{top:120px;animation:tutU 1.1s cubic-bezier(.5,0,.3,1) infinite}
+@keyframes tutLR{0%,100%{transform:translateX(-70px)}50%{transform:translateX(70px)}}
+@keyframes tutU{0%{transform:translateY(0);opacity:0}15%{opacity:1}80%{transform:translateY(-92px);opacity:1}100%{transform:translateY(-92px);opacity:0}}
+@media (max-height:480px){#tut{transform:scale(.8);margin-top:-80px}}
 
 /* ---------- 화면 ---------- */
 .scr{position:fixed;inset:0;z-index:30;pointer-events:none}
@@ -224,7 +234,7 @@ body.m-shop #distP,body.m-shop #multP,body.m-shop #coinP,body.m-shop #pauseB{dis
 <canvas id="cv"></canvas>
 <div id="uw"></div><div id="dolv"></div><div id="fxl"></div>
 
-<div id="jumpB" role="button" aria-label="jump">JUMP</div>
+<div id="tut"><div class="trk"></div><div class="ar l"></div><div class="ar r"></div><div class="ar u"></div><div class="dot"></div><div class="lbl"></div></div>
 <div id="topbar">
   <div class="stat" id="distP"><b id="distV">0</b></div>
   <div class="stat" id="coinP"><span class="coin"></span><b id="coinV">0</b></div>
@@ -276,7 +286,7 @@ body.m-shop #distP,body.m-shop #multP,body.m-shop #coinP,body.m-shop #pauseB{dis
 <script src="js/sfx.js?v=3"></script>
 <script src="lib/three.min.js"></script>
 <script src="lib/GLTFLoader.global.js"></script>
-<script src="js/surf.js?v=18"></script>
+<script src="js/surf.js?v=19"></script>
 <script src="assets/game-home.js" data-top="6" data-left="6" data-fullscreen="1" defer></script>
 <script src="/assets/visit.js?v=17" defer></script>
 <script src="/assets/game-events.js?v=2" defer></script>
