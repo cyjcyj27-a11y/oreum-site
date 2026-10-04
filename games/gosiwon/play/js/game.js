@@ -355,7 +355,7 @@ cv.addEventListener('pointerdown', function (e) {
   if (locked) { ptr.down = true; ptr.x = ptr.y = 0; if (!useIt(CH.focus(rayAt(0, 0))) && !G.carry && CH.stainAt(rayAt(0, 0))) { if (G.gloves) scrubPtr = true; else ui.nope('glove'); } return; }
   if (e.pointerType === 'mouse' && !touchMode) { lockPtr(); }
   if (press) return;
-  ndc(e); var r = rayAt(ptr.x, ptr.y), hit = CH.stainAt(r);
+  ndc(e); var r = rayAt(ptr.x, ptr.y), hit = pad.id == null && CH.stainAt(r);   // 패드를 쥔 채 화면을 누르면 닦기 말고 시점 돌리기
   press = { id: e.pointerId, x: e.clientX, y: e.clientY, t: performance.now(), moved: 0, scrub: !!hit };
   if (hit) { if (G.gloves) { scrubPtr = true; ptr.down = true; } else ui.nope('glove'); }
   try { cv.setPointerCapture(e.pointerId); } catch (er) {}
@@ -402,10 +402,11 @@ var stepAcc = 0, moveAmt = 0, focusIt = null, focusT = 0;
 function walk(dt) {
   var P = G.P, f = 0, s = 0;
   if (keys.KeyW || keys.ArrowUp) f += 1; if (keys.KeyS || keys.ArrowDown) f -= 1; if (keys.KeyD || keys.ArrowRight) s += 1; if (keys.KeyA || keys.ArrowLeft) s -= 1;
-  if (pad.id != null) { f -= Math.sign(pad.y); s += Math.sign(pad.x); }
+  // 폰 패드(10/4 사장님 "카메라가 따라와야"): 위아래는 앞뒤로 걷고, 좌우는 몸을 돌린다. 민 만큼 빠르다
+  if (pad.id != null) { f -= GS.clamp(pad.y / 0.7, -1, 1); P.yaw -= pad.x * Math.abs(pad.x) * 2.6 * dt; }
   var len = Math.hypot(f, s), sp = 3.3 * (G.items.shoes ? 1.2 : 1) * (G.carry ? 0.72 : 1);
   if (len > 0) {
-    f /= len; s /= len; var sy = Math.sin(P.yaw), cy = Math.cos(P.yaw), dx = (-sy * f + cy * s) * sp * dt, dz = (-cy * f - sy * s) * sp * dt;
+    if (len > 1) { f /= len; s /= len; } var sy = Math.sin(P.yaw), cy = Math.cos(P.yaw), dx = (-sy * f + cy * s) * sp * dt, dz = (-cy * f - sy * s) * sp * dt;
     P.x += dx; P.z += dz; W.collide(P, 0.29, P.y); stepAcc += sp * dt; if (stepAcc > 0.8) { stepAcc = 0; GS.snd('step'); }
   }
   moveAmt += ((len > 0 ? 1 : 0) - moveAmt) * Math.min(1, dt * 10);
@@ -462,7 +463,9 @@ function update(dt) {
     if (G.mode === 'day') {
       if (wakeT >= 1) G.t += dt * 60 / HS;
       inspTick(); GS.ev.tick(dt);
-      if (walkMode() && !crOn && crK === 0) walk(dt); else moveAmt *= 0.8;
+      var padOn = pad.id != null && (pad.x || pad.y);
+      if (padOn && walkMode()) { scrubPtr = false; actHeld = false; crOn = false; if (press) press.scrub = false; ptr.down = false; }   // 패드를 밀면 닦기를 풀고 걷는다(화장실은 바닥이 때투성이라 화면을 끌면 닦기로 들어간다)
+      if (walkMode() && (padOn || !crOn && crK === 0)) walk(dt); else moveAmt *= 0.8;
       if (G.t >= DAYMIN) { midnight(); return; }
     }
     if (G.mode === 'study' && G.study) {
