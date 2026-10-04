@@ -68,7 +68,7 @@ body.touch.showtasks #tasks{display:block}
 body.m-title #tasks,body.m-study #tasks,body.m-end #tasks,body.st #tasks{display:none!important}
 
 /* ---------- 가운데 점, 이름표, 칭찬 ---------- */
-#dot{position:fixed;left:50%;top:50%;width:7px;height:7px;margin:-3.5px;border-radius:50%;background:rgba(255,255,255,.85);box-shadow:0 0 0 1.5px rgba(0,0,0,.45);z-index:15;pointer-events:none}
+#dot{display:none!important}   /* 가운데 흰 점은 안 쓴다(10/4 사장님 "화면에 표시되는 흰점도 지워줘") */
 #focus{position:fixed;left:50%;top:calc(50% + 22px);transform:translateX(-50%);z-index:15;pointer-events:none;height:30px;padding:5px 10px 0;font-family:'Eulji','Ria',sans-serif;font-size:19px;color:var(--ink);
   border:2.5px solid var(--grout);border-radius:4px;background:linear-gradient(180deg,#fbfbf3,#e2e4d6);box-shadow:0 3px 0 #6c6a5c;white-space:nowrap}
 #focus kbd{font:inherit;font-size:14px;color:#fff;background:var(--red);border-radius:3px;padding:1px 5px;margin-right:6px}
@@ -271,8 +271,8 @@ html.ol-land #tbtns{margin-bottom:3vh}
 <script src="js/hands.js?v=37"></script>
 <script src="assets/kimchi-tex.js?v=1"></script>
 <script src="js/chores.js?v=19"></script>
-<script src="js/loot.js?v=7"></script>
-<script src="js/events.js?v=10"></script>
+<script src="js/loot.js?v=8"></script>
+<script src="js/events.js?v=11"></script>
 <script src="js/sfx.js?v=3"></script>
 <script src="js/audio.js?v=9"></script>
 <script src="js/booktext.js?v=1"></script>

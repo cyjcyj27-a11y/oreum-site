@@ -231,7 +231,7 @@ function got(id) {
 }
 function card(id, isNew) { cardQ.push([id, isNew]); if (!cardOn) nextCard(); }
 function nextCard() {
-  var q = cardQ.shift(), el = $('loot'); if (!q) { cardOn = false; return; } cardOn = true;
+  var q = cardQ.shift(), el = $('loot'); if (!q) { cardOn = false; el.classList.remove('on'); return; } cardOn = true;
   var o = BY[q[0]]; $('lootImg').src = iconOf(q[0]); $('lootName').textContent = name(q[0]);
   $('lootTag').textContent = q[1] ? (o.rare ? 'RARE' : 'NEW') : (o.fx && !o.every ? '' : L('중고 +2,000', 'SOLD +2,000')); $('lootTag').className = q[1] ? (o.rare ? 'rare' : 'new') : 'old';
   el.classList.toggle('rare', !!(q[1] && o.rare));

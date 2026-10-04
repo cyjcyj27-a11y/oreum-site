@@ -193,6 +193,8 @@ function shh() { var d = W.tri.desk, m = memo(TXT.shh, d.x - 0.12, d.y + 0.004, 
 /* 퇴실한 방: 쓰레기 셋 + 버리고 간 물건(도감에 없는 것부터). 자리는 방 안 좌표 (u, v, 돌림) — world.js 빈 방과 같은 틀 */
 var SPOT = { bed: [[0.6, 2.45, 0.1], [0.58, 1.8, 0.6], [0.62, 1.2, -0.4]], desk: [[-0.9, 2.62, 0.35], [-0.68, 2.5, -0.3]], floor: [[-0.15, 1.0, 0.4], [-0.3, 1.95, -0.6]], wall: [[-0.8, 1.55, 0]] };
 var JUNK = [[0.0, 0.5, 'cup'], [-0.1, 1.45, 'can'], [-0.55, 2.2, 'bag']];
+/* 퇴실 방 물건은 가까이 가야 집힌다(10/4 사장님 "팔을 기괴하게 늘리지말고 플레이어가 가까이 가서 터치해서 하게"): 몸에서 1m 안 */
+function near1(x, z) { var P = G.P; return Math.hypot(P.x - x, P.z - z) < 1.0; }
 function moveoutRoom(mo) {
   var S = st(mo.key), V = W.vroom; if (!V || !V.num()) return; S.n = S.n || 0;
   if (!S.loot) {                                       // 처음 한 번 정해서 저장(다시 불러도 같은 물건)
@@ -210,7 +212,7 @@ function moveoutRoom(mo) {
     else if (q[2] === 'can') { m = new T.Mesh(new T.CylinderGeometry(0.03, 0.03, 0.11, 12), new T.MeshPhongMaterial({ color: 0xd8262a, shininess: 80 })); m.position.set(p.x, p.y + 0.03, p.z); m.rotation.z = PI / 2; m.rotation.y = 0.7; }
     else { m = new T.Mesh(new T.IcosahedronGeometry(0.1, 1), new T.MeshLambertMaterial({ color: 0xeeeeea })); m.scale.set(1.2, 0.7, 1); m.position.set(p.x, p.y + 0.07, p.z); }
     grp.add(m);
-    inter({ x: m.position.x, y: p.y + 0.07, z: m.position.z, sx: 0.28, sy: 0.2, sz: 0.28, label: '쓰레기', can: function () { return st(mo.key).sent; }, use: function () { gone(this); m.visible = false; S['j' + i] = 1; S.n++; GS.snd(q[2] === 'bag' ? 'trash' : 'can'); GS.hands.jab(); check(); } });
+    inter({ x: m.position.x, y: p.y + 0.07, z: m.position.z, sx: 0.28, sy: 0.2, sz: 0.28, label: '쓰레기', can: function () { return st(mo.key).sent && near1(this.x, this.z); }, use: function () { gone(this); m.visible = false; S['j' + i] = 1; S.n++; GS.snd(q[2] === 'bag' ? 'trash' : 'can'); GS.hands.jab(); check(); } });
   });
   S.loot.forEach(function (L0, i) {
     if (S['l' + i]) return;
@@ -218,7 +220,7 @@ function moveoutRoom(mo) {
     g.position.set(p.x, p.y + (L0.t === 'bed' ? VRY.bed : L0.t === 'desk' ? VRY.desk : 0), p.z);
     g.rotation.y = L0.t === 'wall' ? PI / 2 : V.ry() + sp[2]; grp.add(g); g.updateMatrixWorld(true);
     var bb = new T.Box3().setFromObject(g), c = bb.getCenter(new T.Vector3()), z = bb.getSize(new T.Vector3());
-    inter({ x: c.x, y: c.y, z: c.z, sx: Math.max(0.22, z.x + 0.06), sy: Math.max(0.2, z.y + 0.06), sz: Math.max(0.22, z.z + 0.06), label: GS.loot.BY[L0.id].ko, can: function () { return st(mo.key).sent; }, use: function () {
+    inter({ x: c.x, y: c.y, z: c.z, sx: Math.max(0.22, z.x + 0.06), sy: Math.max(0.2, z.y + 0.06), sz: Math.max(0.22, z.z + 0.06), label: GS.loot.BY[L0.id].ko, can: function () { return st(mo.key).sent && near1(this.x, this.z); }, use: function () {
       gone(this); S['l' + i] = 1; S.n++; GS.hands.jab(); fly(g); GS.loot.got(L0.id); check(2400);
     } });
   });
