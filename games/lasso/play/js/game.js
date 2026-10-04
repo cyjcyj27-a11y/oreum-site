@@ -579,11 +579,12 @@
   }
 
   // ── 게시판(현상수배 전단 고르기) ──
-  const tierOpen = t => G.caught.length >= TIER_NEED[t];
+  // 전단은 한 장씩만 열린다: 아직 안 잡은 놈 중 번호가 제일 앞인 한 명(10/4 사장님 "현상수배범카드오픈은 한번에 한명씩만 공개해"). 예전엔 급별로 2·5·8·12명에 묶음으로 열렸다(TIER_NEED, 지금은 안 씀)
+  const tierOpen = (t, id) => { const d = OUTLAWS.find(q => !G.caught.includes(q.id)); return !!d && d.id === id; };
   function openBoard() {
     G.ui = 'board'; G.seenBoard = true; sfx('paper'); const box = $('#posters'); box.innerHTML = '';
     OUTLAWS.forEach(d => {
-      const done = G.caught.includes(d.id), lock = !done && !tierOpen(d.tier), b = document.createElement('button');
+      const done = G.caught.includes(d.id), lock = !done && !tierOpen(d.tier, d.id), b = document.createElement('button');
       b.className = 'poster' + (done ? ' done' : '') + (lock ? ' lock' : '') + (G.target === d.id ? ' sel' : '');
       b.innerHTML = `<div class="w${G.ch === 2 && !done ? ' esc' : ''}">${G.ch === 2 && !done ? 'ESCAPED' : 'WANTED'}</div><img src="${d.img || ''}" alt=""><div class="n">${lock ? '?' : d.name}</div>${d.crime ? `<div class="c">${lock ? '?' : d.crime}</div>` : ''}<div class="p">$${d.bounty.toLocaleString('en-US')}</div>`;
       b.onclick = () => { if (done) return; if (lock) { sfx('no'); return; } sfx('paper'); if (G.target !== d.id && !captives.some(o => o.kind === 'main' && o.def.id === d.id)) setTarget(d.id); closeUI(); };
@@ -646,7 +647,7 @@
   function drawBoard() { // 게시판 창(전단 고르기)과 같은 그림: 얼굴, 죄목, 현상금. 잠긴 것은 잿빛에 물음표
     const B = WORLD.board, c = B.canvas.getContext('2d'), W = B.canvas.width, Hh = B.canvas.height; c.clearRect(0, 0, W, Hh);
     OUTLAWS.forEach((d, i) => {
-      const cw = W / 5, ch = Hh / 3, w = cw - 22, h = ch - 16, x = (i % 5) * cw + 11, y = Math.floor(i / 5) * ch + 8, done = G.caught.includes(d.id), lock = !done && !tierOpen(d.tier), is = h * 0.42;
+      const cw = W / 5, ch = Hh / 3, w = cw - 22, h = ch - 16, x = (i % 5) * cw + 11, y = Math.floor(i / 5) * ch + 8, done = G.caught.includes(d.id), lock = !done && !tierOpen(d.tier, d.id), is = h * 0.42;
       c.save(); c.translate(x + w / 2, y + h / 2); c.rotate((i % 2 ? 1 : -1) * 0.022);
       c.fillStyle = 'rgba(30,14,4,.45)'; c.fillRect(-w / 2 + 3, -h / 2 + 5, w, h); c.fillStyle = lock ? '#9a9486' : '#f0dfb4'; c.fillRect(-w / 2, -h / 2, w, h);
       c.fillStyle = '#8a8a8a'; c.beginPath(); c.arc(0, -h / 2 + 7, 4, 0, 7); c.fill();
