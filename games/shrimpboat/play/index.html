@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>새우잡이배</title>
+<!-- 단추 디자인은 design.md: 주 단추는 주황 구명환(양끝 반사 테이프), 보조 단추와 알약은 녹슨 청록 선박 철판(네 귀 리벳), 창은 파란 방수포(모서리 쇠고리) -->
+<style>
+@font-face{font-family:'Saemaul';src:url('fonts/title.woff2?v=1') format('woff2');font-display:block}
+@font-face{font-family:'Ria';src:url('fonts/RiaSans-ExtraBold.woff2') format('woff2');font-display:swap}
+:root{--ink:#10232a;--plate:#2f6a72;--plateD:#0f2a30;--or:#ff6a13;--orD:#8a3006;--paper:#f3efe2;--sl:env(safe-area-inset-left);--sr:env(safe-area-inset-right)}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+html,body{width:100%;height:100%;overflow:hidden;background:#0b1418;color:#fff;font-family:'Ria',-apple-system,'Malgun Gothic',sans-serif;user-select:none;-webkit-user-select:none;touch-action:none;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+#gl{position:fixed;left:0;top:0;width:100%;height:100%;display:block;touch-action:none}
+button{font:inherit;color:inherit;border:0;background:none}
+/* ---------- 철판 단추(보조): 청록 칠, 용접 테, 네 귀 리벳, 녹 점 ---------- */
+.btn{position:relative;pointer-events:auto;cursor:pointer;font-family:'Saemaul','Ria',sans-serif;font-size:26px;line-height:1;white-space:nowrap;color:var(--paper);letter-spacing:1px;
+  min-height:48px;min-width:150px;padding:13px 24px 12px;border:3px solid var(--plateD);border-radius:3px;text-shadow:0 2px 0 rgba(0,0,0,.45);
+  background:radial-gradient(circle at 9px 9px,#c9d3d0 0 2.4px,#4b5b5c 2.6px 3.6px,transparent 3.8px),radial-gradient(circle at calc(100% - 9px) 9px,#c9d3d0 0 2.4px,#4b5b5c 2.6px 3.6px,transparent 3.8px),
+    radial-gradient(circle at 9px calc(100% - 9px),#c9d3d0 0 2.4px,#4b5b5c 2.6px 3.6px,transparent 3.8px),radial-gradient(circle at calc(100% - 9px) calc(100% - 9px),#c9d3d0 0 2.4px,#4b5b5c 2.6px 3.6px,transparent 3.8px),
+    radial-gradient(ellipse 9px 5px at 78% 70%,rgba(150,70,25,.75),transparent 70%),radial-gradient(ellipse 5px 8px at 18% 30%,rgba(150,70,25,.6),transparent 70%),radial-gradient(ellipse 14px 3px at 60% 92%,rgba(130,60,20,.55),transparent 70%),
+    linear-gradient(180deg,#4a8790,#2f6a72 50%,#24575e);
+  box-shadow:0 5px 0 #0b2024,0 9px 12px rgba(0,0,0,.45),inset 0 0 0 2px rgba(255,255,255,.12),inset 0 3px 0 rgba(255,255,255,.18);
+  display:inline-flex;align-items:center;justify-content:center;transition:transform .2s cubic-bezier(.34,1.56,.64,1),box-shadow .2s,filter .15s}
+.btn:hover{filter:brightness(1.08)}
+.btn:active{transform:translateY(3px);filter:brightness(1.12);transition-duration:.04s;box-shadow:0 2px 0 #0b2024,0 4px 6px rgba(0,0,0,.45),inset 0 0 0 2px rgba(255,255,255,.12),inset 0 3px 0 rgba(255,255,255,.18)}
+/* ---------- 구명환 단추(주): 주황 통통한 알약, 양끝 은회색 반사 테이프 ---------- */
+.btn.main{font-size:34px;color:#fff;min-width:200px;padding:15px 44px 16px;border:3px solid var(--orD);border-radius:999px;text-shadow:0 2px 0 var(--orD);
+  background:linear-gradient(90deg,transparent 0 13px,#e9eeee 13px 25px,#9ea7aa 25px 27px,transparent 27px calc(100% - 27px),#9ea7aa calc(100% - 27px) calc(100% - 25px),#e9eeee calc(100% - 25px) calc(100% - 13px),transparent calc(100% - 13px)),
+    radial-gradient(ellipse 60% 40% at 40% 18%,rgba(255,255,255,.6),rgba(255,255,255,0) 70%),linear-gradient(180deg,#ff9346,#ff6a13 48%,#d84c06);
+  box-shadow:0 6px 0 var(--orD),0 11px 14px rgba(0,0,0,.45),inset 0 -8px 0 rgba(150,40,0,.28),inset 0 3px 0 rgba(255,255,255,.35)}
+.btn.main:active{transform:translateY(4px) scale(1.04,.92);box-shadow:0 2px 0 var(--orD),0 4px 6px rgba(0,0,0,.45),inset 0 -8px 0 rgba(150,40,0,.28),inset 0 3px 0 rgba(255,255,255,.35)}
+/* ---------- 상단바: 철판 알약 ---------- */
+#topbar{position:fixed;top:0;left:0;right:0;z-index:20;display:flex;flex-wrap:wrap;align-items:center;gap:6px;pointer-events:none;
+  padding:calc(6px + env(safe-area-inset-top)) calc(8px + var(--sr)) 14px calc(104px + var(--sl));background:linear-gradient(180deg,rgba(0,0,0,.45),rgba(0,0,0,0))}
+.stat{display:flex;align-items:baseline;gap:6px;height:36px;padding:9px 12px 0;flex:0 0 auto;border-radius:3px;border:2.5px solid var(--plateD);color:var(--paper);font-size:13px;
+  background:radial-gradient(circle at 5px 5px,#c9d3d0 0 1.6px,transparent 2.2px),radial-gradient(circle at calc(100% - 5px) 5px,#c9d3d0 0 1.6px,transparent 2.2px),radial-gradient(circle at 5px calc(100% - 5px),#c9d3d0 0 1.6px,transparent 2.2px),radial-gradient(circle at calc(100% - 5px) calc(100% - 5px),#c9d3d0 0 1.6px,transparent 2.2px),radial-gradient(ellipse 6px 3px at 70% 80%,rgba(150,70,25,.7),transparent 70%),linear-gradient(180deg,#3d7c85,#24575e);
+  box-shadow:0 3px 0 #0b2024}
+.stat b{font-family:'Saemaul','Ria',sans-serif;font-weight:400;font-size:19px}
+#sTask{pointer-events:auto;cursor:pointer}
+#sClock.late b{color:#ff9a6a}
+.stat.flash{animation:fl .5s}
+@keyframes fl{20%,60%{filter:brightness(1.6);transform:scale(1.12)}40%,80%{transform:scale(1)}}
+body:not(.m-day) #sTask{display:none}
+.spacer{flex:1 1 4px}
+.tog{pointer-events:auto;position:relative;width:36px;height:36px;flex:0 0 36px;border-radius:50%;border:2.5px solid var(--orD);cursor:pointer;color:#fff;font-size:13px;
+  background:radial-gradient(ellipse 60% 40% at 36% 24%,rgba(255,255,255,.55),rgba(255,255,255,0) 70%),linear-gradient(180deg,#ff8a3a,#e0560a);box-shadow:0 3px 0 var(--orD);
+  display:flex;align-items:center;justify-content:center;transition:transform .2s cubic-bezier(.34,1.56,.64,1)}
+.tog:active{transform:translateY(2px) scale(1.06,.9);transition-duration:.04s}
+.tog svg{width:20px;height:20px;display:block}
+.tog.off{opacity:.6}
+.tog.off::after{content:'';position:absolute;left:22%;right:22%;top:50%;height:2.5px;margin-top:-1px;background:#fff;border-radius:1px;transform:rotate(-40deg)}
+body.m-title #topbar .stat,body.m-end #topbar .stat,body.m-title #tPause,body.m-end #tPause,body.m-title #tView,body.m-end #tView,body.m-escape #tView,body.m-sleep #tView{display:none}
+/* ---------- 방수포 창(파란 천, 모서리 쇠고리) ---------- */
+.tarp{position:relative;color:#fff;background:radial-gradient(circle at 12px 12px,#e8e2c8 0 4px,#7a6a3a 4.5px 6.5px,transparent 7px),radial-gradient(circle at calc(100% - 12px) 12px,#e8e2c8 0 4px,#7a6a3a 4.5px 6.5px,transparent 7px),radial-gradient(circle at 12px calc(100% - 12px),#e8e2c8 0 4px,#7a6a3a 4.5px 6.5px,transparent 7px),radial-gradient(circle at calc(100% - 12px) calc(100% - 12px),#e8e2c8 0 4px,#7a6a3a 4.5px 6.5px,transparent 7px),
+  repeating-linear-gradient(90deg,rgba(255,255,255,.05) 0 1px,transparent 1px 3px),repeating-linear-gradient(0deg,rgba(0,0,0,.07) 0 1px,transparent 1px 3px),linear-gradient(170deg,#3170c4,#2459a8 45%,#1b4685);
+  border:2px solid #143668;box-shadow:0 10px 26px rgba(0,0,0,.55),inset 0 0 0 1px rgba(255,255,255,.15)}
+#tasks{position:fixed;z-index:19;right:calc(10px + var(--sr));top:calc(58px + env(safe-area-inset-top));width:180px;padding:16px 16px 12px;font-size:16px;line-height:1.6;pointer-events:none;transform:rotate(1deg)}
+#tasks div{display:flex;justify-content:space-between;gap:8px;white-space:nowrap}
+#tasks div.done{opacity:.5;text-decoration:line-through}
+#tasks b{font-weight:400;font-family:'Saemaul','Ria',sans-serif;color:#ffd27a}
+#tasks:empty{display:none}
+body.touch #tasks{display:none}
+body.touch.showtasks #tasks{display:block}
+body:not(.m-day) #tasks,body.st #tasks{display:none!important}
+/* ---------- 가운데 점, 이름표, 칭찬, 알림 ---------- */
+#dot{position:fixed;left:50%;top:50%;width:7px;height:7px;margin:-3.5px;border-radius:50%;background:rgba(255,255,255,.85);box-shadow:0 0 0 1.5px rgba(0,0,0,.45);z-index:15;pointer-events:none}
+#focus{position:fixed;left:0;top:0;transform:translate(-50%,-100%);z-index:15;pointer-events:none;min-height:38px;padding:7px 14px 6px;line-height:1;font-family:'Saemaul','Ria',sans-serif;font-size:26px;color:var(--paper);
+  border:2.5px solid var(--plateD);border-radius:3px;background:linear-gradient(180deg,#3d7c85,#24575e);box-shadow:0 3px 0 #0b2024;white-space:nowrap}
+#focus kbd{font:inherit;font-size:20px;color:#fff;background:var(--or);border-radius:3px;padding:2px 7px;margin-right:9px}
+#focus i{display:block;height:8px;margin:5px 0 0;border-radius:3px;background:rgba(0,0,0,.45);overflow:hidden}#focus i b{display:block;height:100%;width:0;background:var(--or)}
+body.touch #focus kbd{display:none}
+body:not(.m-day):not(.m-night) #dot,body:not(.m-day):not(.m-night) #focus,body.st #dot,body.st #focus,body.paused #dot,body.paused #focus{display:none}
+#praise{position:fixed;left:0;right:0;top:26%;text-align:center;z-index:25;pointer-events:none;font-family:'Saemaul','Ria',sans-serif;font-size:66px;color:#fff;-webkit-text-stroke:9px var(--orD);paint-order:stroke fill;opacity:0}
+#praise.on{animation:pr .9s}
+@keyframes pr{0%{opacity:0;transform:scale(.6)}16%{opacity:1;transform:scale(1.12)}26%{transform:scale(1)}75%{opacity:1}100%{opacity:0;transform:translateY(-16px)}}
+#toast{position:fixed;left:0;right:0;top:calc(26% + 76px);text-align:center;z-index:25;pointer-events:none;font-family:'Saemaul','Ria',sans-serif;font-size:32px;color:#ffe07a;-webkit-text-stroke:6px #4a2a00;paint-order:stroke fill;opacity:0}
+#toast.on{animation:pr 1.4s}
+#bubble,#zzz{position:fixed;left:0;top:0;z-index:16;pointer-events:none;white-space:nowrap}
+#bubble{font-family:'Saemaul','Ria',sans-serif;font-size:22px;color:#1a1a18;background:#fbf8ec;border:3px solid #1a1a18;border-radius:16px;padding:8px 14px 6px;margin:-64px 0 0 0;translate:-50% 0;box-shadow:0 4px 0 rgba(0,0,0,.35)}
+#bubble::after{content:'';position:absolute;left:50%;bottom:-13px;margin-left:-8px;border:9px solid transparent;border-top:11px solid #1a1a18;border-bottom:0}
+#bubble.pop{animation:bp .25s cubic-bezier(.34,1.56,.64,1)}
+@keyframes bp{from{scale:.5}}
+#zzz{font-family:'Saemaul','Ria',sans-serif;font-size:24px;color:#cfe3ff;-webkit-text-stroke:4px #0d1b2a;paint-order:stroke fill;margin-top:-30px;translate:-50% 0;letter-spacing:3px;animation:zz 2.4s infinite}
+#zzz.warn{color:#ffd24a;font-size:40px;animation:none}
+@keyframes zz{50%{margin-top:-40px;opacity:.6}}
+#bubble.off,#zzz.off{visibility:hidden}
+#fade{position:fixed;inset:0;background:#000;z-index:28;pointer-events:none;opacity:0;transition:opacity .5s}
+#fade.on{opacity:1}
+#hitf{position:fixed;inset:0;background:radial-gradient(circle,rgba(180,0,0,0) 30%,rgba(180,0,0,.75));z-index:27;pointer-events:none;opacity:0}
+#hitf.on{animation:hf .9s}
+@keyframes hf{10%{opacity:1}100%{opacity:0}}
+#stx{position:fixed;z-index:22;right:calc(12px + var(--sr));top:calc(58px + env(safe-area-inset-top));width:46px;height:46px;min-width:0;padding:0;font-size:22px;display:none}
+body.st #stx{display:inline-flex}
+/* ---------- 장력계: 철판 반원 눈금 ---------- */
+#gauge{position:fixed;z-index:21;left:50%;margin-left:-129px;bottom:calc(18px + env(safe-area-inset-bottom));width:230px;padding:12px 14px 12px;border-radius:6px;border:3px solid var(--plateD);background:linear-gradient(180deg,#3d7c85,#24575e);box-shadow:0 5px 0 #0b2024,0 9px 14px rgba(0,0,0,.45)}
+#dial{position:relative;width:200px;height:100px;margin:0 auto;border-radius:100px 100px 0 0;overflow:hidden;background:conic-gradient(from -90deg at 50% 100%,#3aa856 0deg 95deg,#e8c22a 95deg 128deg,#d8341e 128deg 180deg,transparent 180deg);box-shadow:inset 0 0 0 3px #0f2a30}
+#dial::after{content:'';position:absolute;left:24px;right:24px;top:24px;bottom:-76px;border-radius:50%;background:#f2eee0}
+#needle{position:absolute;left:50%;bottom:0;width:5px;height:88px;margin-left:-2.5px;background:#1a1a18;transform-origin:50% 100%;border-radius:3px;z-index:2;transition:transform .05s}
+#hub{position:absolute;left:50%;bottom:-11px;width:22px;height:22px;margin-left:-11px;border-radius:50%;background:#1a1a18;z-index:3}
+#gbar{height:12px;margin-top:10px;border-radius:6px;background:#0f2a30;overflow:hidden}
+#gprog{height:100%;width:0;background:repeating-linear-gradient(-45deg,#e8d06a 0 6px,#c8a83a 6px 12px)}
+#gauge.shake{animation:gs .2s}
+#ghold{font-family:'Saemaul','Ria',sans-serif;font-size:22px;color:#fff;text-align:center;margin:-2px 0 8px;letter-spacing:2px;animation:gh 1s infinite}
+#ghold kbd{font:inherit;font-size:17px;background:var(--or);border-radius:3px;padding:1px 7px;margin-right:8px}
+#gauge.holding #ghold{animation:none;opacity:.35}
+body.touch #ghold kbd{display:none}
+@keyframes gh{50%{opacity:.35}}
+@keyframes gs{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+/* ---------- 프롤로그: 위아래 검은 띠, 자막, SKIP ---------- */
+#story{position:fixed;inset:0;z-index:26;pointer-events:none}
+#story::before,#story::after{content:'';position:absolute;left:0;right:0;height:10vh;background:#000}
+#story::before{top:0}#story::after{bottom:0}
+#sub{position:absolute;left:50%;bottom:13vh;transform:translateX(-50%);width:min(92vw,900px);text-align:center;text-shadow:0 2px 6px #000,0 0 2px #000}
+#subWho{display:block;font-family:'Saemaul','Ria',sans-serif;font-size:22px;color:#ffb35a;margin-bottom:4px;letter-spacing:2px}
+#sub.who-c #subWho{color:#9fd3ff}
+#subTxt{font-size:30px;line-height:1.35;color:#fff}
+#sub.who-n #subTxt{font-style:italic;color:#e8e2cf}
+#skip{position:absolute;right:calc(14px + var(--sr));top:calc(10vh + 10px);min-width:0;font-size:20px;padding:10px 16px 9px;pointer-events:auto}
+body.m-story #topbar .stat,body.m-story #tPause,body.m-story #tView{display:none}
+/* ---------- 튜토리얼 안내 판과 가장자리 화살 ---------- */
+#tut{position:fixed;z-index:24;left:50%;top:calc(58px + env(safe-area-inset-top));transform:translateX(-50%) rotate(-.5deg);max-width:min(92vw,620px);padding:14px 46px 12px 22px;font-size:19px;line-height:1.4;pointer-events:none;white-space:normal;word-break:keep-all}
+#tut.pop{animation:tp .3s cubic-bezier(.34,1.56,.64,1)}
+@keyframes tp{from{transform:translateX(-50%) scale(.85);opacity:0}}
+#tutX{position:absolute;right:8px;top:50%;margin-top:-17px;width:34px;height:34px;min-width:0;min-height:0;padding:0;font-size:16px;pointer-events:auto}
+#tutEdge{position:fixed;left:0;top:0;z-index:23;width:54px;height:40px;margin:-20px 0 0 -27px;pointer-events:none;transform-origin:50% 50%}
+body.st #tut{top:calc(10px + env(safe-area-inset-top))}
+#tView svg .p3{display:none}#tView.third svg .p3{display:inline}#tView.third svg .p1{display:none}
+/* ---------- 폰: 이동 패드와 행동 단추(구명환) ---------- */
+#pad{position:fixed;z-index:21;left:calc(22px + var(--sl));bottom:calc(52px + env(safe-area-inset-bottom));width:150px;height:150px;border-radius:50%;display:none;touch-action:none;background:rgba(0,0,0,.34);border:2.5px solid rgba(255,255,255,.5)}
+#pad i{position:absolute;left:50%;top:50%;width:62px;height:62px;margin:-31px 0 0 -31px;border-radius:50%;background:radial-gradient(ellipse 60% 40% at 36% 26%,rgba(255,255,255,.6),rgba(255,255,255,0) 70%),linear-gradient(180deg,#ff8a3a,#e0560a);border:2.5px solid var(--orD)}
+#act{position:fixed;z-index:21;right:calc(22px + var(--sr));bottom:calc(30px + env(safe-area-inset-bottom));width:92px;height:92px;border-radius:50%;display:none;pointer-events:auto;touch-action:none;border:3px solid var(--orD);
+  background:radial-gradient(circle,transparent 0 22px,var(--orD) 22px 25px,transparent 25px),conic-gradient(#ff6a13 0 40deg,#eef0f0 40deg 50deg,#ff6a13 50deg 130deg,#eef0f0 130deg 140deg,#ff6a13 140deg 220deg,#eef0f0 220deg 230deg,#ff6a13 230deg 310deg,#eef0f0 310deg 320deg,#ff6a13 320deg);box-shadow:0 5px 0 var(--orD),0 9px 12px rgba(0,0,0,.4)}
+#act.dim{opacity:.45}
+#act:active{transform:translateY(3px) scale(1.05,.92)}
+body.touch.m-day:not(.st):not(.paused) #pad,body.touch.m-day:not(.st):not(.paused) #act,body.touch.m-night:not(.st):not(.paused) #pad,body.touch.m-night:not(.st):not(.paused) #act{display:block}
+body.playing #oreumFs{display:none}
+/* ---------- 노 젓기 ---------- */
+#meter{position:fixed;z-index:21;left:50%;top:calc(58px + env(safe-area-inset-top));transform:translateX(-50%);width:min(320px,60vw);height:22px;border-radius:3px;border:3px solid var(--plateD);background:#0f2a30;overflow:hidden;box-shadow:0 4px 0 #0b2024}
+#mfill{height:100%;width:0;background:linear-gradient(90deg,#f0d24a,#ff6a13);transition:width .1s}
+#meter.hot #mfill{background:#d8341e}
+body.lit #meter{box-shadow:0 0 0 3px #fff6c0,0 0 24px #fff6c0}
+.pbtn{position:fixed;z-index:21;bottom:calc(30px + env(safe-area-inset-bottom));width:110px;height:110px;min-width:0;padding:0;font-size:40px;display:none}
+#pL{left:calc(24px + var(--sl))}#pR{right:calc(24px + var(--sr))}
+body.rowing.touch .pbtn{display:inline-flex}
+body.m-escape #topbar .stat{display:none}
+/* ---------- 화면들 ---------- */
+.scr{position:fixed;inset:0;z-index:30;pointer-events:none;display:flex;flex-direction:column;align-items:center}
+.dim{background:rgba(5,12,16,.6);pointer-events:auto}
+#title{justify-content:flex-end;padding-bottom:5vh}
+#logo{order:2;font-family:'Saemaul','Ria',sans-serif;font-size:min(15vw,20vh,150px);line-height:1;color:#fff;-webkit-text-stroke:min(1.5vw,13px) #0d2a33;paint-order:stroke fill;text-shadow:0 .06em 0 #0d2a33,0 .12em .2em rgba(0,0,0,.5);white-space:nowrap;letter-spacing:.02em}
+body.en #logo{font-size:min(11vw,18vh,120px)}
+#tbtns{order:1;margin-bottom:3.5vh;display:flex;gap:18px;align-items:center;pointer-events:auto}
+.sheet{pointer-events:auto;margin:auto;padding:30px 30px 24px;text-align:center;transform:rotate(-.6deg);animation:pop .2s cubic-bezier(.34,1.56,.64,1)}
+@keyframes pop{from{transform:scale(.85);opacity:0}}
+.sheet h2{font-family:'Saemaul','Ria',sans-serif;font-weight:400;font-size:46px;line-height:1.1;color:#fff;text-shadow:0 3px 0 #10305e}
+.sheet .row{display:flex;gap:14px;justify-content:center;margin-top:18px}
+#morn{justify-content:center;pointer-events:none}
+#morn .card{margin-top:-6vh;text-align:center}
+#mday{font-family:'Saemaul','Ria',sans-serif;font-size:min(16vw,22vh,170px);line-height:1;color:#fff;-webkit-text-stroke:min(1.4vw,12px) #0d2a33;paint-order:stroke fill;text-shadow:0 .06em 0 #0d2a33}
+#msub{font-family:'Saemaul','Ria',sans-serif;font-size:min(6vw,8vh,54px);color:#ffd27a;-webkit-text-stroke:6px #0d2a33;paint-order:stroke fill;margin-top:8px}
+#morn.go .card{animation:mg 2.3s forwards}
+@keyframes mg{0%{opacity:0;transform:scale(.8)}12%{opacity:1;transform:scale(1)}75%{opacity:1}100%{opacity:0}}
+#endW{font-family:'Saemaul','Ria',sans-serif;font-size:min(17vw,30vh,180px);line-height:1;margin-top:13vh;color:#fff;-webkit-text-stroke:min(1.6vw,14px) var(--orD);paint-order:stroke fill;transform:rotate(-4deg)}
+#endW.fail{-webkit-text-stroke-color:#1a1a18;color:#cfcfc6}
+#endE{font-family:'Saemaul','Ria',sans-serif;font-size:30px;margin-top:12px;letter-spacing:5px;text-shadow:0 2px 0 #000}
+#end .btn{margin-top:auto;margin-bottom:12vh;pointer-events:auto}
+#rotate{position:fixed;inset:0;z-index:90;display:none;align-items:center;justify-content:center;background:#0b1418}
+#rotate .btn{pointer-events:auto}
+@media (orientation:portrait) and (pointer:coarse){#rotate{display:flex}}
+html.ol-land #rotate{display:none!important}
+@media (max-width:700px){.stat{height:32px;padding:8px 9px 0;font-size:11px}.stat b{font-size:16px}.tog{width:32px;height:32px;flex-basis:32px}}
+@media (max-height:480px){
+  #title{padding-bottom:3vh}#logo{font-size:min(17vh,13vw)}#tbtns{margin-bottom:7vh;gap:3vw}
+  #title .btn{font-size:5.6vh;min-height:44px;padding:2.4vh 3.5vh}#title .btn.main{font-size:6.6vh;padding:2.4vh 6vh 2.6vh;min-width:150px}
+  .sheet{padding:20px 18px 14px}.sheet h2{font-size:9vh}.sheet .btn{font-size:5.6vh;min-height:44px;padding:2.2vh 3.5vh}.sheet .btn.main{font-size:6.4vh}
+  #praise{font-size:15vh}#toast{font-size:8vh;top:calc(26% + 17vh)}
+  #pad{width:124px;height:124px;bottom:calc(46px + env(safe-area-inset-bottom))}#pad i{width:52px;height:52px;margin:-26px 0 0 -26px}
+  #act{width:80px;height:80px}
+  #tasks{font-size:14px;width:160px;top:calc(84px + env(safe-area-inset-top))}
+  #gauge{transform:scale(.78);transform-origin:100% 100%;bottom:8px;left:auto;margin-left:0;right:calc(8px + var(--sr))}
+  #endW{margin-top:8vh}#end .btn{margin-bottom:28vh}
+  #bubble{font-size:17px}
+  #subTxt{font-size:6vh}#subWho{font-size:4.6vh}#sub{bottom:12vh}#skip{font-size:4.6vh;top:calc(10vh + 4px)}
+  #tut{font-size:4.2vh;top:calc(44px + env(safe-area-inset-top));padding:2vh 40px 1.6vh 16px;max-width:70vw}
+}
+</style>
+</head>
+<body class="m-title">
+<canvas id="gl"></canvas>
+
+<div id="topbar">
+  <div class="stat" id="sDay"><b id="vDay">DAY 1</b></div>
+  <div class="stat" id="sClock"><b id="vClock">04:00</b></div>
+  <div class="stat" id="sTask"><span class="ko">남은 일</span><span class="en">TASKS</span><b id="vTask">0</b></div>
+  <div class="stat" id="sRaft"><span class="ko">뗏목</span><span class="en">RAFT</span><b id="vRaft">0/12</b></div>
+  <div class="spacer"></div>
+  <button class="tog" id="tPause" aria-label="pause">&#10074;&#10074;</button>
+  <button class="tog" id="tBgm" aria-label="music"><svg viewBox="0 0 24 24"><path d="M9 17.5V5.5l11-2.5v12" fill="none" stroke="#fff" stroke-width="2.6" stroke-linejoin="round"/><ellipse cx="6.3" cy="17.8" rx="3.4" ry="2.7" fill="#fff"/><ellipse cx="17.3" cy="15.3" rx="3.4" ry="2.7" fill="#fff"/></svg></button>
+  <button class="tog" id="tSnd" aria-label="sound"><svg viewBox="0 0 24 24"><path d="M3 9h4l5-4.5v15L7 15H3z" fill="#fff"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg></button>
+</div>
+<div id="tasks" class="tarp"></div>
+<div id="focus" hidden></div>
+<div id="praise"></div><div id="toast"></div>
+<div id="bubble" hidden></div><div id="zzz" hidden></div>
+<button class="btn" id="stx">&#10005;</button>
+<div id="gauge" hidden><div id="ghold"><kbd>E</kbd>HOLD</div><div id="dial"><div id="needle"></div><div id="hub"></div></div><div id="gbar"><div id="gprog"></div></div></div>
+<div id="meter" hidden><div id="mfill"></div></div>
+<button class="btn pbtn" id="pL">&#9664;</button><button class="btn pbtn" id="pR">&#9654;</button>
+<div id="pad"><i id="knob"></i></div>
+<button id="act" class="dim" aria-label="use"></button>
+<div id="story" hidden><div id="sub"><span id="subWho"></span><span id="subTxt"></span></div><button class="btn" id="skip">SKIP</button></div>
+<div id="tut" class="tarp" hidden><span id="tutTxt"></span><button class="btn" id="tutX" aria-label="close">&#10005;</button></div>
+
+<div id="hitf"></div>
+<div id="fade"></div>
+
+<div class="scr" id="title">
+  <div id="logo"></div>
+  <div id="tbtns"><button class="btn main" id="bStart">START</button><button class="btn main" id="bCont" hidden>CONTINUE</button><button class="btn" id="bNew" hidden>NEW GAME</button></div>
+</div>
+<div class="scr" id="morn" hidden><div class="card"><div id="mday"></div><div id="msub"></div></div></div>
+<div class="scr dim" id="pause" hidden>
+  <div class="sheet tarp"><h2>PAUSE</h2><div class="row"><button class="btn main" id="bResume">RESUME</button><button class="btn" id="bTitle">TITLE</button></div></div>
+</div>
+<div class="scr dim" id="confirm" hidden>
+  <div class="sheet tarp"><h2>NEW GAME</h2><div class="row"><button class="btn" id="bNo">NO</button><button class="btn main" id="bYes">YES</button></div></div>
+</div>
+<div class="scr" id="end" hidden>
+  <div id="endW"></div><div id="endE">THE END</div><button class="btn main" id="bEnd">TITLE</button>
+</div>
+<div id="rotate"><button class="btn main" id="bLand"></button></div>
+<style>.en{display:none}body.en .en{display:inline}body.en .ko{display:none}</style>
+
+<script src="assets/landscape.js?v=1"></script>
+<script src="assets/game-home.js?v=1" data-top="6" data-left="6" data-fullscreen="1" defer></script>
+<script src="lib/three.min.js"></script>
+<script src="lib/GLTFLoader.global.js"></script>
+<script src="js/core.js?v=1"></script>
+<script src="js/sea.js?v=1"></script>
+<script src="js/boat.js?v=1"></script>
+<script src="js/fx.js?v=1"></script>
+<script src="js/catch.js?v=3"></script>
+<script src="js/haul.js?v=6"></script>
+<script src="js/sort.js?v=10"></script>
+<script src="js/work.js?v=2"></script>
+<script src="js/captain.js?v=6"></script>
+<script src="js/night.js?v=1"></script>
+<script src="js/escape.js?v=2"></script>
+<script src="js/hero.js?v=5"></script>
+<script src="js/story.js?v=2"></script>
+<script src="js/tut.js?v=3"></script>
+<script src="js/sfx.js?v=1"></script>
+<script src="js/audio.js?v=2"></script>
+<script src="js/game.js?v=5"></script>
+<script src="/assets/visit.js?v=17" defer></script>
+<script src="/assets/game-events.js?v=2" defer></script>
+</body>
+</html>
