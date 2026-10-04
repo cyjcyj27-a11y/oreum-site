@@ -19,6 +19,8 @@ var ITEMS = [
   { id: 'coffee', n: L('믹스커피', 'Instant Coffee'), e: L('공부 +5%', 'Study +5%'), p: 20000, s: 0.05 },
   { id: 'book', n: L('기출문제집', 'Past Papers'), e: L('공부 +10%', 'Study +10%'), p: 50000, s: 0.1 }
 ];
+/* 일하는 동안 시간 흐름(10/4 사장님 "청소할때 일을할때 시간이 너무 늦게 흐르는게 원인", "초반만 빠르게"): 할 일이 적은 1~3일은 1.8배, 4~8일은 1.4배, 9일부터 현실 1초 = 게임 1분 */
+function timeSpd() { return G.day <= 3 ? 1.8 : G.day <= 8 ? 1.4 : 1; }
 function studyMult() { var m = 1 + (GS.ev ? GS.ev.bonus() : 0); ITEMS.forEach(function (it) { if (it.s && G.items[it.id]) m += it.s; }); return m; }
 function makeTasks(d) {
   var a = [{ id: 'rice', type: 'rice' }], nf = d >= 15 ? 4 : d >= 9 ? 3 : d >= 4 ? 2 : 1, k;
@@ -462,7 +464,7 @@ function update(dt) {
   if (!paused) {
     if (wakeT < 1) wakeT = Math.min(1, wakeT + dt / 1.7);
     if (G.mode === 'day') {
-      if (wakeT >= 1) G.t += dt * 60 / HS;
+      if (wakeT >= 1) G.t += dt * 60 / HS * timeSpd();
       inspTick(); GS.ev.tick(dt);
       var padOn = pad.id != null && (pad.x || pad.y);
       if (padOn && walkMode()) { scrubPtr = false; actHeld = false; crOn = false; if (press) press.scrub = false; ptr.down = false; }   // 패드를 밀면 닦기를 풀고 걷는다(화장실은 바닥이 때투성이라 화면을 끌면 닦기로 들어간다)
