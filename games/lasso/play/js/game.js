@@ -74,7 +74,16 @@
     hero.pos.set(horse.pos.x + Math.cos(horse.yaw) * 1.45, 0, horse.pos.z - Math.sin(horse.yaw) * 1.45); collide(hero.pos, 0.35); hero.yaw = horse.yaw; H.vel.set(0, 0, 0);
     horse.speed = 0; CAM.chase = null; CAM.tYaw = CAM.yaw; CAM.tDist = 7.5; sfx('step');
   }
-  function callHorse() { if (H.mode !== 'foot' || G.chase || G.horseDead) return; H.autoMount = false; horse.calling = true; sfx('whistle'); }
+  function warpHorse() {   // 카메라 뒤(화면 밖)에서 막힌 데 없는 자리를 찾아 말을 옮긴다
+    const cx = cam.position.x - hero.pos.x, cz = cam.position.z - hero.pos.z, cl = Math.hypot(cx, cz) || 1, base = Math.atan2(cx / cl, cz / cl);
+    const bad = horse.warpAt;   // 방금 옮겼다가 또 막힌 자리는 피한다
+    for (const da of [0, 0.4, -0.4, 0.8, -0.8, 1.2, -1.2, 1.6, -1.6, 2.1, -2.1, 2.6, -2.6, PI]) for (const r of [CAM.dist + 7, CAM.dist + 4, 9, 6]) { const a = base + da, x = hero.pos.x + Math.sin(a) * r, z = hero.pos.z + Math.cos(a) * r; _a.set(x, 0, z); if (collide(_a, 0.9) || Math.hypot(x, z) > EDGE - 5) continue;
+      if (bad && Math.hypot(x - bad.x, z - bad.z) < 5) continue;
+      if (freeLen(x, z, -Math.sin(a), -Math.cos(a), r - 1.5) < r - 3) continue;   // 주인공 바로 앞(3m)까지 곧장 달려올 길이 트여 있어야
+      horse.pos.set(x, heightAt(x, z), z); horse.yaw = a + PI; horse.speed = 6; horse.callP = null; horse.callT = 0; horse.warpAt = { x, z }; return true; }
+    horse.warpAt = null; return false; }
+  function boardOnFoot() { dismount(); hero.yaw = Math.atan2(TOWN.board.x - hero.pos.x, -6.2 - hero.pos.z); openBoard(); }   // 처음 한 번: 말에서 내려 게시판을 보며 연다
+  function callHorse() { if (H.mode !== 'foot' || G.chase || G.horseDead) return; H.autoMount = false; horse.calling = true; horse.callT = 0; horse.callP = null; horse.warpAt = null; sfx('whistle'); }
   // 말을 누르면 탄다(10/3 사장님 "말을 클릭하면 타는 거로"): 가까우면 바로, 멀면 불러서 닿는 순간 탄다. 판정은 화면에서 말 몸통 둘레(뼈대 메쉬 광선 판정 대신)
   const _hp0 = new V3(), _hp1 = new V3();
   function horseUnder(x, y) { if (!horse.root.visible || G.horseDead) return false; _hp0.set(horse.pos.x, horse.pos.y + 1.15, horse.pos.z).project(cam); if (_hp0.z > 1) return false; _hp1.set(horse.pos.x, horse.pos.y + 2.2, horse.pos.z).project(cam);
@@ -175,6 +184,9 @@
       if (horse.dead) { horse.deadT += dt; horse.speed = 0; horse.calling = false; horse.root.rotation.z = Math.min(PI / 2, horse.deadT * 4); horse.pos.y = heightAt(horse.pos.x, horse.pos.z) + Math.min(0.2, horse.deadT * 0.8); if (horse.deadT > 3.5) horse.root.visible = false; }
       else if (horse.calling) {
         const dx = hero.pos.x - horse.pos.x, dz = hero.pos.z - horse.pos.z, d = Math.hypot(dx, dz);
+        // 길을 못 찾고 건물·울타리에 막히면(1.2초에 1m 도 못 다가옴) 또는 6초가 지나도 40m 넘게 멀면, 카메라 뒤쪽 빈자리로 옮겨 거기서 달려오게 한다(10/4 사장님 "말이 안온다 어디 갖혔나봐")
+        horse.callT = (horse.callT || 0) + dt; if (!horse.callP) horse.callP = { d, t: 0 }; horse.callP.t += dt;
+        if (horse.callP.t >= 1.2) { const stuck = horse.callP.d - d < 1 && d > 4; horse.callP = { d, t: 0 }; if (stuck && d < 10) { horse.calling = false; horse.speed = 0; H.autoMount = false; } else if (stuck || (horse.callT > 6 && d > 40)) warpHorse(); }   // 10m 안에서 막히면(주인공이 처마 밑 같은 좁은 데) 거기 서서 기다린다
         if (d < 2.6) { horse.calling = false; horse.speed = 0; if (H.autoMount) { H.autoMount = false; mount(); } } else { horse.yaw += wrap(Math.atan2(dx, dz) - horse.yaw) * Math.min(1, dt * 4); horse.speed += (Math.min(11, d * 1.2 + 2) - horse.speed) * Math.min(1, dt * 3); horse.pos.x += Math.sin(horse.yaw) * horse.speed * dt; horse.pos.z += Math.cos(horse.yaw) * horse.speed * dt; collide(horse.pos, 0.85); horse.pos.y = heightAt(horse.pos.x, horse.pos.z); }
       } else horse.speed *= Math.pow(0.02, dt);
     }
@@ -602,7 +614,7 @@
     ctxT -= dt; if (ctxT > 0) return; ctxT = 0.12;
     const c = heroCenter(_hc); let label = '', fn = null; ctxAt = null;
     if (G.started && !G.ui && !G.deliver && !G.cine && L.state === 'idle' && H.stun <= 0) {
-      if ((Math.hypot(c.x - TOWN.board.x, c.z - TOWN.board.z) < 4.6 || Math.hypot(c.x - TOWN.board.x, c.z + 6.2) < 3.4) && (H.mode === 'foot' || G.seenBoard)) { label = T.board; fn = openBoard; ctxAt = WCTX_BOARD; } // 처음 한 번은 말에서 내려 걸어가서 본다
+      if ((Math.hypot(c.x - TOWN.board.x, c.z - TOWN.board.z) < 4.6 || Math.hypot(c.x - TOWN.board.x, c.z + 6.2) < 3.4)) { label = T.board; fn = H.mode === 'ride' && !G.seenBoard ? boardOnFoot : openBoard; ctxAt = WCTX_BOARD; } // 말에 탄 채로도 단추는 보인다(10/4). 처음 한 번은 누르면 말에서 내려서 본다(10/2 규칙 그대로)
       else if (H.mode === 'foot' && !G.chase && !G.horseDead && Math.hypot(hero.pos.x - horse.pos.x, hero.pos.z - horse.pos.z) < 3.4) { label = T.ride; fn = mount; }   // 말 바로 옆이면 타기가 먼저(10/3 "말을 사고 E 누르면 마구간 창이 뜬다")
       else if (G.horseDead && Math.hypot(c.x - TOWN.store.x, c.z - TOWN.store.z) < 4.6) { label = T.store; fn = openShop; ctxAt = WCTX_STABLE; }   // 말이 살아 있으면 마구간에서 살 게 없다
       else if (H.mode === 'ride') { label = T.off; fn = dismount; }
