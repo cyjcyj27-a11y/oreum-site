@@ -654,22 +654,24 @@ cv.addEventListener('pointermove', function (e) {
 });
 cv.addEventListener('pointerup', function () { swp = null; });
 cv.addEventListener('pointercancel', function () { swp = null; });
-/* 튜토리얼(첫 판): 1단계 좌우로 밀기, 2단계 위로 밀기(JUMP). 해 보면 넘어가고 둘 다 끝나면 다시 안 뜬다. PC 는 글자만 화살표 키로 */
+/* 튜토리얼(첫 판): 1단계 좌우로 밀기, 2단계 위로 밀기(JUMP), 3단계 아래로 밀기(DUCK). 해 보면 넘어가고 다 끝나면 다시 안 뜬다. PC 는 글자만 화살표 키로.
+   저장 값 '1' = 옛 두 단계만 마친 사람(아래 밀기만 보여 줌), '2' = 다 마침 */
 var TUT = { step: 0 };
-try { if (localStorage.getItem('surf.tut') === '1') TUT.step = 3; } catch (er) {}
+try { var tv = localStorage.getItem('surf.tut'); if (tv === '2') TUT.step = 4; else if (tv === '1') TUT.step = 3; } catch (er) {}
 try { if (matchMedia('(pointer:coarse)').matches) document.documentElement.classList.add('touch'); } catch (er) {}
 window.addEventListener('pointerdown', function (e) { if (e.pointerType === 'touch') document.documentElement.classList.add('touch'); }, true);
 function tutShow() {
   var el = $('tut'); if (!el) return;
   var touch = document.documentElement.classList.contains('touch');
-  if (G.mode !== 'play' || G.bot || TUT.step >= 3) { el.className = ''; return; }
+  if (G.mode !== 'play' || G.bot || TUT.step >= 4) { el.className = ''; return; }
   if (TUT.step === 0) TUT.step = 1;
-  el.className = 'on ' + (TUT.step === 1 ? 'lane' : 'jump');
-  el.querySelector('.lbl').textContent = TUT.step === 1 ? (touch ? 'SWIPE' : '←  →') : (touch ? 'JUMP' : '↑  JUMP');
+  el.className = 'on ' + ['', 'lane', 'jump', 'duck'][TUT.step];
+  el.querySelector('.lbl').textContent = TUT.step === 1 ? (touch ? 'SWIPE' : '←  →') : TUT.step === 2 ? (touch ? 'JUMP' : '↑  JUMP') : (touch ? 'DUCK' : '↓  DUCK');
 }
 function tutDo(k) {
   if (TUT.step === 1 && (k === 'L' || k === 'R')) { TUT.step = 2; setTimeout(tutShow, 450); $('tut').className = ''; }
-  else if (TUT.step === 2 && k === 'U') { TUT.step = 3; $('tut').className = ''; try { localStorage.setItem('surf.tut', '1'); } catch (er) {} }
+  else if (TUT.step === 2 && k === 'U') { TUT.step = 3; $('tut').className = ''; try { localStorage.setItem('surf.tut', '1'); } catch (er) {} setTimeout(tutShow, 900); }
+  else if (TUT.step === 3 && k === 'D') { TUT.step = 4; $('tut').className = ''; try { localStorage.setItem('surf.tut', '2'); } catch (er) {} }
 }
 
 /* ====================================================================== 미션: 셋씩, 끝내면 배수 +1(영구) */

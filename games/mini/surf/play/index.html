@@ -91,6 +91,12 @@ body.m-title #distP,body.m-title #multP,body.m-title #coinP,body.m-title #pauseB
 #tut.jump .ar.l,#tut.jump .ar.r{display:none}
 #tut.jump .ar.u{display:block}
 #tut.jump .dot{top:120px;animation:tutU 1.1s cubic-bezier(.5,0,.3,1) infinite}
+#tut.duck .trk{left:50%;top:20px;width:14px;height:110px;margin:0 0 0 -7px}
+#tut.duck .ar.l,#tut.duck .ar.r{display:none}
+#tut.duck .ar.d{display:block}
+#tut.duck .dot{top:28px;animation:tutD 1.1s cubic-bezier(.5,0,.3,1) infinite}
+#tut .ar.d{left:50%;top:126px;margin:0 0 0 -13px;border:13px solid transparent;border-top:20px solid #fff;border-bottom:0;display:none;filter:drop-shadow(0 2px 0 var(--teal)) drop-shadow(0 -2px 0 var(--teal))}
+@keyframes tutD{0%{transform:translateY(0);opacity:0}15%{opacity:1}80%{transform:translateY(92px);opacity:1}100%{transform:translateY(92px);opacity:0}}
 @keyframes tutLR{0%,100%{transform:translateX(-70px)}50%{transform:translateX(70px)}}
 @keyframes tutU{0%{transform:translateY(0);opacity:0}15%{opacity:1}80%{transform:translateY(-92px);opacity:1}100%{transform:translateY(-92px);opacity:0}}
 @media (max-height:480px){#tut{transform:scale(.8);margin-top:-80px}}
@@ -234,7 +240,7 @@ body.m-shop #distP,body.m-shop #multP,body.m-shop #coinP,body.m-shop #pauseB{dis
 <canvas id="cv"></canvas>
 <div id="uw"></div><div id="dolv"></div><div id="fxl"></div>
 
-<div id="tut"><div class="trk"></div><div class="ar l"></div><div class="ar r"></div><div class="ar u"></div><div class="dot"></div><div class="lbl"></div></div>
+<div id="tut"><div class="trk"></div><div class="ar l"></div><div class="ar r"></div><div class="ar u"></div><div class="ar d"></div><div class="dot"></div><div class="lbl"></div></div>
 <div id="topbar">
   <div class="stat" id="distP"><b id="distV">0</b></div>
   <div class="stat" id="coinP"><span class="coin"></span><b id="coinV">0</b></div>
@@ -286,7 +292,7 @@ body.m-shop #distP,body.m-shop #multP,body.m-shop #coinP,body.m-shop #pauseB{dis
 <script src="js/sfx.js?v=3"></script>
 <script src="lib/three.min.js"></script>
 <script src="lib/GLTFLoader.global.js"></script>
-<script src="js/surf.js?v=19"></script>
+<script src="js/surf.js?v=20"></script>
 <script src="assets/game-home.js" data-top="6" data-left="6" data-fullscreen="1" defer></script>
 <script src="/assets/visit.js?v=17" defer></script>
 <script src="/assets/game-events.js?v=2" defer></script>
