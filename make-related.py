@@ -18,6 +18,7 @@ import io, os, re, sys
 
 # slug, 한국어 경로, 영어 경로, 한국어 이름, 한국어 장르 앵커, 영어 이름, 영어 장르 앵커, 태그
 GAMES = [
+    ("sudoku",        "/games/flash/sudoku/",        "/en/games/flash/sudoku/",        "스도쿠",            "스도쿠 숫자 퍼즐게임",              "SUDOKU",               "sudoku puzzle game online free", {"board", "puzzle", "casual"}),
     ("lasso",         "/games/lasso/",               "/en/games/lasso/",               "올가미 언니",        "올가미 언니 3D 액션게임",           "LASSO SISTER",          "3d western lasso game",                    {"3d", "action", "adventure"}),
     ("shrimpboat",    "/games/shrimpboat/",          "/en/games/shrimpboat/",          "새우잡이배",         "새우잡이배 3D 탈출게임",            "SHRIMP BOAT",           "3d shrimp boat escape game",               {"3d", "adventure", "sim", "korean"}),
     ("gosiwon",       "/games/gosiwon/",             "/en/games/gosiwon/",             "고시원 총무",       "고시원 총무 3D 청소게임",          "GOSIWON MANAGER",       "3d first-person cleaning simulation game", {"3d", "sim", "tycoon", "korean"}),

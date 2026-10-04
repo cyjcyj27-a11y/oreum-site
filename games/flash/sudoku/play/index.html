@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, viewport-fit=cover">
+<title>스도쿠</title>
+<!-- 소재(oreum-game-ui 규칙 7, design.md): 문방구. 주 단추 노란 육각 연필, 보조 분홍 지우개, 숫자판 단어 카드,
+     상단 알약 마스킹테이프, 둥근 단추 빨간 압정, 창 스프링 공책 한 장, 다 풀면 빨간 도장. -->
+<style>
+  @font-face { font-family: 'Kku'; src: url('fonts/kkubulim.woff2') format('woff2'); font-display: block; }
+  @font-face { font-family: 'Allim'; src: url('fonts/allim-b.woff2') format('woff2'); font-display: block; }
+  @font-face { font-family: 'Nadeuri'; src: url('fonts/nadeuri.woff2') format('woff2'); font-display: block; }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #f4efe2; font-family: 'Allim', 'Malgun Gothic', sans-serif; color: #2b2b33; user-select: none; -webkit-user-select: none; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+  #c { position: fixed; inset: 0; display: block; width: 100vw; height: 100vh; touch-action: none; }
+
+  /* ---------- 연필(주 단추) ---------- */
+  .bw { display: inline-block; position: relative; filter: drop-shadow(0 4px 0 rgba(90,70,30,.55)) drop-shadow(0 8px 8px rgba(40,30,10,.25)); transition: transform .22s cubic-bezier(.34,1.56,.64,1), filter .2s; cursor: pointer; touch-action: manipulation; pointer-events: auto; }
+  .bw:hover { filter: drop-shadow(0 4px 0 rgba(90,70,30,.55)) drop-shadow(0 8px 8px rgba(40,30,10,.25)) brightness(1.05); }
+  .bw:active { transform: translateY(3px); filter: drop-shadow(0 1px 0 rgba(90,70,30,.55)) drop-shadow(0 3px 4px rgba(40,30,10,.25)); transition-duration: .04s; }
+  .pen { position: relative; display: inline-flex; align-items: center; justify-content: center; height: 58px; min-width: 150px; margin: 0 30px 0 36px; padding: 0 18px 0 14px; font-size: 25px; letter-spacing: 2px; color: #3b2a07; white-space: nowrap;
+    background: linear-gradient(180deg, #ffeaa0 0, #ffe27c 30%, #f7c531 30%, #f2bd25 68%, #d6a113 68%, #c99511 100%);
+    text-shadow: 0 1px 0 rgba(255,255,255,.55); }
+  .pen::before { content: ''; position: absolute; right: 100%; top: 0; bottom: 0; width: 36px;
+    background: linear-gradient(90deg, #2e2e33 0, #4a4a52 24%, #e9c99c 25%, #e2bd8a 70%, #d4ab73 100%);
+    clip-path: polygon(0 47%, 0 53%, 100% 100%, 88% 84%, 100% 67%, 88% 50%, 100% 33%, 88% 16%, 100% 0); }
+  .pen::after { content: ''; position: absolute; left: 100%; top: 0; bottom: 0; width: 30px; border-radius: 0 9px 9px 0;
+    background: linear-gradient(180deg, rgba(255,255,255,.4), rgba(255,255,255,0) 40%, rgba(0,0,0,.2)),
+      linear-gradient(90deg, #a9aab0 0 3px, #e8e9ee 3px 6px, #9a9ba1 6px 9px, #dcdde2 9px 12px, #8f9096 12px 15px, #f3a1ad 15px, #ee8f9d 100%); }
+  .pen.sm { height: 44px; min-width: 0; font-size: 18px; padding: 0 12px 0 8px; margin: 0 22px 0 26px; letter-spacing: 1px; }
+  .pen.sm::before { width: 26px; } .pen.sm::after { width: 22px; border-radius: 0 7px 7px 0; }
+
+  /* ---------- 지우개(보조 단추) ---------- */
+  .era { position: relative; display: inline-flex; align-items: center; justify-content: center; height: 46px; min-width: 104px; padding: 0 16px 0 52px; border-radius: 11px; font-size: 18px; letter-spacing: 1px; color: #6b2433; white-space: nowrap;
+    background: linear-gradient(180deg, rgba(255,255,255,.45) 0, rgba(255,255,255,0) 26%, rgba(0,0,0,0) 72%, rgba(120,20,40,.14) 100%), #f59aa8;
+    box-shadow: inset 0 0 0 2px rgba(150,50,70,.35); overflow: hidden; transition: transform .22s cubic-bezier(.34,1.56,.64,1); }
+  .era::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 36px;
+    background: linear-gradient(180deg, rgba(255,255,255,.3), rgba(0,0,0,.12)), linear-gradient(180deg, #2f5f9e 0 34%, #f6f3ea 34% 46%, #2f5f9e 46% 100%);
+    box-shadow: 2px 0 0 rgba(0,0,0,.15); }
+  .bw:active .era { transform: scaleY(.92); }
+  .era.solo { padding: 0 16px; } .era.solo::before { display: none; }
+
+  /* ---------- 단어 카드(숫자판·작은 단추) ---------- */
+  .card { position: relative; display: flex; align-items: center; justify-content: center; background-color: #fffdf5; border-radius: 4px; color: #3a3c47; font-family: 'Kku', sans-serif;
+    box-shadow: 0 0 0 1px #d8d0bc, 0 3px 0 #d3c9b0, 0 4px 0 #c1b598, 0 7px 9px rgba(50,40,20,.18);
+    background-image: linear-gradient(180deg, rgba(0,0,0,0) 22%, #e2666a 22%, #e2666a calc(22% + 2px), rgba(0,0,0,0) calc(22% + 2px)),
+      repeating-linear-gradient(180deg, rgba(0,0,0,0) 0 13px, rgba(80,130,200,.16) 13px 14px);
+    transition: transform .18s cubic-bezier(.34,1.56,.64,1), box-shadow .18s, opacity .2s; cursor: pointer; touch-action: manipulation; pointer-events: auto; }
+  .card:active { transform: translateY(2px) scale(.97); box-shadow: 0 0 0 1px #d8d0bc, 0 1px 0 #d3c9b0, 0 2px 4px rgba(50,40,20,.18); transition-duration: .04s; }
+  .card.done { opacity: .28; }
+  .card .k { pointer-events: none; }
+
+  /* ---------- 상단 바: 마스킹테이프 + 압정 ---------- */
+  #topbar { position: fixed; left: 0; right: 0; top: 0; height: calc(50px + env(safe-area-inset-top)); padding: env(safe-area-inset-top) calc(10px + env(safe-area-inset-right)) 0 calc(104px + env(safe-area-inset-left)); display: flex; align-items: center; gap: 10px; pointer-events: none; z-index: 5; }
+  .tape { display: inline-flex; align-items: center; gap: 8px; height: 32px; padding: 0 16px; font-family: 'Nadeuri', 'Allim', sans-serif; font-size: 17px; color: #3d3a33; white-space: nowrap;
+    background: linear-gradient(180deg, rgba(255,255,255,.25), rgba(0,0,0,.04)), repeating-linear-gradient(90deg, rgba(150,120,60,.06) 0 2px, rgba(0,0,0,0) 2px 5px), rgba(236,221,180,.92);
+    clip-path: polygon(0 8%, 3% 0, 6% 10%, 9% 2%, 91% 3%, 94% 10%, 97% 0, 100% 9%, 98% 30%, 100% 50%, 97% 72%, 100% 92%, 96% 100%, 93% 91%, 90% 100%, 10% 98%, 7% 90%, 4% 100%, 0 92%, 2% 70%, 0 50%, 3% 28%);
+    transform: rotate(-1.2deg); }
+  .tape + .tape { transform: rotate(1deg); }
+  .tape b { font-family: 'Allim', sans-serif; font-weight: 400; }
+  .tape.hide { display: none; }
+  .spacer { flex: 1; }
+  .tog { pointer-events: auto; position: relative; width: 38px; height: 38px; border-radius: 50%; border: 0; padding: 0; cursor: pointer; touch-action: manipulation;
+    background: radial-gradient(circle at 36% 30%, #ff9a8c 0, #e8443a 32%, #b5231d 78%, #8e1712 100%);
+    box-shadow: 0 2px 0 #6e0f0b, 0 5px 7px rgba(0,0,0,.3), inset 0 -2px 3px rgba(0,0,0,.25); display: inline-flex; align-items: center; justify-content: center; color: #fff; font-size: 13px; line-height: 1; font-family: Arial, sans-serif; }
+  .tog::before { content: ''; position: absolute; left: 4px; right: 4px; top: 4px; bottom: 4px; border-radius: 50%; border: 1px solid rgba(255,255,255,.22); pointer-events: none; }
+  .tog svg { width: 20px; height: 20px; display: block; position: relative; }
+  .tog.off { opacity: .6; }
+  .tog.off::after { content: ''; position: absolute; left: 24%; right: 24%; top: 50%; height: 2px; margin-top: -1px; background: #fff; border-radius: 1px; transform: rotate(-40deg); }
+  .tog:active { transform: translateY(2px); box-shadow: 0 0 0 #6e0f0b, 0 2px 3px rgba(0,0,0,.3); }
+  .tog.hide { display: none; }
+  @media (max-width: 560px) {
+    #topbar { padding-left: calc(96px + env(safe-area-inset-left)); padding-right: 6px; gap: 6px; }
+    .tape { font-size: 14px; padding: 0 10px; height: 28px; gap: 5px; }
+    .tog { width: 33px; height: 33px; } .tog svg { width: 17px; height: 17px; }
+  }
+
+  /* ---------- 게임 화면 조작부 ---------- */
+  #tools, #pad { position: fixed; display: none; z-index: 4; }
+  body.playing #tools, body.playing #pad { display: grid; }
+  #pad { gap: 7px; }
+  #pad .card .k { font-size: 30px; line-height: 1; margin-top: 8%; }
+  body.memo #pad .card .k { font-family: 'Nadeuri', sans-serif; color: #6b6e7a; }
+  #tools { gap: 4px; align-items: center; justify-items: center; }
+  #tools .bw { filter: drop-shadow(0 3px 0 rgba(90,70,30,.5)) drop-shadow(0 6px 6px rgba(40,30,10,.2)); }
+  #tools .card { width: 54px; height: 44px; font-family: 'Allim', sans-serif; font-size: 24px; background-image: none; }
+  #tools .card svg { width: 26px; height: 26px; }
+  #btnMemo .pen { opacity: .7; }
+  body.memo #btnMemo .pen { opacity: 1; }
+  #btnMemo .st { font-size: 12px; margin-left: 6px; padding: 2px 5px; border-radius: 3px; background: rgba(59,42,7,.15); letter-spacing: 0; }
+  body.memo #btnMemo .st { background: #3b2a07; color: #ffe27c; }
+  #keys { position: fixed; right: calc(12px + env(safe-area-inset-right)); bottom: calc(6px + env(safe-area-inset-bottom)); font-size: 12px; color: #5d5a50; opacity: .7; pointer-events: none; z-index: 3; display: none; white-space: nowrap; font-family: 'Nadeuri', sans-serif; }
+  body.playing #keys { display: block; }
+  body.touch #keys { display: none !important; }
+  @media (max-width: 760px), (max-height: 480px) { #keys { display: none !important; } }
+
+  /* ---------- 창: 스프링 공책 한 장 ---------- */
+  .sheetw { position: fixed; left: 50%; top: 50%; z-index: 11; transform: translate(-50%, -50%) scale(.85); opacity: 0; visibility: hidden; pointer-events: none; filter: drop-shadow(0 10px 18px rgba(40,30,10,.35)); transition: transform .18s cubic-bezier(.34,1.56,.64,1), opacity .15s, visibility 0s .18s; }
+  #dim { position: fixed; inset: 0; z-index: 8; background: rgba(50,38,18,.38); opacity: 0; visibility: hidden; transition: opacity .15s, visibility 0s .15s; }
+  body.sheeton #dim { opacity: 1; visibility: visible; transition-delay: 0s; }
+  .sheetw.show { transform: translate(-50%, -50%) scale(1); opacity: 1; visibility: visible; pointer-events: auto; transition-delay: 0s; }
+  .sheet { position: relative; width: min(94vw, 560px); max-height: 88vh; overflow: auto; padding: 46px 24px 24px 50px;
+    background: linear-gradient(90deg, rgba(0,0,0,0) 36px, rgba(214,80,80,.55) 36px 38px, rgba(0,0,0,0) 38px),
+      repeating-linear-gradient(180deg, rgba(0,0,0,0) 0 27px, rgba(90,140,205,.28) 27px 28px), #fbf8ef;
+    background-position: 0 0, 0 40px, 0 0;
+    -webkit-mask: radial-gradient(circle 7px at 50% 18px, transparent 6.5px, #000 7.5px) 0 0 / 30px 100% repeat-x;
+            mask: radial-gradient(circle 7px at 50% 18px, transparent 6.5px, #000 7.5px) 0 0 / 30px 100% repeat-x;
+    clip-path: polygon(0 3px, 4% 0, 9% 4px, 15% 1px, 22% 4px, 30% 0, 38% 3px, 47% 1px, 56% 4px, 64% 0, 72% 3px, 81% 1px, 89% 4px, 96% 0, 100% 3px, 100% 100%, 0 100%); }
+  .sheet h3 { margin: 0 0 12px; font-family: 'Kku', sans-serif; font-weight: 400; font-size: 34px; letter-spacing: 2px; color: #2b2b33; text-align: center; }
+  .sheet .row { display: flex; gap: 6px; justify-content: center; align-items: center; margin-top: 12px; flex-wrap: wrap; }
+  .sheet .big { font-family: 'Kku', sans-serif; font-size: 52px; text-align: center; color: #2b2b33; line-height: 1.1; }
+  .sheet .sm { font-family: 'Nadeuri', sans-serif; font-size: 18px; text-align: center; color: #5d5a50; margin: 4px 0; min-height: 22px; }
+  #wClear .sheet { width: min(94vw, 430px); padding: 36px 12px 12px 44px; }
+  #wClear h3 { font-size: 22px; margin: 0; line-height: 1.2; }
+  #wClear .big { font-size: 40px; }
+  #wClear .pen { height: 50px; }
+  #wClear .era { height: 42px; }
+  #wClear .sm { min-height: 0; margin: 0; }
+  #wClear .row { margin-top: 6px; flex-wrap: nowrap; }
+  /* 판 고르기 표 */
+  .tierrow { display: grid; grid-template-columns: 74px 1fr; align-items: center; gap: 8px; margin: 0 0 10px; }
+  .tierrow .tn { font-family: 'Kku', sans-serif; font-size: 19px; color: #2b2b33; white-space: nowrap; }
+  .tierrow .tn small { display: block; font-family: 'Nadeuri', sans-serif; font-size: 12px; color: #7a766a; }
+  .cells { display: flex; flex-wrap: wrap; gap: 6px; }
+  .cl { width: 34px; height: 34px; font-size: 18px; border-radius: 3px; background-image: none; }
+  .cl.lock { color: #b9b2a0; cursor: default; }
+  .cl.lock .k { display: none; }
+  .cl.lock::after { content: ''; width: 12px; height: 9px; border-radius: 2px; background: #b9b2a0; box-shadow: 0 -5px 0 -1px #fffdf5, 0 -6px 0 1px #b9b2a0; margin-top: 6px; }
+  .cl.ok::before { content: ''; position: absolute; right: -4px; top: -5px; width: 13px; height: 13px; border-radius: 50%; border: 2px solid #d2342a; opacity: .85; }
+  .cl.on { box-shadow: 0 0 0 2px #2b2b33, 0 3px 0 #d3c9b0, 0 6px 8px rgba(50,40,20,.2); background-color: #fff3a8; }
+  .xbtn { position: absolute; right: 10px; top: 30px; width: 40px; height: 40px; border: 0; background: none; font-family: Arial, sans-serif; font-size: 22px; color: #6b6458; cursor: pointer; }
+  @media (max-height: 480px) and (min-width: 600px) { #wPick .sheet { width: min(96vw, 780px); padding: 36px 16px 10px 46px; } #wPick h3 { font-size: 24px; margin-bottom: 4px; } #wPick .tierrow { margin-bottom: 4px; } #wPick .cl { width: 30px; height: 30px; font-size: 16px; } #wPick .cells { gap: 5px; } .xbtn { top: 24px; } }
+  @media (max-width: 480px) { .sheet { padding: 42px 12px 18px 44px; } .tierrow { grid-template-columns: 56px 1fr; gap: 6px; } .tierrow .tn { font-size: 16px; } .cl { width: 30px; height: 30px; font-size: 16px; } .cells { gap: 5px; } }
+
+  /* ---------- 타이틀 ---------- */
+  #title { position: fixed; z-index: 6; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; text-align: center; pointer-events: none; }
+  #title.hide { display: none; }
+  #title h1 { position: relative; z-index: 0; margin: 10px 0 0; font-family: 'Kku', sans-serif; font-weight: 400; font-size: 120px; line-height: 1; color: #24242b; letter-spacing: 6px; white-space: nowrap; }
+  #title h1::before { content: ''; position: absolute; left: -5%; right: -5%; top: 48%; height: 38%; background: rgba(255,222,60,.65); border-radius: 3px 10px 4px 12px; transform: rotate(-1.5deg); z-index: -1; }
+  #title .pick { display: flex; align-items: center; gap: 10px; margin: 0 0 6px; }
+  #title .pick .card { height: 46px; font-family: 'Allim', sans-serif; background-image: none; }
+  #title .pick .arr { width: 46px; font-size: 18px; color: #6b6458; }
+  #title .pick .lab { min-width: 150px; padding: 0 16px; font-family: 'Kku', sans-serif; font-size: 24px; }
+  #title .best { font-family: 'Nadeuri', sans-serif; font-size: 16px; color: #5d5a50; min-height: 20px; margin: 0 0 12px; }
+  #title .btns { display: flex; gap: 6px; align-items: center; justify-content: center; flex-wrap: wrap; }
+  #btnNew.hide { display: none; }
+
+  /* ---------- 다 풀었을 때: 도장 ---------- */
+  #stamp { position: fixed; z-index: 9; left: 50%; top: 50%; width: 200px; height: 200px; margin: -100px 0 0 -100px; border-radius: 50%; display: none; align-items: center; justify-content: center; text-align: center; pointer-events: none; color: #d2342a; mix-blend-mode: multiply;
+    border: 7px solid currentColor; font-family: 'Allim', sans-serif; font-size: 38px; line-height: 1.15; letter-spacing: 2px; }
+  #stamp::before { content: ''; position: absolute; inset: 7px; border-radius: 50%; border: 3px solid currentColor; }
+  #stamp.show { display: flex; animation: slam .42s cubic-bezier(.2,.9,.3,1.2) both; }
+  #stamp.gold { color: #c08a12; }
+  body.en #stamp { letter-spacing: 1px; }
+  body.en .tierrow { grid-template-columns: 84px 1fr; }
+  body.en .tierrow .tn { font-size: 14px; letter-spacing: 0; }
+  @media (max-width: 480px) { body.en .tierrow { grid-template-columns: 70px 1fr; } body.en .tierrow .tn { font-size: 12px; } }
+  @keyframes slam { 0% { transform: scale(2.6) rotate(-4deg); opacity: 0; } 60% { transform: scale(.92) rotate(-13deg); opacity: 1; } 100% { transform: scale(1) rotate(-12deg); opacity: .9; } }
+
+  body.still *, body.still *::before, body.still *::after { transition: none !important; animation-duration: 0s !important; animation-delay: 0s !important; }
+  body.shot #title { justify-content: center; padding-bottom: 0 !important; }
+  body.shot #topbar, body.shot #keys, body.shot #oreumHome, body.shot #oreumFs, body.shot #title .btns, body.shot #title .pick, body.shot #title .best { display: none !important; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+
+<div id="topbar">
+  <span class="tape" id="tStage">입문 1</span>
+  <span class="tape" id="tTime"><b id="tTimeV">00:00</b></span>
+  <span class="spacer"></span>
+  <button class="tog hide" id="tgPause" title="Esc">❚❚</button>
+  <button class="tog" id="tgBgm" title="M"><svg viewBox="0 0 24 24"><path d="M9 17.5V5.5l11-2.5v12" fill="none" stroke="#fff" stroke-width="2.6" stroke-linejoin="round"/><ellipse cx="6.3" cy="17.8" rx="3.4" ry="2.7" fill="#fff"/><ellipse cx="17.3" cy="15.3" rx="3.4" ry="2.7" fill="#fff"/></svg></button>
+  <button class="tog" id="tgSnd" title="K"><svg viewBox="0 0 24 24"><path d="M3 9h4l5-4.5v15L7 15H3z" fill="#fff"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg></button>
+</div>
+
+<div id="tools">
+  <span class="bw" id="btnUndo"><span class="card" title="Z"><svg viewBox="0 0 24 24"><path d="M9 7H4V2" fill="none" stroke="#3a3c47" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M4.5 7.2A8 8 0 1 1 6 17" fill="none" stroke="#3a3c47" stroke-width="2.4" stroke-linecap="round"/></svg></span></span>
+  <span class="bw" id="btnErase"><span class="era" data-en="ERASER">지우개</span></span>
+  <span class="bw" id="btnMemo"><span class="pen sm"><span data-en="MEMO">메모</span><span class="st" id="memoSt">OFF</span></span></span>
+</div>
+<div id="pad"></div>
+<div id="keys" data-en="1-9 number · arrows move · N memo · Backspace eraser · Z undo">1~9 숫자 · 방향키 이동 · N 메모 · Backspace 지우개 · Z 되돌리기</div>
+
+<div id="dim"></div>
+<div id="stamp"><span id="stampT">참 잘<br>했어요</span></div>
+
+<div id="title">
+  <div class="pick">
+    <span class="card arr" id="lvDn">◀</span>
+    <span class="card lab" id="lvBtn">입문 1</span>
+    <span class="card arr" id="lvUp">▶</span>
+  </div>
+  <div class="best" id="best"></div>
+  <div class="btns">
+    <span class="bw" id="btnStart"><span class="pen" id="btnStartT">시작</span></span>
+    <span class="bw" id="btnNew"><span class="era" data-en="RESTART">처음부터</span></span>
+  </div>
+  <h1 data-en="SUDOKU">스도쿠</h1>
+</div>
+
+<div class="sheetw" id="wPick"><div class="sheet">
+  <button class="xbtn" id="btnPickX">✕</button>
+  <h3 data-en="STAGE">판 고르기</h3>
+  <div id="tiers"></div>
+</div></div>
+
+<div class="sheetw" id="wPause"><div class="sheet">
+  <h3 data-en="PAUSE">잠깐</h3>
+  <div class="row">
+    <span class="bw" id="btnResume"><span class="pen" data-en="RESUME">계속</span></span>
+  </div>
+  <div class="row">
+    <span class="bw" id="btnRestart"><span class="era" data-en="RESTART">처음부터</span></span>
+    <span class="bw" id="btnTitle"><span class="era solo">TITLE</span></span>
+  </div>
+</div></div>
+
+<div class="sheetw" id="wConfirm"><div class="sheet">
+  <h3 data-en="RESTART">처음부터</h3>
+  <div class="row">
+    <span class="bw" id="btnNo"><span class="era solo">✕</span></span>
+    <span class="bw" id="btnYes"><span class="pen" data-en="RESTART">처음부터</span></span>
+  </div>
+</div></div>
+
+<div class="sheetw" id="wClear"><div class="sheet">
+  <h3 id="cStage">입문 1</h3>
+  <div class="big" id="cTime">00:00</div>
+  <div class="sm" id="cBest"></div>
+  <div class="row">
+    <span class="bw" id="btnTitle2"><span class="era solo">TITLE</span></span>
+    <span class="bw" id="btnNext"><span class="pen" id="btnNextT">NEXT</span></span>
+  </div>
+</div></div>
+
+<div class="sheetw" id="wEnd"><div class="sheet">
+  <h3>THE END</h3>
+  <div class="big" id="eCount">60 / 60</div>
+  <div class="sm" id="eTime"></div>
+  <div class="row">
+    <span class="bw" id="btnTitle3"><span class="pen">TITLE</span></span>
+  </div>
+</div></div>
+
+<script src="assets/game-home.js" data-top="6" data-left="6" data-fullscreen="1" defer></script>
+<script src="js/puzzles.js?v=3"></script>
+<script src="js/sfx.js?v=3"></script>
+<script src="js/audio.js?v=3"></script>
+<script src="js/game.js?v=3"></script>
+<script src="/assets/visit.js?v=17" defer></script>
+<script src="/assets/game-events.js" defer></script>
+</body>
+</html>
