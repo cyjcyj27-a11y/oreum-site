@@ -390,7 +390,7 @@
   // 끌고 간 거리가 LOOSE_D 를 넘으면 줄이 풀려 달아난다(현상범마다 한 번). 주인공은 누구보다 빠르지만 뒤 번호일수록 더 빨리 두드려야 따라잡는다
   const LOOSE_D = 80, CHASE_V0 = 4.6, CHASE_K = 0.62;
   const looseV = id => 5.0 + (id - 1) * 0.267;   // 1번 5.0(초당 1번쯤) … 13번 8.2(초당 6번쯤)
-  function tugUI(txt) { const e = $('#tug'); e.classList.toggle('on', !!txt); e.classList.toggle('fight', txt === 'FIGHT'); e.querySelector('b').textContent = txt || 'PULL'; }
+  function tugUI(txt) { const e = $('#tug'); e.classList.toggle('on', !!txt); document.body.classList.toggle('mash-run', txt === 'RUN'); document.body.classList.toggle('mash-fight', txt === 'FIGHT'); e.classList.toggle('fight', txt === 'FIGHT'); e.querySelector('b').textContent = txt || 'PULL'; }
   function endChase() { if (G.fight) CAM.tDist = 7.5; G.chase = null; G.fight = null; tugUI(''); }
   function snapRope(o) {
     o.state = 'loose'; o.getup = 0.25; o.boost = 2.5; o.fleeT = 0; o.lspeed = looseV(o.def.id || 1) + (G.ch === 2 ? 0.3 : 0); o.p.lie(false); o.p.cur = null; o.p.play('stand'); o.pos.y = heightAt(o.pos.x, o.pos.z);
@@ -828,6 +828,7 @@
     click('#btnLand', () => window.OL && OL.go()); click('#cineSkip', () => cineSkip());
     ['#boardUI', '#shopUI'].forEach(s => $(s).addEventListener('click', e => { if (e.target === $(s)) closeUI(); }));
     const lb = $('#lassoBtn'); lb.addEventListener('pointerdown', e => { e.preventDefault(); lb.setPointerCapture(e.pointerId); lassoDown(); }); lb.addEventListener('pointerup', lassoUp); lb.addEventListener('pointercancel', lassoUp);
+    R.domElement.addEventListener('pointerdown', () => { if (touch && (G.chase || G.fight)) lassoDown(); });   // 폰: 쫓기·주먹 싸움 땐 화면 아무 데나 두드려도 뛴다·때린다(올가미 단추와 같다)
     IN.onTap = (x, y) => { if (canClickRide() && horseUnder(x, y)) { clickRide(); return; } if (L.state === 'hold') lassoDown(); };
     R.domElement.addEventListener('pointermove', e => { if (e.pointerType !== 'mouse' || e.buttons) return; R.domElement.style.cursor = canClickRide() && horseUnder(e.clientX, e.clientY) ? 'pointer' : ''; });   // 말 위에선 손가락 커서
     IN.onKey = e => {
