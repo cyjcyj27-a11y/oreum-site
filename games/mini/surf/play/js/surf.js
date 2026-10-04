@@ -654,6 +654,14 @@ cv.addEventListener('pointermove', function (e) {
 });
 cv.addEventListener('pointerup', function () { swp = null; });
 cv.addEventListener('pointercancel', function () { swp = null; });
+/* 폰 점프 단추(스와이프 위와 같은 일) */
+(function () {
+  var jb = $('jumpB'), H5 = document.documentElement;
+  try { if (matchMedia('(pointer:coarse)').matches) H5.classList.add('touch'); } catch (er) {}
+  window.addEventListener('pointerdown', function (e) { if (e.pointerType === 'touch') H5.classList.add('touch'); }, true);
+  jb.addEventListener('pointerdown', function (e) { e.preventDefault(); e.stopPropagation(); jb.classList.add('on'); input('U'); });
+  ['pointerup', 'pointercancel', 'pointerleave'].forEach(function (t) { jb.addEventListener(t, function () { jb.classList.remove('on'); }); });
+})();
 
 /* ====================================================================== 미션: 셋씩, 끝내면 배수 +1(영구) */
 var MIS_ORDER = { c50: 1, m500: 1, j10: 2, d8: 2, cl5: 3, o5: 3, c150: 4, m1200: 4, dol1: 5, mg1: 5, sd1: 5, j25: 6, d20: 6, c300: 7, m2500: 7, cl15: 7, o15: 7, dol2: 8, m4000: 9 };
