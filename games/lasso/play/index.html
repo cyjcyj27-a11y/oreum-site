@@ -88,6 +88,7 @@
     background: radial-gradient(circle at 6px 6px, #b9b6ad 0 1.6px, transparent 2.2px), radial-gradient(circle at calc(100% - 6px) calc(100% - 6px), #b9b6ad 0 1.6px, transparent 2.2px), linear-gradient(180deg, #57504a, #3a3531 55%, #26221f);
     box-shadow: inset 0 2px 0 rgba(255,255,255,.18), 0 4px 0 var(--ink), 0 6px 6px rgba(0,0,0,.3); text-shadow: 0 2px 0 #000; }
   .stat b { font-weight: 400; } .stat small { font-family: 'Ria'; font-size: 14px; color: #e9dcc0; }
+  #sTarget small { white-space: nowrap; overflow: hidden; max-width: 150px; text-align: center; }   /* 긴 목표 이름(영문 Savings Club Ring 등)은 game.js fitTargetName 이 글자만 줄인다(10/4 영문판 검수: 폰 667px 에서 상단바 단추가 둘째 줄로 밀렸다) */
   #sTarget { display: none; pointer-events: auto; } #sTarget.on { display: flex; }
   #sTarget img { width: 30px; height: 30px; border: 2px solid #e9dcc0; background: #cdb98a; }
   /* 방향 화살표: 몸통이 있는 굵은 화살, 밝은 노랑에 짙은 테(세모만 있으면 어느 쪽을 가리키는지 안 읽힌다) */
@@ -239,7 +240,7 @@
   @media (max-height: 480px) {
     #title { padding-bottom: 3vh; } #title h1 { font-size: min(15vh, 7.4vw); -webkit-text-stroke-width: 6px; border-width: 4px; }
     #title .btns { margin-bottom: 3.5vh; gap: 4vw; } #title .btns .bw { min-width: 0; width: 26vw; } #title .btns .btn, #title .btns .btn.main { font-size: 6.6vh; padding: 2vh 1vw 1.8vh; }
-    #topbar { min-height: 40px; gap: 6px; } .stat { height: 31px; font-size: 17px; padding: 0 9px; } #sHp svg { width: 18px; height: 18px; } #sHp .hp i { width: 14px; height: 9px; } .stat small { font-size: 12px; } #sTarget img { width: 23px; height: 23px; } #sTarget i { width: 26px; height: 26px; } #way i { left: -27px; top: -27px; width: 54px; height: 54px; }
+    #topbar { min-height: 40px; gap: 6px; } .stat { height: 31px; font-size: 17px; padding: 0 9px; } #sHp svg { width: 18px; height: 18px; } #sHp .hp i { width: 14px; height: 9px; } .stat small { font-size: 12px; } #sTarget small { max-width: 96px; } #sTarget img { width: 23px; height: 23px; } #sTarget i { width: 26px; height: 26px; } #way i { left: -27px; top: -27px; width: 54px; height: 54px; }
     .tog { width: 33px; height: 33px; } .tog svg { width: 17px; height: 17px; }
     #pad { width: 122px; height: 122px; left: calc(18px + env(safe-area-inset-left)); bottom: calc(14px + env(safe-area-inset-bottom)); } #pad i { width: 52px; height: 52px; margin: -26px 0 0 -26px; }
     #lassoBtn { width: 88px; height: 88px; } #lassoBtn svg { width: 52px; height: 52px; } #callBtn.on { width: 50px; height: 50px; } .btn.sm { font-size: 16px; padding: 7px 24px 6px; }
@@ -259,6 +260,7 @@
 <div id="banner"></div>
 
 <div id="load"><div class="ttl">올가미 언니</div><div class="bar"><i></i></div><div class="pct">0%</div></div>
+<script>if (/[?&]lang=en(&|$)/.test(location.search)) { document.querySelector('#load .ttl').textContent = 'LASSO SISTER'; document.title = 'LASSO SISTER'; }</script>   <!-- 영문판: 불러오는 동안에도 영어 제목(10/4 영문판 검수) -->
 
 <div id="title">
   <h1>올가미 언니</h1>
@@ -309,7 +311,7 @@
 <script src="assets/wanted.js?v=1"></script>
 <script src="js/data.js?v=14"></script>
 <script src="js/music.js?v=1"></script>
-<script src="js/game.js?v=55"></script>
+<script src="js/game.js?v=57"></script>
 <script src="/assets/visit.js?v=17" defer></script>
 <script src="/assets/game-events.js?v=2" defer></script>
 </body>

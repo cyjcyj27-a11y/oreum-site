@@ -532,12 +532,15 @@
   function updCapHUD() {}   // 10/3 사장님 "올가미 표시는 왜 있어? → 빼자": 묶은 수 칸(#sCap)을 뺐다. 묶인 놈은 말 뒤에 보이고, 셋이 차면 던질 때 FULL 이 뜬다
   const mainCaptive = () => captives.find(o => o.kind === 'main');
   let HORSE_IMG = '';   // 위쪽 목적지 칸의 말 머리(아래에서 그린다)
+  function fitTargetName() { const n = $('#sTarget small'); n.style.fontSize = ''; const f0 = parseFloat(getComputedStyle(n).fontSize); let f = f0; while (n.scrollWidth > n.clientWidth + 1 && f > f0 * 0.5) { f -= 0.5; n.style.fontSize = f + 'px'; } }   // 넘칠 때만 글자를 줄인다(배치는 그대로)
+  addEventListener('resize', () => setTimeout(fitTargetName, 50));
   function updTargetHUD() {
     const e = $('#sTarget'), img = e.querySelector('img'), nm = e.querySelector('small'); e.classList.add('on');
     if (captives.length) { img.style.display = 'none'; nm.textContent = 'JAIL'; G.dest = 'jail'; }
     else if (G.horseDead) { img.style.display = ''; img.src = HORSE_IMG; nm.textContent = '$' + DATA.HORSE_PRICE; G.dest = 'shop'; }   // 말이 죽으면 새 말 사러 상점으로(10/3 "상점앞으로 가서 말을 사야되는구나 알수있게")
     else if (G.target) { const d = OUTLAWS[G.target - 1]; img.style.display = ''; img.src = d.img || ''; nm.textContent = d.name; G.dest = 'target'; }
     else { img.style.display = 'none'; nm.textContent = 'WANTED'; G.dest = 'board'; }
+    fitTargetName();
   }
   // 목적지 표식: 은신처 위에서 까딱이는 노란 화살(건물에 가려도 보인다). 마을(게시판·감옥·마구간)엔 띄우지 않는다 — 건물 생김새로 안다(10/3 "ui를 말이되게 구성하면 맨날 노란테두리로 얼버무릴일도 없지")
   const mark = new THREE.Group();
@@ -590,7 +593,9 @@
       b.onclick = () => { if (done) return; if (lock) { sfx('no'); return; } sfx('paper'); if (G.target !== d.id && !captives.some(o => o.kind === 'main' && o.def.id === d.id)) setTarget(d.id); closeUI(); };
       box.appendChild(b);
     });
-    $('#boardUI').classList.add('show'); box.querySelectorAll('.n').forEach(n => { if (n.scrollWidth > n.clientWidth) n.style.fontSize = (15 * n.clientWidth / n.scrollWidth).toFixed(1) + 'px'; }); // 긴 죄목은 글자를 줄인다
+    $('#boardUI').classList.add('show');
+    const fitN = () => box.querySelectorAll('.n, .w, .p').forEach(n => { n.style.fontSize = ''; const w = n.clientWidth, sw = n.scrollWidth; if (w && sw > w) n.style.fontSize = (parseFloat(getComputedStyle(n).fontSize) * w / sw * 0.97).toFixed(1) + 'px'; });   // 긴 죄목(영문 Savings Club Ring 등)·폰에서 전단 폭보다 넓던 WANTED·$10,000 은 글자를 줄인다. 창이 막 뜰 때는 폭이 0일 수 있어 조금 뒤에 한 번 더
+    fitN(); setTimeout(fitN, 60); setTimeout(fitN, 300);
     const sel = box.querySelector('.poster:not(.done):not(.lock)'); if (sel && sel.scrollIntoView) sel.scrollIntoView({ inline: 'center', block: 'nearest' });
   }
   const ICON = {
