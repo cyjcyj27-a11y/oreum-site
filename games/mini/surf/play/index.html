@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>서프런 게임</title>
+<!-- 3D 판(2026-10-03 새로 만듦). 2D 판은 index2d.html.
+  버튼 디자인(oreum-game-ui 규칙 7):
+  소재: 서핑보드. 주 단추 = 산호색 유광 레진 보드(가운데 나무 스트링어 줄, 위 넓은 광택), 보조 단추·상단 알약·창 = 흰 레진 보드(위아래 산호·청록 레일 줄), 둥근 단추 = 청록 유광 지느러미 받침
+  모양: 양끝 둥근 긴 알약(보드 윤곽), 창은 큰 둥근 모서리 판
+  색 하나: 산호 #ff5a3c(주), 흰 레진 #fbf7ef 에 짙은 청록 #0b3a45 글자(보조)
+  재질 층: 짙은 청록 테 + 아래 두께 + 위 넓은 유광 반사 + 아래 그늘 + 스트링어(가는 나무 줄)
+  누름: 물에 눌리듯 4px 내려가며 살짝 납작(scaleY .96), 떼면 튕겨 올라옴 -->
+<style>
+@font-face{font-family:'Summer';src:url('fonts/summer.woff2?v=4') format('woff2');font-display:block}
+@font-face{font-family:'Plg';src:url('fonts/plg.woff2?v=4') format('woff2');font-display:swap}
+:root{--u:.5px;--coral:#ff5a3c;--coralD:#d93a20;--teal:#0b3a45;--teal2:#127184;--resin:#fbf7ef;--wood:#b07a3f}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+html,body{width:100%;height:100%;overflow:hidden;font-family:'Summer','Plg',sans-serif;color:var(--teal);background:#7aa9c4;
+  user-select:none;-webkit-user-select:none;touch-action:none;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+#cv{position:fixed;left:0;top:0;display:block;touch-action:none}
+button{font:inherit;color:inherit;border:0;background:none}
+
+/* ---------- 단추: 보드 ---------- */
+.btn{position:relative;pointer-events:auto;cursor:pointer;font-family:'Summer',sans-serif;font-size:calc(var(--u)*46);line-height:1;color:var(--teal);white-space:nowrap;letter-spacing:.02em;
+  padding:calc(var(--u)*26) calc(var(--u)*56) calc(var(--u)*24);min-height:46px;min-width:calc(var(--u)*240);border-radius:999px;
+  border:calc(var(--u)*6) solid var(--teal);
+  background:linear-gradient(180deg,#fff 0%,var(--resin) 45%,#e9e1d1 100%);
+  box-shadow:inset 0 calc(var(--u)*7) 0 rgba(255,255,255,.9),inset 0 calc(var(--u)*-8) 0 rgba(11,58,69,.12),inset 0 calc(var(--u)*12) 0 calc(var(--u)*-6) var(--coral),0 calc(var(--u)*9) 0 var(--teal);
+  display:flex;align-items:center;justify-content:center;transition:transform .24s cubic-bezier(.34,1.56,.64,1),box-shadow .24s,filter .15s}
+.btn span{position:relative;z-index:1}
+/* 스트링어: 보드 가운데를 지나는 가는 나무 줄 */
+.btn::before{content:'';position:absolute;left:12%;right:12%;top:50%;height:calc(var(--u)*3);margin-top:calc(var(--u)*-1.5);background:var(--wood);opacity:.35;border-radius:2px}
+/* 유광 레진: 위쪽 넓은 반사 */
+.btn::after{content:'';position:absolute;left:9%;right:9%;top:calc(var(--u)*7);height:34%;border-radius:999px;background:linear-gradient(180deg,rgba(255,255,255,.75),rgba(255,255,255,0));pointer-events:none}
+.btn:hover{filter:brightness(1.06)}
+.btn:active{transform:translateY(calc(var(--u)*6)) scaleY(.96);transition-duration:.05s;
+  box-shadow:inset 0 calc(var(--u)*7) 0 rgba(255,255,255,.9),inset 0 calc(var(--u)*-8) 0 rgba(11,58,69,.12),inset 0 calc(var(--u)*12) 0 calc(var(--u)*-6) var(--coral),0 calc(var(--u)*3) 0 var(--teal)}
+.btn.main{font-size:calc(var(--u)*66);color:#fff;padding:calc(var(--u)*30) calc(var(--u)*90) calc(var(--u)*28);min-width:calc(var(--u)*380);
+  background:linear-gradient(180deg,#ff8a6a 0%,var(--coral) 46%,var(--coralD) 100%);
+  -webkit-text-stroke:calc(var(--u)*7) var(--teal);paint-order:stroke fill;
+  box-shadow:inset 0 calc(var(--u)*7) 0 rgba(255,255,255,.55),inset 0 calc(var(--u)*-9) 0 rgba(0,0,0,.16),0 calc(var(--u)*10) 0 var(--teal)}
+.btn.main::before{background:#ffe6c8;opacity:.45}
+.btn.main:active{box-shadow:inset 0 calc(var(--u)*7) 0 rgba(255,255,255,.55),inset 0 calc(var(--u)*-9) 0 rgba(0,0,0,.16),0 calc(var(--u)*4) 0 var(--teal)}
+
+/* ---------- 상단바: 흰 보드 알약 + 청록 지느러미 단추 ---------- */
+#topbar{position:fixed;top:0;left:0;right:0;z-index:20;display:flex;align-items:center;gap:6px;pointer-events:none;
+  padding:calc(7px + env(safe-area-inset-top)) 8px 8px calc(104px + env(safe-area-inset-left))}
+.stat{display:flex;align-items:center;gap:5px;height:34px;padding:0 12px 0 10px;flex:0 0 auto;border-radius:999px;border:2.5px solid var(--teal);color:var(--teal);
+  background:linear-gradient(180deg,#fff,var(--resin) 55%,#e7dfcf);box-shadow:inset 0 2px 0 #fff,inset 0 -3px 0 rgba(11,58,69,.1),0 3px 0 var(--teal)}
+.stat b{font-family:'Plg',sans-serif;font-weight:900;font-size:18px;line-height:1;min-width:14px}
+.stat i{font-style:normal;font-family:'Plg',sans-serif;font-size:12px;color:var(--coralD)}
+.coin{width:18px;height:18px;border-radius:50%;flex:0 0 18px;background:radial-gradient(circle at 35% 30%,#fff3b8 0 18%,#ffd24a 30%,#e09a14 72%,#a8650a 100%);box-shadow:inset 0 0 0 2px rgba(150,90,10,.55)}
+#coinP.pop{animation:cp .22s}
+@keyframes cp{40%{transform:scale(1.18)}}
+.spacer{flex:1 1 4px}
+.tog{pointer-events:auto;position:relative;width:38px;height:38px;flex:0 0 38px;border-radius:50%;cursor:pointer;border:2.5px solid var(--teal);
+  background:radial-gradient(circle at 35% 28%,#3fb3c6 0 20%,var(--teal2) 55%,#0b4f5c 100%);box-shadow:inset 0 2px 0 rgba(255,255,255,.45),0 3px 0 var(--teal);
+  display:flex;align-items:center;justify-content:center;transition:transform .22s cubic-bezier(.34,1.56,.64,1)}
+.tog:active{transform:translateY(2px) scale(.94);transition-duration:.04s}
+.tog svg{width:17px;height:17px;display:block}
+.tog.off{opacity:.6}
+.tog.off::after{content:'';position:absolute;left:24%;right:24%;top:50%;height:2px;margin-top:-1px;background:#fff;border-radius:1px;transform:rotate(-40deg)}
+@media (max-width:400px){.tog{width:34px;height:34px;flex-basis:34px}.stat{padding:0 9px 0 8px}.stat b{font-size:16px}}
+body.m-title #distP,body.m-title #multP,body.m-title #coinP,body.m-title #pauseB,body.m-over #pauseB,body.m-load #topbar{display:none}
+
+/* ---------- 화면 ---------- */
+.scr{position:fixed;inset:0;z-index:30;pointer-events:none}
+/* 타이틀: 제목 맨 아래, 단추 그 위(사장님 10/2) */
+#logo{position:absolute;left:50%;bottom:calc(var(--u)*120 + env(safe-area-inset-bottom));transform:translateX(-50%) rotate(-3deg);white-space:nowrap;
+  font-family:'Summer',sans-serif;line-height:1;font-size:calc(var(--u)*170);color:#fff;letter-spacing:.02em;
+  -webkit-text-stroke:calc(var(--u)*16) var(--teal);paint-order:stroke fill;text-shadow:0 calc(var(--u)*12) 0 var(--teal)}
+body.en #logo{font-size:calc(var(--u)*140)}
+#best{position:absolute;left:0;right:0;bottom:calc(var(--u)*54 + env(safe-area-inset-bottom));text-align:center;font-family:'Plg',sans-serif;font-size:calc(var(--u)*36);color:#fff;
+  -webkit-text-stroke:calc(var(--u)*8) var(--teal);paint-order:stroke fill}
+#tbtns{position:absolute;left:0;right:0;bottom:calc(var(--u)*400 + env(safe-area-inset-bottom));display:flex;justify-content:center}
+html.wide #logo{left:72%;bottom:calc(var(--u)*110);font-size:calc(var(--u)*150)}
+html.wide #best{left:44%;bottom:calc(var(--u)*40)}
+html.wide #tbtns{left:44%;bottom:auto;top:calc(var(--u)*300)}
+
+/* 창: 흰 레진 보드 판 + 위 레이싱 줄 두 개 */
+.card{pointer-events:auto;position:absolute;left:50%;top:50%;width:min(92vw,calc(var(--u)*680));transform:translate(-50%,-50%);padding:calc(var(--u)*70) calc(var(--u)*46) calc(var(--u)*50);text-align:center;color:var(--teal);
+  border-radius:calc(var(--u)*56);border:calc(var(--u)*7) solid var(--teal);
+  background:linear-gradient(180deg,var(--coral) 0 calc(var(--u)*18),#fff calc(var(--u)*18) calc(var(--u)*26),var(--teal2) calc(var(--u)*26) calc(var(--u)*36),transparent calc(var(--u)*36)),linear-gradient(180deg,#fff,var(--resin) 40%,#efe7d6);
+  box-shadow:inset 0 calc(var(--u)*-10) 0 rgba(11,58,69,.08),0 calc(var(--u)*14) 0 var(--teal);animation:pop .24s cubic-bezier(.34,1.56,.64,1)}
+@keyframes pop{from{transform:translate(-50%,-50%) scale(.86);opacity:0}}
+.dim{background:rgba(6,30,40,.35);pointer-events:auto}
+.card h2{font-family:'Summer',sans-serif;font-weight:400;font-size:calc(var(--u)*86);line-height:1;color:#fff;-webkit-text-stroke:calc(var(--u)*12) var(--teal);paint-order:stroke fill}
+.card .big{font-family:'Plg',sans-serif;font-size:calc(var(--u)*120);line-height:1.02;color:var(--teal);margin-top:calc(var(--u)*18)}
+.card .big i{font-style:normal;font-size:calc(var(--u)*48);color:var(--coralD);margin-left:calc(var(--u)*6)}
+.card .line{display:flex;align-items:center;justify-content:center;gap:calc(var(--u)*14);font-family:'Plg',sans-serif;font-size:calc(var(--u)*50);margin-top:calc(var(--u)*6)}
+.card .line .coin{width:calc(var(--u)*46);height:calc(var(--u)*46);flex-basis:calc(var(--u)*46)}
+.card .sub{font-family:'Plg',sans-serif;font-size:calc(var(--u)*32);color:#4f7480;margin-top:calc(var(--u)*6)}
+.card .btns{display:flex;justify-content:center;gap:calc(var(--u)*26);margin-top:calc(var(--u)*44)}
+.card .btns .btn{font-size:calc(var(--u)*40);min-width:calc(var(--u)*210);padding:calc(var(--u)*22) calc(var(--u)*36) calc(var(--u)*20)}
+.card .btns .btn.main{font-size:calc(var(--u)*50);min-width:calc(var(--u)*260)}
+#newbest{display:inline-block;margin-top:calc(var(--u)*12);font-family:'Summer',sans-serif;font-size:calc(var(--u)*36);color:#fff;background:var(--coral);border:calc(var(--u)*5) solid var(--teal);border-radius:999px;padding:calc(var(--u)*10) calc(var(--u)*24) calc(var(--u)*8);transform:rotate(-4deg)}
+.mis{margin-top:calc(var(--u)*24);display:flex;flex-direction:column;gap:calc(var(--u)*8);text-align:left}
+.mis div{font-family:'Summer',sans-serif;font-size:calc(var(--u)*32);line-height:1.2;color:var(--teal);padding:calc(var(--u)*12) calc(var(--u)*22) calc(var(--u)*10);border-radius:999px;background:rgba(18,113,132,.09);display:flex;justify-content:space-between;align-items:center;gap:calc(var(--u)*10)}
+.mis div b{font-family:'Plg',sans-serif;font-weight:900;font-size:calc(var(--u)*30);color:#4f7480;flex:0 0 auto}
+.mis div.done{background:rgba(255,90,60,.16);color:var(--coralD)}
+.mis div.done b{color:var(--coralD)}
+html.wide .card{width:calc(var(--u)*760)}
+@media (max-height:480px){
+  .card{top:47%;padding-top:calc(var(--u)*50);padding-bottom:calc(var(--u)*30)}
+  .card h2{font-size:calc(var(--u)*68)}
+  .card .big{font-size:calc(var(--u)*84);margin-top:calc(var(--u)*6)}
+  .card .line{font-size:calc(var(--u)*40);margin-top:0}
+  .card .sub{font-size:calc(var(--u)*28);margin-top:0}
+  .mis{margin-top:calc(var(--u)*12);gap:calc(var(--u)*5)}
+  .mis div{padding:calc(var(--u)*7) calc(var(--u)*18) calc(var(--u)*5);font-size:calc(var(--u)*26)}
+  .mis div b{font-size:calc(var(--u)*26)}
+  .card .btns{margin-top:calc(var(--u)*24)}
+  #newbest{margin-top:calc(var(--u)*4);font-size:calc(var(--u)*28)}
+  /* 폰 가로: 단추를 미션 줄 위로(아래 26% 는 전체화면 알림이 가린다) */
+  .card{display:flex;flex-direction:column;align-items:center}
+  .card .btns{order:5;margin-top:calc(var(--u)*20)}
+  .card .mis{order:6;width:100%}
+}
+
+/* 덮개: 잠수 물막, 돌고래 테, 떠오르는 글자, 로딩 */
+#uw{position:fixed;inset:0;z-index:6;pointer-events:none;opacity:0;background:linear-gradient(180deg,rgba(20,110,130,.25) 0%,rgba(8,80,105,.6) 55%,rgba(4,50,75,.85) 100%)}
+#dolv{position:fixed;inset:0;z-index:6;pointer-events:none;opacity:0;box-shadow:inset 0 0 calc(var(--u)*160) calc(var(--u)*40) rgba(110,220,255,.5)}
+#fxl{position:fixed;inset:0;z-index:25;pointer-events:none}
+.fx{position:absolute;top:24%;transform:translateX(-50%);font-family:'Summer',sans-serif;font-size:calc(var(--u)*64);line-height:1;white-space:nowrap;color:#fff;
+  -webkit-text-stroke:calc(var(--u)*11) var(--teal);paint-order:stroke fill;animation:fxup 1.1s ease-out forwards}
+.fx-y{color:#ffd24a}.fx-b{color:#8ff0ff;font-size:calc(var(--u)*80)}.fx-m{color:var(--coral);font-size:calc(var(--u)*80)}
+@keyframes fxup{0%{opacity:0;transform:translate(-50%,10px) scale(.8)}12%{opacity:1;transform:translate(-50%,0) scale(1.08)}70%{opacity:1}100%{opacity:0;transform:translate(-50%,calc(var(--u)*-70))}}
+#loading{position:fixed;inset:0;z-index:40;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,#2a6fa8,#ffcf9e)}
+#loading .bar{width:min(60vw,320px);height:18px;border-radius:999px;border:3px solid var(--teal);background:var(--resin);overflow:hidden;box-shadow:0 3px 0 var(--teal)}
+#loadBar{display:block;height:100%;width:0;background:linear-gradient(180deg,#ff8a6a,var(--coral));transition:width .2s}
+
+/* ---------- 타이틀 두 단추: SHOP(보조) + START(주) 한 줄 ---------- */
+#tbtns{gap:calc(var(--u)*30);align-items:center}
+.btn.sub{font-size:calc(var(--u)*44);min-width:calc(var(--u)*230);padding:calc(var(--u)*24) calc(var(--u)*40) calc(var(--u)*22)}
+.card .line .x{font-family:'Plg',sans-serif;color:var(--coralD);margin-right:calc(var(--u)*14)}
+
+/* ---------- 상점: 아래(세로) 또는 오른쪽(가로)에 흰 레진 보드 판, 위쪽엔 헬라가 계속 서핑 ---------- */
+#shop .sheet{pointer-events:auto;position:absolute;left:0;right:0;bottom:0;height:58%;padding:calc(var(--u)*30) calc(var(--u)*34) calc(var(--u)*30 + env(safe-area-inset-bottom));
+  border-radius:calc(var(--u)*56) calc(var(--u)*56) 0 0;border:calc(var(--u)*7) solid var(--teal);border-bottom:0;display:flex;flex-direction:column;
+  background:linear-gradient(180deg,var(--coral) 0 calc(var(--u)*18),#fff calc(var(--u)*18) calc(var(--u)*26),var(--teal2) calc(var(--u)*26) calc(var(--u)*36),transparent calc(var(--u)*36)),linear-gradient(180deg,#fff,var(--resin) 40%,#efe7d6);
+  box-shadow:0 calc(var(--u)*-8) 0 rgba(11,58,69,.25);animation:up .26s cubic-bezier(.34,1.56,.64,1)}
+@keyframes up{from{transform:translateY(30%);opacity:0}}
+.shead{display:flex;align-items:center;gap:calc(var(--u)*20);margin-top:calc(var(--u)*24)}
+.shead h2{font-family:'Summer',sans-serif;font-weight:400;font-size:calc(var(--u)*72);line-height:1;color:#fff;-webkit-text-stroke:calc(var(--u)*11) var(--teal);paint-order:stroke fill;flex:1}
+.shead .bal{height:auto;padding:calc(var(--u)*10) calc(var(--u)*26)}
+.shead .bal b{font-size:calc(var(--u)*40)}
+.shead .bal .coin{width:calc(var(--u)*38);height:calc(var(--u)*38);flex-basis:calc(var(--u)*38)}
+.shead .tog.x{width:calc(var(--u)*84);height:calc(var(--u)*84);flex:0 0 calc(var(--u)*84);min-width:44px;min-height:44px}
+.tabs{display:flex;gap:calc(var(--u)*16);margin-top:calc(var(--u)*24)}
+.tab{flex:1;cursor:pointer;font-family:'Summer',sans-serif;font-size:calc(var(--u)*40);line-height:1;color:var(--teal);padding:calc(var(--u)*20) 0 calc(var(--u)*16);min-height:44px;border-radius:999px;
+  border:calc(var(--u)*5) solid var(--teal);background:linear-gradient(180deg,#fff,var(--resin) 55%,#e7dfcf);box-shadow:0 calc(var(--u)*6) 0 var(--teal);transition:transform .2s cubic-bezier(.34,1.56,.64,1)}
+.tab:active{transform:translateY(calc(var(--u)*4))}
+.tab.on{color:#fff;background:linear-gradient(180deg,#3fb3c6,var(--teal2) 55%,#0b4f5c);-webkit-text-stroke:calc(var(--u)*6) var(--teal);paint-order:stroke fill}
+.grid{flex:1;min-height:0;overflow-y:auto;display:grid;grid-template-columns:repeat(3,1fr);gap:calc(var(--u)*22);margin-top:calc(var(--u)*28);padding:calc(var(--u)*4) calc(var(--u)*4) calc(var(--u)*12);align-content:start}
+.item{position:relative;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:calc(var(--u)*10);padding:calc(var(--u)*22) calc(var(--u)*10) calc(var(--u)*18);border-radius:calc(var(--u)*34);
+  border:calc(var(--u)*5) solid var(--teal);background:linear-gradient(180deg,#fff,var(--resin) 60%,#ece4d4);box-shadow:inset 0 calc(var(--u)*5) 0 #fff,0 calc(var(--u)*7) 0 var(--teal);transition:transform .2s cubic-bezier(.34,1.56,.64,1)}
+.item:active{transform:translateY(calc(var(--u)*5)) scaleY(.97)}
+.item.on{background:linear-gradient(180deg,#e9fbff,#c8eef5);border-color:var(--teal2)}
+.item .nm{font-family:'Summer',sans-serif;font-size:calc(var(--u)*30);line-height:1.1;color:var(--teal);text-align:center}
+.item em{position:absolute;right:calc(var(--u)*16);top:calc(var(--u)*12);font-style:normal;font-family:'Plg',sans-serif;font-size:calc(var(--u)*30);color:var(--coralD)}
+.tag{font-family:'Plg',sans-serif;font-weight:900;font-size:calc(var(--u)*28);line-height:1;display:flex;align-items:center;gap:calc(var(--u)*6);padding:calc(var(--u)*10) calc(var(--u)*18);border-radius:999px;background:rgba(18,113,132,.12);color:var(--teal)}
+.tag.on{background:var(--coral);color:#fff}
+.tag.price .coin{width:calc(var(--u)*28);height:calc(var(--u)*28);flex-basis:calc(var(--u)*28)}
+.tag.no{color:#d22;background:rgba(220,40,40,.1)}
+/* 그림: 보드는 서핑보드 윤곽 + 레일 줄, 옷은 색 동그라미, 아이템은 빛나는 보드와 자석 */
+.pb{display:block;width:calc(var(--u)*56);height:calc(var(--u)*150);border-radius:50% 50% 46% 46% / 62% 62% 38% 38%;border:calc(var(--u)*4) solid var(--teal);
+  background-image:linear-gradient(90deg,transparent 22%,var(--st) 22% 30%,transparent 30% 70%,var(--st) 70% 78%,transparent 78%);box-shadow:inset calc(var(--u)*6) calc(var(--u)*6) 0 rgba(255,255,255,.35)}
+.po{display:block;width:calc(var(--u)*110);height:calc(var(--u)*110);border-radius:50%;border:calc(var(--u)*5) solid var(--teal);box-shadow:inset calc(var(--u)*10) calc(var(--u)*10) 0 rgba(255,255,255,.4),inset calc(var(--u)*-8) calc(var(--u)*-8) 0 rgba(0,0,0,.15);margin:calc(var(--u)*20) 0}
+.pi{display:block;width:calc(var(--u)*110);height:calc(var(--u)*150);position:relative}
+.pi-shield{width:calc(var(--u)*56);border-radius:50% 50% 46% 46% / 62% 62% 38% 38%;border:calc(var(--u)*4) solid var(--teal);background:linear-gradient(180deg,#b9f6ff,#3fc8ff);box-shadow:0 0 calc(var(--u)*24) rgba(63,200,255,.8)}
+.pi-magnet{width:calc(var(--u)*100);height:calc(var(--u)*100);margin:calc(var(--u)*25) 0;border:calc(var(--u)*28) solid #d62b26;border-bottom:0;border-radius:calc(var(--u)*100) calc(var(--u)*100) 0 0}
+.pi-magnet::before,.pi-magnet::after{content:'';position:absolute;bottom:calc(var(--u)*-28);width:calc(var(--u)*28);height:calc(var(--u)*28);background:#d0d4d8;left:calc(var(--u)*-28)}
+.pi-magnet::after{left:auto;right:calc(var(--u)*-28)}
+html.wide #shop .sheet{left:auto;right:0;top:0;bottom:0;height:auto;width:min(56vw,calc(var(--u)*1000));border-radius:calc(var(--u)*56) 0 0 calc(var(--u)*56);border-bottom:calc(var(--u)*7) solid var(--teal);border-right:0}
+body.m-shop #distP,body.m-shop #multP,body.m-shop #coinP,body.m-shop #pauseB{display:none}
+@media (max-height:480px){
+  .shead{margin-top:calc(var(--u)*30)}
+  .shead h2{font-size:calc(var(--u)*60)}
+  .tabs{margin-top:calc(var(--u)*14)}
+  .grid{gap:calc(var(--u)*14);margin-top:calc(var(--u)*16)}
+  .pb{width:calc(var(--u)*36);height:calc(var(--u)*96)}
+  .po{width:calc(var(--u)*70);height:calc(var(--u)*70);margin:0}
+  .pi{width:calc(var(--u)*70);height:calc(var(--u)*96)}
+  .pi-shield{width:calc(var(--u)*36)}
+  .pi-magnet{width:calc(var(--u)*70);height:calc(var(--u)*70);margin:calc(var(--u)*13) 0;border-width:calc(var(--u)*20)}
+  /* 폰 가로: 한 줄 여섯 칸(아래 26% 는 전체화면 알림이 가린다) */
+  .grid{grid-template-columns:repeat(6,1fr)}
+  .item{padding:calc(var(--u)*14) calc(var(--u)*4) calc(var(--u)*12);gap:calc(var(--u)*8);border-radius:calc(var(--u)*26)}
+  .item .nm{font-size:calc(var(--u)*24)}
+  .tag{font-size:calc(var(--u)*22);padding:calc(var(--u)*6) calc(var(--u)*10)}
+  .pb{width:calc(var(--u)*30);height:calc(var(--u)*80)}
+  .po{width:calc(var(--u)*60);height:calc(var(--u)*60);margin:calc(var(--u)*10) 0}
+  .pi{width:calc(var(--u)*60);height:calc(var(--u)*80)}
+  .pi-shield{width:calc(var(--u)*30)}
+  .pi-magnet{width:calc(var(--u)*56);height:calc(var(--u)*56);margin:calc(var(--u)*12) 0;border-width:calc(var(--u)*16)}
+  .pi-magnet::before,.pi-magnet::after{width:calc(var(--u)*16);height:calc(var(--u)*16);bottom:calc(var(--u)*-16);left:calc(var(--u)*-16)}
+  .pi-magnet::after{left:auto;right:calc(var(--u)*-16)}
+}
+</style>
+</head>
+<body class="m-load">
+<canvas id="cv"></canvas>
+<div id="uw"></div><div id="dolv"></div><div id="fxl"></div>
+
+<div id="topbar">
+  <div class="stat" id="distP"><b id="distV">0</b></div>
+  <div class="stat" id="coinP"><span class="coin"></span><b id="coinV">0</b></div>
+  <div class="stat" id="multP"><b id="multV">x1</b></div>
+  <div class="spacer"></div>
+  <div class="tog" id="pauseB"><svg viewBox="0 0 24 24"><rect x="5" y="4" width="5" height="16" rx="1.5" fill="#fff"/><rect x="14" y="4" width="5" height="16" rx="1.5" fill="#fff"/></svg></div>
+  <div class="tog" id="bgmB"><svg viewBox="0 0 24 24"><path d="M9 17.5V5.5l11-2.5v12" fill="none" stroke="#fff" stroke-width="2.6" stroke-linejoin="round"/><ellipse cx="6.3" cy="17.8" rx="3.4" ry="2.7" fill="#fff"/><ellipse cx="17.3" cy="15.3" rx="3.4" ry="2.7" fill="#fff"/></svg></div>
+  <div class="tog" id="sfxB"><svg viewBox="0 0 24 24"><path d="M3 9h4l5-4.5v15L7 15H3z" fill="#fff"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg></div>
+</div>
+
+<div class="scr" id="title" hidden>
+  <div id="tbtns"><button class="btn sub" id="shopB"><span>SHOP</span></button><button class="btn main" id="startB"><span>START</span></button></div>
+  <div id="logo">서프런 게임</div>
+  <div id="best">BEST 0m</div>
+</div>
+
+<div class="scr" id="shop" hidden>
+  <div class="sheet">
+    <div class="shead"><h2>SHOP</h2><div class="stat bal"><span class="coin"></span><b id="shopCoin">0</b></div><button class="tog x" id="shopX" aria-label="close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" stroke="#fff" stroke-width="3.2" stroke-linecap="round"/></svg></button></div>
+    <div class="tabs"><button class="tab" id="tab_board"><span>보드</span></button><button class="tab" id="tab_outfit"><span>의상</span></button><button class="tab" id="tab_item"><span>아이템</span></button></div>
+    <div class="grid" id="shopList"></div>
+  </div>
+</div>
+
+<div class="scr dim" id="pause" hidden>
+  <div class="card">
+    <h2>PAUSE</h2>
+    <div class="mis" id="misP"></div>
+    <div class="btns"><button class="btn" id="homeB"><span>HOME</span></button><button class="btn main" id="resumeB"><span>GO</span></button></div>
+  </div>
+</div>
+
+<div class="scr dim" id="over" hidden>
+  <div class="card">
+    <h2>GAME OVER</h2>
+    <div class="big" id="oScore">0</div>
+    <div class="line"><span id="oDist">0m</span><span class="x" id="oMult">x1</span><span class="coin"></span><span id="oCoin">0</span></div>
+    <div class="sub" id="oBest">BEST 0m</div>
+    <div id="newbest" hidden>NEW BEST</div>
+    <div class="mis" id="misO"></div>
+    <div class="btns"><button class="btn" id="homeB2"><span>HOME</span></button><button class="btn main" id="retryB"><span>RETRY</span></button></div>
+  </div>
+</div>
+
+<div id="loading"><div class="bar"><i id="loadBar"></i></div></div>
+
+<script src="js/sfxdata.js?v=1"></script>
+<script src="js/music.js?v=1"></script>
+<script src="js/sfx.js?v=3"></script>
+<script src="lib/three.min.js"></script>
+<script src="lib/GLTFLoader.global.js"></script>
+<script src="js/surf.js?v=16"></script>
+<script src="assets/game-home.js" data-top="6" data-left="6" data-fullscreen="1" defer></script>
+<script src="/assets/visit.js?v=17" defer></script>
+<script src="/assets/game-events.js?v=2" defer></script>
+</body>
+</html>
