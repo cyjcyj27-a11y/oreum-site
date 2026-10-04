@@ -120,6 +120,7 @@
   #lassoBtn svg { width: 62px; height: 62px; }
   #lassoBtn.on { transform: translateY(4px) scale(.96); filter: brightness(1.15); box-shadow: inset 0 4px 0 rgba(255,255,255,.5), 0 2px 0 var(--ink); transition-duration: .04s; }
   body.touch #lassoBtn { display: flex; }
+  #tug.fight b { display: none; }   /* 주먹 싸움 땐 FIGHT 글씨 없이 막대만(10/4 사장님 "싸울때 fight 글씨 빼") */
   /* 쫓기·주먹 싸움 동안 올가미 단추가 달리기·주먹 모양으로 바뀌어 두근거린다(10/4 사장님 "모바일에서 뭘 눌러야 뛰냐") */
   #lassoBtn .ic-run, #lassoBtn .ic-fist { display: none; }
   body.mash-run #lassoBtn .ic-lasso, body.mash-fight #lassoBtn .ic-lasso { display: none; }
