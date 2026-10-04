@@ -686,17 +686,24 @@ var MIS = [
   { id: 'dol1', k: 'dolphin', n: 1, t: ['돌고래 1', 'Dolphin 1'] }, { id: 'dol2', k: 'dolphin', n: 2, t: ['돌고래 2', 'Dolphin 2'] },
   { id: 'mg1', k: 'magnet', n: 1, t: ['자석 1', 'Magnet 1'] }, { id: 'sd1', k: 'shield', n: 1, t: ['보드 1', 'Shield 1'] }
 ];
-function misLoad() { var ids = null; try { ids = JSON.parse(localStorage.getItem('surf3.mis') || 'null'); } catch (e) {} G.mis = []; if (ids) ids.forEach(function (id) { var m = MIS.filter(function (q) { return q.id === id; })[0]; if (m) G.mis.push(m); }); while (G.mis.length < 3) misDraw(); }
+function misLoad() { var ids = null; try { ids = JSON.parse(localStorage.getItem('surf3.mis') || 'null'); } catch (e) {} G.mis = []; if (ids) ids.forEach(function (id) { var m = MIS.filter(function (q) { return q.id === id; })[0]; if (m) G.mis.push(m); }); while (G.mis.length < 3 && misDraw()); }
+/* 새 미션 뽑기. 깬 미션은 저장소와 메모리(MIS_DONE) 둘 다 보고, 이번 판 기록으로 이미 채운 미션은 뽑지 않는다.
+   옛 판은 저장소가 막힌 브라우저나 미션을 다 깬 사람에게서 깬 걸 다시 뽑아 깨고 또 뽑기를 끝없이 돌며 게임이 멈췄다(10/4 쇼츠 촬영 중 발견) */
+var MIS_DONE = [];
 function misDraw() {
   var used = G.mis.map(function (m) { return m.id; }), done = []; try { done = JSON.parse(localStorage.getItem('surf3.misdone') || '[]'); } catch (e) {}
+  done = done.concat(MIS_DONE);
   var keys = G.mis.map(function (m) { return m.k; });
-  var c = MIS.filter(function (m) { return used.indexOf(m.id) < 0 && done.indexOf(m.id) < 0 && keys.indexOf(m.k) < 0; });
-  if (c.length < 3) c = MIS.filter(function (m) { return used.indexOf(m.id) < 0 && done.indexOf(m.id) < 0; });
-  if (!c.length) c = MIS.filter(function (m) { return used.indexOf(m.id) < 0; });
+  var open = function (m) { return used.indexOf(m.id) < 0 && ((G.R && G.R[m.k]) || 0) < m.n; };
+  var c = MIS.filter(function (m) { return open(m) && done.indexOf(m.id) < 0 && keys.indexOf(m.k) < 0; });
+  if (c.length < 3) c = MIS.filter(function (m) { return open(m) && done.indexOf(m.id) < 0; });
+  if (!c.length) c = MIS.filter(open);
+  if (!c.length) return false;
   c.sort(function (a, b) { return (MIS_ORDER[a.id] || 9) - (MIS_ORDER[b.id] || 9); });
   G.mis.push(c[Math.floor(Math.random() * Math.min(3, c.length))]);
+  return true;
 }
-function misCheck() { for (var i = 0; i < G.mis.length; i++) { var m = G.mis[i]; if ((G.R[m.k] || 0) >= m.n) { G.mis.splice(i, 1); i--; G.mult++; try { var d = JSON.parse(localStorage.getItem('surf3.misdone') || '[]'); d.push(m.id); localStorage.setItem('surf3.misdone', JSON.stringify(d)); } catch (e) {} misDraw(); save(); SFX.mission(); fx(L(TX.mission) + ' x' + G.mult, 'm'); } } }
+function misCheck() { for (var i = 0; i < G.mis.length; i++) { var m = G.mis[i]; if ((G.R[m.k] || 0) >= m.n) { G.mis.splice(i, 1); i--; G.mult++; if (MIS_DONE.indexOf(m.id) < 0) MIS_DONE.push(m.id); try { var d = JSON.parse(localStorage.getItem('surf3.misdone') || '[]'); d.push(m.id); localStorage.setItem('surf3.misdone', JSON.stringify(d)); } catch (e) {} misDraw(); save(); SFX.mission(); fx(L(TX.mission) + ' x' + G.mult, 'm'); } } }
 function misHTML(el) { el.innerHTML = G.mis.map(function (m) { var v = Math.min(m.n, Math.floor(G.R[m.k] || 0)); return '<div class="' + (v >= m.n ? 'done' : '') + '"><span>' + L(m.t) + '</span><b>' + v + '/' + m.n + '</b></div>'; }).join(''); }
 
 /* ====================================================================== 봇(타이틀 시연·시험) */
