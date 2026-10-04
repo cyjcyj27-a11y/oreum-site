@@ -18,6 +18,7 @@ import io, os, re, sys
 
 # slug, 한국어 경로, 영어 경로, 한국어 이름, 한국어 장르 앵커, 영어 이름, 영어 장르 앵커, 태그
 GAMES = [
+    ("gosiwon",       "/games/gosiwon/",             "/en/games/gosiwon/",             "고시원 총무",       "고시원 총무 3D 청소게임",          "GOSIWON MANAGER",       "3d first-person cleaning simulation game", {"3d", "sim", "tycoon", "korean"}),
     ("surf",          "/games/mini/surf/",           "/en/games/mini/surf/",           "서프런 게임",       "서프런 게임 3D 서핑게임",          "SURF RUN",              "3d surfing endless runner game", {"3d", "casual", "sports", "action"}),
     ("chess",         "/games/flash/chess/",         "/en/games/flash/chess/",         "체스",              "혼자·2인용 체스 보드게임",          "CHESS",                "chess board game vs computer",  {"board", "pvp", "strategy"}),
     ("taco",          "/games/flash/taco/",          "/en/games/flash/taco/",          "비바타코스",         "타코 만들기 요리게임",              "VIVA TACOS",            "taco maker cooking game",       {"sim", "tycoon", "casual", "food"}),
