@@ -7,8 +7,8 @@
 <title>고시원 총무</title>
 <!-- 단추 디자인은 design.md: 주 단추는 빨간 고무장갑 고무, 알약과 보조 단추는 화장실 흰 타일, 창은 청테이프로 붙인 공지 종이 -->
 <style>
-@font-face{font-family:'Eulji';src:url('fonts/title.woff2?v=3') format('woff2');font-display:block}
-@font-face{font-family:'Note';src:url('fonts/note.woff2?v=1') format('woff2');font-display:block}
+@font-face{font-family:'Eulji';src:url('fonts/title.woff2?v=4') format('woff2');font-display:block}
+@font-face{font-family:'Note';src:url('fonts/note.woff2?v=2') format('woff2');font-display:block}
 @font-face{font-family:'Ria';src:url('fonts/RiaSans-ExtraBold.woff2') format('woff2');font-display:swap}
 :root{--ink:#2b2a26;--grout:#8a8878;--red:#d3121a;--redd:#7c0a10;--sl:env(safe-area-inset-left);--sr:env(safe-area-inset-right)}
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -163,6 +163,29 @@ body.en #logo{font-size:min(9.5vw,17vh,110px)}
 #endW.fail{-webkit-text-stroke-color:#2a2a2a;color:#c8c8c0}
 #endE{font-family:'Eulji','Ria',sans-serif;font-size:30px;margin-top:10px;letter-spacing:4px}
 #end .btn{margin-top:auto;margin-bottom:17vh}
+/* ---------- 득템 카드·도감(10/4 퇴실 청소) ---------- */
+#loot{position:fixed;left:50%;top:12%;z-index:26;display:flex;align-items:center;gap:12px;padding:10px 20px 10px 10px;color:var(--ink);background:linear-gradient(180deg,#f8f5e8,#eae6d3);box-shadow:0 8px 24px rgba(0,0,0,.55);pointer-events:none;opacity:0;transform:translateX(-50%)}
+#loot.on{animation:lootIn 2.2s}
+@keyframes lootIn{0%{opacity:0;transform:translateX(-50%) scale(.55) rotate(-8deg)}9%{opacity:1;transform:translateX(-50%) scale(1.1) rotate(-1deg)}16%{transform:translateX(-50%) scale(1) rotate(-1.5deg)}86%{opacity:1;transform:translateX(-50%) scale(1) rotate(-1.5deg)}100%{opacity:0;transform:translateX(-50%) translateY(-14px) scale(.96) rotate(-1.5deg)}}
+#lootImg{width:96px;height:96px;border:2.5px solid var(--grout);display:block}
+#loot .lt{display:flex;flex-direction:column;align-items:flex-start;gap:3px}
+#lootTag{font-family:'Eulji','Ria',sans-serif;font-weight:400;font-size:19px;line-height:1;color:#fff;background:var(--red);padding:4px 9px 3px;transform:rotate(-4deg)}
+#lootTag.old{background:#7a5a00}#lootTag.rare{background:linear-gradient(180deg,#ffd75e,#c8901a);color:#4a2c00}#lootTag:empty{display:none}
+#loot.rare{box-shadow:0 0 0 4px #e0aa2a,0 0 26px 6px rgba(255,200,60,.75),0 8px 24px rgba(0,0,0,.55)}
+.dx.rare{border-color:#d29a1e;background:linear-gradient(180deg,#fbefc8,#efe0b0)}
+#lootName{font-family:'Eulji','Ria',sans-serif;font-size:32px;line-height:1.05;white-space:nowrap}
+#lootFx{font-style:normal;font-size:16px;font-weight:700;color:#1c8a3c}#lootFx:empty{display:none}
+#lootN{font-style:normal;font-size:13px;font-weight:700;opacity:.6}
+#dex{z-index:35}
+#dex .sheet{max-width:min(96vw,920px);padding:22px 18px 14px}
+#dexN{font-family:'Eulji','Ria',sans-serif;font-size:22px;color:#7a5a00;margin:0 0 10px}
+#dexGrid{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:7px}
+.dx{display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 3px 5px;border:2.5px solid var(--grout);background:#efebda;min-width:0}
+.dx img{width:100%;max-width:92px;display:block}
+.dx span{font-family:'Eulji','Ria',sans-serif;font-size:15px;line-height:1.1;white-space:nowrap;max-width:100%}
+.dx i{font-style:normal;font-size:11px;font-weight:700;color:#1c8a3c;white-space:nowrap}
+.dx.no span{opacity:.45}
+#dex .row{margin-top:12px}
 #rotate{position:fixed;inset:0;z-index:90;display:none;align-items:center;justify-content:center;background:#1c1b18}
 @media (orientation:portrait) and (pointer:coarse){#rotate{display:flex}}
 html.ol-land #rotate{display:none!important}
@@ -174,6 +197,8 @@ html.ol-land #rotate{display:none!important}
   .btn{font-size:5.6vh;min-height:44px;padding:2.6vh 4vh}.btn.main{font-size:7vh;padding:2.6vh 5vh 3.6vh;min-width:150px}
   .sheet{padding:22px 16px 12px}.sheet h2{font-size:9vh}
   #morn .sheet{gap:4px 14px;margin-top:max(58px,16vh)}
+  #loot{top:max(50px,14vh);padding:6px 14px 6px 6px;gap:9px}#lootImg{width:19vh;height:19vh}#lootName{font-size:7.5vh}#lootTag{font-size:5vh}#lootFx{font-size:4.2vh}#lootN{font-size:3.6vh}
+  #dex .sheet{padding:12px 12px 8px;margin:auto}#dex h2{font-size:7vh}#dexN{font-size:4.6vh;margin-bottom:1vh}#dexGrid{gap:1.1vh}.dx{padding:2px 2px 3px;gap:0}.dx img{max-width:12.5vh}.dx span{font-size:4vh}.dx i{font-size:2.8vh}#dex .row{margin-top:1.6vh}#dex .btn.main{font-size:5.2vh;padding:1.4vh 5vh 2vh;min-width:0}
   #mleft{gap:1.4vh;min-width:140px}#mres{font-size:4vh;line-height:1.5}#mres b{font-size:6vh}#mcoin{font-size:5.6vh}
   #shop{gap:5px}.item{padding:1.2vh 3px;min-width:92px}.item .nm{font-size:4.6vh}.item .ef{font-size:2.9vh}.item .pr{font-size:4.2vh}
   #praise{font-size:15vh}#cointoast{font-size:8vh;top:calc(27% + 17vh)}
@@ -219,13 +244,17 @@ html.ol-land #tbtns{margin-bottom:3vh}
 </div>
 <div class="scr dim" id="morn" hidden>
   <div class="sheet">
-    <div id="mleft"><h2 id="mday"></h2><div id="mres"></div><div id="mcoin"></div><button class="btn main" id="bGo">GO</button></div>
+    <div id="mleft"><h2 id="mday"></h2><div id="mres"></div><div id="mcoin"></div><button class="btn main" id="bGo">GO</button><button class="btn" id="bDex">도감</button></div>
     <div id="shop"></div>
   </div>
 </div>
 <div class="scr dim" id="pause" hidden>
-  <div class="sheet"><h2>PAUSE</h2><div class="row"><button class="btn main" id="bResume">RESUME</button><button class="btn" id="bTitle">TITLE</button></div></div>
+  <div class="sheet"><h2>PAUSE</h2><div class="row"><button class="btn main" id="bResume">RESUME</button><button class="btn" id="bDex2">도감</button><button class="btn" id="bTitle">TITLE</button></div></div>
 </div>
+<div class="scr dim" id="dex" hidden>
+  <div class="sheet"><h2 id="dexH">도감</h2><div id="dexN"></div><div id="dexGrid"></div><div class="row"><button class="btn main" id="bDexX">OK</button></div></div>
+</div>
+<div id="loot"><img id="lootImg" alt=""><div class="lt"><b id="lootTag"></b><span id="lootName"></span><i id="lootFx"></i><em id="lootN"></em></div></div>
 <div class="scr dim" id="confirm" hidden>
   <div class="sheet"><h2>NEW GAME</h2><div class="row"><button class="btn" id="bNo">NO</button><button class="btn main" id="bYes">YES</button></div></div>
 </div>
@@ -238,15 +267,16 @@ html.ol-land #tbtns{margin-bottom:3vh}
 <script src="assets/game-home.js?v=1" data-top="6" data-left="6" data-fullscreen="1" defer></script>
 <script src="lib/three.min.js"></script>
 <script src="js/core.js?v=1"></script>
-<script src="js/world.js?v=6"></script>
+<script src="js/world.js?v=7"></script>
 <script src="js/hands.js?v=37"></script>
 <script src="assets/kimchi-tex.js?v=1"></script>
 <script src="js/chores.js?v=19"></script>
-<script src="js/events.js?v=7"></script>
+<script src="js/loot.js?v=7"></script>
+<script src="js/events.js?v=10"></script>
 <script src="js/sfx.js?v=3"></script>
 <script src="js/audio.js?v=9"></script>
 <script src="js/booktext.js?v=1"></script>
-<script src="js/game.js?v=29"></script>
+<script src="js/game.js?v=30"></script>
 <script src="/assets/visit.js?v=17" defer></script>
 <script src="/assets/game-events.js?v=2" defer></script>
 </body>

@@ -87,7 +87,7 @@ var LBL = { '고무장갑': 'Rubber gloves', '책상': 'Desk', '휴지통': 'Tra
   '음식물': 'Food waste', '냉장고': 'Fridge', '밥솥': 'Rice cooker', '라면 상자': 'Ramen box', '선반': 'Shelf', '김치': 'Kimchi', '도마': 'Cutting board',
   '쪽지': 'Note', '메모': 'Memo', '메모 붙이기': 'Stick a note', '귀마개': 'Earplugs', '형광등': 'Light tube', '형광등 갈기': 'Replace the light', '박카스': 'Energy drink',
   '독촉장 붙이기': 'Post the notice', '보일러': 'Boiler', '쓰레기': 'Trash', '이불': 'Blanket', '저금통': 'Coin jar' };
-function lbl(k) { if (!EN || !k) return k; var m = /^(\d+)호$/.exec(k); return m ? 'Room ' + m[1] : LBL[k] || k; }
+function lbl(k) { if (!EN || !k) return k; var m = /^(\d+)호$/.exec(k); return m ? 'Room ' + m[1] : LBL[k] || GS.loot.en(k) || k; }
 function setMode(m) { G.mode = m; document.body.className = document.body.className.replace(/\bm-\w+/g, '').trim() + ' m-' + m; document.body.classList.toggle('playing', m === 'day' || m === 'study'); }
 function show(id, on) { $(id).hidden = !on; }
 function shopDraw() {
@@ -135,7 +135,7 @@ var ptr = GS.ptr = { x: 0, y: 0, down: false, mv: 0 }, locked = false, progExit 
 GS.ptrRay = new T.Ray(); var rc = new T.Raycaster();
 function initGL() {
   renderer = new T.WebGLRenderer({ canvas: cv, antialias: true, powerPreference: 'high-performance' });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5)); renderer.toneMapping = T.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.05; renderer.autoClear = false;
+  GS.renderer = renderer; renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5)); renderer.toneMapping = T.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.05; renderer.autoClear = false;
   scene = new T.Scene(); scene.background = new T.Color(0x0c0d0c);
   cam = GS.cam = new T.PerspectiveCamera(68, 1, 0.05, 60); cam.rotation.order = 'YXZ'; camB = new T.PerspectiveCamera(68, 1, 0.05, 60);
   W.build(scene); GS.hands.init(scene); CH.init(scene); GS.ev.init(scene); buildDesk(); resize();
@@ -335,6 +335,7 @@ function useIt(it) { if (!it) return false; it.use(); return true; }
 window.addEventListener('keydown', function (e) {
   if (e.repeat) return; var k = e.code; keys[k] = true; SND.unlock();
   if (GS.ev.isNote() && (k === 'KeyE' || k === 'KeyF' || k === 'Space' || k === 'Enter' || k === 'Escape')) { e.preventDefault(); GS.ev.closeNote(); return; }
+  if (!$('dex').hidden) { if (k === 'Escape' || k === 'Enter' || k === 'Space' || k === 'KeyE') { e.preventDefault(); GS.loot.open(false); } return; }   // 도감 창이 떠 있으면 닫기만
   if (k === 'Tab') { e.preventDefault(); document.body.classList.toggle('showtasks'); }
   if (k === 'Escape' && performance.now() - unlockAt > 400) { if (CH.cur) CH.leave(); else if (G.mode === 'day' || G.mode === 'study') pause(!paused); }
   if (k === 'KeyP') pause(!paused);
@@ -519,6 +520,8 @@ function wire() {
   click('bNew', function () { show('confirm', true); }); click('bNo', function () { show('confirm', false); });
   click('bYes', function () { show('confirm', false); wipe(); newGame(); if (!touchMode) lockPtr(); });
   click('bGo', function () { show('morn', false); paused = false; save(); if (!touchMode) lockPtr(); });
+  click('bDex', function () { GS.loot.open(true); }); click('bDex2', function () { GS.loot.open(true); }); click('bDexX', function () { GS.loot.open(false); });
+  ['bDex', 'bDex2', 'dexH'].forEach(function (id) { $(id).textContent = L('도감', 'COLLECTION'); });
   click('bResume', function () { pause(false); }); click('bTitle', function () { save(); toTitle(); }); click('bEnd', toTitle);
   click('tPause', function () { pause(!paused); }); click('tBgm', function () { tog('bgm'); }); click('tSnd', function () { tog('snd'); });
   click('stx', function () { if (CH.cur) CH.leave(); });

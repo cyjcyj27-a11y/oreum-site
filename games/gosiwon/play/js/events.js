@@ -7,7 +7,10 @@ var T = THREE, PI = Math.PI, W, CH, G, grp, CW = 0.75, FH = GS.FH, WH = GS.WH;
 var EN = /[?&]lang=en/.test(location.search), L = function (ko, en) { return EN ? en : ko; };
 var $ = function (id) { return document.getElementById(id); };
 /* ---------- 일정 ---------- */
-var DAY = { fridge: 2, fridge2: 3, ramen: 3, jar: 4, snore: 4, snore2: 5, hair: 6, lamp: 8, exam: 10, bac: 13, parcel: 11, praise: 15, rent: 16, rent2: 17, boiler: 17, moveout: 23 };
+var DAY = { fridge: 2, fridge2: 3, ramen: 3, jar: 4, snore: 4, snore2: 5, hair: 6, lamp: 8, exam: 10, bac: 13, parcel: 11, praise: 15, rent: 16, rent2: 17, boiler: 17 };
+/* 퇴실(10/4 사장님 "퇴실청소하다가 생필품 득템", "매번호수는 달라져야지"): 30일 동안 8번, 호실마다 다르다. 빈 방은 world.js W.vroom 을 그 호실 문 뒤로 옮긴다 */
+var MOVE = [{ d: 5, n: 205 }, { d: 9, n: 303 }, { d: 12, n: 409 }, { d: 16, n: 302 }, { d: 19, n: 510 }, { d: 23, n: 407 }, { d: 26, n: 309 }, { d: 29, n: 503 }];
+function moveOf(d) { for (var i = 0; i < MOVE.length; i++) if (MOVE[i].d === d) return { d: d, n: MOVE[i].n, i: i, key: 'mo' + d }; return null; }
 /* ---------- 글 ---------- */
 var TXT = {
   fridge: L('냉장고에 넣어둔 제 장조림\n누가 먹었어요??\n이름도 써 놨는데 ㅠㅠ\n- 203호 -', 'Who ate my braised beef\nin the fridge??\nMy name was on it!!\n- Room 203 -'),
@@ -29,7 +32,16 @@ var TXT = {
   rentMemo: L('월세 납부 바랍니다\n- 총무실 -', 'Rent is overdue.\n- Manager -'),
   rent2: L('다음 주에 꼭...\n진짜로...\n- 304 -', 'Next week for sure...\nReally...\n- 304 -'),
   boiler: [L('물이 차가워요 ㅠ', 'The water is cold'), L('온수 안 나와요!!!', 'NO HOT WATER!!!'), L('샤워하다 얼어 죽는 줄', 'Almost froze in the shower')],
-  moveout: L('205호 오늘 나갔다\n방 좀 치워놔라', 'Room 205 moved out today.\nClean up the room.'),
+  move: [
+    L('205호 오늘 나갔다\n방 좀 치워놔라\n버리고 간 건 니가 가져도 된다', 'Room 205 moved out today.\nClean up the room.\nKeep whatever they left.'),
+    L('303호 짐 반은 두고 나갔다\n싹 치워', 'Room 303 left half their stuff.\nClear it all out.'),
+    L('409호 사흘 만에 나갔다\n방 치워놔', 'Room 409 left after 3 days.\nClean the room.'),
+    L('302호 합격해서 나갔다\n방 치워라', 'Room 302 passed and moved out.\nClean the room.'),
+    L('510호 월세 안 내고 잠수탔다\n방 비워라', 'Room 510 skipped rent and vanished.\nEmpty the room.'),
+    L('407호 나갔다\n오늘 방 보러 오는 사람 있다', 'Room 407 moved out.\nSomeone is viewing it today.'),
+    L('309호 군대 간단다\n방 치워놔', 'Room 309 is off to the army.\nClean the room.'),
+    L('503호 나갔다\n이번 달 마지막이다 치워놔', 'Room 503 moved out.\nLast one this month. Clean it.')
+  ],
   owe: L('어제 민원 하나 안 했더라\n오천원 깐다', 'You skipped a complaint yesterday.\n5,000 won off.'),
   pass: L('합격 축하한다\n방 빼라 ㅋㅋ', 'Congrats on passing.\nNow move out lol'),
   fail: L('수고했다\n다음 달도 총무 할래?', 'Good work anyway.\nManager again next month?')
@@ -37,9 +49,9 @@ var TXT = {
 /* 일거리 이름(할 일 목록) */
 var ROW = {
   fridge: L('냉장고 메모', 'Fridge note'), ramen: L('라면 선반 메모', 'Ramen note'), snore: L('305호 귀마개', 'Earplugs 305'), hair: L('2F 하수구', '2F drain'),
-  lamp: L('3F 형광등', '3F light'), parcel: L('택배', 'Parcels'), rent: L('304호 독촉장', 'Notice 304'), boiler: L('보일러', 'Boiler'), moveout: L('205호 정리', 'Clean 205')
+  lamp: L('3F 형광등', '3F light'), parcel: L('택배', 'Parcels'), rent: L('304호 독촉장', 'Notice 304'), boiler: L('보일러', 'Boiler')
 };
-var JOBS = ['fridge', 'ramen', 'snore', 'hair', 'lamp', 'parcel', 'rent', 'boiler', 'moveout'];
+var JOBS = ['fridge', 'ramen', 'snore', 'hair', 'lamp', 'parcel', 'rent', 'boiler'];
 /* ---------- 도움 ---------- */
 function st(id) { G.ev = G.ev || { st: {}, owe: [] }; return G.ev.st[id] = G.ev.st[id] || {}; }
 function has(id) { return G.ev && G.ev.st[id]; }
@@ -97,7 +109,7 @@ function fridgeMemo() { memo(TXT.fridgeMemo, 4.704, 1.38, 2.3, -PI / 2, { bg: '#
 function setup() {
   G = GS.G; clear(); var d = G.day, s;
   if (lamp) { lamp.dim = 1; lamp = null; }
-  if (W.room205) W.room205.open(d >= DAY.moveout);
+  var mo = moveOf(d); if (W.vroom) { if (mo) W.vroom.place(mo.n); else W.vroom.clear(); }
   // 지난 일의 흔적(메모, 귀마개)은 계속 남는다
   if (has('fridge') && st('fridge').done) fridgeMemo();
   if (has('ramen') && st('ramen').done) ramenMemo();
@@ -158,7 +170,7 @@ function setup() {
     var sw = box(0.04, 0.09, 0.04, 0x333333, 2.215, 1.36, -1.98); sw.rotation.z = s.done ? 0 : 0.7;
     if (!s.done) inter({ x: 2.26, y: 1.35, z: -1.9, sx: 0.25, sy: 0.5, sz: 0.4, label: '보일러', can: function () { return st('boiler').read && !st('boiler').done; }, use: function () { gone(this); GS.snd('click'); sw.rotation.z = 0; led.material.color.set(0x40e060); led.material.emissive.set(0x10a030); done('boiler'); } });
   }
-  if (d === DAY.moveout) { s = st('moveout'); if (!s.sent) text('moveout', 40, TXT.moveout); if (!s.done) moveoutJunk(); }
+  if (mo) { s = st(mo.key); if (!s.sent) text(mo.key, 40, TXT.move[mo.i]); if (!s.done) moveoutRoom(mo); }
 }
 
 // ---------- 소품 ----------
@@ -178,26 +190,45 @@ function parcelBox(num, x, y, z) {
 }
 function parcelAt(num) { var d = door(num); parcelBox(num, d.x + 0.25, d.y0, d.s * (CW - 0.2)); }
 function shh() { var d = W.tri.desk, m = memo(TXT.shh, d.x - 0.12, d.y + 0.004, d.z - 0.26, 0, { sw: 0.09, sh: 0.09, rz: 0 }); m.rotation.set(-PI / 2, 0, PI / 2 + 0.2); }
-// 205호 퇴실 뒤 남은 것: 컵라면 용기, 캔, 봉지 + 구겨진 이불
-function moveoutJunk() {
-  var S = st('moveout'), R = W.room205; if (!R) return; S.n = S.n || 0;
-  var junk = [[8.6, -1.4, 0xf2efe6, 'cup'], [9.9, -1.7, 0xc8c8cc, 'can'], [9.2, -2.9, 0xeeeeea, 'bag']];
-  junk.forEach(function (q, i) {
-    if (S['j' + i]) return; var m;
-    if (q[3] === 'cup') { m = new T.Mesh(new T.CylinderGeometry(0.05, 0.04, 0.08, 12), new T.MeshLambertMaterial({ color: q[2] })); m.position.set(q[0], 0.04, q[1]); m.rotation.z = 1.3; }
-    else if (q[3] === 'can') { m = new T.Mesh(new T.CylinderGeometry(0.03, 0.03, 0.11, 12), new T.MeshPhongMaterial({ color: 0xd8262a, shininess: 80 })); m.position.set(q[0], 0.03, q[1]); m.rotation.z = PI / 2; m.rotation.y = 0.7; }
-    else { m = new T.Mesh(new T.IcosahedronGeometry(0.1, 1), new T.MeshLambertMaterial({ color: q[2] })); m.scale.set(1.2, 0.7, 1); m.position.set(q[0], 0.07, q[1]); }
-    grp.add(m);
-    inter({ x: q[0], y: 0.07, z: q[1], sx: 0.28, sy: 0.2, sz: 0.28, label: '쓰레기', can: function () { return st('moveout').sent; }, use: function () { gone(this); m.visible = false; S['j' + i] = 1; S.n++; GS.snd(q[3] === 'bag' ? 'trash' : 'can'); GS.hands.jab(); check(); } });
-  });
-  if (!S.bed) {
-    var bl = new T.Mesh(new T.IcosahedronGeometry(0.4, 1), new T.MeshLambertMaterial({ color: 0x7a93b8 })); bl.scale.set(1.3, 0.35, 0.9); bl.position.set(R.bed.x, R.bed.y + 0.08, R.bed.z); grp.add(bl);
-    inter({ x: R.bed.x, y: R.bed.y + 0.1, z: R.bed.z, sx: 1.0, sy: 0.4, sz: 0.8, label: '이불', can: function () { return st('moveout').sent; }, use: function () {
-      gone(this); S.bed = 1; S.n++; GS.snd('blanket'); GS.hands.jab();
-      CH.anim(0.5, function (t) { var e = GS.ease(t); bl.scale.set(1.3 - e * 0.85, 0.35 + e * 0.15, 0.9 - e * 0.45); bl.position.x = R.bed.x - e * 0.5; }, check);
-    } });
+/* 퇴실한 방: 쓰레기 셋 + 버리고 간 물건(도감에 없는 것부터). 자리는 방 안 좌표 (u, v, 돌림) — world.js 빈 방과 같은 틀 */
+var SPOT = { bed: [[0.6, 2.45, 0.1], [0.58, 1.8, 0.6], [0.62, 1.2, -0.4]], desk: [[-0.9, 2.62, 0.35], [-0.68, 2.5, -0.3]], floor: [[-0.15, 1.0, 0.4], [-0.3, 1.95, -0.6]], wall: [[-0.8, 1.55, 0]] };
+var JUNK = [[0.0, 0.5, 'cup'], [-0.1, 1.45, 'can'], [-0.55, 2.2, 'bag']];
+function moveoutRoom(mo) {
+  var S = st(mo.key), V = W.vroom; if (!V || !V.num()) return; S.n = S.n || 0;
+  if (!S.loot) {                                       // 처음 한 번 정해서 저장(다시 불러도 같은 물건)
+    var seen = G.ev.seen = G.ev.seen || [], left = { bed: 3, desk: 2, floor: 2, wall: 1 }, used = { bed: 0, desk: 0, floor: 0, wall: 0 };
+    S.loot = [];
+    GS.loot.choose(G.day, seen).forEach(function (id) {
+      var t = GS.loot.BY[id].at; if (S.loot.length >= 3 || used[t] >= left[t]) return;
+      S.loot.push({ id: id, t: t, i: used[t]++ }); if (seen.indexOf(id) < 0) seen.push(id);
+    });
   }
-  function check() { if (S.n >= 4 && !S.done) done('moveout', 10000); else { GS.ui.tasks(); GS.save(); } }
+  var total = JUNK.length + S.loot.length;
+  JUNK.forEach(function (q, i) {
+    if (S['j' + i]) return; var p = V.at(q[0], q[1]), m;
+    if (q[2] === 'cup') { m = new T.Mesh(new T.CylinderGeometry(0.05, 0.04, 0.08, 12), new T.MeshLambertMaterial({ color: 0xf2efe6 })); m.position.set(p.x, p.y + 0.04, p.z); m.rotation.z = 1.3; }
+    else if (q[2] === 'can') { m = new T.Mesh(new T.CylinderGeometry(0.03, 0.03, 0.11, 12), new T.MeshPhongMaterial({ color: 0xd8262a, shininess: 80 })); m.position.set(p.x, p.y + 0.03, p.z); m.rotation.z = PI / 2; m.rotation.y = 0.7; }
+    else { m = new T.Mesh(new T.IcosahedronGeometry(0.1, 1), new T.MeshLambertMaterial({ color: 0xeeeeea })); m.scale.set(1.2, 0.7, 1); m.position.set(p.x, p.y + 0.07, p.z); }
+    grp.add(m);
+    inter({ x: m.position.x, y: p.y + 0.07, z: m.position.z, sx: 0.28, sy: 0.2, sz: 0.28, label: '쓰레기', can: function () { return st(mo.key).sent; }, use: function () { gone(this); m.visible = false; S['j' + i] = 1; S.n++; GS.snd(q[2] === 'bag' ? 'trash' : 'can'); GS.hands.jab(); check(); } });
+  });
+  S.loot.forEach(function (L0, i) {
+    if (S['l' + i]) return;
+    var sp = SPOT[L0.t][L0.i], p = V.at(L0.t === 'wall' && L0.id !== 'bike' ? -1.0 : sp[0], sp[1]), g = GS.loot.mk(L0.id);   // 긴 것은 벽에 바짝(자전거는 손잡이 폭만큼 띄움)
+    g.position.set(p.x, p.y + (L0.t === 'bed' ? VRY.bed : L0.t === 'desk' ? VRY.desk : 0), p.z);
+    g.rotation.y = L0.t === 'wall' ? PI / 2 : V.ry() + sp[2]; grp.add(g); g.updateMatrixWorld(true);
+    var bb = new T.Box3().setFromObject(g), c = bb.getCenter(new T.Vector3()), z = bb.getSize(new T.Vector3());
+    inter({ x: c.x, y: c.y, z: c.z, sx: Math.max(0.22, z.x + 0.06), sy: Math.max(0.2, z.y + 0.06), sz: Math.max(0.22, z.z + 0.06), label: GS.loot.BY[L0.id].ko, can: function () { return st(mo.key).sent; }, use: function () {
+      gone(this); S['l' + i] = 1; S.n++; GS.hands.jab(); fly(g); GS.loot.got(L0.id); check(2400);
+    } });
+  });
+  function check(wait) { if (S.n >= total && !S.done) { S.done = 1; GS.save(); setTimeout(function () { S.done = 0; done(mo.key, 5000); }, wait || 0); } else { GS.ui.tasks(); GS.save(); } }   // 마지막이 물건이면 카드가 내려간 뒤 NICE
+}
+var VRY = { bed: 0.43, desk: 0.74 };
+/* 주운 물건이 눈앞으로 날아와 작아지며 사라진다 */
+function fly(g) {
+  var cam = GS.cam, a = g.position.clone(), b = cam.position.clone().add(new T.Vector3(0, -0.12, -0.45).applyQuaternion(cam.quaternion)), r0 = g.rotation.y, s0 = 1;
+  CH.anim(0.42, function (t) { var e = GS.ease(t); g.position.lerpVectors(a, b, e); g.position.y += Math.sin(t * PI) * 0.18; g.rotation.y = r0 + e * 3.2; var k = s0 * (1 - e * 0.85); g.scale.set(k, k, k); }, function () { grp.remove(g); });
 }
 
 // ---------- 매 프레임 ----------
@@ -220,15 +251,18 @@ function rows() {
   if (!G || !G.ev) return ''; var h = '';
   JOBS.forEach(function (id) {
     if (G.day !== DAY[id] || !has(id)) return; var s = st(id); if (!(s.read || s.sent)) return;
-    var right = s.done ? '&#10004;' : id === 'parcel' ? (s.n || 0) + '/3' : id === 'moveout' ? (s.n || 0) + '/4' : '';
+    var right = s.done ? '&#10004;' : id === 'parcel' ? (s.n || 0) + '/3' : '';
     h += '<div class="evrow' + (s.done ? ' done' : '') + '"><span>' + ROW[id] + '</span><span>' + right + '</span></div>';
   });
+  var mo = moveOf(G.day); if (mo && has(mo.key) && st(mo.key).sent) { var S = st(mo.key), tot = JUNK.length + (S.loot ? S.loot.length : 3);
+    h += '<div class="evrow' + (S.done ? ' done' : '') + '"><span>' + L(mo.n + '호 정리', 'Clean ' + mo.n) + '</span><span>' + (S.done ? '&#10004;' : (S.n || 0) + '/' + tot) + '</span></div>'; }
   return h;
 }
 // 하루가 끝날 때: 그날 받은 민원을 안 했으면 내일 꾸중
 function endDay() {
   if (!G) return; G.ev = G.ev || { st: {}, owe: [] }; G.ev.owe = G.ev.owe || [];
   JOBS.forEach(function (id) { if (G.day === DAY[id] && !st(id).done) G.ev.owe.push(id); });
+  var mo = moveOf(G.day); if (mo && has(mo.key) && st(mo.key).sent && !st(mo.key).done) G.ev.owe.push(mo.key);
   if (lamp) { lamp.dim = 1; lamp = null; }
 }
 function final(ok) { setTimeout(function () { GS.phone(ok ? TXT.pass : TXT.fail); }, 2600); }
@@ -244,6 +278,6 @@ return {
   wageX: function (d) { return G && G.ev && G.ev.st.praise && G.ev.st.praise.sent && d >= DAY.praise + 1 && d <= DAY.praise + 7 ? 2 : 1; },
   bonus: function () { return G && G.ev && G.ev.bac === G.day ? 0.1 : 0; },
   shhNow: function () { return G && G.day === DAY.exam && has('exam') && st('exam').read; },
-  DAY: DAY, TXT: TXT, door: door, _texts: function () { return texts; }, _lamp: function () { return [lamp, lampOff]; }
+  DAY: DAY, TXT: TXT, door: door, MOVE: MOVE, _texts: function () { return texts; }, _lamp: function () { return [lamp, lampOff]; }
 };
 })();

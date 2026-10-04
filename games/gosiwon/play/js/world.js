@@ -3,7 +3,7 @@
 (function () {
 'use strict';
 var T = THREE, FH = GS.FH, WH = GS.WH, CW = 0.75, XE = 15.5, PI = Math.PI;
-var W = GS.world = { cols: [], stair: [], lamps: [], floors: [], toilets: [], group: null, hits: null };
+var W = GS.world = { cols: [], stair: [], lamps: [], floors: [], toilets: [], doors: {}, group: null, hits: null };
 var M;
 function seg(list, x1, z1, x2, z2) { list.push({ x1: x1, z1: z1, x2: x2, z2: z2 }); }
 function boxCol(list, cx, cz, sx, sz) { var a = cx - sx / 2, b = cx + sx / 2, c = cz - sz / 2, d = cz + sz / 2; var n = list.length; seg(list, a, c, b, c); seg(list, b, c, b, d); seg(list, b, d, a, d); seg(list, a, d, a, c); for (; n < list.length; n++) list[n].p = 1; }
@@ -171,22 +171,48 @@ function storage(B, C) {
   B.pla.put(new T.CylinderGeometry(0.012, 0.012, 1.3, 6), 2.25, 0.65, -1.1, { rz: 0.12, col: [0.5, 0.4, 0.25] }); B.pla.box(2.18, 0.05, -1.1, 0.26, 0.1, 0.1, { col: [0.3, 0.5, 0.75] });
   S.box = { x: 1.3, y: 0, z: -2.45 }; S.center = [1.4, -1.9];
 }
-/* ---------- 205호(빈 방): x 8.05~10.55, z -0.75~-3.35. 문은 퇴실 이벤트 날부터 열린다(W.room205.open) ---------- */
-function room205(B, C, grp) {
-  var x0 = 8.05, x1 = 10.55, z1 = -3.35, cx = (x0 + x1) / 2, cz = (-CW + z1) / 2;
-  B.jang.box(cx, -0.1, cz, x1 - x0, 0.2, -CW - z1, { t: 2 }); B.ceil.box(cx, WH + 0.05, cz, x1 - x0, 0.1, -CW - z1, { t: 1.2 });
-  wallZ(B.wall, C, x0, z1, -CW, 0); wallZ(B.wall, C, x1, z1, -CW, 0); wallX(B.wall, C, x0, x1, z1, 0);
-  lamp(B, 0, cx, WH - 0.02, cz, false, 0.6);
-  var bx = x1 - 0.5, bz = z1 + 1.0;                                   // 침대 프레임과 매트리스(시트만)
-  B.pla.box(bx, 0.17, bz, 0.9, 0.34, 1.9, { col: [0.45, 0.33, 0.22] }); B.mat.box(bx, 0.38, bz, 0.84, 0.1, 1.84, { col: [0.86, 0.85, 0.8] }); boxCol(C, bx, bz, 0.9, 1.9);
-  B.pla.box(x0 + 0.3, 0.37, z1 + 0.35, 0.55, 0.74, 0.5, { col: [0.62, 0.5, 0.34] }); boxCol(C, x0 + 0.3, z1 + 0.35, 0.55, 0.5);   // 빈 책상
-  var dm = new T.Mesh(new T.BoxGeometry(0.84, 2.0, 0.04), M.door); dm.position.set(9.3, 1.0, -CW + 0.03); grp.add(dm);
-  var sg = { x1: 8.88, z1: -CW, x2: 9.72, z2: -CW };
-  W.room205 = { bed: { x: bx, y: 0.43, z: bz }, open: function (on) {
-    var i = C.indexOf(sg); if (on) { dm.rotation.y = -1.45; dm.position.set(8.9 + 0.02, 1.0, -CW - 0.42); if (i >= 0) C.splice(i, 1); }
-    else { dm.rotation.y = 0; dm.position.set(9.3, 1.0, -CW + 0.03); if (i < 0) C.push(sg); }
-  } };
-  W.room205.open(false);
+/* ---------- 빈 방(퇴실한 호실): 한 칸을 만들어 두고 퇴실 날마다 그 호실 문 뒤로 옮긴다(10/4 사장님 "매번호수는 달라져야지").
+   방 안 좌표 u(복도 방향, 문 가운데 0, -1.1~1.1), v(문에서 안쪽으로 0~2.85). 침대 오른쪽 벽, 책상 왼쪽 안. W.vroom.place(num) / W.vroom.clear() ---------- */
+var VR = { u0: -1.1, u1: 1.1, d: 2.85, bed: { u: 0.6, v: 1.85, w: 0.9, l: 1.9, top: 0.43 }, desk: { u: -0.8, v: 2.58, w: 0.55, l: 0.5, top: 0.74 } };
+function vroomBuild(scene) {
+  var B = newB(), u0 = VR.u0, u1 = VR.u1, d = VR.d, cz = d / 2, w = u1 - u0;
+  /* 남쪽 방(s=-1) 기준으로 만든다: z = -(CW + v). 북쪽 방은 z 를 뒤집어 놓는다 */
+  B.jang.box(0, -0.1, -(CW + cz), w, 0.2, d, { t: 2 });   // 천장은 층 천장(폭 7.5)이 이미 덮는다
+  B.wall.box(u0 - 0.05, WH / 2, -(CW + cz), 0.1, WH, d, { t: 2.4, tv: 2.4, y0: 0 }); B.wall.box(u1 + 0.05, WH / 2, -(CW + cz), 0.1, WH, d, { t: 2.4, tv: 2.4, y0: 0 });
+  B.wall.box(0, WH / 2, -(CW + d + 0.05), w + 0.2, WH, 0.1, { t: 2.4, tv: 2.4, y0: 0 });
+  var b = VR.bed, k = VR.desk;
+  B.pla.box(b.u, 0.17, -(CW + b.v), b.w, 0.34, b.l, { col: [0.45, 0.33, 0.22] }); B.mat.box(b.u, 0.38, -(CW + b.v), b.w - 0.06, 0.1, b.l - 0.06, { col: [0.86, 0.85, 0.8] });
+  B.pla.box(k.u, 0.37, -(CW + k.v), k.w, 0.74, k.l, { col: [0.62, 0.5, 0.34] });
+  B.pla.box(0, WH + 0.005, -(CW + 1.4), 0.18, 0.05, 0.9, { col: [0.8, 0.8, 0.76] }); B.glow.box(0, WH - 0.03, -(CW + 1.4), 0.1, 0.035, 0.45, { col: [1, 1, 0.94] });
+  var g = new T.Group(); flush(B, g);
+  var leaf = new T.Mesh(new T.BoxGeometry(0.84, 2.0, 0.04), M.doorLeaf || (M.doorLeaf = new T.MeshLambertMaterial({ color: 0x6e4a2c })));
+  leaf.rotation.y = -1.45; leaf.position.set(-0.38, 1.0, -(CW + 0.42)); g.add(leaf);
+  g.visible = false; scene.add(g);
+  var lampObj = { x: 0, y: -100, z: 0, k: 0 }; W.lamps.push(lampObj);
+  var added = [], cur = null;
+  W.vroom = {
+    VR: VR, num: function () { return cur && cur.num; },
+    /* 방 안 (u,v) → 세상 좌표 */
+    at: function (u, v) { return cur ? { x: cur.x + u, y: cur.y0, z: cur.s * (CW + v) } : null; },
+    ry: function () { return cur && cur.s > 0 ? PI : 0; },              // 방 안 물건이 문 쪽을 보는 방향
+    place: function (num) {
+      this.clear(); var D = W.doors[num]; if (!D) return false; cur = { num: num, x: D.x, s: D.s, y0: D.k * FH, k: D.k };
+      g.position.set(D.x, D.k * FH, 0); g.scale.set(1, 1, D.s > 0 ? -1 : 1); g.visible = true;
+      lampObj.x = D.x; lampObj.y = D.k * FH + WH - 0.4; lampObj.z = D.s * (CW + 1.4); lampObj.k = D.k;
+      D.mesh.visible = false; var C = W.cols[D.k], j = C.indexOf(D.seg); if (j >= 0) C.splice(j, 1);
+      var z = function (v) { return D.s * (CW + v); }, x = D.x, n0 = C.length;
+      seg(C, x + VR.u0, z(0), x + VR.u0, z(VR.d)); seg(C, x + VR.u1, z(0), x + VR.u1, z(VR.d)); seg(C, x + VR.u0, z(VR.d), x + VR.u1, z(VR.d));
+      boxCol(C, x + b.u, z(b.v), b.w, b.l); boxCol(C, x + k.u, z(k.v), k.w, k.l);
+      for (var i = n0; i < C.length; i++) added.push([C, C[i]]);
+      return true;
+    },
+    clear: function () {
+      added.forEach(function (q) { var j = q[0].indexOf(q[1]); if (j >= 0) q[0].splice(j, 1); }); added = [];
+      if (cur) { var D = W.doors[cur.num]; D.mesh.visible = true; if (W.cols[D.k].indexOf(D.seg) < 0) W.cols[D.k].push(D.seg); }
+      cur = null; g.visible = false; lampObj.y = -100;
+    },
+    group: g
+  };
 }
 /* ---------- 삼각형 쪽방: 꼭짓점 (2.6,-0.75) (6.4,-0.75) (2.6,-3.6) ---------- */
 function triangle(B, C) {
@@ -219,11 +245,12 @@ function triangle(B, C) {
 /* ---------- 한 층 ---------- */
 function newB() { var B = {}; ['wall', 'tile', 'tfloor', 'jang', 'ceil', 'conc', 'swall', 'door', 'steel', 'cer', 'pla', 'mat', 'glow'].forEach(function (k) { B[k] = new GS.Batch(); }); return B; }
 function flush(B, grp) { Object.keys(B).forEach(function (k) { if (B[k].n) grp.add(B[k].mesh(M[k])); }); }
-function decoDoor(B, grp, k, x, s, num) {              // 복도에 늘어선 방문(안 열림)
-  var y0 = k * FH, z = s * (CW - 0.052), w = 0.42, n = [0, 0, -s];
-  if (s > 0) B.door.quad([x + w, y0, z], [x - w, y0, z], [x - w, y0 + 2.02, z], [x + w, y0 + 2.02, z], n);
-  else B.door.quad([x - w, y0, z], [x + w, y0, z], [x + w, y0 + 2.02, z], [x - w, y0 + 2.02, z], n);
-  var F = [0.24, 0.17, 0.11]; B.pla.box(x - w - 0.025, y0 + 1.03, s * (CW - 0.04), 0.05, 2.06, 0.03, { col: F }); B.pla.box(x + w + 0.025, y0 + 1.03, s * (CW - 0.04), 0.05, 2.06, 0.03, { col: F }); B.pla.box(x, y0 + 2.045, s * (CW - 0.04), 0.94, 0.05, 0.03, { col: F });
+function decoDoor(B, grp, k, x, s, num) {              // 복도에 늘어선 방문. 문짝은 따로(퇴실한 방은 문을 연다), 문틀은 벽(wallX frame)이 그린다
+  var y0 = k * FH, z = s * (CW - 0.052), w = 0.42, n = [0, 0, -s], D = new GS.Batch();
+  if (s > 0) D.quad([x + w, y0, z], [x - w, y0, z], [x - w, y0 + 2.02, z], [x + w, y0 + 2.02, z], n);
+  else D.quad([x - w, y0, z], [x + w, y0, z], [x + w, y0 + 2.02, z], [x - w, y0 + 2.02, z], n);
+  var dm = D.mesh(M.door); grp.add(dm); var sg = { x1: x - w, z1: s * CW, x2: x + w, z2: s * CW }; W.cols[k].push(sg);
+  W.doors[num] = { k: k, x: x, s: s, mesh: dm, seg: sg };
   grp.add(plane(GS.TEX.label(num, { w: 128, h: 64, bg: '#e9e6d8', border: '#3a3a3a', bw: 5, fs: 44, font: "'Ria',sans-serif" }), 0.17, 0.085, x, y0 + 1.62, s * (CW - 0.056), s > 0 ? PI : 0));
 }
 function floor(k) {
@@ -231,8 +258,10 @@ function floor(k) {
   W.cols[k] = C; W.floors[k] = grp;
   B.jang.box(XE / 2, y0 - 0.1, 0, XE, 0.2, CW * 2, { t: 2 }); B.conc.box(-0.5, y0 - 0.1, 0, 1, 0.2, 2.5, { t: 1.5 });
   B.ceil.box(XE / 2, y0 + WH + 0.05, 0, XE, 0.1, 7.5, { t: 1.2 });
-  var gN = [[12.4, 13.3]], gS = [[12.4, 13.3]];
-  if (k === 0) { gN.unshift([1.6, 2.7]); gS.unshift([3.2, 4.05]); gS.unshift([0.95, 1.85]); gS.splice(gS.length - 1, 0, [8.88, 9.72]); }   // 205호 문 자리(퇴실 이벤트)
+  var xsN = k === 0 ? [6.6, 8.6, 10.6] : [1.6, 3.6, 5.6, 7.6, 9.6, 11.2], xsS = k === 0 ? [7.4, 9.3, 11.1] : xsN;
+  var gN = k === 0 ? [[1.6, 2.7]] : [], gS = k === 0 ? [[0.95, 1.85], [3.2, 4.05]] : [];
+  xsN.forEach(function (x) { gN.push([x - 0.42, x + 0.42]); }); xsS.forEach(function (x) { gS.push([x - 0.42, x + 0.42]); });   // 방문마다 구멍(퇴실한 방은 문을 연다)
+  gN.push([12.4, 13.3]); gS.push([12.4, 13.3]);
   wallX(B.wall, C, 0, XE, CW, y0, { gaps: gN, frame: B.pla }); wallX(B.wall, C, 0, XE, -CW, y0, { gaps: gS, frame: B.pla });
   wallZ(B.wall, C, XE, -CW, CW, y0);
   /* 복도 끝 창, 형광등 */
@@ -240,9 +269,9 @@ function floor(k) {
   win.position.set(XE - 0.055, y0 + 1.5, 0); win.rotation.y = -PI / 2; win.updateMatrix(); win.matrixAutoUpdate = false; grp.add(win);
   [2, 6, 10, 14].forEach(function (x) { lamp(B, k, x, y0 + WH - 0.02, 0, true); });
   /* 방문들 */
-  var n = 1, xs;
-  xs = k === 0 ? [6.6, 8.6, 10.6] : [1.6, 3.6, 5.6, 7.6, 9.6, 11.2]; xs.forEach(function (x) { decoDoor(B, grp, k, x, 1, fl + '0' + n++); });
-  xs = k === 0 ? [7.4, 9.3, 11.1] : [1.6, 3.6, 5.6, 7.6, 9.6, 11.2]; xs.forEach(function (x) { var num = fl + (n < 10 ? '0' : '') + n++; if (num === '205') { grp.add(plane(GS.TEX.label(num, { w: 128, h: 64, bg: '#e9e6d8', border: '#3a3a3a', bw: 5, fs: 44, font: "'Ria',sans-serif" }), 0.17, 0.085, x, 1.62, -(CW - 0.056), 0)); return; } decoDoor(B, grp, k, x, -1, num); });
+  var n = 1;
+  xsN.forEach(function (x) { decoDoor(B, grp, k, x, 1, fl + '0' + n++); });
+  xsS.forEach(function (x) { decoDoor(B, grp, k, x, -1, fl + (n < 10 ? '0' : '') + n++); });
   /* 화장실 둘과 표지, 열린 문짝 */
   W.toilets[k] = { m: toiletRoom(B, C, k, 1), w: toiletRoom(B, C, k, -1) };
   [1, -1].forEach(function (s) {
@@ -250,7 +279,7 @@ function floor(k) {
     B.pla.box(13.74, y0 + 1.0, s * (CW + 0.105), 0.86, 2.0, 0.035, { col: [0.74, 0.76, 0.7] }); B.steel.box(14.08, y0 + 1.0, s * (CW + 0.135), 0.03, 0.12, 0.03, { col: [0.9, 0.92, 0.95] });
   });
   if (k === 0) {
-    kitchen(B, C); storage(B, C); triangle(B, C); room205(B, C, grp);
+    kitchen(B, C); storage(B, C); triangle(B, C);
     grp.add(plane(GS.TEX.label('주방', { w: 256, h: 112, bg: '#f1ede0', border: '#2f6b4a', fs: 76, fg: '#2f6b4a' }), 0.5, 0.22, 2.15, 2.2, CW - 0.056, PI));
     grp.add(plane(GS.TEX.label('창고', { w: 256, h: 112, bg: '#e9e6d8', border: '#3a3a3a', fs: 76 }), 0.3, 0.13, 1.35, 1.75, -CW + 0.056 + 0.0, 0));
     grp.add(plane(GS.TEX.label('총무', { w: 256, h: 112, bg: '#e9e6d8', border: '#b0222a', fs: 76, fg: '#b0222a' }), 0.3, 0.13, 4.35, 1.62, -CW + 0.056, 0));
@@ -345,7 +374,7 @@ W.build = function (scene) {
   W.group = new T.Group(); scene.add(W.group); W.hits = new T.Group(); scene.add(W.hits);
   W.winTex = GS.TEX.window(); W.winMats = [];
   for (var k = 0; k < GS.NF; k++) floor(k);
-  stairwell();
+  stairwell(); vroomBuild(scene);
   scene.add(new T.HemisphereLight(0xdfe8e0, 0x6a6450, 0.46)); scene.add(new T.AmbientLight(0xffffff, 0.11));
   W.lights = []; W.lightPow = 2.1;
   for (var i = 0; i < 3; i++) { var pl = new T.PointLight(0xf2ffe9, 0, 9, 1.6); scene.add(pl); W.lights.push({ light: pl, lamp: null, next: null, lv: 0 }); }
