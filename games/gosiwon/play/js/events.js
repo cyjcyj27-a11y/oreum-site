@@ -224,7 +224,7 @@ function moveoutRoom(mo) {
       gone(this); S['l' + i] = 1; S.n++; GS.hands.jab(); fly(g); GS.loot.got(L0.id); check(2400);
     } });
   });
-  function check(wait) { if (S.n >= total && !S.done) { S.done = 1; GS.save(); setTimeout(function () { S.done = 0; done(mo.key, 5000); }, wait || 0); } else { GS.ui.tasks(); GS.save(); } }   // 마지막이 물건이면 카드가 내려간 뒤 NICE
+  function check(wait) { if (S.n >= total && !S.done) { S.done = 1; GS.ui.tasks(); GS.save(); setTimeout(function () { S.done = 0; done(mo.key, 5000); }, wait || 0); } else { GS.ui.tasks(); GS.save(); } }   // 마지막이 물건이면 카드가 내려간 뒤 NICE
 }
 var VRY = { bed: 0.43, desk: 0.74 };
 /* 주운 물건이 눈앞으로 날아와 작아지며 사라진다 */
