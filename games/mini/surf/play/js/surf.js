@@ -719,7 +719,9 @@ function step(dt) {
   var ts = G.dead ? 0 : targetSpeed() * (G.danger > 0 ? 0.85 : 1) * (G.mode !== 'play' ? 0.8 : 1);
   G.speed += (ts - G.speed) * Math.min(1, dt * (G.dead ? 2 : 1.1));
   var dz = G.speed * dt; G.z += dz; G.dist = G.z; G.R.dist = G.dist;
-  var tx = lx(G.lane), ox = G.x; G.x += (tx - G.x) * Math.min(1, dt * 12); G.xv = (G.x - ox) / Math.max(dt, 1e-4);
+  /* 좌우: 임계 감쇠 용수철 — 처음엔 서서히 붙고 끝에선 미끄러지듯 멈춘다. 옛 지수 따라가기는 누르는 순간 속도가 튀어 몸·카메라 기울기가 뚝 끊겼다(10/4 사장님 "좌우움직임이 뚝뚝 끊긴다") */
+  var tx = lx(G.lane), sdt = dt, OM = 17;
+  while (sdt > 0) { var h = Math.min(sdt, 1 / 120); G.xv += (OM * OM * (tx - G.x) - 2 * OM * G.xv) * h; G.x += G.xv * h; sdt -= h; }
   if (G.air) { G.jv -= 28 * dt; G.jy += G.jv * dt; if (G.jy <= 0) { G.jy = 0; G.air = false; G.jv = 0; SFX.land(); spray(24, 1, G.x, 0.1, -G.z); G.shake = 0.22; G.landT = 0.3; } }
   if (G.landT > 0) G.landT -= dt;
   if (G.duck > 0) G.duck = Math.max(0, G.duck - dt);
