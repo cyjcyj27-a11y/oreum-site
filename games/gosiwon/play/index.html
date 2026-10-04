@@ -208,6 +208,14 @@ html.ol-land #rotate{display:none!important}
   #endW{margin-top:8vh}#end .btn{margin-bottom:28vh}
 }
 html.ol-land #tbtns{margin-bottom:3vh}
+/* 영문판 글자 맞추기(10/4 사장님 영문판 검수): 줄바꿈 없이 칸 안에서 재고 넘치면 game.js fitEl 이 글자만 줄인다 */
+body.en #shop .item>span,body.en #mres,body.en #mcoin{max-width:100%;overflow:hidden}
+body.en #bDex,body.en #bDex2{overflow:hidden}
+body.en .dx span,body.en .dx i{overflow:hidden}
+body.en #phMsg{white-space:pre;overflow:hidden}
+body.en #note .pap{white-space:pre;overflow:hidden}
+body.en .stat{overflow:hidden;white-space:nowrap}
+body.en #tasks div{overflow:hidden}
 </style>
 </head>
 <body class="m-title">
@@ -266,17 +274,17 @@ html.ol-land #tbtns{margin-bottom:3vh}
 <script src="assets/landscape.js?v=1"></script>
 <script src="assets/game-home.js?v=1" data-top="6" data-left="6" data-fullscreen="1" defer></script>
 <script src="lib/three.min.js"></script>
-<script src="js/core.js?v=1"></script>
-<script src="js/world.js?v=7"></script>
+<script src="js/core.js?v=2"></script>
+<script src="js/world.js?v=8"></script>
 <script src="js/hands.js?v=37"></script>
 <script src="assets/kimchi-tex.js?v=1"></script>
-<script src="js/chores.js?v=19"></script>
+<script src="js/chores.js?v=20"></script>
 <script src="js/loot.js?v=8"></script>
-<script src="js/events.js?v=12"></script>
+<script src="js/events.js?v=13"></script>
 <script src="js/sfx.js?v=3"></script>
 <script src="js/audio.js?v=9"></script>
 <script src="js/booktext.js?v=1"></script>
-<script src="js/game.js?v=31"></script>
+<script src="js/game.js?v=32"></script>
 <script src="/assets/visit.js?v=17" defer></script>
 <script src="/assets/game-events.js?v=2" defer></script>
 </body>

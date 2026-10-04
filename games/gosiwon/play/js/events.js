@@ -86,6 +86,7 @@ var noteOn = false;
 function showNote(texts, kind) {
   var el = $('note'); el.innerHTML = ''; [].concat(texts).forEach(function (t, i) { var d = document.createElement('div'); d.className = 'pap ' + (kind || '') + ' p' + i; d.textContent = t; el.appendChild(d); });
   el.hidden = false; noteOn = true; GS.snd('pick');
+  if (GS.fitEl) [].forEach.call(el.children, function (p) { GS.fitEl(p); });   // 영문판: 줄이 넘치면 글자만 줄인다(10/4 사장님 영문판 검수)
 }
 function closeNote() { if (!noteOn) return false; $('note').hidden = true; noteOn = false; GS.ui.tasks(); return true; }
 /* 문틈 쪽지: 총무방 문 안쪽 바닥 */

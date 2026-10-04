@@ -407,7 +407,7 @@ function packTex() {
   var c = document.createElement('canvas'); c.width = 512; c.height = 768; var g = c.getContext('2d'), i;
   g.fillStyle = '#b4160e'; g.fillRect(0, 0, 512, 768);
   var gr = g.createRadialGradient(256, 300, 20, 256, 256, 330); gr.addColorStop(0, '#f04a2c'); gr.addColorStop(1, '#b0120c'); g.fillStyle = gr; g.fillRect(0, 0, 512, 512);
-  g.fillStyle = '#fff4e4'; g.fillRect(0, 0, 512, 62); g.fillStyle = '#b0120c'; g.font = "bold 34px 'Ria',sans-serif"; g.textBaseline = 'middle'; g.textAlign = 'left'; g.fillText('오름식품', 22, 32); g.textAlign = 'right'; g.fillStyle = '#1c7a3c'; g.fillText('매운맛', 490, 32);
+  g.fillStyle = '#fff4e4'; g.fillRect(0, 0, 512, 62); g.fillStyle = '#b0120c'; g.font = "bold 34px 'Ria',sans-serif"; g.textBaseline = 'middle'; g.textAlign = 'left'; g.fillText(GS.EN ? 'OREUM FOODS' : '오름식품', 22, 32); g.textAlign = 'right'; g.fillStyle = '#1c7a3c'; g.fillText(GS.EN ? 'SPICY' : '매운맛', 490, 32);   // 영문판은 영어 포장(10/4 사장님 영문판 검수)
   g.save(); g.translate(256, 330); g.scale(1, 0.56); g.fillStyle = '#f7f5ee'; g.beginPath(); g.arc(0, 0, 176, 0, 6.3); g.fill(); g.fillStyle = '#d8d4c8'; g.beginPath(); g.arc(0, 0, 176, 0, 6.3); g.arc(0, 0, 150, 0, 6.3, true); g.fill();
   g.fillStyle = '#e8902a'; g.beginPath(); g.arc(0, 8, 150, 0, 6.3); g.fill(); g.restore();
   g.strokeStyle = '#f5c842'; g.lineWidth = 9; g.lineCap = 'round';
@@ -415,7 +415,7 @@ function packTex() {
   g.fillStyle = '#fffdf2'; g.beginPath(); g.ellipse(300, 318, 46, 32, 0.2, 0, 6.3); g.fill(); g.fillStyle = '#f7b31a'; g.beginPath(); g.arc(300, 318, 20, 0, 6.3); g.fill();
   g.fillStyle = '#3d9a3a'; [[180, 300], [215, 345], [345, 352], [250, 362]].forEach(function (q) { g.beginPath(); g.ellipse(q[0], q[1], 9, 6, 0.6, 0, 6.3); g.fill(); });
   g.fillStyle = '#e3301a'; [[165, 340], [330, 300]].forEach(function (q) { g.beginPath(); g.arc(q[0], q[1], 8, 0, 6.3); g.fill(); g.fillStyle = '#f4d040'; g.beginPath(); g.arc(q[0], q[1], 3, 0, 6.3); g.fill(); g.fillStyle = '#e3301a'; });
-  g.textAlign = 'center'; g.font = "126px 'Eulji','Ria',sans-serif"; g.lineWidth = 16; g.strokeStyle = '#5a0a06'; g.lineJoin = 'round'; g.strokeText('라면', 256, 178); g.fillStyle = '#fff'; g.fillText('라면', 256, 178);
+  g.textAlign = 'center'; g.font = "126px 'Eulji','Ria',sans-serif"; g.lineWidth = 16; g.strokeStyle = '#5a0a06'; g.lineJoin = 'round'; var rw = GS.EN ? 'RAMEN' : '라면'; if (GS.EN && g.measureText(rw).width > 440) g.font = Math.floor(126 * 440 / g.measureText(rw).width) + "px 'Eulji','Ria',sans-serif"; g.strokeText(rw, 256, 178); g.fillStyle = '#fff'; g.fillText(rw, 256, 178);
   g.font = "bold 26px 'Ria',sans-serif"; g.fillStyle = '#fff4e4'; g.fillText('120g x 5', 256, 470);
   g.fillStyle = 'rgba(255,255,255,.08)'; for (i = 0; i < 512; i += 24) g.fillRect(i, 512, 12, 256);
   var t = new T.CanvasTexture(c); t.colorSpace = T.SRGBColorSpace; t.anisotropy = 4; return t;
@@ -487,7 +487,7 @@ var KM = { stage: -1 }, NSL = 14, CABL = 0.34, CX = 2.02, CZ = 3.4, STY = [0.95,
 function styro(b, lid) { if (lid) { b.box(0, 0.02, 0, 0.42, 0.04, 0.32, { col: STY }); b.box(0, 0.042, 0, 0.42, 0.003, 0.06, { col: [0.82, 0.74, 0.5] }); return; } b.box(0, 0.015, 0, 0.4, 0.03, 0.3, { col: STY }); b.box(-0.185, 0.11, 0, 0.03, 0.22, 0.3, { col: STY }); b.box(0.185, 0.11, 0, 0.03, 0.22, 0.3, { col: STY }); b.box(0, 0.11, -0.135, 0.4, 0.22, 0.03, { col: [0.9, 0.9, 0.88] }); b.box(0, 0.11, 0.135, 0.4, 0.22, 0.03, { col: [0.9, 0.9, 0.88] }); }
 function initKimchi() {
   KM.land = new T.Group(); KM.land.add(mk(function (b) { styro(b); }, GS.M.mat)); var ll = mk(function (b) { styro(b, 1); }, GS.M.mat); ll.position.y = 0.22; KM.land.add(ll);
-  var lab = W.plane(GS.TEX.label('김치 10kg', { w: 256, h: 96, bg: '#f2f2ee', fg: '#b0222a', fs: 56 }), 0.22, 0.08, 0.1, 0.264, 0.09, PI / 2, { rx: -PI / 2 }); KM.land.add(lab);
+  var lab = W.plane(GS.TEX.label(GS.EN ? 'KIMCHI 10kg' : '김치 10kg', { w: 256, h: 96, bg: '#f2f2ee', fg: '#b0222a', fs: 56 }), 0.22, 0.08, 0.1, 0.264, 0.09, PI / 2, { rx: -PI / 2 }); KM.land.add(lab);
   KM.land.position.set(0.82, 0, -2.25); KM.land.rotation.y = 0.15; scene.add(KM.land);                  // 창고 바닥
   addInter({ x: 0.82, y: 0.15, z: -2.25, sx: 0.5, sy: 0.34, sz: 0.42, label: '김치', can: function () { return KM.stage === 0 && !G.carry; }, use: function () { if (!need()) return; KM.stage = 1; KM.land.visible = false; G.carry = 'kimchi'; GS.hands.carry('kimchi'); GS.snd('pick'); } });
   addInter({ x: CX, y: 0.98, z: CZ - 0.05, sx: 0.6, sy: 0.3, sz: 0.5, label: '도마', can: function () { return G.carry === 'kimchi'; }, use: function () { G.carry = null; GS.hands.carry(null); CH.enter('kimchi'); } });

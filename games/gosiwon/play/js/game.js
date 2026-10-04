@@ -3,7 +3,7 @@
 'use strict';
 var T = THREE, W = GS.world, CH = GS.chores, PI = Math.PI, $ = function (id) { return document.getElementById(id); };
 var KEY = 'gosiwon.save', HS = 60, DAYS = 30, PASSLINE = 80, STUDY = 1200, WAGE = 15000, EYE = 1.55, DAYMIN = 960;
-var EN = /[?&]lang=en/.test(location.search), L = function (ko, en) { return EN ? en : ko; };
+var EN = /[?&]lang=en/.test(location.search), KO = {}, L = function (ko, en) { if (EN) KO[en] = ko; return EN ? en : ko; };   // KO: 영어 → 한글(영문판 칸 크기를 한글판과 같게 재려고, 10/4 사장님 영문판 검수)
 if (EN) { document.body.classList.add('en'); document.documentElement.lang = 'en'; document.title = 'Gosiwon Manager'; }
 var G = GS.G = { mode: 'title', day: 1, t: 0, pass: 50, coin: 0, items: {}, gloves: false, carry: null, tasks: [], neglect: {}, stock: 8, study: null, last: null, riceAt: 0, P: { x: 3.9, y: 0, z: -1.35, yaw: -2.29, pitch: 0 } };
 var ITEMS = [
@@ -65,6 +65,7 @@ ui.hud = function () {
   $('sClock').style.color = G.mode === 'day' && G.t > 420 ? '#d3121a' : '';
   $('vPass').textContent = Math.round(G.pass) + '%';
   var dl = $('vDelta'); dl.textContent = (pr.d > 0 ? '+' : '') + fmt1(pr.d); dl.className = pr.d > 0 ? 'up' : pr.d < 0 ? 'dn' : '';
+  if (EN) { var sg = $('topbar').textContent + innerWidth + 'x' + innerHeight + document.body.className; if (sg !== barSig) { barSig = sg; fitBar(); fitRows(); } }   // 영문판: 상단바 글이 바뀌면 다시 맞춤
 };
 ui.tasks = function () {
   var h = ''; if (G.mode !== 'day') { $('tasks').innerHTML = ''; return; }
@@ -74,7 +75,7 @@ ui.tasks = function () {
   h += GS.ev.rows();
   if (!left()) h += '<div class="' + (G.gloves ? '' : 'done') + '" id="rowGlove"><span>' + L('고무장갑 벗기', 'Gloves off') + '</span>' + (G.gloves ? '' : '<span>&#10004;</span>') + '</div>';   // 일이 끝나면 장갑을 벗어 문에 걸고 마무리
   h += '<div class="' + (left() || G.gloves ? 'done' : '') + '" id="rowDesk"><span>' + L('공부', 'Study') + '</span></div>';
-  $('tasks').innerHTML = h; ui.hud();
+  $('tasks').innerHTML = h; barSig = ''; ui.hud();
 };
 ui.praise = function (w) { var p = $('praise'); p.textContent = w; p.classList.remove('on'); void p.offsetWidth; p.classList.add('on'); };
 ui.nope = function (kind) {
@@ -82,6 +83,62 @@ ui.nope = function (kind) {
   if (kind === 'glove') document.body.classList.add('showtasks');
   if (el) { var c = kind === 'glove' ? 'warn' : 'flash'; el.classList.remove(c); void el.offsetWidth; el.classList.add(c); }
 };
+// ---------- 영문판 글자 맞추기(10/4 사장님 영문판 검수 "글자크기 줄이는거알지?") ----------
+/* 영어가 칸보다 길면 배치는 그대로 두고 그 글자만 0.5px 씩 줄인다(원래 크기의 45%까지). 한글판은 손대지 않는다.
+   칸 크기는 같은 자리에 한글을 잠깐 넣어 재서(한글판과 똑같은 칸) 고정하고, 영어를 넣은 뒤 그 칸에 맞춘다 */
+function koText(s) {
+  if (KO[s] != null) return KO[s];
+  var m = /^(\d+:\d\d) (AM|PM)$/.exec(s); if (m) return (m[2] === 'PM' ? '오후 ' : '오전 ') + m[1];
+  for (var i = 0; i < GS.loot.LIST.length; i++) if (GS.loot.LIST[i].en === s) return GS.loot.LIST[i].ko;
+  return s.replace(/ won$/, '원').replace(/^Room (\d+)$/, '$1호');
+}
+function asKo(root) {                                  // root 안 글자를 잠깐 한글로 바꾸고, 되돌리는 함수를 준다(그 사이 화면엔 안 그려진다)
+  var wk = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null, false), n, back = [];
+  while ((n = wk.nextNode())) { var s = n.nodeValue, t = s.trim(); if (!t) continue; var k = koText(t); if (k !== t) { back.push([n, s]); n.nodeValue = s.replace(t, k); } }
+  return function () { back.forEach(function (b) { b[0].nodeValue = b[1]; }); };
+}
+function fitEl(el, min) {                              // 글자가 칸보다 넓으면 줄인다
+  el.style.fontSize = ''; if (!EN || !el.offsetWidth) return;
+  var f0 = parseFloat(getComputedStyle(el).fontSize), f = f0, lim = f0 * (min || 0.45);
+  while (el.scrollWidth > el.clientWidth + 0.5 && f > lim) { f -= 0.5; el.style.fontSize = f + 'px'; }
+}
+GS.fitEl = fitEl;
+function fitBox(root, lock, fit) {                     // lock 칸들의 폭을 한글일 때 폭으로 고정하고 fit 글자들을 맞춘다
+  if (!EN || !root || !root.offsetWidth) return;
+  var A = [].slice.call(root.querySelectorAll(lock)), F = [].slice.call(root.querySelectorAll(fit));
+  A.forEach(function (e) { e.style.width = ''; }); F.forEach(function (e) { e.style.fontSize = ''; });
+  var back = asKo(root), ws = A.map(function (e) { return e.offsetWidth; }); back();
+  A.forEach(function (e, i) { e.style.width = ws[i] + 'px'; });
+  F.forEach(function (e) { fitEl(e); });
+}
+function barRows(bar) { var y = [], t0 = null; [].forEach.call(bar.children, function (c) { if (!c.offsetWidth || c.classList.contains('spacer')) return; if (t0 === null) t0 = c.offsetTop; y.push(c.offsetTop > t0 + 4 ? 1 : 0); }); return y.join(''); }   // 줄 자리: 첫 줄 0, 아랫줄 1
+var barSig = '';
+function fitBar() {                                    // 상단바: 한글판보다 줄 수가 늘면(일시정지 단추가 아래로 밀리면) 이름 글자(휴지·남은 일·공부·합격 자리)만 줄인다
+  var bar = $('topbar'), st = [].slice.call(bar.querySelectorAll('.stat'));
+  st.forEach(function (e) { e.style.fontSize = ''; });
+  var back = asKo(bar), want = barRows(bar); back();
+  var f = parseFloat(getComputedStyle(st[0]).fontSize), lim = f * 0.45;
+  while (barRows(bar) !== want && f > lim) { f -= 0.5; st.forEach(function (e) { e.style.fontSize = f + 'px'; }); }
+  if (barRows(bar) !== want) st.forEach(function (e) { e.style.fontSize = ''; });   // 줄여도 안 맞으면 원래 크기로 둔다
+}
+function fitAct() {                                    // 폰 오른쪽 아래 동그란 단추: 낱말이 동그라미보다 넓으면 줄인다(줄바꿈은 한글판처럼 그대로)
+  var a = $('act'); a.style.fontSize = ''; if (!EN || !a.offsetWidth) return;
+  var f0 = parseFloat(getComputedStyle(a).fontSize), f = f0, rg = document.createRange(), r;
+  for (;;) { rg.selectNodeContents(a); r = rg.getBoundingClientRect(); if ((r.width <= a.clientWidth - 8 && r.height <= a.clientHeight - 12) || f <= f0 * 0.45) break; f -= 0.5; a.style.fontSize = f + 'px'; }
+}
+function fitRows() {                                   // 할 일 종이(폭 고정): 줄이 종이보다 길면 그 줄 글자만 줄인다
+  var t = $('tasks'); if (!EN || !t.offsetWidth) return;
+  [].forEach.call(t.children, function (d) { d.style.fontSize = ''; var f0 = parseFloat(getComputedStyle(d).fontSize), f = f0; while (d.scrollWidth > d.clientWidth + 0.5 && f > f0 * 0.45) { f -= 0.5; d.style.fontSize = f + 'px'; } });
+}
+function enFit() {                                     // 지금 보이는 창들을 다시 맞춘다(창이 열릴 때, 글이 바뀔 때, 화면 크기가 바뀔 때)
+  if (!EN) return;
+  fitBox($('morn'), '#mleft, #shop .item, #bDex', '#shop .item>span, #mres, #mcoin, #bDex');
+  fitBox($('pause'), '#bDex2', '#bDex2');
+  fitBox($('dex'), '.dx', '.dx span, .dx i');
+  barSig = ''; fitRows(); fitAct(); fitEl($('phMsg'));
+  [].forEach.call(document.querySelectorAll('#note .pap'), function (p) { fitEl(p); });
+}
+if (EN) window.addEventListener('resize', function () { setTimeout(enFit, 60); });
 GS.coin = function (n) { G.coin += n; var p = $('cointoast'); p.textContent = '+' + n.toLocaleString(); p.classList.remove('on'); void p.offsetWidth; p.classList.add('on'); GS.snd('coin'); };
 GS.snd = function (n) { SND.play(n); };
 /* 물건 이름표(코드에선 한글 이름으로 찾으니 화면에 띄울 때만 영어로) */
@@ -100,7 +157,7 @@ function morning() {                                   // 아침 종이: 어제 
   var r = G.last, h = '';
   $('mday').textContent = 'DAY ' + G.day;
   if (r) h = L('공부', 'Study') + ' <b>' + fmt1(r.h) + 'h</b><br>' + L('합격', 'Pass') + ' <b>' + Math.round(G.pass) + '%</b> <b class="' + (r.d >= 0 ? 'up' : 'dn') + '">' + (r.d > 0 ? '+' : '') + fmt1(r.d) + '</b>';
-  $('mres').innerHTML = h; shopDraw(); show('morn', true); paused = true; unlockPtr();
+  $('mres').innerHTML = h; shopDraw(); show('morn', true); enFit(); paused = true; unlockPtr();
   if (r) GS.snd(r.d >= 0 ? 'up' : 'down');
 }
 // ---------- 원장 불시 점검(10/4 사장님 고른 이벤트 #1): 사람은 안 나오고 원장 문자로만 ----------
@@ -115,7 +172,7 @@ function inspOk() { var I = G.insp; return G.tasks.filter(function (t) { return 
 function phone(msg) {
   var el = $('phone'); phone.q = phone.q || [];
   if (el.classList.contains('on')) { phone.q.push(msg); return; }                // 앞 문자가 떠 있으면 줄 세운다
-  $('phWho').textContent = L('원장님', 'Boss'); $('phMsg').textContent = msg; $('phTime').textContent = clockStr(G.t);
+  $('phWho').textContent = L('원장님', 'Boss'); $('phMsg').textContent = msg; $('phTime').textContent = clockStr(G.t); fitEl($('phMsg'));
   el.classList.add('on'); GS.snd('buzz');
   clearTimeout(phone.tm); phone.tm = setTimeout(function () { el.classList.remove('on'); if (phone.q.length) setTimeout(function () { phone(phone.q.shift()); }, 700); }, 5200);
 }
@@ -326,7 +383,7 @@ document.addEventListener('pointerlockchange', function () {
   if (was && !progExit && G.mode === 'day' && !paused) { if (CH.cur) CH.leave(); else pause(true); }
   progExit = false;
 });
-function pause(on) { if (G.mode !== 'day' && G.mode !== 'study') return; paused = on; show('pause', on); document.body.classList.toggle('paused', on); if (on) { unlockPtr(); keys = {}; ptr.down = false; SND.scrub(0); } else if (G.mode === 'day' && !CH.cur) lockPtr(); }
+function pause(on) { if (G.mode !== 'day' && G.mode !== 'study') return; paused = on; show('pause', on); document.body.classList.toggle('paused', on); if (on) enFit(); if (on) { unlockPtr(); keys = {}; ptr.down = false; SND.scrub(0); } else if (G.mode === 'day' && !CH.cur) lockPtr(); }
 
 // ---------- 입력 ----------
 var unlockAt = 0, keys = {}, look = null, scrubPtr = false, actHeld = false, noGloveWarn = false, pad = { x: 0, y: 0, id: null }, press = null;
@@ -489,7 +546,7 @@ function update(dt) {
       if (!G.gloves) { if (!noGloveWarn && CH.stainAt(cRay)) { noGloveWarn = true; ui.nope('glove'); } }
       else if (!G.carry && CH.scrub(cRay, dt)) scrubbing = true;
     } else noGloveWarn = false;
-    focusT -= dt; if (focusT <= 0) { focusT = 0.08; focusIt = CH.focus(locked || touchMode ? rayAt(0, 0) : rayAt(ptr.x, ptr.y)); var fe = $('focus'), onSt = !focusIt && G.gloves && !G.carry && CH.stainAt(rayAt(locked || touchMode ? 0 : ptr.x, locked || touchMode ? 0 : ptr.y)), lab = focusIt ? lbl(focusIt.label) : onSt ? L('닦기', 'Scrub') : ''; if (fe.dataset.l !== lab) { fe.dataset.l = lab; fe.hidden = !lab; fe.innerHTML = lab ? (focusIt ? '<kbd>E</kbd>' : '') + lab : ''; $('act').textContent = lab || L('닦기', 'Scrub'); $('act').classList.toggle('dim', !lab); } }
+    focusT -= dt; if (focusT <= 0) { focusT = 0.08; focusIt = CH.focus(locked || touchMode ? rayAt(0, 0) : rayAt(ptr.x, ptr.y)); var fe = $('focus'), onSt = !focusIt && G.gloves && !G.carry && CH.stainAt(rayAt(locked || touchMode ? 0 : ptr.x, locked || touchMode ? 0 : ptr.y)), lab = focusIt ? lbl(focusIt.label) : onSt ? L('닦기', 'Scrub') : ''; if (fe.dataset.l !== lab) { fe.dataset.l = lab; fe.hidden = !lab; fe.innerHTML = lab ? (focusIt ? '<kbd>E</kbd>' : '') + lab : ''; $('act').textContent = lab || L('닦기', 'Scrub'); $('act').classList.toggle('dim', !lab); fitAct(); } }
   }
   if (!scrubbing && !((scrubPtr && ptr.down) || actHeld)) { CH.scrubEnd(); crOn = false; }
   else if (CH.plane && !crOn && walkMode()) crouchStart(CH.plane.p);
@@ -522,7 +579,7 @@ function wire() {
   click('bNew', function () { show('confirm', true); }); click('bNo', function () { show('confirm', false); });
   click('bYes', function () { show('confirm', false); wipe(); newGame(); if (!touchMode) lockPtr(); });
   click('bGo', function () { show('morn', false); paused = false; save(); if (!touchMode) lockPtr(); });
-  click('bDex', function () { GS.loot.open(true); }); click('bDex2', function () { GS.loot.open(true); }); click('bDexX', function () { GS.loot.open(false); });
+  click('bDex', function () { GS.loot.open(true); enFit(); }); click('bDex2', function () { GS.loot.open(true); enFit(); }); click('bDexX', function () { GS.loot.open(false); });
   ['bDex', 'bDex2', 'dexH'].forEach(function (id) { $(id).textContent = L('도감', 'COLLECTION'); });
   click('bResume', function () { pause(false); }); click('bTitle', function () { save(); toTitle(); }); click('bEnd', toTitle);
   click('tPause', function () { pause(!paused); }); click('tBgm', function () { tog('bgm'); }); click('tSnd', function () { tog('snd'); });
@@ -533,7 +590,7 @@ function wire() {
     var b = e.target.closest('.item'); if (!b) return; var it = ITEMS.filter(function (x) { return x.id === b.dataset.id; })[0]; SND.unlock();
     if (G.items[it.id]) return;
     if (G.coin < it.p) { GS.snd('nope'); b.classList.remove('no'); void b.offsetWidth; b.classList.add('no'); return; }
-    G.coin -= it.p; G.items[it.id] = 1; GS.snd('buy'); shopDraw(); propsVis(); ui.hud(); save();
+    G.coin -= it.p; G.items[it.id] = 1; GS.snd('buy'); shopDraw(); enFit(); propsVis(); ui.hud(); save();
   });
   window.addEventListener('pagehide', save);
   document.addEventListener('visibilitychange', function () { SND.hide(document.hidden); if (document.hidden && G.mode === 'day' && !paused && !$('morn').hidden === false) pause(true); });
@@ -556,7 +613,7 @@ window.__gs = {
   day: function (d, pass) { G.day = d; if (pass != null) G.pass = pass; startDay(true); }, set: function (o) { for (var k in o) G[k] = o[k]; },
   ptr: function (x, y, down) { ptr.x = x; ptr.y = y; if (down != null) { var was = ptr.down; ptr.down = !!down; GS.ptrRay.copy(rayAt(x, y)); if (CH.cur) { if (down && !was) CH.cur.down(); if (!down && was) CH.cur.up(); } } }, mv: function (v) { ptr.mv += v; },
   shot: function (name, w) { render(); var c = cv; if (w) { c = document.createElement('canvas'); c.width = w; c.height = Math.round(w * cv.height / cv.width); c.getContext('2d').drawImage(cv, 0, 0, c.width, c.height); } return fetch('/save?name=' + name, { method: 'POST', body: c.toDataURL('image/jpeg', 0.85) }).then(function (r) { return r.text(); }); },
-  info: function () { return rinfo; }, morning: morning, ending: ending, pause: pause
+  info: function () { return rinfo; }, morning: morning, ending: ending, pause: pause, enFit: enFit, fitAct: fitAct
 };
 if (document.fonts && document.fonts.load) Promise.all([document.fonts.load("40px 'Eulji'"), document.fonts.load("40px 'Ria'"), document.fonts.load("bold 40px 'Note'")]).then(boot, boot); else boot();
 })();

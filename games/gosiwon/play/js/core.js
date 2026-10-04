@@ -1,5 +1,5 @@
 /* 고시원 총무 — 바탕: 난수, 질감(캔버스로 그림), 한 덩어리로 묶는 도형 모음, 재질 */
-var GS = { FH: 3, WH: 2.4, NF: 4 };
+var GS = { FH: 3, WH: 2.4, NF: 4, EN: /[?&]lang=en/.test(location.search) };   // EN: 영문판(주소 ?lang=en 일 때만)
 (function () {
 'use strict';
 var T = THREE;
@@ -120,6 +120,7 @@ TEX.label = function (text, o) {
   g.fillStyle = o.fg || '#22201c'; g.textAlign = 'center'; g.textBaseline = 'middle';
   var lines = String(text).split('\n'), fs = o.fs || h * 0.6;
   g.font = (o.weight || '') + ' ' + fs + 'px ' + (o.font || "'Eulji','Ria','Malgun Gothic',sans-serif");
+  if (GS.EN) { var mw = 0; lines.forEach(function (ln) { mw = Math.max(mw, g.measureText(ln).width); }); if (mw > w - 20) { fs = Math.floor(fs * (w - 20) / mw); g.font = (o.weight || '') + ' ' + fs + 'px ' + (o.font || "'Eulji','Ria','Malgun Gothic',sans-serif"); } }   // 영문판: 판보다 긴 영어는 글자만 줄인다
   lines.forEach(function (ln, i) { g.fillText(ln, w * (o.tx || 0.5), h * (o.ty || 0.5) + (i - (lines.length - 1) / 2) * fs * 1.1 + fs * 0.04); });
   return fin(c, 1);
 };

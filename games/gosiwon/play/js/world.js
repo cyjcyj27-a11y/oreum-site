@@ -280,14 +280,14 @@ function floor(k) {
   });
   if (k === 0) {
     kitchen(B, C); storage(B, C); triangle(B, C);
-    grp.add(plane(GS.TEX.label('주방', { w: 256, h: 112, bg: '#f1ede0', border: '#2f6b4a', fs: 76, fg: '#2f6b4a' }), 0.5, 0.22, 2.15, 2.2, CW - 0.056, PI));
-    grp.add(plane(GS.TEX.label('창고', { w: 256, h: 112, bg: '#e9e6d8', border: '#3a3a3a', fs: 76 }), 0.3, 0.13, 1.35, 1.75, -CW + 0.056 + 0.0, 0));
-    grp.add(plane(GS.TEX.label('총무', { w: 256, h: 112, bg: '#e9e6d8', border: '#b0222a', fs: 76, fg: '#b0222a' }), 0.3, 0.13, 4.35, 1.62, -CW + 0.056, 0));
+    grp.add(plane(GS.TEX.label(GS.EN ? 'KITCHEN' : '주방', { w: 256, h: 112, bg: '#f1ede0', border: '#2f6b4a', fs: 76, fg: '#2f6b4a' }), 0.5, 0.22, 2.15, 2.2, CW - 0.056, PI));
+    grp.add(plane(GS.TEX.label(GS.EN ? 'STORAGE' : '창고', { w: 256, h: 112, bg: '#e9e6d8', border: '#3a3a3a', fs: 76 }), 0.3, 0.13, 1.35, 1.75, -CW + 0.056 + 0.0, 0));
+    grp.add(plane(GS.TEX.label(GS.EN ? 'MANAGER' : '총무', { w: 256, h: 112, bg: '#e9e6d8', border: '#b0222a', fs: 76, fg: '#b0222a' }), 0.3, 0.13, 4.35, 1.62, -CW + 0.056, 0));
     /* 창고·쪽방 열린 문짝(안쪽으로) */
     B.door.box(0.95, 1.0, -CW - 0.48, 0.04, 2.0, 0.84, { t: 0.84, tv: 2 }); seg(C, 0.95, -CW - 0.08, 0.95, -CW - 0.9);
     B.door.box(4.48, 1.0, -CW - 0.085, 0.84, 2.0, 0.04, { t: 0.84, tv: 2 });
     seg(C, -1, -1.25, -1, 0);                                                    // 건물 출입문(닫힘)
-    grp.add(plane(GS.TEX.label('정 숙', { w: 256, h: 160, bg: '#f4f1e4', border: '#22201c', fs: 100 }), 0.4, 0.25, 5.9, 1.6, CW - 0.056, PI));
+    grp.add(plane(GS.TEX.label(GS.EN ? 'QUIET' : '정 숙', { w: 256, h: 160, bg: '#f4f1e4', border: '#22201c', fs: 100 }), 0.4, 0.25, 5.9, 1.6, CW - 0.056, PI));
   }
   if (k === GS.NF - 1) seg(C, -1, 0, -1, 1.25);                                  // 옥상 문(닫힘)
   grp.add(plane(GS.TEX.label(fl + 'F', { w: 256, h: 160, bg: '#d2cfb9', fs: 130, fg: '#3d5a4c' }), 0.6, 0.38, -0.5, y0 + 1.75, 1.19, PI));
@@ -323,8 +323,8 @@ function stairwell() {
   B.steel.box(SX0 - 0.03, 1.05, -0.63, 0.05, 2.1, 1.14, { col: [0.55, 0.6, 0.62] }); B.pla.box(SX0 + 0.002, 1.45, -0.63, 0.01, 0.5, 0.6, { col: [0.75, 0.85, 0.9] });
   B.steel.box(SX0 - 0.03, (GS.NF - 1) * FH + 1.05, 0.63, 0.05, 2.1, 1.14, { col: [0.5, 0.52, 0.5] });
   var g = new T.Group(); flush(B, g);
-  g.add(plane(GS.TEX.label('출입문', { w: 256, h: 96, bg: '#2f6b4a', fg: '#fff', fs: 64 }), 0.42, 0.16, SX0 + 0.012, 1.95, -0.63, PI / 2));
-  g.add(plane(GS.TEX.label('옥상\n출입금지', { w: 256, h: 160, bg: '#f4f1e4', fg: '#b0222a', fs: 62, border: '#b0222a' }), 0.4, 0.25, SX0 + 0.012, (GS.NF - 1) * FH + 1.5, 0.63, PI / 2));
+  g.add(plane(GS.TEX.label(GS.EN ? 'EXIT' : '출입문', { w: 256, h: 96, bg: '#2f6b4a', fg: '#fff', fs: 64 }), 0.42, 0.16, SX0 + 0.012, 1.95, -0.63, PI / 2));
+  g.add(plane(GS.TEX.label(GS.EN ? 'ROOF\nNO ENTRY' : '옥상\n출입금지', { w: 256, h: 160, bg: '#f4f1e4', fg: '#b0222a', fs: 62, border: '#b0222a' }), 0.4, 0.25, SX0 + 0.012, (GS.NF - 1) * FH + 1.5, 0.63, PI / 2));
   W.group.add(g); W.stairGroup = g;
 }
 /* 발밑 높이: 계단에서는 지금 높이와 가장 가까운 단을 고른다 */
