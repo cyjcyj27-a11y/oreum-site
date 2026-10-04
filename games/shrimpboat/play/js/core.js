@@ -119,6 +119,7 @@ TEX.label = function (text, o) {               // 글자 판: 배 이름, 상자
   g.fillStyle = o.fg || '#22201c'; g.textAlign = 'center'; g.textBaseline = 'middle';
   var lines = String(text).split('\n'), fs = o.fs || h * 0.6;
   g.font = (o.weight || '') + ' ' + fs + 'px ' + (o.font || "'Saemaul','Ria','Malgun Gothic',sans-serif");
+  if (o.fit) { var mw = 0; lines.forEach(function (ln) { mw = Math.max(mw, g.measureText(ln).width); }); if (mw > w * 0.92) { fs = Math.max(fs * 0.45, fs * w * 0.92 / mw); g.font = (o.weight || '') + ' ' + fs + 'px ' + (o.font || "'Saemaul','Ria','Malgun Gothic',sans-serif"); } }   // 영문판: 판보다 긴 글자는 글자만 줄인다(10/4 사장님 영문판 검수)
   lines.forEach(function (ln, i) { g.fillText(ln, w * (o.tx || 0.5), h * (o.ty || 0.5) + (i - (lines.length - 1) / 2) * fs * 1.1 + fs * 0.04); });
   return fin(c, 1);
 };

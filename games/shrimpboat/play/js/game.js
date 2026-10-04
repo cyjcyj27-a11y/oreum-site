@@ -402,7 +402,9 @@ function tick(dt) {
   SND.music(G.mode === 'day' ? 1 : 0); if (G.mode === 'day') SND.bgmVol(SB.clamp(1.2 - Math.hypot(G.P.x + 5, G.P.z) / 16, 0.3, 1));
   /* 선장 머리 위 말풍선·코골이 */
   if (bubbleOn || zzzV >= 0) { SB.cap.headPos(_hp); _hp.project(cam); var vis = _hp.z < 1 && Math.abs(_hp.x) < 1.05 && _hp.y < 0.62 && _hp.y > -1, px = (_hp.x + 1) / 2 * window.innerWidth, py = (1 - _hp.y) / 2 * window.innerHeight;
-    var bb = $('bubble'), zz = $('zzz'); bb.style.transform = zz.style.transform = 'translate(' + px.toFixed(0) + 'px,' + py.toFixed(0) + 'px)'; bb.classList.toggle('off', !vis); zz.classList.toggle('off', !vis); }
+    var bb = $('bubble'), zz = $('zzz'); bb.style.transform = zz.style.transform = 'translate(' + px.toFixed(0) + 'px,' + py.toFixed(0) + 'px)'; bb.classList.toggle('off', !vis); zz.classList.toggle('off', !vis);
+    if (EN && bubbleOn) { var bh = bb.offsetWidth / 2 + 6, bx = Math.min(Math.max(px, bh), window.innerWidth - bh); bb.style.transform = 'translate(' + bx.toFixed(0) + 'px,' + Math.max(py, 70).toFixed(0) + 'px)'; }   // 영문판: 대사가 길어 화면 가장자리에서 말풍선이 잘리지 않게 안쪽으로(10/4 사장님 영문판 검수)
+  }
   /* 그리기 */
   if (window.__noRender) { scene.updateMatrixWorld(); cam.updateMatrixWorld(); return; }
   renderer.clear(); renderer.render(scene, cam);

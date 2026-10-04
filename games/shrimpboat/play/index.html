@@ -233,15 +233,16 @@ html.ol-land #rotate{display:none!important}
   <div id="endW"></div><div id="endE">THE END</div><button class="btn main" id="bEnd">TITLE</button>
 </div>
 <div id="rotate"><button class="btn main" id="bLand"></button></div>
-<style>.en{display:none}body.en .en{display:inline}body.en .ko{display:none}</style>
+<!-- body 자체에 en 줄이 붙으므로 .en 만 쓰면 영문판 화면 전체가 숨는다. body 안쪽만 고른다(10/4 사장님 영문판 검수) -->
+<style>body .en{display:none}body.en .en{display:inline}body.en .ko{display:none}</style>
 
 <script src="assets/landscape.js?v=1"></script>
 <script src="assets/game-home.js?v=1" data-top="6" data-left="6" data-fullscreen="1" defer></script>
 <script src="lib/three.min.js"></script>
 <script src="lib/GLTFLoader.global.js"></script>
-<script src="js/core.js?v=1"></script>
+<script src="js/core.js?v=2"></script>
 <script src="js/sea.js?v=1"></script>
-<script src="js/boat.js?v=1"></script>
+<script src="js/boat.js?v=2"></script>
 <script src="js/fx.js?v=1"></script>
 <script src="js/catch.js?v=3"></script>
 <script src="js/haul.js?v=6"></script>
@@ -255,7 +256,7 @@ html.ol-land #rotate{display:none!important}
 <script src="js/tut.js?v=3"></script>
 <script src="js/sfx.js?v=1"></script>
 <script src="js/audio.js?v=2"></script>
-<script src="js/game.js?v=5"></script>
+<script src="js/game.js?v=7"></script>
 <script src="/assets/visit.js?v=17" defer></script>
 <script src="/assets/game-events.js?v=2" defer></script>
 </body>
