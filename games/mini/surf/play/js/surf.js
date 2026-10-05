@@ -1,4 +1,4 @@
-/* 서프런 게임(영문 SURF RUN, 옛 임시 제목 파도타기) 3D — 헬라(올가미 언니)가 실제 바다에서 서핑하는 세 줄 러너 (Three.js r159, 2026-10-03 새로 만듦)
+/* 서프런 게임(영문 SURF RUN, 옛 임시 제목 파도타기) 3D — 아기 상어가 실제 바다에서 서핑하는 세 줄 러너(10/5 주인공 헬라 → 상어, 적 상어 → 범고래) (Three.js r159, 2026-10-03 새로 만듦)
  * 그림: 실사풍. 늦은 오후 해(앞 오른쪽 낮게), ACES 톤, 하늘 셰이더 + 환경맵, 거스트너 파도 바다(프레넬 반사·햇빛 윤슬·물마루 거품·햇빛 비침),
  *       왼쪽 큰 청록 파도 벽(마루 거품·물보라), 오른쪽 섬 해안(지형·야자수·등대), 그림자 한 개
  * 단위 m. 앞이 -z. 레일 x = -2.4, 0, 2.4
@@ -24,7 +24,7 @@ var G = {
   objs: [], fxs: [], nextZ: 40, dead: false, deadT: 0, magnet: 0, dolphin: 0, shield: 0, bot: false, shake: 0, landT: 0, hitT: 0,
   best: 0, total: 0, mis: [], R: {}, camK: 0
 };
-/* 상점(10/4 사장님 "둘다 넣어"): 금화로 보드·헬라 옷 색·시작 아이템. 최고 기록은 점수(거리 × 배수 + 금화) */
+/* 상점(10/4 사장님 "둘다 넣어"): 금화로 보드·상어 색·시작 아이템. 최고 기록은 점수(거리 × 배수 + 금화) */
 var SH = { board: 'white', outfit: 'o_white', own: { white: 1, o_white: 1 }, stock: { shield: 0, magnet: 0 } };
 try { G.best = +localStorage.getItem('surf3.bestS') || 0; G.total = +localStorage.getItem('surf3.coins') || 0; G.mult = +localStorage.getItem('surf3.mult') || 1; var shv = JSON.parse(localStorage.getItem('surf3.shop') || 'null'); if (shv) { for (var k in shv) SH[k] = shv[k]; } if (String(SH.outfit).indexOf('o_') !== 0) SH.outfit = 'o_white'; } catch (e) {}
 function save() { try { localStorage.setItem('surf3.bestS', G.best); localStorage.setItem('surf3.shop', JSON.stringify(SH)); localStorage.setItem('surf3.coins', G.total); localStorage.setItem('surf3.mult', G.mult); localStorage.setItem('surf3.mis', JSON.stringify(G.mis.map(function (m) { return m.id; }))); } catch (e) {} }
@@ -335,30 +335,9 @@ var farG = new THREE.Group(); S.add(farG);
     g.computeVertexNormals(); var o = new THREE.Mesh(g, m); o.position.set(a[0], 0, a[1]); farG.add(o); });
 })();
 
-/* ====================================================================== 올가미 언니(bounty 의 hero.glb, 실사 재질 그대로) */
+/* ====================================================================== 주인공(10/5 헬라 → 아기 상어) */
 var HERO = null;
-var BN = { sp0: /^Spine$/i, neck: /^neck$/i, head: /^Head$/i, hf: /^headfront$/i, la: /^LeftArm$/i, lfa: /^LeftForeArm$/i, lh: /^LeftHand$/i, ra: /^RightArm$/i, rfa: /^RightForeArm$/i, rh: /^RightHand$/i,
-  lul: /^LeftUpLeg$/i, ll: /^LeftLeg$/i, lf: /^LeftFoot$/i, lt: /^LeftToeBase$/i, rul: /^RightUpLeg$/i, rl: /^RightLeg$/i, rf: /^RightFoot$/i, rt: /^RightToeBase$/i };
-function smoothNormals(g) {
-  if (g.userData.smooth || !g.attributes.position) return; g.userData.smooth = 1;
-  var P = g.attributes.position, n = P.count, ix = g.index, acc = new Float32Array(n * 3), rep = new Int32Array(n), key = new Map();
-  for (var i = 0; i < n; i++) { var k = Math.round(P.getX(i) * 2e4) + ',' + Math.round(P.getY(i) * 2e4) + ',' + Math.round(P.getZ(i) * 2e4); var r = key.get(k); if (r === undefined) { r = i; key.set(k, i); } rep[i] = r; }
-  var tn = ix ? ix.count : n, a = new V3(), b = new V3(), c = new V3();
-  for (var t = 0; t < tn; t += 3) { var i0 = ix ? ix.getX(t) : t, i1 = ix ? ix.getX(t + 1) : t + 1, i2 = ix ? ix.getX(t + 2) : t + 2;
-    a.fromBufferAttribute(P, i0); b.fromBufferAttribute(P, i1).sub(a); c.fromBufferAttribute(P, i2).sub(a); b.cross(c);
-    var r0 = rep[i0] * 3, r1 = rep[i1] * 3, r2 = rep[i2] * 3; acc[r0] += b.x; acc[r0 + 1] += b.y; acc[r0 + 2] += b.z; acc[r1] += b.x; acc[r1 + 1] += b.y; acc[r1 + 2] += b.z; acc[r2] += b.x; acc[r2 + 1] += b.y; acc[r2 + 2] += b.z; }
-  var N = new Float32Array(n * 3);
-  for (var j = 0; j < n; j++) { var q = rep[j] * 3, l = Math.hypot(acc[q], acc[q + 1], acc[q + 2]) || 1; N[j * 3] = acc[q] / l; N[j * 3 + 1] = acc[q + 1] / l; N[j * 3 + 2] = acc[q + 2] / l; }
-  g.setAttribute('normal', new THREE.BufferAttribute(N, 3));
-}
-var _va = new V3(), _vb = new V3(), _qa = new THREE.Quaternion(), _qb = new THREE.Quaternion(), _qc = new THREE.Quaternion(), _t = new V3();
-function aimBone(bone, child, d) {
-  if (!bone || !child) return;
-  bone.getWorldPosition(_va); child.getWorldPosition(_vb);
-  _qa.setFromUnitVectors(_vb.sub(_va).normalize(), d);
-  bone.getWorldQuaternion(_qb); bone.parent.getWorldQuaternion(_qc);
-  bone.quaternion.copy(_qc.invert().multiply(_qa.multiply(_qb))); bone.updateMatrixWorld(true);
-}
+var _va = new V3();
 /* 서핑보드: 위에서 본 물방울 윤곽을 두께 있게 뽑고 위아래를 둥글게. 흰 레진 + 산호색 레일 줄 + 가운데 나무 줄 + 지느러미 셋 */
 function makeBoard() {
   var sh = new THREE.Shape(), Lb = 1.08, Wb = 0.27;
@@ -379,53 +358,44 @@ function makeBoard() {
   return g;
 }
 var U_OUTFIT = { value: new THREE.Color(1, 1, 1) };
-function makeSurfer(gltf, height) {
-  var body = gltf.scene, bones = {};
+/* ====================================================================== 상어 주인공(2026-10-05, 메시 아기 상어. 뼈대가 없어 꼬리 흔들기·휘기는 정점 셰이더로)
+ * 모델은 얼굴이 +z, 몸길이 z 로 약 1.9. 보드 위에 배를 대고 엎드려 탄다 */
+var U_SK = { uPh: { value: 0 }, uWag: { value: 0.08 }, uArch: { value: 0 }, uTint: { value: 0 } };
+function makeShark(gltf, len) {
+  var body = gltf.scene;
   body.traverse(function (o) {
-    if (o.isMesh) { smoothNormals(o.geometry); o.frustumCulled = false; o.castShadow = true; var m = o.material; m.roughness = 0.62; m.metalness = 0; m.envMapIntensity = 0.7; if (m.map) m.map.anisotropy = 8;
-      m.onBeforeCompile = function (sh) { sh.uniforms.uOutfit = U_OUTFIT; sh.fragmentShader = 'uniform vec3 uOutfit;\n' + sh.fragmentShader.replace('#include <map_fragment>', '#include <map_fragment>\n{ vec3 cc = diffuseColor.rgb; float mx = max(cc.r, max(cc.g, cc.b)), mn = min(cc.r, min(cc.g, cc.b)); float wh = smoothstep(0.35, 0.6, mx) * (1.0 - smoothstep(0.06, 0.16, mx - mn)); diffuseColor.rgb = mix(cc, cc * uOutfit, wh); }'); };
-      m.customProgramCacheKey = function () { return 'outfit'; }; }
-    if (o.isBone) { for (var k in BN) if (BN[k].test(o.name)) bones[k] = o; }
+    if (!o.isMesh) return; o.frustumCulled = false; o.castShadow = true; var m = o.material; m.envMapIntensity = 0.85; if (m.map) m.map.anisotropy = 8;
+    m.onBeforeCompile = function (sh) {
+      sh.uniforms.uOutfit = U_OUTFIT; for (var k in U_SK) sh.uniforms[k] = U_SK[k];
+      /* 꼬리 쪽(-z)일수록 좌우로 흔들고(uWag) 위아래로 휜다(uArch) */
+      sh.vertexShader = 'uniform float uPh, uWag, uArch;\n' + sh.vertexShader.replace('#include <begin_vertex>', '#include <begin_vertex>\n{ float f = smoothstep(0.25, -0.95, transformed.z); f *= f; transformed.x += sin(uPh - transformed.z * 3.2) * uWag * f; transformed.y += uArch * f; float hf = smoothstep(0.35, 0.95, transformed.z); transformed.x += sin(uPh - 1.3) * uWag * 0.25 * hf; }');
+      /* 의상 색: 파란 몸통만 고른 색으로(화이트 = 원래 파랑) */
+      sh.fragmentShader = 'uniform vec3 uOutfit; uniform float uTint;\n' + sh.fragmentShader.replace('#include <map_fragment>', '#include <map_fragment>\n{ vec3 cc = diffuseColor.rgb; float bl = smoothstep(0.04, 0.18, cc.b - max(cc.r, cc.g)); diffuseColor.rgb = mix(cc, uOutfit * clamp(cc.b * 1.55, 0.0, 1.2) + cc.b * 0.04, bl * uTint); }');
+    };
+    m.customProgramCacheKey = function () { return 'shark'; };
   });
   body.updateMatrixWorld(true);
-  var bb = new THREE.Box3().setFromObject(body), sc = height / (bb.max.y - bb.min.y);
+  var bb = new THREE.Box3().setFromObject(body), sc = len / (bb.max.z - bb.min.z);
   var root = new THREE.Group(), tilt = new THREE.Group(), turn = new THREE.Group(), lift = new THREE.Group();
-  body.scale.multiplyScalar(sc); body.position.y = -bb.min.y * sc;
-  lift.add(body); turn.add(lift); turn.rotation.y = PI / 2; tilt.add(turn); root.add(tilt); S.add(root);
+  body.scale.multiplyScalar(sc); body.position.set(-(bb.min.x + bb.max.x) / 2 * sc, -bb.min.y * sc, -(bb.min.z + bb.max.z) / 2 * sc - 0.12);
+  lift.add(body); turn.add(lift); turn.rotation.y = PI; tilt.add(turn); root.add(tilt); S.add(root);
   var board = makeBoard(); tilt.add(board);
-  var mixer = new THREE.AnimationMixer(body);
-  gltf.animations.forEach(function (a) { if (a.name === 'idle') { var ac = mixer.clipAction(a); ac.play(); ac.timeScale = 0; ac.time = 0.3; } });
-  return { root: root, tilt: tilt, turn: turn, lift: lift, body: body, bones: bones, mixer: mixer, board: board, p: { c: 0.45, air: 0, duck: 0, cheer: 0 } };
+  return { shark: true, root: root, tilt: tilt, turn: turn, lift: lift, body: body, board: board, p: { c: 0.45, air: 0, duck: 0, cheer: 0 } };
 }
-/* 서핑 자세: 몸은 오른쪽(+x)을 보고 왼발이 앞(-z). idle 첫 자세 위에 매 프레임 뼈를 겨눈다
- * p.c 웅크림, p.air 공중 무릎 당기기, p.duck 쪼그려 보드 옆 잡기, p.cheer 두 팔 번쩍 */
-var _F = new V3(), _C = new V3(), _D = new V3(), _U = new V3(0, 1, 0);
-function dir(f, d, c) { return _t.set(0, 0, 0).addScaledVector(_F, f).addScaledVector(_D, d).addScaledVector(_C, c).normalize(); }
-function surfPose(h, t) {
-  var b = h.bones, p = h.p, c = p.c, a = p.air, dk = p.duck, ch = p.cheer;
-  h.lift.position.y = 0; h.mixer.update(0); h.root.updateMatrixWorld(true);
-  h.tilt.getWorldQuaternion(_qa); _F.set(0, 0, -1).applyQuaternion(_qa); _C.set(1, 0, 0).applyQuaternion(_qa); _D.set(0, -1, 0).applyQuaternion(_qa);
-  var ck = c + a * 0.35;
-  function bl(f1, d1, c1, f2, d2, c2) { return dir(f1 + (f2 - f1) * dk, d1 + (d2 - d1) * dk, c1 + (c2 - c1) * dk); }
-  aimBone(b.sp0, b.neck, bl(0.04, -1, 0.16 + ck * 0.36, 0.1, -0.25, 1));
-  var spread = 0.42 - a * 0.12;
-  aimBone(b.lul, b.ll, bl(spread + ck * 0.1, 1 - a * 0.35, 0.2 + ck * 0.75 + a * 0.6, 0.3, 0.35, 1));
-  aimBone(b.ll, b.lf, bl(0.12, 1, -0.1 - ck * 0.45 - a * 0.4, 0.05, 1, -0.75));
-  aimBone(b.rul, b.rl, bl(-spread - ck * 0.1, 1 - a * 0.35, 0.2 + ck * 0.75 + a * 0.6, -0.3, 0.35, 1));
-  aimBone(b.rl, b.rf, bl(-0.12, 1, -0.1 - ck * 0.45 - a * 0.4, -0.05, 1, -0.75));
-  aimBone(b.lf, b.lt, dir(0.25, 0.3, 1)); aimBone(b.rf, b.rt, dir(-0.25, 0.3, 1));
-  var sw = Math.sin(t * 2.1) * 0.08;
-  if (ch > 0.05) {
-    aimBone(b.la, b.lfa, dir(0.3, 0.3 - 1.3 * ch, 0.15)); aimBone(b.lfa, b.lh, dir(0.2, -1, 0.1));
-    aimBone(b.ra, b.rfa, dir(-0.3, 0.3 - 1.3 * ch, 0.15)); aimBone(b.rfa, b.rh, dir(-0.2, -1, 0.1));
-  } else {
-    aimBone(b.la, b.lfa, bl(0.95, 0.35 - a * 0.6 + sw, 0.25, 0.35, 1, 0.2)); aimBone(b.lfa, b.lh, bl(0.9, 0.15 - a * 0.4, 0.4, 0.2, 1, -0.1));
-    aimBone(b.ra, b.rfa, bl(-0.85, 0.5 - a * 0.7 - sw, 0.15, -0.35, 1, 0.2)); aimBone(b.rfa, b.rh, bl(-0.6, 0.6 - a * 0.5, 0.35, -0.2, 1, -0.1));
-  }
-  aimBone(b.head, b.hf, dir(1, 0.22 - dk * 0.3, 0.3 + dk * 0.4));
-  var y0 = h.tilt.getWorldPosition(_vb).y;
-  b.lf.getWorldPosition(_va); var fy = _va.y; b.rf.getWorldPosition(_va); fy = Math.min(fy, _va.y);
-  h.lift.position.y = (y0 + 0.16) - fy;
+/* 상어 자세: p.c 웅크림(착지에 납작), p.air 공중(코 들고 꼬리 내림), 잠수는 draw 에서 통째로 물속으로, p.cheer 콩콩 뛰며 꼬리 빨리 */
+var _skPh = 0;
+function sharkPose(h, t, dt, xv) {
+  var p = h.p, c = p.c, a = p.air, dk = p.duck, ch = p.cheer;
+  _skPh += dt * (6 + Math.min(6, Math.abs(xv)) + ch * 8);
+  U_SK.uPh.value = _skPh;
+  U_SK.uWag.value = 0.07 + Math.min(0.08, Math.abs(xv) * 0.012) + ch * 0.06 + a * 0.03;
+  U_SK.uArch.value = -a * 0.12 + Math.sin(t * 2.4) * 0.02;
+  var sq = Math.max(0, c - 0.48) * 0.5;
+  h.body.parent.scale.set(1 + sq * 0.6, 1 - sq, 1 + sq * 0.25);
+  var hop = ch * Math.abs(Math.sin(t * 7)) * 0.32;
+  h.lift.position.y = 0.115 + hop;
+  /* turn 이 반 바퀴 돌아 있어 lift 의 +x 회전 = 코 내림 */
+  h.lift.rotation.set(-a * 0.32 - hop * 0.6 + Math.sin(t * 2.1) * 0.03, Math.sin(_skPh * 0.5) * 0.04, 0);
 }
 
 /* ====================================================================== 장애물(실제 크기, 재질 공유) */
@@ -435,7 +405,7 @@ var MT = {
   bark: std(0x6a4a30, 0.95), barkL: std(0xb8946a, 0.9), rock: std(0x3b3f42, 0.85), rockW: std(0x26292b, 0.35), wood: std(0x7b5a3c, 0.8), woodD: std(0x4c3624, 0.9),
   rope: std(0xd9c9a3, 0.9), hull: std(0xf6f6f2, 0.3), hullB: std(0x1f4f8a, 0.35), sail: std(0xfbfaf4, 0.8, 0, { side: THREE.DoubleSide }), ski: std(0xff5a1f, 0.3), seat: std(0x1c1c1e, 0.6),
   foam: std(0xf2f6f7, 0.95), gull: std(0xf3f2ee, 0.7), gullG: std(0x8d949b, 0.7), beak: std(0xe8a52a, 0.5), net: std(0x2e3a3a, 0.9, 0, { transparent: true, alphaTest: 0.5, side: THREE.DoubleSide }),
-  shark: std(0x56656f, 0.45), sharkB: std(0xdfe3e4, 0.5), dol: std(0x6f8aa0, 0.35), dolB: std(0xdde4e8, 0.4),
+  dol: std(0x6f8aa0, 0.35), dolB: std(0xdde4e8, 0.4),
   gold: std(0xffc44a, 0.22, 1), magR: std(0xd62b26, 0.35, 0.2), magS: std(0xd0d4d8, 0.25, 0.9), glow: std(0x7fe8ff, 0.2, 0, { emissive: 0x3fc8ff, emissiveIntensity: 0.8 })
 };
 function mesh(g, m, par, x, y, z) { var o = new THREE.Mesh(g, m); o.position.set(x || 0, y || 0, z || 0); o.castShadow = true; if (par) par.add(o); return o; }
@@ -460,7 +430,7 @@ var SHAPE = {
     for (var i = 0; i < 15; i++) mesh(new THREE.SphereGeometry(0.2, 14, 10), i % 2 ? MT.white : MT.red, g, -len / 2 + (i + 0.5) * len / 15, 0.3); return g; },
   /* 갈매기 떼(덕다이브): 머리 높이로 낮게 나는 세 마리 */
   gulls: function () { var g = new THREE.Group(), birds = [];
-    for (var i = 0; i < 3; i++) { var b = new THREE.Group(); b.position.set((i - 1) * 0.8, 1.55 + (i % 2) * 0.25, i * 0.6); g.add(b);
+    for (var i = 0; i < 3; i++) { var b = new THREE.Group(); b.position.set((i - 1) * 0.8, 0.88 + (i % 2) * 0.18, i * 0.6); g.add(b);
       var bd = mesh(new THREE.SphereGeometry(0.16, 12, 8), MT.gull, b); bd.scale.set(1, 0.9, 2.2);
       mesh(new THREE.SphereGeometry(0.1, 10, 8), MT.gull, b, 0, 0.08, -0.32); var bk = mesh(new THREE.ConeGeometry(0.035, 0.14, 6), MT.beak, b, 0, 0.06, -0.45); bk.rotation.x = -PI / 2;
       var wl = new THREE.Group(), wr = new THREE.Group(); b.add(wl); b.add(wr);
@@ -470,18 +440,18 @@ var SHAPE = {
     g.userData.birds = birds; return g; },
   /* 그물(덕다이브, 두 줄): 기둥 둘 사이 머리 높이 그물 */
   net: function () { var g = new THREE.Group(), len = 2 * LANE + 1;
-    [-1, 1].forEach(function (s) { mesh(new THREE.CylinderGeometry(0.08, 0.1, 2.8, 8), MT.wood, g, s * len / 2, 0.9); });
-    var n = mesh(new THREE.PlaneGeometry(len, 1.1), MT.net, g, 0, 1.55); n.castShadow = false;
-    var top = mesh(new THREE.CylinderGeometry(0.025, 0.025, len, 6), MT.rope, g, 0, 2.1); top.rotation.z = PI / 2;
-    for (var i = 0; i < 8; i++) mesh(new THREE.SphereGeometry(0.08, 8, 6), MT.yel, g, -len / 2 + (i + 0.5) * len / 8, 2.1); return g; },
-  /* 나무 잔교(덕다이브, 세 줄 전부): 물 위 1.6m 판자 다리 */
+    [-1, 1].forEach(function (s) { mesh(new THREE.CylinderGeometry(0.08, 0.1, 2.4, 8), MT.wood, g, s * len / 2, 0.6); });
+    var n = mesh(new THREE.PlaneGeometry(len, 1.1), MT.net, g, 0, 1.2); n.castShadow = false;
+    var top = mesh(new THREE.CylinderGeometry(0.025, 0.025, len, 6), MT.rope, g, 0, 1.75); top.rotation.z = PI / 2;
+    for (var i = 0; i < 8; i++) mesh(new THREE.SphereGeometry(0.08, 8, 6), MT.yel, g, -len / 2 + (i + 0.5) * len / 8, 1.75); return g; },
+  /* 나무 잔교(덕다이브, 세 줄 전부): 물 위 0.9m 판자 다리(10/5 상어 키에 맞춰 낮춤) */
   pier: function () { var g = new THREE.Group(), w = 3 * LANE + 4;
-    for (var i = 0; i < 9; i++) { var pl = mesh(new THREE.BoxGeometry(w, 0.1, 0.3), i % 3 ? MT.wood : MT.woodD, g, 0, 1.75, -1.2 + i * 0.31); pl.rotation.x = (hash(i) - 0.5) * 0.02; }
-    [-1, 1].forEach(function (s) { mesh(new THREE.BoxGeometry(0.25, 0.3, 3), MT.woodD, g, s * (w / 2 - 0.3), 1.6, 0); [-1.3, 1.3].forEach(function (z) { mesh(new THREE.CylinderGeometry(0.16, 0.18, 3.4, 8), MT.woodD, g, s * (w / 2 - 0.3), 0.2, z); }); });
-    var rail = mesh(new THREE.BoxGeometry(w, 0.08, 0.08), MT.woodD, g, 0, 2.6, -1.3); [-w / 2 + 1, -w / 4, 0, w / 4, w / 2 - 1].forEach(function (x) { mesh(new THREE.BoxGeometry(0.08, 0.85, 0.08), MT.woodD, g, x, 2.2, -1.3); }); return g; },
+    for (var i = 0; i < 9; i++) { var pl = mesh(new THREE.BoxGeometry(w, 0.1, 0.3), i % 3 ? MT.wood : MT.woodD, g, 0, 0.95, -1.2 + i * 0.31); pl.rotation.x = (hash(i) - 0.5) * 0.02; }
+    [-1, 1].forEach(function (s) { mesh(new THREE.BoxGeometry(0.25, 0.3, 3), MT.woodD, g, s * (w / 2 - 0.3), 0.8, 0); [-1.3, 1.3].forEach(function (z) { mesh(new THREE.CylinderGeometry(0.16, 0.18, 2.6, 8), MT.woodD, g, s * (w / 2 - 0.3), -0.2, z); }); });
+    var rail = mesh(new THREE.BoxGeometry(w, 0.08, 0.08), MT.woodD, g, 0, 1.8, -1.3); [-w / 2 + 1, -w / 4, 0, w / 4, w / 2 - 1].forEach(function (x) { mesh(new THREE.BoxGeometry(0.08, 0.85, 0.08), MT.woodD, g, x, 1.4, -1.3); }); return g; },
   /* 부서지는 흰 물 둔덕(덕다이브, 두 줄): 거품 덩어리 */
   white: function () { var g = new THREE.Group(), len = 2 * LANE + 1, blobs = [];
-    for (var i = 0; i < 16; i++) { var r = 0.45 + hash(i * 3) * 0.35, b = mesh(new THREE.IcosahedronGeometry(r, 1), MT.foam, g, -len / 2 + (i + 0.5) * len / 16, 1.2 + hash(i) * 0.6, hash(i + 5) * 0.6); b.scale.set(1.2, 0.85, 1); blobs.push(b); }
+    for (var i = 0; i < 16; i++) { var r = 0.45 + hash(i * 3) * 0.35, b = mesh(new THREE.IcosahedronGeometry(r, 1), MT.foam, g, -len / 2 + (i + 0.5) * len / 16, 0.9 + hash(i) * 0.45, hash(i + 5) * 0.6); b.scale.set(1.2, 0.85, 1); blobs.push(b); }
     for (var j = 0; j < 10; j++) { var b2 = mesh(new THREE.IcosahedronGeometry(0.5, 1), MT.foam, g, -len / 2 + (j + 0.5) * len / 10, 0.25, 0.6); b2.scale.set(1.4, 0.6, 1.2); blobs.push(b2); }
     g.userData.blobs = blobs; return g; },
   /* 바위(피하기): 젖은 바위 셋 + 둘레 거품 */
@@ -559,14 +529,45 @@ function drawLaneBuoys(pz, t) {
 }
 
 /* ====================================================================== 상어: 한 번 부딪히면 뒤에서 쫓아온다(지느러미 + 물밑 그림자) */
-var shark = (function () { var g = new THREE.Group(), b = new THREE.Group(); g.add(b);
-  var body = mesh(new THREE.SphereGeometry(0.6, 18, 12), MT.shark, b, 0, -0.55); body.scale.set(0.9, 0.75, 3.4);
-  var belly = mesh(new THREE.SphereGeometry(0.55, 16, 10), MT.sharkB, b, 0, -0.75); belly.scale.set(0.8, 0.5, 3.0);
-  var fs = new THREE.Shape(); fs.moveTo(-0.5, 0); fs.quadraticCurveTo(-0.2, 0.5, 0.3, 1.05); fs.quadraticCurveTo(0.25, 0.5, 0.55, 0); fs.lineTo(-0.5, 0);
-  var fg = new THREE.ExtrudeGeometry(fs, { depth: 0.07, bevelEnabled: true, bevelThickness: 0.02, bevelSize: 0.02, bevelSegments: 2 }); fg.translate(0, 0, -0.035); fg.rotateY(PI / 2);
-  mesh(fg, MT.shark, b, 0, -0.1, 0.2);
-  var tail = mesh(new THREE.ConeGeometry(0.4, 0.9, 4), MT.shark, b, 0, -0.45, 2.2); tail.rotation.x = PI / 2; tail.scale.set(0.2, 1, 1.6);
-  g.visible = false; S.add(g); g.userData.b = b; return g; })();
+/* 뒤쫓는 범고래(10/5 상어에서 바꿈): 주인공 아기 상어와 어울리게 반질반질한 장난감 느낌. 몸은 구를 늘여 빚고
+ * 검정·흰 무늬(턱 밑·배·눈 뒤 흰 반점·등 회색 안장)는 셰이더가 몸 좌표로 그린다. 앞이 -z, 길이 약 4.6m */
+var orca = (function () { var g = new THREE.Group(), b = new THREE.Group(); g.add(b);
+  var L = 2.3, geo = new THREE.SphereGeometry(1, 72, 48), P, pat;
+  geo.rotateX(PI / 2);   /* 극을 앞뒤(z)로 */
+  P = geo.attributes.position; pat = new Float32Array(P.count * 3);
+  for (var i = 0; i < P.count; i++) {
+    var x = P.getX(i), y = P.getY(i), z = P.getZ(i), t = (z + 1) / 2;   /* t: 코 0 → 꼬리 1 */
+    var R = 0.66 * Math.pow(Math.sin(PI * Math.pow(t, 0.62)), 0.45) * (1 - t * 0.45) + 0.03;
+    var ry = y < 0 ? 0.92 : 1.02;
+    pat[i * 3] = t; pat[i * 3 + 1] = y; pat[i * 3 + 2] = x;
+    P.setXYZ(i, x * R * (1 - Math.pow(t, 3) * 0.55), y * R * ry, (t * 2 - 1) * L);
+  }
+  geo.setAttribute('aPat', new THREE.BufferAttribute(pat, 3)); geo.computeVertexNormals();
+  var bm = new THREE.MeshPhysicalMaterial({ color: 0xffffff, roughness: 0.32, clearcoat: 1, clearcoatRoughness: 0.12 });
+  bm.onBeforeCompile = function (sh) {
+    sh.vertexShader = 'attribute vec3 aPat; varying vec3 vPat;\n' + sh.vertexShader.replace('#include <begin_vertex>', '#include <begin_vertex>\nvPat = aPat;');
+    sh.fragmentShader = 'varying vec3 vPat;\n' + sh.fragmentShader.replace('#include <color_fragment>', '#include <color_fragment>\n{ float t = vPat.x, yn = vPat.y, xn = abs(vPat.z);\n'
+      + ' float belly = smoothstep(-0.08, -0.16, yn - (-0.28 + 0.22 * smoothstep(0.42, 0.62, t) * (1.0 - smoothstep(0.66, 0.8, t)) + 0.08 * sin(t * 18.0))) * step(0.03, t) * (1.0 - smoothstep(0.76, 0.8, t));\n'
+      + ' vec2 e = vec2((t - 0.2) / 0.075, (yn - 0.42) / 0.16); float eye = (1.0 - smoothstep(0.85, 1.0, length(e))) * smoothstep(0.35, 0.5, xn);\n'
+      + ' vec2 sd = vec2((t - 0.47) / 0.1, (yn - 0.85) / 0.3); float sad = (1.0 - smoothstep(0.7, 1.0, length(sd))) * 0.55;\n'
+      + ' vec3 col = mix(vec3(0.012, 0.014, 0.018), vec3(0.16, 0.17, 0.19), sad); col = mix(col, vec3(0.92, 0.94, 0.95), max(belly, eye)); diffuseColor.rgb = col; }');
+  };
+  bm.customProgramCacheKey = function () { return 'orca'; };
+  mesh(geo, bm, b, 0, -0.78, 0);
+  var blk = new THREE.MeshPhysicalMaterial({ color: 0x050608, roughness: 0.32, clearcoat: 1, clearcoatRoughness: 0.12 });
+  /* 등지느러미: 곧게 선 큰 세모(수컷) */
+  var fs = new THREE.Shape(); fs.moveTo(-0.45, 0); fs.quadraticCurveTo(-0.12, 0.55, 0.02, 1.25); fs.quadraticCurveTo(0.14, 1.28, 0.16, 1.18); fs.quadraticCurveTo(0.2, 0.5, 0.5, 0); fs.lineTo(-0.45, 0);
+  var fg = new THREE.ExtrudeGeometry(fs, { depth: 0.05, bevelEnabled: true, bevelThickness: 0.05, bevelSize: 0.04, bevelSegments: 4, curveSegments: 16 }); fg.translate(0, 0, -0.025); fg.rotateY(PI / 2);
+  mesh(fg, blk, b, 0, -0.26, -0.15);
+  /* 가슴지느러미: 둥근 노 모양 */
+  [-1, 1].forEach(function (s) { var f = mesh(new THREE.SphereGeometry(0.5, 24, 12), blk, b, s * 0.55, -1.12, -0.95); f.scale.set(0.85, 0.1, 0.5); f.rotation.set(0.15, s * 0.5, s * -0.5); });
+  /* 꼬리지느러미: 가로로 누운 두 갈래, 위아래로 친다 */
+  var tail = new THREE.Group(); tail.position.set(0, -0.8, L - 0.05); b.add(tail);
+  var ts = new THREE.Shape(); ts.moveTo(0, -0.1); ts.quadraticCurveTo(0.45, 0.05, 0.85, 0.55); ts.quadraticCurveTo(0.6, 0.62, 0.3, 0.5); ts.quadraticCurveTo(0.1, 0.42, 0, 0.36); ts.quadraticCurveTo(-0.1, 0.42, -0.3, 0.5); ts.quadraticCurveTo(-0.6, 0.62, -0.85, 0.55); ts.quadraticCurveTo(-0.45, 0.05, 0, -0.1);
+  var tg = new THREE.ExtrudeGeometry(ts, { depth: 0.03, bevelEnabled: true, bevelThickness: 0.03, bevelSize: 0.03, bevelSegments: 3, curveSegments: 14 }); tg.rotateX(PI / 2);
+  mesh(tg, blk, tail, 0, 0, 0);
+  b.position.y = 0.32;   /* 등과 눈 뒤 흰 반점이 물 위로 보이게 */
+  g.visible = false; S.add(g); g.userData.b = b; g.userData.tail = tail; return g; })();
 
 /* ====================================================================== 물보라 알갱이(점 하나로 다 그린다) */
 var PART_N = 700, parts = [], partPos = new Float32Array(PART_N * 3), partSz = new Float32Array(PART_N), partA = new Float32Array(PART_N), partHead = 0;
@@ -812,7 +813,7 @@ function fx(text, kind) {
 }
 
 
-/* ====================================================================== 상점: 보드 색 · 헬라 옷 색 · 시작 아이템 */
+/* ====================================================================== 상점: 보드 색 · 상어 색 · 시작 아이템 */
 var SHOP = {
   board: [
     { id: 'white', n: ['화이트', 'WHITE'], p: 0, deck: 0xfbf7ef, st: 0xff5a3c },
@@ -841,7 +842,7 @@ function applyLook() {
   if (!HERO) return;
   var b = SHOP.board.filter(function (x) { return x.id === SH.board; })[0] || SHOP.board[0], o = SHOP.outfit.filter(function (x) { return x.id === SH.outfit; })[0] || SHOP.outfit[0], dm = HERO.board.userData.deck.material;
   dm.color.setHex(b.deck); dm.metalness = b.metal ? 0.5 : 0; dm.roughness = b.metal ? 0.3 : 0.25; HERO.board.userData.stripe.color.setHex(b.st);
-  U_OUTFIT.value.setHex(o.c);
+  U_OUTFIT.value.setHex(o.c); U_SK.uTint.value = o.c === 0xffffff ? 0 : 1;
 }
 function hex(c) { return '#' + ('00000' + c.toString(16)).slice(-6); }
 function shopHTML() {
@@ -891,17 +892,18 @@ function draw(dt) {
   /* 주인공: 물결 따라 오르내리고 레일 옮길 때 몸을 기울인다 */
   var wy = seaH(px, pz, t);
   if (HERO) {
-    var p = HERO.p, e = Math.min(1, dt * 10), duckK = G.duck > 0 ? Math.sin((1 - G.duck / 0.8) * PI) : 0;
+    var p = HERO.p, e = Math.min(1, dt * 10), duckK = G.duck > 0 ? Math.min(1, Math.sin((1 - G.duck / 0.8) * PI) * 1.7) : 0;   /* 상어는 숙이지 않고 물속으로 잠수: 가운데는 다 잠긴 채로 */
     p.c += ((G.landT > 0 ? 0.95 : 0.48 + Math.sin(t * 2.4) * 0.05) - p.c) * e;
     p.air += ((G.air ? 1 : 0) - p.air) * e;
     p.duck += (duckK - p.duck) * Math.min(1, dt * 14);
     p.cheer += ((G.mode !== 'play' && Math.sin(t * 0.5) > 0.85 ? 1 : 0) - p.cheer) * Math.min(1, dt * 4);
-    var roll = clamp(-G.xv * 0.035, -0.45, 0.45), pitch = G.air ? clamp(G.jv * 0.02, -0.25, 0.25) : (seaH(px, pz - 1, t) - seaH(px, pz + 1, t)) * 0.4, y = wy + G.jy - p.duck * 0.55, yaw = 0;
+    var roll = clamp(-G.xv * 0.035, -0.45, 0.45), pitch = G.air ? clamp(G.jv * 0.02, -0.25, 0.25) : (seaH(px, pz - 1, t) - seaH(px, pz + 1, t)) * 0.4, y = wy + G.jy - p.duck * 0.95, yaw = 0;   /* 다 잠기면 놓치니 등지느러미 끝만 물 위로 */
     if (G.air) yaw = Math.sin(clamp((10 - G.jv) / 20, 0, 1) * PI) * 0.35;
+    if (G.duck > 0) { var dph = 1 - G.duck / 0.8; pitch += -Math.cos(dph * PI) * 0.45 * Math.sin(dph * PI); if (G.duck < 0.14 && !G.duckUp) { G.duckUp = 1; spray(22, 2, px, 0.1, pz); } } else G.duckUp = 0;
     if (G.hitT > 0) roll += Math.sin(G.hitT * 40) * 0.12;
     if (G.dead) { var dk = Math.min(1, G.deadT * 2); roll = dk * 1.6; y = wy - dk * 0.9; pitch = dk * 0.6; }
     HERO.root.position.set(px, y, pz); HERO.tilt.rotation.set(pitch, yaw, roll);
-    surfPose(HERO, t);
+    sharkPose(HERO, t, dt, G.xv);
     HERO.board.userData.deck.material.emissive.setHex(G.shield > 0 ? 0x3fc8ff : 0x000000); HERO.board.userData.deck.material.emissiveIntensity = G.shield > 0 ? 0.6 + Math.sin(t * 8) * 0.25 : 0;
   }
   /* 장애물·금화 */
@@ -925,7 +927,7 @@ function draw(dt) {
     }
     if (o.type === 'buoy') { m.rotation.z = Math.sin(t * 1.7 + o.ph) * 0.14; m.rotation.x = Math.cos(t * 1.3 + o.ph) * 0.1; }
     if (o.type === 'log' || o.type === 'rope') m.rotation.x = Math.sin(t * 1.4 + o.ph) * 0.06;
-    if (o.type === 'gulls') { m.position.y = 0; m.userData.birds.forEach(function (bd, q) { var fl = Math.sin(t * 12 + q * 1.7 + o.ph) * 0.65; bd.wl.rotation.z = -fl; bd.wr.rotation.z = fl; bd.b.position.y = 1.55 + (q % 2) * 0.25 + Math.sin(t * 2 + q) * 0.1; }); }
+    if (o.type === 'gulls') { m.position.y = 0; m.userData.birds.forEach(function (bd, q) { var fl = Math.sin(t * 12 + q * 1.7 + o.ph) * 0.65; bd.wl.rotation.z = -fl; bd.wr.rotation.z = fl; bd.b.position.y = 0.88 + (q % 2) * 0.18 + Math.sin(t * 2 + q) * 0.06; }); }
     if (o.type === 'net' || o.type === 'pier') m.position.y = 0;
     if (o.type === 'white') { m.position.y = sy * 0.5; m.userData.blobs.forEach(function (b2, q) { b2.scale.y = 0.75 + Math.sin(t * 4 + q * 1.3) * 0.12; }); if (Math.random() < 0.3) spray(1, 2, o.x + rnd(-2, 2), 1.6, o.wz); }
     if (o.type === 'sail') { m.rotation.z = Math.sin(t * 0.9 + o.ph) * 0.05; }
@@ -947,9 +949,13 @@ function draw(dt) {
   partGeo.setDrawRange(0, pc); partGeo.attributes.position.needsUpdate = true; partGeo.attributes.sz.needsUpdate = true; partGeo.attributes.al.needsUpdate = true;
   /* 상어: 위험한 동안 뒤에서 따라붙고, 쓰러지면 덮친다 */
   var dg = G.dead ? 1 : G.danger / 3.5;
-  shark.visible = dg > 0.01;
-  if (shark.visible) { var back = G.dead ? 2.2 - Math.min(1, G.deadT) * 2.2 : 2.6 + (1 - dg) * 5; shark.position.set(px + Math.sin(t * 2.2) * 0.6, seaH(px, pz + back, t) + (G.dead ? Math.sin(Math.min(1, G.deadT * 1.5) * PI) * 1.2 : 0), pz + back);
-    shark.userData.b.rotation.y = Math.sin(t * 5) * 0.12; if (Math.random() < 0.5) spray(1, 0, shark.position.x, 0.2, shark.position.z - 0.5); }
+  orca.visible = dg > 0.01;
+  if (orca.visible) {   /* 범고래는 길어서 바로 뒤면 화면 밖이다. 옆 줄 뒤에 붙어 오다가 잡을 때 옆에서 뛰어올라 덮친다 */
+    var side = px > 0.5 ? -1 : 1, dk2 = G.dead ? Math.min(1, G.deadT * 1.5) : 0, leap = Math.sin(dk2 * PI);
+    var back = G.dead ? 0.6 - dk2 * 1.4 : 0.6 + (1 - dg) * 4.5, ox = side * 1.25 * (1 - dk2);
+    orca.position.set(px + ox + Math.sin(t * 2.2) * 0.2, seaH(px + ox, pz + back, t) + leap * 1.7, pz + back);
+    orca.userData.b.rotation.set(-Math.cos(dk2 * PI) * leap * 0.6, Math.sin(t * 3.2) * 0.08 + side * dk2 * 1.2, 0); orca.userData.tail.rotation.x = Math.sin(t * 6) * 0.35;
+    if (Math.random() < 0.5) spray(1, 0, orca.position.x, 0.2, orca.position.z - 1.5); }
   /* 그림자 받는 판을 물결에 맞춘다 */
   shadowCatcher.position.set(px, 0.03, pz - 4);
   for (var sc2 = 0; sc2 < catcherP.count; sc2++) catcherP.setY(sc2, seaH(px + catcherX[sc2], pz - 4 + catcherZ[sc2], t));
@@ -962,7 +968,7 @@ function draw(dt) {
   _tp.set(px * 0.6, up + G.jy * 0.35 + wy * 0.5, pz + back2); _tl.set(px * 0.5, 1.1 + G.jy * 0.3, pz - 12);
   _cp.set(px + 3.6 + Math.sin(t * 0.15) * 0.6, 1.5 + wy, pz - 3.4); _cl.set(px + 0.1, 1.05 + wy + G.jy * 0.6, pz + 0.4);
   if (WIDE) _cp.set(px + 4.4, 1.6 + wy, pz - 2.8);
-  if (G.mode === 'shop') { if (WIDE) { _cl.x -= 1.5; _cl.z -= 1.5; _cl.y -= 0.2; } else { _cp.multiplyScalar(1).add(_va.set(0.9, 0.9, -0.6)); _cl.y -= 1.35; } }   /* 상점 판이 가리지 않게 헬라를 위(세로)·왼쪽(가로)으로 */
+  if (G.mode === 'shop') { if (WIDE) { _cl.x -= 1.5; _cl.z -= 1.5; _cl.y -= 0.2; } else { _cp.multiplyScalar(1).add(_va.set(0.9, 0.6, -0.6)); _cl.y -= 2.5; } }   /* 상점 판이 가리지 않게 상어를 위(세로)·왼쪽(가로)으로 */
   camPos.copy(_cp).lerp(_tp, kk); camLook.copy(_cl).lerp(_tl, kk);
   if (sh > 0) { camPos.x += (Math.random() * 2 - 1) * sh * 0.25; camPos.y += (Math.random() * 2 - 1) * sh * 0.2; }
   cam.position.copy(camPos); cam.lookAt(camLook); cam.rotateZ(clamp(-G.xv * 0.006, -0.06, 0.06) * kk);
@@ -1023,7 +1029,7 @@ togInit('bgmB', 'bgm', SFX.setBgm); togInit('sfxB', 'snd', SFX.setSnd);
 document.addEventListener('visibilitychange', function () { if (document.hidden && G.mode === 'play') pause(); });
 window.addEventListener('pointerdown', function () { SFX.unlock(); }, { once: true });
 document.title = L(TX.title); $('logo').textContent = L(TX.title);
-if (EN) { $('tab_board').firstChild.textContent = 'BOARD'; $('tab_outfit').firstChild.textContent = 'OUTFIT'; $('tab_item').firstChild.textContent = 'ITEM'; }
+if (EN) { $('tab_board').firstChild.textContent = 'BOARD'; $('tab_outfit').firstChild.textContent = 'COLOR'; $('tab_item').firstChild.textContent = 'ITEM'; }
 window.addEventListener('resize', resize);
 resize();
 
@@ -1046,16 +1052,16 @@ function loadGLB(url) {
 }
 setMode('load');
 bakeEnv();
-loadGLB('assets/models/hero.glb').then(function (gltf) {
-  HERO = makeSurfer(gltf, 1.68); applyLook();
+loadGLB('assets/models/shark.glb').then(function (gltf) {
+  HERO = makeShark(gltf, 1.8); applyLook();
   /* 처음 나오는 모양·재질을 한 번 그려 둔다(화면 밖이어도 올라가게 잘라내기를 잠깐 끈다) */
   var all = []; for (var k in OM) OM[k].forEach(function (m) { all.push(m); });
   all.forEach(function (m) { m.visible = true; m.position.set(0, 0, -15); });
-  shark.visible = true;
+  orca.visible = true;
   var culled = []; S.traverse(function (o) { if ((o.isMesh || o.isPoints || o.isSprite) && o.frustumCulled) { culled.push(o); o.frustumCulled = false; } });
   draw(0); coins.count = 3; partGeo.setDrawRange(0, 3); R.compile(S, cam); R.render(S, cam); coins.count = 0;
   culled.forEach(function (o) { o.frustumCulled = true; });
-  all.forEach(function (m) { m.visible = false; }); shark.visible = false;
+  all.forEach(function (m) { m.visible = false; }); orca.visible = false;
   toTitle();
 }).catch(function (e) { console.error(e); });
 
@@ -1069,6 +1075,7 @@ requestAnimationFrame(frame);
 window.__sf = {
   G: G, cam: cam, S: S, R: R, hero: function () { return HERO; }, grow: function () { return __grow; },
   tick: function (n, dt) { for (var i = 0; i < (n || 1); i++) { step(dt || 1 / 60); draw(dt || 1 / 60); } },
+  look: function (id) { SH.outfit = id; applyLook(); },
   start: startRun, title: toTitle, key: input, add: addObj, coin: addCoin, power: addPower, clear: clearObjs, resize: resize, draw: draw,
   shot: function (name) { R.render(S, cam); return fetch('/save?name=' + name, { method: 'POST', body: cv.toDataURL('image/png') }).then(function (r) { return r.text(); }); }
 };
