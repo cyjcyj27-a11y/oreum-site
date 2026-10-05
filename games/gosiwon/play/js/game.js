@@ -387,7 +387,11 @@ function pause(on) { if (G.mode !== 'day' && G.mode !== 'study') return; paused 
 
 // ---------- 입력 ----------
 var unlockAt = 0, keys = {}, look = null, scrubPtr = false, actHeld = false, noGloveWarn = false, pad = { x: 0, y: 0, id: null }, press = null;
-function ndc(e) { ptr.x = e.clientX / window.innerWidth * 2 - 1; ptr.y = -(e.clientY / window.innerHeight * 2 - 1); }
+/* 10/5 사장님 폰(녹화 안 할 때)은 터치 포인터 이벤트의 clientX/Y 가 전부 0 으로 들어온다(진단 사진) → 0,0 이면 pageX, 그다음 screenX 로 대신 읽는다 */
+var coordSrc = 'client';
+function evX(e) { if (e.clientX || e.clientY) { coordSrc = 'client'; return e.clientX; } if (e.pageX || e.pageY) { coordSrc = 'page'; return e.pageX; } coordSrc = 'screen'; return (e.screenX || 0) - (window.screenX || 0); }
+function evY(e) { if (e.clientX || e.clientY) return e.clientY; if (e.pageX || e.pageY) return e.pageY; return (e.screenY || 0) - (window.screenY || 0) - (window.outerHeight - window.innerHeight); }
+function ndc(e) { ptr.x = evX(e) / window.innerWidth * 2 - 1; ptr.y = -(evY(e) / window.innerHeight * 2 - 1); }
 function rayAt(x, y) { rc.setFromCamera({ x: zm.cx + x / zm.Z, y: zm.cy + y / zm.Z }, camB); return rc.ray; }   // 화면 좌표 → 줌 없는 카메라의 좌표
 function walkMode() { return G.mode === 'day' && !CH.cur && !paused && wakeT >= 1; }
 function useIt(it) { if (!it) return false; it.use(); return true; }
@@ -421,7 +425,7 @@ cv.addEventListener('pointerdown', function (e) {
   SND.unlock(); if (paused) return;
   if (e.pointerType === 'touch' && !touchMode) { touchMode = true; document.body.classList.add('touch'); }
   if (GS.ev.closeNote()) return;                                         // 펼친 쪽지는 아무 데나 누르면 닫힌다
-  if (G.mode === 'study') { ndc(e); tapBook(e.clientX, e.clientY); return; }
+  if (G.mode === 'study') { ndc(e); tapBook(evX(e), evY(e)); return; }
   if (G.mode !== 'day' || wakeT < 1) return;
   if (CH.cur) { ndc(e); ptr.down = true; ptr.id = e.pointerId; GS.ptrRay.copy(rayAt(ptr.x, ptr.y)); CH.cur.down(); return; }
   if (e.pointerType === 'touch' && pad.id == null && walkMode() && GS.padHit(e)) { GS.padStart(e); return; }   // 10/5 "움직이면 구도가 이렇게 됨": 패드 자리 터치가 시점 끌기로 새지 않게
@@ -430,7 +434,7 @@ cv.addEventListener('pointerdown', function (e) {
   if (press) return;
   ndc(e); var r = rayAt(ptr.x, ptr.y), hit = pad.id == null && !G.carry && CH.stainAt(r);   // 때를 직접 누른 때만 닦기. 그 밖은 끌어서 시점 돌리기(표준). 패드를 쥔 채면 늘 시점 돌리기
   if (e.pointerId === pad.id) return;
-  press = { id: e.pointerId, x: e.clientX, y: e.clientY, t: performance.now(), moved: 0, scrub: !!hit };
+  press = { id: e.pointerId, x: evX(e), y: evY(e), t: performance.now(), moved: 0, scrub: !!hit };
   if (hit) { if (G.gloves) { scrubPtr = true; ptr.down = true; } else ui.nope('glove'); }
   try { cv.setPointerCapture(e.pointerId); } catch (er) {}
 });
@@ -443,7 +447,7 @@ cv.addEventListener('pointermove', function (e) {
   }
   if (CH.cur) { if (!ptr.down || e.pointerId === ptr.id) { var ox = ptr.x, oy = ptr.y; ndc(e); if (ptr.down) ptr.mv += Math.hypot((ptr.x - ox) * GS.aspect, ptr.y - oy); } return; }
   if (press && e.pointerId === press.id) {
-    var dx = e.clientX - press.x, dy = e.clientY - press.y; press.moved += Math.abs(dx) + Math.abs(dy); press.x = e.clientX; press.y = e.clientY;
+    var ex = evX(e), ey = evY(e), dx = ex - press.x, dy = ey - press.y; press.moved += Math.abs(dx) + Math.abs(dy); press.x = ex; press.y = ey;
     if (press.scrub) { ptr.x = GS.clamp(ptr.x + dx * 2 / window.innerWidth, -0.98, 0.98); ptr.y = GS.clamp(ptr.y - dy * 2 / window.innerHeight, -0.98, 0.98); }
     else { var k = touchMode ? 0.0213 : 0.0034; /* 10/5 "시점이동은 개같이 느림": 손가락 100px 에 63도(전 30도) */ G.P.yaw -= dx * k; G.P.pitch = GS.clamp(G.P.pitch - dy * k, -1.45, 1.45); }
   } else if (!press && e.pointerType === 'mouse') ndc(e);
@@ -453,16 +457,16 @@ var DBG = /[?&]dbg=1/.test(location.search), dbgEl = null, dbgEv = [], dbgFrames
 if (DBG) {
   dbgEl = document.createElement('pre'); dbgEl.style.cssText = 'position:fixed;left:8px;top:60px;z-index:99;margin:0;padding:6px 8px;font:12px/1.35 monospace;color:#0f0;background:rgba(0,0,0,.7);pointer-events:none;white-space:pre'; document.body.appendChild(dbgEl);
   ['pointerdown', 'pointermove', 'pointerup', 'pointercancel', 'touchstart', 'touchend', 'touchcancel'].forEach(function (t) {
-    window.addEventListener(t, function (e) { if (t === 'pointermove' && dbgEv.length && dbgEv[0].t === 'pointermove' && dbgEv[0].id === e.pointerId) { dbgEv[0].x = e.clientX | 0; dbgEv[0].y = e.clientY | 0; dbgEv[0].n++; return; } var tg = e.target && (e.target.id || e.target.tagName); dbgEv.unshift({ t: t, id: e.pointerId != null ? e.pointerId : (e.changedTouches && e.changedTouches[0] ? e.changedTouches[0].identifier : '-'), pt: e.pointerType || 'touchev', tg: tg, x: e.clientX | 0, y: e.clientY | 0, n: 1 }); if (dbgEv.length > 6) dbgEv.pop(); }, true);
+    window.addEventListener(t, function (e) { if (t === 'pointermove' && dbgEv.length && dbgEv[0].t === 'pointermove' && dbgEv[0].id === e.pointerId) { dbgEv[0].x = e.clientX | 0; dbgEv[0].y = e.clientY | 0; dbgEv[0].n++; return; } var tg = e.target && (e.target.id || e.target.tagName), tc = e.changedTouches && e.changedTouches[0]; dbgEv.unshift({ t: t, id: e.pointerId != null ? e.pointerId : (tc ? tc.identifier : '-'), pt: e.pointerType || 'touchev', tg: tg, x: (tc ? tc.clientX : e.clientX) | 0, y: (tc ? tc.clientY : e.clientY) | 0, px: (tc ? tc.pageX : e.pageX) | 0, sx: (tc ? tc.screenX : e.screenX) | 0, sy: (tc ? tc.screenY : e.screenY) | 0, n: 1 }); if (dbgEv.length > 6) dbgEv.pop(); }, true);
   });
 }
 function dbgDraw(dt) {
   dbgFrames++; dbgT += dt; if (dbgT >= 0.5) { dbgFps = Math.round(dbgFrames / dbgT); dbgFrames = 0; dbgT = 0; }
   dbgEl.textContent = 'fps ' + dbgFps + '  dt ' + (dt * 1000).toFixed(1) + 'ms  win ' + innerWidth + 'x' + innerHeight + '  touch ' + touchMode + '\n' +
-    'pad id ' + pad.id + '  x ' + pad.x.toFixed(2) + '  y ' + pad.y.toFixed(2) + '\n' +
+    'pad id ' + pad.id + '  x ' + pad.x.toFixed(2) + '  y ' + pad.y.toFixed(2) + '  src ' + coordSrc + '  ox,oy ' + (pad.ox | 0) + ',' + (pad.oy | 0) + '\n' +
     'press ' + (press ? press.id + (press.scrub ? ' scrub' : ' look') : '-') + '  scrubPtr ' + scrubPtr + '  actHeld ' + actHeld + '\n' +
     'yaw ' + G.P.yaw.toFixed(2) + '  pitch ' + G.P.pitch.toFixed(2) + '  pos ' + G.P.x.toFixed(1) + ',' + G.P.y.toFixed(2) + ',' + G.P.z.toFixed(1) + '  crK ' + crK.toFixed(2) + '\n' +
-    dbgEv.map(function (v) { return v.t + ' id' + v.id + ' ' + v.pt + ' @' + v.tg + ' ' + v.x + ',' + v.y + (v.n > 1 ? ' x' + v.n : ''); }).join('\n');
+    dbgEv.map(function (v) { return v.t + ' id' + v.id + ' ' + v.pt + ' @' + v.tg + ' c' + v.x + ',' + v.y + ' p' + v.px + ' s' + v.sx + ',' + v.sy + (v.n > 1 ? ' x' + v.n : ''); }).join('\n');
 }
 function ptrUp(e) {
   if (CH.cur) { if (ptr.down && (e.pointerId === ptr.id || locked)) { ptr.down = false; CH.cur.up(); } return; }
@@ -477,10 +481,10 @@ cv.addEventListener('contextmenu', function (e) { e.preventDefault(); });
 // 폰: 이동 패드(켜짐/꺼짐 방향, 옆걸음), 행동 단추
 (function () {
   var el = $('pad'), kn = $('knob');
-  function set(e) { var r = el.getBoundingClientRect(), R = r.width / 2, x = (e.clientX - r.left - R) / R, y = (e.clientY - r.top - R) / R, d = Math.hypot(x, y); if (d > 1) { x /= d; y /= d; } pad.x = Math.abs(x) > 0.22 ? x : 0; pad.y = Math.abs(y) > 0.22 ? y : 0; kn.style.transform = 'translate(' + x * R * 0.6 + 'px,' + y * R * 0.6 + 'px)'; }
-  function start(e) { SND.unlock(); touchMode = true; document.body.classList.add('touch'); pad.id = e.pointerId; try { el.setPointerCapture(e.pointerId); } catch (er) {} set(e); e.preventDefault(); }
+  function set(e) { var r = el.getBoundingClientRect(), R = r.width / 2 * 0.8, x = (evX(e) - pad.ox) / R, y = (evY(e) - pad.oy) / R, d = Math.hypot(x, y); /* 10/5 "오른쪽으로 밀어도 왼쪽으로만": 동그라미 가운데가 아니라 손가락이 처음 닿은 자리(pad.ox/oy) 기준으로 잰다. 60px 밀면 최대 */ if (d > 1) { x /= d; y /= d; } pad.x = Math.abs(x) > 0.22 ? x : 0; pad.y = Math.abs(y) > 0.22 ? y : 0; kn.style.transform = 'translate(' + x * R * 0.6 + 'px,' + y * R * 0.6 + 'px)'; }
+  function start(e) { SND.unlock(); touchMode = true; document.body.classList.add('touch'); pad.id = e.pointerId; pad.ox = evX(e); pad.oy = evY(e); try { el.setPointerCapture(e.pointerId); } catch (er) {} set(e); e.preventDefault(); }
   el.addEventListener('pointerdown', start);
-  GS.padHit = function (e) { var r = el.getBoundingClientRect(); return r.width > 0 && e.clientX >= r.left - 24 && e.clientX <= r.right + 24 && e.clientY >= r.top - 24 && e.clientY <= r.bottom + 24; };   // 패드 자리(여유 24px)
+  GS.padHit = function (e) { var r = el.getBoundingClientRect(); var x = evX(e), y = evY(e); return r.width > 0 && x >= r.left - 24 && x <= r.right + 24 && y >= r.top - 24 && y <= r.bottom + 24; };   // 패드 자리(여유 24px)
   GS.padStart = start;
   var end = function (e) { if (e.pointerId === pad.id) { pad.id = null; pad.x = pad.y = 0; kn.style.transform = ''; } };
   window.addEventListener('pointermove', function (e) { if (e.pointerId === pad.id) set(e); }, { passive: true });   // 10/5 "조이스틱이 자꾸 왼쪽으로 간다": 손가락이 동그라미 밖으로 나가도 놓치지 않게 창 전체에서 따라간다(포인터 캡처가 안 되는 폰 브라우저 대비)
