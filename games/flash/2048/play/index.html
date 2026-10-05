@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, viewport-fit=cover">
+<title>2048</title>
+<!-- 소재(oreum-game-ui 규칙 7, design.md): 점토 놀이 탁자. 주 단추 주황 점토 판, 보조 흰 점토 판,
+     상단 점수 아이스크림 막대, 둥근 단추 파란 점토 공, 창 원목 점토판. -->
+<style>
+  @font-face { font-family: 'Miso'; src: url('fonts/miso.woff2') format('woff2'); font-display: block; }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #b98a55; font-family: 'Miso', 'Malgun Gothic', sans-serif; color: #4a2f17; user-select: none; -webkit-user-select: none; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+  #c { position: fixed; inset: 0; display: block; width: 100vw; height: 100vh; touch-action: none; }
+
+  /* ---------- 점토 판 단추 ---------- */
+  .cb { position: relative; display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 58px; min-width: 150px; padding: 0 26px; font-family: 'Miso', sans-serif; font-size: 26px; letter-spacing: 1px; white-space: nowrap; cursor: pointer; touch-action: manipulation; pointer-events: auto; border: 0; outline: 0;
+    color: #a24a10; border-radius: 24px 28px 22px 30px / 28px 23px 30px 22px;
+    background:
+      radial-gradient(rgba(90,30,0,.10) .7px, transparent 1.3px) 0 0 / 7px 7px,
+      radial-gradient(rgba(255,240,220,.16) .7px, transparent 1.3px) 3px 4px / 11px 11px,
+      radial-gradient(120% 95% at 28% 18%, #ffb877 0, #f4954a 38%, #f08a3c 55%, #d96b22 100%);
+    box-shadow: inset 0 3px 2px rgba(255,236,210,.45), inset 0 -7px 9px rgba(130,45,0,.35), inset 4px 0 6px rgba(255,220,180,.18), 0 6px 0 #b9581b, 0 11px 14px rgba(60,30,10,.35);
+    text-shadow: 0 1.6px 0 rgba(255,214,176,.85), 0 -1.2px 0 rgba(110,40,0,.55);
+    transition: transform .38s cubic-bezier(.34,1.56,.64,1), box-shadow .3s, filter .15s; }
+  .cb::after { content: ''; position: absolute; right: 12%; bottom: 14%; width: 30px; height: 30px; border-radius: 50%; pointer-events: none; opacity: .55;
+    background: repeating-radial-gradient(ellipse 50% 40% at 50% 50%, rgba(110,40,0,.18) 0 1px, transparent 1px 3.6px);
+    -webkit-mask: radial-gradient(circle, #000 30%, transparent 70%); mask: radial-gradient(circle, #000 30%, transparent 70%); }
+  .cb:hover { filter: brightness(1.05); }
+  .cb:active, .cb.prs { transform: translateY(4px) scale(1.05, .88); box-shadow: inset 0 3px 2px rgba(255,236,210,.45), inset 0 -4px 7px rgba(130,45,0,.35), 0 2px 0 #b9581b, 0 4px 6px rgba(60,30,10,.3); transition-duration: .05s; }
+  .cb.w { color: #8c7652; text-shadow: 0 1.6px 0 rgba(255,255,255,.9), 0 -1.2px 0 rgba(110,85,40,.45);
+    background:
+      radial-gradient(rgba(90,70,30,.09) .7px, transparent 1.3px) 0 0 / 7px 7px,
+      radial-gradient(120% 95% at 28% 18%, #fffdf6 0, #f6eedd 45%, #ece0c7 70%, #d8c8a8 100%);
+    box-shadow: inset 0 3px 2px rgba(255,255,255,.7), inset 0 -7px 9px rgba(120,95,50,.28), 0 6px 0 #b8a581, 0 11px 14px rgba(60,30,10,.3); }
+  .cb.w::after { background: repeating-radial-gradient(ellipse 50% 40% at 50% 50%, rgba(110,85,40,.16) 0 1px, transparent 1px 3.6px); }
+  .cb.w:active, .cb.w.prs { box-shadow: inset 0 3px 2px rgba(255,255,255,.7), inset 0 -4px 7px rgba(120,95,50,.28), 0 2px 0 #b8a581, 0 4px 6px rgba(60,30,10,.25); }
+  .cb.sm { height: 48px; min-width: 0; padding: 0 18px; font-size: 21px; border-radius: 19px 22px 18px 23px / 22px 18px 23px 18px; }
+  .cb.sm::after { width: 22px; height: 22px; }
+  .cb .n { display: inline-flex; align-items: center; justify-content: center; min-width: 26px; height: 26px; padding: 0 6px; border-radius: 13px; font-size: 17px; letter-spacing: 0; color: #fff7ea; text-shadow: none;
+    background: radial-gradient(circle at 35% 30%, #8a5a2b, #5e3a17); box-shadow: inset 0 -2px 2px rgba(0,0,0,.3), 0 1px 0 rgba(255,255,255,.4); }
+  .cb.dis { filter: saturate(.35) brightness(.95); opacity: .7; }
+  .cb svg { width: 24px; height: 24px; display: block; filter: drop-shadow(0 1.4px 0 rgba(255,255,255,.7)); }
+
+  /* ---------- 상단 바: 아이스크림 막대 + 점토 공 ---------- */
+  #topbar { position: fixed; left: 0; right: 0; top: 0; height: calc(52px + env(safe-area-inset-top)); padding: env(safe-area-inset-top) calc(10px + env(safe-area-inset-right)) 0 calc(104px + env(safe-area-inset-left)); display: flex; align-items: center; gap: 10px; pointer-events: none; z-index: 5; }
+  .stick { display: inline-flex; align-items: baseline; gap: 8px; height: 34px; padding: 0 18px; border-radius: 17px; white-space: nowrap; color: #24305e; transform-origin: 50% 50%;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.4) 0, rgba(255,255,255,0) 35%, rgba(0,0,0,0) 70%, rgba(90,55,15,.22) 100%),
+      repeating-linear-gradient(178deg, rgba(150,100,40,0) 0 5px, rgba(150,100,40,.16) 5px 6px, rgba(150,100,40,0) 6px 9px, rgba(150,100,40,.09) 9px 10px),
+      #ecd09a;
+    box-shadow: 0 2px 0 #b8935a, 0 5px 7px rgba(50,30,10,.3); line-height: 34px; }
+  #sScore { transform: rotate(-1.2deg); }
+  #sBest { transform: rotate(1.5deg); }
+  .stick small { font-size: 13px; letter-spacing: 1px; opacity: .75; }
+  .stick b { font-weight: 400; font-size: 21px; }
+  .stick.bump { animation: bump .32s cubic-bezier(.34,1.56,.64,1); }
+  @keyframes bump { 0% { transform: scale(1); } 40% { transform: scale(1.12, .92); } 100% { transform: scale(1); } }
+  .stick.hide { display: none; }
+  .spacer { flex: 1; }
+  .tog { pointer-events: auto; position: relative; width: 40px; height: 40px; border-radius: 50%; border: 0; padding: 0; cursor: pointer; touch-action: manipulation;
+    background: radial-gradient(rgba(10,30,80,.10) .6px, transparent 1.2px) 0 0 / 6px 6px, radial-gradient(circle at 34% 28%, #a9cdf7 0, #5b97e3 34%, #3b78cf 70%, #295aa6 100%);
+    box-shadow: 0 3px 0 #1f4682, 0 6px 8px rgba(0,0,0,.3), inset 0 -3px 4px rgba(0,0,0,.22), inset 0 2px 2px rgba(255,255,255,.35); display: inline-flex; align-items: center; justify-content: center; color: #fff; font-size: 13px; line-height: 1; font-family: Arial, sans-serif;
+    transition: transform .35s cubic-bezier(.34,1.56,.64,1); }
+  .tog svg { width: 20px; height: 20px; display: block; position: relative; }
+  .tog.off { opacity: .6; }
+  .tog.off::after { content: ''; position: absolute; left: 24%; right: 24%; top: 50%; height: 2px; margin-top: -1px; background: #fff; border-radius: 1px; transform: rotate(-40deg); }
+  .tog:active { transform: translateY(2px) scale(1.08, .86); transition-duration: .05s; }
+  .tog.hide { display: none; }
+  @media (max-width: 560px) {
+    #topbar { padding-left: calc(96px + env(safe-area-inset-left)); padding-right: 6px; gap: 6px; }
+    .stick { height: 30px; line-height: 30px; padding: 0 11px; gap: 5px; }
+    .stick small { font-size: 11px; letter-spacing: 0; } .stick b { font-size: 17px; }
+    .tog { width: 34px; height: 34px; } .tog svg { width: 17px; height: 17px; }
+  }
+  @media (max-width: 440px) { .stick { flex-direction: column; align-items: center; justify-content: center; gap: 0; line-height: 1; height: 36px; padding: 0 12px; min-width: 70px; } .stick small { font-size: 9px; letter-spacing: 1px; margin-bottom: 1px; } .stick b { font-size: 17px; } }
+  .tog { flex-shrink: 0; }
+  @media (max-width: 400px) { #topbar { gap: 4px; padding-right: 4px; } .stick { padding: 0 8px; min-width: 0; } .tog { width: 31px; height: 31px; } .tog svg { width: 16px; height: 16px; } }
+
+  /* ---------- 게임 중 단추 ---------- */
+  #tools { position: fixed; display: none; z-index: 4; gap: 14px; align-items: center; justify-content: center; }
+  body.playing #tools { display: flex; }
+  #tools.col { flex-direction: column; }
+  #keys { position: fixed; right: calc(12px + env(safe-area-inset-right)); bottom: calc(8px + env(safe-area-inset-bottom)); font-size: 13px; color: #3b2410; opacity: .62; pointer-events: none; z-index: 3; display: none; white-space: nowrap; }
+  body.playing #keys { display: block; }
+  body.touch #keys { display: none !important; }
+  @media (max-width: 760px), (max-height: 480px) { #keys { display: none !important; } }
+
+  /* ---------- 창: 원목 점토판 ---------- */
+  .sheetw { position: fixed; left: 50%; top: 50%; z-index: 11; transform: translate(-50%, -50%) scale(.85); opacity: 0; visibility: hidden; pointer-events: none; filter: drop-shadow(0 12px 18px rgba(40,22,8,.42)); transition: transform .2s cubic-bezier(.34,1.56,.64,1), opacity .15s, visibility 0s .2s; }
+  #dim { position: fixed; inset: 0; z-index: 8; background: rgba(45,25,8,.42); opacity: 0; visibility: hidden; transition: opacity .15s, visibility 0s .15s; }
+  body.sheeton #dim { opacity: 1; visibility: visible; transition-delay: 0s; }
+  .sheetw.show { transform: translate(-50%, -50%) scale(1); opacity: 1; visibility: visible; pointer-events: auto; transition-delay: 0s; }
+  .wood { position: relative; width: min(92vw, 440px); max-height: 90vh; overflow: auto; padding: 40px 22px 26px; text-align: center; border-radius: 26px 30px 24px 32px / 30px 24px 32px 26px;
+    background:
+      radial-gradient(ellipse 34px 10px at 22% 64%, rgba(120,70,20,.22), transparent 70%),
+      repeating-linear-gradient(176deg, rgba(140,85,30,0) 0 9px, rgba(140,85,30,.12) 9px 10px, rgba(140,85,30,0) 10px 17px, rgba(140,85,30,.07) 17px 19px),
+      linear-gradient(180deg, #f3ddb2, #e9cb94);
+    box-shadow: inset 0 3px 0 rgba(255,250,235,.6), inset 0 -4px 0 rgba(150,95,35,.25), 0 9px 0 #b98949; }
+  .wood::before { content: ''; position: absolute; left: 50%; top: 13px; width: 16px; height: 16px; margin-left: -8px; border-radius: 50%; background: radial-gradient(circle at 50% 35%, #5c3a17, #3a230c); box-shadow: 0 1.5px 0 rgba(255,245,220,.8); }
+  .wood h3 { margin: 4px 0 6px; font-weight: 400; font-size: 40px; letter-spacing: 2px; color: #6a3f16; text-shadow: 0 2px 0 rgba(255,245,220,.85), 0 -1px 0 rgba(90,50,10,.4); }
+  .wood .row { display: flex; gap: 12px; justify-content: center; align-items: center; margin-top: 16px; flex-wrap: wrap; }
+  .wood .big { font-size: 56px; line-height: 1.05; color: #4a2c10; text-shadow: 0 2px 0 rgba(255,245,220,.85); }
+  .wood .sm { font-size: 19px; color: #7a5532; margin: 4px 0; min-height: 22px; }
+  .wood canvas.tile { display: block; margin: 0 auto 4px; width: 120px; height: 120px; }
+  .endrow { display: flex; justify-content: center; gap: 8px; margin: 8px 0; }
+  .endrow canvas { width: 70px; height: 70px; display: block; margin: 0 auto; }
+  .endrow .es { font-size: 15px; color: #7a5532; }
+  .endrow .eb { font-size: 19px; color: #4a2c10; }
+  @media (max-height: 480px) {
+    .wood { padding: 30px 18px 16px; max-height: 94vh; }
+    .wood h3 { font-size: 30px; margin: 0 0 2px; }
+    .wood .big { font-size: 40px; }
+    .wood canvas.tile { width: 76px; height: 76px; }
+    .wood .row { margin-top: 8px; }
+    .wood .cb { height: 48px; font-size: 21px; min-width: 120px; }
+    .endrow canvas { width: 52px; height: 52px; }
+  }
+  @media (max-height: 480px) and (min-width: 600px) {
+    #wOver .wood, #wClear .wood { width: min(92vw, 620px); display: grid; grid-template-columns: 1fr 1fr; align-items: center; column-gap: 14px; }
+    #wOver .wood .col2, #wClear .wood .col2 { grid-column: 2; grid-row: 1 / span 4; }
+    #wOver .wood .row, #wClear .wood .row { flex-direction: column; gap: 10px; margin: 0; }
+  }
+
+  /* ---------- 타이틀 ---------- */
+  #title { position: fixed; z-index: 6; display: none; flex-direction: column; align-items: center; text-align: center; pointer-events: none; }
+  body.ontitle #title { display: flex; }
+  #title .pick { display: flex; align-items: center; gap: 10px; margin: 0 0 6px; pointer-events: auto; }
+  #title .arr { width: 50px; min-width: 0; padding: 0; height: 52px; font-family: Arial, sans-serif; font-size: 18px; }
+  #title .arr::after { display: none; }
+  #title .lab { min-width: 150px; height: 56px; flex-direction: column; gap: 0; line-height: 1; padding: 0 18px; }
+  #title .lab .sz { font-size: 27px; }
+  #title .lab .gl { font-size: 13px; letter-spacing: 1px; opacity: .85; margin-top: 4px; }
+  #title .lab.clr .gl { color: #b4260f; opacity: 1; }
+  #title .best { font-size: 17px; color: #3e240c; min-height: 22px; margin: 4px 0 12px; text-shadow: 0 1px 0 rgba(255,235,200,.6); }
+  #title .btns { display: flex; gap: 10px; align-items: center; justify-content: center; pointer-events: auto; }
+  body.shot #topbar, body.shot #keys, body.shot #oreumHome, body.shot #oreumFs, body.shot #title { display: none !important; }
+  body.still *, body.still *::before, body.still *::after { transition: none !important; animation-duration: 0s !important; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="topbar">
+  <span class="stick hide" id="sScore"><small>SCORE</small><b id="vScore">0</b></span>
+  <span class="stick hide" id="sBest"><small>BEST</small><b id="vBest">0</b></span>
+  <span class="spacer"></span>
+  <button class="tog hide" id="tgPause" title="Esc">❚❚</button>
+  <button class="tog" id="tgBgm" title="M"><svg viewBox="0 0 24 24"><path d="M9 17.5V5.5l11-2.5v12" fill="none" stroke="#fff" stroke-width="2.6" stroke-linejoin="round"/><ellipse cx="6.3" cy="17.8" rx="3.4" ry="2.7" fill="#fff"/><ellipse cx="17.3" cy="15.3" rx="3.4" ry="2.7" fill="#fff"/></svg></button>
+  <button class="tog" id="tgSnd" title="K"><svg viewBox="0 0 24 24"><path d="M3 9h4l5-4.5v15L7 15H3z" fill="#fff"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg></button>
+</div>
+<div id="tools">
+  <button class="cb w sm" id="btnUndo" title="Z"><svg viewBox="0 0 24 24"><path d="M9 7H4V2" fill="none" stroke="#8c7652" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M4.5 7.2A8 8 0 1 1 6 17" fill="none" stroke="#8c7652" stroke-width="2.6" stroke-linecap="round"/></svg><span class="n" id="undoN">3</span></button>
+  <button class="cb w sm" id="btnNew" data-en="NEW GAME">새 게임</button>
+</div>
+<div id="keys" data-en="arrows / WASD move · Z undo · Esc pause">방향키 · WASD 이동 · Z 되돌리기 · Esc 일시정지</div>
+<div id="dim"></div>
+<div id="title">
+  <div class="pick">
+    <button class="cb w arr" id="szDn">◀</button>
+    <button class="cb w lab" id="szLab"><span class="sz" id="szT">4 x 4</span><span class="gl" id="szG">GOAL 2048</span></button>
+    <button class="cb w arr" id="szUp">▶</button>
+  </div>
+  <div class="best" id="best"></div>
+  <div class="btns"><button class="cb" id="btnStart" data-en="START">시작</button></div>
+</div>
+<div class="sheetw" id="wOver"><div class="wood">
+  <h3>GAME OVER</h3>
+  <div class="big" id="oScore">0</div>
+  <div class="sm" id="oBest"></div>
+  <div class="col2"><div class="row">
+    <button class="cb w" id="btnOUndo"><svg viewBox="0 0 24 24"><path d="M9 7H4V2" fill="none" stroke="#8c7652" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M4.5 7.2A8 8 0 1 1 6 17" fill="none" stroke="#8c7652" stroke-width="2.6" stroke-linecap="round"/></svg><span class="n" id="oUndoN">3</span></button>
+    <button class="cb" id="btnRetry">RETRY</button>
+    <button class="cb w sm" id="btnTitle1">TITLE</button>
+  </div></div>
+</div></div>
+<div class="sheetw" id="wClear"><div class="wood">
+  <canvas class="tile" id="cTile" width="240" height="240"></canvas>
+  <h3>CLEAR</h3>
+  <div class="big" id="cScore">0</div>
+  <div class="sm" id="cBest"></div>
+  <div class="col2"><div class="row">
+    <button class="cb w" id="btnTitle2">TITLE</button>
+    <button class="cb" id="btnNext">NEXT</button>
+  </div></div>
+</div></div>
+<div class="sheetw" id="wEnd"><div class="wood">
+  <h3>THE END</h3>
+  <div class="endrow" id="endRow"></div>
+  <div class="sm" id="eScore"></div>
+  <div class="row"><button class="cb" id="btnTitle3">TITLE</button></div>
+</div></div>
+<div class="sheetw" id="wPause"><div class="wood">
+  <h3 data-en="PAUSE">일시정지</h3>
+  <div class="row"><button class="cb" id="btnResume" data-en="RESUME">계속</button></div>
+  <div class="row">
+    <button class="cb w sm" id="btnPNew" data-en="NEW GAME">새 게임</button>
+    <button class="cb w sm" id="btnTitle4">TITLE</button>
+  </div>
+</div></div>
+<div class="sheetw" id="wConfirm"><div class="wood">
+  <h3 data-en="NEW GAME">새 게임</h3>
+  <div class="row">
+    <button class="cb w" id="btnNo">✕</button>
+    <button class="cb" id="btnYes" data-en="NEW GAME">새 게임</button>
+  </div>
+</div></div>
+<script src="assets/game-home.js" data-top="6" data-left="6" data-fullscreen="1" defer></script>
+<script src="js/sfx.js?v=1"></script>
+<script src="js/audio.js?v=1"></script>
+<script src="js/game.js?v=1"></script>
+<script src="/assets/visit.js?v=17" defer></script>
+<script src="/assets/game-events.js" defer></script>
+</body>
+</html>
