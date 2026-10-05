@@ -391,6 +391,18 @@ function ndc(e) { ptr.x = e.clientX / window.innerWidth * 2 - 1; ptr.y = -(e.cli
 function rayAt(x, y) { rc.setFromCamera({ x: zm.cx + x / zm.Z, y: zm.cy + y / zm.Z }, camB); return rc.ray; }   // 화면 좌표 → 줌 없는 카메라의 좌표
 function walkMode() { return G.mode === 'day' && !CH.cur && !paused && wakeT >= 1; }
 function useIt(it) { if (!it) return false; it.use(); return true; }
+var sv3 = new T.Vector3();
+function stainView() {                        // 10/5 "시야에 있을 때 닦기가 떠야": 가운데(마우스면 포인터)가 때 위면 그 자리, 아니면 손 닿는 거리 안에서 보이는 가장 가까운 때의 화면 자리. 팔은 안 늘린다(손 그림만 그 자리로)
+  var c = locked || touchMode ? { x: 0, y: 0 } : { x: ptr.x, y: ptr.y };
+  if (CH.stainAt(rayAt(c.x, c.y))) return c;
+  var best = null, bd = 1e9;
+  CH.eachStain(function (mesh) {
+    mesh.getWorldPosition(sv3); var d = sv3.distanceTo(camB.position); if (d > 2.1 || d > bd) return;
+    sv3.project(camB); if (sv3.z > 1) return; var x = (sv3.x - zm.cx) * zm.Z, y = (sv3.y - zm.cy) * zm.Z; if (Math.abs(x) > 0.9 || Math.abs(y) > 0.9) return;
+    if (!CH.stainAt(rayAt(x, y))) return; bd = d; best = { x: x, y: y };
+  });
+  return best;
+}
 window.addEventListener('keydown', function (e) {
   if (e.repeat) return; var k = e.code; keys[k] = true; SND.unlock();
   if (GS.ev.isNote() && (k === 'KeyE' || k === 'KeyF' || k === 'Space' || k === 'Enter' || k === 'Escape')) { e.preventDefault(); GS.ev.closeNote(); return; }
@@ -412,10 +424,11 @@ cv.addEventListener('pointerdown', function (e) {
   if (G.mode === 'study') { ndc(e); tapBook(e.clientX, e.clientY); return; }
   if (G.mode !== 'day' || wakeT < 1) return;
   if (CH.cur) { ndc(e); ptr.down = true; ptr.id = e.pointerId; GS.ptrRay.copy(rayAt(ptr.x, ptr.y)); CH.cur.down(); return; }
-  if (locked) { ptr.down = true; ptr.x = ptr.y = 0; if (!useIt(CH.focus(rayAt(0, 0))) && !G.carry && CH.stainAt(rayAt(0, 0))) { if (G.gloves) scrubPtr = true; else ui.nope('glove'); } return; }
+  if (locked) { ptr.down = true; ptr.x = ptr.y = 0; if (!useIt(CH.focus(rayAt(0, 0))) && !G.carry) { var sv = stainView(); if (sv) { if (G.gloves) { scrubPtr = true; ptr.x = sv.x; ptr.y = sv.y; } else ui.nope('glove'); } } return; }
   if (e.pointerType === 'mouse' && !touchMode) { lockPtr(); }
   if (press) return;
-  ndc(e); var r = rayAt(ptr.x, ptr.y), hit = pad.id == null && CH.stainAt(r);   // 패드를 쥔 채 화면을 누르면 닦기 말고 시점 돌리기
+  ndc(e); var r = rayAt(ptr.x, ptr.y), hit = pad.id == null && !G.carry && (CH.stainAt(r) ? { x: ptr.x, y: ptr.y } : stainView());   // 패드를 쥔 채 화면을 누르면 닦기 말고 시점 돌리기. 누른 데가 때가 아니면 보이는 때로
+  if (hit) { ptr.x = hit.x; ptr.y = hit.y; }
   press = { id: e.pointerId, x: e.clientX, y: e.clientY, t: performance.now(), moved: 0, scrub: !!hit };
   if (hit) { if (G.gloves) { scrubPtr = true; ptr.down = true; } else ui.nope('glove'); }
   try { cv.setPointerCapture(e.pointerId); } catch (er) {}
@@ -514,7 +527,7 @@ function placeCam(dt) {
   var k = GS.ease(blend); cam.position.lerpVectors(pe, stP, k); cam.quaternion.copy(qe).slerp(stQ, k);
 }
 // ---------- 매 프레임 ----------
-var hudT = 0, scrubbing = false, hs = { move: 0, scrub: false, station: false, px: 0, py: 0 };
+var hudT = 0, scrubbing = false, heldWas = false, hs = { move: 0, scrub: false, station: false, px: 0, py: 0 };
 function update(dt) {
   var P = G.P, i;
   ptr.mvNow = ptr.mv;
@@ -540,13 +553,14 @@ function update(dt) {
   scrubbing = false;
   if (walkMode()) {
     var held = (scrubPtr && ptr.down) || actHeld;
-    if (scrubPtr && ptr.down) { aim.x = ptr.x; aim.y = ptr.y; } else if (!held || crK === 0 && !crOn) { aim.x = 0; aim.y = 0; }   // E 키·단추로 닦을 땐 화면 가운데에서 시작
+    if (scrubPtr && ptr.down) { aim.x = ptr.x; aim.y = ptr.y; } else if (!held) { aim.x = 0; aim.y = 0; } else if (!heldWas) { var sv0 = stainView(); aim.x = sv0 ? sv0.x : 0; aim.y = sv0 ? sv0.y : 0; }   // 스페이스·단추로 닦을 땐 보이는 때에서 시작(없으면 화면 가운데)
+    heldWas = held;
     var cRay = held ? rayAt(aim.x, aim.y) : rayAt(0, 0);
     if (held) {
       if (!G.gloves) { if (!noGloveWarn && CH.stainAt(cRay)) { noGloveWarn = true; ui.nope('glove'); } }
       else if (!G.carry && CH.scrub(cRay, dt)) scrubbing = true;
     } else noGloveWarn = false;
-    focusT -= dt; if (focusT <= 0) { focusT = 0.08; focusIt = CH.focus(locked || touchMode ? rayAt(0, 0) : rayAt(ptr.x, ptr.y)); var fe = $('focus'), onSt = !focusIt && G.gloves && !G.carry && CH.stainAt(rayAt(locked || touchMode ? 0 : ptr.x, locked || touchMode ? 0 : ptr.y)), lab = focusIt ? lbl(focusIt.label) : onSt ? L('닦기', 'Scrub') : ''; if (fe.dataset.l !== lab) { fe.dataset.l = lab; fe.hidden = !lab; fe.innerHTML = lab ? (focusIt ? '<kbd>E</kbd>' : '') + lab : ''; $('act').textContent = lab || L('닦기', 'Scrub'); $('act').classList.toggle('dim', !lab); fitAct(); } }
+    focusT -= dt; if (focusT <= 0) { focusT = 0.08; focusIt = CH.focus(locked || touchMode ? rayAt(0, 0) : rayAt(ptr.x, ptr.y)); var fe = $('focus'), onSt = !focusIt && G.gloves && !G.carry && stainView(), lab = focusIt ? lbl(focusIt.label) : onSt ? L('닦기', 'Scrub') : ''; if (fe.dataset.l !== lab) { fe.dataset.l = lab; fe.hidden = !lab; fe.innerHTML = lab ? (focusIt ? '<kbd>E</kbd>' : '') + lab : ''; $('act').textContent = lab || L('닦기', 'Scrub'); $('act').classList.toggle('dim', !lab); fitAct(); } }
   }
   if (!scrubbing && !((scrubPtr && ptr.down) || actHeld)) { CH.scrubEnd(); crOn = false; }
   else if (CH.plane && !crOn && walkMode()) crouchStart(CH.plane.p);

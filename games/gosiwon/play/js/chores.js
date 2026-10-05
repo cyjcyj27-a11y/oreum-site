@@ -90,6 +90,7 @@ CH.planeHit = function (ray) {                    // 닦기 시작한 면 위에
   var P = CH.plane; if (!P) return null; var d = ray.direction.dot(P.n); if (Math.abs(d) < 1e-4) return null;
   var t = _hp.copy(P.p).sub(ray.origin).dot(P.n) / d; if (t < 0 || t > 3) return null; return _hp.copy(ray.direction).multiplyScalar(t).add(ray.origin);
 };
+CH.eachStain = function (fn) { for (var i = 0; i < stains.length; i++) if (!stains[i].done) fn(stains[i].mesh); };
 CH.stainAt = function (ray) {
   tmpList.length = 0; for (var i = 0; i < stains.length; i++) if (!stains[i].done) tmpList.push(stains[i].mesh);
   rc.ray.copy(ray); rc.far = 2.3; var h = rc.intersectObjects(tmpList, false)[0]; return h && !blocked(ray.origin, h.point) ? h : null;
