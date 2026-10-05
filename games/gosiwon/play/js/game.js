@@ -467,17 +467,22 @@ cv.addEventListener('contextmenu', function (e) { e.preventDefault(); });
     if (pad.id != null || paused || !walkMode() || G.mode !== 'day' || wakeT < 1) return false;
     if (e.pointerType !== 'touch' && !touchMode) return false;
     if (e.clientX > innerWidth * 0.42) return false;
-    pad.id = e.pointerId; pad.ox = e.clientX; pad.oy = e.clientY; pad.x = pad.y = 0;
+    pad.id = e.pointerId; pad.ox = e.clientX; pad.oy = e.clientY; pad.x = pad.y = 0; pad.t = performance.now(); pad.moved = 0; pad.ex = e.clientX; pad.ey = e.clientY;
     el.style.left = (e.clientX - el.offsetWidth / 2) + 'px'; el.style.top = (e.clientY - el.offsetHeight / 2) + 'px'; el.style.bottom = 'auto'; el.classList.add('live');
     return true;
   };
   GS.padMove = function (e) {
     if (e.pointerId !== pad.id) return false;
-    var x = (e.clientX - pad.ox) / R, y = (e.clientY - pad.oy) / R, d = Math.hypot(x, y); if (d > 1) { x /= d; y /= d; }
+    var x = (e.clientX - pad.ox) / R, y = (e.clientY - pad.oy) / R, d = Math.hypot(x, y); pad.moved = Math.max(pad.moved, d * R); pad.ex = e.clientX; pad.ey = e.clientY; if (d > 1) { x /= d; y /= d; }
     pad.x = Math.abs(x) > 0.12 ? x : 0; pad.y = Math.abs(y) > 0.12 ? y : 0; kn.style.transform = 'translate(' + (x * R).toFixed(1) + 'px,' + (y * R).toFixed(1) + 'px)';
     return true;
   };
-  GS.padUp = function (e) { if (e.pointerId !== pad.id) return false; reset(); return true; };
+  GS.padUp = function (e) {
+    if (e.pointerId !== pad.id) return false;
+    var tap = performance.now() - pad.t < 300 && pad.moved < 12; reset();
+    if (tap && walkMode()) { ndc(e); useIt(CH.focus(rayAt(ptr.x, ptr.y))); }                       // 왼쪽을 톡 치면(안 끌면) 스틱이 아니라 그 자리 물건 쓰기(문·장갑·택배 같은 것). 10/5 "터치도 안 되네" 원인
+    return true;
+  };
   window.addEventListener('blur', reset);
   var a = $('act');
   a.addEventListener('pointerdown', function (e) { SND.unlock(); e.preventDefault(); if (!walkMode()) return; if (!useIt(CH.focus(rayAt(0, 0)))) actHeld = true; });
