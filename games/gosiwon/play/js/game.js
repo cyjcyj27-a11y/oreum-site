@@ -427,8 +427,7 @@ cv.addEventListener('pointerdown', function (e) {
   if (locked) { ptr.down = true; ptr.x = ptr.y = 0; if (!useIt(CH.focus(rayAt(0, 0))) && !G.carry) { var sv = stainView(); if (sv) { if (G.gloves) { scrubPtr = true; ptr.x = sv.x; ptr.y = sv.y; } else ui.nope('glove'); } } return; }
   if (e.pointerType === 'mouse' && !touchMode) { lockPtr(); }
   if (press) return;
-  ndc(e); var r = rayAt(ptr.x, ptr.y), hit = pad.id == null && !G.carry && (CH.stainAt(r) ? { x: ptr.x, y: ptr.y } : stainView());   // 패드를 쥔 채 화면을 누르면 닦기 말고 시점 돌리기. 누른 데가 때가 아니면 보이는 때로
-  if (hit) { ptr.x = hit.x; ptr.y = hit.y; }
+  ndc(e); var r = rayAt(ptr.x, ptr.y), hit = pad.id == null && !G.carry && CH.stainAt(r);   // 때를 직접 누른 때만 닦기. 그 밖은 끌어서 시점 돌리기(표준). 패드를 쥔 채면 늘 시점 돌리기
   press = { id: e.pointerId, x: e.clientX, y: e.clientY, t: performance.now(), moved: 0, scrub: !!hit };
   if (hit) { if (G.gloves) { scrubPtr = true; ptr.down = true; } else ui.nope('glove'); }
   try { cv.setPointerCapture(e.pointerId); } catch (er) {}
@@ -476,10 +475,7 @@ function walk(dt) {
   var P = G.P, f = 0, s = 0;
   if (keys.KeyW || keys.ArrowUp) f += 1; if (keys.KeyS || keys.ArrowDown) f -= 1; if (keys.KeyD || keys.ArrowRight) s += 1; if (keys.KeyA || keys.ArrowLeft) s -= 1;
   // 폰 패드(10/4 사장님 "카메라가 따라와야"): 위아래는 앞뒤로 걷고, 좌우는 몸을 돌린다. 민 만큼 빠르다
-  if (pad.id != null) {
-    f -= GS.clamp(pad.y / 0.7, -1, 1); P.yaw -= pad.x * 3.0 * dt;                                   // 10/5 사장님 "이동할 때 카메라가 따라와야": 좌우는 민 만큼 바로 돈다(제곱 없이, 2.6→3.0)
-    if (pad.y) P.pitch += (-0.12 - P.pitch) * Math.min(1, dt * 1.6);                                  // 앞뒤로 걸으면 숙였던 고개가 저절로 앞을 본다(바닥이 살짝 보이는 각도)
-  }
+  if (pad.id != null) { f -= GS.clamp(pad.y / 0.7, -1, 1); s += GS.clamp(pad.x / 0.7, -1, 1); }   // 10/5 모바일 1인칭 표준(배그M·콜옵M·마인크래프트): 왼쪽 스틱은 이동(앞뒤+옆걸음)만, 시점은 오른쪽 화면을 끌어서. 스틱으로 돌리기·고개 자동 올리기는 "지멋대로"라 뺌
   var len = Math.hypot(f, s), sp = 3.3 * (G.items.shoes ? 1.2 : 1) * (G.carry ? 0.72 : 1);
   if (len > 0) {
     if (len > 1) { f /= len; s /= len; } var sy = Math.sin(P.yaw), cy = Math.cos(P.yaw), dx = (-sy * f + cy * s) * sp * dt, dz = (-cy * f - sy * s) * sp * dt;
