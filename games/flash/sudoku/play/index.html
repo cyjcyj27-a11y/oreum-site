@@ -118,6 +118,8 @@
   #wClear .era { height: 42px; }
   #wClear .sm { min-height: 0; margin: 0; }
   #wClear .row { margin-top: 6px; flex-wrap: nowrap; }
+  #wClear .sheet { overflow-x: hidden; }
+  @media (max-width: 400px) { #wClear .pen { min-width: 118px; margin: 0 26px 0 30px; } #wClear .era.solo { min-width: 88px; } }
   /* 판 고르기 표 */
   .tierrow { display: grid; grid-template-columns: 74px 1fr; align-items: center; gap: 8px; margin: 0 0 10px; }
   .tierrow .tn { font-family: 'Kku', sans-serif; font-size: 19px; color: #2b2b33; white-space: nowrap; }
