@@ -267,7 +267,7 @@
     W = innerWidth; H = innerHeight;
     DPR = Math.min(qp('dpr') ? +qp('dpr') : (window.devicePixelRatio || 1), 3);
     cv.width = Math.round(W * DPR); cv.height = Math.round(H * DPR);
-    var top = 52, land = landscape(), low = H <= 480;
+    var top = window.__TOP || 52, land = landscape(), low = H <= 480; // __TOP: 쇼츠 촬영 때 위 자막 자리
     var b = {}, t = {}, tools = {};
     L.panel = null;
     function vfit(areaTop, areaH) { return areaTop + (areaH - b.s * 1.12) / 2 + b.s * 0.06; }

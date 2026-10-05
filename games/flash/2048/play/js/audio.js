@@ -56,7 +56,7 @@
     bad: function () { smp('clk', 0.18, 0.5); },
     clear: function () {
       var t = ac.currentTime;
-      for (var i = 0; i < 5; i++) smp('pop', 0.6, 0.9 + i * 0.12, t + i * 0.09);
+      for (var i = 0; i < 5; i++) smp('pop', 0.3, 0.9 + i * 0.12, t + i * 0.12);
       [523.25, 659.25, 783.99, 1046.5, 1318.5].forEach(function (f, i) { tone(t + 0.3 + i * 0.09, f, 0.9, 0.07, 'sine'); tone(t + 0.3 + i * 0.09, f * 2, 0.5, 0.02, 'triangle'); });
     },
     over: function () { var t = ac.currentTime; [392, 349.23, 311.13, 261.63].forEach(function (f, i) { tone(t + i * 0.17, f, 0.4, 0.07, 'triangle'); }); }
