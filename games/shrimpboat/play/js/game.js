@@ -83,7 +83,7 @@ function initGL() {
   SB.M = SB.makeMaterials();
   S = SB.sea = SEA.build(scene, mob);
   SB.boat.build(scene); SB.fx.init(SB.boat.group);
-  SB.haul.init(); SB.sort.init(); SB.work.init(); SB.cap.init(SB.boat.group); SB.cap.initInter(); SB.night.init(); SB.escape.init(scene); SB.hero.init(SB.boat.group); SB.story.init(scene); SB.tut.init();
+  SB.haul.init(); SB.sort.init(); SB.work.init(); SB.cap.init(SB.boat.group); SB.cap.initInter(); SB.night.init(); SB.boat.inMain(4.55, -0.45, 0.28); SB.escape.init(scene); SB.hero.init(SB.boat.group); SB.story.init(scene); SB.tut.init();
   gulls(); resize();
 }
 function resize() {
@@ -326,7 +326,7 @@ $('pL').addEventListener('pointerdown', function (e) { e.preventDefault(); SND.u
 document.addEventListener('visibilitychange', function () { SND.hide(document.hidden); if (document.hidden && (G.mode === 'day' || G.mode === 'night')) { save(); pause(true); } });
 
 // ---------- 매 프레임 ----------
-var stepAcc = 0, bob = 0, _hp = new T.Vector3(), _lp = new T.Vector3(), lastT = 0, focusIt = null, rainAcc = 0;
+var stepAcc = 0, rescueT = 0.5, bob = 0, _hp = new T.Vector3(), _lp = new T.Vector3(), lastT = 0, focusIt = null, rainAcc = 0;
 function updRay() { SB.boat.group.updateMatrixWorld(); SB.boat.toLocalRay(rayAt(ptr.x, ptr.y), SB.ptrLocal); }
 function tick(dt) {
   if (dt > 0.1) dt = 0.1;
@@ -353,11 +353,12 @@ function tick(dt) {
   if (playing && walkMode() && !scrub) {
     var f = (keys.KeyW || keys.ArrowUp ? 1 : 0) - (keys.KeyS || keys.ArrowDown ? 1 : 0) - pad.y, s = (keys.KeyD || keys.ArrowRight ? 1 : 0) - (keys.KeyA || keys.ArrowLeft ? 1 : 0) + pad.x, l = Math.hypot(f, s);
     if (l > 0.01) { if (l > 1) { f /= l; s /= l; } run = keys.ShiftLeft || keys.ShiftRight || pad.run; sp = (run ? RUN : WALK) * (G.carry === 'pallet' || G.carry === 'buoy' ? 0.7 : 1); var cy = Math.cos(G.P.yaw), sy = Math.sin(G.P.yaw);
-      var vx = -f * sy + s * cy, vz = -f * cy - s * sy; G.P.x += vx * sp * dt; G.P.z += vz * sp * dt; B.collide(G.P, 0.28); stepAcc += sp * dt; if (stepAcc > (run ? 0.85 : 0.68)) { stepAcc = 0; SB.snd('step'); }
+      var vx = -f * sy + s * cy, vz = -f * cy - s * sy; B.walk(G.P, vx * sp * dt, vz * sp * dt, 0.28); stepAcc += sp * dt; if (stepAcc > (run ? 0.85 : 0.68)) { stepAcc = 0; SB.snd('step'); }
       var mh = Math.atan2(vx, vz); G.P.face += wrap(mh - G.P.face) * Math.min(1, dt * 11);                     // 몸은 가는 쪽으로
       if (third() && performance.now() - lookT > 900) G.P.yaw += Math.sin(wrap(mh - (G.P.yaw + PI))) * 1.0 * dt;   // 옆으로 갈수록 사진기가 등 뒤로(올가미 언니 기준)
     }
   }
+  if (playing && walkMode() && !scrub) { rescueT -= dt; if (rescueT < 0) { rescueT = 0.5; if (B.rescue(G.P, 0.28)) SB.snd('step'); } }   // 갇혔으면 꺼내 준다
   SB.night.update(dt, sp, run);
   bob += dt * sp * 3.1;
   /* 사진기 */

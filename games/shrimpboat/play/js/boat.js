@@ -211,7 +211,7 @@ function galley(P, S, I) {
   P.box((x0 + x1) / 2, top - 0.02, zc, x1 - x0, 0.04, 0.52, { col: WOOD });
   [[x0 + 0.04, zc - 0.22], [x0 + 0.04, zc + 0.22], [x1 - 0.04, zc - 0.22], [x1 - 0.04, zc + 0.22]].forEach(function (q) { S.box(q[0], D + 0.41, q[1], 0.04, 0.82, 0.04, { col: [0.55, 0.55, 0.55] }); });
   P.box((x0 + x1) / 2, D + 0.15, zc, x1 - x0 - 0.04, 0.02, 0.48, { col: WOOD });
-  solid(x0, x1, zc - 0.27, zc + 0.27, D, top);
+  solid(x0, x1, zc - 0.27, zc + 0.18, D, top);   // 안쪽 모서리를 조금 들여 조타실 옆 통로(고물 상자 가는 길)를 몸 폭만큼 연다
   /* 버너(부르스타) */
   P.box(-2.62, top + 0.05, zc, 0.34, 0.1, 0.28, { col: [0.12, 0.12, 0.13] }); S.box(-2.62, top + 0.101, zc, 0.3, 0.004, 0.24, { col: [0.7, 0.7, 0.68] });
   S.put(new T.TorusGeometry(0.075, 0.01, 6, 14), -2.62, top + 0.11, zc, { rx: PI / 2, col: [0.15, 0.15, 0.15] });
@@ -426,6 +426,58 @@ B.collide = function (p, r) {
       } else { var d = Math.sqrt(d2), push = (r - d) / d; p.x += dx * push; p.z += dz * push; }
     }
   }
+};
+/* 몸이 상자와 겹쳐 있나 */
+B.overlap = function (x, z, r) {
+  for (var i = 0; i < B.solids.length; i++) {
+    var s = B.solids[i]; if (s.nc || s.off || s.y1 < D + 0.25) continue;
+    var cx = SB.clamp(x, s.x0, s.x1), cz = SB.clamp(z, s.z0, s.z1), dx = x - cx, dz = z - cz;
+    if (dx * dx + dz * dz < r * r - 1e-6) return true;
+  }
+  return false;
+};
+/* 걷기: 상자 둘이 서로 밀어내다 몸을 좁은 틈 안으로 넣어 버리면(뱃머리 방수포·양묘기 사이에 갇힘, 사장님 10/5 "갖혔어")
+   그 걸음은 버리고 한 축씩 다시 해 본다. 한 번에 0.1m 씩 나눠 걷는다 */
+B.walk = function (p, dx, dz, r) {
+  if (!B.inMain(p.x, p.z, r)) { B.rescue(p, r); return; }
+  var n = Math.max(1, Math.ceil(Math.hypot(dx, dz) / 0.1)), k, q = { x: 0, z: 0 };
+  for (k = 0; k < n; k++) {
+    var tries = [[dx / n, dz / n], [dx / n, 0], [0, dz / n]], ok = false;
+    for (var t = 0; t < 3 && !ok; t++) {
+      if (!tries[t][0] && !tries[t][1]) continue;
+      q.x = p.x + tries[t][0]; q.z = p.z + tries[t][1]; B.collide(q, r);
+      if (!B.overlap(q.x, q.z, r) && B.inMain(q.x, q.z, r)) { p.x = q.x; p.z = q.z; ok = true; }
+    }
+  }
+};
+/* 갇혔으면 꺼내 준다: 이미 겹쳐 있거나(옛 저장·연출 뒤) 갑판 본 바닥과 끊긴 틈에 있으면 가장 가까운 본 바닥으로 */
+var MAIN = null, MAINKEY = '', GS = 0.08;
+function mainKey() { var k = B.solids.length + ':'; for (var i = 0; i < B.solids.length; i++) k += B.solids[i].off ? 1 : 0; return k; }
+function buildMain(r) {
+  var free = {}, x, z, i, j, key, q = { x: 0, z: 0 };
+  for (i = Math.ceil(XS / GS); i * GS <= XB; i++) for (j = Math.ceil(-3 / GS); j * GS <= 3; j++) {
+    x = i * GS; z = j * GS; q.x = x; q.z = z; B.collide(q, r);
+    if (Math.abs(q.x - x) < 1e-6 && Math.abs(q.z - z) < 1e-6 && !B.overlap(x, z, r)) free[i + ',' + j] = 1;
+  }
+  var seed = null, bd = 1e9;                      // 일 시작 자리(4.55, -0.45)에서 이어진 곳이 본 바닥
+  for (key in free) { var a = key.split(','), d = Math.hypot(a[0] * GS - 4.55, a[1] * GS + 0.45); if (d < bd) { bd = d; seed = key; } }
+  var main = {}, st = [seed]; main[seed] = 1;
+  while (st.length) { var c = st.pop().split(','), ci = +c[0], cj = +c[1]; [[1, 0], [-1, 0], [0, 1], [0, -1]].forEach(function (o) { var nk = (ci + o[0]) + ',' + (cj + o[1]); if (free[nk] && !main[nk]) { main[nk] = 1; st.push(nk); } }); }
+  return main;
+}
+B.inMain = function (x, z, r) {
+  if (MAINKEY !== mainKey() || !MAIN) { MAIN = buildMain(r); MAINKEY = mainKey(); }
+  var i0 = Math.floor(x / GS), j0 = Math.floor(z / GS);
+  for (var i = i0; i <= i0 + 1; i++) for (var j = j0; j <= j0 + 1; j++) if (MAIN[i + ',' + j]) return true;
+  return false;
+};
+B.rescue = function (p, r) {
+  var inM = B.inMain(p.x, p.z, r);
+  if (inM && !B.overlap(p.x, p.z, r)) return false;
+  var best = null, bd = 1e9;
+  for (var key in MAIN) { var a = key.split(','), x = a[0] * GS, z = a[1] * GS, d = (x - p.x) * (x - p.x) + (z - p.z) * (z - p.z); if (d < bd) { bd = d; best = [x, z]; } }
+  if (best) { p.x = best[0]; p.z = best[1]; return true; }
+  return false;
 };
 /* 조타실 안인가 */
 B.inCabin = function (x, z) { return x > WX0 && x < WX1 && Math.abs(z) < WZ; };
