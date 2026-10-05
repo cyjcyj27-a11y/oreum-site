@@ -445,7 +445,7 @@ cv.addEventListener('pointermove', function (e) {
   if (press && e.pointerId === press.id) {
     var dx = e.clientX - press.x, dy = e.clientY - press.y; press.moved += Math.abs(dx) + Math.abs(dy); press.x = e.clientX; press.y = e.clientY;
     if (press.scrub) { ptr.x = GS.clamp(ptr.x + dx * 2 / window.innerWidth, -0.98, 0.98); ptr.y = GS.clamp(ptr.y - dy * 2 / window.innerHeight, -0.98, 0.98); }
-    else { var k = touchMode ? 0.0266 : 0.0034; /* 10/5 "시점이동은 개같이 느림": 손가락 100px 에 63도(전 30도) */ G.P.yaw -= dx * k; G.P.pitch = GS.clamp(G.P.pitch - dy * k, -1.45, 1.45); }
+    else { var k = touchMode ? 0.0213 : 0.0034; /* 10/5 "시점이동은 개같이 느림": 손가락 100px 에 63도(전 30도) */ G.P.yaw -= dx * k; G.P.pitch = GS.clamp(G.P.pitch - dy * k, -1.45, 1.45); }
   } else if (!press && e.pointerType === 'mouse') ndc(e);
 });
 function ptrUp(e) {
