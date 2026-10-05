@@ -295,7 +295,7 @@
   // ---- 화면 ----
   var off = 0; function clock() { return performance.now() + off; }
   var cv = $('cv'), ctx = cv.getContext('2d'), board = $('board'), dd = $('doodle'), dctx = dd.getContext('2d');
-  var DPR = Math.min(2, window.devicePixelRatio || 1);
+  var DPR = qp('dpr') ? +qp('dpr') : Math.min(2, window.devicePixelRatio || 1); // 쇼츠 촬영은 ?dpr=3
   var M = null, DM = null, view = 'title', hover = -1, allRun = false, resTimer = null, started = false, follow = -1;
   var fn = { name: nameOf, res: resOf, win: isWin };
 
@@ -617,7 +617,7 @@
     }
     return false;
   }
-  window.__sd2 = { tick: function (ms) { var k = Math.ceil((ms || 16) / 16); for (var i = 0; i < k; i++) { off += 16; frame(); } }, S: S, get M() { return M; }, runAll: runAll, runOne: runOne, openRes: openRes, shareURL: shareURL, order: order };
+  window.__sd2 = { tick: function (ms) { var k = Math.ceil((ms || 16) / 16); for (var i = 0; i < k; i++) { off += 16; frame(); } }, S: S, get M() { return M; }, runAll: runAll, runOne: runOne, openRes: openRes, shareURL: shareURL, order: order, frame: frame, draw: draw, newBoard: newBoard, get view() { return view; } };
 
   togState(); syncRows();
   (document.fonts && document.fonts.load ? Promise.all([document.fonts.load('20px Barunpen'), document.fonts.load('40px Goding')]) : Promise.resolve()).then(function () {}, function () {}).then(function () {
