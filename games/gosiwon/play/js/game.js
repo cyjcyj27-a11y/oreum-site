@@ -443,7 +443,7 @@ cv.addEventListener('pointermove', function (e) {
   if (press && e.pointerId === press.id) {
     var dx = e.clientX - press.x, dy = e.clientY - press.y; press.moved += Math.abs(dx) + Math.abs(dy); press.x = e.clientX; press.y = e.clientY;
     if (press.scrub) { ptr.x = GS.clamp(ptr.x + dx * 2 / window.innerWidth, -0.98, 0.98); ptr.y = GS.clamp(ptr.y - dy * 2 / window.innerHeight, -0.98, 0.98); }
-    else { var k = touchMode ? 0.0052 : 0.0034; G.P.yaw -= dx * k; G.P.pitch = GS.clamp(G.P.pitch - dy * k, -1.45, 1.45); }
+    else { var k = touchMode ? 0.0213 : 0.0034; G.P.yaw -= dx * k; G.P.pitch = GS.clamp(G.P.pitch - dy * k, -1.45, 1.45); }
   } else if (!press && e.pointerType === 'mouse') ndc(e);
 });
 function ptrUp(e) {
@@ -475,7 +475,7 @@ function walk(dt) {
   var P = G.P, f = 0, s = 0;
   if (keys.KeyW || keys.ArrowUp) f += 1; if (keys.KeyS || keys.ArrowDown) f -= 1; if (keys.KeyD || keys.ArrowRight) s += 1; if (keys.KeyA || keys.ArrowLeft) s -= 1;
   // 폰 패드(10/4 사장님 "카메라가 따라와야"): 위아래는 앞뒤로 걷고, 좌우는 몸을 돌린다. 민 만큼 빠르다
-  if (pad.id != null) { f -= GS.clamp(pad.y / 0.7, -1, 1); P.yaw -= pad.x * Math.abs(pad.x) * 2.6 * dt; }
+  if (pad.id != null) { f -= GS.clamp(pad.y / 0.7, -1, 1) * 0.36; P.yaw -= pad.x * Math.abs(pad.x) * 2.6 * dt; }   /* 10/5 사장님: 시점은 빠르게(0.0213), 걷기는 느리게(키보드의 0.36 = 1.2m/s) */
   var len = Math.hypot(f, s), sp = 3.3 * (G.items.shoes ? 1.2 : 1) * (G.carry ? 0.72 : 1);
   if (len > 0) {
     if (len > 1) { f /= len; s /= len; } var sy = Math.sin(P.yaw), cy = Math.cos(P.yaw), dx = (-sy * f + cy * s) * sp * dt, dz = (-cy * f - sy * s) * sp * dt;
