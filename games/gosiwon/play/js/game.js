@@ -448,6 +448,22 @@ cv.addEventListener('pointermove', function (e) {
     else { var k = touchMode ? 0.0213 : 0.0034; /* 10/5 "시점이동은 개같이 느림": 손가락 100px 에 63도(전 30도) */ G.P.yaw -= dx * k; G.P.pitch = GS.clamp(G.P.pitch - dy * k, -1.45, 1.45); }
   } else if (!press && e.pointerType === 'mouse') ndc(e);
 });
+/* 진단(10/5 "녹화하면 멀쩡, 아니면 조이스틱이 왼쪽으로만"): 주소에 ?dbg=1 이면 패드 값·손가락 이벤트·yaw·dt 를 화면에 찍는다 */
+var DBG = /[?&]dbg=1/.test(location.search), dbgEl = null, dbgEv = [], dbgFrames = 0, dbgFps = 0, dbgT = 0;
+if (DBG) {
+  dbgEl = document.createElement('pre'); dbgEl.style.cssText = 'position:fixed;left:8px;top:60px;z-index:99;margin:0;padding:6px 8px;font:12px/1.35 monospace;color:#0f0;background:rgba(0,0,0,.7);pointer-events:none;white-space:pre'; document.body.appendChild(dbgEl);
+  ['pointerdown', 'pointermove', 'pointerup', 'pointercancel', 'touchstart', 'touchend', 'touchcancel'].forEach(function (t) {
+    window.addEventListener(t, function (e) { if (t === 'pointermove' && dbgEv.length && dbgEv[0].t === 'pointermove' && dbgEv[0].id === e.pointerId) { dbgEv[0].x = e.clientX | 0; dbgEv[0].y = e.clientY | 0; dbgEv[0].n++; return; } var tg = e.target && (e.target.id || e.target.tagName); dbgEv.unshift({ t: t, id: e.pointerId != null ? e.pointerId : (e.changedTouches && e.changedTouches[0] ? e.changedTouches[0].identifier : '-'), pt: e.pointerType || 'touchev', tg: tg, x: e.clientX | 0, y: e.clientY | 0, n: 1 }); if (dbgEv.length > 6) dbgEv.pop(); }, true);
+  });
+}
+function dbgDraw(dt) {
+  dbgFrames++; dbgT += dt; if (dbgT >= 0.5) { dbgFps = Math.round(dbgFrames / dbgT); dbgFrames = 0; dbgT = 0; }
+  dbgEl.textContent = 'fps ' + dbgFps + '  dt ' + (dt * 1000).toFixed(1) + 'ms  win ' + innerWidth + 'x' + innerHeight + '  touch ' + touchMode + '\n' +
+    'pad id ' + pad.id + '  x ' + pad.x.toFixed(2) + '  y ' + pad.y.toFixed(2) + '\n' +
+    'press ' + (press ? press.id + (press.scrub ? ' scrub' : ' look') : '-') + '  scrubPtr ' + scrubPtr + '  actHeld ' + actHeld + '\n' +
+    'yaw ' + G.P.yaw.toFixed(2) + '  pitch ' + G.P.pitch.toFixed(2) + '  pos ' + G.P.x.toFixed(1) + ',' + G.P.y.toFixed(2) + ',' + G.P.z.toFixed(1) + '  crK ' + crK.toFixed(2) + '\n' +
+    dbgEv.map(function (v) { return v.t + ' id' + v.id + ' ' + v.pt + ' @' + v.tg + ' ' + v.x + ',' + v.y + (v.n > 1 ? ' x' + v.n : ''); }).join('\n');
+}
 function ptrUp(e) {
   if (CH.cur) { if (ptr.down && (e.pointerId === ptr.id || locked)) { ptr.down = false; CH.cur.up(); } return; }
   if (locked) { ptr.down = false; scrubPtr = false; press = null; ptr.x = ptr.y = 0; return; }
@@ -573,7 +589,7 @@ function update(dt) {
   SND.scrub(scrubbing ? 0.25 + CH.scrubV * 0.75 : 0);
   if (CH.cur && !paused) { GS.ptrRay.copy(rayAt(ptr.x, ptr.y)); }
   ptr.mv = ptr.mvNow; if (!paused) CH.update(dt); ptr.mv = 0;
-  hs.move = moveAmt; hs.scrub = scrubbing; hs.station = !!CH.cur || G.mode === 'study'; hs.day = G.mode === 'day'; hs.px = ptr.x; hs.py = ptr.y; GS.hands.update(dt, hs);
+  hs.move = moveAmt; hs.scrub = scrubbing; hs.station = !!CH.cur || G.mode === 'study'; hs.day = G.mode === 'day'; hs.px = ptr.x; hs.py = ptr.y; GS.hands.update(dt, hs); if (DBG) dbgDraw(dt);
   W.updateLights(cam.position.x, cam.position.y, cam.position.z, dt); W.setFloorVis(cam.position.y - EYE);
   // 창밖 빛: 낮, 노을, 밤
   var tt = G.mode === 'study' && G.study ? G.study.at + (DAYMIN - G.study.at) * (1 - Math.max(0, studyRem()) / STUDY) : G.mode === 'day' ? G.t : 200;
