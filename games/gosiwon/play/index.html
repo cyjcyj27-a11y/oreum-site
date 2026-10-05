@@ -124,7 +124,8 @@ body.st #stx{display:inline-flex}
   background:radial-gradient(ellipse 60% 36% at 36% 22%,rgba(255,255,255,.6),rgba(255,255,255,0) 70%),linear-gradient(180deg,#f0333a,#b80e16);box-shadow:0 5px 0 var(--redd),0 9px 12px rgba(0,0,0,.4)}
 #act.dim{opacity:.45}
 #act:active{transform:translateY(3px) scale(1.05,.92)}
-body.touch.m-day:not(.st):not(.paused) #pad,body.touch.m-day:not(.st):not(.paused) #act{display:block}
+body.touch.m-day:not(.st):not(.paused) #pad{display:block}
+#act{display:none!important}   /* 10/5 사장님 "닦기버튼은 필요가 없는듯 화면을 터치하면 닦아지니까": 물건도 화면을 톡 치면 쓰이므로 단추 없음 */
 body.playing #oreumFs{display:none}
 
 /* ---------- 화면들 ---------- */
