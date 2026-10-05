@@ -4,7 +4,7 @@ GS.hands = (function () {
 var T = THREE, PI = Math.PI, scene = new T.Scene(), cam = new T.PerspectiveCamera(44, 1, 0.02, 5);
 var offT = 0, R, L, Rw, armW, armR, ringR, sponge, spongeW, wscene, knife, boxes = {}, has = false, carry = null, tool = null, wearT = 1, jabT = 1, clock = 0, asp = 1;
 var sleeveMat = new T.MeshLambertMaterial({ color: 0x7d8597, side: T.DoubleSide });   // 회색 츄리닝 소매
-var mat = new T.MeshPhongMaterial({ color: 0xcc1017, shininess: 40, specular: 0xe08c8c, side: T.DoubleSide });
+var mat = new T.MeshPhongMaterial({ color: 0xff9ab5, shininess: 40, specular: 0xffdce6, side: T.DoubleSide });   // 분홍 고무장갑(10/5 사장님 "고무장갑을 핑크로", 그림 손과 같은 색)
 function M(g, x, y, z, rx, ry, rz, sx, sy, sz, m) { var o = new T.Mesh(g, m || mat); o.position.set(x, y, z); o.rotation.set(rx || 0, ry || 0, rz || 0); o.scale.set(sx || 1, sy || 1, sz || 1); return o; }
 function finger(x, z, len, r, spread, curl) {               // 세 마디, 마디마다 공을 끼워 이음새가 안 보이게
   var root = new T.Group(), cur = root, i; root.position.set(x, -0.002, z); root.rotation.y = spread; root.rotation.x = curl[0];
@@ -70,7 +70,7 @@ function picInit() {
       tail.style.left = ((sp.tail[0] - sp.tail[2] / 2) / sp.fw * 100) + '%'; tail.style.top = (sp.tail[1] / sp.fh * 100) + '%'; tail.style.width = (sp.tail[2] / sp.fw * 100) + '%';
       inn.appendChild(tail);
     }
-    im.src = 'assets/' + a[1] + '.webp?v=2'; im.alt = ''; im.draggable = false; im.style.cssText = 'position:absolute;left:0;top:0;width:100%;height:100%;user-select:none';
+    im.src = 'assets/' + a[1] + '.webp?v=3'; im.alt = ''; im.draggable = false; im.style.cssText = 'position:absolute;left:0;top:0;width:100%;height:100%;user-select:none';
     inn.appendChild(im); box.appendChild(inn); layer.appendChild(box); pics[a[0]] = box; box.sp = sp;
     if (a[0] === 'C') {                                                                  // 두 손 그림은 왼팔·오른팔 반쪽씩 따로 두고 사이를 벌린다(10/5 "양손 사이를 벌려서")
       box.style.overflow = 'hidden'; inn.style.width = '200%';
