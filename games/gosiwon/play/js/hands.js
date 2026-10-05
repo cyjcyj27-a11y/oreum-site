@@ -94,14 +94,14 @@ function picPlace(el, tip, tx, ty, left, wob) {          // tip: 그림 안 손�
   el.style.transform = 'translate(' + L.toFixed(1) + 'px,' + T.toFixed(1) + 'px) rotate(' + ang.toFixed(4) + 'rad) scale(' + sc.toFixed(4) + ')';
   el.style.display = 'block';
 }
-var HAND_K = 0.8, CARRY_K = 0.6, CARRY_W = 0.75, CARRY_T = 0.63, CARRY_GAP = 0.24;   // 손 크기 배수(10/5 댓글 "손이 너무..." → 1.1에서 줄임), 두 손 높이·너비 한도, 두 손 윗자리, 두 손 사이 벌림(w 비율)
+var HAND_K = 0.8, CARRY_K = 0.6, CARRY_W = 0.75, CARRY_T = 0.63, CARRY_GAP = 0.32, CT = GS.carryTune = { by: 0.44, bw: 0.42, rot: 0.18, d: 0.56 };   // CT: 상자 가운데 높이(h 비율)·손 안쪽 겹침 너비(w 비율)·기울기·거리(시험용 손잡이)   // 손 크기 배수(10/5 댓글 "손이 너무..." → 1.1에서 줄임), 두 손 높이·너비 한도, 두 손 윗자리, 두 손 사이 벌림(w 비율)
 function carryPlace(el, bob) {                           // 두 손 받치기: 화면 아래 가운데, 왼팔·오른팔 반쪽을 gap 만큼 벌려 놓는다. 걸으면 출렁. 상자 자리(화면)를 돌려준다
   var P = el.sp, vw = innerWidth, vh = innerHeight, h = Math.min(vh * CARRY_K, vw * CARRY_W * P.h / P.w), s0 = h / P.h, w = P.w * s0, gap = CARRY_GAP * w;
   var FW = P.fw * s0, FH = P.fh * s0, L = (vw - w) / 2 - P.ox * s0, T = vh * CARRY_T + bob, el2 = pics.C2;
   el.style.width = el2.style.width = (FW / 2).toFixed(1) + 'px'; el.style.height = el2.style.height = FH.toFixed(1) + 'px';
   el.style.transform = 'translate(' + (L - gap / 2).toFixed(1) + 'px,' + T.toFixed(1) + 'px)'; el.style.display = 'block';
   el2.style.transform = 'translate(' + (L + FW / 2 + gap / 2).toFixed(1) + 'px,' + T.toFixed(1) + 'px)'; el2.style.display = 'block';
-  return [(vw - w) / 2 + P.box[0] * w, T + P.box[1] * h, P.box[2] * w + gap];
+  return [(vw - w) / 2 + P.box[0] * w, T + CT.by * h, CT.bw * w + gap];
 }
 function picHide(k) { if (pics[k] && pics[k].style.display !== 'none') pics[k].style.display = 'none'; }
 var BOXW = { ramen: 0.4, kimchi: 0.42, tub: 0.34, tube: 0.45, parcel: 0.3 };
@@ -127,7 +127,7 @@ function update(dt, s) {                              // s: move(0~1), scrub, st
   var it = (GS.G && GS.G.items) || {}, vw = innerWidth, vh = innerHeight, down = (1 - GS.ease(wearT)) * vh * 0.7, kk = Math.min(1, dt * 18), tgt, key = it.brush ? 'W' : 'S', tip = PICS.pinch.tipS, wob = 0, all = ['S', 'W', 'P', 'L', 'K', 'KS', 'C', 'C2'];   // 상점: 철수세미를 사면 손에 철수세미, 식칼을 사기 전엔 과도
   if (!showPic) { all.forEach(picHide); picPt = null; return; }
   if (carry) {                                                                           // 상자: 두 손 사이에 3D 상자를 맞춘다
-    var bp = carryPlace(pics.C, bob * vh * 2.2 + down), bx3 = boxes[carry], D = 0.56, hh = D * Math.tan(cam.fov * PI / 360);
+    var bp = carryPlace(pics.C, bob * vh * 2.2 + down), bx3 = boxes[carry], D = CT.d, hh = D * Math.tan(cam.fov * PI / 360); bx3.rotation.x = CT.rot;
     bx3.position.set((bp[0] / vw * 2 - 1) * hh * asp, (1 - bp[1] / vh * 2) * hh - 0.02, -D); bx3.scale.setScalar(bp[2] / vw * 2 * hh * asp / BOXW[carry]);
     all.forEach(function (k) { if (k !== 'C' && k !== 'C2') picHide(k); }); picPt = null; return;
   }
