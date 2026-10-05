@@ -125,6 +125,7 @@ body.st #stx{display:inline-flex}
 #act.dim{opacity:.45}
 #act:active{transform:translateY(3px) scale(1.05,.92)}
 body.touch.m-day:not(.st):not(.paused) #pad{display:block}
+@media (pointer:coarse){body.m-day:not(.st):not(.paused) #pad{display:block}}   /* 10/5 손가락 폰은 첫 터치 전에도 패드가 있어야 첫 손가락이 시점 끌기로 안 샌다 */
 #act{display:none!important}   /* 10/5 사장님 "닦기버튼은 필요가 없는듯 화면을 터치하면 닦아지니까": 물건도 화면을 톡 치면 쓰이므로 단추 없음 */
 body.playing #oreumFs{display:none}
 
@@ -285,7 +286,7 @@ body.en #tasks div{overflow:hidden}
 <script src="js/sfx.js?v=3"></script>
 <script src="js/audio.js?v=9"></script>
 <script src="js/booktext.js?v=1"></script>
-<script src="js/game.js?v=45"></script>
+<script src="js/game.js?v=46"></script>
 <script src="/assets/visit.js?v=17" defer></script>
 <script src="/assets/game-events.js?v=2" defer></script>
 </body>

@@ -424,10 +424,12 @@ cv.addEventListener('pointerdown', function (e) {
   if (G.mode === 'study') { ndc(e); tapBook(e.clientX, e.clientY); return; }
   if (G.mode !== 'day' || wakeT < 1) return;
   if (CH.cur) { ndc(e); ptr.down = true; ptr.id = e.pointerId; GS.ptrRay.copy(rayAt(ptr.x, ptr.y)); CH.cur.down(); return; }
+  if (e.pointerType === 'touch' && pad.id == null && walkMode() && GS.padHit(e)) { GS.padStart(e); return; }   // 10/5 "움직이면 구도가 이렇게 됨": 패드 자리 터치가 시점 끌기로 새지 않게
   if (locked) { ptr.down = true; ptr.x = ptr.y = 0; if (!useIt(CH.focus(rayAt(0, 0))) && !G.carry) { var sv = stainView(); if (sv) { if (G.gloves) { scrubPtr = true; ptr.x = sv.x; ptr.y = sv.y; } else ui.nope('glove'); } } return; }
   if (e.pointerType === 'mouse' && !touchMode) { lockPtr(); }
   if (press) return;
   ndc(e); var r = rayAt(ptr.x, ptr.y), hit = pad.id == null && !G.carry && CH.stainAt(r);   // 때를 직접 누른 때만 닦기. 그 밖은 끌어서 시점 돌리기(표준). 패드를 쥔 채면 늘 시점 돌리기
+  if (e.pointerId === pad.id) return;
   press = { id: e.pointerId, x: e.clientX, y: e.clientY, t: performance.now(), moved: 0, scrub: !!hit };
   if (hit) { if (G.gloves) { scrubPtr = true; ptr.down = true; } else ui.nope('glove'); }
   try { cv.setPointerCapture(e.pointerId); } catch (er) {}
@@ -460,7 +462,10 @@ cv.addEventListener('contextmenu', function (e) { e.preventDefault(); });
 (function () {
   var el = $('pad'), kn = $('knob');
   function set(e) { var r = el.getBoundingClientRect(), R = r.width / 2, x = (e.clientX - r.left - R) / R, y = (e.clientY - r.top - R) / R, d = Math.hypot(x, y); if (d > 1) { x /= d; y /= d; } pad.x = Math.abs(x) > 0.22 ? x : 0; pad.y = Math.abs(y) > 0.22 ? y : 0; kn.style.transform = 'translate(' + x * R * 0.6 + 'px,' + y * R * 0.6 + 'px)'; }
-  el.addEventListener('pointerdown', function (e) { SND.unlock(); touchMode = true; document.body.classList.add('touch'); pad.id = e.pointerId; try { el.setPointerCapture(e.pointerId); } catch (er) {} set(e); e.preventDefault(); });
+  function start(e) { SND.unlock(); touchMode = true; document.body.classList.add('touch'); pad.id = e.pointerId; try { el.setPointerCapture(e.pointerId); } catch (er) {} set(e); e.preventDefault(); }
+  el.addEventListener('pointerdown', start);
+  GS.padHit = function (e) { var r = el.getBoundingClientRect(); return r.width > 0 && e.clientX >= r.left - 24 && e.clientX <= r.right + 24 && e.clientY >= r.top - 24 && e.clientY <= r.bottom + 24; };   // 패드 자리(여유 24px)
+  GS.padStart = start;
   var end = function (e) { if (e.pointerId === pad.id) { pad.id = null; pad.x = pad.y = 0; kn.style.transform = ''; } };
   window.addEventListener('pointermove', function (e) { if (e.pointerId === pad.id) set(e); }, { passive: true });   // 10/5 "조이스틱이 자꾸 왼쪽으로 간다": 손가락이 동그라미 밖으로 나가도 놓치지 않게 창 전체에서 따라간다(포인터 캡처가 안 되는 폰 브라우저 대비)
   window.addEventListener('pointerup', end); window.addEventListener('pointercancel', end); window.addEventListener('blur', function () { pad.id = null; pad.x = pad.y = 0; kn.style.transform = ''; });
