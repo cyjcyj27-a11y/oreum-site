@@ -950,12 +950,17 @@ function draw(dt) {
   /* 상어: 위험한 동안 뒤에서 따라붙고, 쓰러지면 덮친다 */
   var dg = G.dead ? 1 : G.danger / 3.5;
   orca.visible = dg > 0.01;
-  if (orca.visible) {   /* 범고래는 길어서 바로 뒤면 화면 밖이다. 옆 줄 뒤에 붙어 오다가 잡을 때 옆에서 뛰어올라 덮친다 */
-    var side = px > 0.5 ? -1 : 1, dk2 = G.dead ? Math.min(1, G.deadT * 1.5) : 0, leap = Math.sin(dk2 * PI);
-    var back = G.dead ? 0.6 - dk2 * 1.4 : 0.6 + (1 - dg) * 4.5, ox = side * 1.25 * (1 - dk2);
-    orca.position.set(px + ox + Math.sin(t * 2.2) * 0.2, seaH(px + ox, pz + back, t) + leap * 1.7, pz + back);
-    orca.userData.b.rotation.set(-Math.cos(dk2 * PI) * leap * 0.6, Math.sin(t * 3.2) * 0.08 + side * dk2 * 1.2, 0); orca.userData.tail.rotation.x = Math.sin(t * 6) * 0.35;
-    if (Math.random() < 0.5) spray(1, 0, orca.position.x, 0.2, orca.position.z - 1.5); }
+  if (orca.visible) {   /* 범고래: 같은 줄 바로 뒤에서 따라오다가(보드 꼬리에 닿지 않게) 잡을 때만 앞으로 튀어나와 덮친다
+       10/5 사장님 "뒤에 돌고래가 너무 들이받는데", "헬라때는 이렇게 어렵지 않았는데": 처음엔 옆 줄에 붙여 두었더니 옆 줄 앞이 가려지고
+       줄을 옮길 때 상어를 뚫고 넘어가 들이받는 것처럼 보였다. 헬라 때 상어처럼 뒤에 둔다(판정은 그때와 같음) */
+    var ou = orca.userData; if (ou.x == null || !ou.on) ou.x = px; ou.on = 1;
+    ou.x += (px - ou.x) * Math.min(1, dt * 3);
+    var dk2 = G.dead ? Math.min(1, G.deadT * 1.5) : 0, leap = Math.sin(dk2 * PI);
+    var back = G.dead ? 3.5 - dk2 * 3.6 : 3.5 + (1 - dg) * 5;
+    orca.position.set(ou.x + Math.sin(t * 2.2) * 0.15, seaH(ou.x, pz + back, t) + leap * 1.9, pz + back);
+    orca.userData.b.rotation.set(-Math.cos(dk2 * PI) * leap * 0.6, Math.sin(t * 3.2) * 0.08, 0); orca.userData.tail.rotation.x = Math.sin(t * 6) * 0.35;
+    if (Math.random() < 0.5) spray(1, 0, orca.position.x, 0.2, orca.position.z - 2.3); }
+  else orca.userData.on = 0;
   /* 그림자 받는 판을 물결에 맞춘다 */
   shadowCatcher.position.set(px, 0.03, pz - 4);
   for (var sc2 = 0; sc2 < catcherP.count; sc2++) catcherP.setY(sc2, seaH(px + catcherX[sc2], pz - 4 + catcherZ[sc2], t));
