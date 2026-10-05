@@ -48,6 +48,9 @@ function init(mainScene) {
   [R, L].forEach(function (h) { h.add(M(new T.CylinderGeometry(0.052, 0.064, 0.6, 16, 1, true), 0, -0.004, 0.59, PI / 2, 0, 0, 1, 1, 0.85, sleeveMat)); });
   boxes.tube = new T.Group(); boxes.tube.add(M(new T.BoxGeometry(0.45, 0.09, 0.09), 0, 0, 0, 0, 0, 0, 1, 1, 1, L2(0xdfe6ef))); boxes.tube.add(M(new T.BoxGeometry(0.2, 0.092, 0.092), 0, 0, 0, 0, 0, 0, 1, 1, 1, L2(0x2f62b8)));   // 형광등 상자
   boxes.parcel = new T.Group(); boxes.parcel.add(M(new T.BoxGeometry(0.3, 0.22, 0.26), 0, 0, 0, 0, 0, 0, 1, 1, 1, L2(0xb98f5c))); boxes.parcel.add(M(new T.BoxGeometry(0.06, 0.222, 0.262), 0, 0, 0, 0, 0, 0, 1, 1, 1, L2(0xcfb880)));   // 택배
+  // 든 택배 윗면 호수 딱지(10/6 사장님 "택배를 들면 상자에 호수가 안써있어서 어느방인지 모르게됨") — 바닥 택배 딱지와 같은 자리·모양
+  lbCv = document.createElement('canvas'); lbCv.width = 192; lbCv.height = 128; lbTex = new T.CanvasTexture(lbCv);
+  boxes.parcel.add(M(new T.PlaneGeometry(0.12, 0.08), 0.07, 0.1115, 0, -PI / 2, 0, 0, 1, 1, 1, new T.MeshLambertMaterial({ map: lbTex })));
   Object.keys(boxes).forEach(function (k) { boxes[k].position.set(0, -0.3, -0.56); boxes[k].rotation.x = 0.25; boxes[k].visible = false; scene.add(boxes[k]); });
   R.visible = L.visible = false; R.position.set(0.2, -0.8, -0.4); L.position.set(-0.2, -0.8, -0.4);
 }
@@ -55,7 +58,14 @@ function init(mainScene) {
    한 팔 그림은 화면 밖 어깨(원래 그림 아래 모서리)를 축으로 돌리고 손끝이 목표에 오게 어깨를 옮긴다. 소매 꼬리가 화면 밖까지 잇는다.
    걸을 때·닦을 때 = 수세미 낀 집는 손, 작업대 = 빈 집는 손, 칼질 = 식칼 손, 상자 = 두 손 받치기(3D 상자를 두 손 사이에 맞춘다) */
 var PICS = {"pinch": {"w": 849, "h": 757, "fw": 1760, "fh": 1819, "tipS": [0.0972, 0.1387], "tipP": [0.159, 0.1308], "tail": [1611.3, 1684.1, 353, -40.62]}, "knife": {"w": 862, "h": 825, "fw": 1878, "fh": 1787, "tip": [0.1096, 0.2376], "tipS": [0.1791, 0.2924], "tail": [1725.1, 1658.8, 314, -46.54]}, "carry": {"w": 918, "h": 664, "fw": 2318, "fh": 1164, "ox": 700, "box": [0.4995, 0.1898, 0.31]}};
-var pics = {}, picPt = null, picLast = null, scrubScr = null, carryBox = null;
+var pics = {}, picPt = null, picLast = null, scrubScr = null, carryBox = null, lbCv = null, lbTex = null;
+function drawLabel(s) {                                     // events.js paperTex 와 같은 흰 딱지·굵은 글씨
+  if (!lbCv) return; var g = lbCv.getContext('2d'), w = 192, h = 128;
+  g.fillStyle = '#ffffff'; g.fillRect(0, 0, w, h); g.fillStyle = 'rgba(0,0,0,.06)'; g.fillRect(0, 0, w, h * 0.12);
+  g.fillStyle = '#2b2a26'; g.font = "bold 70px 'Note','Ria',sans-serif"; g.textAlign = 'center'; g.textBaseline = 'middle';
+  var ww = g.measureText(s).width, sc = Math.min(1, (w - 24) / ww); g.save(); g.translate(w / 2, h / 2); g.scale(sc, 1); g.fillText(s, 0, 0); g.restore();
+  lbTex.needsUpdate = true;
+}
 function picInit() {
   /* 손 하나 = 감싸는 상자(자리·회전) 안에 [소매 꼬리 + 그림]. 왼손은 안쪽을 좌우로 뒤집는다 */
   var layer = document.createElement('div');                                             // 화면 밖으로 넘치는 손·소매를 잘라 내는 틀(넘치면 폰 브라우저가 화면을 키운다)
@@ -249,6 +259,6 @@ return {
   reset: function (h) { offT = 0; has = h; carry = null; tool = null; wearT = 1; },
   unwear: function () { offT = 1; carry = null; },
   wear: function () { offT = 0; has = true; wearT = 0; R.position.set(0.2, -0.8, -0.4); L.position.set(-0.2, -0.8, -0.4); },
-  jab: function () { jabT = 0; }, carry: function (c) { carry = c; }, tool: function (t) { tool = t; }, scene: scene
+  jab: function () { jabT = 0; }, carry: function (c) { carry = c; }, tool: function (t) { tool = t; }, label: drawLabel, scene: scene
 };
 })();

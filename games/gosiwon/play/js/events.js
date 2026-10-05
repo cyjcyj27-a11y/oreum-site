@@ -157,7 +157,7 @@ function setup() {
     [203, 305, 402].forEach(function (num, i) {
       if (s['p' + num]) { parcelAt(num); return; }
       var pz = -0.45 + i * 0.42, pc = parcelBox(num, 0.5, 0, pz);
-      inter({ x: 0.5, y: 0.13, z: pz, sx: 0.36, sy: 0.3, sz: 0.36, label: L('택배 ', 'Parcel ') + num, can: function () { return st('parcel').sent && !G.carry; }, use: function () { gone(this); pc.visible = false; G.carry = 'parcel'; carryTo = num; GS.hands.carry('parcel'); GS.snd('pick'); } });
+      inter({ x: 0.5, y: 0.13, z: pz, sx: 0.36, sy: 0.3, sz: 0.36, label: L('택배 ', 'Parcel ') + num, can: function () { return st('parcel').sent && !G.carry; }, use: function () { gone(this); pc.visible = false; G.carry = 'parcel'; carryTo = num; GS.hands.label(num + L('호', '')); GS.hands.carry('parcel'); GS.snd('pick'); } });
       var dd2 = door(num); inter({ x: dd2.x, y: dd2.y0 + 0.4, z: dd2.zf, sx: 0.8, sy: 0.9, sz: 0.4, label: num + L('호', ''), can: function () { return G.carry === 'parcel' && carryTo === num; }, use: function () { gone(this); G.carry = null; carryTo = null; GS.hands.carry(null); GS.snd('box'); parcelAt(num); var S = st('parcel'); S['p' + num] = 1; S.n++; if (S.n >= 3) done('parcel', 3000); else { GS.ui.tasks(); GS.save(); } } });
     });
   }
