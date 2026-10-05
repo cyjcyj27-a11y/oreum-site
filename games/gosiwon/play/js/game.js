@@ -461,9 +461,9 @@ cv.addEventListener('contextmenu', function (e) { e.preventDefault(); });
   var el = $('pad'), kn = $('knob');
   function set(e) { var r = el.getBoundingClientRect(), R = r.width / 2, x = (e.clientX - r.left - R) / R, y = (e.clientY - r.top - R) / R, d = Math.hypot(x, y); if (d > 1) { x /= d; y /= d; } pad.x = Math.abs(x) > 0.22 ? x : 0; pad.y = Math.abs(y) > 0.22 ? y : 0; kn.style.transform = 'translate(' + x * R * 0.6 + 'px,' + y * R * 0.6 + 'px)'; }
   el.addEventListener('pointerdown', function (e) { SND.unlock(); touchMode = true; document.body.classList.add('touch'); pad.id = e.pointerId; try { el.setPointerCapture(e.pointerId); } catch (er) {} set(e); e.preventDefault(); });
-  el.addEventListener('pointermove', function (e) { if (e.pointerId === pad.id) set(e); });
   var end = function (e) { if (e.pointerId === pad.id) { pad.id = null; pad.x = pad.y = 0; kn.style.transform = ''; } };
-  el.addEventListener('pointerup', end); el.addEventListener('pointercancel', end);
+  window.addEventListener('pointermove', function (e) { if (e.pointerId === pad.id) set(e); }, { passive: true });   // 10/5 "조이스틱이 자꾸 왼쪽으로 간다": 손가락이 동그라미 밖으로 나가도 놓치지 않게 창 전체에서 따라간다(포인터 캡처가 안 되는 폰 브라우저 대비)
+  window.addEventListener('pointerup', end); window.addEventListener('pointercancel', end); window.addEventListener('blur', function () { pad.id = null; pad.x = pad.y = 0; kn.style.transform = ''; });
   var a = $('act');
   a.addEventListener('pointerdown', function (e) { SND.unlock(); e.preventDefault(); if (!walkMode()) return; if (!useIt(CH.focus(rayAt(0, 0)))) actHeld = true; });
   var ae = function () { actHeld = false; }; a.addEventListener('pointerup', ae); a.addEventListener('pointercancel', ae); a.addEventListener('pointerleave', ae);
