@@ -29,7 +29,7 @@ FX.splash = function (x, z, big) { var y = 0.05; FX.burst('drops', x, y, z, big 
 
 /* ---------- 때: 작은 그림(24x24)의 투명도를 문지른 만큼 지운다 ---------- */
 var SN = 24, stains = FX.stains = [];
-var KIND = { slime: [150, 140, 110], scale: [200, 205, 200], gut: [120, 50, 40], ink: [30, 28, 35], mud: [90, 78, 60] };
+var KIND = { slime: [196, 205, 70], scale: [236, 242, 246], gut: [185, 38, 30], ink: [92, 70, 170], mud: [78, 150, 62] };   // 나무 갑판과 확 다른 색(10/5 "때가 안보여")
 FX.makeStain = function (o) {
   var r = SB.rng(o.seed || 1), data = new Uint8Array(SN * SN * 4), mask = new Float32Array(SN * SN), col = KIND[o.kind || 'slime'], lob = [], i, j, k, sum = 0;
   for (k = 0; k < 5; k++) lob.push([0.5 + (r() - 0.5) * 0.45, 0.5 + (r() - 0.5) * 0.45, 0.16 + r() * 0.16]);
@@ -38,7 +38,7 @@ FX.makeStain = function (o) {
     for (k = 0; k < lob.length; k++) { var d = Math.sqrt((u - lob[k][0]) * (u - lob[k][0]) + (v - lob[k][1]) * (v - lob[k][1])) / lob[k][2]; m = Math.max(m, 1 - d * d); }
     var e = Math.min(u, v, 1 - u, 1 - v) * 7; m = Math.max(0, Math.min(1, m * 1.5)) * Math.min(1, e) * (0.7 + r() * 0.3); if (m < 0.08) m = 0;
     var id = j * SN + i, sh = 0.8 + r() * 0.35; mask[id] = m; sum += m;
-    data[id * 4] = Math.min(255, col[0] * sh); data[id * 4 + 1] = Math.min(255, col[1] * sh); data[id * 4 + 2] = Math.min(255, col[2] * sh); data[id * 4 + 3] = m * 230;
+    data[id * 4] = Math.min(255, col[0] * sh); data[id * 4 + 1] = Math.min(255, col[1] * sh); data[id * 4 + 2] = Math.min(255, col[2] * sh); data[id * 4 + 3] = m * 255;
   }
   var tex = new T.DataTexture(data, SN, SN, T.RGBAFormat); tex.magFilter = tex.minFilter = T.LinearFilter; tex.colorSpace = T.SRGBColorSpace; tex.needsUpdate = true;
   var mesh = new T.Mesh(new T.PlaneGeometry(o.w, o.w), new T.MeshPhongMaterial({ map: tex, transparent: true, depthWrite: false, shininess: 90, specular: 0x666655, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 }));
@@ -51,7 +51,7 @@ FX.scrubStain = function (st, uv, amt, power) {    // amt: 이번에 문지른 �
   var cu = uv.x * SN, cv = uv.y * SN, ru = Rr / st.w * SN, i0 = Math.max(0, Math.floor(cu - ru)), i1 = Math.min(SN - 1, Math.ceil(cu + ru)), j0 = Math.max(0, Math.floor(cv - ru)), j1 = Math.min(SN - 1, Math.ceil(cv + ru));
   for (j = j0; j <= j1; j++) for (i = i0; i <= i1; i++) {
     var id = j * SN + i, d = Math.hypot((i + 0.5 - cu) / ru, (j + 0.5 - cv) / ru); if (d > 1 || st.mask[id] <= 0) continue;
-    var dm = Math.min(st.mask[id], rate * (1 - d * 0.6)); st.mask[id] -= dm; st.sum -= dm; st.data[id * 4 + 3] = st.mask[id] * 230;
+    var dm = Math.min(st.mask[id], rate * (1 - d * 0.6)); st.mask[id] -= dm; st.sum -= dm; st.data[id * 4 + 3] = st.mask[id] * 255;
   }
   st.tex.needsUpdate = true;
   if (st.sum < st.sum0 * 0.1 && !st.done) { st.done = true; return true; }

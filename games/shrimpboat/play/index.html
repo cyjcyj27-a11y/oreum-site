@@ -57,10 +57,11 @@ body.m-title #topbar .stat,body.m-end #topbar .stat,body.m-title #tPause,body.m-
 .tarp{position:relative;color:#fff;background:radial-gradient(circle at 12px 12px,#e8e2c8 0 4px,#7a6a3a 4.5px 6.5px,transparent 7px),radial-gradient(circle at calc(100% - 12px) 12px,#e8e2c8 0 4px,#7a6a3a 4.5px 6.5px,transparent 7px),radial-gradient(circle at 12px calc(100% - 12px),#e8e2c8 0 4px,#7a6a3a 4.5px 6.5px,transparent 7px),radial-gradient(circle at calc(100% - 12px) calc(100% - 12px),#e8e2c8 0 4px,#7a6a3a 4.5px 6.5px,transparent 7px),
   repeating-linear-gradient(90deg,rgba(255,255,255,.05) 0 1px,transparent 1px 3px),repeating-linear-gradient(0deg,rgba(0,0,0,.07) 0 1px,transparent 1px 3px),linear-gradient(170deg,#3170c4,#2459a8 45%,#1b4685);
   border:2px solid #143668;box-shadow:0 10px 26px rgba(0,0,0,.55),inset 0 0 0 1px rgba(255,255,255,.15)}
-#tasks{position:fixed;z-index:19;right:calc(10px + var(--sr));top:calc(58px + env(safe-area-inset-top));width:180px;padding:16px 16px 12px;font-size:16px;line-height:1.6;pointer-events:none;transform:rotate(1deg)}
+#tasks{position:fixed;z-index:19;right:calc(10px + var(--sr));top:calc(58px + env(safe-area-inset-top));width:200px;padding:16px 16px 12px;font-size:16px;line-height:1.6;pointer-events:none;transform:rotate(1deg)}
 #tasks div{display:flex;justify-content:space-between;gap:8px;white-space:nowrap}
 #tasks div.done{opacity:.5;text-decoration:line-through}
 #tasks b{font-weight:400;font-family:'Saemaul','Ria',sans-serif;color:#ffd27a}
+#tasks p.hint{margin:-2px 0 6px;font-size:12px;line-height:1.35;color:#d7ecff;white-space:normal;font-family:'Ria',sans-serif}
 #tasks:empty{display:none}
 body.touch #tasks{display:none}
 body.touch.showtasks #tasks{display:block}
@@ -243,11 +244,11 @@ html.ol-land #rotate{display:none!important}
 <script src="js/core.js?v=2"></script>
 <script src="js/sea.js?v=1"></script>
 <script src="js/boat.js?v=3"></script>
-<script src="js/fx.js?v=1"></script>
+<script src="js/fx.js?v=2"></script>
 <script src="js/catch.js?v=3"></script>
 <script src="js/haul.js?v=6"></script>
 <script src="js/sort.js?v=10"></script>
-<script src="js/work.js?v=2"></script>
+<script src="js/work.js?v=3"></script>
 <script src="js/captain.js?v=6"></script>
 <script src="js/night.js?v=1"></script>
 <script src="js/escape.js?v=2"></script>
@@ -256,7 +257,7 @@ html.ol-land #rotate{display:none!important}
 <script src="js/tut.js?v=3"></script>
 <script src="js/sfx.js?v=1"></script>
 <script src="js/audio.js?v=2"></script>
-<script src="js/game.js?v=8"></script>
+<script src="js/game.js?v=9"></script>
 <script src="/assets/visit.js?v=17" defer></script>
 <script src="/assets/game-events.js?v=2" defer></script>
 </body>

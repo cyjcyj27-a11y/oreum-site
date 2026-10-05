@@ -43,9 +43,32 @@ ui.tasks = function () {
   if (G.mode === 'day') G.tasks.forEach(function (t) {
     var nm = { net: L('그물', 'Nets'), deck: L('갑판 청소', 'Deck'), ramen: L('선장 라면', 'Ramen') }[t.id], dn = t.done >= t.n;
     h += '<div class="' + (dn ? 'done' : '') + '"><span>' + nm + '</span><b>' + (dn ? '&#10004;' : t.n > 1 ? t.done + '/' + t.n : '') + '</b></div>';
+    if (!dn) { var hn = taskHint(t); if (hn) h += '<p class="hint">' + hn + '</p>'; }
   });
-  $('tasks').innerHTML = h; ui.hud();
+  if (h !== lastTasksH) { lastTasksH = h; $('tasks').innerHTML = h; } ui.hud();
 };
+/* 할 일 판: 아직 안 끝난 일마다 어디서 무엇을 하는지 한 줄(사장님 10/5 "그물 머 어쩌라는 건지 갑판청소는 어케하는건지", "모바일에서 e키는 없어") */
+var lastTasksH = '';
+function taskHint(t) {
+  var tb = touchMode || document.body.classList.contains('touch'), key = tb ? L('구명환 단추', 'ring button') : 'E', ph = SB.haul.phase;
+  if (t.id === 'net') {
+    if (ph === 'idle') return L('양망기 손잡이에서 ', 'Winch lever, ') + key;
+    if (ph === 'haul') return tb ? L('구명환 단추를 누르고 있으면 감긴다', 'Hold the ring button to wind') : L('E 를 누르고 있으면 감긴다', 'Hold E to wind');
+    if (ph === 'ready') return L('선별대 위 그물을 쏟는다', 'Dump the net on the table');
+    if (ph === 'sort') return L('선별대에서 새우 고르기', 'Sort shrimp at the table');
+    if (ph === 'full') return L('새우 바구니를 어창에', 'Basket to the fish hold');
+    return '';
+  }
+  if (t.id === 'deck') {
+    var n = SB.work.stainsLeft(), net = SB.taskOf('net');
+    if (n > 0) return L('때 ', 'Stains ') + n + L('곳 · ', ' · ') + key + L(' 길게', ' hold');
+    if (net && net.done < net.n) return L('그물을 다 올리면 때가 생긴다', 'Stains come after the nets');
+    return L('양동이로 물 뿌리기', 'Rinse with the bucket');
+  }
+  if (t.id === 'ramen') return G.carry === 'pot' ? L('냄비를 선장에게', 'Pot to the captain') : L('버너에서 라면 끓이기', 'Cook ramen at the burner');
+  return '';
+}
+SB.taskHint = taskHint;
 ui.praise = function (w) { var p = $('praise'); p.textContent = w; p.classList.remove('on'); void p.offsetWidth; p.classList.add('on'); };
 ui.toast = function (w, good) { var p = $('toast'); p.textContent = w; p.className = good ? 'good' : ''; void p.offsetWidth; p.classList.add('on'); };
 ui.nope = function (kind) {
@@ -326,7 +349,7 @@ $('pL').addEventListener('pointerdown', function (e) { e.preventDefault(); SND.u
 document.addEventListener('visibilitychange', function () { SND.hide(document.hidden); if (document.hidden && (G.mode === 'day' || G.mode === 'night')) { save(); pause(true); } });
 
 // ---------- 매 프레임 ----------
-var stepAcc = 0, rescueT = 0.5, bob = 0, _hp = new T.Vector3(), _lp = new T.Vector3(), lastT = 0, focusIt = null, rainAcc = 0;
+var stepAcc = 0, rescueT = 0.5, taskT = 0, bob = 0, _hp = new T.Vector3(), _lp = new T.Vector3(), lastT = 0, focusIt = null, rainAcc = 0;
 function updRay() { SB.boat.group.updateMatrixWorld(); SB.boat.toLocalRay(rayAt(ptr.x, ptr.y), SB.ptrLocal); }
 function tick(dt) {
   if (dt > 0.1) dt = 0.1;
@@ -358,6 +381,7 @@ function tick(dt) {
       if (third() && performance.now() - lookT > 900) G.P.yaw += Math.sin(wrap(mh - (G.P.yaw + PI))) * 1.0 * dt;   // 옆으로 갈수록 사진기가 등 뒤로(올가미 언니 기준)
     }
   }
+  if (G.mode === 'day') { taskT -= dt; if (taskT < 0) { taskT = 0.5; ui.tasks(); } }
   if (playing && walkMode() && !scrub) { rescueT -= dt; if (rescueT < 0) { rescueT = 0.5; if (B.rescue(G.P, 0.28)) SB.snd('step'); } }   // 갇혔으면 꺼내 준다
   SB.night.update(dt, sp, run);
   bob += dt * sp * 3.1;

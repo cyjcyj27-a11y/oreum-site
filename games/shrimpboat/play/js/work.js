@@ -31,7 +31,7 @@ W.spawnStains = function (n) {
   for (i = 0; i < SPOTS.length; i++) if (used.indexOf(i) < 0) free.push(i);
   for (i = 0; i < n && free.length; i++) {
     var k = free.splice(Math.floor(Math.random() * free.length), 1)[0], sp = SPOTS[k];
-    var st = SB.fx.makeStain({ x: sp[0] + (Math.random() - 0.5) * 0.2, z: sp[1] + (Math.random() - 0.5) * 0.2, w: 0.45 + Math.random() * 0.25, kind: KINDS[Math.floor(Math.random() * KINDS.length)], seed: Math.floor(Math.random() * 1e6), rot: Math.random() * 6, tough: SB.sea.storm ? 1.2 : 1 });
+    var st = SB.fx.makeStain({ x: sp[0] + (Math.random() - 0.5) * 0.2, z: sp[1] + (Math.random() - 0.5) * 0.2, w: 0.75 + Math.random() * 0.2, kind: KINDS[Math.floor(Math.random() * KINDS.length)], seed: Math.floor(Math.random() * 1e6), rot: Math.random() * 6, tough: SB.sea.storm ? 1.2 : 1 });
     st.spot = k;
   }
   SB.taskProgress();
