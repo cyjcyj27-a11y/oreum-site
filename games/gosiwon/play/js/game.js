@@ -443,7 +443,7 @@ cv.addEventListener('pointermove', function (e) {
   if (press && e.pointerId === press.id) {
     var dx = e.clientX - press.x, dy = e.clientY - press.y; press.moved += Math.abs(dx) + Math.abs(dy); press.x = e.clientX; press.y = e.clientY;
     if (press.scrub) { ptr.x = GS.clamp(ptr.x + dx * 2 / window.innerWidth, -0.98, 0.98); ptr.y = GS.clamp(ptr.y - dy * 2 / window.innerHeight, -0.98, 0.98); }
-    else { var k = touchMode ? 0.026 : 0.0034; /* 10/5 "시점이동은 개같이 느림": 손가락 100px 에 63도(전 30도) */ G.P.yaw -= dx * k; G.P.pitch = GS.clamp(G.P.pitch - dy * k, -1.45, 1.45); }
+    else { var k = touchMode ? 0.038 : 0.0034; /* 10/5 "시점이동은 개같이 느림": 손가락 100px 에 63도(전 30도) */ G.P.yaw -= dx * k; G.P.pitch = GS.clamp(G.P.pitch - dy * k, -1.45, 1.45); }
   } else if (!press && e.pointerType === 'mouse') ndc(e);
 });
 function ptrUp(e) {
@@ -475,7 +475,7 @@ function walk(dt) {
   var P = G.P, f = 0, s = 0;
   if (keys.KeyW || keys.ArrowUp) f += 1; if (keys.KeyS || keys.ArrowDown) f -= 1; if (keys.KeyD || keys.ArrowRight) s += 1; if (keys.KeyA || keys.ArrowLeft) s -= 1;
   // 폰 패드(10/4 사장님 "카메라가 따라와야"): 위아래는 앞뒤로 걷고, 좌우는 몸을 돌린다. 민 만큼 빠르다
-  if (pad.id != null) { f -= GS.clamp(pad.y / 0.7, -1, 1) * 0.5; P.yaw -= pad.x * Math.abs(pad.x) * 2.6 * dt; }   // 10/4 초기 패드 그대로(위아래 걷기, 좌우 몸 돌리기), 사장님 10/5 "초기버전으로 복구". 속도만 0.7(2.3m/s, "이동은 개같이 빠르고")   // 10/5 "이동은 개같이 빠르고": 패드 끝까지 밀어도 2.3m/s(키보드 3.3 의 0.7), 민 만큼 느려진다   // 10/5 모바일 1인칭 표준(배그M·콜옵M·마인크래프트): 왼쪽 스틱은 이동(앞뒤+옆걸음)만, 시점은 오른쪽 화면을 끌어서. 스틱으로 돌리기·고개 자동 올리기는 "지멋대로"라 뺌
+  if (pad.id != null) { f -= GS.clamp(pad.y / 0.7, -1, 1) * 0.36; P.yaw -= pad.x * Math.abs(pad.x) * 2.6 * dt; }   // 10/4 초기 패드 그대로(위아래 걷기, 좌우 몸 돌리기), 사장님 10/5 "초기버전으로 복구". 속도만 0.7(2.3m/s, "이동은 개같이 빠르고")   // 10/5 "이동은 개같이 빠르고": 패드 끝까지 밀어도 2.3m/s(키보드 3.3 의 0.7), 민 만큼 느려진다   // 10/5 모바일 1인칭 표준(배그M·콜옵M·마인크래프트): 왼쪽 스틱은 이동(앞뒤+옆걸음)만, 시점은 오른쪽 화면을 끌어서. 스틱으로 돌리기·고개 자동 올리기는 "지멋대로"라 뺌
   var len = Math.hypot(f, s), sp = 3.3 * (G.items.shoes ? 1.2 : 1) * (G.carry ? 0.72 : 1);
   if (len > 0) {
     if (len > 1) { f /= len; s /= len; } var sy = Math.sin(P.yaw), cy = Math.cos(P.yaw), dx = (-sy * f + cy * s) * sp * dt, dz = (-cy * f - sy * s) * sp * dt;
