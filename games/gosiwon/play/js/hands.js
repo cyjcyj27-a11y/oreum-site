@@ -72,10 +72,14 @@ function picInit() {
     }
     im.src = 'assets/' + a[1] + '.webp?v=2'; im.alt = ''; im.draggable = false; im.style.cssText = 'position:absolute;left:0;top:0;width:100%;height:100%;user-select:none';
     inn.appendChild(im); box.appendChild(inn); layer.appendChild(box); pics[a[0]] = box; box.sp = sp;
+    if (a[0] === 'C') {                                                                  // 두 손 그림은 왼팔·오른팔 반쪽씩 따로 두고 사이를 벌린다(10/5 "양손 사이를 벌려서")
+      box.style.overflow = 'hidden'; inn.style.width = '200%';
+      var box2 = box.cloneNode(true); box2.firstChild.style.left = '-100%'; layer.appendChild(box2); pics.C2 = box2; box2.sp = sp;
+    }
   });
 }
 function picPlace(el, tip, tx, ty, left, wob) {          // tip: 그림 안 손끝 자리(0~1), tx·ty: 화면 목표, left: 왼손(뒤집은 그림, 어깨는 왼쪽 아래)
-  var P = el.sp, vw = innerWidth, vh = innerHeight, w = Math.min(vh * 0.6, vw * 0.4) * 1.1 * P.w / 849, h = w * P.h / P.w, s0 = w / P.w;
+  var P = el.sp, vw = innerWidth, vh = innerHeight, w = Math.min(vh * 0.6, vw * 0.4) * HAND_K * P.w / 849, h = w * P.h / P.w, s0 = w / P.w;
   var rx = left ? vw * 0.38 : vw * 0.62, ry = vh * 0.66;                                   // 쉬는 자리
   var px = (left ? -0.05 * w : vw + 0.05 * w) + (tx - rx) * 0.5, py = vh + 0.08 * w + (ty - ry) * 0.5;   // 어깨: 화면 밖, 손이 가는 쪽으로 조금 따라간다
   var fx = left ? 1 - tip[0] : tip[0], ax = left ? fx * w : (fx - 1) * w, ay = (tip[1] - 1) * h;
@@ -90,11 +94,14 @@ function picPlace(el, tip, tx, ty, left, wob) {          // tip: 그림 안 손�
   el.style.transform = 'translate(' + L.toFixed(1) + 'px,' + T.toFixed(1) + 'px) rotate(' + ang.toFixed(4) + 'rad) scale(' + sc.toFixed(4) + ')';
   el.style.display = 'block';
 }
-function carryPlace(el, bob) {                           // 두 손 받치기: 화면 아래 가운데에 고정, 걸으면 출렁. 상자 자리(화면)를 돌려준다
-  var P = el.sp, vw = innerWidth, vh = innerHeight, h = vh * 0.78 * 1.1, s0 = h / P.h, w = P.w * s0, L = (vw - w) / 2 - P.ox * s0, T = vh * 0.24 + bob;
-  el.style.width = (P.fw * s0).toFixed(1) + 'px'; el.style.height = (P.fh * s0).toFixed(1) + 'px'; el.style.transformOrigin = '0 0';
-  el.style.transform = 'translate(' + L.toFixed(1) + 'px,' + T.toFixed(1) + 'px)'; el.style.display = 'block';
-  return [(vw - w) / 2 + P.box[0] * w, T + P.box[1] * h, P.box[2] * w];
+var HAND_K = 0.8, CARRY_K = 0.6, CARRY_W = 0.75, CARRY_T = 0.63, CARRY_GAP = 0.24;   // 손 크기 배수(10/5 댓글 "손이 너무..." → 1.1에서 줄임), 두 손 높이·너비 한도, 두 손 윗자리, 두 손 사이 벌림(w 비율)
+function carryPlace(el, bob) {                           // 두 손 받치기: 화면 아래 가운데, 왼팔·오른팔 반쪽을 gap 만큼 벌려 놓는다. 걸으면 출렁. 상자 자리(화면)를 돌려준다
+  var P = el.sp, vw = innerWidth, vh = innerHeight, h = Math.min(vh * CARRY_K, vw * CARRY_W * P.h / P.w), s0 = h / P.h, w = P.w * s0, gap = CARRY_GAP * w;
+  var FW = P.fw * s0, FH = P.fh * s0, L = (vw - w) / 2 - P.ox * s0, T = vh * CARRY_T + bob, el2 = pics.C2;
+  el.style.width = el2.style.width = (FW / 2).toFixed(1) + 'px'; el.style.height = el2.style.height = FH.toFixed(1) + 'px';
+  el.style.transform = 'translate(' + (L - gap / 2).toFixed(1) + 'px,' + T.toFixed(1) + 'px)'; el.style.display = 'block';
+  el2.style.transform = 'translate(' + (L + FW / 2 + gap / 2).toFixed(1) + 'px,' + T.toFixed(1) + 'px)'; el2.style.display = 'block';
+  return [(vw - w) / 2 + P.box[0] * w, T + P.box[1] * h, P.box[2] * w + gap];
 }
 function picHide(k) { if (pics[k] && pics[k].style.display !== 'none') pics[k].style.display = 'none'; }
 var BOXW = { ramen: 0.4, kimchi: 0.42, tub: 0.34, tube: 0.45, parcel: 0.3 };
@@ -117,14 +124,14 @@ function update(dt, s) {                              // s: move(0~1), scrub, st
   else { tp.set(0.2, -0.205 + bob - (1 - GS.ease(wearT)) * 0.5, -0.38 - jab); tr.set(0.42 + jab * 3, 0.32, -0.12); lp.set(-0.2, -0.235 - bob - (1 - GS.ease(wearT)) * 0.5 + (wearT < 1 ? 0 : -0.5), -0.38); lr.set(0.42, -0.32, 0.12); }
   approach(R, tp, tr, k); approach(L, lp, lr, k);
   /* 그림 손 */
-  var it = (GS.G && GS.G.items) || {}, vw = innerWidth, vh = innerHeight, down = (1 - GS.ease(wearT)) * vh * 0.7, kk = Math.min(1, dt * 18), tgt, key = it.brush ? 'W' : 'S', tip = PICS.pinch.tipS, wob = 0, all = ['S', 'W', 'P', 'L', 'K', 'KS', 'C'];   // 상점: 철수세미를 사면 손에 철수세미, 식칼을 사기 전엔 과도
+  var it = (GS.G && GS.G.items) || {}, vw = innerWidth, vh = innerHeight, down = (1 - GS.ease(wearT)) * vh * 0.7, kk = Math.min(1, dt * 18), tgt, key = it.brush ? 'W' : 'S', tip = PICS.pinch.tipS, wob = 0, all = ['S', 'W', 'P', 'L', 'K', 'KS', 'C', 'C2'];   // 상점: 철수세미를 사면 손에 철수세미, 식칼을 사기 전엔 과도
   if (!showPic) { all.forEach(picHide); picPt = null; return; }
   if (carry) {                                                                           // 상자: 두 손 사이에 3D 상자를 맞춘다
     var bp = carryPlace(pics.C, bob * vh * 2.2 + down), bx3 = boxes[carry], D = 0.56, hh = D * Math.tan(cam.fov * PI / 360);
     bx3.position.set((bp[0] / vw * 2 - 1) * hh * asp, (1 - bp[1] / vh * 2) * hh - 0.02, -D); bx3.scale.setScalar(bp[2] / vw * 2 * hh * asp / BOXW[carry]);
-    all.forEach(function (k) { if (k !== 'C') picHide(k); }); picPt = null; return;
+    all.forEach(function (k) { if (k !== 'C' && k !== 'C2') picHide(k); }); picPt = null; return;
   }
-  picHide('C');
+  picHide('C'); picHide('C2');
   if (scrubScr) { tgt = [scrubScr[0] + Math.sin(clock * 15) * vh * 0.012, scrubScr[1] + Math.cos(clock * 30) * vh * 0.006]; wob = Math.sin(clock * 15) * 0.03; kk = Math.min(1, dt * 26); }
   else if (s.station && tool === 'knife') { key = it.knife ? 'K' : 'KS'; tip = it.knife ? PICS.knife.tip : PICS.knife.tipS; tgt = [(s.px + 1) / 2 * vw, (1 - s.py) / 2 * vh + jab * vh * 0.5]; wob = -jab * 2.5; kk = Math.min(1, dt * 30); }   // 썰 때 칼이 내려찍힌다
   else if (s.station) { key = 'P'; tip = PICS.pinch.tipP; tgt = [(s.px + 1) / 2 * vw, (1 - s.py) / 2 * vh - jab * vh * 0.4]; kk = Math.min(1, dt * 30); }
