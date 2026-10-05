@@ -789,11 +789,13 @@ function step(dt) {
   if (G.mode === 'play') { if (!G.dead) misCheck(); hud(); }
   if (G.dead) { G.deadT += dt; if (G.deadT > 1.8 && G.mode === 'play') gameOver(); }
 }
+/* 범고래가 쫓는 시간(작은 것에 한 번 부딪힌 뒤 이 안에 또 부딪히면 끝). 10/5 사장님 "범고래가 들이받아서 멀리 못간다" → 3.5초에서 2초로 */
+var DANGER_T = 2.0;
 function hitObj(o) {
   var big = o.kind === 'tall';
   if (G.shield > 0 && !G.dead) { G.shield = 0; o.hit = true; o.hitT = 0; SFX.hit(); G.shake = 0.35; spray(30, 3, o.x, 0.6, o.wz); fx('SHIELD', 'b'); return; }
   if (big || G.danger > 0) { wipeout(o); return; }
-  o.hit = true; o.hitT = 0; G.danger = 3.5; G.hitT = 0.5; SFX.hit(); SFX.danger(); G.shake = 0.45; spray(26, 3, G.x, 0.4, -G.z);
+  o.hit = true; o.hitT = 0; G.danger = DANGER_T; G.hitT = 0.5; SFX.hit(); SFX.danger(); G.shake = 0.45; spray(26, 3, G.x, 0.4, -G.z);
 }
 function wipeout(o) { if (G.dead) return; G.dead = true; G.deadT = 0; if (o) { o.hit = true; o.hitT = 0; } SFX.wipeout(); G.shake = 0.9; spray(70, 3, G.x, 0.4, -G.z); G.air = false; G.duck = 0; }
 
@@ -948,7 +950,7 @@ function draw(dt) {
     partPos[pc * 3] = r.x; partPos[pc * 3 + 1] = r.y; partPos[pc * 3 + 2] = r.z; partSz[pc] = r.r * (1.4 - r.life / r.max * 0.5); partA[pc] = Math.min(1, r.life / r.max * 2.2) * 0.85; pc++; }
   partGeo.setDrawRange(0, pc); partGeo.attributes.position.needsUpdate = true; partGeo.attributes.sz.needsUpdate = true; partGeo.attributes.al.needsUpdate = true;
   /* 상어: 위험한 동안 뒤에서 따라붙고, 쓰러지면 덮친다 */
-  var dg = G.dead ? 1 : G.danger / 3.5;
+  var dg = G.dead ? 1 : G.danger / DANGER_T;
   orca.visible = dg > 0.01;
   if (orca.visible) {   /* 범고래: 같은 줄 바로 뒤에서 따라오다가(보드 꼬리에 닿지 않게) 잡을 때만 앞으로 튀어나와 덮친다
        10/5 사장님 "뒤에 돌고래가 너무 들이받는데", "헬라때는 이렇게 어렵지 않았는데": 처음엔 옆 줄에 붙여 두었더니 옆 줄 앞이 가려지고
