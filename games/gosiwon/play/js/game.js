@@ -431,6 +431,11 @@ function focusNear(x, y) {                      // 10/5 폰 탭 보정: 그 점 
   return null;
 }
 function ndc(e) { ptr.x = evX(e) / window.innerWidth * 2 - 1; ptr.y = -(evY(e) / window.innerHeight * 2 - 1); }
+var noCoord = false;                              // 10/5 사장님 폰(녹화 안 할 때): 좌표가 전부 0 → 손가락 밑 요소(칸)로만 조작하는 모드
+function coordCheck(e) {
+  if (noCoord || e.pointerType !== 'touch') return;
+  if (!e.clientX && !e.clientY && !e.pageX && !e.pageY && !e.screenX && !e.screenY) { noCoord = true; document.body.classList.add('nocoord'); }
+}
 function rayAt(x, y) { rc.setFromCamera({ x: zm.cx + x / zm.Z, y: zm.cy + y / zm.Z }, camB); return rc.ray; }   // 화면 좌표 → 줌 없는 카메라의 좌표
 function walkMode() { return G.mode === 'day' && !CH.cur && !paused && wakeT >= 1; }
 function useIt(it) { if (!it) return false; it.use(); return true; }
@@ -463,10 +468,12 @@ window.addEventListener('blur', function () { keys = {}; actHeld = false; ptr.do
 cv.addEventListener('pointerdown', function (e) {
   SND.unlock(); if (paused) return;
   if (e.pointerType === 'touch' && !touchMode) { touchMode = true; document.body.classList.add('touch'); }
+  coordCheck(e);
   if (GS.ev.closeNote()) return;                                         // 펼친 쪽지는 아무 데나 누르면 닫힌다
   if (G.mode === 'study') { ndc(e); tapBook(evX(e), evY(e)); return; }
   if (G.mode !== 'day' || wakeT < 1) return;
   if (CH.cur) { ndc(e); ptr.down = true; ptr.id = e.pointerId; GS.ptrRay.copy(rayAt(ptr.x, ptr.y)); CH.cur.down(); return; }
+  if (noCoord) return;                                                   // 좌표 없는 폰: 캔버스 터치는 쓰지 않는다(패드 칸·시점 칸판·물건 단추로만)
   if (e.pointerType === 'touch' && pad.id == null && walkMode() && GS.padHit(e)) { GS.padStart(e); return; }   // 10/5 "움직이면 구도가 이렇게 됨": 패드 자리 터치가 시점 끌기로 새지 않게
   if (locked) { ptr.down = true; ptr.x = ptr.y = 0; if (!useIt(CH.focus(rayAt(0, 0))) && !G.carry) { var sv = stainView(); if (sv) { if (G.gloves) { scrubPtr = true; ptr.x = sv.x; ptr.y = sv.y; } else ui.nope('glove'); } } return; }
   if (e.pointerType === 'mouse' && !touchMode) { lockPtr(); }
@@ -522,7 +529,23 @@ cv.addEventListener('contextmenu', function (e) { e.preventDefault(); });
   var el = $('pad'), kn = $('knob');
   function set(e) { var r = el.getBoundingClientRect(), R = r.width / 2 * 0.8, x = (evX(e) - pad.ox) / R, y = (evY(e) - pad.oy) / R, d = Math.hypot(x, y); /* 10/5 "오른쪽으로 밀어도 왼쪽으로만": 동그라미 가운데가 아니라 손가락이 처음 닿은 자리(pad.ox/oy) 기준으로 잰다. 60px 밀면 최대 */ if (d > 1) { x /= d; y /= d; } pad.x = Math.abs(x) > 0.22 ? x : 0; pad.y = Math.abs(y) > 0.22 ? y : 0; kn.style.transform = 'translate(' + x * R * 0.6 + 'px,' + y * R * 0.6 + 'px)'; }
   function start(e) { SND.unlock(); touchMode = true; document.body.classList.add('touch'); pad.id = e.pointerId; pad.ox = evX(e); pad.oy = evY(e); try { el.setPointerCapture(e.pointerId); } catch (er) {} set(e); e.preventDefault(); }
-  el.addEventListener('pointerdown', start);
+  el.addEventListener('pointerdown', function (e) { coordCheck(e); if (noCoord) return; start(e); });
+  /* 좌표 없는 폰: 패드 9칸(#pad .pc). 손가락이 닿은 칸·옮겨 간 칸(pointerover)으로 방향을 정한다. 포인터 캡처는 안 건다(칸이 바뀌는 걸 봐야 하니) */
+  var cells = el.querySelectorAll('.pc');
+  function cellSet(c) { var d = c.dataset.d.split(','); pad.x = +d[0]; pad.y = +d[1]; kn.style.transform = 'translate(' + (pad.x * 36) + 'px,' + (pad.y * 36) + 'px)'; }
+  Array.prototype.forEach.call(cells, function (c) {
+    c.addEventListener('pointerdown', function (e) { coordCheck(e); if (!noCoord) { start(e); return; } SND.unlock(); touchMode = true; document.body.classList.add('touch'); pad.id = e.pointerId; cellSet(c); e.preventDefault(); e.stopPropagation(); });
+    c.addEventListener('pointerover', function (e) { if (noCoord && e.pointerId === pad.id) cellSet(c); });
+  });
+  /* 좌표 없는 폰: 시점 칸판(#lookgrid, 가로 12칸 × 세로 5칸). 손가락이 칸을 옮기면 그만큼 돈다 */
+  var lg = $('lookgrid'), lk = { id: null, c: 0, r: 0 };
+  if (lg) {
+    for (var gi = 0; gi < 60; gi++) { var g = document.createElement('b'); g.dataset.c = gi % 12; g.dataset.r = (gi / 12) | 0; g.style.left = (gi % 12) * 8.3334 + '%'; g.style.top = ((gi / 12) | 0) * 20 + '%'; lg.appendChild(g); }
+    lg.addEventListener('pointerdown', function (e) { coordCheck(e); if (!noCoord || !walkMode()) return; var t = e.target; if (!t.dataset || t.dataset.c == null) return; lk.id = e.pointerId; lk.c = +t.dataset.c; lk.r = +t.dataset.r; lk.t = performance.now(); lk.moved = 0; e.preventDefault(); });
+    lg.addEventListener('pointerover', function (e) { if (e.pointerId !== lk.id) return; var t = e.target; if (!t.dataset || t.dataset.c == null) return; var dc = +t.dataset.c - lk.c, dr = +t.dataset.r - lk.r; if (!dc && !dr) return; lk.moved++; G.P.yaw -= dc * 0.26; G.P.pitch = GS.clamp(G.P.pitch - dr * 0.22, -1.45, 1.45); lk.c = +t.dataset.c; lk.r = +t.dataset.r; });
+    var lgEnd = function (e) { if (e.pointerId === lk.id) { if (!lk.moved && performance.now() - lk.t < 500) { var f = CH.focus(rayAt(0, 0)); if (f) useIt(f); } lk.id = null; } };   // 칸판을 톡 치면 가운데 물건 쓰기
+    window.addEventListener('pointerup', lgEnd); window.addEventListener('pointercancel', lgEnd);
+  }
   GS.padHit = function (e) { var r = el.getBoundingClientRect(); var x = evX(e), y = evY(e); return r.width > 0 && x >= r.left - 24 && x <= r.right + 24 && y >= r.top - 24 && y <= r.bottom + 24; };   // 패드 자리(여유 24px)
   GS.padStart = start;
   var end = function (e) { if (e.pointerId === pad.id) { pad.id = null; pad.x = pad.y = 0; kn.style.transform = ''; } };
