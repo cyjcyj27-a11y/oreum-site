@@ -489,7 +489,7 @@ var vC = new T.Vector3(), qe = new T.Quaternion(), pe = new T.Vector3(), eu = ne
 /* 쪼그려 앉기: 닦기 시작한 자리 쪽으로, 그 자리를 보는 선을 따라 다가간다. 각도는 그대로라 때가 화면에서 제자리에 있다 */
 /* 닦기 줌(사장님 10/3 "팔을 늘리지 말고 카메라를 줌인"): 쪼그려 앉을 때 시점은 돌리지 않고 화면만 확대해, 닦는 자리가 손이 쉬는 자리 가까이 오게 한다.
    cam 에 setViewOffset 으로 창을 잘라 그리고, 광선은 줌 없는 camB 로 쏜다. 닦는 손끝(aim, 화면 좌표)은 줌이 바뀌어도 같은 곳을 가리키게 옮긴다 */
-var camB, zm = { Z: 1, cx: 0, cy: 0, tZ: 1, tx: 0, ty: 0 }, aim = { x: 0, y: 0 }, ZD = { x: 0.24, y: -0.32 }, ZMAX = 2.2;
+var camB, zm = { Z: 1, cx: 0, cy: 0, tZ: 1, tx: 0, ty: 0 }, aim = { x: 0, y: 0 }, ZD = { x: 0.24, y: -0.32 }, ZMAX = 1.4;   // 10/5 사장님 "줌인이 너무 가까워져서 닦기가 오히려 어려움": 2.2 → 1.4
 function zoomAim(a) {                                  // a: 닦기 시작한 화면 자리 → 목표 줌과 창 가운데
   var bx = zm.cx + a.x / zm.Z, by = zm.cy + a.y / zm.Z, Z, cx, cy;
   for (Z = 1; Z <= ZMAX + 1e-6; Z += 0.1) {
@@ -509,7 +509,7 @@ function zoomUpdate() {
   if (Z > 1.0001) cam.setViewOffset(w * Z, h * Z, (cx + 1) / 2 * w * Z - w / 2, (1 - cy) / 2 * h * Z - h / 2, w, h); else if (cam.view && cam.view.enabled) cam.clearViewOffset();
   camB.position.copy(cam.position); camB.quaternion.copy(cam.quaternion); if (camB.fov !== cam.fov || camB.aspect !== cam.aspect) { camB.fov = cam.fov; camB.aspect = cam.aspect; camB.updateProjectionMatrix(); } camB.updateMatrixWorld();
 }
-var crOn = false, crK = 0, crDir = new T.Vector3(), crLen = 0, REACH = 0.62, KNEE = 0.5;
+var crOn = false, crK = 0, crDir = new T.Vector3(), crLen = 0, REACH = 0.85, KNEE = 0.5;   // 쪼그려 다가가는 거리도 덜(0.62 → 0.85m 앞에서 멈춤)
 function crouchStart(p) {
   var P = G.P; vC.set(P.x, P.y + EYE, P.z); crDir.copy(p).sub(vC); var d = crDir.length(); crDir.divideScalar(d);
   crLen = Math.max(0, d - REACH); if (crDir.y < -1e-3) crLen = Math.min(crLen, (EYE - KNEE) / -crDir.y); crOn = true; zoomAim(aim);
