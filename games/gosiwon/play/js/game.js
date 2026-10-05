@@ -476,7 +476,10 @@ function walk(dt) {
   var P = G.P, f = 0, s = 0;
   if (keys.KeyW || keys.ArrowUp) f += 1; if (keys.KeyS || keys.ArrowDown) f -= 1; if (keys.KeyD || keys.ArrowRight) s += 1; if (keys.KeyA || keys.ArrowLeft) s -= 1;
   // 폰 패드(10/4 사장님 "카메라가 따라와야"): 위아래는 앞뒤로 걷고, 좌우는 몸을 돌린다. 민 만큼 빠르다
-  if (pad.id != null) { f -= GS.clamp(pad.y / 0.7, -1, 1); P.yaw -= pad.x * Math.abs(pad.x) * 2.6 * dt; }
+  if (pad.id != null) {
+    f -= GS.clamp(pad.y / 0.7, -1, 1); P.yaw -= pad.x * 3.0 * dt;                                   // 10/5 사장님 "이동할 때 카메라가 따라와야": 좌우는 민 만큼 바로 돈다(제곱 없이, 2.6→3.0)
+    if (pad.y) P.pitch += (-0.12 - P.pitch) * Math.min(1, dt * 1.6);                                  // 앞뒤로 걸으면 숙였던 고개가 저절로 앞을 본다(바닥이 살짝 보이는 각도)
+  }
   var len = Math.hypot(f, s), sp = 3.3 * (G.items.shoes ? 1.2 : 1) * (G.carry ? 0.72 : 1);
   if (len > 0) {
     if (len > 1) { f /= len; s /= len; } var sy = Math.sin(P.yaw), cy = Math.cos(P.yaw), dx = (-sy * f + cy * s) * sp * dt, dz = (-cy * f - sy * s) * sp * dt;
