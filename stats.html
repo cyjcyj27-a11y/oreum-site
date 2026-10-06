@@ -124,7 +124,9 @@
 
   <div class="foot">
     <p id="readWarn" style="display:none;color:#a35c10;font-weight:600"></p>
-    <a class="reload" onclick="location.reload()">↻ 새로고침</a><br>
+    <a class="reload" onclick="location.reload()">↻ 새로고침</a>
+    <span style="color:#c8c2b4;margin:0 6px">·</span>
+    <a class="reload" id="liveBtn" title="자동 집계를 거치지 않고 계수기 전부를 지금 읽습니다 (2~3분)">⟳ 지금 값으로 읽기</a><br>
     이 페이지는 검색에 안 잡히고 링크로만 봅니다.
   </div>
 </div>
@@ -236,6 +238,7 @@
   // 3개씩 260ms로는 화면이 뜨기까지 30초가 걸려서 멈춘 것처럼 보였습니다.
   // 막히면 위 get()이 알아서 쉬었다 다시 부르므로, 여기서는 조금 넉넉하게 갑니다.
   // Abacus 는 10초에 30번까지만 받습니다(429). 칸이 많으면 쉬는 시간을 늘려 부릅니다.
+  var progLabel = '불러오는 중…';
   function fetchChunked(list, size, gap) {
     var out = [], i = 0;
     function next() {
@@ -243,7 +246,7 @@
       var chunk = list.slice(i, i + size); i += size;
       var pct = Math.round(i / list.length * 100);
       var w = document.getElementById('readWarn');
-      w.textContent = '불러오는 중… ' + Math.min(100, pct) + '%';
+      w.textContent = progLabel + ' ' + Math.min(100, pct) + '%';
       w.style.color = '#6b7280'; w.style.display = 'block';
       // map이 넘겨주는 순번이 재시도 횟수로 잘못 들어가지 않게 감싸서 부릅니다
       return Promise.all(chunk.map(function (k) { return get(k); }))
@@ -265,6 +268,7 @@
   // ── 빠른 길: 깃허브 액션이 2시간마다 만들어 두는 스냅샷(stats.json)을 한 번에 읽어 바로 그린다.
   //    (브라우저에서 카운터 100개를 하나씩 읽던 옛길은 40~50초가 걸렸다. 스냅샷을 못 읽으면 그 옛길로 간다.)
   var SNAP = 'https://raw.githubusercontent.com/cyjcyj27-a11y/oreum-site/stats/stats.json';
+  var PV_BASE = 16199;   // assets/visit.js 의 PV_BASE 와 같은 수(2026-09-21 09:50 페이지별 pv_* 합). 꼬리말 "N visits" 와 같은 값을 만든다
   var fmt = function (n) { return (n || 0).toLocaleString('ko-KR'); };
   var stones = [37, 100, 300, 1000, 3000, 10000];
 
@@ -440,33 +444,56 @@
         }
         // 머릿수 세 칸만 실시간으로 덧읽는다 (요청 5번)
         // 페이지뷰 총계도 실시간으로 — 꼬리말 "N visits" 와 같은 값(PV_BASE + pvall). 스냅샷 합은 2시간마다라 사장님이 "왜 그대로지" 물었다(2026-09-21)
-        var PV_BASE = 16199;   // assets/visit.js 의 PV_BASE 와 같은 수(2026-09-21 09:50 페이지별 pv_* 합)
         return Promise.all([get('total'), get('returning'), get('day_' + today), get('pvday_' + today), get('pvall')]).then(function (vs) {
           d.total = vs[0]; d.returning = vs[1]; d['day_' + today] = vs[2]; d['pvday_' + today] = vs[3];
           renderVisits(d);
           document.getElementById('pv-today').textContent = fmt(vs[3]);
           if (vs[4]) document.getElementById('pv-total').innerHTML = fmt(PV_BASE + vs[4]) + '<small>회</small>';
-          note(ago > 300 ? '자동 집계가 ' + Math.round(ago / 60) + '시간 전에 멈춰 있어요. 방문 수와 오늘만 지금 값입니다.' : '', ago > 300 ? '#a35c10' : '#6b7280');
+          note(ago > 300 ? '자동 집계가 ' + Math.round(ago / 60) + '시간 전에 멈춰 있어요. 방문 수와 오늘만 지금 값입니다. 전부 지금 값으로 보려면 아래 "지금 값으로 읽기"를 누르세요.' : '', ago > 300 ? '#a35c10' : '#6b7280');
         });
       });
   }
 
   function fromCounters() {
     // 옛길: 카운터를 5개씩 2초 간격으로 읽는다 — Abacus 는 10초에 30번까지만 받는다(429)
+    // 스냅샷을 못 읽을 때 자동으로 타고, "지금 값으로 읽기" 단추(2026-10-06)로도 탄다. 읽기만 하고 어디에도 쓰지 않는다.
+    failed = 0;
     return fetchChunked(keys, 5, 2000).then(function (vals) {
       var d = {}; keys.forEach(function (k, i) { d[k] = vals[i]; });
-      if (failed > 0) note('값 ' + failed + '개를 못 읽었어요. 실제보다 적게 보일 수 있으니 새로고침해 주세요.', '#a35c10');
       render(d);
       var ks = []; GAMES.forEach(function (g) { ks.push('pv_game_' + g[1], 'rounds_' + g[1], 'min_' + g[1]); });
-      document.getElementById('games-table').innerHTML = '<div class="loading">게임별 불러오는 중… 30초쯤 걸립니다</div>';
-      return fetchChunked(ks, 5, 2000).then(renderGames);
+      document.getElementById('games-table').innerHTML = '<div class="loading">게임별 읽는 중… 1분쯤 걸립니다</div>';
+      return fetchChunked(ks, 5, 2000).then(renderGames).then(function () { return get('pvall'); }).then(function (pvall) {
+        if (pvall) document.getElementById('pv-total').innerHTML = fmt(PV_BASE + pvall) + '<small>회</small>';
+        var t = new Date(Date.now() + 9 * 3600 * 1000).toISOString().slice(11, 16);
+        if (failed > 0) note('값 ' + failed + '개를 못 읽었어요. 실제보다 적게 보일 수 있으니 다시 눌러 주세요. (' + t + ' 기준)', '#a35c10');
+        else note('지금 값 · ' + t + ' 기준 (자동 집계를 거치지 않고 전부 방금 읽은 숫자)', '#2f6b3a');
+      });
     });
   }
 
-  fromSnapshot().catch(function (e) {
-    console.warn('스냅샷 못 읽음, 카운터를 직접 읽습니다', e);
-    fromCounters().catch(function (err) { showReadError(); console.error(err); });
-  });
+  // "지금 값으로 읽기" 단추 — 자동 집계(깃허브 예약)가 몇 시간씩 늦을 때 전부 지금 값으로 다시 그린다. 2~3분 걸린다.
+  var liveBtn = document.getElementById('liveBtn'), liveBusy = false;
+  function readLive() {
+    if (liveBusy) return;
+    liveBusy = true; liveBtn.style.opacity = '.45'; liveBtn.style.pointerEvents = 'none';
+    progLabel = '지금 값 읽는 중… 2~3분 걸립니다 ·';
+    document.getElementById('games-table').innerHTML = '<div class="loading">지금 값 읽는 중…</div>';
+    fromCounters().catch(function (err) { showReadError(); console.error(err); }).then(function () {
+      liveBusy = false; liveBtn.style.opacity = ''; liveBtn.style.pointerEvents = '';
+      progLabel = '불러오는 중…';
+    });
+  }
+  liveBtn.addEventListener('click', readLive);
+
+  if (/[?&]live=1/.test(location.search)) {
+    readLive();                                     // 즐겨찾기용: /stats?live=1 이면 열자마자 전부 지금 값
+  } else {
+    fromSnapshot().catch(function (e) {
+      console.warn('스냅샷 못 읽음, 카운터를 직접 읽습니다', e);
+      fromCounters().catch(function (err) { showReadError(); console.error(err); });
+    });
+  }
 })();
 </script>
 </body>
