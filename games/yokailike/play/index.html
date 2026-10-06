@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>요괴라이크</title>
+<!-- 버튼 디자인은 design.md: 옛 JRPG 대화창(남색·흰 1도트 테·검은 바깥 테, 계단 명암) + 등롱 빨강 주 단추, 사다리타기와 같은 도트 세계 -->
+<style>
+@font-face{font-family:'Galmuri';src:url('fonts/galmuri11b.woff2') format('woff2');font-display:block}
+@font-face{font-family:'NeoDGM';src:url('fonts/neodgm.woff') format('woff');font-display:block}
+:root{--ink:#15131a;--navy:#1d2a5a;--navy2:#2f4287;--navy3:#121a3a;--red:#e0453a;--red2:#f27a6c;--red3:#9a2a22;--gold:#f2c744;--paper:#fff3dc}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+html,body{width:100%;height:100%;overflow:hidden;background:#0b1030;font-family:'Galmuri','NeoDGM',monospace;color:#fff;
+  user-select:none;-webkit-user-select:none;touch-action:none;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+#cv{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
+.btn{position:relative;pointer-events:auto;cursor:pointer;font-family:inherit;font-size:22px;line-height:1;padding:15px 22px 11px;min-width:120px;min-height:50px;
+  border:3px solid var(--ink);color:#fff;display:inline-flex;align-items:center;justify-content:center;gap:8px;white-space:nowrap;text-shadow:2px 2px 0 var(--ink);
+  background:linear-gradient(var(--navy2) 0 16%,var(--navy) 16% 82%,var(--navy3) 82%);
+  box-shadow:inset 0 0 0 3px #fff,0 5px 0 var(--ink);transition:transform .1s steps(2),box-shadow .1s steps(2)}
+.btn:hover{filter:brightness(1.08)}
+.btn:active{transform:translateY(5px);box-shadow:inset 0 0 0 3px #fff,0 0 0 var(--ink);transition-duration:.03s}
+.btn.main{font-size:28px;padding:18px 36px 14px;min-width:210px;background:linear-gradient(var(--red2) 0 14%,var(--red) 14% 82%,var(--red3) 82%)}
+.btn.small{font-size:17px;padding:11px 14px 8px;min-width:0;min-height:42px}
+.btn[disabled]{opacity:.45;pointer-events:none}
+/* 상단바 */
+#topbar{position:fixed;top:0;left:0;right:0;z-index:20;display:flex;align-items:center;gap:6px;pointer-events:none;
+  padding:calc(8px + env(safe-area-inset-top)) 10px 8px calc(104px + env(safe-area-inset-left))}
+.stat{display:flex;align-items:center;gap:6px;height:38px;padding:4px 10px 0;border:3px solid var(--ink);background:var(--navy);box-shadow:inset 0 0 0 2px #fff,0 3px 0 var(--ink);font-size:18px;white-space:nowrap;text-shadow:2px 2px 0 var(--ink)}
+.stat i{font-style:normal;font-size:12px;opacity:.8}
+.spacer{flex:1 1 4px}
+.tog{pointer-events:auto;position:relative;width:38px;height:38px;flex:0 0 38px;cursor:pointer;border:3px solid var(--ink);background:var(--navy);
+  box-shadow:inset 0 0 0 2px #fff,0 3px 0 var(--ink);display:flex;align-items:center;justify-content:center;transition:transform .1s steps(2);font-size:16px;text-shadow:none}
+.tog:active{transform:translateY(3px);box-shadow:inset 0 0 0 2px #fff,0 0 0 var(--ink);transition-duration:.03s}
+.tog svg{width:20px;height:20px;display:block}
+.tog.off{opacity:.6}
+.tog.off::after{content:"";position:absolute;left:22%;right:22%;top:50%;height:3px;margin-top:-1px;background:#fff;transform:rotate(-40deg)}
+body:not(.playing) #topbar .game{display:none}
+#xpbar{position:fixed;left:0;right:0;top:0;height:6px;background:#15131a;z-index:21}
+#xpbar b{display:block;height:100%;width:0;background:var(--gold)}
+body:not(.playing) #xpbar{display:none}
+body.playing #oreumFs{display:none}
+/* 타이틀 */
+#title{position:fixed;inset:0;z-index:15;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;pointer-events:none;padding-bottom:6vh;gap:2.2vh}
+#girls{display:flex;gap:6px;pointer-events:auto;flex-wrap:wrap;justify-content:center;max-width:96vw}
+.girl{width:62px;height:76px;border:3px solid var(--ink);background:var(--navy);box-shadow:inset 0 0 0 2px #fff,0 3px 0 var(--ink);cursor:pointer;position:relative;overflow:hidden}
+.girl canvas{width:100%;height:100%;display:block}
+.girl.on{box-shadow:inset 0 0 0 3px var(--gold),0 3px 0 var(--ink);background:var(--navy2)}
+.girl.lock canvas{filter:brightness(0) opacity(.55)}
+.girl.lock::after{content:"?";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:30px;color:#fff;text-shadow:2px 2px 0 var(--ink)}
+#gname{font-size:20px;text-shadow:2px 2px 0 var(--ink);min-height:24px}
+#title .btns{display:flex;gap:12px;pointer-events:auto}
+#logo{font-family:'NeoDGM','Galmuri',monospace;font-size:clamp(38px,10vw,84px);line-height:1;color:#fff;letter-spacing:2px;text-align:center;
+  text-shadow:4px 4px 0 var(--ink),-4px 0 0 var(--ink),4px 0 0 var(--ink),0 -4px 0 var(--ink),0 4px 0 var(--ink),-4px -4px 0 var(--ink),4px -4px 0 var(--ink),-4px 4px 0 var(--ink),8px 8px 0 var(--red3)}
+#logo span{color:var(--gold)}
+@media (max-height:480px){#title{justify-content:center;padding-bottom:24vh;gap:1.4vh}#logo{font-size:12vh}.btn.main{font-size:6vh;padding:1.4vh 4vh 1vh;min-height:0}.girl{width:11vh;height:13.5vh}}
+/* 창 */
+.sheet{position:fixed;inset:0;z-index:16;display:flex;align-items:center;justify-content:center;padding:calc(56px + env(safe-area-inset-top)) 10px 14px;pointer-events:none;background:rgba(5,8,30,.45)}
+.sheet .box{pointer-events:auto;width:min(560px,100%);max-height:100%;display:flex;flex-direction:column;background:var(--navy);border:3px solid var(--ink);box-shadow:inset 0 0 0 3px #fff,0 6px 0 var(--ink);padding:16px 14px 14px}
+.sheet h2{font-size:24px;font-weight:400;display:flex;align-items:center;gap:10px;margin:0 2px 12px;text-shadow:2px 2px 0 var(--ink)}
+.sheet h2 .spacer{flex:1}
+.sheet .foot{display:flex;justify-content:center;gap:10px;margin-top:12px;flex-wrap:wrap}
+.sheet .big{font-family:'NeoDGM','Galmuri',monospace;font-size:56px;text-align:center;color:var(--gold);text-shadow:3px 3px 0 var(--ink);margin:4px 0 10px}
+.sheet .line{display:flex;justify-content:space-between;font-size:19px;padding:7px 10px 4px;background:var(--navy3);border:3px solid var(--ink);margin-bottom:6px}
+.cards{display:flex;flex-direction:column;gap:8px}
+.card{display:flex;align-items:center;gap:12px;padding:8px 10px;background:var(--navy3);border:3px solid var(--ink);box-shadow:inset 0 0 0 2px #fff;cursor:pointer;transition:transform .1s steps(2)}
+.card:hover{background:var(--navy2)}
+.card:active{transform:translateY(3px)}
+.card canvas{width:56px;height:56px;flex:0 0 56px}
+.card .t{flex:1;min-width:0}
+.card .n{font-size:20px;text-shadow:2px 2px 0 var(--ink)}
+.card .d{font-size:14px;opacity:.85;margin-top:3px}
+.card .lv{font-size:16px;color:var(--gold);text-shadow:2px 2px 0 var(--ink)}
+.card.evo{box-shadow:inset 0 0 0 3px var(--gold)}
+@media (max-height:480px){.sheet{padding-top:calc(46px + env(safe-area-inset-top))}.sheet .box{width:min(860px,100%);padding:10px 12px}.sheet h2{font-size:4.6vh;margin-bottom:6px}.cards{flex-direction:row}.card{flex:1;flex-direction:column;text-align:center;gap:6px}.card canvas{width:10vh;height:10vh;flex-basis:auto}.card .n{font-size:4vh}.card .d{font-size:2.8vh}.sheet .big{font-size:12vh;margin:0 0 4px}.sheet .line{font-size:3.6vh;padding:1vh 2vh .6vh}.btn{min-height:0;font-size:4.4vh;padding:1.3vh 2vh .9vh}.btn.main{font-size:5.4vh;padding:1.3vh 3vh .9vh;min-width:0}}
+/* 폰 패드 */
+#pad{position:fixed;left:calc(14px + env(safe-area-inset-left));bottom:calc(14px + env(safe-area-inset-bottom));width:160px;height:160px;border-radius:50%;background:rgba(0,0,0,.38);border:3px solid rgba(255,255,255,.35);z-index:18;touch-action:none;display:none}
+#knob{position:absolute;left:50%;top:50%;width:64px;height:64px;margin:-32px 0 0 -32px;border-radius:50%;background:rgba(255,255,255,.55);border:3px solid #15131a}
+body.touch.playing #pad{display:block}
+#act{position:fixed;right:calc(16px + env(safe-area-inset-right));bottom:calc(18px + env(safe-area-inset-bottom));width:92px;height:92px;border-radius:50%;z-index:18;touch-action:none;display:none;border:3px solid #15131a;background:radial-gradient(circle at 50% 42%,#ffd27a 0 28%,#e0453a 30% 100%);box-shadow:inset 0 0 0 3px #fff,0 5px 0 #15131a}
+#act:active{transform:translateY(4px);box-shadow:inset 0 0 0 3px #fff,0 1px 0 #15131a}
+body.touch.playing #act{display:block}
+#toast{position:fixed;left:50%;top:18%;transform:translate(-50%,0);z-index:40;font-size:22px;padding:12px 18px 9px;background:var(--navy);border:3px solid var(--ink);box-shadow:inset 0 0 0 3px #fff,0 4px 0 var(--ink);opacity:0;transition:opacity .2s;pointer-events:none;text-shadow:2px 2px 0 var(--ink)}
+#toast.show{opacity:1}
+#hint{position:fixed;right:10px;bottom:calc(10px + env(safe-area-inset-bottom));z-index:13;font-size:13px;opacity:.55;text-shadow:1px 1px 0 var(--ink);pointer-events:none}
+body.touch #hint,body:not(.playing) #hint{display:none}
+</style>
+</head>
+<body>
+<canvas id="cv"></canvas>
+<script src="assets/game-home.js" data-top="6" data-left="6" data-fullscreen="1"></script>
+<div id="xpbar"><b id="xpfill"></b></div>
+<div id="topbar">
+  <div class="stat game"><i>TIME</i><span id="hTime">12:00</span></div>
+  <div class="stat game"><i>LV</i><span id="hLv">1</span></div>
+  <div class="stat game"><i>KILL</i><span id="hKill">0</span></div>
+  <div class="spacer"></div>
+  <div class="tog game" id="tPause" title="PAUSE">&#10074;&#10074;</div>
+  <div class="tog" id="tBgm" title="BGM"><svg viewBox="0 0 24 24"><path d="M9 17.5V5.5l11-2.5v12" fill="none" stroke="#fff" stroke-width="2.6" stroke-linejoin="round"/><ellipse cx="6.3" cy="17.8" rx="3.4" ry="2.7" fill="#fff"/><ellipse cx="17.3" cy="15.3" rx="3.4" ry="2.7" fill="#fff"/></svg></div>
+  <div class="tog" id="tSfx" title="SFX"><svg viewBox="0 0 24 24"><path d="M3 9h4l5-4.5v15L7 15H3z" fill="#fff"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg></div>
+</div>
+
+<div id="title">
+  <div id="girls"></div>
+  <div id="gname"></div>
+  <div class="btns"><button class="btn main" id="bStart" data-l="start">시작</button></div>
+  <div id="logo"><span data-l="t1">요괴</span><em data-l="t2" style="font-style:normal">라이크</em></div>
+</div>
+
+<div class="sheet" id="levelup" hidden>
+  <div class="box">
+    <h2><span data-l="levelup">LEVEL UP</span><span class="spacer"></span><span id="luLv" style="color:var(--gold)"></span></h2>
+    <div class="cards" id="cards"></div>
+  </div>
+</div>
+
+<div class="sheet" id="pause" hidden>
+  <div class="box">
+    <h2><span data-l="pause">PAUSE</span></h2>
+    <div class="foot"><button class="btn small" id="bQuit" data-l="home">처음으로</button><button class="btn main" id="bResume" data-l="resume">계속</button></div>
+  </div>
+</div>
+
+<div class="sheet" id="over" hidden>
+  <div class="box">
+    <div class="big" id="ovTitle">GAME OVER</div>
+    <div class="line"><span data-l="time">TIME</span><b id="ovTime">0:00</b></div>
+    <div class="line"><span data-l="level">LEVEL</span><b id="ovLv">1</b></div>
+    <div class="line"><span data-l="kills">KILL</span><b id="ovKill">0</b></div>
+    <div class="line" id="ovUnlockRow" hidden><span data-l="unlock">NEW</span><b id="ovUnlock"></b></div>
+    <div class="foot"><button class="btn small" id="bHome" data-l="home">처음으로</button><button class="btn main" id="bRetry">RETRY</button></div>
+  </div>
+</div>
+
+<div id="pad"><div id="knob"></div></div>
+<div id="act"></div>
+<div id="hint" data-l="hint">WASD / ←↑↓→ 이동 · SPACE 불꽃 · Esc 일시정지</div>
+<div id="toast"></div>
+
+<script src="js/atlas.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/game.js"></script>
+<script src="/assets/visit.js?v=17" defer></script>
+<script src="/assets/game-events.js?v=2" defer></script>
+</body>
+</html>
