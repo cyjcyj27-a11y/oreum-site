@@ -2,7 +2,7 @@
 (function () {
   'use strict';
   var D = GY_DATA, $ = function (id) { return document.getElementById(id); };
-  var hover = null, last = 0, acc = 0;
+  var hover = null, last = 0, acc = 0, pend = null;
   function ls(k, v) { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } }
   var prog = { max: 1, stars: {} };
   try { var sv = JSON.parse(ls('gyodo.prog') || 'null'); if (sv && sv.max) prog = sv; } catch (e) {}
@@ -88,9 +88,11 @@
     var c = GYD.toCell(e.clientX, e.clientY); if (e.pointerType !== 'touch') hover = c;
     var i = c.y * 20 + c.x, tw = G.towers[i];
     if (c.x < 0 || c.y < 0 || c.x >= 20 || c.y >= 12) return;
-    if (tw) { if (e.pointerType === 'touch') hover = null; G.sel = G.sel === tw ? null : tw; AU.play('click'); refresh(); return; }
+    if (tw) { pend = null; if (e.pointerType === 'touch') hover = null; G.sel = G.sel === tw ? null : tw; AU.play('click'); refresh(); return; }
     if (G.tool) {
-      // 터치도 한 번에 놓는다(10/6 사장님 폰 "교도관이 안놔지는데" — 두 번 눌러 놓기는 설명 없이는 아무도 모름)
+      // 터치는 두 번: 첫 탭은 미리보기(칸·사거리), 같은 칸을 한 번 더 누르면 놓는다. 마우스는 한 번에
+      if (e.pointerType === 'touch' && !(pend && pend.x === c.x && pend.y === c.y && pend.tool === G.tool)) { pend = { x: c.x, y: c.y, tool: G.tool }; hover = c; AU.play('click'); return; }
+      pend = null;
       if (GYL.build(G.tool, c.x, c.y)) { AU.play(G.tool === 'door' ? 'door' : 'build'); G.sel = null; G.fx.push({ k: 'dust', x: c.x + 0.5, y: c.y + 0.7, t: 0, life: 0.35 }); if (e.pointerType === 'touch') hover = null; }
       else AU.play('no');
       refresh(); return;
