@@ -37,6 +37,16 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0b1030;font-family:
 .tog.off{opacity:.6}
 .tog.off::after{content:"";position:absolute;left:22%;right:22%;top:50%;height:3px;margin-top:-1px;background:#fff;transform:rotate(-40deg)}
 body:not(.playing) #topbar .game{display:none}
+/* 폰 세로(폭 560 이하): 상단바를 두 줄로 — 윗줄 오른쪽에 단추 셋, 아랫줄에 TIME·LV·KILL. 한 줄이면 단추가 화면 밖으로 밀린다 */
+@media (max-width:560px){
+  #topbar{flex-wrap:wrap;padding-left:10px}
+  #topbar .tog{order:-2}
+  #topbar #tPause{margin-left:auto}
+  body:not(.playing) #topbar #tBgm{margin-left:auto}
+  #topbar .spacer{order:-1;flex:0 0 100%;height:0}
+  #topbar .stat{margin-top:6px}
+  .sheet{padding-top:calc(104px + env(safe-area-inset-top))}
+}
 #xpbar{position:fixed;left:0;right:0;top:0;height:6px;background:#15131a;z-index:21}
 #xpbar b{display:block;height:100%;width:0;background:var(--gold)}
 body:not(.playing) #xpbar{display:none}
