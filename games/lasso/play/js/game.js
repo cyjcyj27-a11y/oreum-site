@@ -360,15 +360,15 @@
   function steerDir(o, body, ax, az, dt) { o.sgT = (o.sgT || 0) - dt; if (o.sgT > 0 && o.sgYaw !== undefined) return o.sgYaw; o.sgT = 0.25;
     const al = Math.hypot(ax, az) || 1; ax /= al; az /= al; let best = -1e9, by = body.yaw;
     for (let k = 0; k < 16; k++) { const a = k / 16 * PI * 2, sx = Math.sin(a), sz = Math.cos(a), free = freeLen(body.pos.x, body.pos.z, sx, sz, 16.5);
-      const sc = (sx * ax + sz * az) * 2 + free / 16.5 * 5 + Math.cos(wrap(a - body.yaw)) * 0.6; if (sc > best) { best = sc; by = a; } }
+      const sc = (sx * ax + sz * az) * 1.5 + free / 16.5 * 6 + Math.cos(wrap(a - body.yaw)) * 0.6; if (sc > best) { best = sc; by = a; } }   // 10/6: 트인 정도 x5→x6, 반대쪽 x2→x1.5(막다른 모서리로 덜 몰리게)
     o.sgYaw = by; return by; }
   function flee(o, dt, dx, dz, d) {
     o.fleeT += dt; const riding = !!o.horse, fry = o.kind === 'fry';
     let sp = (riding ? o.def.horse : o.speed) * (o.fleeT > 30 ? 0.76 : o.fleeT > 15 ? 0.88 : 1); if (o.boost > 0) { o.boost -= dt; sp *= 1.25; } if (d > 48) sp *= 0.6;
     let ax = dx / d, az = dz / d; if (o.def.zig) { const z = Math.sin(o.t * 2.1) * 0.75; ax += -dz / d * z; az += dx / d * z; }
-    const body = riding ? o.horse : o, esc = stuckCheck(o, body, sp, dt, dx / d, dz / d), want = esc !== null ? esc : steerDir(o, body, ax, az, dt), tr = (riding ? 2.4 : 5) * (esc !== null ? 1.8 : 1) * dt; body.yaw += clamp(wrap(want - body.yaw), -tr, tr);
-    // 말 탄 놈: 벽에 닿으면 벽을 따라 미끄러지는 쪽으로 고개를 튼다(멈춰 박고 있지 않게)
-    if (riding) { const h = o.horse; h.speed += (sp - h.speed) * Math.min(1, dt * 2.5); const hx0 = h.pos.x, hz0 = h.pos.z; h.pos.x += Math.sin(h.yaw) * h.speed * dt; h.pos.z += Math.cos(h.yaw) * h.speed * dt; if (collide(h.pos, 0.85)) { const mx = h.pos.x - hx0, mz = h.pos.z - hz0; if (Math.hypot(mx, mz) > 0.5 * dt) h.yaw += wrap(Math.atan2(mx, mz) - h.yaw) * Math.min(1, dt * 6); h.speed *= Math.pow(0.4, dt); } h.pos.y = heightAt(h.pos.x, h.pos.z); o.vel.set(Math.sin(h.yaw) * h.speed, 0, Math.cos(h.yaw) * h.speed); o.pos.copy(h.pos); o.yaw = h.yaw; }
+    const body = riding ? o.horse : o, esc = stuckCheck(o, body, sp, dt, dx / d, dz / d), want = esc !== null ? esc : steerDir(o, body, ax, az, dt), pinned = riding && o.pinT > 0.3, tr = (riding ? 2.4 : 5) * (esc !== null ? 1.8 : 1) * (pinned ? 2.2 : 1) * dt; body.yaw += clamp(wrap(want - body.yaw), -tr, tr);
+    // 말 탄 놈: 벽에 닿으면 벽을 따라 미끄러지는 쪽으로 고개를 튼다(멈춰 박고 있지 않게) — 단 실제로 나아갈 때만(10/6 사장님 "은행강도가 절벽앞에 갇혀 움직이지 않는다": 모서리에선 두 벽이 번갈아 고개를 틀어 머리가 모서리 한가운데에 고정됐다). 제자리면 미끄러지기를 끄고 위의 조향으로 빨리 돌아선다
+    if (riding) { const h = o.horse; h.speed += (sp - h.speed) * Math.min(1, dt * 2.5); const hx0 = h.pos.x, hz0 = h.pos.z, step = h.speed * dt; h.pos.x += Math.sin(h.yaw) * h.speed * dt; h.pos.z += Math.cos(h.yaw) * h.speed * dt; if (collide(h.pos, 0.85)) { const mx = h.pos.x - hx0, mz = h.pos.z - hz0, mv = Math.hypot(mx, mz); if (mv > step * 0.45) { h.yaw += wrap(Math.atan2(mx, mz) - h.yaw) * Math.min(1, dt * 6); o.pinT = 0; } else o.pinT = (o.pinT || 0) + dt; h.speed *= Math.pow(0.4, dt); } else o.pinT = 0; h.pos.y = heightAt(h.pos.x, h.pos.z); o.vel.set(Math.sin(h.yaw) * h.speed, 0, Math.cos(h.yaw) * h.speed); o.pos.copy(h.pos); o.yaw = h.yaw; }
     else { o.vel.set(Math.sin(o.yaw) * sp, 0, Math.cos(o.yaw) * sp); o.pos.x += o.vel.x * dt; o.pos.z += o.vel.z * dt; collide(o.pos, 0.35); o.pos.y = heightAt(o.pos.x, o.pos.z); o.p.play('run', sp / 5.4 * 1.6); o.dustT -= dt; if (o.dustT <= 0) { o.dustT = 0.22; puff(o.pos.x, o.pos.y + 0.12, o.pos.z, 0, 0.6, 0, 0xe2c096, 0.6, 0.5); } }
     if ((o.def.shoot || o.def.bomb) && H.stun <= 0) { o.shootT -= dt; if (o.shootT <= 0 && d < 32 && d > 5) { o.shootT = (o.def.shoot || o.def.bomb) * (0.8 + Math.random() * 0.5); if (o.def.shoot) shoot(o, heroCenter(_hc)); else bomb(o, heroCenter(_hc)); } }
     if (d > (fry ? 80 : 130)) { o.far += dt; if (o.far > 4) escaped(o); } else o.far = 0;
