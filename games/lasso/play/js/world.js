@@ -48,6 +48,32 @@
   function removeCol(c) { c.dead = true; }
   // 메사처럼 각도마다 반지름이 다른 경계: 각도 a(타원 좌표)에서 경계 배율
   function tabF(c, a) { const N = c.tab.length, u = ((a / (Math.PI * 2)) % 1 + 1) % 1 * N, k = Math.floor(u), t = u - k; return c.tab[k % N] * (1 - t) + c.tab[(k + 1) % N] * t; }
+  // (x,z) 가 들어가 있는 메사 경계(tab) 충돌체를 돌려준다(except 는 빼고, 없으면 null)
+  function inTab(x, z, r, except) {
+    const i0 = Math.floor((x - r) / CELL), i1 = Math.floor((x + r) / CELL), j0 = Math.floor((z - r) / CELL), j1 = Math.floor((z + r) / CELL);
+    for (let i = i0; i <= i1; i++) for (let j = j0; j <= j1; j++) {
+      const a = GRID.get(i * 4096 + j); if (!a) continue;
+      for (let n = 0; n < a.length; n++) { const c = a[n]; if (c === except || c.dead || !c.tab) continue;
+        const dx = x - c.x, dz = z - c.z, an = Math.atan2(dz / c.rz, dx / c.rx), rn = Math.hypot(dx / c.rx, dz / c.rz), R = Math.hypot(Math.cos(an) * c.rx, Math.sin(an) * c.rz) || 1;
+        if (rn < tabF(c, an) + r / R) return c; }
+    }
+    return null;
+  }
+  // 붙은 메사 사이(골짜기 양쪽 메사처럼 경계가 겹치는 곳): 한쪽(c)이 밀어낸 자리가 다른 쪽(c2) 속이면 번갈아 밀리다가 한 프레임에 30m 를 튕겨 절벽 반대편으로 넘어갔다
+  // (10/6 사장님 "은행강도가 도망갈 때 절벽을 뚫고 지나간다"). 그럴 땐 밀어내지 않고, 각 메사 바깥쪽·두 메사를 잇는 선의 직각(골짜기 축)·그 사이 여덟 방향으로 0.2m 씩 더듬어
+  // 어느 메사에도 안 들어간 가장 가까운 자리로 되돌린다(들어온 만큼만, 늘 골짜기 입구 쪽이라 벽 타기가 그쪽으로 돈다). 북쪽부터 돌아가며 찾으면 자리가 들쭉날쭉해 오목한 데서 제자리를 맴돌았다
+  function seekFree(pos, r, c, c2) {
+    const x0 = pos.x, z0 = pos.z, dirs = [], put = (dx, dz) => { const l = Math.hypot(dx, dz) || 1; dirs.push([dx / l, dz / l]); };
+    put(x0 - c.x, z0 - c.z); put(x0 - c2.x, z0 - c2.z); const lx = c2.x - c.x, lz = c2.z - c.z; put(-lz, lx); put(lz, -lx);
+    for (let i = 0; i < 4; i++) { const p = dirs[i], q = dirs[(i + 1) % 4]; put(p[0] + q[0], p[1] + q[1]); }
+    let best = 1e9, bx = 0, bz = 0;
+    // 빈자리는 그 방향으로 2m 더 트여 있어야 한다(골짜기 맨 안쪽의 손바닥만 한 빈틈으로 돌아가면 거기서 영영 못 나온다). 그런 자리가 없으면 트인 조건 없이 가장 가까운 빈자리
+    for (let pass = 0; pass < 2 && best === 1e9; pass++)
+      for (let k = 0; k < dirs.length; k++) { const sx = dirs[k][0], sz = dirs[k][1]; for (let d = 0.2; d <= 8 && d < best; d += 0.2) { const x = x0 + sx * d, z = z0 + sz * d; if (inTab(x, z, r, null)) continue;
+        let ok = true; if (pass === 0) for (let e = 0.4; e <= 2.01; e += 0.4) if (inTab(x + sx * e, z + sz * e, r, null)) { ok = false; break; }
+        if (ok) { best = d; bx = x; bz = z; break; } } }
+    if (best < 1e9) { pos.x = bx; pos.z = bz; return true; } return false;
+  }
   // pos 를 밀어내고 부딪힌 것의 tag 를 돌려준다(없으면 null)
   function collide(pos, r) {
     let hit = null;
@@ -58,7 +84,9 @@
         const c = a[n]; if (c.dead) continue;
         if (c.tab) {   // 울퉁불퉁 경계(메사): 그 각도의 경계 밖으로 밀어낸다
           const dx = pos.x - c.x, dz = pos.z - c.z, a = Math.atan2(dz / c.rz, dx / c.rx), rn = Math.hypot(dx / c.rx, dz / c.rz), ca = Math.cos(a), sa = Math.sin(a), R = Math.hypot(ca * c.rx, sa * c.rz) || 1, fb = tabF(c, a) + r / R;
-          if (rn < fb) { pos.x = c.x + ca * c.rx * fb; pos.z = c.z + sa * c.rz * fb; hit = c.tag || 'rock'; }
+          if (rn < fb) { const nx = c.x + ca * c.rx * fb, nz = c.z + sa * c.rz * fb;
+            const c2 = inTab(nx, nz, r, c); if (!c2 || !seekFree(pos, r, c, c2)) { pos.x = nx; pos.z = nz; }   // 밀어낸 자리가 다른 메사 속이면(붙은 메사 사이) 가장 가까운 빈자리로
+            hit = c.tag || 'rock'; }
         } else if (c.rx !== undefined) {
           const ex = c.rx + r, ez = c.rz + r, ux = (pos.x - c.x) / ex, uz = (pos.z - c.z) / ez, l = ux * ux + uz * uz;
           if (l < 1) { const k = 1 / Math.sqrt(l || 1e-6); pos.x = c.x + ux * k * ex; pos.z = c.z + uz * k * ez; hit = c.tag || 'rock'; hit === 'cactus' && (collide.last = c); }

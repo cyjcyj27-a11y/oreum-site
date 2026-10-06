@@ -98,6 +98,23 @@
     [-190, 40, 20, 20, 40], [230, -40, 17, 17, 46], [-20, 290, 40, 24, 26], [240, 210, 30, 22, 32], [-340, 90, 26, 34, 30], [62, -252, 30, 18, 28], [340, -30, 24, 40, 34], [-320, -140, 28, 24, 40], [-130, 262, 18, 18, 36]];
   // 메사 경계를 한 번 재 두고(buildMesas 도 이것을 쓴다), 메사 끝을 뚫고 지나가던 길(협곡·골짜기 길)을 경계 5m 밖으로 비켜 가게 한다(10/3 메사에 충돌을 제대로 넣으며)
   const MESA_TABS = MESAS.map((m, i) => { const [x, z, rx, rz, h] = m; return mesaBlockTab(x, z, rx, rz, h, i * 1.7 + 0.4, heightAt(x, z) - 2.5); });
+  // 붙은 메사 사이 메우기(10/6 사장님 "은행강도가 도망갈 때 절벽을 뚫고 지나간다"): 골짜기(은신처 gulch) 양쪽 메사 [-120,-328]·[-160,-282] 는 경계가 겹쳐서
+  // 두 비탈이 만나는 데에 말 한 마리 폭(4m)의 막다른 틈이 생겼다. 거기 들어간 말은 양쪽이 번갈아 밀어내다 한 프레임에 30m 를 튕겨 절벽 반대편으로 넘어갔고,
+  // 밀어내기를 고쳐도 틈 맨 안쪽에서 벽 타기가 안쪽으로만 돌아 못 나왔다. 그래서 경계가 서로 3m 안으로 닿는 각도는 상대 메사에서 3m 떨어질 때까지(최대 6m) 경계를 늘려 틈을 메운다
+  (function sealSeams() {
+    const at = (i, a, f) => { const [x, z, rx, rz] = MESAS[i]; return [x + Math.cos(a) * rx * f, z + Math.sin(a) * rz * f]; };
+    const near = (j, px, pz, pad) => { const [x, z, rx, rz] = MESAS[j], t = MESA_TABS[j], N = t.length, dx = px - x, dz = pz - z, a = Math.atan2(dz / rz, dx / rx), rn = Math.hypot(dx / rx, dz / rz);
+      const u = ((a / (PI * 2)) % 1 + 1) % 1 * N, k = Math.floor(u), q = u - k, f = t[k % N] * (1 - q) + t[(k + 1) % N] * q, R = Math.hypot(Math.cos(a) * rx, Math.sin(a) * rz) || 1; return rn < f + pad / R; };
+    let sealed = 0;
+    for (let i = 0; i < MESAS.length; i++) for (let j = 0; j < MESAS.length; j++) { if (i === j) continue;
+      const [xi, zi, rxi, rzi] = MESAS[i], [xj, zj, rxj, rzj] = MESAS[j]; if (Math.abs(xi - xj) > (rxi + rxj) * 1.5 || Math.abs(zi - zj) > (rzi + rzj) * 1.5) continue;
+      const t = MESA_TABS[i], N = t.length; let n = 0;
+      for (let k = 0; k < N; k++) { const a = k / N * PI * 2, R = Math.hypot(Math.cos(a) * rxi, Math.sin(a) * rzi) || 1; let f = t[k], m = 0;
+        while (m < 6) { const [px, pz] = at(i, a, f); if (!near(j, px, pz, 3)) break; f += 0.5 / R; m += 0.5; }
+        if (f !== t[k]) { t[k] = f; n++; } }
+      if (n) sealed++; }
+    WORLD.mesaSeams = sealed;   // 시험용: 메운 메사 수(골짜기 둘이면 2)
+  })();
   (function fixRoads() {
     const push = (p, pad) => MESAS.forEach((m, i) => { const [x, z, rx, rz] = m, tab = MESA_TABS[i], N = tab.length, dx = p.x - x, dz = p.z - z, a = Math.atan2(dz / rz, dx / rx), rn = Math.hypot(dx / rx, dz / rz);
       const u = ((a / (PI * 2)) % 1 + 1) % 1 * N, k = Math.floor(u), t = u - k, f = tab[k % N] * (1 - t) + tab[(k + 1) % N] * t, ca = Math.cos(a), sa = Math.sin(a), fb = f + pad / (Math.hypot(ca * rx, sa * rz) || 1);
@@ -111,7 +128,8 @@
   function buildMesas() {
     const near = [], far = [];
     MESAS.forEach((m, i) => { const [x, z, rx, rz, h] = m; const g = mesaGeo(rx, rz, h, i * 1.7 + 0.4); g.applyMatrix4(M4(x, heightAt(x, z) - 2.5, z)); near.push(g); const tab = MESA_TABS[i], mx = Math.max(...tab); addCol({ x, z, rx, rz, tab, bx: rx * mx, bz: rz * mx, tag: 'mesa' }); });
-    for (let i = 0; i < 26; i++) { const a = i / 26 * PI * 2 + rr(-0.08, 0.08), d = rr(480, 640), rx = rr(40, 95), rz = rr(36, 80), h = rr(34, 80); const g = mesaGeo(rx, rz, h, i * 2.3); g.applyMatrix4(M4(Math.sin(a) * d, -3, Math.cos(a) * d, rr(0, 3))); far.push(g); }
+    // 배경 메사(충돌 없음)는 비탈 끝(1.5배)이 놀이 구역(EDGE) 안으로 안 들어오게 물린다(10/6: 북쪽 것이 반지름 376 부터 들어와 있어 지도 끝을 달리는 현상범이 6.7m 파묻혔다). rr 호출 순서는 그대로
+    for (let i = 0; i < 26; i++) { const a = i / 26 * PI * 2 + rr(-0.08, 0.08), d0 = rr(480, 640), rx = rr(40, 95), rz = rr(36, 80), h = rr(34, 80), d = Math.max(d0, EDGE + 2 + Math.max(rx, rz) * 1.5); const g = mesaGeo(rx, rz, h, i * 2.3); g.applyMatrix4(M4(Math.sin(a) * d, -3, Math.cos(a) * d, rr(0, 3))); far.push(g); }
     const mat = new THREE.MeshStandardMaterial({ vertexColors: true, flatShading: true, roughness: 1, metalness: 0, envMapIntensity: 0.2 });
     [near, far].forEach((l, i) => { const me = new THREE.Mesh(joinGeos(l), mat); me.castShadow = i === 0; me.receiveShadow = true; S.add(me); if (i === 0) WORLD.mesaMesh = me; });
   }
