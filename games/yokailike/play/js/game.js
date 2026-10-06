@@ -48,7 +48,7 @@ const PROPS = ['p_sakura1', 'p_sakura2', 'p_sakura3', 'p_sakura4', 'p_takoyaki_s
 // ---------- 그림 ----------
 const AT = window.YOKAI_ATLAS, atlas = new Image(), bg = new Image();
 let ready = 0; atlas.onload = bg.onload = () => { ready++; if (ready >= 2 && G.phase === 'title') buildTitle(); };
-atlas.src = 'img/atlas.webp'; bg.src = 'img/bg.webp';
+atlas.src = 'img/atlas.webp?v=3'; bg.src = 'img/bg.webp?v=3';
 const BGW = 1376, BGH = 768;
 const cell = n => AT.cells[n];
 const cv = $('#cv'), ctx = cv.getContext('2d');
