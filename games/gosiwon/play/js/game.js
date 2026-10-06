@@ -191,6 +191,9 @@ function inspTick() {
 // ---------- 그리기 준비 ----------
 var cv = $('gl'), renderer, scene, cam, paused = false, wakeT = 1, blend = 0, stPose = null, stQ = new T.Quaternion(), stP = new T.Vector3(), titleT = 0;
 var ptr = GS.ptr = { x: 0, y: 0, down: false, mv: 0 }, locked = false, progExit = false, touchMode = false;
+/* 10/6 폰은 첫 터치 전에도 패드를 보인다. 패드가 숨은 채 첫 엄지가 캔버스에 닿으면 시점 끌기가 되어 시야가 천장으로 치솟고 왼쪽으로 돌았다(미리보기 재현: 60px 에 pitch -0.36 → +0.92) */
+try { if (window.matchMedia && matchMedia('(pointer:coarse)').matches) { touchMode = true; document.body.classList.add('touch'); } } catch (er) {}
+var padStart = null, padHit = null;
 GS.ptrRay = new T.Ray(); var rc = new T.Raycaster();
 function initGL() {
   renderer = new T.WebGLRenderer({ canvas: cv, antialias: true, powerPreference: 'high-performance' });
@@ -420,6 +423,7 @@ window.addEventListener('blur', function () { keys = {}; actHeld = false; ptr.do
 cv.addEventListener('pointerdown', function (e) {
   SND.unlock(); if (paused) return;
   if (e.pointerType === 'touch' && !touchMode) { touchMode = true; document.body.classList.add('touch'); }
+  if (e.pointerType === 'touch' && pad.id == null && padHit && padHit(e)) { padStart(e); return; }   /* 10/6 패드 자리에 닿은 손가락은 시점 끌기가 아니라 패드 */
   if (GS.ev.closeNote()) return;                                         // 펼친 쪽지는 아무 데나 누르면 닫힌다
   if (G.mode === 'study') { ndc(e); tapBook(e.clientX, e.clientY); return; }
   if (G.mode !== 'day' || wakeT < 1) return;
@@ -443,7 +447,7 @@ cv.addEventListener('pointermove', function (e) {
   if (press && e.pointerId === press.id) {
     var dx = e.clientX - press.x, dy = e.clientY - press.y; press.moved += Math.abs(dx) + Math.abs(dy); press.x = e.clientX; press.y = e.clientY;
     if (press.scrub) { ptr.x = GS.clamp(ptr.x + dx * 2 / window.innerWidth, -0.98, 0.98); ptr.y = GS.clamp(ptr.y - dy * 2 / window.innerHeight, -0.98, 0.98); }
-    else { var k = touchMode ? 0.0213 : 0.0034; G.P.yaw -= dx * k; G.P.pitch = GS.clamp(G.P.pitch - dy * k, -1.45, 1.45); }
+    else { var k = touchMode ? 0.03 : 0.0034; G.P.yaw -= dx * k; G.P.pitch = GS.clamp(G.P.pitch - dy * k, -1.45, 1.45); }
   } else if (!press && e.pointerType === 'mouse') ndc(e);
 });
 function ptrUp(e) {
@@ -459,11 +463,20 @@ cv.addEventListener('contextmenu', function (e) { e.preventDefault(); });
 // 폰: 이동 패드(켜짐/꺼짐 방향, 옆걸음), 행동 단추
 (function () {
   var el = $('pad'), kn = $('knob');
-  function set(e) { var r = el.getBoundingClientRect(), R = r.width / 2, x = (e.clientX - r.left - R) / R, y = (e.clientY - r.top - R) / R, d = Math.hypot(x, y); if (d > 1) { x /= d; y /= d; } pad.x = Math.abs(x) > 0.22 ? x : 0; pad.y = Math.abs(y) > 0.22 ? y : 0; kn.style.transform = 'translate(' + x * R * 0.6 + 'px,' + y * R * 0.6 + 'px)'; }
-  el.addEventListener('pointerdown', function (e) { SND.unlock(); touchMode = true; document.body.classList.add('touch'); pad.id = e.pointerId; try { el.setPointerCapture(e.pointerId); } catch (er) {} set(e); e.preventDefault(); });
-  el.addEventListener('pointermove', function (e) { if (e.pointerId === pad.id) set(e); });
+  var tx = null;
+  function tsave(e) { var t = e.touches && e.touches[0]; tx = t && (t.clientX || t.clientY) ? { x: t.clientX, y: t.clientY } : null; }
+  el.addEventListener('touchstart', tsave, { passive: true }); el.addEventListener('touchmove', tsave, { passive: true });
+  el.addEventListener('touchend', function () { tx = null; }, { passive: true });
+  function set(e) {
+    var ex = e.clientX, ey = e.clientY;
+    if (!ex && !ey) { if (tx) { ex = tx.x; ey = tx.y; } else { pad.x = pad.y = 0; kn.style.transform = ''; return; } }   /* 10/6 좌표가 (0,0) 으로 오는 폰: 왼쪽 앞으로 쏠리지 않게 멈춤 */
+    var r = el.getBoundingClientRect(), R = r.width / 2, x = (ex - r.left - R) / R, y = (ey - r.top - R) / R, d = Math.hypot(x, y); if (d > 1) { x /= d; y /= d; } pad.x = Math.abs(x) > 0.22 ? x : 0; pad.y = Math.abs(y) > 0.22 ? y : 0; kn.style.transform = 'translate(' + x * R * 0.6 + 'px,' + y * R * 0.6 + 'px)'; }
+  padStart = function (e) { SND.unlock(); touchMode = true; document.body.classList.add('touch'); pad.id = e.pointerId; try { el.setPointerCapture(e.pointerId); } catch (er) {} set(e); e.preventDefault(); };
+  padHit = function (e) { if (!e.clientX && !e.clientY) return false; var r = el.getBoundingClientRect(); if (!r.width) return false; return e.clientX >= r.left - 24 && e.clientX <= r.right + 24 && e.clientY >= r.top - 24 && e.clientY <= r.bottom + 24; };
+  el.addEventListener('pointerdown', padStart);
+  window.addEventListener('pointermove', function (e) { if (e.pointerId === pad.id) set(e); });
   var end = function (e) { if (e.pointerId === pad.id) { pad.id = null; pad.x = pad.y = 0; kn.style.transform = ''; } };
-  el.addEventListener('pointerup', end); el.addEventListener('pointercancel', end);
+  window.addEventListener('pointerup', end); window.addEventListener('pointercancel', end); window.addEventListener('blur', function () { end({ pointerId: pad.id }); });
   var a = $('act');
   a.addEventListener('pointerdown', function (e) { SND.unlock(); e.preventDefault(); if (!walkMode()) return; if (!useIt(CH.focus(rayAt(0, 0)))) actHeld = true; });
   var ae = function () { actHeld = false; }; a.addEventListener('pointerup', ae); a.addEventListener('pointercancel', ae); a.addEventListener('pointerleave', ae);

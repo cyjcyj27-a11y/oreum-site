@@ -76,7 +76,7 @@ function play(name) {
     case 'perfect': arp([72, 76, 79, 84], 0.07, 'sine', 0.17, 0.32); break;
     case 'up': arp([67, 72, 76, 79], 0.09, 'triangle', 0.22, 0.3); break;
     case 'down': arp([64, 60, 57], 0.14, 'triangle', 0.2, 0.34); break;
-    case 'step': if (!smp('step', 0.35, 0.9 + Math.random() * 0.2)) { noise(0.05, 0.1, 'lowpass', 420, 160); } break;
+    case 'step': if (!smp('step', 0.15, 0.9 + Math.random() * 0.2)) { noise(0.05, 0.1, 'lowpass', 420, 160); } break;
     case 'door': noise(0.1, 0.3, 'lowpass', 500, 150); tone('sine', 110, 70, 0.12, 0.3); break;
     case 'pass': arp([60, 64, 67, 72, 76, 79, 84, 88], 0.11, 'triangle', 0.26, 0.5); arp([48, 55, 60], 0.3, 'sawtooth', 0.06, 0.7); break;
     case 'fail': arp([67, 63, 60, 55, 51], 0.24, 'triangle', 0.22, 0.5); break;
