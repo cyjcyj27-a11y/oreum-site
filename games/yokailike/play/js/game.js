@@ -4,8 +4,8 @@
 const $ = s => document.querySelector(s);
 const LANG = /[?&]lang=en/.test(location.search) ? 'en' : 'ko';
 const DICT = {
-  ko: { start: '시작', levelup: 'LEVEL UP', pause: 'PAUSE', resume: '계속', home: '처음으로', time: 'TIME', level: 'LEVEL', kills: 'KILL', unlock: 'NEW', t1: '요괴', t2: '라이크', dawn: '새벽', over: 'GAME OVER', evo: '진화', max: 'MAX', newW: '새 무기', newP: '새 아이템', locked: '잠김', heal: '회복', hint: 'WASD / ←↑↓→ 이동 · SPACE 불꽃 · Esc 일시정지' },
-  en: { start: 'START', levelup: 'LEVEL UP', pause: 'PAUSE', resume: 'RESUME', home: 'HOME', time: 'TIME', level: 'LEVEL', kills: 'KILL', unlock: 'NEW', t1: 'YOKAI', t2: 'LIKE', dawn: 'DAWN', over: 'GAME OVER', evo: 'EVOLVE', max: 'MAX', newW: 'NEW WEAPON', newP: 'NEW ITEM', locked: 'LOCKED', heal: 'HEAL', hint: 'WASD / Arrows move · SPACE firework · Esc pause' },
+  ko: { start: '시작', levelup: 'LEVEL UP', pause: 'PAUSE', resume: '계속', home: '처음으로', time: 'TIME', level: 'LEVEL', kills: 'KILL', unlock: 'NEW', t1: '요괴', t2: '라이크', dawn: '새벽', over: 'GAME OVER', evo: '진화', max: 'MAX', newW: '새 무기', newP: '새 아이템', locked: '잠김', heal: '회복', shop: '상점', dex: '도감', coin: '코인', close: '닫기', tabE: '요괴', tabW: '무기', tabI: '아이템', tabG: '소녀', unknown: '아직 못 봤습니다', hint: 'WASD / ←↑↓→ 이동 · SPACE 불꽃 · Esc 일시정지' },
+  en: { start: 'START', levelup: 'LEVEL UP', pause: 'PAUSE', resume: 'RESUME', home: 'HOME', time: 'TIME', level: 'LEVEL', kills: 'KILL', unlock: 'NEW', t1: 'YOKAI', t2: 'LIKE', dawn: 'DAWN', over: 'GAME OVER', evo: 'EVOLVE', max: 'MAX', newW: 'NEW WEAPON', newP: 'NEW ITEM', locked: 'LOCKED', heal: 'HEAL', shop: 'SHOP', dex: 'COLLECTION', coin: 'COIN', close: 'CLOSE', tabE: 'YOKAI', tabW: 'WEAPONS', tabI: 'ITEMS', tabG: 'GIRLS', unknown: 'Not seen yet', hint: 'WASD / Arrows move · SPACE firework · Esc pause' },
 };
 const L = k => DICT[LANG][k];
 document.querySelectorAll('[data-l]').forEach(e => { const v = L(e.dataset.l); if (typeof v === 'string') e.textContent = v; });
@@ -58,8 +58,23 @@ addEventListener('resize', resize); resize();
 const TOUCH = 'ontouchstart' in window; if (TOUCH) document.body.classList.add('touch');
 
 // ---------- 저장 ----------
-const SAVE = { unlock: 1, best: {} };
-try { const s = JSON.parse(localStorage.getItem('yokailike.save') || 'null'); if (s) Object.assign(SAVE, s); } catch (e) {}
+const SAVE = { unlock: 1, best: {}, coins: 0, shop: {}, seen: {} };
+try { const s = JSON.parse(localStorage.getItem('yokailike.save') || 'null'); if (s) Object.assign(SAVE, s); if (!SAVE.shop) SAVE.shop = {}; if (!SAVE.seen) SAVE.seen = {}; if (!SAVE.coins) SAVE.coins = 0; } catch (e) {}
+// 상점: 코인으로 사는 영구 강화. 값은 단계마다 1.6배
+const SHOP = [
+  { k: 'atk', ko: '사과사탕 묶음', en: 'Candy Apple Pack', icon: 'i_candyapple', d: ['공격 +6%', 'DAMAGE +6%'], base: 40 },
+  { k: 'hp', ko: '초코바나나 묶음', en: 'Choco Banana Pack', icon: 'i_chocobanana', d: ['최대 체력 +10', 'MAX HP +10'], base: 40 },
+  { k: 'spd', ko: '라무네 묶음', en: 'Ramune Pack', icon: 'i_ramune', d: ['이동 속도 +3%', 'SPEED +3%'], base: 40 },
+  { k: 'mag', ko: '등롱', en: 'Lantern', icon: 'i_lantern', d: ['영혼불 자석 +20', 'SOUL MAGNET +20'], base: 40 },
+  { k: 'gas', ko: '폭죽 상자', en: 'Firework Box', icon: 'i_firework', d: ['폭죽 게이지 +12%', 'FIREWORK GAUGE +12%'], base: 50 },
+  { k: 'xp', ko: '부적 다발', en: 'Ofuda Bundle', icon: 'i_ofuda', d: ['영혼불 경험치 +6%', 'SOUL XP +6%'], base: 50 },
+];
+const SHOP_MAX = 5;
+const shopLv = k => SAVE.shop[k] || 0;
+const shopCost = (it, lv) => Math.round(it.base * Math.pow(1.6, lv));
+const ENAMES = { kasa: ['가라카사', 'Karakasa'], hitotsume: ['외눈 동자', 'One-eyed Boy'], kappa: ['갓파', 'Kappa'], hitodama: ['혼불', 'Soul Flame'], kitsune: ['여우', 'Fox'], noppera: ['놋페라보', 'Noppera-bo'], nekomata: ['네코마타', 'Nekomata'], oni: ['꼬마 오니', 'Little Oni'], tanuki: ['너구리', 'Tanuki'], tengu: ['텐구', 'Tengu'], bigkasa: ['큰 우산', 'Giant Umbrella'] };
+const EDESC = { kasa: ['깡충깡충 뛰는 우산 요괴', 'Hopping umbrella yokai'], hitotsume: ['빠르게 다가오는 외눈 동자', 'Fast one-eyed boy'], kappa: ['잡으면 가끔 타코야키를 떨어뜨림', 'Sometimes drops takoyaki'], hitodama: ['떠다니는 혼불', 'Drifting soul flame'], kitsune: ['단단한 여우', 'A tough fox'], noppera: ['얼굴 없는 유령', 'Faceless ghost'], nekomata: ['빠르고 단단한 고양이 요괴', 'Fast, tough cat yokai'], oni: ['느리지만 아픈 꼬마 오니', 'Slow but hits hard'], tanuki: ['3분·11분 보스, 덩치', '3:00 and 11:00 boss, big'], tengu: ['6분·11분 30초 보스, 돌진', '6:00 and 11:30 boss, charges'], bigkasa: ['9분 보스, 작은 우산을 불러냄', '9:00 boss, summons umbrellas'] };
+function seen(k) { if (!SAVE.seen[k]) { SAVE.seen[k] = 1; save(); } }
 function save() { try { localStorage.setItem('yokailike.save', JSON.stringify(SAVE)); } catch (e) {} }
 
 // ---------- 상태 ----------
@@ -72,7 +87,8 @@ function nearestEnemy(x, y, maxD) { let best = null, bd = (maxD || 1e9) * (maxD 
 // ---------- 주인공·무기 ----------
 function newPlayer(gi) {
   const g = GIRLS[gi];
-  return { gi, g, x: 0, y: 0, hp: 100, maxhp: 100, speed: 165, lv: 1, xp: 0, need: 12, inv: 0, face: 1, moving: 0, walkT: 0, dmgMul: 1, spMul: 1, weapons: [{ k: g.w, lv: 1, cd: 0 }], passives: {}, magnet: 80, hurtT: 0, gas: 40, charge: 0, charging: false, held: false, capT: 0 };
+  seen('w_' + g.w); const hpB = 100 + 10 * shopLv('hp');
+  return { gi, g, x: 0, y: 0, hp: hpB, maxhp: hpB, hpBase: hpB, speed: 165, lv: 1, xp: 0, need: 12, inv: 0, face: 1, moving: 0, walkT: 0, dmgBase: 1 + 0.06 * shopLv('atk'), dmgMul: 1 + 0.06 * shopLv('atk'), spBase: 1 + 0.03 * shopLv('spd'), spMul: 1 + 0.03 * shopLv('spd'), gasMul: 1 + 0.12 * shopLv('gas'), xpMul: 1 + 0.06 * shopLv('xp'), weapons: [{ k: g.w, lv: 1, cd: 0 }], passives: {}, magnet: 80 + 20 * shopLv('mag'), hurtT: 0, gas: 40, charge: 0, charging: false, held: false, capT: 0 };
 }
 function wstat(w) { const d = WEAPONS[w.k]; const evo = w.lv >= 6; const L = Math.min(w.lv, 5) - 1; return { dmg: d.dmg * (1 + 0.25 * L) * (evo ? 2 : 1) * G.P.dmgMul, cd: d.cd * Math.pow(0.92, L) * (evo ? 0.85 : 1), n: (d.n || 1) + Math.floor(L / 2) + (evo ? 1 : 0), r: (d.r || 0) * (1 + 0.1 * L) * (evo ? 1.3 : 1), speed: d.speed || 0, life: d.life || 0, evo, d }; }
 function proj(o) { o.hits = new Map(); o.age = 0; G.B.push(o); return o; }
@@ -100,7 +116,7 @@ function hurtEnemy(e, dmg, fromX, kb, quiet) {
   if (e.hp <= 0 && !e.dead) killEnemy(e);
 }
 function killEnemy(e) {
-  e.dead = true; G.kills++; $('#hKill').textContent = G.kills;
+  e.dead = true; G.kills++; $('#hKill').textContent = G.kills; G.coins += e.boss ? 40 : e.xp; seen('e_' + e.key);
   for (let i = 0; i < (e.boss ? 14 : 1); i++) G.GEM.push({ x: e.x + rnd(-14, 14), y: e.y + rnd(-10, 10), v: e.boss ? Math.ceil(e.xp / 14) : e.xp, t: rnd(0, 6) });
   if (e.def.heal && Math.random() < 0.08) G.GEM.push({ x: e.x, y: e.y, heal: 30, t: 0 });
   G.FX.push({ x: e.x, y: e.y - e.h * 0.4, kind: 'poof', life: 0.35, max: 0.35, r: e.r * 1.6 });
@@ -172,7 +188,7 @@ function updatePlayer(dt) {
   P.inv -= dt; P.hurtT -= dt;
   // 폭죽: 스페이스(폰은 오른쪽 아래 단추)를 누르고 있으면 모으고, 떼면 터진다. 게이지는 저절로 찬다
   if (!P.charging) {
-    P.gas = Math.min(100, P.gas + 9 * dt);
+    P.gas = Math.min(100, P.gas + 9 * P.gasMul * dt);
     if (G.sp && !P.held) { P.held = true; if (P.gas >= 15) { P.charging = true; P.charge = 0; P.capT = 0; } }
   } else {
     P.charge = Math.min(P.gas, P.charge + 70 * dt); const capped = P.charge >= P.gas - 0.01; if (capped) P.capT += dt;
@@ -181,7 +197,7 @@ function updatePlayer(dt) {
   }
   if (!G.sp) P.held = false;
   // 영혼불 줍기
-  for (const g of G.GEM) { g.t += dt; const dx = P.x - g.x, dy = P.y - 20 - g.y, d = Math.hypot(dx, dy); if (d < P.magnet) { const sp = 320 + (P.magnet - d) * 6; g.x += dx / d * sp * dt; g.y += dy / d * sp * dt; } if (d < 22) { g.dead = true; if (g.heal) { P.hp = Math.min(P.maxhp, P.hp + g.heal); toast('+' + g.heal); } else { P.xp += g.v; SND.gem(); } } }
+  for (const g of G.GEM) { g.t += dt; const dx = P.x - g.x, dy = P.y - 20 - g.y, d = Math.hypot(dx, dy); if (d < P.magnet) { const sp = 320 + (P.magnet - d) * 6; g.x += dx / d * sp * dt; g.y += dy / d * sp * dt; } if (d < 22) { g.dead = true; if (g.heal) { P.hp = Math.min(P.maxhp, P.hp + g.heal); toast('+' + g.heal); } else { P.xp += g.v * P.xpMul; SND.gem(); } } }
   G.GEM = G.GEM.filter(g => !g.dead); if (G.GEM.length > 400) G.GEM.splice(0, G.GEM.length - 400);
   if (P.xp >= P.need) { P.xp -= P.need; P.lv++; P.hp = Math.min(P.maxhp, P.hp + 15); P.need = Math.round(10 + P.lv * 7 + P.lv * P.lv * 1.3); $('#hLv').textContent = P.lv; openLevelUp(); }
   $('#xpfill').style.width = Math.min(100, P.xp / P.need * 100) + '%';
@@ -216,9 +232,9 @@ function openLevelUp() {
 function applyCard(c) {
   const P = G.P;
   if (c.kind === 'heal') { P.hp = Math.min(P.maxhp, P.hp + 50); return; }
-  if (c.kind === 'w') { const w = P.weapons.find(x => x.k === c.k); if (w) w.lv = c.lv; else P.weapons.push({ k: c.k, lv: 1, cd: 0 }); return; }
-  P.passives[c.k] = c.lv;
-  if (c.k === 'candyapple') P.dmgMul = 1 + 0.12 * c.lv; if (c.k === 'chocobanana') { P.maxhp = 100 + 25 * c.lv; P.hp = Math.min(P.maxhp, P.hp + 25); } if (c.k === 'ramune') P.spMul = 1 + 0.08 * c.lv;
+  if (c.kind === 'w') { const w = P.weapons.find(x => x.k === c.k); if (w) w.lv = c.lv; else P.weapons.push({ k: c.k, lv: 1, cd: 0 }); seen('w_' + c.k); if (c.evo) seen('w_' + c.k + '_evo'); return; }
+  P.passives[c.k] = c.lv; seen('i_' + c.k);
+  if (c.k === 'candyapple') P.dmgMul = P.dmgBase * (1 + 0.12 * c.lv); if (c.k === 'chocobanana') { P.maxhp = P.hpBase + 25 * c.lv; P.hp = Math.min(P.maxhp, P.hp + 25); } if (c.k === 'ramune') P.spMul = P.spBase * (1 + 0.08 * c.lv);
 }
 function drawIcon(c, icon) { const x = c.getContext('2d'); const cl = cell(icon); if (!cl) return; const sc = Math.min((c.width - 12) / cl[2], (c.height - 12) / cl[3]); const w = cl[2] * sc, h = cl[3] * sc; x.imageSmoothingEnabled = true; x.drawImage(atlas, cl[0], cl[1], cl[2], cl[3], (c.width - w) / 2, (c.height - h) / 2, w, h); }
 // ---------- 그리기 ----------
@@ -322,12 +338,12 @@ function fmt(s) { s = Math.max(0, Math.floor(s)); return Math.floor(s / 60) + ':
 function buildTitle() {
   const box = $('#girls'); box.innerHTML = '';
   GIRLS.forEach((g, i) => { const d = document.createElement('div'); const locked = !(SAVE.unlock & (1 << i)); d.className = 'girl' + (i === G.sel ? ' on' : '') + (locked ? ' lock' : ''); const c = document.createElement('canvas'); c.width = 124; c.height = 152; const cl = cell('p_g' + (i + 1) + '_stand'); const x = c.getContext('2d'); const sc = Math.min(110 / cl[2], 140 / cl[3]); x.drawImage(atlas, cl[0], cl[1], cl[2], cl[3], (124 - cl[2] * sc) / 2, 148 - cl[3] * sc, cl[2] * sc, cl[3] * sc); d.appendChild(c); d.onclick = () => { if (locked) { SND.back(); toast(L('locked')); return; } G.sel = i; SND.blip(); buildTitle(); }; box.appendChild(d); });
-  const g = GIRLS[G.sel]; const w = WEAPONS[g.w]; const best = SAVE.best[G.sel]; $('#gname').textContent = g[LANG] + ' · ' + w[LANG] + (best ? ' · BEST ' + fmt(best) : '');
+  const g = GIRLS[G.sel]; const w = WEAPONS[g.w]; const best = SAVE.best[G.sel]; $('#gname').textContent = g[LANG] + ' · ' + w[LANG] + (best ? ' · BEST ' + fmt(best) : ''); $('#gcoin').textContent = L('coin') + ' ' + SAVE.coins.toLocaleString();
 }
-function toTitle() { G.phase = 'title'; document.body.classList.remove('playing'); show('#title', true); show('#over', false); show('#pause', false); show('#levelup', false); buildTitle(); G.titleT = 0; }
+function toTitle() { G.phase = 'title'; document.body.classList.remove('playing'); show('#title', true); show('#over', false); show('#pause', false); show('#levelup', false); show('#shop', false); show('#dex', false); buildTitle(); G.titleT = 0; }
 function startGame() {
   G.phase = 'play'; document.body.classList.add('playing'); show('#title', false); show('#over', false); show('#pause', false);
-  G.P = newPlayer(G.sel); G.E = []; G.B = []; G.GEM = []; G.FX = []; G.DN = []; G.AURA = []; G.kills = 0; G.time = 0; G.spawnT = 0.6; G.bossI = 0; G.cam = { x: 0, y: 0 }; G.shake = 0; G.flash = 0; G.dawn = 0; G.run++;
+  G.P = newPlayer(G.sel); G.E = []; G.B = []; G.GEM = []; G.FX = []; G.DN = []; G.AURA = []; G.kills = 0; G.coins = 0; G.time = 0; G.spawnT = 0.6; G.bossI = 0; G.cam = { x: 0, y: 0 }; G.shake = 0; G.flash = 0; G.dawn = 0; G.run++;
   $('#hKill').textContent = 0; $('#hLv').textContent = 1; $('#hTime').textContent = fmt(NIGHT); $('#xpfill').style.width = '0%';
   SND.bgm(true);
 }
@@ -338,9 +354,50 @@ function gameOver(cleared) {
   let unlockName = '';
   if (cleared) { const nx = G.sel + 1; if (nx < 8 && !(SAVE.unlock & (1 << nx))) { SAVE.unlock |= (1 << nx); unlockName = GIRLS[nx][LANG]; } SND.bell(); setTimeout(() => SND.cheer(), 400); }
   else SND.fail();
-  save(); $('#ovUnlockRow').hidden = !unlockName; $('#ovUnlock').textContent = unlockName;
+  SAVE.coins += G.coins; $('#ovCoin').textContent = '+' + G.coins; save(); $('#ovUnlockRow').hidden = !unlockName; $('#ovUnlock').textContent = unlockName;
   setTimeout(() => { show('#over', true); }, cleared ? 2200 : 900);
 }
+// ---------- 상점 ----------
+function openShop() {
+  G.phase = 'shop'; show('#shop', true); const box = $('#shopList'); box.innerHTML = ''; $('#shopCoin').textContent = L('coin') + ' ' + SAVE.coins.toLocaleString();
+  for (const it of SHOP) {
+    const lv = shopLv(it.k), max = lv >= SHOP_MAX, cost = max ? 0 : shopCost(it, lv);
+    const el = document.createElement('div'); el.className = 'card shoprow' + (max ? ' max' : (SAVE.coins < cost ? ' poor' : ''));
+    const ic = document.createElement('canvas'); ic.width = ic.height = 112; drawIcon(ic, it.icon); el.appendChild(ic);
+    const t = document.createElement('div'); t.className = 't'; t.innerHTML = '<div class="n">' + it[LANG] + '</div><div class="d">' + it.d[LANG === 'en' ? 1 : 0] + ' × ' + lv + '</div>';
+    const r = document.createElement('div'); r.className = 'lv'; r.innerHTML = (max ? L('max') : cost.toLocaleString()) + '<b>LV ' + lv + '/' + SHOP_MAX + '</b>';
+    el.append(t, r);
+    el.onclick = () => { if (max) { SND.back(); return; } if (SAVE.coins < cost) { SND.back(); toast(L('coin') + ' ' + cost); return; } SAVE.coins -= cost; SAVE.shop[it.k] = lv + 1; save(); SND.levelup(); openShop(); buildTitle(); };
+    box.appendChild(el);
+  }
+}
+// ---------- 도감 ----------
+const DEX_TABS = ['E', 'W', 'I', 'G']; let dexTab = 'E';
+function dexItems(tab) {
+  if (tab === 'E') return Object.keys(ENEMIES).map(k => ({ icon: ENEMIES[k].boss ? 'b_' + k : 'y_' + k + '_a', name: ENAMES[k][LANG === 'en' ? 1 : 0], desc: EDESC[k][LANG === 'en' ? 1 : 0], ok: !!SAVE.seen['e_' + k] }));
+  if (tab === 'W') return Object.keys(WEAPONS).map(k => { const w = WEAPONS[k], evo = !!SAVE.seen['w_' + k + '_evo']; return { icon: w.icon, name: evo ? w.evo[LANG === 'en' ? 1 : 0] : w[LANG], desc: WDESC[w.type][LANG === 'en' ? 1 : 0] + (evo ? '' : ' · ' + L('evo') + ': ' + w.evo[LANG === 'en' ? 1 : 0]), ok: !!SAVE.seen['w_' + k], evo }; });
+  if (tab === 'I') return Object.keys(PASSIVES).map(k => ({ icon: PASSIVES[k].icon, name: PASSIVES[k][LANG], desc: PASSIVES[k].d[LANG === 'en' ? 1 : 0], ok: !!SAVE.seen['i_' + k] }));
+  return GIRLS.map((g, i) => ({ icon: 'p_g' + (i + 1) + '_stand', name: g[LANG], desc: WEAPONS[g.w][LANG] + (SAVE.best[i] ? ' · BEST ' + fmt(SAVE.best[i]) : ''), ok: !!(SAVE.unlock & (1 << i)) }));
+}
+function openDex(tab) {
+  G.phase = 'dex'; show('#dex', true); dexTab = tab || dexTab;
+  const tabs = $('#dexTabs'); tabs.innerHTML = '';
+  for (const t of DEX_TABS) { const b = document.createElement('button'); b.className = 'btn small' + (t === dexTab ? ' on' : ''); b.textContent = L('tab' + t); b.onclick = () => { SND.blip(); openDex(t); }; tabs.appendChild(b); }
+  const items = dexItems(dexTab); const grid = $('#dexGrid'); grid.innerHTML = ''; $('#dxInfo').textContent = '';
+  let all = 0, got = 0; for (const t of DEX_TABS) { const it = dexItems(t); all += it.length; got += it.filter(x => x.ok).length; }
+  $('#dexCount').textContent = got + ' / ' + all;
+  items.forEach(it => {
+    const d = document.createElement('div'); d.className = 'dx' + (it.ok ? '' : ' unk') + (it.evo ? ' evo' : '');
+    const c = document.createElement('canvas'); c.width = c.height = 128; drawIcon(c, it.icon); d.appendChild(c);
+    const i = document.createElement('i'); i.textContent = it.ok ? it.name : '???'; d.appendChild(i);
+    d.onclick = () => { SND.blip(); grid.querySelectorAll('.dx.on').forEach(x => x.classList.remove('on')); d.classList.add('on'); $('#dxInfo').textContent = it.ok ? it.name + ' — ' + it.desc : L('unknown'); };
+    grid.appendChild(d);
+  });
+}
+$('#bShop').onclick = () => { SND.unlock(); SND.blip(); openShop(); };
+$('#bDex').onclick = () => { SND.unlock(); SND.blip(); openDex(); };
+$('#bShopClose').onclick = () => { SND.back(); show('#shop', false); G.phase = 'title'; };
+$('#bDexClose').onclick = () => { SND.back(); show('#dex', false); G.phase = 'title'; };
 $('#bStart').onclick = () => { SND.unlock(); SND.blip(); startGame(); };
 $('#bRetry').onclick = () => { SND.blip(); startGame(); };
 $('#bHome').onclick = () => { SND.back(); SND.bgm(false); toTitle(); };
@@ -354,7 +411,7 @@ $('#tBgm').classList.toggle('off', !SND.bgmOn); $('#tSfx').classList.toggle('off
 addEventListener('keydown', e => {
   G.keys[e.key] = true; if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', ' '].includes(e.key)) e.preventDefault(); if (e.key === ' ' && G.phase === 'play') G.sp = true;
   if (e.key === 'Enter') { if (G.phase === 'title') $('#bStart').click(); else if (G.phase === 'over' && !$('#over').hidden) $('#bRetry').click(); else if (G.phase === 'pause') $('#bResume').click(); }
-  if (e.key === 'Escape' || e.key === 'p' || e.key === 'P') { if (G.phase === 'play') pause(); else if (G.phase === 'pause') $('#bResume').click(); }
+  if (e.key === 'Escape' || e.key === 'p' || e.key === 'P') { if (G.phase === 'play') pause(); else if (G.phase === 'pause') $('#bResume').click(); else if (G.phase === 'shop') $('#bShopClose').click(); else if (G.phase === 'dex') $('#bDexClose').click(); }
   if (G.phase === 'title' && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) { let i = G.sel; for (let k = 0; k < 8; k++) { i = (i + (e.key === 'ArrowRight' ? 1 : 7)) % 8; if (SAVE.unlock & (1 << i)) break; } G.sel = i; buildTitle(); SND.blip(); }
 });
 addEventListener('keyup', e => { G.keys[e.key] = false; if (e.key === ' ') G.sp = false; });
@@ -394,7 +451,7 @@ function tick(now) {
   const dt = Math.max(0, Math.min(0.05, (now - lastT) / 1000 || 0.016)); lastT = now; G.t += dt; G.dtLast = dt;
   if (ready < 2) return;
   ctx.setTransform(DPR, 0, 0, DPR, 0, 0); ctx.imageSmoothingEnabled = true;
-  if (G.phase === 'title') { drawTitle(dt); return; }
+  if (G.phase === 'title' || G.phase === 'shop' || G.phase === 'dex') { drawTitle(dt); return; }
   if (G.phase === 'play') {
     G.time += dt; $('#hTime').textContent = fmt(NIGHT - G.time);
     updatePlayer(dt); if (G.phase !== 'play') { /* 레벨업 창 */ }
@@ -418,7 +475,7 @@ toTitle();
 const LOCAL = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol === 'file:';
 const qa = new URLSearchParams(location.search);
 window.__yk.tick = (n, ms) => { for (let i = 0; i < (n || 1); i++) tick((lastT || performance.now()) + (ms || 16)); };
-window.__yk.start = i => { if (i != null) G.sel = i; startGame(); }; window.__yk.lu = openLevelUp; window.__yk.spawn = spawnEnemy; window.__yk.over = gameOver;
+window.__yk.start = i => { if (i != null) G.sel = i; startGame(); }; window.__yk.lu = openLevelUp; window.__yk.shop = openShop; window.__yk.dex = openDex; window.__yk.spawn = spawnEnemy; window.__yk.over = gameOver;
 if (LOCAL && qa.get('dbg')) window.onerror = (m, src, l, c) => { document.title = 'ERR ' + m + ' @' + l + ':' + c; };
 if (LOCAL && qa.get('auto')) { const w = () => { if (ready < 2) return setTimeout(w, 60); SAVE.unlock = 255; G.sel = +(qa.get('girl') || 0); startGame(); if (qa.get('t')) G.time = +qa.get('t'); const fr = +qa.get('frames') || 0; if (qa.get('key')) G.keys[qa.get('key')] = true; for (let i = 0; i < fr; i++) { if (qa.get('sp')) { if (i === 200) G.sp = true; if (i === 262) G.sp = false; } tick((lastT || performance.now()) + 16); } if (qa.get('dbg')) document.title = JSON.stringify({ kills: G.kills, lv: G.P.lv, xp: G.P.xp, need: G.P.need, gems: G.GEM.length, E: G.E.length, B: G.B.length, hp: Math.round(G.P.hp), phase: G.phase, w: G.P.weapons.map(w => w.k + w.lv), x: Math.round(G.P.x) }); }; w(); }
 })();

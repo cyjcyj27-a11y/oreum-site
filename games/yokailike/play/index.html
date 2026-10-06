@@ -61,6 +61,8 @@ body.playing #oreumFs{display:none}
 .girl.lock::after{content:"?";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:30px;color:#fff;text-shadow:2px 2px 0 var(--ink)}
 #gname{font-size:20px;text-shadow:2px 2px 0 var(--ink);min-height:24px}
 #title .btns{display:flex;gap:12px;pointer-events:auto}
+/* 폰 세로: 시작 한 줄, 그 아래 상점·도감 */
+@media (max-width:560px){#title .btns{flex-wrap:wrap;justify-content:center;width:min(92vw,340px);gap:10px}#title #bStart{order:-1;flex:1 0 100%}#title .btn.small{flex:1 1 0;min-width:0}}
 #logo{font-family:'NeoDGM','Galmuri',monospace;font-size:clamp(38px,10vw,84px);line-height:1;color:#fff;letter-spacing:2px;text-align:center;
   text-shadow:4px 4px 0 var(--ink),-4px 0 0 var(--ink),4px 0 0 var(--ink),0 -4px 0 var(--ink),0 4px 0 var(--ink),-4px -4px 0 var(--ink),4px -4px 0 var(--ink),-4px 4px 0 var(--ink),8px 8px 0 var(--red3)}
 #logo span{color:var(--gold)}
@@ -83,6 +85,27 @@ body.playing #oreumFs{display:none}
 .card .d{font-size:14px;opacity:.85;margin-top:3px}
 .card .lv{font-size:16px;color:var(--gold);text-shadow:2px 2px 0 var(--ink)}
 .card.evo{box-shadow:inset 0 0 0 3px var(--gold)}
+/* 상점·도감 창 */
+.sheet .box.wide{width:min(620px,100%)}
+.sheet .scroll{overflow-y:auto;min-height:0;flex:1 1 auto;-webkit-overflow-scrolling:touch}
+#gcoin{font-size:16px;color:var(--gold);text-shadow:2px 2px 0 var(--ink);min-height:20px}
+.shoprow .d{color:#dfe6ff}
+.shoprow .lv{min-width:64px;text-align:right}
+.shoprow .lv b{display:block;font-size:14px;color:#fff;opacity:.85;font-weight:400}
+.shoprow.max .lv{color:#9fb8ff}
+.shoprow.poor{opacity:.55}
+.tabs{display:flex;gap:6px;margin:0 0 10px;flex-wrap:wrap}
+.tabs .btn.small.on{background:linear-gradient(var(--red2) 0 14%,var(--red) 14% 82%,var(--red3) 82%)}
+.dxgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:8px}
+.dx{background:var(--navy3);border:3px solid var(--ink);box-shadow:inset 0 0 0 2px #fff;padding:6px 4px 4px;text-align:center;cursor:pointer;position:relative}
+.dx canvas{width:64px;height:64px;display:block;margin:0 auto}
+.dx i{display:block;font-style:normal;font-size:13px;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:1px 1px 0 var(--ink)}
+.dx.unk canvas{filter:brightness(0) opacity(.6)}
+.dx.unk::after{content:"?";position:absolute;left:0;right:0;top:14px;font-size:34px;color:#fff;text-shadow:2px 2px 0 var(--ink)}
+.dx.evo{box-shadow:inset 0 0 0 3px var(--gold)}
+.dx.on{background:var(--navy2)}
+#dxInfo{font-size:16px;min-height:44px;margin-top:10px;padding:8px 10px 6px;background:var(--navy3);border:3px solid var(--ink);line-height:1.35}
+@media (max-height:480px){.dxgrid{grid-template-columns:repeat(auto-fill,minmax(72px,1fr))}.dx canvas{width:52px;height:52px}.dx i{font-size:12px}#shopList{flex-direction:column}.shoprow{flex-direction:row!important;text-align:left!important;gap:10px}.shoprow .n{font-size:3.4vh!important}.shoprow .d{font-size:2.6vh!important}.shoprow canvas{width:7vh!important;height:7vh!important}#dxInfo{font-size:2.8vh;min-height:0}}
 @media (max-height:480px){.sheet{padding-top:calc(46px + env(safe-area-inset-top))}.sheet .box{width:min(860px,100%);padding:10px 12px}.sheet h2{font-size:4.6vh;margin-bottom:6px}.cards{flex-direction:row}.card{flex:1;flex-direction:column;text-align:center;gap:6px}.card canvas{width:10vh;height:10vh;flex-basis:auto}.card .n{font-size:4vh}.card .d{font-size:2.8vh}.sheet .big{font-size:12vh;margin:0 0 4px}.sheet .line{font-size:3.6vh;padding:1vh 2vh .6vh}.btn{min-height:0;font-size:4.4vh;padding:1.3vh 2vh .9vh}.btn.main{font-size:5.4vh;padding:1.3vh 3vh .9vh;min-width:0}}
 /* 폰 패드 */
 #pad{position:fixed;left:calc(14px + env(safe-area-inset-left));bottom:calc(14px + env(safe-area-inset-bottom));width:160px;height:160px;border-radius:50%;background:rgba(0,0,0,.38);border:3px solid rgba(255,255,255,.35);z-index:18;touch-action:none;display:none}
@@ -114,7 +137,8 @@ body.touch #hint,body:not(.playing) #hint{display:none}
 <div id="title">
   <div id="girls"></div>
   <div id="gname"></div>
-  <div class="btns"><button class="btn main" id="bStart" data-l="start">시작</button></div>
+  <div id="gcoin"></div>
+  <div class="btns"><button class="btn small" id="bShop" data-l="shop">상점</button><button class="btn main" id="bStart" data-l="start">시작</button><button class="btn small" id="bDex" data-l="dex">도감</button></div>
   <div id="logo"><span data-l="t1">요괴</span><em data-l="t2" style="font-style:normal">라이크</em></div>
 </div>
 
@@ -138,11 +162,28 @@ body.touch #hint,body:not(.playing) #hint{display:none}
     <div class="line"><span data-l="time">TIME</span><b id="ovTime">0:00</b></div>
     <div class="line"><span data-l="level">LEVEL</span><b id="ovLv">1</b></div>
     <div class="line"><span data-l="kills">KILL</span><b id="ovKill">0</b></div>
+    <div class="line"><span data-l="coin">코인</span><b id="ovCoin">+0</b></div>
     <div class="line" id="ovUnlockRow" hidden><span data-l="unlock">NEW</span><b id="ovUnlock"></b></div>
     <div class="foot"><button class="btn small" id="bHome" data-l="home">처음으로</button><button class="btn main" id="bRetry">RETRY</button></div>
   </div>
 </div>
 
+<div class="sheet" id="shop" hidden>
+  <div class="box wide">
+    <h2><span data-l="shop">상점</span><span class="spacer"></span><span id="shopCoin" style="color:var(--gold)"></span></h2>
+    <div class="scroll"><div class="cards" id="shopList"></div></div>
+    <div class="foot"><button class="btn small" id="bShopClose" data-l="close">닫기</button></div>
+  </div>
+</div>
+<div class="sheet" id="dex" hidden>
+  <div class="box wide">
+    <h2><span data-l="dex">도감</span><span class="spacer"></span><span id="dexCount" style="color:var(--gold)"></span></h2>
+    <div class="tabs" id="dexTabs"></div>
+    <div class="scroll"><div class="dxgrid" id="dexGrid"></div></div>
+    <div id="dxInfo"></div>
+    <div class="foot"><button class="btn small" id="bDexClose" data-l="close">닫기</button></div>
+  </div>
+</div>
 <div id="pad"><div id="knob"></div></div>
 <div id="act"></div>
 <div id="hint" data-l="hint">WASD / ←↑↓→ 이동 · SPACE 불꽃 · Esc 일시정지</div>
