@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>교도관24시</title>
+<style>
+@font-face{font-family:Mulmaru;src:url(fonts/mulmaru-sub.woff2) format('woff2');font-display:swap}
+@font-face{font-family:DungGeunMo;src:url(fonts/dgm.woff2) format('woff2');font-display:swap}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
+html,body{margin:0;height:100%;background:#16181c;color:#eef0f2;font-family:DungGeunMo,monospace;overflow:hidden;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+#app{position:fixed;inset:0}
+#stage{position:absolute;left:0;top:46px;right:var(--pw);bottom:0}
+#cv{display:block;image-rendering:pixelated;image-rendering:crisp-edges;touch-action:none}
+:root{--pw:188px}
+/* 상단바: 무전기 액정 알약 */
+#topbar{position:absolute;left:0;right:0;top:0;height:46px;display:flex;align-items:center;gap:6px;padding:0 8px 0 calc(104px + env(safe-area-inset-left));background:#2a2e34;border-bottom:3px solid #121417;box-shadow:0 2px 0 #454b53 inset;z-index:5}
+.stat{display:flex;align-items:center;gap:6px;height:32px;padding:0 10px;background:#18241a;color:#a8f06a;border:3px solid #0b0d0f;box-shadow:inset 0 0 0 2px #3c4a3a,0 3px 0 #0b0d0f;font-size:17px;white-space:nowrap;text-shadow:0 0 6px rgba(168,240,106,.45)}
+.stat .k{color:#6f9e52;font-size:13px}
+.stat.warn .lamp{width:12px;height:12px;background:#3a1714;border:2px solid #0b0d0f}
+.stat.warn .lamp.on{background:#ff3b30;box-shadow:0 0 8px #ff3b30}
+.coinI{width:14px;height:14px;background:#ffd84a;border:2px solid #7a5a10;box-shadow:inset -2px -2px 0 #d9a520}
+.spacer{flex:1}
+/* 둥근 단추 대신 빨간 비상벨(네모 도트) */
+.tog{position:relative;width:38px;height:38px;border:3px solid #0b0d0f;background:#c9302a;box-shadow:inset 0 3px 0 #ff6a5c,inset 0 -4px 0 #8a1c18,0 3px 0 #0b0d0f;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;color:#fff;font-family:Mulmaru,monospace;font-size:15px}
+.tog svg{width:20px;height:20px}
+.tog:active{transform:translateY(3px);box-shadow:inset 0 3px 0 #ff6a5c,inset 0 -4px 0 #8a1c18,0 0 0 #0b0d0f}
+.tog.off{opacity:.6}
+.tog.off::after{content:'';position:absolute;left:24%;right:24%;top:50%;height:3px;margin-top:-1px;background:#fff;transform:rotate(-40deg)}
+.tog.on2{background:#e0a020;box-shadow:inset 0 3px 0 #ffd060,inset 0 -4px 0 #8a5c10,0 3px 0 #0b0d0f}
+/* 오른쪽 장비 칸: 사물함 철판 */
+#panel{position:absolute;right:0;top:46px;bottom:0;width:var(--pw);padding:8px 8px calc(8px + env(safe-area-inset-bottom)) 8px;background:#30353c;border-left:3px solid #121417;display:flex;flex-direction:column;gap:8px;z-index:4;padding-right:calc(8px + env(safe-area-inset-right))}
+#slots{display:grid;grid-template-columns:1fr 1fr;gap:6px;flex:1;min-height:0;align-content:start}
+.slot{min-width:0;position:relative;background:#4a5560;border:3px solid #0b0d0f;box-shadow:inset 0 3px 0 #6c7a87,inset 0 -3px 0 #343c45,0 3px 0 #0b0d0f;display:flex;flex-direction:column;align-items:center;padding:3px 2px 3px;cursor:pointer;min-height:0}
+.slot canvas{width:44px;height:44px;image-rendering:pixelated}
+.slot .nm,.slot .cs{flex-shrink:0}
+.slot canvas{flex-shrink:1;min-height:0;object-fit:contain}
+.slot .nm{max-width:100%;overflow:hidden;background:#eceae2;color:#1b1d21;font-size:12px;padding:1px 4px;margin-top:1px;border:1px solid #0b0d0f;white-space:nowrap}
+.slot .cs{display:flex;align-items:center;gap:3px;font-family:Mulmaru,monospace;color:#ffd84a;font-size:14px;margin-top:2px}
+.slot .cs i{width:9px;height:9px;background:#ffd84a;border:1px solid #7a5a10}
+.slot.sel{background:#d9a520;box-shadow:inset 0 3px 0 #ffd060,inset 0 -3px 0 #8a5c10,0 3px 0 #0b0d0f}
+.slot.poor .cs{color:#ff5a4a}
+.slot.lock{background:#2b3036;box-shadow:inset 0 3px 0 #3a4148,0 3px 0 #0b0d0f;cursor:default}
+.slot.lock canvas{opacity:.15}
+.slot.lock .nm{visibility:hidden}
+.slot .lk{position:absolute;left:0;right:0;top:12px;text-align:center;font-family:Mulmaru,monospace;font-size:13px;color:#9aa3ad}
+.slot .lk b{display:block;width:16px;height:13px;margin:0 auto 3px;background:#9aa3ad;border:2px solid #0b0d0f;position:relative}
+.slot .lk b::before{content:'';position:absolute;left:2px;top:-10px;width:8px;height:9px;border:2px solid #9aa3ad;border-bottom:0}
+.slot:active:not(.lock){transform:translateY(2px)}
+/* 주 단추: 노란 철판 + 경고 사선 테 */
+.btn{font-family:Mulmaru,monospace;font-size:20px;color:#fff;cursor:pointer;border:3px solid #0b0d0f;padding:9px 16px;background:#5d6874;box-shadow:inset 0 3px 0 #8794a1,inset 0 -4px 0 #3e4750,0 4px 0 #0b0d0f;position:relative;text-shadow:2px 2px 0 #0b0d0f;transition:transform .18s cubic-bezier(.34,1.56,.64,1)}
+.btn::before,.btn::after{content:'';position:absolute;width:4px;height:4px;background:#2c3238;box-shadow:inset 1px 1px 0 #a9b4bf}
+.btn::before{left:4px;top:4px}.btn::after{right:4px;top:4px}
+.btn:hover{filter:brightness(1.08)}
+.btn:active{transform:translateY(4px);box-shadow:inset 0 3px 0 #8794a1,inset 0 -4px 0 #3e4750,0 0 0 #0b0d0f;transition-duration:.04s}
+.btn.main{color:#1b1d21;text-shadow:none;background:#f2c230;padding:12px 20px;border:none;box-shadow:0 0 0 3px #0b0d0f,0 5px 0 3px #0b0d0f;
+  background-image:linear-gradient(#f2c230,#f2c230),repeating-linear-gradient(45deg,#1b1d21 0 7px,#f2c230 7px 14px);background-origin:padding-box,border-box;background-clip:padding-box,border-box;border:6px solid transparent}
+.btn.main::before,.btn.main::after{display:none}
+.btn.main:active{box-shadow:0 0 0 3px #0b0d0f,0 1px 0 3px #0b0d0f}
+.btn.main[disabled]{filter:grayscale(1) brightness(.7);cursor:default}
+#next{width:100%;font-size:19px;display:flex;align-items:center;justify-content:center;gap:8px;padding:8px 6px}
+#next .tri{width:0;height:0;border-left:11px solid #1b1d21;border-top:8px solid transparent;border-bottom:8px solid transparent}
+/* 장비 고른 뒤 뜨는 작은 판 */
+#tinfo{position:absolute;z-index:6;display:none;background:#eceae2;color:#1b1d21;border:3px solid #0b0d0f;box-shadow:0 4px 0 #0b0d0f;padding:6px;gap:6px;flex-direction:column;align-items:stretch;min-width:132px}
+#tinfo .tt{font-family:Mulmaru,monospace;font-size:16px;text-align:center}
+#tinfo .row{display:flex;gap:6px}
+#tinfo .btn{font-size:14px;padding:6px 8px;flex:1;display:flex;align-items:center;justify-content:center;gap:4px}
+#tinfo .btn i{width:9px;height:9px;background:#ffd84a;border:1px solid #7a5a10;display:inline-block}
+#tinfo .btn.sell{background:#9b3a2e;box-shadow:inset 0 3px 0 #c95a4a,inset 0 -4px 0 #6a2219,0 4px 0 #0b0d0f}
+/* 창: 클립보드 근무일지 */
+.ov{position:absolute;inset:0;z-index:20;display:none;align-items:center;justify-content:center;flex-direction:column}
+.ov.show{display:flex}
+.clip{position:relative;background:#8a5a32;border:3px solid #0b0d0f;box-shadow:0 6px 0 #0b0d0f,inset 0 3px 0 #a87448,inset 0 -4px 0 #5e3c20;padding:26px 14px 14px;min-width:300px;max-width:calc(92 * var(--vw,1vw))}
+.clip::before{content:'';position:absolute;left:50%;top:-14px;width:90px;height:26px;margin-left:-45px;background:#b9c0c8;border:3px solid #0b0d0f;box-shadow:inset 0 3px 0 #e2e6ea,inset 0 -4px 0 #7d858e}
+.paper{background:#f4f1e6;color:#1b1d21;border:2px solid #0b0d0f;padding:14px 16px;background-image:repeating-linear-gradient(#f4f1e6 0 23px,#c9d6e3 23px 24px);text-align:center}
+.paper h2{font-family:Mulmaru,monospace;font-weight:normal;font-size:30px;margin:0 0 8px;color:#1b1d21}
+.paper .big{font-family:Mulmaru,monospace;font-size:22px;margin:6px 0}
+.paper .stars{font-family:Mulmaru,monospace;font-size:34px;color:#c9302a;letter-spacing:6px;margin:4px 0}
+.paper .stars .off{color:#b9b4a6}
+.btns{display:flex;gap:10px;justify-content:center;margin-top:12px}
+#title{background:rgba(10,12,16,.18);justify-content:flex-end;padding-bottom:calc(5 * var(--vh,1vh))}
+#title .logo{font-family:Mulmaru,monospace;font-size:clamp(48px,calc(11 * var(--vw,1vw)),120px);color:#f2c230;text-shadow:5px 5px 0 #0b0d0f,-3px -3px 0 #0b0d0f,3px -3px 0 #0b0d0f,-3px 3px 0 #0b0d0f;letter-spacing:2px;line-height:1;order:2}
+#title .btns{order:1;margin:0 0 calc(3 * var(--vh,1vh))}
+#title .btn{min-width:150px}
+#daygrid{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-top:6px}
+#daygrid button{font-family:Mulmaru,monospace;font-size:15px;padding:6px 0 4px;border:2px solid #0b0d0f;background:#dfe6ec;color:#1b1d21;cursor:pointer}
+#daygrid button small{display:block;font-size:10px;color:#c9302a;letter-spacing:1px;min-height:11px}
+#daygrid button[disabled]{background:#b9b4a6;color:#8a857a;cursor:default}
+#intro .who{display:flex;gap:14px;justify-content:center;margin-top:8px;flex-wrap:wrap}
+#intro .who div{display:flex;flex-direction:column;align-items:center;font-size:14px}
+#intro .who canvas{width:56px;height:56px;image-rendering:pixelated;background:#e6e2d4;border:2px solid #0b0d0f}
+#intro .tag{display:inline-block;background:#c9302a;color:#fff;font-size:12px;padding:1px 6px;margin-bottom:6px}
+#rotate{position:fixed;inset:0;z-index:50;background:#16181c;display:none;align-items:center;justify-content:center;flex-direction:column;gap:16px;pointer-events:auto}
+@media (orientation:portrait) and (max-width:700px){#rotate{display:flex}}
+html.ol-land #rotate{display:none!important}
+body.ttl #topbar,body.ttl #panel{display:none}
+html body.ttl #stage{top:0;right:0}
+body:not(.ttl) #oreumFs{display:none!important}
+html.h480{--pw:150px}
+html.h480 #topbar{height:40px}
+html.h480 #stage,html.h480 #panel{top:40px}
+html.h480 .stat{height:28px;font-size:15px;padding:0 7px}
+html.h480 .tog{width:32px;height:32px}
+html.h480 .slot canvas{width:34px;height:34px}
+html.h480 .slot .nm{font-size:11px}
+html.h480 #next{font-size:16px;padding:6px 4px}
+html.h480 .paper h2{font-size:24px}
+html.h480 .clip{padding:20px 10px 10px}
+html.h480 .paper{padding:8px 12px}
+html.h480 #title{padding-bottom:calc(3 * var(--vh,1vh))}
+html.h480 .ov .clip{transform-origin:center top}
+html.h480 #intro,html.h480 #result,html.h480 #pause,html.h480 #days{justify-content:flex-start;padding-top:44px}
+html.h480 #intro .paper h2,html.h480 #result .paper h2{font-size:20px;margin-bottom:2px}
+html.h480 .paper .big{font-size:16px;margin:2px 0}
+html.h480 .paper .stars{font-size:26px;margin:0}
+html.h480 #intro .who canvas{width:40px;height:40px}
+html.h480 #intro .who div{font-size:12px}
+html.h480 #intro .tag{margin-bottom:2px}
+html.h480 .btns{margin-top:6px}
+html.h480 .paper .btn{font-size:16px;padding:7px 14px}
+html.h480 .paper .btn.main{padding:8px 16px}
+html.h480 #daygrid{grid-template-columns:repeat(10,1fr);gap:4px}
+html.h480 #daygrid button{padding:3px 0 2px;font-size:13px;min-width:34px}
+html.h480 #title .logo{font-size:calc(14 * var(--vh,1vh))}
+html.h480 #title .btns{margin-bottom:calc(12 * var(--vh,1vh))}
+html.h480 #title .btn{font-size:calc(5.4 * var(--vh,1vh));padding:calc(1.6 * var(--vh,1vh)) calc(3 * var(--vh,1vh));min-width:0}
+
+.endcv{width:240px;height:156px;image-rendering:pixelated;border:2px solid #0b0d0f;display:block;margin:4px auto 6px}
+html.h480 .endcv{width:170px;height:110px;margin:2px auto 4px}
+
+html.h360 #intro,html.h360 #result,html.h360 #pause,html.h360 #days{padding-top:40px}
+html.h360 .slot canvas{width:28px;height:28px}
+html.h360 .slot{padding:2px 2px 2px}
+html.h360 #slots{gap:4px}
+html.h360 .clip{padding:16px 10px 8px}
+html.h360 .clip::before{top:-11px;height:20px}
+html.h360 #intro .paper h2,html.h360 #result .paper h2{font-size:18px}
+html.h360 .paper{padding:6px 12px}
+html.h360 #intro .who{gap:10px;margin-top:4px}
+html.h360 #intro .who canvas{width:34px;height:34px}
+html.h360 #intro .tag{font-size:10px;padding:0 4px}
+html.h360 .btns{margin-top:4px}
+html.h360 .endcv{width:140px;height:91px}
+
+html.w760 .stat.rk{display:none}
+html.w620 .stat .k{display:none}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="topbar">
+    <div class="stat"><span class="k">DAY</span><b id="sDay">1</b></div>
+    <div class="stat"><b id="sClock">06:00</b></div>
+    <div class="stat"><span class="coinI"></span><b id="sCoin">0</b></div>
+    <div class="stat warn"><span class="lamp" id="l0"></span><span class="lamp" id="l1"></span><span class="lamp" id="l2"></span><span class="lamp" id="l3"></span><span class="lamp" id="l4"></span></div>
+    <div class="stat rk"><b id="sRank">교도</b></div>
+    <div class="spacer"></div>
+    <button class="tog" id="bPause" aria-label="일시정지">&#10074;&#10074;</button>
+    <button class="tog" id="bSpd" aria-label="배속">x2</button>
+    <button class="tog" id="bBgm" aria-label="음악"><svg viewBox="0 0 24 24"><path d="M9 17.5V5.5l11-2.5v12" fill="none" stroke="#fff" stroke-width="2.6" stroke-linejoin="round"/><ellipse cx="6.3" cy="17.8" rx="3.4" ry="2.7" fill="#fff"/><ellipse cx="17.3" cy="15.3" rx="3.4" ry="2.7" fill="#fff"/></svg></button>
+    <button class="tog" id="bSnd" aria-label="효과음"><svg viewBox="0 0 24 24"><path d="M3 9h4l5-4.5v15L7 15H3z" fill="#fff"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg></button>
+  </div>
+  <div id="stage"><canvas id="cv"></canvas></div>
+  <div id="panel">
+    <div id="slots"></div>
+    <button class="btn main" id="next"><span class="tri"></span><span id="nextT">06:00</span></button>
+  </div>
+  <div id="tinfo"><div class="tt" id="tiName"></div><div class="row"><button class="btn" id="tiUp"></button><button class="btn sell" id="tiSell"></button></div></div>
+
+  <div class="ov show" id="title">
+    <div class="btns" id="tBtns"></div>
+    <div class="logo">교도관24시</div>
+  </div>
+  <div class="ov" id="days"><div class="clip"><div class="paper"><h2>근무표</h2><div id="daygrid"></div><div class="btns"><button class="btn" id="dBack">&#10005;</button></div></div></div></div>
+  <div class="ov" id="intro"><div class="clip"><div class="paper"><h2 id="iDay">DAY 1</h2><div class="big" id="iZone"></div><div id="iNew"></div><div class="btns"><button class="btn main" id="iGo">START</button></div></div></div></div>
+  <div class="ov" id="result"><div class="clip"><div class="paper"><h2 id="rTitle">DAY CLEAR</h2><div class="stars" id="rStars"></div><div class="big" id="rInfo"></div><div class="btns" id="rBtns"></div></div></div></div>
+  <div class="ov" id="pause"><div class="clip"><div class="paper"><h2>PAUSE</h2><div class="btns"><button class="btn main" id="pGo">&#9654;</button><button class="btn" id="pRetry">RETRY</button><button class="btn" id="pHome">HOME</button></div></div></div></div>
+  <div id="rotate"><div style="font-family:Mulmaru,monospace;font-size:28px;color:#f2c230">교도관24시</div><button class="btn main" id="rotBtn">가로로 보기</button></div>
+</div>
+<script>/* 화면 크기 클래스·단위: 진짜 가로와 OL 억지 가로(innerWidth/Height 를 돌려 줌) 모두 같은 규칙으로 */
+(function(){function f(){var h=innerHeight,w=innerWidth,d=document.documentElement;d.classList.toggle('h480',h<=480);d.classList.toggle('h360',h<=360);d.classList.toggle('w760',w<=760);d.classList.toggle('w620',w<=620);d.style.setProperty('--vh',h/100+'px');d.style.setProperty('--vw',w/100+'px');}f();addEventListener('resize',f);setTimeout(f,50);setInterval(f,1000);})();</script>
+<script src="assets/game-home.js" data-top="6" data-left="6" data-fullscreen="1"></script>
+<script src="assets/landscape.js"></script>
+<script src="js/atlas.js?v=1"></script>
+<script src="js/data.js?v=2"></script>
+<script src="js/map.js?v=2"></script>
+<script src="js/sfx.js?v=2"></script>
+<script src="js/audio.js?v=1"></script>
+<script src="js/logic.js?v=2"></script>
+<script src="js/draw.js?v=2"></script>
+<script src="js/ui.js?v=2"></script>
+<script src="/assets/visit.js?v=17" defer></script>
+<script src="/assets/game-events.js?v=2" defer></script>
+</body>
+</html>

@@ -18,6 +18,7 @@ import io, os, re, sys
 
 # slug, 한국어 경로, 영어 경로, 한국어 이름, 한국어 장르 앵커, 영어 이름, 영어 장르 앵커, 태그
 GAMES = [
+    ("gyodo",         "/games/gyodo/",               "/en/games/gyodo/",               "교도관24시",        "교도관24시 타워디펜스게임",        "PRISON GUARD 24",       "reverse tower defense game", {"strategy", "casual", "korean"}),
     ("2048",          "/games/flash/2048/",          "/en/games/flash/2048/",          "2048",              "숫자 퍼즐 게임",                    "2048",                 "2048 online free",               {"puzzle", "casual"}),
     ("sadari",        "/games/flash/sadari/",        "/en/games/flash/sadari/",        "사다리타기",        "사다리타기 뽑기게임",               "LADDER GAME",          "korean ladder game online",      {"board", "casual", "party"}),
     ("sudoku",        "/games/flash/sudoku/",        "/en/games/flash/sudoku/",        "스도쿠",            "스도쿠 숫자 퍼즐게임",              "SUDOKU",               "sudoku puzzle game online free", {"board", "puzzle", "casual"}),
