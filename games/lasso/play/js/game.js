@@ -112,8 +112,8 @@
     G.horseDead = false; G.horseHp = 3; horse.dead = false; horse.deadT = 0; horse.root.rotation.z = 0; horse.root.visible = true; horse.calling = false; horse.speed = 0;
     // 새 말은 주인공 옆 울타리 바깥(길 쪽) 빈자리에 길을 보고 선다(10/3 "말을 샀는데 갇혀서 못 나온다": 바라보는 쪽에 세웠더니 울타리 안에 생겼다)
     const inPen = (x, z) => x > 6.4 && x < 19.6 && z > 6.6 && z < 14.5; let ok = false;
-    for (const da of [PI / 2, -PI / 2, PI, PI * 0.75, -PI * 0.75, PI / 4, -PI / 4, 0]) { const a = hero.yaw + da, x = hero.pos.x + Math.sin(a) * 2.6, z = hero.pos.z + Math.cos(a) * 2.6; if (inPen(x, z)) continue; _a.set(x, 0, z); if (collide(_a, 0.85)) continue; horse.pos.set(x, 0, z); ok = true; break; }
-    if (!ok) horse.pos.set(TOWN.store.x + 2.2, 0, TOWN.store.z - 1.2);
+    for (const r of [2.6, 4, 6]) { for (const da of [PI / 2, -PI / 2, PI, PI * 0.75, -PI * 0.75, PI / 4, -PI / 4, 0]) { const a = hero.yaw + da, x = hero.pos.x + Math.sin(a) * r, z = hero.pos.z + Math.cos(a) * r; if (inPen(x, z) || Math.hypot(x, z) > EDGE - 4) continue; _a.set(x, 0, z); if (collide(_a, 0.85)) continue; horse.pos.set(x, 0, z); ok = true; break; } if (ok) break; }
+    if (!ok) horse.pos.set(hero.pos.x + Math.sin(hero.yaw + PI / 2) * 2.6, 0, hero.pos.z + Math.cos(hero.yaw + PI / 2) * 2.6);   // 어디서든 사니까(10/6) 마구간이 아니라 주인공 옆
     horse.pos.y = heightAt(horse.pos.x, horse.pos.z); horse.yaw = PI; horse.rear = 0.7; horse.update(0.016); updHpHUD(); updTargetHUD();
   }
   // 내가 쓰러진다: 게임 오버. 저장은 그대로 두고 RETRY 로 이어하기(체력만 채워서)
@@ -206,7 +206,10 @@
   const loop = ACT.makeLoop(), lrope = new ACT.Rope(10, 0.026);
   const ring = new THREE.Mesh(new THREE.RingGeometry(0.8, 1, 44), new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.85, depthWrite: false, side: THREE.DoubleSide })); ring.rotation.x = -PI / 2; ring.visible = false; ring.renderOrder = 2; S.add(ring);
   const catchables = () => outlaws.filter(o => o.state === 'idle' || o.state === 'alert' || o.state === 'mount' || o.state === 'flee' || o.state === 'guard');
-  function idleLasso() { if (L.state === 'cinch' && L.target && L.target.state === 'snared') { L.target.state = 'flee'; L.target.boost = 2; } if (CAM.manualT > performance.now()) CAM.manualT = performance.now() - 600; L.state = 'idle'; L.pending = false; loop.visible = false; lrope.hide(); ring.visible = false; $('#tug').classList.remove('on'); $('#lassoBtn').classList.remove('on'); }
+  // 올가미 거리 게이지(10/5 포럼 플레이어 "고리가 펴지는 중인지 돌아오는 중인지 알 수 없어 놓는 타이밍이 찍기였다"): 화면 아래 막대 위를 손잡이가 오가고, 표적이 있는 거리에 금색 눈금. 손잡이가 눈금에 닿을 때 놓는다
+  const aimE = $('#aim'), aimKb = aimE.querySelector('.kb'), aimTk = aimE.querySelector('.tk'), aimNum = aimE.querySelector('b');
+  function aimUI(on, pos, back, tick, gold, dist) { aimE.classList.toggle('on', on); if (!on) return; aimKb.style.left = (pos * 100).toFixed(1) + '%'; aimKb.classList.toggle('back', back); aimKb.classList.toggle('gold', gold); aimTk.style.display = tick === null ? 'none' : ''; if (tick !== null) aimTk.style.left = (tick * 100).toFixed(1) + '%'; aimNum.textContent = Math.round(dist) + 'm'; }
+  function idleLasso() { aimUI(false); if (L.state === 'cinch' && L.target && L.target.state === 'snared') { L.target.state = 'flee'; L.target.boost = 2; } if (CAM.manualT > performance.now()) CAM.manualT = performance.now() - 600; L.state = 'idle'; L.pending = false; loop.visible = false; lrope.hide(); ring.visible = false; $('#tug').classList.remove('on'); $('#lassoBtn').classList.remove('on'); }
   function lassoDown() {
     if (!G.started || G.paused || G.ui || G.deliver || G.introT > 0 || G.ended || G.cine) return; actx();
     if (G.fight) { punch(); return; } if (G.chase) { H.mash += 1; return; }
@@ -215,7 +218,7 @@
     L.state = 'spin'; L.t = 0; L.sfxT = 0; L.aimYaw = facing(); L.pending = false; $('#lassoBtn').classList.add('on');
   }
   function lassoUp() { $('#lassoBtn').classList.remove('on'); if (L.state !== 'spin') return; if (L.t < 0.15) L.pending = true; else release(); }
-  function release() { L.pending = false; L.state = 'fly'; L.t = 0; L.from.copy(loop.position); L.dur = 0.26 + L.dist * 0.022; L.r0 = loop.scale.x; H.throwT = 0.4; sfx('throw'); }
+  function release() { aimUI(false); L.pending = false; L.state = 'fly'; L.t = 0; L.from.copy(loop.position); L.dur = 0.26 + L.dist * 0.022; L.r0 = loop.scale.x; H.throwT = 0.4; sfx('throw'); }
   function slip() { const o = L.target; sfx('slip'); if (o) { ftext('MISS', o.p.chest(_a), 'bad'); o.state = 'flee'; o.boost = 2.5; } L.state = 'cool'; L.t = 0; loop.visible = false; lrope.hide(); $('#tug').classList.remove('on'); if (CAM.manualT > performance.now()) CAM.manualT = performance.now() - 600; }
   function landLasso() {
     ring.visible = false; const lr = stat('loop'); let best = null, bd = 1e9;
@@ -251,7 +254,9 @@
       if (best) L.aimYaw += wrap(Math.atan2(best.pos.x + best.vel.x * ft - c.x - H.vel.x * 0, best.pos.z + best.vel.z * ft - c.z) - L.aimYaw) * Math.min(1, dt * 12); else L.aimYaw += wrap(base - L.aimYaw) * Math.min(1, dt * 8);
       L.land.set(c.x + Math.sin(L.aimYaw) * L.dist, 0, c.z + Math.cos(L.aimYaw) * L.dist); L.land.y = heightAt(L.land.x, L.land.z) + 0.12;
       const lr = stat('loop'); ring.visible = true; ring.position.copy(L.land); ring.scale.setScalar(lr);
-      ring.material.color.set(best && Math.hypot(best.pos.x + best.vel.x * ft - L.land.x, best.pos.z + best.vel.z * ft - L.land.z) < lr ? 0xffd23a : 0xffffff);
+      const gold = !!best && Math.hypot(best.pos.x + best.vel.x * ft - L.land.x, best.pos.z + best.vel.z * ft - L.land.z) < lr; ring.material.color.set(gold ? 0xffd23a : 0xffffff);
+      const dp = best ? Math.hypot(best.pos.x + best.vel.x * ft - c.x, best.pos.z + best.vel.z * ft - c.z) : 0;
+      aimUI(true, (L.dist - 3) / (maxD - 3), cyc >= 1, best && dp < maxD + 1 ? clamp((dp - 3) / (maxD - 3), 0, 1) : null, gold, L.dist);
       L.spinA += dt * (9 + 6 * L.charge); const rad = 0.5 + 0.55 * L.charge;
       loop.visible = true; loop.position.set(hp.x, hp.y + 0.5, hp.z); loop.scale.setScalar(rad); loop.rotation.set(Math.sin(L.spinA) * 0.22, L.spinA, Math.cos(L.spinA) * 0.22);
       _a.set(loop.position.x + Math.cos(L.spinA) * rad, loop.position.y, loop.position.z + Math.sin(L.spinA) * rad); lrope.hang(hp, _a, 0.04);
@@ -537,7 +542,6 @@
   function updTargetHUD() {
     const e = $('#sTarget'), img = e.querySelector('img'), nm = e.querySelector('small'); e.classList.add('on');
     if (captives.length) { img.style.display = 'none'; nm.textContent = 'JAIL'; G.dest = 'jail'; }
-    else if (G.horseDead) { img.style.display = ''; img.src = HORSE_IMG; nm.textContent = '$' + DATA.HORSE_PRICE; G.dest = 'shop'; }   // 말이 죽으면 새 말 사러 상점으로(10/3 "상점앞으로 가서 말을 사야되는구나 알수있게")
     else if (G.target) { const d = OUTLAWS[G.target - 1]; img.style.display = ''; img.src = d.img || ''; nm.textContent = d.name; G.dest = 'target'; }
     else { img.style.display = 'none'; nm.textContent = 'WANTED'; G.dest = 'board'; }
     fitTargetName();
@@ -568,17 +572,20 @@
     const c = heroCenter(_hc); let tx, tz;
     if (G.dest === 'jail') { tx = TOWN.jail.x; tz = TOWN.jail.z; } else if (G.dest === 'target') { const o = curTarget(); if (o && o.state !== 'idle') { tx = o.pos.x; tz = o.pos.z; } else { const s = SITES[OUTLAWS[G.target - 1].site]; tx = s.x; tz = s.z; } } else if (G.dest === 'shop') { tx = TOWN.store.x; tz = TOWN.store.z; } else { tx = TOWN.board.x; tz = TOWN.board.z; }
     if (G.chase) { tx = G.chase.pos.x; tz = G.chase.pos.z; }
-    const e = $('#sTarget'), d = Math.hypot(tx - c.x, tz - c.z), rel = wrap(Math.atan2(tx - c.x, tz - c.z) - (CAM.yaw + PI));
+    // 상단 화살은 "가는 방향" 기준: 말 탔을 땐 말이 향한 쪽(위 키로 가는 쪽), 걸을 땐 화면 기준(10/5 포럼 플레이어 "화살표가 화면 기준이고 A/D 가 카메라를 돌려서 반대로 달렸다"). 가장자리 화살은 화면 기준 그대로
+    const e = $('#sTarget'), d = Math.hypot(tx - c.x, tz - c.z), ang = Math.atan2(tx - c.x, tz - c.z), rel = wrap(ang - (H.mode === 'ride' ? horse.yaw : CAM.yaw + PI)), relCam = wrap(ang - (CAM.yaw + PI));
     e.querySelector('i').style.transform = `rotate(${(-rel * 180 / PI).toFixed(0)}deg)`; e.querySelector('b').textContent = Math.round(d) + 'm';
-    const town = G.dest !== 'target', chasing = !town && curTarget() && curTarget().state !== 'idle', show = !G.ui && !G.deliver && !G.ended && !G.cine && (G.chase ? !G.fight : !chasing) && d > 1.6;
+    const town = G.dest !== 'target', chasing = !town && curTarget() && curTarget().state !== 'idle', base = !G.ui && !G.deliver && !G.ended && !G.cine && !G.fight && d > 1.6, show = base && (G.chase || !chasing);
     mark.visible = show && !G.chase && !town;
     if (mark.visible) { const gy = heightAt(tx, tz), k = clamp(Math.hypot(tx - cam.position.x, tz - cam.position.z) / 18, 1, 5);
       mark.position.set(tx, gy + 4.4 + k * 0.2 + Math.abs(Math.sin(G.time * 3.2)) * 0.28 * k, tz); mark.scale.setScalar(k); mark.rotation.y = G.time * 1.6; }
     // 표식이 화면 밖(옆이나 등 뒤)이면 화면 가장자리에 큰 화살로 그쪽을 가리킨다
     const way = $('#way'); let off = false;
-    if (show) { _a.set(tx, heightAt(tx, tz) + 2, tz).project(cam); off = _a.z > 1 || Math.abs(_a.x) > 0.9 || Math.abs(_a.y) > 0.86; }
-    way.classList.toggle('on', off);
-    if (off) { const th = -rel, W = innerWidth, Hh = innerHeight; way.style.transform = `translate(${(W / 2 + Math.sin(th) * W * 0.36).toFixed(0)}px, ${(Hh * 0.52 - Math.cos(th) * Hh * 0.3).toFixed(0)}px) rotate(${(th * 180 / PI).toFixed(0)}deg)`; }
+    if (base) { _a.set(tx, heightAt(tx, tz) + 2, tz).project(cam); off = _a.z > 1 || Math.abs(_a.x) > 0.9 || Math.abs(_a.y) > 0.86; }
+    const uturn = off && Math.abs(rel) > 2.35; off = off && (show || uturn);   // 쫓는 중엔 가장자리 화살을 안 띄우지만(놈이 보이니까), 놈이 등 뒤로 돌아가면 유턴 화살은 띄운다   // 목적지가 거의 정반대(135도 넘게)면 아래 가운데에 돌아서라는 유턴 화살(10/5 포럼 "화살표가 내 뒤에 있어 한참 반대로 달렸다")
+    way.classList.toggle('on', off); way.classList.toggle('u', uturn);
+    if (uturn) { const W = innerWidth, Hh = innerHeight; way.style.transform = `translate(${(W / 2).toFixed(0)}px, ${(Hh * 0.8).toFixed(0)}px) scale(${rel < 0 ? -1 : 1}, 1)`; }
+    else if (off) { const th = -relCam, W = innerWidth, Hh = innerHeight; way.style.transform = `translate(${(W / 2 + Math.sin(th) * W * 0.36).toFixed(0)}px, ${(Hh * 0.52 - Math.cos(th) * Hh * 0.3).toFixed(0)}px) rotate(${(th * 180 / PI).toFixed(0)}deg)`; }
   }
 
   // ── 게시판(현상수배 전단 고르기) ──
@@ -622,7 +629,7 @@
     if (G.started && !G.ui && !G.deliver && !G.cine && L.state === 'idle' && H.stun <= 0) {
       if ((Math.hypot(c.x - TOWN.board.x, c.z - TOWN.board.z) < 4.6 || Math.hypot(c.x - TOWN.board.x, c.z + 6.2) < 3.4)) { label = T.board; fn = H.mode === 'ride' && !G.seenBoard ? boardOnFoot : openBoard; ctxAt = WCTX_BOARD; } // 말에 탄 채로도 단추는 보인다(10/4). 처음 한 번은 누르면 말에서 내려서 본다(10/2 규칙 그대로)
       else if (H.mode === 'foot' && !G.chase && !G.horseDead && Math.hypot(hero.pos.x - horse.pos.x, hero.pos.z - horse.pos.z) < 3.4) { label = T.ride; fn = mount; }   // 말 바로 옆이면 타기가 먼저(10/3 "말을 사고 E 누르면 마구간 창이 뜬다")
-      else if (G.horseDead && Math.hypot(c.x - TOWN.store.x, c.z - TOWN.store.z) < 4.6) { label = T.store; fn = openShop; ctxAt = WCTX_STABLE; }   // 말이 살아 있으면 마구간에서 살 게 없다
+      else if (G.horseDead) { label = T.store + ' $' + DATA.HORSE_PRICE; fn = openShop; ctxAt = Math.hypot(c.x - TOWN.store.x, c.z - TOWN.store.z) < 4.6 ? WCTX_STABLE : null; }   // 말이 죽으면 그 자리에서 바로 산다(10/6 사장님 "말을 잃고나면 그자리에서 다시 살수있게"). 마구간 앞이면 울타리 위에, 아니면 구석 단추. 말이 살아 있으면 살 게 없다
       else if (H.mode === 'ride') { label = T.off; fn = dismount; }
       else if (!G.chase && !G.horseDead && Math.hypot(hero.pos.x - horse.pos.x, hero.pos.z - horse.pos.z) < 3.4) { label = T.ride; fn = mount; }
     }
