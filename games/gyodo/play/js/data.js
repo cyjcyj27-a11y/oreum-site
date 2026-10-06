@@ -114,7 +114,8 @@
       var bag = extra.slice();
       for (var i = 0; i < picks && bag.length; i++) {
         var k = bag.splice(Math.floor(r() * bag.length), 1)[0];
-        var cnt = k === 'big' ? 1 + Math.floor(day / 12) : k === 'riot' ? 3 + Math.floor(day / 8) : 2 + Math.floor(day / 10);
+        // 폭동꾼은 0.45초 간격 떼라 6명부터는 교도관 수갑으로 못 막는다(24일 아침 벽, 2026-10-07) → 5명까지
+        var cnt = k === 'big' ? 1 + Math.floor(day / 12) : k === 'riot' ? Math.min(5, 3 + Math.floor(day / 8)) : 2 + Math.floor(day / 10);
         grp.push([k, cnt, k === 'riot' ? 0.45 : 1.2]);
       }
       if (n === 6 && w === 5 && day % 6 === 0) grp.push(['king', 1, 0]);
@@ -123,6 +124,10 @@
     return out;
   }
   function hpMul(day) { return 1 + (day - 1) * 0.08 + Math.max(0, day - 15) * 0.035; }
+  // 탈옥왕 기세 배수(2026-10-07). 전엔 hpMul × (1+구역×0.25) 라 6일마다 1.5배씩 뛰어 18일부터 벽이 됐다(코인은 1.2배씩만 는다).
+  // 하루 8% 는 수감자와 같이 가고, 구역 가산만 KZ 로 줄였다. 6일 728 은 그대로.
+  var KZ = 0.15, KSMOKE = 1.2;   // 연막 도주도 2.4초→1.2초(18일 벽)
+  function kingMul(day) { var z = Math.min(4, Math.floor((day - 1) / 6)); return (1 + (day - 1) * 0.08) * (1 + z * (window.GY_DATA ? window.GY_DATA.KZ : KZ)); }
   var RANKS = ['교도', '교사', '교위', '교감', '교정'];
 
   var LIVES = 5;
@@ -136,5 +141,5 @@
     '근무표': 'ROSTER', '검거': 'Caught', '탈옥': 'Escaped', '30일 근무 완료': '30 days on duty', '교도관24시': 'PRISON GUARD 24', '가로로 보기': 'LANDSCAPE'
   };
   function L(s) { return window.GY_LANG === 'en' ? (EN[s] || s) : s; }
-  window.GY_DATA = { LIVES: LIVES, L: L, MAPS: MAPS, TOWERS: TOWERS, TORDER: TORDER, ENEMIES: ENEMIES, FIRST: FIRST, SLOTS: SLOTS, waves: waves, hpMul: hpMul, RANKS: RANKS, DAYS: 30 };
+  window.GY_DATA = { LIVES: LIVES, L: L, kingMul: kingMul, KZ: KZ, KSMOKE: KSMOKE, MAPS: MAPS, TOWERS: TOWERS, TORDER: TORDER, ENEMIES: ENEMIES, FIRST: FIRST, SLOTS: SLOTS, waves: waves, hpMul: hpMul, RANKS: RANKS, DAYS: 30 };
 })();

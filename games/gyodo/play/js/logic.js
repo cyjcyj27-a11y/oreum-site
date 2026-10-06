@@ -67,7 +67,7 @@
   // 수감자
   function spawn(type, si) {
     var def = D.ENEMIES[type], s = G.map.spawns[si % G.map.spawns.length];
-    var hp = def.hp * D.hpMul(G.day) * (type === 'king' ? (1 + G.zone * 0.25) : 1);
+    var hp = def.hp * (type === 'king' ? D.kingMul(G.day) : D.hpMul(G.day));
     var e = { type: type, hp: hp, max: hp, x: s[0] + 0.5, y: s[1] + 0.5, ci: idx(s[0], s[1]), ni: -1, dir: 0, fr: Math.random() * 4, slow: 0, state: 'run', t: 0, rev: false, smash: 0, smoke: 0, smoked: false, hit: 0, id: Math.random() };
     G.enemies.push(e); if (type === 'king') G.kingSeen = true; return e;
   }
@@ -91,7 +91,7 @@
     if (e.state !== 'run') return;
     e.hp -= dmg; e.hit = 0.12; if (slow) e.slow = Math.max(e.slow, slow);
     var def = D.ENEMIES[e.type];
-    if (def.boss && !e.smoked && e.hp < e.max * 0.5) { e.smoked = true; e.smoke = 2.4; G.fx.push({ k: 'smoke', x: e.x, y: e.y, t: 0, life: 2.4 }); AU.play('smoke'); }
+    if (def.boss && !e.smoked && e.hp < e.max * 0.5) { e.smoked = true; e.smoke = D.KSMOKE; G.fx.push({ k: 'smoke', x: e.x, y: e.y, t: 0, life: D.KSMOKE }); AU.play('smoke'); }
     if (e.hp <= 0) {
       e.state = 'caught'; e.t = 0; G.coins += def.pay; G.caught++;
       G.fx.push({ k: 'coin', x: e.x, y: e.y - 0.6, t: 0, life: 0.9, v: def.pay });
