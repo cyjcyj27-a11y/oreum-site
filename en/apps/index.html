@@ -29,6 +29,12 @@
 
 <link rel="stylesheet" href="/style.css?v=47">
 
+<style>
+  /* 앱스 카드 NEW 는 낸 날부터 3일만 (사장님 2026-10-07 "앱스에 뉴표시는 3일만 뜨게 하자"). data-new 날짜를 보고 아래 스크립트가 켠다 */
+  .showcase .grid.apps a.mini .shot::after{ content:none !important; }
+  .showcase .grid.apps a.mini.newon .shot::after{ content:'NEW' !important; position:absolute; right:10px; top:10px; font-size:12px; font-weight:800; letter-spacing:.14em;
+    padding:3px 10px; border-radius:999px; background:#e4572e; color:#fff; border:1px solid rgba(0,0,0,.06); box-shadow:0 2px 8px rgba(228,87,46,.35); }
+</style>
 </head>
 <body>
 
@@ -60,8 +66,8 @@
   <section class="showcase">
     <div class="wrap">
       <div class="list-head"><h1>APPS</h1></div>
-      <div class="grid">
-        <a class="mini" href="/en/apps/piano/">
+      <div class="grid apps">
+        <a class="mini" href="/en/apps/piano/" data-new="2026-10-07">
           <span class="shot"><img src="/assets/piano-cover-en.webp?v=1" alt="Gold note bars falling over a black panel above white and black piano keys" width="800" height="500" loading="lazy"><span class="kind">APPS</span></span>
           <span class="mbody"><b>Piano Practice</b><i>learn piano · ear · sight reading</i></span>
         </a>
@@ -125,7 +131,18 @@
   h('pageviews'); h('pv_app'); h('pv_apps');
 })();
 </script>
-<script src="/assets/board-new.js?v=3" defer></script>
+<script>
+/* 앱스 카드 NEW: data-new="YYYY-MM-DD" 가 한국시간 기준 3일 안이면 붙인다 */
+(function(){
+  var DAYS = 3;
+  var cards = document.querySelectorAll('.grid.apps a.mini[data-new]');
+  for (var i = 0; i < cards.length; i++) {
+    var t = new Date(cards[i].getAttribute('data-new') + 'T00:00:00+09:00').getTime();
+    if (Date.now() - t < DAYS * 86400000) cards[i].className += ' newon';
+  }
+})();
+</script>
+<script src="/assets/board-new.js?v=4" defer></script>
 <script src="/assets/mail.js" defer></script>
 <script src="/assets/install.js?v=7" defer></script>
 <script src="/assets/search.js?v=29" defer></script>
