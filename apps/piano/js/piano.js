@@ -568,12 +568,21 @@
   }
 
   /* ---------------------------------------------------------- 건반(자유 연주) */
-  function freeRange() { var w = window.innerWidth; return w >= 1000 ? [48, 84] : w >= 600 ? [60, 84] : [60, 72]; }
+  /* 건반 크기 = 옥타브 수(사장님 10/7 "건반크기 선택하게 해줘"). 저장 piano.oct, 처음엔 화면 폭으로 */
+  function freeOct() { var o = LS.get('oct', 0); if (o) return o; var w = window.innerWidth; return w >= 1000 ? 3 : w >= 600 ? 2 : 1; }
+  function freeRange() { var o = freeOct(), lo = o >= 3 ? 48 : 60; return [lo, lo + 12 * o]; }
   var REC = { on: false, t0: 0, ev: [], timers: [] };
   function startFree() {
     var r = freeRange();
     openStage(tr('건반', 'Keyboard'), r[0], r[1], { noprog: true, nofall: true, staff: true, paper: true });
     var bL = tool('<button type="button" class="btn ivory small">◀</button>'), bR = tool('<button type="button" class="btn ivory small">▶</button>');
+    var bOct = tool('<button type="button" class="btn ivory small" id="tOct"></button>');
+    function octTxt() { bOct.textContent = freeOct() + (EN ? ' oct' : '옥타브'); }
+    bOct.addEventListener('click', function () {
+      var o = freeOct() % 3 + 1; LS.set('oct', o);
+      var lo = Math.max(21, Math.min(KB.lo, 108 - 12 * o)); releaseAll(); buildKB(lo, lo + 12 * o); octTxt(); live();
+    });
+    octTxt();
     labelBtn();
     var bRec = tool('<button type="button" class="btn ivory small" id="tRec">REC</button>');
     var bPlay = tool('<button type="button" class="btn ivory small" id="tPlay">PLAY</button>');
