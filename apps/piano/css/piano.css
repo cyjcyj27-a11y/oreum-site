@@ -54,6 +54,13 @@
 .piano .paper::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 29px; opacity: .9; pointer-events: none;
   background: repeating-linear-gradient(to bottom, transparent 0 6px, var(--pline) 6px 7px); }
 .piano .lhead { display: flex; align-items: baseline; gap: 12px; margin: 10px 0 14px; }
+/* 접히는 소제목(사장님 10/7 "목록 좌르륵 뜨는거 접어줘 소제목 터치하면 펼쳐지게") */
+.piano .paper.fold { padding-bottom: 12px; }
+.piano .paper.fold .lhead { width: 100%; background: none; border: 0; padding: 0; margin: 8px 0 0; cursor: pointer; text-align: left; font: inherit; color: inherit; }
+.piano .paper.fold .lhead::after { content: '▾'; font-size: 20px; color: var(--gold3); margin-left: 2px; transition: transform .2s; }
+.piano .paper.fold:not(.open) .lhead::after { transform: rotate(-90deg); }
+.piano .paper.fold .fbody { display: none; margin-top: 14px; }
+.piano .paper.fold.open .fbody { display: block; }
 .piano .lhead b { font-family: var(--font); font-weight: 800; font-size: 24px; }
 .piano .prog { color: var(--muted); font-size: 15px; font-weight: 700; margin-left: auto; }
 

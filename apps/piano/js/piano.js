@@ -292,13 +292,17 @@
     prog.textContent = done + ' / ' + DEF.length;
     qa('.lvcard', box).forEach(function (b) { b.addEventListener('click', function () { if (kind === 'ear') startEar(+b.dataset.i); else startSheet(+b.dataset.i); }); });
   }
+  /* 접힌 목록: 소제목을 누르면 펼치고, 위 칸 단추는 펼친 뒤 내려간다 */
+  function fold(id, open) { var el = $(id); if (!el) return; el.classList.toggle('open', open === undefined ? !el.classList.contains('open') : !!open); }
+  qa('.lhead[data-fold]').forEach(function (h) { h.addEventListener('click', function () { fold(h.dataset.fold); }); });
+  function openFold(id) { fold(id, true); setTimeout(function () { $(id).scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 30); }
   qa('.mode').forEach(function (b) {
     b.addEventListener('click', function () {
       var go = b.dataset.go;
       if (go === 'keys') startFree();
-      else if (go === 'songs') { $('pSongList').scrollIntoView({ behavior: 'smooth', block: 'start' }); }
-      else if (go === 'ear') { $('pEarList').scrollIntoView({ behavior: 'smooth', block: 'start' }); }
-      else if (go === 'sheet') { $('pSheetList').scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+      else if (go === 'songs') openFold('fSongs');
+      else if (go === 'ear') openFold('fEar');
+      else if (go === 'sheet') openFold('fSheet');
     });
   });
   $('pReset').addEventListener('click', function () {
@@ -335,7 +339,7 @@
     qa('.stagebtn', $('pStages')).forEach(function (b) { b.addEventListener('click', function () { startSong(curSong, +b.dataset.k); }); });
     show('pSong');
   }
-  $('pSongBack').addEventListener('click', function () { renderHome(); show('pHome'); });
+  $('pSongBack').addEventListener('click', function () { renderHome(); show('pHome'); fold('fSongs', true); });
   $('pListen').addEventListener('click', function () { startSong(curSong, -1); });
 
   /* ---------------------------------------------------------- 연주 화면 공통 */
