@@ -63,10 +63,10 @@
 .piano .mode.ebony i { opacity: .75; }
 
 /* 곡 카드 */
-.piano .songgrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.piano .songgrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
 .piano .songcard { display: grid; gap: 4px; padding: 12px 12px 10px; text-align: left; position: relative; min-height: 86px; }
 .piano .songcard .n { font-size: 13px; color: var(--muted); font-weight: 800; }
-.piano .songcard .t { font-size: 17px; line-height: 1.2; word-break: keep-all; }
+.piano .songcard .t { font-size: 17px; line-height: 1.2; word-break: keep-all; overflow-wrap: anywhere; }
 .piano .songcard .st { font-size: 13px; letter-spacing: 1px; color: var(--gold3); }
 .piano .songcard .st i { font-style: normal; color: #cdc5ae; }
 .piano .songcard.lock { opacity: .55; }
@@ -76,10 +76,10 @@
 .piano .songcard.done .t::after { content: ' ✔'; color: var(--felt); }
 
 /* 단계 카드(계이름·악보) */
-.piano .lvgrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.piano .lvgrid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
 .piano .lvcard { display: grid; gap: 3px; padding: 11px 10px 9px; text-align: left; min-height: 74px; position: relative; }
 .piano .lvcard .n { font-size: 13px; color: var(--muted); font-weight: 800; }
-.piano .lvcard .t { font-size: 15px; line-height: 1.2; word-break: keep-all; }
+.piano .lvcard .t { font-size: 15px; line-height: 1.2; word-break: keep-all; overflow-wrap: anywhere; }
 .piano .lvcard .st { font-size: 13px; letter-spacing: 1px; color: var(--gold3); }
 .piano .lvcard .st i { font-style: normal; color: #cdc5ae; }
 .piano .lvcard.lock { opacity: .55; }
@@ -88,7 +88,7 @@
 .piano .kbar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 6px; }
 .piano .kbar b { font-family: var(--serif); font-size: clamp(24px, 5vw, 34px); line-height: 1.1; }
 .piano .lv { color: var(--muted); font-weight: 800; font-size: 14px; }
-.piano .stages { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px; }
+.piano .stages { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 10px; }
 .piano .stagebtn { display: grid; gap: 4px; padding: 16px 16px 14px; text-align: left; }
 .piano .stagebtn .n { font-size: 13px; opacity: .65; }
 .piano .stagebtn .t { font-size: 20px; }
@@ -169,8 +169,12 @@
   .piano .modes { grid-template-columns: 1fr; }
   .piano .mode { padding: 16px 18px 14px; }
   .piano .mode b { font-size: 24px; }
-  .piano .songgrid { grid-template-columns: repeat(2, 1fr); }
-  .piano .lvgrid { grid-template-columns: repeat(3, 1fr); }
+  .piano .songgrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .piano .lvgrid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  .piano .lvcard { padding: 10px 8px 8px; }
+  .piano .lvcard .t { font-size: 14px; }
+  .piano .songcard { padding: 10px 10px 8px; }
+  .piano .songcard .t { font-size: 16px; }
   .piano .stages { grid-template-columns: 1fr; }
   .piano .sbar b { display: none; }
   .piano .sbar { gap: 8px; padding: 6px 8px; flex-wrap: wrap; }
