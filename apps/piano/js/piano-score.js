@@ -5,7 +5,7 @@
   var NAMES_E = ['C', 'C♯', 'D', 'D♯', 'E', 'F', 'F♯', 'G', 'G♯', 'A', 'A♯', 'B'];
   var FLAT_K = ['도', '레♭', '레', '미♭', '미', '파', '솔♭', '솔', '라♭', '라', '시♭', '시'];
   var FLAT_E = ['C', 'D♭', 'D', 'E♭', 'E', 'F', 'G♭', 'G', 'A♭', 'A', 'B♭', 'B'];
-  var STD = [4, 3, 2, 1.5, 1, 0.75, 0.5, 0.25];   // 온·점2분·2분·점4분·4분·점8분·8분·16분
+  var STD = [4, 3, 2, 1.5, 1, 0.75, 0.5, 0.375, 0.25, 0.125];   // 온·점2분·2분·점4분·4분·점8분·8분·점16분·16분·32분
   function eq(a, b) { return Math.abs(a - b) < 1e-6; }
   function stepOf(m, flat, clef) {
     var k = m % 12, o = Math.floor(m / 12) - 1;
@@ -18,7 +18,7 @@
   function splitDur(d) {
     var out = [], left = d, guard = 0;
     while (left > 1e-6 && guard++ < 20) {
-      var pick = 0.25;
+      var pick = 0.125;
       for (var i = 0; i < STD.length; i++) if (STD[i] <= left + 1e-6) { pick = STD[i]; break; }
       out.push(pick); left -= pick;
     }
@@ -86,7 +86,7 @@
     if (whole || d >= 4) return '<rect x="' + (x - 6) + '" y="' + (top + LG) + '" width="12" height="4.5" fill="#17161b"/>';
     if (d >= 2) return '<rect x="' + (x - 6) + '" y="' + (mid - 4.5) + '" width="12" height="4.5" fill="#17161b"/>' + (d === 3 ? '<circle cx="' + (x + 10) + '" cy="' + (mid - 3) + '" r="1.6" fill="#17161b"/>' : '');
     if (d >= 1) return '<path d="M' + (x - 3) + ' ' + (mid - 11) + ' l6 7 l-5 6 l6 8 c-6 -3 -9 1 -5 6 c-6 -3 -6 -9 -2 -10 l-5 -6 l5 -6 z" fill="#17161b"/>' + (d === 1.5 ? '<circle cx="' + (x + 9) + '" cy="' + (mid + 1) + '" r="1.6" fill="#17161b"/>' : '');
-    var hooks = d >= 0.5 ? 1 : 2, h = '';
+    var hooks = d >= 0.5 ? 1 : d >= 0.25 ? 2 : 3, h = '';
     for (var i = 0; i < hooks; i++) h += '<circle cx="' + (x - 3) + '" cy="' + (mid - 4 + i * 6) + '" r="2.3" fill="#17161b"/><path d="M' + (x - 1) + ' ' + (mid - 3 + i * 6) + ' q4 2 7 -2" fill="none" stroke="#17161b" stroke-width="1.6"/>';
     h += '<line x1="' + (x + 6) + '" y1="' + (mid - 5) + '" x2="' + (x + 1) + '" y2="' + (mid + 10) + '" stroke="#17161b" stroke-width="1.6"/>';
     if (d === 0.75) h += '<circle cx="' + (x + 11) + '" cy="' + (mid + 1) + '" r="1.6" fill="#17161b"/>';
@@ -119,13 +119,13 @@
       for (k = 10; k <= s.s; k += 2) h += '<line x1="' + (x - 9) + '" x2="' + (x + 9) + '" y1="' + (bottom - k * HALF) + '" y2="' + (bottom - k * HALF) + '" stroke="#17161b" stroke-width="1.2"/>';
       h += head(x, y, ev.d, up);
       if (s.acc) h += '<text x="' + (x - 8) + '" y="' + (y + 5) + '" text-anchor="end" font-size="15" font-weight="700" fill="#17161b">' + s.acc + '</text>';
-      if (ev.d === 3 || ev.d === 1.5 || ev.d === 0.75) h += '<circle cx="' + (x + 9) + '" cy="' + (s.s % 2 === 0 ? y - 3 : y) + '" r="1.7" fill="#17161b"/>';
+      if (ev.d === 3 || ev.d === 1.5 || ev.d === 0.75 || ev.d === 0.375) h += '<circle cx="' + (x + 9) + '" cy="' + (s.s % 2 === 0 ? y - 3 : y) + '" r="1.7" fill="#17161b"/>';
       if (names) h += '<text x="' + x + '" y="' + (clef === 'treble' ? top - 14 - i * 12 : bottom + 20 + i * 12) + '" text-anchor="middle" font-size="11" font-weight="700" fill="#8a6a22">' + nameOf(ev.ms[i], flat, names) + '</text>';
     });
     if (ev.d < 4) {
       var sx = up ? x + 5.2 : x - 5.2, yFrom = up ? Math.max.apply(null, ys) : Math.min.apply(null, ys), yTo = (up ? Math.min.apply(null, ys) - 3.3 * LG : Math.max.apply(null, ys) + 3.3 * LG);
       h += '<line x1="' + sx + '" y1="' + yFrom + '" x2="' + sx + '" y2="' + yTo + '" stroke="#17161b" stroke-width="1.4"/>';
-      if (ev.d < 1) h += flag(sx, yTo, up, ev.d < 0.5 ? 2 : 1);
+      if (ev.d < 1) h += flag(sx, yTo, up, ev.d < 0.25 ? 3 : ev.d < 0.5 ? 2 : 1);
     }
     out.h += h;
     if (ev.tieIn && tiesFrom && tiesFrom.x !== undefined) ys.forEach(function (y) { out.h += tie(tiesFrom.x, x, y, up); });
@@ -139,7 +139,7 @@
     var CLEF = window.PIANO_CLEF, B = bars(song), i, j;
     var all = song.R.concat(song.L), hasFlat = false, hasSharp = false;
     all.forEach(function (n) { n[2].forEach(function (m) { if (m % 12 === 10) hasFlat = true; if (m % 12 === 6 || m % 12 === 1 || m % 12 === 8 || m % 12 === 3) hasSharp = true; }); });
-    var flat = hasFlat && !hasSharp;
+    var flat = (song.flat !== undefined) ? !!song.flat : (hasFlat && !hasSharp);
     var R = handEvents(song.R, B), L = handEvents(song.L, B), nb = B.length - 1, mw = [], slots = [];
     for (i = 0; i < nb; i++) {
       var ts = {}, hasNote = false;
