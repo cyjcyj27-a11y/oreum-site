@@ -70,6 +70,7 @@
 .piano .mode b { font-family: var(--font); font-weight: 800; font-size: 25px; line-height: 1.1; }
 .piano .mode i { font-style: normal; font-size: 14px; font-weight: 700; opacity: .7; }
 .piano .mode.ebony i { opacity: .75; }
+.piano a.mode.wide { display: grid; width: 100%; margin-top: 18px; text-decoration: none; color: var(--ebony); box-sizing: border-box; }   /* 피아노 악보 칸(사장님 10/7 "버튼 더 크게") */
 
 /* 곡 카드 */
 .piano .songgrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
