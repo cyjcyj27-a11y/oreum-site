@@ -11,7 +11,7 @@
 // ─────────────────────────────────────────────────────────────
 // ─────────────────────────────────────────────────────────────
 // APPS 메뉴 NEW — 새 앱·도구를 낸 뒤 3일 동안 붙입니다 (사장님 2026-09-19 "앱스에 뉴띄워줘", 2026-10-07 "앱스에 뉴표시는 3일만").
-// 앱스(/apps/…, /en/apps/…)에 한 번 들어오면 그 브라우저에서는 떼어 냅니다(커뮤니티 NEW 와 같은 규칙).
+// 2026-10-07 부터는 앱스에 다녀가도 3일 동안 그대로 붙습니다(커뮤니티 NEW 만 다녀가면 사라짐).
 // 새 앱을 올릴 때 APPS_NEW 날짜만 그날로 바꾸면 됩니다.
 // ─────────────────────────────────────────────────────────────
 (function () {
@@ -26,9 +26,7 @@
     return;
   }
   if (Date.now() - t > SHOW) return;
-  var seen = 0;
-  if (store) { try { seen = +(store.getItem(SEEN) || 0); } catch (e) {} }
-  if (seen && seen >= t) return;
+  // 앱스에 다녀간 브라우저에서도 3일 동안은 그대로 둔다(사장님 2026-10-07 "앱스에도 뉴띄워줘" — 다녀가면 사라지던 규칙은 뺌)
   [].slice.call(document.querySelectorAll('.nav a[href$="/apps/"]')).forEach(function (a) {
     if (a.querySelector('.navnew')) return;
     var b = document.createElement('span');
