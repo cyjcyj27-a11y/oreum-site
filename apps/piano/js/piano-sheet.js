@@ -21,6 +21,8 @@
   function esc(t) { return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;'); }
   function songOf(i) { return (window.PIANO_SONG_DATA || {})[INDEX[i].id]; }
 
+  /* 곡 수는 데이터에서(10/7 "아까 39곡이었는데" — 글자로 박아 두면 틀린다) */
+  if ($('shCount')) $('shCount').textContent = EN ? INDEX.length + ' songs' : '곡 ' + INDEX.length + '개';
   /* 곡 목록 카드 */
   var list = $('shList');
   if (list) {

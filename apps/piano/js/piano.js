@@ -821,6 +821,7 @@
   /* ---------------------------------------------------------- 연주회(엔딩) · 시작 */
   $('pConcertBtn').addEventListener('click', function () { startSong(SONGS[20], -1, { recital: true }); });
   window.__pp = { mode: function () { return MODE; }, startSong: startSong, startEar: startEar, startSheet: startSheet, startFree: startFree, S: S, KB: KB, press: press, release: release, close: closeStage, songs: SONGS, staff: staffSVG };
+  var mc = document.querySelector('.mode[data-go="songs"] i'); if (mc) mc.textContent = EN ? SONGS.length + ' songs · falling notes' : SONGS.length + '곡 · 떨어지는 음표';
   renderHome(); show('pHome');
   /* 악보 페이지에서 '이 곡 연습하기' → #song=id */
   var hs = /song=([a-z0-9]+)/.exec(location.hash || '');
