@@ -301,7 +301,10 @@
   function unhorse(o) { const h = o.horse; o.horse = null; o.myHorse = null; h.fade = 7; o.pos.copy(h.pos); h.rear = 0.5; }
   // 현상범 전용 모델은 표적으로 고를 때 읽는다(13명을 처음에 다 읽으면 로딩이 길어진다)
   const modelP = {};
-  function needModel(def) { if (!def.model) return Promise.resolve(); return modelP[def.id] || (modelP[def.id] = loadGLB('assets/models/outlaws/' + def.model + '.glb').then(g => { const o = mkOutlaw(g, def.id); outlaws.push(o); o.p.root.visible = true; o.p.root.position.copy(hero.pos); R.compile(S, cam); o.p.root.traverse(c => c.frustumCulled = false); o.p.mixer.update(0.01); R.render(S, cam); o.p.root.traverse(c => c.frustumCulled = true); o.p.root.visible = false; })); }   // 불러올 때 한 번 그려 GPU 에 올려 둔다(처음 눈에 들어올 때 0.3~0.5초 멈칫하던 것)
+  function needModel(def) { if (!def.model) return Promise.resolve(); return modelP[def.id] || (modelP[def.id] = loadGLB('assets/models/outlaws/' + def.model + '.glb').then(g => new Promise(r => setTimeout(() => r(g), 0))).then(g => { const o = mkOutlaw(g, def.id); o.p.root.visible = true; o.p.root.position.copy(hero.pos);
+      const warm = () => { o.p.root.visible = true; o.p.root.traverse(c => c.frustumCulled = false); o.p.mixer.update(0.01); R.render(S, cam); o.p.root.traverse(c => c.frustumCulled = true); o.p.root.visible = false; outlaws.push(o); };
+      const cp = R.compileAsync ? R.compileAsync(o.p.root, cam, S).catch(() => {}) : Promise.resolve(R.compile(S, cam)); o.p.root.visible = false;   // 셰이더는 따로 엮고(compileAsync) 그동안 화면엔 안 보이게
+      return cp.then(() => new Promise(r => setTimeout(r, 0))).then(warm); })); }   // 불러올 때 한 번 그려 GPU 에 올려 둔다(처음 눈에 들어올 때 0.3~0.5초 멈칫하던 것)
   const curTarget = () => outlaws.find(o => o.kind === 'main' && o.state !== 'off' && o.def.id === G.target);
   function setTarget(id) {
     if (G.ch === 2) { if (L.state === 'hold') idleLasso(); G.target = id; G.respawn = 0; updTargetHUD(); save(); return; }   // 2부: 다 풀려 있으니 전단은 화살표 목적지만 바꾼다(놈들은 updCh2 가 은신처마다 세워 둔다)
@@ -759,12 +762,16 @@
   }
   // 감옥에서 뛰쳐나오는 놈들: 남는 사람 모델(이번에 읽어 둔 현상범 먼저, 모자라면 복면 쓴 카우보이)
   let runners = [];
+  // 탈옥 장면: 13명이 한 명씩 제 얼굴로 뛰쳐나온다(10/7 "탈옥장면에 은행강도만 10명나옴" — 전엔 아직 안 불러온 모델 자리를 은행강도 복제가 채웠다).
+  // 모델은 장면 시작 때 하나씩 불러 두고(preloadAll), 폭파 때까지 못 받은 놈은 복제로 채우지 않고 뺀다.
+  function preloadAll() { return OUTLAWS.filter(d => d.model).reduce((p, d) => p.then(() => needModel(d)).catch(() => {}), Promise.resolve()); }
   function cineRunners() {
-    const free = outlaws.filter(o => o.state === 'off').sort((a, b) => b.only - a.only).slice(0, 7);
-    runners = free.map((o, i) => { const fromHole = i % 3 !== 2, a = (i / Math.max(1, free.length - 1) - 0.5) * 2.0 + (Math.random() - 0.5) * 0.25;
-      Object.assign(o, { kind: 'cine', def: { tier: 1 }, state: 'cine', cd: 0.15 + i * 0.22, yaw: a, rs: 5.6 + Math.random() * 1.6 });
+    const used = new Set(), free = [];
+    OUTLAWS.forEach(d => { const mine = d.model ? d.id : 0, o = outlaws.find(q => q.state === 'off' && q.only === mine && !used.has(q)); if (o) { used.add(o); free.push([o, d]); } });
+    runners = free.map(([o, d], i) => { const fromHole = i % 3 !== 2, a = (i / Math.max(1, free.length - 1) - 0.5) * 2.0 + (Math.random() - 0.5) * 0.25;
+      Object.assign(o, { kind: 'cine', def: { tier: 1 }, state: 'cine', cd: 0.15 + i * 0.2, yaw: a, rs: 5.6 + Math.random() * 1.6 });
       o.pos.set(fromHole ? BREACH.x + (Math.random() - 0.5) * 0.8 : DOOR.x, 0, (fromHole ? BREACH.z : DOOR.z) - 0.6); o.vel.set(0, 0, 0);
-      o.p.lie(false); o.p.mat.color.set(0xffffff); if (o.p.mask) { o.p.mask.visible = !o.only; o.p.mask.material.color.set(0x8a1c14); } o.p.root.scale.setScalar(1); o.p.root.visible = false; o.p.cur = null; o.p.play('run', 1.7); return o; });
+      o.p.lie(false); o.p.mat.color.set(d.tint || 0xffffff); if (o.p.mask) { o.p.mask.visible = !d.noMask; o.p.mask.material.color.set(d.mask || 0x8a1c14); } o.p.root.scale.setScalar((d.h || 1.76) / 1.76); o.p.root.visible = false; o.p.cur = null; o.p.play('run', 1.7); return o; });
   }
   function updRunners(dt) { runners.forEach(o => { if (o.state !== 'cine') return; if (o.cd > 0) { o.cd -= dt; if (o.cd <= 0) { o.p.root.visible = true; dust(o.pos, 4, 0.8); } return; }
     o.pos.x += Math.sin(o.yaw) * o.rs * dt; o.pos.z += Math.cos(o.yaw) * o.rs * dt; collide(o.pos, 0.35); o.pos.y = heightAt(o.pos.x, o.pos.z); o.dustT = (o.dustT || 0) - dt; if (o.dustT <= 0) { o.dustT = 0.2; puff(o.pos.x, o.pos.y + 0.12, o.pos.z, 0, 0.6, 0, 0xe2c096, 0.6, 0.5); } }); }
@@ -812,7 +819,7 @@
     if (G.cine || G.ended) return; if (G.deliver) { setTimeout(() => cineStart(kind), 500); return; }
     const b1 = {}; OUTLAWS.forEach(d => b1[d.id] = d.bounty); followSave = followSave || CAM.follow;
     G.cine = { kind, t: 0, i: 0, thr: 0, sum0: sumOf(), b1 }; document.body.classList.add('cine');
-    if (kind === 'break') { G.ch = 2; G.caught = []; G.target = 0; applyCh2(); save(); }   // 장면 도중 꺼도 2부부터 이어진다(마을 게시판 그림은 폭파 때 바꾼다)
+    if (kind === 'break') { G.ch = 2; G.caught = []; G.target = 0; applyCh2(); save(); preloadAll(); }   // 장면 도중 꺼도 2부부터 이어진다(마을 게시판 그림은 폭파 때 바꾼다)
   }
   function updCine(dt) {
     const C = G.cine, list = CINE[C.kind]; C.t += dt;
