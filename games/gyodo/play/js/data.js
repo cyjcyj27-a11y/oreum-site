@@ -123,7 +123,11 @@
     }
     return out;
   }
-  function hpMul(day) { return 1 + (day - 1) * 0.08 + Math.max(0, day - 15) * 0.035; }
+  // 수감자 기세. 15일까지 하루 8%, 16일부터 LATE 만큼 더(2026-10-07 사장님 "18일 깨고 나니 그다음부터 급속도로 쉬워졌어" → 후반 기울기 손잡이)
+  var LATE = 0.06;   // 0.035 → 0.06 (2026-10-07): 16일부터 하루 +14%. 수감자가 늘면 잡는 코인도 늘어 상쇄되므로 수가 아니라 기세로 올린다
+  // 구역별 보정: 정문(25~30일)은 문 여섯이 출구 하나로 모여 길목 하나로 다 막혀 쉬웠다 → 기세 가산
+  var ZONEHP = [1, 1, 1, 1, 1.15];
+  function hpMul(day) { var z = Math.min(4, Math.floor((day - 1) / 6)), Dd = window.GY_DATA; return (1 + (day - 1) * 0.08 + Math.max(0, day - 15) * (Dd ? Dd.LATE : LATE)) * (Dd ? Dd.ZONEHP : ZONEHP)[z]; }
   // 탈옥왕 기세 배수(2026-10-07). 전엔 hpMul × (1+구역×0.25) 라 6일마다 1.5배씩 뛰어 18일부터 벽이 됐다(코인은 1.2배씩만 는다).
   // 하루 8% 는 수감자와 같이 가고, 구역 가산만 KZ 로 줄였다. 6일 728 은 그대로.
   var KZ = 0.15, KSMOKE = 1.2;   // 연막 도주도 2.4초→1.2초(18일 벽)
@@ -141,5 +145,5 @@
     '근무표': 'ROSTER', '검거': 'Caught', '탈옥': 'Escaped', '30일 근무 완료': '30 days on duty', '교도관24시': 'PRISON GUARD 24', '가로로 보기': 'LANDSCAPE'
   };
   function L(s) { return window.GY_LANG === 'en' ? (EN[s] || s) : s; }
-  window.GY_DATA = { LIVES: LIVES, L: L, kingMul: kingMul, KZ: KZ, KSMOKE: KSMOKE, MAPS: MAPS, TOWERS: TOWERS, TORDER: TORDER, ENEMIES: ENEMIES, FIRST: FIRST, SLOTS: SLOTS, waves: waves, hpMul: hpMul, RANKS: RANKS, DAYS: 30 };
+  window.GY_DATA = { LIVES: LIVES, L: L, LATE: LATE, ZONEHP: ZONEHP, kingMul: kingMul, KZ: KZ, KSMOKE: KSMOKE, MAPS: MAPS, TOWERS: TOWERS, TORDER: TORDER, ENEMIES: ENEMIES, FIRST: FIRST, SLOTS: SLOTS, waves: waves, hpMul: hpMul, RANKS: RANKS, DAYS: 30 };
 })();
