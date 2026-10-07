@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Piano Practice — Free Online Piano Lessons, No Install</title>
+<meta name="description" content="Free piano practice app in your browser: learn 39 songs with falling notes, train your ear with 12 note-naming levels, read notes on the staff, and record yourself on a virtual keyboard. No install, no sign-up.">
+<meta name="keywords" content="piano practice, learn piano online free, online piano, piano app free, virtual piano keyboard, piano lessons online, ear training piano, sight reading practice, falling notes piano, Oreum Games">
+<link rel="canonical" href="https://oreumgames.com/en/apps/piano/">
+<link rel="alternate" hreflang="ko" href="https://oreumgames.com/apps/piano/">
+<link rel="alternate" hreflang="en" href="https://oreumgames.com/en/apps/piano/">
+<link rel="alternate" hreflang="x-default" href="https://oreumgames.com/apps/piano/">
+<meta name="theme-color" content="#f8f5ec">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" href="/assets/icon-512.png" type="image/png" sizes="512x512">
+<link rel="apple-touch-icon" href="/assets/icon-180.png">
+<link rel="manifest" href="/manifest.webmanifest">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Oreum Games">
+<meta property="og:title" content="Piano Practice — Free Online Piano Lessons, No Install">
+<meta property="og:description" content="Free piano practice app in your browser: learn 39 songs with falling notes, train your ear with 12 note-naming levels, read notes on the staff, and record yourself on a virtual keyboard. No install, no sign-up.">
+<meta property="og:url" content="https://oreumgames.com/en/apps/piano/">
+<meta property="og:image" content="https://oreumgames.com/assets/piano-cover-og-en.webp?v=1">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="en_US">
+<meta name="twitter:card" content="summary_large_image">
+
+<link rel="stylesheet" href="/style.css?v=47">
+<link rel="stylesheet" href="/apps/tools.css?v=2">
+<link rel="stylesheet" href="/apps/piano/css/piano.css?v=1">
+<style>
+  .pm-panel { background: #fff; border: 1px solid #ececec; border-radius: 22px; padding: 28px 22px 24px; box-shadow: 0 1px 2px rgba(20,20,30,.04), 0 18px 40px rgba(20,20,30,.06); }
+  .pm-panel + .gp-line { margin-top: 28px; }
+  .game-page > h2 { margin: 40px 0 10px; }
+  .pm-howto { margin: 0; padding-left: 1.3em; line-height: 1.75; }
+  .pm-howto li { margin: 4px 0; }
+  .song-nav { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-top: 16px; }
+  .song-list { list-style: none; padding: 0; margin: 10px 0 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px 14px; }
+  .song-list li a { display: block; padding: 8px 10px; border-radius: 10px; background: #fbf7ec; border: 1px solid #e4dcc6; color: #17161b; text-decoration: none; font-weight: 700; }
+  .song-list li a:hover { border-color: #c8a04c; }
+  @media (max-width: 520px) { .pm-panel { padding: 22px 14px 18px; border-radius: 18px; } .song-list { grid-template-columns: 1fr 1fr; } }
+</style>
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": "WebApplication",
+ "name": "Piano Practice",
+ "alternateName": [
+  "Online Piano",
+  "Learn Piano Online",
+  "Virtual Piano Keyboard",
+  "피아노 연습"
+ ],
+ "url": "https://oreumgames.com/en/apps/piano/",
+ "image": "https://oreumgames.com/assets/piano-cover-og-en.webp?v=1",
+ "description": "A free web app for learning piano in the browser. 39 public-domain songs (children songs, carols, classical themes, Hanon, scales) are taught with falling notes in four stages each, from right hand only to both hands at tempo. Twelve ear-training levels and twelve sight-reading levels train ear and eye. A free-play keyboard records, keeps time with a metronome, has a sustain pedal and draws every pressed note on a grand staff. The piano sound is synthesised in the browser, and progress stays in the browser only.",
+ "applicationCategory": "EducationalApplication",
+ "applicationSubCategory": "Music learning",
+ "operatingSystem": "Web browser",
+ "browserRequirements": "Requires JavaScript",
+ "isAccessibleForFree": true,
+ "featureList": [
+  "39 songs, four stages each (right hand practice and play, both hands practice and play)",
+  "Falling notes that wait for you in practice stages",
+  "12 ear-training levels",
+  "12 sight-reading levels (treble, bass, ledger lines, sharps, flats)",
+  "Free-play keyboard with record, metronome and pedal",
+  "Computer keyboard: left half for the left hand, right half for the right",
+  "No install, no sign-up"
+ ],
+ "datePublished": "2026-10-07",
+ "dateModified": "2026-10-07",
+ "inLanguage": [
+  "en",
+  "ko"
+ ],
+ "teaches": "Piano",
+ "offers": {
+  "@type": "Offer",
+  "price": "0",
+  "priceCurrency": "USD"
+ },
+ "isPartOf": {
+  "@type": "CollectionPage",
+  "name": "Apps",
+  "url": "https://oreumgames.com/en/apps/"
+ },
+ "publisher": {
+  "@type": "Organization",
+  "name": "Oreum Games",
+  "url": "https://oreumgames.com/en/"
+ }
+}
+</script>
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": "FAQPage",
+ "mainEntity": [
+  {
+   "@type": "Question",
+   "name": "How do the four stages differ?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "Stage 1 (right hand practice) stops at the hit line until you press the note. Stage 2 (right hand play) runs at tempo and you must press as the note reaches the line. Stages 3 and 4 add the left-hand notes. Stars come at 60%, 80% and 95% accuracy."
+   }
+  },
+  {
+   "@type": "Question",
+   "name": "How do I play on a computer keyboard?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "The left half of the keyboard is the left hand and the right half the right hand. Left: Z X C V B, then A S D F G, then Q W E R T go up the scale. Right: N M , . /, then H J K L ; and the quote key, then Y U I O P. Hold Shift for a black key, and Space is the sustain pedal. The letters are printed on the on-screen keys."
+   }
+  },
+  {
+   "@type": "Question",
+   "name": "What happens in Ear Training?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "Each question plays a reference C first, then the question note, and you press the key you heard. It starts with C D E and grows to black keys, two octaves, and sequences of two or three notes over 12 levels."
+   }
+  },
+  {
+   "@type": "Question",
+   "name": "What does Sight Reading show?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "One note on a staff; you press its key. Levels go from treble C to G up through ledger lines, sharps, flats, bass clef and a mix of both clefs. A wrong answer lights the correct key and plays it."
+   }
+  },
+  {
+   "@type": "Question",
+   "name": "Which songs are included?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "Children songs such as Twinkle Twinkle and Mary Had a Little Lamb, carols such as Jingle Bells and Silent Night, classical themes such as Ode to Joy, Canon in D, Für Elise, Minuet in G and Rondo alla Turca, plus Hanon No. 1 and major and minor scales — 39 pieces, all public domain. Longer works use the opening section and say so in the title."
+   }
+  },
+  {
+   "@type": "Question",
+   "name": "Can I hear my recording again?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "Press REC on the Keyboard screen, play, then PLAY to hear it back. The last recording stays in this browser. There is no audio file download."
+   }
+  }
+ ]
+}
+</script>
+</head>
+
+<body>
+
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="/en/">
+      <img src="/assets/logo-full.webp?v=1" alt="Oreum Games" width="78" height="74">
+    </a>
+    <div class="brand-copy">
+      <p class="brandname">Oreum Games</p>
+      <p class="factory">INDIE GAME FACTORY</p>
+    </div>
+    <ul class="values">
+      <li><span>No install</span> one link and you are in</li>
+      <li><span>No sign-up</span> saves stay in your browser</li>
+    </ul>
+    <nav class="nav" aria-label="Main menu">
+      <a class="navsearch" href="/en/games/">SEARCH</a>
+      <a href="/en/games/">GAMES</a>
+      <a href="/en/apps/">APPS</a>
+      <a href="/en/news/">NEWS</a>
+      <a href="/en/board/">COMMUNITY</a>
+      <a href="/apps/piano/" lang="ko" hreflang="ko">한국어</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+  <section class="showcase">
+    <div class="wrap game-page">
+      <a class="backlink" href="/en/apps/">← All apps</a>
+
+<div class="pm piano pm-panel" id="piano">
+  <div class="pm-page">
+
+    <div class="top">
+      <h1 data-en="Piano Practice">피아노 연습</h1>
+      <ul class="promise"><li data-en="No install">설치 없이</li><li data-en="No sign-up">회원가입 없이</li><li data-en="Progress saved">진도 저장</li></ul>
+    </div>
+
+    <!-- 홈 -->
+    <section id="pHome">
+      <div class="modes">
+        <button type="button" class="mode ebony" data-go="songs"><b data-en="Songs">곡 연습</b><i data-en="24 songs · falling notes">24곡 · 떨어지는 음표</i></button>
+        <button type="button" class="mode ivory" data-go="keys"><b data-en="Keyboard">건반</b><i data-en="Free play · record · metronome">자유 연주 · 녹음 · 메트로놈</i></button>
+        <button type="button" class="mode ivory" data-go="ear"><b data-en="Ear Training">계이름 듣기</b><i data-en="Hear a note, find the key">소리 듣고 건반 찾기</i></button>
+        <button type="button" class="mode ivory" data-go="sheet"><b data-en="Sight Reading">악보 읽기</b><i data-en="Read the staff, press the key">오선지 보고 건반 찾기</i></button>
+      </div>
+
+      <div class="paper">
+        <div class="lhead"><b data-en="Songs">곡 연습</b><span id="pSongProg" class="prog"></span></div>
+        <div class="songgrid" id="pSongList"></div>
+      </div>
+      <div class="paper">
+        <div class="lhead"><b data-en="Ear Training">계이름 듣기</b><span id="pEarProg" class="prog"></span></div>
+        <div class="lvgrid" id="pEarList"></div>
+      </div>
+      <div class="paper">
+        <div class="lhead"><b data-en="Sight Reading">악보 읽기</b><span id="pSheetProg" class="prog"></span></div>
+        <div class="lvgrid" id="pSheetList"></div>
+      </div>
+      <div class="paper" id="pConcert" hidden>
+        <div class="lhead"><b data-en="Recital">연주회</b></div>
+        <button type="button" class="btn ebony wide" id="pConcertBtn" data-en="RECITAL">연주회</button>
+      </div>
+      <div class="acts"><a class="btn ivory" id="pSheetLink" href="/en/apps/piano-sheet/" data-en="PIANO SHEET MUSIC">피아노 악보</a></div>
+      <button type="button" class="ghost wide" id="pReset" data-en="Clear progress">진도 지우기</button>
+    </section>
+
+    <!-- 곡 하나: 단계 넷 -->
+    <section id="pSong" hidden>
+      <div class="kbar">
+        <button type="button" class="btn ivory small" id="pSongBack" data-en="← Songs">← 곡 목록</button>
+        <b id="pSongTitle"></b>
+        <span id="pSongLv" class="lv"></span>
+      </div>
+      <div class="paper">
+        <div class="stages" id="pStages"></div>
+        <div class="acts">
+          <button type="button" class="btn ivory" id="pListen" data-en="LISTEN">들어보기</button>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- 연주 화면(전체) -->
+  <div id="stage" hidden>
+    <div class="sbar">
+      <button type="button" class="btn ivory small" id="sBack" data-en="← Back">← 처음으로</button>
+      <b id="sName"></b>
+      <div class="sprog" id="sProgWrap"><span id="sBar"></span></div>
+      <span id="sInfo" class="sinfo"></span>
+      <div class="stools" id="sTools"></div>
+      <button type="button" class="btn ivory small" id="tRot" data-en="Rotate">가로로 돌리기</button>
+      <button type="button" class="pedal" id="sSnd" aria-label="소리">
+        <svg viewBox="0 0 24 24"><path d="M3 9h4l5-4.5v15L7 15H3z" fill="#fff"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="sview" id="sView">
+      <canvas id="fall"></canvas>
+      <div id="staffBox" hidden></div>
+      <div id="earBox" hidden>
+        <div class="earq" id="earQ"></div>
+        <button type="button" class="btn ivory" id="earReplay" data-en="REPLAY">다시 듣기</button>
+      </div>
+      <div id="judge"></div>
+      <div id="count" hidden></div>
+    </div>
+    <div class="kbwrap" id="kbwrap"><div class="kb" id="kb"></div></div>
+
+    <div id="result" hidden>
+      <div class="paper card">
+        <div class="stars" id="rStars"></div>
+        <b id="rTitle"></b>
+        <span id="rSub"></span>
+        <div class="acts">
+          <button type="button" class="btn ivory" id="rRetry">RETRY</button>
+          <button type="button" class="btn ebony" id="rNext">NEXT</button>
+          <button type="button" class="btn ivory" id="rList" data-en="LIST">목록</button>
+        </div>
+      </div>
+    </div>
+    <div id="ending" hidden>
+      <div class="paper card end">
+        <i data-en="RECITAL">연주회</i>
+        <b id="endTitle" data-en="All 24 songs played">24곡을 다 쳤습니다</b>
+        <span id="endSub"></span>
+        <div class="acts"><button type="button" class="btn ebony" id="endHome" data-en="HOME">처음으로</button></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+      <p class="gp-line">Piano Practice is a free web app where you learn songs from falling notes, train your ear on note names and read notes on the staff. It opens straight in the browser with nothing to install.</p>
+
+      <h2>How to start</h2>
+      <ol class="pm-howto">
+        <li>Open <b>Songs</b> and start with Twinkle Twinkle. Stage 1 waits at the hit line until you press the right key, so take your time.</li>
+        <li>Stage 2 runs at tempo. Press as the note reaches the line for PERFECT or GOOD; 60% accuracy earns the first star.</li>
+        <li>Stages 3 and 4 add the left hand. On a phone use the on-screen keys; on a computer the left half of the keyboard is your left hand and the right half your right.</li>
+        <li>In between, use <b>Ear Training</b> and <b>Sight Reading</b>, then play freely on the <b>Keyboard</b> and record yourself.</li>
+      </ol>
+
+      <h2>Before the first lesson</h2>
+      <p class="gp-body">Learning piano alone takes an eye for the staff, an ear for pitch and hands that find the keys, so this app keeps song practice, ear training and sight reading together. All 39 pieces are public domain, and the same songs are available as printable sheet music on the Piano Sheet Music page.</p>
+      <p class="gp-body">The piano sound is synthesised in the browser with no audio files, so the page opens instantly. Stars, progress and your last recording stay in this browser and are never sent to a server.</p>
+
+      <dl class="spec"><dt>Type</dt><dd>Piano practice · Music learning · Free web app</dd>
+              <dt>Songs</dt><dd>39 (children songs, carols, classical, Hanon, scales) × 4 stages</dd>
+              <dt>Training</dt><dd>12 ear-training levels · 12 sight-reading levels</dd>
+              <dt>Keyboard</dt><dd>Free play · record · metronome · pedal · grand-staff display</dd>
+              <dt>Sound</dt><dd>Browser-synthesised piano (no files)</dd>
+              <dt>Works on</dt><dd>Desktop (computer keyboard) and mobile browsers (on-screen keys)</dd>
+              <dt>Released</dt><dd>2026-10-07</dd>
+              <dt>Last updated</dt><dd>2026-10-07</dd></dl>
+      <p class="gp-for">Good for — adults starting piano from scratch, anyone who wants to try a song before buying a keyboard, parents learning note names with a child, and students warming up between lessons.</p>
+
+      <section class="faq">
+        <h2>FAQ</h2>
+        <details><summary>How do the four stages differ?</summary><p>Stage 1 (right hand practice) stops at the hit line until you press the note. Stage 2 (right hand play) runs at tempo and you must press as the note reaches the line. Stages 3 and 4 add the left-hand notes. Stars come at 60%, 80% and 95% accuracy.</p></details>
+        <details><summary>How do I play on a computer keyboard?</summary><p>The left half of the keyboard is the left hand and the right half the right hand. Left: Z X C V B, then A S D F G, then Q W E R T go up the scale. Right: N M , . /, then H J K L ; and the quote key, then Y U I O P. Hold Shift for a black key, and Space is the sustain pedal. The letters are printed on the on-screen keys.</p></details>
+        <details><summary>What happens in Ear Training?</summary><p>Each question plays a reference C first, then the question note, and you press the key you heard. It starts with C D E and grows to black keys, two octaves, and sequences of two or three notes over 12 levels.</p></details>
+        <details><summary>What does Sight Reading show?</summary><p>One note on a staff; you press its key. Levels go from treble C to G up through ledger lines, sharps, flats, bass clef and a mix of both clefs. A wrong answer lights the correct key and plays it.</p></details>
+        <details><summary>Which songs are included?</summary><p>Children songs such as Twinkle Twinkle and Mary Had a Little Lamb, carols such as Jingle Bells and Silent Night, classical themes such as Ode to Joy, Canon in D, Für Elise, Minuet in G and Rondo alla Turca, plus Hanon No. 1 and major and minor scales — 39 pieces, all public domain. Longer works use the opening section and say so in the title.</p></details>
+        <details><summary>Can I hear my recording again?</summary><p>Press REC on the Keyboard screen, play, then PLAY to hear it back. The last recording stays in this browser. There is no audio file download.</p></details>
+      </section>
+    </div>
+  </section>
+  <section class="related" aria-label="More tools · Take a quick break">
+    <div class="wrap game-page">
+      <h2>More tools · Take a quick break</h2>
+      <ul class="related-list">
+      <li><a href="/en/apps/piano-sheet/"><img src="/assets/pianosheet-cover-en.webp?v=1" alt="" width="96" height="60" loading="lazy"><span class="related-txt"><b>Piano Sheet Music</b><span>free scores · note names · print</span></span><em>Open ▸</em></a></li>
+      <li><a href="/en/apps/kana/"><img src="/assets/kana-cover-en.webp?v=1" alt="" width="96" height="60" loading="lazy"><span class="related-txt"><b>Hiragana &amp; Katakana</b><span>chart, writing, sound, sentences</span></span><em>Open ▸</em></a></li>
+      <li><a href="/en/apps/pdf-merge/"><img src="/assets/pdfmerge-cover-en.webp?v=2" alt="" width="96" height="60" loading="lazy"><span class="related-txt"><b>Merge PDF</b><span>free PDF combiner</span></span><em>Open ▸</em></a></li>
+      <li><a href="/en/games/flash/taja/"><img src="/assets/taja-shot.webp" alt="" width="96" height="60" loading="lazy"><span class="related-txt"><b>Typing Race</b><span>typing practice game</span></span><em>Play ▸</em></a></li>
+      <li><a href="/en/games/flash/bowling/"><img src="/assets/bowling-shot.webp" alt="" width="96" height="60" loading="lazy"><span class="related-txt"><b>Bowling</b><span>3D bowling game</span></span><em>Play ▸</em></a></li>
+      <li><a href="/en/games/flash/sudoku/"><img src="/assets/sudoku-shot.webp" alt="" width="96" height="60" loading="lazy"><span class="related-txt"><b>Sudoku</b><span>number puzzle, 60 boards</span></span><em>Play ▸</em></a></li>
+      </ul>
+      <p class="related-more"><a href="/en/apps/">All apps</a> · <a href="/en/games/">All free games</a> · <a href="/en/">Oreum Games home</a></p>
+    </div>
+  </section></main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <div class="footer-brand">
+      <img src="/assets/logo-full.webp?v=1" alt="" width="52" height="50">
+      <span>Oreum Games <em>오름게임즈</em></span>
+    </div>
+    <p class="footer-motto">Oreum Games keeps climbing</p>
+    <nav class="footer-nav" aria-label="Footer menu">
+      <a href="/en/support/">Support</a>
+      <a href="/en/privacy/">Privacy Policy</a>
+      <a href="https://www.youtube.com/@Oreumgames" rel="me noopener" target="_blank">YouTube</a>
+      <a href="https://www.tiktok.com/@oreumgames" rel="me noopener" target="_blank">TikTok</a>
+      <button type="button" class="js-mail mailbtn" data-u="cyjcyj27" data-d="gmail.com" data-go="gmail">Ads &amp; partnerships</button>
+      <button type="button" class="js-install mailbtn" hidden><img src="/assets/logo-symbol.png" alt="" class="install-ico">Add a shortcut</button>
+    </nav>
+    <p class="copy" id="visitCount" hidden></p>
+    <p class="copy">oreumgames.com · © 2026 Oreum Games. All rights reserved.</p>
+  </div>
+</footer>
+
+<!-- 앱: 소리·진도 모두 이 브라우저 안에서만 다룬다 -->
+<script src="/apps/piano/js/landscape.js?v=1"></script>
+<script src="/apps/piano/js/piano-synth.js?v=1"></script>
+<script src="/apps/piano/js/piano-data.js?v=1"></script>
+<script src="/apps/piano/js/piano-clef.js?v=1"></script>
+<script src="/apps/piano/js/piano.js?v=1"></script>
+<script>window.PIANO_V="1"</script>
+<script src="/assets/visit.js?v=17" defer></script>
+<!-- 방문 집계 — 쿠키 없이, 페이지뷰(반복 방문 포함)까지 Abacus로 셉니다 -->
+<script>
+(function(){
+  if (/^(localhost|127\.0\.0\.1)$/.test(location.hostname) || location.protocol==='file:') return;
+  var b='https://abacus.jasoncameron.dev/hit/oreumgames/';
+  function h(k){ try{ fetch(b+k,{mode:'cors'}).catch(function(){}); }catch(e){} }
+  h('pageviews'); h('pv_app'); h('pv_piano');
+})();
+</script>
+<script src="/assets/board-new.js?v=3" defer></script>
+<script src="/assets/app-time.js?v=1" data-app="piano" defer></script>
+<script src="/assets/mail.js" defer></script>
+<script src="/assets/install.js?v=7" defer></script>
+<script src="/assets/search.js?v=28" defer></script>
+</body>
+</html>

@@ -1,0 +1,201 @@
+/* 피아노 연습 — 소재: 흑건(주 단추)·상아 건반(보조)·금색 페달(둥근 단추)·오선지 종이(창·목록). design.md 참고 */
+.piano { --ebony: #17161b; --ebony2: #2a2930; --ivory: #f6f1e4; --ivory2: #e9e2d0; --ivory3: #d8d0bb;
+  --gold: #c8a04c; --gold2: #f1dc93; --gold3: #8a6a22; --felt: #c8323a; --paper: #fbf7ec; --pline: #cfc5aa;
+  --serif: "GraceSerif", "Pretendard", serif; }
+@font-face { font-family: "GraceSerif"; src: url("../fonts/grace.woff2") format("woff2"); font-weight: 700; font-display: swap; }
+.piano .top h1 { font-family: var(--serif); font-weight: 700; letter-spacing: -.02em; }
+.piano .top h1::before { background: var(--ebony); }
+.piano .promise li { color: var(--ebony); border-color: var(--ivory3); background: var(--ivory); }
+
+/* ---------- 단추: 흑건 / 상아 */
+.piano .btn, .piano .mode, .piano .stagebtn, .piano .songcard, .piano .lvcard {
+  cursor: pointer; border: 0; border-radius: 10px; font-weight: 800; line-height: 1.15;
+  transition: transform .22s cubic-bezier(.34,1.56,.64,1), box-shadow .22s, filter .15s; -webkit-tap-highlight-color: transparent; }
+.piano .btn:hover, .piano .mode:hover, .piano .stagebtn:hover, .piano .songcard:hover, .piano .lvcard:hover { filter: brightness(1.05); }
+.piano .btn { padding: 13px 22px; font-size: 19px; min-width: 120px; }
+.piano .btn.small { padding: 8px 14px; font-size: 15px; min-width: 0; }
+.piano .btn.wide { width: 100%; }
+.piano .ebony { color: var(--ivory); background: linear-gradient(180deg, #4a4952 0%, #212026 16%, #141318 100%);
+  box-shadow: 0 5px 0 #000, inset 0 2px 0 rgba(255,255,255,.26), inset 0 -4px 0 rgba(0,0,0,.55), inset 0 0 0 1px rgba(255,255,255,.06); }
+.piano .ebony:active { transform: translateY(4px); box-shadow: 0 1px 0 #000, inset 0 2px 0 rgba(255,255,255,.26), inset 0 -4px 0 rgba(0,0,0,.55); transition-duration: .04s; }
+.piano .ivory { color: var(--ebony); background: linear-gradient(180deg, #fffdf7 0%, #f6f1e4 55%, #ebe4d1 100%);
+  box-shadow: 0 4px 0 #b4ab95, inset 0 1px 0 #fff, inset 0 0 0 1px rgba(60,50,30,.12); }
+.piano .ivory:active { transform: translateY(3px); box-shadow: 0 1px 0 #b4ab95, inset 0 1px 0 #fff, inset 0 0 0 1px rgba(60,50,30,.12); transition-duration: .04s; }
+.piano .ghost { background: transparent; border: 1px solid var(--ivory3); color: var(--muted); border-radius: 10px; padding: 10px 16px; cursor: pointer; }
+.piano .ghost.wide { width: 100%; margin-top: 18px; }
+
+/* 금색 페달(둥근 단추) */
+.piano .pedal { width: 44px; height: 44px; border-radius: 50%; border: 0; cursor: pointer; position: relative; flex: none; padding: 0;
+  background: radial-gradient(circle at 35% 30%, #fbeaa8 0%, #d9b45e 35%, #a6812d 75%, #6f5218 100%);
+  box-shadow: 0 4px 0 #4e3a10, inset 0 2px 0 rgba(255,255,255,.55), inset 0 -3px 0 rgba(0,0,0,.25); }
+.piano .pedal::before { content: ''; position: absolute; inset: 0; border-radius: 50%; background: linear-gradient(135deg, transparent 38%, rgba(255,255,255,.35) 46%, transparent 54%); }
+.piano .pedal svg { width: 24px; height: 24px; position: absolute; left: 10px; top: 10px; filter: drop-shadow(0 1px 0 rgba(0,0,0,.5)); }
+.piano .pedal:active, .piano .pedal.down { transform: translateY(3px); box-shadow: 0 1px 0 #4e3a10, inset 0 2px 0 rgba(255,255,255,.55), inset 0 -3px 0 rgba(0,0,0,.25); }
+.piano .pedal.off { opacity: .6; }
+.piano .pedal.off::after { content: ''; position: absolute; left: 24%; right: 24%; top: 50%; height: 2px; margin-top: -1px; background: #fff; border-radius: 1px; transform: rotate(-40deg); }
+.piano .pedal.txt { font: 800 14px/1 var(--font); color: #fff; text-shadow: 0 1px 0 rgba(0,0,0,.5); }
+
+/* ---------- 오선지 종이(창·목록) */
+.piano .paper { background: var(--paper); border-radius: 14px; padding: 22px 18px 18px; margin-top: 18px; position: relative;
+  box-shadow: 0 1px 0 #fff inset, 0 10px 30px rgba(40,30,10,.08), 0 0 0 1px #e4dcc6; overflow: hidden; }
+.piano .paper::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 29px; opacity: .9; pointer-events: none;
+  background: repeating-linear-gradient(to bottom, transparent 0 6px, var(--pline) 6px 7px); }
+.piano .lhead { display: flex; align-items: baseline; gap: 12px; margin: 10px 0 14px; }
+.piano .lhead b { font-family: var(--serif); font-size: 26px; }
+.piano .prog { color: var(--muted); font-size: 15px; font-weight: 700; margin-left: auto; }
+
+/* 홈 네 칸 */
+.piano .modes { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.piano .mode { display: grid; justify-items: start; gap: 4px; padding: 20px 20px 18px; text-align: left; }
+.piano .mode b { font-family: var(--serif); font-size: 27px; line-height: 1.1; }
+.piano .mode i { font-style: normal; font-size: 14px; font-weight: 700; opacity: .7; }
+.piano .mode.ebony i { opacity: .75; }
+
+/* 곡 카드 */
+.piano .songgrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.piano .songcard { display: grid; gap: 4px; padding: 12px 12px 10px; text-align: left; position: relative; min-height: 86px; }
+.piano .songcard .n { font-size: 13px; color: var(--muted); font-weight: 800; }
+.piano .songcard .t { font-size: 17px; line-height: 1.2; word-break: keep-all; }
+.piano .songcard .st { font-size: 13px; letter-spacing: 1px; color: var(--gold3); }
+.piano .songcard .st i { font-style: normal; color: #cdc5ae; }
+.piano .songcard.lock { opacity: .55; }
+.piano .songcard.lock::after { content: ''; position: absolute; right: 10px; top: 10px; width: 14px; height: 18px; border-radius: 3px; background: #8f8775;
+  box-shadow: 0 -7px 0 -2px transparent; }
+.piano .songcard.lock::before { content: ''; position: absolute; right: 12px; top: 3px; width: 6px; height: 10px; border: 2px solid #8f8775; border-bottom: 0; border-radius: 6px 6px 0 0; }
+.piano .songcard.done .t::after { content: ' ✔'; color: var(--felt); }
+
+/* 단계 카드(계이름·악보) */
+.piano .lvgrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.piano .lvcard { display: grid; gap: 3px; padding: 11px 10px 9px; text-align: left; min-height: 74px; position: relative; }
+.piano .lvcard .n { font-size: 13px; color: var(--muted); font-weight: 800; }
+.piano .lvcard .t { font-size: 15px; line-height: 1.2; word-break: keep-all; }
+.piano .lvcard .st { font-size: 13px; letter-spacing: 1px; color: var(--gold3); }
+.piano .lvcard .st i { font-style: normal; color: #cdc5ae; }
+.piano .lvcard.lock { opacity: .55; }
+
+/* 곡 하나 화면 */
+.piano .kbar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 6px; }
+.piano .kbar b { font-family: var(--serif); font-size: clamp(24px, 5vw, 34px); line-height: 1.1; }
+.piano .lv { color: var(--muted); font-weight: 800; font-size: 14px; }
+.piano .stages { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px; }
+.piano .stagebtn { display: grid; gap: 4px; padding: 16px 16px 14px; text-align: left; }
+.piano .stagebtn .n { font-size: 13px; opacity: .65; }
+.piano .stagebtn .t { font-size: 20px; }
+.piano .stagebtn .st { font-size: 15px; letter-spacing: 2px; color: var(--gold2); }
+.piano .stagebtn .st i { font-style: normal; opacity: .35; }
+.piano .stagebtn.ivory .st { color: var(--gold3); }
+.piano .acts { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 16px; }
+
+/* ---------- 연주 화면 */
+.piano #stage { position: fixed; inset: 0; z-index: 50; display: grid; grid-template-rows: auto 1fr auto; background: #0f0e12; color: var(--ivory);
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area-inset-left); }
+.piano .sbar { display: flex; align-items: center; gap: 10px; padding: 8px 10px; background: linear-gradient(180deg, #2a2930, #1b1a20); border-bottom: 1px solid #000; min-height: 56px; flex-wrap: nowrap; }
+.piano .sbar b { font-family: var(--serif); font-size: 20px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 34vw; }
+.piano .sprog { flex: 1 1 60px; height: 8px; border-radius: 4px; background: #000; box-shadow: inset 0 1px 2px rgba(0,0,0,.8), 0 1px 0 rgba(255,255,255,.08); overflow: hidden; min-width: 40px; }
+.piano .sprog span { display: block; height: 100%; width: 0%; background: linear-gradient(90deg, var(--gold3), var(--gold2)); transition: width .15s; }
+.piano .sinfo { font-weight: 800; font-size: 16px; white-space: nowrap; color: var(--gold2); min-width: 2em; text-align: right; }
+.piano .stools { display: flex; gap: 6px; align-items: center; margin-left: auto; }
+.piano .stools .btn.small { padding: 7px 10px; font-size: 14px; }
+.piano .stools .pedal { width: 40px; height: 40px; }
+.piano .stools .pedal svg { width: 22px; height: 22px; left: 9px; top: 9px; }
+.piano .stools .num { font-weight: 800; font-size: 15px; min-width: 2.2em; text-align: center; color: var(--ivory); }
+.piano .sview { position: relative; overflow: hidden; background: linear-gradient(180deg, #17161b 0%, #1d1c23 100%); }
+.piano .sview.paperbg { background: var(--paper); color: var(--ebony); }
+.piano #fall { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.piano #staffBox { position: absolute; inset: 0; display: grid; place-items: center; padding: 10px; }
+.piano #staffBox svg { width: min(100%, 560px); height: auto; max-height: 100%; }
+.piano #earBox { position: absolute; inset: 0; display: grid; place-items: center; align-content: center; gap: 18px; }
+.piano .earq { font-family: var(--serif); font-size: clamp(28px, 6vw, 54px); color: var(--ivory); text-align: center; line-height: 1.1; }
+.piano .earq b { display: block; font-weight: 700; font-size: clamp(64px, 14vh, 120px); line-height: 1; }
+.piano .earq small { display: block; font-family: var(--font); font-size: 16px; color: var(--gold2); margin-top: 10px; }
+.piano #judge { position: absolute; left: 0; right: 0; top: 34%; text-align: center; pointer-events: none; font-family: var(--serif); font-size: clamp(64px, 13vw, 150px); line-height: 1; color: #3fe07a; -webkit-text-stroke: 3px #0f3a1f; paint-order: stroke fill; text-shadow: 0 6px 0 rgba(0,0,0,.45); opacity: 0; z-index: 3; }
+.piano #judge.pop { animation: pjudge .75s ease-out; }
+.piano #judge.bad { color: #ff5a4e; -webkit-text-stroke: 3px #4a0f0a; }
+@keyframes pjudge { 0% { opacity: 0; transform: translateY(16px) scale(.7); } 18% { opacity: 1; transform: translateY(0) scale(1.12); } 30% { transform: scale(1); } 72% { opacity: 1; } 100% { opacity: 0; transform: translateY(-20px); } }
+.piano #count { position: absolute; inset: 0; display: grid; place-items: center; font-family: var(--serif); font-size: clamp(60px, 16vh, 140px); color: var(--gold2); text-shadow: 0 3px 0 rgba(0,0,0,.6); pointer-events: none; }
+
+/* 건반 */
+.piano .kbwrap { background: #0a0a0c; padding: 6px 6px calc(8px + env(safe-area-inset-bottom)); border-top: 3px solid #3a2a0a; box-shadow: inset 0 6px 10px rgba(0,0,0,.8); }
+.piano .kb { position: relative; height: clamp(120px, 30vh, 230px); touch-action: none; user-select: none; -webkit-user-select: none; }
+.piano .wk, .piano .bk { position: absolute; top: 0; box-sizing: border-box; cursor: pointer; }
+.piano .wk { height: 100%; background: linear-gradient(180deg, #fffefa 0%, #f7f3e8 78%, #e5ddc8 100%); border: 1px solid #7d7663; border-top: 0; border-radius: 0 0 6px 6px;
+  box-shadow: inset 0 -7px 0 rgba(0,0,0,.07), inset -2px 0 0 rgba(0,0,0,.05); transition: background .06s, transform .05s; }
+.piano .wk.on { background: linear-gradient(180deg, #fff2c2, #f3d98a 80%, #d9bd66); transform: translateY(2px); box-shadow: inset 0 -5px 0 rgba(0,0,0,.08); }
+.piano .bk { height: 62%; z-index: 2; background: linear-gradient(180deg, #4d4c55 0%, #1d1c22 10%, #0f0e12 100%); border-radius: 0 0 5px 5px;
+  box-shadow: 0 4px 0 #000, inset 0 -9px 0 rgba(255,255,255,.08), inset 2px 0 0 rgba(255,255,255,.08), inset -2px 0 0 rgba(0,0,0,.6); transition: background .06s, transform .05s; }
+.piano .bk.on { background: linear-gradient(180deg, #8a7430, #4a3c12 60%, #2a2208); transform: translateY(3px); box-shadow: 0 1px 0 #000, inset 0 -6px 0 rgba(255,255,255,.08); }
+.piano .wk.hint { background: linear-gradient(180deg, #fff6d6, #ffe3a0 80%, #e8c76e); box-shadow: inset 0 0 0 3px var(--gold), inset 0 -7px 0 rgba(0,0,0,.07); }
+.piano .bk.hint { background: linear-gradient(180deg, #a68a3a, #6b5618 70%, #4a3b10); box-shadow: 0 4px 0 #000, inset 0 0 0 3px var(--gold2); }
+.piano .wk.hintL { background: linear-gradient(180deg, #e7f1ff, #bcd6fb 80%, #9bbfe9); box-shadow: inset 0 0 0 3px #4d8fe0, inset 0 -7px 0 rgba(0,0,0,.07); }
+.piano .bk.hintL { background: linear-gradient(180deg, #3e6fae, #24466f 70%, #182f4a); box-shadow: 0 4px 0 #000, inset 0 0 0 3px #86b6f3; }
+.piano .wk.bad { background: linear-gradient(180deg, #ffd9d9, #f3a3a3 80%, #d97b7b); }
+.piano .bk.bad { background: linear-gradient(180deg, #8a3030, #4a1212 60%, #2a0808); }
+.piano .wk .lb { position: absolute; left: 0; right: 0; bottom: 7px; text-align: center; font-weight: 800; font-size: clamp(10px, 1.6vw, 15px); color: #5b5443; pointer-events: none; }
+.piano .wk .kk { position: absolute; left: 0; right: 0; bottom: 26px; text-align: center; font-size: 11px; color: #a39b86; pointer-events: none; font-weight: 700; }
+.piano .bk .lb { position: absolute; left: 0; right: 0; bottom: 6px; text-align: center; font-weight: 800; font-size: clamp(9px, 1.3vw, 12px); color: #c9c1aa; pointer-events: none; }
+.piano .bk .kk { position: absolute; left: 0; right: 0; bottom: 20px; text-align: center; font-size: 10px; color: #8a8270; pointer-events: none; font-weight: 700; }
+.piano .kb.nolabel .lb { display: none; }
+.piano .kb.tiny .bk .lb, .piano .kb.tiny .kk { display: none; }
+.piano .kb.tiny .wk .lb { font-size: 9px; bottom: 4px; letter-spacing: -.04em; }
+.piano .kb.narrow .bk .lb { font-size: 9px; }
+.piano #tRot { display: none; }
+@media (orientation: portrait) and (max-width: 600px) { .piano #tRot.show { display: inline-block; } }
+.piano .kb.nokey .kk { display: none; }
+
+/* 결과·엔딩 */
+.piano #result, .piano #ending { position: absolute; inset: 0; display: grid; place-items: center; background: rgba(10,10,14,.55); z-index: 5; padding: 16px; }
+.piano .card { width: min(92vw, 440px); text-align: center; display: grid; justify-items: center; gap: 6px; padding: 30px 20px 22px; color: var(--ebony); animation: pcard .2s ease-out; }
+@keyframes pcard { from { transform: scale(.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.piano .stars { font-size: 54px; line-height: 1; color: var(--gold); letter-spacing: 6px; }
+.piano .stars i { font-style: normal; color: #ddd5bf; }
+.piano .card b { font-family: var(--serif); font-size: 34px; }
+.piano .card span { color: var(--muted); font-weight: 700; font-size: 16px; }
+.piano .card.end i { font-style: normal; font-family: var(--serif); font-size: 18px; color: var(--felt); letter-spacing: .2em; }
+.piano .card.end b { font-size: 30px; }
+
+/* 폰 세로 */
+@media (max-width: 520px) {
+  .piano .modes { grid-template-columns: 1fr; }
+  .piano .mode { padding: 16px 18px 14px; }
+  .piano .mode b { font-size: 24px; }
+  .piano .songgrid { grid-template-columns: repeat(2, 1fr); }
+  .piano .lvgrid { grid-template-columns: repeat(3, 1fr); }
+  .piano .stages { grid-template-columns: 1fr; }
+  .piano .sbar b { display: none; }
+  .piano .sbar { gap: 8px; padding: 6px 8px; flex-wrap: wrap; }
+  .piano .stools { display: contents; }
+  .piano .stools .btn.small { padding: 6px 9px; font-size: 13px; }
+  .piano .sbar .btn.small { padding: 6px 10px; font-size: 14px; }
+  .piano .wk .kk, .piano .bk .kk { display: none; }
+  .piano .kb { height: clamp(140px, 30vh, 200px); }
+}
+/* 폰 가로: 높이가 낮다 — 상단바 얇게, 건반은 화면의 40% */
+@media (max-height: 480px) {
+  .piano .sbar { min-height: 44px; padding: 4px 8px; }
+  .piano .sbar b { font-size: 16px; }
+  .piano .sbar .btn.small { padding: 5px 10px; font-size: 13px; }
+  .piano .pedal, .piano .stools .pedal { width: 36px; height: 36px; }
+  .piano .pedal svg, .piano .stools .pedal svg { width: 20px; height: 20px; left: 8px; top: 8px; }
+  .piano .kb { height: 40vh; }
+  .piano .kbwrap { padding: 4px 6px 6px; }
+  .piano .wk .lb { bottom: 4px; font-size: 11px; }
+  .piano .wk .kk { bottom: 18px; font-size: 10px; }
+  .piano .card { padding: 14px 16px 12px; gap: 2px; }
+  .piano .stars { font-size: 38px; }
+  .piano .card b { font-size: 24px; }
+  .piano .card .acts { margin-top: 8px; }
+  .piano .card .btn { padding: 8px 16px; font-size: 16px; min-width: 96px; }
+  .piano #judge { top: 24%; font-size: clamp(48px, 20vh, 96px); }
+}
+
+/* ---------- 피아노 악보 페이지 */
+.piano .paper.score { padding: 14px 10px 10px; }
+.piano .paper.score::before { display: none; }
+.piano .paper.score svg { width: 100%; height: auto; display: block; }
+.piano .kbar .spacer { flex: 1; }
+.piano .acts a.btn { text-decoration: none; display: inline-block; }
+@media print {
+  .piano .top, .piano .kbar, .piano .acts, .piano #shHome { display: none !important; }
+  .piano .paper.score { box-shadow: none; background: #fff; padding: 0; margin: 0; }
+  body { background: #fff; }
+}
