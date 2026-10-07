@@ -32,7 +32,7 @@
 
 <link rel="stylesheet" href="/style.css?v=47">
 <link rel="stylesheet" href="/apps/tools.css?v=2">
-<link rel="stylesheet" href="/apps/piano/css/piano.css?v=10">
+<link rel="stylesheet" href="/apps/piano/css/piano.css?v=12">
 <style>
   .pm-panel { background: #fff; border: 1px solid #ececec; border-radius: 22px; padding: 28px 22px 24px; box-shadow: 0 1px 2px rgba(20,20,30,.04), 0 18px 40px rgba(20,20,30,.06); }
   .pm-panel + .gp-line { margin-top: 28px; }
@@ -189,20 +189,24 @@
 <div class="pm piano pm-panel" id="piano">
   <div class="pm-page">
 
-    <div class="top">
-      <h1 data-en="Piano Practice">피아노 연습</h1>
-      <ul class="promise"><li data-en="No install">설치 없이</li><li data-en="No sign-up">회원가입 없이</li><li data-en="Progress saved">진도 저장</li></ul>
+    <div class="top hero">
+      <div class="hero-in">
+        <h1 data-en="Piano Practice">피아노 연습</h1>
+        <ul class="promise"><li data-en="No install">설치 없이</li><li data-en="No sign-up">회원가입 없이</li><li data-en="Progress saved">진도 저장</li></ul>
+      </div>
+      <div class="hero-keys" aria-hidden="true"></div>
     </div>
 
     <!-- 홈 -->
     <section id="pHome">
       <div class="modes">
-        <button type="button" class="mode ebony" data-go="songs"><b data-en="Songs">곡 연습</b><i data-en="39 songs · falling notes">39곡 · 떨어지는 음표</i></button>
-        <button type="button" class="mode ivory" data-go="keys"><b data-en="Keyboard">건반</b><i data-en="Free play · record · metronome">자유 연주 · 녹음 · 메트로놈</i></button>
-        <button type="button" class="mode ivory" data-go="ear"><b data-en="Ear Training">계이름 듣기</b><i data-en="Hear a note, find the key">소리 듣고 건반 찾기</i></button>
-        <button type="button" class="mode ivory" data-go="sheet"><b data-en="Sight Reading">악보 읽기</b><i data-en="Read the staff, press the key">오선지 보고 건반 찾기</i></button>
+        <button type="button" class="mode ebony" data-go="songs"><span class="ic" aria-hidden="true"><svg viewBox="0 0 28 28"><rect x="5" y="3" width="4.2" height="10" rx="1.6" fill="currentColor"/><rect x="11.9" y="8" width="4.2" height="7" rx="1.6" fill="currentColor" opacity=".75"/><rect x="18.8" y="2" width="4.2" height="13.5" rx="1.6" fill="currentColor" opacity=".9"/><path d="M3 19.5h22" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M5 23.5h4M12 23.5h4M19 23.5h4" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" opacity=".45"/></svg></span><b data-en="Songs">곡 연습</b><i data-en="39 songs · falling notes">39곡 · 떨어지는 음표</i></button>
+        <button type="button" class="mode ivory" data-go="keys"><span class="ic" aria-hidden="true"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="6" width="22" height="16" rx="2.5"/><path d="M9.3 6v16M15.7 6v16M22 6v16" opacity=".55"/><rect x="7.6" y="6" width="3.4" height="9" rx="1" fill="currentColor" stroke="none"/><rect x="14" y="6" width="3.4" height="9" rx="1" fill="currentColor" stroke="none"/></svg></span><b data-en="Keyboard">건반</b><i data-en="Free play · record · metronome">자유 연주 · 녹음 · 메트로놈</i></button>
+        <button type="button" class="mode ivory" data-go="ear"><span class="ic" aria-hidden="true"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 20V8l9-2v11"/><ellipse cx="8.6" cy="20.4" rx="2.9" ry="2.3" fill="currentColor" stroke="none"/><ellipse cx="17.6" cy="17.4" rx="2.9" ry="2.3" fill="currentColor" stroke="none"/><path d="M23 9.5a5 5 0 0 1 0 6M25.6 7a9 9 0 0 1 0 11" opacity=".6"/></svg></span><b data-en="Ear Training">계이름 듣기</b><i data-en="Hear a note, find the key">소리 듣고 건반 찾기</i></button>
+        <button type="button" class="mode ivory" data-go="sheet"><span class="ic" aria-hidden="true"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3 7h22M3 11h22M3 15h22M3 19h22M3 23h22" opacity=".55"/><ellipse cx="11" cy="19" rx="3" ry="2.2" transform="rotate(-20 11 19)" fill="currentColor" stroke="none"/><path d="M13.7 18.2V6.5" stroke-width="2"/><ellipse cx="19.5" cy="13" rx="3" ry="2.2" transform="rotate(-20 19.5 13)" fill="currentColor" stroke="none"/><path d="M22.2 12.2V3" stroke-width="2"/></svg></span><b data-en="Sight Reading">악보 읽기</b><i data-en="Read the staff, press the key">오선지 보고 건반 찾기</i></button>
       </div>
 
+      <div class="lists">
       <div class="paper fold" id="fSongs">
         <button type="button" class="lhead" data-fold="fSongs"><b data-en="Songs">곡 연습</b><span id="pSongProg" class="prog"></span></button>
         <div class="fbody"><div class="songgrid" id="pSongList"></div></div>
@@ -215,11 +219,12 @@
         <button type="button" class="lhead" data-fold="fSheet"><b data-en="Sight Reading">악보 읽기</b><span id="pSheetProg" class="prog"></span></button>
         <div class="fbody"><div class="lvgrid" id="pSheetList"></div></div>
       </div>
+      </div>
       <div class="paper" id="pConcert" hidden>
         <div class="lhead"><b data-en="Recital">연주회</b></div>
         <button type="button" class="btn ebony wide" id="pConcertBtn" data-en="RECITAL">연주회</button>
       </div>
-      <a class="mode ivory wide" id="pSheetLink" href="/apps/piano-sheet/"><b data-en="Piano Sheet Music">피아노 악보</b><i data-en="free scores for every song · note names · print">곡마다 무료 악보 · 계이름 · 인쇄</i></a>
+      <a class="mode ivory wide" id="pSheetLink" href="/apps/piano-sheet/"><b data-en="Piano Sheet Music">피아노 악보</b><i data-en="free scores for every song · note names · print">곡마다 무료 악보 · 계이름 · 인쇄</i><span class="staffart" aria-hidden="true"><svg viewBox="0 0 150 64" fill="none" stroke="#c5c9d0" stroke-width="1.2"><path d="M0 12h150M0 22h150M0 32h150M0 42h150M0 52h150"/><g fill="#17161b" stroke="none"><ellipse cx="34" cy="47" rx="6" ry="4.4" transform="rotate(-20 34 47)"/><ellipse cx="62" cy="37" rx="6" ry="4.4" transform="rotate(-20 62 37)"/><ellipse cx="90" cy="27" rx="6" ry="4.4" transform="rotate(-20 90 27)"/><ellipse cx="118" cy="32" rx="6" ry="4.4" transform="rotate(-20 118 32)"/></g><g stroke="#17161b" stroke-width="2"><path d="M39.5 45V18M67.5 35V8M95.5 25V-2M123.5 30V3"/></g><path d="M95.5 -2C104 3 110 4 112 12" stroke="#17161b" stroke-width="2"/></svg></span></a>
       <button type="button" class="ghost wide" id="pReset" data-en="Clear progress">진도 지우기</button>
     </section>
 
@@ -360,12 +365,12 @@
 </footer>
 
 <!-- 앱: 소리·진도 모두 이 브라우저 안에서만 다룬다 -->
-<script src="/apps/piano/js/landscape.js?v=10"></script>
-<script src="/apps/piano/js/piano-synth.js?v=10"></script>
-<script src="/apps/piano/js/piano-data.js?v=10"></script>
-<script src="/apps/piano/js/piano-clef.js?v=10"></script>
-<script src="/apps/piano/js/piano.js?v=10"></script>
-<script>window.PIANO_V="10"</script>
+<script src="/apps/piano/js/landscape.js?v=12"></script>
+<script src="/apps/piano/js/piano-synth.js?v=12"></script>
+<script src="/apps/piano/js/piano-data.js?v=12"></script>
+<script src="/apps/piano/js/piano-clef.js?v=12"></script>
+<script src="/apps/piano/js/piano.js?v=12"></script>
+<script>window.PIANO_V="12"</script>
 <script src="/assets/visit.js?v=17" defer></script>
 <!-- 방문 집계 — 쿠키 없이, 페이지뷰(반복 방문 포함)까지 Abacus로 셉니다 -->
 <script>
