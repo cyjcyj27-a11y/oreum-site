@@ -62,7 +62,40 @@
   qa('button').forEach(function (b) { b.addEventListener('pointerdown', function () { if (!b.classList.contains('nosnd')) tapSound(); }); });
 
   /* ---------------------------------------------------------- 건반 */
-  var KB = { lo: 60, hi: 84, keys: {}, geom: {}, el: $('kb'), pcBase: 60, baseZ: 48, baseQ: 60, down: {}, ptr: {} };
+  var KB = { lo: 60, hi: 84, keys: {}, geom: {}, el: $('kb'), pcBase: 60, baseZ: 48, baseQ: 60, down: {}, ptr: {}, whites: [], vis: 15, scroll: 0, anim: 0 };
+  /* 보이는 건반 수(흰건반 기준, 사장님 10/7 "옥타브가 아니라 건반숫자"). 저장 piano.keys, 처음엔 화면 폭으로 */
+  var KEY_STEPS = [8, 11, 14, 17, 21, 24];
+  function keyCount() { var k = LS.get('keys', 0); if (k) return k; var w = window.innerWidth; return w >= 1000 ? 21 : w >= 600 ? 14 : 8; }
+  function whiteIndex(m) { var i = KB.whites.indexOf(m); if (i < 0) i = KB.whites.indexOf(m + 1); return i < 0 ? 0 : i; }
+  /* 건반을 s 번째 흰건반이 왼쪽 끝에 오게 민다(움직임 .2초) */
+  function setScroll(s, instant) {
+    var nw = KB.whites.length, vis = Math.min(KB.vis, nw);
+    s = Math.max(0, Math.min(nw - vis, s));
+    if (KB.anim) cancelAnimationFrame(KB.anim);
+    var from = KB.scroll, t0 = performance.now();
+    if (instant || Math.abs(s - from) < 0.01) { KB.scroll = s; KB.el.style.transform = 'translateX(' + (-s * 100 / nw) + '%)'; measureKB(); return; }
+    function step(ts) {
+      var k = Math.min(1, (ts - t0) / 200), e = 1 - (1 - k) * (1 - k);
+      KB.scroll = from + (s - from) * e;
+      KB.el.style.transform = 'translateX(' + (-KB.scroll * 100 / nw) + '%)'; measureKB();
+      if (k < 1) KB.anim = requestAnimationFrame(step); else KB.anim = 0;
+    }
+    KB.anim = requestAnimationFrame(step);
+  }
+  /* 보이는 건반 수를 바꾼다(곡이 더 넓게 필요하면 고른 수보다 넓혀서) */
+  function setVis(v) {
+    var nw = KB.whites.length; KB.vis = Math.max(1, v);
+    var vis = Math.min(KB.vis, nw);
+    KB.el.style.width = (nw / vis * 100) + '%';
+    setScroll(KB.scroll, true);
+  }
+  /* 이 음들이 보이게 민다(안 보이는 음이 있을 때만, 가운데로) */
+  function scrollTo(ms) {
+    var nw = KB.whites.length, vis = Math.min(KB.vis, nw); if (nw <= vis || !ms.length) return;
+    var lo = 1e9, hi = -1; ms.forEach(function (m) { var i = whiteIndex(m); if (i < lo) lo = i; if (i > hi) hi = i; });
+    if (lo >= KB.scroll && hi < KB.scroll + vis) return;
+    setScroll((lo + hi + 1) / 2 - vis / 2);
+  }
   var LOWER = { KeyZ: 0, KeyS: 1, KeyX: 2, KeyD: 3, KeyC: 4, KeyV: 5, KeyG: 6, KeyB: 7, KeyH: 8, KeyN: 9, KeyJ: 10, KeyM: 11, Comma: 12, KeyL: 13, Period: 14, Semicolon: 15, Slash: 16 };
   var UPPER = { KeyQ: 0, Digit2: 1, KeyW: 2, Digit3: 3, KeyE: 4, KeyR: 5, Digit5: 6, KeyT: 7, Digit6: 8, KeyY: 9, Digit7: 10, KeyU: 11, KeyI: 12, Digit9: 13, KeyO: 14, Digit0: 15, KeyP: 16 };
   var LOWER_LB = {}, UPPER_LB = {};
@@ -108,6 +141,10 @@
     KB.lo = lo; KB.hi = hi; KB.keys = {}; KB.down = {};
     var el = KB.el; el.innerHTML = '';
     var whites = white(lo, hi), nw = whites.length, ww = 100 / nw;
+    KB.whites = whites; KB.vis = keyCount();
+    var vis = Math.min(KB.vis, nw);
+    el.style.width = (nw / vis * 100) + '%';   // 보이는 수보다 많으면 건반이 화면 밖으로 이어지고 옆으로 민다
+    el.style.transform = 'none'; KB.scroll = 0; if (KB.anim) { cancelAnimationFrame(KB.anim); KB.anim = 0; }
     var m, i, k;
     for (i = 0; i < nw; i++) {
       m = whites[i];
@@ -368,6 +405,17 @@
     b.addEventListener('click', function () { S.label = S.label === 'kor' ? 'eng' : S.label === 'eng' ? 'none' : 'kor'; LS.set('label', S.label); txt(); labelKB(); });
     txt(); return b;
   }
+  /* 건반 수 단추: 8 → 11 → 14 → 17 → 21 → 24 */
+  function keysBtn(onChange) {
+    var b = tool('<button type="button" class="btn ivory small" id="tKeys"></button>');
+    function txt() { b.textContent = EN ? keyCount() + ' keys' : '건반 ' + keyCount(); }
+    b.addEventListener('click', function () {
+      var k = keyCount(), i = KEY_STEPS.indexOf(k); if (i < 0) { i = 0; while (i < KEY_STEPS.length - 1 && KEY_STEPS[i] < k) i++; }
+      LS.set('keys', KEY_STEPS[(i + 1) % KEY_STEPS.length]); txt();
+      if (onChange) onChange(); else { releaseAll(); var lo = KB.lo, hi = KB.hi; buildKB(lo, hi); }
+    });
+    txt(); return b;
+  }
   /* 결과 창 */
   var afterResult = null;
   function showResult(stars, title, sub, next) {
@@ -432,12 +480,32 @@
     KB.baseQ = fitBase(rLo, rHi, 29);
     KB.baseZ = (def && def.hand === 'LR' && lLo < 127) ? fitBase(lLo, lHi, 24) : KB.baseQ - 12;
     labelKB();
+    /* 고른 건반 수가 이 단계에 모자라면(양손이 멀리 떨어져 같이 나올 때) 1.5박 안에 같이 나오는 음이 다 보이는 수까지 넓힌다 */
+    function fitKeys() {
+      var need = 1, player = notes.filter(function (n) { return !n.auto; });
+      for (var i = 0; i < player.length; i++) {
+        var lo = whiteIndex(player[i].m), hi = lo;
+        for (var j = i + 1; j < player.length && player[j].t <= player[i].t + 1.5; j++) { var k = whiteIndex(player[j].m); if (k < lo) lo = k; if (k > hi) hi = k; }
+        if (hi - lo + 2 > need) need = hi - lo + 2;
+      }
+      if (need > KB.vis) setVis(need);
+    }
+    fitKeys();
     $('sInfo').textContent = def ? '0 / ' + G.total : '';
     labelBtn();
+    keysBtn(function () { releaseAll(); buildKB(KB.lo, KB.hi); labelKB(); fitKeys(); follow(true); });
     var rb = tool('<button type="button" class="btn ivory small">RETRY</button>');
     rb.addEventListener('click', function () { startSong(song, k, opt); });
 
     function firstPending() { for (var i = 0; i < notes.length; i++) if (!notes[i].auto && notes[i].st === 0) return notes[i]; return null; }
+    /* 다음 2박 안의 칠 음이 보이게 건반을 민다 */
+    function follow(instant) {
+      var ms = [], lim = G.t + Math.max(2, 1.5 / G.spb);
+      for (var i = 0; i < notes.length; i++) { var n = notes[i]; if (n.auto || n.st !== 0) continue; if (n.t > lim) break; ms.push(n.m); }
+      if (!ms.length) { var f = firstPending(); if (f) ms.push(f.m); }
+      if (instant) { var nw = KB.whites.length, vis = Math.min(KB.vis, nw); if (nw > vis && ms.length) { var lo = 1e9, hi = -1; ms.forEach(function (m) { var k = whiteIndex(m); if (k < lo) lo = k; if (k > hi) hi = k; }); setScroll((lo + hi + 1) / 2 - vis / 2, true); } }
+      else scrollTo(ms);
+    }
     function finish() {
       if (G.done) return; G.done = true; G.run = false;
       if (k < 0) {
@@ -492,6 +560,7 @@
         if (!n.auto && !G.wait && n.st === 0 && (tNew - n.t) * G.spb > 0.22) n.st = 2;
       });
       G.t = tNew;
+      follow();
       clearHints();
       if (G.wait && due && due.t <= G.t + 0.001) notes.forEach(function (n) { if (!n.auto && n.st === 0 && Math.abs(n.t - due.t) < 1e-6) hint(n.m, n.hand === 'L'); });
       if (G.t > G.end + 1.5) finish();
@@ -515,6 +584,7 @@
         $('sInfo').textContent = G.hits + ' / ' + G.total;
       }
     };
+    follow(true);
     draw();
     countIn(spb, 3, function () { if (MODE && MODE.tick === tick) G.run = true; });
   }
@@ -569,20 +639,14 @@
 
   /* ---------------------------------------------------------- 건반(자유 연주) */
   /* 건반 크기 = 옥타브 수(사장님 10/7 "건반크기 선택하게 해줘"). 저장 piano.oct, 처음엔 화면 폭으로 */
-  function freeOct() { var o = LS.get('oct', 0); if (o) return o; var w = window.innerWidth; return w >= 1000 ? 3 : w >= 600 ? 2 : 1; }
-  function freeRange() { var o = freeOct(), lo = o >= 3 ? 48 : 60; return [lo, lo + 12 * o]; }
+  function hiFor(lo, n) { var m = lo, c = 0; while (c < n) { if (!Y.isBlack(m)) c++; if (c < n) m++; } return m; }   // lo 부터 흰건반 n 개째 음
+  function freeRange() { var n = keyCount(), lo = n >= 21 ? 48 : 60; return [lo, hiFor(lo, n)]; }
   var REC = { on: false, t0: 0, ev: [], timers: [] };
   function startFree() {
     var r = freeRange();
     openStage(tr('건반', 'Keyboard'), r[0], r[1], { noprog: true, nofall: true, staff: true, paper: true });
     var bL = tool('<button type="button" class="btn ivory small">◀</button>'), bR = tool('<button type="button" class="btn ivory small">▶</button>');
-    var bOct = tool('<button type="button" class="btn ivory small" id="tOct"></button>');
-    function octTxt() { bOct.textContent = freeOct() + (EN ? ' oct' : '옥타브'); }
-    bOct.addEventListener('click', function () {
-      var o = freeOct() % 3 + 1; LS.set('oct', o);
-      var lo = Math.max(21, Math.min(KB.lo, 108 - 12 * o)); releaseAll(); buildKB(lo, lo + 12 * o); octTxt(); live();
-    });
-    octTxt();
+    keysBtn(function () { var lo = KB.lo, hi = hiFor(lo, keyCount()); if (hi > 108) { lo -= 12; hi = hiFor(lo, keyCount()); } releaseAll(); buildKB(lo, hi); live(); });
     labelBtn();
     var bRec = tool('<button type="button" class="btn ivory small" id="tRec">REC</button>');
     var bPlay = tool('<button type="button" class="btn ivory small" id="tPlay">PLAY</button>');
