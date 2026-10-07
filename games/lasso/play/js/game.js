@@ -93,8 +93,8 @@
   // 말 울음(neigh)은 내 말이 총에 맞을 때만 낸다(10/3 사장님 "총 안 맞았는데도 소리 내네"). 다른 데서 쓰지 말 것
   function stunHero(shot) {
     if (H.safe > 0 || H.stun > 0 || G.deliver) return;
-    if (shot) { // 총알: 말이 놀라 앞발을 들고 멈춘다(떨어지지는 않는다). 걷는 중이면 잠깐 주춤
-      H.safe = 2.6; CAM.shake = 0.4; sfx('ricochet'); if (L.state === 'spin' || L.state === 'fly') idleLasso();
+    if (shot) { // 총알: 말이 놀라 앞발을 들고 멈춘다(떨어지지는 않는다). 걷는 중이면 잠깐 주춤. 'powder' 는 하얀 가루: 피해는 총알과 같고 연출만 다르다(하얀 번쩍 + COUGH)
+      const pw = shot === 'powder'; H.safe = 2.6; CAM.shake = 0.4; if (pw) { powderFx(); sfx('cough'); powderBurst(hero.chest(_a), 10, false); ftext('COUGH', hero.chest(_a).setY(_a.y + 0.7), 'bad'); } else sfx('ricochet'); if (L.state === 'spin' || L.state === 'fly') idleLasso();
       const hpE = $('#sHp'); hpE.classList.remove('hurt'); void hpE.offsetWidth; hpE.classList.add('hurt');
       if (H.mode === 'ride') { G.horseHp--; updHpHUD(); if (G.horseHp <= 0) { horseDie(); return; } horse.rear = 0.7; horse.speed = 0; sfx('neigh'); H.hold = 0.8; }   // 탔을 땐 말이 맞는다: 3발이면 말이 쓰러진다
       else { G.hp--; updHpHUD(); if (G.hp <= 0) { heroDie(); return; } H.hold = 0.6; H.vel.set(0, 0, 0); sfx('oof'); }   // 걸을 땐 내가 맞는다: 3발이면 게임 오버
@@ -136,11 +136,11 @@
       let thr = 0, st = 0;
       if (inp.m > 0.1) { st = inp.x * inp.m; thr = JOY.on ? (inp.y > -0.6 ? inp.m : -1) : inp.y; }
       // 아래(뒤) = 뒷걸음이 아니라 제자리에서 돌아선다: 카메라가 말 뒤를 따라 같이 돌아 가는 쪽이 늘 보인다
-      const pivot = thr < -0.4 && horse.speed < 3.5; if (Math.abs(st) >= 0.3) H.pivot = Math.sign(st); else if (pivot) st = H.pivot || 1;
+      const pivot = thr < -0.4 && horse.speed < (JOY.on ? 5 : 3.5); if (Math.abs(st) >= 0.3) H.pivot = Math.sign(st); else if (pivot) st = H.pivot || 1;   // 폰(조이스틱)은 더 빠른 속도에서부터 돌아서기 시작(10/7 포럼 "유턴이 답답")
       const want = thr > 0.15 ? maxV * Math.min(1, thr * 1.15) : thr < -0.4 ? 1.3 : Math.abs(st) > 0.3 ? 1.4 : 0;
-      const acc = want > horse.speed ? 7 : thr < -0.1 || lock ? 15 : 5;
+      const acc = want > horse.speed ? 7 : thr < -0.1 || lock ? (JOY.on && thr < -0.4 ? 24 : 15) : 5;   // 폰에서 뒤로 당기면 더 빨리 선다
       horse.speed += clamp(want - horse.speed, -acc * dt, acc * dt);
-      horse.yaw -= st * (2.5 - 1.1 * Math.min(1, Math.abs(horse.speed) / maxV)) * (pivot ? 1.25 : 1) * dt * (horse.speed < -0.1 ? -1 : 1);
+      horse.yaw -= st * (2.5 - 1.1 * Math.min(1, Math.abs(horse.speed) / maxV)) * (pivot ? (JOY.on ? 2.1 : 1.25) : 1) * dt * (horse.speed < -0.1 ? -1 : 1);   // 폰 돌아서기 x2.1(180도 0.65초쯤, 전엔 1초)
       const px = horse.pos.x, pz = horse.pos.z;
       horse.pos.x += Math.sin(horse.yaw) * horse.speed * dt; horse.pos.z += Math.cos(horse.yaw) * horse.speed * dt;
       const hit = collide(horse.pos, 0.85);
@@ -304,6 +304,7 @@
   function needModel(def) { if (!def.model) return Promise.resolve(); return modelP[def.id] || (modelP[def.id] = loadGLB('assets/models/outlaws/' + def.model + '.glb').then(g => { const o = mkOutlaw(g, def.id); outlaws.push(o); o.p.root.visible = true; o.p.root.position.copy(hero.pos); R.compile(S, cam); o.p.root.traverse(c => c.frustumCulled = false); o.p.mixer.update(0.01); R.render(S, cam); o.p.root.traverse(c => c.frustumCulled = true); o.p.root.visible = false; })); }   // 불러올 때 한 번 그려 GPU 에 올려 둔다(처음 눈에 들어올 때 0.3~0.5초 멈칫하던 것)
   const curTarget = () => outlaws.find(o => o.kind === 'main' && o.state !== 'off' && o.def.id === G.target);
   function setTarget(id) {
+    if (G.ch === 2) { if (L.state === 'hold') idleLasso(); G.target = id; G.respawn = 0; updTargetHUD(); save(); return; }   // 2부: 다 풀려 있으니 전단은 화살표 목적지만 바꾼다(놈들은 updCh2 가 은신처마다 세워 둔다)
     if (G.chase) endChase();
     outlaws.forEach(o => { if (o.state !== 'off' && o.state !== 'down' && o.state !== 'jail' && (o.kind === 'main' || o.kind === 'guard')) despawn(o); });
     if (L.state === 'hold') idleLasso();
@@ -314,19 +315,44 @@
       needModel(def).then(go).catch(e => console.error(e)); }
     updTargetHUD(); save();
   }
-  function escaped(o) { if (o.kind !== 'main') { despawn(o); return; } banner('ESCAPED', true); sfx('escaped'); MUSIC.mode('calm'); despawn(o); G.respawn = 6; }
+  function escaped(o) { if (o.kind !== 'main') { despawn(o); return; } banner('ESCAPED', true); sfx('escaped'); MUSIC.mode('calm'); const id = o.def.id; despawn(o); if (G.ch === 2) ch2Gone[id] = G.time; else G.respawn = 6; }
+  // ── 2부: 탈옥한 놈들이 은신처마다 한꺼번에 나와 있다(10/7 사장님 "2부에서는 한꺼번에 다 풀려 있고 여러 명을 한꺼번에 잡을 수 있게") ──
+  // 주인공이 은신처 280m 안에 들어오면 그 놈을 세운다(모델은 한 번에 하나씩 읽어 멈칫이 겹치지 않게). 달아난 놈은 6초 뒤, 주인공이 은신처에서 60m 넘게 떨어져 있을 때 다시 선다
+  const ch2Gone = {}; let ch2Loading = false;
+  const outlawOut = id => outlaws.some(o => o.kind === 'main' && o.state !== 'off' && o.def && o.def.id === id);
+  function updCh2(dt) {
+    if (G.ch !== 2 || !G.started || G.cine || G.ended || ch2Loading) return;
+    const c = heroCenter(_hc);
+    for (const d of OUTLAWS) {
+      if (G.caught.includes(d.id) || !tierOpen(d.tier, d.id) || outlawOut(d.id)) continue;
+      const s = SITES[d.site], dist = Math.hypot(c.x - s.x, c.z - s.z); if (dist > 280 || dist < 60) continue;
+      if (ch2Gone[d.id] && G.time - ch2Gone[d.id] < 6) continue;
+      ch2Loading = true;
+
+      needModel(d).then(() => { ch2Loading = false; if (G.ch !== 2 || G.caught.includes(d.id) || outlawOut(d.id)) return; const s2 = SITES[d.site], c2 = heroCenter(_hc); if (Math.hypot(c2.x - s2.x, c2.z - s2.z) > 320) return;   // 읽는 사이 멀어졌으면 다음에
+        const k = Math.cos(s2.ry), sn = Math.sin(s2.ry), at = (lx, lz) => [s2.x + lx * k + lz * sn, s2.z - lx * sn + lz * k]; const [x, z] = at(2.4, 2.6); spawn('main', d, x, z);
+        for (let i = 0; i < (d.guards || 0); i++) { const [gx, gz] = at(-7 + i * 7, 9); spawn('guard', { name: T.hench, tint: 0x8a7a70, h: 1.74 + i * 0.05, tug: 1, shoot: 2.8, bounty: DATA.GUARD_BOUNTY }, gx, gz); } }).catch(e => { ch2Loading = false; console.error(e); });
+      break;   // 한 틱에 하나
+    }
+  }
+  // 2부에서 목적지가 비면 가장 가까운 은신처의 놈을 화살표 목적지로(전단에서 바꿀 수 있다)
+  function autoTarget() { if (G.ch !== 2 || G.target || G.ended) return; const c = heroCenter(_hc); let best = 0, bd = 1e9; OUTLAWS.forEach(d => { if (G.caught.includes(d.id) || !tierOpen(d.tier, d.id)) return; const s = SITES[d.site], dist = Math.hypot(c.x - s.x, c.z - s.z); if (dist < bd) { bd = dist; best = d.id; } }); if (best) setTarget(best); }
   function capture(o) {
     o.state = 'down'; o.vel.set(0, 0, 0); o.p.lie(true); o.p.cur = null; o.p.play('run', 1.3); sfx('yank'); sfx('oof', 0.8 + Math.random() * 0.5); CAM.shake = 0.6; G.slowT = Math.max(G.slowT || 0, 0.22); G.fovK = Math.max(G.fovK || 0, 0.7);   // 확 잡아채 땅에 메친다
     const c = heroCenter(_hc), dx = c.x - o.pos.x, dz = c.z - o.pos.z, d = Math.hypot(dx, dz) || 1; o.pos.x += dx / d * Math.min(3.2, d * 0.5); o.pos.z += dz / d * Math.min(3.2, d * 0.5); o.hop = 0.8; o.dragV = 0; o.coins = 0; o.coinT = 2; dust(o.pos, 14, 2, 1.4); try { if (navigator.vibrate && touch) navigator.vibrate(60); } catch (e) {}
     captives.push(o); updCapHUD(); updTargetHUD(); if (o.kind === 'main') MUSIC.mode('calm');
   }
   // 총알·다이너마이트(미리 만들어 돌려 쓴다)
-  const bullets = [], bombs = [];
+  const bullets = [], bombs = [], powders = [];
   function shoot(o, c) {
     const b = bullets.find(q => q.life <= 0); if (!b) return; o.p.chest(b.pos); const tt = Math.hypot(c.x - b.pos.x, c.z - b.pos.z) / 30;
     _a.set(c.x + H.vel.x * tt * 0.5 + (Math.random() - 0.5) * 4.4, c.y + 1.2, c.z + H.vel.z * tt * 0.5 + (Math.random() - 0.5) * 4.4).sub(b.pos).normalize();
     b.vel.copy(_a).multiplyScalar(30); b.life = 2; b.m.visible = true; sfx('shot'); puff(b.pos.x, b.pos.y, b.pos.z, _a.x * 2, 0.5, _a.z * 2, 0xfff0c0, 0.9, 0.25);
   }
+  // 하얀 가루(마약유통범, 10/7 사장님 "하얀 가루를 뿌려서 주인공이 맞으면 데미지"): 주머니를 던져 발밑에서 터지고, 구름 안에 있으면 총알 한 발과 같은 피해
+  function powder(o, c) { const b = powders.find(q => q.state === 0); if (!b) return; o.p.chest(b.from); b.to.set(c.x + H.vel.x * 0.45, 0, c.z + H.vel.z * 0.45); b.to.y = heightAt(b.to.x, b.to.z) + 0.1; b.state = 1; b.t = 0; b.hit = false; b.m.visible = true; b.m.scale.setScalar(1); sfx('throw'); }
+  function powderBurst(p, n, big) { for (let i = 0; i < n; i++) puff(p.x + (Math.random() - 0.5) * 0.6, p.y + (big ? 0.3 + Math.random() * 0.8 : -0.6 + Math.random() * 0.8), p.z + (Math.random() - 0.5) * 0.6, (Math.random() - 0.5) * (big ? 5 : 3), big ? 0.6 + Math.random() * 2 : 0.2 + Math.random() * 1.0, (Math.random() - 0.5) * (big ? 5 : 3), i % 4 ? 0xf6f3ea : 0xdcd8cc, big ? 1.5 + Math.random() * 1.3 : 0.9 + Math.random() * 0.6, big ? 1.0 + Math.random() * 0.5 : 0.7); }
+  function powderFx() { const f = $('#powderFx'); f.classList.remove('on'); void f.offsetWidth; f.classList.add('on'); }
   function bomb(o, c) { const b = bombs.find(q => q.state === 0); if (!b) return; o.p.chest(b.from); b.to.set(c.x + H.vel.x * 0.55, 0, c.z + H.vel.z * 0.55); b.to.y = heightAt(b.to.x, b.to.z) + 0.12; b.state = 1; b.t = 0; b.m.visible = true; sfx('throw'); }
   function updShots(dt) {
     const c = heroCenter(_hc);
@@ -340,6 +366,13 @@
         if (b.t > 1.0) { b.state = 0; b.m.visible = false; b.m.scale.setScalar(1); sfx('boom'); CAM.shake = 0.9;
           for (let i = 0; i < 16; i++) puff(b.to.x, b.to.y + 0.4, b.to.z, (Math.random() - 0.5) * 9, 1 + Math.random() * 5, (Math.random() - 0.5) * 9, i % 3 ? 0x6a5a4c : 0xffa040, 2.2, 0.9);
           if (Math.hypot(c.x - b.to.x, c.z - b.to.z) < 4.2) stunHero(); } } });
+    powders.forEach(b => { if (!b.state) return; b.t += dt;
+      if (b.state === 1) { const e = Math.min(1, b.t / 0.55); b.m.position.lerpVectors(b.from, b.to, e); b.m.position.y += Math.sin(e * PI) * 2.6; b.m.rotation.x += dt * 7; b.m.rotation.z += dt * 5;
+        if (Math.random() < dt * 40) puff(b.m.position.x, b.m.position.y, b.m.position.z, (Math.random() - 0.5) * 0.6, 0.3, (Math.random() - 0.5) * 0.6, 0xf6f3ea, 0.35, 0.3);   // 날아가며 가루가 흩날린다
+        if (e >= 1) { b.state = 2; b.t = 0; b.m.visible = false; sfx('land'); powderBurst(b.to, 26, true); } }
+      else { if (b.t < 0.9 && Math.random() < dt * 18) puff(b.to.x + (Math.random() - 0.5) * 2.4, b.to.y + 0.2 + Math.random() * 0.6, b.to.z + (Math.random() - 0.5) * 2.4, (Math.random() - 0.5) * 0.8, 0.5, (Math.random() - 0.5) * 0.8, 0xf1eee6, 1.4, 0.8);   // 구름이 1초쯤 머문다
+        if (!b.hit && Math.hypot(c.x - b.to.x, c.z - b.to.z) < 2.6 && H.safe <= 0 && H.stun <= 0 && !G.deliver) { b.hit = true; stunHero('powder'); }
+        if (b.t > 1.0) b.state = 0; } });
   }
   const _av = new V3();
   // 막힘 풀기(10/3 사장님 "얘 여기 갇힘": 말 탄 놈이 메사 비탈 오목한 데 대고 달리다 멈춤). 0.5초에 기대한 거리의 35%도 못 움직였으면
@@ -370,7 +403,7 @@
     // 말 탄 놈: 벽에 닿으면 벽을 따라 미끄러지는 쪽으로 고개를 튼다(멈춰 박고 있지 않게) — 단 실제로 나아갈 때만(10/6 사장님 "은행강도가 절벽앞에 갇혀 움직이지 않는다": 모서리에선 두 벽이 번갈아 고개를 틀어 머리가 모서리 한가운데에 고정됐다). 제자리면 미끄러지기를 끄고 위의 조향으로 빨리 돌아선다
     if (riding) { const h = o.horse; h.speed += (sp - h.speed) * Math.min(1, dt * 2.5); const hx0 = h.pos.x, hz0 = h.pos.z, step = h.speed * dt; h.pos.x += Math.sin(h.yaw) * h.speed * dt; h.pos.z += Math.cos(h.yaw) * h.speed * dt; if (collide(h.pos, 0.85)) { const mx = h.pos.x - hx0, mz = h.pos.z - hz0, mv = Math.hypot(mx, mz); if (mv > step * 0.45) { h.yaw += wrap(Math.atan2(mx, mz) - h.yaw) * Math.min(1, dt * 6); o.pinT = 0; } else o.pinT = (o.pinT || 0) + dt; h.speed *= Math.pow(0.4, dt); } else o.pinT = 0; h.pos.y = heightAt(h.pos.x, h.pos.z); o.vel.set(Math.sin(h.yaw) * h.speed, 0, Math.cos(h.yaw) * h.speed); o.pos.copy(h.pos); o.yaw = h.yaw; }
     else { o.vel.set(Math.sin(o.yaw) * sp, 0, Math.cos(o.yaw) * sp); o.pos.x += o.vel.x * dt; o.pos.z += o.vel.z * dt; collide(o.pos, 0.35); o.pos.y = heightAt(o.pos.x, o.pos.z); o.p.play('run', sp / 5.4 * 1.6); o.dustT -= dt; if (o.dustT <= 0) { o.dustT = 0.22; puff(o.pos.x, o.pos.y + 0.12, o.pos.z, 0, 0.6, 0, 0xe2c096, 0.6, 0.5); } }
-    if ((o.def.shoot || o.def.bomb) && H.stun <= 0) { o.shootT -= dt; if (o.shootT <= 0 && d < 32 && d > 5) { o.shootT = (o.def.shoot || o.def.bomb) * (0.8 + Math.random() * 0.5); if (o.def.shoot) shoot(o, heroCenter(_hc)); else bomb(o, heroCenter(_hc)); } }
+    if ((o.def.shoot || o.def.bomb || o.def.powder) && H.stun <= 0) { o.shootT -= dt; if (o.shootT <= 0 && d < (o.def.powder ? 24 : 32) && d > 5) { o.shootT = (o.def.shoot || o.def.bomb || o.def.powder) * (0.8 + Math.random() * 0.5); if (o.def.shoot) shoot(o, heroCenter(_hc)); else if (o.def.bomb) bomb(o, heroCenter(_hc)); else powder(o, heroCenter(_hc)); } }
     if (d > (fry ? 80 : 130)) { o.far += dt; if (o.far > 4) escaped(o); } else o.far = 0;
   }
   function updOutlaw(o, dt) {
@@ -398,6 +431,7 @@
     }
     if (o.state === 'down') return; // 끌려가는 몸은 updCaptives 가 놓는다
     if (o.horse) { const h = o.horse; P.root.position.set(h.seat.x, h.seat.y - H.hipH * P.root.scale.y + 0.3, h.seat.z); P.root.rotation.set(0, h.yaw, 0); } else { P.root.position.copy(o.pos); P.root.rotation.set(0, o.yaw, 0); }
+    if ((o.state === 'idle' || o.state === 'guard') && Math.hypot(o.pos.x - cam.position.x, o.pos.z - cam.position.z) > 140) return;   // 멀리서 가만히 있는 놈은 뼈대 계산을 쉰다(2부엔 12명이 한꺼번에 서 있다)
     P.mixer.update(dt); if (o.horse) P.pose('ride'); else if (o.state === 'snared') P.pose('tied'); else if (P.cur === P.acts.stand) P.pose('stand');
     o.fv = (o.fv || 0) + ((o.state === 'fight' ? 1 : 0) - (o.fv || 0)) * Math.min(1, dt * 10); P.fist(o.fv);   // 격투 중엔 주먹
     if (o.state === 'fight' && G.fight && P.acts.fightidle) { if (G.fight.phase === 'guard' && !(o.hitT > 0)) P.pose('guard'); }   // 막는 동안은 두 팔을 얼굴 앞으로(믹사모 자세만으로는 막는 줄 모른다)
@@ -438,7 +472,8 @@
     if (F.phase === 'open') { if (F.t > F.openT) { F.phase = 'guard'; F.t = 0; } }       // 팔을 내리고 있다: 때릴 때
     else if (F.phase === 'guard') { if (F.t > F.guardT) { F.phase = 'swing'; F.t = 0; if (P.acts.hook) P.play('hook', 1.2, 0.42); sfx('alert'); ftext('!', P.chest(_a).setY(_a.y + 0.8), 'big bad'); } }   // 팔을 올려 막는다
     else if (F.t > 0.6) { F.phase = 'open'; F.t = 0; F.punchT = 0.28; sfx('throw');      // 주먹을 뒤로 뺐다가 휘두른다: 물러나면 빗나간다
-      if (d < 1.75 && H.stun <= 0) hitHero(o, dx, dz, d); else { ftext('MISS', hero.chest(_a).setY(_a.y + 0.5)); F.t = -0.5; } }
+      if (o.def.powder) powderBurst(P.chest(_a).add(_b.set(-dx / d * 0.9, 0, -dz / d * 0.9)), 14, false);   // 마약유통범: 주먹 대신 가루를 뿌린다
+      if (d < (o.def.powder ? 2.3 : 1.75) && H.stun <= 0) hitHero(o, dx, dz, d, !!o.def.powder); else { ftext('MISS', hero.chest(_a).setY(_a.y + 0.5)); F.t = -0.5; } }
   }
   function punch() {
     const F = G.fight, o = F.o; if (H.punchT > 0 || H.stun > 0 || H.hold > 0) return; H.punchT = 0.27;
@@ -450,8 +485,8 @@
     F.hp--; o.fhp = F.hp; o.kick = 0.12; o.hitT = 0.34; if (o.p.acts.hitbody) o.p.play('hitbody', 1.8, 0.05); sfx('thud'); sfx('oof', 0.9 + Math.random() * 0.5); CAM.shake = 0.28; ftext('POW', o.p.chest(_a).setY(_a.y + 0.5), 'big'); o.p.chest(_a); for (let i = 0; i < 4; i++) puff(_a.x, _a.y, _a.z, (Math.random() - 0.5) * 3, 1 + Math.random() * 2, (Math.random() - 0.5) * 3, 0xfff0c0, 0.4, 0.3);
     if (F.hp <= 0) { endChase(); o.tight = true; ftext('K.O.', o.p.chest(_a).setY(_a.y + 1), 'big'); sfx('stamp'); capture(o); }
   }
-  function hitHero(o, dx, dz, d) {
-    H.stam--; if (hero.acts.hitbody) hero.play('hitbody', 1.7, 0.05); sfx('thud'); sfx('oof'); CAM.shake = 0.55; ftext('OOF', hero.chest(_a).setY(_a.y + 0.5), 'bad'); hero.pos.x -= dx / d * 0.7; hero.pos.z -= dz / d * 0.7; collide(hero.pos, 0.35); H.vel.set(0, 0, 0); H.hold = 0.55; dust(hero.pos, 4, 0.8);
+  function hitHero(o, dx, dz, d, pw) {
+    H.stam--; if (hero.acts.hitbody) hero.play('hitbody', 1.7, 0.05); if (pw) { powderFx(); sfx('cough'); } else { sfx('thud'); sfx('oof'); } CAM.shake = 0.55; ftext(pw ? 'COUGH' : 'OOF', hero.chest(_a).setY(_a.y + 0.5), 'bad'); hero.pos.x -= dx / d * 0.7; hero.pos.z -= dz / d * 0.7; collide(hero.pos, 0.35); H.vel.set(0, 0, 0); H.hold = 0.55; dust(hero.pos, 4, 0.8);
     if (H.stam <= 0) { H.stun = 2.0; H.safe = 3; hero.lie(true); hero.play('stand'); H.stam = 4; G.fight = null; o.state = 'loose'; o.fleeT = 0; o.getup = 0; tugUI('RUN'); } // 쓰러지면 그 틈에 다시 달아난다
   }
   function updFightUI() {
@@ -459,7 +494,7 @@
     else if (G.chase) $('#tug .g i').style.width = clamp((H.runV - CHASE_V0) / (CHASE_K * 9) * 100, 0, 100) + '%';
   }
   function updStable(dt) { if (Math.hypot(cam.position.x - TOWN.store.x, cam.position.z - TOWN.store.z) > 120) return; stable.forEach(h => h.update(dt)); }
-  function updOutlawHorses(dt) { updStable(dt); ohorses.forEach(h => { if (!h.root.visible) return; if (h.fade > 0) { h.fade -= dt; h.speed += (9 - h.speed) * Math.min(1, dt * 2); avoid(h.pos.x, h.pos.z, 12, _av); h.yaw += clamp(wrap(Math.atan2(Math.sin(h.yaw) + _av.x * 2, Math.cos(h.yaw) + _av.z * 2) - h.yaw), -2 * dt, 2 * dt); h.pos.x += Math.sin(h.yaw) * h.speed * dt; h.pos.z += Math.cos(h.yaw) * h.speed * dt; collide(h.pos, 0.85); h.pos.y = heightAt(h.pos.x, h.pos.z); if (h.fade <= 0) { h.root.visible = false; h.used = false; } } h.update(dt); if (h.stepHit && h.speed > 6 && Math.hypot(h.pos.x - hero.pos.x, h.pos.z - hero.pos.z) < 40) sfx('hoof', 0.4); }); }
+  function updOutlawHorses(dt) { updStable(dt); ohorses.forEach(h => { if (!h.root.visible) return; if (h.fade > 0) { h.fade -= dt; h.speed += (9 - h.speed) * Math.min(1, dt * 2); avoid(h.pos.x, h.pos.z, 12, _av); h.yaw += clamp(wrap(Math.atan2(Math.sin(h.yaw) + _av.x * 2, Math.cos(h.yaw) + _av.z * 2) - h.yaw), -2 * dt, 2 * dt); h.pos.x += Math.sin(h.yaw) * h.speed * dt; h.pos.z += Math.cos(h.yaw) * h.speed * dt; collide(h.pos, 0.85); h.pos.y = heightAt(h.pos.x, h.pos.z); if (h.fade <= 0) { h.root.visible = false; h.used = false; } } else if (Math.hypot(h.pos.x - cam.position.x, h.pos.z - cam.position.z) > 140) return; h.update(dt); if (h.stepHit && h.speed > 6 && Math.hypot(h.pos.x - hero.pos.x, h.pos.z - hero.pos.z) < 40) sfx('hoof', 0.4); }); }
 
   // ── 잡은 놈들: 밧줄에 묶여 줄줄이 끌려온다 ──
   function updCaptives(dt) {
@@ -493,7 +528,7 @@
     if (!D) { if (captives.length && L.state !== 'hold' && G.started) { const c = heroCenter(_hc); if (Math.hypot(c.x - TOWN.jail.x, c.z - TOWN.jail.z) < 6.5) { G.deliver = { t: 0.2, cur: null, k: 0, from: new V3() }; if (H.mode === 'ride') horse.speed = 0; } } return; }
     D.t += dt;
     if (D.cur) { const o = D.cur; D.k += dt / 0.55; const e = Math.min(1, D.k); o.pos.lerpVectors(D.from, DOOR, e); o.pos.y = Math.sin(e * PI) * 1.4 + 0.2; o.p.root.position.copy(o.pos); o.p.root.rotation.y += dt * 9; o.p.mixer.update(dt); if (e >= 1) { jailed(o); D.cur = null; D.t = 0; } return; }
-    if (D.t > 0.4) { if (captives.length) { const o = captives.shift(); o.state = 'jail'; D.cur = o; D.k = 0; D.from.copy(o.pos); sfx('throw'); updCapHUD(); } else { G.deliver = null; save(); } }
+    if (D.t > 0.4) { if (captives.length) { const o = captives.shift(); o.state = 'jail'; D.cur = o; D.k = 0; D.from.copy(o.pos); sfx('throw'); updCapHUD(); } else { G.deliver = null; save(); autoTarget(); } }
   }
   function jailed(o) {
     sfx('clang'); CAM.shake = 0.3; dust(DOOR, 5, 1.2);
@@ -590,13 +625,14 @@
 
   // ── 게시판(현상수배 전단 고르기) ──
   // 전단은 한 장씩만 열린다: 아직 안 잡은 놈 중 번호가 제일 앞인 한 명(10/4 사장님 "현상수배범카드오픈은 한번에 한명씩만 공개해"). 예전엔 급별로 2·5·8·12명에 묶음으로 열렸다(TIER_NEED, 지금은 안 씀)
-  const tierOpen = (t, id) => { const d = OUTLAWS.find(q => !G.caught.includes(q.id)); return !!d && d.id === id; };
+  // 1부: 아직 안 잡은 놈 중 번호가 제일 앞인 한 명만 열린다(10/4). 2부: 다 풀려 있다(10/7 사장님) — 두목만 나머지 12명을 넣은 뒤에 열린다
+  const tierOpen = (t, id) => { if (G.ch === 2) return id !== 13 || G.caught.length >= 12; const d = OUTLAWS.find(q => !G.caught.includes(q.id)); return !!d && d.id === id; };
   function openBoard() {
     G.ui = 'board'; G.seenBoard = true; sfx('paper'); const box = $('#posters'); box.innerHTML = '';
     OUTLAWS.forEach(d => {
-      const done = G.caught.includes(d.id), lock = !done && !tierOpen(d.tier, d.id), b = document.createElement('button');
-      b.className = 'poster' + (done ? ' done' : '') + (lock ? ' lock' : '') + (G.target === d.id ? ' sel' : '');
-      b.innerHTML = `<div class="w${G.ch === 2 && !done ? ' esc' : ''}">${G.ch === 2 && !done ? 'ESCAPED' : 'WANTED'}</div><img src="${d.img || ''}" alt=""><div class="n">${lock ? '?' : d.name}</div>${d.crime ? `<div class="c">${lock ? '?' : d.crime}</div>` : ''}<div class="p">$${d.bounty.toLocaleString('en-US')}</div>`;
+      const done = G.caught.includes(d.id), lock = !done && !tierOpen(d.tier, d.id), hide = lock && G.ch !== 2, b = document.createElement('button');   // 2부 두목은 잠겨도 얼굴·이름은 보인다(1부에서 봤으니까), 잿빛만
+      b.className = 'poster' + (done ? ' done' : '') + (lock ? ' lock' : '') + (hide ? ' hide' : '') + (G.target === d.id ? ' sel' : '');
+      b.innerHTML = `<div class="w${G.ch === 2 && !done ? ' esc' : ''}">${G.ch === 2 && !done ? 'ESCAPED' : 'WANTED'}</div><img src="${d.img || ''}" alt=""><div class="n">${hide ? '?' : d.name}</div>${d.crime ? `<div class="c">${hide ? '?' : d.crime}</div>` : ''}<div class="p">$${d.bounty.toLocaleString('en-US')}</div>`;
       b.onclick = () => { if (done) return; if (lock) { sfx('no'); return; } sfx('paper'); if (G.target !== d.id && !captives.some(o => o.kind === 'main' && o.def.id === d.id)) setTarget(d.id); closeUI(); };
       box.appendChild(b);
     });
@@ -659,14 +695,14 @@
   function drawBoard() { // 게시판 창(전단 고르기)과 같은 그림: 얼굴, 죄목, 현상금. 잠긴 것은 잿빛에 물음표
     const B = WORLD.board, c = B.canvas.getContext('2d'), W = B.canvas.width, Hh = B.canvas.height; c.clearRect(0, 0, W, Hh);
     OUTLAWS.forEach((d, i) => {
-      const cw = W / 5, ch = Hh / 3, w = cw - 22, h = ch - 16, x = (i % 5) * cw + 11, y = Math.floor(i / 5) * ch + 8, done = G.caught.includes(d.id), lock = !done && !tierOpen(d.tier, d.id), is = h * 0.42;
+      const cw = W / 5, ch = Hh / 3, w = cw - 22, h = ch - 16, x = (i % 5) * cw + 11, y = Math.floor(i / 5) * ch + 8, done = G.caught.includes(d.id), lock = !done && !tierOpen(d.tier, d.id), hide = lock && G.ch !== 2, is = h * 0.42;
       c.save(); c.translate(x + w / 2, y + h / 2); c.rotate((i % 2 ? 1 : -1) * 0.022);
       c.fillStyle = 'rgba(30,14,4,.45)'; c.fillRect(-w / 2 + 3, -h / 2 + 5, w, h); c.fillStyle = lock ? '#9a9486' : '#f0dfb4'; c.fillRect(-w / 2, -h / 2, w, h);
       c.fillStyle = '#8a8a8a'; c.beginPath(); c.arc(0, -h / 2 + 7, 4, 0, 7); c.fill();
       const esc = G.ch === 2 && !done; c.fillStyle = lock ? '#3a3632' : esc ? '#a8281a' : '#3a2410'; c.textAlign = 'center'; c.font = Math.round(h * (esc ? 0.15 : 0.17)) + 'px BHTitle, Georgia, serif'; c.fillText(esc ? 'ESCAPED' : 'WANTED', 0, -h / 2 + h * 0.2);
       c.fillStyle = lock ? '#4a4642' : '#cdb98a'; c.fillRect(-is / 2, -h / 2 + h * 0.24, is, is); c.lineWidth = 3; c.strokeStyle = lock ? '#3a3632' : '#3a2410'; c.strokeRect(-is / 2, -h / 2 + h * 0.24, is, is);
-      const im = boardImgs[d.id]; if (!lock && im && im.complete && im.naturalWidth) { c.filter = done ? 'sepia(1) brightness(.8)' : 'sepia(.75) contrast(1.08)'; c.drawImage(im, -is / 2 + 2, -h / 2 + h * 0.24 + 2, is - 4, is - 4); c.filter = 'none'; }
-      c.fillStyle = lock ? '#3a3632' : '#3a2410'; const nm = lock ? '?' : d.name; let fs = Math.round(h * 0.105); c.font = '800 ' + fs + 'px Ria, sans-serif'; const tw = c.measureText(nm).width; if (tw > w - 10) { fs = Math.floor(fs * (w - 10) / tw); c.font = '800 ' + fs + 'px Ria, sans-serif'; } c.fillText(nm, 0, -h / 2 + h * 0.79);
+      const im = boardImgs[d.id]; if (!hide && im && im.complete && im.naturalWidth) { c.filter = done ? 'sepia(1) brightness(.8)' : lock ? 'sepia(.6) brightness(.55)' : 'sepia(.75) contrast(1.08)'; c.drawImage(im, -is / 2 + 2, -h / 2 + h * 0.24 + 2, is - 4, is - 4); c.filter = 'none'; }
+      c.fillStyle = lock ? '#3a3632' : '#3a2410'; const nm = hide ? '?' : d.name; let fs = Math.round(h * 0.105); c.font = '800 ' + fs + 'px Ria, sans-serif'; const tw = c.measureText(nm).width; if (tw > w - 10) { fs = Math.floor(fs * (w - 10) / tw); c.font = '800 ' + fs + 'px Ria, sans-serif'; } c.fillText(nm, 0, -h / 2 + h * 0.79);
       c.fillStyle = lock ? '#5a2a22' : '#a8281a'; c.font = Math.round(h * 0.17) + 'px BHTitle, Georgia, serif'; c.fillText('$' + d.bounty.toLocaleString('en-US'), 0, h / 2 - h * 0.05);
       if (done) { c.rotate(-0.28); c.fillStyle = 'rgba(243,229,191,.5)'; c.fillRect(-w * 0.44, -h * 0.1, w * 0.88, h * 0.2); c.strokeStyle = '#a8281a'; c.lineWidth = 5; c.strokeRect(-w * 0.44, -h * 0.1, w * 0.88, h * 0.2); c.fillStyle = '#a8281a'; c.font = Math.round(h * 0.14) + 'px BHTitle, Georgia, serif'; c.fillText('CAPTURED', 0, h * 0.05); }
       c.restore();
@@ -678,7 +714,8 @@
   // 2부: 13명이 다른 은신처로 흩어지고, 현상금 두 배, 조금씩 세진다(걷는 놈 +12% · 말 탄 놈 +4% · 줄다리기 +1(4까지) · 1~3번 지그재그 · 맨손이던 놈은 총)
   const CH2_SITE = { 1: 'wagon', 2: 'flats', 3: 'camp1', 4: 'hay', 5: 'camp3', 6: 'camp2', 7: 'mine', 8: 'grave', 9: 'canyon', 10: 'ghost', 11: 'tower', 12: 'gulch', 13: 'fort' };
   function applyCh2() { if (OUTLAWS.ch2) return; OUTLAWS.ch2 = 1;
-    OUTLAWS.forEach(d => { d.bounty *= 2; d.site = CH2_SITE[d.id]; if (d.horse) d.horse = +(d.horse * 1.04).toFixed(2); else d.speed = +(d.speed * 1.12).toFixed(2); d.tug = Math.min(4, (d.tug || 0) + 1); if (d.id <= 3) d.zig = 1; else if (!d.shoot && !d.bomb) d.shoot = 3.4; }); }
+    OUTLAWS.forEach(d => { d.bounty *= 2; d.site = CH2_SITE[d.id]; if (d.horse) d.horse = +(d.horse * 1.04).toFixed(2); else d.speed = +(d.speed * 1.12).toFixed(2); d.tug = Math.min(4, (d.tug || 0) + 1); if (d.id <= 3) d.zig = 1; else if (!d.shoot && !d.bomb && !d.powder) d.shoot = 3.4; });
+    while (ohorses.length < 9) { const h = ACT.makeHorse(0x6a4a34); h.root.visible = false; h.used = false; h.fade = 0; ohorses.push(h); } }   // 2부는 말 탄 놈 7명이 한꺼번에 나와 있으니 말을 미리 더 만든다
   // 감옥 왼쪽 벽에 뚫린 구멍 + 앞에 흩어진 돌무더기. 2부 내내 남아 있다
   const BREACH = new V3(-44.3, 0, -9.5), breach = new THREE.Group(), rubble = [], smokes = []; let fireball = null;
   function mkBreach() {
@@ -715,7 +752,7 @@
   // 헬라를 감옥 앞에 말 탄 채로 세운다(말이 죽었으면 살려서)
   function cinePlace() {
     if (G.chase) endChase(); if (L.state !== 'idle') idleLasso(); closeUI(); captives.forEach(o => despawn(o)); captives.length = 0; capRopes.forEach(r => r.hide()); setTarget(0);
-    outlaws.forEach(o => { if (o.state !== 'off') despawn(o); }); bullets.forEach(b => { b.life = 0; b.m.visible = false; }); bombs.forEach(b => { b.state = 0; b.m.visible = false; });
+    outlaws.forEach(o => { if (o.state !== 'off') despawn(o); }); bullets.forEach(b => { b.life = 0; b.m.visible = false; }); bombs.forEach(b => { b.state = 0; b.m.visible = false; }); powders.forEach(b => { b.state = 0; b.m.visible = false; });
     G.horseDead = false; G.horseHp = 3; G.hp = 3; horse.dead = false; horse.deadT = 0; horse.root.rotation.z = 0; horse.root.visible = true; horse.calling = false;
     H.mode = 'ride'; H.stun = 0; H.hold = 0; H.safe = 0; H.vel.set(0, 0, 0); hero.lie(false); hero.play('stand');
     horse.pos.set(-37, 0, 0.2); horse.pos.y = heightAt(horse.pos.x, horse.pos.z); horse.yaw = PI / 2; horse.speed = 0; horse.update(0.016); updHpHUD(); updTargetHUD();
@@ -790,7 +827,7 @@
     const C = G.cine; if (!C) return; $('#cine').classList.remove('show');
     runners.forEach(o => { if (o.state === 'cine') despawn(o); }); runners = [];
     smokes.forEach(q => { q.t = 9; q.m.visible = false; }); if (fireball) fireball.visible = false;
-    if (C.kind === 'break') { if (!breach.visible) { breachShow(1); drawBoard(); } rubble.forEach(r => { r.t = 1; r.m.position.copy(r.rest); r.m.rotation.copy(r.rot); }); MUSIC.mode('calm'); }
+    if (C.kind === 'break') { if (!breach.visible) { breachShow(1); drawBoard(); } rubble.forEach(r => { r.t = 1; r.m.position.copy(r.rest); r.m.rotation.copy(r.rot); }); MUSIC.mode('calm'); autoTarget(); }
     CAM.follow = followSave; G.cine = null; document.body.classList.remove('cine'); horse.speed = Math.min(horse.speed, 2);
     CAM.chase = horse.yaw; CAM.off = 0; CAM.tDist = 9.5; CAM.tPitch = 0.3; CAM.manualT = -9999; updTargetHUD(); save();
   }
@@ -807,7 +844,7 @@
     G.hp = 3; G.horseHp = 3; G.dead = false; G.horseDead = !!(d && d.hd); horse.dead = G.horseDead; horse.deadT = 0; horse.root.rotation.z = 0; horse.root.visible = !G.horseDead;
     H.mode = 'ride'; CAM.off = wrap(CAM.yaw - (horse.yaw + PI)); CAM.chase = horse.yaw; CAM.manualT = -9999; CAM.tDist = 9.5; CAM.tPitch = 0.3;
     if (G.horseDead) { dismount(); H.hold = 0; }   // 말 없이 이어하기: 마을에서 걸어서 시작(상점에서 새 말 $300)
-    drawBoard(); setTarget(d && d.target && !G.caught.includes(d.target) ? d.target : 0); updCapHUD(); updHpHUD(); MUSIC.start(); if (!G.horseDead) horse.rear = 0.7;
+    drawBoard(); setTarget(d && d.target && !G.caught.includes(d.target) ? d.target : 0); updCapHUD(); updHpHUD(); MUSIC.start(); if (!G.horseDead) horse.rear = 0.7; autoTarget();
   }
   function ending() {
     G.ended = true; document.body.classList.add('ending'); try { localStorage.removeItem(SAVE); localStorage.setItem('bounty.ending', '1'); } catch (e) {}
@@ -826,7 +863,7 @@
       if (G.cine) updCine(rdt);
       updHero(dt); updLasso(dt);
       for (let i = 0; i < outlaws.length; i++) updOutlaw(outlaws[i], dt);
-      updOutlawHorses(dt); updCaptives(dt); updShots(dt); updDeliver(dt); updFry(dt); updAmbient(dt); updPuffs(dt); updCtx(dt);
+      updOutlawHorses(dt); updCaptives(dt); updShots(dt); updDeliver(dt); updFry(dt); updAmbient(dt); updPuffs(dt); updCtx(dt); updCh2(dt);
       if (G.respawn > 0) { G.respawn -= dt; if (G.respawn <= 0) { const s = G.target && SITES[OUTLAWS[G.target - 1].site]; if (s && Math.hypot(heroCenter(_hc).x - s.x, _hc.z - s.z) > 60) setTarget(G.target); else G.respawn = 2; } }
       if (G.started) { updHUD(); updFightUI(); updHpHUD(); }
       if (!G.started) { CAM.tYaw = horse.yaw + 0.55 + Math.sin(performance.now() * 0.00025) * 0.25; }
@@ -889,6 +926,8 @@
     for (let i = 0; i < 6; i++) { const m = new THREE.Mesh(bg, bm); m.visible = false; m.frustumCulled = false; S.add(m); bullets.push({ m, pos: new V3(), vel: new V3(), life: 0 }); }
     const dg = new THREE.CylinderGeometry(0.09, 0.09, 0.42, 8), dm = new THREE.MeshStandardMaterial({ color: 0xc02a1c, roughness: 0.7 });
     for (let i = 0; i < 3; i++) { const m = new THREE.Mesh(dg, dm); m.visible = false; S.add(m); bombs.push({ m, state: 0, t: 0, from: new V3(), to: new V3() }); }
+    const pg = new THREE.SphereGeometry(0.17, 10, 8), pm = new THREE.MeshStandardMaterial({ color: 0xf3efe4, roughness: 0.95 });   // 하얀 가루 주머니
+    for (let i = 0; i < 3; i++) { const m = new THREE.Mesh(pg, pm); m.visible = false; S.add(m); powders.push({ m, state: 0, t: 0, hit: false, from: new V3(), to: new V3() }); }
     mkAmbient(); mkBreach(); CORE.resize(); prog(0.96);
     await Promise.all(OUTLAWS.map(d => new Promise(res => { const im = new Image(); im.onload = im.onerror = res; im.src = d.img; boardImgs[d.id] = im; })));
     drawBoard(); applyQ();
@@ -897,7 +936,7 @@
     H.mode = 'ride'; hero.pos.copy(horse.pos); CAM.chase = null; CAM.tYaw = horse.yaw + 0.55; CAM.tDist = 5.4; CAM.tPitch = 0.05; CAM.snap();
     // 처음 보이는 것들을 한 번 그려 둔다(끊김 방지)
     tick(0.016, true);
-    const warm = v => { outlaws.forEach(o => o.p.root.visible = v); ohorses.forEach(h => h.root.visible = v); loop.visible = ring.visible = v; bullets.forEach(q => q.m.visible = v); bombs.forEach(q => q.m.visible = v); vultures.forEach(q => q.visible = v); mark.visible = v; breach.visible = v; smokes.forEach(q => q.m.visible = v); fireball.visible = v; [breach, fireball, ...smokes.map(q => q.m)].forEach(o => o.traverse(c => c.frustumCulled = !v)); };   // 목적지 화살·감옥 구멍·폭파 연기도 미리 한 번 그려 둔다(처음 보일 때 멈칫하지 않게)
+    const warm = v => { outlaws.forEach(o => o.p.root.visible = v); ohorses.forEach(h => h.root.visible = v); loop.visible = ring.visible = v; bullets.forEach(q => q.m.visible = v); bombs.forEach(q => q.m.visible = v); powders.forEach(q => q.m.visible = v); vultures.forEach(q => q.visible = v); mark.visible = v; breach.visible = v; smokes.forEach(q => q.m.visible = v); fireball.visible = v; [breach, fireball, ...smokes.map(q => q.m)].forEach(o => o.traverse(c => c.frustumCulled = !v)); };   // 목적지 화살·감옥 구멍·폭파 연기도 미리 한 번 그려 둔다(처음 보일 때 멈칫하지 않게)
     warm(true); outlaws.forEach((o, i) => { o.p.root.position.set(horse.pos.x + 2 + i, 0, horse.pos.z + 3); o.p.root.updateMatrixWorld(true); }); ohorses.forEach((h, i) => { h.pos.set(horse.pos.x - 3 - i * 2, 0, horse.pos.z + 3); h.update(0.016); }); vultures.forEach((v, i) => v.position.set(horse.pos.x + i, 3, horse.pos.z));
     lrope.hang(_a.set(horse.pos.x, 1, horse.pos.z), _b.set(horse.pos.x + 1, 1, horse.pos.z), 0.1); capRopes.forEach(r0 => r0.hang(_a, _b, 0.1));
     R.compile(S, cam); { const fc = []; S.traverse(o => { if ((o.isMesh || o.isPoints || o.isLine || o.isSprite) && o.frustumCulled) { fc.push(o); o.frustumCulled = false; } }); R.render(S, cam); fc.forEach(o => o.frustumCulled = true); }   // 맵 전체를 한 번 그려 GPU 에 올려 둔다(시작 직후 카메라가 돌 때 처음 보이는 건물에서 멈칫하지 않게)

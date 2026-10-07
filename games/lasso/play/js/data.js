@@ -13,7 +13,7 @@
     O(7, 3, 'canyon', '몰카범', 'Hidden Camera', 700, { model: 'spycam', horse: 8.4, coat: 0x9a4a2a, shoot: 3.1, tug: 2, h: 1.74 }),
     O(8, 3, 'ghost', '코인사기꾼', 'Crypto Scammer', 850, { model: 'coin', horse: 8.8, coat: 0x3a3230, shoot: 2.8, tug: 2, h: 1.78 }),
     O(9, 3, 'mine', '방화범', 'Arsonist', 1000, { model: 'arson', speed: 5.8, bomb: 3.6, tug: 2, h: 1.68 }),
-    O(10, 4, 'tower', '마약유통', 'Drug Dealer', 1500, { model: 'drug', horse: 9.6, coat: 0xb89a74, zig: 1, tug: 3, h: 1.6 }),
+    O(10, 4, 'tower', '마약유통', 'Drug Dealer', 1500, { model: 'drug', horse: 9.6, coat: 0xb89a74, zig: 1, tug: 3, h: 1.6, powder: 2.6 }),
     O(11, 4, 'gulch', '은행강도', 'Bank Robber', 2000, { horse: 10.2, coat: 0xd8d2c6, shoot: 2.3, tug: 3, noMask: 1, h: 1.82 }),   // 10/3 "은행강도 복면 없애 줘": 맨얼굴(부하·좀도둑은 같은 모델이라도 복면 그대로)
     O(12, 4, 'grave', '남편살해범', 'Husband Killer', 3000, { model: 'husband', horse: 10.4, coat: 0x7a7672, shoot: 2.1, zig: 1, tug: 3, h: 1.68 }),
     O(13, 5, 'fort', '범죄단체조직(계모임)', 'Savings Club Ring', 10000, { model: 'gye', horse: 10.8, coat: 0x1c1a1a, shoot: 1.9, tug: 4, h: 1.6, guards: 3, boss: 1 })

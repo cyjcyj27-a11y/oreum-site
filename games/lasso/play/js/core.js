@@ -253,7 +253,8 @@
     escaped() { const t = AU.ctx.currentTime; [392, 349, 294, 220].forEach((f, i) => tone(f, t + i * 0.16, 0.25, 'triangle', 0.14)); },
     fanfare() { const t = AU.ctx.currentTime; [392, 523, 659, 784, 659, 784, 1046].forEach((f, i) => { tone(f, t + i * 0.12, 0.3, 'square', 0.05); tone(f / 2, t + i * 0.12, 0.3, 'triangle', 0.1); }); },
     cactus() { const t = AU.ctx.currentTime; tone(1400, t, 0.08, 'square', 0.05, 1.6); noise(t, 0.06, 0.3, 3000, 2); },
-    bump() { const t = AU.ctx.currentTime; noise(t, 0.09, 0.45, 300, 1, null, 'lowpass'); }
+    bump() { const t = AU.ctx.currentTime; noise(t, 0.09, 0.45, 300, 1, null, 'lowpass'); },
+    cough() { if (smp('cough', 0.9)) return; SFX.oof(); }   // 하얀 가루를 맞았다: 기침 녹음(없으면 oof)
   };
   function sfx(name, a) { if (!AU.sfxOn) return; if (!actx()) return; try { SFX[name] && SFX[name](a); } catch (e) {} }
 
