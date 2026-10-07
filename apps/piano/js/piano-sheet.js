@@ -41,7 +41,8 @@
     var s = songOf(cur); if (!s) return;
     if ($('shTitle')) $('shTitle').textContent = EN ? s.en : s.ko;
     if ($('shLv')) $('shLv').textContent = tr('난이도', 'Level') + ' ' + s.lv + ' · ♩ ' + s.bpm;
-    $('shScore').innerHTML = SC.svg(s, { names: label, en: EN });
+    var narrow = $('shScore').clientWidth < 600;   // 폰은 한 줄에 마디를 적게 넣어 음표가 크게 보이게(10/7)
+    $('shScore').innerHTML = SC.svg(s, { names: label, en: EN, width: narrow ? 420 : 760 });
     if ($('shPrev')) $('shPrev').disabled = cur === 0;
     if ($('shNext')) $('shNext').disabled = cur === INDEX.length - 1;
     if ($('shPlay')) $('shPlay').href = PRACTICE + '#song=' + s.id;
@@ -73,6 +74,7 @@
   if ($('shLabel')) $('shLabel').addEventListener('click', function () { label = label === 'kor' ? 'eng' : label === 'eng' ? 'none' : 'kor'; LS.set('label', label); labelTxt(); draw(); });
   if ($('shPrint')) $('shPrint').addEventListener('click', function () { window.print(); });
   labelTxt();
+  var rsz = 0; window.addEventListener('resize', function () { clearTimeout(rsz); rsz = setTimeout(function () { if (cur >= 0 && songOf(cur)) draw(); }, 200); });
 
   /* 처음 열 곡: 사이트 곡 페이지는 data-song, 로컬은 주소의 #id */
   var first = root.getAttribute('data-song') || (location.hash || '').slice(1), idx = -1;

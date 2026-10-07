@@ -1,9 +1,9 @@
 /* 피아노 연습 — 소재: 흑건(주 단추)·상아 건반(보조)·금색 페달(둥근 단추)·오선지 종이(창·목록). design.md 참고 */
 .piano { --ebony: #17161b; --ebony2: #2a2930; --ivory: #f6f1e4; --ivory2: #e9e2d0; --ivory3: #d8d0bb;
   --gold: #c8a04c; --gold2: #f1dc93; --gold3: #8a6a22; --felt: #c8323a; --paper: #fbf7ec; --pline: #cfc5aa;
-  --serif: "GraceSerif", "Pretendard", serif; }
-@font-face { font-family: "GraceSerif"; src: url("../fonts/grace.woff2") format("woff2"); font-weight: 700; font-display: swap; }
-.piano .top h1 { font-family: var(--serif); font-weight: 700; letter-spacing: -.02em; }
+  --serif: var(--font); }   /* 우아한 세리프는 긴 곡 이름에서 흉해서 뺌(사장님 10/7 "글씨는 왜이러며") */
+.piano .top h1 { font-family: var(--font); font-weight: 800; letter-spacing: -.03em; }
+.piano.sheetapp .top h1 { font-size: clamp(26px, 6.5vw, 40px); line-height: 1.15; word-break: keep-all; }
 .piano .top h1::before { background: var(--ebony); }
 .piano .promise li { color: var(--ebony); border-color: var(--ivory3); background: var(--ivory); }
 
@@ -17,7 +17,7 @@
 .piano .stars { display: block; }
 .piano .card { max-width: min(92vw, 440px); }
 .piano b, .piano h1, .piano h2 { font-weight: 800; }
-.piano .mode b, .piano .lhead b, .piano .kbar b, .piano .sbar b, .piano .card b { font-weight: 700; }
+.piano .card b { font-weight: 800; }
 
 /* ---------- 단추: 흑건 / 상아 */
 .piano .btn, .piano .mode, .piano .stagebtn, .piano .songcard, .piano .lvcard {
@@ -54,13 +54,13 @@
 .piano .paper::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 29px; opacity: .9; pointer-events: none;
   background: repeating-linear-gradient(to bottom, transparent 0 6px, var(--pline) 6px 7px); }
 .piano .lhead { display: flex; align-items: baseline; gap: 12px; margin: 10px 0 14px; }
-.piano .lhead b { font-family: var(--serif); font-size: 26px; }
+.piano .lhead b { font-family: var(--font); font-weight: 800; font-size: 24px; }
 .piano .prog { color: var(--muted); font-size: 15px; font-weight: 700; margin-left: auto; }
 
 /* 홈 네 칸 */
 .piano .modes { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .piano .mode { display: grid; justify-items: start; gap: 4px; padding: 20px 20px 18px; text-align: left; }
-.piano .mode b { font-family: var(--serif); font-size: 27px; line-height: 1.1; }
+.piano .mode b { font-family: var(--font); font-weight: 800; font-size: 25px; line-height: 1.1; }
 .piano .mode i { font-style: normal; font-size: 14px; font-weight: 700; opacity: .7; }
 .piano .mode.ebony i { opacity: .75; }
 
@@ -88,7 +88,7 @@
 
 /* 곡 하나 화면 */
 .piano .kbar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 6px; }
-.piano .kbar b { font-family: var(--serif); font-size: clamp(24px, 5vw, 34px); line-height: 1.1; }
+.piano .kbar b { font-family: var(--font); font-weight: 800; font-size: clamp(20px, 4.5vw, 28px); line-height: 1.15; }
 .piano .lv { color: var(--muted); font-weight: 800; font-size: 14px; }
 .piano .stages { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 10px; }
 .piano .stagebtn { display: grid; gap: 4px; padding: 16px 16px 14px; text-align: left; }
@@ -103,7 +103,7 @@
 .piano #stage { position: fixed; inset: 0; z-index: 50; display: grid; grid-template-rows: auto 1fr auto; background: #0f0e12; color: var(--ivory);
   padding: env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area-inset-left); }
 .piano .sbar { display: flex; align-items: center; gap: 10px; padding: 8px 10px; background: linear-gradient(180deg, #2a2930, #1b1a20); border-bottom: 1px solid #000; min-height: 56px; flex-wrap: nowrap; }
-.piano .sbar b { font-family: var(--serif); font-size: 20px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 34vw; }
+.piano .sbar b { font-family: var(--font); font-weight: 800; font-size: 18px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 34vw; }
 .piano .sprog { flex: 1 1 60px; height: 8px; border-radius: 4px; background: #000; box-shadow: inset 0 1px 2px rgba(0,0,0,.8), 0 1px 0 rgba(255,255,255,.08); overflow: hidden; min-width: 40px; }
 .piano .sprog span { display: block; height: 100%; width: 0%; background: linear-gradient(90deg, var(--gold3), var(--gold2)); transition: width .15s; }
 .piano .sinfo { font-weight: 800; font-size: 16px; white-space: nowrap; color: var(--gold2); min-width: 2em; text-align: right; }

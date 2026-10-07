@@ -1,6 +1,6 @@
 /* 피아노 연습 — 곡 악보 그리기(큰보표 SVG). 곡 데이터 [시작박, 길이, [미디]] 를 오선지로 찍는다. 외부 악보 없음 */
 (function () {
-  var LG = 10, HALF = 5, W = 760;
+  var LG = 10, HALF = 5, W = 760;   // W 는 svg() 안에서 opt.width 로 바꿀 수 있다(폰은 420)
   var NAMES_K = ['도', '도♯', '레', '레♯', '미', '파', '파♯', '솔', '솔♯', '라', '라♯', '시'];
   var NAMES_E = ['C', 'C♯', 'D', 'D♯', 'E', 'F', 'F♯', 'G', 'G♯', 'A', 'A♯', 'B'];
   var FLAT_K = ['도', '레♭', '레', '미♭', '미', '파', '솔♭', '솔', '라♭', '라', '시♭', '시'];
@@ -135,6 +135,7 @@
   /* 곡 전체 악보 SVG. opt: { names: 'kor'|'eng'|null, en: bool } */
   function svg(song, opt) {
     opt = opt || {};
+    var W = opt.width || 760;
     var CLEF = window.PIANO_CLEF, B = bars(song), i, j;
     var all = song.R.concat(song.L), hasFlat = false, hasSharp = false;
     all.forEach(function (n) { n[2].forEach(function (m) { if (m % 12 === 10) hasFlat = true; if (m % 12 === 6 || m % 12 === 1 || m % 12 === 8 || m % 12 === 3) hasSharp = true; }); });
@@ -163,7 +164,8 @@
     var top0 = 78, gapTB = 44, sysH = 8 * LG + gapTB + 54 + nameGap + nameGapB;
     var H = top0 + lines.length * sysH - 30;
     var out = { h: '' };
-    out.h += '<text x="' + (W / 2) + '" y="36" text-anchor="middle" font-size="26" font-weight="700" font-family="GraceSerif, Pretendard, serif" fill="#17161b">' + esc(opt.en ? song.en : song.ko) + '</text>';
+    var tt = opt.en ? song.en : song.ko, tsz = W < 600 ? (tt.length > 14 ? 15 : 18) : (tt.length > 22 ? 20 : 26);   // 폰·긴 제목은 작게
+    out.h += '<text x="' + (W / 2) + '" y="36" text-anchor="middle" font-size="' + tsz + '" font-weight="700" font-family="Pretendard, sans-serif" fill="#17161b">' + esc(tt) + '</text>';
     out.h += '<text x="' + (W - 4) + '" y="60" text-anchor="end" font-size="13" font-weight="700" fill="#5b5443">♩ = ' + song.bpm + '</text>';
     out.h += '<text x="4" y="60" font-size="12" font-weight="700" fill="#8a8270">' + (opt.en ? 'Oreum Games · Piano Practice' : '오름게임즈 · 피아노 연습') + '</text>';
     var num = song.ts === 1.5 ? ['3', '8'] : [String(song.ts), '4'];
