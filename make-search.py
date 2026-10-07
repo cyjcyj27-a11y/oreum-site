@@ -22,7 +22,7 @@ SOURCES = {
 }
 
 CARD = re.compile(
-    r'<a class="mini" href="(?P<u>[^"]+)">.*?<img src="(?P<img>[^"]+)".*?'
+    r'<a class="mini" href="(?P<u>[^"]+)"[^>]*>.*?<img src="(?P<img>[^"]+)".*?'   # [^>]*: NEW 표시(data-new="…")가 붙은 카드도 읽는다(10/7 피아노 카드가 빠졌다)
     r'<b>(?P<n>.*?)</b>(?:<i>(?P<t>.*?)</i>)?', re.S)
 
 

@@ -232,7 +232,14 @@
 .piano .top.hero { position: relative; margin: 6px 0 20px; border-radius: 22px; overflow: hidden; color: var(--ivory);
   background: radial-gradient(120% 100% at 88% -10%, rgba(255,255,255,.10), transparent 55%), linear-gradient(180deg, #2b2a31 0%, #17161b 62%, #0e0d11 100%);
   box-shadow: 0 22px 44px -18px rgba(10,12,20,.5), inset 0 1px 0 rgba(255,255,255,.14); }
-.piano:has(#pHome[hidden]) .top.hero { display: none; }   /* 큰 머리판은 홈에서만(곡 단계 화면에선 위를 다 먹었다) */
+.piano:has(#pHome[hidden]) .top.hero { display: none; }
+.piano:has(#shHome[hidden]) .top.hero { display: none; }   /* 악보 앱(로컬)도 곡을 열면 머리판을 접는다 */
+/* 곡별 악보 페이지: 곡 이름 h1 이 든 작은 머리판(검색용 제목이라 숨기지 않는다) */
+.piano .top.hero.mini { margin-bottom: 16px; }
+.piano .top.hero.mini .hero-in { padding: 24px 26px 20px; }
+.piano .top.hero.mini h1 { font-size: clamp(26px, 5.4vw, 42px); line-height: 1.15; margin: 0; word-break: keep-all; }
+.piano .top.hero.mini h1::before { margin-bottom: 14px; width: 40px; height: 4px; }
+.piano .top.hero.mini .hero-keys { height: 52px; background-size: auto 78px; background-position: left bottom; }   /* 띠가 낮아도 건반은 큰 머리판과 같은 크기, 아래쪽만 보이게(촘촘해 보였다) */   /* 큰 머리판은 홈에서만(곡 단계 화면에선 위를 다 먹었다) */
 .piano .hero-in { position: relative; padding: 36px 34px 30px; }
 .piano .hero-in::after { content: ''; position: absolute; inset: 0; pointer-events: none;
   background: linear-gradient(115deg, transparent 0 46%, rgba(255,255,255,.07) 52%, transparent 60%); }   /* 래커 반사 */
