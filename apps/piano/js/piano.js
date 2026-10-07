@@ -314,6 +314,8 @@
     opt = opt || {};
     $('stage').hidden = false;
     document.body.style.overflow = 'hidden';
+    // 폰 세로면 가로 화면이 기본(사장님 10/7 "가로화면 기본으로"): 누른 손가락 안에서 전체화면 → 가로 잠금 → 안 되면 강제 회전
+    if (window.OL && window.innerWidth < 700 && window.innerHeight > window.innerWidth) { try { OL.go(); } catch (e) {} setTimeout(function () { measureKB(); sizeCanvas(); }, 900); }
     $('sName').textContent = name;
     $('sBar').style.width = '0%';
     $('sInfo').textContent = '';
@@ -338,6 +340,8 @@
     if (rafId) cancelAnimationFrame(rafId); rafId = 0;
     $('stage').hidden = true;
     document.body.style.overflow = '';
+    if (window.OL && OL.forced) { try { OL.release(); } catch (e) {} }
+    if (document.fullscreenElement && document.exitFullscreen) { try { document.exitFullscreen(); } catch (e) {} }
     renderHome();
     if (curSong && !$('pSong').hidden) openSong(SONGS.indexOf(curSong));
   }

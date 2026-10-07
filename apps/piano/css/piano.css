@@ -7,6 +7,17 @@
 .piano .top h1::before { background: var(--ebony); }
 .piano .promise li { color: var(--ebony); border-color: var(--ivory3); background: var(--ivory); }
 
+/* 사이트 공통 style.css 와 겹치는 이름 되돌리기(.btn 폭 100%·알약·font-weight 400, .stars 숨김, .card 폭) — 사이트에 올린 뒤 폰에서 단추가 세로로 늘어졌다(10/7) */
+.piano .btn, .piano .sbar .btn, .piano .acts .btn { display: inline-flex; align-items: center; justify-content: center; width: auto; max-width: none; border-radius: 10px; font-weight: 800; text-decoration: none; }
+.piano .btn.wide { width: 100%; }
+.piano .btn:hover { transform: none; }
+.piano .btn:active { transform: translateY(3px) scale(.97); }
+.piano .ebony:active { transform: translateY(4px); }
+.piano .stars { display: block; }
+.piano .card { max-width: min(92vw, 440px); }
+.piano b, .piano h1, .piano h2 { font-weight: 800; }
+.piano .mode b, .piano .lhead b, .piano .kbar b, .piano .sbar b, .piano .card b { font-weight: 700; }
+
 /* ---------- 단추: 흑건 / 상아 */
 .piano .btn, .piano .mode, .piano .stagebtn, .piano .songcard, .piano .lvcard {
   cursor: pointer; border: 0; border-radius: 10px; font-weight: 800; line-height: 1.15;
