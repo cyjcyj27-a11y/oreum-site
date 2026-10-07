@@ -12,6 +12,8 @@
     $('toDex').firstChild.textContent = 'COLLECTION';
     $('endingDex').firstChild.textContent = 'COLLECTION';
     $('dexTitle').textContent = 'COLLECTION';
+    $('rotTitle').textContent = 'HIDDEN OBJECTS';
+    $('rotBtn').firstChild.textContent = 'ROTATE';
   }
   const ALL_SCENES = [
     { id: 'attic', ko: '다락방', en: 'Attic' },
@@ -60,16 +62,16 @@
     DPR = Math.min(window.devicePixelRatio || 1, 2);
     const pill = document.getElementById('oreumHome');   // 오름 알약 옆에 STAGE 라벨(폰 가로)
     if (pill) document.documentElement.style.setProperty('--pillw', Math.round(pill.getBoundingClientRect().right + 2) + 'px');
+    // 그림은 크게, 찾을 물건 목록은 작게(10/7 사장님 "보통 그림이 크고 찾을물건이 작지않냐")
     if (!port) {
-      const pw = Math.round(Math.max(H < 480 ? 232 : 190, Math.min(300, Math.max(W - H * S.ASPECT, W * 0.18))));
+      const pw = Math.round(H < 480 ? Math.max(200, Math.min(232, W - H * S.ASPECT)) : Math.max(170, Math.min(260, W - H * S.ASPECT)));
       document.documentElement.style.setProperty('--pw', pw + 'px');
       PX = pw; PY = 0; PW = W - pw; PH = H;
     } else {
       const ph = 96;
       document.documentElement.style.setProperty('--ph', ph + 'px');
-      const n = Math.max(1, st.items.length || 8), c = Math.ceil(n / 2);
-      const s = Math.min(92, (W - 24 - (c - 1) * 8) / c);
-      const lh = 2 * s * 1.12 + 8 + 20;
+      const L = portList(W);
+      const lh = L.rows * L.s * 1.08 + (L.rows - 1) * 6 + 18;
       PX = 0; PY = ph; PW = W; PH = Math.max(160, H - ph - lh);
     }
     pic.style.left = PX + 'px'; pic.style.top = PY + 'px'; pic.style.width = PW + 'px'; pic.style.height = PH + 'px';
@@ -78,25 +80,32 @@
     clampView();
     dirty = true;
   }
+  // 세로 화면 목록: 한 줄에 다 들어가면 한 줄, 아니면 두 줄. 칸은 52px 까지
+  function portList(W) {
+    const n = Math.max(1, st.items.length || 8);
+    const s1 = (W - 24 - (n - 1) * 6) / n;
+    if (s1 >= 40) return { s: Math.floor(Math.min(52, s1)), c: n, rows: 1 };
+    const c = Math.ceil(n / 2);
+    return { s: Math.floor(Math.min(52, (W - 24 - (c - 1) * 6) / c)), c, rows: 2 };
+  }
   function layoutList() {
     const n = st.items.length;
     if (!n) return;
     let best = { s: 0, c: 2 };
     if (!port) {
+      const cap = innerHeight < 480 ? 52 : 74;   // PC 도 물건 사진은 74px 까지
       const r = listEl.getBoundingClientRect();
       const aw = r.width - 12, ah = innerHeight - r.top - 10;
       for (let c = 1; c <= 4; c++) {
         const rows = Math.ceil(n / c);
-        const s = Math.min((aw - (c - 1) * 8) / c, (ah - (rows - 1) * 8) / rows / 1.24);
-        if (s > best.s) best = { s, c };
+        const sz = Math.min(cap, (aw - (c - 1) * 6) / c, (ah - (rows - 1) * 6) / rows / 1.24);
+        if (sz > best.s + 0.5) best = { s: sz, c };
       }
-    } else {
-      const c = Math.ceil(n / 2);
-      best = { s: Math.min(92, (innerWidth - 24 - (c - 1) * 8) / c), c };
-    }
-    best.s = Math.floor(Math.min(best.s, 128));
+    } else best = portList(innerWidth);
+    best.s = Math.floor(best.s);
     listEl.style.gridTemplateColumns = 'repeat(' + best.c + ',' + best.s + 'px)';
-    listEl.classList.toggle('small', best.s < 84);
+    listEl.style.gap = '6px';
+    listEl.classList.toggle('small', best.s < 70);
   }
   addEventListener('resize', () => { layout(); if (st.mode === 'title') drawTitle(); });
 
@@ -494,7 +503,7 @@
       makeList();
       layout();
       // 세로 화면은 그림이 작으니 조금 당겨서 시작(옆으로 밀어 본다)
-      view.z = port ? Math.max(1, Math.min(2, PH * 0.9 * S.ASPECT / PW)) : 1; view.cx = 0.5; view.cy = 0.5;
+      view.z = port ? Math.max(1, Math.min(2.5, PH * S.ASPECT / PW)) : 1; view.cx = 0.5; view.cy = 0.5;
       clampView();
       hud();
       $('loading').hidden = true;
@@ -675,6 +684,7 @@
   function syncTog() { tMus.classList.toggle('off', !AU.bgm); tSnd.classList.toggle('off', !AU.snd); }
   tMus.onclick = () => { AU.unlock(); AU.setBgm(!AU.bgm); syncTog(); };
   $('tRot').onclick = () => { AU.play('click'); if (window.OL && OL.go) OL.go(); };
+  $('rotBtn').onclick = () => { AU.unlock(); AU.play('click'); if (window.OL && OL.go) OL.go(); };
   tSnd.onclick = () => { AU.unlock(); AU.setSnd(!AU.snd); syncTog(); AU.play('click'); };
   syncTog();
   addEventListener('keydown', (e) => {

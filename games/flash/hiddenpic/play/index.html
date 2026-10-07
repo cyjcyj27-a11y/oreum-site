@@ -32,7 +32,13 @@ html,body{width:100%;height:100%;overflow:hidden;background:#2a2230;font-family:
   box-shadow:inset -8px 0 0 var(--wood),inset -11px 0 0 #4a2c1a,inset 0 0 30px rgba(60,30,10,.35),6px 0 18px rgba(0,0,0,.35)}
 body:not(.playing) #panel{visibility:hidden}
 body.playing #oreumFs{display:none}
-#tRot{display:none}html.port #tRot{display:grid}
+#tRot{display:none}
+/* 폰을 세로로 들면 가로로 돌리기 화면(10/7 사장님 "가로화면으로 하면 될거같은데") */
+#rotate{position:fixed;inset:0;z-index:60;display:none;flex-direction:column;align-items:center;justify-content:center;gap:22px;pointer-events:auto;
+  background:radial-gradient(circle at 20% 30%,rgba(90,50,20,.25) 0 1px,transparent 2px) 0 0/7px 9px,linear-gradient(160deg,#d3a670,#bb8a54)}
+#rotate h2{font-family:'Tmon','Dan',sans-serif;font-weight:400;font-size:min(14vw,64px);color:#fff6e4;-webkit-text-stroke:.07em #8a2a1a;paint-order:stroke fill;filter:drop-shadow(0 5px 0 #4a1a10)}
+@media (orientation:portrait) and (max-width:700px){#rotate{display:flex}}
+html.ol-land #rotate{display:none!important}
 .row{display:flex;align-items:center;gap:6px;margin-bottom:7px;padding-right:10px}
 .dymo{display:inline-flex;align-items:center;gap:5px;height:30px;padding:0 10px;border-radius:3px;background:linear-gradient(180deg,#d8463a,#b8302a);
   color:#fff;font-size:17px;letter-spacing:2px;text-shadow:0 1px 0 rgba(255,255,255,.35),0 -1px 0 rgba(0,0,0,.35);
@@ -70,7 +76,7 @@ body.playing #oreumFs{display:none}
 @keyframes ink{from{transform:rotate(-8deg) scale(1.6);opacity:0}}
 .pol.hit{animation:bump .5s cubic-bezier(.34,1.56,.64,1)}
 @keyframes bump{30%{transform:scale(1.25) rotate(4deg)}}
-.small .pol .nm{display:none}.small .pol{padding-bottom:6%}
+.small .pol .nm{display:none}.small .pol{padding:5%}
 
 /* ---------- 그림 ---------- */
 #pic{position:fixed;z-index:5;overflow:hidden;cursor:crosshair;touch-action:none;background:#2a2230}
@@ -210,6 +216,9 @@ html.port #list{position:fixed;left:0;right:0;bottom:0;top:auto;padding:10px 12p
   #panel{padding-top:calc(8px + env(safe-area-inset-top))}
   #panel>.row:first-child{margin-left:var(--pillw,96px);min-height:30px;margin-bottom:8px}
   #list{gap:6px}
+  .lens{width:34px;height:34px;flex-basis:34px}.lens svg{width:18px;height:18px}
+  #bHint{min-width:56px;font-size:17px;padding-left:30px;background:radial-gradient(circle at 16px 50%,#cfe6ee 0 10px,#8fb8c8 11px,transparent 12px),linear-gradient(180deg,#f6dc8a,#c99a3a 55%,#9a6a22)}
+  #bHint svg{left:6px!important}
   .small .pol{padding:4% 4% 4%}
   #endingCv{width:min(60vw,440px)}
 }
@@ -232,6 +241,7 @@ html.port #list{position:fixed;left:0;right:0;bottom:0;top:auto;padding:10px 12p
   <div id="list"></div>
 </div>
 
+<div id="rotate"><h2 id="rotTitle">숨은그림찾기</h2><button class="tag" id="rotBtn"><span>가로로 보기</span></button></div>
 <div id="pauseCover" hidden>▶</div>
 <div id="word"></div>
 <div id="loading" hidden>LOADING</div>
@@ -300,7 +310,7 @@ html.port #list{position:fixed;left:0;right:0;bottom:0;top:auto;padding:10px 12p
 <script src="js/scn_ending.js?v=1"></script>
 <script src="js/sfx.js?v=2"></script>
 <script src="js/audio.js?v=3"></script>
-<script src="js/game.js?v=1"></script>
+<script src="js/game.js?v=4"></script>
 <script src="/assets/visit.js?v=17" defer></script>
 <script src="/assets/game-events.js" defer></script>
 </body>
