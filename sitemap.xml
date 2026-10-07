@@ -226,6 +226,114 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://oreumgames.com/apps/piano-sheet/bm_arabesque/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/apps/piano-sheet/bm_arabesque/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/apps/piano-sheet/bm_arabesque/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/apps/piano-sheet/bm_arabesque/"/>
+    <lastmod>2026-10-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://oreumgames.com/en/apps/piano-sheet/bm_arabesque/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/apps/piano-sheet/bm_arabesque/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/apps/piano-sheet/bm_arabesque/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/apps/piano-sheet/bm_arabesque/"/>
+    <lastmod>2026-10-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://oreumgames.com/apps/piano-sheet/bm_ballade/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/apps/piano-sheet/bm_ballade/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/apps/piano-sheet/bm_ballade/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/apps/piano-sheet/bm_ballade/"/>
+    <lastmod>2026-10-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://oreumgames.com/en/apps/piano-sheet/bm_ballade/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/apps/piano-sheet/bm_ballade/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/apps/piano-sheet/bm_ballade/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/apps/piano-sheet/bm_ballade/"/>
+    <lastmod>2026-10-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://oreumgames.com/apps/piano-sheet/bm_candeur/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/apps/piano-sheet/bm_candeur/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/apps/piano-sheet/bm_candeur/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/apps/piano-sheet/bm_candeur/"/>
+    <lastmod>2026-10-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://oreumgames.com/en/apps/piano-sheet/bm_candeur/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/apps/piano-sheet/bm_candeur/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/apps/piano-sheet/bm_candeur/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/apps/piano-sheet/bm_candeur/"/>
+    <lastmod>2026-10-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://oreumgames.com/apps/piano-sheet/bm_chasse/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/apps/piano-sheet/bm_chasse/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/apps/piano-sheet/bm_chasse/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/apps/piano-sheet/bm_chasse/"/>
+    <lastmod>2026-10-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://oreumgames.com/en/apps/piano-sheet/bm_chasse/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/apps/piano-sheet/bm_chasse/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/apps/piano-sheet/bm_chasse/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/apps/piano-sheet/bm_chasse/"/>
+    <lastmod>2026-10-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://oreumgames.com/apps/piano-sheet/bm_pastorale/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/apps/piano-sheet/bm_pastorale/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/apps/piano-sheet/bm_pastorale/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/apps/piano-sheet/bm_pastorale/"/>
+    <lastmod>2026-10-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://oreumgames.com/en/apps/piano-sheet/bm_pastorale/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/apps/piano-sheet/bm_pastorale/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/apps/piano-sheet/bm_pastorale/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/apps/piano-sheet/bm_pastorale/"/>
+    <lastmod>2026-10-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://oreumgames.com/apps/piano-sheet/brahmswaltz/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/apps/piano-sheet/brahmswaltz/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/apps/piano-sheet/brahmswaltz/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/apps/piano-sheet/brahmswaltz/"/>
+    <lastmod>2026-10-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://oreumgames.com/en/apps/piano-sheet/brahmswaltz/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/apps/piano-sheet/brahmswaltz/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/apps/piano-sheet/brahmswaltz/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/apps/piano-sheet/brahmswaltz/"/>
+    <lastmod>2026-10-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://oreumgames.com/apps/piano-sheet/canon/</loc>
     <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/apps/piano-sheet/canon/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/apps/piano-sheet/canon/"/>
@@ -298,6 +406,42 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://oreumgames.com/apps/piano-sheet/clairdelune/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/apps/piano-sheet/clairdelune/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/apps/piano-sheet/clairdelune/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/apps/piano-sheet/clairdelune/"/>
+    <lastmod>2026-10-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://oreumgames.com/en/apps/piano-sheet/clairdelune/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/apps/piano-sheet/clairdelune/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/apps/piano-sheet/clairdelune/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/apps/piano-sheet/clairdelune/"/>
+    <lastmod>2026-10-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://oreumgames.com/apps/piano-sheet/clementi/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/apps/piano-sheet/clementi/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/apps/piano-sheet/clementi/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/apps/piano-sheet/clementi/"/>
+    <lastmod>2026-10-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://oreumgames.com/en/apps/piano-sheet/clementi/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/apps/piano-sheet/clementi/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/apps/piano-sheet/clementi/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/apps/piano-sheet/clementi/"/>
+    <lastmod>2026-10-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://oreumgames.com/apps/piano-sheet/elise/</loc>
     <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/apps/piano-sheet/elise/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/apps/piano-sheet/elise/"/>
@@ -348,6 +492,24 @@
     <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/apps/piano-sheet/frere/"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/apps/piano-sheet/frere/"/>
     <lastmod>2026-10-07</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://oreumgames.com/apps/piano-sheet/gondola/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/apps/piano-sheet/gondola/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/apps/piano-sheet/gondola/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/apps/piano-sheet/gondola/"/>
+    <lastmod>2026-10-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://oreumgames.com/en/apps/piano-sheet/gondola/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/apps/piano-sheet/gondola/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/apps/piano-sheet/gondola/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/apps/piano-sheet/gondola/"/>
+    <lastmod>2026-10-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -496,6 +658,24 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://oreumgames.com/apps/piano-sheet/kuhlau/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/apps/piano-sheet/kuhlau/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/apps/piano-sheet/kuhlau/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/apps/piano-sheet/kuhlau/"/>
+    <lastmod>2026-10-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://oreumgames.com/en/apps/piano-sheet/kuhlau/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/apps/piano-sheet/kuhlau/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/apps/piano-sheet/kuhlau/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/apps/piano-sheet/kuhlau/"/>
+    <lastmod>2026-10-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://oreumgames.com/apps/piano-sheet/london/</loc>
     <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/apps/piano-sheet/london/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/apps/piano-sheet/london/"/>
@@ -528,6 +708,24 @@
     <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/apps/piano-sheet/macdonald/"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/apps/piano-sheet/macdonald/"/>
     <lastmod>2026-10-07</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://oreumgames.com/apps/piano-sheet/mapleleaf/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/apps/piano-sheet/mapleleaf/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/apps/piano-sheet/mapleleaf/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/apps/piano-sheet/mapleleaf/"/>
+    <lastmod>2026-10-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://oreumgames.com/en/apps/piano-sheet/mapleleaf/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/apps/piano-sheet/mapleleaf/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/apps/piano-sheet/mapleleaf/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/apps/piano-sheet/mapleleaf/"/>
+    <lastmod>2026-10-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -568,6 +766,24 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://oreumgames.com/apps/piano-sheet/minutewaltz/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/apps/piano-sheet/minutewaltz/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/apps/piano-sheet/minutewaltz/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/apps/piano-sheet/minutewaltz/"/>
+    <lastmod>2026-10-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://oreumgames.com/en/apps/piano-sheet/minutewaltz/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/apps/piano-sheet/minutewaltz/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/apps/piano-sheet/minutewaltz/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/apps/piano-sheet/minutewaltz/"/>
+    <lastmod>2026-10-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://oreumgames.com/apps/piano-sheet/morning/</loc>
     <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/apps/piano-sheet/morning/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/apps/piano-sheet/morning/"/>
@@ -604,6 +820,24 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://oreumgames.com/apps/piano-sheet/musette/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/apps/piano-sheet/musette/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/apps/piano-sheet/musette/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/apps/piano-sheet/musette/"/>
+    <lastmod>2026-10-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://oreumgames.com/en/apps/piano-sheet/musette/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/apps/piano-sheet/musette/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/apps/piano-sheet/musette/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/apps/piano-sheet/musette/"/>
+    <lastmod>2026-10-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://oreumgames.com/apps/piano-sheet/nabi/</loc>
     <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/apps/piano-sheet/nabi/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/apps/piano-sheet/nabi/"/>
@@ -622,6 +856,24 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://oreumgames.com/apps/piano-sheet/oldfrench/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/apps/piano-sheet/oldfrench/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/apps/piano-sheet/oldfrench/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/apps/piano-sheet/oldfrench/"/>
+    <lastmod>2026-10-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://oreumgames.com/en/apps/piano-sheet/oldfrench/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/apps/piano-sheet/oldfrench/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/apps/piano-sheet/oldfrench/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/apps/piano-sheet/oldfrench/"/>
+    <lastmod>2026-10-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://oreumgames.com/apps/piano-sheet/prelude/</loc>
     <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/apps/piano-sheet/prelude/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/apps/piano-sheet/prelude/"/>
@@ -636,6 +888,60 @@
     <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/apps/piano-sheet/prelude/"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/apps/piano-sheet/prelude/"/>
     <lastmod>2026-10-07</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://oreumgames.com/apps/piano-sheet/prelude4/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/apps/piano-sheet/prelude4/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/apps/piano-sheet/prelude4/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/apps/piano-sheet/prelude4/"/>
+    <lastmod>2026-10-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://oreumgames.com/en/apps/piano-sheet/prelude4/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/apps/piano-sheet/prelude4/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/apps/piano-sheet/prelude4/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/apps/piano-sheet/prelude4/"/>
+    <lastmod>2026-10-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://oreumgames.com/apps/piano-sheet/prelude7/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/apps/piano-sheet/prelude7/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/apps/piano-sheet/prelude7/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/apps/piano-sheet/prelude7/"/>
+    <lastmod>2026-10-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://oreumgames.com/en/apps/piano-sheet/prelude7/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/apps/piano-sheet/prelude7/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/apps/piano-sheet/prelude7/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/apps/piano-sheet/prelude7/"/>
+    <lastmod>2026-10-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://oreumgames.com/apps/piano-sheet/raindrop/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/apps/piano-sheet/raindrop/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/apps/piano-sheet/raindrop/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/apps/piano-sheet/raindrop/"/>
+    <lastmod>2026-10-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://oreumgames.com/en/apps/piano-sheet/raindrop/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/apps/piano-sheet/raindrop/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/apps/piano-sheet/raindrop/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/apps/piano-sheet/raindrop/"/>
+    <lastmod>2026-10-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -766,6 +1072,24 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://oreumgames.com/apps/piano-sheet/soldiers/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/apps/piano-sheet/soldiers/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/apps/piano-sheet/soldiers/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/apps/piano-sheet/soldiers/"/>
+    <lastmod>2026-10-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://oreumgames.com/en/apps/piano-sheet/soldiers/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/apps/piano-sheet/soldiers/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/apps/piano-sheet/soldiers/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/apps/piano-sheet/soldiers/"/>
+    <lastmod>2026-10-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://oreumgames.com/apps/piano-sheet/susanna/</loc>
     <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/apps/piano-sheet/susanna/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/apps/piano-sheet/susanna/"/>
@@ -780,6 +1104,24 @@
     <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/apps/piano-sheet/susanna/"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/apps/piano-sheet/susanna/"/>
     <lastmod>2026-10-07</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://oreumgames.com/apps/piano-sheet/traumerei/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/apps/piano-sheet/traumerei/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/apps/piano-sheet/traumerei/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/apps/piano-sheet/traumerei/"/>
+    <lastmod>2026-10-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://oreumgames.com/en/apps/piano-sheet/traumerei/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/apps/piano-sheet/traumerei/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/apps/piano-sheet/traumerei/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/apps/piano-sheet/traumerei/"/>
+    <lastmod>2026-10-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>

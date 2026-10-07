@@ -28,7 +28,7 @@
   if (list) {
     var h = '';
     INDEX.forEach(function (s, i) {
-      var inner = '<span class="n">' + (i + 1) + ' · ' + tr('난이도', 'Level') + ' ' + s.lv + '</span><span class="t">' + esc(EN ? s.en : s.ko) + '</span><span class="st">' + (s.ts === 1.5 ? '3/8' : s.ts + '/4') + ' · ♩' + s.bpm + '</span>';
+      var inner = '<span class="n">' + (i + 1) + ' · ' + tr('난이도', 'Level') + ' ' + s.lv + '</span><span class="t">' + esc(EN ? s.en : s.ko) + '</span><span class="st">' + (s.sig || (s.ts === 1.5 ? '3/8' : s.ts + '/4')) + ' · ♩' + s.bpm + '</span>';
       h += SITE ? '<a class="songcard ivory" href="' + SITE + s.id + '/">' + inner + '</a>'
                 : '<button type="button" class="songcard ivory" data-i="' + i + '">' + inner + '</button>';
     });

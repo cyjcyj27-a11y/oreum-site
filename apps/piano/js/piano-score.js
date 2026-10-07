@@ -168,7 +168,7 @@
     out.h += '<text x="' + (W / 2) + '" y="36" text-anchor="middle" font-size="' + tsz + '" font-weight="700" font-family="Pretendard, sans-serif" fill="#17161b">' + esc(tt) + '</text>';
     out.h += '<text x="' + (W - 4) + '" y="60" text-anchor="end" font-size="13" font-weight="700" fill="#5b5443">♩ = ' + song.bpm + '</text>';
     out.h += '<text x="4" y="60" font-size="12" font-weight="700" fill="#8a8270">' + (opt.en ? 'Oreum Games · Piano Practice' : '오름게임즈 · 피아노 연습') + '</text>';
-    var num = song.ts === 1.5 ? ['3', '8'] : [String(song.ts), '4'];
+    var num = song.sig ? song.sig.split('/') : song.ts === 1.5 ? ['3', '8'] : [String(song.ts), '4'];
     var prevR = null, prevL = null;
     lines.forEach(function (line, li) {
       var y = top0 + li * sysH + nameGap, tT = y, tB = y + 4 * LG + gapTB, k;
