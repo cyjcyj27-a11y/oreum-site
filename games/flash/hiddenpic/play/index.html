@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>숨은그림찾기</title>
+<!--
+  버튼 소재(oreum-game-ui 규칙 7): 탐정 코르크 보드
+  - 주 단추: 빨간 꼬리표(왼쪽 귀를 깎고 끈 구멍 + 빨간 끈), 보조 단추: 마닐라 꼬리표
+  - 둥근 단추: 놋쇠 테 돋보기 렌즈, 숫자: 엠보싱 라벨 테이프(빨강·검정에 흰 돋은 글자)
+  - 왼쪽 판: 나무 테 코르크 보드, 찾을 목록: 폴라로이드 사진, 창: 검은 사진 앨범 종이 + 사진 모서리
+  - 누르면 꼬리표는 3px 내려가며 살짝 흔들, 렌즈는 딸깍 들어감
+-->
+<style>
+@font-face{font-family:'Tmon';src:url('fonts/title.woff2') format('woff2');font-display:swap}
+@font-face{font-family:'Dan';src:url('fonts/body.woff2') format('woff2');font-display:swap}
+:root{--pw:212px;--ph:0px;--cork:#c99a63;--wood:#6a432a;--red:#c8402e;--manila:#ecd29a;--ink:#3a2618;--paper:#1e1c1b}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+html,body{width:100%;height:100%;overflow:hidden;background:#2a2230;font-family:'Dan',-apple-system,'Malgun Gothic',sans-serif;color:var(--ink);
+  user-select:none;-webkit-user-select:none;touch-action:none}
+
+/* ---------- 왼쪽 코르크 보드 ---------- */
+#panel{position:fixed;left:0;top:0;bottom:0;width:var(--pw);z-index:20;display:flex;flex-direction:column;
+  padding:calc(46px + env(safe-area-inset-top)) 10px calc(8px + env(safe-area-inset-bottom)) calc(10px + env(safe-area-inset-left));
+  background:
+    radial-gradient(circle at 20% 30%,rgba(90,50,20,.25) 0 1px,transparent 2px) 0 0/7px 9px,
+    radial-gradient(circle at 70% 60%,rgba(255,230,190,.25) 0 1px,transparent 2px) 0 0/11px 8px,
+    radial-gradient(circle at 40% 80%,rgba(80,40,10,.2) 0 1.5px,transparent 2.5px) 0 0/13px 12px,
+    linear-gradient(160deg,#d3a670,#bb8a54);
+  box-shadow:inset -8px 0 0 var(--wood),inset -11px 0 0 #4a2c1a,inset 0 0 30px rgba(60,30,10,.35),6px 0 18px rgba(0,0,0,.35)}
+body:not(.playing) #panel{visibility:hidden}
+body.playing #oreumFs{display:none}
+#tRot{display:none}html.port #tRot{display:grid}
+.row{display:flex;align-items:center;gap:6px;margin-bottom:7px;padding-right:10px}
+.dymo{display:inline-flex;align-items:center;gap:5px;height:30px;padding:0 10px;border-radius:3px;background:linear-gradient(180deg,#d8463a,#b8302a);
+  color:#fff;font-size:17px;letter-spacing:2px;text-shadow:0 1px 0 rgba(255,255,255,.35),0 -1px 0 rgba(0,0,0,.35);
+  box-shadow:0 2px 0 rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.25),inset 0 -2px 0 rgba(0,0,0,.18);transform:rotate(-1.2deg);white-space:nowrap}
+.dymo.blk{background:linear-gradient(180deg,#3a3a40,#202024);transform:rotate(.8deg)}
+.dymo.low{animation:blink 1s steps(2) infinite}
+@keyframes blink{50%{background:linear-gradient(180deg,#e85a3a,#c8302a)}}
+#tbar{flex:1;height:8px;border-radius:4px;background:rgba(60,30,10,.35);overflow:hidden;box-shadow:inset 0 1px 2px rgba(0,0,0,.4)}
+#tbar>span{display:block;height:100%;width:100%;background:linear-gradient(180deg,#f8e070,#e0a830);border-radius:4px}
+#tbar.low>span{background:linear-gradient(180deg,#ff7a5a,#d8302a)}
+/* 놋쇠 돋보기 렌즈 단추 */
+.lens{position:relative;width:38px;height:38px;flex:0 0 38px;border-radius:50%;border:0;cursor:pointer;
+  background:radial-gradient(circle at 35% 30%,rgba(255,255,255,.85) 0 3px,transparent 7px),
+    radial-gradient(circle,#cfe6ee 0 52%,#8fb8c8 62%,transparent 63%),
+    conic-gradient(from 30deg,#f6dc8a,#b8862e,#f0d07a,#8a5a1a,#f6dc8a);
+  box-shadow:0 3px 0 #5a3a12,0 4px 6px rgba(0,0,0,.35);display:grid;place-items:center;
+  transition:transform .2s cubic-bezier(.34,1.56,.64,1),box-shadow .2s,filter .15s}
+.lens svg{width:20px;height:20px}
+.lens:hover{filter:brightness(1.08)}
+.lens:active{transform:translateY(2px) scale(.95);box-shadow:0 1px 0 #5a3a12;transition-duration:.04s}
+.lens.off{opacity:.6}
+.lens.off::after{content:'';position:absolute;left:24%;right:24%;top:50%;height:2px;margin-top:-1px;background:#3a2618;border-radius:1px;transform:rotate(-40deg)}
+#bHint{width:auto;border-radius:19px;flex:1 1 auto;min-width:64px;padding:0 10px 0 6px;gap:4px;display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(circle at 18px 50%,#cfe6ee 0 11px,#8fb8c8 12px,transparent 13px),linear-gradient(180deg,#f6dc8a,#c99a3a 55%,#9a6a22);
+  color:#3a2618;font-family:inherit;font-size:19px;padding-left:34px}
+#bHint.empty{filter:grayscale(.7) brightness(.85)}
+#bHint b{font-weight:400}
+/* 폴라로이드 목록 */
+#list{flex:1;display:grid;gap:8px;align-content:start;justify-content:center;padding:4px 10px 0 2px;min-height:0}
+.pol{position:relative;background:#fbf8f0;border-radius:2px;padding:6% 6% 18%;box-shadow:0 3px 6px rgba(40,20,5,.45);transition:transform .3s}
+.pol canvas{display:block;width:100%;aspect-ratio:1;background:linear-gradient(160deg,#e8e0d0,#d8ccb8);border-radius:1px}
+.pol .nm{position:absolute;left:0;right:0;bottom:2%;text-align:center;font-size:12px;color:#4a3a2a;white-space:nowrap;overflow:hidden}
+.pol.got canvas{filter:saturate(.35) brightness(1.05)}
+.pol.got::after{content:'';position:absolute;inset:4% 4% 14%;border:3px solid #d8302a;border-radius:50%;transform:rotate(-8deg) scale(1.02);opacity:.9;animation:ink .35s ease-out}
+@keyframes ink{from{transform:rotate(-8deg) scale(1.6);opacity:0}}
+.pol.hit{animation:bump .5s cubic-bezier(.34,1.56,.64,1)}
+@keyframes bump{30%{transform:scale(1.25) rotate(4deg)}}
+.small .pol .nm{display:none}.small .pol{padding-bottom:6%}
+
+/* ---------- 그림 ---------- */
+#pic{position:fixed;z-index:5;overflow:hidden;cursor:crosshair;touch-action:none;background:#2a2230}
+#pic canvas{position:absolute;left:0;top:0;width:100%;height:100%}
+#pic.shake{animation:shake .3s}
+@keyframes shake{20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(3px)}}
+#word{position:fixed;left:50%;top:42%;transform:translate(-50%,-50%) scale(.6);z-index:26;pointer-events:none;white-space:nowrap;
+  font-family:'Tmon','Dan',sans-serif;font-size:clamp(38px,8vw,80px);color:#fff4d0;opacity:0;
+  -webkit-text-stroke:.06em #8a2a1a;paint-order:stroke fill;filter:drop-shadow(0 6px 10px rgba(0,0,0,.45));
+  transition:transform .25s cubic-bezier(.3,1.6,.5,1),opacity .2s}
+#word.on{opacity:1;transform:translate(-50%,-50%) scale(1)}
+#loading{position:fixed;inset:0;z-index:30;display:grid;place-items:center;background:rgba(20,16,28,.55);color:#fff;font-size:22px;letter-spacing:3px}
+#pauseCover{position:fixed;inset:0;z-index:18;background:rgba(18,14,26,.92);display:grid;place-items:center;font-size:64px;color:#fff;cursor:pointer}
+#fly{position:fixed;z-index:24;pointer-events:none;width:64px;height:64px}
+
+/* ---------- 꼬리표 단추 ---------- */
+.tag{position:relative;border:0;background:none;cursor:pointer;font-family:inherit;padding:0;
+  filter:drop-shadow(0 4px 0 #6a2a1a) drop-shadow(0 6px 8px rgba(0,0,0,.35));
+  transition:transform .22s cubic-bezier(.34,1.56,.64,1),filter .15s}
+.tag>span{display:flex;align-items:center;justify-content:center;gap:8px;min-width:150px;height:56px;padding:0 26px 0 42px;
+  font-size:24px;color:#fff6e4;letter-spacing:1px;
+  background:linear-gradient(180deg,#e0583e,var(--red) 50%,#a8301e);
+  clip-path:polygon(18px 0,100% 0,100% 100%,18px 100%,0 calc(100% - 16px),0 16px);
+  -webkit-mask:radial-gradient(circle at 20px 50%,transparent 6px,#000 7px);mask:radial-gradient(circle at 20px 50%,transparent 6px,#000 7px);
+  text-shadow:0 2px 0 rgba(90,20,10,.6)}
+.tag::before{content:'';position:absolute;left:-14px;top:50%;width:36px;height:3px;background:#f2ead6;border-radius:2px;transform:rotate(-24deg);transform-origin:right center;z-index:2;box-shadow:0 1px 1px rgba(0,0,0,.3)}
+.tag.m{filter:drop-shadow(0 4px 0 #8a6a3a) drop-shadow(0 6px 8px rgba(0,0,0,.3))}
+.tag.m>span{background:linear-gradient(180deg,#f6e2b0,var(--manila) 50%,#d8b878);color:var(--ink);text-shadow:0 1px 0 rgba(255,255,255,.5)}
+.tag.m::before{background:#c8402e}
+.tag.s>span{min-width:96px;height:44px;font-size:19px;padding:0 16px 0 34px}
+.tag:hover{filter:drop-shadow(0 4px 0 #6a2a1a) drop-shadow(0 6px 8px rgba(0,0,0,.35)) brightness(1.08)}
+.tag:active{transform:translateY(3px) rotate(-1.5deg);transition-duration:.04s}
+
+/* ---------- 창: 검은 앨범 종이 ---------- */
+.ov{position:fixed;inset:0;z-index:45;display:none;align-items:center;justify-content:center;background:rgba(18,14,20,.62);backdrop-filter:blur(3px)}
+.ov.on{display:flex}
+.album{position:relative;display:flex;flex-direction:column;align-items:center;gap:10px;padding:24px 30px 26px;max-width:min(94vw,760px);
+  background:radial-gradient(circle at 30% 20%,rgba(255,255,255,.04),transparent 60%),repeating-linear-gradient(90deg,rgba(255,255,255,.015) 0 2px,transparent 2px 5px),var(--paper);
+  border-radius:6px;box-shadow:0 18px 50px rgba(0,0,0,.6),inset 0 0 0 2px #2c2928;color:#f2ead6;animation:popin .2s cubic-bezier(.34,1.56,.64,1)}
+@keyframes popin{from{transform:scale(.86);opacity:0}}
+.album h2{font-family:'Tmon','Dan',sans-serif;font-weight:400;font-size:clamp(40px,7vw,62px);line-height:1.05;color:#fff4d0;letter-spacing:1px;text-shadow:0 3px 0 #8a2a1a}
+.stars{font-size:clamp(34px,6vw,48px);color:#f2c44a;letter-spacing:6px;text-shadow:0 2px 0 #8a5a10}
+.stars .dim{color:rgba(255,255,255,.14);text-shadow:none}
+.sub{font-size:21px;color:#e0d4bc}
+.btns{display:flex;gap:16px;margin-top:6px;flex-wrap:wrap;justify-content:center}
+/* 사진 모서리 */
+.corner{position:absolute;width:22px;height:22px;background:linear-gradient(135deg,#d8d0c0 50%,transparent 50%)}
+.corner.a{left:-4px;top:-4px}.corner.b{right:-4px;top:-4px;transform:rotate(90deg)}.corner.c{right:-4px;bottom:-4px;transform:rotate(180deg)}.corner.d{left:-4px;bottom:-4px;transform:rotate(270deg)}
+
+/* ---------- 카드 셋 ---------- */
+#cards{display:flex;gap:min(4vw,26px);justify-content:center;margin:6px 0 2px;perspective:900px}
+.card{position:relative;width:min(25vw,150px);aspect-ratio:3/4.2;cursor:pointer;transform-style:preserve-3d;transition:transform .55s cubic-bezier(.3,1.3,.5,1)}
+.card .f,.card .bk{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:8px}
+.card .bk{background:radial-gradient(circle at 50% 46%,#cfe6ee 0 18%,#8fb8c8 19% 21%,#c99a3a 22% 27%,transparent 28%),
+  linear-gradient(135deg,transparent 47%,#c99a3a 47% 53%,transparent 53%) 50% 50%/100% 100% no-repeat,
+  repeating-linear-gradient(45deg,#7a2a22 0 8px,#8a3428 8px 16px);box-shadow:inset 0 0 0 5px #f2ead6,inset 0 0 0 7px #7a2a22,0 6px 14px rgba(0,0,0,.5)}
+.card .f{transform:rotateY(180deg);background:#fbf8f0;box-shadow:0 6px 14px rgba(0,0,0,.5);display:flex;flex-direction:column;align-items:center;padding:8% 8% 6%;color:var(--ink)}
+.card .f canvas{width:100%;aspect-ratio:1;background:linear-gradient(160deg,#ece4d4,#d8ccb8)}
+.card .f .nm{font-size:clamp(14px,2.4vw,19px);margin-top:6%}
+.card .f .fx{margin-top:auto;font-size:clamp(13px,2.2vw,17px);background:var(--ink);color:#fff;border-radius:3px;padding:2px 8px;letter-spacing:1px}
+.card.gold .f{background:linear-gradient(135deg,#fff3c0,#f2c44a 40%,#fff0b0 55%,#d8a028);box-shadow:0 0 0 3px #b8801a,0 0 26px #ffd84a,0 6px 14px rgba(0,0,0,.5)}
+.card.gold .f .fx{background:#8a5a10}
+.card.open{transform:rotateY(180deg)}
+.card.pre{animation:pre .5s ease-in-out}
+.card.pre.goldglow .bk{box-shadow:inset 0 0 0 5px #f2ead6,inset 0 0 0 7px #7a2a22,0 0 30px 8px #ffd84a}
+@keyframes pre{25%{transform:rotate(-4deg) scale(1.06)}50%{transform:rotate(4deg) scale(1.08)}75%{transform:rotate(-2deg) scale(1.06)}}
+.card.dim{opacity:.55}
+.card.pick{transform:rotateY(180deg) scale(1.08)}
+.card.new::after{content:'NEW';position:absolute;top:-10px;right:-8px;transform:rotateY(180deg) rotate(8deg);background:#d8302a;color:#fff;font-size:15px;padding:2px 8px;border-radius:3px;letter-spacing:1px}
+
+/* ---------- 스테이지 목록·도감 (앨범 한 장) ---------- */
+.sheet{position:fixed;inset:0;z-index:50;display:none;background:rgba(18,14,20,.7)}
+.sheet.on{display:block}
+.sheet .page{position:absolute;inset:calc(8px + env(safe-area-inset-top)) calc(8px + env(safe-area-inset-right)) calc(8px + env(safe-area-inset-bottom)) calc(8px + env(safe-area-inset-left));
+  overflow-y:auto;overscroll-behavior:contain;touch-action:pan-y;border-radius:6px;padding:16px 18px 30px;color:#f2ead6;
+  background:repeating-linear-gradient(90deg,rgba(255,255,255,.015) 0 2px,transparent 2px 5px),var(--paper);box-shadow:inset 0 0 0 2px #2c2928}
+.shead{display:flex;align-items:center;gap:12px;margin:30px auto 10px;max-width:900px}
+.shead h2{font-family:'Tmon','Dan',sans-serif;font-weight:400;font-size:34px;flex:1;color:#fff4d0;text-shadow:0 2px 0 #8a2a1a}
+.x{width:44px;height:44px;border-radius:50%;border:0;cursor:pointer;font-family:inherit;font-size:20px;color:#3a2618;
+  background:radial-gradient(circle at 35% 30%,rgba(255,255,255,.8) 0 3px,transparent 7px),radial-gradient(circle,#cfe6ee 0 52%,#8fb8c8 62%,transparent 63%),conic-gradient(from 30deg,#f6dc8a,#b8862e,#f0d07a,#8a5a1a,#f6dc8a);box-shadow:0 3px 0 #5a3a12}
+.x:active{transform:translateY(2px)}
+.wrap{max-width:900px;margin:0 auto}
+.room{display:flex;align-items:center;gap:12px;margin:18px 0 8px;font-size:21px}
+.room img{width:96px;height:60px;object-fit:cover;border:4px solid #fbf8f0;border-bottom-width:10px;box-shadow:0 3px 6px rgba(0,0,0,.5);transform:rotate(-2deg)}
+.room .st{margin-left:auto;font-size:17px;color:#f2c44a}
+.grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;max-width:520px}
+.cell{border:0;cursor:pointer;font-family:inherit;height:58px;border-radius:3px;font-size:22px;color:var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;
+  background:linear-gradient(180deg,#f6e2b0,var(--manila) 50%,#d8b878);box-shadow:0 3px 0 #8a6a3a;transition:transform .2s cubic-bezier(.34,1.56,.64,1)}
+.cell small{font-size:12px;color:#c8402e;letter-spacing:1px;min-height:13px}
+.cell.lock{opacity:.35;cursor:default}
+.cell.cur{background:linear-gradient(180deg,#e0583e,var(--red) 50%,#a8301e);color:#fff6e4;box-shadow:0 3px 0 #6a2a1a}
+.cell.cur small{color:#ffe08a}
+.cell:active:not(.lock){transform:translateY(2px)}
+.lockic{display:block;width:16px;height:14px;margin-top:2px;border-radius:2px;background:#5a4630;position:relative}
+.lockic::before{content:'';position:absolute;left:3px;top:-8px;width:6px;height:8px;border:2.5px solid #5a4630;border-bottom:0;border-radius:6px 6px 0 0}
+#dexGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:14px 12px}
+.dx{position:relative;background:#fbf8f0;padding:7% 7% 22%;border-radius:2px;box-shadow:0 3px 6px rgba(0,0,0,.5);color:var(--ink);cursor:pointer}
+.dx canvas{display:block;width:100%;aspect-ratio:1;background:linear-gradient(160deg,#ece4d4,#d8ccb8)}
+.dx .nm{position:absolute;left:0;right:0;bottom:3%;text-align:center;font-size:14px;white-space:nowrap}
+.dx.no{background:#3a3634;cursor:default}.dx.no canvas{background:#2a2726}.dx.no .nm{color:#8a827a}
+.dx.gold{background:linear-gradient(135deg,#fff3c0,#f2c44a 40%,#fff0b0 55%,#d8a028);box-shadow:0 0 0 2px #b8801a,0 0 14px #ffd84a}
+#dexInfo{min-height:30px;margin:4px 0 12px;font-size:19px;color:#f2c44a}
+
+/* ---------- 타이틀 ---------- */
+#titleBg{position:fixed;inset:0;z-index:39;background:#e8d4bc}
+#titleBg canvas{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+#title{position:fixed;inset:0;z-index:40;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:10px;
+  padding-bottom:calc(3vh + env(safe-area-inset-bottom));background:linear-gradient(180deg,rgba(30,18,10,0) 40%,rgba(30,18,10,.2) 65%,rgba(30,18,10,.6))}
+#title .btns{align-items:center;margin-bottom:1vh}
+#title h1{font-family:'Tmon','Dan',sans-serif;font-weight:400;font-size:min(12vw,18vh);line-height:1.05;color:#fff6e4;white-space:nowrap;
+  -webkit-text-stroke:.07em #8a2a1a;paint-order:stroke fill;filter:drop-shadow(0 8px 0 #4a1a10) drop-shadow(0 12px 16px rgba(0,0,0,.4))}
+#title h1.en{font-size:min(9vw,15vh)}
+#title.off,#titleBg.off{display:none}
+
+/* ---------- 엔딩 ---------- */
+#endingCv{width:min(84vw,720px);aspect-ratio:16/10;border:8px solid #fbf8f0;border-bottom-width:26px;box-shadow:0 6px 16px rgba(0,0,0,.6);transform:rotate(-1.5deg)}
+
+/* ---------- 세로 화면 ---------- */
+html.port #panel{right:0;bottom:auto;width:auto;height:var(--ph);padding:calc(6px + env(safe-area-inset-top)) 10px 6px var(--pillw,104px);flex-direction:row;flex-wrap:wrap;align-content:flex-start;column-gap:8px;
+  box-shadow:inset 0 -6px 0 var(--wood),0 4px 14px rgba(0,0,0,.35)}
+html.port #panel>.row:nth-child(2){flex:1}
+html.port #panel>.row:nth-child(3){flex-basis:100%;margin-left:calc(10px - var(--pillw,104px))}
+html.port #list{position:fixed;left:0;right:0;bottom:0;top:auto;padding:10px 12px calc(10px + env(safe-area-inset-bottom));z-index:19;
+  background:linear-gradient(160deg,#d3a670,#bb8a54);box-shadow:inset 0 6px 0 var(--wood)}
+@media (max-height:480px){
+  #title h1{font-size:min(11vw,19vh)}
+  #title{padding-bottom:2vh;gap:4px}
+  #title .btns{margin-bottom:4vh}
+  .tag>span{height:46px;font-size:20px;min-width:120px}
+  .tag.s>span{height:38px;font-size:17px;min-width:84px}
+  .album{padding:12px 20px 14px;gap:4px}
+  .album h2{font-size:34px}.stars{font-size:28px}.sub{font-size:16px}
+  .card{width:min(19vw,104px)}
+  .card .f .nm{font-size:13px}.card .f .fx{font-size:12px}
+  .shead{margin:24px auto 6px}.shead h2{font-size:26px}
+  .row{margin-bottom:5px}.dymo{height:26px;font-size:14px;letter-spacing:1px;padding:0 7px}
+  #panel{padding-top:calc(8px + env(safe-area-inset-top))}
+  #panel>.row:first-child{margin-left:var(--pillw,96px);min-height:30px;margin-bottom:8px}
+  #list{gap:6px}
+  .small .pol{padding:4% 4% 4%}
+  #endingCv{width:min(60vw,440px)}
+}
+</style>
+</head>
+<body>
+
+<div id="pic"><canvas id="view"></canvas></div>
+
+<div id="panel">
+  <div class="row"><span class="dymo" id="stage">STAGE 1</span><span class="dymo blk" id="shield" hidden>SHIELD 2</span></div>
+  <div class="row"><span class="dymo blk" id="tnum">0:00</span><div id="tbar"><span id="tfill"></span></div></div>
+  <div class="row">
+    <button class="lens" id="bHint" title="HINT"><svg viewBox="0 0 24 24" style="position:absolute;left:8px"><circle cx="10" cy="10" r="6" fill="none" stroke="#3a2618" stroke-width="2.6"/><path d="M14.5 14.5l5 5" stroke="#3a2618" stroke-width="3" stroke-linecap="round"/></svg><b id="hints">2</b></button>
+    <button class="lens" id="tPause" title="PAUSE"><svg viewBox="0 0 24 24"><rect x="6" y="5" width="4" height="14" rx="1" fill="#3a2618"/><rect x="14" y="5" width="4" height="14" rx="1" fill="#3a2618"/></svg></button>
+    <button class="lens" id="tMus" title="BGM"><svg viewBox="0 0 24 24"><path d="M9 17.5V5.5l11-2.5v12" fill="none" stroke="#3a2618" stroke-width="2.6" stroke-linejoin="round"/><ellipse cx="6.3" cy="17.8" rx="3.4" ry="2.7" fill="#3a2618"/><ellipse cx="17.3" cy="15.3" rx="3.4" ry="2.7" fill="#3a2618"/></svg></button>
+    <button class="lens" id="tRot" title="ROTATE"><svg viewBox="0 0 24 24"><rect x="7" y="3" width="10" height="18" rx="2" fill="none" stroke="#3a2618" stroke-width="2.2"/><path d="M3 15a9 9 0 0 0 6 6" fill="none" stroke="#3a2618" stroke-width="2" stroke-linecap="round"/><path d="M7 21.5l2.3-.6-.6-2.3" fill="none" stroke="#3a2618" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    <button class="lens" id="tSnd" title="SFX"><svg viewBox="0 0 24 24"><path d="M3 9h4l5-4.5v15L7 15H3z" fill="#3a2618"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13" fill="none" stroke="#3a2618" stroke-width="2.4" stroke-linecap="round"/></svg></button>
+  </div>
+  <div id="list"></div>
+</div>
+
+<div id="pauseCover" hidden>▶</div>
+<div id="word"></div>
+<div id="loading" hidden>LOADING</div>
+<canvas id="fly" width="128" height="128" hidden></canvas>
+
+<div class="ov" id="end"><div class="album">
+  <i class="corner a"></i><i class="corner b"></i><i class="corner c"></i><i class="corner d"></i>
+  <h2 id="endTitle">CLEAR</h2>
+  <div class="stars" id="endStars"></div>
+  <div class="sub" id="endSub"></div>
+  <div id="cards"></div>
+  <div class="btns">
+    <button class="tag m s" id="endList"><span>STAGE</span></button>
+    <button class="tag m s" id="endRetry"><span>RETRY</span></button>
+    <button class="tag" id="endNext"><span>NEXT</span></button>
+  </div>
+</div></div>
+
+<div class="ov" id="ending"><div class="album">
+  <i class="corner a"></i><i class="corner b"></i><i class="corner c"></i><i class="corner d"></i>
+  <h2 id="endingTitle">THE END</h2>
+  <canvas id="endingCv" width="1280" height="800"></canvas>
+  <div class="sub" id="endingSub"></div>
+  <div class="btns">
+    <button class="tag m s" id="endingDex"><span>도감</span></button>
+    <button class="tag" id="endingOk"><span>OK</span></button>
+  </div>
+</div></div>
+
+<div class="sheet" id="stages"><div class="page"><div class="wrap">
+  <div class="shead"><h2>STAGE</h2><span class="dymo" id="starSum">★ 0</span><button class="x" id="closeStages">✕</button></div>
+  <div id="slist"></div>
+</div></div></div>
+
+<div class="sheet" id="dex"><div class="page"><div class="wrap">
+  <div class="shead"><h2 id="dexTitle">도감</h2><span class="dymo blk" id="dexCount">0 / 40</span><button class="x" id="closeDex">✕</button></div>
+  <div id="dexInfo"></div>
+  <div id="dexGrid"></div>
+</div></div></div>
+
+<div id="titleBg"><canvas id="cvT"></canvas></div>
+<div id="title">
+  <div class="btns">
+    <button class="tag m s" id="toList" hidden><span>STAGE</span></button>
+    <button class="tag" id="start"><span>시작</span></button>
+    <button class="tag m s" id="toDex"><span>도감</span></button>
+  </div>
+  <h1 id="h1">숨은그림찾기</h1>
+</div>
+
+<script src="assets/game-home.js" data-top="6" data-left="6" data-fullscreen="1" defer></script>
+<script src="assets/landscape.js"></script>
+<script src="lib/three.min.js"></script>
+<script src="js/kit.js?v=1"></script>
+<script src="js/props.js?v=1"></script>
+<script src="js/items.js?v=1"></script>
+<script src="js/clutter.js?v=1"></script>
+<script src="js/stage.js?v=1"></script>
+<script src="js/scnkit.js?v=1"></script>
+<script src="js/scn_attic.js?v=1"></script>
+<script src="js/scn_shop.js?v=1"></script>
+<script src="js/scn_grandma.js?v=1"></script>
+<script src="js/scn_garage.js?v=1"></script>
+<script src="js/scn_library.js?v=1"></script>
+<script src="js/scn_greenhouse.js?v=1"></script>
+<script src="js/scn_ending.js?v=1"></script>
+<script src="js/sfx.js?v=2"></script>
+<script src="js/audio.js?v=3"></script>
+<script src="js/game.js?v=1"></script>
+<script src="/assets/visit.js?v=17" defer></script>
+<script src="/assets/game-events.js" defer></script>
+</body>
+</html>

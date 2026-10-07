@@ -18,6 +18,7 @@ import io, os, re, sys
 
 # slug, 한국어 경로, 영어 경로, 한국어 이름, 한국어 장르 앵커, 영어 이름, 영어 장르 앵커, 태그
 GAMES = [
+    ("hiddenpic",     "/games/flash/hiddenpic/",     "/en/games/flash/hiddenpic/",     "숨은그림찾기",      "3D 숨은그림찾기 게임",               "Hidden Objects",       "hidden object game online",      {"puzzle", "casual", "kids"}),
     ("yokailike",     "/games/yokailike/",           "/en/games/yokailike/",           "요괴라이크",        "요괴라이크 뱀서라이크게임",        "YOKAI LIKE",            "survivors-like yokai game", {"action", "arcade", "casual", "korean"}),
     ("gyodo",         "/games/gyodo/",               "/en/games/gyodo/",               "교도관24시",        "교도관24시 타워디펜스게임",        "PRISON GUARD 24",       "reverse tower defense game", {"strategy", "casual", "korean"}),
     ("2048",          "/games/flash/2048/",          "/en/games/flash/2048/",          "2048",              "숫자 퍼즐 게임",                    "2048",                 "2048 online free",               {"puzzle", "casual"}),
