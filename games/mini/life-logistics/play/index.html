@@ -77,7 +77,7 @@
   /* ── 폰: 상단이 좁아 셋이 겹친다 — 카드 한 줄, 주문서·콤보는 그 아래로 ──
      왼쪽 위 '오름게임즈' 배지(top 8px + 높이 약 24px)가 첫 카드를 덮어서
      HUD 전체를 배지 아래로 내렸다. 배지와 같은 방식으로 노치 여백도 더한다. */
-  @media (max-width:700px) {
+  @media (max-width:700px), (max-height:500px) {
     #top { top:calc(36px + env(safe-area-inset-top)); left:8px; right:8px; transform:none;
       justify-content:space-between; gap:6px; }
     .card { padding:5px 7px; border-radius:8px; flex:1; }
@@ -211,7 +211,7 @@ body.touch.portrait #rotate{display:grid}
   .talk:after { content:""; position:absolute; left:50%; bottom:-7px; margin-left:-7px; border:7px solid transparent;
     border-bottom:0; border-top-color:#fff; }
   .talk.red:after { border-top-color:#ff3b3b; }
-  @media (max-width:700px) {
+  @media (max-width:700px), (max-height:500px) {
     #praise .w { font-size:46px; -webkit-text-stroke:3px #08111a; }
     #praise .s { font-size:18px; }
     #droneOn { top:calc(64px + env(safe-area-inset-top)); font-size:12px; }
@@ -295,6 +295,16 @@ body.touch.portrait #rotate{display:grid}
     #praise .w { font-size:44px; -webkit-text-stroke:3px #08111a; }
     #praise .s { font-size:17px; }
     .fly { font-size:20px; }
+  }
+  /* 폰 가로: 이동 동그라미가 전체화면 단추·손에 든 것 칸을 덮던 것 (2026-10-08 "폰 화면 깨지는 것도 고쳐") */
+  @media (max-width:700px), (max-height:500px) {
+    body.touch .ot-stick { bottom:calc(40px + env(safe-area-inset-bottom)) !important; }
+    body.touch #hand { left:50%; transform:translateX(-50%); bottom:calc(12px + env(safe-area-inset-bottom)); padding:6px 12px; font-size:13px; }
+    body.touch #droneOn { top:auto; bottom:calc(56px + env(safe-area-inset-bottom)); }
+  }
+  @media (max-height:500px) {
+    body.touch #prompt { bottom:calc(96px + env(safe-area-inset-bottom)) !important; }
+    body.touch #toasts { bottom:calc(140px + env(safe-area-inset-bottom)); }
   }
 </style>
 
@@ -1880,6 +1890,11 @@ const LS = KO ? {
 };
 if(window.OREUM_TOUCH) LS.chuteSeal = KO ? '<span style="color:#ffd479">포장대에서 잡기 버튼으로 포장 마감부터</span>'
                                          : '<span style="color:#ffd479">Seal the box at the packing table first (Grab button)</span>';
+if(window.OREUM_TOUCH){                                // 폰엔 F·Q 키가 없다 — 남아 있던 셋도 단추 이름으로 (2026-10-08)
+  STR.monSealNow = KO ? '포장 마감!' : 'Seal the box!';
+  STR.tListDone  = KO ? '목록 완료 — 잡기 버튼으로 포장 마감' : 'List complete — seal it with Grab';
+  STR.tHandFull  = KO ? '손이 이미 찼습니다 (내려놓기 버튼)' : 'Your hands are full (Drop button)';
+}
 
 /* ── 소리: 귀에 편한 쪽으로(밝기 2kHz 아래), 골판지·테이프·롤러 느낌을 소음과 낮은 음으로 ── */
 function acx(){ try{ if(!AC) AC = new (window.AudioContext||window.webkitAudioContext)(); if(AC.state === 'suspended') AC.resume(); return AC; }catch(e){ return null; } }
