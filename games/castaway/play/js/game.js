@@ -58,7 +58,7 @@
   btnAct.addEventListener('touchstart', e => { e.preventDefault(); actDown(); }, { passive: false });
   btnAct.addEventListener('touchend', e => { e.preventDefault(); actUp(); }, { passive: false });
   btnAct.addEventListener('touchcancel', e => { actUp(); });
-  $('invF').addEventListener('click', () => toggleDex()); $('bait').addEventListener('click', () => toggleBB()); $('bbX').addEventListener('click', () => toggleBB(false)); $('bb').addEventListener('click', e => { if (e.target === $('bb')) toggleBB(false); }); $('titleDex').addEventListener('click', () => toggleDex(true)); $('dexX').addEventListener('click', () => toggleDex(false)); $('dex').addEventListener('click', e => { if (e.target === $('dex')) toggleDex(false); });
+  $('invF').addEventListener('click', () => toggleDex()); $('bait').addEventListener('click', () => toggleBB()); $('bbX').addEventListener('click', () => toggleBB(false)); $('bb').addEventListener('click', e => { if (e.target === $('bb')) toggleBB(false); else disarm(); }); $('titleDex').addEventListener('click', () => toggleDex(true)); $('dexX').addEventListener('click', () => toggleDex(false)); $('dex').addEventListener('click', e => { if (e.target === $('dex')) toggleDex(false); });
   $('btnSfx').addEventListener('click', toggleSfx); function toggleSfx() { const on = A.toggle(); $('btnSfx').classList.toggle('off', !on); }
   $('btnSfx').classList.toggle('off', !A.on);
   $('title').querySelector('.go.start').addEventListener('click', start);
@@ -180,7 +180,7 @@
   }
   /* ---------- 미끼 창 — 고기를 토막 내 통에 담고, 토막을 하나씩 바늘에 꿴다 (사장님 2026-10-09 "미끼도 팝업으로 열어서 하나씩 거는 손맛") ----------
      바늘에는 언제나 한 토막. 입질에 놓치거나 줄이 끊기거나 잡으면 바늘의 그 토막만 없어지고 통은 그대로다. */
-  let bbOpen = false, bbLock = false, bbHi = null;
+  let bbOpen = false, bbLock = false, bbHi = null, bbArm = null, bbArmT = 0;   // bbArm: 한 번 눌러 '썰기' 가 뜬 고기 — 한 번 더 눌러야 토막 난다 (사장님 2026-10-09 "잘못 눌러서 굶어 죽는다")
   const boxAll = () => Object.keys(G.box).reduce((n, k) => n + (G.box[k] || 0), 0);
   const hex = c => '#' + c.toString(16).padStart(6, '0');
   function pieceSvg(sp, w) {   // 토막 하나: 위는 등 색, 아래는 배 색, 끝은 붉은 살과 등뼈
@@ -194,13 +194,13 @@
   function toggleBB(on, hi) {
     on = on == null ? !bbOpen : on; if (on === bbOpen || bbLock) return;
     if (on && (G.state !== 'play' || G.eatT > 0 || dexOpen || (L.st !== 'idle' && L.st !== 'float'))) return;   // 던지는 중·싸우는 중엔 안 열린다
-    bbOpen = on; bbHi = on ? hi || null : null; if (on) buildBB();
+    bbOpen = on; bbHi = on ? hi || null : null; bbArm = null; if (on) buildBB();
     $('bb').classList.toggle('show', on); document.body.classList.toggle('dexOpen', on);
   }
   function drawHook() { $('hookPc').innerHTML = G.bait > 0 && G.baitSp ? pieceSvg(F.BY[G.baitSp], 70) : ''; $('bbHook').classList.toggle('on', G.bait > 0); }
   function buildBB() {
     $('bbH').textContent = T('미끼', 'BAIT'); drawHook();
-    const pr = $('bbPcs'), fr = $('bbFish'); pr.innerHTML = ''; fr.innerHTML = '';
+    const pr = $('bbPcs'), fr = $('bbFish'); pr.innerHTML = ''; fr.innerHTML = ''; bbArm = null; clearTimeout(bbArmT);
     for (const id of BAIT_ORDER) {
       const sp = F.BY[id], n = G.box[id] || 0; if (n <= 0) continue;
       const b = document.createElement('button'); b.type = 'button'; b.className = 'pc' + (G.bait > 0 && G.baitSp === id ? ' cur' : ''); b.dataset.id = id;
@@ -211,10 +211,13 @@
       const sp = F.BY[id], n = G.inv[id] || 0; if (n <= 0) continue;
       const b = document.createElement('button'); b.type = 'button'; b.className = 'fs' + (bbHi === id ? ' hi' : ''); b.dataset.id = id;
       b.innerHTML = '<img src="' + F.thumb(id) + '" alt=""><span class="nm">' + (EN ? sp.en : sp.ko) + '</span><b class="n">×' + n + '</b><span class="cutN">' + CUT_SVG + '<b>×' + sp.cut + '</b></span>';
-      b.addEventListener('click', () => cutFish(id, b)); fr.appendChild(b);
+      b.dataset.cut = T('썰기', 'CUT');
+      b.addEventListener('click', e => { e.stopPropagation(); if (bbArm === id) { disarm(); cutFish(id, b); } else armFish(id, b); }); fr.appendChild(b);
     }
     pr.classList.toggle('empty', !pr.children.length); fr.classList.toggle('empty', !fr.children.length);
   }
+  function disarm() { bbArm = null; clearTimeout(bbArmT); document.querySelectorAll('#bbFish .fs.arm').forEach(e => e.classList.remove('arm')); }
+  function armFish(id, tile) { if (bbLock) return; disarm(); bbArm = id; tile.classList.add('arm'); A.reelTick(); bbArmT = setTimeout(disarm, 3000); }
   // 토막 그림 하나를 창 안 한 곳에서 다른 곳으로 던진다(포물선)
   function flyPiece(sp, from, to, ms, delay) {
     const a = from.getBoundingClientRect(), b = to.getBoundingClientRect();
@@ -237,7 +240,7 @@
   function hangPiece(id, tile) {   // 토막 하나를 바늘로 — 꿰는 순간 바늘이 휘청, 원래 걸려 있던 토막은 통으로 돌아온다
     if (bbLock || G.state !== 'play' || (L.st !== 'idle' && L.st !== 'float') || (G.box[id] || 0) <= 0) return;
     if (G.bait > 0 && G.baitSp === id) return;   // 같은 토막이 이미 걸려 있다
-    const sp = F.BY[id]; bbLock = true; G.box[id]--;
+    disarm(); const sp = F.BY[id]; bbLock = true; G.box[id]--;
     if (G.bait > 0 && G.baitSp) { const old = G.baitSp; G.box[old] = (G.box[old] || 0) + 1; flyPiece(F.BY[old], $('hookPc'), $('bbPcs'), 380); $('hookPc').innerHTML = ''; A.pieceBack(); }
     tile.classList.add('pick'); flyPiece(sp, tile, $('hookPc'), 300);
     setTimeout(() => {

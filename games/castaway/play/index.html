@@ -129,6 +129,9 @@
   #bb button.pc.got { animation: got .6s ease-out; }
   #bb button.fs.hi { animation: hiP 1s ease-in-out 3; } @keyframes hiP { 50% { box-shadow: 0 0 0 4px rgba(255,210,74,.7), 0 3px 0 rgba(0,0,0,.35); } }
   #bb button.fs.chop { animation: chop .13s ease-out; } @keyframes chop { 0% { transform: translateY(0); } 40% { transform: translateY(4px) scale(1.04, .94); } 100% { transform: translateY(0); } }
+  #bb button.fs.arm { border-color: #ffd24a; }
+  #bb button.fs.arm::after { content: attr(data-cut); position: absolute; inset: 0; display: grid; place-items: center; border-radius: 10px; background: rgba(150,34,22,.95); box-shadow: inset 0 0 0 2px #ffd24a; color: #fff8ec; font-family: 'Ria', 'Griun', sans-serif; font-size: 24px; letter-spacing: 3px; text-shadow: 0 2px 0 rgba(0,0,0,.45); animation: armIn .18s cubic-bezier(.34,1.56,.64,1); }
+  @keyframes armIn { 0% { transform: scale(.85); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
   #bb .pc .pcs { filter: drop-shadow(0 2px 2px rgba(0,0,0,.45)); }
   #bb .pc .n { position: static; margin-top: 1px; }
   #bb .fs img { width: 100%; aspect-ratio: 2 / 1; object-fit: contain; border-radius: 7px; background: radial-gradient(ellipse at 50% 60%, rgba(120,190,220,.28), rgba(20,50,70,.2) 75%); }
@@ -231,7 +234,7 @@
 <script src="js/fish.js?v=58"></script>
 <script src="js/world.js?v=55"></script>
 <script src="js/audio.js?v=55"></script>
-<script src="js/game.js?v=71"></script>
+<script src="js/game.js?v=72"></script>
 <script src="/assets/visit.js?v=17" defer></script>
 <script src="/assets/game-events.js?v=1" defer></script>
 </body>
