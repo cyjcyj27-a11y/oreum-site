@@ -11,6 +11,8 @@
 
   /* 영문판: data-en 글자로 바꾼다 */
   if (EN) { qa('[data-en]').forEach(function (el) { el.textContent = el.getAttribute('data-en'); }); qa('a[href="sheet.html"]').forEach(function (a) { a.href = 'sheet-en.html'; }); }
+  /* 곡 수는 데이터에서(10/8 곡 58개로 늘리다 홈 단추의 39곡 글자가 남아 있었다) */
+  if ($('pSongN')) $('pSongN').textContent = tr(SONGS.length + '곡 · 떨어지는 음표', SONGS.length + ' songs · falling notes');
 
   /* ---------------------------------------------------------- 저장 */
   var LS = {
