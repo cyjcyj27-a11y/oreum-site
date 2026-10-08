@@ -60,9 +60,10 @@ N.vis = function () {
   N.PARTS.forEach(function (p) { P[p].visible = !!G.parts[p]; });
   SB.boat.setTarp(N.count());
 };
-/* 낮 그물에서 부표가 떨어진다(2, 4, 6, 8일차 첫 그물) */
+/* 낮 그물에서 부표가 떨어진다(2, 4, 6, 8일차 그물, 놓친 것은 다음 그물에서) */
 N.dropBuoy = function () {
-  var G = SB.G, k = N.BUOYDAYS.indexOf(G.day); if (k < 0 || G.dropped[k]) return;
+  var G = SB.G, k = -1, j; for (j = 0; j < N.BUOYDAYS.length; j++) if (N.BUOYDAYS[j] <= G.day && !G.dropped[j]) { k = j; break; }   /* 10/8: 그날 그물을 못 올려 놓친 부표는 다음 그물에서 하나씩 */
+  if (k < 0) return;
   G.dropped[k] = true; var b = deckBuoys[k], y0 = D + 2.8;
   b.visible = true; SB.fx.anim(0.6, function (t) { b.position.y = y0 + (D + 0.2 - y0) * t * t; }, function () { SB.snd('thud'); SB.fx.burst('drops', b.position.x, D + 0.1, b.position.z, 12, 1.2, 1, 0.5); });
   SB.save();

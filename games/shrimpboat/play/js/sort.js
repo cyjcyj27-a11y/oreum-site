@@ -25,8 +25,9 @@ S.spill = function (x, y, z, q) {                    // q: 그물 성한 정도(
   var G = SB.G, ns = Math.round((22 + G.day * 1.1 + Math.random() * 8) * q), nb = 5 + Math.floor(G.day / 3) + Math.floor(Math.random() * 3), list = [], i;
   for (i = 0; i < ns; i++) list.push('shrimp');
   for (i = 0; i < nb; i++) list.push(CR.KINDS[Math.floor(Math.random() * CR.KINDS.length)]);
-  if (G.day >= 3 && !G.inv.key && !G.flags.monk) list.push('monk');
-  if (G.day >= 12 && !G.inv.compass && !G.parts.compass && !G.flags.compassSeen) list.push('compass');
+  /* 10/8 사장님 "3일동안 뗏목재료가 안나옴": 열쇠·나침반은 한 번 놓치면 다시 안 나와 밧줄 둘·나침반을 영영 못 얻었다 → 손에 넣을 때까지 매일 나온다 */
+  if (G.day >= 3 && !G.inv.key && !G.flags.chest) list.push('monk');
+  if (G.day >= 12 && !G.inv.compass && !G.parts.compass) list.push('compass');
   S.total = ns;
   list.forEach(function (k, j) {
     var m = CR.make(k); grp.add(m);
