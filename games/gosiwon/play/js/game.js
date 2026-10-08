@@ -178,10 +178,18 @@ function phone(msg) {
 }
 GS.phone = phone;
 function inspTick() {
-  var I = G.insp; if (!I || G.mode !== 'day') return;
+  var I = G.insp; if (!I || G.mode !== 'day' && G.mode !== 'study') return;
+  if (G.mode === 'study') { if (G.study && I.sent && !I.res && G.study.at + (DAYMIN - G.study.at) * (1 - Math.max(0, studyRem()) / STUDY) >= INSP_DUE) inspResolve(); return; }
   var fl = (I.k + 2) + L('층', 'F');
   if (!I.sent && G.t >= INSP_AT) { I.sent = true; phone(L('오늘 오후 3시에 들른다\n' + fl + ' 화장실 본다', 'Dropping by at 3 PM today.\nChecking the ' + fl + ' restrooms.')); ui.tasks(); save(); }
-  if (I.sent && !I.res && G.t >= INSP_DUE) {
+  if (I.sent && !I.res && G.t >= INSP_DUE) inspResolve();
+}
+/* 10/8 3시 전에 일을 다 끝내고 책상에 앉으면 공부 중엔 inspTick 이 안 돌아 결과 문자가 빠졌다(사장님 7일차) → 공부 시계로도 3시에 판정. 껐다 켜서 3시를 건너뛰면 다음 날 아침에 문자 */
+function inspResolve(late) {
+  var I = G.insp, fl = (I.k + 2) + L('층', 'F');
+  if (late) { I.res = inspOk() ? 'ok' : 'bad'; if (I.res === 'ok') G.coin += INSP_PAY; else G.coin = Math.max(0, G.coin - INSP_PAY);
+    G.inspLate = I.res === 'ok' ? L(fl + ' 깨끗하네. 수고했다\n만원 더 넣었다', fl + ' looks clean. Good job.\nAdded 10,000 won.') : L(fl + ' 이게 청소한 거냐?\n월급에서 만원 깐다', 'You call ' + fl + ' clean?\n10,000 won off your pay.'); return; }
+  {
     I.res = inspOk() ? 'ok' : 'bad'; ui.tasks();
     if (I.res === 'ok') { phone(L(fl + ' 깨끗하네. 수고했다\n만원 더 넣었다', fl + ' looks clean. Good job.\nAdded 10,000 won.')); setTimeout(function () { GS.coin(INSP_PAY); }, 900); }
     else { phone(L(fl + ' 이게 청소한 거냐?\n월급에서 만원 깐다', 'You call ' + fl + ' clean?\n10,000 won off your pay.')); G.coin = Math.max(0, G.coin - INSP_PAY); setTimeout(function () { GS.snd('down'); }, 900); }
@@ -306,6 +314,7 @@ function startDay(fresh, s) {
   phone.q = []; clearTimeout(phone.tm); $('phone').classList.remove('on');      // 어제 문자가 남아 있지 않게
   SND.music(1); SND.hum(0.18);   // 형광등 웅 소리는 깔릴 듯 말 듯(10/4 "웅소리 나는데")
   if (fresh) { GS.snd('alarm'); if (G.day > 1) morning(); }
+  if (G.inspLate) { var lm = G.inspLate; G.inspLate = null; setTimeout(function () { phone(lm); }, 1200); }
 }
 GS.taskDone = function (t) { if (!t || t.done) return; t.done = true; ui.tasks(); save(); if (!left()) { var e = $('rowDesk'); if (e) { e.classList.add('warn'); } } };
 function studyRem() { return STUDY - (Date.now() - G.study.start) / 1000 - G.study.skip; }
@@ -326,7 +335,7 @@ function tapBook(cx, cy) {
   for (var i = 0; i < book.pages.length; i++) if (book.pages[i].userData.t >= 1) { var pv = book.pages[i], k = G.bookK || 0; pv.userData.t = 0; pv.visible = true; setPage(pv.userData.f, 2 * k + 1); setPage(pv.userData.b, 2 * k + 2); setPage(book.st[0], 2 * k + 3); pv.userData.left = 2 * k + 2; G.bookK = k + 1; break; }
   if (studyRem() <= 0) finishStudy(); else if ((book.saveN = (book.saveN || 0) + 1) % 10 === 0) save();
 }
-function finishStudy() { var s = G.study; G.study = null; endDay(s.h, s.d); }
+function finishStudy() { var s = G.study; if (G.insp && G.insp.sent && !G.insp.res) inspResolve(true); G.study = null; endDay(s.h, s.d); }
 function endDay(h, d) {
   GS.ev.endDay();
   book.hand.visible = false;
@@ -556,7 +565,7 @@ function update(dt) {
     if (G.mode === 'study' && G.study) {
       var fa = -1;
       for (i = 0; i < book.pages.length; i++) { var pg = book.pages[i]; if (pg.userData.t < 1) { pg.userData.t = Math.min(1, pg.userData.t + dt * 3); pg.rotation.x = GS.ease(pg.userData.t) * PI; fa = Math.max(fa, pg.rotation.x); if (pg.userData.t >= 1) { pg.visible = false; setPage(book.st[1], pg.userData.left); } } }
-      flapHand(fa, dt);
+      flapHand(fa, dt); inspTick();
       if (studyRem() <= 0) { finishStudy(); return; }
     }
   }

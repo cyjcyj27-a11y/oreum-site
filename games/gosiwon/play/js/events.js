@@ -101,6 +101,42 @@ function doorMemo(num, text, o) {
   inter({ x: d.x + off, y: d.y0 + 1.32, z: d.s * (CW - 0.08), sx: 0.22, sy: 0.22, sz: 0.1, label: '메모', use: function () { showNote(text, 'memo'); } });
   return m;
 }
+/* ---------- 입주자 선물(10/8 사장님 "다른 민원은 입주자들이 박카스 갖다주거나 뭔가 보상이 있지않냐"): 보상 없던 민원을 끝내면 다음 날 아침 총무 방문 앞에 선물+쪽지 ---------- */
+var GIFT = {
+  hair: { kind: 'tp', fx: L('휴지 +6', 'TP +6'), note: L('하수구 뚫어 주셔서\n이제 발 안 감겨요\n휴지 남아서 드려요\n- 204호 -', 'Thanks for the drain!\nNo more hair on my feet\nSpare toilet paper for you\n- Room 204 -') },
+  lamp: { kind: 'coffee', k: 0.05, fx: '+5%', note: L('복도 불 고쳐 주셔서\n밤에 안 무서워요\n캔커피 드시고 힘내세요\n- 307호 -', 'The hallway light works!\nNot scary at night anymore\nHave a coffee\n- Room 307 -') },
+  boiler: { kind: 'bac1', k: 0.1, fx: '+10%', note: L('보일러 고쳐 주셔서\n뜨신 물로 씻었어요\n박카스 드세요\n- 206호 -', 'Thanks for fixing the boiler\nFinally a hot shower\nHave a Bacchus\n- Room 206 -') }
+};
+function giftMesh(kind) {
+  var g = new T.Group(), i;
+  if (kind === 'tp') {                         // 휴지 여섯 롤 묶음(비닐 띠)
+    var wm = new T.MeshLambertMaterial({ color: 0xf6f4ee });
+    var hm = new T.MeshLambertMaterial({ color: 0x9a8a70 }), bm = new T.MeshLambertMaterial({ color: 0x4f8fd8 });
+    for (i = 0; i < 6; i++) { var r = new T.Mesh(new T.CylinderGeometry(0.052, 0.052, 0.1, 16), wm), hx = (i % 3 - 1) * 0.105, hz = (i < 3 ? -1 : 1) * 0.053; r.position.set(hx, 0.05, hz); g.add(r);
+      var hole = new T.Mesh(new T.CylinderGeometry(0.016, 0.016, 0.002, 12), hm); hole.position.set(hx, 0.1005, hz); g.add(hole); }
+    [[0, 0.106, 0.32, 0.004], [0, -0.106, 0.32, 0.004], [0.158, 0, 0.004, 0.212], [-0.158, 0, 0.004, 0.212]].forEach(function (q) { var b = new T.Mesh(new T.BoxGeometry(q[2], 0.04, q[3]), bm); b.position.set(q[0], 0.05, q[1]); g.add(b); });   // 비닐 포장 띠(옆면만)
+  } else if (kind === 'coffee') {                     // 캔커피 한 캔
+    [[0, 0]].forEach(function (p) { var c = new T.Mesh(new T.CylinderGeometry(0.026, 0.026, 0.1, 14), new T.MeshPhongMaterial({ color: 0x23324f, shininess: 70 })), s = new T.Mesh(new T.CylinderGeometry(0.0262, 0.0262, 0.03, 14), new T.MeshLambertMaterial({ color: 0xc9a25a })), t = new T.Mesh(new T.CylinderGeometry(0.022, 0.026, 0.006, 14), new T.MeshPhongMaterial({ color: 0xc7cacc, shininess: 90 })); c.position.set(p[0], 0.05, p[1]); s.position.set(p[0], 0.055, p[1]); t.position.set(p[0], 0.103, p[1]); g.add(c); g.add(s); g.add(t); });
+  } else {                                            // 박카스 한 병(302호 박카스와 같은 모양)
+    var bo = new T.Mesh(new T.CylinderGeometry(0.022, 0.024, 0.11, 12), new T.MeshPhongMaterial({ color: 0x5a2a0a, shininess: 80 })), lb = new T.Mesh(new T.CylinderGeometry(0.0235, 0.0245, 0.05, 12), new T.MeshLambertMaterial({ color: 0xf3d23a }));
+    bo.position.y = 0.055; lb.position.y = 0.055; g.add(bo); g.add(lb);
+  }
+  return g;
+}
+var GX = 4.05, GZ = -0.48;                             // 총무 방문 앞 복도 바닥
+function giftSetup(d) {
+  Object.keys(GIFT).forEach(function (id) {
+    var gd = DAY[id]; if (d !== gd + 1 || !has(id) || !st(id).done || st('g_' + id).done) return;
+    var o = GIFT[id], m = giftMesh(o.kind), y0 = 0; m.position.set(GX, y0, GZ); m.rotation.y = 0.3; grp.add(m);
+    var pm = memo(L('총무님께', 'For the manager'), GX + 0.2, y0 + 0.003, GZ + 0.05, 0, { sw: 0.16, sh: 0.11, w: 320, h: 220, fs: 64, rz: 0 }); pm.rotation.set(-PI / 2, 0, 0.25);
+    inter({ x: GX + 0.05, y: 0.1, z: GZ, sx: 0.45, sy: 0.25, sz: 0.4, label: L('선물', 'Gift'), can: function () { return !G.carry; }, use: function () {
+      gone(this); m.visible = false; pm.visible = false; st('g_' + id).done = 1;
+      if (o.kind === 'tp') { G.rolls = Math.min(12, (G.rolls || 0) + 6); GS.snd('pick'); }
+      else { G.ev.boost = { d: G.day, k: (G.ev.boost && G.ev.boost.d === G.day ? G.ev.boost.k : 0) + o.k }; GS.snd('drink'); }
+      GS.ui.praise(o.fx); GS.ui.hud(); showNote(o.note, 'memo'); GS.save();
+    } });
+  });
+}
 // ---------- 하루 준비(아침마다, 이어하기 때) ----------
 var texts = [], lamp = null, lampOff = null, hairIt = null, carryTo = null, shhOn = false;
 function clear() { while (grp.children.length) { var m = grp.children[0]; grp.remove(m); if (m.geometry) m.geometry.dispose(); if (m.material) { if (m.material.map) m.material.map.dispose(); m.material.dispose(); } } texts = []; carryTo = null; shhOn = false; }
@@ -172,6 +208,7 @@ function setup() {
     if (!s.done) inter({ x: 2.26, y: 1.35, z: -1.9, sx: 0.25, sy: 0.5, sz: 0.4, label: '보일러', can: function () { return st('boiler').read && !st('boiler').done; }, use: function () { gone(this); GS.snd('click'); sw.rotation.z = 0; led.material.color.set(0x40e060); led.material.emissive.set(0x10a030); done('boiler'); } });
   }
   if (mo) { s = st(mo.key); if (!s.sent) text(mo.key, 40, TXT.move[mo.i]); if (!s.done) moveoutRoom(mo); }
+  giftSetup(d);
 }
 
 // ---------- 소품 ----------
@@ -279,7 +316,7 @@ return {
   },
   tick: tick, rows: rows, endDay: endDay, final: final, closeNote: closeNote, isNote: function () { return noteOn; },
   wageX: function (d) { return G && G.ev && G.ev.st.praise && G.ev.st.praise.sent && d >= DAY.praise + 1 && d <= DAY.praise + 7 ? 2 : 1; },
-  bonus: function () { return G && G.ev && G.ev.bac === G.day ? 0.1 : 0; },
+  bonus: function () { if (!G || !G.ev) return 0; return (G.ev.bac === G.day ? 0.1 : 0) + (G.ev.boost && G.ev.boost.d === G.day ? G.ev.boost.k : 0); },
   shhNow: function () { return G && G.day === DAY.exam && has('exam') && st('exam').read; },
   DAY: DAY, TXT: TXT, door: door, MOVE: MOVE, _texts: function () { return texts; }, _lamp: function () { return [lamp, lampOff]; }
 };
