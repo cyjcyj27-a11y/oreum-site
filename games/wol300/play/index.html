@@ -230,7 +230,7 @@ const G={month:1, day:1, dleft:30, hour:8, money:0, grade:2, fresh:1,
 /* AI 신선 토마토 점수(사장님 9/26) — AI 가 처음 보는 것일수록 높다. 사람은 안 사 볼 영상이라도 AI 에겐 신선하다.
    흔한 것(고양이·라면)은 낮고, 사투리·취중 고백처럼 드문 건 높다. 60% 넘으면 싱싱한 토마토, 아래면 썩은 토마토.
    값 = 점수 1% 에 2,500원. 같은 걸 또 하면 AI 가 이미 배워서 점수가 떨어진다 */
-const ACC={ramen:{fresh:30,n:0}, cat:{fresh:25,n:0}, chair:{fresh:45,n:0}, fridge:{fresh:50,n:0}, bath:{fresh:40,n:0}, granny:{fresh:90,n:0}, confess:{fresh:85,n:0}, poop:{fresh:78,n:0}, snack:{fresh:15,n:0}, sofa:{fresh:10,n:0}, mirror:{fresh:8,n:0},   /* 거울 몸자랑 — 넘친다 */   /* 소파에서 TV 보며 멍 — 제일 흔한 일상 */ swing:{fresh:33,n:0}};   // 그네에서 날아가기 — 실패 영상 모음에 흔해서 낮다   // 변기(사장님 9/26 "똥 싸는 것도 돈 쳐줘") — 아무도 안 올리는 장면이라 AI 에겐 신선
+const ACC={ramen:{fresh:30,n:0}, cat:{fresh:25,n:0}, chair:{fresh:45,n:0}, fridge:{fresh:50,n:0}, bath:{fresh:40,n:0}, granny:{fresh:45,n:0}, confess:{fresh:85,n:0}, poop:{fresh:78,n:0}, snack:{fresh:15,n:0}, sofa:{fresh:10,n:0}, mirror:{fresh:8,n:0},   /* 거울 몸자랑 — 넘친다 */   /* 소파에서 TV 보며 멍 — 제일 흔한 일상 */ swing:{fresh:33,n:0}};   // 그네에서 날아가기 — 실패 영상 모음에 흔해서 낮다   // 변기(사장님 9/26 "똥 싸는 것도 돈 쳐줘") — 아무도 안 올리는 장면이라 AI 에겐 신선
 const WON_PER_PCT=2500;
 const REPEAT=[1,.5,.25,.12,.06,.03];
 const GRADES=['F','D','C','B','A','S'];
@@ -1787,13 +1787,13 @@ const EVENTS={
   dance:{slot:'beachA', n:'챌린지 춤', sc:6, mood:1, draw:(P,t,X)=>{
     efig(P,PAL('#f3c9a6','#6a3a1a','#7ad3ff','#f4f4f4','#fff'),X,.92,1,Object.assign(danceP(t,.0065),{body:'w'}),t); }},
   /* ── 해변 오른쪽 — 드문 것 ── */
-  trunks:{slot:'beachB', n:'80대 트렁크 체조', sc:96, mood:-1, draw:(P,t,X)=>{ const up=kf(cyc(t,3600),[[0,0],[.3,1],[.45,1],[.75,0],[1,0]]);   // 하나 둘 — 팔을 천천히 올렸다 내리며 무릎을 굽힌다
+  trunks:{slot:'beachB', n:'80대 트렁크 체조', sc:48, mood:-1, draw:(P,t,X)=>{ const up=kf(cyc(t,3600),[[0,0],[.3,1],[.45,1],[.75,0],[1,0]]);   // 하나 둘 — 팔을 천천히 올렸다 내리며 무릎을 굽힌다
     efig(P,PAL(OLD,'#e6e6e2',OLD,OLD,'#d49f7c'),X,.97,-1,{th1:.12+.12*(1-up),kn1:-.1-.3*(1-up),th2:-.12+.12*(1-up),kn2:-.1-.3*(1-up),ar1:.25+up*2.6,el1:.1+.15*(1-up),ar2:.2+up*2.6,el2:.1+.15*(1-up),rot:.02,curl:.15+.1*(1-up),neck:-.12+.22*up,body:'g',swim:P.mono?0:{trunk:'#1f6fd6'}},t,FLOOR-21*FIG*.97-1+6*(1-up)); }},
   castle:{slot:'beachB', n:'할아버지 모래성', sc:89, mood:-1, draw:(P,t,X)=>{ const d=kf(cyc(t,1500),[[0,0],[.22,1],[.35,1],[.6,0],[1,0]]);   // 토닥토닥
     x.fillStyle=P.mono?'#0d0d0c':'#d9b877'; for(const [cx,cw,ch] of [[X-78,20,34],[X-56,26,48],[X-30,20,30]]){ x.fillRect(cx,FLOOR-ch,cw,ch); for(let k=0;k<3;k++) x.fillRect(cx+k*cw/3,FLOOR-ch-5,cw/5,5); }
     efig(P,PAL(OLD,'#e6e6e2',OLD,OLD,'#d49f7c'),X,.97,-1,{th1:1.5,kn1:-1.9,th2:1.3,kn2:-1.7,ar1:.95+.45*d,el1:.35+.35*d,ar2:.9+.1*d,el2:.6,rot:.35+.03*d,curl:.3,neck:-.42+.06*d,body:'g',swim:P.mono?0:{trunk:'#e8483c'}},t,FLOOR-30); }},
   /* ── 놀이터 ── */
-  swingman:{slot:'swing', n:'정장 아저씨 혼자 그네', sc:91, mood:0, draw:(P,t,X)=>{ const ph=t*.0014, a=Math.sin(ph)*.18, fw=Math.cos(ph);   // 앞으로 갈 땐 다리를 펴고, 뒤로 갈 땐 접는다
+  swingman:{slot:'swing', n:'정장 아저씨 혼자 그네', sc:46, mood:0, draw:(P,t,X)=>{ const ph=t*.0014, a=Math.sin(ph)*.18, fw=Math.cos(ph);   // 앞으로 갈 땐 다리를 펴고, 뒤로 갈 땐 접는다
     x.save(); x.translate(X,404); x.rotate(a); efig(P,null,0,1,1,{th1:1.4,kn1:-1.5+.55*Math.max(0,fw),th2:1.3,kn2:-1.4+.5*Math.max(0,fw),ar1:2.85-a*.3,el1:.1,ar2:2.8-a*.3,el2:.1,rot:-.05-a*.6,curl:.3,neck:-.5+a*.4},t,112); x.restore(); }},
   kiddance:{slot:'play', n:'초등학생 춤 영상', sc:6, mood:0, draw:(P,t,X)=>{ const hop=Math.pow(Math.max(0,Math.sin(t*.0085*2)),2);   // 콩콩 뛴다
     efig(P,null,X,.62,1,danceP(t,.0085),t,FLOOR-21*FIG*.62-1-8*hop); }},
@@ -1809,7 +1809,7 @@ const EVENTS={
     const man=(pn,hit,ph)=>({th1:.35,kn1:-.35-.06*Math.sin(t*.008+ph),th2:-.3,kn2:-.2-.06*Math.sin(t*.008+ph+1),ar1:1.1+pn*.55,el1:1.5-pn*1.45,ar2:1.45+.1*st,el2:1.9,rot:.1+pn*.1-hit*.16,curl:.15,neck:-.08-hit*.3});
     efig(P,null,X-66,1,1,man(pA,hA,0),t); efig(P,null,X+66,1,-1,man(pB,hB,2),t); }},
   /* ── 버스 정류장 ── */
-  ballet:{slot:'bus', n:'정류장 발레 아저씨', sc:94, mood:0, draw:(P,t,X)=>{ const w=Math.sin(t*.0012)*.05+Math.sin(t*.0031)*.02;   // 한 발로 버티며 휘청휘청, 팔은 물결
+  ballet:{slot:'bus', n:'정류장 발레 아저씨', sc:47, mood:0, draw:(P,t,X)=>{ const w=Math.sin(t*.0012)*.05+Math.sin(t*.0031)*.02;   // 한 발로 버티며 휘청휘청, 팔은 물결
     efig(P,null,X,1,1,{th1:.05,kn1:-.02+w*.5,th2:-1.35+w,kn2:.05,ar1:2.9+.12*Math.sin(t*.0015),el1:-.25+.12*Math.sin(t*.0015+1),ar2:-2.2+.15*Math.sin(t*.0017+2),el2:.2,rot:.28+w,neck:.15-w},t); }},
   phone:{slot:'bus', n:'폰 보며 버스 기다림', sc:5, mood:0, draw:(P,t,X)=>{ efig(P,null,X,1,1,standPhone(t),t); }},
   courier:{slot:'bus', n:'택배 기사 5분 휴식', sc:81, mood:0, draw:(P,t,X)=>{ const w=kf(cyc(t,6500),[[0,0],[.08,1],[.22,1],[.32,0],[1,0]]);   // 숨을 몰아쉬다 가끔 이마의 땀을 훔친다
