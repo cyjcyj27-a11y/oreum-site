@@ -136,31 +136,43 @@
     });
   }
 
+  // 상자 무늬 — 레몬색 그라데이션 + 흰 물음표(사장님 10/8 "칙칙하니까 상큼하게 채도 올려줘")
   function qTex() {
     const cv = document.createElement('canvas');
-    cv.width = cv.height = 64;
+    cv.width = cv.height = 128;
     const c = cv.getContext('2d');
-    c.fillStyle = '#ffd634';
-    c.fillRect(0, 0, 64, 64);
-    c.fillStyle = 'rgba(255,255,255,.35)';
-    c.fillRect(0, 0, 64, 10);
-    c.fillStyle = 'rgba(0,0,0,.14)';
-    c.fillRect(0, 54, 64, 10);
-    c.fillStyle = '#7a4a00';
-    c.font = 'bold 44px sans-serif';
+    const g = c.createLinearGradient(0, 0, 0, 128);
+    g.addColorStop(0, '#fff45a');
+    g.addColorStop(0.55, '#ffde14');
+    g.addColorStop(1, '#ffbe00');
+    c.fillStyle = g;
+    c.fillRect(0, 0, 128, 128);
+    c.fillStyle = 'rgba(255,255,255,.6)';
+    c.fillRect(0, 0, 128, 16);
+    c.strokeStyle = '#ff8c00';
+    c.lineWidth = 6;
+    c.strokeRect(3, 3, 122, 122);
+    c.font = 'bold 88px sans-serif';
     c.textAlign = 'center';
     c.textBaseline = 'middle';
-    c.fillText('?', 32, 35);
-    return new THREE.CanvasTexture(cv);
+    c.lineJoin = 'round';
+    c.lineWidth = 12;
+    c.strokeStyle = '#ff7a00';
+    c.strokeText('?', 64, 70);
+    c.fillStyle = '#ffffff';
+    c.fillText('?', 64, 70);
+    const t = new THREE.CanvasTexture(cv);
+    t.colorSpace = THREE.SRGBColorSpace;
+    return t;
   }
   let TEX = null;
   function boxMesh() {
     if (!TEX) TEX = qTex();
     const g = new THREE.Group();
     const m = new THREE.Mesh(new THREE.BoxGeometry(1.5, 1.5, 1.5),
-      new THREE.MeshLambertMaterial({ map: TEX, emissive: 0x4a3200 }));
+      new THREE.MeshLambertMaterial({ map: TEX, emissive: 0xffffff, emissiveMap: TEX, emissiveIntensity: 0.55, toneMapped: false }));   // 저녁 빛·색 보정에 눌려 겨자색이 되던 것
     const e = new THREE.Mesh(new THREE.BoxGeometry(1.62, 1.62, 1.62),
-      new THREE.MeshBasicMaterial({ color: 0xfff0a0, wireframe: true, transparent: true, opacity: 0.4 }));
+      new THREE.MeshBasicMaterial({ color: 0xffffff, wireframe: true, transparent: true, opacity: 0.7, toneMapped: false }));
     g.add(m, e);
     return g;
   }
