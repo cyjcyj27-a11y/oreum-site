@@ -39,6 +39,35 @@
   });
 })();
 
+// ─────────────────────────────────────────────────────────────
+// NEWS 메뉴 NEW — 개발뉴스 새 글을 올린 뒤 3일 동안 붙입니다 (사장님 2026-10-08 "뉴스에도 뉴뜨게 해줘").
+// APPS NEW 와 같은 규칙: 뉴스(/news/…, /en/news/…)에 한 번 들어오면 그 브라우저에서는 떼어 냅니다.
+// 새 글을 올릴 때 NEWS_NEW 시각만 그날로 바꾸면 됩니다.
+// ─────────────────────────────────────────────────────────────
+(function () {
+  var NEWS_NEW = '2026-10-08T15:38:00+09:00';   // 마지막으로 뉴스 글을 올린 시각 (올가미 언니 Indie DB TOP 25)
+  var SHOW = 3 * 24 * 60 * 60 * 1000;
+  var SEEN = 'oreum_news_seen';
+  var t = new Date(NEWS_NEW).getTime();
+  var store = null;
+  try { store = window.localStorage; } catch (e) {}
+  if (/^\/(en\/)?news\//.test(location.pathname)) {
+    if (store) { try { store.setItem(SEEN, String(Date.now())); } catch (e) {} }
+    return;
+  }
+  if (Date.now() - t > SHOW) return;
+  var seen = 0;
+  if (store) { try { seen = +(store.getItem(SEEN) || 0); } catch (e) {} }
+  if (seen && seen >= t) return;
+  [].slice.call(document.querySelectorAll('.nav a[href$="/news/"]')).forEach(function (a) {
+    if (a.querySelector('.navnew')) return;
+    var b = document.createElement('span');
+    b.className = 'navnew';
+    b.textContent = 'NEW';
+    a.appendChild(b);
+  });
+})();
+
 (function () {
   var URL_ = 'https://yefzzvtipsygqlvkaesx.supabase.co';
   var KEY = 'sb_publishable_qERx6ADFGxFDCjwc0O2cUg_b5EE6WPR';
