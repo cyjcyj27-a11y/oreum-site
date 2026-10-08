@@ -82,7 +82,7 @@
     // 미끼 칸 = 바늘 그림(꿴 토막이 바늘 끝에 보인다) + 통에 남은 토막 수 (사장님 2026-10-09 "이 표시가 뭔지 모르겠어")
     $('baitT').textContent = boxAll(); $('baitHk').innerHTML = G.bait > 0 && G.baitSp ? '<g transform="translate(0 15.5) rotate(-12 8 6)">' + pieceSvg(F.BY[G.baitSp], 16) + '</g>' : '';
     $('bait').className = 'stat item' + (G.bait > 0 ? ' on' + Math.min(2, G.bait) : '') + (boxAll() + (G.bait > 0 ? 1 : 0) === 0 ? ' dim' : '');
-    const m = $('meter'); if (L.st === 'charge') { m.className = 'show'; $('meterBar').style.width = (L.power * 100) + '%'; } else if (L.st === 'fight') { m.className = 'show tens' + (L.tension > 0.78 ? ' hot' : ''); $('meterBar').style.width = (Math.min(1, L.tension) * 100) + '%'; } else m.className = '';
+    const m = $('meter'); if (L.st === 'charge') { m.className = 'show'; $('meterBar').style.width = (L.power * 100) + '%'; } else if (L.st === 'fight') { m.className = 'show tens' + (L.tension > 0.78 ? ' hot' : '') + (L.warnT > 0 || L.strong ? ' warn' : ''); $('meterBar').style.width = (Math.min(1, L.tension) * 100) + '%'; } else m.className = '';
     if (isTouch) { btnAct.className = 'tbtn' + (L.st === 'bite' ? ' bite' : ((L.hold || L.pulse > 0) ? ' on' : '')); btnAct.textContent = L.st === 'bite' ? T('걸기', 'HOOK') : (L.st === 'idle' || L.st === 'charge') ? T('던지기', 'CAST') : T('감기', 'REEL'); }
   }
   function pop(id) { const el = $(id); el.classList.remove('got'); void el.offsetWidth; el.classList.add('got'); }
@@ -145,14 +145,15 @@
   function hookFish() {
     const f = L.fish; L.st = 'fight'; L.hold = false; f.state = 'hooked'; f.t = 0;
     L.dist = Math.hypot(L.pos.x - W.raftPos.x, L.pos.z - W.raftPos.z); L.dir = Math.atan2(L.pos.z - W.raftPos.z, L.pos.x - W.raftPos.x);
-    L.tension = 0.3; L.sta = 1; L.run = 0; L.breakT = 0; L.runRest = 2.5; L.pulse = 0; L.slackT = 0; L.jump = null; A.hook(); W.setPose('fight');
+    L.tension = 0.3; L.sta = 1; L.run = 0; L.warnT = 0; L.strong = false; L.runRest = 2.5; L.pulse = 0; L.slackT = 0; L.jump = null; A.hook(); W.setPose('fight');
     f.fightPos = new V(); f.thrash = 1;
   }
   function loseFish(why) {
-    const f = L.fish; if (f) { f.state = 'flee'; f.fightPos = null; F.active = null; }
+    const f = L.fish; const lostTxt = f && why === 'snap' ? (EN ? f.sp.en : f.sp.ko) + ' ' + Math.round(f.len * 100) + 'cm' : null;   // 끊겨 달아난 고기의 이름과 크기 — 아쉽게
+    if (f) { f.state = 'flee'; f.fightPos = null; F.active = null; }
     L.fish = null; L.st = 'idle'; L.hold = false; W.setRodBend(0); W.setPose('idle');
     useBait();
-    if (why === 'snap') { A.snap(); toast('SNAP', null, true); } else { A.miss(); toast('MISS', null, true); }
+    if (why === 'snap') { A.snap(); toast('SNAP', lostTxt, true, 2.4); } else { A.miss(); toast('MISS', null, true); }
     hud();
   }
   function landFish() {
@@ -370,14 +371,23 @@
         // 체력은 줄이 팽팽할 때 빠진다
         // 체력은 줄이 팽팽할 때 빠지고, 달릴 때도 제풀에 빠진다
         L.sta = Math.max(0, L.sta - dt / sp.sta * (L.tension > 0.35 ? 1 : L.run > 0 ? 0.5 : 0.15));
-        if (L.run <= 0 && L.runRest <= 0 && Math.random() < dt * (sp.tier >= 3 ? 0.3 : sp.tier === 2 ? 0.45 : 0.3) * (0.2 + L.sta)) {
-          L.run = L.runDur = (sp.tier >= 3 ? 1.5 : 1.0) + Math.random() * 1.0; L.runRest = 1.2 + Math.random() * 1.5; A.splash(0.6 + f.len); W.splash(f.pos, 0.6 + f.len);   // 물보라가 예고
-          if (Math.random() < (sp.tier >= 4 ? 0.04 : sp.tier === 3 ? 0.08 : sp.tier === 2 ? 0.12 : 0)) L.breakT = 0.5 + Math.random() * 0.6;   // 큰 고기는 달릴 때 어쩌다 줄을 끊고 달아난다 — 기다려도 안전하지 않다
-          if (sp.tier >= 2 && !L.jump && Math.random() < 0.55) { L.jump = { t: 0, dur: 0.75 + f.len * 0.15, h: 0.8 + f.len * 0.6 }; }
+        // 센 질주(사장님 2026-10-09 "줄 끊고 달아나는 게 억울하면 안 되고 아쉬워야"): 운으로 끊기는 건 뺐다.
+        // 좋은 고기·대물은 가끔 물 위로 솟구쳐(0.45초 예고, 막대가 빨갛게 번쩍) 더 세고 길게 달린다. 그때 감으면 끊긴다 — 놓치면 내 손 탓이다
+        if (L.warnT > 0) {
+          L.warnT -= dt;
+          if (L.warnT <= 0) { L.strong = true; L.run = L.runDur = (sp.tier >= 3 ? 1.5 : 1.0) + Math.random() * 1.0 + 1.2; L.runRest = 1.2 + Math.random() * 1.5; A.splash(1 + f.len); W.splash(f.pos, 1 + f.len); }
+        } else if (L.run <= 0 && L.runRest <= 0 && Math.random() < dt * (sp.tier >= 3 ? 0.3 : sp.tier === 2 ? 0.45 : 0.3) * (0.2 + L.sta)) {
+          if (sp.tier >= 2 && Math.random() < (sp.tier >= 3 ? 0.45 : 0.35)) {
+            L.warnT = 0.45; A.splash(0.9 + f.len); W.splash(f.pos, 0.9 + f.len); A.creak(1);
+            L.jump = { t: 0, dur: 0.75 + f.len * 0.15, h: 1.1 + f.len * 0.7 };   // 솟구치는 것이 예고
+          } else {
+            L.strong = false; L.run = L.runDur = (sp.tier >= 3 ? 1.5 : 1.0) + Math.random() * 1.0; L.runRest = 1.2 + Math.random() * 1.5; A.splash(0.6 + f.len); W.splash(f.pos, 0.6 + f.len);   // 물보라가 예고
+            if (sp.tier >= 2 && !L.jump && Math.random() < 0.55) { L.jump = { t: 0, dur: 0.75 + f.len * 0.15, h: 0.8 + f.len * 0.6 }; }
+          }
         }
-        if (L.run > 0) L.run -= dt; else L.runRest -= dt;
+        if (L.run > 0) { L.run -= dt; if (L.run <= 0) L.strong = false; } else if (L.warnT <= 0) L.runRest -= dt;
         const runK = L.run > 0 ? Math.min(1, (L.runDur - L.run) / (sp.tier >= 3 ? 0.9 : 0.5)) : 0;   // 달리기 힘은 반 초(참치는 0.9초)에 걸쳐 차오른다
-        const pullBase = sp.pull * (0.3 + 0.7 * L.sta), pull = pullBase * (1 + (sp.tier >= 3 ? 0.95 : 0.7) * runK);
+        const pullBase = sp.pull * (0.3 + 0.7 * L.sta), pull = pullBase * (1 + (sp.tier >= 3 ? 0.95 : 0.7) * runK * (L.strong ? 1.6 : 1));
         const far = L.dist > 28 ? 0.45 : 1;   // 줄이 많이 풀리면 물의 저항으로 덜 끌려 나간다
         // 긴장은 물고기 힘에 따른 목표치로 수렴한다 — 작은 놈은 계속 감아도 안 끊기고, 큰 놈은 달릴 때 감고 있으면 끊긴다
         const reeling = L.pulse > 0; L.pulse -= dt;
@@ -388,7 +398,6 @@
         L.tension += (target - L.tension) * Math.min(1, 1.5 * dt);
         L.tension = Math.max(0, Math.min(1.05, L.tension));
         if (L.tension > 0.75) A.creak(L.tension);
-        if (L.breakT > 0) { L.breakT -= dt; if (L.breakT <= 0) L.tension = 1; }
         if (L.tension >= 0.985 || L.dist > 60) { loseFish('snap'); }
         else {
           if (L.tension < 0.07) { L.slackT += dt; if (L.slackT > 2.4) loseFish('slack'); } else L.slackT = 0;
