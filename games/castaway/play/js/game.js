@@ -268,6 +268,7 @@
     const has = id => !!DEX[id];
     const chain = ['anchovy', 'damsel', 'scad', 'sardine', 'mackerel']; let st = 0; while (st < chain.length && has(chain[st])) st++; F.stage = st;   // 멸치→자리돔→각재기→정어리→고등어 차례로 열린다
     F.giantOK = F.SPECIES.every(sp => sp.tier === 4 || has(sp.id));
+    const n2 = F.SPECIES.filter(sp => sp.tier === 2 && has(sp.id)).length; F.big = n2 >= 14 ? 4 : n2 >= 12 ? 3 : n2 >= 10 ? 2 : n2 >= 8 ? 1 : 0;   // 대물은 좋은 고기 도감 8·10·12·14종에 하나씩 열린다
   }
   syncStage();
   function dexRecord(id, cm) { const first = !DEX[id]; const d = DEX[id] || (DEX[id] = { n: 0, cm: 0 }); d.n++; d.cm = Math.max(d.cm, cm); try { localStorage.setItem('castaway.dex', JSON.stringify(DEX)); } catch (e) { } syncStage(); return first; }

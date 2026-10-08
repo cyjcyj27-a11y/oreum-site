@@ -3,6 +3,7 @@
   // tier 1 발밑에서 빈바늘에도 무는 고기 · 2 미끼를 걸어야 오는 고기 · 3 미끼 걸고 멀리 던져야 오는 대물 · 4 백상아리 — 다른 29종을 다 잡은 뒤에만 나타나고, 잡으면 엔딩(사장님, 2026-09-11 거대 참다랑어에서 바꿈)
   // stage(tier 1): 0 멸치 → 1 자리돔 → 2 각재기 → 3 정어리 → 4 고등어 → 5 나머지. 앞 것을 잡아야 다음이 나온다(사장님, 2026-09-09 "제일 먼저 발밑에서 잡히는 고기는 멸치, 그다음 자리돔 각재기 정어리 고등어 순")
   // len 은 cm, pull 은 당기는 힘(0~1), sta 는 체력(초), food 는 배부름, cut 은 미끼로 쓸 때 토막 수 = round(평균cm/8)+1. 상어(cut 0)만 미끼로 못 쓴다 — 사장님 2026-09-11, wt 는 나타날 확률 가중치, night 는 밤에만, dusk 는 밤에 잘 옴
+  const BIG_ORDER = ['sailfish', 'tuna', 'marlin', 'swordfish'];   // 대물이 열리는 차례 — 작은 것부터
   const SPECIES = [
     { id: 'anchovy', ko: '멸치', en: 'Anchovy', tier: 1, stage: 0, len: [8, 14], top: 0x3a5a78, belly: 0xe0eaf0, h: 0.9, w: 0.55, tail: 0.8, dorsal: 0.4, pull: 0.12, sta: 1.5, speed: 1.5, food: 20, cut: 2, wt: 2 },
     { id: 'damsel', ko: '자리돔', en: 'Damselfish', tier: 1, stage: 1, len: [10, 18], top: 0x3a3a48, belly: 0xb8b0c0, h: 1.5, w: 0.6, tail: 0.8, dorsal: 0.9, pull: 0.15, sta: 2, speed: 1.3, food: 24, cut: 3, wt: 3 },
@@ -164,10 +165,10 @@
     const fishes = [];
     let nextId = 1;
     const F = {
-      fishes, SPECIES, BY, active: null, night: false, stage: 0, giantOK: false,   // stage·giantOK 는 game 이 도감을 보고 넣어 준다
+      fishes, SPECIES, BY, active: null, night: false, stage: 0, giantOK: false, big: 0,   // big: 열린 대물 수(0~4) — 좋은 고기 도감 8·10·12·14종에 하나씩 (사장님 2026-10-09 "초반에 큰 고기가 너무 빨리 나와")   // stage·giantOK 는 game 이 도감을 보고 넣어 준다
       // 등급 안에서 가중치로 한 종을 뽑는다 — 밤에만 오는 놈(night), 밤에 잘 오는 놈(dusk)
       pick(tier) {
-        const c = SPECIES.filter(sp => sp.tier === tier && (tier !== 1 || (sp.stage || 0) <= F.stage)); let tot = 0; const w = c.map(sp => { let k = sp.wt || 1; if (sp.night) k *= F.night ? 3 : 0; if (sp.dusk) k *= F.night ? 2 : 0.6; tot += k; return k; });
+        const c = SPECIES.filter(sp => sp.tier === tier && (tier !== 1 || (sp.stage || 0) <= F.stage) && (tier !== 3 || BIG_ORDER.indexOf(sp.id) < F.big)); let tot = 0; const w = c.map(sp => { let k = sp.wt || 1; if (sp.night) k *= F.night ? 3 : 0; if (sp.dusk) k *= F.night ? 2 : 0.6; tot += k; return k; });
         let r = Math.random() * tot; for (let i = 0; i < c.length; i++) { r -= w[i]; if (r <= 0) return c[i].id; } return c[0].id;
       },
       // 도감용 그림 — 따로 만든 작은 캔버스에 한 마리를 옆모습으로 찍어 그림 주소로 돌려준다
@@ -287,7 +288,7 @@
         const beyond = (extra) => ({ r: Math.max(22, hd + 4 + Math.random() * 5 + extra), angle: ha + (Math.random() - .5) * 1.0 });   // 찌 너머에서 나타나 찌 쪽으로 온다
         const toward = (f) => { if (!hk) return; const rr = 1.5 + Math.random() * 3, aa = Math.random() * Math.PI * 2; f.tgt.set(hk.x + Math.cos(aa) * rr, -F.depthFor(f.sp), hk.z + Math.sin(aa) * rr); f.retgt = 3 + f.pos.distanceTo(f.tgt) / (f.speed * 0.7); };
         if (baitTier >= 1 && F.count(2) < 2 && Math.random() < 0.6) toward(F.spawn(F.pick(2), beyond(0)));
-        if (baitTier >= 2 && F.count(3) < 1 && Math.random() < 0.6) toward(F.spawn(F.pick(3), Object.assign(beyond(6), { depth: 1.2 })));
+        if (baitTier >= 2 && F.big > 0 && F.count(3) < 1 && Math.random() < 0.6) toward(F.spawn(F.pick(3), Object.assign(beyond(6), { depth: 1.2 })));
         if (baitTier >= 2 && F.giantOK && F.count(4) < 1 && Math.random() < 0.7) toward(F.spawn('giant', Object.assign(beyond(12), { depth: 2.4 })));   // 마지막: 백상아리 — 도감 29종을 다 채운 뒤에만
       },
       // 가끔 지나가는 구경거리 — 미끼 없어도 좋은 물고기가 스쳐간다
