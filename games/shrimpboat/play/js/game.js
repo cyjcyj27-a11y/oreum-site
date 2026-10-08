@@ -8,8 +8,8 @@ if (EN) { document.body.classList.add('en'); document.documentElement.lang = 'en
 var G = SB.G = { mode: 'title', day: 1, t: 4, tasks: [], inv: {}, parts: {}, taken: {}, dropped: {}, flags: {}, carry: null, holding: null, P: { x: 4.6, z: -1.3, yaw: PI / 2, pitch: 0, face: -PI / 2 }, idle: 0, view: 3 };
 function third() { return G.mode === 'day' || G.mode === 'night'; }                 // 3인칭 하나로(사장님 10/3 "걍 3인칭으로 통일하자")
 SB.third = third;
-function makeTasks(d) {
-  var a = [{ id: 'net', n: d >= 10 ? 3 : d >= 4 ? 2 : 1, done: 0 }, { id: 'deck', n: 1, done: 0 }];
+function makeTasks(d) {                               // 그물은 하루 한 번(사장님 10/8 "그물올리는거 하루한번만")
+  var a = [{ id: 'net', n: 1, done: 0 }, { id: 'deck', n: 1, done: 0 }];
   if (d >= 2) a.push({ id: 'ramen', n: 1, done: 0 });
   return a;
 }
