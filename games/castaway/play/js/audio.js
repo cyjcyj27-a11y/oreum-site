@@ -37,6 +37,10 @@
       const c = ac(), t = c.currentTime, notes = tier >= 3 ? [523, 659, 784, 1047, 1319, 1568] : tier === 2 ? [523, 659, 784, 1047] : [660, 880];
       notes.forEach((f, i) => { const o = c.createOscillator(); o.type = 'triangle'; o.frequency.value = f; const g = c.createGain(); env(g, t + i * .12, .01, .4, .16); o.connect(g); g.connect(master); o.start(t + i * .12); o.stop(t + i * .12 + .5); });
     },
+    // 미끼 창 — 도마 위 칼질(둔탁한 탁 + 짧은 날 소리), 바늘 꿰기(살 찢는 쭉 + 쇠 바늘 팅)
+    chop() { burst(.07, .34, .002, .06, 'lowpass', 900); tone('triangle', 260, 120, .07, .16, .002); setTimeout(() => burst(.04, .08, .002, .03, 'bandpass', 1700, 3), 25); },
+    pierce() { const b = burst(.16, .22, .005, .13, 'bandpass', 700, 2.5); b.f.frequency.exponentialRampToValueAtTime(1500, b.t + .13); setTimeout(() => tone('sine', 1650, 1500, .22, .07, .002), 110); },
+    pieceBack() { tone('sine', 520, 360, .1, .08, .004); },
     flop() { burst(.08, .12, .003, .06, 'lowpass', 700); },
     eat() { [0, .18, .36].forEach(dt => setTimeout(() => burst(.06, .18, .003, .05, 'bandpass', 2000, 2), dt * 1000)); setTimeout(() => tone('sine', 300, 380, .2, .06), 600); },
     day() { [523, 784].forEach((f, i) => setTimeout(() => tone('sine', f, f, .4, .12, .02), i * 200)); },

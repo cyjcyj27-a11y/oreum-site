@@ -22,7 +22,7 @@
 
   /* ---------- 상태 ---------- */
   let best = { days: 0, cm: 0 }; try { best = Object.assign(best, JSON.parse(localStorage.getItem('castaway.best') || '{}')); } catch (e) { }
-  const G = { state: 'title', day: 1, food: 100, inv: {}, bait: 0, baitSp: null, time: 0, eatT: 0, cheerT: 0, pull: 0, baitUses: 0, bestCm: 0, caught: 0, overT: 0, ending: null, down: false, sit: false };
+  const G = { state: 'title', day: 1, food: 100, inv: {}, box: {}, bait: 0, baitSp: null, time: 0, eatT: 0, cheerT: 0, pull: 0, baitUses: 0, bestCm: 0, caught: 0, overT: 0, ending: null, down: false, sit: false };
   // 낚시 단계: idle 대 들고 있음 · charge 힘 모으기 · flying 날아감 · float 찌 떠 있음 · bite 입질 · fight 싸움 · land 끌어올림
   const L = { st: 'idle', power: 0, t: 0, pos: new V(), vel: new V(), dip: 0, fish: null, dist: 0, dir: 0, tension: 0, sta: 1, run: 0, slackT: 0, hold: false, pulse: 0, biteT: 0, hookT: 0, reelTk: 0, jump: null };
   sea.dayT = 0.1;
@@ -35,10 +35,12 @@
     if (e.repeat) return;
     if (e.code === 'Space') { e.preventDefault(); actDown(); }
     if (e.code === 'Escape' && dexOpen) { toggleDex(false); return; }
-    if (e.code === 'KeyD') { toggleDex(); return; }
-    if (dexOpen) return;
+    if (e.code === 'Escape' && bbOpen) { toggleBB(false); return; }
+    if (e.code === 'KeyD' && !bbOpen) { toggleDex(); return; }
+    if (e.code === 'KeyB' && !dexOpen) { toggleBB(); return; }
+    if (dexOpen || bbOpen) return;
     // 빠른 먹기 키(1·2)는 뺀다 — 있는 줄도 모른다고 하셔서. 먹기는 도감(D)에서 골라 누른다 (사장님 2026-09-11)
-    if (e.code === 'KeyB') cycleBait(); if (e.code === 'KeyK') toggleSfx();
+    if (e.code === 'KeyK') toggleSfx();
     if (e.code === 'Enter' && G.state === 'title') start();
   });
   addEventListener('keyup', e => { if (e.code === 'Space') actUp(); });
@@ -56,7 +58,7 @@
   btnAct.addEventListener('touchstart', e => { e.preventDefault(); actDown(); }, { passive: false });
   btnAct.addEventListener('touchend', e => { e.preventDefault(); actUp(); }, { passive: false });
   btnAct.addEventListener('touchcancel', e => { actUp(); });
-  $('invF').addEventListener('click', () => toggleDex()); $('bait').addEventListener('click', cycleBait); $('titleDex').addEventListener('click', () => toggleDex(true)); $('dexX').addEventListener('click', () => toggleDex(false)); $('dex').addEventListener('click', e => { if (e.target === $('dex')) toggleDex(false); });
+  $('invF').addEventListener('click', () => toggleDex()); $('bait').addEventListener('click', () => toggleBB()); $('bbX').addEventListener('click', () => toggleBB(false)); $('bb').addEventListener('click', e => { if (e.target === $('bb')) toggleBB(false); }); $('titleDex').addEventListener('click', () => toggleDex(true)); $('dexX').addEventListener('click', () => toggleDex(false)); $('dex').addEventListener('click', e => { if (e.target === $('dex')) toggleDex(false); });
   $('btnSfx').addEventListener('click', toggleSfx); function toggleSfx() { const on = A.toggle(); $('btnSfx').classList.toggle('off', !on); }
   $('btnSfx').classList.toggle('off', !A.on);
   $('title').querySelector('.go.start').addEventListener('click', start);
@@ -77,7 +79,9 @@
     $('foodBar').style.width = Math.max(0, Math.min(100, G.food)) + '%';
     $('foodN').textContent = Math.max(0, Math.round(G.food)); $('food').classList.toggle('hot', G.food < 25);
     $('nF').textContent = invAll(); $('invF').classList.toggle('dim', !invAll());
-    $('baitT').innerHTML = G.bait > 0 ? pips(G.baitUses) : '—'; $('bait').className = 'stat item on' + Math.min(2, G.bait);   // 남은 토막
+    // 미끼 칸 = 바늘 그림(꿴 토막이 바늘 끝에 보인다) + 통에 남은 토막 수 (사장님 2026-10-09 "이 표시가 뭔지 모르겠어")
+    $('baitT').textContent = boxAll(); $('baitHk').innerHTML = G.bait > 0 && G.baitSp ? '<g transform="translate(0 15.5) rotate(-12 8 6)">' + pieceSvg(F.BY[G.baitSp], 16) + '</g>' : '';
+    $('bait').className = 'stat item' + (G.bait > 0 ? ' on' + Math.min(2, G.bait) : '') + (boxAll() + (G.bait > 0 ? 1 : 0) === 0 ? ' dim' : '');
     const m = $('meter'); if (L.st === 'charge') { m.className = 'show'; $('meterBar').style.width = (L.power * 100) + '%'; } else if (L.st === 'fight') { m.className = 'show tens' + (L.tension > 0.78 ? ' hot' : ''); $('meterBar').style.width = (Math.min(1, L.tension) * 100) + '%'; } else m.className = '';
     if (isTouch) { btnAct.className = 'tbtn' + (L.st === 'bite' ? ' bite' : ((L.hold || L.pulse > 0) ? ' on' : '')); btnAct.textContent = L.st === 'bite' ? T('걸기', 'HOOK') : (L.st === 'idle' || L.st === 'charge') ? T('던지기', 'CAST') : T('감기', 'REEL'); }
   }
@@ -98,7 +102,7 @@
     }
   }
   /* 저장 · 이어하기 — 노는 동안 5초마다, 창을 닫을 때. GAME OVER·엔딩 시작에서 지운다(사장님, 2026-09-09 "망망대해도 이어하기가 없어") */
-  const SAVE_KEY = 'castaway.prog', SAVE_G = ['day', 'food', 'inv', 'bait', 'baitSp', 'baitUses', 'bestCm', 'caught']; let saveT = 0;
+  const SAVE_KEY = 'castaway.prog', SAVE_G = ['day', 'food', 'inv', 'box', 'bait', 'baitSp', 'baitUses', 'bestCm', 'caught']; let saveT = 0;
   function saveProg() { if (G.state !== 'play' || G.ending) return; try { const o = { v: 1, dayT: sea.dayT }; SAVE_G.forEach(k => o[k] = G[k]); localStorage.setItem(SAVE_KEY, JSON.stringify(o)); } catch (e) { } }
   function clearProg() { try { localStorage.removeItem(SAVE_KEY); } catch (e) { } }
   function loadProg() { try { const o = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); return o && o.v === 1 && o.day >= 1 && o.food > 0 ? o : null; } catch (e) { return null; } }
@@ -106,14 +110,16 @@
     const o = loadProg(); if (!o || G.state !== 'title') return;
     SAVE_G.forEach(k => { if (o[k] !== undefined) G[k] = o[k]; }); G.inv = G.inv || {}; sea.dayT = o.dayT || 0.1;
     if (G.baitSp && !F.BY[G.baitSp]) { G.baitSp = null; G.bait = 0; G.baitUses = 0; }
+    G.box = G.box || {};
+    if (G.baitSp && G.baitUses > 1) { G.box[G.baitSp] = (G.box[G.baitSp] || 0) + G.baitUses - 1; G.baitUses = 1; }   // 옛 저장: 바늘에 여러 토막 → 바늘엔 하나, 나머지는 통으로
     W.setBait(G.bait); W.setRack(invAll());
     start();
   }
   $('title').querySelector('.go.cont').classList.toggle('off', !loadProg());   // 저장이 없으면 흐리게(눌러도 아무 일 없음)
   addEventListener('pagehide', saveProg); document.addEventListener('visibilitychange', () => { if (document.hidden) saveProg(); });
-  const busy = () => G.state !== 'play' || G.eatT > 0 || dexOpen;
+  const busy = () => G.state !== 'play' || G.eatT > 0 || dexOpen || bbOpen;
   function actDown() {
-    if (dexOpen) return;
+    if (dexOpen || bbOpen) return;
     if (G.state === 'title') { start(); return; }
     if (busy()) return;
     if (L.st === 'idle') { camYaw += orbYaw; orbYaw = 0; L.st = 'charge'; L.power = 0; L.t = 0; W.setPose('charge'); }   // 카메라가 보는 쪽으로 몸을 돌려 던진다
@@ -139,7 +145,7 @@
   function hookFish() {
     const f = L.fish; L.st = 'fight'; L.hold = false; f.state = 'hooked'; f.t = 0;
     L.dist = Math.hypot(L.pos.x - W.raftPos.x, L.pos.z - W.raftPos.z); L.dir = Math.atan2(L.pos.z - W.raftPos.z, L.pos.x - W.raftPos.x);
-    L.tension = 0.3; L.sta = 1; L.run = 0; L.runRest = 2.5; L.pulse = 0; L.slackT = 0; L.jump = null; A.hook(); W.setPose('fight');
+    L.tension = 0.3; L.sta = 1; L.run = 0; L.breakT = 0; L.runRest = 2.5; L.pulse = 0; L.slackT = 0; L.jump = null; A.hook(); W.setPose('fight');
     f.fightPos = new V(); f.thrash = 1;
   }
   function loseFish(why) {
@@ -172,24 +178,74 @@
     G.eatT = 1.3; W.setPose('eat'); A.eat(); pop('food'); toast('+' + gain, null, false, 0.9); W.setRack(invAll()); hud();
     if (dexOpen) buildDex();
   }
-  function cycleBait() {
-    if (busy() || (L.st !== 'idle' && L.st !== 'float')) return;   // 찌가 떠 있을 때도 미끼를 바꿀 수 있다(사장님, 2026-09-09 만새기 단추)
-    // 지금 걸린 미끼는 돌려받고 다음 것으로
-    if (G.baitSp && G.baitUses === BAIT_USES[G.baitSp]) G.inv[G.baitSp] = (G.inv[G.baitSp] || 0) + 1;   // 안 쓴 미끼만 돌려받는다
-    // 작은 것 → 큰 것 → 없음 순으로 돈다
-    const cur = G.baitSp ? BAIT_ORDER.indexOf(G.baitSp) : -1; let next = null;
-    for (let k = cur + 1; k < BAIT_ORDER.length; k++) if ((G.inv[BAIT_ORDER[k]] || 0) > 0) { next = BAIT_ORDER[k]; break; }
-    if (next) G.inv[next]--;
-    G.baitSp = next; G.bait = next ? F.BY[next].tier : 0; G.baitUses = next ? BAIT_USES[next] : 0; W.setBait(G.bait); W.setRack(invAll()); pop('bait'); hud();
+  /* ---------- 미끼 창 — 고기를 토막 내 통에 담고, 토막을 하나씩 바늘에 꿴다 (사장님 2026-10-09 "미끼도 팝업으로 열어서 하나씩 거는 손맛") ----------
+     바늘에는 언제나 한 토막. 입질에 놓치거나 줄이 끊기거나 잡으면 바늘의 그 토막만 없어지고 통은 그대로다. */
+  let bbOpen = false, bbLock = false, bbHi = null;
+  const boxAll = () => Object.keys(G.box).reduce((n, k) => n + (G.box[k] || 0), 0);
+  const hex = c => '#' + c.toString(16).padStart(6, '0');
+  function pieceSvg(sp, w) {   // 토막 하나: 위는 등 색, 아래는 배 색, 끝은 붉은 살과 등뼈
+    const g = 'pg' + sp.id;
+    return '<svg class="pcs" viewBox="0 0 44 30" width="' + (w || 44) + '" height="' + Math.round((w || 44) * 30 / 44) + '" aria-hidden="true"><defs><linearGradient id="' + g + '" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="' + hex(sp.top) + '"/><stop offset=".48" stop-color="' + hex(sp.top) + '"/><stop offset=".62" stop-color="' + hex(sp.belly) + '"/><stop offset="1" stop-color="' + hex(sp.belly) + '"/></linearGradient></defs>'
+      + '<path d="M7 4 Q22 1 37 4 Q41 15 37 26 Q22 29 7 26 Q3 15 7 4 Z" fill="url(#' + g + ')" stroke="rgba(0,0,0,.45)" stroke-width="1.2"/>'
+      + '<path d="M10 14 Q22 12 35 14" fill="none" stroke="rgba(255,255,255,.35)" stroke-width="1"/>'
+      + '<ellipse cx="37.5" cy="15" rx="3.6" ry="10.4" fill="#d9837d" stroke="rgba(0,0,0,.35)" stroke-width="1"/><ellipse cx="37.5" cy="12" rx="1.3" ry="1.6" fill="#f3dccf"/>'
+      + '<path d="M13 5.5 Q22 3.5 31 5.5" fill="none" stroke="rgba(255,255,255,.5)" stroke-width="1.4" stroke-linecap="round"/></svg>';
   }
-  function setBaitSp(id) {
-    if (G.state !== 'play' || G.eatT > 0 || (L.st !== 'idle' && L.st !== 'float') || (G.inv[id] || 0) <= 0) return;
-    // 같은 고기가 이미 걸려 있고 토막이 남았으면 그대로 쓴다.
-    // 여기서 또 받으면 남은 토막을 버리고 새 고기를 한 마리 더 잡아먹는다 (사장님, 2026-09-11 멸치 두 마리)
-    if (G.baitSp === id && G.baitUses > 0) return;
-    if (G.baitSp && G.baitUses === BAIT_USES[G.baitSp]) G.inv[G.baitSp] = (G.inv[G.baitSp] || 0) + 1;   // 안 쓴 미끼만 돌려받는다
-    G.inv[id]--; G.baitSp = id; G.bait = F.BY[id].tier; G.baitUses = BAIT_USES[id]; W.setBait(G.bait); W.setRack(invAll()); pop('bait'); hud();
-    if (dexOpen) buildDex();
+  function toggleBB(on, hi) {
+    on = on == null ? !bbOpen : on; if (on === bbOpen || bbLock) return;
+    if (on && (G.state !== 'play' || G.eatT > 0 || dexOpen || (L.st !== 'idle' && L.st !== 'float'))) return;   // 던지는 중·싸우는 중엔 안 열린다
+    bbOpen = on; bbHi = on ? hi || null : null; if (on) buildBB();
+    $('bb').classList.toggle('show', on); document.body.classList.toggle('dexOpen', on);
+  }
+  function drawHook() { $('hookPc').innerHTML = G.bait > 0 && G.baitSp ? pieceSvg(F.BY[G.baitSp], 70) : ''; $('bbHook').classList.toggle('on', G.bait > 0); }
+  function buildBB() {
+    $('bbH').textContent = T('미끼', 'BAIT'); drawHook();
+    const pr = $('bbPcs'), fr = $('bbFish'); pr.innerHTML = ''; fr.innerHTML = '';
+    for (const id of BAIT_ORDER) {
+      const sp = F.BY[id], n = G.box[id] || 0; if (n <= 0) continue;
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'pc' + (G.bait > 0 && G.baitSp === id ? ' cur' : ''); b.dataset.id = id;
+      b.innerHTML = pieceSvg(sp, 62) + '<span class="nm">' + (EN ? sp.en : sp.ko) + '</span><b class="n">×' + n + '</b>';
+      b.addEventListener('click', () => hangPiece(id, b)); pr.appendChild(b);
+    }
+    for (const id of BAIT_ORDER) {
+      const sp = F.BY[id], n = G.inv[id] || 0; if (n <= 0) continue;
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'fs' + (bbHi === id ? ' hi' : ''); b.dataset.id = id;
+      b.innerHTML = '<img src="' + F.thumb(id) + '" alt=""><span class="nm">' + (EN ? sp.en : sp.ko) + '</span><b class="n">×' + n + '</b><span class="cutN">' + CUT_SVG + '<b>×' + sp.cut + '</b></span>';
+      b.addEventListener('click', () => cutFish(id, b)); fr.appendChild(b);
+    }
+    pr.classList.toggle('empty', !pr.children.length); fr.classList.toggle('empty', !fr.children.length);
+  }
+  // 토막 그림 하나를 창 안 한 곳에서 다른 곳으로 던진다(포물선)
+  function flyPiece(sp, from, to, ms, delay) {
+    const a = from.getBoundingClientRect(), b = to.getBoundingClientRect();
+    const el = document.createElement('div'); el.className = 'fly'; el.innerHTML = pieceSvg(sp, 40); document.body.appendChild(el);
+    const x0 = a.left + a.width / 2 - 20, y0 = a.top + a.height / 2 - 14, x1 = b.left + b.width / 2 - 20, y1 = b.top + b.height / 2 - 14;
+    el.style.left = x0 + 'px'; el.style.top = y0 + 'px';
+    const dx = x1 - x0, dy = y1 - y0, r = (Math.random() - .5) * 140;
+    const an = el.animate([{ transform: 'translate(0,0) rotate(0deg) scale(1)' }, { transform: 'translate(' + dx * .5 + 'px,' + (dy * .5 - 46) + 'px) rotate(' + r / 2 + 'deg) scale(1.2)', offset: .5 }, { transform: 'translate(' + dx + 'px,' + dy + 'px) rotate(' + r + 'deg) scale(.9)' }], { duration: ms, delay: delay || 0, easing: 'cubic-bezier(.3,.7,.4,1)', fill: 'both' });
+    an.onfinish = () => el.remove();
+  }
+  function cutFish(id, tile) {   // 고기 한 마리 → 칼질 몇 번 → 토막들이 통으로 튄다
+    if (bbLock || G.state !== 'play' || (G.inv[id] || 0) <= 0) return;
+    const sp = F.BY[id]; bbLock = true; G.inv[id]--; W.setRack(invAll());
+    const hits = Math.min(4, 1 + Math.ceil(sp.cut / 4));
+    for (let k = 0; k < hits; k++) setTimeout(() => { A.chop(); tile.classList.remove('chop'); void tile.offsetWidth; tile.classList.add('chop'); }, k * 130);
+    const dst = $('bbPcs').querySelector('.pc[data-id="' + id + '"]') || $('bbPcs');
+    const nFly = Math.min(sp.cut, 7); for (let k = 0; k < nFly; k++) flyPiece(sp, tile, dst, 420, hits * 130 + k * 50);
+    setTimeout(() => { G.box[id] = (G.box[id] || 0) + sp.cut; bbLock = false; buildBB(); const t = $('bbPcs').querySelector('.pc[data-id="' + id + '"]'); if (t) t.classList.add('got'); pop('bait'); hud(); }, hits * 130 + nFly * 50 + 420);
+  }
+  function hangPiece(id, tile) {   // 토막 하나를 바늘로 — 꿰는 순간 바늘이 휘청, 원래 걸려 있던 토막은 통으로 돌아온다
+    if (bbLock || G.state !== 'play' || (L.st !== 'idle' && L.st !== 'float') || (G.box[id] || 0) <= 0) return;
+    if (G.bait > 0 && G.baitSp === id) return;   // 같은 토막이 이미 걸려 있다
+    const sp = F.BY[id]; bbLock = true; G.box[id]--;
+    if (G.bait > 0 && G.baitSp) { const old = G.baitSp; G.box[old] = (G.box[old] || 0) + 1; flyPiece(F.BY[old], $('hookPc'), $('bbPcs'), 380); $('hookPc').innerHTML = ''; A.pieceBack(); }
+    tile.classList.add('pick'); flyPiece(sp, tile, $('hookPc'), 300);
+    setTimeout(() => {
+      G.baitSp = id; G.bait = sp.tier; G.baitUses = 1; W.setBait(G.bait); A.pierce();
+      drawHook(); const h = $('bbHook'); h.classList.remove('stab'); void h.offsetWidth; h.classList.add('stab');
+      pop('bait'); hud(); buildBB();
+      setTimeout(() => { bbLock = false; toggleBB(false); }, 650);
+    }, 300);
   }
   // 미끼 한 마리는 토막 내어 여러 번 쓴다 — 종마다 cut 토막 (사장님 2026-09-07). 순서는 작은(배부름 낮은) 것부터
   const BAIT_USES = {}; F.SPECIES.forEach(sp => BAIT_USES[sp.id] = sp.cut);
@@ -211,7 +267,7 @@
   }
   syncStage();
   function dexRecord(id, cm) { const first = !DEX[id]; const d = DEX[id] || (DEX[id] = { n: 0, cm: 0 }); d.n++; d.cm = Math.max(d.cm, cm); try { localStorage.setItem('castaway.dex', JSON.stringify(DEX)); } catch (e) { } syncStage(); return first; }
-  const CUT_SVG = $('bait').querySelector('svg').outerHTML;   // 상단바의 토막난 생선 그림을 그대로 쓴다
+  const CUT_SVG = '<svg class="ic cut" viewBox="0 0 40 18" aria-hidden="true"><path d="M0 9 L7 2 Q10 1 11 3 L11 15 Q10 17 7 16 Z"/><path d="M13.5 2 L20 1.5 L20 16.5 L13.5 16 Z"/><path d="M22.5 1.5 L29 2.5 L29 15.5 L22.5 16.5 Z"/><path d="M31.5 3 L34 5 L40 1 L38 9 L40 17 L34 13 L31.5 15 Z"/><circle cx="4.5" cy="7.5" r="1.1" class="eye"/></svg>';   // 토막난 생선 그림 — 이 고기가 몇 토막 나오는지
   function buildDex() {
     const grid = $('dexGrid'); grid.innerHTML = '';
     for (const sp of F.SPECIES) {
@@ -224,12 +280,11 @@
         const bE = document.createElement('button'); bE.type = 'button'; bE.className = 'act eat'; bE.innerHTML = '🍖 <b>+' + sp.food + '</b>'; bE.addEventListener('click', () => eat(sp.id)); acts.appendChild(bE);
         // 미끼로 못 쓰는 고기(상어)는 미끼 단추를 아예 안 보여 준다
         if (sp.cut > 0) {
-          // 이미 걸려 있어 남은 토막을 쓰는 중이면 눌러도 소용없으니 흐리게
-          const onHook = G.baitSp === sp.id && G.baitUses > 0;
+          // 누르면 미끼 창이 열리고 이 고기가 반짝인다 — 토막 내기·꿰기는 미끼 창에서
           const bB = document.createElement('button'); bB.type = 'button';
-          bB.className = 'act bait' + (onHook ? ' on' : (L.st === 'idle' || L.st === 'float') ? '' : ' off');
-          bB.innerHTML = CUT_SVG + ' <b>' + (onHook ? pips(G.baitUses) : '×' + sp.cut) + '</b>';
-          bB.addEventListener('click', () => setBaitSp(sp.id)); acts.appendChild(bB);
+          bB.className = 'act bait' + ((L.st === 'idle' || L.st === 'float') ? '' : ' off');
+          bB.innerHTML = CUT_SVG + ' <b>×' + sp.cut + '</b>';
+          bB.addEventListener('click', () => { toggleDex(false); toggleBB(true, sp.id); }); acts.appendChild(bB);
         }
         card.appendChild(acts);
       } else { const rc = document.createElement('div'); rc.className = 'rc'; rc.textContent = d ? d.cm + 'cm' : (sp.len[0] + '~' + sp.len[1] + 'cm'); card.appendChild(rc); }
@@ -314,6 +369,7 @@
         L.sta = Math.max(0, L.sta - dt / sp.sta * (L.tension > 0.35 ? 1 : L.run > 0 ? 0.5 : 0.15));
         if (L.run <= 0 && L.runRest <= 0 && Math.random() < dt * (sp.tier >= 3 ? 0.3 : sp.tier === 2 ? 0.45 : 0.3) * (0.2 + L.sta)) {
           L.run = L.runDur = (sp.tier >= 3 ? 1.5 : 1.0) + Math.random() * 1.0; L.runRest = 1.2 + Math.random() * 1.5; A.splash(0.6 + f.len); W.splash(f.pos, 0.6 + f.len);   // 물보라가 예고
+          if (Math.random() < (sp.tier >= 4 ? 0.04 : sp.tier === 3 ? 0.08 : sp.tier === 2 ? 0.12 : 0)) L.breakT = 0.5 + Math.random() * 0.6;   // 큰 고기는 달릴 때 어쩌다 줄을 끊고 달아난다 — 기다려도 안전하지 않다
           if (sp.tier >= 2 && !L.jump && Math.random() < 0.55) { L.jump = { t: 0, dur: 0.75 + f.len * 0.15, h: 0.8 + f.len * 0.6 }; }
         }
         if (L.run > 0) L.run -= dt; else L.runRest -= dt;
@@ -329,6 +385,7 @@
         L.tension += (target - L.tension) * Math.min(1, 1.5 * dt);
         L.tension = Math.max(0, Math.min(1.05, L.tension));
         if (L.tension > 0.75) A.creak(L.tension);
+        if (L.breakT > 0) { L.breakT -= dt; if (L.breakT <= 0) L.tension = 1; }
         if (L.tension >= 0.985 || L.dist > 60) { loseFish('snap'); }
         else {
           if (L.tension < 0.07) { L.slackT += dt; if (L.slackT > 2.4) loseFish('slack'); } else L.slackT = 0;
@@ -413,5 +470,5 @@
   function loop(now) { const dt = (now - last) / 1000; last = now; frame(dt); requestAnimationFrame(loop); }
   requestAnimationFrame(loop);
   hud();
-  window.__cw = { saveProg, resume, loadProg, orbit(y, p, d) { orbYaw = y; if (p != null) orbPitch = p; if (d != null) orbDist = d; }, render() { renderer.render(scene, camera); }, tick(n, dt) { for (let i = 0; i < (n || 1); i++) frame(dt || 1 / 60); }, G, L, F, W, sea, camera, start, actDown, actUp, eat, cycleBait, toggleDex, dexRecord, setBaitSp, setYaw(y) { camYaw = y; }, landFish, hookFish };
+  window.__cw = { saveProg, resume, loadProg, orbit(y, p, d) { orbYaw = y; if (p != null) orbPitch = p; if (d != null) orbDist = d; }, render() { renderer.render(scene, camera); }, tick(n, dt) { for (let i = 0; i < (n || 1); i++) frame(dt || 1 / 60); }, G, L, F, W, sea, camera, start, actDown, actUp, eat, toggleDex, toggleBB, cutFish, hangPiece, dexRecord, setYaw(y) { camYaw = y; }, landFish, hookFish };
 })();

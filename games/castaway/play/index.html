@@ -37,6 +37,7 @@
   #dex .act .pip { height: 11px; width: 4px; background: #ffd24a; vertical-align: -1px; }
   @media (max-width: 700px) { .pip { width: 4px; height: 12px; margin-right: 2px; } }
   #bait.on1 .cut { fill: #cfe0e8; } #bait.on2 .cut { fill: #ffd24a; }
+  .stat .hk { width: 28px; height: 28px; margin: -3px 0; overflow: visible; } @media (max-width: 700px) { .stat .hk { width: 24px; height: 24px; } }
   @media (max-width: 700px) { .stat .cut { width: 22px; height: 10px; } }
   .spacer { display: none; }
   .tog { position: absolute; top: calc(4px + env(safe-area-inset-top)); right: calc(10px + env(safe-area-inset-right)); pointer-events: auto; width: 36px; height: 36px; border-radius: 50%; border: 1px solid rgba(255,255,255,.3); background: rgba(0,0,0,.4); color: #fff; font-family: inherit; font-size: 17px; line-height: 1; padding: 0; touch-action: manipulation; }
@@ -103,6 +104,40 @@
   #dex .card.no .nm { opacity: .55; } #dex .card.no .rc { color: rgba(255,255,255,.35); }
   @media (max-width: 700px) { #dex .grid { grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 7px; padding: 10px; } #dex .head { font-size: 18px; padding: 8px 10px 7px 14px; } #dex .card { padding: 6px 6px 7px; } #dex .card .nm, #dex .card .rc { font-size: 13px; } #dex .act { font-size: 12px; padding: 5px 0 4px; } #dex .act b { font-size: 13px; } #title .dexT { font-size: 13px; padding: 7px 12px; } }
   @media (max-height: 480px) { #dex .grid { grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); gap: 6px; padding: 8px; } #dex .head { font-size: 17px; padding: 6px 8px 5px 12px; } #dex .head button { width: 30px; height: 30px; } #dex .card { padding: 5px 5px 6px; } #dex .card .nm { margin-top: 4px; font-size: 12px; } #dex .card .rc { font-size: 12px; } }
+  /* 미끼 창 — 도감과 같은 남색 판. 왼쪽 큰 바늘, 오른쪽 위 토막 통, 아래 고기 (2026-10-09) */
+  #bb { position: fixed; inset: 0; z-index: 30; display: grid; place-items: center; background: rgba(4,12,20,.62); opacity: 0; pointer-events: none; transition: opacity .2s; padding: calc(12px + env(safe-area-inset-top)) calc(12px + env(safe-area-inset-right)) calc(12px + env(safe-area-inset-bottom)) calc(12px + env(safe-area-inset-left)); }
+  #bb.show { opacity: 1; pointer-events: auto; }
+  #bb .panel { width: min(820px, 100%); max-height: 100%; display: flex; flex-direction: column; border-radius: 18px; background: rgba(12,28,40,.94); border: 1px solid rgba(255,255,255,.16); box-shadow: 0 16px 48px rgba(0,0,0,.5); overflow: hidden; transform: scale(.9); transition: transform .2s cubic-bezier(.34,1.56,.64,1); }
+  #bb.show .panel { transform: scale(1); }
+  #bb .head { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px 10px 20px; font-family: 'Ria', 'Griun', sans-serif; font-size: 22px; letter-spacing: 2px; color: #ffd24a; border-bottom: 1px solid rgba(255,255,255,.1); }
+  #bb .head button { width: 36px; height: 36px; border-radius: 50%; border: 1px solid rgba(255,255,255,.3); background: rgba(0,0,0,.35); color: #fff; font-size: 17px; font-family: inherit; cursor: pointer; padding: 0; touch-action: manipulation; }
+  #bb .body { display: flex; gap: 12px; padding: 12px 14px 14px; min-height: 0; }
+  #bbHook { flex: 0 0 150px; display: grid; place-items: center; border-radius: 14px; background: radial-gradient(ellipse at 50% 40%, rgba(120,190,220,.22), rgba(20,50,70,.15) 75%); border: 1px solid rgba(255,255,255,.08); transform-origin: 50% 0; }
+  #bbHook svg.hk { width: 120px; height: auto; overflow: visible; }
+  #bbHook.on { border-color: rgba(255,210,74,.55); background: radial-gradient(ellipse at 50% 40%, rgba(255,210,74,.2), rgba(20,50,70,.15) 75%); }
+  #bbHook.stab { animation: stab .6s ease-out; } @keyframes stab { 0% { transform: rotate(0); } 18% { transform: rotate(-9deg) translateY(6px); } 40% { transform: rotate(6deg); } 62% { transform: rotate(-3deg); } 82% { transform: rotate(1.5deg); } 100% { transform: rotate(0); } }
+  #bb .lists { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+  #bb .row { display: flex; flex-wrap: wrap; gap: 8px; min-height: 72px; padding: 8px; border-radius: 12px; background: rgba(0,0,0,.22); border: 1px solid rgba(255,255,255,.07); }
+  #bb .row.empty { min-height: 0; padding: 0; border: 0; background: none; }
+  #bb button.pc, #bb button.fs { position: relative; display: flex; flex-direction: column; align-items: center; gap: 3px; border-radius: 11px; border: 1px solid rgba(255,255,255,.18); background: rgba(255,255,255,.07); color: #fff8ec; font-family: inherit; cursor: pointer; touch-action: manipulation; box-shadow: 0 3px 0 rgba(0,0,0,.35); transition: transform .22s cubic-bezier(.34,1.56,.64,1), box-shadow .22s, filter .15s; }
+  #bb button.pc { width: 92px; padding: 9px 4px 6px; }
+  #bb button.fs { width: 132px; padding: 7px 6px 6px; background: rgba(255,210,74,.12); border-color: rgba(255,210,74,.5); }
+  #bb button.pc:hover, #bb button.fs:hover { filter: brightness(1.12); }
+  #bb button.pc:active, #bb button.fs:active { transform: translateY(3px) scale(.96); box-shadow: 0 0 0 rgba(0,0,0,.35); transition-duration: .04s; }
+  #bb button.pc.cur { border-color: #ffd24a; background: rgba(255,210,74,.2); }
+  #bb button.pc.pick { opacity: .5; }
+  #bb button.pc.got { animation: got .6s ease-out; }
+  #bb button.fs.hi { animation: hiP 1s ease-in-out 3; } @keyframes hiP { 50% { box-shadow: 0 0 0 4px rgba(255,210,74,.7), 0 3px 0 rgba(0,0,0,.35); } }
+  #bb button.fs.chop { animation: chop .13s ease-out; } @keyframes chop { 0% { transform: translateY(0); } 40% { transform: translateY(4px) scale(1.04, .94); } 100% { transform: translateY(0); } }
+  #bb .pc .pcs { filter: drop-shadow(0 2px 2px rgba(0,0,0,.45)); }
+  #bb .pc .n { position: static; margin-top: 1px; }
+  #bb .fs img { width: 100%; aspect-ratio: 2 / 1; object-fit: contain; border-radius: 7px; background: radial-gradient(ellipse at 50% 60%, rgba(120,190,220,.28), rgba(20,50,70,.2) 75%); }
+  #bb .nm { font-size: 14px; letter-spacing: 1px; white-space: nowrap; }
+  #bb .n { position: absolute; right: 5px; top: 5px; padding: 1px 7px; border-radius: 999px; background: #ffd24a; color: #2a1c08; font-family: 'Ria', 'Griun', sans-serif; font-size: 14px; font-weight: normal; letter-spacing: 1px; }
+  #bb .cutN { display: inline-flex; align-items: center; gap: 3px; } #bb .cutN .cut { width: 24px; height: 11px; fill: #cfe0e8; } #bb .cutN .cut .eye { fill: rgba(0,0,0,.6); } #bb .cutN b { font-family: 'Ria', 'Griun', sans-serif; font-weight: normal; font-size: 14px; color: #ffd24a; letter-spacing: 1px; }
+  .fly { position: fixed; z-index: 40; pointer-events: none; width: 40px; filter: drop-shadow(0 3px 3px rgba(0,0,0,.5)); }
+  @media (max-height: 480px) { #bb .head { font-size: 17px; padding: 6px 8px 5px 12px; } #bb .head button { width: 32px; height: 32px; } #bb .body { padding: 8px 10px 10px; gap: 8px; } #bbHook { flex-basis: 110px; } #bbHook svg.hk { width: 86px; } #bb .row { min-height: 60px; padding: 6px; gap: 6px; } #bb button.pc { width: 78px; padding: 6px 3px 4px; } #bb button.fs { width: 112px; padding: 5px 5px 4px; } #bb .nm { font-size: 12px; } }
+  @media (max-width: 520px) { #bbHook { flex-basis: 96px; } #bbHook svg.hk { width: 76px; } }
   body.dexOpen .tbtn { display: none; }
 
   /* 게임오버 · 클리어 */
@@ -127,7 +162,7 @@
   <div class="stat" id="dayH">DAY 1</div>
   <div class="stat" id="food"><span class="ic">🍖</span><div class="bar"><div id="foodBar"></div></div><b id="foodN">100</b></div>
   <div class="stat item" id="invF" title="물고기"><span class="ic">🐟</span><b id="nF">0</b></div>
-  <div class="stat item" id="bait" title="미끼"><svg class="ic cut" viewBox="0 0 40 18" aria-hidden="true"><path d="M0 9 L7 2 Q10 1 11 3 L11 15 Q10 17 7 16 Z"/><path d="M13.5 2 L20 1.5 L20 16.5 L13.5 16 Z"/><path d="M22.5 1.5 L29 2.5 L29 15.5 L22.5 16.5 Z"/><path d="M31.5 3 L34 5 L40 1 L38 9 L40 17 L34 13 L31.5 15 Z"/><circle cx="4.5" cy="7.5" r="1.1" class="eye"/></svg><b id="baitT">—</b></div>
+  <div class="stat item" id="bait" title="미끼"><svg class="ic hk" viewBox="0 0 30 30" aria-hidden="true"><path d="M19 0 L19 3" stroke="rgba(255,255,255,.6)" stroke-width="1"/><circle cx="19" cy="5" r="2.2" fill="none" stroke="#e6eef2" stroke-width="1.8"/><path d="M19 7.2 L19 19 Q19 27 12.5 27 Q7 27 7 21 L7.4 17" fill="none" stroke="#e6eef2" stroke-width="2.4" stroke-linecap="round"/><g id="baitHk"></g><path d="M7.2 20 L7.4 17" fill="none" stroke="#e6eef2" stroke-width="2.4" stroke-linecap="round"/><path d="M7.5 14.5 L5 18.5 L9.4 18.8 Z" fill="#e6eef2"/></svg><b id="baitT">0</b></div>
   <div class="spacer"></div>
   <button id="btnSfx" class="tog" title="효과음">🔊</button>
 </div>
@@ -161,6 +196,25 @@
   </div>
 </div>
 
+<div id="bb">
+  <div class="panel">
+    <div class="head"><span id="bbH">미끼</span><button type="button" id="bbX" aria-label="close">✕</button></div>
+    <div class="body">
+      <div id="bbHook"><svg class="hk" viewBox="0 0 120 210" aria-hidden="true">
+        <path d="M66 0 L66 22" stroke="rgba(230,240,245,.75)" stroke-width="1.6"/>
+        <circle cx="66" cy="29" r="7" fill="none" stroke="#56636c" stroke-width="7"/><circle cx="66" cy="29" r="7" fill="none" stroke="#c8d3da" stroke-width="4"/>
+        <path d="M66 36 L66 140 Q66 186 36 184 Q12 182 12 154 L14 128" fill="none" stroke="#56636c" stroke-width="9" stroke-linecap="round"/>
+        <path d="M66 36 L66 140 Q66 186 36 184 Q12 182 12 154 L14 128" fill="none" stroke="#b9c5cd" stroke-width="5.5" stroke-linecap="round"/>
+        <path d="M68.5 40 L68.5 138" stroke="rgba(255,255,255,.75)" stroke-width="1.6" stroke-linecap="round"/>
+        <g id="hookPc" transform="translate(-21 113) rotate(-12 35 24)"></g>
+        <path d="M13 150 L14 128" fill="none" stroke="#56636c" stroke-width="9" stroke-linecap="round"/><path d="M13 150 L14 128" fill="none" stroke="#b9c5cd" stroke-width="5.5" stroke-linecap="round"/>
+        <path d="M14 122 L8 134 L19 136 Z" fill="#b9c5cd" stroke="#56636c" stroke-width="2.4" stroke-linejoin="round"/>
+      </svg></div>
+      <div class="lists"><div class="row" id="bbPcs"></div><div class="row" id="bbFish"></div></div>
+    </div>
+  </div>
+</div>
+
 <div id="over">
   <h2 id="overH">GAME OVER</h2>
   <p><small>DAY</small><span id="overDay">1</span></p>
@@ -176,8 +230,8 @@
 <script src="js/sea.js?v=54"></script>
 <script src="js/fish.js?v=58"></script>
 <script src="js/world.js?v=55"></script>
-<script src="js/audio.js?v=54"></script>
-<script src="js/game.js?v=65"></script>
+<script src="js/audio.js?v=55"></script>
+<script src="js/game.js?v=71"></script>
 <script src="/assets/visit.js?v=17" defer></script>
 <script src="/assets/game-events.js?v=1" defer></script>
 </body>
