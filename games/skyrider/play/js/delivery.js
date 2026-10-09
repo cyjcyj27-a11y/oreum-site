@@ -34,8 +34,12 @@
     ["Hold on. The light is too good.", "Photo first, then set the food down.", "Stay right there.", "Today's concept is natural.", "The colors of this food are insane.", "Hold on. Even the shadows are perfect.", "This would work without a filter.", "Even just your hands would make art.", "One photo, then eat.", "Today's best subject wasn't the food."],
   ];
   const LINES = TX(LINES_KO, LINES_EN);
+  // 짐 4종 (2026-10-09 "할 게 없대") — 음식은 기본, 케이크는 부딪히면 망가지고, 피자는 식기 전에, 큰 짐은 무거워서 잘 안 뜬다
   const PKG = [
-    { key: 'food', name: TX('음식', 'Food'), icon: '🍱', w: 1.0, pay: 1.0, time: 1.0, fragile: false },
+    { key: 'food', name: TX('음식', 'Food'), w: 0.4, pay: 1.0, time: 1.0, fragile: false, color: 0xd42a1a },
+    { key: 'cake', name: TX('케이크', 'Cake'), note: TX('부딪히면 망가짐', 'Breaks if you bump'), w: 0.2, pay: 1.5, time: 1.1, fragile: true, color: 0xf2a6c0 },
+    { key: 'pizza', name: TX('뜨거운 피자', 'Hot Pizza'), note: TX('식기 전에', 'Before it cools'), w: 0.2, pay: 1.5, time: 0.6, fragile: false, color: 0xe8862a, hot: true },
+    { key: 'big', name: TX('큰 짐', 'Big Parcel'), note: TX('무거워서 잘 안 뜸', 'Heavy, hard to lift'), w: 0.2, pay: 2.0, time: 1.3, fragile: false, color: 0x9a6a3a, heavy: true },
   ];
   const D = { targets: [], cur: null, home: null, money: 10, done: 0, late: 0, t: 0, limit: 0, state: 'idle', best: 0, pkg: PKG[0], value: 1, broken: false, lastFrom: null, pay: 0 };
   D.startMoney = D.money;
@@ -50,7 +54,7 @@
     for (let i = 0; i < huts.length; i++) {
       const h = huts[i];
       const pad = h.group.position.clone().lerp(h.pos, 0.8); pad.y = h.pos.y;   // 집 문 앞
-      D.targets.push({ name: NAMES[i % NAMES.length] + (i >= NAMES.length ? ' ' + (Math.floor(i / NAMES.length) + 1) : ''), who: WHO[i % WHO.length], lines: LINES[i % LINES.length], pos: h.pos.clone(), pad, hut: h });
+      D.targets.push({ idx: i, name: NAMES[i % NAMES.length] + (i >= NAMES.length ? ' ' + (Math.floor(i / NAMES.length) + 1) : ''), who: WHO[i % WHO.length], lines: LINES[i % LINES.length], pos: h.pos.clone(), pad, hut: h });
     }
     D.home = { name: TX('식당', 'Diner'), pos: new THREE.Vector3(0, T.SUMMIT, 0) };
     const bg = new THREE.CylinderGeometry(1.2, 1.6, 300, 12, 1, true).translate(0, 150, 0);
@@ -66,6 +70,8 @@
     // 초록 발판: 여기 내리면 배달
     padDisc = new THREE.Mesh(new THREE.PlaneGeometry(2.0, 2.0).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: 0x3ddb55, transparent: true, opacity: 0.6, depthWrite: false, side: THREE.DoubleSide }));
     padDisc.visible = false; padDisc.renderOrder = 4; scene.add(padDisc);
+    // 가운데 금색 원: 여기 딱 내리면 PERFECT
+    padDisc.add(new THREE.Mesh(new THREE.RingGeometry(0.42, 0.6, 28).rotateX(-Math.PI / 2).translate(0, 0.01, 0), new THREE.MeshBasicMaterial({ color: 0xffd27a, transparent: true, opacity: 0.95, depthWrite: false, side: THREE.DoubleSide })));
     // 'DELIVERY' 표지: 배달 갈 집 위에
     const sc = document.createElement('canvas'); sc.width = 512; sc.height = 160; const x = sc.getContext('2d');
     x.fillStyle = '#d42a1a'; x.beginPath(); x.roundRect(8, 8, 496, 144, 28); x.fill(); x.strokeStyle = '#fff3d0'; x.lineWidth = 8; x.stroke();
@@ -85,8 +91,9 @@
       else if (m.userData.eh !== undefined) { m.material.emissive.setHex(m.userData.eh); m.material.emissiveIntensity = m.userData.ei; m.material.fog = true; m.material.needsUpdate = true; }
     });
   }
-  function pickPkg() { let r = rng(); for (const p of PKG) { if (r < p.w) return p; r -= p.w; } return PKG[0]; }
+  function pickPkg() { if (window.EXTRA && EXTRA.X.total < 2) return PKG[0]; let r = rng(); for (const p of PKG) { if (r < p.w) return p; r -= p.w; } return PKG[0]; }
   function pickNext(from) {
+    if (window.EXTRA && EXTRA.finalReady()) return pickFinal();
     const reach = 70 + D.done * 25;
     const skip = t => t !== D.cur && t.name !== D.lastName;
     const flat = t => Math.hypot(t.pos.x - from.x, t.pos.z - from.z);   // 높이 차는 빼고 거리만
@@ -99,12 +106,26 @@
     const dist = t.pos.distanceTo(from);
     D.limit = (24 + dist / 5) * D.pkg.time;   // 236m 이면 71초. 스쿠터로도 닿는 여유
     const bk = (window.GAME && GAME.BIKES) ? GAME.BIKES[GAME.GARAGE.cur] : null;   // 배달비는 기종마다 정해져 있다 (10·20·30·50·100)
-    D.pay = bk && bk.pay ? bk.pay : 10;
+    D.pay = Math.round((bk && bk.pay ? bk.pay : 10) * D.pkg.pay); D.final = false;
     glow.visible = true; glow.position.copy(t.pos); glow.position.y += 3;
     padRing.visible = true; padRing.position.copy(t.pad); padRing.position.y += 0.16;
     padDisc.visible = true; padDisc.position.copy(t.pad); padDisc.position.y += 0.15;
     if (window.AUDIO && AUDIO.order) AUDIO.order();   // 딩동 먼저, 자막은 살짝 뒤에
-    if (window.UI) setTimeout(function () { if (D.cur === t) UI.pop(TX('🥄 주문 → ', '🥄 ORDER → ') + t.name); }, 600);
+    if (window.UI) setTimeout(function () { if (D.cur === t) UI.pop('🥄 ' + D.pkg.name + ' → ' + t.name); }, 600);
+    if (window.EXTRA) EXTRA.onOrder(D.pkg);
+  }
+  // 마지막 주문: 단골 열 집을 다 채우고 호버바이크로 — 식당 마당으로
+  function pickFinal() {
+    paintHut(D.cur, false);
+    const pad = new THREE.Vector3(2.2, T.SUMMIT, 2.6);
+    const t = { name: TX('식당', 'Diner'), who: '', lines: [], pos: pad.clone(), pad, final: true };
+    D.cur = t; D.state = 'carry'; D.t = 0; D.pkg = { key: 'final', name: TX('모두의 주문', "Everyone's Order"), pay: 0, time: 1, color: 0xffd27a }; D.value = 1; D.broken = false;
+    D.limit = 9999; D.pay = 0; D.final = true;
+    glow.visible = true; glow.position.copy(t.pos); glow.position.y += 3;
+    padRing.visible = true; padRing.position.copy(pad); padRing.position.y += 0.16;
+    padDisc.visible = true; padDisc.position.copy(pad); padDisc.position.y += 0.15;
+    if (window.AUDIO && AUDIO.order) AUDIO.order();
+    if (window.UI) setTimeout(function () { if (D.cur === t) UI.pop(TX('🥄 마지막 주문 → 식당', '🥄 LAST ORDER → Diner')); }, 600);
   }
   function begin(from) { D.lastFrom = from.clone(); pickNext(from); }
 
@@ -112,8 +133,9 @@
   function hit(impact) {
     if (D.state !== 'carry' || !D.pkg.fragile || D.broken) return;
     D.value *= impact > 7 ? 0.35 : 0.6;
-    if (D.value < 0.2) { D.broken = true; D.value = 0; if (window.UI) UI.msg(TX('짐이 깨졌다…', 'Cargo broke…'), true); }
-    else if (window.UI) UI.msg(TX('짐이 흔들렸다!  값 ', 'Cargo shaken!  value ') + Math.round(D.value * 100) + '%');
+    if (D.value < 0.2) { D.broken = true; D.value = 0; if (window.UI) UI.msg(TX('케이크가 망가졌다…', 'The cake is ruined…'), true); }
+    else if (window.UI) UI.msg(TX('케이크가 찌그러졌다!  ', 'Cake squashed!  ') + Math.round(D.value * 100) + '%');
+    if (window.EXTRA) EXTRA.cakeHit(D.value);
   }
 
   function update(dt, bikePos, speed) {
@@ -127,17 +149,20 @@
       D.hover = (D.hover || 0) + dt;
       if (D.hover > 0.8) {
         D.hover = 0;
+        if (t.final) { D.state = 'idle'; glow.visible = padRing.visible = padDisc.visible = signSp.visible = false; D.cur = null; if (window.EXTRA) EXTRA.startEnding(); return; }
         const late = D.t > D.limit;
-        const pay = Math.round(D.pay * D.value * (late ? 0.5 : 1));   // 늦으면 반값
+        const perfect = hd < 0.6 && !D.broken;   // 가운데 금색 원 안
+        const pay = Math.round(D.pay * D.value * (late ? 0.5 : 1) * (perfect ? 1.5 : 1));   // 늦으면 반값, PERFECT 면 1.5배
         D.done++; if (late) D.late++;
         if (D.done > D.best) { D.best = D.done; try { localStorage.setItem('maedal.deliv', String(D.best)); } catch (e) { } }
         // 멘트가 먼저, 동전은 1.2초 뒤에 올라간다. 멘트는 집마다 1번부터 순서대로
-        t.lineIdx = t.lineIdx || 0;
+        t.lineIdx = window.EXTRA ? EXTRA.heard(t.idx) : (t.lineIdx || 0);
         // 말풍선으로 멘트 (집마다 1번부터 순서대로). 제때면 그다음 코인, 늦으면 코인 대신 말풍선 한 번 더
         const line = t.lines[t.lineIdx % t.lines.length]; t.lineIdx++;
+        if (window.EXTRA) EXTRA.onDeliver(t, { late, perfect, pay, pkg: D.pkg });
         const who = t.name + ' ' + t.who;
         if (window.UI) UI.bubble(who, line, late ? 2.6 : 2.8);
-        const coin = function () { D.money += pay; if (window.UI) UI.pop('🪙 +' + pay); };
+        const coin = function () { D.money += pay; if (window.UI) UI.pop((perfect ? 'PERFECT  ' : '') + '🪙 +' + pay); if (window.EXTRA) EXTRA.coinBurst(t.pad, perfect); };
         if (late) {
           setTimeout(function () { if (window.UI) UI.bubble(who, TX('늦었으니까 음식값은 반만 받아요', 'You were late, so I pay half.'), 2.8); }, 2800);
           setTimeout(coin, 4300);

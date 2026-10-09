@@ -15,7 +15,8 @@
   (function sizeNow() { renderer.setSize(window.innerWidth, window.innerHeight); camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); })();
   renderer.render(scene, camera);
   setTimeout(function boot() {
-  SCENERY.init(scene); FX.init(scene); DELIVERY.init(scene);
+  SCENERY.init(scene); FX.init(scene); DELIVERY.init(scene); if (window.EXTRA) EXTRA.init(scene);
+  try { renderer.compile(scene, camera); } catch (e) { }   // 선물·고리·입자 셰이더를 로딩 때 미리 (처음 볼 때 멈칫하지 않게)
   const P = PLAYER.pts;
 
   // ── 라이더 메시 ───────────────────────────────────
@@ -85,7 +86,8 @@
     if (e.code === 'KeyK') { AUDIO.init(); const on = AUDIO.toggleSfx(); UI.msg(on ? TX('효과음 켬', 'Sound ON') : TX('효과음 끔', 'Sound OFF')); syncTog(); }
     if (e.code === 'KeyR') input.resetHold = 0.0001;
     if (e.code === 'KeyF') input.far = !input.far;
-    if ((e.code === 'KeyP' || (e.code === 'Escape' && !shopOpen && !bigOpen)) && started && !DEAD.on) togglePause();
+    if (window.EXTRA && EXTRA.E.ending) return;
+    if ((e.code === 'KeyP' || (e.code === 'Escape' && !shopOpen && !bigOpen && !document.getElementById('dex').classList.contains('show'))) && started && !DEAD.on) togglePause();
     if (e.code === 'KeyG' && started) { if (shopOpen) closeShop(); else openShop(); }
     if (e.code === 'Escape') { if (shopOpen) closeShop(); if (bigOpen) closeBig(); }
     if (e.code === 'KeyT' && started) { if (bigOpen) closeBig(); else openBig(); }
@@ -173,6 +175,7 @@
     document.getElementById('title').classList.add('hide');
     document.getElementById('hud').classList.add('show'); document.getElementById('topbar').classList.add('show'); mmC.classList.add('show');
     t0 = performance.now();
+    if (window.EXTRA && EXTRA.X.ended) { EXTRA.showEndAgain(); return; }
     scheduleFirstOrder();
   }
   // 첫 주문은 10초 뒤에 (멈춤 중이면 풀릴 때까지 기다린다). 다시 시작하면 옛 예약은 버린다
@@ -190,7 +193,7 @@
     HP.hp = HP.max; HP.inv = 0; drawHp();
     FUEL.fuel = FUEL.tank; FUEL.warnT = 0; FUEL.refueling = false;
     const B = bike(); B.g.rotation.set(0, 0, 0); SCENERY.parkBikeAtHome(); seatRider(); snapCamera(); shake = 0;
-    DELIVERY.reset(); if (bankrupt) DELIVERY.D.money = 10;
+    DELIVERY.reset(); if (bankrupt) DELIVERY.D.money = 10; if (window.EXTRA) EXTRA.resetBoost();
     document.getElementById('over').classList.remove('show');
     document.getElementById('hud').classList.add('show'); document.getElementById('topbar').classList.add('show'); mmC.classList.add('show');
     paused = false; t0 = performance.now();
@@ -284,7 +287,7 @@
     document.getElementById('overReason').textContent = 'GAME OVER';
     document.getElementById('overStat').textContent = reason.startsWith('파산') ? '' : '🪙 ' + Math.round(D.money);
     document.getElementById('over').classList.add('show');
-    document.getElementById('hud').classList.remove('show'); document.getElementById('topbar').classList.remove('show'); mmC.classList.remove('show'); closeBig(); elTut.classList.remove('on'); elMsg.classList.remove('on'); elSub.classList.remove('on');
+    document.getElementById('hud').classList.remove('show'); document.getElementById('topbar').classList.remove('show'); mmC.classList.remove('show'); closeBig(); if (window.EXTRA) { EXTRA.closeDex(); EXTRA.resetBoost(); } elTut.classList.remove('on'); elMsg.classList.remove('on'); elSub.classList.remove('on');
     // RETRY: 0.6초 뒤부터 어디를 눌러도(터치·클릭·키) 제자리에서 다시 시작
     setTimeout(() => {
       const over = document.getElementById('over');
@@ -336,16 +339,17 @@
     const SPEC = bikeSpec();
     RIDE.yaw += steer * SPEC.turn * dt * (0.5 + 0.5 * Math.min(1, RIDE.vel.length() / 6));
     RIDE.fwd.set(Math.sin(RIDE.yaw), 0, Math.cos(RIDE.yaw));
-    RIDE.vel.addScaledVector(RIDE.fwd, fwd * SPEC.accel * dt); RIDE.vel.y += climb * SPEC.climb * dt;
+    const heavy = window.EXTRA && EXTRA.heavy();   // 큰 짐: 오를 땐 힘이 모자라고, 느리면 더 가라앉는다
+    RIDE.vel.addScaledVector(RIDE.fwd, fwd * SPEC.accel * dt); RIDE.vel.y += climb * SPEC.climb * dt * (heavy && climb > 0 ? 0.6 : 1);
     // 날개 없는 기종은 앞으로 달려야 뜬다 — 느리면 가라앉는다
     if (!SPEC.hover && !empty && climb <= 0) {   // 상승 중엔 가라앉지 않는다
       const hs = Math.hypot(RIDE.vel.x, RIDE.vel.z);
       const liftK = Math.min(1, hs / SPEC.lift);
-      RIDE.vel.y -= SPEC.sink * (1 - liftK) * dt;
+      RIDE.vel.y -= SPEC.sink * (heavy ? 1.5 : 1) * (1 - liftK) * dt;
       if (RIDE.vel.y < 0 && climb <= 0) RIDE.vel.y *= Math.exp(-dt * 1.4);   // 낙하 상한 ~5m/s
       RIDE.sinking = liftK < 0.5 && climb <= 0;
     } else RIDE.sinking = false;
-    if (!empty) { RIDE.vel.multiplyScalar(Math.exp(-dt * 1.3)); const sp = RIDE.vel.length(); if (sp > SPEC.speed) RIDE.vel.multiplyScalar(SPEC.speed / sp); }
+    if (!empty) { RIDE.vel.multiplyScalar(Math.exp(-dt * 1.3)); const cap = SPEC.speed + (window.EXTRA ? EXTRA.extraSpeed() : 0); const sp = RIDE.vel.length(); if (sp > cap) RIDE.vel.multiplyScalar(cap / sp); }
     else if (RIDE.vel.y < -68) RIDE.vel.y = -68;
     B.g.position.addScaledVector(RIDE.vel, dt);
     // 본 기둥·선반·정상
@@ -375,7 +379,7 @@
     RIDE.roll += ((-steer * 0.45) - RIDE.roll) * (1 - Math.exp(-dt * 5));
     RIDE.pitch += ((-fwd * 0.12 + climb * 0.1) - RIDE.pitch) * (1 - Math.exp(-dt * 5));
     B.g.rotation.set(RIDE.pitch, RIDE.yaw, RIDE.roll);
-    B.throttle = (Math.abs(fwd) * 0.7 + Math.abs(climb) * 0.5) * (SPEC.quiet ? 0.15 : 1); B.vel.copy(RIDE.vel); B.riding = true;
+    B.throttle = Math.min(1.4, Math.abs(fwd) * 0.7 + Math.abs(climb) * 0.5 + (window.EXTRA ? EXTRA.charging() * 0.9 : 0)) * (SPEC.quiet ? 0.15 : 1); B.vel.copy(RIDE.vel); B.riding = true;
     updateRideTargets();
     // 상체 기울기: 가속 반대 + 진행 방향으로
     const L = RIDE.targets.lean; L[0] = RIDE.fwd.x * 0.35 - RIDE.vel.x * 0.02; L[2] = RIDE.fwd.z * 0.35 - RIDE.vel.z * 0.02;
@@ -462,6 +466,7 @@
     }
     if (SCENERY.S.shop) { const [x, y] = toXY(SCENERY.S.shop.pos.x, SCENERY.S.shop.pos.z); const sx = x + (showNames ? 34 : 8), sy = y - (showNames ? 16 : 6); ctx.fillText('🏍', sx, sy); if (showNames) { ctx.save(); ctx.font = '30px Griun, sans-serif'; ctx.fillStyle = 'rgba(255,255,255,.9)'; ctx.fillText(TX('모터샵', 'Shop'), sx, sy - 34); ctx.restore(); } }
     { const [x, y] = toXY(0, 0); ctx.fillStyle = '#ffd27a'; ctx.fillText('★', x, y - 1); if (showNames) { ctx.save(); ctx.font = '38px Griun, sans-serif'; ctx.fillStyle = 'rgba(255,255,255,.95)'; ctx.fillText(TX('식당', 'Diner'), x, y + 42); ctx.restore(); } }
+    if (window.EXTRA) EXTRA.mapRings(ctx, toXY, showNames);
     // 배달 갈 곳: 맥박 원
     if (D.state === 'carry' && D.cur) {
       let [x, y] = toXY(D.cur.pos.x, D.cur.pos.z);
@@ -533,7 +538,7 @@
     elVert.classList.toggle('sink', !!RIDE.sinking && !nearHome());
     const nh = nearHome(); if (nh !== atHome) { atHome = nh; btnShop.classList.toggle('show', nh); if (!nh && shopOpen) closeShop(); }
     if (shopOpen && !nh) closeShop();
-    elPkg.textContent = D.state === 'carry' ? D.pkg.icon + ' ' + D.pkg.name + '  ' + D.pay + TX('코인', ' coins') : '';
+    elPkg.textContent = D.state === 'carry' ? (D.final ? D.pkg.name : D.pkg.name + (D.pkg.key === 'cake' ? ' ' + Math.round(D.value * 100) + '%' : '') + '  ' + D.pay + TX('코인', ' coins')) : '';
     if (D.state !== 'carry' || !D.cur) { elDeliv.textContent = TX('다음 주문 기다리는 중…', 'Waiting for next order…'); elArrow.style.opacity = 0; elVert.textContent = ''; }
     else {
       const dx = D.cur.pos.x - B.g.position.x, dz = D.cur.pos.z - B.g.position.z, dy = D.cur.pos.y - B.g.position.y;
@@ -615,12 +620,14 @@
     const dt = Math.min(0.05, (now - last) / 1000); last = now;
     const t = now / 1000;
     if (paused) { updateMaps(dt); renderer.render(scene, camera); return; }
-    if (started) { if (DEAD.on) updateDead(dt); else { updateRide(dt); DELIVERY.update(dt, bike().g.position, RIDE.vel.length(), true); } }
+    const ending = window.EXTRA && EXTRA.E.ending;
+    if (started && !ending) { if (DEAD.on) updateDead(dt); else { updateRide(dt); DELIVERY.update(dt, bike().g.position, RIDE.vel.length(), true); if (window.EXTRA) EXTRA.update(dt, t); } }
     wind(t); if (started) fellCheck();
     acc += dt; let n = 0;
     while (acc >= STEP && n++ < 8) { physStep(); acc -= STEP; }
-    if (started && !DEAD.on) { hud(dt); updateMaps(dt); }
-    updateCamera(dt, t);
+    if (started && !DEAD.on && !ending) { hud(dt); updateMaps(dt); }
+    if (ending) EXTRA.endCam(camera, dt); else updateCamera(dt, t);
+    if (window.EXTRA) EXTRA.parts(dt);
     drawBody();
     FX.update(dt);
     SCENERY.update(dt, t, camera.position, _a.set(P.chest.x, P.chest.y, P.chest.z));
@@ -630,7 +637,7 @@
     renderer.render(scene, camera);
     if (!canvas.classList.contains('ready')) canvas.classList.add('ready');
   }
-  window.GAME = { scene, renderer, camera, input, RIDE, FUEL, DEAD, orbit, BIKES, GARAGE, applyBike, openShop, crash, restart };
+  window.GAME = { scene, renderer, camera, input, RIDE, FUEL, DEAD, orbit, BIKES, GARAGE, applyBike, openShop, crash, restart, pack, packLid, isStarted: () => started, isPaused: () => paused, park() { SCENERY.parkBikeAtHome(); seatRider(); RIDE.vel.set(0, 0, 0); }, _frame: frame, _start: () => start() };   // _frame·_start: 숨은 탭 시험용
   requestAnimationFrame(frame);
   }, 20);
 })();

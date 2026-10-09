@@ -178,6 +178,52 @@
     #pad { width: 160px; height: 160px; left: calc(10px + env(safe-area-inset-left)); bottom: calc(44px + env(safe-area-inset-bottom)); }   /* 전체화면 알약 위 */
     #knob { width: 62px; height: 62px; margin: -31px 0 0 -31px; }
   }
+
+  /* ── 2026-10-09 할 거리: 도감·부스트·엔딩 ── */
+  .tog.dexb { width: auto; padding: 0 12px; border-radius: 999px; font-size: 15px; color: #ffd27a; border-color: rgba(255,210,122,.6); }
+  #boost { position: fixed; left: 50%; bottom: 25%; transform: translateX(-50%); display: flex; align-items: center; gap: 10px; padding: 8px 14px; border-radius: 999px; background: rgba(10,14,20,.6); border: 1px solid rgba(143,230,255,.4); font-size: 16px; color: #bfefff; opacity: 0; transition: opacity .15s; pointer-events: none; z-index: 7; }
+  #boost.on { opacity: 1; }
+  #boost b { display: block; width: 180px; height: 10px; border-radius: 5px; background: rgba(255,255,255,.15); overflow: hidden; }
+  #boost i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #4fb0ff, #8fe6ff); border-radius: 5px; }
+  #boost.full { border-color: #ffd27a; color: #ffd27a; animation: bpulse .35s infinite alternate; } #boost.full i { background: linear-gradient(90deg, #ffb43a, #ffd27a); }
+  @keyframes bpulse { from { transform: translateX(-50%) scale(1); } to { transform: translateX(-50%) scale(1.06); } }
+  #bo { border-color: rgba(143,230,255,.75); color: #bfefff; }
+  body.touch #bo { right: calc(14px + env(safe-area-inset-right)); bottom: calc(108px + env(safe-area-inset-bottom)); }
+  #dex { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%) scale(.96); width: min(94vw, 640px); max-height: 84vh; overflow-y: auto; background: rgba(18,16,20,.95); border: 1px solid rgba(255,210,122,.35); border-radius: 14px; padding: 12px 14px 16px; opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; z-index: 21; }
+  #dex.show { opacity: 1; pointer-events: auto; transform: translate(-50%, -50%) scale(1); }
+  #dex .head { display: flex; justify-content: space-between; align-items: center; font-size: 22px; letter-spacing: 2px; color: #ffd27a; margin-bottom: 8px; }
+  #dex .head button { background: none; border: 0; color: #fff; font-size: 22px; font-family: inherit; }
+  #dex .tabs { display: flex; gap: 6px; margin-bottom: 10px; }
+  #dex .tabs button { flex: 1; padding: 9px 4px; border-radius: 999px; border: 1px solid rgba(255,255,255,.2); background: rgba(255,255,255,.05); color: #f2ede4; font-family: inherit; font-size: 16px; touch-action: manipulation; }
+  #dex .tabs button.on { border-color: #ffd27a; color: #ffd27a; background: rgba(255,210,122,.12); }
+  #dex .tabs small { opacity: .75; font-size: 13px; }
+  #dex .goal { margin: 0 0 8px; font-size: 14px; opacity: .8; text-align: center; }
+  #dex .who { border-top: 1px solid rgba(255,255,255,.08); padding: 8px 4px; cursor: pointer; }
+  #dex .who .top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  #dex .who b { font-weight: normal; font-size: 17px; } #dex .who span { font-size: 13px; opacity: .7; }
+  #dex .who em { font-style: normal; font-size: 12px; color: #2a1a05; background: #ffd27a; border-radius: 999px; padding: 1px 8px; }
+  #dex .who u { margin-left: auto; display: inline-flex; gap: 3px; text-decoration: none; }
+  #dex .who u i { width: 10px; height: 10px; border-radius: 50%; background: rgba(255,255,255,.14); }
+  #dex .who u i.on { background: #ffd27a; box-shadow: 0 0 5px rgba(255,210,122,.6); }
+  #dex .who ol { display: none; margin: 8px 0 2px; padding-left: 24px; font-size: 14px; line-height: 1.6; opacity: .9; }
+  #dex .who.open ol { display: block; }
+  #dex .items { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  #dex .it { display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 10px 4px; border-radius: 10px; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08); text-align: center; }
+  #dex .it .bx { width: 26px; height: 26px; border-radius: 5px; box-shadow: inset 0 0 0 3px rgba(255,210,122,.9); filter: grayscale(1) brightness(.35); }
+  #dex .it.got .bx { filter: none; }
+  #dex .it b { font-weight: normal; font-size: 14px; } #dex .it small { font-size: 11px; opacity: .6; }
+  #dex .it:not(.got) b { opacity: .5; }
+  #dex .road { display: flex; justify-content: space-between; padding: 10px 4px; border-top: 1px solid rgba(255,255,255,.08); font-size: 16px; }
+  #dex .road b { font-weight: normal; } #dex .road em { font-style: normal; color: #ffd27a; }
+  #dex .road:not(.done) b { opacity: .7; }
+  body.ending #topbar, body.ending #hud, body.ending #minimap, body.ending #pad, body.ending .tbtn, body.ending #keys, body.ending #arrow, body.ending #btnShop, body.ending #msg, body.ending #sub, body.ending #boost, body.ending #game-home, body.ending .oreum-home { display: none !important; }
+  #ending { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; background: rgba(10,8,14,.5); opacity: 0; pointer-events: none; transition: opacity 2s; z-index: 30; text-shadow: 0 2px 12px rgba(0,0,0,.7); }
+  #ending.show { opacity: 1; pointer-events: auto; }
+  #ending h2 { font-family: 'Ria', Arial, sans-serif; font-size: 72px; letter-spacing: 8px; margin: 0 0 6px; color: #ffd27a; }
+  #ending .sub { font-size: 24px; margin: 0 0 18px; }
+  #ending #endStat { font-size: 19px; line-height: 1.7; opacity: .9; margin: 0 0 24px; }
+  #ending button { padding: 12px 30px; border-radius: 999px; border: 1px solid #ffd27a; background: rgba(255,210,122,.15); color: #ffd27a; font-family: inherit; font-size: 20px; touch-action: manipulation; }
+  @media (max-height: 520px) { #ending h2 { font-size: 46px; } #ending .sub { font-size: 18px; margin-bottom: 8px; } #ending #endStat { font-size: 15px; margin-bottom: 12px; } #boost { bottom: 30%; } body.touch #bo { right: calc(186px + env(safe-area-inset-right)); bottom: calc(18px + env(safe-area-inset-bottom)); } }
 </style>
 </head>
 <body>
@@ -213,6 +259,7 @@
   <div class="stat"><span class="ic">⏱</span><b id="time">0:00</b></div>
   <span id="done" hidden></span>
   <div class="spacer"></div>
+  <button id="btnDex" class="tog dexb" data-en="BOOK">도감</button>
   <button id="btnPause" class="tog" title="일시정지" data-en-title="Pause">❚❚</button>
   <button id="btnMusic" class="tog" title="음악" data-en-title="Music">♪</button>
   <button id="btnSfx" class="tog" title="효과음" data-en-title="Sound">🔊</button>
@@ -245,7 +292,11 @@
 <div id="msg"></div>
 <div id="tut"></div>
 <div id="hint"></div>
-<div id="keys" data-en="↑↓←→ Move · Space Up · Shift Down<br>T Map · M Music · K Sound · R Respawn">↑↓←→ 이동 · 스페이스 상승 · Shift 하강<br>T 지도 · M 음악 · K 효과음 · R 리스폰</div>
+<div id="keys" data-en="↑↓←→ Move · Space Up · Shift Down · E Boost (hold, release)<br>T Map · B Book · M Music · K Sound · R Respawn">↑↓←→ 이동 · 스페이스 상승 · Shift 하강 · E 부스트(누르고 떼기)<br>T 지도 · B 도감 · M 음악 · K 효과음 · R 리스폰</div>
+<div id="boost"><span data-en="BOOST">부스트</span><b><i></i></b></div>
+<button id="bo" class="tbtn" data-en="BOOST">부스트</button>
+<div id="dex"><div class="head"><span data-en="BOOK">도감</span><button id="dexClose">✕</button></div><div id="dexBody"></div></div>
+<div id="ending"><h2>THE END</h2><p class="sub" data-en="The rider every home in the sky calls a regular">하늘 위 열 집의 단골 배달부</p><p id="endStat"></p><button id="endAgain" data-en="START OVER">처음부터</button></div>
 <button id="dn" class="tbtn" data-en="DOWN">아래로</button>
 <button id="up" class="tbtn" data-en="UP">위로</button>
 <div id="pad"><div id="knob"></div></div>
@@ -279,9 +330,10 @@ if (EN_MODE) {
 <script src="js/physics.js?v=211"></script>
 <script src="js/player.js?v=211"></script>
 <script src="js/scenery.js?v=211"></script>
-<script src="js/audio.js?v=211"></script>
-<script src="js/delivery.js?v=211"></script>
-<script src="js/game.js?v=212"></script>
+<script src="js/audio.js?v=212"></script>
+<script src="js/delivery.js?v=212"></script>
+<script src="js/extra.js?v=6"></script>
+<script src="js/game.js?v=217"></script>
 <script src="/assets/visit.js?v=17" defer></script>
 <script src="/assets/game-events.js?v=1" defer></script>
 </body>

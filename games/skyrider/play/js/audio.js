@@ -138,5 +138,6 @@
       }
     },
   };
+  A.raw = function () { return ctx ? { ctx, bus: sfxBus, noise: noiseBuffer } : null; };   // extra.js 효과음용
   window.AUDIO = A;
 })();
