@@ -48,8 +48,10 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--ink);font
 .btn.main:active{box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 1px 0 var(--accD),0 4px 10px rgba(242,72,58,.2)}
 .btn.icon{width:48px;flex:0 0 48px;padding:0}
 .btn.off svg .w{display:none}.btn.off{color:var(--sub)}
-#ctrl{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;max-width:420px;width:100%;margin:10px auto 0}
-#ctrl .btn{flex-direction:row;gap:8px}
+#ctrl{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;max-width:420px;width:100%;margin:10px auto 0}
+#ctrl .btn{flex-direction:row;gap:8px;min-width:0;white-space:nowrap}
+/* 폰 세로: 글자를 키운 폰에서도 세 칸이 화면 안에(10/9 사장님 폰에서 STAGE 가 잘림) */
+@media (max-aspect-ratio:6/5){#ctrl{gap:8px}#ctrl .btn{gap:5px;padding:10px 6px}#ctrl .btn svg{width:20px;height:20px;flex:none}#ctrl .btn .l{font-size:min(15px,3.7vw)}}
 #ctrl .btn .l{color:var(--ink);font-size:15px}
 #side{display:contents}
 /* 오름 알약(왼쪽 위 약 26px)과 전체화면 단추(왼쪽 아래 약 34px) 자리 */
@@ -96,7 +98,7 @@ body[data-mode=title] #ov{align-items:flex-end;background:linear-gradient(rgba(2
 .card{background:var(--card);border-radius:24px;padding:22px 20px 20px;box-shadow:inset 0 1px 0 #fff,0 4px 0 var(--key),0 24px 50px rgba(43,45,49,.14);animation:rise .22s cubic-bezier(.2,1.3,.4,1)}
 @keyframes rise{from{transform:translateY(14px) scale(.96);opacity:0}to{transform:none;opacity:1}}
 .row{display:flex;gap:10px;justify-content:center;margin-top:14px}
-.row .btn{flex:1;max-width:170px}
+.row .btn{flex:1;max-width:170px;min-width:0;white-space:nowrap}
 .row .btn.main{flex:1.3;max-width:220px}
 /* 타이틀 */
 .ttl h1{font-weight:900;line-height:.95;letter-spacing:-1px;margin-bottom:6px}
@@ -106,18 +108,18 @@ body[data-mode=title] #ov{align-items:flex-end;background:linear-gradient(rgba(2
 .ttl .tag i{width:26px;height:26px;border-radius:50%;background:var(--ink);color:#fff;font-style:normal;font-weight:900;font-size:14px;display:grid;place-items:center;letter-spacing:0}
 /* 판 고르기 */
 .sel h3,.clr h3{font-weight:900;font-size:15px;letter-spacing:3px;color:var(--sub);margin-bottom:12px}
-.tabs{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;background:#f1efeb;border-radius:14px;padding:4px;margin-bottom:14px}
-.tab{flex:1;font-family:inherit;font-weight:900;font-size:17px;padding:9px 0;border:0;border-radius:11px;background:transparent;color:var(--sub);cursor:pointer;position:relative}
+.tabs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px;background:#f1efeb;border-radius:14px;padding:4px;margin-bottom:14px}
+.tab{min-width:0;white-space:nowrap;flex:1;font-family:inherit;font-weight:900;font-size:min(17px,4.2vw);padding:9px 0;border:0;border-radius:11px;background:transparent;color:var(--sub);cursor:pointer;position:relative}
 .tab::before{content:'';display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--fc);margin-right:6px;vertical-align:2px}
 .tab.on{background:var(--card);color:var(--ink);box-shadow:0 2px 0 var(--key),0 4px 10px rgba(43,45,49,.08)}
-.tiles{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
-.tile{font-family:inherit;aspect-ratio:1;background:#f7f6f3;border:0;border-radius:14px;color:var(--ink);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;box-shadow:inset 0 0 0 1px var(--line);transition:transform .2s cubic-bezier(.34,1.56,.64,1)}
+.tiles{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+.tile{min-width:0;overflow:hidden;font-family:inherit;aspect-ratio:1;background:#f7f6f3;border:0;border-radius:14px;color:var(--ink);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;box-shadow:inset 0 0 0 1px var(--line);transition:transform .2s cubic-bezier(.34,1.56,.64,1)}
 .tile:active{transform:scale(.94)}
-.tile b{font-weight:900;font-size:22px;line-height:1}
+.tile b{font-weight:900;font-size:min(22px,5.6vw);line-height:1}
 .tile.cur{background:var(--card);box-shadow:inset 0 0 0 2px var(--acc),0 3px 0 var(--key)}
 .tile.locked{cursor:default;color:#c4c1bb}
 .tile.locked svg{width:18px;height:18px;stroke:#c4c1bb;fill:none;stroke-width:2.4}
-.st{display:inline-block;width:11px;height:11px;background:#dcd9d3;clip-path:polygon(50% 0,63% 35%,100% 38%,71% 60%,80% 100%,50% 77%,20% 100%,29% 60%,0 38%,37% 35%);margin:0 1px}
+.st{display:inline-block;width:min(11px,2.6vw);height:min(11px,2.6vw);background:#dcd9d3;clip-path:polygon(50% 0,63% 35%,100% 38%,71% 60%,80% 100%,50% 77%,20% 100%,29% 60%,0 38%,37% 35%);margin:0 1px}
 .st.on{background:var(--acc)}.st.big{width:44px;height:44px;margin:0 5px}
 .st.pop{animation:pop .45s cubic-bezier(.2,1.6,.4,1)}@keyframes pop{0%{transform:scale(.2)}100%{transform:scale(1)}}
 /* 클리어·엔딩 */
@@ -141,11 +143,19 @@ body[data-mode=title] #ov{align-items:flex-end;background:linear-gradient(rgba(2
   .ttl h1 span{font-size:15vh}.ttl h1 b{font-size:17vh}
   .ttl .tag{margin-bottom:2vh}
   .row{margin-top:2.5vh}.row .btn{min-height:44px;padding:6px 10px}
-  .tiles{grid-template-columns:repeat(10,1fr);gap:6px}.tile b{font-size:18px}.st{width:8px;height:8px}
-  .tabs{margin-bottom:2vh;grid-template-columns:repeat(10,1fr)}.tab{padding:6px 0;font-size:14px}.tab::before{display:none}
+  .tiles{grid-template-columns:repeat(10,minmax(0,1fr));gap:6px}.tile b{font-size:18px}.st{width:8px;height:8px}
+  .tabs{margin-bottom:2vh;grid-template-columns:repeat(10,minmax(0,1fr))}.tab{padding:6px 0;font-size:14px}.tab::before{display:none}
   .clr h2,.end h2{font-size:11vh;margin-bottom:1vh}.st.big{width:9vh;height:9vh}.clr .stars{margin:0 0 1vh}
   .clr .res .v{font-size:6vh}.end .rank{font-size:16vh;margin:1vh 0}.end.card h2{font-size:7vh}.clr .time{font-size:7vh;margin:0 0 .3vh}.clr .stars{margin:0}.st.big{width:8vh;height:8vh}.tile em{display:none}
   .chip small{font-size:9px}
+}
+/* 좁은 폰(380px 아래): 아래 단추는 그림을 빼고 글자만, 글자·시계·창 단추를 화면 폭에 맞춰 */
+@media (max-aspect-ratio:6/5) and (max-width:380px){
+  #ctrl .btn svg{display:none}#ctrl .btn{padding:10px 4px}
+  #hud{gap:4px;padding:6px}.stat{gap:5px}.stat i{display:none}.stat .k{font-size:min(11px,2.8vw);letter-spacing:0}.stat .v{font-size:min(22px,5.8vw)}.stat .v.clk{font-size:min(17px,4.1vw)}
+  .chip{padding:5px 7px;font-size:min(18px,4.6vw)}.chip small{font-size:min(11px,2.8vw)}.btn.icon{width:38px;flex:0 0 38px;min-height:40px}
+  .row{gap:6px}.row .btn{padding:8px 4px;font-size:min(17px,4.4vw)}.row .btn.main{font-size:min(20px,5.2vw)}
+  .clr .row{flex-wrap:wrap}.clr .row .btn.main{order:-1;flex:1 0 100%;max-width:none}.clr .row .btn{flex:1 1 40%;max-width:none}
 }
 </style>
 </head>
@@ -177,7 +187,7 @@ body[data-mode=title] #ov{align-items:flex-end;background:linear-gradient(rgba(2
   // 세로 화면에서는 단추 줄을 판 아래로, 가로 화면에서는 왼쪽 칸 안으로
   const side = document.getElementById('side'), ctrl = document.getElementById('ctrl'), app = document.getElementById('app');
   function arrange(){ const land = innerWidth / innerHeight >= 1.2; if(land && ctrl.parentNode !== side) side.appendChild(ctrl); if(!land && ctrl.parentNode !== app) app.appendChild(ctrl); R.fit(); }
-  addEventListener('resize', arrange); arrange();
+  addEventListener('resize', arrange); addEventListener('orientationchange', () => setTimeout(arrange, 150)); arrange();
   // 첫 손길에 소리 깨우기 + 배경음악 시작(브라우저는 손길 전엔 소리를 막는다)
   addEventListener('pointerdown', () => SFX.wake(), true);
   if(EN){ document.documentElement.lang = 'en'; document.title = 'Double Parking Escape';
