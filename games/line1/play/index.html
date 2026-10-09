@@ -52,12 +52,12 @@ html,body{margin:0;height:100%;background:#121418;color:#eef0f2;font-family:DOSG
 .btn::before{content:'';position:absolute;left:9px;top:50%;width:13px;height:10px;margin-top:-5px;background:linear-gradient(135deg,#f6d36a,#c99a2a);border:1px solid #7a5a10;border-radius:2px;box-shadow:inset 3px 0 0 rgba(122,90,16,.35),inset 0 3px 0 rgba(122,90,16,.25)}
 .btn:hover{filter:brightness(1.06)}
 .btn:active{transform:translateY(3px) scale(.97);box-shadow:inset 0 2px 0 #fff,0 1px 0 #7f8790;transition-duration:.04s}
-.btn.main{color:#fff;background:linear-gradient(180deg,#2a74c8,var(--navy) 50%,#00428a);border-radius:5px;padding:11px 22px 11px 40px;box-shadow:inset 0 2px 0 #5e9ae0,0 5px 0 var(--navyD);text-shadow:0 2px 0 var(--navyD)}
-.btn.main::before{left:11px;width:16px;height:16px;margin-top:-8px;background:#fff;border:4px solid var(--navyD);border-radius:50%;box-shadow:none}
+.btn.main{color:#fff;background:linear-gradient(180deg,#2a74c8,var(--navy) 50%,#00428a);border-radius:5px;padding:11px 22px;box-shadow:inset 0 2px 0 #5e9ae0,0 5px 0 var(--navyD);text-shadow:0 2px 0 var(--navyD)}
+.btn.main::before{display:none}
 .btn.main:active{box-shadow:inset 0 2px 0 #5e9ae0,0 1px 0 var(--navyD)}
 .btn.main[disabled]{filter:grayscale(1) brightness(.75);cursor:default}
 .btn.red{background:linear-gradient(180deg,#e85a4a,#c9302a 55%,#9b1c16);color:#fff;box-shadow:inset 0 2px 0 #ff8a7a,0 4px 0 #6a1410}
-#next{width:100%;font-size:16px;display:flex;align-items:center;justify-content:center;gap:6px;padding:8px 6px 8px 30px;min-height:46px}
+#next{width:100%;font-size:16px;display:flex;align-items:center;justify-content:center;gap:6px;padding:8px 6px;min-height:46px}
 #next .tri{width:0;height:0;border-left:10px solid #fff;border-top:7px solid transparent;border-bottom:7px solid transparent;flex-shrink:0}
 #nextT{overflow:hidden;white-space:nowrap;text-overflow:clip}
 /* 고른 장비 위 작은 판 */
@@ -154,7 +154,7 @@ html.h480 .slot .nm{font-size:12px;flex:1;min-width:0;margin:0;text-align:left;b
 html.h480 .slot .cs{font-size:13px;margin:0}
 html.h480 .slot .lk{top:50%;margin-top:-8px;display:flex;align-items:center;justify-content:center;gap:6px}
 html.h480 .slot .lk b{margin:0}
-html.h480 #next{font-size:13px;padding:5px 4px 5px 26px;min-height:36px}
+html.h480 #next{font-size:13px;padding:5px 4px;min-height:36px}
 html.h480 .sheet{padding:24px 12px 10px}
 html.h480 .sheet::before{height:10px}
 html.h480 .sheet::after{width:9px;height:9px;top:4px}
@@ -163,7 +163,7 @@ html.h480 .sheet .big{font-size:15px;margin:2px 0}
 html.h480 .sheet .stars{font-size:24px;margin:0}
 html.h480 .btns{margin-top:6px}
 html.h480 .sheet .btn{font-size:15px;padding:7px 12px 7px 26px}
-html.h480 .sheet .btn.main{padding:8px 16px 8px 34px}
+html.h480 .sheet .btn.main{padding:8px 16px}
 html.h480 #intro,html.h480 #result,html.h480 #pause,html.h480 #route,html.h480 #dex,html.h480 #pick{justify-content:flex-start;padding-top:40px}
 html.h480 #intro .who canvas{width:40px;height:40px}
 html.h480 #intro .who div{font-size:11px}
@@ -180,6 +180,7 @@ html.h480 #title{padding-bottom:calc(26 * var(--vh,1vh));justify-content:flex-en
 html.h480 #title .logo{font-size:calc(13 * var(--vh,1vh));padding:6px 18px 8px 12px}
 html.h480 #title .btns{margin-bottom:calc(4 * var(--vh,1vh))}
 html.h480 #title .btn{font-size:calc(5.2 * var(--vh,1vh));padding:calc(1.6 * var(--vh,1vh)) calc(3 * var(--vh,1vh)) calc(1.6 * var(--vh,1vh)) calc(7 * var(--vh,1vh));min-width:0}
+html.h480 #title .btn.main{padding-left:calc(3 * var(--vh,1vh))}
 html.h480 .endcv{width:220px;height:132px}
 html.h360 .slot canvas{width:24px;height:24px}
 html.h360 #slots{gap:3px}
