@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>1호선 빌런</title>
+<style>
+@font-face{font-family:DOSSaemmul;src:url(fonts/saemmul.woff2) format('woff2');font-display:swap}
+@font-face{font-family:DOSGothic;src:url(fonts/dosgothic.woff2) format('woff2');font-display:swap}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
+html,body{margin:0;height:100%;background:#121418;color:#eef0f2;font-family:DOSGothic,monospace;overflow:hidden;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+:root{--pw:190px;--navy:#0052a4;--navyD:#002f63;--steel:#c2c8cf;--steelD:#7f8790;--led:#ff9a2a}
+#app{position:fixed;inset:0}
+#stage{position:absolute;left:0;top:46px;right:var(--pw);bottom:0}
+#cv{display:block;image-rendering:pixelated;image-rendering:crisp-edges;touch-action:none}
+/* 상단바: 객차 천장 띠 + LED 행선 전광판 알약 */
+#topbar{position:absolute;left:0;right:0;top:0;height:46px;display:flex;align-items:center;gap:6px;padding:0 8px 0 calc(104px + env(safe-area-inset-left));background:#d8dbd4;border-bottom:3px solid #1e2128;box-shadow:inset 0 -6px 0 #b9bcb2,inset 0 3px 0 #eef0e8;z-index:5}
+.stat{display:flex;align-items:center;gap:6px;height:32px;padding:0 10px;background-color:#0d0e10;background-image:radial-gradient(#26180a 1px,transparent 1.4px);background-size:4px 4px;color:var(--led);border:3px solid #1e2128;box-shadow:inset 0 0 0 2px #5a6068,0 3px 0 #7f8790;font-size:17px;white-space:nowrap;text-shadow:0 0 6px rgba(255,154,42,.6)}
+.stat .k{color:#b8651a;font-size:12px}
+.stat.warn .lamp{width:11px;height:11px;background:#3a1714;border:2px solid #000}
+.stat.warn .lamp.on{background:#ff3b30;box-shadow:0 0 8px #ff3b30}
+.coinI{width:13px;height:13px;background:#ffd84a;border:2px solid #7a5a10;box-shadow:inset -2px -2px 0 #d9a520}
+.spacer{flex:1}
+/* 둥근 단추: 출입문 열림 단추(스테인리스 테 + 초록 버튼) */
+.tog{position:relative;width:38px;height:38px;border-radius:50%;border:3px solid #1e2128;background:#2fa84f;box-shadow:0 0 0 3px var(--steel),0 4px 0 3px var(--steelD),inset 0 3px 0 #6fd88a,inset 0 -4px 0 #1d7a36;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;color:#fff;font-family:DOSSaemmul,monospace;font-size:14px;margin:0 4px;transition:transform .2s cubic-bezier(.34,1.56,.64,1)}
+.tog svg{width:20px;height:20px}
+.tog:active{transform:translateY(3px);box-shadow:0 0 0 3px var(--steel),0 1px 0 3px var(--steelD),inset 0 3px 0 #6fd88a,inset 0 -4px 0 #1d7a36;transition-duration:.04s}
+.tog.off{opacity:.6}
+.tog.off::after{content:'';position:absolute;left:24%;right:24%;top:50%;height:2px;margin-top:-1px;background:#fff;border-radius:1px;transform:rotate(-40deg)}
+.tog.on2{background:#e0a020;box-shadow:0 0 0 3px var(--steel),0 4px 0 3px var(--steelD),inset 0 3px 0 #ffd060,inset 0 -4px 0 #8a5c10}
+/* 오른쪽 장비 칸: 객차 광고 액자 */
+#panel{position:absolute;right:0;top:46px;bottom:0;width:var(--pw);padding:8px 8px calc(8px + env(safe-area-inset-bottom)) 8px;background:#dfe0d6;border-left:3px solid #1e2128;box-shadow:inset 6px 0 0 #b9bcb2;display:flex;flex-direction:column;gap:8px;z-index:4;padding-right:calc(8px + env(safe-area-inset-right))}
+#slots{display:grid;grid-template-columns:1fr 1fr;gap:6px;flex:1;min-height:0;align-content:start}
+.slot{min-width:0;position:relative;background:#f4f1e6;border:3px solid #1e2128;box-shadow:inset 0 0 0 3px var(--steel),inset 0 0 0 4px var(--steelD),0 3px 0 var(--steelD);display:flex;flex-direction:column;align-items:center;padding:5px 3px 4px;cursor:pointer;min-height:0;transition:transform .2s cubic-bezier(.34,1.56,.64,1)}
+.slot canvas{width:44px;height:44px;image-rendering:pixelated;flex-shrink:1;min-height:0;object-fit:contain}
+.slot .nm,.slot .cs{flex-shrink:0}
+.slot .nm{max-width:100%;overflow:hidden;background:var(--navy);color:#fff;font-size:11px;padding:1px 4px;margin-top:1px;white-space:nowrap}
+.slot .cs{display:flex;align-items:center;gap:3px;font-family:DOSSaemmul,monospace;color:#1b1d21;font-size:13px;margin-top:2px}
+.slot .cs i{width:9px;height:9px;background:#ffd84a;border:1px solid #7a5a10}
+.slot.sel{background:#ffe9a0;box-shadow:inset 0 0 0 3px #f2c230,inset 0 0 0 4px #8a5c10,0 3px 0 #8a5c10}
+.slot.poor .cs{color:#d12a1e}
+.slot.lock{background:#b9bcb2;cursor:default}
+.slot.lock canvas{opacity:.12}
+.slot.lock .nm{visibility:hidden}
+.slot .lk{position:absolute;left:0;right:0;top:12px;text-align:center;font-family:DOSSaemmul,monospace;font-size:12px;color:#4b525a}
+.slot .lk b{display:block;width:16px;height:13px;margin:0 auto 3px;background:#4b525a;border:2px solid #1e2128;position:relative}
+.slot .lk b::before{content:'';position:absolute;left:2px;top:-10px;width:8px;height:9px;border:2px solid #4b525a;border-bottom:0}
+.slot:active:not(.lock){transform:translateY(2px)}
+/* 주 단추: 1호선 남색 노선 표지판(왼쪽 역 동그라미) / 보조: 교통카드 */
+.btn{font-family:DOSSaemmul,monospace;font-size:19px;color:#23262c;cursor:pointer;border:3px solid #1e2128;border-radius:9px;padding:9px 16px 9px 30px;background:linear-gradient(180deg,#ffffff,#e9ecef 55%,#d5dade);box-shadow:inset 0 2px 0 #fff,0 4px 0 #7f8790;position:relative;transition:transform .22s cubic-bezier(.34,1.56,.64,1),box-shadow .22s,filter .15s}
+.btn::before{content:'';position:absolute;left:9px;top:50%;width:13px;height:10px;margin-top:-5px;background:linear-gradient(135deg,#f6d36a,#c99a2a);border:1px solid #7a5a10;border-radius:2px;box-shadow:inset 3px 0 0 rgba(122,90,16,.35),inset 0 3px 0 rgba(122,90,16,.25)}
+.btn:hover{filter:brightness(1.06)}
+.btn:active{transform:translateY(3px) scale(.97);box-shadow:inset 0 2px 0 #fff,0 1px 0 #7f8790;transition-duration:.04s}
+.btn.main{color:#fff;background:linear-gradient(180deg,#2a74c8,var(--navy) 50%,#00428a);border-radius:5px;padding:11px 22px 11px 40px;box-shadow:inset 0 2px 0 #5e9ae0,0 5px 0 var(--navyD);text-shadow:0 2px 0 var(--navyD)}
+.btn.main::before{left:11px;width:16px;height:16px;margin-top:-8px;background:#fff;border:4px solid var(--navyD);border-radius:50%;box-shadow:none}
+.btn.main:active{box-shadow:inset 0 2px 0 #5e9ae0,0 1px 0 var(--navyD)}
+.btn.main[disabled]{filter:grayscale(1) brightness(.75);cursor:default}
+.btn.red{background:linear-gradient(180deg,#e85a4a,#c9302a 55%,#9b1c16);color:#fff;box-shadow:inset 0 2px 0 #ff8a7a,0 4px 0 #6a1410}
+#next{width:100%;font-size:16px;display:flex;align-items:center;justify-content:center;gap:6px;padding:8px 6px 8px 30px;min-height:46px}
+#next .tri{width:0;height:0;border-left:10px solid #fff;border-top:7px solid transparent;border-bottom:7px solid transparent;flex-shrink:0}
+#nextT{overflow:hidden;white-space:nowrap;text-overflow:clip}
+/* 고른 장비 위 작은 판 */
+#tinfo{position:absolute;z-index:6;display:none;background:#f4f1e6;color:#1b1d21;border:3px solid #1e2128;box-shadow:inset 0 0 0 3px var(--steel),0 4px 0 var(--steelD);padding:8px;gap:6px;flex-direction:column;align-items:stretch;min-width:140px}
+#tinfo .tt{font-family:DOSSaemmul,monospace;font-size:15px;text-align:center;background:var(--navy);color:#fff;padding:2px 6px;margin:-2px -2px 2px}
+#tinfo .row{display:flex;gap:6px}
+#tinfo .btn{font-size:13px;padding:6px 8px 6px 24px;flex:1;display:flex;align-items:center;justify-content:center;gap:4px}
+#tinfo .btn::before{left:6px;width:10px;height:8px;margin-top:-4px}
+#tinfo .btn i{width:9px;height:9px;background:#ffd84a;border:1px solid #7a5a10;display:inline-block}
+/* 창: 노선도 액자(은색 테 + 위 남색 띠) */
+.ov{position:absolute;inset:0;z-index:20;display:none;align-items:center;justify-content:center;flex-direction:column}
+.ov.show{display:flex}
+.sheet{position:relative;background:#fbfaf5;color:#1b1d21;border:3px solid #1e2128;box-shadow:inset 0 0 0 4px var(--steel),inset 0 0 0 5px var(--steelD),0 6px 0 #1e2128;padding:30px 18px 16px;min-width:300px;max-width:calc(94 * var(--vw,1vw));text-align:center}
+.sheet::before{content:'';position:absolute;left:5px;right:5px;top:5px;height:14px;background:var(--navy);box-shadow:inset 0 -3px 0 var(--navyD)}
+.sheet::after{content:'';position:absolute;left:18px;top:3px;width:12px;height:12px;border-radius:50%;background:#fff;border:3px solid var(--navyD)}
+.sheet h2{font-family:DOSSaemmul,monospace;font-weight:normal;font-size:30px;margin:0 0 6px;color:var(--navy)}
+.sheet .big{font-family:DOSSaemmul,monospace;font-size:20px;margin:6px 0}
+.sheet .stars{font-family:DOSSaemmul,monospace;font-size:32px;color:#e0a020;letter-spacing:6px;margin:2px 0}
+.sheet .stars .off{color:#c9cdd3}
+.btns{display:flex;gap:10px;justify-content:center;margin-top:12px;flex-wrap:wrap}
+#title{background:rgba(10,12,16,.12);justify-content:flex-end;padding-bottom:calc(5 * var(--vh,1vh))}
+#title .logo{order:2;display:flex;align-items:center;gap:14px;font-family:DOSSaemmul,monospace;font-size:clamp(40px,calc(7.4 * var(--vw,1vw)),96px);color:#fff;line-height:1;padding:10px 28px 12px 18px;background:var(--navy);border:4px solid #1e2128;box-shadow:inset 0 4px 0 #2a74c8,inset 0 -6px 0 var(--navyD),0 6px 0 #1e2128;text-shadow:0 4px 0 var(--navyD)}
+#title .logo i{display:block;width:.86em;height:.86em;border-radius:50%;background:#fff;border:.1em solid var(--navyD);font-style:normal;flex-shrink:0;position:relative;margin-right:-.06em}
+#title .logo i::after{content:'1';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:.72em;color:var(--navy);padding-top:.04em}
+body.en #title .logo i{display:none}
+#title .btns{order:1;margin:0 0 calc(3 * var(--vh,1vh))}
+#title .btn{min-width:140px}
+/* 노선도(판 고르기) */
+#routes{display:flex;flex-direction:column;gap:5px;margin-top:4px;text-align:left}
+.rline{display:flex;align-items:center;gap:6px}
+.rline .zn{width:118px;font-size:12px;color:#4b525a;white-space:nowrap;overflow:hidden;flex-shrink:0}
+.rline .st{display:flex;align-items:center;position:relative;gap:3px}
+.rline .st::before{content:'';position:absolute;left:6px;right:6px;top:50%;height:5px;margin-top:-2px;background:var(--navy)}
+.rline button{position:relative;width:26px;height:26px;border-radius:50%;border:3px solid var(--navy);background:#fff;font-family:DOSSaemmul,monospace;font-size:11px;color:#1b1d21;cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center}
+.rline button.boss{border-color:#c9302a;width:30px;height:30px}
+.rline button.s1{background:#ffe9a0}.rline button.s2{background:#ffd860}.rline button.s3{background:#f2b81a;color:#fff}
+.rline button[disabled]{border-color:#b9bcb2;color:#b9bcb2;cursor:default}
+.rline button.cur{box-shadow:0 0 0 3px #ff9a2a}
+/* 소개 창 */
+#intro .who{display:flex;gap:14px;justify-content:center;margin-top:8px;flex-wrap:wrap}
+#intro .who div{display:flex;flex-direction:column;align-items:center;font-size:13px}
+#intro .who canvas{width:56px;height:56px;image-rendering:pixelated;background:#eceae2;border:2px solid #1e2128}
+#intro .tag{display:inline-block;background:var(--navy);color:#fff;font-size:11px;padding:1px 6px;margin-bottom:6px}
+#intro .tag.bad{background:#c9302a}
+/* 카드: 승차권(아래 갈색 자기띠), 금테는 금색 */
+.cards{display:flex;gap:12px;justify-content:center;margin:8px 0 2px;perspective:600px}
+.card{position:relative;width:118px;height:156px;cursor:pointer;transform-style:preserve-3d;transition:transform .5s cubic-bezier(.34,1.3,.64,1)}
+.card .f,.card .b{position:absolute;inset:0;backface-visibility:hidden;border:3px solid #1e2128;border-radius:8px;box-shadow:0 4px 0 #1e2128;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 8px 22px;text-align:center}
+.card .b{background:repeating-linear-gradient(45deg,var(--navy) 0 8px,#00428a 8px 16px);}
+.card .b::after{content:'';width:42px;height:42px;border-radius:50%;background:#fff;border:7px solid var(--navyD)}
+.card .f{transform:rotateY(180deg);background:#fbfaf5}
+.card .f::after,.card .b::before{content:'';position:absolute;left:0;right:0;bottom:10px;height:9px;background:#5a3c22}
+.card.open{transform:rotateY(180deg)}
+.card .nm{font-family:DOSSaemmul,monospace;font-size:15px;color:var(--navy);margin-bottom:8px}
+.card .v{font-size:12px;color:#1b1d21;line-height:1.4}
+.card .cnt{position:absolute;top:6px;right:8px;font-size:11px;color:#7f8790}
+.card.gold .f{background:linear-gradient(160deg,#fff6d6,#f7dd8a);border-color:#8a5c10;box-shadow:0 0 0 3px #f2c230,0 4px 0 #8a5c10}
+.card.gold .nm{color:#8a5c10}
+.card.gold .b{box-shadow:0 0 14px 5px rgba(255,210,80,.85),0 4px 0 #1e2128}
+.card.pick{transform:rotateY(180deg) translateY(-10px) scale(1.06)}
+.card.dim .f{filter:grayscale(.6) brightness(.8);opacity:.5}.card.dim .b{display:none}
+/* 도감 */
+#dexgrid{display:grid;grid-template-columns:repeat(8,1fr);gap:5px;margin-top:6px;max-height:calc(60 * var(--vh,1vh));overflow:auto}
+#dexgrid .d{background:#eceae2;border:2px solid #1e2128;display:flex;flex-direction:column;align-items:center;padding:3px 2px;font-size:10px;cursor:pointer;min-width:0}
+#dexgrid .d canvas{width:44px;height:44px;image-rendering:pixelated}
+#dexgrid .d.no canvas{filter:brightness(0) opacity(.5)}
+#dexgrid .d.boss{border-color:#c9302a}
+#dexgrid .d span{max-width:100%;overflow:hidden;white-space:nowrap}
+#dexgrid .cd{background:#fbfaf5;border:2px solid #1e2128;border-radius:5px;padding:5px 3px;font-size:10px;min-height:56px;display:flex;flex-direction:column;justify-content:center;text-align:center}
+#dexgrid .cd.g{background:#fff1c2;border-color:#8a5c10}
+#dexgrid .cd.no{background:#c9cdd3;color:#7f8790}
+.tabs{display:flex;gap:6px;justify-content:center}
+.tabs .btn{font-size:15px;padding:6px 12px 6px 28px}
+.tabs .btn.on{background:linear-gradient(180deg,#2a74c8,var(--navy) 50%,#00428a);color:#fff}
+#dexN{font-family:DOSSaemmul,monospace;font-size:15px;color:#4b525a}
+#rotate{position:fixed;inset:0;z-index:50;background:#121418;display:none;align-items:center;justify-content:center;flex-direction:column;gap:16px;pointer-events:auto}
+@media (orientation:portrait) and (max-width:700px){#rotate{display:flex}}
+html.ol-land #rotate{display:none!important}
+body.ttl #topbar,body.ttl #panel{display:none}
+html body.ttl #stage{top:0;right:0}
+body:not(.ttl) #oreumFs{display:none!important}
+.endcv{width:300px;height:180px;image-rendering:pixelated;border:3px solid #1e2128;display:block;margin:4px auto 6px}
+/* 폰 가로 */
+html.h480{--pw:154px}
+html.h480 #topbar{height:40px}
+html.h480 #stage,html.h480 #panel{top:40px}
+html.h480 .stat{height:28px;font-size:14px;padding:0 7px}
+html.h480 .tog{width:30px;height:30px}
+html.h480 .tog svg{width:16px;height:16px}
+html.h480 #slots{grid-template-columns:1fr;gap:4px;align-content:stretch}
+html.h480 .slot{flex-direction:row;padding:2px 6px 2px 4px;gap:5px;justify-content:flex-start}
+html.h480 .slot canvas{width:28px;height:28px;flex-shrink:0}
+html.h480 .slot .nm{font-size:12px;flex:1;min-width:0;margin:0;text-align:left;background:none;color:#0052a4;padding:0}
+html.h480 .slot .cs{font-size:13px;margin:0}
+html.h480 .slot .lk{top:50%;margin-top:-8px;display:flex;align-items:center;justify-content:center;gap:6px}
+html.h480 .slot .lk b{margin:0}
+html.h480 #next{font-size:13px;padding:5px 4px 5px 26px;min-height:36px}
+html.h480 .sheet{padding:24px 12px 10px}
+html.h480 .sheet::before{height:10px}
+html.h480 .sheet::after{width:9px;height:9px;top:4px}
+html.h480 .sheet h2{font-size:22px;margin-bottom:2px}
+html.h480 .sheet .big{font-size:15px;margin:2px 0}
+html.h480 .sheet .stars{font-size:24px;margin:0}
+html.h480 .btns{margin-top:6px}
+html.h480 .sheet .btn{font-size:15px;padding:7px 12px 7px 26px}
+html.h480 .sheet .btn.main{padding:8px 16px 8px 34px}
+html.h480 #intro,html.h480 #result,html.h480 #pause,html.h480 #route,html.h480 #dex,html.h480 #pick{justify-content:flex-start;padding-top:40px}
+html.h480 #intro .who canvas{width:40px;height:40px}
+html.h480 #intro .who div{font-size:11px}
+html.h480 .card{width:96px;height:118px}
+html.h480 .card .nm{font-size:13px;margin-bottom:4px}
+html.h480 .card .v{font-size:11px}
+html.h480 .rline button{width:20px;height:20px;font-size:9px;border-width:2px}
+html.h480 .rline button.boss{width:23px;height:23px}
+html.h480 .rline .zn{width:92px;font-size:10px}
+html.h480 #routes{gap:2px}
+html.h480 #dexgrid{grid-template-columns:repeat(11,1fr);max-height:calc(54 * var(--vh,1vh))}
+html.h480 #dexgrid .d canvas{width:30px;height:30px}
+html.h480 #title{padding-bottom:calc(26 * var(--vh,1vh));justify-content:flex-end}
+html.h480 #title .logo{font-size:calc(13 * var(--vh,1vh));padding:6px 18px 8px 12px}
+html.h480 #title .btns{margin-bottom:calc(4 * var(--vh,1vh))}
+html.h480 #title .btn{font-size:calc(5.2 * var(--vh,1vh));padding:calc(1.6 * var(--vh,1vh)) calc(3 * var(--vh,1vh)) calc(1.6 * var(--vh,1vh)) calc(7 * var(--vh,1vh));min-width:0}
+html.h480 .endcv{width:220px;height:132px}
+html.h360 .slot canvas{width:24px;height:24px}
+html.h360 #slots{gap:3px}
+html.h360 .slot .nm{font-size:11px}
+html.h360 .card{width:86px;height:104px}
+html.h360 .rline button{width:17px;height:17px;font-size:8px}
+html.h360 .rline button.boss{width:20px;height:20px}
+html.h360 #intro .who canvas{width:34px;height:34px}
+html.w760 .stat.rk{display:none}
+html.w620 .stat .k{display:none}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="topbar">
+    <div class="stat"><span class="k">RUN</span><b id="sStage">1</b></div>
+    <div class="stat"><b id="sSta">소요산</b></div>
+    <div class="stat"><span class="coinI"></span><b id="sCoin">0</b></div>
+    <div class="stat warn" id="lamps"></div>
+    <div class="stat rk"><b id="sRank">순경</b></div>
+    <div class="spacer"></div>
+    <button class="tog" id="bPause" aria-label="pause">&#10074;&#10074;</button>
+    <button class="tog" id="bSpd" aria-label="speed">x2</button>
+    <button class="tog" id="bBgm" aria-label="music"><svg viewBox="0 0 24 24"><path d="M9 17.5V5.5l11-2.5v12" fill="none" stroke="#fff" stroke-width="2.6" stroke-linejoin="round"/><ellipse cx="6.3" cy="17.8" rx="3.4" ry="2.7" fill="#fff"/><ellipse cx="17.3" cy="15.3" rx="3.4" ry="2.7" fill="#fff"/></svg></button>
+    <button class="tog" id="bSnd" aria-label="sound"><svg viewBox="0 0 24 24"><path d="M3 9h4l5-4.5v15L7 15H3z" fill="#fff"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg></button>
+  </div>
+  <div id="stage"><canvas id="cv"></canvas></div>
+  <div id="panel">
+    <div id="slots"></div>
+    <button class="btn main" id="next"><span class="tri"></span><span id="nextT"></span></button>
+  </div>
+  <div id="tinfo"><div class="tt" id="tiName"></div><div class="row"><button class="btn" id="tiUp"></button><button class="btn red" id="tiSell"></button></div></div>
+
+  <div class="ov show" id="title">
+    <div class="btns" id="tBtns"></div>
+    <div class="logo"><i></i><span id="logoT">호선 빌런</span></div>
+  </div>
+  <div class="ov" id="route"><div class="sheet"><h2 id="routeH">노선도</h2><div id="routes"></div><div class="btns"><button class="btn" id="rBack">&#10005;</button></div></div></div>
+  <div class="ov" id="dex"><div class="sheet"><div class="tabs"><button class="btn on" id="tabV">빌런</button><button class="btn" id="tabC">카드</button><span id="dexN"></span></div><div id="dexgrid"></div><div class="btns"><button class="btn" id="dBack">&#10005;</button></div></div></div>
+  <div class="ov" id="intro"><div class="sheet"><h2 id="iStage">RUN 1</h2><div class="big" id="iZone"></div><div id="iNew"></div><div class="btns"><button class="btn main" id="iGo">START</button></div></div></div>
+  <div class="ov" id="result"><div class="sheet"><h2 id="rTitle">CLEAR</h2><div class="stars" id="rStars"></div><div class="big" id="rInfo"></div><div class="btns" id="rBtns"></div></div></div>
+  <div class="ov" id="pick"><div class="sheet"><h2 id="pTitle">CARD</h2><div class="cards" id="cards"></div><div class="btns" id="pBtns"></div></div></div>
+  <div class="ov" id="pause"><div class="sheet"><h2>PAUSE</h2><div class="btns"><button class="btn main" id="pGo">&#9654;</button><button class="btn" id="pRetry">RETRY</button><button class="btn" id="pHome">HOME</button></div></div></div>
+  <div id="rotate"><div style="font-family:DOSSaemmul,monospace;font-size:28px;color:#fff" id="rotT">1호선 빌런</div><button class="btn main" id="rotBtn">가로로 보기</button></div>
+</div>
+<script>(function(){function f(){var h=innerHeight,w=innerWidth,d=document.documentElement;d.classList.toggle('h480',h<=480);d.classList.toggle('h360',h<=360);d.classList.toggle('w760',w<=760);d.classList.toggle('w620',w<=620);d.style.setProperty('--vh',h/100+'px');d.style.setProperty('--vw',w/100+'px');}f();addEventListener('resize',f);setTimeout(f,50);setInterval(f,1000);})();</script>
+<script src="assets/game-home.js" data-top="6" data-left="6" data-fullscreen="1"></script>
+<script src="assets/landscape.js"></script>
+<script src="js/atlas.js?v=6"></script>
+<script src="js/data.js?v=3"></script>
+<script src="js/map.js?v=1"></script>
+<script src="js/sfx.js?v=1"></script>
+<script src="js/audio.js?v=1"></script>
+<script src="js/logic.js?v=1"></script>
+<script src="js/draw.js?v=7"></script>
+<script src="js/ui.js?v=7"></script>
+<script src="/assets/visit.js?v=17" defer></script>
+<script src="/assets/game-events.js?v=2" defer></script>
+</body>
+</html>
