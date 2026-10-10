@@ -18,6 +18,7 @@ import io, os, re, sys
 
 # slug, 한국어 경로, 영어 경로, 한국어 이름, 한국어 장르 앵커, 영어 이름, 영어 장르 앵커, 태그
 GAMES = [
+    ("villainlike",   "/games/villainlike/",         "/en/games/villainlike/",         "빌런라이크",        "빌런라이크 뱀서류 게임",              "VILLAIN LIKE",          "subway survivors-like bullet heaven game", {"action", "arcade", "casual", "korean"}),
     ("line1",         "/games/line1/",               "/en/games/line1/",               "1호선 빌런",        "1호선 빌런 지하철 디펜스게임",        "LINE 1 VILLAINS",       "korean subway tower defense game", {"strategy", "casual", "korean"}),
     ("doublepark",    "/games/flash/doublepark/",    "/en/games/flash/doublepark/",    "이중주차 탈출",     "주차게임 차빼기 퍼즐",               "Double Parking Escape", "parking jam game online",       {"puzzle", "casual", "kids"}),
     ("hiddenpic",     "/games/flash/hiddenpic/",     "/en/games/flash/hiddenpic/",     "숨은그림찾기",      "3D 숨은그림찾기 게임",               "Hidden Objects",       "hidden object game online",      {"puzzle", "casual", "kids"}),
