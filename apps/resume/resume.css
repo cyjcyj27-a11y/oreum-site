@@ -97,6 +97,12 @@
 .sheet .isec { margin:0 0 4.5mm; }
 .sheet .iqt { margin:0 0 1.5mm; font-weight:800; font-size:11pt; }
 .sheet .ibox { border:.6pt solid #333; padding:2.6mm 3.2mm; min-height:34mm; white-space:pre-wrap; word-break:keep-all; overflow-wrap:anywhere; font-size:10pt; line-height:1.75; min-height:44mm; }
+/* 각종 서식 사이 오가는 탭(QR 도구 .qrsw 와 같은 모양) */
+.rs .fmsw { display:flex; gap:4px; background:#f1f2f4; padding:4px; border-radius:14px; margin:0 0 16px; }
+.rs .fmsw a { flex:1; text-align:center; padding:11px 6px; border-radius:10px; font-size:16px; font-weight:800; color:#4a5160; text-decoration:none; word-break:keep-all; }
+.rs .fmsw a.on { background:#fff; color:#1d2433; box-shadow:0 1px 3px rgba(20,25,40,.14); }
+.rs .fmsw a:not(.on):hover { color:#1d2433; }
+
 #rsPrint { display:none; }
 @media print {
   @page { size:A4; margin:11mm 15mm 7mm; }

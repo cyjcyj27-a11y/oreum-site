@@ -91,6 +91,12 @@
 .sheet .big { font-size:10.5pt; font-weight:800; }
 .sheet .pb { position:absolute; left:0; right:0; border-top:1px dashed #c33; pointer-events:none; }
 .sheet .pb span { position:absolute; right:2mm; top:-5mm; font-size:8pt; color:#c33; background:#fff; padding:0 1mm; }
+/* 각종 서식 사이 오가는 탭(QR 도구 .qrsw 와 같은 모양) */
+.rs .fmsw { display:flex; gap:4px; background:#f1f2f4; padding:4px; border-radius:14px; margin:0 0 16px; }
+.rs .fmsw a { flex:1; text-align:center; padding:11px 6px; border-radius:10px; font-size:16px; font-weight:800; color:#4a5160; text-decoration:none; word-break:keep-all; }
+.rs .fmsw a.on { background:#fff; color:#1d2433; box-shadow:0 1px 3px rgba(20,25,40,.14); }
+.rs .fmsw a:not(.on):hover { color:#1d2433; }
+
 #rsPrint { display:none; }
 @media print {
   @page { size:A4; margin:10mm 11mm 8mm; }
