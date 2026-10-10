@@ -38,6 +38,14 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://oreumgames.com/apps/contract/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/apps/contract/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/apps/contract/"/>
+    <lastmod>2026-10-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://oreumgames.com/apps/hanja-search/</loc>
     <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/apps/hanja-search/"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/apps/hanja-search/"/>
@@ -95,6 +103,14 @@
     <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/apps/image-crop/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/apps/image-crop/"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/apps/image-crop/"/>
+    <lastmod>2026-10-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://oreumgames.com/apps/invoice/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/apps/invoice/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/apps/invoice/"/>
     <lastmod>2026-10-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -1255,6 +1271,14 @@
     <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/apps/qr-scan/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/apps/qr-scan/"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/apps/qr-scan/"/>
+    <lastmod>2026-10-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://oreumgames.com/apps/resume/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/apps/resume/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/apps/resume/"/>
     <lastmod>2026-10-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>

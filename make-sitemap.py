@@ -34,7 +34,7 @@ PRIORITY = [
 PAIRS = {
     "/saju/": "/en/apps/saju/",
 }
-NO_EN = {"/apps/saju/", "/apps/hanja-search/", "/apps/manse/"}   # 한자 앱·만세력은 한국어판만
+NO_EN = {"/apps/saju/", "/apps/hanja-search/", "/apps/manse/", "/apps/resume/", "/apps/contract/", "/apps/invoice/"}   # 한자 앱·만세력은 한국어판만
 
 def priority_of(path):
     if path == "/":

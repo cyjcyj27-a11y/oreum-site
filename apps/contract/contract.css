@@ -1,0 +1,117 @@
+/* 계약서 양식 — 입력 칸 + A4 미리보기(이력서 양식에서 가져온 틀). 인쇄하면 A4 만 나온다 */
+.rs { --ink:#1d2433; --sub:#5d6575; --line:#e3e6ec; --soft:#f5f6f9; --acc:#2d4a8a; --red:#c23b32;
+  color:var(--ink); font-size:16px; line-height:1.5; }
+.rs .top { text-align:center; margin:0 0 18px; }
+.rs .top h1 { margin:0; font-size:34px; letter-spacing:-.5px; }
+.rs .top p { margin:6px 0 0; color:var(--sub); font-size:15px; }
+.rs .bar { display:flex; flex-wrap:wrap; gap:8px; margin:0 0 16px; }
+.rs .bar button { font:inherit; font-weight:700; font-size:15px; padding:11px 14px; border-radius:11px; border:1.5px solid var(--line); background:#fff; color:var(--ink); cursor:pointer; }
+.rs .bar button.main { background:var(--acc); border-color:var(--acc); color:#fff; flex:1 1 180px; }
+.rs .bar button.word { flex:1 1 140px; }
+.rs .bar .sp { flex:1 0 0; }
+.rs .bar button.ghost { color:var(--sub); font-size:14px; padding:9px 12px; }
+.rs .mtabs { display:none; gap:6px; background:var(--soft); padding:5px; border-radius:14px; margin:0 0 14px; }
+.rs .mtabs button { flex:1; border:0; background:transparent; font:inherit; font-weight:700; font-size:16px; padding:11px 6px; border-radius:10px; color:var(--sub); cursor:pointer; }
+.rs .mtabs button.on { background:#fff; color:var(--ink); box-shadow:0 1px 3px rgba(20,25,40,.12); }
+.rs .cols { display:grid; grid-template-columns:minmax(0,1fr) 448px; gap:22px; align-items:start; }
+.rs .pv { position:sticky; top:12px; }
+.rs .pvbox { background:#e9ecf1; border-radius:14px; padding:12px; overflow:hidden; }
+.rs .pvscale { transform-origin:0 0; width:210mm; }
+.rs .pvhint { font-size:13px; color:var(--sub); text-align:center; margin:8px 0 0; }
+
+/* 입력 */
+.rs fieldset { border:1px solid var(--line); border-radius:14px; padding:14px 14px 10px; margin:0 0 14px; min-width:0; }
+.rs legend { font-weight:800; font-size:16px; padding:0 6px; display:flex; align-items:center; gap:8px; }
+.rs legend label { font-weight:600; font-size:13px; color:var(--sub); display:inline-flex; align-items:center; gap:4px; cursor:pointer; }
+.rs legend input { width:16px; height:16px; accent-color:var(--acc); }
+.rs fieldset.off > :not(legend) { display:none; }
+.rs .g2 { display:grid; grid-template-columns:1fr 1fr; gap:8px 10px; }
+.rs .g3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px 10px; }
+.rs .fl { display:block; min-width:0; }
+.rs .fl.w2 { grid-column:span 2; } .rs .fl.w3 { grid-column:1 / -1; }
+.rs .fl > span { display:block; font-size:13px; font-weight:700; color:var(--sub); margin:0 0 4px; }
+.rs input[type=text], .rs input[type=tel], .rs input[type=email], .rs input[type=date], .rs input[type=time], .rs select, .rs textarea {
+  width:100%; box-sizing:border-box; font:inherit; font-size:16px; padding:9px 10px; border:1.5px solid var(--line); border-radius:9px; background:#fff; color:var(--ink); }
+.rs textarea { min-height:84px; resize:vertical; line-height:1.55; }
+.rs input:focus, .rs select:focus, .rs textarea:focus { outline:none; border-color:var(--acc); }
+.rs .photo { display:flex; gap:12px; align-items:center; margin:0 0 10px; }
+.rs .ph { width:84px; height:112px; border:1.5px dashed #c5cad4; border-radius:8px; background:var(--soft) center/cover no-repeat; flex:0 0 auto; cursor:pointer; display:flex; align-items:center; justify-content:center; color:var(--sub); font-size:13px; text-align:center; touch-action:none; }
+.rs .ph.has { border-style:solid; color:transparent; }
+.rs .phbtn { display:flex; flex-direction:column; gap:6px; align-items:flex-start; }
+.rs .phbtn button, .rs .add, .rs .rm { font:inherit; font-size:14px; font-weight:700; padding:7px 11px; border-radius:9px; border:1.5px solid var(--line); background:#fff; color:var(--ink); cursor:pointer; }
+.rs .phbtn small { color:var(--sub); font-size:12.5px; line-height:1.4; }
+.rs .rows .row { position:relative; border-top:1px dashed var(--line); padding:10px 0 8px; }
+.rs .rows .row:first-child { border-top:0; padding-top:2px; }
+.rs .rm { position:absolute; right:0; top:8px; padding:3px 9px; font-size:13px; color:var(--sub); }
+.rs .rows .row:first-child .rm { top:0; }
+.rs .add { width:100%; margin:4px 0 4px; border-style:dashed; color:var(--acc); }
+.rs .hint { font-size:13px; color:var(--sub); margin:6px 2px 2px; }
+.rs .opt { display:flex; flex-wrap:wrap; gap:6px 14px; font-size:14px; color:var(--sub); margin:2px 0 6px; }
+.rs .opt label { display:inline-flex; gap:5px; align-items:center; cursor:pointer; }
+.rs .opt input { width:16px; height:16px; accent-color:var(--acc); }
+.rs .saved { font-size:12.5px; color:var(--sub); text-align:right; margin:-6px 2px 10px; min-height:18px; }
+
+@media (max-width: 880px) {
+  .rs .mtabs { display:flex; }
+  .rs .cols { grid-template-columns:minmax(0,1fr); }
+  .rs .pv { position:static; }
+  .rs[data-tab=edit] .pv { display:none; }
+  .rs[data-tab=view] .ed { display:none; }
+}
+@media (max-width: 420px) { .rs .g3 { grid-template-columns:1fr 1fr; } .rs .g3 .fl.w1m { grid-column:1 / -1; } }
+
+/* A4 계약서 한 장 */
+.sheet { width:210mm; min-height:297mm; box-sizing:border-box; padding:16mm 18mm 12mm; background:#fff; color:#111; position:relative;
+  font-family:"Malgun Gothic","맑은 고딕","Apple SD Gothic Neo","Noto Sans KR",sans-serif; font-size:10.5pt; line-height:1.62; box-shadow:0 1px 3px rgba(0,0,0,.18); }
+.sheet .ttl { text-align:center; font-size:20pt; font-weight:800; letter-spacing:3pt; margin:0 0 7mm; }
+.sheet p { margin:0; }
+.sheet .lead { margin:0 0 3.5mm; }
+.sheet .it { margin:1.6mm 0 0; padding-left:0; }
+.sheet .sub { padding-left:4.5mm; text-indent:-2.2mm; margin:.4mm 0 0; }
+.sheet .sub2 { padding-left:9mm; margin:.2mm 0 0; }
+.sheet u { text-decoration:none; border-bottom:.6pt solid #222; padding:0 1.2mm; display:inline-block; min-width:10mm; line-height:1.25; text-align:center; }
+.sheet u.w { min-width:42mm; text-align:left; }
+.sheet u.n { min-width:6mm; }
+.sheet .ck { display:inline-block; min-width:4mm; text-align:center; font-weight:700; }
+.sheet .bx { display:inline-block; width:3.4mm; height:3.4mm; border:.7pt solid #222; vertical-align:-.4mm; margin:0 1mm 0 3mm; text-align:center; line-height:3.2mm; font-size:9pt; font-weight:800; }
+.sheet .bx:first-child { margin-left:0; }
+.sheet .date { text-align:center; margin:8mm 0 6mm; letter-spacing:.5pt; }
+.sheet .party { display:grid; grid-template-columns:20mm 1fr; gap:.6mm 2mm; margin:0 0 3.5mm; }
+.sheet .party .who { font-weight:700; }
+.sheet .party .ln { display:flex; gap:2mm; }
+.sheet .party .ln b { font-weight:400; min-width:17mm; display:inline-block; }
+.sheet .party .ln span.v { flex:1; border-bottom:.6pt solid #222; min-height:5mm; }
+.sheet .party .ln i { font-style:normal; color:#444; }
+.sheet .pb { position:absolute; left:0; right:0; border-top:1px dashed #c33; pointer-events:none; }
+.sheet .pb span { position:absolute; right:2mm; top:-5mm; font-size:8pt; color:#c33; background:#fff; padding:0 1mm; }
+.rs .warn { color:#b3261e; font-size:13px; font-weight:700; margin:6px 2px 0; }
+.rs .seg2 { display:flex; gap:6px; margin:0 0 4px; }
+.rs .seg2 button { flex:1 1 0; min-width:0; word-break:keep-all; font:inherit; font-size:15px; font-weight:700; padding:10px 6px; border:1.5px solid var(--line); background:#fff; color:var(--sub); border-radius:10px; cursor:pointer; }
+.rs .seg2 button.on { border-color:var(--acc); background:var(--acc); color:#fff; }
+.rs .kinds { display:flex; flex-wrap:wrap; gap:6px; margin:0 0 14px; }
+.rs .kinds button { font:inherit; font-weight:700; font-size:15px; padding:9px 14px; border-radius:999px; border:1.5px solid var(--line); background:#fff; color:var(--sub); cursor:pointer; }
+.rs .kinds button.on { background:var(--ink); border-color:var(--ink); color:#fff; }
+.rs .kinds button[disabled] { opacity:.45; cursor:default; }
+.rs .g4 { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px 8px; }
+@media (max-width:520px) { .rs .g4 { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+.rs .chks { display:flex; flex-wrap:wrap; gap:6px 16px; font-size:15px; }
+.rs .chks label { display:inline-flex; gap:6px; align-items:center; cursor:pointer; }
+.rs .chks input { width:18px; height:18px; accent-color:var(--acc); }
+
+#rsPrint { display:none; }
+@media print {
+  @page { size:A4; margin:16mm 18mm 10mm; }
+  html, body { background:#fff !important; margin:0 !important; padding:0 !important; }
+  body > *:not(#rsPrint) { display:none !important; }
+  #rsPrint { display:block !important; }
+  #rsPrint .sheet { box-shadow:none; min-height:0; width:auto; padding:0; }
+  .sheet thead { display:table-header-group; }
+  #rsPrint .pb { display:none; }
+  .sheet tr { break-inside:avoid; }
+}
+
+.sheet .tb { width:100%; border-collapse:collapse; margin:1.5mm 0 1mm; }
+.sheet .tb th, .sheet .tb td { border:.6pt solid #333; padding:1.2mm 2mm; font-size:10pt; }
+.sheet .tb th { background:#eef0f3; width:22mm; font-weight:700; }
+.sheet .memo { border:.6pt solid #333; min-height:24mm; padding:2mm 2.5mm; white-space:pre-wrap; margin:1mm 0 0; font-size:10pt; }
+.sheet .lead2 { margin:5mm 0 0; }
