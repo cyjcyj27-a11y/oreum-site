@@ -5,8 +5,8 @@ const $ = s => document.querySelector(s);
 const LANG = /[?&]lang=en/.test(location.search) ? 'en' : 'ko';
 const EN = LANG === 'en';
 const DICT = {
-  ko: { start: '출근', levelup: 'LEVEL UP', pause: 'PAUSE', resume: '계속', home: '처음으로', time: 'TIME', level: 'LEVEL', kills: '검거', unlock: 'NEW', t2: '빌런라이크', clear: '퇴근', over: 'GAME OVER', evo: '진화', max: 'MAX', newW: '새 무기', newP: '새 아이템', locked: '잠김', heal: '회복', shop: '상점', dex: '도감', coin: '코인', close: '닫기', tabE: '빌런', tabW: '무기', tabI: '아이템', tabG: '직원', unknown: '아직 못 봤습니다', last: '막차', boss: '보스', gold: '금테', hint: 'WASD / ←↑↓→ 이동 · SPACE 경적 · Esc 일시정지', theEnd: 'THE END', ending: '엔딩', dex100: '도감 100%' },
-  en: { start: 'START', levelup: 'LEVEL UP', pause: 'PAUSE', resume: 'RESUME', home: 'HOME', time: 'TIME', level: 'LEVEL', kills: 'ARREST', unlock: 'NEW', t2: 'VILLAIN LIKE', clear: 'CLOCK OUT', over: 'GAME OVER', evo: 'EVOLVE', max: 'MAX', newW: 'NEW WEAPON', newP: 'NEW ITEM', locked: 'LOCKED', heal: 'HEAL', shop: 'SHOP', dex: 'COLLECTION', coin: 'COIN', close: 'CLOSE', tabE: 'VILLAINS', tabW: 'WEAPONS', tabI: 'ITEMS', tabG: 'STAFF', unknown: 'Not seen yet', last: 'LAST TRAIN', boss: 'BOSS', gold: 'GOLD', hint: 'WASD / Arrows move · SPACE horn · Esc pause', theEnd: 'THE END', ending: 'ENDING', dex100: 'COLLECTION 100%' },
+  ko: { start: '출근', levelup: 'LEVEL UP', pause: 'PAUSE', resume: '계속', home: '처음으로', time: 'TIME', level: 'LEVEL', kills: '검거', unlock: 'NEW', t2: '빌런라이크', clear: '퇴근', over: 'GAME OVER', evo: '진화', max: 'MAX', newW: '새 무기', newP: '새 아이템', locked: '잠김', heal: '회복', shop: '상점', dex: '도감', coin: '코인', close: '닫기', tabE: '빌런', tabW: '무기', tabI: '아이템', tabG: '직원', unknown: '아직 못 봤습니다', last: '막차', boss: '보스', gold: '금테', hint: 'WASD / ←↑↓→ 이동 · SPACE 경적 · Esc 일시정지', theEnd: 'THE END', ending: '엔딩', dex100: '도감 100%', owned: '보유' },
+  en: { start: 'START', levelup: 'LEVEL UP', pause: 'PAUSE', resume: 'RESUME', home: 'HOME', time: 'TIME', level: 'LEVEL', kills: 'ARREST', unlock: 'NEW', t2: 'VILLAIN LIKE', clear: 'CLOCK OUT', over: 'GAME OVER', evo: 'EVOLVE', max: 'MAX', newW: 'NEW WEAPON', newP: 'NEW ITEM', locked: 'LOCKED', heal: 'HEAL', shop: 'SHOP', dex: 'COLLECTION', coin: 'COIN', close: 'CLOSE', tabE: 'VILLAINS', tabW: 'WEAPONS', tabI: 'ITEMS', tabG: 'STAFF', unknown: 'Not seen yet', last: 'LAST TRAIN', boss: 'BOSS', gold: 'GOLD', hint: 'WASD / Arrows move · SPACE horn · Esc pause', theEnd: 'THE END', ending: 'ENDING', dex100: 'COLLECTION 100%', owned: 'OWNED' },
 };
 const L = k => DICT[LANG][k];
 const T2 = a => a[EN ? 1 : 0];
@@ -96,23 +96,35 @@ function sprF(name, f, x, y, h, flip, wh, alpha) {
 // 아이콘: 'i_xxx' 는 icons.png, 'o:N' 은 물건 시트 N번 칸. 가운데 (x,y), 크기 s
 function iconSrc(spec) { if (spec.startsWith('o:')) { const q = fr('o_items', +spec.slice(2)); return [atlas, q[0], q[1], q[2], q[3]]; } const c = IC[spec]; return c ? [icons, c[0], c[1], c[2], c[3]] : null; }
 function iconC(spec, x, y, s, rot, alpha) { const q = iconSrc(spec); if (!q) return; ctx.save(); if (alpha != null) ctx.globalAlpha = alpha; ctx.translate(x, y); ctx.rotate(rot || 0); ctx.drawImage(q[0], q[1], q[2], q[3], q[4], -s / 2, -s / 2, s, s); ctx.restore(); }
-function drawIcon(c, spec) { const x = c.getContext('2d'); x.imageSmoothingEnabled = false; const q = iconSrc(spec); if (!q) return; const s = c.width - 12; x.drawImage(q[0], q[1], q[2], q[3], q[4], 6, 6, s, s); }
+function drawIcon(c, spec) { const x = c.getContext('2d'); x.imageSmoothingEnabled = false; if (spec === 'auto') return drawAutoIcon(c, x); const q = iconSrc(spec); if (!q) return; const s = c.width - 12; x.drawImage(q[0], q[1], q[2], q[3], q[4], 6, 6, s, s); }
+// 자동 근무 아이콘: 승강장 천장에 매달린 LED 안내판에 AUTO, 오른쪽 위 초록 운행등(도트)
+function drawAutoIcon(c, x) {
+  const u = c.width / 16, px = (a, b, w, h, col) => { x.fillStyle = col; x.fillRect(Math.round(a * u), Math.round(b * u), Math.ceil(w * u), Math.ceil(h * u)); };
+  px(4, 0, 1, 4, '#7f8790'); px(11, 0, 1, 4, '#7f8790'); px(5, 0, 1, 4, '#c2c8cf'); px(12, 0, 1, 4, '#c2c8cf');
+  px(0, 4, 16, 10, '#1e2128'); px(1, 5, 14, 8, '#0d0e10'); px(0, 14, 16, 1, '#7f8790'); px(1, 4, 14, 1, '#5a6068');
+  for (let i = 0; i < 14; i += 2) for (let j = 0; j < 8; j += 2) px(1 + i, 5 + j, 1, 1, '#1a1208');
+  x.save(); x.font = Math.round(5 * u) + 'px DOSSaemmul, monospace'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.shadowColor = 'rgba(255,154,42,.85)'; x.shadowBlur = u * 1.4; x.fillStyle = '#ff9a2a'; x.fillText('AUTO', 8 * u, 9.4 * u); x.restore();
+  px(13, 6, 1, 1, '#6fd88a'); px(12, 6, 1, 1, '#2fa84f');
+}
 function drawPortrait(c, name, f) { const x = c.getContext('2d'); x.clearRect(0, 0, c.width, c.height); const q = fr(name, f || 0); if (!q) return; const sc = Math.min((c.width - 10) / q[4], (c.height - 8) / q[5]); const w = q[4] * sc, h = q[5] * sc; x.imageSmoothingEnabled = true; x.drawImage(atlas, q[0], q[1], q[2], q[3], (c.width - w) / 2, c.height - 4 - h, w, h); }
 
 // ---------- 저장 ----------
 const SAVE = { unlock: 1, best: {}, coins: 0, shop: {}, seen: {}, clears: 0 };
 try { const s = JSON.parse(localStorage.getItem('villainlike.save') || 'null'); if (s) Object.assign(SAVE, s); if (!SAVE.shop) SAVE.shop = {}; if (!SAVE.seen) SAVE.seen = {}; if (!SAVE.coins) SAVE.coins = 0; } catch (e) {}
 const SHOP = [
-  { k: 'atk', n: ['캔커피 한 박스', 'Coffee Case'], icon: 'i_coffee', d: ['공격 +6%', 'DAMAGE +6%'], base: 40 },
-  { k: 'hp', n: ['삼각김밥 묶음', 'Rice Triangle Pack'], icon: 'i_gimbap', d: ['최대 체력 +10', 'MAX HP +10'], base: 40 },
-  { k: 'spd', n: ['새 운동화', 'New Sneakers'], icon: 'i_sneakers', d: ['이동 속도 +3%', 'SPEED +3%'], base: 40 },
-  { k: 'mag', n: ['교통카드 지갑', 'Card Wallet'], icon: 'i_card', d: ['승차권 자석 +20', 'TICKET MAGNET +20'], base: 40 },
-  { k: 'gas', n: ['경적 정비', 'Horn Tune-up'], icon: 'o:3', d: ['경적 게이지 +12%', 'HORN GAUGE +12%'], base: 50 },
-  { k: 'xp', n: ['근무 수당', 'Overtime Pay'], icon: 'o:10', d: ['승차권 경험치 +6%', 'TICKET XP +6%'], base: 50 },
+  // 맨 위(PC 720 높이에서 일곱째 칸은 밑으로 숨어서). 자동 근무(10/11 사장님 "아이템을 구입하면 자동사냥"): 한 번 사면 위쪽 AUTO 단추로 이동을 맡김. 공격은 원래 자동
+  { k: 'auto', n: ['자동근무', 'Auto Shift'], icon: 'auto', d: ['알아서 피하고 줍기', 'Dodges and collects for you'], base: 2000, max: 1 },
+  { k: 'atk', n: ['캔커피한박스', 'Coffee Case'], icon: 'i_coffee', d: ['공격 +6%', 'DAMAGE +6%'], base: 40 },
+  { k: 'hp', n: ['삼각김밥묶음', 'Rice Triangle Pack'], icon: 'i_gimbap', d: ['최대체력 +10', 'MAX HP +10'], base: 40 },
+  { k: 'spd', n: ['새운동화', 'New Sneakers'], icon: 'i_sneakers', d: ['이동속도 +3%', 'SPEED +3%'], base: 40 },
+  { k: 'mag', n: ['교통카드지갑', 'Card Wallet'], icon: 'i_card', d: ['승차권자석 +20', 'TICKET MAGNET +20'], base: 40 },
+  { k: 'gas', n: ['경적정비', 'Horn Tune-up'], icon: 'o:3', d: ['경적게이지 +12%', 'HORN GAUGE +12%'], base: 50 },
+  { k: 'xp', n: ['근무수당', 'Overtime Pay'], icon: 'o:10', d: ['승차권경험치 +6%', 'TICKET XP +6%'], base: 50 },
 ];
 const SHOP_MAX = 5;
 const shopLv = k => SAVE.shop[k] || 0;
 const shopCost = (it, lv) => Math.round(it.base * Math.pow(1.6, lv));
+const hasAuto = () => shopLv('auto') > 0;
 function seen(k) { if (!SAVE.seen[k]) { SAVE.seen[k] = 1; save(); } }
 function save() { try { localStorage.setItem('villainlike.save', JSON.stringify(SAVE)); } catch (e) {} }
 
@@ -216,7 +228,7 @@ function spawnEnemy(key, x, y, v) {
 }
 function spawnBoss(key) {
   if (key === 'hikers') { const vw = W / ZOOM / 2 + 80; const x = G.cam.x + (Math.random() < 0.5 ? -vw : vw), y = G.cam.y + rnd(-120, 120); for (let i = 0; i < 4; i++) spawnEnemy('hikers', x + (i % 2) * 50, y + Math.floor(i / 2) * 50, i); return; }
-  if (key === 'demon') { G.lastTrain = true; toast(L('last')); }
+  if (key === 'demon') { G.lastTrain = true; toast(L('last')); if (G.auto) { G.autoLock = true; syncAuto(); if (G.AI) G.AI.hold = 0; G.sp = false; setTimeout(() => { if (G.phase === 'play') toast(L('last') + ' · AUTO OFF'); }, 1500); } }
   spawnEnemy(key);
 }
 function updateEnemies(dt) {
@@ -264,6 +276,7 @@ function updatePlayer(dt) {
   const P = G.P; let mx = 0, my = 0; const K = G.keys;
   if (K.ArrowLeft || K.a || K.A) mx -= 1; if (K.ArrowRight || K.d || K.D) mx += 1; if (K.ArrowUp || K.w || K.W) my -= 1; if (K.ArrowDown || K.s || K.S) my += 1;
   if (G.pad.x || G.pad.y) { mx = G.pad.x; my = G.pad.y; }
+  if (G.auto) { const a = autoSteer(dt, !!(mx || my)); if (!(mx || my)) { mx = a[0]; my = a[1]; } }
   const l = Math.hypot(mx, my); if (l > 1) { mx /= l; my /= l; }
   const slow = P.slowT > 0 ? 0.62 : 1;
   P.moving = l > 0.05;
@@ -284,6 +297,28 @@ function updatePlayer(dt) {
   G.GEM = G.GEM.filter(g => !g.dead); if (G.GEM.length > 400) G.GEM.splice(0, G.GEM.length - 400);
   if (P.xp >= P.need) { P.xp -= P.need; P.lv++; P.hp = Math.min(P.maxhp, P.hp + 15); P.need = Math.round(10 + P.lv * 7 + P.lv * P.lv * 1.3); $('#hLv').textContent = P.lv; openLevelUp(); }
   $('#xpfill').style.width = Math.min(100, P.xp / P.need * 100) + '%';
+}
+// 자동 근무 길찾기: 0.12초마다 둘러보고(사람처럼 조금 늦게) 빌런 무리 반대쪽으로, 안전하면 승차권, 체력이 낮으면 회복 먼저. 경적은 꽉 차고 빌런이 많을 때
+// 실력: 0.35초마다 둘러보고 200 안쪽만 봄(10/11 봇으로 잼: 상점 0단계 4~10분, 2단계부터 막차까지 버팀). 막차 대악마는 손으로(자동이 꺼짐)
+const AUTO_CFG = { look: 0.35, R: 200, greed: 0.03, safe: 110, horn: 1 };
+function autoSteer(dt, manual) {
+  const P = G.P, A = G.AI || (G.AI = { x: 0, y: 0, tx: 0, ty: 0, t: 0, hold: 0 });
+  if (manual) { A.t = 0.3; A.x = A.y = 0; return [0, 0]; }
+  A.t -= dt;
+  if (A.t <= 0) {
+    const C = AUTO_CFG; A.t = C.look; let fx = 0, fy = 0, near = 1e9;
+    for (const e of G.E) { const dx = P.x - e.x, dy = P.y - 10 - e.y, d2 = dx * dx + dy * dy + 1; if (d2 < near) near = d2; if (d2 < C.R * C.R) { let w = (e.boss ? 3 : 1) * (e.dmg / 6) / d2; if (e.dashing > 0) w *= 4; fx += dx * w; fy += dy * w; } }
+    for (const c of G.CLOUD) { const dx = P.x - c.x, dy = P.y - 20 - c.y, d2 = dx * dx + dy * dy + 1; if (d2 < (c.r + 60) ** 2) { fx += dx / d2 * 2; fy += dy / d2 * 2; } }
+    const low = P.hp < P.maxhp * 0.45; let g = null, gd = 1e9;
+    for (const q of G.GEM) { let d = (q.x - P.x) ** 2 + (q.y - P.y) ** 2; if (q.heal) d *= low ? 0.05 : 0.5; if (d < gd) { gd = d; g = q; } }
+    if (g && gd < 600 * 600) { const d = Math.hypot(g.x - P.x, g.y - P.y) + 1, k = near > C.safe * C.safe ? C.greed : g.heal && low ? 0.02 : 0.006; fx += (g.x - P.x) / d * k; fy += (g.y - P.y) / d * k; }
+    fx += -P.x * 1e-7; fy += -P.y * 1e-7;
+    const l = Math.hypot(fx, fy); A.tx = l > 1e-9 ? fx / l : 0; A.ty = l > 1e-9 ? fy / l : 0;
+  }
+  const k = Math.min(1, dt * 9); A.x += (A.tx - A.x) * k; A.y += (A.ty - A.y) * k;
+  // 경적: 손으로 스페이스를 안 누를 때만
+  if (A.hold > 0) { A.hold -= dt; G.sp = A.hold > 0; } else if (AUTO_CFG.horn && P.gas >= 99 && G.E.length > 15 && !G.TRAIN) { A.hold = 1.3; G.sp = true; }
+  return [A.x, A.y];
 }
 // ---------- 레벨업 카드(가끔 금테: 두 단계 한꺼번에) ----------
 function cardPool() {
@@ -531,7 +566,7 @@ function startGame() {
   G.phase = 'play'; document.body.classList.add('playing'); show('#title', false); show('#over', false); show('#pause', false);
   G.P = newPlayer(G.sel); G.E = []; G.B = []; G.GEM = []; G.FX = []; G.DN = []; G.AURA = []; G.CLOUD = []; G.TRAIN = null; G.kills = 0; G.coins = 0; G.time = 0; G.spawnT = 0.6; G.bossI = 0; G.cam = { x: 0, y: -30 }; G.shake = 0; G.flash = 0; G.dawn = 0; G.run++; G.demonDown = false; G.lastTrain = false; G.endT = 0;
   $('#hKill').textContent = 0; $('#hLv').textContent = 1; $('#hTime').textContent = fmt(NIGHT); $('#xpfill').style.width = '0%'; $('#hSta').textContent = T2(STATIONS[0]);
-  SND.boss(false); SND.bgm(true);
+  SND.boss(false); SND.bgm(true); G.AI = null; G.autoLock = false; syncAuto();
 }
 function gameOver(cleared) {
   if (G.phase === 'over') return; G.phase = 'over'; SND.duck(true); G.P.charging = false;
@@ -553,13 +588,13 @@ function gameOver(cleared) {
 function openShop() {
   G.phase = 'shop'; show('#shop', true); const box = $('#shopList'); box.innerHTML = ''; $('#shopCoin').textContent = SAVE.coins.toLocaleString();
   for (const it of SHOP) {
-    const lv = shopLv(it.k), max = lv >= SHOP_MAX, cost = max ? 0 : shopCost(it, lv);
+    const top = it.max || SHOP_MAX, lv = shopLv(it.k), max = lv >= top, cost = max ? 0 : shopCost(it, lv);
     const el = document.createElement('div'); el.className = 'card shoprow' + (max ? ' max' : (SAVE.coins < cost ? ' poor' : ''));
     const ic = document.createElement('canvas'); ic.width = ic.height = 96; drawIcon(ic, it.icon); el.appendChild(ic);
-    const t = document.createElement('div'); t.className = 't'; t.innerHTML = '<div class="n"></div><div class="d"></div>'; t.firstChild.textContent = T2(it.n); t.lastChild.textContent = T2(it.d) + ' × ' + lv;
-    const r = document.createElement('div'); r.className = 'lv'; r.innerHTML = (max ? L('max') : '<i class="coinI"></i>' + cost.toLocaleString()) + '<b>LV ' + lv + '/' + SHOP_MAX + '</b>';
+    const t = document.createElement('div'); t.className = 't'; t.innerHTML = '<div class="n"></div><div class="d"></div>'; t.firstChild.textContent = T2(it.n); t.lastChild.textContent = T2(it.d) + (top > 1 ? ' ×' + lv : '');
+    const r = document.createElement('div'); r.className = 'lv'; r.innerHTML = top > 1 ? (max ? L('max') : '<i class="coinI"></i>' + cost.toLocaleString()) + '<b>LV ' + lv + '/' + top + '</b>' : max ? L('owned') : '<i class="coinI"></i>' + cost.toLocaleString();
     el.append(t, r);
-    el.onclick = () => { if (max) { SND.back(); return; } if (SAVE.coins < cost) { SND.back(); toast(L('coin') + ' ' + cost); return; } SAVE.coins -= cost; SAVE.shop[it.k] = lv + 1; save(); SND.levelup(); openShop(); buildTitle(); };
+    el.onclick = () => { if (max) { SND.back(); return; } if (SAVE.coins < cost) { SND.back(); toast(L('coin') + ' ' + cost); return; } SAVE.coins -= cost; SAVE.shop[it.k] = lv + 1; if (it.k === 'auto') SAVE.autoOn = 1; save(); SND.levelup(); openShop(); buildTitle(); syncAuto(); };
     box.appendChild(el);
   }
 }
@@ -598,6 +633,10 @@ $('#bRetry').onclick = () => { SND.unlock(); SND.blip(); startGame(); };
 $('#bHome').onclick = () => { SND.back(); SND.bgm(false); toTitle(); };
 $('#bQuit').onclick = () => { SND.back(); SND.bgm(false); G.paused = false; toTitle(); };
 $('#bResume').onclick = () => { SND.blip(); show('#pause', false); G.phase = 'play'; SND.duck(false); };
+// 자동 근무: 상점에서 사면 AUTO 단추가 생기고, 켜 두면 손을 뗀 동안 알아서 피하고 줍는다
+function syncAuto() { G.auto = hasAuto() && !!SAVE.autoOn && !G.autoLock; document.body.classList.toggle('hasauto', hasAuto()); $('#tAuto').classList.toggle('on', G.auto); }
+$('#tAuto').onclick = () => { if (!hasAuto()) return; SND.unlock(); if (G.autoLock && G.phase === 'play') { SND.back(); toast(L('last') + ' · AUTO OFF'); return; } SAVE.autoOn = SAVE.autoOn ? 0 : 1; save(); syncAuto(); SND.blip(); toast('AUTO ' + (G.auto ? 'ON' : 'OFF')); if (!G.auto && G.AI) { G.AI.hold = 0; G.sp = false; } };
+syncAuto();
 function pause() { if (G.phase !== 'play') return; G.phase = 'pause'; show('#pause', true); SND.blip(); SND.duck(true); G.sp = false; }
 $('#tPause').onclick = pause;
 $('#tBgm').onclick = () => { SND.unlock(); $('#tBgm').classList.toggle('off', !SND.toggleBgm()); if (G.phase !== 'play' && G.phase !== 'levelup' && G.phase !== 'pause') SND.bgm(false); };
@@ -714,7 +753,7 @@ toTitle();
 const LOCAL = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || location.protocol === 'file:';
 const qa = new URLSearchParams(location.search);
 window.__vl.tick = (n, ms) => { for (let i = 0; i < (n || 1); i++) tick((lastT || performance.now()) + (ms || 16)); };
-window.__vl.start = i => { if (i != null) G.sel = i; startGame(); }; window.__vl.lu = openLevelUp; window.__vl.shop = openShop; window.__vl.dex = openDex; window.__vl.spawn = spawnEnemy; window.__vl.boss = spawnBoss; window.__vl.over = gameOver; window.__vl.horn = horn; window.__vl.ending = openEnding; window.__vl.dexDone = () => dexDone(); window.__vl.WEAPONS = WEAPONS;
+window.__vl.start = i => { if (i != null) G.sel = i; startGame(); }; window.__vl.lu = openLevelUp; window.__vl.shop = openShop; window.__vl.dex = openDex; window.__vl.spawn = spawnEnemy; window.__vl.boss = spawnBoss; window.__vl.over = gameOver; window.__vl.horn = horn; window.__vl.ending = openEnding; window.__vl.dexDone = () => dexDone(); window.__vl.WEAPONS = WEAPONS; window.__vl.AUTO_CFG = AUTO_CFG;
 if (LOCAL && qa.get('dbg')) window.onerror = (m, src, l, c) => { document.title = 'ERR ' + m + ' @' + l + ':' + c; };
 if (LOCAL && qa.get('auto')) { const w = () => { if (ready < 2) return setTimeout(w, 60); SAVE.unlock = 31; G.sel = +(qa.get('guard') || 0); startGame(); if (qa.get('t')) { G.time = +qa.get('t'); G.bossI = BOSS_AT.filter(b => b[0] < G.time).length; } const n = +qa.get('frames') || 0; if (qa.get('key')) G.keys[qa.get('key')] = true; for (let i = 0; i < n; i++) tick((lastT || performance.now()) + 16); if (qa.get('dbg')) document.title = JSON.stringify({ kills: G.kills, lv: G.P.lv, E: G.E.length, B: G.B.length, hp: Math.round(G.P.hp), phase: G.phase, w: G.P.weapons.map(w => w.k + w.lv) }); }; w(); }
 })();
