@@ -225,3 +225,9 @@
 .pm .cropbox i[data-h=e] { top: 50%; margin-top: -11px; right: -11px; cursor: ew-resize; }
 .pm .croptop { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; margin-top: 16px; }
 .pm .cropinfo { font-weight: 800; font-size: 17px; color: var(--green-lit); }
+
+/* QR 만들기·스캔 페이지 전환 (2026-10-10) — 아래 모드 단추와 다르게 회색 바탕 반반 */
+.pm .qrsw { display: flex; gap: 4px; background: #f1f2f4; padding: 4px; border-radius: 14px; margin: 0 0 16px; }
+.pm .qrsw a { flex: 1; text-align: center; padding: 11px 6px; border-radius: 10px; font-size: 16px; font-weight: 800; color: var(--ink-2); text-decoration: none; }
+.pm .qrsw a.on { background: #fff; color: var(--ink); box-shadow: 0 1px 3px rgba(20,25,40,.14); }
+.pm .qrsw a:not(.on):hover { color: var(--ink); }
