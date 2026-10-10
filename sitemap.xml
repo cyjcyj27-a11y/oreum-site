@@ -118,6 +118,14 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://oreumgames.com/apps/manse/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/apps/manse/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/apps/manse/"/>
+    <lastmod>2026-10-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://oreumgames.com/apps/pdf-merge/</loc>
     <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/apps/pdf-merge/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/apps/pdf-merge/"/>

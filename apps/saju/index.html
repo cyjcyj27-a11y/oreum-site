@@ -8804,6 +8804,22 @@ var state = { gender: 'none', mbti: null, lastResult: null };
   $('#shareBtn').addEventListener('click', shareResult);
 
   forgetSaved();
+
+  /* 만세력(/apps/manse/)에서 넘어온 생년월일 — 읽자마자 지우고 바로 풀이한다 (2026-10-10) */
+  (function fromManse() {
+    var raw = null;
+    try { raw = sessionStorage.getItem('oreum_to_saju'); sessionStorage.removeItem('oreum_to_saju'); } catch (e) {}
+    if (!raw) return;
+    try {
+      var v = JSON.parse(raw);
+      $('#y').value = v.y; $('#m').value = v.m; $('#d').value = v.d;
+      if (typeof v.h === 'number') $('#hour').value = String(v.h);
+      var gv = v.g === 'm' ? 'male' : v.g === 'f' ? 'female' : 'none';
+      var gb = document.querySelector('#gender .seg-btn[data-v="' + gv + '"]');
+      if (gb) gb.click();
+      onSubmit({ preventDefault: function () {} });
+    } catch (e) {}
+  })();
 })();
 
 function showScreen(which) {
@@ -9198,8 +9214,16 @@ function renderResult(input, r) {
   /* 2027 운세는 따로 페이지에서 길게 본다 (사장님 2026-09-28) */
   h.push('<a class="yr-next ko" href="/apps/saju/2027/">2027년 운세 보기</a>' +
          '<a class="yr-next en" href="/en/apps/saju/2027/">2027 Fire Goat predictions</a>');
+  /* 같은 생년월일로 만세력(사주팔자 원국·대운·세운) 보기 (2026-10-10) */
+  h.push('<button type="button" class="yr-next ko to-manse" id="toManse" style="width:100%;cursor:pointer">만세력으로 대운과 세운 보기</button>');
 
   $('#result').innerHTML = h.join('');
+  var tm = document.getElementById('toManse');
+  if (tm) tm.addEventListener('click', function () {
+    try { sessionStorage.setItem('oreum_to_manse', JSON.stringify({ y: input.year, m: input.month, d: input.day, h: input.hourIndex,
+      g: input.gender === 'male' ? 'm' : input.gender === 'female' ? 'f' : '' })); } catch (e) {}
+    location.href = '/apps/manse/';
+  });
 
   // 막대 애니메이션 (십신 분포 등)
   requestAnimationFrame(function () {
