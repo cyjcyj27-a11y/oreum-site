@@ -241,7 +241,8 @@
               'pv_piano', 'appmin_piano', 'pv_pianosheet', 'appmin_pianosheet',   // 피아노 연습·피아노 악보(2026-10-07)
               'pv_manse', 'appmin_manse',   // 만세력(2026-10-10)
               'pv_resume', 'appmin_resume', 'pv_contract', 'appmin_contract', 'pv_invoice', 'appmin_invoice',   // 각종 서식(2026-10-10)
-              'pv_simri', 'pv_simri_mbti', 'pv_simri_age', 'pv_simri_love', 'pv_simri_job', 'pv_simri_play', 'appmin_simri'];   // 심리테스트 소개 다섯 쪽·본체, 표에선 한 칸 합계(2026-10-11)
+              'pv_simri', 'pv_simri_mbti', 'pv_simri_age', 'pv_simri_love', 'pv_simri_job', 'pv_simri_play', 'appmin_simri',
+              'pv_iqtest', 'pv_iqtest_play', 'appmin_iqtest'];   // 다중지능 테스트 소개·본체(2026-10-11) / 심리테스트 소개 다섯 쪽·본체, 표에선 한 칸 합계(2026-10-11)
   // 한꺼번에 많이 부르면 속도 제한에 걸리므로 나눠 부르고 사이에 잠깐 쉽니다.
   // 3개씩 260ms로는 화면이 뜨기까지 30초가 걸려서 멈춘 것처럼 보였습니다.
   // 막히면 위 get()이 알아서 쉬었다 다시 부르므로, 여기서는 조금 넉넉하게 갑니다.
@@ -395,6 +396,7 @@
       function (d) { return d.appmin_resume + d.appmin_contract + d.appmin_invoice; }, '/apps/resume/'],   // 이력서·계약서·거래명세서 한 칸 합계(사장님 10/11)
     ['심리테스트', function (d) { return d.pv_simri + d.pv_simri_mbti + d.pv_simri_age + d.pv_simri_love + d.pv_simri_job + d.pv_simri_play; },
       function (d) { return d.appmin_simri; }, '/apps/simri/'],
+    ['다중지능 테스트(아이큐테스트)', function (d) { return d.pv_iqtest + d.pv_iqtest_play; }, function (d) { return d.appmin_iqtest; }, '/apps/iqtest/'],
     ['앱스 목록', function (d) { return d.pv_apps; }, function () { return 0; }, '/apps/']
   ];
   function renderApps(d) {
@@ -453,7 +455,8 @@
                        'pv_imgconvert', 'pv_imgcompress', 'pv_imgcrop', 'appmin_imgconvert', 'appmin_imgcompress', 'appmin_imgcrop',
                        'pv_piano', 'appmin_piano', 'pv_pianosheet', 'appmin_pianosheet', 'pv_manse', 'appmin_manse',
                        'pv_resume', 'appmin_resume', 'pv_contract', 'appmin_contract', 'pv_invoice', 'appmin_invoice',
-                       'pv_simri', 'pv_simri_mbti', 'pv_simri_age', 'pv_simri_love', 'pv_simri_job', 'pv_simri_play', 'appmin_simri'];
+                       'pv_simri', 'pv_simri_mbti', 'pv_simri_age', 'pv_simri_love', 'pv_simri_job', 'pv_simri_play', 'appmin_simri',
+                       'pv_iqtest', 'pv_iqtest_play', 'appmin_iqtest'];
         if (appKeys.some(function (k) { return !(k in v); })) {
           fetchChunked(appKeys, 4, 1200).then(function (vs) {
             appKeys.forEach(function (k, i) { if (!(k in v)) d[k] = vs[i] || 0; });
