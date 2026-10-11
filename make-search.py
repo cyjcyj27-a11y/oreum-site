@@ -41,6 +41,13 @@ ALIASES = {
 }
 
 
+# 목록에선 한 카드로 묶였지만 검색에선 따로 찾혀야 하는 페이지(2026-10-11, 「각종 서식」 카드에 묶인 계약서·거래명세서)
+EXTRA = {"ko": [
+    {"u": "/apps/contract/", "n": "계약서 양식", "t": "표준근로계약서 · 부동산 매매계약서", "i": "/assets/contract-cover.webp?v=1"},
+    {"u": "/apps/invoice/", "n": "거래명세서", "t": "거래명세표 양식 · 자동 계산 · 두 부 인쇄", "i": "/assets/invoice-cover.webp?v=1"},
+], "en": []}
+
+
 def read(path):
     with io.open(os.path.join(HERE, path), encoding="utf-8") as f:
         return f.read()
@@ -72,6 +79,7 @@ def cards(lang):
                 if lang == "ko" and u in ALIASES:
                     c["a"] = ALIASES[u]
                 out.append(c)
+    out += [dict(c) for c in EXTRA[lang] if c["u"] not in seen]
     return out
 
 
