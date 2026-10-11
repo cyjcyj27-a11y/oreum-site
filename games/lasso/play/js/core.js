@@ -234,6 +234,7 @@
     oof(v) { const t = AU.ctx.currentTime, f = 170 * (v || 1); const o = AU.ctx.createOscillator(), g = AU.ctx.createGain(), bp = AU.ctx.createBiquadFilter(); // 사람 "어이쿠"
       o.type = 'sawtooth'; o.frequency.setValueAtTime(f * 1.5, t); o.frequency.exponentialRampToValueAtTime(f * 0.7, t + 0.28); bp.type = 'bandpass'; bp.frequency.setValueAtTime(900, t); bp.frequency.exponentialRampToValueAtTime(500, t + 0.28); bp.Q.value = 3;
       g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.3, t + 0.03); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.32); o.connect(bp); bp.connect(g); g.connect(AU.master); o.start(t); o.stop(t + 0.4); },
+    strain(k) { if (smp('creak', 0.32 + k * 0.1, 1.05 + k * 0.07)) return; const t = AU.ctx.currentTime; noise(t, 0.22, 0.35 + k * 0.06, 420 + k * 60, 0.7); tone(180 + k * 25, t, 0.2, 'sawtooth', 0.05, 0.3); },   // 줄이 늘어나 삐걱(풀림 경고)
     slip() { const t = AU.ctx.currentTime; noise(t, 0.25, 0.4, 2000, 1); tone(500, t, 0.25, 'sine', 0.08, 0.4); },
     hoof(v) { const t = AU.ctx.currentTime; noise(t, 0.06, 0.5 * (v || 1), 240, 1.4, null, 'lowpass'); tone(95, t, 0.05, 'sine', 0.22 * (v || 1), 0.6); },
     step() { const t = AU.ctx.currentTime; noise(t, 0.05, 0.14, 900, 1.2); },

@@ -212,6 +212,13 @@
       P.needsUpdate = true; N.needsUpdate = true; U.needsUpdate = true; this.mesh.visible = true;
     }
     hide() { this.mesh.visible = false; }
+    // 풀리기 직전 경고(f 0~1): 줄이 점점 빨개지고 끝에 가까울수록 빨리 깜박인다(10/11 포럼 "끊기기 전에 신호가 있나")
+    tint(f, t) {
+      if (!(f > 0)) { if (this.mesh.material !== ropeMat) this.mesh.material = ropeMat; return; }
+      if (!this.wm) { this.wm = ropeMat.clone(); this.wm.emissive = new THREE.Color(0, 0, 0); }
+      this.mesh.material = this.wm; const k = f * (0.75 + 0.25 * Math.sin(t * (6 + f * 16)));
+      this.wm.color.setRGB(1, 1 - 0.85 * k, 1 - 0.9 * k); this.wm.emissive.setRGB(0.9 * k, 0.05 * k, 0.02 * k);
+    }
   }
   // 올가미 고리: 고리를 따라 무늬가 감기게 무늬 좌표를 바꿔 넣는다(둘레 방향 = 가로, 고리 방향 = 세로)
   const loopGeo = new THREE.TorusGeometry(1, 0.03, 8, 40); loopGeo.rotateX(PI / 2);

@@ -442,7 +442,7 @@
   }
   // ── 올가미가 풀린다 → 맨몸 추격(Space 연타) → 격투 ──
   // 끌고 간 거리가 LOOSE_D 를 넘으면 줄이 풀려 달아난다(현상범마다 한 번). 주인공은 누구보다 빠르지만 뒤 번호일수록 더 빨리 두드려야 따라잡는다
-  const LOOSE_D = 80, CHASE_V0 = 4.6, CHASE_K = 0.62;
+  const LOOSE_D = 80, CHASE_V0 = 4.6, CHASE_K = 0.62, WARN_D = [50, 60, 67, 72, 76, 79];
   const looseV = id => 5.0 + (id - 1) * 0.267;   // 1번 5.0(초당 1번쯤) … 13번 8.2(초당 6번쯤)
   function tugUI(txt) { const e = $('#tug'); e.classList.toggle('on', !!txt); document.body.classList.toggle('mash-run', txt === 'RUN'); document.body.classList.toggle('mash-fight', txt === 'FIGHT'); e.classList.toggle('fight', txt === 'FIGHT'); e.querySelector('b').textContent = txt || 'PULL'; }
   function endChase() { if (G.fight) CAM.tDist = 7.5; G.chase = null; G.fight = null; tugUI(''); }
@@ -518,7 +518,10 @@
         o.coinT -= dt; if (!reel && o.coinT <= 0 && o.coins < 10) { o.coinT = 1.6 + Math.random() * 2.4; o.coins++; const v = 1 + Math.floor(Math.random() * 3); setMoney(G.money + v, true); sfx('coin', o.coins); ftext('+$' + v, _a.copy(o.pos).setY(o.pos.y + 0.8)); } }
       // 밧줄
       const rp = capRopes[i]; if (i === 0) { if (H.mode === 'ride' || G.chase) _a.set(horse.pos.x - fx * 0.5, horse.pos.y + (horse.pony ? 1.42 : 1.75), horse.pos.z - fz * 0.5); else hero.bones.lh ? hero.bones.lh.getWorldPosition(_a) : _a.copy(hero.pos).setY(hero.pos.y + 1); } else captives[i - 1].p.chest(_a);
-      P.chest(_b); rp.hang(_a, _b, Math.max(0.03, (Lr - d) * 0.5), heightAt);
+      // 풀림 경고: 50m 부터 줄이 빨개지고 떨리며, 50·60·67·72·76·79m 에서 점점 크게 삐걱인다
+      const wf = (!o.tight && !G.deliver) ? clamp((o.dragD - WARN_D[0]) / (LOOSE_D - WARN_D[0]), 0, 1) : 0;
+      o.warnI = o.warnI || 0; while (wf > 0 && o.warnI < WARN_D.length && o.dragD >= WARN_D[o.warnI]) { sfx('strain', o.warnI); o.warnI++; if (o.warnI >= 4) CAM.shake = Math.max(CAM.shake, 0.08 * o.warnI); }
+      P.chest(_b); rp.hang(_a, _b, Math.max(0.03, (Lr - d) * 0.5) + (wf > 0 ? Math.sin(o.t * 38) * 0.05 * wf : 0), heightAt); rp.tint(wf, o.t);
     });
     if (snapO) { captives.splice(captives.indexOf(snapO), 1); snapRope(snapO); }
     for (let i = captives.length; i < capRopes.length; i++) capRopes[i].hide();
