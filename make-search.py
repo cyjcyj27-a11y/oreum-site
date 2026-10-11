@@ -45,6 +45,11 @@ ALIASES = {
 EXTRA = {"ko": [
     {"u": "/apps/contract/", "n": "계약서 양식", "t": "표준근로계약서 · 부동산 매매계약서", "i": "/assets/contract-cover.webp?v=1"},
     {"u": "/apps/invoice/", "n": "거래명세서", "t": "거래명세표 양식 · 자동 계산 · 두 부 인쇄", "i": "/assets/invoice-cover.webp?v=1"},
+    # 「심리테스트」 카드에 묶인 테스트 넷(2026-10-11)
+    {"u": "/apps/simri/mbti/", "n": "MBTI테스트", "t": "60문항 · 16가지 성격유형", "i": "/assets/simri-mbti-og.webp?v=1"},
+    {"u": "/apps/simri/age/", "n": "정신연령테스트", "t": "20문항으로 보는 내 마음 나이", "i": "/assets/simri-age-og.webp?v=1"},
+    {"u": "/apps/simri/love/", "n": "연애테스트", "t": "애착 유형 연애심리테스트", "i": "/assets/simri-love-og.webp?v=1"},
+    {"u": "/apps/simri/job/", "n": "직업적성테스트", "t": "홀랜드 6유형 · 나에게 맞는 직업", "i": "/assets/simri-job-og.webp?v=1"},
 ], "en": []}
 
 
