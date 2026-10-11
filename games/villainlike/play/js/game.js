@@ -112,7 +112,7 @@ function drawPortrait(c, name, f) { const x = c.getContext('2d'); x.clearRect(0,
 const SAVE = { unlock: 1, best: {}, coins: 0, shop: {}, seen: {}, clears: 0 };
 try { const s = JSON.parse(localStorage.getItem('villainlike.save') || 'null'); if (s) Object.assign(SAVE, s); if (!SAVE.shop) SAVE.shop = {}; if (!SAVE.seen) SAVE.seen = {}; if (!SAVE.coins) SAVE.coins = 0; } catch (e) {}
 const SHOP = [
-  // 맨 위(PC 720 높이에서 일곱째 칸은 밑으로 숨어서). 자동 근무(10/11 사장님 "아이템을 구입하면 자동사냥"): 한 번 사면 위쪽 AUTO 단추로 이동을 맡김. 공격은 원래 자동
+  // 맨 위(PC 720 높이에서 일곱째 칸은 밑으로 숨어서). 자동 근무(10/10 사장님 "아이템을 구입하면 자동사냥"): 한 번 사면 위쪽 AUTO 단추로 이동을 맡김. 공격은 원래 자동
   { k: 'auto', n: ['자동근무', 'Auto Shift'], icon: 'auto', d: ['알아서 피하고 줍기', 'Dodges and collects for you'], base: 2000, max: 1 },
   { k: 'atk', n: ['캔커피한박스', 'Coffee Case'], icon: 'i_coffee', d: ['공격 +6%', 'DAMAGE +6%'], base: 40 },
   { k: 'hp', n: ['삼각김밥묶음', 'Rice Triangle Pack'], icon: 'i_gimbap', d: ['최대체력 +10', 'MAX HP +10'], base: 40 },
@@ -129,7 +129,7 @@ function seen(k) { if (!SAVE.seen[k]) { SAVE.seen[k] = 1; save(); } }
 function save() { try { localStorage.setItem('villainlike.save', JSON.stringify(SAVE)); } catch (e) {} }
 
 // ---------- 상태 ----------
-const G = { phase: 'title', sel: 0, t: 0, time: 0, P: null, E: [], B: [], GEM: [], FX: [], DN: [], AURA: [], CLOUD: [], TRAIN: null, kills: 0, spawnT: 0, bossI: 0, cam: { x: 0, y: 0 }, keys: {}, pad: { x: 0, y: 0 }, shake: 0, flash: 0, dawn: 0, paused: false, run: 0, coins: 0, demonDown: false };
+const G = { phase: 'title', sel: 0, t: 0, time: 0, P: null, E: [], B: [], GEM: [], FLY: [], FX: [], DN: [], AURA: [], CLOUD: [], TRAIN: null, kills: 0, spawnT: 0, bossI: 0, cam: { x: 0, y: 0 }, keys: {}, pad: { x: 0, y: 0 }, shake: 0, flash: 0, dawn: 0, paused: false, run: 0, coins: 0, demonDown: false };
 window.__vl = { G, SAVE };
 function rnd(a, b) { return a + Math.random() * (b - a); }
 function hash(x, y) { let h = (x * 374761393 + y * 668265263) | 0; h = (h ^ (h >> 13)) * 1274126177; return ((h ^ (h >> 16)) >>> 0) / 4294967296; }
@@ -293,13 +293,13 @@ function updatePlayer(dt) {
   }
   if (!G.sp) P.held = false;
   // 승차권 줍기
-  for (const g of G.GEM) { g.t += dt; const dx = P.x - g.x, dy = P.y - 20 - g.y, d = Math.hypot(dx, dy) || 1; if (d < P.magnet) { const sp = 320 + (P.magnet - d) * 6; g.x += dx / d * sp * dt; g.y += dy / d * sp * dt; } if (d < 22) { g.dead = true; if (g.heal) { P.hp = Math.min(P.maxhp, P.hp + g.heal); toast('+' + g.heal); SND.levelup(); } else { P.xp += g.v * P.xpMul; SND.gem(); } } }
+  for (const g of G.GEM) { g.t += dt; const dx = P.x - g.x, dy = P.y - 20 - g.y, d = Math.hypot(dx, dy) || 1; if (d < P.magnet) { const sp = 320 + (P.magnet - d) * 6; g.x += dx / d * sp * dt; g.y += dy / d * sp * dt; } if (d < 22) { g.dead = true; if (!g.heal && G.FLY.length < 30) G.FLY.push({ x: sx(g.x), y: sy(g.y), t: 0, big: g.v >= 3 }); if (g.heal) { P.hp = Math.min(P.maxhp, P.hp + g.heal); toast('+' + g.heal); SND.levelup(); } else { P.xp += g.v * P.xpMul; SND.gem(); } } }
   G.GEM = G.GEM.filter(g => !g.dead); if (G.GEM.length > 400) G.GEM.splice(0, G.GEM.length - 400);
   if (P.xp >= P.need) { P.xp -= P.need; P.lv++; P.hp = Math.min(P.maxhp, P.hp + 15); P.need = Math.round(10 + P.lv * 7 + P.lv * P.lv * 1.3); $('#hLv').textContent = P.lv; openLevelUp(); }
   $('#xpfill').style.width = Math.min(100, P.xp / P.need * 100) + '%';
 }
 // 자동 근무 길찾기: 0.12초마다 둘러보고(사람처럼 조금 늦게) 빌런 무리 반대쪽으로, 안전하면 승차권, 체력이 낮으면 회복 먼저. 경적은 꽉 차고 빌런이 많을 때
-// 실력: 0.35초마다 둘러보고 200 안쪽만 봄(10/11 봇으로 잼: 상점 0단계 4~10분, 2단계부터 막차까지 버팀). 막차 대악마는 손으로(자동이 꺼짐)
+// 실력: 0.35초마다 둘러보고 200 안쪽만 봄(10/10 봇으로 잼: 상점 0단계 4~10분, 2단계부터 막차까지 버팀). 막차 대악마는 손으로(자동이 꺼짐)
 const AUTO_CFG = { look: 0.35, R: 200, greed: 0.03, safe: 110, horn: 1 };
 function autoSteer(dt, manual) {
   const P = G.P, A = G.AI || (G.AI = { x: 0, y: 0, tx: 0, ty: 0, t: 0, hold: 0 });
@@ -531,6 +531,21 @@ function drawWorld() {
   const z = zone(); const vg = ctx.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.42, W / 2, H / 2, Math.max(W, H) * 0.75); vg.addColorStop(0, z.v + '0)'); vg.addColorStop(1, z.v + (G.time > 600 ? '.78)' : '.55)')); ctx.fillStyle = vg; ctx.fillRect(0, 0, W, H);
   if (G.flash > 0) { ctx.fillStyle = 'rgba(224,69,58,' + (G.flash * 1.4) + ')'; ctx.fillRect(0, 0, W, H); }
   if (G.dawn > 0) { ctx.fillStyle = 'rgba(255,226,170,' + Math.min(0.8, G.dawn * 0.5) + ')'; ctx.fillRect(0, 0, W, H); }
+  drawFly();
+}
+// 주운 승차권이 위쪽 경험치 줄 끝으로 날아가 꽂힌다(10/10 사장님 "모인 게 화면에 안 보인다")
+function drawFly() {
+  if (!G.FLY.length) return; const dt = G.phase === 'play' ? G.dtLast || 0.016 : 0; const P = G.P, tx = W * Math.min(1, P.xp / P.need), ty = 6; let hit = 0;
+  for (const f of G.FLY) {
+    f.t += dt / 0.42; const t = Math.min(1, f.t), e = t * t * (3 - 2 * t);
+    const cx = (f.x + tx) / 2 + (f.x < tx ? -60 : 60), cy = Math.min(f.y, ty) - 40; const u = 1 - e;
+    const x = u * u * f.x + 2 * u * e * cx + e * e * tx, y = u * u * f.y + 2 * u * e * cy + e * e * ty;
+    const s = 1.5 - e * 0.6, w = (f.big ? 16 : 12) * s, h = (f.big ? 10 : 8) * s;
+    ctx.save(); ctx.translate(x, y); ctx.rotate(e * 6.3); R(-w / 2 - 1, -h / 2 - 1, w + 2, h + 2, '#1e2128'); R(-w / 2, -h / 2, w, h, f.big ? '#f2c744' : '#0052a4'); R(-w / 2, -h * 0.05, w, Math.max(1, h * 0.18), '#fff'); ctx.restore();
+    if (f.t >= 1) { f.dead = true; hit++; }
+  }
+  G.FLY = G.FLY.filter(f => !f.dead);
+  if (hit && G.t - (G.xpHitT || 0) > 0.12) { G.xpHitT = G.t; const b = $('#xpbar'); b.classList.remove('hit'); void b.offsetWidth; b.classList.add('hit'); }
 }
 function drawFX() {
   for (const f of G.FX) {
@@ -564,7 +579,7 @@ function buildTitle() {
 function toTitle() { show('#ending', false); G.phase = 'title'; document.body.classList.remove('playing'); show('#title', true); show('#over', false); show('#pause', false); show('#levelup', false); show('#shop', false); show('#dex', false); if (ready >= 2) buildTitle(); G.titleT = 0; SND.boss(false); }
 function startGame() {
   G.phase = 'play'; document.body.classList.add('playing'); show('#title', false); show('#over', false); show('#pause', false);
-  G.P = newPlayer(G.sel); G.E = []; G.B = []; G.GEM = []; G.FX = []; G.DN = []; G.AURA = []; G.CLOUD = []; G.TRAIN = null; G.kills = 0; G.coins = 0; G.time = 0; G.spawnT = 0.6; G.bossI = 0; G.cam = { x: 0, y: -30 }; G.shake = 0; G.flash = 0; G.dawn = 0; G.run++; G.demonDown = false; G.lastTrain = false; G.endT = 0;
+  G.P = newPlayer(G.sel); G.E = []; G.B = []; G.GEM = []; G.FX = []; G.DN = []; G.AURA = []; G.CLOUD = []; G.TRAIN = null; G.FLY = []; G.kills = 0; G.coins = 0; G.coinShown = -1; document.body.classList.remove('tight'); G.time = 0; G.spawnT = 0.6; G.bossI = 0; G.cam = { x: 0, y: -30 }; G.shake = 0; G.flash = 0; G.dawn = 0; G.run++; G.demonDown = false; G.lastTrain = false; G.endT = 0;
   $('#hKill').textContent = 0; $('#hLv').textContent = 1; $('#hTime').textContent = fmt(NIGHT); $('#xpfill').style.width = '0%'; $('#hSta').textContent = T2(STATIONS[0]);
   SND.boss(false); SND.bgm(true); G.AI = null; G.autoLock = false; syncAuto();
 }
@@ -729,6 +744,8 @@ function tick(now) {
   if (G.phase === 'ending') { drawEnding(dt); return; }
   if (G.phase === 'title' || G.phase === 'shop' || G.phase === 'dex') { drawTitle(dt); return; }
   if (G.phase === 'play') {
+    if (G.t - (G.fitT || 0) > 1) { G.fitT = G.t; const last = $('#tSfx').getBoundingClientRect(), t0 = $('#hTime').getBoundingClientRect(), c0 = $('#hCoin').getBoundingClientRect(); if (!document.body.classList.contains('tight') && (last.right > innerWidth + 0.5 || c0.top > t0.top + 4)) document.body.classList.add('tight'); }
+    if (G.coins !== G.coinShown) { G.coinShown = G.coins; const c = $('#hCoin'); c.textContent = G.coins.toLocaleString(); if (G.t - (G.coinBumpT || 0) > 0.15) { G.coinBumpT = G.t; const b = c.parentNode; b.classList.remove('bump'); void b.offsetWidth; b.classList.add('bump'); } }
     G.time += dt; $('#hTime').textContent = G.time >= NIGHT ? L('last') : fmt(NIGHT - G.time); const st = T2(station()); if ($('#hSta').textContent !== st) $('#hSta').textContent = st;
     const PF = G.prof, q0 = PF ? performance.now() : 0;
     updatePlayer(dt); const q1 = PF ? performance.now() : 0;

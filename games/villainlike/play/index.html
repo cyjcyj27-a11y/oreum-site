@@ -54,7 +54,18 @@ body:not(.playing) #topbar .game{display:none}
   .stat{height:30px;font-size:15px;padding:0 7px}
   .sheet{padding-top:calc(104px + env(safe-area-inset-top))}
 }
-#xpbar{position:fixed;left:0;right:0;top:0;height:6px;background:#0d0e10;z-index:21}
+/* 코인 칸이 늘어 위쪽 줄이 빠듯함: 폰에선 LED 칸을 조금 좁게. 그래도 넘치면(늦은 판 긴 역 이름+큰 숫자) 역 이름 칸을 숨김 — 기둥 표지판에도 역 이름이 있음 */
+@media (max-width:900px){#topbar{gap:4px}.stat{padding:0 6px;gap:4px}.stat i{font-size:11px}.stat.coin .coinI{width:11px;height:11px}}
+@media (max-width:900px) and (min-width:561px){.stat{font-size:16px}}
+@media (max-width:400px){.stat{font-size:14px;padding:0 5px}}
+body.tight #topbar .stat.sta{display:none}
+#xpbar{position:fixed;left:0;right:0;top:0;height:10px;background:#0d0e10;border-bottom:2px solid var(--ink);z-index:21}
+#xpbar.hit b{animation:xpHit .25s ease-out}
+@keyframes xpHit{0%{filter:brightness(2.2);box-shadow:0 0 14px #9cc3ff}100%{filter:none}}
+.stat.coin{color:#ffd84a;text-shadow:0 0 6px rgba(255,216,74,.6)}
+.stat.coin .coinI{margin-right:0}
+.stat.bump{animation:coinBump .22s ease-out}
+@keyframes coinBump{40%{transform:scale(1.12)}}
 #xpbar b{display:block;height:100%;width:0;background:linear-gradient(90deg,#4f8ae0,var(--navy));box-shadow:0 0 6px #4f8ae0}
 body:not(.playing) #xpbar{display:none}
 body.playing #oreumFs{display:none}
@@ -164,6 +175,7 @@ body.touch #hint,body:not(.playing) #hint{display:none}
   <div class="stat game sta"><span id="hSta">소요산</span></div>
   <div class="stat game"><i>LV</i><span id="hLv">1</span></div>
   <div class="stat game"><i data-l="kills">검거</i><span id="hKill">0</span></div>
+  <div class="stat game coin"><i class="coinI"></i><span id="hCoin">0</span></div>
   <div class="spacer"></div>
   <div class="tog game" id="tPause" title="PAUSE"><svg viewBox="0 0 24 24"><rect x="6" y="5" width="4" height="14" fill="#fff"/><rect x="14" y="5" width="4" height="14" fill="#fff"/></svg></div>
   <div class="tog game" id="tAuto" title="AUTO">AUTO</div>
@@ -231,7 +243,7 @@ body.touch #hint,body:not(.playing) #hint{display:none}
 <script src="js/icons.js?v=1"></script>
 <script src="js/sfx.js?v=1"></script>
 <script src="js/audio.js?v=1"></script>
-<script src="js/game.js?v=2"></script>
+<script src="js/game.js?v=3"></script>
 <script src="/assets/visit.js?v=17" defer></script>
 <script src="/assets/game-events.js?v=2" defer></script>
 </body>
