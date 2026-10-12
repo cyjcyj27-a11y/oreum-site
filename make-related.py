@@ -18,6 +18,7 @@ import io, os, re, sys
 
 # slug, 한국어 경로, 영어 경로, 한국어 이름, 한국어 장르 앵커, 영어 이름, 영어 장르 앵커, 태그
 GAMES = [
+    ("ddakji",        "/games/flash/ddakji/",        "/en/games/flash/ddakji/",        "딱지치기",          "딱지치기 게임 전통놀이",             "Ddakji",                "ddakji game online",            {"casual", "kids", "physics"}),
     ("villainlike",   "/games/villainlike/",         "/en/games/villainlike/",         "빌런라이크",        "빌런라이크 뱀서류 게임",              "VILLAIN LIKE",          "subway survivors-like bullet heaven game", {"action", "arcade", "casual", "korean"}),
     ("line1",         "/games/line1/",               "/en/games/line1/",               "1호선 빌런",        "1호선 빌런 지하철 디펜스게임",        "LINE 1 VILLAINS",       "korean subway tower defense game", {"strategy", "casual", "korean"}),
     ("doublepark",    "/games/flash/doublepark/",    "/en/games/flash/doublepark/",    "이중주차 탈출",     "주차게임 차빼기 퍼즐",               "Double Parking Escape", "parking jam game online",       {"puzzle", "casual", "kids"}),
