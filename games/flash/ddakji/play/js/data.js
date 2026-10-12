@@ -47,9 +47,9 @@
   // 동네: 바닥 재질, 마찰, 바람이 얼마나 잘 드는가
   var PLACES = [
     { id: 'alley',  ko: '골목',      en: 'Alley',          tex: 'alley', fr: 0.75, air: 1.00, rep: 3.2, sun: '#ffd9a8' },
-    { id: 'park',   ko: '놀이터',    en: 'Playground',     tex: 'sand',  fr: 0.95, air: 0.92, rep: 2.6, sun: '#ffe2b8' },
-    { id: 'school', ko: '운동장',    en: 'Schoolyard',     tex: 'dirt',  fr: 0.85, air: 0.96, rep: 3.2, sun: '#ffc98e' },
-    { id: 'shop',   ko: '문방구 앞', en: 'Stationery Shop',tex: 'brick', fr: 0.70, air: 1.04, rep: 9.0, sun: '#ffb27a' }
+    { id: 'park',   ko: '놀이터',    en: 'Playground',     tex: 'sand',  base: '#d8c39a', fr: 0.95, air: 0.92, rep: 2.6, sun: '#ffe2b8' },
+    { id: 'school', ko: '운동장',    en: 'Schoolyard',     tex: 'dirt',  base: '#9a7a58', fr: 0.85, air: 0.96, rep: 3.2, sun: '#ffc98e' },
+    { id: 'shop',   ko: '문방구 앞', en: 'Stationery Shop',tex: 'brick', base: '#9a5442', fr: 0.70, air: 1.04, rep: 9.0, sun: '#ffb27a' }
   ];
   // 상대: [한글 이름, 영문, 동네, 까는 딱지 순서, 실력(tools/tune.py 로 맞춤), 말버릇]
   var O = [

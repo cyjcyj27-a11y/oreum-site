@@ -36,8 +36,20 @@
     initDust();
     resize();
   }
+  // 바닥 사진: 골목만 처음에 받고(js/tex/alley.js), 다른 동네는 타이틀 뒤에 뒤에서 받는다(file:// 에서도 되게 script 로)
+  var texWait = {};
+  function loadTex(key, cb) {
+    if (window.DDK_TEX && window.DDK_TEX[key]) { if (cb) cb(); return; }
+    if (texWait[key]) { if (cb) texWait[key].push(cb); return; }
+    texWait[key] = cb ? [cb] : [];
+    var s = document.createElement('script'); s.src = 'js/tex/' + key + '.js?v=2';
+    s.onload = function () { tex(key); var l = texWait[key]; texWait[key] = null; l.forEach(function (f) { f(); }); };
+    document.head.appendChild(s);
+  }
+  function preloadTex() { ['sand', 'dirt', 'brick'].forEach(function (k, i) { setTimeout(function () { loadTex(k); }, 400 + i * 600); }); }
   function tex(key) {
     if (texCache[key]) return texCache[key];
+    if (!window.DDK_TEX || !window.DDK_TEX[key]) return null;
     var d = window.DDK_TEX[key], ld = new T.TextureLoader();
     var up = function (t) { if (renderer) renderer.initTexture(t); };   // 다 읽히면 바로 GPU 에 올려 둔다(처음 그 동네에 갈 때 멈춤 방지)
     var c = ld.load(d.c, up), n = ld.load(d.n, up);
@@ -121,11 +133,18 @@
     var leaves = kind === 'park' || kind === 'school' ? 12 : 6;
     for (i = 0; i < leaves; i++) { s = spot(); var lg = new T.PlaneGeometry(0.3, 0.3); lg.rotateX(-Math.PI / 2); m = new T.Mesh(lg, leafMat); m.position.set(s[0], 0.004 + i * 0.0003, s[1]); m.rotation.y = R() * 6; decor.add(m); }
   }
+  var curPlace = null;
   function setPlace(pl) {
+    curPlace = pl;
     while (decor.children.length) { var o = decor.children.pop(); if (o.geometry && o.geometry !== stoneGeo && o.geometry !== capGeo && o.geometry !== marbleGeo) o.geometry.dispose(); }
-    var t = tex(pl.tex), rep = 40 / pl.rep;
-    [t.c, t.n].forEach(function (x) { x.repeat.set(rep, rep); });
-    ground.material.map = t.c; ground.material.normalMap = t.n; ground.material.normalScale.set(1.1, 1.1); ground.material.needsUpdate = true;
+    var put = function () {
+      if (curPlace !== pl) return;
+      var t = tex(pl.tex), rep = 40 / pl.rep;
+      [t.c, t.n].forEach(function (x) { x.repeat.set(rep, rep); });
+      ground.material.map = t.c; ground.material.normalMap = t.n; ground.material.normalScale.set(1.1, 1.1); ground.material.color.set('#fff'); ground.material.needsUpdate = true;
+    };
+    if (tex(pl.tex)) put();
+    else { ground.material.map = null; ground.material.normalMap = null; ground.material.color.set(pl.base || '#8a7a66'); ground.material.needsUpdate = true; loadTex(pl.tex, put); }
     sun.color.set(pl.sun);
     var R = srand(pl.id.length * 977 + 13);
     if (pl.id === 'alley') { decal(hopscotch(R), 2.6, 5.2, -5.2, -0.6, 0.25, 0.85); decal(doodle(R), 1.6, 1.6, 4.9, 2.6, 0.4, 0.7); }
@@ -198,6 +217,6 @@
     else camera.position.copy(camBase);
     renderer.render(scene, camera);
   }
-  window.DDKScene = { init: init, resize: resize, setPlace: setPlace, makeDdakji: makeDdakji, prewarm: prewarm, remove: remove, aimMark: aimMark, puff: puff, shake: shake, groundAt: groundAt, toScreen: toScreen, render: render, H: H,
+  window.DDKScene = { init: init, resize: resize, setPlace: setPlace, makeDdakji: makeDdakji, prewarm: prewarm, preloadTex: preloadTex, remove: remove, aimMark: aimMark, puff: puff, shake: shake, groundAt: groundAt, toScreen: toScreen, render: render, H: H,
     get camera() { return camera; }, get renderer() { return renderer; }, get scene() { return scene; } };
 })();

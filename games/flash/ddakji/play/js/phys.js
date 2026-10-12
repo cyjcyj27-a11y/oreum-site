@@ -1,10 +1,18 @@
 /* 물리 — Rapier 로 딱지를 떨어뜨리고, 바닥을 친 순간 옆 딱지 밑으로 바람(힘)을 넣는다 */
 (function () {
-  var RP = window.RAPIER, W = null, groundCol = null, Q = null;
+  var RP = null, W = null, groundCol = null, Q = null;
   var H = 0.07, DENS = 14, G = 42;
   var P = {
     ready: false,
-    init: function () { return RP.init().then(function () { P.reset(0.8); P.ready = true; }); },
+    // rapier.js(약 700KB)는 async 로 받는다 — 타이틀을 보는 동안 뒤에서 받고, 다 오면 준비 끝
+    init: function () {
+      return new Promise(function (res, rej) {
+        if (window.RAPIER) return res();
+        var s = document.getElementById('rapierjs');
+        if (!s) { s = document.createElement('script'); s.src = 'lib/rapier.js'; document.head.appendChild(s); }
+        s.addEventListener('load', res); s.addEventListener('error', rej);
+      }).then(function () { RP = window.RAPIER; return RP.init(); }).then(function () { P.reset(0.8); P.ready = true; });
+    },
     reset: function (fr) {
       if (W) W.free();
       W = new RP.World({ x: 0, y: -G, z: 0 }); W.timestep = 1 / 120;

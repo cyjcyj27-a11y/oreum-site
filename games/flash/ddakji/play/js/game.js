@@ -26,7 +26,7 @@
     var o = { p: p, m: m, t: t }; pairs.push(o); sync(o); return o;
   }
   function unpair(o, keepMesh) { if (!o) return; PH.kill(o.p); o.p = null; var i = pairs.indexOf(o); if (i >= 0) pairs.splice(i, 1); if (!keepMesh) S.remove(o.m); }
-  function clearAll() { pairs.slice().forEach(function (o) { unpair(o); }); tweens.forEach(function (w) { S.remove(w.m); }); tweens = []; timers = []; }
+  function clearAll() { titleMs.forEach(function (m) { S.remove(m); }); titleMs = []; titleD = null; pairs.slice().forEach(function (o) { unpair(o); }); tweens.forEach(function (w) { S.remove(w.m); }); tweens = []; timers = []; }
   function sync(o) { if (!o.p) return; var t = o.p.b.translation(), r = o.p.b.rotation(); o.m.position.set(t.x, t.y, t.z); o.m.quaternion.set(r.x, r.y, r.z, r.w); }
   // 메쉬만 날려 보내기(딴 딱지가 더미로 가는 것)
   function flyAway(o, tx, ty, tz, dur) {
@@ -203,7 +203,7 @@
       if (bubT > 0) { bubT -= dt; if (bubT <= 0) $('bub').classList.remove('on'); }
       if (slowT > 0) { slowT -= dt; if (slowT <= 0) timeScale = 1; }
       if (mode === 'play' && M) update(dt);
-      if (mode === 'play' || mode === 'end' || mode === 'title') {
+      if (PH.ready && (mode === 'play' || mode === 'end')) {
         acc += dt * timeScale; var n = 0;
         while (acc >= 1 / 120 && n < 10) { PH.step(onHit); acc -= 1 / 120; n++; }
         if (n >= 10) acc = 0;
@@ -212,7 +212,7 @@
         w.m.position.lerpVectors(w.a, w.b, e); w.m.position.y += Math.sin(k * Math.PI) * 1.4; w.m.rotation.y += dt * 4;
         if (k >= 1) { S.remove(w.m); tweens.splice(j, 1); } }
       pairs.forEach(sync);
-      if (mode === 'title' && titleD && titleD.p) PH.hold(titleD.p, -1.25, 1.35 + Math.sin(rt * 1.6) * 0.12, 0.9, Math.sin(rt * 1.1) * 0.12, 0.25 + Math.sin(rt * 1.3) * 0.08, 0.5);
+      if (mode === 'title' && titleD) { titleD.position.set(-1.25, 1.35 + Math.sin(rt * 1.6) * 0.12, 0.9); titleD.rotation.set(Math.sin(rt * 1.1) * 0.12, 0.5, 0.25 + Math.sin(rt * 1.3) * 0.08, 'YXZ'); }
     }
     if (!nr) S.render(dt);
   }
@@ -303,7 +303,7 @@
   }
   $('places').addEventListener('click', function (e) {
     var b = e.target.closest('.kid'); if (!b || b.classList.contains('lock')) return;
-    A.init(); A.click(); startMatch(+b.dataset.i);
+    A.init(); A.click(); var i = +b.dataset.i; whenReady(function () { startMatch(i); });
   });
   function openBag() {
     show('bag'); var h = '';
@@ -336,15 +336,19 @@
     setTimeout(function () { A.clear(); show('end'); $('endH').textContent = full ? L('딱지왕') : 'THE END'; var n = SV.seen.length; $('endN').textContent = n + ' / ' + TY.length; }, 4400);
   }
   // ── 타이틀 ──
-  var titleD = null;
+  var titleD = null, titleMs = [], waitFn = null;
+  // 물리 엔진이 아직 오는 중이면 다 온 뒤에 한다(시작 단추는 그동안 숨 쉬듯 깜빡)
+  function whenReady(fn) { if (PH.ready) fn(); else { waitFn = fn; var b = $('bStart'); if (b) b.classList.add('wait'); } }
+  function physReady() { var b = $('bStart'); if (b) b.classList.remove('wait'); if (waitFn) { var f = waitFn; waitFn = null; f(); } }
   function openTitle() {
     mode = 'title'; clearAll(); M = null; hud(false); show(null); $('title').classList.remove('hide');
-    S.setPlace(D.PLACES[0]); PH.reset(0.75);
-    pair(BY.cal, 0.5, -0.1, false, 0.3);
-    titleD = pair(BY[SV.eq], -1.25, 0.9, false, 0.5); PH.hold(titleD.p, -1.25, 1.35, 0.9, 0, 0.25, 0.5);
+    S.setPlace(D.PLACES[0]);
+    var m0 = S.makeDdakji(BY.cal); m0.position.set(0.5, PH.H / 2, -0.1); m0.rotation.y = 0.3;
+    titleD = S.makeDdakji(BY[SV.eq]); titleMs = [m0, titleD];
     var b = $('tBtns'), started = SV.cl > 0 || SV.own.length > 1;
     b.innerHTML = '<button class="btn" id="bStart">' + (started ? L('이어하기') : L('시작')) + '</button>';
-    $('bStart').onclick = function () { A.init(); A.click(); $('title').classList.add('hide'); if (started) openMap(); else startMatch(0); };
+    $('bStart').onclick = function () { A.init(); A.click(); whenReady(function () { $('title').classList.add('hide'); if (started) openMap(); else startMatch(0); }); };
+    if (!PH.ready) $('bStart').classList.add('wait');
   }
   // ── 단추 ──
   function on(id, fn) { $(id).addEventListener('click', function (e) { A.init(); A.click(); fn(e); }); }
@@ -366,5 +370,6 @@
   window.__dk = { get M() { return M; }, SV: SV, startMatch: startMatch, openPick: openPick, ending: ending, openMap: openMap, release: function (a, p) { release(a, p); }, blastOf: blastOf, save: save,
     setT: function (s) { timeScale = s; }, tick: function (n, dt, nr) { for (var i = 0; i < n; i++) tick(dt || 1 / 60, nr); } };
   // ── 시작 ──
-  PH.init().then(function () { openTitle(); requestAnimationFrame(frame); });
+  openTitle(); requestAnimationFrame(frame); S.preloadTex();
+  PH.init().then(physReady);
 })();
