@@ -18,6 +18,7 @@ import io, os, re, sys
 
 # slug, 한국어 경로, 영어 경로, 한국어 이름, 한국어 장르 앵커, 영어 이름, 영어 장르 앵커, 태그
 GAMES = [
+    ("toycrane",      "/games/flash/toycrane/",      "/en/games/flash/toycrane/",      "인형뽑기게임", "3D 인형뽑기게임",                 "TOY CRANE",             "claw machine game online",      {"arcade", "casual", "kids", "physics", "3d"}),
     ("colormix",      "/games/flash/colormix/",      "/en/games/flash/colormix/",      "색깔섞기 퍼즐게임", "물감 섞기 퍼즐게임",                 "Color Mix",             "color mixing game online",      {"puzzle", "casual", "kids"}),
     ("ddakji",        "/games/flash/ddakji/",        "/en/games/flash/ddakji/",        "딱지치기",          "딱지치기 게임 전통놀이",             "Ddakji",                "ddakji game online",            {"casual", "kids", "physics"}),
     ("villainlike",   "/games/villainlike/",         "/en/games/villainlike/",         "빌런라이크",        "빌런라이크 뱀서류 게임",              "VILLAIN LIKE",          "subway survivors-like bullet heaven game", {"action", "arcade", "casual", "korean"}),

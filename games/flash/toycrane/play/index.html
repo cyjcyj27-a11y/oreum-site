@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>인형뽑기게임</title>
+<style>
+/* 단추 소재 = 인형뽑기 기계 부품
+   주 단추: 크롬 테를 두른 분홍 아크릴 라이트박스(안쪽 흰 네온 줄, 글자에 분홍 번짐) · 보조: 크롬 금속 판에 보라 글자
+   HUD 알약: 검은 유리 LED 창(분홍 LED 숫자) · 둥근 단추: 크롬 링 아케이드 버튼 · 창: 크롬 나사 네 개 박은 짙은 보라 아크릴 판
+   DROP: 크롬 베젤 빨간 아케이드 버튼 · 패드: 오락기 조이스틱 */
+@font-face{font-family:'Star';src:url('fonts/title.woff2?v=1') format('woff2');font-display:block}
+@font-face{font-family:'Ui';src:url('fonts/ui.woff2?v=1') format('woff2');font-display:swap}
+:root{--pink:#ff4fa3;--pinkD:#c8146e;--ink:#2a0a3a;--chrome1:#ffffff;--chrome2:#c9c6d6;--chrome3:#7d7894;--led:#ff7ac4}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+html,body{width:100%;height:100%;overflow:hidden;background:#140c20;color:#fff;font-family:'Ui',-apple-system,'Malgun Gothic',sans-serif;
+  user-select:none;-webkit-user-select:none;touch-action:none;-webkit-text-size-adjust:100%}
+#cv{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:grab}
+#cv:active{cursor:grabbing}
+
+/* ---------- 단추 ---------- */
+.btn{position:relative;border:0;cursor:pointer;font:400 22px/1 'Ui',sans-serif;color:var(--ink);padding:12px 26px;min-width:120px;border-radius:14px;
+  background:linear-gradient(180deg,#ffffff 0%,#dedbe8 45%,#b4b0c6 100%);
+  box-shadow:inset 0 0 0 3px #5b5672,inset 0 4px 0 rgba(255,255,255,.9),inset 0 -5px 0 rgba(60,40,90,.18),0 5px 0 #3a3450,0 8px 14px rgba(0,0,0,.35);
+  transition:transform .22s cubic-bezier(.34,1.56,.64,1),box-shadow .22s,filter .15s;white-space:nowrap}
+.btn:hover{filter:brightness(1.08)}
+.btn:active{transform:translateY(3px) scale(.97);box-shadow:inset 0 0 0 3px #5b5672,inset 0 4px 0 rgba(255,255,255,.9),inset 0 -5px 0 rgba(60,40,90,.18),0 2px 0 #3a3450;transition-duration:.04s}
+.btn.main{font:400 30px/1 'Star','Ui',sans-serif;color:#fff;padding:15px 40px;min-width:200px;border-radius:18px;
+  background:linear-gradient(180deg,#ff9ad2 0%,#ff4fa3 45%,#d8187a 100%);
+  text-shadow:0 0 10px #ffd0ec,0 2px 0 #8a0a4a;
+  box-shadow:inset 0 0 0 4px #e9e6f2,inset 0 0 0 6px #6d6884,inset 0 6px 0 rgba(255,255,255,.55),inset 0 -7px 0 rgba(90,0,40,.3),0 6px 0 #4a3a5a,0 0 22px rgba(255,79,163,.55)}
+.btn.main::after{content:'';position:absolute;inset:9px;border-radius:10px;box-shadow:inset 0 0 0 2px rgba(255,255,255,.55),0 0 8px rgba(255,255,255,.4);pointer-events:none}
+.btn.main:active{box-shadow:inset 0 0 0 4px #e9e6f2,inset 0 0 0 6px #6d6884,inset 0 6px 0 rgba(255,255,255,.55),inset 0 -7px 0 rgba(90,0,40,.3),0 2px 0 #4a3a5a,0 0 30px rgba(255,79,163,.8)}
+.btn.sm{font-size:19px;padding:9px 18px;min-width:84px}
+.btn.main.sm{font-size:24px;padding:11px 24px;min-width:110px}
+
+/* ---------- 상단바 ---------- */
+#hud{position:fixed;top:0;left:0;right:0;z-index:5;display:flex;align-items:center;gap:6px;pointer-events:none;
+  padding:calc(6px + env(safe-area-inset-top)) calc(8px + env(safe-area-inset-right)) 10px calc(104px + env(safe-area-inset-left));
+  background:linear-gradient(180deg,rgba(10,2,16,.55),rgba(10,2,16,0))}
+.stat{display:flex;align-items:baseline;gap:6px;padding:4px 11px;min-height:34px;border-radius:9px;white-space:nowrap;
+  background:linear-gradient(180deg,#1a1022,#07040b);box-shadow:inset 0 0 0 2px #8d89a0,inset 0 0 0 3px #2a2436,0 3px 0 #05020a,inset 0 8px 10px rgba(255,255,255,.05)}
+.stat i{font-style:normal;font-size:12px;color:#c8b8d8;align-self:center}
+.stat b{font-family:'Star','Ui',sans-serif;font-weight:400;font-size:19px;color:var(--led);text-shadow:0 0 6px rgba(255,90,170,.9);font-variant-numeric:tabular-nums}
+.stat.click{pointer-events:auto;cursor:pointer}
+.stat.click:active{transform:translateY(2px)}
+#timer.low b{color:#ffd24a;text-shadow:0 0 8px rgba(255,200,60,.9)}
+.sp{flex:1 1 6px}
+.seg{display:flex;pointer-events:auto;border-radius:9px;overflow:hidden;background:linear-gradient(180deg,#1a1022,#07040b);box-shadow:inset 0 0 0 2px #8d89a0,0 3px 0 #05020a}
+.seg b{font-weight:400;font-size:15px;padding:8px 10px;color:#a898b8;cursor:pointer;white-space:nowrap}
+.seg b+b{box-shadow:inset 1px 0 0 #3a3448}
+.seg b.on{color:#fff;background:radial-gradient(ellipse at 50% 120%,rgba(255,79,163,.85),rgba(255,79,163,.25));text-shadow:0 0 6px #ff9ad2}
+.tog{pointer-events:auto;position:relative;width:38px;height:38px;border-radius:50%;border:0;cursor:pointer;flex:none;display:grid;place-items:center;
+  background:radial-gradient(circle at 50% 38%,#b98cff 0 30%,#7a3ad8 62%,#4a1a8a 100%);
+  box-shadow:0 0 0 3px #d8d5e4,0 0 0 4px #5b5672,0 3px 0 4px #2a2436,inset 0 3px 3px rgba(255,255,255,.45)}
+.tog svg{width:20px;height:20px}
+.tog .q{font:400 21px/1 'Star',sans-serif;color:#fff}
+.tog:active{transform:translateY(2px)}
+.tog.off{opacity:.6}
+.tog.off::after{content:'';position:absolute;left:24%;right:24%;top:50%;height:2px;margin-top:-1px;background:#fff;border-radius:1px;transform:rotate(-40deg)}
+body:not(.playing) #hud,body:not(.playing) #pad,body:not(.playing) #drop{display:none}
+body.playing #oreumFs{display:none}
+@media (max-width:900px){html[lang=en] .seg b{font-size:12px;padding:7px 6px}html[lang=en] .stat i{font-size:10px}html[lang=en] .stat{padding:3px 7px}}
+@media (max-width:700px){#hud{flex-wrap:wrap;row-gap:7px}#hud .sp{flex:0 0 100%;height:0}#views{margin-left:auto}.hd h2{font-size:26px;white-space:nowrap}}
+@media (max-width:760px){#hud{gap:5px}.stat{padding:3px 8px;min-height:30px}.stat b{font-size:16px}.stat i{font-size:11px}.seg b{font-size:13px;padding:7px 7px}.tog{width:32px;height:32px}.tog svg{width:17px;height:17px}}
+
+/* ---------- 조이스틱 · DROP ---------- */
+#pad{position:fixed;left:calc(24px + env(safe-area-inset-left));bottom:calc(24px + env(safe-area-inset-bottom));width:150px;height:150px;border-radius:50%;z-index:6;touch-action:none;
+  background:radial-gradient(circle at 50% 45%,#2a2034 0 48%,#120a18 70%);box-shadow:0 0 0 4px #d8d5e4,0 0 0 6px #5b5672,0 6px 0 6px #1a1422,inset 0 6px 14px rgba(0,0,0,.7)}
+#pad::before{content:'';position:absolute;left:50%;top:50%;width:26px;height:26px;margin:-13px;border-radius:50%;background:radial-gradient(circle,#55506a,#1a1422)}
+#knob{position:absolute;left:50%;top:50%;width:66px;height:66px;margin:-33px 0 0 -33px;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%,#ffc0c0 0 8%,#ff3a3a 30%,#b80a1a 75%,#6a0010);box-shadow:0 6px 0 #3a0008,0 9px 12px rgba(0,0,0,.5)}
+#drop{position:fixed;right:calc(28px + env(safe-area-inset-right));bottom:calc(30px + env(safe-area-inset-bottom));width:128px;height:128px;border-radius:50%;border:0;z-index:6;cursor:pointer;
+  font:400 29px/1 'Star','Ui',sans-serif;color:#fff;text-shadow:0 2px 0 #6a0010,0 0 10px rgba(255,200,200,.6);
+  background:radial-gradient(circle at 50% 36%,#ffb0a0 0 10%,#ff3a2a 38%,#c8101a 70%,#7a0010 100%);
+  box-shadow:0 0 0 6px #e9e6f2,0 0 0 8px #5b5672,0 8px 0 8px #2a2436,0 14px 20px rgba(0,0,0,.5),inset 0 -8px 12px rgba(80,0,0,.4);transition:transform .2s cubic-bezier(.34,1.56,.64,1)}
+#drop:active{transform:translateY(6px);transition-duration:.04s}
+#drop:disabled{filter:grayscale(.75) brightness(.7);cursor:default}
+@media (max-height:420px){#pad{width:124px;height:124px}#knob{width:56px;height:56px;margin:-28px 0 0 -28px}#drop{width:104px;height:104px;font-size:23px}}
+
+#msg{position:fixed;left:50%;top:36%;transform:translate(-50%,-50%);font:400 72px/1 'Star',sans-serif;color:#fff36a;white-space:nowrap;
+  text-shadow:0 4px 0 #a0185a,0 0 24px #ff4aa8;-webkit-text-stroke:3px #a0185a;paint-order:stroke fill;pointer-events:none;z-index:7;opacity:0;transition:opacity .2s}
+
+/* ---------- 창: 크롬 나사 네 개 박은 짙은 보라 아크릴 판 ---------- */
+.scr{position:fixed;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(10,4,16,.6)}
+.sheet{position:relative;width:min(780px,100%);max-height:100%;overflow:auto;padding:16px 18px 18px;border-radius:18px;
+  background:linear-gradient(180deg,rgba(70,24,100,.96),rgba(34,12,52,.97));
+  box-shadow:inset 0 0 0 3px #d8d5e4,inset 0 0 0 5px #5b5672,inset 0 7px 0 rgba(255,79,163,.85),0 10px 30px rgba(0,0,0,.6);animation:pop .18s ease-out}
+@keyframes pop{from{transform:scale(.85);opacity:0}}
+.sheet>.nut{position:absolute;width:10px;height:10px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#fff,#9a96aa 60%,#4a4660);box-shadow:0 1px 1px rgba(0,0,0,.6)}
+.sheet>.nut::after{content:'';position:absolute;left:2px;right:2px;top:4px;height:2px;background:#4a4660;transform:rotate(-35deg)}
+.nut.a{left:9px;top:12px}.nut.b{right:9px;top:12px}.nut.c{left:9px;bottom:9px}.nut.d{right:9px;bottom:9px}
+.hd{display:flex;align-items:center;gap:12px;margin:2px 10px 12px}
+.hd h2{font:400 30px/1 'Star',sans-serif;color:#fff36a;text-shadow:0 0 12px rgba(255,79,163,.8);font-weight:400}
+.hd .cnt{font-size:18px;color:#f6d0e8;flex:1}
+.hd .hb{margin-left:auto}
+#dexGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:10px;padding:0 6px}
+.card{border-radius:12px;padding:6px;text-align:center;display:flex;flex-direction:column;align-items:center;
+  background:linear-gradient(180deg,#1a1022,#07040b);box-shadow:inset 0 0 0 2px #8d89a0}
+.card img{width:100%;max-width:118px;aspect-ratio:1}
+.card b{font-weight:400;font-size:17px;margin-top:2px}
+.card i{font-style:normal;font-size:15px;color:var(--led);min-height:18px;text-shadow:0 0 6px rgba(255,90,170,.8)}
+.card.no img{filter:brightness(0) opacity(.55)}
+.card.no b{color:#8a7a9a}
+
+/* ---------- 타이틀: 실제 기계 장면 위에 제목만(아래쪽), 단추는 그 위 ---------- */
+#title{position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:14px;padding:0 16px calc(4vh + env(safe-area-inset-bottom));pointer-events:none;
+  background:linear-gradient(180deg,rgba(20,8,30,0) 55%,rgba(20,8,30,.55) 100%)}
+#title .btn{pointer-events:auto}
+#logo{font:400 clamp(56px,11vw,128px)/1 'Star',sans-serif;color:#fff36a;white-space:nowrap;letter-spacing:.01em;
+  -webkit-text-stroke:8px #8a0a4a;paint-order:stroke fill;text-shadow:0 7px 0 #4a0628,0 0 34px rgba(255,79,163,.9)}
+#tag{font-size:clamp(18px,2.4vw,26px);color:#fff;text-shadow:0 2px 0 #4a0628,0 0 10px rgba(255,79,163,.8);white-space:nowrap}
+body.playing #title{display:none}
+
+/* ---------- HOW TO PLAY ---------- */
+#how .sheet{width:min(1000px,100%)}
+#how .free{margin:0 10px 12px;font-size:19px;color:#fff36a;text-align:center;text-shadow:0 0 8px rgba(255,79,163,.7)}
+.steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;padding:0 6px}
+.step{display:flex;flex-direction:column;align-items:center;gap:8px;min-width:0}
+.step canvas{width:100%;aspect-ratio:11/8;display:block;border-radius:10px;background:#1a0e24;box-shadow:inset 0 0 0 2px #8d89a0}
+.step p{font-size:17px;line-height:1.4;text-align:center;word-break:keep-all;color:#f8eefc}
+.step p b{font:400 22px/1 'Star',sans-serif;color:#fff36a;font-weight:400}
+@media (max-aspect-ratio:1/1){
+  .steps{grid-template-columns:1fr}
+  .step{flex-direction:row;align-items:center;gap:12px}
+  .step canvas{width:46%;flex:none}
+  .step p{text-align:left}
+}
+/* 폰 가로: 창은 높이에 맞춰 줄이고, 누를 것은 아래 26vh 위에 */
+@media (max-height:480px){
+  .scr{padding:34px 10px 42px calc(10px + env(safe-area-inset-left))}
+  .sheet{padding:10px 14px 12px}
+  .hd{margin:0 8px 6px}.hd h2{font-size:6.4vh}
+  #how .free{font-size:4.4vh;margin-bottom:4px}
+  .step canvas{width:min(100%,40vh)}
+  .step p{font-size:3.7vh;line-height:1.25}
+  .steps{gap:10px}.step{gap:4px}
+  .step p b{font-size:5vh}
+  #title{gap:2.4vh;padding-bottom:3vh}
+  #logo{font-size:17vh;-webkit-text-stroke:6px #8a0a4a}
+  #tag{font-size:4.6vh}
+  #title .btn.main{font-size:6.4vh;padding:2.6vh 7vh}
+  #dexGrid{grid-template-columns:repeat(auto-fill,minmax(92px,1fr))}
+}
+</style>
+</head>
+<body>
+<canvas id="cv"></canvas>
+<div id="hud">
+  <div class="stat"><i>뽑은 인형</i><b id="total">0</b></div>
+  <div class="stat"><i>남은 인형</i><b id="left">0</b></div>
+  <div class="stat click" id="dexBtn"><i>도감</i><b id="dexHud">0/11</b></div>
+  <div class="stat" id="timer"><i>TIME</i><b id="timeN">30</b></div>
+  <div class="sp"></div>
+  <div class="seg" id="views"><b data-v="left">왼쪽</b><b data-v="front" class="on">앞</b><b data-v="right">오른쪽</b></div>
+  <div class="seg"><b id="zoom">확대</b></div>
+  <button class="tog" id="howBtn" aria-label="how to play"><span class="q">?</span></button>
+  <button class="tog" id="bgmBtn" aria-label="music"><svg viewBox="0 0 24 24"><path d="M9 17.5V5.5l11-2.5v12" fill="none" stroke="#fff" stroke-width="2.6" stroke-linejoin="round"/><ellipse cx="6.3" cy="17.8" rx="3.4" ry="2.7" fill="#fff"/><ellipse cx="17.3" cy="15.3" rx="3.4" ry="2.7" fill="#fff"/></svg></button>
+  <button class="tog" id="sndBtn" aria-label="sound"><svg viewBox="0 0 24 24"><path d="M3 9h4l5-4.5v15L7 15H3z" fill="#fff"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg></button>
+</div>
+<div id="pad"><div id="knob"></div></div>
+<button id="drop">DROP</button>
+<div id="msg">GET!</div>
+
+<div id="title">
+  <button class="btn main" id="startBtn">START</button>
+  <div id="logo">인형뽑기게임</div>
+  <div id="tag">돈안드니까 실컷 뽑아보세요 ㅋㅋㅋ</div>
+</div>
+
+<div class="scr" id="how" hidden><div class="sheet"><i class="nut a"></i><i class="nut b"></i><i class="nut c"></i><i class="nut d"></i>
+  <div class="hd"><h2>HOW TO PLAY</h2><div class="hb"><button class="btn main sm" id="howOk">OK</button></div></div>
+  <div class="free">이 게임은 무료로 뽑기가 가능합니다</div>
+  <div class="steps">
+    <div class="step"><canvas width="440" height="320"></canvas><p><b>1</b><br>조이스틱이나 방향키로 집게를 옮겨요<br>화면을 끌면 기계가 돌아가요</p></div>
+    <div class="step"><canvas width="440" height="320"></canvas><p><b>2</b><br>DROP 을 누르면 집게가 내려가서 인형을 집어요<br>TIME 이 끝나면 저절로 내려가요</p></div>
+    <div class="step"><canvas width="440" height="320"></canvas><p><b>3</b><br>구멍에 떨어지면 GET!<br>뽑은 인형은 도감에 모이고 다 뽑으면 새로 채워져요</p></div>
+  </div>
+</div></div>
+
+<div class="scr" id="dex" hidden><div class="sheet"><i class="nut a"></i><i class="nut b"></i><i class="nut c"></i><i class="nut d"></i>
+  <div class="hd"><h2>도감</h2><span class="cnt" id="dexN">0 / 11</span><div class="hb"><button class="btn sm" id="dexClose">닫기</button></div></div>
+  <div id="dexGrid"></div>
+</div></div>
+
+<script src="js/lang.js?v=2"></script>
+<script src="assets/game-home.js" data-top="6" data-left="6" data-fullscreen="1" defer></script>
+<script src="lib/three.min.js"></script>
+<script src="lib/rapier.js"></script>
+<script src="js/sfx.js?v=1"></script>
+<script src="js/audio.js?v=4"></script>
+<script src="js/plush.js?v=1"></script>
+<script src="js/proto.js?v=34"></script>
+<script src="/assets/visit.js?v=17" defer></script>
+<script src="/assets/game-events.js" defer></script>
+</body>
+</html>
