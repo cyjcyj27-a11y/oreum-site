@@ -116,27 +116,22 @@
     synth(ctx, bus, name, v, ctx.currentTime + 0.01);
   };
 
-  // ── 집게 모터: 실제 모터 녹음을 작게 깔고, 위에 오락실 8비트 소리를 얹는다(사장님 10/13 "조금만 더 레트로하게 재밌게")
+  // ── 집게 모터 소리: 오락실 8비트 소리만(사장님 10/13 "조금만 더 레트로하게 재밌게" → "첨에 넣은 기계 움직이는 소리는 빼줘 위잉하는소리" 로 모터 녹음은 뺌)
   //   옆으로 갈 때 = 도미솔미 "또로로로" 빠른 아르페지오, 내려갈 때 = "뿌우-" 내려가는 미끄럼, 올라올 때 = 올라가는 미끄럼
   //   네모파지만 1.6kHz 아래만 남겨 귀가 편하게
-  let mot = null, motG = null, chip = null, chipG = null, chipT0 = 0;
+  let chip = null, chipG = null, chipT0 = 0;
   const ARP = [523.25, 659.25, 783.99, 659.25];
   A.motor = function (level, rate, mode) {
-    if (!ctx || !buf.motor) return;
+    if (!ctx) return;
     const t = ctx.currentTime;
-    if (!mot && level > 0 && A.snd) {
-      motG = ctx.createGain(); motG.gain.value = 0.0001; motG.connect(bus);
-      mot = ctx.createBufferSource(); mot.buffer = buf.motor; mot.loop = true; mot.loopStart = 0.1; mot.loopEnd = 3.9;
-      mot.connect(motG); mot.start();
+    if (!chip && level > 0 && A.snd) {
       chipG = ctx.createGain(); chipG.gain.value = 0.0001;
       const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 1600; lp.Q.value = 0.7;
       chip = ctx.createOscillator(); chip.type = 'square'; chip.frequency.value = 523;
       chip.connect(lp); lp.connect(chipG); chipG.connect(bus); chip.start();
     }
-    if (!mot) return;
+    if (!chip) return;
     const on = A.snd && level > 0;
-    motG.gain.setTargetAtTime(on ? level * 0.22 : 0.0001, t, 0.05);
-    mot.playbackRate.setTargetAtTime(rate || 1, t, 0.08);
     if (!on) { chipG.gain.setTargetAtTime(0.0001, t, 0.03); chipT0 = t; return; }
     const k = t - chipT0;
     let f;
