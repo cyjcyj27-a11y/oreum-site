@@ -323,7 +323,7 @@
     for (const p of plush) {
       if (p.gone) continue;
       const y = p.body.translation().y;
-      { const vy = p.body.linvel().y; if (p.vy < -0.7 && vy > p.vy * 0.35 && !window.__botOn) AU.play('thud', Math.min(0.7, -p.vy * 0.35)); p.vy = vy; } // 떨어진 인형이 툭 하고 멈출 때
+      { const vy = p.body.linvel().y; if (p.vy < -0.7 && vy > p.vy * 0.35 && !window.__botOn && G.playing) AU.play('thud', Math.min(0.7, -p.vy * 0.35)); p.vy = vy; } // 떨어진 인형이 툭 하고 멈출 때
       if (!p.got && y < BED - 0.12) {
         if (performance.now() - p.born < 4000) { p.body.setTranslation({ x: 0.1, y: BED + 0.5, z: -0.1 }, true); p.body.setLinvel({ x: 0, y: 0, z: 0 }, true); continue; } // 리필하며 굴러 들어간 건 무효
         const fresh = !S.dex[p.idx]; p.got = true; K.got = 1; S.total++; S.dex[p.idx] = (S.dex[p.idx] || 0) + 1; say(fresh ? 'NEW!' : 'GET!'); save(); hud();

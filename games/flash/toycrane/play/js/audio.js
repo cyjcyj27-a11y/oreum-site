@@ -9,6 +9,7 @@
   A.snd = load('toycrane.snd', true);
   A.bgm = load('toycrane.bgm', true);
   const SV = 0.9, MV = 0.14;
+  let rs = 12345; const rnd = () => ((rs = (rs * 16807) % 2147483647) - 1) / 2147483646; // 소리 쪽 난수는 따로(게임 물리 난수와 섞이지 않게)
 
   // 효과음 버스: 소리 → (바로 + 짧은 잔향) → 4kHz 아래만 → 눌러 주기 → 출력
   function makeBus(ac, dest) {
@@ -106,12 +107,12 @@
   const last = {};
   function gate(k, ms) { const t = performance.now(); if (last[k] && t - last[k] < ms) return false; last[k] = t; return true; }
   A.play = function (name, v) {
-    if (!ensure() || !A.snd) return;
+    if (!ctx || !A.snd) return; // 소리판은 첫 손길(unlock)에만 연다 — 불러올 때 소리가 쌓였다가 시작할 때 한꺼번에 쾅 터지던 것(10/14)
     switch (name) {
       case 'click': smp('clk', 0.55); return;
       case 'clamp': smp('clamp', v == null ? 0.8 : v); return;
       case 'clunk': smp('clunk', 0.9); smp('thud', 0.45, 0.8); return;
-      case 'thud': if (gate('thud', 70)) smp('thud', v == null ? 0.7 : v, 0.9 + Math.random() * 0.1); return;
+      case 'thud': if (gate('thud', 70)) smp('thud', v == null ? 0.7 : v, 0.9 + rnd() * 0.1); return;
     }
     synth(ctx, bus, name, v, ctx.currentTime + 0.01);
   };
@@ -145,7 +146,7 @@
   // ── 배경음: 8비트 오락실(사장님 10/13 "레트로하게 재밌게"). 140bpm, C - Am - F - G
   //   네모파 가락 + 세모파 베이스 + 빠른 화음 아르페지오 + 잡음 북. 전부 3.2kHz 아래만 남겨 귀가 편하게
   let timer = null, step = 0, next = 0, noise = null, mlp = null;
-  function noiseBuf() { if (noise) return noise; const n = ctx.sampleRate, b = ctx.createBuffer(1, n, n), d = b.getChannelData(0); for (let i = 0; i < n; i++) d[i] = Math.random() * 2 - 1; return (noise = b); }
+  function noiseBuf() { if (noise) return noise; const n = ctx.sampleRate, b = ctx.createBuffer(1, n, n), d = b.getChannelData(0); for (let i = 0; i < n; i++) d[i] = rnd() * 2 - 1; return (noise = b); }
   function musOut() { if (mlp && mlp.context === ctx) return mlp; mlp = ctx.createBiquadFilter(); mlp.type = 'lowpass'; mlp.frequency.value = 3200; mlp.connect(mus); return mlp; }
   function tone(f, t0, dur, type, vol, opt) {
     const o = ctx.createOscillator(), g = ctx.createGain();
@@ -160,7 +161,7 @@
     const s = ctx.createBufferSource(), fl = ctx.createBiquadFilter(), g = ctx.createGain();
     s.buffer = noiseBuf(); fl.type = type; fl.frequency.value = f; if (type === 'bandpass') fl.Q.value = 0.9;
     g.gain.setValueAtTime(vol, t0); g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
-    s.connect(fl); fl.connect(g); g.connect(musOut()); s.start(t0, Math.random() * 0.5); s.stop(t0 + dur + 0.02);
+    s.connect(fl); fl.connect(g); g.connect(musOut()); s.start(t0, rnd() * 0.5); s.stop(t0 + dur + 0.02);
   }
   const CH = [[48, 52, 55], [45, 48, 52], [41, 45, 48], [43, 47, 50]]; // C Am F G
   // 가락(16스텝 = 한 마디, -1 쉼, 0 은 앞 음 이어서). 통통 튀는 오락실 가락 두 갈래
