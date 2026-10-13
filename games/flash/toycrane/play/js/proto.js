@@ -152,7 +152,7 @@
   const bridge = box(IN.x1 - IN.x0, 0.02, 0.03, steel, 0, TOP + 0.1, 0, true);
 
   // 집게 힘: 오므릴 때 STRONG, 다 올라가면 WEAK 로 떨어진다(진짜 기계처럼)
-  const PWR = { open: 0.75, shut: -0.4, strong: 0.55, weak: 0.22, damp: 0.02, wob: 0.12, jolt: 0.05, topJolt: 0.05, slipK: 0.3, slipT: 0.25 }; // jolt: 쿵 할 때 떨어지는 높이(m), slipK: 그 순간 힘 배율
+  const PWR = { open: 0.75, shut: -0.4, strong: 0.45, weak: 0.16, damp: 0.02, wob: 0.12, jolt: 0.05, topJolt: 0.05, slipK: 0.3, slipT: 0.25 }; // jolt: 쿵 할 때 떨어지는 높이(m), slipK: 그 순간 힘 배율
   function clawTarget(ang, k) { for (const p of prongs) p.joint.configureMotorPosition(ang + (ang < 0 ? (Math.random() - 0.5) * 2 * PWR.wob : 0), k, PWR.damp); } // 오므릴 땐 발마다 조금씩 다르게(허벌한 집게)
   clawTarget(PWR.open, PWR.strong);
 
@@ -174,7 +174,7 @@
   }
   // ---------- 저장: 뽑은 인형 수 · 도감 · 기계에 남은 인형 ----------
   const KEY = 'toycrane.save';
-  const S = Object.assign({ total: 0, dex: {}, left: null }, (() => { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { return {}; } })());
+  const S = Object.assign({ total: 0, dex: {}, left: null, big: 0 }, (() => { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { return {}; } })());
   const save = () => { S.left = plush.filter((p) => !p.gone && !p.got).map((p) => p.idx); try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
   const KINDS = 11; // 도감에 오르는 인형 종류(사격게임 경품 인형 0~10)
 
@@ -260,9 +260,9 @@
   const tEnd = (e) => { touches.delete(e.pointerId); if (touches.size < 2) pinch0 = 0; };
   cv.addEventListener('pointerup', tEnd); cv.addEventListener('pointercancel', tEnd);
   function drop() { if (K.st !== 'move' || !G.playing || G.paused()) return; K.st = 'down'; K.t = 0; K.got = 0; AU.play('click'); hud(); }
-  function hud() { $('total').textContent = S.total; $('left').textContent = plush.filter((p) => !p.gone && !p.got).length; $('timeN').textContent = Math.ceil(K.timer); $('timer').classList.toggle('low', K.timer < 5.5 && K.st === 'move'); $('dexHud').textContent = Object.keys(S.dex).length + '/' + KINDS; $('drop').disabled = K.st !== 'move'; }
+  function hud() { $('total').textContent = hold(); $('left').textContent = plush.filter((p) => !p.gone && !p.got).length; $('timeN').textContent = Math.ceil(K.timer); $('timer').classList.toggle('low', K.timer < 5.5 && K.st === 'move'); $('dexHud').textContent = Object.keys(S.dex).length + '/' + KINDS; $('drop').disabled = K.st !== 'move'; }
   let msgT = 0;
-  function say(s) { const m = $('msg'); m.textContent = s; m.style.opacity = 1; msgT = 1.6; }
+  function say(s) { const m = $('msg'); m.textContent = s; m.classList.toggle('long', s.length > 5); m.style.opacity = 1; msgT = 1.6; }
 
   // 집게 바로 아래 무엇이 있나(인형 윗면 높이)
   function surfaceBelow() {
@@ -353,7 +353,7 @@
       acc += dt; let n = 0;
       while (acc >= DT && n < 8) { step(); acc -= DT; n++; }
       if (n === 8) acc = 0;
-      sync();
+      sync(); window.__bearTick(dt);
       if (msgT > 0) { msgT -= dt; if (msgT <= 0) $('msg').style.opacity = 0; }
       if ((K.timer | 0) !== (frame.lt | 0)) { frame.lt = K.timer; hud(); if (K.st === 'move' && K.timer < 5.5 && K.timer > 0) AU.play('tick'); }
       // 집게 모터: 움직일 때만 돈다(위아래는 조금 낮게)
@@ -392,7 +392,7 @@
     const dl = new T.DirectionalLight(0xffffff, 1.6); dl.position.set(0.5, 1, 1.2); sc.add(dl);
     const c = new T.PerspectiveCamera(30, 1, 0.01, 5); c.position.set(0, 0.17, 0.62); c.lookAt(0, 0.13, 0);
     thumbs = [];
-    for (let i = 0; i < KINDS; i++) { const g = PL.makePrize(i); g.rotation.y = -0.35; sc.add(g); r.render(sc, c); thumbs.push(r.domElement.toDataURL()); sc.remove(g); }
+    for (let i = 0; i <= KINDS; i++) { const g = PL.makePrize(i); g.scale.setScalar(1); g.rotation.y = -0.35; sc.add(g); r.render(sc, c); thumbs.push(r.domElement.toDataURL()); sc.remove(g); } // 마지막은 대왕 곰돌이
     r.dispose();
   }
   function openDex() {
@@ -403,10 +403,55 @@
       const n = S.dex[i] || 0;
       return '<div class="card' + (n ? '' : ' no') + '"><img src="' + thumbs[i] + '"><b>' + (n ? P.name : '???') + '</b><i>' + (n ? 'x ' + n : '') + '</i></div>';
     }).join('');
+    $('xImg').src = thumbs[BIG]; xchgView();
     $('dex').hidden = false;
   }
   $('dexBtn').addEventListener('click', () => { AU.play('click'); openDex(); });
   $('dexClose').addEventListener('click', () => { AU.play('click'); $('dex').hidden = true; });
+
+  // ---------- 교환: 뽑은 인형 100개 → 대왕 곰돌이(하얀 곰). 교환하면 기계 옆 받침대에 앉는다 ----------
+  const BIG = 11, COST = 100;
+  function hold() { return S.total - S.big * 100; } // 손에 든 인형 수(교환하면 100개 줄어든다)
+  // 첫 둘은 기계 양옆 받침대 위(오락실 큰 경품 자리), 그 뒤로는 받침대 앞 바닥에
+  const BEAR_AT = [[0.8, 0.0, -0.45, 0.9], [-0.8, 0.0, 0.45, 0.9], [0.84, 0.48, -0.3, 0], [-0.84, 0.48, 0.3, 0], [0.82, -0.6, -0.2, 0], [-0.82, -0.6, 0.2, 0]];
+  const bears = [];
+  const WHITE_FUR = PL.furMat.clone(); WHITE_FUR.emissive = new T.Color(0x3a3434); // 분홍 조명 아래서도 흰 털로 보이게
+  function stand(x, z) {
+    box(0.5, 0.86, 0.5, mat(0xff6ab0, { roughness: 0.35 }), x, 0.43, z, true);
+    box(0.54, 0.04, 0.54, mat(0xffd84a, { metalness: 0.6, roughness: 0.3 }), x, 0.88, z);
+  }
+  function placeBear(i, fall) {
+    if (i >= BEAR_AT.length) return;
+    const [x, z, yaw, y0] = BEAR_AT[i];
+    if (y0) stand(x, z);
+    const g = PL.makePrize(BIG);
+    g.traverse((o) => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; if (o.material === PL.furMat) o.material = WHITE_FUR; } });
+    g.position.set(x, fall ? y0 + 1.6 : y0, z); g.rotation.y = yaw; scene.add(g);
+    bears.push({ g, y0, vy: 0, fall: !!fall });
+  }
+  for (let i = 0; i < S.big; i++) placeBear(i, false);
+  window.__bearTick = function (dt) { // 새 대왕 곰돌이가 위에서 떨어져 통 튄다
+    for (const b of bears) {
+      if (!b.fall) continue;
+      b.vy -= 9.8 * dt; b.g.position.y += b.vy * dt;
+      if (b.g.position.y <= b.y0) { b.g.position.y = b.y0; if (b.vy < -1.2) { AU.play('thud', Math.min(1, -b.vy * 0.2)); CAM.shake = 0.25; b.vy *= -0.32; } else { b.vy = 0; b.fall = false; } }
+      const sq = b.fall && b.g.position.y < b.y0 + 0.05 ? 0.9 : 1; b.g.scale.set(3.2 / Math.sqrt(sq), 3.2 * sq, 3.2 / Math.sqrt(sq));
+    }
+  };
+  function xchgView() {
+    const h = hold();
+    $('xHave').textContent = h; $('xBar').style.width = Math.min(100, h) + '%';
+    $('xBtn').disabled = h < COST;
+    $('xOwn').textContent = S.big ? '가진 대왕 곰돌이 x ' + S.big : '';
+  }
+  $('xBtn').addEventListener('click', () => {
+    if (hold() < COST) return;
+    S.big++; save(); hud();
+    $('dex').hidden = true;
+    placeBear(S.big - 1, true);
+    if (S.big - 1 < BEAR_AT.length) { setZoom(0); CAM.azT = BEAR_AT[S.big - 1][0] > 0 ? 0.45 : -0.45; CAM.elT = 0.3; markView(); } // 곰돌이 쪽으로 살짝 돌려 보여 준다
+    say('대왕 곰돌이!'); AU.play('get'); setTimeout(() => AU.play('newdex'), 500);
+  });
   // 소리 켜기·끄기 + 첫 손길에 소리판 열기(브라우저 규칙)
   const togs = () => { $('sndBtn').classList.toggle('off', !AU.snd); $('bgmBtn').classList.toggle('off', !AU.bgm); };
   $('sndBtn').addEventListener('click', () => { AU.setSnd(!AU.snd); AU.play('click'); togs(); });
@@ -500,6 +545,7 @@
     plush.length = 0; fillBed(); STAT.thunkHeld = STAT.thunkDrop = 0;
     Object.assign(K, { st: 'move', x: HOME.x, y: TOP, z: HOME.z, t: 0, jy: 0, stall: 0, held: null }); clawTarget(PWR.open, PWR.strong);
   };
+  window.__give = function (n) { S.total += n; save(); hud(); }; // 시험용
   window.__sim = function (n, aimErr) {
     window.__botOn = 1; let got0 = S.total, tries = 0;
     for (let i = 0; i < n; i++) {

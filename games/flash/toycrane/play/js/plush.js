@@ -87,7 +87,7 @@
     { id: 'panda', name: '판다', c: 0xffffff, d: 0x1a1a1a, l: 0xffffff, ears: 'round', panda: 1 },
     { id: 'fox', name: '여우', c: 0xf07a2a, d: 0x8a3a10, l: 0xffffff, ears: 'point', tail: 1 },
     { id: 'dino', name: '공룡', c: 0x7ad85a, d: 0x3a9a3a, l: 0xf8f0a0, ears: 'none', spikes: 1 },
-    { id: 'king', name: '대왕 곰', c: 0xc8844a, d: 0x7a4a20, l: 0xf6dcb4, ears: 'round', ribbon: 1, big: 1 },
+    { id: 'king', name: '대왕 곰돌이', c: 0xfbf8f2, d: 0xe6ded2, l: 0xfff3ea, ears: 'round', ribbon: 1, big: 1 }, // 대왕 곰돌이: 하얀 곰(인형 100개로 교환)
   ];
   SC.makePrize = function (idx) {
     const P = SC.PRIZES[idx];

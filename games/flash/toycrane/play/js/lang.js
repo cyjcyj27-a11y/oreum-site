@@ -13,7 +13,7 @@
     'TIME 이 끝나면 저절로 내려가요': 'It drops by itself when TIME runs out',
     '구멍에 떨어지면 GET!': 'Drop it in the hole for a GET!',
     '뽑은 인형은 도감에 모이고 다 뽑으면 새로 채워져요': 'Toys you win go in the BOOK, and the machine refills when it is empty',
-    '곰': 'Bear', '토끼': 'Rabbit', '고양이': 'Cat', '강아지': 'Puppy', '오리': 'Duck', '펭귄': 'Penguin', '돼지': 'Pig', '개구리': 'Frog', '판다': 'Panda', '여우': 'Fox', '공룡': 'Dino',
+    '인형 100개 → 대왕 곰돌이': '100 toys → GIANT TEDDY', '대왕 곰돌이': 'GIANT TEDDY', '교환': 'TRADE', '가진 대왕 곰돌이': 'GIANT TEDDY owned', '곰': 'Bear', '토끼': 'Rabbit', '고양이': 'Cat', '강아지': 'Puppy', '오리': 'Duck', '펭귄': 'Penguin', '돼지': 'Pig', '개구리': 'Frog', '판다': 'Panda', '여우': 'Fox', '공룡': 'Dino',
   };
   const keys = Object.keys(D).sort((a, b) => b.length - a.length);
   const esc = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\$&');

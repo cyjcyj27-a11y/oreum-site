@@ -80,6 +80,7 @@ body.playing #oreumFs{display:none}
 #drop:disabled{filter:grayscale(.75) brightness(.7);cursor:default}
 @media (max-height:420px){#pad{width:124px;height:124px}#knob{width:56px;height:56px;margin:-28px 0 0 -28px}#drop{width:104px;height:104px;font-size:23px}}
 
+#msg.long{font-size:min(72px,12vw)}
 #msg{position:fixed;left:50%;top:36%;transform:translate(-50%,-50%);font:400 72px/1 'Star',sans-serif;color:#fff36a;white-space:nowrap;
   text-shadow:0 4px 0 #a0185a,0 0 24px #ff4aa8;-webkit-text-stroke:3px #a0185a;paint-order:stroke fill;pointer-events:none;z-index:7;opacity:0;transition:opacity .2s}
 
@@ -104,6 +105,16 @@ body.playing #oreumFs{display:none}
 .card i{font-style:normal;font-size:15px;color:var(--led);min-height:18px;text-shadow:0 0 6px rgba(255,90,170,.8)}
 .card.no img{filter:brightness(0) opacity(.55)}
 .card.no b{color:#8a7a9a}
+/* 교환 칸: 인형 100개 → 대왕 곰돌이 */
+#xchg{display:flex;align-items:center;gap:12px;margin:0 6px 12px;padding:8px 12px;border-radius:12px;background:linear-gradient(180deg,#2a1438,#12081a);box-shadow:inset 0 0 0 2px #ffd84a,0 0 14px rgba(255,216,74,.25)}
+#xImg{width:92px;height:92px;flex:none}
+#xchg .xt{flex:1;min-width:0;display:flex;flex-direction:column;gap:5px}
+#xchg .xt b{font-weight:400;font-size:19px;color:#fff36a;word-break:keep-all}
+#xchg .xt span{font-size:16px;color:#f6d0e8}#xchg em{font-style:normal;color:#fff;font-size:20px}
+#xchg .bar{height:10px;border-radius:5px;background:#07040b;box-shadow:inset 0 0 0 1px #8d89a0;overflow:hidden}
+#xchg .bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#ff4fa3,#ffd84a)}
+@media (max-width:560px){#xchg{flex-wrap:wrap}#xchg .xt{flex:1 1 0}#xBtn{flex:1 1 100%}#xImg{width:76px;height:76px}#xchg .xt b{font-size:17px}}
+#xBtn:disabled{filter:grayscale(1) brightness(.6);cursor:default}
 
 /* ---------- 타이틀: 실제 기계 장면 위에 제목만(아래쪽), 단추는 그 위 ---------- */
 #title{position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:14px;padding:0 16px calc(4vh + env(safe-area-inset-bottom));pointer-events:none;
@@ -143,6 +154,7 @@ body.playing #title{display:none}
   #tag{font-size:4.6vh}
   #title .btn.main{font-size:6.4vh;padding:2.6vh 7vh}
   #dexGrid{grid-template-columns:repeat(auto-fill,minmax(92px,1fr))}
+  #xchg{padding:4px 10px;margin-bottom:6px}#xImg{width:64px;height:64px}#xchg .xt{gap:2px}#xchg .xt b{font-size:4.6vh}
 }
 </style>
 </head>
@@ -182,17 +194,18 @@ body.playing #title{display:none}
 
 <div class="scr" id="dex" hidden><div class="sheet"><i class="nut a"></i><i class="nut b"></i><i class="nut c"></i><i class="nut d"></i>
   <div class="hd"><h2>도감</h2><span class="cnt" id="dexN">0 / 11</span><div class="hb"><button class="btn sm" id="dexClose">닫기</button></div></div>
+  <div id="xchg"><img id="xImg" alt=""><div class="xt"><b>인형 100개 → 대왕 곰돌이</b><span><em id="xHave">0</em> / 100</span><div class="bar"><i id="xBar"></i></div><span id="xOwn"></span></div><button class="btn main sm" id="xBtn">교환</button></div>
   <div id="dexGrid"></div>
 </div></div>
 
-<script src="js/lang.js?v=2"></script>
+<script src="js/lang.js?v=3"></script>
 <script src="assets/game-home.js" data-top="6" data-left="6" data-fullscreen="1" defer></script>
 <script src="lib/three.min.js"></script>
 <script src="lib/rapier.js"></script>
 <script src="js/sfx.js?v=1"></script>
 <script src="js/audio.js?v=4"></script>
-<script src="js/plush.js?v=1"></script>
-<script src="js/proto.js?v=34"></script>
+<script src="js/plush.js?v=2"></script>
+<script src="js/proto.js?v=35"></script>
 <script src="/assets/visit.js?v=17" defer></script>
 <script src="/assets/game-events.js" defer></script>
 </body>
