@@ -16,7 +16,7 @@
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 [hidden]{display:none!important}
 html,body{width:100%;height:100%;overflow:hidden;background:#140c20;color:#fff;font-family:'Ui',-apple-system,'Malgun Gothic',sans-serif;
-  user-select:none;-webkit-user-select:none;touch-action:none;-webkit-text-size-adjust:100%}
+  user-select:none;-webkit-user-select:none;touch-action:none;-webkit-text-size-adjust:100%;text-size-adjust:100%}
 #cv{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:grab}
 #cv:active{cursor:grabbing}
 
@@ -65,6 +65,17 @@ body.playing #oreumFs{display:none}
 @media (max-width:900px){html[lang=en] .seg b{font-size:12px;padding:7px 6px}html[lang=en] .stat i{font-size:10px}html[lang=en] .stat{padding:3px 7px}}
 @media (max-width:700px){#hud{flex-wrap:wrap;row-gap:7px}#hud .sp{flex:0 0 100%;height:0}#views{margin-left:auto}.hd h2{font-size:26px;white-space:nowrap}}
 @media (max-width:760px){#hud{gap:5px}.stat{padding:3px 8px;min-height:30px}.stat b{font-size:16px}.stat i{font-size:11px}.seg b{font-size:13px;padding:7px 7px}.tog{width:32px;height:32px}.tog svg{width:17px;height:17px}}
+@media (max-width:560px) and (orientation:portrait){   /* 10/15 사장님 "허드정렬좀"(폰 세로): 첫 줄 = 오름 알약 옆에 시점·확대·단추 셋, 둘째 줄 = 수치 넷을 같은 너비로 나란히 */
+  #hud{flex-wrap:wrap;justify-content:flex-end;row-gap:8px;column-gap:5px;padding-left:calc(8px + env(safe-area-inset-left))}
+  #hud::before{content:'';order:0;flex:0 0 92px;height:1px}   /* 오름 알약 자리: 좁으면 단추가 다음 줄로 넘어간다 */
+  #views{order:0;margin-left:0}#hud .seg{order:0}#hud .tog{order:0;width:32px;height:32px}#hud .tog svg{width:17px;height:17px}
+  #hud .sp{order:1;flex:0 0 100%;height:0}
+  #hud .stat{order:2;flex:1 1 0;min-width:0;justify-content:center;gap:4px;padding:3px 4px;min-height:32px}#hud .stat i{font-size:11px}#hud .stat b{font-size:16px}
+  .seg b{font-size:13px;padding:7px 7px}
+}
+@media (max-width:560px) and (orientation:portrait){.hd{flex-wrap:wrap;row-gap:8px}.hd h2{font-size:min(26px,7vw)}.hd .hb{flex:none}}   /* 10/15 폰 세로·글자 크게 설정한 폰에서 HOW TO PLAY 제목 옆 OK 가 창 밖으로 나갔다 → 좁으면 다음 줄로 */
+@media (max-width:345px) and (orientation:portrait){#hud{column-gap:3px}#hud::before{flex-basis:90px}#hud .tog{width:25px!important;height:25px!important}#hud .tog svg{width:13px!important;height:13px!important}#hud .tog .q{font-size:15px!important}.seg b{font-size:11px!important;padding:5px 4px!important}}
+@media (max-width:390px) and (orientation:portrait){#hud{column-gap:4px}#hud .tog{width:28px;height:28px}#hud .tog svg{width:15px;height:15px}#hud .tog .q{font-size:17px}.seg b{font-size:12px;padding:6px 5px}#hud .stat i{font-size:10px}#hud .stat b{font-size:15px}}
 
 /* ---------- 조이스틱 · DROP ---------- */
 #pad{position:fixed;left:calc(24px + env(safe-area-inset-left));bottom:calc(24px + env(safe-area-inset-bottom));width:150px;height:150px;border-radius:50%;z-index:6;touch-action:none;
@@ -205,7 +216,7 @@ body.playing #title{display:none}
 <script src="js/sfx.js?v=2"></script>
 <script src="js/audio.js?v=6"></script>
 <script src="js/plush.js?v=2"></script>
-<script src="js/proto.js?v=43"></script>
+<script src="js/proto.js?v=44"></script>
 <script src="/assets/visit.js?v=17" defer></script>
 <script src="/assets/game-events.js" defer></script>
 </body>

@@ -478,10 +478,10 @@
     const loop = (now) => {
       if ($('how').hidden) return;
       const t = (now - t0) / 1000;
-      how1(cvs[0].getContext('2d'), t % 3.4); how2(cvs[1].getContext('2d'), t % 3.6); how3(cvs[2].getContext('2d'), t % 3.2);
+      [[how1, 3.4], [how2, 3.6], [how3, 3.2]].forEach(([f, p], i) => { try { f(cvs[i].getContext('2d'), t % p); } catch (e) { console.warn(e); } });   /* 10/15 폰에서 둘째·셋째 그림이 검게 비었다 → 하나가 실패해도 나머지는 그린다 */
       howRaf = requestAnimationFrame(loop);
     };
-    cancelAnimationFrame(howRaf); howRaf = requestAnimationFrame(loop);
+    cancelAnimationFrame(howRaf); loop(t0);
   }
   $('howOk').addEventListener('click', () => { AU.play('click'); $('how').hidden = true; S.how = 1; save(); const f = howThen; howThen = null; if (f) f(); });
   // 그림 도구: 실제 게임의 인형 색으로 그린 작은 인형·집게
