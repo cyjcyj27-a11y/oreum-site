@@ -138,7 +138,7 @@
       const a = r.clone().multiplyScalar(ARM[k][0]).setY(ARM[k][1]), b = r.clone().multiplyScalar(ARM[k + 1][0]).setY(ARM[k + 1][1]);
       const mid = a.clone().add(b).multiplyScalar(0.5), dir = b.clone().sub(a), len = dir.length();
       const q = new T.Quaternion().setFromUnitVectors(_y, dir.normalize());
-      world.createCollider(C.capsule(len / 2, 0.007).setTranslation(mid.x, mid.y, mid.z).setRotation(q).setDensity(2500).setFriction(1.1).setCollisionGroups(G_CLAW), body);
+      world.createCollider(C.capsule(len / 2, 0.007).setTranslation(mid.x, mid.y, mid.z).setRotation(q).setDensity(2500).setFriction(0.3).setFrictionCombineRule(RP.CoefficientCombineRule.Min).setCollisionGroups(G_CLAW), body);
       const m = new T.Mesh(new T.CylinderGeometry(0.006, 0.006, len + 0.008, 8), steel);
       m.position.copy(mid); m.quaternion.copy(q); m.castShadow = true; grp.add(m);
     }
