@@ -62,6 +62,7 @@ const SAVE = { unlock: 1, best: {}, coins: 0, shop: {}, seen: {} };
 try { const s = JSON.parse(localStorage.getItem('yokailike.save') || 'null'); if (s) Object.assign(SAVE, s); if (!SAVE.shop) SAVE.shop = {}; if (!SAVE.seen) SAVE.seen = {}; if (!SAVE.coins) SAVE.coins = 0; } catch (e) {}
 // 상점: 코인으로 사는 영구 강화. 값은 단계마다 1.6배
 const SHOP = [
+  { k: 'auto', ko: '자동사냥', en: 'Auto Hunt', icon: 'auto', d: ['알아서 피하고 줍기', 'Dodges and collects for you'], base: 2000, max: 1 },   /* 10/15 사장님 "이거도 빌런라이크처럼 자동사냥 넣어줘": 빌런라이크 자동근무와 같은 값(2,000코인 한 번) */
   { k: 'atk', ko: '사과사탕 묶음', en: 'Candy Apple Pack', icon: 'i_candyapple', d: ['공격 +6%', 'DAMAGE +6%'], base: 40 },
   { k: 'hp', ko: '초코바나나 묶음', en: 'Choco Banana Pack', icon: 'i_chocobanana', d: ['최대 체력 +10', 'MAX HP +10'], base: 40 },
   { k: 'spd', ko: '라무네 묶음', en: 'Ramune Pack', icon: 'i_ramune', d: ['이동 속도 +3%', 'SPEED +3%'], base: 40 },
@@ -157,7 +158,7 @@ function updateEnemies(dt) {
   const P = G.P; const min = G.time / 60;
   // 나오기
   G.spawnT -= dt; if (G.spawnT <= 0 && G.E.length < 230) { const pool = WAVES[Math.min(WAVES.length - 1, Math.floor(min / 2.2))]; const n = 1 + Math.floor(min / 2.5); for (let i = 0; i < n; i++) spawnEnemy(pool[Math.floor(Math.random() * pool.length)]); G.spawnT = Math.max(0.22, 1.0 - min * 0.07); }
-  while (G.bossI < BOSS_AT.length && G.time >= BOSS_AT[G.bossI][0]) { spawnEnemy(BOSS_AT[G.bossI][1]); G.bossI++; }
+  while (G.bossI < BOSS_AT.length && G.time >= BOSS_AT[G.bossI][0]) { spawnEnemy(BOSS_AT[G.bossI][1]); G.bossI++; if (G.bossI === BOSS_AT.length && G.auto) { G.autoLock = true; syncAuto(); if (G.AI) G.AI.hold = 0; G.sp = false; setTimeout(() => { if (G.phase === 'play') toast((LANG === 'en' ? 'LAST BOSS' : '마지막 보스') + ' · AUTO OFF'); }, 1200); } }   /* 빌런라이크처럼 마지막 보스는 손으로 */
   // 움직임 + 간단한 밀어내기(격자)
   const grid = new Map(); const CS = 48;
   for (const e of G.E) { const k = ((e.x / CS) | 0) + ',' + ((e.y / CS) | 0); (grid.get(k) || grid.set(k, []).get(k)).push(e); }
@@ -183,6 +184,7 @@ function updatePlayer(dt) {
   const P = G.P; let mx = 0, my = 0; const K = G.keys;
   if (K.ArrowLeft || K.a || K.A) mx -= 1; if (K.ArrowRight || K.d || K.D) mx += 1; if (K.ArrowUp || K.w || K.W) my -= 1; if (K.ArrowDown || K.s || K.S) my += 1;
   if (G.pad.x || G.pad.y) { mx = G.pad.x; my = G.pad.y; }
+  if (G.auto) { const a = autoSteer(dt, !!(mx || my)); if (!(mx || my)) { mx = a[0]; my = a[1]; } }   /* 손으로 움직이면 그동안 손이 먼저 */
   const l = Math.hypot(mx, my); if (l > 1) { mx /= l; my /= l; }
   P.moving = l > 0.05; if (P.moving) { P.x += mx * P.speed * P.spMul * dt; P.y += my * P.speed * P.spMul * dt; P.walkT += dt; if (Math.abs(mx) > 0.3) P.face = mx > 0 ? 1 : -1; P.horiz = Math.abs(mx) > Math.abs(my) * 0.8; }
   P.inv -= dt; P.hurtT -= dt;
@@ -236,7 +238,7 @@ function applyCard(c) {
   P.passives[c.k] = c.lv; seen('i_' + c.k);
   if (c.k === 'candyapple') P.dmgMul = P.dmgBase * (1 + 0.12 * c.lv); if (c.k === 'chocobanana') { P.maxhp = P.hpBase + 25 * c.lv; P.hp = Math.min(P.maxhp, P.hp + 25); } if (c.k === 'ramune') P.spMul = P.spBase * (1 + 0.08 * c.lv);
 }
-function drawIcon(c, icon) { const x = c.getContext('2d'); const cl = cell(icon); if (!cl) return; const sc = Math.min((c.width - 12) / cl[2], (c.height - 12) / cl[3]); const w = cl[2] * sc, h = cl[3] * sc; x.imageSmoothingEnabled = true; x.drawImage(atlas, cl[0], cl[1], cl[2], cl[3], (c.width - w) / 2, (c.height - h) / 2, w, h); }
+function drawIcon(c, icon) { const x = c.getContext('2d'); if (icon === 'auto') return drawAutoIcon(c, x); const cl = cell(icon); if (!cl) return; const sc = Math.min((c.width - 12) / cl[2], (c.height - 12) / cl[3]); const w = cl[2] * sc, h = cl[3] * sc; x.imageSmoothingEnabled = true; x.drawImage(atlas, cl[0], cl[1], cl[2], cl[3], (c.width - w) / 2, (c.height - h) / 2, w, h); }
 // ---------- 그리기 ----------
 function sx(x) { return (x - G.cam.x) * ZOOM + W / 2; }
 function sy(y) { return (y - G.cam.y) * ZOOM + H / 2; }
@@ -343,7 +345,7 @@ function buildTitle() {
 function toTitle() { G.phase = 'title'; document.body.classList.remove('playing'); show('#title', true); show('#over', false); show('#pause', false); show('#levelup', false); show('#shop', false); show('#dex', false); buildTitle(); G.titleT = 0; }
 function startGame() {
   G.phase = 'play'; document.body.classList.add('playing'); show('#title', false); show('#over', false); show('#pause', false);
-  G.P = newPlayer(G.sel); G.E = []; G.B = []; G.GEM = []; G.FX = []; G.DN = []; G.AURA = []; G.kills = 0; G.coins = 0; G.time = 0; G.spawnT = 0.6; G.bossI = 0; G.cam = { x: 0, y: 0 }; G.shake = 0; G.flash = 0; G.dawn = 0; G.run++;
+  G.P = newPlayer(G.sel); G.E = []; G.B = []; G.GEM = []; G.FX = []; G.DN = []; G.AURA = []; G.kills = 0; G.coins = 0; G.time = 0; G.spawnT = 0.6; G.bossI = 0; G.AI = null; G.autoLock = false; syncAuto(); G.cam = { x: 0, y: 0 }; G.shake = 0; G.flash = 0; G.dawn = 0; G.run++;
   $('#hKill').textContent = 0; $('#hLv').textContent = 1; $('#hTime').textContent = fmt(NIGHT); $('#xpfill').style.width = '0%';
   SND.bgm(true);
 }
@@ -357,17 +359,46 @@ function gameOver(cleared) {
   SAVE.coins += G.coins; $('#ovCoin').textContent = '+' + G.coins; save(); $('#ovUnlockRow').hidden = !unlockName; $('#ovUnlock').textContent = unlockName;
   setTimeout(() => { show('#over', true); }, cleared ? 2200 : 900);
 }
+// ---------- 자동사냥(10/15, 빌런라이크 자동근무를 옮김) ----------
+// 0.35초마다 둘러보고(사람처럼 조금 늦게) 200 안쪽 요괴 무리 반대쪽으로, 안전하면 영혼불, 체력이 낮으면 타코야키 먼저. 폭죽은 게이지가 꽉 차고 요괴가 많을 때 끝까지 모아 터뜨림
+const AUTO_CFG = { look: 0.35, R: 200, greed: 0.03, safe: 110, fire: 1 };
+function autoSteer(dt, manual) {
+  const P = G.P, A = G.AI || (G.AI = { x: 0, y: 0, tx: 0, ty: 0, t: 0, hold: 0 });
+  if (manual) { A.t = 0.3; A.x = A.y = 0; return [0, 0]; }
+  A.t -= dt;
+  if (A.t <= 0) {
+    const C = AUTO_CFG; A.t = C.look; let fx = 0, fy = 0, near = 1e9;
+    for (const e of G.E) { const dx = P.x - e.x, dy = P.y - 10 - e.y, d2 = dx * dx + dy * dy + 1; if (d2 < near) near = d2; if (d2 < C.R * C.R) { let w = (e.boss ? 3 : 1) * (e.dmg / 6) / d2; if (e.dashing > 0) w *= 4; fx += dx * w; fy += dy * w; } }
+    const low = P.hp < P.maxhp * 0.45; let g = null, gd = 1e9;
+    for (const q of G.GEM) { let d = (q.x - P.x) ** 2 + (q.y - P.y) ** 2; if (q.heal) d *= low ? 0.05 : 0.5; if (d < gd) { gd = d; g = q; } }
+    if (g && gd < 600 * 600) { const d = Math.hypot(g.x - P.x, g.y - P.y) + 1, k = near > C.safe * C.safe ? C.greed : g.heal && low ? 0.02 : 0.006; fx += (g.x - P.x) / d * k; fy += (g.y - P.y) / d * k; }
+    fx += -P.x * 1e-7; fy += -P.y * 1e-7;
+    const l = Math.hypot(fx, fy); A.tx = l > 1e-9 ? fx / l : 0; A.ty = l > 1e-9 ? fy / l : 0;
+  }
+  const k = Math.min(1, dt * 9); A.x += (A.tx - A.x) * k; A.y += (A.ty - A.y) * k;
+  if (A.hold > 0) { A.hold -= dt; G.sp = A.hold > 0; } else if (AUTO_CFG.fire && P.gas >= 99 && G.E.length > 15 && !P.charging) { A.hold = 1.5; G.sp = true; }
+  return [A.x, A.y];
+}
+const hasAuto = () => shopLv('auto') > 0;
+function syncAuto() { G.auto = hasAuto() && !!SAVE.autoOn && !G.autoLock; document.body.classList.toggle('hasauto', hasAuto()); const b = $('#tAuto'); if (b) b.classList.toggle('on', G.auto); if (!G.auto && G.AI) { G.AI = null; G.sp = false; } }
+// 자동사냥 아이콘: 붉은 테 부적에 AUTO(도트)
+function drawAutoIcon(c, x) {
+  const u = c.width / 16, px = (a, b, w, h, col) => { x.fillStyle = col; x.fillRect(Math.round(a * u), Math.round(b * u), Math.ceil(w * u), Math.ceil(h * u)); };
+  px(3, 0, 10, 16, '#15131a'); px(4, 1, 8, 14, '#fff3dc'); px(4, 1, 8, 1, '#e0453a'); px(4, 14, 8, 1, '#e0453a'); px(4, 1, 1, 14, '#e0453a'); px(11, 1, 1, 14, '#e0453a');
+  px(7, 3, 2, 2, '#e0453a'); px(6, 11, 4, 1, '#9a2a22'); px(7, 12, 2, 1, '#9a2a22');
+  x.save(); x.font = 'bold ' + Math.round(3.6 * u) + 'px monospace'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillStyle = '#1d2a5a'; x.fillText('AUTO', 8 * u, 8 * u); x.restore();
+}
 // ---------- 상점 ----------
 function openShop() {
   G.phase = 'shop'; show('#shop', true); const box = $('#shopList'); box.innerHTML = ''; $('#shopCoin').textContent = L('coin') + ' ' + SAVE.coins.toLocaleString();
   for (const it of SHOP) {
-    const lv = shopLv(it.k), max = lv >= SHOP_MAX, cost = max ? 0 : shopCost(it, lv);
+    const lv = shopLv(it.k), mx = it.max || SHOP_MAX, max = lv >= mx, cost = max ? 0 : shopCost(it, lv);
     const el = document.createElement('div'); el.className = 'card shoprow' + (max ? ' max' : (SAVE.coins < cost ? ' poor' : ''));
     const ic = document.createElement('canvas'); ic.width = ic.height = 112; drawIcon(ic, it.icon); el.appendChild(ic);
     const t = document.createElement('div'); t.className = 't'; t.innerHTML = '<div class="n">' + it[LANG] + '</div><div class="d">' + it.d[LANG === 'en' ? 1 : 0] + ' × ' + lv + '</div>';
-    const r = document.createElement('div'); r.className = 'lv'; r.innerHTML = (max ? L('max') : cost.toLocaleString()) + '<b>LV ' + lv + '/' + SHOP_MAX + '</b>';
+    const r = document.createElement('div'); r.className = 'lv'; r.innerHTML = (max ? L('max') : cost.toLocaleString()) + '<b>LV ' + lv + '/' + mx + '</b>';
     el.append(t, r);
-    el.onclick = () => { if (max) { SND.back(); return; } if (SAVE.coins < cost) { SND.back(); toast(L('coin') + ' ' + cost); return; } SAVE.coins -= cost; SAVE.shop[it.k] = lv + 1; save(); SND.levelup(); openShop(); buildTitle(); };
+    el.onclick = () => { if (max) { SND.back(); return; } if (SAVE.coins < cost) { SND.back(); toast(L('coin') + ' ' + cost); return; } SAVE.coins -= cost; SAVE.shop[it.k] = lv + 1; if (it.k === 'auto') SAVE.autoOn = 1; save(); SND.levelup(); openShop(); buildTitle(); syncAuto(); };
     box.appendChild(el);
   }
 }
@@ -416,6 +447,8 @@ addEventListener('keydown', e => {
 });
 addEventListener('keyup', e => { G.keys[e.key] = false; if (e.key === ' ') G.sp = false; });
 addEventListener('blur', () => { G.keys = {}; G.pad.x = G.pad.y = 0; G.sp = false; });
+$('#tAuto').onclick = () => { if (!hasAuto()) return; SND.unlock(); if (G.autoLock && G.phase === 'play') { SND.back(); toast((LANG === 'en' ? 'LAST BOSS' : '마지막 보스') + ' · AUTO OFF'); return; } SAVE.autoOn = SAVE.autoOn ? 0 : 1; save(); syncAuto(); SND.levelup(); toast('AUTO ' + (G.auto ? 'ON' : 'OFF')); };
+syncAuto();
 const actB = $('#act'); if (actB) { actB.addEventListener('pointerdown', e => { e.preventDefault(); SND.unlock(); G.sp = true; try { actB.setPointerCapture(e.pointerId); } catch (x) {} }); const aEnd = () => { G.sp = false; }; actB.addEventListener('pointerup', aEnd); actB.addEventListener('pointercancel', aEnd); }
 // 폰 패드
 const pad = $('#pad'), knob = $('#knob'); let padId = null;
