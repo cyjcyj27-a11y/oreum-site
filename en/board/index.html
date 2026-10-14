@@ -132,7 +132,7 @@
   var SUPABASE_URL = 'https://yefzzvtipsygqlvkaesx.supabase.co';
   var SUPABASE_KEY = 'sb_publishable_qERx6ADFGxFDCjwc0O2cUg_b5EE6WPR';
 
-  var PAGE = 12;                 // 한 번에 보여줄 글 수
+  var PAGE = 50;                 // 한 번에 보여줄 글 수 (사장님 2026-10-14 "50개로")
   var MAX_MB = 6;                // 고를 수 있는 원본 사진 크기
   var MAX_SIDE = 1400;           // 올리기 전에 이만큼으로 줄입니다 (저장공간 절약)
 
@@ -300,6 +300,13 @@
     return t || (p.image_path ? 'Photo' : '');
   }
 
+  /* 글 조회수 — 펼칠 때마다 1 올린다(같은 사람이 여러 번 봐도 센다). 화면에는 안 띄운다.
+     숫자는 post_views 표에만 있고 방문자는 못 읽는다(사장님 2026-10-14) */
+  function bumpView(id) {
+    if (!db || /^(localhost|127\.0\.0\.1)$/.test(location.hostname)) return;
+    db.rpc('bump_post_view', { p_id: id }).then(function () {}, function () {});
+  }
+
   function render(rows) {
     var frag = document.createDocumentFragment();
     rows.forEach(function (p) {
@@ -325,6 +332,7 @@
         body.hidden = !open;
         el.classList.toggle('open', open);
         head.setAttribute('aria-expanded', open ? 'true' : 'false');
+        if (open) bumpView(p.id);
       });
       el.querySelector('.del').addEventListener('click', function () { remove(p.id, el); });
       if (window.BoardExtra) BoardExtra.attach(body, p.id);   // 사진 확대 + 댓글
