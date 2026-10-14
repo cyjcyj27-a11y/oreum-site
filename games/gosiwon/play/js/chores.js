@@ -166,7 +166,8 @@ function setupToilet(R, task, day, neg) {
   });
   /* 남자: 꽁초, 여자: 하수구 머리카락 */
   if (R.g === 'm') { var nb = (r() * 3.4) | 0; for (i = 0; i < nb; i++) (function () {
-    var q = R.w(0.6 + r() * 2.2, 0.5 + r() * 2), butt = mk(function (b) { b.put(new T.CylinderGeometry(0.008, 0.008, 0.05, 6), 0, 0, 0, { rz: PI / 2, col: [0.95, 0.93, 0.88] }); b.put(new T.CylinderGeometry(0.0085, 0.0085, 0.018, 6), 0.03, 0, 0, { rz: PI / 2, col: [0.8, 0.55, 0.25] }); }, GS.M.mat);
+    var q = R.w(0.6 + r() * 2.2, 0.5 + r() * 2), qt = 0; while (qt++ < 8 && (Math.hypot(q[0] - R.bucket.x, q[1] - R.bucket.z) < 0.5 || Math.hypot(q[0] - R.bin.x, q[1] - R.bin.z) < 0.4)) q = R.w(0.6 + r() * 2.2, 0.5 + r() * 2);   /* 대야·휴지통 밑에 숨지 않게(10/14 게시판: 11일차 4층 남자 화장실 꽁초가 대야에 가려 못 끝냄) */
+    var butt = mk(function (b) { b.put(new T.CylinderGeometry(0.008, 0.008, 0.05, 6), 0, 0, 0, { rz: PI / 2, col: [0.95, 0.93, 0.88] }); b.put(new T.CylinderGeometry(0.0085, 0.0085, 0.018, 6), 0.03, 0, 0, { rz: PI / 2, col: [0.8, 0.55, 0.25] }); }, GS.M.mat);
     butt.position.set(q[0], y0 + 0.01, q[1]); butt.rotation.y = r() * 6; dyn.add(butt); D.extra++;
     addInter({ day: 1, x: q[0], y: y0 + 0.06, z: q[1], sx: 0.2, sy: 0.14, label: '꽁초', use: function () { butt.visible = false; GS.snd('pick'); GS.hands.jab(); killInter(this); D.extra--; roomCheck(R); } });
   })(); }
