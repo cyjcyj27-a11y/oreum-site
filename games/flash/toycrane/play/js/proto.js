@@ -157,7 +157,7 @@
   const bridge = box(IN.x1 - IN.x0, 0.02, 0.03, steel, 0, TOP + 0.1, 0, true);
 
   // 집게 힘: 오므릴 때 STRONG, 다 올라가면 WEAK 로 떨어진다(진짜 기계처럼)
-  const PWR = { open: 0.75, shut: -0.4, strong: 0.2835, weak: 0.1008, damp: 0.02, wob: 0.12, jolt: 0.05, topJolt: 0.05, slipK: 0.3, slipT: 0.25 }; // jolt: 쿵 할 때 떨어지는 높이(m), slipK: 그 순간 힘 배율
+  const PWR = { open: 0.75, shut: -0.4, strong: 0.2835, weak: 0.1008, damp: 0.02, wob: 0.12, jolt: 0.05, topJolt: 0, slipK: 0.3, slipT: 0.25 }; // jolt: 쿵 할 때 떨어지는 높이(m), slipK: 그 순간 힘 배율
   function clawTarget(ang, k) { for (const p of prongs) p.joint.configureMotorPosition(ang + (ang < 0 ? (Math.random() - 0.5) * 2 * PWR.wob : 0), k, PWR.damp); } // 오므릴 땐 발마다 조금씩 다르게(허벌한 집게)
   clawTarget(PWR.open, PWR.strong);
 
