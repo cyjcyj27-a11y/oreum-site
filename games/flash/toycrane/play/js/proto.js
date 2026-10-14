@@ -9,7 +9,7 @@
   const IN = { x0: -0.38, x1: 0.38, z0: -0.33, z1: 0.33 };   // 기계 안쪽
   const BED = 0.9;                                           // 인형 바닥 높이
   const TOP = 1.66;                                          // 집게 머리가 쉬는 높이
-  const HOLE = { x0: -0.38, x1: -0.15, z0: 0.10, z1: 0.33 }; // 앞 왼쪽 경품 구멍
+  const HOLE = { x0: -0.38, x1: -0.125, z0: 0.075, z1: 0.33 }; // 앞 왼쪽 경품 구멍(10/14 인형이 2.5cm 줄어든 만큼 23→25.5cm 로 넓힘)
   const HOME = { x: (HOLE.x0 + HOLE.x1) / 2 + 0.01, z: (HOLE.z0 + HOLE.z1) / 2 };
 
   // ---------- 그림 ----------
@@ -65,9 +65,14 @@
     const hw = HOLE.x1 - HOLE.x0, hd = HOLE.z1 - HOLE.z0;
     const hole = new T.Mesh(new T.PlaneGeometry(hw, hd), new T.MeshBasicMaterial({ color: 0x050208 }));
     hole.rotation.x = -Math.PI / 2; hole.position.set((HOLE.x0 + HOLE.x1) / 2, BED + 0.003, (HOLE.z0 + HOLE.z1) / 2); scene.add(hole);
-    const acr = new T.MeshStandardMaterial({ color: 0xc8f0ff, transparent: true, opacity: 0.28, roughness: 0.05, metalness: 0.1 });
+    const acr = new T.MeshStandardMaterial({ color: 0xc8f0ff, transparent: true, opacity: 0.42, roughness: 0.05, metalness: 0.1, depthWrite: false });
     box(0.006, 0.12, hd, acr, HOLE.x1, BED + 0.06, (HOLE.z0 + HOLE.z1) / 2);
     box(hw, 0.12, 0.006, acr, (HOLE.x0 + HOLE.x1) / 2, BED + 0.06, HOLE.z0);
+    // 칸막이 테두리: 밝은 선으로 둘러 칸막이가 있는 게 보이게(안 보이면 걸친 인형이 떠 있는 것처럼 보였다)
+    const rim = new T.MeshStandardMaterial({ color: 0xe8fbff, emissive: 0x9fe8ff, emissiveIntensity: 0.55, roughness: 0.2, metalness: 0.3 });
+    box(0.012, 0.01, hd + 0.006, rim, HOLE.x1, BED + 0.12, (HOLE.z0 + HOLE.z1) / 2);
+    box(hw + 0.006, 0.01, 0.012, rim, (HOLE.x0 + HOLE.x1) / 2, BED + 0.12, HOLE.z0);
+    for (const [px, pz] of [[HOLE.x1, HOLE.z0], [HOLE.x1, HOLE.z1 - 0.004], [HOLE.x0 + 0.004, HOLE.z0]]) box(0.012, 0.12, 0.012, rim, px, BED + 0.06, pz);
     // 뒤 벽: 별무늬 거울판
     const b = PL.canvas(256, 256), y = b.getContext('2d');
     const g = y.createLinearGradient(0, 0, 0, 256); g.addColorStop(0, '#3a1a6a'); g.addColorStop(1, '#ff7ac8'); y.fillStyle = g; y.fillRect(0, 0, 256, 256);
@@ -152,7 +157,7 @@
   const bridge = box(IN.x1 - IN.x0, 0.02, 0.03, steel, 0, TOP + 0.1, 0, true);
 
   // 집게 힘: 오므릴 때 STRONG, 다 올라가면 WEAK 로 떨어진다(진짜 기계처럼)
-  const PWR = { open: 0.75, shut: -0.4, strong: 0.45, weak: 0.16, damp: 0.02, wob: 0.12, jolt: 0.05, topJolt: 0.05, slipK: 0.3, slipT: 0.25 }; // jolt: 쿵 할 때 떨어지는 높이(m), slipK: 그 순간 힘 배율
+  const PWR = { open: 0.75, shut: -0.4, strong: 0.405, weak: 0.144, damp: 0.02, wob: 0.12, jolt: 0.05, topJolt: 0.05, slipK: 0.3, slipT: 0.25 }; // jolt: 쿵 할 때 떨어지는 높이(m), slipK: 그 순간 힘 배율
   function clawTarget(ang, k) { for (const p of prongs) p.joint.configureMotorPosition(ang + (ang < 0 ? (Math.random() - 0.5) * 2 * PWR.wob : 0), k, PWR.damp); } // 오므릴 땐 발마다 조금씩 다르게(허벌한 집게)
   clawTarget(PWR.open, PWR.strong);
 
@@ -160,15 +165,18 @@
   // 몸통 공 + 머리 공을 한 몸으로. 털 천이라 잘 미끄러지지 않고 튀지 않는다.
   const plush = [];
   const PROTO = [];
+  let PDENS = 55 * 1.1; // 인형 밀도(사장님 10/14 "무게 10% 증가")
+  let PSIZE = 0.9; // 인형 크기(사장님 10/14 "10%만 줄여"). 그림과 몸 둘 다 같이 줄인다
   function addPlush(idx, x, y, z, yaw) {
     const q = new T.Quaternion().setFromEuler(new T.Euler((Math.random() - 0.5) * 0.6, yaw, (Math.random() - 0.5) * 0.6));
     const body = world.createRigidBody(RP.RigidBodyDesc.dynamic().setTranslation(x, y, z).setRotation({ x: q.x, y: q.y, z: q.z, w: q.w })
       .setLinearDamping(0.4).setAngularDamping(0.9).setCanSleep(false));
-    const pc = (d) => world.createCollider(d.setDensity(55).setFriction(0.95).setRestitution(0.02).setCollisionGroups(G_ALL), body);
-    pc(C.ball(0.07).setTranslation(0, 0.075, 0));
-    pc(C.ball(0.066).setTranslation(0, 0.18, 0));
-    pc(C.capsule(0.03, 0.022).setTranslation(0, 0.03, 0.04).setRotation({ x: 0, y: 0, z: 0.7071, w: 0.7071 })); // 발
-    const g = (PROTO[idx] || (PROTO[idx] = PL.makePrize(idx))).clone(); scene.add(g); // 모양은 종류마다 한 번만 만들고 복사(리필 때 멈춤 없게)
+    const pc = (d) => world.createCollider(d.setDensity(PDENS).setFriction(0.95).setRestitution(0.02).setCollisionGroups(G_ALL), body);
+    const k = PSIZE;
+    pc(C.ball(0.07 * k).setTranslation(0, 0.075 * k, 0));
+    pc(C.ball(0.066 * k).setTranslation(0, 0.18 * k, 0));
+    pc(C.capsule(0.03 * k, 0.022 * k).setTranslation(0, 0.03 * k, 0.04 * k).setRotation({ x: 0, y: 0, z: 0.7071, w: 0.7071 })); // 발
+    const g = (PROTO[idx] || (PROTO[idx] = PL.makePrize(idx))).clone(); g.scale.setScalar(k); scene.add(g); // 모양은 종류마다 한 번만 만들고 복사(리필 때 멈춤 없게)
     g.traverse((o) => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
     plush.push({ idx, body, g, got: false });
   }
@@ -539,7 +547,7 @@
   // __sim(n): 그리지 않고 n 번 뽑아 성공률을 잰다. 목표는 아직 안 뽑힌 인형 중 무작위, 몸통 위를 노린다.
   window.__step = (n) => { for (let i = 0; i < n; i++) step(); sync(); hud(); };
   window.__refill = () => refill();
-  window.__K = K; window.__prongs = prongs; window.__head = head; window.__PWR = PWR; window.__S = S; window.__plush = plush;
+  window.__K = K; window.__prongs = prongs; window.__head = head; window.__PWR = PWR; window.__dens = (v) => { if (v) PDENS = v; return PDENS; }; window.__psize = (v) => { if (v) PSIZE = v; return PSIZE; }; window.__S = S; window.__plush = plush;
   window.__reset = function () { // 인형을 다 치우고 새로 쌓는다(시험용)
     for (const p of plush) if (!p.gone) { world.removeRigidBody(p.body); scene.remove(p.g); }
     plush.length = 0; fillBed(); STAT.thunkHeld = STAT.thunkDrop = 0;
