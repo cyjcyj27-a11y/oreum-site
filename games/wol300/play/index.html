@@ -80,6 +80,18 @@
   #endc.on{display:flex} #endc.show{opacity:1}
   @media (max-height:480px){ #endc{padding-bottom:26vh} }   /* 폰 가로 — 안드로이드 전체화면 알림이 아래 1/5 을 덮는다(oreum-game-ui 규칙 8) */
   body.ending #pad,body.ending #ebtn,body.ending #topbar,body.ending #keys{display:none!important}
+  /* 엔딩 결과표 카드(10/15) — 왼쪽 카드, 오른쪽 단추. 폰 세로는 위아래 */
+  #endc{align-items:center!important;padding:3vh 4vw!important;background:rgba(0,0,0,.62)!important}
+  #endc .ecw{display:flex;align-items:center;justify-content:center;gap:4vw;max-width:100%}
+  #ecard{height:min(84vh,620px);width:auto;max-width:56vw;border:1.5px solid rgba(255,255,255,.55);box-shadow:0 10px 40px rgba(0,0,0,.6)}
+  #endc .ebt{display:flex;flex-direction:column;align-items:center;gap:14px}
+  #endc .erow{display:flex;gap:12px}
+  #endc .mbtn{margin:0;background:rgba(0,0,0,.45);color:#f2f2ee;border:1.5px solid rgba(255,255,255,.7);border-radius:2px;box-shadow:none;font-weight:600;letter-spacing:.12em;padding:.5em 1.4em;white-space:nowrap}
+  #endc .mbtn:active{background:#fff;color:#000}
+  #endc .st2{margin:0}
+  @media (max-height:480px){ #ecard{height:84vh} #endc .ebt{align-self:flex-start;margin-top:4vh} #endc .st2{font-size:13vh} }
+  @media (max-aspect-ratio:1/1){ #endc .ecw{flex-direction:column;gap:2.4vh} #ecard{height:auto;width:min(78vw,420px);max-width:none} }
+
   /* 월말 정산 — 흑백, 가운데 큰 숫자 하나 */
   #settle{position:fixed;inset:0;z-index:20;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.9);color:#fff;font-family:sans-serif;text-align:center}
   #settle.on{display:flex}
@@ -116,7 +128,7 @@
 <div id="ebtn">E</div>
 <div id="topbar"><div class="stat"><b id="sD">D-30</b></div><div class="stat"><b id="sH">08:00</b></div><div class="stat"><span style="margin:0 6px 0 0" data-en="BANK">총잔고</span><b id="sB">0</b><span data-en="/ 30M">/ 3000만</span></div><div class="stat snd" id="sSnd">♪</div></div>
 <div id="settle"><div class="sbox"><div class="sL"><div class="st1" id="stT" data-en="MONTH 1 STATEMENT">1월 정산</div><table class="stab" id="stTab"></table></div><div class="sfoot"><div><div class="st4" id="stV" data-en="DEBT">빚</div><div class="st5" id="stG">C → D</div></div><button class="mbtn" id="stNext" data-en="NEXT MONTH">다음 달</button></div></div></div>
-<div id="endc"><div><div class="st2">THE END</div><button class="mbtn" id="endBtn" data-en="RESTART">처음부터</button></div></div>
+<div id="endc"><div class="ecw"><img id="ecard" alt=""><div class="ebt"><div class="st2">THE END</div><div class="erow"><button class="mbtn" id="cardSave" data-en="SAVE">저장</button><button class="mbtn" id="cardShare" data-en="SHARE">공유</button></div><button class="mbtn" id="endBtn" data-en="RESTART">처음부터</button></div></div></div>
 <div id="mini"><div class="kbox"><div class="kgrid" id="kgrid"></div><div class="kside"><div class="khead">DATA BOOTH</div><div class="kq" id="kq"></div><button class="kbtn" id="kok" data-en="VERIFY">확인</button></div><button class="kx" id="kx">✕</button></div></div>
 <div id="recb"><i></i><span>REC</span></div>
 <div id="rotate"><div data-en="Turn your phone sideways">가로로 돌려 주세요</div><button class="mbtn" id="rotBtn" data-en="FULLSCREEN">전체화면보기</button></div>
@@ -226,6 +238,7 @@ const G={month:1, day:1, dleft:30, hour:8, money:0, grade:2, fresh:1,
   rec:null, recN:{},
   bank:0, broken:{}, sbroken:[], sparks:[], muz:0, endWait:0, end:null, twin:null,
   cctvT:0, lock:null, score:null, coins:[], flash:0, pops:[], shake:0, fade:0, sleeping:0};
+G.st={recN:0,recWon:0,accN:0,accWon:0,capN:0,capWon:0,best:null};   /* 엔딩 결과표에 쓸 1년 기록(10/15) */
 /* 사고 — 카메라에 찍히면 돈. 같은 걸 또 하면 AI 가 이미 배워서 값이 떨어진다 */
 /* AI 신선 토마토 점수(사장님 9/26) — AI 가 처음 보는 것일수록 높다. 사람은 안 사 볼 영상이라도 AI 에겐 신선하다.
    흔한 것(고양이·라면)은 낮고, 사투리·취중 고백처럼 드문 건 높다. 60% 넘으면 싱싱한 토마토, 아래면 썩은 토마토.
@@ -1387,10 +1400,11 @@ function startSleep(){ if(!G.sleeping){ if(G.rec) deliver(); if(MINI) closeMini(
   if(G.parcel.st==='carry'||G.parcel.st==='lift'||G.parcel.st==='drop') G.parcel={st:'home',x:HX+110,t:0};
   camHours(Math.max(0,DAY_H1-G.hour)); G.hour=Math.max(G.hour,DAY_H0); G.sleeping=1; G.fade=0; SFX.sleep(); } }   // 일찍 자도 그날 몫은 CCTV 가 마저 번다
 /* 신선도 회복(사장님 9/26 "그렇게 하자") — 한동안 안 찍은 장면은 AI 가 새 데이터에 묻혀 잊는다.
-   마지막으로 판 날에서 이틀 지날 때마다 한 단계씩 제값으로 돌아간다 */
+   마지막으로 판 날에서 일주일 지날 때마다 한 단계씩 제값으로 돌아간다(10/15 이틀에서 바꿈) */
 const absDay=()=>(G.month-1)*30+G.day;
+const REC_BACK=7;   /* 10/15 사장님 "하루만에 값이 돌아오지않게 바꿔" — 이틀마다 한 단계 돌아오던 것을 일주일마다 한 단계로 */
 function recoverFresh(){ const d=absDay();
-  const back=(n,used)=>{ if(!n||used==null) return n; const gap=d-used; return gap>=2&&gap%2===0?n-1:n; };
+  const back=(n,used)=>{ if(!n||used==null) return n; const gap=d-used; return gap>=REC_BACK&&gap%REC_BACK===0?n-1:n; };
   for(const k in ACC){ const a=ACC[k]; a.n=back(a.n,a.used); }
   G.recUsed=G.recUsed||{}; for(const k in G.recN){ G.recN[k]=back(G.recN[k],G.recUsed[k]); } }
 function newDay(){
@@ -1445,8 +1459,61 @@ document.getElementById('stNext').addEventListener('click',()=>{
 });
 /* 엔딩 둘 — 총으로 CCTV 를 다 쏘면 세상에 색이 번진다 / 12달 동안 못 사면 흑백 그대로, 디지털 트윈이 나 대신 산다 */
 const endEl=document.getElementById('endc');
-function showEnd(){ clearSave(); try{ window.OG&&OG.over({result:G.end?'GUN':'TWIN'}); }catch(e){} endEl.classList.add('on'); setTimeout(()=>endEl.classList.add('show'),50); }
+function showEnd(){ G.pops=[]; try{ draw(TT); CARD=makeCard(); document.getElementById('ecard').src=CARD.toDataURL('image/png'); }catch(e){} clearSave(); try{ window.OG&&OG.over({result:G.end?'GUN':'TWIN'}); }catch(e){} endEl.classList.add('on'); setTimeout(()=>endEl.classList.add('show'),50); }
 document.getElementById('endBtn').addEventListener('click',()=>location.reload());
+document.getElementById('cardSave').addEventListener('click',cardSave);
+document.getElementById('cardShare').addEventListener('click',cardShare);
+/* 엔딩 결과표(사장님 10/15 "월300정산표 만들어서 넣어줘") — 1년을 정리한 인생 정산표 카드 한 장(1080x1350), 저장·공유. 한·영 */
+const ACCNAME={ramen:'라면 넘치기',cat:'고양이 화분',chair:'의자에서 꽈당',fridge:'밤 냉장고 야식',bath:'욕실에서 미끄러짐',granny:'할머니 옛날이야기',confess:'전봇대 고백',
+  poop:'변기',snack:'밤 과자',sofa:'소파에서 멍',mirror:'거울 몸자랑',swing:'그네에서 날아가기'};
+const ACCNAME_EN={ramen:'Ramen boil-over',cat:'Cat and the plant pot',chair:'Chair fall',fridge:'Midnight fridge raid',bath:'Slip in the bathroom',granny:"Grandma's old stories",confess:'Confession to a pole',
+  poop:'The toilet',snack:'Late night snack',sofa:'Zoning out on the sofa',mirror:'Mirror flexing',swing:'Flying off the swing'};
+function stBest(name,v){ if(!G.st.best||v>G.st.best.v) G.st.best={n:name,v:v}; }
+function subjName(key){ if(key==='street') return EN?'Empty alley':'빈 골목'; const e=EVENTS[key]||SUBJ_FIX.find(o=>o.id===key); return e?tr(e.n):key; }
+function cardTitle(gun){
+  const d=absDay(), b=liveBank();
+  if(gun) return d<=30?(EN?'Out in One Month':'한 달 만에 탈출'):d<=90?(EN?'Camera of the Alley':'골목의 카메라맨'):d<=180?(EN?'The One Who Held On':'버티는 사람'):(EN?'Made It in the End':'마지막에 해낸 사람');
+  return b>=20000000?(EN?'So Close':'거의 다 왔는데'):b>=10000000?(EN?'Half Awake':'반쯤 깨어난 사람'):(EN?'Lost to the Digital Twin':'디지털 트윈에게 진 사람');
+}
+function won(v){ v=Math.round(v||0); return EN?'₩'+v.toLocaleString():v.toLocaleString()+'원'; }
+function makeCard(){
+  const gun=!!G.end, W2=1080, H2=1350, c=document.createElement('canvas'); c.width=W2; c.height=H2; const g=c.getContext('2d');
+  g.fillStyle='#0b0b0c'; g.fillRect(0,0,W2,H2);
+  // 위: 엔딩 장면(총 엔딩은 색이 번진 그대로, 트윈 엔딩은 흑백)
+  const sw=cv.width, sh=cv.height, top=520, k=Math.max(W2/sw, top/sh), dw=sw*k, dh=sh*k;
+  g.save(); g.beginPath(); g.rect(0,0,W2,top); g.clip(); g.drawImage(cv,(W2-dw)/2,(top-dh)/2,dw,dh); g.restore();
+  const gr=g.createLinearGradient(0,top-260,0,top); gr.addColorStop(0,'rgba(11,11,12,0)'); gr.addColorStop(1,'rgba(11,11,12,1)'); g.fillStyle=gr; g.fillRect(0,top-260,W2,260);
+  g.textAlign='center'; g.fillStyle='#fff';
+  g.font="130px WolDokdo, sans-serif"; g.fillText(EN?'300 A MONTH':'월300', W2/2, 480);
+  g.font='600 30px sans-serif'; g.fillStyle='rgba(255,255,255,.6)'; g.fillText(EN?'LIFE STATEMENT':'인생 정산표', W2/2, 530);
+  g.font='900 46px sans-serif'; g.fillStyle='#fff'; g.fillText(gun?(EN?'Gun Ending: Color Came Back':'총 엔딩 — 색이 돌아왔다'):(EN?'Twin Ending: Still Black and White':'트윈 엔딩 — 흑백 그대로'), W2/2, 598);
+  // 명세서 줄
+  const broken=Object.keys(G.broken||{}).filter(k=>G.broken[k]).length+(G.sbroken||[]).filter(Boolean).length;
+  const rows=[
+    [EN?'Days lived':'살아 낸 날', EN?(absDay()+' days'):(absDay()+'일')],
+    [EN?'Recordings sold':'녹화 납품', (EN?G.st.recN+' times  ':G.st.recN+'번  ')+won(G.st.recWon)],
+    [EN?'Accidents on camera':'카메라에 찍힌 사고', (EN?G.st.accN+' times  ':G.st.accN+'번  ')+won(G.st.accWon)],
+    [EN?'Captcha jobs':'캡차 알바', (EN?G.st.capN+' times  ':G.st.capN+'번  ')+won(G.st.capWon)],
+    [EN?'Best seller':'제일 비싸게 판 장면', G.st.best?(G.st.best.n+'  '+won(G.st.best.v)):'—'],
+    [EN?'CCTV destroyed':'부순 CCTV', EN?(broken+' cameras'):(broken+'대')],
+    [EN?'Final grade':'마지막 등급', GRADES[G.grade]],
+  ];
+  let y=672; g.textBaseline='middle';
+  rows.forEach(([a,b])=>{ g.textAlign='left'; g.font='500 32px sans-serif'; g.fillStyle='rgba(255,255,255,.62)'; g.fillText(a,90,y);
+    g.textAlign='right'; g.font='800 34px sans-serif'; g.fillStyle='#fff'; let fs=34; while(g.measureText(b).width>560&&fs>20){ fs-=2; g.font='800 '+fs+'px sans-serif'; } g.fillText(b,W2-90,y);
+    g.fillStyle='rgba(255,255,255,.12)'; g.fillRect(90,y+29,W2-180,2); y+=60; });
+  g.fillStyle='#fff'; g.fillRect(90,y+2,W2-180,4);
+  g.textAlign='center'; g.font='600 28px sans-serif'; g.fillStyle='rgba(255,255,255,.6)'; g.fillText(EN?'TITLE':'칭호', W2/2, y+44);
+  g.font='900 64px sans-serif'; g.fillStyle='#fff'; g.fillText(cardTitle(gun), W2/2, y+104);
+  g.font='700 30px sans-serif'; g.fillStyle='rgba(255,255,255,.55)'; g.fillText('OREUM GAMES   oreumgames.com', W2/2, H2-46);
+  return c;
+}
+let CARD=null;
+function cardBlob(cb){ CARD.toBlob(b=>cb(b),'image/png'); }
+function cardSave(){ cardBlob(b=>{ const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download='wol300-result.png'; document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },500); }); }
+function cardShare(){ cardBlob(b=>{ const f=new File([b],'wol300-result.png',{type:'image/png'});
+  if(navigator.canShare&&navigator.canShare({files:[f]})) navigator.share({files:[f],title:EN?'300 A MONTH':'월300',text:'oreumgames.com'}).catch(()=>{}); else cardSave(); }); }
+
 function twinEnding(){
   G.twin={t:0}; document.body.classList.add('ending');
   Object.assign(G.bar,{st:'idle'}); G.drunk=0; G.hour=21; G.fade=0; G.sleeping=0;
@@ -1457,7 +1524,7 @@ function accident(key,wx,wy,room){
   if(room in G.cams&&!G.cams[room]){ G.shake=Math.max(G.shake,3); return; }
   const a=ACC[key], m=REPEAT[Math.min(a.n,REPEAT.length-1)]; a.n++; a.used=absDay();
   const sc=Math.max(1,Math.round(a.fresh*m)), v=sc*WON_PER_PCT; G.score={v:sc,t:6}; SFX.coin(sc);
-  G.money+=v; LEARN+=Math.round(v/37);
+  G.money+=v; LEARN+=Math.round(v/37); G.st.accN++; G.st.accWon+=v; stBest(EN?ACCNAME_EN[key]:ACCNAME[key],v);
   G.pops.push({x:wx,y:wy,txt:'+'+v.toLocaleString(),t:0,big:m>.5});
   if(ROOMS[room]) G.lock={room,x:wx,t:5}; G.flash=1; G.shake=m>.5?7:3;
   const n=Math.round(10+26*m);
@@ -1604,7 +1671,7 @@ function saveGame(){ if(TITLE||G.end||G.endWait||G.twin) return;
   const pc=G.parcel.st==='wait'||G.parcel.st==='home'?G.parcel:{st:G.parcel.st==='none'?'none':'home',x:G.parcel.st==='none'?-34:Math.max(WALL+60,HERO.x),t:0};
   const d={v:1,month:G.month,day:G.day,hour:G.hour,money:G.money,grade:G.grade,bank:G.bank,cams:G.cams,broken:G.broken,sbroken:G.sbroken,
     recN:G.recN,recUsed:G.recUsed||{},accN,accU,capN:CAPN,camM:G.camM||{},baseFull:G.baseFull||0,baseGot:G.baseGot||0,spent:G.spent||0,cctvAcc:G.cctvAcc||0,parcel:pc,gun:HERO.gun||0,learn:LEARN,
-    wcDay:G.wc.day,ate:G.fridge.ate,outPrev:G.outPrev};
+    wcDay:G.wc.day,ate:G.fridge.ate,outPrev:G.outPrev,st:G.st};
   try{ localStorage.setItem(SAVE_KEY,JSON.stringify(d)); }catch(e){} }
 function loadSave(){ try{ const d=JSON.parse(localStorage.getItem(SAVE_KEY)||'null'); return d&&d.v===1?d:null; }catch(e){ return null; } }
 function clearSave(){ try{ localStorage.removeItem(SAVE_KEY); }catch(e){} }
@@ -1613,7 +1680,7 @@ function applySave(d){
     cams:d.cams,broken:d.broken||{},baseFull:d.baseFull||0,sbroken:d.sbroken||[],recN:d.recN||{},camM:d.camM||{},baseGot:d.baseGot||0,spent:d.spent||0,cctvAcc:d.cctvAcc||0,
     parcel:Object.assign({t:0},d.parcel||{st:'none',x:-34}),outPrev:d.outPrev||{}});
   for(const k in (d.accN||{})) if(ACC[k]){ ACC[k].n=d.accN[k]; ACC[k].used=(d.accU||{})[k]; }
-  G.recUsed=d.recUsed||{};
+  G.recUsed=d.recUsed||{}; if(d.st) G.st=Object.assign(G.st,d.st);
   Object.assign(CAPN,d.capN||{}); HERO.gun=d.gun||0; LEARN=d.learn||LEARN; G.wc.day=d.wcDay||0; G.fridge.ate=d.ate||0;
   HERO.x=BX+300; HERO.face=-1; camX=camFor('bed');                     // 이어서 하면 침실에서
 }
@@ -1901,6 +1968,7 @@ function beachScreen(t){
 /* 캠코더 — 밖에 나가면 손에 든다. REC 로 녹화를 시작하면 시간이 6배로 흐르고, 다시 누르면 찍은 영상을 납품한다.
    값 = 찍힌 것의 AI 신선도 × 2,500원 × 찍힌 시간(상한 없음, 사람은 자정에 사라진다). 같은 걸 또 찍어 납품하면 AI 가 이미 배워서 떨어진다 */
 const REC_SPEED=6;
+const REC_CAP=1;   /* 한 번 녹화는 게임 시간 1시간까지(10/16) */
 const SUBJ_FIX=[
   {id:'granny', n:'할머니 옛날이야기', x:()=>SPOT.granny, sc:70, here:()=>grannyHere(), mood:0},
   {id:'aunt',   n:'포장마차 이모', x:()=>AUNTX, sc:35, here:()=>tentOpen(), mood:0},
@@ -1927,10 +1995,10 @@ function deliver(){
   for(const key of keys){
     const n=G.recN[key]||0, m=REPEAT[Math.min(n,REPEAT.length-1)];
     const base=key!=='street'&&R.sc&&R.sc[key]!=null?R.sc[key]:3;
-    const s=Math.max(1,Math.round(base*m)), hrs=key!=='street'?R.got[key]:R.t, kv=Math.round(s*WON_PER_PCT*hrs/100)*100;   // 상한 없음 — 찍힌 시간만큼(사장님 9/26 "어차피 12시 되면 사라지잖아")
-    v+=kv; if(kv>bv){ bv=kv; sc=s; }                                                     // 토마토는 제일 많이 번 사람 점수로
+    const s=Math.max(1,Math.round(base*m)), hrs=Math.min(REC_CAP,key!=='street'?R.got[key]:R.t), kv=Math.round(s*WON_PER_PCT*hrs/100)*100;   // 찍힌 시간만큼, 한 번에 1시간까지(10/16 사장님 "1시간이내로 제한해" — 9/26 상한 없음에서 바꿈)
+    v+=kv; if(kv>bv){ bv=kv; sc=s; } stBest(subjName(key),kv);                                                     // 토마토는 제일 많이 번 사람 점수로
     G.recN[key]=n+1; G.recUsed[key]=absDay(); }
-  G.money+=v; LEARN+=Math.max(1,Math.round(v/37)); G.score={v:sc,t:6}; SFX.coin(sc);
+  G.money+=v; LEARN+=Math.max(1,Math.round(v/37)); G.score={v:sc,t:6}; SFX.coin(sc); G.st.recN++; G.st.recWon+=v;
   G.pops.push({x:HERO.x,y:210,txt:'+'+v.toLocaleString()+'  '+sc+'%',t:0,big:sc>=60});
   G.flash=1; G.shake=sc>=60?6:2;
 }
@@ -2223,7 +2291,7 @@ function checkMini(){
   const box=document.querySelector('.kbox');
   if(ok){ const n=CAPN[MINI.t.k]||0; CAPN[MINI.t.k]=n+1;
     const v=27000; G.score={v:Math.max(1,Math.round(v/WON_PER_PCT)),t:6};   // 캡차 알바 — 늘 27,000원: 빈 골목 녹화의 실제 1초 값(7,500원÷1.7초≈4,500) × 한 문제 약 6초(사장님 9/26 "균일하게"·"실제 걸리는 시간으로"), 제일 흔한 데이터라 늘 썩은 토마토
-    G.money+=v; LEARN+=Math.max(1,Math.round(v/37));
+    G.money+=v; LEARN+=Math.max(1,Math.round(v/37)); G.st.capN++; G.st.capWon+=v;
     G.pops.push({x:SPOT.kiosk,y:360,txt:'+'+v.toLocaleString(),t:0,big:false});
     SFX.ok(); box.classList.remove('good'); void box.offsetWidth; box.classList.add('good'); }
   else { SFX.bad(); box.classList.remove('bad'); void box.offsetWidth; box.classList.add('bad'); }
@@ -2410,7 +2478,7 @@ function update(dt,t){
   document.body.classList.toggle('outside',isOut(HERO.x));
   if(isOut(HERO.x)&&!G.wasOut) rollOut(); G.wasOut=isOut(HERO.x);           // 현관을 나설 때마다 새 사건
   if(G.rec){ const q=recSubject(); if(q){ G.rec.got[q.id]=(G.rec.got[q.id]||0)+dt*REC_SPEED/SEC_PER_H; G.rec.sc=G.rec.sc||{}; G.rec.sc[q.id]=q.sc; }   // 찍힌 시간(게임 시간)·점수를 그때 기억 — 납품 때 사람이 사라져도 제값(9/26 버그)
-    if(!G.sleeping&&!TITLE) G.rec.t+=dt*REC_SPEED/SEC_PER_H;
+    if(!G.sleeping&&!TITLE){ G.rec.t+=dt*REC_SPEED/SEC_PER_H; if(G.rec.t>=REC_CAP){ deliver(); } }   // 1시간이 차면 그 자리에서 납품
     if(!isOut(HERO.x)||G.sleeping) deliver(); }                     // 집에 들어가거나 잠들면 그때까지 찍은 걸 납품
   /* 할머니 이야기 — 7초 녹음하면 돈 */
   const Gr=G.granny;
