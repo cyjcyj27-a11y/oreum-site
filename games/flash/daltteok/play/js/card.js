@@ -114,7 +114,7 @@
       c.font = '30px ' + RIA; var lw0 = c.measureText(T.score).width;
       c.save(); c.translate(lx + lw0 + 62, P.y + 52); c.rotate(-0.12);
       rrect(c, -46, -21, 92, 42, 12); c.fillStyle = '#d6480c'; c.fill(); c.lineWidth = 4; c.strokeStyle = DEEP; c.stroke();
-      text(c, T.newb, 0, 2, '28px ' + TK, '#fff'); c.restore();
+      text(c, T.newb, 0, 2, '28px ' + RIA, '#fff'); c.restore();
     }
     // 칭호
     text(c, TT[top - 1], lx, P.y + 300, fit(c, TT[top - 1], '54px ' + RIA, 560), NAVY, null, 0, 'left');
@@ -126,7 +126,7 @@
       var cxx = P.x + P.w * (0.5 + i) / 3, ly = P.y + 390, vy = P.y + 450;
       text(c, cols[i][0], cxx, ly, '28px ' + RIA, 'rgba(31,58,122,.7)');
       if (i === 2) { moonIcon(c, cxx - c.measureText(cols[i][1]).width * 0.5 - 32, vy, 22); }
-      text(c, cols[i][1], cxx + (i === 2 ? 14 : 0), vy, fit(c, cols[i][1], '58px ' + TK, 260), i === 0 && G.newBest ? '#d6480c' : NAVY);
+      text(c, cols[i][1], cxx + (i === 2 ? 14 : 0), vy, fit(c, cols[i][1], (i === 2 ? '50px ' + RIA : '58px ' + TK), 260), i === 0 && G.newBest ? '#d6480c' : NAVY);
     }
     // 떡 도감 줄: 이 판에서 만든 떡까지
     var dy = 1228, cell = 86, x0 = 540 - cell * 5;
@@ -136,7 +136,7 @@
       else { c.beginPath(); c.arc(cx2, dy, r2, 0, PI2); c.fillStyle = 'rgba(195,205,221,.35)'; c.fill(); c.lineWidth = 2; c.strokeStyle = 'rgba(142,154,184,.7)'; c.stroke(); text(c, '?', cx2, dy + 1, Math.round(r2 * 1.1) + 'px ' + RIA, 'rgba(255,255,255,.55)'); }
     }
     // 보는 사람에게 던지는 한 줄 + 주소
-    text(c, T.hook, 540, 1290, (EN ? 44 : 46) + 'px ' + TK, '#fff3b0', DEEP, 12);
+    text(c, T.hook, 540, 1290, (EN ? 42 : 44) + 'px ' + RIA, '#fff3b0', DEEP, 12);
     c.font = '34px ' + RIA; var sw2 = c.measureText(T.site).width, lw = 58, gap = 14, bx = 540 - (sw2 + lw + gap) / 2;
     if (logo) c.drawImage(logo, bx, 1329 - 14, lw, 28);
     text(c, T.site, bx + lw + gap, 1330, '34px ' + RIA, '#fff', null, 0, 'left');
