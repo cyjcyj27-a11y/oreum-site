@@ -282,7 +282,6 @@ def render_list(posts, L, ch, pair_list):
     <div class="wrap game-page">
       <a class="backlink" href="%s">%s</a>
       <h1 class="news-h1">%s</h1>
-      <p class="news-lead">%s</p>
       <ul class="news-list">
 %s
       </ul>
@@ -290,7 +289,7 @@ def render_list(posts, L, ch, pair_list):
     </div>
   </section>
 </main>
-""" % (L["back_href"], L["back"], L["section"], html.escape(L["list_desc"], quote=False), "\n".join(items), L["cta_href"], L["cta"])
+""" % (L["back_href"], L["back"], L["section"], "\n".join(items), L["cta_href"], L["cta"])
     return head + body + "\n" + footer + "\n\n" + scripts + "\n</body>\n</html>\n"
 
 
