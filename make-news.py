@@ -155,6 +155,7 @@ ARTICLE_STYLE = """.note-page h1{ font-size:clamp(18px,2.4vw,24px); line-height:
 .note-sub{ margin:10px 0 0; font-size:17px; line-height:1.6; color:var(--ink-2); }
 .note-date{ margin:8px 0 22px; font-size:13px; color:var(--muted); }
 .note-page h2{ font-size:21px; margin:30px 0 4px; }
+.note-page p > strong:only-child{ font-size:calc(1em + 2pt); }
 .note-page .gp-body a{ text-decoration:underline; text-underline-offset:3px; }
 .note-page .gp-cta{ margin-top:30px; }
 .note-fig{ margin:18px 0 4px; }
