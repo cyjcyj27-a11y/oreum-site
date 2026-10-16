@@ -13,8 +13,8 @@
     en: ['Bean Rookie', 'Dango Rookie', 'Honey Apprentice', 'Mugwort Apprentice', 'Songpyeon Hand', 'Injeolmi Hand', 'Rainbow Artisan', 'Mochi Artisan', 'Pumpkin Master', 'Snow Cake Master', 'Full Moon Mill']
   };
   var L = {
-    ko: { title: '달떡 합치기', score: '점수', best: '최고 기록', today: '오늘 최고', moon: '보름달', top: '제일 큰 떡', newb: 'NEW', hook: '너는 몇 점까지 합칠 수 있을까?', site: 'oreumgames.com', cnt: function (n) { return n + '개'; } },
-    en: { title: 'Moon Mochi Merge', score: 'SCORE', best: 'BEST', today: 'TODAY', moon: 'FULL MOON', top: 'BIGGEST', newb: 'NEW', hook: 'How far can you merge?', site: 'oreumgames.com', cnt: function (n) { return 'x ' + n; } }
+    ko: { title: '달떡 합치기', score: '점수', best: '최고 기록', today: '오늘 최고', moon: '보름달', top: '제일 큰 떡', newb: 'NEW', hook: '너는 몇 점까지 합칠 수 있을까?', site: 'oreumgames.com', cnt: function (n) { return n + '개'; }, copied: '주소를 복사했어요' },
+    en: { title: 'Moon Mochi Merge', score: 'SCORE', best: 'BEST', today: 'TODAY', moon: 'FULL MOON', top: 'BIGGEST', newb: 'NEW', hook: 'How far can you merge?', site: 'oreumgames.com', cnt: function (n) { return 'x ' + n; }, copied: 'Link copied' }
   };
   function rng(seed) { var a = seed >>> 0; return function () { a = (a + 0x6D2B79F5) | 0; var t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
   function rrect(c, x, y, w, h, r) { c.beginPath(); if (c.roundRect) c.roundRect(x, y, w, h, r); else c.rect(x, y, w, h); }
@@ -167,17 +167,28 @@
   function save() {
     return make().then(function (c) { return toBlob(c).then(function (b) { download(b, fname(window.__dtCard())); }); });
   }
+  // 공유 = 링크(글+주소). 카톡은 그림 파일이 붙으면 글·링크를 버리고, 두 번 누르는 공유는 아무도 안 쓴다(10/16 사장님 "링크공유로 바꿔").
+  // 카드 그림은 저장 단추로 남긴다.
+  function toast(t) {
+    var e = document.getElementById('__dtToast');
+    if (!e) {
+      e = document.createElement('div'); e.id = '__dtToast';
+      e.style.cssText = 'position:fixed;left:50%;top:calc(64px + env(safe-area-inset-top));transform:translateX(-50%);z-index:999;max-width:92vw;padding:12px 22px;border-radius:16px;white-space:pre-line;word-break:keep-all;border:3px solid #1f3a7a;color:#1f3a7a;font:700 18px/1.3 Ria,sans-serif;text-align:center;background:linear-gradient(180deg,#fff,#eef2f8 60%,#d6deea);box-shadow:0 4px 0 #14285a,0 8px 14px rgba(6,10,40,.35);pointer-events:none;transition:opacity .25s';
+      document.body.appendChild(e);
+    }
+    e.textContent = t; e.style.opacity = '1'; clearTimeout(e.__t); e.__t = setTimeout(function () { e.style.opacity = '0'; }, 2600);
+  }
+  function T() { return window.__dtCard().EN ? L.en : L.ko; }
+  function copyLink(X, t) {
+    var full = X.text + (X.url ? String.fromCharCode(10) + X.url : '');
+    var ok = function () { toast(t.copied); };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(full).then(ok, function () {});
+    else { try { var ta = document.createElement('textarea'); ta.value = full; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); ok(); } catch (e) {} }
+  }
   function share() {
-    return make().then(function (c) {
-      return toBlob(c).then(function (b) {
-        var X = window.__dtCard(), f = new File([b], fname(X), { type: 'image/png' });
-        var msg = X.text + (X.url ? '\n' + X.url : '');
-        if (navigator.canShare && navigator.canShare({ files: [f] })) {
-          return navigator.share({ files: [f], text: msg }).catch(function (e) { if (!e || e.name !== 'AbortError') download(b, f.name); });
-        }
-        download(b, f.name);
-      });
-    });
+    var X = window.__dtCard(), t = T();
+    if (navigator.share && X.url) return navigator.share({ title: t.title, text: X.text, url: X.url }).catch(function (e) { if (!e || e.name !== 'AbortError') copyLink(X, t); });
+    copyLink(X, t); return Promise.resolve();
   }
   window.DTC = { make: make, share: share, save: save };
 })();
