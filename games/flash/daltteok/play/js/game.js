@@ -4,11 +4,11 @@
   var EN = /[?&]lang=en\b/.test(location.search);
   if (EN) document.documentElement.lang = 'en';
   var T = EN ? {
-    t1: 'Moon Mochi', t2: 'Merge', today: 'TODAY', share: 'SHARE', copied: 'COPIED',
+    t1: 'Moon Mochi', t2: 'Merge', today: 'TODAY', share: 'SHARE', save: 'SAVE', copied: 'COPIED',
     moon: function (n) { return 'x ' + n; },
     msg: function (s, m) { return 'Moon Mochi Merge ' + s + ' pts' + (m ? ' / full moon x' + m : ''); }
   } : {
-    t1: '달떡', t2: '합치기', today: '오늘', share: '자랑하기', copied: '복사됨',
+    t1: '달떡', t2: '합치기', today: '오늘', share: '공유', save: '저장', copied: '복사됨',
     moon: function (n) { return n + '개'; },
     msg: function (s, m) { return '달떡 합치기 ' + s + '점' + (m ? ' 보름달 ' + m + '개' : ''); }
   };
@@ -40,7 +40,7 @@
 
   var G = {
     state: 'title', bodies: [], born: [], parts: [], rings: [], floats: [],
-    score: 0, best: +ls('best', 0), seen: +ls('seen', 0), today: 0, moons: 0,
+    score: 0, best: +ls('best', 0), seen: +ls('seen', 0), today: 0, moons: 0, top: 0,
     chain: 0, chainT: 0, gauge: 0, GMAX: 14, cur: 0, next: 1, aimX: 200, cool: 0,
     warn: false, noOver: 0, shake: 0, kung: -1, kungHit: false, t: 0, praise: null, flash: 0, overT: 0
   };
@@ -288,7 +288,7 @@
     DTA.sfx('merge', lv);
     if (G.state === 'play') {
       addScore(lv * (lv + 1) / 2 * Math.min(G.chain, 5), x, y - R[lv - 1]);
-      seen(lv);
+      seen(lv); if (lv > G.top) G.top = lv;
       if (lv === 11) { G.moons++; G.flash = 0.5; G.shake = 10; burst(x, y, '#fff3a0', 30, 300); DTA.sfx('moon'); }
     }
   }
@@ -403,7 +403,7 @@
   function start() {
     DTA.init(); DTA.sfx('tap');
     G.bodies = []; G.born = []; G.parts = []; G.rings = []; G.floats = [];
-    G.score = 0; G.moons = 0; G.chain = 0; G.chainT = 0; G.gauge = 0; G.cool = 0; G.kung = -1; G.praise = null; G.warn = false; G.noOver = 0;
+    G.score = 0; G.moons = 0; G.top = 0; G.chain = 0; G.chainT = 0; G.gauge = 0; G.cool = 0; G.kung = -1; G.praise = null; G.warn = false; G.noOver = 0;
     G.cur = randLv(); G.next = randLv(); G.aimX = 200; setAim(200);
     if (ls('day', '') !== dstr()) G.today = 0;
     G.state = 'play'; document.body.classList.add('playing');
@@ -424,15 +424,25 @@
     $('share').textContent = T.share; $('tbestN').textContent = G.best; $('best').textContent = G.best;
     $('over').hidden = false;
   }
+  function shareUrl() { return location.protocol === 'file:' ? '' : (window.DT_SHARE_URL || location.origin + location.pathname + (EN ? '?lang=en' : '')); }
+  // 공유·저장은 결과 카드 그림 한 장(js/card.js). 손님 기기 안에서 그려 공유창으로 바로 가고 서버에는 남지 않는다.
   function share() {
     DTA.sfx('tap');
-    var url = location.protocol === 'file:' ? '' : (window.DT_SHARE_URL || location.origin + location.pathname + (EN ? '?lang=en' : ''));
-    var text = T.msg(G.score, G.moons), full = text + (url ? '\n' + url : '');
-    if (navigator.share) { navigator.share(url ? { text: text, url: url } : { text: text }).catch(function () {}); return; }
+    if (window.DTC) { window.DTC.share().catch(shareText); return; }
+    shareText();
+  }
+  function save() { DTA.sfx('tap'); if (window.DTC) window.DTC.save().catch(function () {}); }
+  function shareText() {
+    var url = shareUrl(), text = T.msg(G.score, G.moons), full = text + (url ? '\n' + url : '');
+    if (navigator.share) { navigator.share({ text: full }).catch(function () {}); return; }
     function done() { $('share').textContent = T.copied; setTimeout(function () { $('share').textContent = T.share; }, 1500); }
     function legacy() { var ta = document.createElement('textarea'); ta.value = full; document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); done(); } catch (e) {} ta.remove(); }
     if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(full).then(done, legacy); else legacy();
   }
+  // 카드가 쓰는 값(그릴 때마다 지금 값으로)
+  window.__dtCard = function () {
+    return { G: G, SPR: SPR, R: R, cv: cv, EN: EN, s: s, ox: ox, dpr: dpr, SS: SS, floorY: floorY, lineY: lineY, BL: BL, BR: BR, W: W, url: shareUrl(), text: T.msg(G.score, G.moons) };
+  };
 
   // ---------- 그리기 ----------
   function drawBody(c, b) {
@@ -578,11 +588,12 @@
   $('start').addEventListener('click', start);
   $('retry').addEventListener('click', start);
   $('share').addEventListener('click', share);
+  $('save').addEventListener('click', save);
   $('kung').addEventListener('click', function () { kung(); });
 
   // ---------- 시작 ----------
   $('ttl').innerHTML = T.t1 + '<span>' + T.t2 + '</span>';
-  $('otodayL').textContent = T.today; $('share').textContent = T.share;
+  $('otodayL').textContent = T.today; $('share').textContent = T.share; $('save').textContent = T.save;
   $('tbestN').textContent = G.best; $('best').textContent = G.best;
   document.title = EN ? 'Moon Mochi Merge' : '달떡 합치기';
   resize();

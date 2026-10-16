@@ -95,9 +95,22 @@ html[lang=en] #title h1{font-size:min(calc(var(--col) * .165),11vh)}
 #orow .new b{color:#d6480c}
 #omoon{font-family:'Tokki','Ria',sans-serif;font-size:20px;margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:6px}
 #omoon i{display:inline-block;width:22px;height:22px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff7c0,#ffe36a 55%,#e0a820);box-shadow:0 0 0 2px var(--deep)}
-#obtns{display:flex;gap:10px;justify-content:center;margin-top:8px;position:relative;z-index:1}
-#obtns .btn{flex:0 1 150px;min-width:0;padding-left:10px;padding-right:10px}
-#obtns .btn.main{font-size:26px}
+.obtns{display:flex;gap:10px;justify-content:center;margin-top:8px;position:relative;z-index:1}
+.obtns .btn{flex:0 1 150px;min-width:0;padding-left:10px;padding-right:10px}
+.obtns .btn.main{flex-basis:220px;font-size:26px}
+/* 폰 가로(높이 460 아래): 결과창을 납작하게, 단추 셋을 한 줄로 */
+@media (max-height:460px){
+  #card{width:min(96vw,430px);padding:8px 12px 10px;border-width:3px;border-radius:18px}
+  #card h2{font-size:22px}
+  #oscore{font-size:46px;-webkit-text-stroke:5px var(--deep);margin:0}
+  #orow{gap:18px;font-size:11px;margin-bottom:2px}
+  #orow b{font-size:19px}
+  #omoon{font-size:15px;margin-bottom:2px}
+  #omoon i{width:16px;height:16px}
+  .obtns{display:inline-flex;vertical-align:top;margin:4px 3px 0;gap:6px}
+  .obtns .btn{flex:0 0 auto;width:92px;min-width:0;min-height:44px;padding:6px 6px;font-size:18px;border-width:2.5px;border-radius:13px}
+  .obtns .btn.main{flex-basis:112px;width:112px;font-size:21px}
+}
 </style>
 </head>
 <body>
@@ -135,16 +148,20 @@ html[lang=en] #title h1{font-size:min(calc(var(--col) * .165),11vh)}
       <div id="otodayW"><span id="otodayL"></span><b id="otoday">0</b></div>
     </div>
     <div id="omoon" hidden><i></i><span id="omoonN"></span></div>
-    <div id="obtns">
+    <div class="obtns">
       <button class="btn main" id="retry">RETRY</button>
+    </div>
+    <div class="obtns">
       <button class="btn" id="share"></button>
+      <button class="btn" id="save"></button>
     </div>
   </div>
 </div>
 
 <script>window.DT_SHARE_URL="https://oreumgames.com"+(/[?&]lang=en/.test(location.search)?"/en":"")+"/games/flash/daltteok/";</script>
 <script src="js/audio.js?v=1"></script>
-<script src="js/game.js?v=7"></script>
+<script src="js/card.js?v=1"></script>
+<script src="js/game.js?v=8"></script>
 <script src="assets/game-home.js" data-top="6" data-left="6" defer></script>
 <script src="/assets/visit.js?v=17" defer></script>
 <script src="/assets/game-events.js" defer></script>
