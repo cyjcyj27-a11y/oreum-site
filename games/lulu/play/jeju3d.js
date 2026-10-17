@@ -4353,30 +4353,24 @@ function isKey(e, code) {
   return alias.includes(e.key) || alias.includes(e.keyCode);
 }
 const keys = {};
+// 한글 입력 상태에서 e.code 가 비어 오면 옛 키번호로 W A S D 를 찾아 줍니다 (걷기가 끊기지 않게)
+const WASD_CODE = { 87: 'KeyW', 65: 'KeyA', 83: 'KeyS', 68: 'KeyD' };
+function keyCode(e) { return e.code || WASD_CODE[e.keyCode] || ''; }
 addEventListener('keydown', (e) => {
-  keys[e.code] = true;
+  keys[keyCode(e)] = true;
   if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space'].includes(e.code)) e.preventDefault();
 });
-addEventListener('keyup', (e) => { keys[e.code] = false; });
+addEventListener('keyup', (e) => { keys[keyCode(e)] = false; });
+addEventListener('blur', () => { for (const k in keys) keys[k] = false; });
 
 // 카메라 조작
-// - 키보드: A D로 시야를 좌우로 돌리고, W S로 올려다보거나 내려다보고, Z/X로 줌
-//   (이동은 방향키이므로, W A S D는 전부 "보는 방향"에만 씁니다)
-// - 마우스: 드래그로 회전, 휠로 줌 — 예전 방식도 그대로 둡니다
+// - PC 게임 표준(2026-10-18 사장님): W A S D 는 걷기, 시야는 마우스 드래그, 줌은 휠
+//   (예전엔 방향키 이동 · W A S D 시야 · Z/X 줌이었습니다)
 let camYaw = 0, camPitch = 0.34, camDist = 9.5;
-const CAM_TURN = 2.2;    // 초당 회전 속도(라디안). 한 바퀴 도는 데 약 3초
-const CAM_PITCH = 1.1;   // 초당 올려다보기/내려다보기 속도
-const CAM_ZOOM = 9.0;    // 초당 줌 속도
 
 // 키를 누르고 있는 동안 매 프레임 조금씩 돌립니다 (톡톡 끊기지 않고 부드럽게 돕니다)
 // (걷는 방향을 따라 도는 자동 추적은 써봤다가 뺐습니다 — 시야는 온전히 플레이어의 것)
 function updateCamera(dt) {
-  if (keys['KeyA']) camYaw += CAM_TURN * dt;
-  if (keys['KeyD']) camYaw -= CAM_TURN * dt;
-  if (keys['KeyW']) camPitch -= CAM_PITCH * dt;     // W = 시선을 눕혀 멀리 보기
-  if (keys['KeyS']) camPitch += CAM_PITCH * dt;     // S = 위에서 내려다보기
-  if (keys['KeyZ']) camDist += CAM_ZOOM * dt;       // 멀리
-  if (keys['KeyX']) camDist -= CAM_ZOOM * dt;       // 가까이
   camPitch = Math.max(pitchMin(), Math.min(1.0, camPitch));
   camDist = Math.max(4, Math.min(22, camDist));
 }
@@ -4569,7 +4563,7 @@ function updateRopeBadge() {
     // 지금 조작 그대로 말합니다 — 왼쪽 화면을 끄는 것이 곧 헤엄입니다.
     ropeBadge.textContent = IS_TOUCH
       ? '행동 버튼으로 채집\n왼쪽 화면을 위로 끌면 떠오르고 아래로 끌면 잠수'
-      : 'F로 채집\n↑ 떠오르기 ↓ 잠수 ←→ 헤엄 수면에서 F로 나가기';
+      : 'F로 채집\nW 떠오르기 S 잠수 A D 헤엄 수면에서 F로 나가기';
     return;
   }
   // 상점 안: 앞에 있는 물건의 이름·가격을 알려줍니다
@@ -6215,7 +6209,7 @@ function updateDiving(dt) {
   if (atSurface) {
     breath = Math.min(BREATH_MAX, breath + dt * 12);   // 수면에서 숨을 몰아쉽니다
     // 그림의 물결선(가슴께)이 실제 수면과 맞도록, 떠 있으면 그 높이에 살며시 붙습니다
-    const goingDown = keys['ArrowDown'] || touchMove.f < -0.3;
+    const goingDown = keys['KeyS'] || keys['ArrowDown'] || touchMove.f < -0.3;
     if (!goingDown && drowning <= 0) {
       // 물결 따라 몸이 천천히 오르내려야 "떠 있다"는 느낌이 납니다 (붙박이면 서 있는 것처럼 보입니다)
       const floatY = SEA_Y - 0.8 + Math.sin(performance.now() * 0.0016) * 0.09;
@@ -7680,7 +7674,7 @@ const TUTOR_LINES = [
   '마당 사방으로 동쪽땅·서쪽땅·남쪽땅·북쪽땅이 놀고 있어요. 전부 이장님 땅입니다.\n밭 앞 팻말에서 (F)를 누르면 한 필지씩 빌립니다. 년세는 한 필지에 50만원이에요.',
   '빌린 밭에는 상점에서 산 씨앗을 심습니다. 며칠 지나 다 자라면 팻말 앞에서 거두세요\n다만 절반은 이장님 몫으로 나갑니다.',
   '소작료가 아까우면 밭을 아예 살 수도 있어요. 목돈이 들지만, 그 뒤로는 거둔 것이 전부 루루 몫이 됩니다.',
-  '물질을 하려면 상점에서 망사리를 사고, 포구 끝까지 걸어가세요. 물속에서는 ↑ 떠오르기 · ↓ 잠수 · ←→ 헤엄이에요. 숨이 다하면 죽을 위험이 있어요!',
+  '물질을 하려면 상점에서 망사리를 사고, 포구 끝까지 걸어가세요. 물속에서는 W 떠오르기 · S 잠수 · A D 헤엄이에요. 숨이 다하면 죽을 위험이 있어요!',
   '남쪽 언덕의 돌집이 루루의 집입니다. 문 앞에 서면 들어가지고, 가구를 사서 꾸밀 수도 있어요.',
   '당근은 하루에 한 개, 애정도 하루에 하나씩 쌓입니다.\n애정이 3이 되면 마구간 옆 팻말에서 경마에 나갈 수 있어요.',
   '말을 일주일동안 굶기면 말이 죽습니다.\n그때는 이장님 만물상 앞에서 새 말을 살 수 있어요. 좋은 하루 되세요!',
@@ -9233,11 +9227,11 @@ bindTouchButton('btnJump',   (down) => { touchJump = down; });
 const WALK = 4.2, RUN = 8.0, GRAVITY = 22, JUMP = 8.9;
 // 물속 움직임 — 「인사이드」의 물속 구간을 참고했습니다.
 // 몸에 부력이 있어서 가만히 있으면 가라앉지 않고 살며시 떠오르고,
-// 방향키는 화면에 보이는 그대로: ↑ 떠오르기 · ↓ 잠수 · ← → 좌우 헤엄.
+// W A S D(방향키도)는 화면에 보이는 그대로: W 떠오르기 · S 잠수 · A D 좌우 헤엄.
 const SWIM_ACCEL = 8.0;     // 물을 밀어내며 붙는 속도 (천천히 붙습니다)
 const SWIM_DRAG = 2.4;      // 손을 놨을 때 물이 잡아주는 정도
 const SWIM_MAX = 2.6;       // 물속 최고 속도 — 뭍 걷기(4.2)보다 한참 느립니다
-const SWIM_UP = 7.0;        // 위아래로 헤엄치는 힘 (↑↓ 방향키 · ⤴ 버튼)
+const SWIM_UP = 7.0;        // 위아래로 헤엄치는 힘 (W S · 방향키 · ⤴ 버튼)
 const SWIM_DOWN = 7.0;      // (지금은 위와 같은 힘 — 따로 조절하고 싶을 때를 위해 남겨둠)
 const BUOYANCY = 0.9;       // 부력 — 아무것도 안 누르면 이 힘으로 살며시 떠오릅니다
 const swimVel = { x: 0, z: 0 };   // 물속에서만 쓰는 좌우 관성
@@ -9254,14 +9248,14 @@ function updateLulu(dt) {
   const fwdX = -Math.sin(camYaw), fwdZ = -Math.cos(camYaw);
   const rgtX = Math.cos(camYaw), rgtZ = -Math.sin(camYaw);
 
-  // 이동은 방향키만 씁니다. W A S D는 시야 회전(updateCamera)이 가져갔습니다.
+  // 이동은 W A S D (방향키도 같이 걷습니다). 시야는 마우스.
   // 폰에서는 화면 왼쪽 조이스틱(touchMove)이 같은 자리에 값을 보탭니다.
   let f = 0, r = 0;
   if (state.harvestT < 0 && state.fixT < 0) {   // 귤 따기·집 고치기 중엔 못 움직입니다
-    if (keys['ArrowUp']) f += 1;
-    if (keys['ArrowDown']) f -= 1;
-    if (keys['ArrowRight']) r += 1;
-    if (keys['ArrowLeft']) r -= 1;
+    if (keys['KeyW'] || keys['ArrowUp']) f += 1;
+    if (keys['KeyS'] || keys['ArrowDown']) f -= 1;
+    if (keys['KeyD'] || keys['ArrowRight']) r += 1;
+    if (keys['KeyA'] || keys['ArrowLeft']) r -= 1;
     f += touchMove.f;
     r += touchMove.r;
   }
@@ -9631,7 +9625,7 @@ function animate() {
   const dt = Math.min(0.05, clock.getDelta());
   const t = clock.elapsedTime;
 
-  updateCamera(dt);   // 방향키로 시야 돌리기 — 이동 계산이 카메라 방향을 쓰므로 먼저 갱신합니다
+  updateCamera(dt);   // 시야 높이 범위 맞추기 — 이동 계산이 카메라 방향을 쓰므로 먼저 갱신합니다
   updateLulu(dt);
   updateBasket(dt);
   updateFlyingFruits(dt);

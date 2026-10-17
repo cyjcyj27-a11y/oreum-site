@@ -1,4 +1,4 @@
-// map.js — 지도: 오른쪽 위 작은 지도(보는 방향이 위) + T 로 여는 큰 지도(북쪽이 위)
+// map.js — 지도: 오른쪽 위 작은 지도(보는 방향이 위) + M 으로 여는 큰 지도(북쪽이 위)
 (function () {
   const $ = id => document.getElementById(id);
   const M = { big: false };
@@ -11,7 +11,7 @@
     $('tMap').onclick = () => toggle();
     // 바깥(어두운 바탕)을 누를 때만 닫는다 — 모음판을 스크롤하려고 만지면 닫혀 버렸다 (9/14 사장님)
     $('bigwrap').addEventListener('pointerdown', e => { if (e.target === e.currentTarget) toggle(false); });
-    addEventListener('keydown', e => { if (e.code === 'KeyT' && T.mode === 'play') toggle(); if (e.code === 'Escape' && M.big) toggle(false); });
+    addEventListener('keydown', e => { if (e.code === 'KeyM' && T.mode === 'play') toggle(); if (e.code === 'Escape' && M.big) toggle(false); });
   }
 
   function toggle(on) {

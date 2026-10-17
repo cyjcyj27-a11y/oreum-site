@@ -26,8 +26,7 @@
       if (GAME.vendOpen() && (e.code === 'Digit3' || e.code === 'Numpad3')) GAME.buy('seed');
       if (GAME.vendOpen() && (e.code === 'Digit4' || e.code === 'Numpad4')) GAME.buy('bone');
       if (e.code === 'Tab' || e.code === 'KeyR') { e.preventDefault(); PLAYER.swap(); }
-      if (e.code === 'KeyM') { T.bgm = !T.bgm; store(); paintTog(); }
-      if (e.code === 'KeyN') { T.sfx = !T.sfx; store(); paintTog(); }
+      // M 은 지도(PC 표준, 10/18 사장님 "PC게임 표준키로"). 음악·효과음은 위 단추로만
       if (e.code === 'Escape' || e.code === 'KeyP') GAME.pause();
     });
     addEventListener('keydown', e => { if (e.code === 'Tab' || e.code.startsWith('Arrow')) e.preventDefault(); });
@@ -143,12 +142,11 @@
 
   function read() {
     if (touch || window.__manual) return;
-    // 방향키 = 이동, WASD = 시점 돌리기 (사장님 지정)
-    IN.f = (keys.ArrowUp ? 1 : 0) - (keys.ArrowDown ? 1 : 0);
-    IN.r = (keys.ArrowRight ? 1 : 0) - (keys.ArrowLeft ? 1 : 0);
+    // PC 게임 표준(10/18 사장님): WASD = 이동(방향키도 같이), 시점은 마우스
+    IN.f = (keys.KeyW || keys.ArrowUp ? 1 : 0) - (keys.KeyS || keys.ArrowDown ? 1 : 0);
+    IN.r = (keys.KeyD || keys.ArrowRight ? 1 : 0) - (keys.KeyA || keys.ArrowLeft ? 1 : 0);
     IN.run = !!(keys.ShiftLeft || keys.ShiftRight);
-    CAM.keyX = (keys.KeyD ? 1 : 0) - (keys.KeyA ? 1 : 0);
-    CAM.keyY = (keys.KeyS ? 1 : 0) - (keys.KeyW ? 1 : 0);
+    CAM.keyX = 0; CAM.keyY = 0;
   }
 
   let lastCoin = -1, lastTaken = -1, lastHp = -1, lastAlly = -1, lastCan = -1, lastSeed = -1, lastBone = -1;

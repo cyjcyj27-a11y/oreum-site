@@ -43,7 +43,7 @@
       wantDist = 7.2;
     }
     if (T.mode === 'play' && !f.dead) wantDist *= C.zoom;
-    // WASD 로 시점 돌리기 (대화 중엔 안 돈다)
+    // 키로 시점 돌리기 — 10/18 PC 표준으로 바꾸며 WASD 는 이동이 됐다(keyX·keyY 는 늘 0)
     if ((C.keyX || C.keyY) && T.mode === 'play' && !T.paused) {
       C.yaw -= C.keyX * 2.4 * dt;
       C.pitch = U.clamp(C.pitch + C.keyY * 1.3 * dt, MINP, MAXP);
@@ -51,7 +51,7 @@
     }
     C.target.lerp(want, 1 - Math.exp(-rate * dt));
     C.dist = U.damp(C.dist, wantDist, 2.5, dt);
-    // 카메라는 저절로 돌지 않는다 — 사람이 끌거나 WASD 로만 돈다 (유니티·언리얼 3인칭 템플릿과 같게).
+    // 카메라는 저절로 돌지 않는다 — 사람이 마우스로만 돌린다 (유니티·언리얼 3인칭 템플릿과 같게).
     //   예전엔 걷는 방향 뒤로 따라 돌았는데, 폰 패드로 옆으로 걸으면 카메라가 돌고 → 방향이 또 바뀌어 빙빙 돌았다 (9/14 사장님 "정신없이 좌우로 회전")
     if (C.auto > 0) C.auto -= dt;
     const cy = Math.cos(C.pitch), sy = Math.sin(C.pitch);

@@ -23,10 +23,10 @@
     '히로미': 'Hiromi', '류지': 'Ryuji', '에리': 'Eri',
 
     // ── 조작 안내 (<br> 로 갈린 두 마디) ──
-    '↑↓←→ 이동 · Shift 달리기 · 좌클릭/J 펀치 · 우클릭/K 킥 · Q 필살기':
-      '↑↓←→ Move · Shift Run · LMB/J Punch · RMB/K Kick · Q Special',
-    'Tab 체인지 · T 지도 · 마우스/WASD 시점 · E 자판기 · M 음악 · N 효과음 · Esc 일시정지':
-      'Tab Swap · T Map · Mouse/WASD Camera · E Vending · M Music · N SFX · Esc Pause',
+    'WASD 이동 · Shift 달리기 · 좌클릭/J 펀치 · 우클릭/K 킥 · Q 필살기':
+      'WASD Move · Shift Run · LMB/J Punch · RMB/K Kick · Q Special',
+    '마우스 시점 · Tab 체인지 · E 자판기 · M 지도 · I 가방 · Esc 일시정지':
+      'Mouse Camera · Tab Swap · E Vending · M Map · I Bag · Esc Pause',
 
     // ── 장소·퍼즐 ──
     '사쿠라길': 'Sakura Path', '시노바즈 연못': 'Shinobazu Pond', '도쇼궁': 'Toshogu Shrine',
