@@ -2754,6 +2754,24 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://oreumgames.com/games/nara/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/games/nara/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/games/nara/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/games/nara/"/>
+    <lastmod>2026-10-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://oreumgames.com/en/games/nara/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/games/nara/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/games/nara/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/games/nara/"/>
+    <lastmod>2026-10-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://oreumgames.com/games/newworldpizza/</loc>
     <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/games/newworldpizza/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/games/newworldpizza/"/>
