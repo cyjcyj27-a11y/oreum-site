@@ -5,7 +5,7 @@
     '正史': 'TRUE', '갈림': 'SPLIT', '연속 ': 'Streak ', '갈라진 역사': 'History split:', '결과': 'Result', '다음': 'Next',
     '심화 1급': 'Advanced Lv.1', '심화 2급': 'Advanced Lv.2', '심화 3급': 'Advanced Lv.3', '불합격': 'Not passed',
     '점수': 'Score', '점': '', '맞힌 문항': 'Correct', '완성 기준': 'Pass mark', '번': '', '게임 속 급수': 'In-game grade',
-    '칭호': 'Title', '사관의 눈': "Historian's Eye", '제 길의 족장': 'True-Path Chief', '아슬아슬한 족장': 'Close-Call Chief',
+    '칭호': 'Title', '사관의 눈': "Historian's Eye", '1급 관리관': 'Grade 1 Senior Executive', '2급 이사관': 'Grade 2 Director General', '3급 부이사관': 'Grade 3 Senior Director', '4급 서기관': 'Grade 4 Director', '5급 사무관': 'Grade 5 Deputy Director',
     '1막 끝 正史': 'Act 1 Complete', '한능검': 'KOREAN HISTORY QUIZ', '선사시대부터 대한민국까지': 'From Prehistory to the Republic of Korea',
     '1막 · 선사 · 고조선 · 여러 나라': 'Act 1 · Prehistory · Gojoseon · Early States'
   };

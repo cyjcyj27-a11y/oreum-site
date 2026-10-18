@@ -107,6 +107,8 @@
     ask(S.i);
   }
   function grade(r, n) { const p = n ? r / n : 0; return p >= 0.8 ? T('심화 1급') : p >= 0.7 ? T('심화 2급') : p >= 0.6 ? T('심화 3급') : T('불합격'); }
+  // 칭호는 점수(맞힌 비율)로, 공무원 직급: 100 1급 관리관, 95~ 2급 이사관, 90~ 3급 부이사관, 85~ 4급 서기관, 80~ 5급 사무관
+  function title(sc) { return T(sc >= 100 ? '1급 관리관' : sc >= 95 ? '2급 이사관' : sc >= 90 ? '3급 부이사관' : sc >= 85 ? '4급 서기관' : '5급 사무관'); }
   function finish(stKey) {
     const fail = !!stKey, final = !fail && HN.LAST_ACT;
     const asked = fail ? S.i + 1 : TOTAL;
@@ -115,7 +117,7 @@
     const E = fail ? { name: HN.failText(ev.st, ev.nat) } : final ? HN.FINAL : HN.REAL_END1;
     const rows = fail ? [[T('점수'), Math.round(S.segR / Math.max(1, S.segN) * 100) + T('점')], [T('맞힌 문항'), S.segR + ' / ' + S.segN], [T('완성 기준'), '80' + T('점')]]
       : [[T('맞힌 문항'), S.right + ' / ' + asked], [T('갈림'), S.wrong + T('번')], [T('게임 속 급수'), grade(S.right, asked)]];
-    if (!fail) rows.push([T('칭호'), S.wrong === 0 ? T('사관의 눈') : S.wrong <= 3 ? T('제 길의 족장') : T('아슬아슬한 족장')]);
+    if (!fail) rows.push([T('칭호'), title(Math.round(S.right / asked * 100))]);
     const box = $('ending'); box.classList.toggle('fail', fail); box.classList.toggle('final', final);
     $('endHead').textContent = fail || final ? '' : T('1막 끝 正史');
     $('eName').textContent = E.name; $('eLine').textContent = E.line || '';
@@ -172,7 +174,7 @@
     rows.forEach((r, k) => {
       const x = k % 2 ? 790 : 290, yy = y + Math.floor(k / 2) * 104;
       g.fillStyle = '#6a5238'; g.font = '30px Galm'; g.fillText(r[0], x, yy);
-      g.fillStyle = '#b8322a'; g.font = '44px Galm'; g.fillText(r[1], x, yy + 48);
+      g.fillStyle = '#b8322a'; let vf = 44; g.font = vf + 'px Galm'; while (g.measureText(r[1]).width > 440 && vf > 26) { vf -= 2; g.font = vf + 'px Galm'; } g.fillText(r[1], x, yy + 48);
     });
     g.fillStyle = '#2a1d14'; g.fillRect(18, 1268, 1044, 64);
     g.fillStyle = '#f6e7c8'; g.font = '34px Galm'; g.fillText('oreumgames.com', 540, 1312);
@@ -182,13 +184,26 @@
     if (!lastCard) return;
     const a = document.createElement('a'); a.href = lastCard; a.download = 'hanneunggeom.png'; document.body.appendChild(a); a.click(); a.remove();
   }
+  // 공유는 링크(결과 그림은 저장 단추가 맡음). 공유 창이 없으면 주소를 복사하고 알림
+  function toast(t) {
+    let e = $('hnToast');
+    if (!e) {
+      e = document.createElement('div'); e.id = 'hnToast';
+      e.style.cssText = 'position:fixed;left:50%;top:calc(64px + env(safe-area-inset-top));transform:translateX(-50%);z-index:999;max-width:92vw;padding:12px 22px;white-space:pre-line;word-break:keep-all;border:3px solid var(--seal2);color:var(--cream);background:var(--seal);font:20px/1.3 Galm,sans-serif;text-align:center;box-shadow:0 5px 0 var(--seal2);pointer-events:none;transition:opacity .25s';
+      document.body.appendChild(e);
+    }
+    e.textContent = t; e.style.opacity = '1'; clearTimeout(e.__t); e.__t = setTimeout(() => { e.style.opacity = '0'; }, 2600);
+  }
   async function shareCard() {
-    if (!lastCard) return;
-    try {
-      const blob = await (await fetch(lastCard)).blob(), file = new File([blob], 'hanneunggeom.png', { type: 'image/png' });
-      if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], title: T('한능검') }); return; }
-    } catch (e) { if (e && e.name === 'AbortError') return; }
-    saveCard();
+    const en = new URLSearchParams(location.search).get('lang') === 'en';
+    const url = 'https://oreumgames.com/' + (en ? 'en/' : '') + 'games/nara/';
+    const title = en ? 'KOREAN HISTORY QUIZ' : '한능검 게임', text = en ? 'Korean history quiz game, from prehistory to the Republic of Korea' : '선사시대부터 대한민국까지 한능검 기출 한국사 게임';
+    if (navigator.share) {
+      try { await navigator.share({ title, text, url }); return; } catch (e) { if (e && e.name === 'AbortError') return; }
+    }
+    const full = text + '\n' + url, ok = () => toast(en ? 'Link copied' : '주소를 복사했습니다');
+    try { await navigator.clipboard.writeText(full); ok(); }
+    catch (e) { try { const ta = document.createElement('textarea'); ta.value = full; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); ok(); } catch (e2) {} }
   }
   function retry() {
     const sn = S.snap; if (!sn) return newGame();
