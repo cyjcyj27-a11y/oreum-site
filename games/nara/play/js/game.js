@@ -117,7 +117,8 @@
     const E = fail ? { name: HN.failText(ev.st, ev.nat) } : final ? HN.FINAL : HN.REAL_END1;
     const rows = fail ? [[T('점수'), Math.round(S.segR / Math.max(1, S.segN) * 100) + T('점')], [T('맞힌 문항'), S.segR + ' / ' + S.segN], [T('완성 기준'), '80' + T('점')]]
       : [[T('맞힌 문항'), S.right + ' / ' + asked], [T('갈림'), S.wrong + T('번')], [T('게임 속 급수'), grade(S.right, asked)]];
-    if (!fail) rows.push([T('칭호'), title(Math.round(S.right / asked * 100))]);
+    const sc = Math.round(S.right / asked * 100);
+    if (!fail) { rows.push([T('칭호'), title(sc)]); shareMsg = new URLSearchParams(location.search).get('lang') === 'en' ? 'KOREAN HISTORY QUIZ ' + sc + ' pts / ' + title(sc) : '한능검 게임 ' + sc + '점 ' + title(sc); }
     const box = $('ending'); box.classList.toggle('fail', fail); box.classList.toggle('final', final);
     $('endHead').textContent = fail || final ? '' : T('1막 끝 正史');
     $('eName').textContent = E.name; $('eLine').textContent = E.line || '';
@@ -144,7 +145,7 @@
       if (t < 6) requestAnimationFrame(step); else c.remove();
     })(t0);
   }
-  let lastCard = '';
+  let lastCard = '', shareMsg = '';
   function wrap(g, text, x, y, maxW, lh) {
     let line = '', yy = y;
     for (const ch of text) { if (g.measureText(line + ch).width > maxW && line) { g.fillText(line, x, yy); line = ch.trim() ? ch : ''; yy += lh; } else line += ch; }
@@ -197,7 +198,7 @@
   async function shareCard() {
     const en = new URLSearchParams(location.search).get('lang') === 'en';
     const url = 'https://oreumgames.com/' + (en ? 'en/' : '') + 'games/nara/';
-    const title = en ? 'KOREAN HISTORY QUIZ' : '한능검 게임', text = en ? 'Korean history quiz game, from prehistory to the Republic of Korea' : '선사시대부터 대한민국까지 한능검 기출 한국사 게임';
+    const title = en ? 'KOREAN HISTORY QUIZ' : '한능검 게임', text = shareMsg || (en ? 'Korean history quiz game, from prehistory to the Republic of Korea' : '선사시대부터 대한민국까지 한능검 기출 한국사 게임');
     if (navigator.share) {
       try { await navigator.share({ title, text, url }); return; } catch (e) { if (e && e.name === 'AbortError') return; }
     }
