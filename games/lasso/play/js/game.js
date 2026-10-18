@@ -662,7 +662,10 @@
       b.onclick = () => { if (G.money < price) { sfx('no'); return; } setMoney(G.money - price, true); buyHorse(); sfx('buy'); save(); closeUI(); }; box.appendChild(b); }
     $('#shopUI').classList.add('show');
   }
-  function closeUI() { if (!G.ui) return; G.ui = null; $('#boardUI').classList.remove('show'); $('#shopUI').classList.remove('show'); sfx('click'); }
+  function closeUI() { if (!G.ui) return; const was = G.ui; G.ui = null; $('#boardUI').classList.remove('show'); $('#shopUI').classList.remove('show'); sfx('click');
+    if (was === 'how') { $('#howUI').classList.remove('show'); HOW.stop(); try { localStorage.setItem('bounty.how', '1'); } catch (e) {} } }
+  // HOW TO PLAY(10/18 사장님 "하우투플레이를 먼저 업뎃하자"): 처음 START 때 한 번, 그 뒤엔 상단 ? 단추로. 열려 있는 동안 게임은 멈춘다(G.ui)
+  function openHow() { if (G.ui === 'how') return; if (G.ui) closeUI(); G.ui = 'how'; $('#howUI').classList.add('show'); HOW.open(); }
   // 상황 단추(E): 게시판 · 상점 · 타기 · 내리기
   let ctxFn = null, ctxT = 0, ctxAt = null;   // ctxAt: 단추를 띄울 세계 자리(시설 단추만). 없으면 오른쪽 아래 구석
   function updCtx(dt) {
@@ -855,6 +858,7 @@
     H.mode = 'ride'; CAM.off = wrap(CAM.yaw - (horse.yaw + PI)); CAM.chase = horse.yaw; CAM.manualT = -9999; CAM.tDist = 9.5; CAM.tPitch = 0.3;
     if (G.horseDead) { dismount(); H.hold = 0; }   // 말 없이 이어하기: 마을에서 걸어서 시작(상점에서 새 말 $300)
     drawBoard(); setTarget(d && d.target && !G.caught.includes(d.target) ? d.target : 0); updCapHUD(); updHpHUD(); MUSIC.start(); if (!G.horseDead) horse.rear = 0.7; autoTarget();
+    let seen = 0; try { seen = localStorage.getItem('bounty.how'); } catch (e) {} if (!seen) openHow();
   }
   function ending() {
     G.ended = true; document.body.classList.add('ending'); try { localStorage.removeItem(SAVE); localStorage.setItem('bounty.ending', '1'); } catch (e) {}
@@ -893,12 +897,13 @@
   function bind() {
     const click = (sel, fn) => $(sel).addEventListener('click', e => { e.stopPropagation(); fn(e); });
     click('#btnNew', () => { sfx('click'); startGame(false); }); click('#btnCont', () => { sfx('click'); startGame(true); });
+    click('#tgHow', () => { sfx('click'); if (G.paused) pause(false); openHow(); }); click('#howOk', closeUI);
     click('#tgPause', () => pause(!G.paused)); click('#pauseVeil', () => pause(false));
     click('#tgBgm', () => toggleSnd('bgm', !AU.bgmOn)); click('#tgSfx', () => toggleSnd('sfx', !AU.sfxOn));
     click('#boardX', closeUI); click('#shopX', closeUI); click('#ctxBtn', () => { if (ctxFn) { sfx('click'); ctxFn(); ctxT = 0; } }); click('#wctxBtn', () => { if (ctxFn) { sfx('click'); ctxFn(); ctxT = 0; } }); click('#callBtn', callHorse);
     click('#btnTitle', () => { if (G.dead) { const u = new URL(location.href); u.searchParams.set('go', 'c'); location.href = u.href; } else location.reload(); });   // 게임 오버면 저장한 데서 이어하기
     click('#btnLand', () => window.OL && OL.go()); click('#cineSkip', () => cineSkip());
-    ['#boardUI', '#shopUI'].forEach(s => $(s).addEventListener('click', e => { if (e.target === $(s)) closeUI(); }));
+    ['#boardUI', '#shopUI', '#howUI'].forEach(s => $(s).addEventListener('click', e => { if (e.target === $(s)) closeUI(); }));
     const lb = $('#lassoBtn'); lb.addEventListener('pointerdown', e => { e.preventDefault(); lb.setPointerCapture(e.pointerId); lassoDown(); }); lb.addEventListener('pointerup', lassoUp); lb.addEventListener('pointercancel', lassoUp);
     R.domElement.addEventListener('pointerdown', () => { if (touch && (G.chase || G.fight)) lassoDown(); });   // 폰: 쫓기·주먹 싸움 땐 화면 아무 데나 두드려도 뛴다·때린다(올가미 단추와 같다)
     IN.onTap = (x, y) => { if (canClickRide() && horseUnder(x, y)) { clickRide(); return; } if (L.state === 'hold') lassoDown(); };
@@ -955,6 +960,6 @@
     requestAnimationFrame(frame);
     if (Q.has('go')) startGame(Q.get('go') === 'c');
   }
-  window.__bh = { G, H, L, CAM, outlaws, captives, tick: (n, dt, noDraw) => { for (let i = 0; i < (n || 1); i++) tick(dt || 1 / 60, noDraw); }, get hero() { return hero; }, get horse() { return horse; }, startGame, setTarget, setMoney, mount, dismount, lassoDown, lassoUp, capture, openBoard, openShop, closeUI, stunHero, spawn, ending, cineStart, cineSkip, applyCh2, stat, JOY, makePortraits, needModel, OUTLAWS };
+  window.__bh = { G, H, L, CAM, outlaws, captives, tick: (n, dt, noDraw) => { for (let i = 0; i < (n || 1); i++) tick(dt || 1 / 60, noDraw); }, get hero() { return hero; }, get horse() { return horse; }, startGame, setTarget, setMoney, mount, dismount, lassoDown, lassoUp, capture, openBoard, openShop, openHow, closeUI, stunHero, spawn, ending, cineStart, cineSkip, applyCh2, stat, JOY, makePortraits, needModel, OUTLAWS };
   boot().catch(e => { console.error(e); $('#load .pct').textContent = 'ERROR ' + e.message; });
 })();
