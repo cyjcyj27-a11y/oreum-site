@@ -1511,8 +1511,15 @@ function makeCard(){
 let CARD=null;
 function cardBlob(cb){ CARD.toBlob(b=>cb(b),'image/png'); }
 function cardSave(){ cardBlob(b=>{ const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download='wol300-result.png'; document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },500); }); }
-function cardShare(){ cardBlob(b=>{ const f=new File([b],'wol300-result.png',{type:'image/png'});
-  if(navigator.canShare&&navigator.canShare({files:[f]})) navigator.share({files:[f],title:EN?'300 A MONTH':'월300',text:'oreumgames.com'}).catch(()=>{}); else cardSave(); }); }
+// 공유는 링크(결과 그림은 저장 단추가 맡음). 공유 창이 없으면 주소를 복사하고 알림
+function wolToast(t){ let e=document.getElementById('wolToast'); if(!e){ e=document.createElement('div'); e.id='wolToast';
+  e.style.cssText='position:fixed;left:50%;top:calc(56px + env(safe-area-inset-top));transform:translateX(-50%);z-index:999;max-width:92vw;padding:10px 22px;white-space:pre-line;word-break:keep-all;background:rgba(0,0,0,.75);color:#f2f2ee;border:1.5px solid rgba(255,255,255,.7);border-radius:2px;font:600 18px/1.3 sans-serif;letter-spacing:.08em;text-align:center;pointer-events:none;transition:opacity .25s';
+  document.body.appendChild(e); } e.textContent=t; e.style.opacity='1'; clearTimeout(e._t); e._t=setTimeout(()=>{ e.style.opacity='0'; },2600); }
+async function cardShare(){ const url='https://oreumgames.com/'+(EN?'en/':'')+'games/wol300/', title=EN?'300 A MONTH':'월300',
+  text=EN?'Sell your private data to AI for 3 million won a month and live one year':'AI에게 사생활을 넘기고 월300으로 1년 살기, 인생 시뮬레이션 게임';
+  if(navigator.share){ try{ await navigator.share({title,text,url}); return; }catch(e){ if(e&&e.name==='AbortError') return; } }
+  const full=text+'\n'+url, ok=()=>wolToast(EN?'Link copied':'주소를 복사했습니다');
+  try{ await navigator.clipboard.writeText(full); ok(); }catch(e){ try{ const ta=document.createElement('textarea'); ta.value=full; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); ok(); }catch(e2){} } }
 
 function twinEnding(){
   G.twin={t:0}; document.body.classList.add('ending');
