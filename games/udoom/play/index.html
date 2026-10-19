@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>어둠</title>
+<style>
+@font-face{font-family:'DOSGothic';src:url('fonts/DOSGothic.woff') format('woff');font-display:swap}
+@font-face{font-family:'TitleFont';src:url('fonts/title.woff2') format('woff2');font-display:swap}
+@font-face{font-family:'Dunggeunmo';src:url('fonts/DungGeunMo.woff') format('woff');font-display:swap}
+:root{--lava:#ff6a1a;--lava2:#ffb347;--rock:#2a1412;--rock2:#4a221c;--bone:#e8dcc0;--bone2:#b8a98a;--ink:#140808;--steel:#3b3b40}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
+html,body{margin:0;height:100%;background:#000;overflow:hidden;font-family:'Dunggeunmo','DOSGothic',monospace;color:#fff;touch-action:none}
+#c{position:fixed;inset:0;width:100%;height:100%;display:block}
+.hide{display:none!important}
+/* ---- 재질: 용암 균열 현무암 판(주), 뼈 돌판(보조), 해골 쇠동전(둥근), 쇠판 LED(알약) ---- */
+.btn{position:relative;display:inline-block;font-family:'DOSGothic','Dunggeunmo',monospace;font-size:22px;letter-spacing:1px;color:#fff;
+  padding:12px 26px;min-width:150px;text-align:center;cursor:pointer;border:3px solid #1a0a08;
+  clip-path:polygon(8px 0,calc(100% - 8px) 0,100% 8px,100% calc(100% - 8px),calc(100% - 8px) 100%,8px 100%,0 calc(100% - 8px),0 8px);
+  background:
+   linear-gradient(115deg,transparent 0 38%,rgba(255,120,30,.75) 38.5% 40%,transparent 40.5% 100%),
+   linear-gradient(60deg,transparent 0 62%,rgba(255,150,40,.7) 62.5% 63.5%,transparent 64% 100%),
+   radial-gradient(ellipse at 30% 110%,rgba(255,106,26,.55),transparent 55%),
+   linear-gradient(180deg,#5a2a22 0%,#3a1a14 48%,#2a1210 100%);
+  box-shadow:inset 0 3px 0 rgba(255,180,120,.25),inset 0 -4px 0 rgba(0,0,0,.45),0 5px 0 #0f0504;
+  text-shadow:0 2px 0 #000,0 0 8px rgba(255,106,26,.5);transition:transform .22s cubic-bezier(.34,1.56,.64,1),box-shadow .22s,filter .15s}
+.btn:hover{filter:brightness(1.12)}
+.btn:active{transform:translateY(3px) scale(.97);box-shadow:inset 0 3px 0 rgba(255,180,120,.25),inset 0 -4px 0 rgba(0,0,0,.45),0 2px 0 #0f0504;filter:brightness(1.3);transition-duration:.04s}
+.btn.main{font-size:26px;color:#fff4e0;background:
+   linear-gradient(115deg,transparent 0 30%,rgba(255,140,40,.95) 30.5% 32.5%,transparent 33% 100%),
+   linear-gradient(55deg,transparent 0 58%,rgba(255,170,60,.9) 58.5% 60%,transparent 60.5% 100%),
+   linear-gradient(150deg,transparent 0 76%,rgba(255,120,30,.8) 76.5% 78%,transparent 78.5% 100%),
+   radial-gradient(ellipse at 50% 120%,rgba(255,106,26,.85),transparent 60%),
+   linear-gradient(180deg,#6a2e22 0%,#3e1a14 50%,#2a1210 100%)}
+.btn.bone{color:#1a0a08;text-shadow:0 1px 0 rgba(255,255,255,.5);border-color:#3a2a1a;
+  background:radial-gradient(ellipse at 20% 0%,rgba(255,255,255,.5),transparent 50%),linear-gradient(180deg,#f0e6cc 0%,#d9cba8 55%,#b8a98a 100%);
+  box-shadow:inset 0 3px 0 rgba(255,255,255,.6),inset 0 -4px 0 rgba(0,0,0,.18),0 5px 0 #4a3a2a}
+.btn.bone:active{box-shadow:inset 0 3px 0 rgba(255,255,255,.6),inset 0 -4px 0 rgba(0,0,0,.18),0 2px 0 #4a3a2a}
+.btn.danger{background:linear-gradient(180deg,#7a1a14 0%,#4a0c0a 55%,#2a0606 100%)}
+.tog{position:relative;width:38px;height:38px;border-radius:50%;cursor:pointer;border:2px solid #0a0404;
+  background:radial-gradient(circle at 35% 30%,#8a8a92,#4a4a52 45%,#26262c 100%);box-shadow:inset 0 2px 0 rgba(255,255,255,.35),inset 0 -3px 0 rgba(0,0,0,.5),0 3px 0 #0a0404;display:flex;align-items:center;justify-content:center}
+.tog svg{width:20px;height:20px}
+.tog.off{opacity:.6}
+.tog.off::after{content:'';position:absolute;left:24%;right:24%;top:50%;height:2px;margin-top:-1px;background:#fff;border-radius:1px;transform:rotate(-40deg)}
+.tog:active{transform:translateY(2px);box-shadow:inset 0 2px 0 rgba(255,255,255,.35),inset 0 -3px 0 rgba(0,0,0,.5),0 1px 0 #0a0404}
+.stat{display:inline-flex;align-items:center;gap:7px;height:34px;padding:0 12px;border:2px solid #0a0606;background:linear-gradient(180deg,#4a4a52,#2a2a30 60%,#1c1c20);
+  box-shadow:inset 0 2px 0 rgba(255,255,255,.18),inset 0 -2px 0 rgba(0,0,0,.5),0 3px 0 #0a0606;clip-path:polygon(5px 0,calc(100% - 5px) 0,100% 5px,100% calc(100% - 5px),calc(100% - 5px) 100%,5px 100%,0 calc(100% - 5px),0 5px)}
+.stat .k{font-family:'Dunggeunmo',monospace;font-size:12px;color:#b8b8c0;letter-spacing:1px}
+.stat .v{font-family:'DOSGothic',monospace;font-size:21px;color:var(--lava2);text-shadow:0 0 6px rgba(255,140,40,.8),0 0 1px #000;min-width:34px;text-align:right}
+.stat .v.low{color:#ff3a2a;text-shadow:0 0 8px rgba(255,60,40,.9)}
+.stat .key{width:14px;height:20px;border:1px solid #000;opacity:.22;box-shadow:inset 0 0 0 2px rgba(255,255,255,.25)}
+.stat .key.on{opacity:1;box-shadow:0 0 6px currentColor}
+.stat .key.r{background:#e8302a;color:#e8302a}.stat .key.y{background:#f2c230;color:#f2c230}.stat .key.b{background:#2f6fd6;color:#2f6fd6}
+/* ---- 상단바 ---- */
+#topbar{position:fixed;left:0;right:0;top:0;height:54px;padding:8px 8px 0 calc(104px + env(safe-area-inset-left));display:flex;gap:8px;align-items:flex-start;pointer-events:none;
+  background:linear-gradient(180deg,rgba(0,0,0,.55),rgba(0,0,0,0));z-index:45} /* 10/18: 화면 막(.scr z40)보다 위 — 전엔 타이틀·일시정지에서 ?·음악·소리 단추가 막에 가려 안 눌렸음 */
+#topbar .stat,#topbar .tog{pointer-events:auto}
+#topbar .spacer{flex:1}
+#slots{position:fixed;right:10px;top:54px;display:flex;gap:4px;z-index:20}
+#slots .s{width:30px;height:26px;border:2px solid #0a0606;background:#1c1c20;color:#555;font-family:'DOSGothic',monospace;font-size:16px;display:flex;align-items:center;justify-content:center;
+  clip-path:polygon(4px 0,calc(100% - 4px) 0,100% 4px,100% calc(100% - 4px),calc(100% - 4px) 100%,4px 100%,0 calc(100% - 4px),0 4px)}
+#slots .s.own{color:#ddd}#slots .s.cur{color:var(--lava2);background:#3a2a20;text-shadow:0 0 6px var(--lava)}
+#xh{position:fixed;left:50%;top:50%;width:18px;height:18px;margin:-9px 0 0 -9px;pointer-events:none;z-index:15}
+#xh::before,#xh::after{content:'';position:absolute;background:#fff;box-shadow:0 0 2px #000}
+#xh::before{left:8px;top:0;width:2px;height:18px}#xh::after{top:8px;left:0;width:18px;height:2px}
+#xh.hot::before,#xh.hot::after{background:#ff4a2a}
+#xh.hm{transform:scale(1.6)}#xh.hm::before,#xh.hm::after{background:#fff;box-shadow:0 0 6px #fff}
+/* 10/19 사장님 "기관총 쏘는 중에 초점 빨간색이 하얀색이 돼": 체인건은 0.09초마다 맞아 명중 표시(흰색, 0.18초)가 계속 켜져 있었음 → 적 위(hot)면 명중 표시도 빨강 유지, 크기만 커짐 */
+#xh.hot.hm::before,#xh.hot.hm::after{background:#ff4a2a;box-shadow:0 0 6px #ff4a2a}
+/* 머리 맞힘: 흰 심에 붉은 번짐, 더 크게 */
+#xh.hh,#xh.hot.hh{transform:scale(2.4)}#xh.hh::before,#xh.hh::after,#xh.hot.hh::before,#xh.hot.hh::after{background:#fff;box-shadow:0 0 4px #fff,0 0 12px #ff2a1a,0 0 22px #ff2a1a}
+#xh.hk{transform:scale(1.9) rotate(45deg)}#xh.hk::before,#xh.hk::after{background:#ff2a1a;box-shadow:0 0 8px #ff2a1a}
+#xh{transition:transform .12s}
+#flash{position:fixed;inset:0;pointer-events:none;z-index:14;opacity:0;background:radial-gradient(ellipse at center,rgba(255,0,0,0) 40%,rgba(255,0,0,.75) 100%);transition:opacity .25s}
+#dmgdir{position:fixed;left:50%;top:50%;width:0;height:0;pointer-events:none;z-index:15;opacity:0;transition:opacity .35s;transform:translate(-50%,-50%)}
+#dmgdir .w{position:absolute;left:-110px;top:-190px;width:220px;height:90px;background:radial-gradient(ellipse at 50% 100%,rgba(255,50,30,.95) 0%,rgba(255,50,30,.55) 45%,rgba(255,50,30,0) 75%);clip-path:polygon(50% 0,100% 100%,0 100%)}
+#flash.pick{background:rgba(255,220,120,.35)}
+#msg{position:fixed;left:50%;top:64px;transform:translateX(-50%);font-family:'DOSGothic',monospace;font-size:20px;color:var(--lava2);text-shadow:0 2px 0 #000,0 0 8px rgba(255,120,30,.6);pointer-events:none;z-index:21;opacity:0;transition:opacity .3s;white-space:nowrap}
+#keys{position:fixed;right:10px;bottom:8px;font-size:12px;color:rgba(255,255,255,.45);text-align:right;line-height:1.5;pointer-events:none;z-index:20}
+/* ---- 폰 조작 ---- */
+#pad{position:fixed;left:calc(14px + env(safe-area-inset-left));bottom:14px;width:186px;height:186px;border-radius:50%;background:rgba(0,0,0,.38);border:2px solid rgba(255,255,255,.25);display:none;z-index:25;touch-action:none}
+#knob{position:absolute;left:50%;top:50%;width:72px;height:72px;margin:-36px 0 0 -36px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#8a8a92,#4a4a52 45%,#26262c 100%);border:2px solid #0a0404;box-shadow:inset 0 2px 0 rgba(255,255,255,.35),0 3px 0 #0a0404}
+#fire{position:fixed;right:calc(14px + env(safe-area-inset-right));bottom:14px;width:88px;height:88px;border-radius:50%;display:none;z-index:25;touch-action:none;
+  font-family:'DOSGothic',monospace;font-size:20px;color:#fff;text-shadow:0 2px 0 #000;align-items:center;justify-content:center;border:3px solid #1a0a08;
+  background:radial-gradient(circle at 40% 30%,#ff9a4a,#c8401a 55%,#6a1a10 100%);box-shadow:inset 0 3px 0 rgba(255,220,180,.35),inset 0 -5px 0 rgba(0,0,0,.4),0 5px 0 #0f0504}
+#fire.on{transform:translateY(3px);filter:brightness(1.3);box-shadow:inset 0 3px 0 rgba(255,220,180,.35),0 2px 0 #0f0504}
+#tbtns{position:fixed;right:calc(110px + env(safe-area-inset-right));bottom:18px;display:none;gap:8px;z-index:25}
+.tbtn{width:58px;height:58px;border-radius:50%;background:rgba(0,0,0,.32);border:2px solid rgba(255,255,255,.55);color:#fff;font-family:'DOSGothic',monospace;font-size:17px;display:flex;align-items:center;justify-content:center;touch-action:none}
+.tbtn.on{background:rgba(255,200,60,.5);border-color:#ffd24a}
+body.touch.playing #pad,body.touch.playing #fire{display:flex}body.touch.playing #tbtns{display:flex}body.touch #keys{display:none}
+body:not(.playing) #topbar .stat,body:not(.playing) #slots,body:not(.playing) #xh,body:not(.playing) #keys,body:not(.playing) #tgPause{display:none}
+#rotate{position:fixed;inset:0;background:#000;z-index:60;display:none;align-items:center;justify-content:center;flex-direction:column;gap:18px;text-align:center;pointer-events:auto}
+/* ---- 화면들(타이틀·설명·집계·게임오버·설정) ---- */
+.scr{position:fixed;inset:0;z-index:40;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:4vh 16px 26vh;pointer-events:auto}
+.scr.dim{background:rgba(0,0,0,.55)}
+#title{justify-content:flex-end}
+#title h1{font-family:'TitleFont','DOSGothic',monospace;font-size:min(22vw,170px);margin:0 0 8px;letter-spacing:6px;line-height:1.05;color:transparent;background:linear-gradient(180deg,#ff9a50 0%,#d8381f 42%,#7a0c08 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-stroke:5px #140000;paint-order:stroke fill;filter:drop-shadow(0 7px 5px rgba(0,0,0,.85)) drop-shadow(0 0 22px rgba(255,50,20,.55))} /* 10/17 사장님 선택: G마켓 산스 Bold, 핏빛 쇠 느낌 */
+
+/* 타이틀 손질(10/17): 비네팅·핏빛 아래 기운·제목 숨쉬기·불티·START 광택 */
+#embers{position:fixed;inset:0;z-index:41;pointer-events:none;display:none}
+#title::before{content:'';position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 55%,rgba(0,0,0,0) 35%,rgba(0,0,0,.78) 100%),linear-gradient(0deg,rgba(140,12,0,.5) 0%,rgba(140,12,0,0) 45%)}
+#title>*{position:relative}
+@keyframes tglow{0%,100%{filter:drop-shadow(0 7px 5px rgba(0,0,0,.85)) drop-shadow(0 0 18px rgba(255,50,20,.45))}50%{filter:drop-shadow(0 7px 5px rgba(0,0,0,.85)) drop-shadow(0 0 34px rgba(255,80,30,.85))}}
+@keyframes tflick{0%,91%,93%,97%,100%{opacity:1}92%{opacity:.72}98%{opacity:.85}}
+#title h1{animation:tglow 2.6s ease-in-out infinite,tflick 7s linear infinite}
+/* 10/18 사장님 "다크 앤 다커처럼 멋있게": 제목은 금속 로고 그림(tools/logo.py), UDOOM 줄도 그림 안에 */
+#title h1{background:none;-webkit-text-stroke:0;line-height:0;margin:0 0 10px}
+#tlogo{display:block;width:min(70vw,600px);height:auto;max-height:46vh;object-fit:contain}
+#ten{display:none!important}
+#title .en{font-family:'DOSGothic',monospace;font-size:22px;letter-spacing:12px;color:#d6c4a0;text-shadow:0 2px 0 #000,0 0 12px rgba(255,80,30,.5);margin:-2px 0 14px 12px}
+@keyframes sheen{0%,70%{background-position:-160% 0}100%{background-position:260% 0}}
+.btn.main::after{content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:linear-gradient(115deg,rgba(255,255,255,0) 40%,rgba(255,230,180,.35) 50%,rgba(255,255,255,0) 60%);background-size:50% 100%;background-repeat:no-repeat;animation:sheen 4s ease-in-out infinite}
+@media (max-height:480px){ #title .en{font-size:2.8vh;letter-spacing:1.4vw;margin-bottom:1vh} }
+#title .sub{font-size:16px;color:#d8c8a8;margin-bottom:18px;letter-spacing:2px;text-shadow:0 2px 0 #000}
+.row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;max-width:62vw}
+.sheet{position:relative;background:linear-gradient(180deg,#3a2a26,#241714 60%,#1a100e);border:4px solid #6a6a72;outline:2px solid #0a0606;padding:18px 22px;max-width:760px;width:94%;
+  box-shadow:inset 0 0 0 2px #2a2a30,0 10px 30px rgba(0,0,0,.7)}
+.sheet::before,.sheet::after{content:'';position:absolute;width:8px;height:8px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ccc,#555);top:6px;left:6px;box-shadow:calc(100% + 0px) 0 0 0 transparent}
+.sheet::after{left:auto;right:6px}
+.sheet h2{font-family:'DOSGothic',monospace;margin:0 0 12px;font-size:28px;color:var(--lava2);letter-spacing:2px;text-shadow:0 2px 0 #000,0 0 10px rgba(255,120,30,.6)}
+.sheet .x{position:absolute;right:10px;top:8px;width:40px;height:40px;cursor:pointer;color:#fff;font-size:22px;display:flex;align-items:center;justify-content:center}
+#how .cols{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+#how .col{background:rgba(0,0,0,.35);border:2px solid #0a0606;padding:8px}
+#how canvas{width:100%;aspect-ratio:4/3;display:block;background:#111;border:1px solid #000}
+#how p{margin:8px 0 0;font-size:15px;line-height:1.5;color:#e8dcc0;min-height:3em}
+#inter .tally{font-family:'DOSGothic',monospace;font-size:26px;line-height:1.7;color:#e8dcc0;text-align:left;min-width:300px}
+#inter .tally b{color:var(--lava2);display:inline-block;min-width:90px;text-align:right;text-shadow:0 0 8px rgba(255,120,30,.7)}
+#inter .lv{font-size:18px;color:#b8a98a;margin-bottom:6px;letter-spacing:2px}
+#over h1{font-family:'DOSGothic',monospace;font-size:min(12vw,80px);color:#ff3a2a;margin:0 0 14px;letter-spacing:4px;-webkit-text-stroke:2px #2a0404;paint-order:stroke fill;text-shadow:0 6px 0 #2a0404,0 0 30px rgba(255,40,20,.8)}
+.opt{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.08);font-size:16px}
+.opt .sw{width:54px;height:28px;border:2px solid #0a0606;background:#2a2a30;position:relative;cursor:pointer;clip-path:polygon(4px 0,calc(100% - 4px) 0,100% 4px,100% calc(100% - 4px),calc(100% - 4px) 100%,4px 100%,0 calc(100% - 4px),0 4px)}
+.opt .sw::after{content:'';position:absolute;left:3px;top:3px;width:18px;height:18px;background:#777;transition:left .15s}
+.opt .sw.on{background:#5a2a20}.opt .sw.on::after{left:29px;background:var(--lava2);box-shadow:0 0 8px var(--lava)}
+.oreum{position:fixed;left:calc(8px + env(safe-area-inset-left));top:8px;z-index:30;height:34px;padding:0 12px;display:flex;align-items:center;gap:6px;border-radius:999px;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.25);font-size:13px;color:#fff;text-decoration:none}
+@media (max-height:480px){
+  .btn{font-size:4.6vh;padding:1.6vh 4vw;min-width:120px}.btn.main{font-size:5.6vh}
+  #title h1{font-size:min(16vw,24vh)}#tlogo{max-height:40vh;width:auto;max-width:62vw}#title .sub{font-size:3.4vh;margin-bottom:1.6vh}
+  .sheet{padding:10px 14px 12px;max-width:92vw}.sheet h2{font-size:4.8vh;margin-bottom:6px;padding-right:120px}
+  #how .cols{gap:8px}#how p{font-size:2.9vh;min-height:2.6em}#how canvas{aspect-ratio:16/9}
+  #how .ok{position:absolute;right:12px;top:8px;min-width:0;padding:1vh 3vw}
+  #inter .tally{font-size:4.6vh;line-height:1.5}#over h1{font-size:14vh}
+  #topbar{height:46px;padding-top:6px}.stat{height:30px}.stat .v{font-size:18px}
+  #pad{width:160px;height:160px}#knob{width:64px;height:64px;margin:-32px 0 0 -32px}
+}
+@media (max-width:700px){#topbar{flex-wrap:wrap;row-gap:4px}}
+/* ── 10/18 사장님 "검은 필기체 휘갈겨 쓴 제목 + 전체 디자인은 요즘 게임처럼": 상자·금테·징을 걷어 내고
+   반투명한 어두운 판 + 가는 흰 선 + 넓게 띄운 고딕(Pretendard Bold 부분집합 fonts/ui.woff2 = 'GUI'). 주 단추만 제목과 같은 핏빛 물감 번짐에 검은 글자.
+   크기·여백은 위(및 @media) 규칙 그대로 두고 생김새만 덮는다 */
+@font-face{font-family:'GUI';src:url('fonts/ui.woff2') format('woff2');font-display:swap}
+:root{--line:rgba(255,255,255,.22);--panel:rgba(12,9,9,.62);--blood:#c4180f}
+.btn{font-family:'GUI','DOSGothic',sans-serif;letter-spacing:.14em;color:#f2ece6;clip-path:none;border:1px solid var(--line);border-radius:2px;
+  background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,0) 60%),var(--panel);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
+  box-shadow:0 8px 24px rgba(0,0,0,.45);text-shadow:none;transition:transform .2s cubic-bezier(.34,1.56,.64,1),background .2s,border-color .2s,filter .15s}
+.btn::before{content:'';position:absolute;left:-1px;top:-1px;bottom:-1px;width:3px;background:var(--blood);transform:scaleY(0);transform-origin:50% 100%;transition:transform .18s}
+.btn:hover{filter:none;border-color:rgba(255,90,70,.75);background:linear-gradient(90deg,rgba(196,24,15,.28),rgba(196,24,15,0) 70%),var(--panel)}
+.btn:hover::before{transform:scaleY(1)}
+.btn:active{transform:scale(.97);border-bottom-width:1px;filter:none;background:rgba(160,20,14,.45);box-shadow:0 4px 12px rgba(0,0,0,.45);transition-duration:.04s}
+.btn.main{color:#0d0a0a;border:none;background:url('assets/btn_brush.webp') center/100% 100% no-repeat;-webkit-backdrop-filter:none;backdrop-filter:none;box-shadow:none;
+  text-shadow:0 1px 0 rgba(255,255,255,.14);filter:drop-shadow(0 6px 10px rgba(0,0,0,.55));padding-left:34px;padding-right:34px}
+.btn.main::before,.btn.main::after{display:none}
+.btn.main:hover{background:url('assets/btn_brush.webp') center/100% 100% no-repeat;filter:drop-shadow(0 6px 10px rgba(0,0,0,.55)) brightness(1.15);transform:scale(1.04)}
+.btn.main:active{background:url('assets/btn_brush.webp') center/100% 100% no-repeat;transform:scale(.96);filter:drop-shadow(0 3px 5px rgba(0,0,0,.55)) brightness(1.3)}
+.btn.bone{color:#f2ece6;text-shadow:none;border-color:var(--line);box-shadow:0 8px 24px rgba(0,0,0,.45);background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,0) 60%),var(--panel)}
+.btn.bone:hover{background:linear-gradient(90deg,rgba(196,24,15,.28),rgba(196,24,15,0) 70%),var(--panel)}
+.btn.bone:active{box-shadow:0 4px 12px rgba(0,0,0,.45)}
+.btn.danger{color:#ff9a8a;border-color:rgba(255,80,60,.55);background:rgba(90,10,8,.55)}
+.tog{border:1px solid var(--line);background:var(--panel);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);box-shadow:none}
+.tog:active{transform:scale(.94);box-shadow:none;background:rgba(160,20,14,.45)}
+.stat{clip-path:none;border:1px solid rgba(255,255,255,.14);border-radius:2px;background:var(--panel);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);box-shadow:none}
+.stat .k{font-family:'GUI','Dunggeunmo',sans-serif;font-size:11px;color:rgba(255,255,255,.55);letter-spacing:.14em}
+.stat .v{font-family:'GUI','DOSGothic',sans-serif;color:#fff;text-shadow:none;letter-spacing:.04em}
+.stat .v.low{color:#ff4a3a;text-shadow:0 0 10px rgba(255,40,20,.6)}
+#slots .s{border:1px solid rgba(255,255,255,.14);border-radius:2px;background:var(--panel);font-family:'GUI',sans-serif;font-size:14px;color:rgba(255,255,255,.28)}
+#slots .s.own{color:rgba(255,255,255,.8)}#slots .s.cur{color:#fff;border-color:var(--blood);background:rgba(170,20,14,.5);text-shadow:none}
+.sheet{border:1px solid rgba(255,255,255,.14);outline:none;border-radius:2px;background:rgba(10,8,8,.84);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);box-shadow:0 20px 60px rgba(0,0,0,.6)}
+.sheet::before{display:none}
+.sheet::after{left:0;right:auto;top:-1px;width:72px;height:3px;border-radius:0;background:var(--blood);box-shadow:none}
+.sheet h2{font-family:'GUI','DOSGothic',sans-serif;color:#fff;letter-spacing:.18em;text-shadow:none}
+.sheet .x{color:rgba(255,255,255,.7)}
+#how .col{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}
+#how p,.opt{font-family:'GUI',sans-serif;letter-spacing:.02em}
+#inter .tally{font-family:'GUI',sans-serif;letter-spacing:.06em;color:rgba(255,255,255,.75)}
+#inter .tally b{color:#fff;text-shadow:none}
+#inter .lv{font-family:'GUI',sans-serif;color:rgba(255,255,255,.5);letter-spacing:.2em}
+#over h1{font-family:'GUI',sans-serif;color:#e8231a;letter-spacing:.2em;-webkit-text-stroke:0;text-shadow:0 0 40px rgba(220,20,10,.55)}
+.opt input[type=range]{accent-color:var(--blood)}
+.opt .sw{clip-path:none;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.08)}
+.opt .sw::after{border-radius:50%;background:#bbb}
+.opt .sw.on{background:#a3140f}.opt .sw.on::after{background:#fff;box-shadow:none}
+/* ── 10/18 사장님 "바꾼 디자인 맘에 든다, 테마를 맞추자 허드도": HUD 를 제목·주 단추와 같은 물감 번짐으로.
+   체력 = 핏빛 번짐(hud_red), 방어·탄알·열쇠 = 검은 먹 번짐(hud_ink), 둥근 단추·무기 칸 = 먹 방울(dab_ink), 들고 있는 무기·누름 = 핏빛 방울(dab_red). 그림은 tools/brushlogo.py pill/dab */
+#topbar .stat{white-space:nowrap;background:url('assets/hud_ink.webp') center/100% 100% no-repeat;border:none;border-radius:0;-webkit-backdrop-filter:none;backdrop-filter:none;padding:0 22px}
+#topbar .stat.hp{background-image:url('assets/hud_red.webp')}
+.stat.hp .k{color:rgba(20,0,0,.7)}
+.stat .v{text-shadow:0 1px 3px rgba(0,0,0,.6)}
+.stat.hp .v.low{color:#fff;animation:hpLow .55s ease-in-out infinite}
+@keyframes hpLow{0%,100%{transform:scale(1)}50%{transform:scale(1.18);text-shadow:0 0 12px #fff}}
+#topbar .stat.hp:has(.v.low){animation:hpLowBg .55s ease-in-out infinite}
+@keyframes hpLowBg{0%,100%{filter:none}50%{filter:brightness(1.45)}}
+.tog{background:url('assets/dab_ink.webp') center/100% 100% no-repeat;border:none;-webkit-backdrop-filter:none;backdrop-filter:none}
+.tog:active{background:url('assets/dab_red.webp') center/100% 100% no-repeat}
+#slots .s{border:none;border-radius:0;background:url('assets/dab_ink.webp') center/100% 100% no-repeat;width:32px;height:30px}
+#slots .s.cur{background:url('assets/dab_red.webp') center/100% 100% no-repeat;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.6)}
+/* ── 10/18 사장님 "전부 빨간 바탕 까만 글씨로": 주·보조·위험 단추 모두 핏빛 물감 번짐 + 검은 글씨(START 와 같게). 잠긴 에피소드 칸만 흐린 회색 */
+.btn,.btn.bone,.btn.danger{color:#0d0a0a;border:none;border-radius:0;background:url('assets/btn_brush.webp') center/100% 100% no-repeat;-webkit-backdrop-filter:none;backdrop-filter:none;box-shadow:none;
+  text-shadow:0 1px 0 rgba(255,255,255,.14);filter:drop-shadow(0 6px 10px rgba(0,0,0,.55));padding-left:34px;padding-right:34px}
+.btn::before,.btn::after{display:none}
+.btn:hover,.btn.bone:hover,.btn.danger:hover{background:url('assets/btn_brush.webp') center/100% 100% no-repeat;border:none;filter:drop-shadow(0 6px 10px rgba(0,0,0,.55)) brightness(1.15);transform:scale(1.04)}
+.btn:active,.btn.bone:active,.btn.danger:active{background:url('assets/btn_brush.webp') center/100% 100% no-repeat;box-shadow:none;transform:scale(.96);filter:drop-shadow(0 3px 5px rgba(0,0,0,.55)) brightness(1.3)}
+#lvGrid .btn:not(.bone){filter:grayscale(1) brightness(.55) drop-shadow(0 4px 8px rgba(0,0,0,.5));opacity:.6;cursor:default;transform:none}
+/* ── 10/18 사장님 "글씨체도 통일": 화면 글자 전부 제목과 같은 동해독도 붓 글씨(fonts/brush.woff2, 게임 글자 473자 부분집합). 글자가 작게 그려져 size-adjust 로 키움 */
+@font-face{font-family:'BRUSH';src:url('fonts/brush.woff2') format('woff2');font-display:swap;size-adjust:128%}
+body,body *{font-family:'BRUSH',sans-serif!important;letter-spacing:.04em}
+.btn{letter-spacing:.06em}
+.stat .k{font-size:15px}
+/* ── 10/18 사장님 "모든 디자인 통일": 창 = 먹 번짐 판(panel_ink, 모서리 결이 안 찌그러지게 border-image), 창 제목 = 빨간 물감에 검은 글씨,
+   폰 패드 = 먹 방울 + 핏빛 손잡이, FIRE·◀▶ = 물감 방울 */
+.sheet{border:2px solid transparent;border-image:url('assets/panel_ink.webp') 80 fill / 40px / 18px stretch;background:none;-webkit-backdrop-filter:none;backdrop-filter:none;box-shadow:none;outline:none;border-radius:0}
+.sheet::before,.sheet::after{display:none}
+.sheet h2{display:inline-block;padding:4px 26px 2px;background:url('assets/btn_brush.webp') center/100% 100% no-repeat;color:#0d0a0a;text-shadow:0 1px 0 rgba(255,255,255,.12)}
+.sheet .x{color:#e8dcd0}
+#how .col{background:rgba(0,0,0,.28);border:none}
+#how canvas{border:none}
+.opt{border-bottom-color:rgba(255,255,255,.06)}
+#pad{background:url('assets/dab_ink.webp') center/100% 100% no-repeat;border:none;opacity:.9}
+#knob{background:url('assets/dab_red.webp') center/100% 100% no-repeat;border:none;box-shadow:none}
+#fire{background:url('assets/dab_red.webp') center/100% 100% no-repeat;border:none;box-shadow:none;color:#0d0a0a;text-shadow:0 1px 0 rgba(255,255,255,.15)}
+#fire.on{box-shadow:none;transform:scale(.94);filter:brightness(1.3)}
+.tbtn{background:url('assets/dab_ink.webp') center/100% 100% no-repeat;border:none;color:#f2ece6}
+.tbtn.on{background:url('assets/dab_red.webp') center/100% 100% no-repeat;color:#0d0a0a}
+/* 붓 글씨가 가늘어 단추·숫자·창 제목은 크게 + 획을 살짝 두껍게(같은 색 테) */
+.btn{font-size:30px;-webkit-text-stroke:1px currentColor;paint-order:stroke fill}.btn.main{font-size:34px}
+.stat .v{-webkit-text-stroke:.6px currentColor}.sheet h2{-webkit-text-stroke:1px currentColor;font-size:32px}
+#how p,.opt,#inter .tally{-webkit-text-stroke:.35px currentColor}
+#lvGrid .btn{font-size:20px!important;-webkit-text-stroke:.6px currentColor}
+@media (max-height:480px){ .btn{font-size:5.8vh}.btn.main{font-size:6.6vh}.sheet h2{font-size:6vh} }
+#how p{font-size:19px;line-height:1.45;color:#efe6da}
+@media (max-height:480px){ #how p{font-size:3.6vh} }
+/* ── 10/18 사장님 "위의 허드도 다 바꿔야지": 위 HUD 전부 빨간 물감 + 검은 글씨(단추와 같게).
+   무기 칸: 들고 있는 것 = 진한 빨강·크게, 가진 것 = 흐린 빨강, 없는 것 = 회색. 체력·탄알이 바닥나면 숫자가 흰색으로 깜빡임 */
+#topbar .stat,#topbar .stat.hp,#topbar .stat.keys{background:url('assets/hud_red.webp') center/100% 100% no-repeat}
+#topbar .stat .k,.stat.hp .k{color:#1a0606;opacity:.85}
+#topbar .stat .v{color:#0d0a0a;text-shadow:0 1px 0 rgba(255,255,255,.14);-webkit-text-stroke:.8px currentColor}
+#topbar .stat .v.low{color:#fff;text-shadow:0 0 8px rgba(255,255,255,.6)}
+.stat .key{border:1.5px solid #120404}
+.tog,.tog:active{background:url('assets/dab_red.webp') center/100% 100% no-repeat}
+.tog svg path[fill="#fff"],.tog svg ellipse[fill="#fff"]{fill:#0d0a0a}
+.tog svg path[stroke="#fff"]{stroke:#0d0a0a}
+.tog span{color:#0d0a0a!important}
+.tog.off::after{background:#0d0a0a}
+#slots .s{background:url('assets/dab_red.webp') center/100% 100% no-repeat;filter:grayscale(1) brightness(2.3);color:#0d0a0a;opacity:.45}
+#slots .s.own{filter:none;opacity:.78;color:#0d0a0a}
+#slots .s.cur{background:url('assets/dab_red.webp') center/100% 100% no-repeat;filter:none;opacity:1;color:#0d0a0a;transform:scale(1.18);text-shadow:0 1px 0 rgba(255,255,255,.15)}
+.oreum{background:url('assets/hud_red.webp') center/100% 100% no-repeat;border:none;border-radius:0;color:#0d0a0a;padding:0 18px}
+/* 알림 글·줍기 번쩍임도 같은 테마(옛 주황 글씨·노란 번쩍임 남아 있던 것) */
+#msg{background:url('assets/hud_red.webp') center/100% 100% no-repeat;color:#0d0a0a;text-shadow:0 1px 0 rgba(255,255,255,.14);-webkit-text-stroke:.8px currentColor;padding:6px 30px;font-size:24px;white-space:nowrap}
+#flash.pick{background:radial-gradient(ellipse at center,rgba(255,255,255,0) 45%,rgba(255,235,225,.28) 100%)}
+/* 10/18: 위 단추 줄(z45)을 막 위로 올린 뒤 폰에서 창 오른쪽 위 OK·✕ 가 ?·음악·소리 단추에 가려짐 → 폰에선 창을 단추 줄 아래(52px)부터 */
+@media (max-height:480px){ .scr.dim{padding-top:52px;padding-bottom:10px} }
+/* 폰에서 설정·에피소드 창이 화면(340)보다 길어 아래 단추를 못 누름 → 촘촘하게 + 넘치면 스크롤 */
+.scr.dim{overflow-y:auto;-webkit-overflow-scrolling:touch}
+@media (max-height:480px){
+  .opt{padding:3px 0;font-size:3.8vh}.opt .sw{transform:scale(.85)}
+  #lvGrid{grid-template-columns:repeat(6,1fr)!important;gap:4px!important}
+  #lvGrid .btn{padding:3px 2px!important;font-size:4.2vh!important}
+  .sheet{padding-top:10px;padding-bottom:10px}.sheet h2{margin-bottom:6px}
+}
+/* 10/18 사장님 "허드 글씨를 좀 크고 굵게": 이름표·숫자·무기 칸·오름게임즈 알약 글씨를 키우고 같은 색 테로 굵게 */
+#topbar .stat{height:44px;gap:9px}
+#topbar .stat .k{font-size:21px;-webkit-text-stroke:.9px currentColor;opacity:1}
+#topbar .stat .v{font-size:30px;-webkit-text-stroke:1.4px currentColor;min-width:40px}
+#slots .s{font-size:21px;-webkit-text-stroke:1px currentColor;width:36px;height:34px}
+.oreum{font-size:18px;-webkit-text-stroke:.8px currentColor;height:40px}
+.tog span{font-size:22px!important;-webkit-text-stroke:1px currentColor}
+@media (max-height:480px){
+  #topbar .stat{height:36px;padding:0 14px;gap:6px}
+  #topbar .stat .k{font-size:17px}
+  #topbar .stat .v{font-size:24px;min-width:30px}
+  #slots .s{font-size:18px;width:32px;height:30px}
+  .oreum{font-size:15px;height:34px;padding:0 12px}
+}
+#topbar{padding-left:calc(128px + env(safe-area-inset-left))}
+@media (max-height:480px){ #topbar{padding-left:calc(112px + env(safe-area-inset-left))} }
+/* 10/18 사장님 "카드에 열쇠 모양을 까맣게 넣으면 될 듯, 허드에도": 열쇠 칸 = 색 카드 + 검은 열쇠(게임 속 카드와 같은 그림).
+   안 주운 칸은 색을 빼고 테두리 + 흐린 열쇠만(빨간 바탕에 흐린 색이 비쳐 파랑이 보라로 보이던 것) */
+#topbar .stat .key{width:24px;height:32px;border-radius:3px;border:2px solid rgba(13,10,10,.6);background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'%3E%3Cpath fill='%230d0a0a' fill-rule='evenodd' d='M128 22a50 50 0 1 1 0 100a50 50 0 1 1 0-100zm0 28a22 22 0 1 0 0 44a22 22 0 1 0 0-44z'/%3E%3Cpath fill='%230d0a0a' d='M114 112h28v118h-28zM142 168h34v20h-34zM142 204h26v20h-26z'/%3E%3C/svg%3E") center/78% 78% no-repeat transparent;opacity:.5;box-shadow:none}
+#topbar .stat .key.on{opacity:1;border-color:#0d0a0a;box-shadow:0 0 8px rgba(255,255,255,.35)}
+#topbar .stat .key.r.on{background-color:#e8302a}#topbar .stat .key.y.on{background-color:#f2c230}#topbar .stat .key.b.on{background-color:#2f6fd6}
+@media (max-height:480px){ #topbar .stat .key{width:20px;height:27px} }
+/* 10/19 사장님 "열쇠에 모양 넣고 원래 색깔이 없어졌는데": 안 주운 칸도 원래 색을 어둡게(비치지 않는 불투명 색), 주우면 밝게 */
+#topbar .stat .key{opacity:1}
+#topbar .stat .key.r{background-color:#5e1210}#topbar .stat .key.y{background-color:#6b5414}#topbar .stat .key.b{background-color:#16305e}
+#topbar .stat .key:not(.on){border-color:rgba(13,10,10,.75)}
+/* 10/19 "원만 가로로 찌그러뜨려 길게": 초안 물감을 가로로 1.7배 늘린 로고 → 폭 제한만 넓힘(높이 제한 46vh 그대로라 글자 크기는 초안과 같음) */
+#tlogo{width:min(92vw,980px)}
+@media (max-height:480px){ #tlogo{max-width:84vw} }
+/* 10/19 판 준비(셰이더 미리 만들기) 동안 「불러오는 중」: 어두운 막 + 가운데 빨간 물감 위 검은 붓 글씨, 숨 쉬듯 흐려졌다 진해짐 */
+#loading{position:fixed;inset:0;z-index:40;display:flex;align-items:center;justify-content:center;background:rgba(8,6,6,.72);pointer-events:none}
+#loading b{background:url('assets/hud_red.webp') center/100% 100% no-repeat;color:#0d0a0a;text-shadow:0 1px 0 rgba(255,255,255,.14);-webkit-text-stroke:1px currentColor;font-weight:normal;font-size:34px;padding:12px 56px;white-space:nowrap;animation:ldPulse 1.1s ease-in-out infinite}
+@keyframes ldPulse{0%,100%{opacity:1}50%{opacity:.55}}
+@media (max-height:480px){#loading b{font-size:26px;padding:9px 42px}}
+/* 10/19 좁은 폰(가로 800 이하)에서 위 줄이 넘쳐 단추 넷이 둘째 줄로 내려가 알림과 겹치고(667x375 영문), 단추가 17px 로 찌그러지던 것(740x340 영문)
+   → 줄바꿈 금지, 단추는 줄어들지 않게, HUD 칸 여백·글자를 조금 줄여 한 줄에 */
+#topbar .tog{flex:0 0 auto}
+@media (max-width:820px){
+  #topbar{flex-wrap:nowrap;gap:5px;padding-left:calc(98px + env(safe-area-inset-left))}
+  #topbar .stat{padding:0 8px;gap:4px}
+  #topbar .stat .k{font-size:14px;-webkit-text-stroke:.7px currentColor}
+  #topbar .stat .v{font-size:21px;min-width:22px;-webkit-text-stroke:1.1px currentColor}
+  #topbar .stat .key{width:16px;height:22px}
+  #topbar .tog{width:34px;height:34px}
+  .oreum{font-size:13px;height:30px;padding:0 10px}
+  #msg{top:96px} /* 무기 칸(54~90) 아래로: 긴 영문 판 이름이 무기 칸과 겹쳤음 */
+}
+/* 10/19 사장님 "전체 30판을 표시해줘, 위에 허드 눌렀을 때 볼 수 있게": 위 줄 아래 왼쪽에 지금 판 번호 칸(4 / 30), 누르면 30판 전체 창 */
+#lvPill{position:fixed;left:calc(128px + env(safe-area-inset-left));top:58px;z-index:39; /* 창(.scr z40) 아래: 30판 창·일시정지 창 위로 올라오지 않게 */height:36px;padding:0 18px;display:flex;align-items:center;gap:6px;cursor:pointer;
+  background:url('assets/hud_red.webp') center/100% 100% no-repeat;color:#0d0a0a;text-shadow:0 1px 0 rgba(255,255,255,.14);white-space:nowrap}
+#lvPill .v{font-size:24px;-webkit-text-stroke:1.1px currentColor}
+#lvPill .k{font-size:18px;-webkit-text-stroke:.8px currentColor;opacity:.85}
+#lvPill:hover{filter:brightness(1.12)}
+body:not(.playing) #lvPill{display:none}
+#progGrid{display:grid;grid-template-columns:auto repeat(6,1fr);gap:6px 6px;align-items:center;margin-top:8px}
+#progGrid .ep{text-align:right;padding-right:8px;font-size:19px;color:#e9dcd2;white-space:nowrap;-webkit-text-stroke:.5px currentColor}
+#progGrid .c{height:40px;display:flex;align-items:center;justify-content:center;font-size:21px;color:#0d0a0a;-webkit-text-stroke:.8px currentColor;
+  background:url('assets/dab_red.webp') center/100% 100% no-repeat;filter:grayscale(1) brightness(2.3);opacity:.4}
+#progGrid .c.done{filter:none;opacity:.8}
+#progGrid .c.cur{filter:brightness(1.3) drop-shadow(0 0 6px rgba(255,255,255,.55));opacity:1;transform:scale(1.25);text-shadow:0 1px 0 rgba(255,255,255,.2)}
+@media (max-width:820px){ #lvPill{left:calc(98px + env(safe-area-inset-left));top:48px;height:30px;padding:0 12px} #lvPill .v{font-size:20px} #lvPill .k{font-size:15px} }
+@media (max-height:480px){ #progGrid{gap:3px 5px;margin-top:4px} #progGrid .c{height:30px;font-size:17px} #progGrid .ep{font-size:15px} }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<a class="oreum" id="home" href="https://oreumgames.com" target="_top">오름게임즈</a>
+<div id="topbar">
+  <div class="stat hp"><span class="k">HEALTH</span><span class="v" id="hp">100</span></div>
+  <div class="stat"><span class="k">ARMOR</span><span class="v" id="ar">0</span></div>
+  <div class="stat"><span class="k" id="ammok">AMMO</span><span class="v" id="am">-</span></div>
+  <div class="stat keys"><span class="key r" id="kr"></span><span class="key y" id="ky"></span><span class="key b" id="kb"></span></div>
+  <div class="spacer"></div>
+  <div class="tog" id="tgHow" title="?"><span style="font-family:DOSGothic;font-size:20px;color:#fff">?</span></div>
+  <div class="tog" id="tgPause"><span style="font-size:16px;color:#fff">❚❚</span></div>
+  <div class="tog" id="tgBgm"><svg viewBox="0 0 24 24"><path d="M9 17.5V5.5l11-2.5v12" fill="none" stroke="#fff" stroke-width="2.6" stroke-linejoin="round"/><ellipse cx="6.3" cy="17.8" rx="3.4" ry="2.7" fill="#fff"/><ellipse cx="17.3" cy="15.3" rx="3.4" ry="2.7" fill="#fff"/></svg></div>
+  <div class="tog" id="tgSfx"><svg viewBox="0 0 24 24"><path d="M3 9h4l5-4.5v15L7 15H3z" fill="#fff"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg></div>
+</div>
+<div id="slots"></div>
+<div id="lvPill" title="30"><span class="v" id="lvNow">1</span><span class="k">/ 30</span></div>
+<div id="xh"></div>
+<div id="flash"></div>
+<div id="dmgdir"><div class="w"></div></div>
+<div id="msg"></div>
+<div id="loading" class="hide"><b id="loadingT">불러오는 중</b></div>
+<div id="keys">WASD 이동 · 마우스 시점 · 클릭 발사<br>1~6 무기 · 휠 바꾸기 · Esc 일시정지</div>
+<div id="pad"><div id="knob"></div></div>
+<div id="fire">FIRE</div>
+<div id="tbtns"><div class="tbtn" id="tbPrev">◀</div><div class="tbtn" id="tbNext">▶</div></div>
+<div id="rotate"><div style="font-size:20px">폰을 가로로 돌려 주세요</div><div class="btn main" id="rotBtn">가로로 보기</div></div>
+
+<canvas id="embers"></canvas>
+<div class="scr" id="title">
+  <h1 id="ttl"><img id="tlogo" src="assets/logo_ko.webp" alt="어둠 UDOOM"></h1>
+  <div class="en" id="ten">UDOOM</div>
+  <div class="sub hide" id="tsub"></div>
+  <div class="row"><div class="btn main" id="bStart">START</div><div class="btn main hide" id="bCont">계속하기</div></div>
+  <div class="row" style="margin-top:10px"><div class="btn bone" id="bOpt">설정</div><div class="btn bone" id="bLv">에피소드</div></div>
+</div>
+<div class="scr dim hide" id="how"><div class="sheet"><h2>HOW TO PLAY</h2><div class="btn main ok" id="howOk" style="position:absolute;right:12px;top:10px;min-width:0;padding:8px 22px">OK</div>
+  <div class="cols"><div class="col"><canvas id="how1" width="320" height="240"></canvas><p id="howp1"></p></div><div class="col"><canvas id="how2" width="320" height="240"></canvas><p id="howp2"></p></div><div class="col"><canvas id="how3" width="320" height="240"></canvas><p id="howp3"></p></div></div>
+</div></div>
+<div class="scr dim hide" id="inter"><div class="sheet" style="text-align:center"><div class="lv" id="ilv">E1M1</div><h2 id="ittl">LEVEL CLEAR</h2>
+  <div class="tally" style="display:inline-block"><div><span id="lkills">KILLS</span> <b id="tk">0%</b></div><div><span id="litems">ITEMS</span> <b id="ti">0%</b></div><div><span id="lsecrets">SECRETS</span> <b id="ts">0%</b></div><div><span id="ltime">TIME</span> <b id="tt">0:00</b> <span style="font-size:16px;color:#b8a98a"><span id="lpar">PAR</span> <span id="tp">0:00</span></span></div></div>
+  <div class="row" style="margin-top:14px"><div class="btn main" id="bNext">NEXT</div></div></div></div>
+<div class="scr dim hide" id="over"><h1>GAME OVER</h1><div class="row"><div class="btn main" id="bRetry">RETRY</div><div class="btn bone" id="bHome">홈</div></div></div>
+<div class="scr dim hide" id="diff"><div class="sheet" style="max-width:560px;text-align:center"><h2 id="diffTtl">난이도</h2><div class="x" id="diffX">✕</div><div class="row"><div class="btn bone" id="dEasy">쉬움</div><div class="btn main" id="dNormal">보통</div><div class="btn bone" id="dHard">어려움</div></div></div></div>
+<div class="scr dim hide" id="prog"><div class="sheet" style="max-width:560px;text-align:center"><h2 id="progTtl">E1M1</h2><div class="x" id="progX">✕</div><div id="progGrid"></div></div></div>
+<div class="scr dim hide" id="pause"><div class="sheet" style="max-width:420px;text-align:center"><h2>PAUSE</h2><div class="row"><div class="btn main" id="bResume">계속</div><div class="btn bone" id="bQuit">타이틀</div></div></div></div>
+<div class="scr dim hide" id="opts"><div class="sheet" style="max-width:460px"><h2 id="optTtl">설정</h2><div class="x" id="optX">✕</div>
+  <div class="opt"><span id="o1">피 표현</span><div class="sw on" id="swBlood"></div></div>
+  <div class="opt"><span id="o2">자동 발사 (폰)</span><div class="sw on" id="swAuto"></div></div>
+  <div class="opt"><span id="o3">머리 흔들림</span><div class="sw on" id="swBob"></div></div>
+  <div class="opt"><span id="o4">화각 넓게</span><div class="sw" id="swFov"></div></div>
+  <div class="opt"><span id="o5">감도</span><input type="range" id="rgSens" min="2" max="20" value="8" style="width:150px"></div>
+  <div class="row" style="margin-top:14px"><div class="btn danger" id="bReset">처음부터</div></div>
+</div></div>
+<div class="scr dim hide" id="lvsel"><div class="sheet" style="max-width:560px"><h2 id="lvTtl">에피소드</h2><div class="x" id="lvX">✕</div><div id="lvGrid" style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px"></div></div></div>
+<div class="scr dim hide" id="ending"><div class="sheet" style="text-align:center"><h2 id="endTtl">THE END</h2><p id="endTxt" style="font-size:18px;line-height:1.7;color:#e8dcc0"></p><div class="row"><div class="btn main" id="bEndHome">홈</div></div></div></div>
+
+<script>if(location.protocol==="file:"||/offline=1/.test(location.search)){document.write('<script src="assets/data/tex.js"><\/script><script src="assets/data/models1.js"><\/script><script src="assets/data/models2.js"><\/script>');}</script>
+<script src="lib/three.min.js"></script>
+<script src="lib/GLTFLoader.global.js"></script>
+<script src="js/lang.js"></script>
+<script src="js/data.js"></script>
+<script src="js/sfx.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/mapgen.js"></script>
+<script src="js/models.js"></script>
+<script src="js/world.js"></script>
+<script src="js/fx.js"></script>
+<script src="js/player.js"></script>
+<script src="js/weapons.js"></script>
+<script src="js/monsters.js"></script>
+<script src="js/embers.js"></script>
+<script src="js/hud.js"></script>
+<script src="js/game.js"></script>
+<script src="/assets/visit.js?v=17" defer></script>
+<script src="/assets/game-events.js?v=2" defer></script>
+</body>
+</html>

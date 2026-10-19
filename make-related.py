@@ -18,6 +18,7 @@ import io, os, re, sys
 
 # slug, 한국어 경로, 영어 경로, 한국어 이름, 한국어 장르 앵커, 영어 이름, 영어 장르 앵커, 태그
 GAMES = [
+    ("udoom",         "/games/udoom/",               "/en/games/udoom/",               "어둠",              "둠 같은 FPS PC게임",                  "UDOOM",                 "doom like browser fps",         {"3d", "action", "horror", "fighting"}),
     ("hoops",         "/games/flash/hoops/",         "/en/games/flash/hoops/",         "오락실 농구",   "3D 오락실 농구게임",              "ARCADE HOOPS",            "basketball arcade game online", {"sport", "arcade", "physics", "3d"}),
     ("nara",          "/games/nara/",                "/en/games/nara/",                "한능검",            "한능검 한국사 게임",                  "KOREAN HISTORY QUIZ",   "korean history quiz game",      {"quiz", "korean", "puzzle"}),
     ("pocketball",    "/games/flash/pocketball/",    "/en/games/flash/pocketball/",    "포켓볼",       "3D 포켓볼게임",                   "POCKET BALL",             "pool game online free",         {"sport", "pvp", "board", "physics", "3d"}),
