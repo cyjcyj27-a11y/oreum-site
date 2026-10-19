@@ -7,7 +7,7 @@ const LAYER={shotgun:0.6};
 // 10/19 사장님 "권총 소리가 너무 딱총 소리 같다": 녹음을 조금 낮게(빠르기 0.88) + 아래에 낮은 쿵(pistol 합성) + 실내 잔향(0.9초, 어둡게)을 섞어 몸통과 꼬리를 줌
 const GUNFX={}; /* 10/19 사장님이 준 권총 녹음(pistol2)으로 바꾸며 권총 쿵·잔향은 뺌(녹음에 실내 울림이 있음). 다른 총에 쓸 때: 이름:{rate,wet} */
 let verbIn=null;
-const ALIAS={weapon:['pick',1], pistol:['pistol2',0.6] /* 10/19 사장님 녹음, 샷건보다 작게 */, shotgun:['pistol',1], zshot:['pistol',0.55], pbite:['stab',1], step:['step1',1] /* 10/19 사장님 "발소리를 1개로 통일" */, pdie:['zdie',0.9], psee:['isee',0.8], idie:['zdie',0.8], cdie:['explode',0.5], locked:['empty',1], btn:['empty',0.5]};
+const ALIAS={weapon:['pick',1], pistol:['pistol9',1.35] /* 10/19 사장님 9mm 녹음(탕 뒤 0.40초에서 끊음), 샷건보다 작게. 앞 녹음 pistol2 는 sfx.js 에 남김 */, shotgun:['pistol',1], zshot:['pistol',0.55], pbite:['stab',1], step:['step1',1] /* 10/19 사장님 "발소리를 1개로 통일" */, pdie:['zdie',0.9], psee:['isee',0.8], idie:['zdie',0.8], cdie:['explode',0.5], locked:['empty',1], btn:['empty',0.5]};
 function loadSamples(){ if(!window.SFXDATA) return; for(const k in SFXDATA){ try{ const bin=atob(SFXDATA[k]); const buf=new Uint8Array(bin.length); for(let i=0;i<bin.length;i++) buf[i]=bin.charCodeAt(i); ctx.decodeAudioData(buf.buffer.slice(0), b=>{ SMP[k]=b; }, e=>console.warn('sfx decode',k,e)); }catch(e){} } }
 function smp(name,vol,rate,wet){ const b=SMP[name]; if(!b) return false; const s=ctx.createBufferSource(); s.buffer=b; if(rate) s.playbackRate.value=rate; const g=ctx.createGain(); g.gain.value=vol; s.connect(g); g.connect(bus); if(wet&&verbIn){ const w=ctx.createGain(); w.gain.value=wet; g.connect(w); w.connect(verbIn); } s.start(); return true; }
 function init(){
