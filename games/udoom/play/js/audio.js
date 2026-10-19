@@ -4,15 +4,20 @@ let ctx=null, bus=null, sfxOn=true, bgmOn=true, bgmNode=null, noiseBuf=null;
 const SMP={}; // 녹음(Pixabay) 디코드 결과
 // 녹음 위에 합성음을 깔아 무게를 더하는 소리(샷건 저음, 10/17). 권총·샷건 녹음은 사장님 지시로 맞바꿔 씀(10/17)
 const LAYER={shotgun:0.6};
-const ALIAS={weapon:['pick',1], pistol:['shotgun',0.8], shotgun:['pistol',1], zshot:['pistol',0.55], pbite:['stab',1], step:['step1',1] /* 10/19 사장님 "발소리를 1개로 통일" */, pdie:['zdie',0.9], psee:['isee',0.8], idie:['zdie',0.8], cdie:['explode',0.5], locked:['empty',1], btn:['empty',0.5]};
+// 10/19 사장님 "권총 소리가 너무 딱총 소리 같다": 녹음을 조금 낮게(빠르기 0.88) + 아래에 낮은 쿵(pistol 합성) + 실내 잔향(0.9초, 어둡게)을 섞어 몸통과 꼬리를 줌
+const GUNFX={}; /* 10/19 사장님이 준 권총 녹음(pistol2)으로 바꾸며 권총 쿵·잔향은 뺌(녹음에 실내 울림이 있음). 다른 총에 쓸 때: 이름:{rate,wet} */
+let verbIn=null;
+const ALIAS={weapon:['pick',1], pistol:['pistol2',0.6] /* 10/19 사장님 녹음, 샷건보다 작게 */, shotgun:['pistol',1], zshot:['pistol',0.55], pbite:['stab',1], step:['step1',1] /* 10/19 사장님 "발소리를 1개로 통일" */, pdie:['zdie',0.9], psee:['isee',0.8], idie:['zdie',0.8], cdie:['explode',0.5], locked:['empty',1], btn:['empty',0.5]};
 function loadSamples(){ if(!window.SFXDATA) return; for(const k in SFXDATA){ try{ const bin=atob(SFXDATA[k]); const buf=new Uint8Array(bin.length); for(let i=0;i<bin.length;i++) buf[i]=bin.charCodeAt(i); ctx.decodeAudioData(buf.buffer.slice(0), b=>{ SMP[k]=b; }, e=>console.warn('sfx decode',k,e)); }catch(e){} } }
-function smp(name,vol){ const b=SMP[name]; if(!b) return false; const s=ctx.createBufferSource(); s.buffer=b; const g=ctx.createGain(); g.gain.value=vol; s.connect(g); g.connect(bus); s.start(); return true; }
+function smp(name,vol,rate,wet){ const b=SMP[name]; if(!b) return false; const s=ctx.createBufferSource(); s.buffer=b; if(rate) s.playbackRate.value=rate; const g=ctx.createGain(); g.gain.value=vol; s.connect(g); g.connect(bus); if(wet&&verbIn){ const w=ctx.createGain(); w.gain.value=wet; g.connect(w); w.connect(verbIn); } s.start(); return true; }
 function init(){
   if(ctx) return;
   ctx = new (window.AudioContext||window.webkitAudioContext)();
   bus = ctx.createGain(); bus.gain.value = 0.8;
   const lp = ctx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=4200;
   const comp = ctx.createDynamicsCompressor(); comp.threshold.value=-14; comp.ratio.value=4; comp.attack.value=0.003; comp.release.value=0.12;
+  { const n=Math.floor(ctx.sampleRate*0.9), ir=ctx.createBuffer(2,n,ctx.sampleRate); for(let c=0;c<2;c++){ const d=ir.getChannelData(c); let y=0; for(let i=0;i<n;i++){ const k=i/n; y=y*0.82+(Math.random()*2-1)*0.18; d[i]=y*Math.pow(1-k,3)*(i<ctx.sampleRate*0.012?0.3:1); } }
+    const cv=ctx.createConvolver(); cv.buffer=ir; const vo=ctx.createGain(); vo.gain.value=0.9; verbIn=ctx.createGain(); verbIn.connect(cv); cv.connect(vo); vo.connect(bus); } /* 권총 잔향(어두운 잡음 IR) */
   bus.connect(lp); lp.connect(comp); comp.connect(ctx.destination);
   noiseBuf = ctx.createBuffer(1, ctx.sampleRate*1.5, ctx.sampleRate);
   const d=noiseBuf.getChannelData(0); for(let i=0;i<d.length;i++) d[i]=Math.random()*2-1;
@@ -33,7 +38,7 @@ function noise(t,dur,vol,fc,q,type){
 function thump(t,f0,f1,dur,vol){ const o=ctx.createOscillator(), g=ctx.createGain(); o.type='sine'; o.frequency.setValueAtTime(f0,t); o.frequency.exponentialRampToValueAtTime(f1,t+dur*0.7);
   g.gain.setValueAtTime(vol,t); g.gain.exponentialRampToValueAtTime(0.0008,t+dur); o.connect(g); g.connect(bus); o.start(t); o.stop(t+dur+0.02); }
 const S = {
-  pistol(t){ thump(t,180,60,0.16,0.9); noise(t,0.14,0.5,1500,0.8); },
+  pistol(t){ thump(t,150,46,0.24,1.0); noise(t,0.12,0.35,900,0.7); },
   shotgun(t){ thump(t,120,40,0.32,1.1); noise(t,0.28,0.7,900,0.6); noise(t+0.05,0.2,0.3,500,0.5); },
   chain(t){ thump(t,200,70,0.1,0.6); noise(t,0.08,0.35,1700,0.8); },
   rocket(t){ thump(t,90,40,0.5,0.9); noise(t,0.5,0.6,700,0.5); },
@@ -78,7 +83,7 @@ function play(name,vol,dist){ if(!ctx||!sfxOn) return; const t=ctx.currentTime+0
   let a=vol==null?1:vol; if(dist!=null){ a*=Math.max(0,1-dist/26); if(a<=0) return; }
   // 녹음이 있으면 녹음으로(이름 → 별칭 → 여러 개면 무작위)
   let key=name, mul=1; const al=ALIAS[name]; if(al){ if(al.length===3&&typeof al[1]==='string') key=al[Math.floor(Math.random()*al.length)]; else { key=al[0]; mul=al[1]||1; } }
-  if(SMP[key]){ smp(key,a*mul); if(LAYER[name]&&S[name]) layer(S[name],t,a*LAYER[name]); return; }
+  if(SMP[key]){ const fx=GUNFX[name]; smp(key,a*mul,fx&&fx.rate,fx&&fx.wet); if(LAYER[name]&&S[name]) layer(S[name],t,a*LAYER[name]); return; }
   const f=S[name]; if(!f) return;
   if(a>=0.99){ f(t); return; }
   const old=bus; const g=ctx.createGain(); g.gain.value=a; g.connect(old); bus=g; try{ f(t); } finally { bus=old; } }
