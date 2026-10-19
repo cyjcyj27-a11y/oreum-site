@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>홈리스1999 개발일지 1, 웹게임으로 시작해 스팀으로 갈 예정인 생존 게임 — 오름게임즈 인디게임 개발뉴스</title>
+<meta name="description" content="1999년 서울역 앞에서 노숙 생활을 하며 하루하루 버티는 인디게임 홈리스1999의 첫 개발일지. 웹게임으로 만들다가 3D 모델이 무거워져 스팀 PC 게임으로 방향을 튼 이야기, 일곱 장면으로 시작한 기획, 배고픔 하나로 만든 하루, 옛 서울역 돔, 사흘 동안 네 번 바뀐 제목까지.">
+<meta name="keywords" content="홈리스1999, 인디게임 개발, 개발일지, 생존 시뮬레이션게임, 스팀 인디게임">
+<link rel="canonical" href="https://oreumgames.com/news/homeless1999-devlog-01/">
+<link rel="alternate" hreflang="ko" href="https://oreumgames.com/news/homeless1999-devlog-01/">
+<link rel="alternate" hreflang="en" href="https://oreumgames.com/en/news/homeless1999-devlog-01/">
+<link rel="alternate" hreflang="x-default" href="https://oreumgames.com/news/homeless1999-devlog-01/">
+<meta name="naver-site-verification" content="4ecba4003fbcbe564918ffd2c33d606f1eaae11a" />
+<meta name="google-site-verification" content="BG736F-J65BHS-viz8rkCjKJ53pxgIhSlPpzVnpGlt4" />
+<meta name="theme-color" content="#f8f5ec">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" href="/assets/icon-512.png" type="image/png" sizes="512x512">
+<link rel="apple-touch-icon" href="/assets/icon-180.png">
+<link rel="manifest" href="/manifest.webmanifest">
+
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="오름게임즈">
+<meta property="og:title" content="홈리스1999 개발일지 1, 웹게임으로 시작해 스팀으로 갈 예정인 생존 게임">
+<meta property="og:description" content="1999년 서울역 앞에서 노숙 생활을 하며 하루하루 버티는 인디게임 홈리스1999의 첫 개발일지. 웹게임으로 만들다가 3D 모델이 무거워져 스팀 PC 게임으로 방향을 튼 이야기, 일곱 장면으로 시작한 기획, 배고픔 하나로 만든 하루, 옛 서울역 돔, 사흘 동안 네 번 바뀐 제목까지.">
+<meta property="og:url" content="https://oreumgames.com/news/homeless1999-devlog-01/">
+<meta property="og:image" content="https://oreumgames.com/assets/og-image.jpg?v=4">
+<meta property="og:locale" content="ko_KR">
+<meta name="twitter:card" content="summary_large_image">
+
+<link rel="stylesheet" href="/style.css?v=47">
+<style>
+.note-page h1{ font-size:clamp(18px,2.4vw,24px); line-height:1.4; margin:22px 0 0; letter-spacing:-.02em; }
+@media (min-width:900px){ .note-page h1{ white-space:nowrap; } }
+.note-kicker{ margin:22px 0 0; font-size:clamp(28px,4.6vw,44px); line-height:1.2; letter-spacing:-.01em; color:var(--ink); font-weight:900; padding-bottom:12px; border-bottom:3px solid var(--ink); }
+.note-kicker a{ color:inherit; text-decoration:none; }
+.note-sub{ margin:10px 0 0; font-size:17px; line-height:1.6; color:var(--ink-2); }
+.note-date{ margin:8px 0 22px; font-size:13px; color:var(--muted); }
+.note-page h2{ font-size:21px; margin:30px 0 4px; }
+.note-page p > strong:only-child{ font-size:calc(1em + 2pt); }
+.note-page .gp-body a{ text-decoration:underline; text-underline-offset:3px; }
+.note-page .gp-cta{ margin-top:30px; }
+.note-fig{ margin:18px 0 4px; }
+.note-fig img{ display:block; width:auto; max-width:100%; max-height:560px; height:auto; border-radius:12px; }
+</style>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "Article", "headline": "홈리스1999 개발일지 1, 웹게임으로 시작해 스팀으로 갈 예정인 생존 게임", "description": "1999년 서울역 앞에서 노숙 생활을 하며 하루하루 버티는 인디게임 홈리스1999의 첫 개발일지. 웹게임으로 만들다가 3D 모델이 무거워져 스팀 PC 게임으로 방향을 튼 이야기, 일곱 장면으로 시작한 기획, 배고픔 하나로 만든 하루, 옛 서울역 돔, 사흘 동안 네 번 바뀐 제목까지.", "datePublished": "2026-10-20", "dateModified": "2026-10-20", "inLanguage": "ko", "mainEntityOfPage": "https://oreumgames.com/news/homeless1999-devlog-01/", "image": "https://oreumgames.com/assets/og-image.jpg?v=4", "author": {"@type": "Organization", "name": "오름게임즈", "url": "https://oreumgames.com/"}, "publisher": {"@type": "Organization", "name": "오름게임즈", "url": "https://oreumgames.com/", "logo": {"@type": "ImageObject", "url": "https://oreumgames.com/assets/icon-512.png"}}}</script>
+</head>
+
+<body>
+
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="/">
+      <img src="/assets/logo-full.webp?v=1" alt="오름게임즈" width="78" height="74">
+    </a>
+    <div class="brand-copy">
+      <p class="brandname">오름게임즈</p>
+      <p class="factory">인디게임팩토리</p>
+    </div>
+    <ul class="values">
+      <li><span>설치 없이</span> 링크 하나로 바로 시작</li>
+      <li><span>회원가입 없이</span> 기록은 브라우저에 저장</li>
+    </ul>
+    <nav class="nav" aria-label="주요 메뉴">
+      <a class="navsearch" href="/games/">SEARCH</a>
+      <a href="/games/">GAMES</a>
+      <a href="/apps/">APPS</a>
+      <a href="/news/">NEWS</a>
+      <a href="/board/">COMMUNITY</a>
+      <a href="/en/news/homeless1999-devlog-01/" lang="en" hreflang="en">EN</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+  <section class="showcase">
+    <div class="wrap game-page note-page">
+      <a class="backlink" href="/games/">← 게임 목록</a>
+      <p class="note-kicker"><a href="/news/">오름게임즈 인디게임 개발뉴스</a></p>
+      <h1>홈리스1999 개발일지 1, 웹게임으로 시작해 스팀으로 갈 예정인 생존 게임</h1>
+      <p class="note-sub">1999년 서울역 앞 노숙 생활을 겪어 보는 3인칭 시뮬레이션게임, 그 시작과 방향을 튼 이야기</p>
+      <p class="note-date"><time datetime="2026-10-20">2026년 10월 20일</time> · 오름게임즈</p>
+
+      <p class="gp-body">홈리스1999는 1999년 서울역 앞에서 노숙 생활을 하는 사람이 되어 하루하루 버티는 게임이다. 지금은 스팀에 PC 게임으로 내려고 만들고 있다. 그런데 처음부터 그럴 생각은 아니었다.</p>
+      <figure class="note-fig"><img src="/assets/news/1020-homeless-devlog1-a.webp" alt="무료급식소 앞에 선 주인공 곁을 지나가던 행인이 숨을 참으며 피해 가는 장면" width="800" height="430" loading="lazy" decoding="async"></figure>
+      <h2>처음엔 당연히 사이트에 올릴 웹게임으로 시작했다</h2>
+      <p class="gp-body">사실 스팀 출시는 의미가 없다라고 생각했다. 이름 없는 작은 인디게임을 스팀에 올려 봐야 개발자 등록비도 못 건지고 묻힐 게 뻔해 보였다. 그래서 처음부터 웹게임 사이트를 만들었고, 이글을 쓰고있는 지금도 여전히 스팀개발자계정이 없다 ㅎㅎ 오름게임즈의 게임은 모두 설치 없이 브라우저에서 바로 하는 무료게임이다.</p>
+      <p class="gp-body">홈리스1999도 처음엔 그렇게 웹게임으로 만들었다. 그러다 거리의 사람들을 Meshy로 그럴듯한 3D 모델로 하나씩 만들어 넣기 시작했다. 편의점 점원, 수녀님, 선배 노숙인, 마트 경비원, 고물상 할아버지까지 한 명씩 늘어날 때마다 거리는 진짜처럼 보였지만, 게임은 그만큼 무거워졌다.</p>
+      <p class="gp-body">그래서 폴리곤을 줄였다. 줄이면 가벼워지는 대신 사람이 사람처럼 안 보였다. 다시 늘렸다. 그러면 또 무거워졌다. 이걸 몇 번이나 되풀이했다. 이대로 웹게임으로 내면 첫 화면이 뜨기까지 로딩이 길어서, 아무도 기다려 주지 않을 것 같았다.</p>
+      <p class="gp-body">결국 에라 모르겠다 하고 마음을 바꿨다. 사람들을 낮은 화질로 깎아 내느니, PC 게임으로 만들어서 스팀에 내기로 했다. 묻힐 게 뻔하다던 스팀으로, 용량 때문에 떠밀려 가게 된 셈이다. 이 일지는 10월 6일 기획부터 그렇게 방향을 틀기까지, 그리고 그 뒤를 차례로 적어 두려고 쓴다.</p>
+      <h2>일곱 장면에서 시작했다</h2>
+      <p class="gp-body">10월 6일, 기획은 장면부터 적었다. 편의점 앞에서 누가 먹다 버린 컵라면을 몰래 먹는 장면이 첫 번째였다. 밤마다 교회 처마 밑이나 어두운 뒷골목에서 잘 곳을 찾는 장면, 땅만 보고 걷다가 떨어진 동전을 줍는 장면, 버거집에서 쫓겨나는 장면, 공중화장실에서 몰래 씻는 장면, 마트 시식 코너를 도는 장면이 뒤를 이었다. 아픈 발을 치료하러 병원에 가는 장면도 있었는데, 발 이야기는 만들다가 통째로 뺐다. 이런 장면을 먼저 적어 두고, 그 장면들이 하루 안에 자연스럽게 이어지도록 규칙을 붙였다.</p>
+      <p class="gp-body">가장 먼저 정한 규칙은 배고픔이다. 먹지 못하면 체력이 바닥나고 그 자리에서 쓰러진다. 쓰러지면 그대로 다음 날 아침이 되고, 길바닥에서 잔 날은 체력이 조금밖에 차지 않는다. 그래서 아침에 눈을 뜨면 무엇보다 먼저 먹을 것부터 찾아야 한다. 이 규칙 하나가 게임의 하루를 만든다.</p>
+      <h2>옛 서울역을 세웠다</h2>
+      <p class="gp-body">배경은 1999년 서울역 광장이다. 지금의 유리 역사가 아니라 붉은 벽돌과 초록 돔이 있는 옛 역사를 세웠다. 처음엔 네모난 건물이었는데, 옛날 서울역 하면 떠오르는 동그란 돔을 꼭 얹고 싶었다. 창 열두 개가 둘러진 둥근 벽 위에 초록 동판 돔을 올리고, 광장 어디서 봐도 보이도록 정면 쪽으로 당겨 놓았다.</p>
+      <figure class="note-fig"><img src="/assets/news/1020-homeless-devlog1-b.webp" alt="밤거리에서 장바구니 카트를 밀고 가는 주인공, 길 건너로 초록 돔의 옛 서울역이 보인다" width="800" height="516" loading="lazy" decoding="async"></figure>
+      <p class="gp-body">주변 거리도 90년대로 바꿨다. 전봇대마다 전선이 늘어지고, 상가에는 간판이 빼곡하고, 큰길로는 23번 시내버스와 흰 택시가 지나간다. 저녁이 되면 길가에 포장마차가 불을 켠다. 벽과 바닥에는 낡은 콘크리트와 벽돌 사진 질감을 입혀서, 깨끗한 장난감 마을이 아니라 사람이 오래 살아온 거리처럼 보이게 했다.</p>
+      <h2>제목은 사흘 동안 네 번 바뀌었다</h2>
+      <p class="gp-body">처음 제목은 그냥 홈리스였다. 다음 날 꽃거지게임이 됐고, 그다음 날 하루에만 1999와 거지1999를 거쳐 다시 홈리스로 돌아오면서 뒤에 1999가 붙었다. 그렇게 지금의 홈리스1999가 됐다.</p>
+      <p class="gp-body">타이틀 화면의 제목은 전봇대에 붙은 전단지 모양으로 만들었다. 가장자리가 찢기고 귀퉁이가 떨어져 나간 종이에 압정 구멍과 커피 자국, 접힌 자국까지 그려 넣었다. 길에서 떼어 온 종이 한 장처럼 보이면 그걸로 충분하다고 생각했다.</p>
+      <h2>지금도 커지고 있는 이야기</h2>
+      <p class="gp-body">처음 시작은 폐지줍고 떠돌이개와 가족이 되어 월세방을 구하는게 스토리의 전부였다.</p>
+      <p class="gp-body">하지만 편의점알바녀에게 첫눈에 반해서 스스로 자립하기위해 노가다도 나가고 군고구마장사 포장마차를 꾸려가며 그녀와의 생활을 꿈꾸는 스토리를 추가했다.</p>
+      <p class="gp-body">지금도 다양한 이벤트를 추가해서 게임의 볼륨을 높이는 작업을 하고있다.</p>
+      <p class="gp-body"><a href="https://www.youtube.com/shorts/sAMtC4ag6dA">홈리스1999 쇼츠 보기</a></p>
+      <p class="gp-cta"><a class="btn btn-primary" href="/games/">🎮 게임 목록 보기</a></p>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <div class="footer-brand">
+      <img src="/assets/logo-full.webp?v=1" alt="" width="52" height="50">
+      <span>오름게임즈 <em>Oreum Games</em></span>
+    </div>
+    <p class="footer-motto">오름게임즈는 오릅니다</p>
+    <nav class="footer-nav" aria-label="푸터 메뉴">
+      <a href="/support/">고객지원</a>
+      <a href="/privacy/">개인정보처리방침</a>
+      <a href="https://www.youtube.com/@Oreumgames" rel="me noopener" target="_blank">유튜브</a>
+      <a href="https://www.tiktok.com/@oreumgames" rel="me noopener" target="_blank">틱톡</a>
+      <button type="button" class="js-mail mailbtn" data-u="cyjcyj27" data-d="gmail.com" data-go="gmail">협업 문의</button>
+      <button type="button" class="js-install mailbtn" hidden><img src="/assets/logo-symbol.png" alt="" class="install-ico">바탕화면에 바로가기 만들기</button>
+    </nav>
+    <p class="copy" id="visitCount" hidden></p>
+    <p class="copy">oreumgames.com · © 2026 오름게임즈. All rights reserved.</p>
+  </div>
+</footer>
+
+<script src="/assets/visit.js?v=17" defer></script>
+<script src="/assets/board-new.js?v=13" defer></script>
+<script src="/assets/mail.js" defer></script>
+<script src="/assets/install.js?v=7" defer></script>
+<script src="/assets/search.js?v=53" defer></script>
+</body>
+</html>
