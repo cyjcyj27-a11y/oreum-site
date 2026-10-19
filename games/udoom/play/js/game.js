@@ -10,7 +10,8 @@ class Game {
     this.scene=new THREE.Scene(); this.camera=new THREE.PerspectiveCamera(80,1,0.05,120); this.scene.add(this.camera);
     this.ambient=new THREE.AmbientLight(0xffffff,0.62); this.scene.add(this.ambient); this.handLight=new THREE.PointLight(0xffe0c0,0.9,2.5); this.handLight.position.set(0.2,0.1,-0.2); this.camera.add(this.handLight);
     this.touch=('ontouchstart' in window)||navigator.maxTouchPoints>0; if(this.touch) document.body.classList.add('touch');
-    this.opts=Object.assign({blood:true,auto:true,bob:true,fov:false,sens:8},this.loadJSON('udoom.opt')||{});
+    this.opts=Object.assign({blood:true,auto:false,bob:true,fov:false,sens:8},this.loadJSON('udoom.opt')||{});
+    if(this.opts.autoOff1019!==1){ this.opts.auto=false; this.opts.autoOff1019=1; } /* 10/19 사장님 "폰 자동 발사를 처음부터 꺼 둬": 기본 끔, 전에 켜짐이 저장된 사람도 한 번 끔(그 뒤 설정에서 켜면 유지) */
     this.save=this.loadJSON('udoom.save');
     this.diff=(()=>{ try{ return localStorage.getItem('udoom.diff')||'normal'; }catch(e){ return 'normal'; } })(); this.playing=false; this.paused=false; this.time=0; this.level=0; this.god=false;
     this.player=new Player.Player(this); this.player.sens=this.opts.sens;
