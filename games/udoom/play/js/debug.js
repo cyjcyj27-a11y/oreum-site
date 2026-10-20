@@ -6,6 +6,7 @@
   document.body.appendChild(box);
   const ev=[]; const keep=(t,e)=>{ ev.push(t+e.pointerId+'@'+(e.target.id||e.target.tagName).slice(0,6)); if(ev.length>6) ev.shift(); };
   for(const t of ['pointerdown','pointerup','pointercancel']) window.addEventListener(t,e=>keep(t.slice(7,9),e),true);
+  let pm=0,tm=0,pmS=0,tmS=0; window.addEventListener('pointermove',()=>pm++,true); window.addEventListener('touchmove',()=>tm++,{capture:true,passive:true}); setInterval(()=>{ pmS=pm; tmS=tm; pm=tm=0; },1000);
   let frames=0, fps=0, lastX=0, lastZ=0, lastYaw=0; (function f(){ frames++; requestAnimationFrame(f); })(); setInterval(()=>{ fps=frames; frames=0; },1000);
   setInterval(()=>{
     const g=window.game; if(!g||!g.player) return; const P=g.player;
@@ -13,7 +14,7 @@
     const mv=Math.hypot(P.x-lastX,P.z-lastZ), dy=P.yaw-lastYaw; lastX=P.x; lastZ=P.z; lastYaw=P.yaw;
     box.textContent='fps '+fps+'  play '+(g.playing?1:0)+' pause '+(g.paused?1:0)+' warm '+(g.warming?1:0)+' dead '+(P.dead?1:0)+' hp '+P.hp+' stop '+(g.stopT||0).toFixed(2)+'\n'+
       'pad '+(P.pad.on?1:0)+' '+P.pad.x.toFixed(2)+','+P.pad.y.toFixed(2)+' id'+P.pad.id+'  look '+(P.touchLook.active?1:0)+' id'+P.touchLook.id+'  mx '+P.mx.toFixed(0)+'  fire '+(P.fireHeld?1:0)+'\n'+
-      'pos '+P.x.toFixed(2)+','+P.z.toFixed(2)+' mv '+mv.toFixed(2)+' yaw '+P.yaw.toFixed(2)+' d '+dy.toFixed(2)+' touch '+(g.touch?1:0)+'\n'+
+      'pos '+P.x.toFixed(2)+','+P.z.toFixed(2)+' mv '+mv.toFixed(2)+' yaw '+P.yaw.toFixed(2)+' d '+dy.toFixed(2)+' touch '+(g.touch?1:0)+' TE '+(P.useTouchEv?1:0)+'\n'+'pmove/s '+pmS+' tmove/s '+tmS+' lock '+(document.pointerLockElement?1:0)+'  padT '+P.padT+' lookT '+P.lookT+'\n'+
       'top@pad '+(a?(a.id||a.tagName):'-')+'  top@look '+(b?(b.id||b.tagName):'-')+'\n'+ev.join(' ');
   },250);
 })();

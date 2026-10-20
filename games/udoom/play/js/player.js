@@ -28,7 +28,8 @@ class Player {
     const self=this;
     window.addEventListener('keydown',e=>{ self.keysDown[e.code]=true; if(['Space','ArrowUp','ArrowDown'].includes(e.code)) e.preventDefault(); self.g.onKey(e); });
     window.addEventListener('keyup',e=>{ self.keysDown[e.code]=false; });
-    canvas.addEventListener('mousedown',e=>{ if(!self.g.playing) return; if(document.pointerLockElement!==canvas){ canvas.requestPointerLock&&canvas.requestPointerLock(); } if(e.button===0) self.fireHeld=true; });
+    window.addEventListener('touchstart',()=>{ self.lastTouchT=performance.now(); },{capture:true,passive:true});
+    canvas.addEventListener('mousedown',e=>{ if(!self.g.playing) return; if(performance.now()-(self.lastTouchT||-1e9)<1000) return; /* 손가락 터치가 만든 가짜 마우스 클릭은 무시(폰에서 마우스 고정·발사가 잘못 켜짐) */ if(document.pointerLockElement!==canvas){ canvas.requestPointerLock&&canvas.requestPointerLock(); } if(e.button===0) self.fireHeld=true; });
     window.addEventListener('mouseup',e=>{ if(e.button===0) self.fireHeld=false; });
     window.addEventListener('mousemove',e=>{ if(document.pointerLockElement===canvas){ self.mx+=e.movementX; self.my+=e.movementY; } });
     window.addEventListener('wheel',e=>{ if(self.g.playing) self.g.weapons.cycle(e.deltaY>0?1:-1); },{passive:true});
@@ -36,17 +37,28 @@ class Player {
     // 폰: 왼쪽 패드(옆걸음), 오른쪽 끌기(시점)
     const pad=document.getElementById('pad'), knob=document.getElementById('knob');
     const R=()=>pad.getBoundingClientRect();
-    pad.addEventListener('pointerdown',e=>{ self.pad.on=true; self.pad.id=e.pointerId; pad.setPointerCapture(e.pointerId); padMove(e); e.preventDefault(); });
-    pad.addEventListener('pointermove',e=>{ if(self.pad.on&&e.pointerId===self.pad.id) padMove(e); });
+    const TE=('ontouchstart' in window); self.useTouchEv=TE;
+    pad.addEventListener('pointerdown',e=>{ if(TE&&e.pointerType==='touch') return; self.pad.on=true; self.pad.id=e.pointerId; pad.setPointerCapture(e.pointerId); padMove(e); e.preventDefault(); });
+    pad.addEventListener('pointermove',e=>{ if(TE&&e.pointerType==='touch') return; if(self.pad.on&&e.pointerId===self.pad.id) padMove(e); });
     const padUp=e=>{ if(e.pointerId===self.pad.id){ self.pad.on=false; self.pad.x=self.pad.y=0; knob.style.transform='translate(0,0)'; } };
     pad.addEventListener('pointerup',padUp); pad.addEventListener('pointercancel',padUp); pad.addEventListener('lostpointercapture',padUp);
     // 10/20 손가락 뗀 신호가 다른 곳으로 가도 패드·시점이 풀리게
     window.addEventListener('pointerup',e=>{ padUp(e); tlUp(e); },true); window.addEventListener('pointercancel',e=>{ padUp(e); tlUp(e); },true);
     function padMove(e){ const r=R(); const cx=r.left+r.width/2, cy=r.top+r.height/2; let dx=(e.clientX-cx)/(r.width/2), dy=(e.clientY-cy)/(r.height/2); const d=Math.hypot(dx,dy); if(d>1){dx/=d;dy/=d;} self.pad.x=dx; self.pad.y=dy; knob.style.transform='translate('+(dx*r.width*0.3)+'px,'+(dy*r.height*0.3)+'px)'; }
-    canvas.addEventListener('pointerdown',e=>{ if(e.pointerType!=='touch') return; if(e.clientX<window.innerWidth*0.45) return; if(self.touchLook.active) return; self.touchLook.active=true; self.touchLook.id=e.pointerId; self.touchLook.lx=e.clientX; self.touchLook.ly=e.clientY; });
+    canvas.addEventListener('pointerdown',e=>{ if(e.pointerType!=='touch'||TE) return; if(e.clientX<window.innerWidth*0.45) return; if(self.touchLook.active) return; self.touchLook.active=true; self.touchLook.id=e.pointerId; self.touchLook.lx=e.clientX; self.touchLook.ly=e.clientY; });
     canvas.addEventListener('pointermove',e=>{ if(self.touchLook.active&&e.pointerId===self.touchLook.id){ self.mx+=(e.clientX-self.touchLook.lx)*2.2; self.my+=(e.clientY-self.touchLook.ly)*2.2; self.touchLook.lx=e.clientX; self.touchLook.ly=e.clientY; } });
     const tlUp=e=>{ if(e.pointerId===self.touchLook.id){ self.touchLook.active=false; self.touchLook.id=-1; } };
     canvas.addEventListener('pointerup',tlUp); canvas.addEventListener('pointercancel',tlUp);
+    if(TE){
+      // 터치 사건: 손가락마다 identifier 로 패드·시점을 나눔
+      self.padT=null; self.lookT=null;
+      pad.addEventListener('touchstart',e=>{ const t=e.changedTouches[0]; self.padT=t.identifier; self.pad.on=true; self.pad.id=-2; padMove(t); e.preventDefault(); },{passive:false});
+      canvas.addEventListener('touchstart',e=>{ for(const t of e.changedTouches){ if(t.clientX<window.innerWidth*0.45||self.lookT!=null) continue; self.lookT=t.identifier; self.touchLook.active=true; self.touchLook.id=-2; self.touchLook.lx=t.clientX; self.touchLook.ly=t.clientY; } e.preventDefault(); },{passive:false});
+      window.addEventListener('touchmove',e=>{ for(const t of e.changedTouches){ if(t.identifier===self.padT) padMove(t); else if(t.identifier===self.lookT){ self.mx+=(t.clientX-self.touchLook.lx)*2.2; self.my+=(t.clientY-self.touchLook.ly)*2.2; self.touchLook.lx=t.clientX; self.touchLook.ly=t.clientY; } } },{passive:false});
+      const tEnd=e=>{ for(const t of e.changedTouches){ if(t.identifier===self.padT){ self.padT=null; self.pad.on=false; self.pad.x=self.pad.y=0; knob.style.transform='translate(0,0)'; } if(t.identifier===self.lookT){ self.lookT=null; self.touchLook.active=false; self.touchLook.id=-1; } }
+        /* 남은 손가락 목록에 없는 것은 뗀 것으로(끝 신호를 놓쳐도 풀리게) */ const live=new Set([...e.touches].map(t=>t.identifier)); if(self.padT!=null&&!live.has(self.padT)){ self.padT=null; self.pad.on=false; self.pad.x=self.pad.y=0; knob.style.transform='translate(0,0)'; } if(self.lookT!=null&&!live.has(self.lookT)){ self.lookT=null; self.touchLook.active=false; self.touchLook.id=-1; } };
+      window.addEventListener('touchend',tEnd); window.addEventListener('touchcancel',tEnd);
+    }
     const fire=document.getElementById('fire');
     fire.addEventListener('pointerdown',e=>{ self.fireHeld=true; fire.classList.add('on'); fire.setPointerCapture(e.pointerId); e.preventDefault(); });
     const fUp=()=>{ self.fireHeld=false; fire.classList.remove('on'); };
