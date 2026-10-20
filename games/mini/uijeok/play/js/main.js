@@ -119,20 +119,22 @@
     if (G.key(e.code, true)) e.preventDefault();
   });
   addEventListener('keyup', (e) => G.key(e.code, false));
-  addEventListener('blur', () => { for (const k of ['l', 'r', 'u', 'd', 'atk', 'blk', 'jmp']) G.press(k, false); });
-  // ← → 사이를 손가락으로 미끄러지면 방향이 바뀐다(두 단추를 한 판처럼)
-  const lpT = new Map();
-  function lpEval() {
-    let l = 0, r = 0; const rc = $('dL').getBoundingClientRect(), rr = $('dR').getBoundingClientRect();
-    for (const [, x] of lpT) { if (x < (rc.right + rr.left) / 2) l = 1; else r = 1; }
-    G.press('l', !!l); G.press('r', !!r); $('dL').classList.toggle('on', !!l); $('dR').classList.toggle('on', !!r);
+  addEventListener('blur', () => { for (const k of ['l', 'r', 'u', 'd', 'atk', 'blk', 'jmp']) G.press(k, false); ST.id = null; stickSet(0, 0); });
+  // 원형 조이스틱: 왼쪽 아래 구석 어디를 눌러도 받침 가운데 기준으로 방향을 읽는다(손을 떼면 손잡이 제자리)
+  const ST = { id: null, on: { l: 0, r: 0, u: 0, d: 0 } };
+  function stickSet(dx, dy) {
+    const sb = $('stick').getBoundingClientRect(), R = sb.width / 2;
+    let vx = dx / R, vy = dy / R; const m = Math.hypot(vx, vy); if (m > 1) { vx /= m; vy /= m; }
+    const want = { l: vx < -0.35 ? 1 : 0, r: vx > 0.35 ? 1 : 0, u: vy < -0.5 ? 1 : 0, d: vy > 0.55 ? 1 : 0 };
+    for (const k in want) if (want[k] !== ST.on[k]) { ST.on[k] = want[k]; G.press(k, !!want[k]); $('a' + k.toUpperCase()).classList.toggle('on', !!want[k]); }
+    $('sKnob').style.transform = 'translate(' + (vx * R * 0.62).toFixed(1) + 'px,' + (vy * R * 0.62).toFixed(1) + 'px)';
   }
-  for (const b of [$('dL'), $('dR')]) {
-    b.addEventListener('pointerdown', (e) => { AU.unlock(); b.setPointerCapture(e.pointerId); lpT.set(e.pointerId, e.clientX); lpEval(); e.preventDefault(); });
-    b.addEventListener('pointermove', (e) => { if (lpT.has(e.pointerId)) { lpT.set(e.pointerId, e.clientX); lpEval(); } });
-    const up = (e) => { lpT.delete(e.pointerId); lpEval(); };
-    b.addEventListener('pointerup', up); b.addEventListener('pointercancel', up);
-  }
+  function stickAt(e) { const sb = $('stick').getBoundingClientRect(); stickSet(e.clientX - (sb.left + sb.width / 2), e.clientY - (sb.top + sb.height / 2)); }
+  const sz = $('szone');
+  sz.addEventListener('pointerdown', (e) => { if (ST.id != null) return; AU.unlock(); try { sz.setPointerCapture(e.pointerId); } catch (er) {} ST.id = e.pointerId; $('stick').classList.add('on'); stickAt(e); e.preventDefault(); });
+  sz.addEventListener('pointermove', (e) => { if (e.pointerId === ST.id) stickAt(e); });
+  const sUp = (e) => { if (e.pointerId !== ST.id) return; ST.id = null; $('stick').classList.remove('on'); stickSet(0, 0); };
+  sz.addEventListener('pointerup', sUp); sz.addEventListener('pointercancel', sUp);
   document.querySelectorAll('#acts .ab').forEach((b) => {
     const k = b.dataset.k;
     b.addEventListener('pointerdown', (e) => { AU.unlock(); b.setPointerCapture(e.pointerId); G.press(k, true); b.classList.add('on'); e.preventDefault(); });

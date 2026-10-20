@@ -96,17 +96,20 @@ body.playing:not(.touch) #keys{display:block}
 /* ---------- 폰 조작 ---------- */
 #touch{position:fixed;inset:0;z-index:4;pointer-events:none;display:none}
 body.touch.playing #touch{display:block}
-/* 왼쪽 구석 ← →, 오른쪽 구석 ↑ ↓ 공격(싸울 때 ↑ = 막기). 그림을 덜 가리게 반투명 놋쇠 테 */
-#lpad{position:absolute;left:calc(8px + env(safe-area-inset-left));bottom:calc(8px + env(safe-area-inset-bottom));width:128px;height:60px;pointer-events:none}
-#acts{position:absolute;right:calc(8px + env(safe-area-inset-right));bottom:calc(8px + env(safe-area-inset-bottom));width:176px;height:128px;pointer-events:none}
+/* 왼쪽 원형 조이스틱(10/20 사장님 "모바일조이스틱 원형으로"): 좌우 달리기, 위 점프·오르기(싸울 때 막기), 아래 숙이기·내려가기, 대각선 위 = 달리며 뛰기.
+   받침 = 먹 칠한 나무 원판에 놋쇠 테, 손잡이 = 상단 둥근 단추와 같은 놋쇠 쟁반. 왼쪽 아래 구석 어디를 눌러도 잡힌다(#szone). 오른쪽 구석은 공격 */
+#szone{position:absolute;left:0;bottom:0;width:42%;height:62%;pointer-events:auto;touch-action:none}
+#stick{position:absolute;left:calc(14px + env(safe-area-inset-left));bottom:calc(14px + env(safe-area-inset-bottom));width:132px;height:132px;border-radius:50%;pointer-events:none;opacity:.7;
+  background:radial-gradient(circle,rgba(20,10,12,.38) 0 58%,rgba(20,10,12,.5) 58% 100%);box-shadow:inset 0 0 0 3px rgba(240,192,88,.9),inset 0 0 0 5px rgba(26,14,18,.55),0 0 0 2px rgba(26,14,18,.6)}
+#stick svg{position:absolute;inset:0;width:100%;height:100%}
+#stick svg path{fill:var(--cream);stroke:var(--ink);stroke-width:1.5;opacity:.85}
+#stick svg path.on{fill:var(--gold);opacity:1}
+#sKnob{position:absolute;left:50%;top:50%;width:42%;height:42%;margin:-21% 0 0 -21%;border-radius:50%;
+  background:radial-gradient(circle at 38% 32%,#fff0b8 0 10%,#e8bc58 16% 46%,#c89a38 46% 62%,#f0d070 62% 70%,#9a6a1c 70%);box-shadow:0 0 0 2px var(--ink),0 3px 0 var(--ink)}
+#stick.on{opacity:.95}
+#acts{position:absolute;right:calc(8px + env(safe-area-inset-right));bottom:calc(8px + env(safe-area-inset-bottom));width:84px;height:84px;pointer-events:none}
 .ab{position:absolute;pointer-events:auto;border:0;font:400 16px/1 'Px',monospace;color:var(--cream);touch-action:none;opacity:.62;
   text-shadow:2px 0 var(--ink),-2px 0 var(--ink),0 2px var(--ink),0 -2px var(--ink)}
-.dk{width:60px;height:60px;background:rgba(20,10,12,.42);box-shadow:inset 0 0 0 3px rgba(240,192,88,.85),0 0 0 2px rgba(26,14,18,.6)}
-.dk::after{content:'';position:absolute;left:50%;top:50%;width:0;height:0;border:11px solid transparent;transform:translate(-50%,-50%)}
-#dL{left:0;bottom:0}#dL::after{border-right:15px solid var(--cream);border-left:0;margin-left:-3px}
-#dR{left:68px;bottom:0}#dR::after{border-left:15px solid var(--cream);border-right:0;margin-left:3px}
-#dU{right:84px;bottom:68px}#dU::after{border-bottom:15px solid var(--cream);border-top:0;margin-top:-3px}
-#dD{right:84px;bottom:0}#dD::after{border-top:15px solid var(--cream);border-bottom:0;margin-top:3px}
 #bAtk{right:0;bottom:0;width:76px;height:76px;border-radius:50%;background:radial-gradient(circle,var(--rugL) 0 50%,var(--rug) 50% 66%,var(--red) 66% 72%,var(--gold) 72% 80%,var(--rugD) 80%);box-shadow:0 0 0 3px var(--ink)}
 .ab.on{opacity:.95;filter:brightness(1.35);transform:translateY(2px)}
 #rotate{position:fixed;inset:0;z-index:40;display:none;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:#0b0710;pointer-events:auto}
@@ -147,7 +150,7 @@ html.ol-land body.touch #rotate{display:none!important}
   .pop{font-size:8vh}.pop.big{font-size:11vh}
   #cardImg{width:auto;height:68vh}
   #endTxt{font-size:4vh}
-  .dk{width:15vh;height:15vh}#dR{left:calc(15vh + 8px)}#dU,#dD{right:calc(19vh + 8px)}#dU{bottom:calc(15vh + 8px)}#bAtk{width:19vh;height:19vh}#lpad{width:calc(30vh + 8px);height:15vh}#acts{width:calc(34vh + 8px);height:calc(30vh + 8px)}
+  #stick{width:34vh;height:34vh}#bAtk{width:21vh;height:21vh}#acts{width:21vh;height:21vh}
 }
 </style>
 </head>
@@ -180,10 +183,9 @@ html.ol-land body.touch #rotate{display:none!important}
 <div id="keys" data-k="keys"><b>← →</b> 달리기 · <b>↑</b> 점프·오르기 · <b>↓</b> 숙이기·내려가기<br><b>Z</b> 공격 · 싸울 때 <b>↑</b> 막기</div>
 
 <div id="touch">
-  <div id="lpad"><button class="ab dk" data-k="l" id="dL"></button><button class="ab dk" data-k="r" id="dR"></button></div>
+  <div id="szone"></div>
+  <div id="stick"><svg viewBox="0 0 100 100"><path id="aU" d="M50 9l9 10H41z"/><path id="aD" d="M50 91l9-10H41z"/><path id="aL" d="M9 50l10-9v18z"/><path id="aR" d="M91 50l-10-9v18z"/></svg><div id="sKnob"></div></div>
   <div id="acts">
-    <button class="ab dk" data-k="u" id="dU"></button>
-    <button class="ab dk" data-k="d" id="dD"></button>
     <button class="ab" id="bAtk" data-k="atk"><span data-t="atk">공격</span></button>
   </div>
 </div>
@@ -223,7 +225,7 @@ html.ol-land body.touch #rotate{display:none!important}
 <script src="js/sfx.js?v=2"></script>
 <script src="js/how.js?v=2"></script>
 <script src="js/card.js?v=2"></script>
-<script src="js/main.js?v=6"></script>
+<script src="js/main.js?v=8"></script>
 <script src="/assets/visit.js?v=17" defer></script>
 <script src="/assets/game-events.js?v=2" defer></script>
 </body>
