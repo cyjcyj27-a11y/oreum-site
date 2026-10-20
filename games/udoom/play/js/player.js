@@ -10,7 +10,19 @@ class Player {
     this.fireHeld=false; this.lastStep=0; this.hurtT=0; this.lavaT=0;
     this.sens=8;
   }
-  reset(x,z,a){ this.x=x; this.z=z; this.yaw=a; this.pitch=0; this.dead=false; this.hurtT=0; }
+  reset(x,z,a){ this.x=x; this.z=z; this.yaw=a; this.pitch=0; this.dead=false; this.hurtT=0; this.stuckT=0; }
+  trapped(){
+    const w=this.g.world, b=this.g.barrels;
+    if(w.solidFor(Math.floor(this.x/CS),Math.floor(this.z/CS),'player')) return true;
+    for(let i=0;i<8;i++){ const a=i*Math.PI/4, q={x:this.x,z:this.z}; for(let s=0;s<6;s++){ w.moveCircle(q,this.r,Math.cos(a)*0.1,Math.sin(a)*0.1,'player'); if(b) b.solidCheck(q,this.r); } if(Math.hypot(q.x-this.x,q.z-this.z)>0.25) return false; }
+    return true;
+  }
+  rescue(p){
+    const w=this.g.world, m=w.map, cx=Math.floor(this.x/CS), cz=Math.floor(this.z/CS); let best=null, bd=1e9;
+    for(let r=0;r<=6&&!best;r++) for(let j=-r;j<=r;j++) for(let i=-r;i<=r;i++){ if(Math.max(Math.abs(i),Math.abs(j))!==r) continue; const x=cx+i, z=cz+j; if(w.cell(x,z)!==m.FLOOR) continue;
+      const q={x:x*CS+CS/2,z:z*CS+CS/2}; { const ox=this.x, oz=this.z; this.x=q.x; this.z=q.z; const bad=this.trapped(); this.x=ox; this.z=oz; if(bad) continue; } const d=Math.hypot(q.x-this.x,q.z-this.z); if(d<bd){ bd=d; best=q; } }
+    if(best){ p.x=best.x; p.z=best.z; this.rescued=(this.rescued||0)+1; }
+  }
   fullReset(){ this.hp=100; this.armor=0; this.keys={R:false,Y:false,B:false}; this.ammo={bullets:50,belt:0,shells:0,rockets:0,cells:0}; this.weapons={knife:true}; this.cur='knife'; }
   bindInput(canvas){
     const self=this;
@@ -27,7 +39,9 @@ class Player {
     pad.addEventListener('pointerdown',e=>{ self.pad.on=true; self.pad.id=e.pointerId; pad.setPointerCapture(e.pointerId); padMove(e); e.preventDefault(); });
     pad.addEventListener('pointermove',e=>{ if(self.pad.on&&e.pointerId===self.pad.id) padMove(e); });
     const padUp=e=>{ if(e.pointerId===self.pad.id){ self.pad.on=false; self.pad.x=self.pad.y=0; knob.style.transform='translate(0,0)'; } };
-    pad.addEventListener('pointerup',padUp); pad.addEventListener('pointercancel',padUp);
+    pad.addEventListener('pointerup',padUp); pad.addEventListener('pointercancel',padUp); pad.addEventListener('lostpointercapture',padUp);
+    // 10/20 손가락 뗀 신호가 다른 곳으로 가도 패드·시점이 풀리게
+    window.addEventListener('pointerup',e=>{ padUp(e); tlUp(e); },true); window.addEventListener('pointercancel',e=>{ padUp(e); tlUp(e); },true);
     function padMove(e){ const r=R(); const cx=r.left+r.width/2, cy=r.top+r.height/2; let dx=(e.clientX-cx)/(r.width/2), dy=(e.clientY-cy)/(r.height/2); const d=Math.hypot(dx,dy); if(d>1){dx/=d;dy/=d;} self.pad.x=dx; self.pad.y=dy; knob.style.transform='translate('+(dx*r.width*0.3)+'px,'+(dy*r.height*0.3)+'px)'; }
     canvas.addEventListener('pointerdown',e=>{ if(e.pointerType!=='touch') return; if(e.clientX<window.innerWidth*0.45) return; if(self.touchLook.active) return; self.touchLook.active=true; self.touchLook.id=e.pointerId; self.touchLook.lx=e.clientX; self.touchLook.ly=e.clientY; });
     canvas.addEventListener('pointermove',e=>{ if(self.touchLook.active&&e.pointerId===self.touchLook.id){ self.mx+=(e.clientX-self.touchLook.lx)*2.2; self.my+=(e.clientY-self.touchLook.ly)*2.2; self.touchLook.lx=e.clientX; self.touchLook.ly=e.clientY; } });
@@ -59,6 +73,11 @@ class Player {
     const vx=(-sy*fw + cy*st)*sp, vz=(-cy*fw - sy*st)*sp;
     const p={x:this.x,z:this.z};
     w.moveCircle(p,this.r,vx*dt,vz*dt,'player');
+    if(!isFinite(p.x)||!isFinite(p.z)){ p.x=this.x; p.z=this.z; }
+    // 10/20 갇힘 구조: 밀어도 0.8초 넘게 제자리면 여덟 방향을 시험해 보고, 어디로도 못 가면 가장 가까운 빈 칸으로 옮김
+    if(w.solidFor(Math.floor(p.x/CS),Math.floor(p.z/CS),'player')){ this.insideT=(this.insideT||0)+dt; if(this.insideT>0.3){ this.insideT=0; this.rescue(p); } } else this.insideT=0;
+    const fd=Math.hypot(this.x-(this.lx==null?this.x:this.lx), this.z-(this.lz==null?this.z:this.lz)); this.lx=this.x; this.lz=this.z;   // 지난 화면 동안 실제로 간 거리(드럼통 밀림까지 친 값)
+    if(len>0.1 && fd<sp*dt*0.05){ this.stuckT=(this.stuckT||0)+dt; if(this.stuckT>0.8){ this.stuckT=0; if(this.trapped()) this.rescue(p); } } else this.stuckT=0;
     this.x=p.x; this.z=p.z;
     const moving=len>0.1;
     // 발소리는 머리 흔들림(bobT)과 따로 센다: 멈출 때 bobT 를 반올림해 되돌리면 다음 발소리가 0~0.8초로 들쭉날쭉해 '났다 안 났다' 했음(10/19)

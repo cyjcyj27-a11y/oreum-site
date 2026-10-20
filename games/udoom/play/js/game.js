@@ -169,7 +169,7 @@ class Game {
     const p=this.player, cam=this.camera;
     if(this.playing && !this.paused){
       this.time+=dt;
-      p.update(dt); this.barrels.solidCheck(p,p.r);
+      p.update(dt); this.barrels.solidCheck(p,p.r); { const q={x:p.x,z:p.z}; this.world.pushOut(q,p.r,'player',true); this.world.pushOut(q,p.r,'player',false); p.x=q.x; p.z=q.z; } /* 10/20 드럼통이 플레이어를 벽 속·구석으로 밀어 넣지 못하게 벽이 이김 */
       this.world.update(dt,p); this.monsters.update(dt); this.weapons.update(dt); FX.update(dt);
       // 줍기
       for(const it of this.items){ if(it.taken) continue; if(Math.hypot(it.x-p.x,it.z-p.z)<0.75){ this.pickup(it); } else if(it.mesh){ it.t+=dt; it.obj.position.y=0.08+Math.sin(it.t*2.5)*0.06; it.mesh.rotation.y+=dt*1.2; } }

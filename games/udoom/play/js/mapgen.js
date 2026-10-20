@@ -119,7 +119,9 @@ function gen(def){
     items.push({type:t, x:s.x+0.5, y:s.y+0.5});
   }
   const barrels=[]; const nBar = 4+Math.floor(R()*5)+def.ep;
-  for(let i=0;i<nBar && mi<spots.length;i++){ const s=spots[mi++]; barrels.push({x:s.x+0.5,y:s.y+0.5}); }
+  // 10/20 구석 칸(두 벽이 만나는 칸) 드럼통은 벽 사이에 플레이어가 끼어 못 나오는 틈을 만듦 → 건너뜀
+  const wallish=(x,y)=>{ const v=g[idx(x,y)]; return v!==FLOOR&&v!==LAVA; };
+  for(let i=0;i<nBar && mi<spots.length;){ const s=spots[mi++]; const ex=wallish(s.x-1,s.y)||wallish(s.x+1,s.y), ey=wallish(s.x,s.y-1)||wallish(s.x,s.y+1); if(ex&&ey) continue; barrels.push({x:s.x+0.5,y:s.y+0.5}); i++; }
   items.push({type:'ammo', x:start.cx+1.5, y:start.cy+0.5});
   return {W,H,g,room,light,ceil,rooms,lockOf,start:{x:start.cx+0.5,y:start.cy+0.5,a:0},exit:exitWall,items,monsters,barrels,secrets,doorCells,keys,SOLID,FLOOR,DOOR,LDOOR,SECRET,EXIT,LAVA};
   function pickWall(r){
