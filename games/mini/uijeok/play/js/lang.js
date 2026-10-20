@@ -12,7 +12,7 @@
     rot: 'Turn your phone sideways',
     h3: 'When a guard <b>raises his weapon, block with ↑</b>. Then <b>attack</b>',
   };
-  const TT = { atk: 'SLASH', rot: 'LANDSCAPE' };
+  const TT = { atk: 'SLASH', jmp: 'JUMP', rot: 'LANDSCAPE' };
   document.addEventListener('DOMContentLoaded', () => {
     document.title = 'Moonlit Outlaw';
     document.querySelectorAll('[data-k]').forEach((e) => { const k = e.getAttribute('data-k'); if (TX[k]) e.innerHTML = TX[k]; });

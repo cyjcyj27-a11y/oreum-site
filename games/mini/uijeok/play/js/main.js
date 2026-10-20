@@ -137,7 +137,7 @@
   sz.addEventListener('pointerup', sUp); sz.addEventListener('pointercancel', sUp);
   document.querySelectorAll('#acts .ab').forEach((b) => {
     const k = b.dataset.k;
-    b.addEventListener('pointerdown', (e) => { AU.unlock(); b.setPointerCapture(e.pointerId); G.press(k, true); b.classList.add('on'); e.preventDefault(); });
+    b.addEventListener('pointerdown', (e) => { AU.unlock(); try { b.setPointerCapture(e.pointerId); } catch (er) {} G.press(k, true); b.classList.add('on'); e.preventDefault(); });
     const up = () => { G.press(k, false); b.classList.remove('on'); };
     b.addEventListener('pointerup', up); b.addEventListener('pointercancel', up);
   });
