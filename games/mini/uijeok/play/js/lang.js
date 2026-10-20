@@ -9,9 +9,10 @@
     h2: '<b>Jump</b> under a ledge to grab it. Press <b>up</b> to climb',
     h4: 'Arrows coming? <b>↓</b> to duck',
     keys: '<b>← →</b> run · <b>↑</b> jump/climb · <b>↓</b> duck/climb down<br><b>Z</b> slash · <b>↑</b> block in a fight',
+    rot: 'Turn your phone sideways',
     h3: 'When a guard <b>raises his weapon, block with ↑</b>. Then <b>attack</b>',
   };
-  const TT = { atk: 'SLASH' };
+  const TT = { atk: 'SLASH', rot: 'LANDSCAPE' };
   document.addEventListener('DOMContentLoaded', () => {
     document.title = 'Moonlit Outlaw';
     document.querySelectorAll('[data-k]').forEach((e) => { const k = e.getAttribute('data-k'); if (TX[k]) e.innerHTML = TX[k]; });
