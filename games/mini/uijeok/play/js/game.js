@@ -454,6 +454,9 @@
   function cellStuff(a) {
     if (!GROUNDED[a.st] || !a.alive) return;
     const c = colOf(a), r = rowOf(a), ch = W.at(c, r);
+    // 밟고 선 썩은 마루가 무너지면 서 있어도 떨어진다(10/20 사장님 지적). 썩은 마루 위에 서기만 해도 흔들리기 시작
+    if (!W.floor(c, r)) { startAir(a, a.vx * 0.6, 0, false); return; }
+    if (ch === '~' && W.step(c, r)) au('crack');
     if ((ch === '^' && W.spikeK(c, r, W.state.t) > 0.55) || ch === 'v') { kill(a, 'spike'); return; }
     if (ch === '%' && W.chopK(c, r, W.state.t) > 0.75 && Math.abs(a.x - (c * TW + 16)) < 11) { kill(a, 'chop'); return; }
     if (W.press(c, r)) au('gate');
@@ -504,9 +507,12 @@
     let foe = null, best = 1e9;
     for (const e of G.enemies) { if (!e.alive || e.kind === 'W' || e.st !== 'fight') continue; const d = Math.abs(e.x - pr.x); if (d < 120 && d < best && lineClear(e, pr)) { best = d; foe = e; } }
     G.foe = foe;
+    // 칼싸움은 지금 방 안에서: 싸움 자세인 두 사람이 밀려 옆 방으로 넘어가 싸움이 안 보이지 않게(10/20 사또 결투). 낭떠러지로 떨어지는 건 그대로
+    if (foe) { const L = RND.rx * 320 + 12, R = RND.rx * 320 + 308; for (const a of [pr, foe]) if (a.alive && a.st === 'fight') { if (a.x < L) a.x = L; else if (a.x > R) a.x = R; } }
     const py = pr.y;
     updatePrince(pr, dt);
     cellStuff(pr);
+    for (const e of G.enemies) if (e.alive && GROUNDED[e.st] && e.kind !== 'W' && !W.floor(colOf(e), rowOf(e))) startAir(e, e.vx * 0.6, 0, false);
     arrowHits();
     for (const e of G.enemies) { if (e.bl > 0) e.bl -= dt; updateEnemy(e, dt); }
     clearPress();
