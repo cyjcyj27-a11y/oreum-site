@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>언어논리퀴즈</title>
+<!--
+버튼 디자인(oreum-game-ui 규칙 7) — 그림자 인형극 무대 물건
+소재: 주 단추 = 오려낸 검은 판지 인형 패(가장자리 울퉁불퉁, 아래에 조종 막대), 보기 카드 = 뒤에서 빛 비치는 한지 막, 상단 알약 = 극장 표, 둥근 단추 = 종이 인형 관절 할핀(놋쇠)
+모양: 울퉁불퉁 자른 판지(clip-path), 한지는 모서리 살짝 둥근 네모, 할핀은 원
+색: 노을 금빛 #f2c46a 글자의 먹 판지(주) · 한지 #f6ead2 에 먹 #1a1620(보기) · 놋쇠 #c9a24a(둥근)
+재질 층: 판지 두께 그림자 + 가장자리 종이 결 + 금빛 글자 / 한지 결 + 안쪽 빛 번짐 / 놋쇠 반짝
+누름: 막대에 눌리듯 3px 내려가며 살짝 기울기
+-->
+<link rel="icon" href="data:,">
+<style>
+@font-face{font-family:'NSerif';src:url('fonts/serif.woff2') format('woff2');font-display:swap}
+@font-face{font-family:'Noonnu';src:url('fonts/noonnu.woff2') format('woff2');font-display:swap}
+:root{--ink:#14111c;--gold:#f2c46a;--hanji:#f6ead2;--brass:#c9a24a;--stage:#1a1424}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;overflow:hidden;background:#100c18;color:var(--hanji);font-family:'Noonnu',sans-serif;user-select:none;-webkit-user-select:none}
+#app{position:fixed;inset:0;display:flex}
+#stage{position:relative;flex:1 1 58%;min-width:0}
+#cv{position:absolute;inset:0;width:100%;height:100%;display:block}
+#panel{position:relative;flex:0 0 44%;max-width:max(640px,42vw);display:flex;flex-direction:column;margin-top:54px;padding:8px 22px 20px;
+  background:repeating-linear-gradient(90deg,rgba(255,255,255,.025) 0 2px,transparent 2px 38px),linear-gradient(180deg,#241a30,#150f1e 60%,#110c18);
+  box-shadow:inset 10px 0 30px rgba(0,0,0,.55);overflow-y:auto}
+body.ttl #panel,body.end #panel{display:none}
+#pin{margin:auto 0;width:100%}
+/* 상단바 */
+#top{position:fixed;left:0;right:0;top:0;height:54px;display:flex;align-items:center;gap:8px;padding:6px 10px 0 calc(104px + env(safe-area-inset-left));z-index:20;pointer-events:none;
+  background:linear-gradient(180deg,rgba(10,8,16,.55),rgba(10,8,16,0))}
+#top>*{pointer-events:auto}
+body.ttl #top .stat,body.end #top .stat{display:none}
+.stat{display:flex;align-items:center;gap:7px;height:34px;padding:0 13px 0 11px;border-radius:3px;font-size:16px;color:var(--gold);
+  background:linear-gradient(180deg,#3a2448,#28173a);box-shadow:0 2px 0 #0c0712,inset 0 0 0 1px rgba(242,196,106,.45);
+  -webkit-mask:radial-gradient(circle at 0 50%,transparent 5px,#000 5.5px) left/51% 100% no-repeat,radial-gradient(circle at 100% 50%,transparent 5px,#000 5.5px) right/51% 100% no-repeat}
+.stat b{font-family:'NSerif';font-weight:400;font-size:17px;color:#fff3d6}
+#dots{display:flex;gap:4px}
+#dots i{width:11px;height:11px;border-radius:50%;background:rgba(246,234,210,.18);box-shadow:inset 0 0 0 1px rgba(246,234,210,.35)}
+#dots i.ok{background:var(--gold);box-shadow:0 0 6px rgba(242,196,106,.8)}
+#dots i.no{background:#5a4a62;box-shadow:inset 0 0 0 1px #8a7894}
+#dots i.cur{box-shadow:inset 0 0 0 2px var(--gold)}
+.sp{flex:1}
+.tog{position:relative;width:38px;height:38px;border-radius:50%;border:0;cursor:pointer;display:grid;place-items:center;
+  background:radial-gradient(circle at 35% 30%,#f7dc8e,#c9a24a 45%,#8a6a24 100%);box-shadow:0 3px 0 #4a3510,inset 0 -2px 0 rgba(0,0,0,.2),inset 0 2px 0 rgba(255,255,255,.5);
+  transition:transform .2s cubic-bezier(.34,1.56,.64,1)}
+.tog svg{width:19px;height:19px}
+.tog svg path,.tog svg ellipse{stroke:#2a1a08}
+.tog .q{font-family:'NSerif';font-size:21px;color:#2a1a08;line-height:1}
+.tog:active{transform:translateY(3px);box-shadow:0 1px 0 #4a3510}
+.tog.off{opacity:.6}
+.tog.off::after{content:'';position:absolute;left:24%;right:24%;top:50%;height:2px;margin-top:-1px;background:#2a1a08;border-radius:1px;transform:rotate(-40deg)}
+/* 지문: 뒤에서 빛 비치는 한지 막 */
+.hanji{position:relative;color:#1a1620;border-radius:6px;
+  background:radial-gradient(ellipse at 50% 40%,#fff8e8 0%,#f6ead2 55%,#e6d2ae 100%);
+  box-shadow:0 0 0 2px #2a1d12,0 0 0 5px #5a3d22,0 6px 0 5px #1a1008,0 0 40px rgba(255,190,110,.18)}
+.hanji::before{content:'';position:absolute;inset:0;border-radius:6px;pointer-events:none;opacity:.35;
+  background:repeating-linear-gradient(97deg,rgba(150,120,80,.18) 0 1px,transparent 1px 9px),repeating-linear-gradient(8deg,rgba(150,120,80,.12) 0 1px,transparent 1px 13px)}
+#qbox{padding:16px 18px 18px;margin:4px 0 18px}
+#qhead{display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:max(16px,1.8vh);color:#7a5a3a}
+#qhead b{font-family:'NSerif';font-weight:400;font-size:max(18px,2.1vh);color:#a8322a}
+#qtext{font-size:max(23px,2.9vh);line-height:1.6;white-space:pre-line;word-break:keep-all;position:relative}
+#opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.opt{min-height:max(64px,7vh)}
+.btn{font-size:max(21px,2.4vh)}
+.opt{position:relative;display:flex;align-items:center;gap:12px;min-height:52px;padding:10px 14px 10px 10px;border:0;text-align:left;cursor:pointer;font:inherit;font-size:max(21px,2.5vh);line-height:1.35;word-break:keep-all;
+  transition:transform .22s cubic-bezier(.34,1.56,.64,1),box-shadow .2s,filter .15s,opacity .3s}
+.opt .no{flex:0 0 34px;height:34px;border-radius:50%;display:grid;place-items:center;font-family:'NSerif';font-size:16px;color:#2a1a08;
+  background:radial-gradient(circle at 35% 30%,#f7dc8e,#c9a24a 50%,#8a6a24);box-shadow:0 2px 0 #4a3510}
+.opt:hover{filter:brightness(1.05)}
+.opt:active{transform:translateY(3px)}
+.opt.right{box-shadow:0 0 0 2px #2a1d12,0 0 0 5px #e0a63a,0 6px 0 5px #1a1008,0 0 30px rgba(255,200,90,.75);animation:glow 1s ease-in-out infinite alternate}
+.opt.wrong{opacity:.55;filter:grayscale(.5)}
+.opt.wrong::after{content:'';position:absolute;left:44px;right:12px;top:50%;height:3px;background:#1a1620;border-radius:2px;transform:rotate(-2deg)}
+.opt.dim{opacity:.45}
+@keyframes glow{to{box-shadow:0 0 0 2px #2a1d12,0 0 0 5px #f2c46a,0 6px 0 5px #1a1008,0 0 46px rgba(255,210,110,.95)}}
+#exp{margin-top:16px;padding:12px 14px;border-left:4px solid var(--gold);background:rgba(246,234,210,.08);font-size:max(18px,2.1vh);line-height:1.55;color:#f3e6cc;word-break:keep-all;display:none}
+#exp.on{display:block;animation:fin .3s ease}
+#exp b{font-family:'NSerif';font-weight:400;color:var(--gold);margin-right:8px}
+@keyframes fin{from{opacity:0;transform:translateY(6px)}}
+#next{margin:16px auto 6px;display:none}
+#next.on{display:block}
+/* 주 단추: 오려낸 검은 판지 인형 패 + 조종 막대 */
+.btn{position:relative;display:block;min-width:170px;padding:13px 30px 15px;border:0;cursor:pointer;font-family:'NSerif';font-size:21px;color:var(--gold);letter-spacing:1px;white-space:nowrap;
+  background:linear-gradient(180deg,#2a2232,#17121e 60%,#0e0b13);
+  clip-path:polygon(3% 8%,10% 0,22% 4%,35% 1%,48% 5%,62% 0,76% 4%,90% 1%,98% 9%,100% 30%,97% 52%,100% 74%,97% 94%,86% 100%,70% 96%,55% 100%,40% 96%,25% 100%,10% 96%,2% 92%,0 70%,3% 48%,0 26%);
+  text-shadow:0 0 10px rgba(242,196,106,.5);transition:transform .22s cubic-bezier(.34,1.56,.64,1),filter .15s}
+.btnw{position:relative;display:inline-block;filter:drop-shadow(0 4px 0 #060409) drop-shadow(0 0 1px rgba(242,196,106,.6))}
+.btnw::after{content:'';position:absolute;right:22%;bottom:-16px;width:4px;height:20px;background:linear-gradient(90deg,#6a4a2a,#3a2614);border-radius:2px;transform:rotate(14deg);z-index:-1}
+.btn:hover{filter:brightness(1.15)}
+.btn:active{transform:translateY(3px) rotate(-1deg)}
+.btn.sub{font-size:17px;min-width:130px;padding:10px 22px 12px;color:#e8dcc4;background:linear-gradient(180deg,#3a3044,#241c2c)}
+.row{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-top:22px}
+/* 덮개 창 */
+.ov{position:fixed;inset:0;z-index:30;display:none;align-items:center;justify-content:center;padding:70px 16px 24px}
+.ov.on{display:flex}
+.ov.dim{background:rgba(8,6,12,.62)}
+.sheet{width:min(560px,100%);max-height:100%;overflow:auto;padding:22px 22px 26px;animation:pop .2s ease}
+@keyframes pop{from{transform:scale(.88);opacity:0}}
+.sheet h2{margin:0 0 6px;font-family:'NSerif';font-weight:400;font-size:26px;text-align:center;color:#1a1620}
+/* 타이틀 */
+#title{position:fixed;inset:0;z-index:25;display:none;flex-direction:column;align-items:center;justify-content:flex-end;padding:0 0 3.5vh;pointer-events:none}
+body.ttl #title{display:flex}
+#title>*{pointer-events:auto}
+#logo{font-family:'NSerif';font-weight:400;font-size:clamp(46px,9vw,104px);line-height:1;color:#fff3d6;letter-spacing:4px;
+  text-shadow:0 0 1px #fff3d6,0 0 1px #fff3d6,0 3px 0 #14111c,0 0 34px rgba(255,190,110,.55),0 0 2px #14111c}
+#title .row{margin:0 0 3vh}
+/* 파트 결과·엔딩 큰 글자 */
+#res{flex-direction:column;text-align:center;background:rgba(12,9,18,.93)}
+body:not(.ttl) #oreumFs{display:none!important}
+#next{text-align:center}
+#res .big{font-family:'NSerif';font-weight:400;font-size:clamp(30px,5.4vw,58px);line-height:1.25;color:#fff3d6;word-break:keep-all;
+  text-shadow:0 3px 0 #14111c,0 0 30px rgba(255,190,110,.6);animation:pop .35s cubic-bezier(.34,1.56,.64,1)}
+#res .sc{margin-top:10px;font-family:'NSerif';font-size:clamp(22px,3.4vw,34px);color:var(--gold);text-shadow:0 2px 0 #14111c}
+#res.fail .big{color:#e8dcc4}
+#praise{position:fixed;z-index:22;left:29%;top:30%;transform:translate(-50%,-50%);font-family:'NSerif';font-size:clamp(34px,5vw,64px);color:var(--gold);pointer-events:none;opacity:0;
+  text-shadow:0 3px 0 #14111c,0 0 24px rgba(255,190,110,.8)}
+#praise.on{animation:prz 1.1s ease forwards}
+@keyframes prz{0%{opacity:0;transform:translate(-50%,-30%) scale(.6)}20%{opacity:1;transform:translate(-50%,-50%) scale(1.08)}70%{opacity:1}100%{opacity:0;transform:translate(-50%,-70%)}}
+#fx{position:fixed;inset:0;z-index:28;pointer-events:none;width:100%;height:100%}
+#toast{position:fixed;z-index:60;left:50%;top:70px;transform:translateX(-50%);padding:10px 18px;font-size:16px;color:var(--gold);background:#1a1424;box-shadow:0 0 0 1px rgba(242,196,106,.5);border-radius:3px;opacity:0;transition:opacity .25s;pointer-events:none}
+/* HOW TO PLAY */
+#how .sheet{width:min(760px,100%)}
+#howg{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:14px}
+.hc{display:flex;flex-direction:column;align-items:center;gap:8px;color:#1a1620;font-size:15px;line-height:1.45;text-align:center;word-break:keep-all}
+.hp{position:relative;width:100%;aspect-ratio:4/3;border-radius:4px;overflow:hidden;background:linear-gradient(180deg,#6a5aa0,#f09a6a 70%,#ffcf8a)}
+.hp .gr{position:absolute;left:0;right:0;bottom:0;height:22%;background:#14111c}
+.hp img{position:absolute;bottom:20%;filter:brightness(0) saturate(0)}
+.mini{position:absolute;left:12%;right:12%;top:12%;bottom:12%;display:grid;grid-template-columns:1fr 1fr;gap:6%;padding:6%;background:#f6ead2;border-radius:3px}
+.mini i{background:#e2cfa8;border-radius:2px}
+.mini i:nth-child(3){animation:tapc 2.4s infinite}
+@keyframes tapc{0%,40%{background:#e2cfa8;box-shadow:none}55%,100%{background:#f2c46a;box-shadow:0 0 10px #f2c46a}}
+.fing{position:absolute;width:16%;aspect-ratio:1;border-radius:50%;background:rgba(20,17,28,.75);left:20%;top:60%;animation:fg 2.4s infinite}
+@keyframes fg{0%{transform:translate(120%,60%)}40%{transform:translate(0,0) scale(1)}50%{transform:translate(0,0) scale(.8)}60%,100%{transform:translate(0,0) scale(1);opacity:0}}
+.rise{animation:rs 2.4s cubic-bezier(.34,1.56,.64,1) infinite}
+@keyframes rs{0%,15%{transform:translateY(110%)}45%,100%{transform:translateY(0)}}
+.hd{position:absolute;left:8%;right:8%;top:10%;display:flex;justify-content:space-between}
+.hd i{width:7%;aspect-ratio:1;border-radius:50%;background:rgba(246,234,210,.3)}
+.hd i{animation:hdot 3s infinite}
+@keyframes hdot{0%,20%{background:rgba(246,234,210,.3)}35%,100%{background:#f2c46a}}
+#how .row{margin-top:18px}
+/* 결과 카드 */
+#endv .sheet{width:min(440px,100%);padding:16px;text-align:center}
+#card{width:100%;max-height:58vh;object-fit:contain;display:block;margin:0 auto;box-shadow:0 0 0 2px #2a1d12}
+/* 폰 세로·좁은 화면: 위 장면, 아래 문제 */
+@media (max-aspect-ratio:1/1){
+  #app{flex-direction:column}
+  #stage{flex:0 0 36%}
+  #panel{flex:1 1 auto;max-width:none;margin-top:0;padding:14px 14px 18px;box-shadow:inset 0 10px 24px rgba(0,0,0,.55)}
+  body.ttl #stage,body.end #stage{flex:1 1 100%}
+  #qbox{padding:12px 14px 14px;margin-bottom:14px}
+  #qtext{font-size:17px;line-height:1.55}
+  .opt{min-height:46px;font-size:16.5px;padding:8px 12px 8px 8px}
+  .opt .no{flex-basis:26px;height:26px;font-size:14px}
+  #opts{gap:8px;grid-template-columns:1fr}
+  #exp{font-size:15px;margin-top:12px}
+  #praise{left:50%;top:20%}
+  #howg{grid-template-columns:1fr;gap:10px}
+  .hc{flex-direction:row;text-align:left}
+  .hp{width:38%;flex:0 0 38%}
+  #top{height:50px;gap:6px;padding-right:8px}
+  .tog{width:33px;height:33px}
+  .tog svg{width:16px;height:16px}
+  .stat{font-size:14px;padding:0 10px 0 9px;height:30px}
+  .stat b{font-size:15px}
+  #dots i{width:8px;height:8px}
+  #dots{gap:3px}
+}
+@media (max-aspect-ratio:1/1) and (max-width:400px){ #pname{display:none} }
+/* 폰 가로: 높이가 낮다 → vh 로 */
+@media (max-height:480px) and (min-aspect-ratio:1/1){
+  #panel{flex-basis:50%;max-width:none;margin-top:46px;padding:4px 14px 10px}
+  #top{height:44px;padding-top:4px}
+  .stat{height:28px;font-size:13px}
+  .stat b{font-size:14px}
+  #qbox{padding:8px 12px 10px;margin-bottom:10px}
+  #qhead{margin-bottom:3px;font-size:12px}
+  #qtext{font-size:3.9vh;line-height:1.45}
+  #opts{grid-template-columns:1fr 1fr;gap:6px}
+  .opt{min-height:9vh;font-size:3.5vh;padding:4px 8px 4px 5px;gap:7px}
+  .opt .no{flex-basis:5.6vh;height:5.6vh;font-size:3vh}
+  #exp{font-size:3.4vh;margin-top:8px;padding:6px 10px}
+  #next{margin-top:8px}
+  .btn{font-size:5.2vh;padding:2.4vh 6vh 2.8vh;min-width:0}
+  .btn.sub{font-size:4.4vh;padding:2vh 4.6vh 2.4vh;min-width:0}
+  #title{padding-bottom:2vh}
+  #logo{font-size:17vh}
+  #title .row{margin:0 0 8vh;flex-wrap:nowrap}
+  .ov{padding:44px 12px 10px}
+  #how .row{margin-top:8px}
+  #howg{gap:10px;margin-top:6px}
+  .hc{font-size:3.4vh;line-height:1.35}
+  .hp{aspect-ratio:2/1}
+  #how .sheet{padding-top:6px}
+  #how h2{font-size:4.6vh;margin:0}
+  .sheet{padding:10px 16px 12px}
+  .sheet h2{font-size:5.4vh}
+  #res .row{margin-top:4vh}
+  #card{max-height:62vh}
+  #endv .sheet{width:auto;display:flex;gap:14px;align-items:center}
+  #endv .row{flex-direction:column;margin-top:0}
+}
+</style>
+</head>
+<body class="ttl">
+<div id="app">
+  <div id="stage"><canvas id="cv"></canvas></div>
+  <div id="panel"><div id="pin">
+    <div id="qbox" class="hanji"><div id="qhead"><b id="qno">1</b><span id="qkind"></span></div><div id="qtext"></div></div>
+    <div id="opts"></div>
+    <div id="exp"></div>
+    <div id="next"><span class="btnw"><button class="btn" id="bNext">다음</button></span></div>
+  </div></div>
+</div>
+<div id="top">
+  <div class="stat" id="sPart"><b id="pno">1</b><span id="pname">나무다리</span></div>
+  <div class="stat"><span id="dots"></span></div>
+  <div class="sp"></div>
+  <button class="tog" id="tHow" aria-label="HOW TO PLAY"><span class="q">?</span></button>
+  <button class="tog" id="tBgm" aria-label="음악"><svg viewBox="0 0 24 24"><path d="M9 17.5V5.5l11-2.5v12" fill="none" stroke="#2a1a08" stroke-width="2.6" stroke-linejoin="round"/><ellipse cx="6.3" cy="17.8" rx="3.4" ry="2.7" fill="#2a1a08"/><ellipse cx="17.3" cy="15.3" rx="3.4" ry="2.7" fill="#2a1a08"/></svg></button>
+  <button class="tog" id="tSfx" aria-label="효과음"><svg viewBox="0 0 24 24"><path d="M3 9h4l5-4.5v15L7 15H3z" fill="#2a1a08"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13" fill="none" stroke="#2a1a08" stroke-width="2.4" stroke-linecap="round"/></svg></button>
+</div>
+<div id="title">
+  <div class="row" id="tBtns"></div>
+  <div id="logo">언어논리퀴즈</div>
+</div>
+<div id="praise"></div>
+<canvas id="fx"></canvas>
+<div id="toast"></div>
+<div class="ov dim" id="how"><div class="sheet hanji">
+  <h2>HOW TO PLAY</h2>
+  <div id="howg">
+    <div class="hc"><div class="hp"><div class="mini"><i></i><i></i><i></i><i></i></div><div class="fing"></div></div><div>지문을 읽고 보기 넷 가운데 답을 고릅니다.<br>시간 제한은 없어요.</div></div>
+    <div class="hc"><div class="hp"><div class="gr"></div><img id="howImg" class="rise" alt="" style="left:30%;height:62%"></div><div>맞히면 그림자 마을에 집과 사람이 하나씩 솟아요.</div></div>
+    <div class="hc"><div class="hp"><div class="hd"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i style="animation:none"></i><i style="animation:none"></i></div><div class="gr"></div><img id="howImg2" class="rise" alt="" style="left:22%;height:64%;animation-delay:.6s"></div><div>10문제 중 8문제를 맞히면 큰 건물이 세워집니다.<br>열 곳을 다 세우면 끝!</div></div>
+  </div>
+  <div class="row"><span class="btnw"><button class="btn" id="bHowOk">OK</button></span></div>
+</div></div>
+<div class="ov" id="res"><div class="big" id="resT"></div><div class="sc" id="resS"></div><div class="row" id="resB"></div></div>
+<div class="ov dim" id="endv"><div class="sheet hanji"><img id="card" alt=""><div class="row" id="endB"></div></div></div>
+<div class="ov dim" id="ask"><div class="sheet hanji" style="width:min(380px,100%);text-align:center"><h2 id="askT"></h2><div class="row" id="askB"></div></div></div>
+<script src="js/sprites.js"></script>
+<script src="js/parts/p1.js"></script><script src="js/parts/p2.js"></script><script src="js/parts/p3.js"></script><script src="js/parts/p4.js"></script><script src="js/parts/p5.js"></script>
+<script src="js/parts/p6.js"></script><script src="js/parts/p7.js"></script><script src="js/parts/p8.js"></script><script src="js/parts/p9.js"></script><script src="js/parts/p10.js"></script>
+<script src="js/en/e1.js"></script><script src="js/en/e2.js"></script><script src="js/en/e3.js"></script><script src="js/en/e4.js"></script><script src="js/en/e5.js"></script><script src="js/en/e6.js"></script><script src="js/en/e7.js"></script><script src="js/en/e8.js"></script><script src="js/en/e9.js"></script><script src="js/en/e10.js"></script>
+<script src="js/en.js"></script>
+<script src="js/sfx.js"></script>
+<script src="js/scene.js"></script>
+<script src="js/game.js"></script>
+<script src="assets/game-home.js" data-top="6" data-left="6" data-fullscreen="1"></script>
+<script src="/assets/visit.js?v=17" defer></script>
+<script src="/assets/game-events.js?v=2" defer></script>
+</body>
+</html>

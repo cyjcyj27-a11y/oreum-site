@@ -1,0 +1,16 @@
+window.NR = window.NR || {}; NR.E = NR.E || [];
+NR.E[1] = {
+  name: 'Windmill', done: 'You built the Windmill!',
+  qs: [
+    { q: 'Carpenter : Hammer = Chef : (   )\nWhich word fills the blank?', a: ['Restaurant', 'Guest', 'Knife', 'Food'], x: 'A hammer is the tool a carpenter works with. The tool a chef works with is a knife.' },
+    { q: 'All flower shops open at 8 a.m.\nNo store on this street opens at 8 a.m.\nWhich must be true?', a: ['Flower shops close at 7 p.m.', 'If it opens at 8, it sells flowers', 'Stores here open at 9 a.m.', 'There is no flower shop here'], x: 'A flower shop would open at 8, but no store here does. So none of them can be a flower shop.' },
+    { q: 'Haneul, Junseo, and Daeun came 1st, 2nd, and 3rd in a race.\nHaneul finished after Junseo but was not last.\nWho came 3rd?', a: ['Daeun', 'Junseo', 'Haneul', 'Cannot tell'], x: 'Haneul is behind Junseo but not last, so 2nd. Junseo is 1st and Daeun is 3rd.' },
+    { q: 'One of Eunu, Doyun, and Seoa hid the gift.\nEunu said he hid it.\nDoyun said Eunu did not hide it.\nSeoa said she did not hide it.\nExactly one told the truth. Who hid it?', a: ['Eunu', 'Seoa', 'Doyun', 'Cannot tell'], x: 'If Eunu or Doyun hid it, two told the truth. Only if Seoa hid it is Doyun the one truth-teller.' },
+    { q: 'Only those who finish their homework can go to the playground.\nDohyeon went to the playground.\nWhich must be true?', a: ['Anyone done with homework goes there', 'Dohyeon did not do his homework', 'Dohyeon likes the playground', 'Dohyeon finished his homework'], x: 'To go to the playground, you must finish your homework. Dohyeon went, so he finished it.' },
+    { q: 'Which word includes all of the other three?', a: ['Piano', 'Drum', 'Instrument', 'Violin'], x: 'The piano, the drum, and the violin are all kinds of instruments.' },
+    { q: 'Minho\'s family goes to at least one place: the beach or the mountains.\nIf they go to the beach, they pack swimsuits.\nThis time they did not pack swimsuits.\nWhich must be true?', a: ['They went to the beach', 'They went to the mountains', 'They went to both', 'They went nowhere'], x: 'If they had gone to the beach, they would have packed swimsuits. So not the beach, but the mountains.' },
+    { q: 'A shelf has slots 1 to 4 from the left.\nA cup, plate, pot, and kettle go one per slot.\nThe cup is in slot 1. The pot is directly left of the kettle.\nThe plate is not in slot 2. What is in slot 2?', a: ['Pot', 'Kettle', 'Plate', 'Cup'], x: 'The plate is not in 2, so the pot and kettle sit in 2 and 3, and the plate is in 4.' },
+    { q: 'Gaeun and Nayeon each either always tell the truth or always lie.\nGaeun said Nayeon always tells the truth.\nNayeon said they are different types.\nWhat are they?', a: ['Both tell the truth', 'Only Gaeun tells the truth', 'Both always lie', 'Only Nayeon tells the truth'], x: 'If Nayeon told the truth, Gaeun would be a liar who said something true. So both are liars.' },
+    { q: 'Everyone in our class who wears glasses likes books.\nHarin is in our class and likes books.\nSo Harin wears glasses. What is wrong here?', a: ['The premises contradict', 'The conclusion repeats a premise', 'We do not know Harin\'s age', 'It flips the condition around'], x: 'Wearing glasses means liking books. It does not mean liking books means wearing glasses.' }
+  ]
+};

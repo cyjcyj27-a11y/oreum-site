@@ -1,0 +1,16 @@
+window.NR = window.NR || {}; NR.E = NR.E || [];
+NR.E[3] = {
+  name: 'Library', done: 'You built the Library!',
+  qs: [
+    { q: 'Some library visitors read comics.\nEveryone who read comics ate no snacks.\nWhich must be true?', a: ['All visitors read comics', 'Some visitors ate no snacks', 'All who ate no snacks read comics', 'No visitor ate any snacks'], x: 'The visitor who read comics ate no snacks. So at least one visitor ate no snacks.' },
+    { q: 'A librarian is to a library\nas a chef is to what?', a: ['Pot', 'Food', 'Restaurant', 'Customer'], x: 'A librarian works in a library and a chef works in a restaurant. It is a person and their workplace.' },
+    { q: 'A dog, cat, rabbit, or hamster tore the book.\nDog: The cat did it. Cat: The rabbit did it.\nRabbit: The cat is lying. Hamster: It was not me.\nExactly one of them lied. Who tore it?', a: ['Dog', 'Cat', 'Rabbit', 'Hamster'], x: 'The dog and cat disagree, so one of them lied. Only if the cat did it is there exactly one lie.' },
+    { q: 'Four people sit in seats 1 to 4, one each.\nSeoyeon has an even seat. Minjun is right next to her.\nJiwoo has a lower number than Minjun.\nDoyun has a higher number than Seoyeon.\nWho sits in seat 3?', a: ['Minjun', 'Seoyeon', 'Jiwoo', 'Doyun'], x: 'If Seoyeon were in 4, Doyun has no seat. So Seoyeon 2, Doyun 4, Minjun 3, Jiwoo 1.' },
+    { q: 'You need a library card to borrow a book.\nWhich must be true?', a: ['Anyone who borrowed has a card', 'With a card you can borrow books', 'You can borrow without a card', 'Non-borrowers have no card'], x: 'A card is a necessary condition. The only sure thing is that anyone who borrowed has a card.' },
+    { q: 'Everyone who borrowed a book has a card.\nNo student in Class 3 has a card.\nWhich must be true?', a: ['Anyone with a card borrowed a book', 'All non-borrowers are in Class 3', 'Some Class 3 students borrowed books', 'No Class 3 student borrowed a book'], x: 'Class 3 students have no card, and without a card you cannot be someone who borrowed a book.' },
+    { q: 'A note is in one of a red, blue, or yellow book.\nRed: The note is in this book.\nBlue: The note is not in this book.\nYellow: The note is not in the red book.\nOnly one of these is true. Where is the note?', a: ['Yellow book', 'Red book', 'Cannot tell', 'Blue book'], x: 'If it is in blue, only yellow is true. If it is in red or yellow, two are true.' },
+    { q: 'Five books are stacked in one pile.\nThe dictionary is at the bottom. Poems sits right on top of Comics.\nFairy Tales is above Novel but not on top.\nWhich book is third from the top?', a: ['Poems', 'Comics', 'Fairy Tales', 'Novel'], x: 'If Fairy Tales is not on top, Poems and Comics take the top two. Poems, Comics, Fairy Tales, Novel, dictionary.' },
+    { q: 'Which pair is related like open and close?', a: ['Read : Book', 'Turn on : Turn off', 'Write : Pencil', 'Sit : Chair'], x: 'Open and close are opposites. Turn on and turn off are opposites too.' },
+    { q: 'Haeun always borrows any mystery novel.\nSo Haeun will borrow this book.\nWhat premise is needed for this conclusion?', a: ['Haeun likes books', 'Haeun is the one who borrowed it', 'This book is a mystery novel', 'She never borrows non-mysteries'], x: 'She borrows any mystery novel. Add that this book is a mystery novel, and the conclusion follows.' }
+  ]
+};
