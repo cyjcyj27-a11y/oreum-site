@@ -437,7 +437,7 @@
     G.enemies = S.spawns.map((s) => {
       const e = actor(s.k, s.c, s.r, s.c * TW + 16 > pr.x ? -1 : 1);
       const sk = SKILL[Math.min(SKILL.length - 1, (lv.skill || 0))];
-      e.skill = s.k === 'V' ? { pb: 0.5, wind: 0.27, cool: 0.85, hp: 15 } : s.k === 'K' ? { pb: 0.3, wind: 0.36, cool: 1.1, hp: 10 } : sk;
+      e.skill = s.k === 'V' ? { pb: 0.5, wind: 0.27, cool: 0.85, hp: 10 } : s.k === 'K' ? { pb: 0.3, wind: 0.36, cool: 1.1, hp: 10 } : sk;
       e.hp = e.maxhp = e.skill.hp; e.sword = s.k === 'W' ? 0 : 2; e.home = { x: e.x, y: e.y, f: e.f }; e.lost = 0; e.cool = 0.6;
       return e;
     });
