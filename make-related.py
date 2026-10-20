@@ -18,6 +18,7 @@ import io, os, re, sys
 
 # slug, 한국어 경로, 영어 경로, 한국어 이름, 한국어 장르 앵커, 영어 이름, 영어 장르 앵커, 태그
 GAMES = [
+    ("uijeok",        "/games/mini/uijeok/",         "/en/games/mini/uijeok/",         "달빛 의적",        "달빛 의적 고전게임 액션게임",        "MOONLIT OUTLAW",        "retro DOS-style platformer",    {"action", "fighting", "korean", "platformer"}),
     ("nonri",         "/games/mini/nonri/",          "/en/games/mini/nonri/",          "언어논리퀴즈",      "언어논리퀴즈 논리퀴즈 게임",        "LOGIC QUIZ",            "logic puzzles quiz game",       {"quiz", "puzzle", "casual"}),
     ("udoom",         "/games/udoom/",               "/en/games/udoom/",               "어둠",              "둠 같은 FPS PC게임",                  "UDOOM",                 "doom like browser fps",         {"3d", "action", "horror", "fighting"}),
     ("hoops",         "/games/flash/hoops/",         "/en/games/flash/hoops/",         "오락실 농구",   "3D 오락실 농구게임",              "ARCADE HOOPS",            "basketball arcade game online", {"sport", "arcade", "physics", "3d"}),
