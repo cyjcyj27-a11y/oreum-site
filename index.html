@@ -31,6 +31,29 @@
 <meta name="twitter:card" content="summary_large_image">
 
 <link rel="stylesheet" href="/style.css?v=47">
+<!-- HOME:style -->
+<style>
+.shelf-head{display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap;margin:44px 0 16px;padding-bottom:10px;border-bottom:2px solid var(--line)}
+.shelf-head:first-of-type{margin-top:8px}
+.shelf-head h2{margin:0;font-size:26px;letter-spacing:.02em;color:var(--ink)}
+.shelf-head h2 small{font-size:15px;font-weight:700;color:var(--muted);margin-left:8px;vertical-align:2px}
+.shelf-head p{margin:0 0 3px;font-size:15px;color:var(--muted);flex:1 1 auto}
+@media (max-width:760px){.shelf-head{margin-top:34px}.shelf-head h2{font-size:22px}.shelf-head p{flex-basis:100%;order:3}}
+.showcase .grid.g-small{grid-template-columns:repeat(6,1fr);gap:10px}
+.showcase .grid.g-small .mbody{padding:7px 8px 9px}
+.showcase .grid.g-small .mbody b{font-size:13px;line-height:1.25}
+.showcase .grid.g-small .mbody i{font-size:11px;margin-top:2px}
+.showcase .grid.g-small .kind{font-size:9px;padding:2px 6px;left:6px;top:6px;letter-spacing:.08em}
+.showcase .grid.g-small a.mini:nth-child(-n+2) .shot::after{font-size:9px;padding:2px 6px;right:6px;top:6px}
+@media (max-width:900px){.showcase .grid.g-small{grid-template-columns:repeat(4,1fr)}}
+@media (max-width:760px){.showcase .grid.g-small{grid-template-columns:repeat(3,1fr);gap:6px}.showcase .grid.g-small .mbody{padding:5px 6px 7px}.showcase .grid.g-small .mbody b{font-size:11.5px}.showcase .grid.g-small .mbody i{display:none}.showcase .grid.g-small .kind{display:none}}
+.shelf-btns{display:flex;justify-content:center;flex-wrap:wrap;gap:12px;margin-top:26px}
+.shelf-btns .shelf-all{margin:0}
+.shelf-search{display:inline-flex!important;align-items:center;gap:8px}
+.shelf-search svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round}
+.shelf-all{display:block;margin:26px auto 0;width:max-content;padding:12px 26px;border:1px dashed var(--line-2);border-radius:999px;font-size:16px;font-weight:800;color:var(--ink);text-decoration:none;background:var(--deep)}
+.shelf-all:hover{background:var(--panel-2)}
+</style>
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -1820,8 +1843,9 @@
   <!-- 히어로 — 아침의 오름 -->
     <section id="games" class="showcase">
     <div class="wrap">
+      <!-- HOME:start -->
+      <div class="shelf-head"><h2>새 게임</h2></div>
       <div class="grid">
-        <!-- CARDS:start -->
         <a class="mini" href="/games/udoom/">
           <span class="shot"><img src="/assets/udoom-shot.webp?v=2" alt="핏빛 물감 위에 어둠 제목과 START, 계속하기 단추가 있고 뒤로 핑키와 좀비 병사가 서 있는 타이틀 화면" width="800" height="500" loading="lazy"></span>
           <span class="mbody"><b>어둠</b><i>FPS게임 PC게임</i></span>
@@ -1838,181 +1862,55 @@
           <span class="shot"><img src="/assets/pocketball-shot.webp?v=1" alt="초록 당구대 위에 삼각형으로 모인 공들과 큐가 겨눈 흰 공, 아래쪽 포켓볼 제목" width="800" height="500" loading="lazy"><span class="kind">FLASH</span></span>
           <span class="mbody"><b>포켓볼</b><i>포켓볼게임 당구게임</i></span>
         </a>
-        <a class="mini" href="/games/flash/toycrane/">
-          <span class="shot"><img src="/assets/toycrane-shot.webp?v=1" alt="분홍 인형뽑기 기계 안에서 집게가 인형을 집어 올리는 장면과 아래쪽 인형뽑기게임 제목" width="800" height="500" loading="lazy"><span class="kind">FLASH</span></span>
-          <span class="mbody"><b>인형뽑기</b><i>인형뽑기게임 토이크레인</i></span>
-        </a>
-        <a class="mini" href="/games/flash/colormix/">
-          <span class="shot"><img src="/assets/colormix-shot.webp?v=1" alt="팔레트 판에서 파랑과 노랑 물감 방울이 섞여 초록이 튀는 장면과 아래쪽 색깔섞기 제목" width="800" height="500" loading="lazy"><span class="kind">FLASH</span></span>
-          <span class="mbody"><b>색깔섞기 퍼즐게임</b><i>퍼즐게임 물감섞기게임</i></span>
-        </a>
+      </div>
+      <div class="shelf-head"><h2>오름게임즈 오리지널</h2></div>
+      <div class="grid nonew">
         <a class="mini" href="/games/villainlike/">
           <span class="shot"><img src="/assets/villainlike-shot.webp?v=1" alt="승강장에서 경광봉을 든 사회복무요원을 단소살인마, 황금 갑옷 장군, 1호선 대악마와 빌런 떼가 둘러싼 도트 그림, 아래에 빌런라이크 제목" width="800" height="500" loading="lazy"></span>
           <span class="mbody"><b>빌런라이크</b><i>뱀서류게임 도트게임</i></span>
-        </a>
-        <a class="mini" href="/games/line1/">
-          <span class="shot"><img src="/assets/line1-shot.webp?v=1" alt="1호선 객차 안에서 단소살인마, 황금 갑옷 장군, 예수천국 전도사 같은 빌런들을 역무원과 보안관이 막는 도트 그림, 아래에 1호선 빌런 제목" width="800" height="500" loading="lazy"></span>
-          <span class="mbody"><b>1호선 빌런</b><i>디펜스게임 도트게임</i></span>
-        </a>
-        <a class="mini" href="/games/yokailike/">
-          <span class="shot"><img src="/assets/yokailike-shot.webp?v=1" alt="축제 밤 벚나무와 노점 사이에서 세일러복 소녀 아야메가 폭죽을 터뜨려 요괴 떼를 날리는 도트 그림, 아래에 요괴라이크 제목" width="800" height="500" loading="lazy"></span>
-          <span class="mbody"><b>요괴라이크</b><i>뱀서라이크게임 도트게임</i></span>
         </a>
         <a class="mini" href="/games/gyodo/">
           <span class="shot"><img src="/assets/gyodo-shot.webp?v=1" alt="1동 감방 복도에서 하늘색 수의를 입은 수감자들이 담 쪽으로 뛰고 남색 제복 교도관들이 수갑을 던지는 도트 그림, 아래에 교도관24시 제목" width="800" height="500" loading="lazy"></span>
           <span class="mbody"><b>교도관24시</b><i>타워디펜스게임 도트게임</i></span>
         </a>
-        <a class="mini" href="/games/lasso/">
-          <span class="shot"><img src="/assets/lasso-shot.webp?v=1" alt="붉은 바위산 아래 들판에서 흰 조랑말을 탄 헬라가 머리 위로 올가미를 돌리고 있다. 아래에 올가미 언니 나무 간판 제목" width="800" height="500" loading="lazy"></span>
-          <span class="mbody"><b>올가미 언니</b><i>액션게임 사냥게임</i></span>
-        </a>
-        <a class="mini" href="/games/shrimpboat/">
-          <span class="shot"><img src="/assets/shrimpboat-shot.webp?v=1" alt="바다 위 어선 갑판에서 선장이 손을 휘둘러 주인공의 뺨을 때리고 주인공이 뒤로 휘청한다. 아래에 새우잡이배 제목" width="800" height="500" loading="lazy"></span>
-          <span class="mbody"><b>새우잡이배</b><i>탈출게임 어드벤처게임</i></span>
-        </a>
         <a class="mini" href="/games/gosiwon/">
           <span class="shot"><img src="/assets/gosiwon-shot.webp?v=2" alt="고시원 남자 화장실에서 빨간 고무장갑을 낀 손이 수세미를 들고 있고 바닥과 벽에 때가 있다. 아래에 고시원 총무 제목" width="800" height="500" loading="lazy"></span>
           <span class="mbody"><b>고시원 총무</b><i>청소게임 시뮬레이션게임</i></span>
-        </a>
-        <a class="mini" href="/games/mini/surf/">
-          <span class="shot"><img src="/assets/surf-shot.webp?v=3" alt="푸른 바다 위에서 흰 서핑보드에 엎드린 파란 상어가 이빨을 드러내고 웃고 있고 뒤로 주황 부표가 떠 있다. 아래에 서프런 게임 제목" width="800" height="500" loading="lazy"><span class="kind">MINI</span></span>
-          <span class="mbody"><b>서프런 게임</b><i>서핑게임 러너게임</i></span>
-        </a>
-        <a class="mini" href="/games/flash/chess/">
-          <span class="shot"><img src="/assets/chess-shot.webp?v=1" alt="크림색과 초록 대리석 체스판 위에 상아 말과 흑단 말이 차려져 있고, 흑단 테에 황동 글자로 좌표가 있다. 아래에 붓글씨로 체스 제목이 있다" width="800" height="500" loading="lazy"><span class="kind">FLASH</span></span>
-          <span class="mbody"><b>체스</b><i>보드게임 체스게임</i></span>
-        </a>
-        <a class="mini" href="/games/flash/taco/">
-          <span class="shot"><img src="/assets/taco-shot.webp?v=1" alt="빨간 줄무늬 차양 아래 사막을 배경으로 웃는 손님 다섯 명이 창구 앞에 서 있고 선반에 타코 세 개가 놓여 있다. 가운데에 VIVA 타코스 제목이 있다" width="800" height="500" loading="lazy"><span class="kind">FLASH</span></span>
-          <span class="mbody"><b>비바타코스</b><i>요리게임 타코게임</i></span>
-        </a>
-        <a class="mini" href="/games/flash/janggi/">
-          <span class="shot"><img src="/assets/janggi-shot.webp?v=1" alt="나무 장기판 위에 팔각 나무 알이 차려져 있다. 위쪽은 붉은 글씨의 한, 아래쪽은 초록 글씨의 초이고 아래에 붓글씨로 장기 제목이 있다" width="800" height="500" loading="lazy"><span class="kind">FLASH</span></span>
-          <span class="mbody"><b>장기</b><i>보드게임 장기게임</i></span>
         </a>
         <a class="mini" href="/games/flash/chicken/">
           <span class="shot"><img src="/assets/chicken-shot.webp?v=1" alt="밤 치킨집 계산대 앞에 손님 셋이 주문 말풍선을 띄우고 서 있고 도마에는 썰린 생닭이, 튀김기에는 노릇한 치킨이 있다. 아래에 꼬꼬가 그려진 개발자 치킨집 간판이 있다" width="800" height="500" loading="lazy"><span class="kind">FLASH</span></span>
           <span class="mbody"><b>개발자치킨집</b><i>타이쿤게임 치킨게임</i></span>
         </a>
-        <a class="mini" href="/games/flash/daltteok/">
-          <span class="shot"><img src="/assets/daltteok-shot.webp?v=1" alt="밤하늘 아래 나무 됫박 안에 웃는 보름달 떡과 딸기찹쌀떡, 인절미, 쑥떡, 송편이 쌓여 있고 달토끼가 꿀떡을 들고 있다. 가운데에 달떡 합치기 제목이 있다" width="800" height="500" loading="lazy"><span class="kind">FLASH</span></span>
-          <span class="mbody"><b>달떡 합치기</b><i>수박게임 합치기게임</i></span>
-        </a>
-        <a class="mini" href="/games/frost/">
-          <span class="shot"><img src="/assets/frost-shot.webp?v=1" alt="원시림 망루 앞에 바구니를 들고 선 주인공, 뒤로 들소 떼와 미르 성이 보이고 위에 얼음할아버지 제목이 있다" width="800" height="500" loading="lazy"></span>
-          <span class="mbody"><b>얼음할아버지</b><i>어드벤쳐게임 힐링게임 사냥게임</i></span>
-        </a>
-        <a class="mini" href="/games/flash/shooting/">
-          <span class="shot"><img src="/assets/shooting-shot.webp?v=1" alt="야시장 사격장 부스 선반에 깡통 피라미드와 병이 서 있고 폭죽 상자가 터져 병과 깡통이 날아가며, 아래에 야시장 사격게임 제목이 있다" width="800" height="500" loading="lazy"><span class="kind">FLASH</span></span>
-          <span class="mbody"><b>야시장 사격게임</b><i>사격게임 물리게임</i></span>
-        </a>
-        <a class="mini" href="/games/controlking/">
-          <span class="shot"><img src="/assets/controlking-shot.webp?v=1" alt="무지개 발판이 떠 있는 하늘에서 개구리가 뛰어오르고 로봇개가 무지개 위에 서 있으며, 위에 컨트롤킹 제목이 있다" width="800" height="500" loading="lazy"></span>
-          <span class="mbody"><b>컨트롤킹</b><i>점프게임 컨트롤게임</i></span>
-        </a>
-        <a class="mini" href="/games/mini/button5/">
-          <span class="shot"><img src="/assets/button5-shot.webp?v=1" alt="하얀 공허 바닥에 돌탑과 석상이 늘어선 가운데 앉아 있는 사람의 뒷모습과 받침 위 빨간 버튼, 위에 5억년 버튼 제목" width="800" height="500" loading="lazy"><span class="kind">MINI</span></span>
-          <span class="mbody"><b>5억년 버튼</b><i>방치형게임 클리커게임</i></span>
-        </a>
-        <a class="mini" href="/games/matchtower/">
-          <span class="shot"><img src="/assets/matchtower-shot.webp?v=1" alt="다방 탁자 위 커피잔과 팔각 통성냥 사이에 성냥개비로 쌓은 우물 정자 탑이 서 있고, 초록 간판에 초원다방 제목이 있다" width="800" height="500" loading="lazy"></span>
-          <span class="mbody"><b>초원다방</b><i>성냥쌓기놀이 성냥쌓기게임</i></span>
-        </a>
-        <a class="mini" href="/games/newworldpizza/">
-          <span class="shot"><img src="/assets/newworldpizza-shot.webp?v=1" alt="피자가게 계산대 앞에 푸틴, 트럼프, 머스크, 김정은 캐리커처가 서 있고 가게 밖 인도에 가면을 쓴 Anonymous가 서 있으며, 위에 뉴월드피자 제목이 있다" width="800" height="500" loading="lazy"></span>
-          <span class="mbody"><b>뉴월드피자</b><i>방치형게임 경영게임</i></span>
-        </a>
-        <a class="mini" href="/games/milsil/">
-          <span class="shot"><img src="/assets/milsil-shot.webp?v=1" alt="어두운 저택 현관에 괘종시계와 닫힌 두 짝 문, 코트 걸이와 우산꽂이가 있고 그 위에 붓글씨로 밀실 제목이 쓰여 있다" width="800" height="500" loading="lazy"></span>
-          <span class="mbody"><b>밀실</b><i>방탈출게임 추리게임</i></span>
-        </a>
         <a class="mini" href="/games/wol300/">
           <span class="shot"><img src="/assets/wol300-shot.webp?v=5" alt="흑백으로 가라앉은 원룸 침실에 남자 실루엣과 창턱의 고양이, 모니터 화면만 컬러로 빛나고 그 위에 붉은 붓글씨로 월300 제목이 비스듬히 쓰여 있다" width="800" height="500" loading="lazy"></span>
           <span class="mbody"><b>월300</b><i>시뮬레이션게임 스토리게임</i></span>
         </a>
-        <a class="mini" href="/games/fartlike/">
-          <span class="shot"><img src="/assets/fartlike-shot.webp?v=1" alt="찜질방 바닥에서 분홍 머리 소녀 둘레로 보라 번개가 치고 아줌마·청소부 적이 몰려오며, 위에 방귀라이크 제목이 있다" width="800" height="500" loading="lazy"></span>
-          <span class="mbody"><b>방귀라이크</b><i>뱀서라이크게임 로그라이크게임</i></span>
+        <a class="mini" href="/games/jeju/">
+          <span class="shot"><img src="/assets/jeju-shot.webp?v=2" alt="제주 오름 꼭대기 바위 위에 남색 오픈카가 서 있고 남녀와 고양이가 아래로 펼쳐진 제주 들판과 바다를 내려다보며 아래에 흰 BUY JEJU 제목이 있다" width="800" height="500" loading="lazy"></span>
+          <span class="mbody"><b>BUY JEJU</b><i>제주도 땅 사는 오픈월드게임</i></span>
         </a>
-        <a class="mini" href="/games/jejukart/">
-          <span class="shot"><img src="/assets/jejukart-shot.webp?v=1" alt="노란 유채꽃이 핀 제주 들판 도로에 파란 카트를 탄 고양이와 분홍 카트를 탄 토끼가 서 있고, 위에 제주카트레이싱 제목이 있다" width="800" height="500" loading="lazy"></span>
-          <span class="mbody"><b>제주카트레이싱</b><i>카트레이싱게임 · 3D 레이싱게임</i></span>
+        <a class="mini" href="/games/making-kimchi/">
+          <span class="shot"><img src="/assets/making-kimchi-shot.webp?v=2" alt="맨해튼 김치가게 안. 묵은지 항아리와 김치가 그득한 빨간 대야, 김치냉장고가 놓여 있고 계산대 앞에 손님이 줄 서 있다" width="800" height="500" loading="lazy"><span class="kind">GAME</span></span>
+          <span class="mbody"><b>메이킹김치</b><i>김치가게 경영 요리게임</i></span>
         </a>
-        <a class="mini" href="/games/flash/checkers/">
-          <span class="shot"><img src="/assets/checkers-shot.webp?v=1" alt="초록과 담황색 칸의 나무 체커판 위아래에 검은 말과 빨간 말이 12개씩 놓여 있고, 가운데에 체커 제목이 있다" width="800" height="500" loading="lazy"><span class="kind">FLASH</span></span>
-          <span class="mbody"><b>체커게임</b><i>보드게임</i></span>
+        <a class="mini" href="/games/lulu/">
+          <span class="shot"><img src="/assets/lulu-home.webp?v=2" alt="노을 진 제주 귤밭의 제주택배 이장님네 분소 창고 앞에 제주감귤 상자가 쌓여 있고, 밀짚모자를 쓴 고양이 루루가 바구니 옆에 서 있다" width="800" height="500" loading="lazy"><span class="kind">GAME</span></span>
+          <span class="mbody"><b>루루냥의 제주살이</b><i>3D 생활 시뮬레이션</i></span>
         </a>
-        <a class="mini" href="/games/mini/chwigwon/">
-          <span class="shot"><img src="/assets/chwigwon-shot.webp?v=1" alt="저택 대문 앞에서 싸움 자세를 잡은 소찬과 졸개들, 위에 취권소찬 제목" width="800" height="500" loading="lazy"><span class="kind">MINI</span></span>
-          <span class="mbody"><b>취권소찬</b><i>횡스크롤액션게임 격투게임</i></span>
+      </div>
+      <div class="shelf-head"><h2>보드게임</h2></div>
+      <div class="grid g-small nonew">
+        <a class="mini" href="/games/flash/chess/">
+          <span class="shot"><img src="/assets/chess-shot.webp?v=1" alt="크림색과 초록 대리석 체스판 위에 상아 말과 흑단 말이 차려져 있고, 흑단 테에 황동 글자로 좌표가 있다. 아래에 붓글씨로 체스 제목이 있다" width="800" height="500" loading="lazy"><span class="kind">FLASH</span></span>
+          <span class="mbody"><b>체스</b><i>보드게임 체스게임</i></span>
         </a>
-        <a class="mini" href="/games/maidcafe/">
-          <span class="shot"><img src="/assets/maidcafe-shot.webp?v=1" alt="분홍 메이드카페 안에 애니풍 메이드 다섯 명이 나란히 서 있고, 위에 모에모에 메이드카페 제목이 있다" width="800" height="500" loading="lazy"></span>
-          <span class="mbody"><b>모에모에 메이드카페</b><i>메이드카페 방치형 경영게임</i></span>
-        </a>
-        <a class="mini" href="/games/mini/fullbrain/">
-          <span class="shot"><img src="/assets/fullbrain-shot.webp?v=3" alt="초록 칠판 앞 안경 쓴 선생님과 사칙연산 문제, 답 카드 네 장. 위에 두뇌풀가동 제목이 있다" width="800" height="500" loading="lazy"><span class="kind">MINI</span></span>
-          <span class="mbody"><b>두뇌풀가동</b><i>사칙연산 퀴즈 · 60스테이지</i></span>
-        </a>
-        <a class="mini" href="/games/flash/saving12chicks/">
-          <span class="shot"><img src="/assets/saving12chicks-shot.webp?v=1" alt="농장 마당에서 수탉과 병아리 두 마리가 서 있고, 뒤로 사일로와 호박, 나무, 산이 보인다. 위에 병아리 일이병구하기 제목이 있다" width="800" height="500" loading="lazy"></span>
-          <span class="mbody"><b>병아리 일이병구하기</b><i>횡스크롤액션게임 오락실게임</i></span>
+        <a class="mini" href="/games/flash/janggi/">
+          <span class="shot"><img src="/assets/janggi-shot.webp?v=1" alt="나무 장기판 위에 팔각 나무 알이 차려져 있다. 위쪽은 붉은 글씨의 한, 아래쪽은 초록 글씨의 초이고 아래에 붓글씨로 장기 제목이 있다" width="800" height="500" loading="lazy"><span class="kind">FLASH</span></span>
+          <span class="mbody"><b>장기</b><i>보드게임 장기게임</i></span>
         </a>
         <a class="mini" href="/games/flash/yut/">
           <span class="shot"><img src="/assets/yut-shot.webp?v=2" alt="멍석 위 윷판에 동물 말들과 윷가락 넷이 놓여 있고, 왼쪽 위에 윷놀이 제목이 있다" width="800" height="500" loading="lazy"><span class="kind">FLASH</span></span>
           <span class="mbody"><b>윷놀이</b><i>윷가락 진짜 던지기 · 1인용·2~4인용</i></span>
-        </a>
-        <a class="mini" href="/games/mini/foosball/">
-          <span class="shot"><img src="/assets/foosball-shot.webp?v=1" alt="초록 테이블 축구대 위 은색 막대에 파랑·노랑 인형이 꽂혀 있고 흰 공이 놓여 있다. 위에 테이블축구게임 제목이 있다" width="800" height="500" loading="lazy"><span class="kind">MINI</span></span>
-          <span class="mbody"><b>테이블축구게임</b><i>3D 테이블 축구 · 1인용·2인용</i></span>
-        </a>
-        <a class="mini" href="/games/flash/cheonggi/">
-          <span class="shot"><img src="/assets/cheonggi-shot.webp?v=1" alt="운동회 운동장에서 청군 머리띠를 한 아이가 청기를 들어 올리고, 왼쪽에 청기백기 제목이 있다" width="800" height="500" loading="lazy"><span class="kind">FLASH</span></span>
-          <span class="mbody"><b>청기백기</b><i>순발력게임 · 선생님 목소리</i></span>
-        </a>
-        <a class="mini" href="/games/flash/woodenblock/">
-          <span class="shot"><img src="/assets/woodenblock-shot.webp?v=1" alt="둥근 나무 탁자 위 나무 블럭 탑에서 블럭 하나가 반쯤 빠져 나와 있고, 왼쪽에 나무블럭쌓기 제목이 있다" width="800" height="500" loading="lazy"><span class="kind">FLASH</span></span>
-          <span class="mbody"><b>나무블럭쌓기</b><i>블럭 빼서 쌓기 · 1인용·2인용</i></span>
-        </a>
-        <a class="mini" href="/games/mini/odaesu/">
-          <span class="shot"><img src="/assets/odaesu-shot.webp?v=1" alt="초록 형광등이 켜진 복도에서 망치를 든 파마머리 남자가 몰려오는 깡패 여섯 명과 마주 서 있고, 위에 오대수게임 붓글씨 제목이 있다" width="800" height="500" loading="lazy"><span class="kind">MINI</span></span>
-          <span class="mbody"><b>오대수게임</b><i>격투게임 · 액션게임</i></span>
-        </a>
-        <a class="mini" href="/games/flash/bowling/">
-          <span class="shot"><img src="/assets/bowling-shot.webp?v=2" alt="야광 볼링장 레인 끝에서 보라·분홍 무늬 공이 핀 무리에 부딪혀 핀들이 공중으로 튀어 오르고, 위에 와르르 볼링 제목이 빛난다" width="800" height="500" loading="lazy"><span class="kind">FLASH</span></span>
-          <span class="mbody"><b>볼링게임</b><i>3D 볼링게임 · 1인용·2인용</i></span>
-        </a>
-        <a class="mini" href="/games/mulgwisin/">
-          <span class="shot"><img src="/assets/mulgwisin-shot.webp?v=1" alt="밤 계곡 물가에 창호지 문에 불이 켜진 초가집이 있고 빨랫줄에 흰 원피스가 걸려 있다. 위에 물귀신 제목과 WATER GHOST 글자가 있다" width="800" height="500" loading="lazy"><span class="kind">GAME</span></span>
-          <span class="mbody"><b>물귀신</b><i>밤 계곡 3D 공포게임</i></span>
-        </a>
-        <a class="mini" href="/games/flash/spotdiff/">
-          <span class="shot"><img src="/assets/spotdiff-shot.webp?v=2" alt="부엌 그림 두 장이 나란히 있고 위에 틀린그림찾기 제목이 있다. 오른쪽 그림은 창틀이 분홍색이고 식탁 위 물건이 달라 두 곳에 초록 동그라미가 쳐져 있다" width="800" height="500" loading="lazy"><span class="kind">FLASH</span></span>
-          <span class="mbody"><b>틀린그림찾기</b><i>두 그림 비교 틀린그림찾기 게임</i></span>
-        </a>
-        <a class="mini" href="/games/flash/taja/">
-          <span class="shot"><img src="/assets/taja-shot.webp?v=1" alt="학교 운동장 트랙 위에 타자연습 달리기 제목이 있고, 토끼와 혀를 내민 거북이가 왼쪽에서, 치타와 웃는 강아지가 오른쪽에서 번호표를 달고 달리고 있다" width="800" height="500" loading="lazy"><span class="kind">FLASH</span></span>
-          <span class="mbody"><b>타자연습 달리기</b><i>한글·영어 타자연습 게임</i></span>
-        </a>
-        <a class="mini" href="/games/flash/burger/">
-          <span class="shot"><img src="/assets/burger-shot.webp?v=2" alt="주방 벽에 킹왕짱버거 제목이 있고, 아래 주문 줄에 더블치즈버거 재료가 아랫빵부터 감자튀김까지 펼쳐져 있으며, 철판에서 패티 다섯 장이 익고 튀김기에서 감자튀김이 튀겨지고 도마 두 개에 버거가 쌓이고 있다" width="800" height="500" loading="lazy"><span class="kind">FLASH</span></span>
-          <span class="mbody"><b>킹왕짱버거</b><i>햄버거 만들기 요리게임</i></span>
-        </a>
-        <a class="mini" href="/games/flash/meowsquad/">
-          <span class="shot"><img src="/assets/meowsquad-shot.webp?v=1" alt="노을 하늘에 쥐 비행접시 네 줄이 대형을 짜고 있고, 가운데에서 떨어진 새장이 낙하산을 타고 내려오며, 아래에서 고양이 전투기가 초록 호위기 두 대와 함께 총을 쏘고 왼쪽에 야옹 편대 제목이 있다" width="800" height="500" loading="lazy"><span class="kind">FLASH</span></span>
-          <span class="mbody"><b>야옹 편대</b><i>고양이 비행기 슈팅게임</i></span>
-        </a>
-        <a class="mini" href="/games/ueno/">
-          <span class="shot"><img src="/assets/ueno-shot.webp?v=1" alt="벚꽃이 핀 공원 길 위에 검은 학생복의 켄과 갸루 여고생 히로미가 나란히 서 있고 위에 우에노짱 제목이 있다" width="800" height="500" loading="lazy"></span>
-          <span class="mbody"><b>우에노짱</b><i>착한 양아치 커플 3D 어드벤처</i></span>
-        </a>
-        <a class="mini" href="/games/flash/ttang/">
-          <span class="shot"><img src="/assets/ttang-shot.webp?v=2" alt="흙마당에 그린 네모 판에서 파란 땅과 빨간 땅이 모서리부터 넓어져 있고 파란 사금파리가 점선을 그리며 집으로 돌아가려 하며 땅따먹기 제목이 있다" width="800" height="500" loading="lazy"><span class="kind">FLASH</span></span>
-          <span class="mbody"><b>땅따먹기</b><i>1인용·2인용 땅따먹기게임</i></span>
-        </a>
-        <a class="mini" href="/games/flash/bangwi/">
-          <span class="shot"><img src="/assets/bangwi-shot.webp?v=1" alt="교실 칠판 앞에서 선생님이 물음표를 띄우며 뒤돌아보려 하고, 맨 앞줄 노란 옷 아이 양옆으로 초록 방귀 구름이 피어오르며 방귀뀌기 제목이 있다" width="800" height="500" loading="lazy"><span class="kind">FLASH</span></span>
-          <span class="mbody"><b>방귀 뀌기</b><i>안 들키게 몰래 뀌는 방귀게임</i></span>
         </a>
         <a class="mini" href="/games/flash/omok/">
           <span class="shot"><img src="/assets/omok-shot.webp?v=1" alt="나무 15줄 오목판 가장자리에 검은 돌과 흰 돌이 몇 개씩 놓여 있고 가운데에 오목 제목이 있다" width="800" height="500" loading="lazy"><span class="kind">FLASH</span></span>
@@ -2022,121 +1920,60 @@
           <span class="shot"><img src="/assets/baduk-shot.webp?v=1" alt="나무 13줄 바둑판 가장자리에 검은 돌과 흰 돌이 몇 개씩 놓여 있고 가운데에 바둑 제목이 있다" width="800" height="500" loading="lazy"><span class="kind">FLASH</span></span>
           <span class="mbody"><b>바둑</b><i>혼자 두는 바둑게임</i></span>
         </a>
-        <a class="mini" href="/games/jeju/">
-          <span class="shot"><img src="/assets/jeju-shot.webp?v=2" alt="제주 오름 꼭대기 바위 위에 남색 오픈카가 서 있고 남녀와 고양이가 아래로 펼쳐진 제주 들판과 바다를 내려다보며 아래에 흰 BUY JEJU 제목이 있다" width="800" height="500" loading="lazy"></span>
-          <span class="mbody"><b>BUY JEJU</b><i>제주도 땅 사는 오픈월드게임</i></span>
-        </a>
-        <a class="mini" href="/games/flash/bungeoppang/">
-          <span class="shot"><img src="/assets/bungeoppang-shot.webp?v=1" alt="눈 내리는 밤 포장마차 좌판에 무쇠 틀에서 붕어빵 네 마리가 익고 있고 가운데 스텐 대야에 오뎅 꼬치가 누워 있으며 가운데에 붕어빵 제목이 있다" width="800" height="500" loading="lazy"><span class="kind">FLASH</span></span>
-          <span class="mbody"><b>붕어빵</b><i>겨울 노점 방치형게임</i></span>
-        </a>
-        <a class="mini" href="/games/farmonmars/">
-          <span class="shot"><img src="/assets/farmonmars-shot.webp?v=1" alt="노란 화성 땅 위에 곰돌이 로봇과 농장 돔, 기지와 로켓이 있고 오른쪽 위로 초록 도시가 보이며 위에 연두색 팜온마즈 제목이 있다" width="800" height="500" loading="lazy"></span>
-          <span class="mbody"><b>팜온마즈</b><i>화성 농장 건설 방치형게임</i></span>
-        </a>
-        <a class="mini" href="/games/flash/catmobile/">
-          <span class="shot"><img src="/assets/catmobile-shot.webp?v=1" alt="연노랑 하늘에 초록 물고기, 하늘색 공, 노란 별, 나비, 쥐, 빨간 점이 흩어져 있고 가운데에 고양이용 게임 제목이 있다" width="800" height="500" loading="lazy"><span class="kind">FLASH</span></span>
-          <span class="mbody"><b>고양이용 게임</b><i>고양이·아기 터치게임</i></span>
-        </a>
-        <a class="mini" href="/games/flash/boa/">
-          <span class="shot"><img src="/assets/boa-shot.webp?v=1" alt="연둣빛 정글 바닥에 잎이 흩어져 있고 초록 보아뱀이 개구리 쪽으로 기어가며 오른쪽 위에 회색 코끼리가 있고 가운데에 보아뱀 제목이 있다" width="800" height="500" loading="lazy"><span class="kind">FLASH</span></span>
-          <span class="mbody"><b>보아뱀</b><i>코끼리 삼키는 뱀게임</i></span>
-        </a>
-        <a class="mini" href="/games/coinwash/">
-          <span class="shot"><img src="/assets/coinwash-shot.webp?v=2" alt="밤 빨래방 타일 바닥에 세탁기 세 대와 초록 환전기, 파란 의자가 있고 앞치마를 두른 주인이 서 있으며 위에 코인빨래방 제목과 OPEN 24 HOURS 부제가 있다" width="800" height="500" loading="lazy"></span>
-          <span class="mbody"><b>코인빨래방</b><i>빨래방 방치형 경영게임</i></span>
-        </a>
-        <a class="mini" href="/games/boyband/">
-          <span class="shot"><img src="/assets/boyband-shot.webp?v=1" alt="보라색 조명 무대 위에 정장 차림의 50살 프로듀서와 인디밴드 청년 넷이 서 있고, 위에 제발 데뷔해줘 제목이 있다" width="800" height="500" loading="lazy"></span>
-          <span class="mbody"><b>제발 데뷔해줘</b><i>인디밴드 육성 시뮬레이션게임</i></span>
-        </a>
         <a class="mini" href="/games/flash/alkkagi/">
           <span class="shot"><img src="/assets/alkkagi-shot.webp?v=1" alt="나무 바둑판 위에 흰 돌 다섯 개와 검은 돌 다섯 개가 마주 놓여 있고 가운데에 알까기 제목이 있다" width="800" height="500" loading="lazy"><span class="kind">FLASH</span></span>
           <span class="mbody"><b>알까기</b><i>바둑돌 튕기기 게임</i></span>
         </a>
-        <a class="mini" href="/games/castaway/">
-          <span class="shot"><img src="/assets/castaway-shot.webp?v=1" alt="파란 바다 한가운데 뗏목 위에 해진 옷을 입은 수염 난 남자가 낚싯대를 들고 서 있고, 아래에 망망대해 제목이 있다" width="800" height="500" loading="lazy"><span class="kind">GAME</span></span>
-          <span class="mbody"><b>망망대해</b><i>뗏목 낚시 생존게임</i></span>
+      </div>
+      <div class="shelf-head"><h2>퍼즐·캐주얼게임</h2></div>
+      <div class="grid g-small nonew">
+        <a class="mini" href="/games/flash/toycrane/">
+          <span class="shot"><img src="/assets/toycrane-shot.webp?v=1" alt="분홍 인형뽑기 기계 안에서 집게가 인형을 집어 올리는 장면과 아래쪽 인형뽑기게임 제목" width="800" height="500" loading="lazy"><span class="kind">FLASH</span></span>
+          <span class="mbody"><b>인형뽑기</b><i>인형뽑기게임 토이크레인</i></span>
         </a>
-        <a class="mini" href="/games/mini/shibavet/">
-          <span class="shot"><img src="/assets/shibavet-shot.webp?v=1" alt="파란 하늘 아래 나무 이층집과 초록 잔디 마당, 하얀 울타리와 파란 차가 있고 가운데에 시바 병원 가는 날 제목이 있다" width="800" height="500" loading="lazy"><span class="kind">MINI</span></span>
-          <span class="mbody"><b>시바 병원 가는 날</b><i>시바견 잡기 게임</i></span>
+        <a class="mini" href="/games/flash/daltteok/">
+          <span class="shot"><img src="/assets/daltteok-shot.webp?v=1" alt="밤하늘 아래 나무 됫박 안에 웃는 보름달 떡과 딸기찹쌀떡, 인절미, 쑥떡, 송편이 쌓여 있고 달토끼가 꿀떡을 들고 있다. 가운데에 달떡 합치기 제목이 있다" width="800" height="500" loading="lazy"><span class="kind">FLASH</span></span>
+          <span class="mbody"><b>달떡 합치기</b><i>수박게임 합치기게임</i></span>
         </a>
-        <a class="mini" href="/games/fingerkick/">
-          <span class="shot"><img src="/assets/fingerkick-shot.webp?v=3" alt="초록 잔디 탁상 축구장 위에 빨강 말과 파랑 말, 공이 놓여 있고 가운데에 핑거킥 제목이 있다" width="800" height="500" loading="lazy"></span>
-          <span class="mbody"><b>핑거킥</b><i>손가락 축구게임</i></span>
+        <a class="mini" href="/games/flash/bowling/">
+          <span class="shot"><img src="/assets/bowling-shot.webp?v=2" alt="야광 볼링장 레인 끝에서 보라·분홍 무늬 공이 핀 무리에 부딪혀 핀들이 공중으로 튀어 오르고, 위에 와르르 볼링 제목이 빛난다" width="800" height="500" loading="lazy"><span class="kind">FLASH</span></span>
+          <span class="mbody"><b>볼링게임</b><i>3D 볼링게임 · 1인용·2인용</i></span>
         </a>
-        <a class="mini" href="/games/skyrider/">
-          <span class="shot"><img src="/assets/skyrider-shot.webp?v=1" alt="구름 위 돌기둥 꼭대기의 빨간 지붕 식당과 DELIVERY 간판, 그 앞에 배달 오토바이가 서 있고 위에 스카이 라이더 제목이 놓여 있다" width="800" height="500" loading="lazy"></span>
-          <span class="mbody"><b>스카이 라이더</b><i>하늘 오토바이 · 음식 배달</i></span>
+        <a class="mini" href="/games/flash/spotdiff/">
+          <span class="shot"><img src="/assets/spotdiff-shot.webp?v=2" alt="부엌 그림 두 장이 나란히 있고 위에 틀린그림찾기 제목이 있다. 오른쪽 그림은 창틀이 분홍색이고 식탁 위 물건이 달라 두 곳에 초록 동그라미가 쳐져 있다" width="800" height="500" loading="lazy"><span class="kind">FLASH</span></span>
+          <span class="mbody"><b>틀린그림찾기</b><i>두 그림 비교 틀린그림찾기 게임</i></span>
         </a>
-        <a class="mini" href="/games/mini/skijump/">
-          <span class="shot"><img src="/assets/skijump-shot.webp?v=1" alt="눈 덮인 비탈 한가운데 스키를 신은 쿼카가 서 있고, 그 아래 SKI JUMP 라는 제목이 놓여 있다" width="800" height="500" loading="lazy"><span class="kind">MINI</span></span>
-          <span class="mbody"><b>SKI JUMP</b><i>스키점프 · 100스테이지</i></span>
+        <a class="mini" href="/games/flash/taja/">
+          <span class="shot"><img src="/assets/taja-shot.webp?v=1" alt="학교 운동장 트랙 위에 타자연습 달리기 제목이 있고, 토끼와 혀를 내민 거북이가 왼쪽에서, 치타와 웃는 강아지가 오른쪽에서 번호표를 달고 달리고 있다" width="800" height="500" loading="lazy"><span class="kind">FLASH</span></span>
+          <span class="mbody"><b>타자연습 달리기</b><i>한글·영어 타자연습 게임</i></span>
         </a>
-        <a class="mini" href="/games/saab/">
-          <span class="shot"><img src="/assets/saab-shot.webp?v=1" alt="밤의 뉴맨해튼 광장. 상공에 스텔스기가 떠 있고 드론과 휴머노이드 로봇, 6륜 장갑차가 다가온다" width="800" height="500" loading="lazy"><span class="kind">GAME</span></span>
-          <span class="mbody"><b>S.A.A.B.</b><i>FPS게임 · 3D 슈팅게임</i></span>
+        <a class="mini" href="/games/flash/ttang/">
+          <span class="shot"><img src="/assets/ttang-shot.webp?v=2" alt="흙마당에 그린 네모 판에서 파란 땅과 빨간 땅이 모서리부터 넓어져 있고 파란 사금파리가 점선을 그리며 집으로 돌아가려 하며 땅따먹기 제목이 있다" width="800" height="500" loading="lazy"><span class="kind">FLASH</span></span>
+          <span class="mbody"><b>땅따먹기</b><i>1인용·2인용 땅따먹기게임</i></span>
         </a>
-        <a class="mini" href="/games/mini/night-study/">
-          <span class="shot"><img src="/assets/night-study-shot.webp?v=2" alt="어두운 폐교 복도. 양옆으로 낡은 사물함이 늘어서 있고, 손전등 빛이 바닥을 비추며 복도 끝은 캄캄하다" width="800" height="500" loading="lazy"><span class="kind">MINI</span></span>
-          <span class="mbody"><b>야간자율학습</b><i>공포게임 · 폐교 탈출</i></span>
-        </a>
-        <a class="mini" href="/games/making-kimchi/">
-          <span class="shot"><img src="/assets/making-kimchi-shot.webp?v=2" alt="맨해튼 김치가게 안. 묵은지 항아리와 김치가 그득한 빨간 대야, 김치냉장고가 놓여 있고 계산대 앞에 손님이 줄 서 있다" width="800" height="500" loading="lazy"><span class="kind">GAME</span></span>
-          <span class="mbody"><b>메이킹김치</b><i>김치가게 경영 요리게임</i></span>
-        </a>
-        <a class="mini" href="/games/mini/break-it-all/">
-          <span class="shot"><img src="/assets/break-it-all-shot.webp?v=5" alt="밤하늘 아래 강철 아파트가 서 있고, 화면 아래에 형광 노란 패들과 분홍 공이 놓여 있다" width="800" height="500" loading="lazy"><span class="kind">MINI</span></span>
-          <span class="mbody"><b>BREAK IT ALL</b><i>벽돌깨기 · 건물 100채</i></span>
-        </a>
-        <a class="mini" href="/games/mini/pixl/">
-          <span class="shot"><img src="/assets/pixl-shot.webp?v=2" alt="" width="800" height="500" loading="lazy"><span class="kind">MINI</span></span>
-          <span class="mbody"><b>PIXL</b><i>직소퍼즐 · 128판</i></span>
-        </a>
-        <a class="mini" href="/games/mini/crispy/">
-          <span class="shot"><img src="/assets/crispy-shot.webp?v=2" alt="" width="800" height="500" loading="lazy"><span class="kind">MINI</span></span>
-          <span class="mbody"><b>CRISPY</b><i>육각 크래커 터뜨리기 퍼즐</i></span>
-        </a>
-        <a class="mini" href="/games/oreumkil/">
-          <span class="shot"><img src="/assets/oreumkil-shot.webp" alt="흑백 실루엣 화면, 구덩이 앞에 선 주인공과 마른 나무들" width="800" height="500" loading="lazy"><span class="kind">GAME</span></span>
-          <span class="mbody"><b>OREUMKIL</b><i>고장난 물리엔진</i></span>
-        </a>
-        <a class="mini" href="/games/mini/doldam/">
-          <span class="shot"><img src="/assets/doldam-shot.webp?v=4" alt="" width="800" height="500" loading="lazy"><span class="kind">MINI</span></span>
-          <span class="mbody"><b>돌담 DOLDAM</b><i>특수 블록이 터지는 블록 퍼즐</i></span>
-        </a>
-        <a class="mini" href="/games/mini/pairboom/">
-          <span class="shot"><img src="/assets/pairboom-shot.webp?v=1" alt="" width="800" height="500" loading="lazy"><span class="kind">MINI</span></span>
-          <span class="mbody"><b>PAIRBOOM!!</b><i>짝 잇기 퍼즐 · 100단계</i></span>
-        </a>
-        <a class="mini" href="/games/mini/oreumnyang/">
-          <span class="shot"><img src="/assets/oreumnyang-shot-2.webp" alt="" width="800" height="500" loading="lazy"><span class="kind">MINI</span></span>
-          <span class="mbody"><b>오름냥</b><i>고양이 3매치 · 200판</i></span>
-        </a>
-        <a class="mini" href="/games/mini/slip-cat/">
-          <span class="shot"><img src="/assets/slip-cat-shot.webp?v=3" alt="" width="800" height="500" loading="lazy"><span class="kind">MINI</span></span>
-          <span class="mbody"><b>SLIP CAT</b><i>낙하하는 물건 피하기</i></span>
-        </a>
-        <a class="mini" href="/games/mini/life-logistics/">
-          <span class="shot"><img src="/assets/life-logistics-shot.webp" alt="" width="800" height="500" loading="lazy"><span class="kind">MINI</span></span>
-          <span class="mbody"><b>LIFE LOGISTICS</b><i>1인칭 창고 작업</i></span>
-        </a>
-        <a class="mini" href="/games/immortality/">
-          <span class="shot"><img src="/assets/teaser-immortality.webp?v=3" alt="2300년 서울, 스무 살 얼굴의 두 사람" width="800" height="500" loading="lazy"><span class="kind">GAME</span></span>
-          <span class="mbody"><b>영생의 가격</b><i>내러티브 생존 어드벤처</i></span>
-        </a>
-        <a class="mini" href="/games/lulu/">
-          <span class="shot"><img src="/assets/lulu-shot.webp?v=3" alt="밀짚모자를 쓴 루루가 풀밭에 서 있고, 뒤로 귤밭과 돌담, 창고와 바다가 보인다" width="800" height="500" loading="lazy"><span class="kind">GAME</span></span>
-          <span class="mbody"><b>루루냥의 제주살이</b><i>3D 생활 시뮬레이션</i></span>
-        </a>
+      </div>
+      <div class="shelf-btns"><a class="shelf-all" href="/games/">게임 전체 보기 →</a><a class="shelf-all shelf-search" href="/games/"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></svg>게임 검색하기</a></div>
+      <script>document.querySelector(".shelf-search").addEventListener("click",function(e){var b=document.querySelector(".nav .navsearch");if(!b)return;e.preventDefault();b.click()})</script>
+      <div class="shelf-head"><h2>APPS</h2></div>
+      <div class="grid nonew">
         <a class="mini" href="/saju/">
           <span class="shot"><img src="/assets/saju-cover2.webp" alt="별자리와 음양을 겹쳐 그린 금빛 원반" width="800" height="500" loading="lazy"><span class="kind">APPS</span></span>
-          <span class="mbody"><b>MBTI사주</b><i>사주 × MBTI 성향 분석</i></span>
+          <span class="mbody"><b>MBTI사주</b><i>무료사주 · 무료궁합 · 토정비결</i></span>
         </a>
-      <!-- CARDS:end -->
-        <a class="mini more-card" href="/games/"><span class="mc"><b>게임<br>전체 보기</b><i>무료 웹게임</i></span></a>
+        <a class="mini" href="/apps/iqtest/">
+          <span class="shot"><img src="/assets/iqtest-cover.webp?v=1" alt="시험지 종이 바탕에 언어, 논리수학, 공간, 음악, 신체운동, 대인관계, 자기성찰, 자연탐구 여덟 칸의 빨간 8각 그래프가 있고 아래에 다중지능 테스트 제목을 쓴 그림" width="800" height="500" loading="lazy"><span class="kind">APPS</span></span>
+          <span class="mbody"><b>다중지능 테스트</b><i>재미로 하는 IQ테스트 EQ테스트</i></span>
+        </a>
+        <a class="mini" href="/apps/piano/">
+          <span class="shot"><img src="/assets/piano-cover.webp?v=5" alt="검은 피아노 판 위로 금색 음표 막대가 떨어지고 아래에 흰·검은 건반이 놓인 그림" width="800" height="500" loading="lazy"><span class="kind">APPS</span></span>
+          <span class="mbody"><b>피아노 연습</b><i>피아노 배우기 · 계이름 · 악보 읽기</i></span>
+        </a>
+        <a class="mini" href="/apps/hanja-search/">
+          <span class="shot"><img src="/assets/hanja-cover.webp?v=1" alt="필기판에 손으로 그린 한자 漢 과 그 옆에 뜬 한자 후보 넉 장" width="800" height="500" loading="lazy"><span class="kind">APPS</span></span>
+          <span class="mbody"><b>한자 검색 필기 입력기</b><i>한자찾기 · 그려서 · 음·뜻·부수로</i></span>
+        </a>
       </div>
+      <!-- HOME:end -->
       <!-- ⚠ 2026-08-21 디자인 개편에서 대문의 한글 본문이 통째로 사라졌다.
            화면에 보이는 한글이 475자 → 209자로 줄면서 네이버·다음의 한글 「오름게임즈」
            검색에서 사이트가 아예 안 잡히게 됐다. 이 문단이 그 자리를 메운다.
