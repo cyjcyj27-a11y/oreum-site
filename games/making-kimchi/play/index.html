@@ -205,6 +205,8 @@ var TR = EN ? {" (그래도 모자람)": " (still short)", " style=\"margin-top:
 /* 차림표 칸이 좁아 영문판만 짧은 이름을 쓴다 */
 var MENUSHORT = {baechu:'Baechu',kkakdugi:'Kkakdugi',chonggak:'Chonggak',oisobagi:'Oi-sobagi',
   pa:'Pa',yeolmu:'Yeolmu',gat:'Gat',baek:'Baek',dongchimi:'Dongchimi',mukeunji:'Mukeunji'};
+if(TR) TR["속이 안 들어간 데를 찾아 문지르세요 — 같은 데를 벅벅 밀면 잎이 뭉개집니다"]=
+  "Find the leaves with no filling yet and rub — scrubbing the same spot bruises the leaves";
 function L$(s){ var v; return (EN && (v=TR[s])!==undefined) ? v : s; }
 function applyLang(){
   if(!EN) return;
@@ -3811,8 +3813,28 @@ function uiBowl(){
 }
 
 /* ── 5) 버무리기 — 손으로 문지르면 빨간 양념이 스며듭니다 ───── */
+/* 백김치는 고춧가루가 없으니 장갑 끝의 빨간 양념을 지운 그림을 씁니다 */
+var CLEANGLOVE=null;
+function cleanGlove(){
+  if(CLEANGLOVE) return CLEANGLOVE;
+  var G=sprite('glove'); if(!G) return null;
+  var cv=document.createElement('canvas'); cv.width=G.width; cv.height=G.height;
+  var x=cv.getContext('2d'); x.drawImage(G,0,0);
+  var d=x.getImageData(0,0,cv.width,cv.height), a=d.data;
+  for(var i=0;i<a.length;i+=4){
+    var r=a[i],g=a[i+1],b=a[i+2];
+    if(!a[i+3]||!r) continue;
+    /* 분홍 장갑은 파랑이 빨강의 6할쯤 — 그보다 파랑이 빠질수록 빨간 양념으로 보고 장갑색으로 덮습니다 */
+    var wq=Math.max(0,Math.min(1,(.6-b/r)/.2));
+    if(wq>0){
+      var l=Math.max(.9,Math.min(1.04,.9+((r+g+b)/3-60)/400));
+      a[i]=r+(214*l-r)*wq; a[i+1]=g+(98*l-g)*wq; a[i+2]=b+(132*l-b)*wq;
+    }
+  }
+  x.putImageData(d,0,0); CLEANGLOVE=cv; return cv;
+}
 function mixGame(){
-  var k=BYID[B.kid], mx=k.mix, done=false, alive=true;
+  var k=BYID[B.kid], mx=k.mix, done=false, alive=true, WHITE=(B.kid==='baek');
   showOv('👐 '+mx.title+' — '+k.name,L$('손으로 문질러 양념을 입히세요'),
     mgStage(),L$('<button class="btn" id="fin" disabled>손가락으로 문질러 주세요</button>'),
     false,null,true);
@@ -3830,7 +3852,7 @@ function mixGame(){
   var covered=0, dist=0, drawing=false, last=null, hand=null, sheens=[];
   var limit=(mx.delicate?3.0:4.8)*w;
   function drawHand(x,y){
-    var GV=sprite('glove');
+    var GV=WHITE?cleanGlove():sprite('glove');
     c.save(); c.translate(x,y);
     if(GV){
       c.rotate(-.35);
@@ -3845,8 +3867,8 @@ function mixGame(){
       rr(c,-16,-12,32,26,12); c.fill();
       for(var f2=0;f2<4;f2++){ rr(c,-14+f2*8,-24,7,16,3.5); c.fill(); }
       rr(c,14,-8,9,15,4.5); c.fill();
-      c.fillStyle='rgba(200,60,40,.35)';
-      rr(c,-12,-20,24,12,6); c.fill();
+      if(!WHITE){ c.fillStyle='rgba(200,60,40,.35)';
+      rr(c,-12,-20,24,12,6); c.fill(); }
     }
     c.restore();
   }
@@ -3855,7 +3877,8 @@ function mixGame(){
     /* 밑그림 + 양념 겹치기 */
     c.drawImage(AL.cv,0,0,w,h);
     var covF=cells?covered/cells:0, doneIm=sprite('cab_done');
-    var t2=(doneIm&&(B.kid==='baechu'||B.kid==='baek'))?clamp((covF-.8)/.2,0,1):0;
+    /* 빨간 완성컷은 배추김치만 — 백김치는 하얀 배추에 속만 박힌 채로 끝납니다 */
+    var t2=(doneIm&&B.kid==='baechu')?clamp((covF-.8)/.2,0,1):0;
     var t=document.createElement('canvas'); t.width=pas.width; t.height=pas.height;
     var tc=t.getContext('2d'); tc.drawImage(pas,0,0);
     tc.globalCompositeOperation='destination-in'; tc.drawImage(AL.cv,0,0);
@@ -3867,7 +3890,7 @@ function mixGame(){
     }
     /* 양념의 윤기 */
     sheens.forEach(function(s2){
-      c.save(); c.globalAlpha=s2.a; c.strokeStyle='#ffd9c2'; c.lineWidth=2.4; c.lineCap='round';
+      c.save(); c.globalAlpha=s2.a; c.strokeStyle=WHITE?'#ffffff':'#ffd9c2'; c.lineWidth=2.4; c.lineCap='round';
       c.beginPath(); c.moveTo(s2.x-8,s2.y+3); c.quadraticCurveTo(s2.x,s2.y-4,s2.x+9,s2.y+1);
       c.stroke(); c.restore(); });
     if(hand) drawHand(hand.x,hand.y);
@@ -3875,24 +3898,38 @@ function mixGame(){
     stageMeter(c,12,meterY(h,w*.36,1),w*.36,(mx.mode==='stuff'?L$('속이 찬 정도'):L$('양념 입힘'))+' '+
       Math.round(cov*100)+'%',cov);
     stageMeter(c,12,meterY(h,w*.36,0),w*.36,L$('잎 뭉개짐'),ow,ow<.4?'#e8c05f':'#d6704f');
-    if(!done) stageHint(c,w,h,L$('하얀 데를 찾아 문지르세요 — 같은 데를 벅벅 밀면 잎이 뭉개집니다'),true);
+    if(!done) stageHint(c,w,h,WHITE?L$('속이 안 들어간 데를 찾아 문지르세요 — 같은 데를 벅벅 밀면 잎이 뭉개집니다')
+      :L$('하얀 데를 찾아 문지르세요 — 같은 데를 벅벅 밀면 잎이 뭉개집니다'),true);
   }
   function tick(){ if(!alive) return;
     sheens.forEach(function(s2){ s2.a-=.015; });
     sheens=sheens.filter(function(s2){ return s2.a>0; });
     draw(); requestAnimationFrame(tick); }
   requestAnimationFrame(tick);
+  /* 백김치 속 — 배채·밤채·쪽파·마늘채가 처음 닿은 잎에 한 가닥씩 박힙니다 */
+  var SC=['#f6edc8','#ecd08a','#86b85a','#fbf7ea','#f3e3b0'];
+  function shred(x,y,cw){
+    var ln=cw*(.55+Math.random()*.5);
+    pc2.save(); pc2.translate(x+(Math.random()-.5)*cw*.6,y+(Math.random()-.5)*cw*.6); pc2.rotate(Math.random()*3.14);
+    pc2.fillStyle=SC[(Math.random()*SC.length)|0];
+    pc2.strokeStyle='rgba(120,100,60,.4)'; pc2.lineWidth=.8;
+    rr(pc2,-ln/2,-cw*.07,ln,cw*.14,cw*.07); pc2.fill(); pc2.stroke();
+    pc2.restore();
+  }
   function brush(p){
     var R=w*.075, gained=0;
-    pc2.fillStyle=k.color; pc2.globalAlpha=.55;
-    pc2.beginPath(); pc2.arc(p.x,p.y,R,0,7); pc2.fill(); pc2.globalAlpha=1;
+    if(!WHITE){
+      pc2.fillStyle=k.color; pc2.globalAlpha=.55;
+      pc2.beginPath(); pc2.arc(p.x,p.y,R,0,7); pc2.fill(); pc2.globalAlpha=1;
+    }
     var cw2=w/N, ch2=h/N;
     var x0=Math.max(0,Math.floor((p.x-R)/cw2)), x1=Math.min(N-1,Math.floor((p.x+R)/cw2));
     var y0=Math.max(0,Math.floor((p.y-R)/ch2)), y1=Math.min(N-1,Math.floor((p.y+R)/ch2));
     for(var yy=y0;yy<=y1;yy++) for(var xx=x0;xx<=x1;xx++){
       var i2=yy*N+xx; if(cell[i2]!==0) continue;
       var dx=(xx+.5)*cw2-p.x, dy=(yy+.5)*ch2-p.y;
-      if(dx*dx+dy*dy<=R*R){ cell[i2]=1; covered++; gained++; } }
+      if(dx*dx+dy*dy<=R*R){ cell[i2]=1; covered++; gained++;
+        if(WHITE) shred((xx+.5)*cw2,(yy+.5)*ch2,cw2); } }
     if(gained>0){ sfx('squish');
       if(Math.random()<.3)
         sheens.push({x:p.x+(Math.random()-.5)*R,y:p.y+(Math.random()-.5)*R,a:.7}); }
@@ -4719,7 +4756,7 @@ function closeShop(sold){
     L$('아무 문제 없었습니다.</p></div>');
   got.forEach(function(k){
     h+='<div class="ucard" style="margin-top:6px;padding:7px 11px">'+
-      '<img src="'+ART.cab_done+'" style="width:52px;height:52px;object-fit:contain;flex:0 0 auto" alt="">'+
+      '<img src="'+(doneURL(k.id)||ART.cab_done)+'" style="width:52px;height:52px;object-fit:contain;flex:0 0 auto" alt="">'+
       '<div style="flex:1;min-width:0;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">'+
         '<b style="font-size:18px">'+k.name+'</b>'+
         '<span style="font-size:14px;font-weight:800;color:#a8712a">'+won(jarPrice(k,{stars:4}))+
