@@ -7,7 +7,7 @@
 
 games/index.html 의 카드 순서에서 최신 게임을 골라 3×2 모음 그림을 굽습니다.
   · 가운데: GAMES 칸 앞 3장 + 플래시 칸 앞 3장 / 양옆: 그다음 4장씩
-  · 결과: assets/og-image.jpg (1200×630) — 대문·GAMES 허브(한·영)가 이 파일 하나를 씁니다
+  · 결과: assets/og-image.jpg (1200×600) — 대문·GAMES 허브(한·영)가 이 파일 하나를 씁니다
 새 게임을 올리고 카드를 앞에 넣은 뒤 이걸 한 번 돌리면 카카오톡·디스코드 미리보기가 최신 게임으로 바뀝니다.
 (카카오톡은 주소별로 미리보기를 오래 기억하므로, 안 바뀌면 developers.kakao.com/tool/clear/og 에서 초기화)
 
@@ -18,7 +18,7 @@ from PIL import Image, ImageDraw
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(ROOT, "assets", "og-image.jpg")
-W, H = 1200, 630
+W, H = 1200, 600   # 사장님 2026-10-21 카톡이 1200×630 을 빌런라이크 한 칸만 잘라 보여 줌 → 카톡이 자르지 않는 2:1 로
 
 
 def cards_after(html, marker, n):
