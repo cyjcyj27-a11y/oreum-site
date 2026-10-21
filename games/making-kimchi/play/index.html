@@ -2459,6 +2459,7 @@ function pointerOn(el,down,move,up){
   el.addEventListener('pointermove',function(e){ move(pt(e)); });
   ['pointerup','pointercancel'].forEach(function(ev){ el.addEventListener(ev,function(){ up(); }); });
 }
+var VEGFLAT=false;   /* 도마에 눕혀 썰 때는 재료 그림자를 빼고 그립니다 */
 var VEG={
  baechu:function(c,W,H){
    /* 반으로 가른 통배추 — 밑동의 하얀 줄기가 부챗살로 퍼지고,
@@ -2584,8 +2585,8 @@ var VEG={
    [[.30,-.05],[.70,.05]].forEach(function(q){
      c.save(); c.translate(W*q[0],H*.5); c.rotate(q[1]);
      var len=H*.78, rad=W*.082;
-     c.fillStyle='rgba(60,80,30,.18)';
-     c.beginPath(); c.ellipse(rad*.4,len*.44,rad*1.1,rad*.4,0,0,7); c.fill();
+     if(!VEGFLAT){ c.fillStyle='rgba(60,80,30,.18)';
+     c.beginPath(); c.ellipse(rad*.4,len*.44,rad*1.1,rad*.4,0,0,7); c.fill(); }
      var g=c.createLinearGradient(-rad,0,rad,0);
      g.addColorStop(0,'#31651f'); g.addColorStop(.35,'#4f8f32');
      g.addColorStop(.62,'#5da13c'); g.addColorStop(1,'#2c5a1e');
@@ -2622,8 +2623,8 @@ var VEG={
  },
  pa:function(c,W,H){
    /* 쪽파 단 — 흰 밑동에서 짙은 초록 잎이 갈라져 오르고, 아래엔 잔뿌리 (사진을 보고 그림) */
-   c.fillStyle='rgba(80,60,35,.15)';
-   c.beginPath(); c.ellipse(W*.5,H*.90,W*.36,H*.045,0,0,7); c.fill();
+   if(!VEGFLAT){ c.fillStyle='rgba(80,60,35,.15)';
+   c.beginPath(); c.ellipse(W*.5,H*.90,W*.36,H*.045,0,0,7); c.fill(); }
    for(var i=0;i<9;i++){
      var x=W*(.17+i*.082)+(i%2?W*.011:0), sway=(i-4)*.016;
      /* 잎 — 두 갈래, 결이 다른 초록 */
@@ -2724,7 +2725,7 @@ function cleaf(c,x0,y0,x1,y1,w,lob,lite,dark,vein,bend){
 /* 흰 무 몸통 — 어깨 연두, 몸통 흰색, 오른쪽 아래 그늘, 윤기, 꼬리 */
 function radishBody(c,cx,cy,rx,ry,ang,shoulder){
   c.save(); c.translate(cx,cy); c.rotate(ang);
-  c.fillStyle='rgba(80,55,30,.11)';
+  c.fillStyle=VEGFLAT?'rgba(0,0,0,0)':'rgba(80,55,30,.11)';
   c.beginPath(); c.ellipse(rx*.18,ry*.72,rx*.95,ry*.2,0,0,7); c.fill();
   var g=c.createLinearGradient(0,-ry,0,ry);
   g.addColorStop(0,shoulder||'#9cc96a'); g.addColorStop(.26,'#d9ebb8');
@@ -2814,8 +2815,8 @@ VEG.yeolmu=function(c,W,H){
 /* 갓 — 자줏빛이 번지는 주름진 큰 잎, 자주색 줄기, 한 단 */
 VEG.gat=function(c,W,H){
   var bx=W*.5, by=H*.94;
-  c.fillStyle='rgba(60,40,30,.16)';
-  c.beginPath(); c.ellipse(W*.5,H*.95,W*.34,H*.035,0,0,7); c.fill();
+  if(!VEGFLAT){ c.fillStyle='rgba(60,40,30,.16)';
+  c.beginPath(); c.ellipse(W*.5,H*.95,W*.34,H*.035,0,0,7); c.fill(); }
   var L=[[-.95,.95],[.95,.95],[-.62,.92],[.62,.92],[-.3,.98],[.3,.98],[0,1]];
   L.forEach(function(q,i){
     var a=-Math.PI/2+q[0]*.62, len=H*.64*q[1];
@@ -3166,48 +3167,142 @@ function washGame(){
 }
 
 /* ── 2) 썰기 — 큼직한 재료를 칼로 직접 가릅니다 ─────────────── */
+/* 썰기 — 재료마다 실제로 써는 방식대로 (2026-10-21)
+   배추: 반쪽 둘을 세워 밑동부터 결 따라 쪼개 4등분 · 무: 통썰기 뒤 깍둑 · 오이: 양끝 자르고 토막
+   쪽파·갓: 뿌리와 시든 끝만 다듬기 · 동치미무: 꼬리 잔뿌리만 · 총각무: 세로로 반 가르기 · 열무: 5cm 토막
+   칼에 잘린 조각은 도마 위에 그대로 남고, 옆으로 살짝 밀리거나(써는 것) 떨어져 나갑니다(다듬는 것). */
+var CUTPLAN={
+  /* x: 그림 폭 비율, b: 이 칼이 닿는 줄(위·아래 비율), m: slide(밀림)·split(쪼갬)·dropR/dropL(다듬어 버림) */
+  baechu:{rot:0, raw:1, cuts:[{x:.75,m:'split',tear:1},{x:.25,m:'split',tear:1}]},
+  baechu1:{rot:0, cuts:[{x:.5,m:'split',tear:1}]},   /* 배추 그림이 없을 때 — 손그림 반쪽 하나 */
+  mu:{rot:0, cuts:[{x:.66,m:'slide'},{x:.55,m:'slide'},{x:.44,m:'slide'},{x:.33,m:'slide'}], dice:1},
+  oi:{rot:1, cuts:[{y:.86,m:'dropR'},{y:.63,m:'slide'},{y:.40,m:'slide'},{y:.15,m:'dropL'}]},
+  pa:{rot:1, cuts:[{y:.875,m:'dropR'},{y:.17,m:'dropL'}]},
+  gat:{rot:1, cuts:[{y:.905,m:'dropR'},{y:.13,m:'dropL'}]},
+  yeolmu:{rot:0, cuts:[{x:.70,m:'slide'},{x:.52,m:'slide'},{x:.34,m:'slide'}]},
+  chonggak:{rot:0, cuts:[{x:.79,m:'split'},{x:.60,m:'split'},{x:.41,m:'split'},{x:.22,m:'split'}]},
+  murad:{rot:1, cuts:[{y:.645,f:.83,m:'dropR'},{y:.645,f:.61,m:'dropR'},{y:.645,f:.39,m:'dropR'},{y:.645,f:.17,m:'dropR'}]}
+};
+/* 썬 단면 색 — 오이 속살은 연두, 무·배추는 흰빛 */
+var FACE={oi:'rgba(214,236,168,.95)',baechu:'rgba(250,248,232,.9)',pa:'rgba(238,246,214,.9)',
+  gat:'rgba(214,232,170,.9)',yeolmu:'rgba(220,238,190,.9)'};
 function uiBoard(){
   if(!needStage(1,B&&B.stage<1?L$('먼저 <b>싱크대</b>에서 씻으세요'):L$('이미 썰었습니다'))) return;
-  var k=BYID[B.kid], N=k.cut.lines.length, cur=0, res=[], done=false, alive=true;
+  var k=BYID[B.kid], veg=k.cut.veg, CAB=(veg==='baechu')&&sprite('cab_fresh');
+  var PL=(veg==='baechu'&&!CAB)?CUTPLAN.baechu1:(CUTPLAN[veg]||CUTPLAN.mu);
+  var N=PL.cuts.length, cur=0, res=[], done=false, alive=true;
   showOv('🔪 '+k.cut.title,L$('과녁에 맞춰 탭!'), mgStage(),'',false,null,true);
   var g=fitStage(), c=g.c, el=g.el, w=g.w, h=g.h;
-  /* 재료를 딴 화면에 구워 두고 조각으로 잘라 쓴다 */
-  var vw=Math.round(w*.5), vh=Math.round(h*.52);
+  /* 재료를 딴 화면에 한 번 그려 두고, 칼금 따라 오려 낸 조각으로 씁니다 */
+  var vw=Math.round(w*.5), vh=Math.round(h*.56);
   var vegCv=document.createElement('canvas'); vegCv.width=vw; vegCv.height=vh;
   var vc=vegCv.getContext('2d');
-  if(!stageSubject(vc,vw,vh,B.kid,null,{state:'cab_fresh'})) stageVeg(vc,vw,vh,B.kid);
-  var boardY=h*.74, vx=w*.14, vy=boardY-vh*.92;
-  var SUBL=vw*.16, SUBR=vw*.85;   /* 그림 여백 빼고 재료 위만 */
-  var lastCut=SUBR, pieces=[], chips=[];
-  var mk=0, mkDir=1, knife={y:0,anim:0};
-  function targetX(){ return SUBL+(SUBR-SUBL)*(1-(cur+1)/(N+1)); }
+  var cuts=[], startPieces=null;
+  if(CAB){
+    /* 반 가른 배추 두 쪽을 밑동이 아래로 오게 세워 나란히 */
+    var ang=-0.86, cw=CAB.width, ch=CAB.height;
+    var bw=Math.abs(cw*Math.cos(ang))+Math.abs(ch*Math.sin(ang)),
+        bh=Math.abs(cw*Math.sin(ang))+Math.abs(ch*Math.cos(ang));
+    var s=Math.min(vh*.96/(Math.sqrt(cw*cw+ch*ch)*.84), vw*.5/bw*1.6);
+    [[.25,1],[.75,-1]].forEach(function(q){
+      vc.save(); vc.translate(vw*q[0],vh*.5); vc.scale(q[1],1); vc.rotate(ang); vc.scale(s,s);
+      vc.drawImage(CAB,-cw/2,-ch/2); vc.restore();
+    });
+    var mid={x:vw*.5}; cuts.push(mid);
+    startPieces=[{L:null,R:mid,y0:0,y1:vh},{L:mid,R:null,y0:0,y1:vh}];
+  } else if(PL.rot){
+    /* 뿌리·꼭지가 오른쪽으로 가게 눕혀서 */
+    vc.save(); vc.translate(0,vh); vc.rotate(-Math.PI/2);
+    vc.translate(vh*STAGE.x0,vw*STAGE.y0);
+    VEGFLAT=true;
+    try{ (VEG[veg]||VEG.mu)(vc,vh*(STAGE.x1-STAGE.x0),vw*(STAGE.y1-STAGE.y0)); } finally { VEGFLAT=false; }
+    vc.restore();
+  } else stageVeg(vc,vw,vh,B.kid);
+  /* 그림 좌표: 눕힌 그림은 VEG 의 (fx,fy) → x=폭*(.09+.78fy), y=높이*(.83-.66fx) */
+  function cutX(q){ return PL.raw ? vw*q.x : q.y!=null ? vw*(.09+.78*q.y) : vw*(.17+.66*q.x); }
+  function cutBand(q){
+    if(q.f==null) return [0,vh];
+    var cy=vh*(.83-.66*q.f); return [cy-vh*.1,cy+vh*.1];
+  }
+  var pieces=startPieces||[{L:null,R:null,y0:0,y1:vh}];
+  if(PL.cuts.some(function(q){ return q.f!=null; })){
+    /* 줄마다 따로 다듬는 재료는 처음부터 줄로 나눠 둡니다 */
+    pieces=[]; var bands=PL.cuts.map(cutBand).sort(function(a,b){ return a[0]-b[0]; });
+    bands.forEach(function(bd,i){
+      var y0=i?(bands[i-1][1]+bd[0])/2:0, y1=i<bands.length-1?(bd[1]+bands[i+1][0])/2:vh;
+      pieces.push({L:null,R:null,y0:y0,y1:y1});
+    });
+  }
+  pieces.forEach(function(p){ p.ox=0; p.oy=0; p.rot=0; p.tx=0; p.ty=0; p.tr=0; p.a=1; });
+  var sd=7; function rnd2(){ sd=(sd*16807)%2147483647; return sd/2147483647; }
+  /* 칼금 — 곧은 칼자국, 배추는 밑동만 칼로 내고 위는 손으로 찢어 결 따라 갈라짐 */
+  function makeLine(x,tear){
+    var pts=[], ph=rnd2()*6;
+    for(var y=0;y<=vh;y+=4){
+      var off=0;
+      if(tear&&y<vh*.74){ var t=1-y/(vh*.74);
+        off=(Math.sin(y*.09+ph)*4+Math.sin(y*.23+ph*2)*2.2)*Math.min(1,t*3); }
+      pts.push([x+off,y]);
+    }
+    return {x:x,pts:pts};
+  }
+  function lineAt(L,y,dflt){ if(!L) return dflt; if(!L.pts) return L.x;
+    var i=Math.max(0,Math.min(L.pts.length-1,Math.round(y/4))); return L.pts[i][0]; }
+  function pieceHas(p,x,band){
+    var my=(Math.max(p.y0,band[0])+Math.min(p.y1,band[1]))/2;
+    if(Math.min(p.y1,band[1])-Math.max(p.y0,band[0])<4) return false;
+    return lineAt(p.L,my,-1)<x && x<lineAt(p.R,my,vw+1);
+  }
+  function clipPiece(cx,p){
+    cx.beginPath();
+    var y, first=true;
+    for(y=p.y0;y<=p.y1;y+=4){ var lx=lineAt(p.L,y,-2); cx[first?'moveTo':'lineTo'](lx,y); first=false; }
+    for(y=p.y1;y>=p.y0;y-=4) cx.lineTo(lineAt(p.R,y,vw+2),y);
+    cx.closePath();
+  }
+  function pivot(p){
+    var l=lineAt(p.L,p.y1,0), r=lineAt(p.R,p.y1,vw);
+    return [(l+r)/2,p.y1];
+  }
+  var GAP=Math.max(7,vw*.028);
+  var boardY=h*.78, vx=w*.12, vy=boardY-vh*.96;
+  var mk=0, mkDir=1, knife={y:0,anim:0}, chips=[], dice=null, diceT=0;
+  var SW0=vw*.06, SW1=vw*1.02;     /* 칼이 오가는 폭 */
+  function curPiece(){
+    var q=PL.cuts[cur], x=cutX(q), bd=cutBand(q);
+    for(var i=0;i<pieces.length;i++) if(pieces[i].a>.5&&pieceHas(pieces[i],x,bd)) return pieces[i];
+    return null;
+  }
+  function targetScreen(){
+    var q=PL.cuts[cur], p=curPiece();
+    return vx+cutX(q)+(p?p.ox:0);
+  }
   function draw(){
     stageBG(c,w,h);
-    /* 도마 */
-    c.fillStyle='rgba(0,0,0,.18)'; rr(c,vx-w*.04,boardY+6,vw+w*.30,14,7); c.fill();
-    box(c,vx-w*.04,boardY-10,vw+w*.30,22,10,'#c9a066','#8a5a2d');
-    /* 남은 재료 */
-    if(lastCut>2) c.drawImage(vegCv,0,0,lastCut,vh, vx,vy,lastCut,vh);
-    /* 잘린 조각들 */
+    c.fillStyle='rgba(0,0,0,.18)'; rr(c,vx-w*.04,boardY+6,vw+w*.34,14,7); c.fill();
+    box(c,vx-w*.04,boardY-10,vw+w*.34,22,10,'#c9a066','#8a5a2d');
     pieces.forEach(function(p){
-      c.save(); c.translate(p.x,p.y); c.rotate(p.rot);
-      c.drawImage(vegCv,p.sx,0,p.sw,vh, -p.sw/2,-vh/2,p.sw,vh);
+      if(p.a<=0) return;
+      var pv=pivot(p);
+      c.save(); c.globalAlpha=p.a;
+      c.translate(vx+p.ox+pv[0],vy+p.oy+pv[1]); c.rotate(p.rot); c.translate(-pv[0],-pv[1]);
+      clipPiece(c,p); c.save(); c.clip(); c.drawImage(vegCv,0,0); c.restore();
       c.restore();
     });
+    c.globalAlpha=1;
+    if(dice) drawDice(Math.min(1,diceT));
     if(!done){
-      /* 과녁 — 다음 칼자리 */
-      var tx=vx+targetX(), pulse=1+Math.sin(now()*6)*.12;
+      var q=PL.cuts[cur], bd=cutBand(q), tx=targetScreen(), pulse=1+Math.sin(now()*6)*.12;
+      var ty0=vy+bd[0]-10, ty1=Math.min(boardY,vy+bd[1]);
       c.strokeStyle='rgba(255,70,45,.9)'; c.lineWidth=3; c.setLineDash([8,7]);
-      c.beginPath(); c.moveTo(tx,vy-14); c.lineTo(tx,boardY); c.stroke(); c.setLineDash([]);
+      c.beginPath(); c.moveTo(tx,ty0); c.lineTo(tx,ty1); c.stroke(); c.setLineDash([]);
       c.fillStyle='#fff6ea'; c.strokeStyle='#e04a30'; c.lineWidth=3.5;
-      c.beginPath(); c.arc(tx,vy-30,13*pulse,0,7); c.fill(); c.stroke();
+      c.beginPath(); c.arc(tx,ty0-16,13*pulse,0,7); c.fill(); c.stroke();
       c.fillStyle='#e04a30'; c.font='900 15px Jua,sans-serif';
-      c.textAlign='center'; c.textBaseline='middle'; c.fillText('▼',tx,vy-29);
-      /* 움직이는 칼 */
-      var kx=vx+SUBL+mk*(lastCut-SUBL);
+      c.textAlign='center'; c.textBaseline='middle'; c.fillText('▼',tx,ty0-15);
+      var kx=vx+SW0+mk*(SW1-SW0);
       c.save(); c.translate(kx,vy-6+knife.y); c.rotate(knife.anim*.18);
       drawKnife(c,h*.40); c.restore();
-      /* 칼 위치 안내선 */
       c.strokeStyle='rgba(255,255,255,.45)'; c.lineWidth=2;
       c.beginPath(); c.moveTo(kx,vy-12); c.lineTo(kx,boardY); c.stroke();
     }
@@ -3217,42 +3312,91 @@ function uiBoard(){
     stageMeter(c,12,meterY(h,w*.34,0),w*.34,L$('칼질 ')+Math.min(cur+1,N)+' / '+N, cur/N);
     if(!done) stageHint(c,w,h,L$('칼이 과녁 위에 올 때 누르세요'),true);
   }
+  /* 깍둑썰기 — 썬 무가 2.5cm 주사위로 */
+  function makeDice(){
+    var s=Math.max(12,vh*.11), list=[], cols=7, rows=3;
+    for(var r=0;r<rows;r++) for(var i=0;i<cols-r;i++)
+      list.push({x:vx+vw*.18+(i+r*.5)*s*1.06+(rnd2()-.5)*s*.25, y:boardY-12-s*.55-r*s*.78+(rnd2()-.5)*3,
+        s:s*(.92+rnd2()*.12), r:(rnd2()-.5)*.35});
+    return list;
+  }
+  function drawDice(a){
+    c.save(); c.globalAlpha=a;
+    dice.forEach(function(d){
+      c.save(); c.translate(d.x,d.y); c.rotate(d.r);
+      var s=d.s, t=s*.28;
+      c.fillStyle='rgba(80,55,30,.18)'; c.beginPath(); c.ellipse(t*.3,s*.52,s*.62,s*.12,0,0,7); c.fill();
+      c.fillStyle='#e9ead6'; c.beginPath();
+      c.moveTo(-s/2,-s/2); c.lineTo(-s/2+t,-s/2-t); c.lineTo(s/2+t,-s/2-t); c.lineTo(s/2,-s/2); c.closePath(); c.fill();
+      c.fillStyle='#d9d8c0'; c.beginPath();
+      c.moveTo(s/2,-s/2); c.lineTo(s/2+t,-s/2-t); c.lineTo(s/2+t,s/2-t); c.lineTo(s/2,s/2); c.closePath(); c.fill();
+      var gr=c.createLinearGradient(-s/2,-s/2,s/2,s/2);
+      gr.addColorStop(0,'#fbfaf2'); gr.addColorStop(1,'#eceadb');
+      c.fillStyle=gr; rr(c,-s/2,-s/2,s,s,s*.08); c.fill();
+      c.strokeStyle='rgba(150,150,115,.35)'; c.lineWidth=1; c.stroke();
+      c.fillStyle='rgba(255,255,255,.55)'; c.fillRect(-s*.36,-s*.36,s*.18,s*.5);
+      c.restore();
+    });
+    c.restore();
+  }
   var lastT2=0;
   function tick(t){ if(!alive) return;
     var dt=Math.min((t-lastT2)/1000||0,.05); lastT2=t;
     if(!done){
-      mk+=mkDir*dt*.85; if(mk>1){mk=1;mkDir=-1;} if(mk<0){mk=0;mkDir=1;}
+      mk+=mkDir*dt*.7; if(mk>1){mk=1;mkDir=-1;} if(mk<0){mk=0;mkDir=1;}
       knife.y*= .72; knife.anim*= .72;
     }
     pieces.forEach(function(p){
-      if(p.rest) return;
-      p.x+=p.vx*dt*60; p.y+=p.vy*dt*60; p.vy+=dt*90; p.rot+=p.vr*dt;
-      if(p.y>boardY-vh*.18){ p.y=boardY-vh*.18;
-        p.rot=Math.PI/2; p.rest=true; }
+      var e=1-Math.pow(.0005,dt);
+      p.ox+=(p.tx-p.ox)*e; p.oy+=(p.ty-p.oy)*e; p.rot+=(p.tr-p.rot)*e;
+      if(dice) p.a=Math.max(0,1-diceT*1.4);
     });
+    if(dice) diceT+=dt*1.6;
     chips.forEach(function(ch){ ch.x+=ch.vx; ch.y+=ch.vy; ch.vy+=.4; ch.a-=.025; });
     chips=chips.filter(function(ch){ return ch.a>0; });
     draw(); requestAnimationFrame(tick); }
   requestAnimationFrame(tick);
   function chop(){
     if(done) return;
-    var kxL=SUBL+mk*(lastCut-SUBL), tgt=targetX();
-    var err=Math.abs(kxL-tgt);
+    var q=PL.cuts[cur], kx=vx+SW0+mk*(SW1-SW0), tgt=targetScreen();
+    var err=Math.abs(kx-tgt);
     var sc=clamp(100-(err/vw)*430,0,100);
     knife.y=16; knife.anim=1;
     res.push(sc); sfx(sc>55?'cut':'bad'); buzz(sc>55?14:40);
-    var cutX=clamp(kxL,tgt-vw*.06,tgt+vw*.06);   /* 크게 빗나가도 조각은 나간다 */
-    var sw=lastCut-cutX;
-    if(sw>3){
-      pieces.push({sx:cutX,sw:sw, x:vx+cutX+sw/2+10, y:vy+vh/2-6,
-        vx:.9+Math.random()*.9, vy:-1.4, vr:2.4+Math.random(), rot:0});
-      for(var q=0;q<7;q++) chips.push({x:vx+cutX+(Math.random()-.5)*20,
-        y:vy+vh*.5+(Math.random()-.5)*20, vx:(Math.random()-.5)*5, vy:-2-Math.random()*3,
-        r:2+Math.random()*3, a:.95, col:Math.random()<.5?'#f4f1e4':'#cfe6a3'});
-      lastCut=cutX;
+    var P=curPiece(), bd=cutBand(q);
+    if(P){
+      /* 크게 빗나가도 칼은 재료 위에 들어갑니다 */
+      var xi=clamp(kx-vx-P.ox, cutX(q)-vw*.05, cutX(q)+vw*.05);
+      var Ln=makeLine(xi,!!q.tear); cuts.push(Ln);
+      /* 칼이 지나간 자리에 밝은 단면 — 재료가 있는 곳에만 */
+      vc.save(); vc.globalCompositeOperation='source-atop';
+      vc.strokeStyle=FACE[veg]||'rgba(246,248,228,.85)'; vc.lineWidth=Math.max(3,vw*.008); vc.lineJoin='round';
+      vc.beginPath(); Ln.pts.forEach(function(pt,i){ if(pt[1]<bd[0]||pt[1]>bd[1]) return; vc[i?'lineTo':'moveTo'](pt[0],pt[1]); });
+      vc.stroke(); vc.restore();
+      var right={L:Ln,R:P.R,y0:P.y0,y1:P.y1,ox:P.ox,oy:P.oy,rot:P.rot,tx:P.tx,ty:P.ty,tr:P.tr,a:1};
+      P.R=Ln;
+      var at=pieces.indexOf(P); pieces.splice(at+1,0,right);
+      if(q.m==='slide'||q.m==='split'){
+        /* 잘린 오른쪽이 옆으로 살짝 밀리고, 그 너머 조각들도 같이 밀립니다 */
+        pieces.forEach(function(o){
+          if(o===P) return;
+          var my=(o.y0+o.y1)/2;
+          if(o.y1>bd[0]&&o.y0<bd[1]&&(o===right||lineAt(o.L,my,-1)>=xi-1)) o.tx+=GAP*(q.m==='split'?(q.tear?2.6:1.6):1);
+        });
+        right.tr+=q.m==='split'?.07:.035;
+        if(q.m==='split') P.tr-=.025;
+      } else if(q.m==='dropR'){
+        right.tx+=GAP*2.2; right.ty+=5; right.tr+=.1;
+      } else {
+        P.tx-=GAP*2.2; P.ty+=5; P.tr-=.1;
+      }
+      for(var n=0;n<7;n++) chips.push({x:vx+P.ox+xi+(Math.random()-.5)*14,
+        y:vy+(bd[0]+bd[1])/2+(Math.random()-.5)*vh*.3, vx:(Math.random()-.5)*4, vy:-1.5-Math.random()*2.5,
+        r:1.5+Math.random()*2.5, a:.95, col:Math.random()<.5?'#f4f1e4':'#cfe6a3'});
     }
     cur++;
     if(cur>=N){ done=true;
+      if(PL.dice) setTimeout(function(){ if(alive){ dice=makeDice(); diceT=0; } },450);
       var avg=res.reduce(function(a,b){return a+b;},0)/res.length;
       B.sc.push(avg); stepScore('cut',avg); B.stage=2; setB(B); holdBar();
       $('ovFoot').innerHTML=L$('<button class="btn green" id="ok">칼질 ')+Math.round(avg)+L$('점 — 절임통으로</button>');
