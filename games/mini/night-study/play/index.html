@@ -214,8 +214,8 @@
     <b data-en="II, top left">왼쪽 위 II</b><span data-en="pause">잠깐 멈추기</span>
   </div>
   <div class="keys forPc">
-    <b data-en="Arrow keys">방향키</b><span data-en="walk">걷기</span>
-    <b data-en="W A S D · Mouse">W A S D · 마우스</b><span data-en="look around">둘러보기</span>
+    <b data-en="W A S D · Arrow keys">W A S D · 방향키</b><span data-en="walk">걷기</span>
+    <b data-en="Mouse">마우스</b><span data-en="look around">둘러보기</span>
     <b>Shift</b><span data-en="run (you lose your breath)">달리기 (숨이 찬다)</span>
     <b>F</b><span data-en="flashlight — bright, but easy to spot">손전등 — 밝지만 들키기 쉽다</span>
     <b>E</b><span data-en="take · hide in a locker">줍기 · 사물함에 숨기</span>
@@ -1382,11 +1382,7 @@ const camWorld = new THREE.Vector3();
 let last = performance.now();
 
 function updatePlayer(dt){
-  // W A S D 는 시점, 방향키는 걷기 — 2026-09-18 사장님 "WASD를 시점 화살표를 이동으로"
-  if(keys.KeyA) P.yaw += 2.3*dt;
-  if(keys.KeyD) P.yaw -= 2.3*dt;
-  if(keys.KeyW) P.pitch = clamp(P.pitch + 1.5*dt, -1.35, 1.35);
-  if(keys.KeyS) P.pitch = clamp(P.pitch - 1.5*dt, -1.35, 1.35);
+  // PC 표준키 — W A S D·방향키 걷기, 시점은 마우스만 (2026-10-21 사장님 "피씨표준키로")
   const spot = P.hideSpot;
   if(P.hidden && spot){
     P.hideT += dt; Snd.walk(false);
@@ -1398,10 +1394,10 @@ function updatePlayer(dt){
     return;
   }
   let fx=0, fz=0;
-  if(keys.ArrowUp) fz-=1;
-  if(keys.ArrowDown) fz+=1;
-  if(keys.ArrowLeft) fx-=1;
-  if(keys.ArrowRight) fx+=1;
+  if(keys.ArrowUp||keys.KeyW) fz-=1;
+  if(keys.ArrowDown||keys.KeyS) fz+=1;
+  if(keys.ArrowLeft||keys.KeyA) fx-=1;
+  if(keys.ArrowRight||keys.KeyD) fx+=1;
   const mag=Math.hypot(fx,fz);
   if(mag>0){ fx/=mag; fz/=mag; }
 
