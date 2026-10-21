@@ -110,6 +110,7 @@
     font-family:inherit;color:#12141a;background:#e8e2d4;box-shadow:0 6px 24px rgba(0,0,0,.6)}
   .btn:active{transform:translateY(1px)}
   .btn.ghosty{background:#8d2230;color:#fff}
+  #win .btn.sub{background:transparent;color:#c9cfdb;box-shadow:inset 0 0 0 2px #4a5163}
   .opts{display:flex;gap:8px;margin-top:18px;flex-wrap:wrap;justify-content:center}
   .opt{padding:8px 18px;border-radius:99px;cursor:pointer;font-family:inherit;
     font-size:15px;font-weight:800;color:#8f8a7f;background:rgba(255,255,255,.06);
@@ -119,6 +120,13 @@
   #dead :is(h1,h2){color:#c33;letter-spacing:10px;text-shadow:0 0 40px rgba(200,20,20,.5)}
   #win{display:none;background:radial-gradient(ellipse at 50% 45%,#1b2030 0%,#05060a 72%)}
   #win :is(h1,h2){color:#dfe6f2}
+  /* 마지막 엔딩 — 10일째를 탈출하면 화면이 하얗게 밝아지고 [꿈이었다] (2026-10-22 사장님) */
+  #dream{position:fixed;inset:0;z-index:40;display:none;flex-direction:column;align-items:center;
+    justify-content:center;background:#fffdf6;opacity:0;transition:opacity 3s ease-in}
+  #dreamTxt{font-size:min(12vw,64px);font-weight:900;letter-spacing:10px;color:#3a3833;
+    opacity:0;transition:opacity 1.6s}
+  #dreamBtn{opacity:0;pointer-events:none;transition:opacity 1s;margin-top:34px;
+    background:#2a2925;color:#fffdf6;box-shadow:none}
   #pause{display:none;background:rgba(4,5,8,.94)}
   #loading{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;
     background:#05060a;font-size:16px;font-weight:800;color:#5d5850;letter-spacing:3px}
@@ -242,7 +250,13 @@
 <div class="screen" id="win">
   <h2 data-en="ESCAPED">탈 출</h2>
   <p id="winMsg"></p>
+  <button class="btn" id="nextBtn" data-en="NEXT NIGHT">다음 날 밤</button>
   <button class="btn" id="againBtn" data-en="PLAY AGAIN">한 번 더</button>
+</div>
+
+<div id="dream">
+  <div id="dreamTxt">꿈이었다</div>
+  <button class="btn" id="dreamBtn" data-en="FROM NIGHT 1">처음부터</button>
 </div>
 
 <div class="screen" id="pause">
@@ -1017,6 +1031,10 @@ function spawnPickups(nPaper, nBatt){
       const d=Math.hypot(x-o[0],z-o[1]) - o[2];
       if(d<m) m=d;
     }
+    for(let i=0;i<pickups.length;i++){            // 한 방에 둘이 들면 서로 떨어뜨린다
+      const d=Math.hypot(x-pickups[i].x,z-pickups[i].z) - 0.6;
+      if(d<m) m=d;
+    }
     return m;
   };
   const make=(kind, room)=>{
@@ -1031,15 +1049,22 @@ function spawnPickups(nPaper, nBatt){
     }
     const isP = kind==='paper';
     const geo = isP ? new THREE.PlaneGeometry(0.34,0.47) : new THREE.PlaneGeometry(0.16,0.32);
-    const m = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({
-      map: isP?TEX.paper:TEX.batt, side:THREE.DoubleSide, transparent:true }));
+    // 시험지만 날이 갈수록 스스로 내는 빛이 흐려진다 — 늦은 날엔 손전등을 비춰야 보인다.
+    // 건전지 밝기는 그대로(2026-10-22 사장님 "건전지가 사실상 역할이 없어" → "시험지만 흐리게")
+    // ⚠Phong 이어야 손전등이 픽셀마다 닿는다(Lambert 금지, 위 버그 8 참고)
+    const glow = isP ? dayGlow(S.day) : 1;
+    const m = new THREE.Mesh(geo, isP
+      ? new THREE.MeshPhongMaterial({ map:TEX.paper, emissive:0xffffff, emissiveMap:TEX.paper,
+          emissiveIntensity:glow, color:new THREE.Color().setScalar(0.08+0.92*glow), opacity:0.3+0.7*glow,  // 바탕빛에도 덜 비치게
+          side:THREE.DoubleSide, transparent:true })
+      : new THREE.MeshBasicMaterial({ map:TEX.batt, side:THREE.DoubleSide, transparent:true }));
     m.position.set(px, isP?0.9:0.86, pz);
     scene.add(m);
     const h = new THREE.Mesh(new THREE.PlaneGeometry(1.5,1.5),
       new THREE.MeshBasicMaterial({map:halo, transparent:true,
         blending:THREE.AdditiveBlending, depthWrite:false, opacity:.34}));
     h.position.copy(m.position); scene.add(h);
-    pickups.push({kind, mesh:m, halo:h, x:px, z:pz, taken:false, ph:rnd(0,6.3)});
+    pickups.push({kind, mesh:m, halo:h, x:px, z:pz, taken:false, ph:rnd(0,6.3), glow, lit:glow});
   };
   for(let i=0;i<nPaper;i++) make('paper', rooms[i % rooms.length]);
   for(let i=0;i<nBatt;i++)  make('batt',  rooms[(nPaper+i) % rooms.length]);
@@ -1282,7 +1307,32 @@ function interact(){
 
 /* ══════════ 게임 진행 ══════════ */
 let RUN_STATE = 'title';
-const S = { papers:0, needed:6, t:0, minutes:4, caught:false };
+const S = { papers:0, needed:6, t:0, minutes:4, caught:false, day:1 };
+
+/* 날(스테이지) — 2026-10-22 사장님 "야간자율학습 스테이지 추가하자" → "10판까지만".
+   같은 1층을 날마다 조금씩 어렵게. 탈출하면 다음 날 밤으로 이어지고, 10일째를 탈출하면 엔딩.
+   시험지 6→10장, 건전지 3→1개, 귀신은 날마다 빨라지고 눈·귀가 밝아진다.
+   ⚠쫓는 속도는 달리기(5.35)보다 느리게 둔다 — 뛰면 벌 수 있어야 한다 */
+const LAST_DAY = 10;
+const DAYS = [null,
+  {papers:6, batt:3}, {papers:6, batt:3}, {papers:7, batt:3}, {papers:7, batt:2}, {papers:8, batt:2},
+  {papers:8, batt:2}, {papers:9, batt:2}, {papers:9, batt:1}, {papers:10, batt:1}, {papers:10, batt:1},
+];
+function dayDiff(base, day){
+  const k = (day-1)/(LAST_DAY-1);              // 0(1일째) → 1(10일째)
+  if(k<=0) return Object.assign({}, base);
+  return Object.assign({}, base, {
+    chase: Math.min(base.chase*(1+0.2*k), RUN-0.15), patrol: base.patrol*(1+0.45*k),
+    sight: base.sight+4*k, sightTorch: base.sightTorch+6*k,
+    hearWalk: base.hearWalk+3*k, hearRun: base.hearRun+6*k, giveUp: base.giveUp+4*k,
+  });
+}
+// 시험지가 스스로 내는 빛: 1일째 1 → 10일째 0.12
+function dayGlow(day){ return 1 - 0.88*(day-1)/(LAST_DAY-1); }
+const DAY_KEY='nightstudy.day';
+function savedDay(){ try{ const d=+localStorage.getItem(DAY_KEY); return d>=1&&d<=LAST_DAY ? d : 1; }catch(e){ return 1; } }
+function saveDay(d){ try{ localStorage.setItem(DAY_KEY, String(d)); }catch(e){} }
+function dayName(d){ return L(d+'일째 밤', 'Night '+d); }
 
 const $ = id => document.getElementById(id);
 const el = {
@@ -1296,10 +1346,15 @@ let toastT=0;
 function toast(msg){ el.toast.textContent=msg; el.toast.style.opacity='1'; toastT=2.6; }
 
 
-function startGame(){
+function startGame(day){
+  if(day>=1 && day<=LAST_DAY) S.day = day;
+  const DY = DAYS[S.day];
+  D = dayDiff(DIFF[diffIdx], S.day);
+  S.needed = DY.papers;
   S.papers=0; S.t=0; S.minutes=4; S.caught=false;
+  saveDay(S.day);
   el.pgot.textContent='0'; el.pneed.textContent='/'+S.needed;
-  spawnPickups(S.needed, 3);
+  spawnPickups(S.needed, DY.batt);
   exitDoor.material.color.setHex(0x2a2118);
 
   P.x=cx2wx(22); P.z=cy2wz(5); P.vx=P.vz=0;
@@ -1317,13 +1372,15 @@ function startGame(){
   if(GM.root){ GM.cur=''; GM.mixer.stopAllAction(); ghostAnim('zwalk'); }
 
   el.title.style.display='none'; el.dead.style.display='none';
-  el.win.style.display='none'; el.pause.style.display='none';
+  el.win.style.display='none'; el.pause.style.display='none'; hideDream();
   el.slats.style.display='none';
   el.hud.style.display='block';
   RUN_STATE='play';
   Snd.start();
   if(!TOUCH) canvas.requestPointerLock();
-  toast(L('교실에서 잠이 들었다… 학교엔 아무도 없다','You fell asleep in class… No one is left in the school'));
+  toast(S.day>1
+    ? dayName(S.day)+L(' — 또 잠들었다… 시험지 '+S.needed+'장',' — You dozed off again… '+S.needed+' papers')
+    : L('교실에서 잠이 들었다… 학교엔 아무도 없다','You fell asleep in class… No one is left in the school'));
 }
 function pauseGame(){
   if(RUN_STATE!=='play') return;
@@ -1371,11 +1428,31 @@ function winGame(){
   RUN_STATE='win'; Snd.unlock(); Snd.whisper(0); Snd.walk(false);
   if(document.pointerLockElement) document.exitPointerLock();
   el.hud.style.display='none'; el.slats.style.display='none';
-  el.winMsg.innerHTML = L('교문 밖은 아직 캄캄했다.<br>걸린 시간 <b>','Outside the gate it was still pitch dark.<br>Time <b>')+
+  const last = S.day>=LAST_DAY;
+  saveDay(last ? 1 : S.day+1);
+  if(last){ dreamEnding(); return; }
+  $('nextBtn').textContent = dayName(S.day+1);
+  $('againBtn').classList.add('sub');
+  el.winMsg.innerHTML = dayName(S.day)+L(' 탈출. 교문 밖은 아직 캄캄했다.<br>걸린 시간 <b>',' escaped. Outside the gate it was still pitch dark.<br>Time <b>')+
     Math.floor(S.t/60)+L('분 ','m ')+Math.floor(S.t%60)+L('초</b>','s</b>') +
     (P.usedTorch?'':'<br><span style="color:#8fbf9a">'+L('한 번도 손전등을 켜지 않았다','Never turned on the flashlight')+'</span>');
   el.win.style.display='flex';
 }
+
+let dreamTimers=[];
+function dreamEnding(){
+  const d=$('dream'), t=$('dreamTxt'), b=$('dreamBtn');
+  t.textContent=L('꿈이었다','It was a dream');
+  t.style.opacity='0'; b.style.opacity='0'; b.style.pointerEvents='none';
+  d.style.display='flex'; d.style.opacity='0';
+  dreamTimers.forEach(clearTimeout);
+  dreamTimers=[
+    setTimeout(()=>{ d.style.opacity='1'; },40),
+    setTimeout(()=>{ t.style.opacity='1'; },3300),
+    setTimeout(()=>{ b.style.opacity='1'; b.style.pointerEvents='auto'; },5600),
+  ];
+}
+function hideDream(){ dreamTimers.forEach(clearTimeout); $('dream').style.display='none'; }
 
 /* ══════════ 한 판 돌리기 ══════════ */
 const camWorld = new THREE.Vector3();
@@ -1567,6 +1644,21 @@ function updateGhost(dt){
      귀신이 가까운 건 속삭임(P.fear 에 따라 커진다)으로 알 수 있다. 되살리지 말 것. */
 }
 
+/* 손전등 빛줄기 안에 든 시험지인가 — 벽 너머는 안 친다.
+   바탕빛만으로는 늦은 날 시험지가 안 보이고, 손전등을 비추면 1일째만큼 밝아진다(2026-10-22 "별차이없어보이는데") */
+const _tf = new THREE.Vector3();
+function torchHits(p){
+  if(!P.torch || torch.intensity<0.3) return false;
+  const dx=p.x-camWorld.x, dz=p.z-camWorld.z, dy=0.9-camWorld.y, d=Math.hypot(dx,dy,dz);
+  if(d>13) return false;
+  camera.getWorldDirection(_tf);
+  if((dx*_tf.x+dy*_tf.y+dz*_tf.z)/d < 0.93) return false;    // 원뿔 반각 약 22도
+  for(let t=0.6; t<d; t+=0.5){
+    if(isWall(wx2cx(camWorld.x+dx*t/d), wz2cy(camWorld.z+dz*t/d))) return false;
+  }
+  return true;
+}
+
 function updateWorld(dt){
   // 줍는 물건 둥둥
   for(const p of pickups){
@@ -1576,7 +1668,14 @@ function updateWorld(dt){
     p.mesh.position.y=y; p.halo.position.y=y;
     p.mesh.rotation.y += dt*0.7;
     p.halo.lookAt(camWorld);
-    p.halo.material.opacity = 0.32+Math.sin(p.ph*1.7)*0.1;
+    if(p.kind==='paper' && p.glow<1){
+      const want = torchHits(p) ? 1 : p.glow;
+      p.lit += (want-p.lit)*Math.min(1, dt*6);
+      p.mesh.material.emissiveIntensity = p.lit;
+      p.mesh.material.color.setScalar(0.08+0.92*p.lit);
+      p.mesh.material.opacity = 0.3+0.7*p.lit;                 // 꺼 두면 바닥 빛깔에 묻힌다
+    }
+    p.halo.material.opacity = (0.32+Math.sin(p.ph*1.7)*0.1)*p.lit;
   }
   // 안내 글
   let msg='', act='take';
@@ -1616,7 +1715,7 @@ function updateWorld(dt){
     ? 'linear-gradient(90deg,#d06a6a,#f0a0a0)' : 'linear-gradient(90deg,#7fc4e8,#b6e2f7)';
   el.pgot.textContent = S.papers;
   const hh=11+Math.floor(S.minutes/60), mm=S.minutes%60;
-  el.clock.textContent = (hh>=12?'AM ':'PM ')+(hh%12||12)+':'+String(mm).padStart(2,'0');
+  el.clock.textContent = dayName(S.day)+'  '+(hh>=12?'AM ':'PM ')+(hh%12||12)+':'+String(mm).padStart(2,'0');
 }
 
 function tick(dt){
@@ -1666,9 +1765,12 @@ $('optSound').addEventListener('click',function(){
   this.textContent = useSound?L('소리 켜기','SOUND ON'):L('소리 끄기','SOUND OFF');
   Snd.mute(!useSound);
 });
-$('startBtn').addEventListener('click',()=>{ Snd.start(); Snd.mute(!useSound); startGame(); });
-$('retryBtn').addEventListener('click',startGame);
-$('againBtn').addEventListener('click',startGame);
+$('startBtn').addEventListener('click',()=>{ Snd.start(); Snd.mute(!useSound); startGame(savedDay()); });
+if(savedDay()>1) $('startBtn').textContent = dayName(savedDay())+L(' 들어가기',' — START');
+$('retryBtn').addEventListener('click',()=>startGame());          // 죽은 그날을 다시
+$('againBtn').addEventListener('click',()=>startGame(S.day));
+$('dreamBtn').addEventListener('click',()=>startGame(1));
+$('nextBtn').addEventListener('click',()=>startGame(Math.min(S.day+1, LAST_DAY)));
 $('resumeBtn').addEventListener('click',resumeGame);
 el.pause.addEventListener('click',e=>{ if(e.target===el.pause) resumeGame(); });
 
