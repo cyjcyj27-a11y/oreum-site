@@ -320,6 +320,428 @@ var ING = {
   tomato:{n:L$('토마토'),    i:ball('#dc3b2c','#b32a1c','#5f9c3a')},
   gamja:{n:L$('감자'),       i:ball('#dcc38d','#b99f68')}
 };
+/* ── 재료 그림 — 사진처럼 다시 그림(2026-10-21) ─────────────────────
+   왼쪽 위에서 빛, 그라데이션 명암·윤기·질감·바닥 그림자.
+   위의 납작한 그림(leaf·root·bowl…)을 덮어씁니다. */
+(function(){
+var SEED=1;
+function rnd(){ SEED=(SEED*16807)%2147483647; return SEED/2147483647; }
+function st(s){ return s.map(function(x){ return '<stop offset="'+x[0]+'" stop-color="'+x[1]+'"'+
+  (x[2]!=null?' stop-opacity="'+x[2]+'"':'')+'/>'; }).join(''); }
+function LG(id,x1,y1,x2,y2,s){ return '<linearGradient id="'+id+'" x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'">'+st(s)+'</linearGradient>'; }
+function RG(id,cx,cy,r,s,fx,fy){ return '<radialGradient id="'+id+'" cx="'+cx+'" cy="'+cy+'" r="'+r+'"'+
+  (fx!=null?' fx="'+fx+'" fy="'+fy+'"':'')+'>'+st(s)+'</radialGradient>'; }
+function SH(rx,cy,o){ return '<ellipse cx="20" cy="'+(cy||37)+'" rx="'+rx+'" ry="1.8" fill="#4a2a10" opacity="'+(o||.22)+'"/>'; }
+function A(defs,body){ return '<svg viewBox="0 0 40 40" aria-hidden="true"><defs>'+defs+'</defs>'+body+'</svg>'; }
+function P(d,f,ex){ return '<path d="'+d+'" fill="'+f+'"'+(ex||'')+'/>'; }
+function S(d,c,w,ex){ return '<path d="'+d+'" fill="none" stroke="'+c+'" stroke-width="'+w+'" stroke-linecap="round" stroke-linejoin="round"'+(ex||'')+'/>'; }
+function E(cx,cy,rx,ry,f,ex){ return '<ellipse cx="'+cx+'" cy="'+cy+'" rx="'+rx+'" ry="'+ry+'" fill="'+f+'"'+(ex||'')+'/>'; }
+function f1(v){ return Math.round(v*10)/10; }
+
+/* 그릇 — 흰 사기 대접에 소복이 담긴 가루·다진 것 */
+function heapY(x,h){ var t=(x-20)/12.6; return 21.2-h*Math.max(0,1-t*t); }
+function grains(seed,n,h,cols,r0,r1,shape){
+  SEED=seed; var o='';
+  for(var i=0;i<n;i++){
+    var x=8.2+rnd()*23.6, top=heapY(x,h), y=top+.6+rnd()*(22.3-top);
+    var r=r0+rnd()*(r1-r0), c=cols[Math.floor(rnd()*cols.length)];
+    if(shape==='sq') o+='<rect x="'+f1(x-r)+'" y="'+f1(y-r)+'" width="'+f1(r*2)+'" height="'+f1(r*2)+'" rx=".25" fill="'+c+'" transform="rotate('+Math.round(rnd()*90)+' '+f1(x)+' '+f1(y)+')"/>';
+    else if(shape==='seed') o+=E(f1(x),f1(y),f1(r),f1(r*.62),c,' transform="rotate('+Math.round(rnd()*180)+' '+f1(x)+' '+f1(y)+')"');
+    else o+='<circle cx="'+f1(x)+'" cy="'+f1(y)+'" r="'+f1(r)+'" fill="'+c+'"/>';
+  }
+  return o;
+}
+function dish(k,base,lite,dark,h,tex){
+  var id='i_'+k, mound='M7.4 21.4 Q20 '+f1(21.4-h*2)+' 32.6 21.4 Z';
+  return A(
+    LG(id+'b',0,0,1,0,[[0,'#ffffff'],[.45,'#f3eee4'],[1,'#c9bfae']])+
+    LG(id+'r',0,0,0,1,[[0,'#ffffff'],[1,'#e2dacb']])+
+    RG(id+'m',.38,.25,.75,[[0,lite],[.55,base],[1,dark]])+
+    '<clipPath id="'+id+'c"><path d="'+mound+'"/></clipPath>',
+    SH(13,36.6)+
+    P('M4.6 21.4 h30.8 c0 8.4 -6.6 14.4 -15.4 14.4 s-15.4 -6 -15.4 -14.4 z','url(#'+id+'b)')+
+    S('M7 26.5 q13 4.4 26 0','#5d82b8',.7,' opacity=".55"')+
+    E(20,21.4,15.4,3.5,'url(#'+id+'r)')+
+    E(20,21.6,13.6,2.6,dark)+
+    P(mound,'url(#'+id+'m)')+
+    '<g clip-path="url(#'+id+'c)">'+(tex||'')+'</g>'+
+    E(14.2,f1(21.4-h*1.1),3.4,1.1,'#fff',' opacity=".28"'));
+}
+
+/* 유리병 — 몸통 액체, 어깨, 뚜껑, 띠지 */
+function glassBottle(k,liq,liqD,cap,capD,label,neck){
+  var id='i_'+k; neck=neck||1;
+  return A(
+    LG(id+'g',0,0,1,0,[[0,liqD],[.3,liq],[.55,liq],[1,liqD]])+
+    LG(id+'c',0,0,1,0,[[0,capD],[.4,cap],[1,capD]])+
+    LG(id+'s',0,0,1,0,[[0,'#ffffff',.55],[.3,'#ffffff',.08],[.8,'#ffffff',0],[1,'#ffffff',.2]]),
+    SH(7.5,37.2)+
+    P('M'+(17.6-neck*.2)+' 9.5 h'+(4.8+neck*.4)+' v4 c0 1.6 5.6 2.6 5.6 6.4 v13.2 a3 3 0 0 1 -3 3 h-10.8 a3 3 0 0 1 -3 -3 v-13.2 c0 -3.8 5.6 -4.8 5.6 -6.4 z','url(#'+id+'g)')+
+    P('M'+(17.6-neck*.2)+' 9.5 h'+(4.8+neck*.4)+' v4 c0 1.6 5.6 2.6 5.6 6.4 v13.2 a3 3 0 0 1 -3 3 h-10.8 a3 3 0 0 1 -3 -3 v-13.2 c0 -3.8 5.6 -4.8 5.6 -6.4 z','url(#'+id+'s)')+
+    '<rect x="16.9" y="4" width="6.2" height="6.4" rx="1.2" fill="url(#'+id+'c)"/>'+
+    S('M17.3 6.2 h5.4 M17.3 8 h5.4',capD,.5,' opacity=".6"')+
+    (label?'<rect x="14.6" y="22.6" width="10.8" height="8" rx="1" fill="'+label[0]+'"/>'+
+      '<rect x="14.6" y="24.6" width="10.8" height="1.6" fill="'+label[1]+'"/>'+
+      S('M16.6 28.4 h6.8',label[1],.8,' opacity=".7"'):'')+
+    S('M16 18.6 v13',"#fff",1.1,' opacity=".55"'));
+}
+/* 짜는 통(케첩·마요) */
+function squeeze(k,body,bodyD,cap,capD,stripe){
+  var id='i_'+k;
+  return A(
+    LG(id+'g',0,0,1,0,[[0,bodyD],[.35,body],[.6,body],[1,bodyD]])+
+    LG(id+'c',0,0,1,0,[[0,capD],[.4,cap],[1,capD]]),
+    SH(8,37.2)+
+    P('M14.2 30.5 c-1.6 -6 -1.2 -14 .6 -17.4 h10.4 c1.8 3.4 2.2 11.4 .6 17.4 c-.6 2.6 -2.2 5 -5.8 5 s-5.2 -2.4 -5.8 -5 z','url(#'+id+'g)')+
+    (stripe||'')+
+    P('M15.4 13.4 h9.2 l-1 -4.6 h-7.2 z','url(#'+id+'c)')+
+    P('M18.6 8.8 l.6 -4.6 h1.6 l.6 4.6 z',capD)+
+    S('M16.3 16 c-.8 4 -.8 9 .2 13',"#fff",1.2,' opacity=".5"'));
+}
+/* 플라스틱 통(고추장·된장) */
+function tub(k,body,bodyD,paste,pasteD,band){
+  var id='i_'+k;
+  return A(
+    LG(id+'g',0,0,1,0,[[0,bodyD],[.35,body],[.65,body],[1,bodyD]])+
+    RG(id+'p',.4,.35,.7,[[0,paste],[1,pasteD]]),
+    SH(12,36.8)+
+    P('M7.6 15.5 h24.8 l-1.8 17.4 a3 3 0 0 1 -3 2.7 h-15.2 a3 3 0 0 1 -3 -2.7 z','url(#'+id+'g)')+
+    '<rect x="8.4" y="22" width="23.2" height="7" fill="'+band[0]+'"/>'+
+    S('M11.5 25.5 h17',band[1],1.4,' opacity=".8"')+
+    E(20,15.5,12.4,3.6,bodyD)+
+    E(20,15.5,11.2,2.9,'url(#'+id+'p)')+
+    S('M14 15 q3 -1.6 6 -.2 t6 .2',pasteD,.7,' opacity=".7"')+
+    S('M10.4 18.6 l1.2 13','#fff',1.1,' opacity=".4"'));
+}
+/* 잎 — 밑에서 끝까지 톱니 가장자리, 가운데 잎맥 */
+function leafP(x0,y0,x1,y1,w,lob,col,vein,bend){
+  var dx=x1-x0, dy=y1-y0, L=Math.sqrt(dx*dx+dy*dy), nx=-dy/L, ny=dx/L, l=[], r=[], N=18;
+  bend=bend||0;
+  for(var i=0;i<=N;i++){
+    var t=i/N, b=Math.sin(Math.PI*t)*bend,
+      ww=w*Math.pow(Math.sin(Math.PI*Math.min(1,t*1.08)),.75)*(1+lob*Math.sin(t*Math.PI*9))*(t<.18?t/.18:1),
+      px=x0+dx*t+nx*b, py=y0+dy*t+ny*b;
+    l.push(f1(px+nx*ww)+' '+f1(py+ny*ww)); r.unshift(f1(px-nx*ww)+' '+f1(py-ny*ww));
+  }
+  var mx=(x0+x1)/2+nx*bend, my=(y0+y1)/2+ny*bend;
+  return P('M'+l.join(' L')+' L'+r.join(' L')+' Z',col)+
+    (vein?S('M'+f1(x0)+' '+f1(y0)+' Q'+f1(mx)+' '+f1(my)+' '+f1(x0+dx*.92+nx*bend*.3)+' '+f1(y0+dy*.92+ny*bend*.3),vein,.55,' opacity=".75"'):'');
+}
+var I={};
+
+/* 배추 — 통배추를 세운 모습: 연두 겉잎이 감싸고, 밑은 흰 줄기 */
+function cabLeaf(d,g,rib){ return P(d,'url(#'+g+')')+S(rib,'#fdfcf3',1.5)+S(rib,'#c4c69c',.3,' transform="translate(.7 0)" opacity=".8"'); }
+I.baechu=A(
+  LG('i_bc1',0,0,0,1,[[0,'#8fbf55'],[.3,'#c4df8e'],[.62,'#eef1d4'],[1,'#fbfaf0']])+
+  LG('i_bc2',0,0,0,1,[[0,'#7fb04a'],[.32,'#b5d47e'],[.66,'#e9eecd'],[1,'#f6f4e4']])+
+  LG('i_bc4',0,0,0,1,[[0,'#a6cf6c'],[.3,'#d3e8a4'],[.6,'#f3f4e0'],[1,'#fdfcf4']])+
+  LG('i_bc3',0,0,1,0,[[0,'#ffffff',.2],[.3,'#ffffff',0],[.68,'#000',0],[1,'#4a5424',.3]]),
+  SH(10.5,37)+
+  cabLeaf('M19.8 36.2 C11.6 35.4 9 24 9.8 15 C10.4 8.4 14.6 5 19.4 6 C17.2 10.4 16.6 21 19.8 36.2 Z','i_bc2','M19.4 35.4 C14.4 30 12.4 20 13.8 9')+
+  cabLeaf('M20.2 36.2 C28.4 35.4 31 24 30.2 15 C29.6 8.4 25.4 5 20.6 6 C22.8 10.4 23.4 21 20.2 36.2 Z','i_bc1','M20.6 35.4 C25.6 30 27.6 20 26.2 9')+
+  cabLeaf('M20 36.6 C15.4 33.6 14.6 22 16 13.4 C17 7.6 23 7.6 24 13.4 C25.4 22 24.6 33.6 20 36.6 Z','i_bc4','M20 36 V10')+
+  S('M10.2 13.6 q1 -2.4 2.6 -2 q.6 -2.6 2.6 -2.4 q1.2 -2.2 3.4 -1.4 M29.8 13.6 q-1 -2.4 -2.6 -2 q-.6 -2.6 -2.6 -2.4 q-1.2 -2.2 -3.4 -1.4','#5f8f34',.6)+
+  S('M16.4 12 q1.2 -2.4 2.4 -1.6 q1.2 -2.2 2.4 -.6 q1.4 -1.4 2.4 1.4','#7aa845',.55)+
+  S('M17.6 30 l-2.2 -2.6 M16.4 23 l-2.6 -2.4 M15.6 16.6 l-2.2 -2 M22.4 30 l2.2 -2.6 M23.6 23 l2.6 -2.4 M24.4 16.6 l2.2 -2','#f6f6e6',.6,' opacity=".8"')+
+  P('M20 36.6 C11.6 35.4 9 24 9.8 15 C10.4 8 14.6 5 20 5.6 C25.4 5 29.6 8 30.2 15 C31 24 28.4 35.4 20 36.6 Z','url(#i_bc3)'));
+
+/* 무 — 조선무: 땅딸막, 어깨가 연두 */
+function radish(id){
+  return LG(id+'1',0,0,0,1,[[0,'#86b955'],[.3,'#cbe1a2'],[.52,'#f1f1e0'],[1,'#fbfaf3']])+
+    LG(id+'2',0,0,1,0,[[0,'#ffffff',.45],[.35,'#ffffff',0],[.72,'#000',0],[1,'#6b6844',.32]]);
+}
+I.mu=A(radish('i_mu'),
+  SH(7.5,37.6)+
+  leafP(19,12.4,9,1.6,3.2,.22,'#3f7a26','#76a84a')+
+  leafP(21,12.4,31,1.6,3.2,.22,'#4f8a30','#86b858')+
+  leafP(20,12,20.6,.6,3,.2,'#5e9a3a','#93c466')+
+  P('M12.8 15.4 C12.4 11.2 27.6 11.2 27.2 15.4 C27.8 25 25.2 32.6 20.6 35.8 Q20 36.3 19.4 35.8 C14.8 32.6 12.2 25 12.8 15.4 Z','url(#i_mu1)')+
+  P('M12.8 15.4 C12.4 11.2 27.6 11.2 27.2 15.4 C27.8 25 25.2 32.6 20.6 35.8 Q20 36.3 19.4 35.8 C14.8 32.6 12.2 25 12.8 15.4 Z','url(#i_mu2)')+
+  E(20,13.3,6.8,1.9,'#77a84a')+E(20,13,4.6,1.1,'#9fca6c')+
+  S('M13.4 21 q.8 .3 1.6 .1 M26.4 24.6 q-.8 .3 -1.6 .1 M14.6 28.4 q.7 .3 1.4 0 M25 30.4 q-.6 .3 -1.2 0','#aaa585',.45)+
+  S('M20 36 q.7 1.6 2 2.4','#d6cfb2',.7)+
+  E(15.6,20.6,1.1,4.6,'#fff',' opacity=".55"'));
+
+/* 총각무 — 작은 무에 무청이 길고 많다 */
+I.chonggak=A(
+  LG('i_cg1',0,0,0,1,[[0,'#a3cd78'],[.25,'#e6efcf'],[1,'#fbfaf3']])+
+  LG('i_cg2',0,0,1,0,[[0,'#ffffff',.4],[.4,'#ffffff',0],[.7,'#000',0],[1,'#6b6844',.3]]),
+  SH(6,37.6)+
+  leafP(18.4,20,7,2.4,2.8,.25,'#3a7424','#6fa045',-1.5)+
+  leafP(21.6,20,33,2.4,2.8,.25,'#467f2c','#7cb050',1.5)+
+  leafP(19.4,20,14,1,2.6,.25,'#56933a','#8cbf5e')+
+  leafP(20.6,20,26,1,2.6,.25,'#5f9c3e','#98c86a')+
+  S('M18.4 20 L9 5 M21.6 20 L31 5 M19.4 20 L14.4 3 M20.6 20 L25.6 3','#3a6e24',.6)+
+  P('M14.8 24 C14.4 19.4 25.6 19.4 25.2 24 C25.6 30 23.4 34.2 20.5 36.2 Q20 36.6 19.5 36.2 C16.6 34.2 14.4 30 14.8 24 Z','url(#i_cg1)')+
+  P('M14.8 24 C14.4 19.4 25.6 19.4 25.2 24 C25.6 30 23.4 34.2 20.5 36.2 Q20 36.6 19.5 36.2 C16.6 34.2 14.4 30 14.8 24 Z','url(#i_cg2)')+
+  E(20,21.4,4.4,1.3,'#7fae4f')+
+  S('M20 36.2 q.4 1.4 1.4 2.2','#d6cfb2',.6)+
+  E(17,26.4,.9,3,'#fff',' opacity=".55"'));
+
+/* 열무 — 가는 흰 뿌리 셋, 잎이 크고 많은 단을 지푸라기로 묶음 */
+I.yeolmu=A(
+  LG('i_ym1',0,0,1,0,[[0,'#d9d4bc'],[.45,'#fbfaf2'],[1,'#d2ccb2']]),
+  SH(8,37.6)+
+  leafP(17,19,5,4,4,.28,'#4f8f32','#8cc163',-2)+
+  leafP(23,19,35,4,4,.28,'#5a9a3a','#97c96d',2)+
+  leafP(19,19,12,1,3.6,.28,'#6aa845','#a3d377',-1)+
+  leafP(21,19,28,1,3.6,.28,'#5fa03f','#9ccf73',1)+
+  leafP(20,19,20,.6,3.4,.26,'#79b552','#b2dc88')+
+  S('M17 19 L18.4 25 M23 19 L21.6 25 M20 19 V25','#6c9e44',1.2)+
+  '<rect x="16.6" y="23.8" width="6.8" height="2.4" rx=".8" fill="#c9a764"/>'+
+  S('M17 25 h6','#9b7a3e',.5)+
+  P('M17.6 26.2 q-.8 5 .6 10 q.8 -5 .6 -10 z','url(#i_ym1)')+
+  P('M19.6 26.2 q-.6 6 .6 11 q.8 -6 .8 -11 z','url(#i_ym1)')+
+  P('M21.8 26.2 q-.6 4.6 .6 9.4 q1 -4.6 .8 -9.4 z','url(#i_ym1)'));
+
+/* 오이 — 비스듬히, 짙은 초록 줄무늬·돌기, 끝에 시든 꽃 */
+SEED=31; var bumps='';
+for(var i=0;i<20;i++){ var by=6+rnd()*28, bx=16.8+rnd()*6.4;
+  bumps+='<circle cx="'+f1(bx)+'" cy="'+f1(by)+'" r=".5" fill="#1d3f12" opacity=".7"/>'+
+    '<circle cx="'+f1(bx-.25)+'" cy="'+f1(by-.3)+'" r=".28" fill="#e8f5d0" opacity=".8"/>'; }
+I.oi=A(
+  LG('i_oi1',0,0,1,1,[[0,'#6fae47'],[.45,'#3f7f28'],[1,'#1f4a14']]),
+  SH(10,36.6)+
+  '<g transform="rotate(-47 20 20)">'+
+  '<rect x="16.2" y="2.4" width="7.6" height="35" rx="3.8" fill="url(#i_oi1)"/>'+
+  S('M18 6 V34 M20 4.6 V35.4 M22 6 V34','#b9df8e',.45,' opacity=".55"')+
+  '<rect x="17.1" y="5" width="1.5" height="27" rx=".75" fill="#fff" opacity=".28"/>'+
+  E(20,36.6,1.4,.9,'#e1c75a')+E(20,2.6,1.1,.8,'#6a8f3a')+S('M20 2.6 v-1.8','#5b7a30',.8)+
+  bumps+'</g>');
+
+/* 갓 — 자줏빛 번지는 주름진 큰 잎 다발 */
+I.gat=A(
+  LG('i_gt1',0,1,0,0,[[0,'#6a9a3a'],[.55,'#5a7d3a'],[1,'#7a3f6a']])+
+  LG('i_gt2',0,1,0,0,[[0,'#7aa944'],[.6,'#6b8a40'],[1,'#8a4a78']]),
+  SH(9,37.4)+
+  leafP(18.4,26,6,4,5.4,.18,'url(#i_gt1)','#c8a6c0',-2)+
+  leafP(21.6,26,34,4,5.4,.18,'url(#i_gt2)','#c8a6c0',2)+
+  leafP(20,26,20,1.2,5.2,.16,'url(#i_gt2)','#d4b4cc')+
+  S('M18.2 36.4 Q18.6 30 18.6 26 M20 36.6 V26 M21.8 36.4 Q21.4 30 21.4 26','#8f5d93',1.8)+
+  S('M18.2 36.4 Q18.6 30 18.6 26 M21.8 36.4 Q21.4 30 21.4 26','#c79ac6',.5,' transform="translate(-.4 0)"')+
+  '<rect x="16.6" y="29.4" width="6.8" height="2.2" rx=".8" fill="#c9a764"/>');
+
+/* 미나리 — 긴 줄기 밑이 불그스름, 위에 작은 톱니잎 */
+var mn='';
+[[-7,1.6,'#5f9c3e'],[-3.4,.4,'#6aa845'],[0,0,'#5a9839'],[3.6,.6,'#72af4c'],[7,1.8,'#62a040']].forEach(function(q,i){
+  var tx=20+q[0], ty=6+q[1];
+  mn+=S('M'+f1(19.6+i*.2)+' 36 Q'+f1(20+q[0]*.4)+' 22 '+tx+' '+f1(ty+5),'#a9cc78',1.1)+
+    leafP(tx,ty+5,tx-3.6,ty-1,1.9,.3,q[2])+leafP(tx,ty+5,tx+3.6,ty-1,1.9,.3,q[2])+leafP(tx,ty+5,tx,ty-3,2,.3,q[2],'#a6d27c');
+});
+I.minari=A(LG('i_mn1',0,0,0,1,[[0,'#a9cc78'],[1,'#c98a8a']]),
+  SH(6,37.4)+mn+S('M18.6 36.6 L19.2 28 M20 36.8 V28 M21.4 36.6 L20.8 28','url(#i_mn1)',1.3)+
+  '<rect x="17.2" y="29" width="5.6" height="2" rx=".7" fill="#c9a764"/>');
+
+/* 부추 — 납작하고 가는 잎을 고무줄로 묶은 단 */
+var bc='';
+for(var i=0;i<11;i++){ var x=15.6+i*.9, tx=8+i*2.4;
+  bc+=S('M'+f1(x)+' 36.4 Q'+f1(x+(tx-x)*.15)+' 20 '+f1(tx)+' '+f1(3+Math.abs(i-5)*.7),i%3?'#3f7f28':'#5a9a3a',1.1); }
+I.buchu=A('',SH(6,37.4)+bc+
+  S('M16 36.4 h8','#e6e2c8',1.4)+
+  '<rect x="15.2" y="27.4" width="9.6" height="2" rx=".8" fill="#d23a2a"/>');
+
+/* 쪽파 — 흰 작은 알뿌리, 실뿌리, 가는 초록 대 */
+var jp='';
+for(var i=0;i<6;i++){ var x=14.4+i*2.2, tx=10+i*4;
+  jp+=S('M'+f1(x)+' 27 Q'+f1(x+(tx-x)*.2)+' 14 '+f1(tx)+' '+f1(2.4+Math.abs(i-2.5)*.8),i%2?'#4f8f32':'#6aa845',1.3)+
+    E(f1(x),30.2,1.15,2.8,'#fbfaf2')+E(f1(x+.35),30.6,.45,2,'#d9d4bc')+S('M'+f1(x)+' 27.4 v1.4','#cbe0a0',1.2)+
+    S('M'+f1(x)+' 33 l-.8 2.6 M'+f1(x)+' 33 l.1 2.9 M'+f1(x)+' 33 l.9 2.5','#d8d0b2',.35); }
+I.jjokpa=A('',SH(7,36.8)+jp);
+
+/* 대파 — 굵은 흰 대, 연두로 넘어가 두 갈래 초록 잎 */
+I.daepa=A(
+  LG('i_dp1',0,0,1,0,[[0,'#d8d4c0'],[.45,'#fdfcf6'],[1,'#cfcab4']])+
+  LG('i_dp2',0,1,0,0,[[0,'#cfe3a4'],[.35,'#5f9e3c'],[1,'#3a7424']]),
+  SH(8,37)+
+  '<g transform="rotate(-38 20 20)">'+
+  P('M18 18 Q16.6 8 15.6 .6 L18 .4 Q19 8 20 16 Z','#3f7f28')+
+  P('M20 16 Q21.4 7 23 -.4 L25.2 .2 Q23.4 9 22 18 Z','#4f8f32')+
+  '<rect x="17.6" y="12" width="4.8" height="12" fill="url(#i_dp2)"/>'+
+  '<rect x="17.6" y="23" width="4.8" height="12.6" rx="1.6" fill="url(#i_dp1)"/>'+
+  S('M19 14 v20 M21 14 v20','#ffffff',.4,' opacity=".6"')+
+  S('M20 35.6 l-1.6 2.8 M20 35.6 v3.2 M20 35.6 l1.6 2.8','#d0c8a8',.45)+
+  '</g>');
+/* 둥근 열매 공통 — 명암 구, 윤기, 꼭지 */
+function fruit(id,lite,base,dark,extra,cy,r){
+  cy=cy||22.5; r=r||12.2;
+  return A(RG(id,.36,.3,.78,[[0,lite],[.5,base],[1,dark]],.32,.26),
+    SH(r*.82,36.8)+'<circle cx="20" cy="'+cy+'" r="'+r+'" fill="url(#'+id+')"/>'+(extra||''));
+}
+/* 양파 — 황갈색 얇은 껍질, 세로 결, 위 꼭지, 아래 뿌리 */
+I.yangpa=A(RG('i_yp',.36,.32,.75,[[0,'#f6dfa4'],[.5,'#d9a85c'],[1,'#8f5a26']],.3,.28),
+  SH(10,37)+P('M20 9 C25 13 32.6 16 32.2 24.6 C31.8 31.6 26.6 35 20 35 C13.4 35 8.2 31.6 7.8 24.6 C7.4 16 15 13 20 9 Z','url(#i_yp)')+
+  S('M20 10 C15 15 12.6 24 15 34 M20 10 C17.6 16 17.4 26 18.4 34.6 M20 10 C22.4 16 22.6 26 21.6 34.6 M20 10 C25 15 27.4 24 25 34','#9c6630',.45,' opacity=".6"')+
+  S('M20 9.6 C19.6 7 20.6 4.6 22 3.4','#b98a4e',1.2)+
+  S('M18.6 34.8 l-1 2 M20 35 v2.4 M21.4 34.8 l1 2','#c9b48a',.5)+
+  E(15.2,18.6,2.6,4,'#fff',' opacity=".3" transform="rotate(25 15.2 18.6)"'));
+
+/* 사과 — 빨강에 노란 줄무늬, 움푹한 꼭지, 잎 */
+SEED=7; var apS='';
+for(var i=0;i<9;i++){ var a=-1.3+i*.32; apS+=S('M'+f1(20+Math.cos(a)*3)+' '+f1(13+Math.sin(a)*1.5)+' Q'+f1(20+Math.cos(a)*11)+' '+f1(22+Math.sin(a)*3)+' '+f1(20+Math.cos(a)*7)+' 33','#f6b04a',.35,' opacity=".22"'); }
+I.sagwa=A(RG('i_sg',.34,.3,.8,[[0,'#ff9a7a'],[.45,'#d8352a'],[1,'#7a1610']],.3,.26),
+  SH(10,37)+P('M20 13 C24 9.6 32.4 10.4 32.6 20.4 C32.8 29.6 27 35 22.6 34.6 C21.4 34.5 20.6 34 20 34 C19.4 34 18.6 34.5 17.4 34.6 C13 35 7.2 29.6 7.4 20.4 C7.6 10.4 16 9.6 20 13 Z','url(#i_sg)')+
+  P('M17.6 13 q2.4 1.8 4.8 0 q-2.4 -1 -4.8 0 z','#5a1a0e',' opacity=".5"')+
+  S('M20 13.4 Q20.2 9 22 6','#6b4423',1.1)+
+  P('M21.6 8.4 C24 5 28.4 5 30 6.4 C28 9.4 24 10 21.6 8.4 Z','#5f9c3a')+S('M21.8 8.3 Q25.6 6.8 29.4 6.5','#3f7426',.4)+
+  E(14.4,17.6,2.4,3.6,'#fff',' opacity=".45" transform="rotate(30 14.4 17.6)"'));
+
+/* 배 — 둥근 신고배, 황갈색에 숨구멍 점 */
+SEED=11; var bd='';
+for(var i=0;i<34;i++){ var a=rnd()*6.28, d=Math.sqrt(rnd())*11; bd+='<circle cx="'+f1(20+Math.cos(a)*d)+'" cy="'+f1(23+Math.sin(a)*d*.95)+'" r=".32" fill="#f7e2b0" opacity=".85"/>'; }
+I.bae=fruit('i_be','#f3d99a','#cf9f52','#7d5420',bd+
+  S('M20 11 Q20.4 7.6 22.4 5.6','#6b4423',1.1)+P('M18 11.2 q2 1.4 4 0 q-2 -.8 -4 0 z','#6a4416',' opacity=".5"')+
+  E(14.6,17.4,2.6,3.6,'#fff',' opacity=".35" transform="rotate(30 14.6 17.4)"'),23,12.2);
+
+/* 밤 — 윤나는 갈색, 밑은 거친 연갈색, 위가 뾰족 */
+I.bam=A(LG('i_bm1',0,0,1,1,[[0,'#b07040'],[.45,'#7a4520'],[1,'#3e2010']])+
+  LG('i_bm2',0,0,0,1,[[0,'#d9b98a'],[1,'#b8945e']]),
+  SH(10,36.6)+P('M20 6.4 C23 9 32.6 15 32 25 C31.6 31 26.4 34.6 20 34.6 C13.6 34.6 8.4 31 8 25 C7.4 15 17 9 20 6.4 Z','url(#i_bm1)')+
+  P('M8.4 27.6 C10 32.6 15 34.6 20 34.6 C25 34.6 30 32.6 31.6 27.6 C27 29.6 13 29.6 8.4 27.6 Z','url(#i_bm2)')+
+  '<circle cx="14" cy="32" r=".35" fill="#8f6d3e"/><circle cx="20" cy="33" r=".35" fill="#8f6d3e"/><circle cx="25.6" cy="31.8" r=".35" fill="#8f6d3e"/>'+
+  S('M20 6.6 v-2.4','#c9a26a',.9)+
+  P('M14 13.6 C16 11.4 18.6 10 20 9.6 C17.6 13 15.6 17 15.4 22 C14.4 19.6 13.6 16 14 13.6 Z','#fff',' opacity=".32"'));
+
+/* 대추 — 짙은 적갈색 타원, 주름 */
+I.daechu=A(RG('i_dc',.35,.3,.8,[[0,'#d8644a'],[.5,'#9c2a1c'],[1,'#4c0f08']],.3,.25),
+  SH(8.5,36.4)+E(20,22,9.4,12.4,'url(#i_dc)')+
+  S('M14.6 16 q2 4 .4 8 q-1.4 3 .6 6 M19.4 12 q1.6 5 -.2 10 M24.6 15 q-1.6 4 .2 9 q1 3 -.6 6','#3e0a05',.55,' opacity=".55"')+
+  E(20,10.2,1.6,.8,'#5a3018')+S('M20 10 q.4 -2 1.8 -3','#6b4423',.8)+
+  E(15.6,16.6,1.6,3.4,'#fff',' opacity=".4" transform="rotate(20 15.6 16.6)"'));
+
+/* 고추 — 반들한 몸통, 초록 꼭지, 굽은 모양 */
+I.honggochu=A(LG('i_hg',0,0,1,1,[[0,'#ff7a5c'],[.45,'#d8261a'],[1,'#7c0c06']]),
+  SH(10,36.4)+P('M9.6 9.6 C13.6 7.6 16.6 9.6 19 13.6 C23.4 21 27 28.6 33.4 33.4 C26 35.4 19 30.6 15 24.4 C12 19.6 9.6 15 9.6 9.6 Z','url(#i_hg)')+
+  S('M12.4 11.4 C15.6 12 18 16.6 20.6 21','#fff',.9,' opacity=".55"')+
+  P('M8 8.8 C9.6 6.6 12.6 7 14.4 9.6 C12.6 11 9.8 11.4 8 8.8 Z','#4f8a30')+
+  S('M9.4 8 Q7.6 5.6 8.6 3','#3f7426',1.2));
+I.sakhin=A(LG('i_sk',0,0,1,1,[[0,'#d6dc9a'],[.5,'#9ea94e'],[1,'#5a6224']]),
+  SH(11,36.6)+
+  P('M6.6 14.6 C10 12.4 13 14 15.4 17.6 C19 23 22 28 27.6 31.6 C21 33.4 15 29.6 11.6 24.8 C9 21 6.6 18.4 6.6 14.6 Z','url(#i_sk)')+
+  P('M14 9 C17.4 6.8 20.4 8.4 22.8 12 C26.4 17.4 29.4 22.4 35 26 C28.4 27.8 22.4 24 19 19.2 C16.4 15.4 14 12.8 14 9 Z','url(#i_sk)')+
+  S('M8.6 15.6 C11.6 16 13.4 19 15.6 22 M16 10 C19 10.4 20.8 13.4 23 16.4','#f4f6d0',.7,' opacity=".6"')+
+  P('M5.6 14 C6.6 12 9 12 10.2 13.8 C8.8 15 6.8 15.4 5.6 14 Z','#6b7a34')+
+  P('M13 8.4 C14 6.4 16.4 6.4 17.6 8.2 C16.2 9.4 14.2 9.8 13 8.4 Z','#6b7a34'));
+/* 그릇에 담긴 양념 */
+I.gochugaru=dish('gochugaru','#c8281a','#ef5a3a','#7d1208',6.4,
+  grains(5,110,6.4,['#9e1a0e','#e8452c','#f07a4a','#7a0e06','#ffb070','#c92e1a'],.22,.62,'sq'));
+I.sogeum=dish('sogeum','#e4e2dc','#ffffff','#a9a6a0',6,
+  grains(6,70,6,['#ffffff','#f4f4f0','#d9d8d2','#c4c3bd'],.4,.8,'sq'));
+I.seoltang=dish('seoltang','#f2eee6','#ffffff','#c9c0b0',5.6,
+  grains(7,90,5.6,['#ffffff','#fdfcf8','#dcd6c8'],.16,.34,'sq'));
+I.maneul=dish('maneul','#e6d7a0','#fbf3d0','#b39e5e',5.8,
+  grains(8,75,5.8,['#f6edc6','#d9c78a','#fff8de','#cbb878'],.35,.7,'sq'));
+I.saenggang=dish('saenggang','#d4ae68','#f0d9a0','#94702f',5.6,
+  grains(9,75,5.6,['#e9cc8e','#b98f48','#f4e0b0','#a07c3c'],.35,.68,'sq'));
+I.chapssal=dish('chapssal','#e9e3d2','#ffffff','#b9af98',3.6,
+  S('M10 20.4 q5 -3 10 -1.2 t9 .6 M12.6 18.8 q4 -1.6 8 -.4','#fff',.7,' opacity=".8"')+
+  S('M11 21 q6 -1.2 12 -.2','#c9bfa6',.5));
+I.milgaru=dish('milgaru','#ede7d8','#fbf8ef','#c4baa4',4,
+  grains(10,50,4,['#f8f4ea','#ddd5c2'],.18,.32)+S('M12 19.6 q6 -2 12 -.6','#fff',.6,' opacity=".6"'));
+I.chanbap=dish('chanbap','#f4f1e8','#ffffff','#c8c0ae',7.2,
+  grains(12,80,7.2,['#ffffff','#f6f3ea','#e5dfcf'],.6,.8,'seed')+
+  grains(13,30,7.2,['#d9d2c0'],.12,.18));
+I.kkae=dish('kkae','#d6bc86','#f3e2b4','#9c7e46',5.8,
+  grains(14,95,5.8,['#f2dfaa','#c9a868','#e6cf94','#b8955a'],.42,.6,'seed'));
+I.kare=dish('kare','#d8961a','#f6c44a','#93600a',6,
+  grains(15,90,6,['#f0b02c','#c4800e','#ffd36a','#a86c08'],.15,.4));
+I.huchu=dish('huchu','#4a3e34','#7a6c5e','#211a14',5.4,
+  grains(16,110,5.4,['#2a221c','#6a5c4e','#8a7c6c','#14100c'],.15,.38));
+
+/* 멸치육수 — 대접에 맑은 국물, 멸치·다시마 */
+I.yuksu=A(LG('i_ysb',0,0,1,0,[[0,'#ffffff'],[.45,'#f3eee4'],[1,'#c9bfae']])+
+  RG('i_ysl',.4,.4,.7,[[0,'#e9c77a'],[1,'#a8782e']]),
+  SH(13,36.6)+P('M4.6 21.4 h30.8 c0 8.4 -6.6 14.4 -15.4 14.4 s-15.4 -6 -15.4 -14.4 z','url(#i_ysb)')+
+  S('M7 26.5 q13 4.4 26 0','#5d82b8',.7,' opacity=".55"')+
+  E(20,21.4,15.4,3.5,'#f6f2ea')+E(20,21.7,13.6,2.7,'url(#i_ysl)')+
+  P('M10.6 21.2 q3 -1.6 6 -.4 q-2.6 1.4 -6 .4 z','#2e3a1a',' opacity=".85"')+
+  P('M19.6 22.6 q2.6 -.8 5.4 .2 l1.2 -.6 l-.2 1.2 q-3 .8 -6.4 -.8 z','#c9cdd2')+
+  P('M24 20.4 q2.4 -.8 4.8 .2 l1 -.6 l-.2 1.1 q-2.6.7 -5.6 -.7 z','#b9bec4')+
+  '<circle cx="20.4" cy="22.6" r=".3" fill="#222"/>'+
+  E(14,20.8,3.2,.5,'#fff',' opacity=".45"'));
+
+/* 실고추 — 작은 접시에 실처럼 가는 고추 */
+SEED=21; var sg='';
+for(var i=0;i<46;i++){ var x=9+rnd()*22, y=17+rnd()*12-Math.abs(x-20)*.25, a=rnd()*6.28, l=3+rnd()*6;
+  sg+=S('M'+f1(x)+' '+f1(y)+' q'+f1(Math.cos(a+1)*l*.5)+' '+f1(Math.sin(a+1)*l*.5)+' '+f1(Math.cos(a)*l)+' '+f1(Math.sin(a)*l*.6),
+    ['#c8281a','#e8452c','#9e1a0e','#f06a4a'][i%4],.38); }
+I.silgochu=A('',SH(14,35.6)+E(20,28,15,6.2,'#d9d3c6')+E(20,27.2,15,6,'#fbf9f4')+E(20,27.2,11.6,4.2,'#f1ede4')+sg);
+
+/* 새우젓 — 유리병에 분홍 새우 */
+SEED=22; var sw='';
+for(var i=0;i<22;i++){ var x=12.6+rnd()*14.6, y=16+rnd()*16.4, r=1.2+rnd()*.6, a=Math.round(rnd()*360);
+  sw+='<g transform="rotate('+a+' '+f1(x)+' '+f1(y)+')">'+S('M'+f1(x-r)+' '+f1(y)+' a'+f1(r)+' '+f1(r)+' 0 1 1 '+f1(r*1.6)+' '+f1(r*.9),
+    ['#f2a28a','#ec8c72','#f7bca8'][i%3],.75)+'<circle cx="'+f1(x-r)+'" cy="'+f1(y)+'" r=".25" fill="#3a1a12"/></g>'; }
+I.saeujeot=A(LG('i_sjg',0,0,1,0,[[0,'#ead6cc'],[.35,'#fbefe8'],[.7,'#f6e4da'],[1,'#d8beb0']])+
+  LG('i_sjl',0,0,1,0,[[0,'#d8261a'],[.45,'#f05a3a'],[1,'#9e140c']]),
+  SH(11,37)+'<rect x="10" y="12.4" width="20" height="23.4" rx="3.6" fill="url(#i_sjg)"/>'+sw+
+  '<rect x="10" y="12.4" width="20" height="23.4" rx="3.6" fill="#fff" opacity=".12"/>'+
+  '<rect x="11.4" y="15" width="1.6" height="18" rx=".8" fill="#fff" opacity=".55"/>'+
+  '<rect x="9.4" y="7.6" width="21.2" height="5.4" rx="1.6" fill="url(#i_sjl)"/>'+
+  S('M10.4 9.4 h19.2 M10.4 11.2 h19.2','#7c0c06',.4,' opacity=".6"'));
+
+/* 병 */
+I.aekjeot=glassBottle('aekjeot','#8a4a18','#3e1a06','#d2362a','#7c140c',['#f4e6c4','#2a5a9a']);
+I.maesil=glassBottle('maesil','#c08a2c','#6a4410','#4f8a30','#2e5a1a',['#f6f0dc','#4f8a30']);
+I.baejeup=glassBottle('baejeup','#ead384','#a8883a','#e8e0c8','#9c9078',['#fffaf0','#c9a04a']);
+I.mul=glassBottle('mul','#dcf0fa','#9ccbe4','#2a7fd0','#155a9a',['#ffffff','#2a7fd0']);
+I.ganjang=glassBottle('ganjang','#4a2410','#0e0602','#d2362a','#7c140c',['#f4e6c4','#d2362a']);
+I.chamgireum=glassBottle('chamgireum','#dca62e','#7a5208','#2e7a3a','#16461e',['#f8eccc','#7a3a14'],.4);
+I.sikcho=glassBottle('sikcho','#f4efd8','#bfb48c','#3a8ad0','#1c5a9a',['#ffffff','#3a8ad0']);
+I.sikyongyu=glassBottle('sikyongyu','#f6dc64','#b8961a','#e8c020','#9a7a08',['#fff6d0','#2e8a3a']);
+I.keochup=squeeze('keochup','#e0301e','#7c0c06','#f4f0e6','#b2ab9a',
+  '<rect x="13.6" y="20" width="12.8" height="7" rx="1" fill="#fbf6e8"/>'+
+  '<path d="M18 21.4 c2 -1 4 -1 4 1.6 c0 2.4 -2.6 2.6 -4 2.6 z" fill="#d8261a"/>'+S('M20 21 l1 -1.2','#4f8a30',.7));
+I.mayo=squeeze('mayo','#fcf7e4','#cfc5a2','#d8261a','#8a120c',
+  S('M14.6 18 l10.8 9 M14.2 22.6 l10 8.6 M14.6 27.4 l6.6 5.6 M25.4 18 l-10.8 9 M25.8 22.6 l-10 8.6 M25.4 27.4 l-6.6 5.6','#d8261a',.6,' opacity=".75"'));
+I.gochujang=tub('gochujang','#d8261a','#7c0c06','#a8241a','#5a0c08',['#f6e7c8','#d8261a']);
+I.doenjang=tub('doenjang','#a87a3a','#5a3a14','#9a7034','#5a3a14',['#f6e7c8','#6a4418']);
+I.uyu=A(LG('i_uyf',0,0,1,0,[[0,'#ffffff'],[1,'#e2e9f0']]),
+  SH(10,36.8)+
+  P('M23 15 L29.4 12.8 L29.4 33 L23 35.4 Z','#c4d2e0')+
+  P('M11 15 L23 15 L23 35.4 L11 35.4 Z','url(#i_uyf)')+
+  P('M11 15 L17 9 L23 15 Z','#f4f7fa')+P('M23 15 L17 9 L23.4 6.8 L29.4 12.8 Z','#d6e0ea')+
+  P('M16.4 9.6 L22.8 7.4 L22.8 5 L16.4 7.2 Z','#eef2f6')+
+  '<rect x="11" y="24" width="12" height="7.4" fill="#2a6fc0"/>'+P('M23 24 L29.4 21.8 L29.4 29.2 L23 31.4 Z','#1d559a')+
+  S('M12 28.6 q2.6 -2 5 0 t5 0','#fff',.8)+'<circle cx="17" cy="19.6" r="2.2" fill="#2a6fc0" opacity=".85"/>');
+I.beoteo=A('',SH(12,35.6)+
+  P('M7 17.4 L22 13 L33 16.4 L18 21 Z','#fbe9a6')+
+  P('M7 17.4 L18 21 L18 31.6 L7 28 Z','#f0cf62')+
+  P('M18 21 L33 16.4 L33 27 L18 31.6 Z','#ddb646')+
+  P('M21.6 19.9 L33 16.4 L33 27 L21.6 30.5 Z','#f2efe6')+P('M21.6 23.4 L33 19.9 L33 22.4 L21.6 25.9 Z','#2a6fc0')+
+  S('M7 17.4 L18 21 L33 16.4','#fff6cc',.6,' opacity=".9"'));
+I.chijeu=A('',SH(13,35.6)+
+  P('M6.6 22.6 L28.6 12.6 L34 18.4 Z','#ffdc6c')+
+  P('M6.6 22.6 L34 18.4 L34 28.4 L6.6 32.4 Z','#f2bb38')+
+  P('M34 18.4 L28.6 12.6 L28.6 22.6 L34 28.4 Z','#e0a224')+
+  E(12.6,27.4,1.6,1.2,'#c98a14')+E(20,26.2,2.2,1.6,'#c98a14')+E(27.6,24.6,1.3,1,'#c98a14')+E(24.4,29.4,1,.8,'#c98a14')+
+  E(19,18.6,1.4,.6,'#e8b830')+E(24,16.6,.9,.4,'#e8b830'));
+I.danggeun=A(LG('i_dg',0,0,1,1,[[0,'#ffae5a'],[.5,'#ec7a22'],[1,'#a8480c']]),
+  SH(10,36.6)+
+  leafP(12,11,5,1.4,2,.4,'#3f7f28','#7cb050')+leafP(12,11,12.6,.6,2,.4,'#5a9a3a','#8cc163')+leafP(12,11,2,7,2,.4,'#4f8f32','#86ba5a')+
+  P('M9.6 12.6 C11.6 9.4 15.6 10 17.6 12 L34 33.6 C31.6 34.6 22 26.4 13.6 18.6 C11 16.2 8.6 14.6 9.6 12.6 Z','url(#i_dg)')+
+  S('M14.4 15 l1.6 -1.8 M18.6 19.4 l1.4 -1.4 M23 23.6 l1.2 -1.2 M27 27.6 l1 -1','#9a3e08',.5,' opacity=".7"')+
+  S('M12.2 13 C15 14.6 22 21.6 30 30.6','#ffd09a',.8,' opacity=".6"'));
+I.yangbaechu=A(RG('i_yb',.38,.32,.78,[[0,'#eef6d4'],[.55,'#c4dc90'],[1,'#7aa848']],.3,.25),
+  SH(11,37)+'<circle cx="20" cy="22.6" r="12.6" fill="url(#i_yb)"/>'+
+  P('M7.6 25 C8 15 14 9.6 20 10 C14.6 13 11.4 19 11.6 27 C10 27.4 8.4 26.6 7.6 25 Z','#9cc463',' opacity=".9"')+
+  P('M32.4 25 C32 15 26 9.6 20 10 C25.4 13 28.6 19 28.4 27 C30 27.4 31.6 26.6 32.4 25 Z','#86b450',' opacity=".9"')+
+  S('M20 34 Q19 24 20 12 M20 30 Q15 26 12.6 20 M20 30 Q25 26 27.4 20 M20 25 Q16.4 21 15.6 15.6 M20 25 Q23.6 21 24.4 15.6','#f4f9e4',.7,' opacity=".85"')+
+  E(15,17,2.4,3.4,'#fff',' opacity=".35" transform="rotate(30 15 17)"'));
+I.tomato=A(RG('i_tm',.36,.3,.8,[[0,'#ff8a6a'],[.45,'#e02a1a'],[1,'#7c0c06']],.3,.26),
+  SH(11,37)+P('M20 11.6 C27 11 32.8 15 32.8 23 C32.8 30.6 27 35 20 35 C13 35 7.2 30.6 7.2 23 C7.2 15 13 11 20 11.6 Z','url(#i_tm)')+
+  S('M14 14 q-1.6 4 -1 8 M26 14 q1.6 4 1 8','#9c140c',.5,' opacity=".5"')+
+  P('M20 13.6 L17 9.6 L19.4 11.6 L18.2 7.8 L20.6 11 L23 8 L21.8 12 L25.4 10.6 L22 13.6 L24.6 15.2 L20.6 14.6 L18 16 L18.6 14.2 L14.8 15 Z','#3f7f28')+
+  S('M20.4 11.4 Q20.6 8.4 22 6.6','#4f8a30',1)+
+  E(14.6,17.4,2.4,3.4,'#fff',' opacity=".5" transform="rotate(30 14.6 17.4)"'));
+SEED=23; var gs='';
+for(var i=0;i<24;i++) gs+='<circle cx="'+f1(9+rnd()*22)+'" cy="'+f1(15+rnd()*17)+'" r=".3" fill="#8a6a3a" opacity=".6"/>';
+I.gamja=A(RG('i_gj',.38,.32,.8,[[0,'#ecd29c'],[.55,'#c49a5c'],[1,'#7a5424']],.3,.26),
+  SH(12,36.2)+P('M9.4 16.6 C12 11.4 19 10.4 24.6 11.6 C30.6 12.8 33.4 17 32.6 23.4 C31.8 30 27 33.6 20 33.4 C13 33.2 7.6 30 7.4 23.6 C7.3 20.6 8.2 18.4 9.4 16.6 Z','url(#i_gj)')+gs+
+  S('M14 18.6 q1 -.8 2 0 M24.4 16.6 q1 -.7 2 .1 M20.6 27 q1 -.8 2 0 M12.4 26 q.8 -.6 1.6 .1','#6a4618',.7)+
+  E(15,16.6,2.6,1.6,'#fff',' opacity=".3" transform="rotate(-20 15 16.6)"'));
+
+for(var k in I) if(ING[k]) ING[k].i=I[k];
+})();
 var KIMCHI = [
 { id:'baechu', name:L$('배추김치'), en:'BAECHU KIMCHI (Napa Cabbage)',
   tag:L$('통배추를 절여 속을 채우는, 김치의 기본'),
@@ -2270,6 +2692,162 @@ var VEG={
  }
 };
 
+/* ── 도마 위 채소 — 갓·열무·총각무·동치미무를 사진처럼 다시 그림(2026-10-21) ── */
+(function(){
+/* 잎 한 장 — 톱니 가장자리, 결 따라 밝은 쪽·그늘 쪽, 가운데 잎맥과 곁맥 */
+function cleaf(c,x0,y0,x1,y1,w,lob,lite,dark,vein,bend){
+  var dx=x1-x0, dy=y1-y0, L=Math.sqrt(dx*dx+dy*dy), nx=-dy/L, ny=dx/L, N=26, l=[], r=[];
+  bend=bend||0;
+  for(var i=0;i<=N;i++){
+    var t=i/N, b=Math.sin(Math.PI*t)*bend,
+      ww=w*Math.pow(Math.sin(Math.PI*Math.min(1,t*1.06)),.7)*(1+lob*Math.sin(t*Math.PI*11))*(t<.15?t/.15:1),
+      px=x0+dx*t+nx*b, py=y0+dy*t+ny*b;
+    l.push([px+nx*ww,py+ny*ww]); r.unshift([px-nx*ww,py-ny*ww]);
+  }
+  var g=c.createLinearGradient(x0+nx*w,y0+ny*w,x0-nx*w,y0-ny*w);
+  g.addColorStop(0,lite); g.addColorStop(1,dark);
+  c.fillStyle=g; c.beginPath();
+  l.concat(r).forEach(function(p,i){ c[i?'lineTo':'moveTo'](p[0],p[1]); });
+  c.closePath(); c.fill();
+  c.strokeStyle='rgba(30,60,15,.35)'; c.lineWidth=1; c.stroke();
+  if(vein){
+    var mx=(x0+x1)/2+nx*bend, my=(y0+y1)/2+ny*bend;
+    c.strokeStyle=vein; c.lineWidth=Math.max(1.2,w*.12); c.lineCap='round';
+    c.beginPath(); c.moveTo(x0,y0); c.quadraticCurveTo(mx,my,x0+dx*.94,y0+dy*.94); c.stroke();
+    c.lineWidth=Math.max(.7,w*.05);
+    for(var k=1;k<6;k++){ var t2=k/6.4, b2=Math.sin(Math.PI*t2)*bend,
+      qx=x0+dx*t2+nx*b2, qy=y0+dy*t2+ny*b2, ww2=w*.75*Math.sin(Math.PI*t2);
+      [1,-1].forEach(function(s){ c.beginPath(); c.moveTo(qx,qy);
+        c.lineTo(qx+nx*ww2*s+dx/L*w*.5, qy+ny*ww2*s+dy/L*w*.5); c.stroke(); }); }
+  }
+}
+/* 흰 무 몸통 — 어깨 연두, 몸통 흰색, 오른쪽 아래 그늘, 윤기, 꼬리 */
+function radishBody(c,cx,cy,rx,ry,ang,shoulder){
+  c.save(); c.translate(cx,cy); c.rotate(ang);
+  c.fillStyle='rgba(80,55,30,.11)';
+  c.beginPath(); c.ellipse(rx*.18,ry*.72,rx*.95,ry*.2,0,0,7); c.fill();
+  var g=c.createLinearGradient(0,-ry,0,ry);
+  g.addColorStop(0,shoulder||'#9cc96a'); g.addColorStop(.26,'#d9ebb8');
+  g.addColorStop(.48,'#f5f4e8'); g.addColorStop(1,'#fbfaf2');
+  c.fillStyle=g; c.beginPath();
+  c.moveTo(0,-ry);
+  c.bezierCurveTo(rx*1.25,-ry*.98,rx*1.2,ry*.25,rx*.18,ry*.92);
+  c.quadraticCurveTo(0,ry*1.05,-rx*.18,ry*.92);
+  c.bezierCurveTo(-rx*1.2,ry*.25,-rx*1.25,-ry*.98,0,-ry);
+  c.closePath(); c.fill();
+  var s=c.createLinearGradient(-rx,0,rx,0);
+  s.addColorStop(0,'rgba(255,255,255,.35)'); s.addColorStop(.4,'rgba(255,255,255,0)');
+  s.addColorStop(.72,'rgba(0,0,0,0)'); s.addColorStop(1,'rgba(90,85,55,.30)');
+  c.fillStyle=s; c.fill();
+  c.strokeStyle='rgba(120,125,90,.35)'; c.lineWidth=1.2; c.stroke();
+  /* 가로 잔주름 */
+  c.strokeStyle='rgba(150,145,115,.35)'; c.lineWidth=1;
+  for(var i=0;i<4;i++){ var yy=-ry*.1+i*ry*.22, sgn=i%2?1:-1;
+    c.beginPath(); c.moveTo(sgn*rx*.75,yy); c.quadraticCurveTo(sgn*rx*.55,yy+ry*.03,sgn*rx*.38,yy); c.stroke(); }
+  c.fillStyle='rgba(255,255,255,.55)';
+  c.beginPath(); c.ellipse(-rx*.42,-ry*.15,rx*.13,ry*.32,0,0,7); c.fill();
+  /* 꼬리 뿌리 */
+  c.strokeStyle='#ddd5ba'; c.lineWidth=Math.max(1.2,rx*.07); c.lineCap='round';
+  c.beginPath(); c.moveTo(0,ry*.98); c.quadraticCurveTo(rx*.15,ry*1.25,rx*.05,ry*1.5); c.stroke();
+  c.lineWidth=.8;
+  c.beginPath(); c.moveTo(-rx*.3,ry*.7); c.lineTo(-rx*.6,ry*.85); c.stroke();
+  c.beginPath(); c.moveTo(rx*.35,ry*.55); c.lineTo(rx*.65,ry*.68); c.stroke();
+  /* 무청 자른 자리 */
+  c.fillStyle='#7aaa4a'; c.beginPath(); c.ellipse(0,-ry*.96,rx*.5,ry*.1,0,0,7); c.fill();
+  c.restore();
+}
+function strawTie(c,x,y,w,h,ang){
+  c.save(); c.translate(x,y); c.rotate(ang||0);
+  var g=c.createLinearGradient(0,-h/2,0,h/2);
+  g.addColorStop(0,'#e3c886'); g.addColorStop(.5,'#c9a45e'); g.addColorStop(1,'#93733a');
+  c.fillStyle=g; c.fillRect(-w/2,-h/2,w,h);
+  c.strokeStyle='rgba(110,80,35,.6)'; c.lineWidth=1;
+  for(var i=-2;i<=2;i++){ c.beginPath(); c.moveTo(-w/2,i*h/5); c.lineTo(w/2,i*h/5+1); c.stroke(); }
+  c.restore();
+}
+
+/* 총각무 — 손가락만 한 통통한 무 넷, 무청이 길고 무성하다 */
+VEG.chonggak=function(c,W,H){
+  [[.22,-.10],[.41,-.03],[.6,.04],[.79,.11]].forEach(function(q,i){
+    var x=W*q[0], top=H*.47;
+    for(var k=-2;k<=2;k++){
+      var ex=x+k*W*.04+q[1]*W*.3, ey=H*.04+Math.abs(k)*H*.05;
+      var mx=x+k*W*.012, my=H*.30;
+      c.strokeStyle=k%2?'#6c9c44':'#86b85a'; c.lineWidth=W*.011; c.lineCap='round';
+      c.beginPath(); c.moveTo(x+k*W*.006,top); c.quadraticCurveTo(x+k*W*.008,H*.38,mx,my); c.stroke();
+      cleaf(c,mx,my,ex,ey,W*.026,.14,(k+i)%2?'#7cb24f':'#93c464','#3f7426','#bcd994',k*1.5);
+    }
+    radishBody(c,x,H*.66,W*.064,H*.18,q[1]*.5);
+  });
+};
+
+/* 열무 — 실처럼 가는 흰 뿌리, 긴 줄기, 크고 여린 잎. 두 단을 지푸라기로 묶음 */
+VEG.yeolmu=function(c,W,H){
+  [[.18,-.06],[.62,.06]].forEach(function(q,bi){
+    var y=H*q[0]+H*.12, x0=W*.08;
+    c.save(); c.translate(W*.5,y); c.rotate(q[1]); c.translate(-W*.5,-y);
+    c.fillStyle='rgba(60,45,20,.16)';
+    c.beginPath(); c.ellipse(W*.5,y+H*.13,W*.42,H*.04,0,0,7); c.fill();
+    for(var i=0;i<4;i++){
+      var oy=(i-1.5)*H*.03;
+      /* 뿌리 */
+      var g=c.createLinearGradient(0,y+oy-3,0,y+oy+3);
+      g.addColorStop(0,'#fbfaf2'); g.addColorStop(1,'#d2ccb2');
+      c.strokeStyle=g; c.lineWidth=H*.016; c.lineCap='round';
+      c.beginPath(); c.moveTo(x0,y+oy*.6); c.quadraticCurveTo(W*.16,y+oy,W*.26,y+oy); c.stroke();
+      c.strokeStyle='#ddd5ba'; c.lineWidth=.8;
+      c.beginPath(); c.moveTo(x0,y+oy*.6); c.lineTo(x0-W*.04,y+oy*.6+2); c.stroke();
+      /* 줄기 */
+      c.strokeStyle=i%2?'#a6cf7a':'#b9da8e'; c.lineWidth=H*.012;
+      c.beginPath(); c.moveTo(W*.26,y+oy); c.quadraticCurveTo(W*.42,y+oy*1.4,W*.5,y+oy*2.2); c.stroke();
+    }
+    for(var j=0;j<5;j++){
+      var a=(j-2)*.16, lx=W*.46, ly=y+(j-2)*H*.035;
+      cleaf(c,lx,ly,lx+Math.cos(a)*W*.46,ly+Math.sin(a)*W*.46*.7,H*.055,.15,
+        j%2?'#9fd06e':'#b2da84','#5a9a38','#e2f2c8',(j-2)*4);
+    }
+    strawTie(c,W*.27,y,W*.035,H*.12,0);
+    c.restore();
+  });
+};
+
+/* 갓 — 자줏빛이 번지는 주름진 큰 잎, 자주색 줄기, 한 단 */
+VEG.gat=function(c,W,H){
+  var bx=W*.5, by=H*.94;
+  c.fillStyle='rgba(60,40,30,.16)';
+  c.beginPath(); c.ellipse(W*.5,H*.95,W*.34,H*.035,0,0,7); c.fill();
+  var L=[[-.95,.95],[.95,.95],[-.62,.92],[.62,.92],[-.3,.98],[.3,.98],[0,1]];
+  L.forEach(function(q,i){
+    var a=-Math.PI/2+q[0]*.62, len=H*.64*q[1];
+    var sx=bx+q[0]*W*.02, sy=by-H*.24, ex=sx+Math.cos(a)*len, ey=sy+Math.sin(a)*len;
+    var g=c.createLinearGradient(sx,by,sx,by-H*.3);
+    g.addColorStop(0,'#c9a0c8'); g.addColorStop(1,'#8a4f8a');
+    c.strokeStyle=g; c.lineWidth=W*.022; c.lineCap='round';
+    c.beginPath(); c.moveTo(bx+q[0]*W*.03,by); c.quadraticCurveTo(sx,sy+H*.1,sx+Math.cos(a)*H*.05,sy+Math.sin(a)*H*.05); c.stroke();
+    cleaf(c,sx+Math.cos(a)*H*.05,sy+Math.sin(a)*H*.05,ex,ey,W*.10,.16,
+      i%2?'#8eb85a':'#7aa648', i%3?'#6a3a66':'#5a4a2e','#b99ab4',q[0]*10);
+  });
+  strawTie(c,bx,by-H*.12,W*.12,H*.04,0);
+};
+
+/* 동치미무 — 작고 단단한 무 넷, 무청은 짧게 쳐 내고 아래로 잔뿌리 (썰기 판정선 자리에 맞춤) */
+VEG.murad=function(c,W,H){
+  [.17,.39,.61,.83].forEach(function(px,i){
+    var x=W*px, y=H*.42, ry=H*.17;
+    for(var k=-1;k<=1;k++){
+      var a=-Math.PI/2+k*.38, sy=y-ry*.92;
+      cleaf(c,x,sy,x+Math.cos(a)*H*.16,sy+Math.sin(a)*H*.16,W*.02,.2,'#8ec05e','#4f8a30','#c6e09c',k*2);
+    }
+    /* 긴 뿌리와 잔뿌리 — 다듬을 곳 */
+    c.strokeStyle='#ddd5ba'; c.lineCap='round'; c.lineWidth=W*.008;
+    c.beginPath(); c.moveTo(x,y+ry*.9); c.quadraticCurveTo(x+W*.01,H*.72,x+(i%2?W*.004:-W*.004),H*.86); c.stroke();
+    c.lineWidth=1;
+    for(var j=0;j<4;j++){ var yy=H*(.64+j*.055), sg=j%2?1:-1;
+      c.beginPath(); c.moveTo(x+W*.004,yy); c.quadraticCurveTo(x+sg*W*.02,yy+H*.01,x+sg*W*.032,yy+H*.035); c.stroke(); }
+    radishBody(c,x,y,W*.082,ry,(i-1.5)*.04,'#8fc05a');
+  });
+};
+})();
 /* ── 싱크대 · 새로 담그기 + 배추 씻기 ───────────────────────── */
 function uiSink(){
   if(B && B.stage>0){ toast(L$('이미 씻었습니다. 다음은 <b>도마</b>입니다')); sfx('bad'); return; }
