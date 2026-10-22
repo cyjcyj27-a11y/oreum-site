@@ -210,7 +210,6 @@
     click('bStart', () => { G.reset(); G.opening(); });
     click('bCont', () => G.opening());
     click('bNew', () => { G.reset(); G.opening(); });
-    click('bShopT', U.shop); click('bDexT', U.dex);
     click('bHowOk', closeHow);
     // 손님 바꿀 때 하얗게 덮고(새 머리 만드는 동안) 걷어 냄
     const swap = (f) => { U.fade(1); setTimeout(() => { f(); setTimeout(() => U.fade(0), 60); }, 380); };
