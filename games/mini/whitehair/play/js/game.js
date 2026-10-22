@@ -20,7 +20,7 @@
   // 조명 단계 → 가게 빛·머리카락 밝기(상점에서 사면 그 자리에서 바로 다시 부름)
   G.light = () => { RND.salonLight(gv('expo')); H.hairMat.uniforms.uExpo.value = 0.92 + (gv('expo') - 1) * 0.7; };
   G.mode = 'title';
-  let cust = null, pat = 100, patMax = 100, combo = 0, clearT = -1;
+  let cust = null, pat = 100, patMax = 100, combo = 0, clearT = -1, spent = 0; // spent: 이번 손님 때 쓴 차·주무르기 값(실패하면 돌려줌)
   const tally = { white: 0, gold: 0, black: 0, nice: 0, snap: 0 }; // 이번 손님 정산할 가닥 수 + 팁 따질 실수
   G.combMode = false;
   const cam = { az: 2.5, pol: 0.72, dist: 38, taz: 2.5, tpol: 0.72, tdist: 38 };
@@ -33,7 +33,7 @@
   G.startCustomer = function (i) {
     cust = G.cust = D.customer(i);
     H.build(cust);
-    pat = patMax; combo = 0; clearT = -1; tally.white = tally.gold = tally.black = tally.nice = tally.snap = 0;
+    pat = patMax; combo = 0; clearT = -1; spent = 0; tally.white = tally.gold = tally.black = tally.nice = tally.snap = 0;
     cam.az = cam.taz = 2.5 + (i % 3) * 0.3; cam.pol = cam.tpol = 0.72; cam.dist = cam.tdist = 38;
     Object.assign(hm, { pitch: 0, yaw: 0, roll: 0, vp: 0, vy: 0, vr: 0, tp: 0, ty: 0, tr: 0, ev: 4, evT: 0, kind: '' });
     H.tent.h.value = 0; drop();
@@ -66,7 +66,7 @@
     const w = list.find((c) => c.st.white && c.d < R * 0.6 && c.d < best.d + 2.5);
     if (w) best = w;
     const sel = [best];
-    const dbl = gv('dblR');
+    const dbl = gv('dblR') * (cust.helix ? 0.35 : 1); // 뽀글이 파마는 고리가 겹쳐 옆 머리가 잘 딸려 오니 덜 딸려 오게(10/22)
     // 옆 머리는 집은 가닥 위에 겹쳐 누운 것만 같이 딸려 온다(족집게가 좋을수록 덜)
     for (const c of list) { if (c === best || sel.length >= 3) continue; if (c.d < dbl && c.z < best.z - 0.05 && !c.st.white) sel.push(c); }
     // 쌍둥이는 같이
@@ -151,7 +151,8 @@
   }
   // 실수 한 번에 깎이는 인내심: 첫 손님 a → 마지막 손님 b(사장님 10/22 "초반은 인내심 높은데 판올라갈수록 실수한번에 바로 나가는거로")
   // 검은 머리 10→100(마지막 쪽은 한 가닥에 바로 나감), 끊김 3→40, 오래 당겨 움찔 6→50
-  function mistake(a, b) { const t = Math.pow(cust.i / (D.COUNT - 2), 1.3); return Math.round(a + (b - a) * Math.min(1, t)); }
+  // 10/22 "15번쨰 손님 깨기 넘 힘든데" → 가운데 손님은 완만하게(1.3제곱→2제곱, 15번째 검은 머리 57→43), 마지막은 그대로 100
+  function mistake(a, b) { const t = Math.pow(cust.i / (D.COUNT - 2), 2); return Math.round(a + (b - a) * Math.min(1, t)); }
   function hurt(n, big) {
     pat = Math.max(0, pat - n);
     hm.vp -= big ? 1.6 : 0.6; hm.vy += (Math.random() - 0.5) * (big ? 1.4 : 0.5); hm.vr += (Math.random() - 0.5) * 0.8;
@@ -163,7 +164,7 @@
     if (G.mode !== 'play' || UI.paused() || clearT >= 0 || !(S.items[id] > 0)) return;
     const it = D.SHOP.find((s) => s.id === id);
     if (pat >= patMax - 1) { SND.fail(); UI.praise(L('인내심 가득', 'Patience full'), '', 'snap', innerWidth / 2, innerHeight * 0.4); return; } // 꽉 찼을 땐 아깝게 버리지 않음
-    S.items[id]--; pat = Math.min(patMax, pat + it.heal); hm.tp = 0.05; SND.coin(); G.save();
+    S.items[id]--; spent += it.cost; pat = Math.min(patMax, pat + it.heal); hm.tp = 0.05; SND.coin(); G.save();
     UI.praise(id === 'tea' ? L('후루룩', 'Sip') : L('시원하다', 'Ahh'), L('인내심 +', 'Patience +') + it.heal, 'nice', innerWidth / 2, innerHeight * 0.4); UI.hud();
   };
   G.rub = () => G.use('rub');
@@ -365,7 +366,9 @@
     if (tip >= 50000) setTimeout(() => SND.gold(), 300);
   }
   function fail() {
-    G.mode = 'over'; drop(); S.stats.fails++; G.save(); SND.fail(); UI.over();
+    // 실패하면 이번 손님 때 써 버린 차·주무르기 값은 코인으로 돌려줌(사장님 10/22 "실패하면 돈은 돌려줘야지")
+    const back = spent; S.coins += back; spent = 0;
+    G.mode = 'over'; drop(); S.stats.fails++; G.save(); SND.fail(); UI.over(back); UI.hud();
   }
   G.next = function () { G.startCustomer(S.cust); };
   G.retry = function () { G.startCustomer(cust.i); };

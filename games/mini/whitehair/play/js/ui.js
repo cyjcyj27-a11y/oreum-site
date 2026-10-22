@@ -141,7 +141,7 @@
     rows.forEach(([a, b, cls]) => { const d = document.createElement('div'); if (cls) d.className = cls; d.innerHTML = '<span></span><b></b>'; d.children[0].textContent = a; d.children[1].textContent = sg(b); $('resL').appendChild(d); });
     $('res').hidden = false; U.hud();
   };
-  U.over = function () { $('over').hidden = false; };
+  U.over = function (back) { $('overBack').hidden = !back; if (back) $('overBack').textContent = L('쓴 코인 돌려받음 +', 'Coins refunded +') + back.toLocaleString(); $('over').hidden = false; };
   U.shop = function () {
     $('shop').hidden = false; drawShop();
   };
