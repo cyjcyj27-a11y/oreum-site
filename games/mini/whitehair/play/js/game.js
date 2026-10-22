@@ -137,7 +137,7 @@
   function snap() {
     const it = grab.items[0], st = it.st;
     S.stats.snaps++; combo = 0; tally.snap++;
-    const keep = Math.max(0.25, it.L0 * 0.9);
+    const keep = Math.min(st.L, Math.max(0.6, it.L0 * 0.9));// 끊겨도 6mm 는 남아 눈에 보이게
     const piece = it.drawn.slice(Math.round(it.sg * 12)).map((p) => p.clone());
     while (piece.length < 13) piece.unshift(piece[0].clone());
     G.flyAdd([{ pts: piece, col: [it.col[1], it.col[1]], wid: st.wid, n: st.n, white: false, broken: true }]);
@@ -240,8 +240,11 @@
     if (G.tw.visible) { G.tw.position.copy(grab.Pw); G.tw.lookAt(RND.camera.position); G.tw.rotateZ(-0.75); G.tw.rotateX(-1.0); }
     // 끊김 둘: ① 끝 쪽을 잡으면 뿌리가 빠지기 전에 머리카락이 먼저 끊김(뿌리 가까이 잡아야 뽑힘)
     //          ② 너무 빨리 확 당김
-    const breakAt = rootS * (1.6 - 1.4 * m.sg) * gv('snapK');
-    const vSnap = 11 * gv('snapK') * (1.2 - 0.5 * m.sg);
+    //   잡은 자리는 비율이 아니라 뿌리에서 실제 거리(cm)로 따짐: 짧은 머리·끊긴 토막은 어디를 잡아도 뿌리 가까이라 뽑힘
+    //   (사장님 10/22 "짧은흰머리 계속 끊어지고 안보여서" — 비율로 따지니 2.5mm 토막도 끝을 잡은 셈이 돼 끝없이 끊겼음)
+    const sgE = Math.min(m.sg, m.L0 / 4);
+    const breakAt = rootS * (1.6 - 1.4 * sgE) * gv('snapK');
+    const vSnap = 11 * gv('snapK') * (1.2 - 0.5 * sgE);
     const danger = Math.max(grab.v / vSnap, breakAt < rootS ? ext / breakAt : 0);
     UI.grip(grab.cx, grab.cy, ext / rootS, danger);
     if (ext > 0.02) grab.maxV = Math.max(grab.maxV, grab.v / vSnap);
