@@ -33,6 +33,8 @@
   G.startCustomer = function (i) {
     cust = G.cust = D.customer(i);
     H.build(cust);
+    // 폰(터치)은 손가락으로 집기 어려우니 인내심 두 배(사장님 10/23 "모바일판 한정 손님인내심을 두배로")
+    patMax = document.body.classList.contains('touch') ? 200 : 100;
     pat = patMax; combo = 0; clearT = -1; spent = 0; tally.white = tally.gold = tally.black = tally.nice = tally.snap = 0;
     cam.az = cam.taz = 2.5 + (i % 3) * 0.3; cam.pol = cam.tpol = 0.72; cam.dist = cam.tdist = 38;
     Object.assign(hm, { pitch: 0, yaw: 0, roll: 0, vp: 0, vy: 0, vr: 0, tp: 0, ty: 0, tr: 0, ev: 4, evT: 0, kind: '' });
