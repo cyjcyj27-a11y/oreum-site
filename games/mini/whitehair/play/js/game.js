@@ -78,7 +78,7 @@
     plane.setFromNormalAndCoplanarPoint(_a, grab.g0w);
     grab.Pw = grab.g0w.clone();
     grab.root = m.st.root.clone();
-    G.tw.visible = S.gear.tweez > 0;
+    G.tw.visible = S.gear.tweez > 0; if (S.gear.tweez > 0) G.buildTweez(S.gear.tweez);
     SND.ui();
     return true;
   };
@@ -404,20 +404,46 @@
   G._fill = () => { pat = patMax; }; // 시험용
   G.rubLeft = () => rubLeft;
 
+  // 족집게 세 가지(사장님 10/22 다이소 족집게 사진들 "족집게종류 모양 다르게"). 원점 = 집는 끝, 뒤로 갈수록 +y.
+  // 반쪽 다리 바깥선(끝→뒤) + 안쪽선(뒤→끝), 색은 끝에서부터 길이로 칠함
+  const TWEEZ = {
+    // 쇠 족집게: 은색 일자형, 끝이 넓게 비스듬히 잘림
+    1: { out: [[0.0, 0.0], [0.15, 0.1], [0.17, 0.7], [0.22, 2.4], [0.25, 4.8], [0.22, 6.4], [0.12, 6.9], [0.0, 7.0]], inn: [[0.02, 6.7], [0.07, 4.6], [0.07, 2.2], [0.04, 0.6], [0.0, 0.08]],
+         col: () => [0.89, 0.91, 0.93], metal: 0.35, glow: '#2a2d31' },
+    // 뾰족 족집게: 검은 코팅 곡선형 몸통 + 은색 뾰족한 끝
+    2: { out: [[0.0, 0.0], [0.04, 0.35], [0.11, 1.2], [0.2, 2.2], [0.27, 3.2], [0.21, 4.3], [0.27, 5.4], [0.2, 6.3], [0.08, 6.55], [0.0, 6.6]], inn: [[0.02, 6.35], [0.07, 4.5], [0.06, 2.6], [0.02, 0.8], [0.0, 0.0]],
+         col: (y) => (y < 1.25 ? [0.86, 0.88, 0.9] : [0.03, 0.03, 0.035]), metal: 0.1, glow: '#000000' },
+    // 장인 족집게: 길고 가는 거울 은색 + 가운데 파란 고무 손잡이, 바늘 같은 끝
+    3: { out: [[0.0, 0.0], [0.025, 0.45], [0.08, 1.5], [0.17, 3.0], [0.2, 5.0], [0.17, 6.8], [0.08, 7.5], [0.0, 7.6]], inn: [[0.02, 7.4], [0.06, 5.0], [0.05, 3.0], [0.012, 1.0], [0.0, 0.0]],
+         col: () => [0.94, 0.96, 0.98], metal: 0.45, glow: '#1a1c20' },
+  };
+  let twLv = 0;
+  G.buildTweez = function (lv) {
+    if (lv === twLv) return; twLv = lv;
+    const tw = G.tw, T = TWEEZ[lv];
+    while (tw.children.length) { const c = tw.children.pop(); c.geometry.dispose(); }
+    const sh = new THREE.Shape(); T.out.concat(T.inn).forEach(([x, y], i) => (i ? sh.lineTo(x, y) : sh.moveTo(x, y)));
+    const g = new THREE.ExtrudeGeometry(sh, { depth: 0.06, bevelEnabled: true, bevelThickness: 0.015, bevelSize: 0.012, bevelSegments: 1 });
+    const pa = g.attributes.position, cols = new Float32Array(pa.count * 3);
+    for (let i = 0; i < pa.count; i++) cols.set(T.col(pa.getY(i)), i * 3);
+    g.setAttribute('color', new THREE.BufferAttribute(cols, 3));
+    // 끝(원점)이 집은 곳, 몸통은 +z(화면 쪽)로 — 놓을 때 비스듬히 눕혀 위로 뻗어 보이게
+    g.rotateX(Math.PI / 2); g.computeVertexNormals();
+    const m = new THREE.MeshStandardMaterial({ vertexColors: true, metalness: T.metal, roughness: 0.28, emissive: T.glow });
+    for (const s of [-1, 1]) { const b = new THREE.Mesh(g, m); b.scale.x = s; tw.add(b); }
+    // 장인 족집게: 다리 바깥에 도드라진 파란 고무 패드(사진의 파란 손잡이)
+    if (lv === 3) {
+      const pm = new THREE.MeshStandardMaterial({ color: '#1f5fe0', roughness: 0.75, emissive: '#0a1f55' });
+      const pg = new THREE.CapsuleGeometry(0.075, 2.0, 4, 10); pg.rotateX(Math.PI / 2);
+      for (const s of [-1, 1]) { const p = new THREE.Mesh(pg, pm); p.position.set(s * 0.2, -0.03, 3.75); p.scale.set(1, 0.9, 1); tw.add(p); }
+    }
+  };
+
   G.boot = function () {
     RND.init(document.getElementById('cv'));
     H.init(RND.salon);
     RND.resize();
-    // 족집게(쇠 두 갈래)
-    const tw = (G.tw = new THREE.Group());
-    const tm = new THREE.MeshStandardMaterial({ color: '#e4e8ec', metalness: 0.25, roughness: 0.3, emissive: '#3a3f44' });
-    // 사장님이 보내 준 사진처럼: 길이 6.5cm, 뒤는 붙고 가운데가 살짝 넓고 끝으로 갈수록 가늘게, 끝이 모임(집은 곳 = 원점)
-    const arm = new THREE.Shape();
-    [[0.0, 0.0], [0.09, 0.18], [0.16, 1.2], [0.24, 3.0], [0.25, 4.6], [0.2, 5.9], [0.1, 6.45], [0.0, 6.5], [0.0, 6.2], [0.05, 5.6], [0.07, 3.4], [0.05, 1.4], [0.015, 0.25]].forEach(([x, y], i) => (i ? arm.lineTo(x, y) : arm.moveTo(x, y)));
-    const ag = new THREE.ExtrudeGeometry(arm, { depth: 0.06, bevelEnabled: true, bevelThickness: 0.015, bevelSize: 0.012, bevelSegments: 1 });
-    ag.rotateX(Math.PI / 2); ag.computeVertexNormals();
-    for (const s of [-1, 1]) { const b = new THREE.Mesh(ag, tm); b.scale.x = s; tw.add(b); }
-    tw.visible = false; RND.salon.add(tw);
+    G.tw = new THREE.Group(); G.tw.visible = false; RND.salon.add(G.tw); G.buildTweez(Math.max(1, S.gear.tweez));
     lastQ.copy(H.g.getWorldQuaternion(new THREE.Quaternion()));
     requestAnimationFrame(loop);
   };
