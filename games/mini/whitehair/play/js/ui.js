@@ -48,7 +48,7 @@
     if ($('vWh').textContent !== String(w)) { $('vWh').textContent = w; flash('sWh'); }
     const co = S.coins.toLocaleString();
     if ($('vCoin').textContent !== co) { $('vCoin').textContent = co; flash('sCoin'); }
-    const r = G.rubLeft(); $('vRub').textContent = r; $('bRub').classList.toggle('dim', r <= 0); $('bRub').hidden = G.gv('rub') <= 0;
+    ['tea', 'rub'].forEach((k) => { const n = S.items[k], K = k[0].toUpperCase() + k.slice(1); $('v' + K).textContent = n; $('b' + K).hidden = n <= 0; });
   };
   function flash(id) { const e = $(id); e.classList.remove('flash'); void e.offsetWidth; e.classList.add('flash'); }
   let lastPat = -1;
@@ -145,17 +145,20 @@
   U.shop = function () {
     $('shop').hidden = false; drawShop();
   };
-  // 상점 창이 칭찬 글자를 가리니, 산 것 알림은 모아 뒀다가 창을 닫을 때 띄움
-  const bought = [];
-  U.boughtLater = (a, b, pat) => bought.push([a, b, pat]);
-  function closeShop() {
-    $('shop').hidden = true;
-    bought.splice(0).forEach(([a, b, pat], i) => setTimeout(() => { if (pat) flash('sPat'); U.praise(a, b, 'nice', innerWidth / 2, innerHeight * 0.4 + i * 70); }, i * 250));
-  }
   function drawShop() {
     $('shopCoin').textContent = L('코인 ', 'COIN ') + S.coins.toLocaleString();
     const L0 = $('shopL'); L0.innerHTML = '';
     D.SHOP.forEach((it) => {
+      if (it.use) { // 쓰는 것: 가진 개수 + 하나 사기
+        const e = document.createElement('div'); e.className = 'item';
+        e.innerHTML = '<div class="nm"></div><div class="lv"></div><div class="pips"></div>';
+        e.querySelector('.nm').textContent = L(it.ko, it.en);
+        e.querySelector('.lv').textContent = L('인내심 +', 'Patience +') + it.heal + L(' · 가진 것 ', ' · Have ') + S.items[it.id];
+        const b = document.createElement('button'); b.className = 'btn sm';
+        b.innerHTML = '<span></span>'; b.firstChild.textContent = it.cost.toLocaleString(); if (S.coins < it.cost) b.classList.add('poor');
+        b.onclick = () => { if (S.coins < it.cost) { SND.fail(); return; } S.coins -= it.cost; S.items[it.id]++; G.save(); SND.coin(); drawShop(); U.hud(); };
+        e.appendChild(b); L0.appendChild(e); return;
+      }
       const lv = S.gear[it.id], nx = it.lv[lv + 1];
       const e = document.createElement('div'); e.className = 'item';
       e.innerHTML = '<div class="nm"></div><div class="lv"></div><div class="pips"></div>';
@@ -163,7 +166,7 @@
       e.querySelector('.lv').textContent = L(it.lv[lv].ko, it.lv[lv].en) + (nx ? ' → ' + L(nx.ko, nx.en) : '');
       for (let i = 1; i < it.lv.length; i++) { const p = document.createElement('i'); if (i <= lv) p.className = 'on'; e.querySelector('.pips').appendChild(p); }
       const b = document.createElement('button'); b.className = 'btn sm';
-      if (nx) { b.innerHTML = '<span></span>'; b.firstChild.textContent = nx.cost.toLocaleString(); if (S.coins < nx.cost) b.classList.add('poor'); b.onclick = () => { if (S.coins < nx.cost) { SND.fail(); return; } S.coins -= nx.cost; S.gear[it.id]++; G.save(); SND.coin(); drawShop(); U.hud(); G.gearUp(it.id, nx); }; }
+      if (nx) { b.innerHTML = '<span></span>'; b.firstChild.textContent = nx.cost.toLocaleString(); if (S.coins < nx.cost) b.classList.add('poor'); b.onclick = () => { if (S.coins < nx.cost) { SND.fail(); return; } S.coins -= nx.cost; S.gear[it.id]++; G.save(); SND.coin(); drawShop(); U.hud(); }; }
       else { b.innerHTML = '<span>MAX</span>'; b.disabled = true; b.style.opacity = 0.6; }
       e.appendChild(b); L0.appendChild(e);
     });
@@ -222,19 +225,19 @@
     const swap = (f) => { U.fade(1); setTimeout(() => { f(); setTimeout(() => U.fade(0), 60); }, 380); };
     click('bNext', () => { $('res').hidden = true; swap(() => G.next()); });
     click('bShopR', U.shop);
-    click('xShop', closeShop); click('xDex', () => ($('dexW').hidden = true));
+    click('xShop', () => ($('shop').hidden = true)); click('xDex', () => ($('dexW').hidden = true));
     click('bRetry', () => { $('over').hidden = true; swap(() => G.retry()); });
     click('bHomeO', () => { $('over').hidden = true; U.show('title'); });
     click('bComb', () => setComb(!G.combMode));
-    click('bRub', () => G.rub());
+    click('bRub', () => G.use('rub')); click('bTea', () => G.use('tea'));
     click('bSave', () => CARD.save());
     click('bShare', () => { const r = CARD.share(); if (r === 'copied') U.toast(L('주소를 복사했습니다', 'Link copied')); });
     click('bEndHome', () => { $('end').hidden = true; G._endShown = false; U.show('title'); });
     addEventListener('keydown', (e) => {
-      if (G.mode !== 'play' || U.paused()) { if (e.key === 'Escape') { if (!$('shop').hidden) closeShop(); $('dexW').hidden = true; } if (e.key === 'Enter' && !$('how').hidden) closeHow(); return; }
+      if (G.mode !== 'play' || U.paused()) { if (e.key === 'Escape') { $('shop').hidden = true; $('dexW').hidden = true; } if (e.key === 'Enter' && !$('how').hidden) closeHow(); return; }
       const k = e.key.toLowerCase();
       if (k === 'c') setComb(!G.combMode);
-      if (k === 'r') G.rub();
+      if (k === 'r') G.use('rub'); if (k === 't') G.use('tea');
       if (k === 'arrowleft') G.orbit(-40, 0); if (k === 'arrowright') G.orbit(40, 0);
       if (k === 'arrowup') G.orbit(0, -30); if (k === 'arrowdown') G.orbit(0, 30);
       if (k === '=' || k === '+') G.zoom(0.88); if (k === '-') G.zoom(1.14);

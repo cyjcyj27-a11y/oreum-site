@@ -3,20 +3,22 @@
   const G = (window.GAME = {});
   const D = DATA, H = HEAD;
   const KEY = 'whitehair.save';
-  const def = () => ({ cust: 0, coins: 0, gear: { tweez: 0, comb: 0, lamp: 0, loupe: 0, chair: 0, tea: 0, rub: 0 }, dex: {}, stats: { plucked: 0, perfect: 0, snaps: 0, blacks: 0, earned: 0, ouch: 0, fails: 0 }, how: false, done: false, started: false });
+  const def = () => ({ cust: 0, coins: 0, gear: { tweez: 0, comb: 0, lamp: 0, loupe: 0, chair: 0 }, items: { tea: 0, rub: 0 }, dex: {}, stats: { plucked: 0, perfect: 0, snaps: 0, blacks: 0, earned: 0, ouch: 0, fails: 0 }, how: false, done: false, started: false });
   let S;
-  try { S = Object.assign(def(), JSON.parse(localStorage.getItem(KEY) || '{}')); S.gear = Object.assign(def().gear, S.gear); S.stats = Object.assign(def().stats, S.stats); } catch (e) { S = def(); }
+  try { S = Object.assign(def(), JSON.parse(localStorage.getItem(KEY) || '{}')); S.gear = Object.assign(def().gear, S.gear); S.items = Object.assign(def().items, S.items); S.stats = Object.assign(def().stats, S.stats); } catch (e) { S = def(); }
+  // 옛 저장: 단계로 샀던 차 대접·주무르기는 산 값을 돌려줌(이제 하나씩 사서 쓰는 것)
+  { const old = { tea: [0, 1300, 5100], rub: [0, 2000, 7200] }; ['tea', 'rub'].forEach((k) => { if (S.gear[k]) S.coins += old[k][S.gear[k]] || 0; delete S.gear[k]; }); }
   G.S = S;
   G.save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
   G.reset = () => { const how = S.how; Object.keys(S).forEach((k) => delete S[k]); Object.assign(S, def()); S.how = how; G.save(); };
-  const gv0 = (k) => D.GEAR[k][S.gear[{ grabR: 'tweez', dblR: 'tweez', snapK: 'tweez', combR: 'comb', expo: 'lamp', zoomMin: 'loupe', move: 'chair', patMax: 'tea', rub: 'rub' }[k]]];
+  const gv0 = (k) => D.GEAR[k][S.gear[{ grabR: 'tweez', dblR: 'tweez', snapK: 'tweez', combR: 'comb', expo: 'lamp', zoomMin: 'loupe', move: 'chair' }[k]]];
   // 참빗은 실제 크기(cm)로: 지금 확대 정도에서 1cm 가 몇 픽셀인지 곱함(확대하면 참빗도 커짐)
   const pxPerCm = () => { const c = RND.camera; return innerHeight * c.projectionMatrix.elements[5] * 0.5 / Math.max(4, c.position.distanceTo(target) - 8); };
   const gv = (k) => (k === 'combR' ? Math.max(40, Math.min(420, gv0(k) * pxPerCm())) : gv0(k));
   G.gv = gv;
 
   G.mode = 'title';
-  let cust = null, pat = 100, patMax = 100, combo = 0, rubLeft = 0, clearT = -1;
+  let cust = null, pat = 100, patMax = 100, combo = 0, clearT = -1;
   const tally = { white: 0, gold: 0, black: 0, nice: 0, snap: 0 }; // 이번 손님 정산할 가닥 수 + 팁 따질 실수
   G.combMode = false;
   const cam = { az: 2.5, pol: 0.72, dist: 38, taz: 2.5, tpol: 0.72, tdist: 38 };
@@ -29,7 +31,7 @@
   G.startCustomer = function (i) {
     cust = G.cust = D.customer(i);
     H.build(cust);
-    patMax = gv('patMax'); pat = patMax; combo = 0; rubLeft = gv('rub'); clearT = -1; tally.white = tally.gold = tally.black = tally.nice = tally.snap = 0;
+    pat = patMax; combo = 0; clearT = -1; tally.white = tally.gold = tally.black = tally.nice = tally.snap = 0;
     cam.az = cam.taz = 2.5 + (i % 3) * 0.3; cam.pol = cam.tpol = 0.72; cam.dist = cam.tdist = 38;
     Object.assign(hm, { pitch: 0, yaw: 0, roll: 0, vp: 0, vy: 0, vr: 0, tp: 0, ty: 0, tr: 0, ev: 4, evT: 0, kind: '' });
     H.tent.h.value = 0; drop();
@@ -155,10 +157,15 @@
     if (big) { SND.ouch(n > 12); UI.ouch(); }
     UI.hud();
   }
-  G.rub = function () {
-    if (G.mode !== 'play' || rubLeft <= 0) return;
-    rubLeft--; pat = Math.min(patMax, pat + 35); hm.tp = 0.05; SND.coin(); UI.praise(L('시원하다', 'Ahh'), '', 'nice', innerWidth / 2, innerHeight * 0.4); UI.hud();
+  // 차 대접·어깨 주무르기: 가진 것 하나 써서 인내심 채움
+  G.use = function (id) {
+    if (G.mode !== 'play' || UI.paused() || clearT >= 0 || !(S.items[id] > 0)) return;
+    const it = D.SHOP.find((s) => s.id === id);
+    if (pat >= patMax - 1) { SND.fail(); UI.praise(L('인내심 가득', 'Patience full'), '', 'snap', innerWidth / 2, innerHeight * 0.4); return; } // 꽉 찼을 땐 아깝게 버리지 않음
+    S.items[id]--; pat = Math.min(patMax, pat + it.heal); hm.tp = 0.05; SND.coin(); G.save();
+    UI.praise(id === 'tea' ? L('후루룩', 'Sip') : L('시원하다', 'Ahh'), L('인내심 +', 'Patience +') + it.heal, 'nice', innerWidth / 2, innerHeight * 0.4); UI.hud();
   };
+  G.rub = () => G.use('rub');
 
   // 날아가 접시로
   const flying = [];
@@ -401,25 +408,10 @@
     G.tick(dt);
     requestAnimationFrame(loop);
   }
-  G.info = () => ({ pat, patMax, combo, rubLeft, whites: H.whiteCount(), hidden: H.S.filter((s) => s.hidden && s.covered && s.alive).length, cust: cust && cust.i });
+  G.info = () => ({ pat, patMax, combo, tea: S.items.tea, rub: S.items.rub, whites: H.whiteCount(), hidden: H.S.filter((s) => s.hidden && s.covered && s.alive).length, cust: cust && cust.i });
   G.patience = () => pat / patMax;
   G.tally = () => tally;
   G._fill = () => { pat = patMax; }; // 시험용
-  G.rubLeft = () => rubLeft;
-  // 손님 받는 중에 상점에서 사면 지금 손님한테도 바로 적용(차는 늘어난 만큼 인내심을 채우고, 주무르기는 늘어난 횟수를 넣음)
-  G.gearUp = function (id, it) {
-    if (G.mode !== 'play' || !cust) return;
-    const nm = L(it.ko, it.en);
-    if (id === 'tea') {
-      const nx = gv('patMax'), add = nx - patMax; if (add <= 0) return;
-      patMax = nx; pat = Math.min(patMax, pat + add); UI.pat(pat / patMax);
-      UI.boughtLater(nm, L('인내심 +', 'Patience +') + add, true);
-    } else if (id === 'rub') {
-      const add = gv('rub') - D.GEAR.rub[S.gear.rub - 1]; if (add <= 0) return;
-      rubLeft += add; UI.hud();
-      UI.boughtLater(L('어깨 주무르기', 'Shoulder Rub'), L('주무르기 +', 'Rub +') + add);
-    }
-  };
 
   // 족집게 세 가지(사장님 10/22 다이소 족집게 사진들 "족집게종류 모양 다르게"). 원점 = 집는 끝, 뒤로 갈수록 +y.
   // 반쪽 다리 바깥선(끝→뒤) + 안쪽선(뒤→끝), 색은 끝에서부터 길이로 칠함

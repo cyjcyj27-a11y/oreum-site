@@ -77,14 +77,9 @@
       { ko: '나무 의자', en: 'Wooden Chair', cost: 0 },
       { ko: '쿠션 의자', en: 'Cushion Chair', cost: 1700 },
       { ko: '안마 의자', en: 'Massage Chair', cost: 4600 }] },
-    { id: 'tea', ko: '차 대접', en: 'Tea', lv: [
-      { ko: '맹물', en: 'Water', cost: 0 },
-      { ko: '보리차', en: 'Barley Tea', cost: 1300 },
-      { ko: '쌍화차', en: 'Herbal Tea', cost: 3800 }] },
-    { id: 'rub', ko: '어깨 주무르기', en: 'Shoulder Rub', lv: [
-      { ko: '없음', en: 'None', cost: 0 },
-      { ko: '한 번', en: 'Once', cost: 2000 },
-      { ko: '두 번', en: 'Twice', cost: 5200 }] },
+    // 쓰는 것(사장님 10/22 "사자마자 발효되는게 아니라 사용하게"): 살 때마다 하나씩 쌓이고, 손님 받다가 단추로 하나씩 씀
+    { id: 'tea', use: true, ko: '차 대접', en: 'Tea', cost: 500, heal: 60 },
+    { id: 'rub', use: true, ko: '어깨 주무르기', en: 'Shoulder Rub', cost: 300, heal: 35 },
   ];
   // 단계별 값
   D.GEAR = {
@@ -95,7 +90,5 @@
     expo: [1.0, 1.14, 1.28],
     zoomMin: [24, 18, 13],
     move: [1, 0.72, 0.48],
-    patMax: [100, 118, 136],
-    rub: [0, 1, 2],
   };
 })();

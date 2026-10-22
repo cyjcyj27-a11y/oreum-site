@@ -98,8 +98,7 @@ body.playing #oreumFs{display:none}
 /* ---------- 놀이 화면 도구 ---------- */
 #tools{position:fixed;right:calc(14px + env(safe-area-inset-right));bottom:calc(16px + env(safe-area-inset-bottom));z-index:6;display:flex;gap:12px;align-items:flex-end}
 #tools .btn.comb{pointer-events:auto}
-#bRub{min-width:0}
-#bRub.dim{opacity:.4}
+#bRub,#bTea{min-width:0}
 #keys{position:fixed;left:50%;transform:translateX(-50%);bottom:10px;z-index:4;pointer-events:none;font-size:13px;line-height:1.5;text-align:center;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.9);opacity:.75;white-space:nowrap}
 body.touch #keys{display:none}
 #dish{position:fixed;left:calc(10px + env(safe-area-inset-left));bottom:calc(8px + env(safe-area-inset-bottom));z-index:4;width:200px;height:120px;pointer-events:none}
@@ -205,6 +204,10 @@ body.combing #combCur{display:block}
   #dish{width:150px;height:90px}
   .btn{font-size:20px;min-width:150px;height:52px}
   .btn.sm{min-width:0;padding:8px 30px;font-size:19px;height:48px}
+  /* 폰 세로: 차·주무르기·참빗 셋이 접시 옆 한 줄에 들어가게 */
+  #tools{gap:7px;right:calc(8px + env(safe-area-inset-right))}
+  #tools .btn.comb.sm{padding:8px 13px 18px;font-size:18px}
+  #dish{bottom:calc(66px + env(safe-area-inset-bottom))}
 }
 /* 폰 가로: 높이에 맞춘 한 벌 */
 @media (max-height:480px){
@@ -260,10 +263,11 @@ body.combing #combCur{display:block}
   </div>
 </div>
 <div id="tools" hidden>
+  <button class="btn comb sm" id="bTea"><span data-en="TEA">차</span> <span id="vTea">0</span></button>
   <button class="btn comb sm" id="bRub"><span data-en="RUB">주무르기</span> <span id="vRub">0</span></button>
   <button class="btn comb sm" id="bComb"><span data-en="COMB">참빗</span></button>
 </div>
-<div id="keys" hidden data-en="Drag a hair: pluck · Drag empty space / right drag: turn · Wheel: zoom · C: comb · R: rub">머리카락 끌기: 뽑기 · 빈 곳 끌기·오른쪽 끌기: 돌리기 · 휠: 확대 · C 참빗 · R 주무르기</div>
+<div id="keys" hidden data-en="Drag a hair: pluck · Drag empty space / right drag: turn · Wheel: zoom · C: comb · T: tea · R: rub">머리카락 끌기: 뽑기 · 빈 곳 끌기·오른쪽 끌기: 돌리기 · 휠: 확대 · C 참빗 · T 차 · R 주무르기</div>
 <div id="skip" hidden data-en="TAP TO SKIP">눌러서 넘기기</div>
 
 <div id="title">
@@ -323,14 +327,14 @@ body.combing #combCur{display:block}
 <script src="js/lang.js?v=2"></script>
 <script src="assets/game-home.js" data-top="6" data-left="6" data-fullscreen="1" defer></script>
 <script src="lib/three.min.js"></script>
-<script src="js/data.js?v=1"></script>
+<script src="js/data.js?v=2"></script>
 <script src="js/audio.js?v=1"></script>
 <script src="js/scene.js?v=1"></script>
 <script src="js/head.js?v=1"></script>
 <script src="js/how.js?v=1"></script>
 <script src="js/card.js?v=1"></script>
-<script src="js/ui.js?v=3"></script>
-<script src="js/game.js?v=4"></script>
+<script src="js/ui.js?v=4"></script>
+<script src="js/game.js?v=5"></script>
 <script>UI.boot();</script>
 <script src="/assets/visit.js?v=17" defer></script>
 <script src="/assets/game-events.js" defer></script>
