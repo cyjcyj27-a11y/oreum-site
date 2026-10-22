@@ -18,6 +18,7 @@ import io, os, re, sys
 
 # slug, 한국어 경로, 영어 경로, 한국어 이름, 한국어 장르 앵커, 영어 이름, 영어 장르 앵커, 태그
 GAMES = [
+    ("whitehair",     "/games/mini/whitehair/",      "/en/games/mini/whitehair/",      "흰머리뽑기방",      "흰머리 뽑기 3D 뽑기게임",           "WHITE HAIR SHOP",       "grey hair plucking game",       {"casual", "3d", "sim", "physics"}),
     ("uijeok",        "/games/mini/uijeok/",         "/en/games/mini/uijeok/",         "달빛 의적",        "달빛 의적 고전게임 액션게임",        "MOONLIT OUTLAW",        "retro DOS-style platformer",    {"action", "fighting", "korean", "platformer"}),
     ("nonri",         "/games/mini/nonri/",          "/en/games/mini/nonri/",          "언어논리퀴즈",      "언어논리퀴즈 논리퀴즈 게임",        "LOGIC QUIZ",            "logic puzzles quiz game",       {"quiz", "puzzle", "casual"}),
     ("udoom",         "/games/udoom/",               "/en/games/udoom/",               "어둠",              "둠 같은 FPS PC게임",                  "UDOOM",                 "doom like browser fps",         {"3d", "action", "horror", "fighting"}),

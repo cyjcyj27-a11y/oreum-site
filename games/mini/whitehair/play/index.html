@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>흰머리뽑기방</title>
+<style>
+/* 단추 소재 = 이발소·미용실 물건
+   주 단추: 옆으로 눕힌 이발소 사인볼(양끝 크롬 뚜껑, 빨강·파랑·흰 사선 줄, 가운데 흰 이름표), 누르면 줄이 돌고 쏙 들어감
+   보조 단추: 검은 플라스틱 빗(반질한 몸통 + 아래 빗살), 크림 글자
+   상단 알약: 이발소 요금표 글자판(검은 펠트 홈줄 + 흰 플라스틱 글자)
+   둥근 단추: 손거울(크롬 테 + 하늘빛 거울, 대각선 반사)
+   창: 미용실 벽거울(두꺼운 크롬 테 + 은빛 거울 판 + 사선 반사) */
+@font-face{font-family:'Ttl';src:url('fonts/title.woff2?v=1') format('woff2');font-weight:100 900;font-display:block}
+@font-face{font-family:'Sign';src:url('fonts/sign.woff2?v=1') format('woff2');font-weight:100 900;font-display:block}
+@font-face{font-family:'Ui';src:url('fonts/ui.woff2?v=1') format('woff2');font-weight:100 900;font-display:swap}
+:root{--red:#d4302a;--blue:#2a58b8;--chrome:#d9dee3;--chromeD:#7c858e;--ink:#1d2430;--felt:#1c1b1d;--cream:#f4ead2;--mirror:#e9f1f5}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+html,body{width:100%;height:100%;overflow:hidden;background:#3a2a20;color:var(--ink);font-family:'Ui','Malgun Gothic',sans-serif;
+  user-select:none;-webkit-user-select:none;touch-action:none;-webkit-text-size-adjust:100%;text-size-adjust:100%;word-break:keep-all}
+/* 첫 화면·오프닝만 옛 사진 느낌: 누런 색감 + 가장자리 어둡게 + 필름 낟알 */
+body.retro #cv{filter:sepia(.2) saturate(.98) contrast(1.06) brightness(.98)}
+#retro{position:fixed;inset:0;z-index:1;pointer-events:none;display:none;
+  background:radial-gradient(ellipse at 50% 45%,rgba(40,25,10,0) 55%,rgba(40,25,10,.42) 100%),url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .2  0 0 0 0 .15  0 0 0 0 .1  0 0 0 .55 0'/></filter><rect width='180' height='180' filter='url(%23n)'/></svg>");opacity:.75;animation:grain .5s steps(3) infinite}
+body.retro #retro{display:block}
+@keyframes grain{33%{background-position:0 0,40px 60px}66%{background-position:0 0,-50px 20px}}
+#cv{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
+
+/* ---------- 주 단추: 사인볼 ---------- */
+.btn{position:relative;border:0;cursor:pointer;font:900 23px/1 'Ttl','Ui',sans-serif;white-space:nowrap;color:var(--ink);
+  padding:12px 46px;min-width:180px;height:56px;border-radius:28px;margin:0 6px;
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.55) 0,rgba(255,255,255,0) 30%,rgba(0,0,0,0) 62%,rgba(0,0,0,.28) 100%),
+    repeating-linear-gradient(115deg,#f7f5f0 0 10px,var(--red) 10px 20px,#f7f5f0 20px 30px,var(--blue) 30px 40px);
+  background-size:100% 100%,200px 100%;
+  box-shadow:inset 0 0 0 3px #3b2a24,0 5px 0 #3b2a24,0 9px 16px rgba(0,0,0,.35);
+  transition:transform .24s cubic-bezier(.34,1.56,.64,1),box-shadow .2s,filter .15s,background-position .5s}
+.btn::before,.btn::after{content:'';position:absolute;top:-4px;bottom:-4px;width:30px;border-radius:15px;
+  background:linear-gradient(180deg,#ffffff 0,#e7ebee 18%,#a9b1b9 55%,#6c757e 100%);box-shadow:inset 0 0 0 3px #3b2a24,0 4px 0 #3b2a24}
+.btn::before{left:-8px}.btn::after{right:-8px}
+.btn span{position:relative;z-index:1;display:inline-block;padding:7px 14px 6px;border-radius:9px;background:#fbfaf6;box-shadow:inset 0 0 0 2px #3b2a24,0 2px 0 rgba(0,0,0,.25)}
+.btn:hover{filter:brightness(1.06);background-position:0 0,60px 0}
+.btn:active{transform:translateY(3px) scale(.97);box-shadow:inset 0 0 0 3px #3b2a24,0 2px 0 #3b2a24;background-position:0 0,120px 0;transition-duration:.04s}
+/* 보조 단추: 검은 빗 */
+.btn.comb{height:auto;min-width:0;padding:11px 24px 22px;border-radius:12px 12px 6px 6px;font-size:19px;color:var(--cream);
+  background:linear-gradient(180deg,#58534f 0,#2a2725 30%,#141313 100%);
+  box-shadow:inset 0 0 0 2px #050505,inset 0 3px 0 rgba(255,255,255,.18),0 4px 0 #050505,0 8px 12px rgba(0,0,0,.3)}
+.btn.comb::before{display:none}
+.btn.comb::after{left:6px;right:6px;top:auto;bottom:-1px;width:auto;height:12px;border-radius:0;box-shadow:none;
+  background:repeating-linear-gradient(90deg,#141313 0 4px,rgba(0,0,0,0) 4px 7px)}
+.btn.comb span{background:none;box-shadow:none;padding:0}
+.btn.comb:active{box-shadow:inset 0 0 0 2px #050505,0 1px 0 #050505}
+.btn.comb.on{color:#ffd86a}
+.btn.sm{font-size:21px;height:50px;padding:8px 40px;min-width:160px}
+.btn.sm span{padding:5px 10px 4px}
+.btn.poor span{color:#c42a20}
+
+/* ---------- 상단바: 요금표 글자판 ---------- */
+#hud{position:fixed;top:0;left:0;right:0;z-index:5;display:flex;align-items:center;gap:7px;pointer-events:none;
+  padding:calc(6px + env(safe-area-inset-top)) calc(8px + env(safe-area-inset-right)) 6px calc(104px + env(safe-area-inset-left));
+  background:linear-gradient(180deg,rgba(25,15,8,.42),rgba(0,0,0,0))}
+.stat{position:relative;display:flex;align-items:center;gap:7px;padding:4px 11px;min-height:38px;border-radius:6px;white-space:nowrap;color:#fff;font-size:18px;
+  background:repeating-linear-gradient(180deg,#1c1b1d 0 5px,#111012 5px 6px),#1c1b1d;
+  box-shadow:inset 0 0 0 2px #6b5a40,inset 0 0 0 4px #2e2416,0 3px 0 rgba(0,0,0,.4)}
+.stat .lb{font-size:12px;color:#c9c4b8;letter-spacing:.05em}
+.stat b{font:900 19px/1 'Ttl','Ui',sans-serif;letter-spacing:.04em;text-shadow:0 1px 0 #000}
+.bar{position:relative;width:78px;height:11px;border-radius:2px;background:#0a0a0a;overflow:hidden;box-shadow:inset 0 0 0 1px rgba(255,255,255,.25)}
+.bar i{position:absolute;inset:0;transform-origin:left center;background:linear-gradient(180deg,#8ff08a,#2fae4a)}
+.bar.mid i{background:linear-gradient(180deg,#ffe07a,#e8a420)}
+.bar.low i{background:linear-gradient(180deg,#ff8a7a,#d43a2a);animation:low .5s steps(2) infinite}
+@keyframes low{50%{opacity:.35}}
+.stat.flash{animation:fl .45s}
+@keyframes fl{30%{transform:scale(1.12);filter:brightness(1.6)}}
+.spacer{flex:1}
+.togs{display:flex;gap:6px}
+/* 둥근 단추: 손거울 */
+.tog{pointer-events:auto;width:40px;height:40px;border-radius:50%;border:0;cursor:pointer;position:relative;flex:none;
+  background:linear-gradient(135deg,rgba(255,255,255,0) 38%,rgba(255,255,255,.7) 44%,rgba(255,255,255,0) 52%),radial-gradient(circle at 40% 35%,#ffffff,#cfe2ec 55%,#8fb1c4);
+  box-shadow:inset 0 0 0 3px #e9edf0,inset 0 0 0 5px #7c858e,0 3px 0 #2a2a2a,0 5px 8px rgba(0,0,0,.3);transition:transform .2s cubic-bezier(.34,1.56,.64,1)}
+.tog svg{width:22px;height:22px;position:absolute;left:9px;top:9px}
+.tog:active{transform:translateY(2px) scale(.94)}
+.tog.off{opacity:.6}
+.tog.off::after{content:'';position:absolute;left:24%;right:24%;top:50%;height:2px;margin-top:-1px;background:#1d2430;border-radius:1px;transform:rotate(-40deg)}
+.tog b{font:900 20px/40px 'Ttl',sans-serif;color:var(--ink)}
+/* 상단바 상점·도감: 손거울을 옆으로 늘인 알약 */
+.tog.wide{width:auto;padding:0 13px;border-radius:20px}
+.tog.wide b{font-size:16px;letter-spacing:.02em}
+.lines div.neg b{color:#c42a20}
+.lines div.jack b{color:#c98a10;font-size:28px;-webkit-text-stroke:1px #fff;animation:jack .5s 3}
+@keyframes jack{50%{transform:scale(1.25)}}
+.lines div.sum{border-top:2.5px solid rgba(29,36,48,.55);border-bottom:0;margin-top:4px}
+.lines div.sum b{font-size:26px}
+.pop.minus i{color:#ff6a5a;font-size:28px}
+body.playing #oreumFs{display:none}
+
+/* ---------- 놀이 화면 도구 ---------- */
+#tools{position:fixed;right:calc(14px + env(safe-area-inset-right));bottom:calc(16px + env(safe-area-inset-bottom));z-index:6;display:flex;gap:12px;align-items:flex-end}
+#tools .btn.comb{pointer-events:auto}
+#bRub{min-width:0}
+#bRub.dim{opacity:.4}
+#keys{position:fixed;left:50%;transform:translateX(-50%);bottom:10px;z-index:4;pointer-events:none;font-size:13px;line-height:1.5;text-align:center;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.9);opacity:.75;white-space:nowrap}
+body.touch #keys{display:none}
+#dish{position:fixed;left:calc(10px + env(safe-area-inset-left));bottom:calc(8px + env(safe-area-inset-bottom));z-index:4;width:200px;height:120px;pointer-events:none}
+#combCur{position:fixed;z-index:4;pointer-events:none;left:0;top:0;width:120px;height:60px;opacity:.78;display:none;filter:drop-shadow(0 3px 3px rgba(0,0,0,.45));transform-origin:50% 50%}
+body.combing #combCur{display:block}
+#grip{position:fixed;z-index:6;width:64px;height:64px;margin:-32px 0 0 -32px;pointer-events:none}
+#grip circle{fill:none;stroke-width:6;stroke-linecap:round}
+#grip.hot{animation:hot .12s steps(2) infinite}
+@keyframes hot{50%{transform:scale(1.08)}}
+#pops{position:fixed;inset:0;z-index:7;pointer-events:none;overflow:hidden}
+.pop{position:absolute;transform:translate(-50%,-50%);text-align:center;white-space:nowrap;animation:pop 1.05s ease-out forwards}
+.pop b{display:block;font:900 30px/1 'Ttl',sans-serif;color:#fff;-webkit-text-stroke:6px #1d2430;paint-order:stroke fill;letter-spacing:.02em}
+.pop i{display:block;font:900 22px/1.3 'Ttl',sans-serif;font-style:normal;color:#ffe27a;-webkit-text-stroke:5px #1d2430;paint-order:stroke fill}
+.pop.perfect b{color:#ffe27a;font-size:36px}
+.pop.gold b{color:#ffcc33;font-size:44px}
+.pop.snap b{color:#c9d2da;font-size:24px}
+.pop.ouch b{color:#ff6a5a;font-size:40px}
+@keyframes pop{0%{opacity:0;transform:translate(-50%,-30%) scale(.6)}15%{opacity:1;transform:translate(-50%,-60%) scale(1.12)}30%{transform:translate(-50%,-62%) scale(1)}100%{opacity:0;transform:translate(-50%,-140%) scale(1)}}
+/* 폰 가로: 세로로 돌려 달라는 안내(사장님 10/22 "모바일 세로화면으로 해줘") */
+#rotate{position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;background:rgba(20,12,6,.86);padding:14px}
+#rotate .sheet{width:auto;text-align:center;padding:18px 34px}
+#rotate h2{margin:6px 0 0;font-size:26px}
+#fade{position:fixed;inset:0;z-index:40;background:#fffaf0;opacity:0;pointer-events:none;transition:opacity .55s}
+#skip{position:fixed;right:16px;bottom:16px;z-index:9;color:#fff;font-size:15px;opacity:.7;text-shadow:0 1px 2px #000;pointer-events:none}
+
+/* ---------- 타이틀 ---------- */
+#title{position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:14px;padding:0 16px calc(7vh + env(safe-area-inset-bottom))}
+#logo{text-align:center;margin-bottom:auto;margin-top:calc(9vh + env(safe-area-inset-top))}
+#logo .a{display:inline-block;font:900 clamp(46px,10vw,104px)/1.05 'Ttl',sans-serif;color:var(--red);letter-spacing:.01em;padding:14px 28px 16px;border-radius:14px;
+  background:linear-gradient(180deg,#ffffff,#f3f1ea);-webkit-text-stroke:2px #fff;paint-order:stroke fill;
+  box-shadow:inset 0 0 0 5px #d03a30,inset 0 0 0 9px #fff,0 6px 0 #8a2620,0 0 34px rgba(255,240,200,.75),0 14px 26px rgba(0,0,0,.35);
+  text-shadow:0 0 14px rgba(255,120,100,.35)}
+#logo .b{margin-top:10px;font:900 20px/1 'Ttl',sans-serif;color:#fff;-webkit-text-stroke:5px #3b2a24;paint-order:stroke fill;letter-spacing:.12em}
+.row{display:flex;gap:16px;justify-content:center;align-items:center;flex-wrap:wrap}
+#tSub{display:flex;gap:10px}
+
+/* ---------- 창: 벽거울 ---------- */
+.ov{position:fixed;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;background:rgba(20,12,6,.5);padding:14px}
+.sheet{position:relative;width:min(640px,96vw);max-height:92vh;overflow:auto;border-radius:22px;padding:22px 24px 22px;color:var(--ink);
+  background:
+    linear-gradient(118deg,rgba(255,255,255,0) 18%,rgba(255,255,255,.55) 22%,rgba(255,255,255,0) 27%,rgba(255,255,255,0) 31%,rgba(255,255,255,.35) 33%,rgba(255,255,255,0) 36%),
+    linear-gradient(180deg,#f4f8fa,#dbe6ec 60%,#c9d7df);
+  box-shadow:inset 0 0 0 4px #fff,inset 0 0 0 13px #b8c0c8,inset 0 0 0 15px #6d757d,inset 0 2px 20px rgba(0,0,0,.12),0 8px 0 #4a5058,0 18px 34px rgba(0,0,0,.45);
+  animation:pin .2s cubic-bezier(.34,1.56,.64,1)}
+@keyframes pin{from{transform:scale(.86);opacity:0}}
+.sheet h2{font:900 30px/1.1 'Ttl',sans-serif;text-align:center;margin:6px 0 14px;letter-spacing:.02em}
+.sheet .x{position:absolute;right:14px;top:14px}
+.sheet .btns{display:flex;gap:16px;justify-content:center;margin-top:18px;flex-wrap:wrap}
+.big{font:900 64px/1 'Ttl',sans-serif;text-align:center;color:var(--red);-webkit-text-stroke:3px #fff;paint-order:stroke fill;text-shadow:0 4px 0 rgba(0,0,0,.15)}
+.lines{margin:14px auto 0;max-width:360px;font-size:20px}
+.lines div{display:flex;justify-content:space-between;padding:5px 2px;border-bottom:1.5px dashed rgba(29,36,48,.25)}
+.lines b{font:900 22px/1 'Ttl',sans-serif}
+/* HOW TO PLAY */
+.how{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.how .c{background:rgba(255,255,255,.55);border-radius:12px;padding:8px;box-shadow:inset 0 0 0 2px rgba(29,36,48,.18);text-align:center}
+.how canvas{width:100%;aspect-ratio:22/15;border-radius:8px;display:block;background:#e9b89c}
+.how p{font-size:16px;line-height:1.35;margin-top:7px}
+.howKeys{text-align:center;font-size:15px;margin-top:12px;opacity:.8}
+/* 상점 */
+.shop{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.item{display:flex;flex-direction:column;gap:5px;padding:10px 12px;border-radius:12px;background:rgba(255,255,255,.55);box-shadow:inset 0 0 0 2px rgba(29,36,48,.18)}
+.item .nm{font:900 19px/1.1 'Ttl',sans-serif}
+.item .lv{font-size:15px;opacity:.85}
+.item .pips{display:flex;gap:4px}
+.item .pips i{width:16px;height:6px;border-radius:2px;background:rgba(29,36,48,.18)}
+.item .pips i.on{background:var(--red)}
+.item .btn{align-self:flex-start;margin-left:8px}
+.coinsLine{text-align:center;font:900 22px/1 'Ttl',sans-serif;margin-bottom:12px}
+/* 도감 */
+.dex{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.dex .d{text-align:center;padding:8px 4px;border-radius:12px;background:rgba(255,255,255,.55);box-shadow:inset 0 0 0 2px rgba(29,36,48,.18);font-size:14px}
+.dex canvas{width:100%;aspect-ratio:1;display:block;border-radius:8px;background:#e6b296}
+.dex .d.no canvas{filter:brightness(.25)}
+.dex .d b{display:block;font:900 15px/1.2 'Ttl',sans-serif;margin-top:4px}
+/* 아야 말풍선 */
+#ouch{position:fixed;z-index:7;pointer-events:none;left:50%;top:20%;transform:translate(-50%,-50%);font:900 46px/1 'Ttl',sans-serif;color:#ff5a4a;-webkit-text-stroke:7px #fff;paint-order:stroke fill;opacity:0}
+#ouch.on{animation:ouch .8s ease-out}
+@keyframes ouch{0%{opacity:0;transform:translate(-50%,-50%) scale(.4) rotate(-8deg)}20%{opacity:1;transform:translate(-50%,-50%) scale(1.2) rotate(4deg)}40%{transform:translate(-50%,-50%) scale(1) rotate(-2deg)}100%{opacity:0;transform:translate(-50%,-80%) scale(1)}}
+#hurtV{position:fixed;inset:0;z-index:3;pointer-events:none;opacity:0;background:radial-gradient(ellipse at center,rgba(255,0,0,0) 50%,rgba(210,30,20,.55) 100%);transition:opacity .4s}
+/* 엔딩 카드 */
+#endImg{display:block;width:min(300px,62vw);margin:0 auto;border-radius:12px;box-shadow:0 0 0 3px #6d757d,0 6px 14px rgba(0,0,0,.3)}
+#toast{position:fixed;left:50%;top:22%;transform:translateX(-50%);z-index:50;padding:10px 18px;border-radius:8px;font-size:18px;color:#fff;background:#1c1b1d;box-shadow:inset 0 0 0 2px #6b5a40;opacity:0;transition:opacity .3s;pointer-events:none}
+#toast.on{opacity:1}
+
+/* ---------- 폰 ---------- */
+@media (max-width:700px){
+  #hud{flex-wrap:wrap;row-gap:5px}
+  #hud .spacer{display:block;order:3;flex:0 0 100%;height:0} /* 줄바꿈: 윗줄 손님·흰머리·코인 / 아랫줄 인내심·단추 */
+  #sCust{order:1}#sWh{order:2}#sCoin{order:3}
+  #sPat{order:4;flex:1 1 180px;margin-left:calc(-96px - env(safe-area-inset-left))}
+  #sPat .bar{flex:1;width:auto}
+  #hud .togs{order:5}
+  .tog{width:36px;height:36px}.tog svg{left:7px;top:7px}.tog b{line-height:36px}
+  .tog.wide{padding:0 9px}.tog.wide b{font-size:14px}
+  #sPat{flex-basis:96px}
+  .stat{font-size:15px;min-height:32px;padding:3px 8px}
+  .stat b{font-size:16px}
+  .bar{width:58px}
+  .how{grid-template-columns:1fr}
+  .how .c{display:grid;grid-template-columns:44% 1fr;align-items:center;gap:10px;text-align:left}
+  .how p{margin:0}
+  .shop{grid-template-columns:1fr}
+  .dex{grid-template-columns:repeat(4,1fr)}
+  #dish{width:150px;height:90px}
+  .btn{font-size:20px;min-width:150px;height:52px}
+  .btn.sm{min-width:0;padding:8px 30px;font-size:19px;height:48px}
+}
+/* 폰 가로: 높이에 맞춘 한 벌 */
+@media (max-height:480px){
+  #hud{gap:5px}
+  .stat{padding:3px 8px;min-height:34px;font-size:15px;gap:5px}.stat b{font-size:17px}.stat .lb{font-size:11px}
+  .bar{width:54px}
+  .tog{width:34px;height:34px}.tog svg{left:6px;top:6px;width:22px;height:22px}.tog b{line-height:34px}
+  .tog.wide{padding:0 9px}.tog.wide b{font-size:14px}
+  #title{justify-content:flex-end;padding-bottom:26vh;gap:2.4vh}
+  #logo{display:none}
+  .btn{height:13vh;font-size:5.2vh;min-width:0;padding:0 7vh}
+  .btn.sm{height:11vh;font-size:4.4vh}
+  .btn.comb{font-size:4.4vh;padding:2vh 4vh 4.4vh}
+  .sheet{max-height:94vh;padding:3.5vh 22px;width:min(760px,92vw)}
+  .sheet h2{font-size:6.4vh;margin:0 0 2vh}
+  .how .c{display:block}
+  .how canvas{aspect-ratio:22/12}
+  .how p{font-size:3.8vh}
+  .big{font-size:13vh}
+  .lines{font-size:4.4vh;margin-top:1vh}
+  .lines div{padding:.6vh 2px}
+  .sheet .btns{margin-top:2.6vh}
+  .shop{grid-template-columns:1fr 1fr 1fr;gap:8px}
+  .item{padding:1.6vh 10px}
+  .item .nm{font-size:4.4vh}.item .lv{font-size:3.6vh}
+  #dish{width:130px;height:78px}
+  #endImg{width:auto;height:44vh}
+}
+</style>
+</head>
+<body>
+<canvas id="cv"></canvas>
+<div id="retro"></div>
+<div id="hurtV"></div>
+<svg id="combCur" viewBox="0 0 200 100"><defs><linearGradient id="bam" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fbf3dc"/><stop offset=".55" stop-color="#eedfb8"/><stop offset="1" stop-color="#cdb98a"/></linearGradient><linearGradient id="bamS" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#e9d9ae"/><stop offset=".5" stop-color="#fbf4de"/><stop offset="1" stop-color="#ddc999"/></linearGradient></defs><rect x="12" y="3" width="176" height="94" fill="#1d1a16" opacity=".35"/><path d="M14.8 5V37M14.8 63V95M16.9 5V37M16.9 63V95M19 5V37M19 63V95M21.1 5V37M21.1 63V95M23.2 5V37M23.2 63V95M25.3 5V37M25.3 63V95M27.4 5V37M27.4 63V95M29.5 5V37M29.5 63V95M31.6 5V37M31.6 63V95M33.7 5V37M33.7 63V95M35.8 5V37M35.8 63V95M37.9 5V37M37.9 63V95" stroke="#2f5d5c" stroke-width="1.5" fill="none"/><path d="M39.4 5V37M39.4 63V95M41.5 5V37M41.5 63V95M43.6 5V37M43.6 63V95M45.7 5V37M45.7 63V95M47.8 5V37M47.8 63V95M49.9 5V37M49.9 63V95M52 5V37M52 63V95M54.1 5V37M54.1 63V95M56.2 5V37M56.2 63V95M58.3 5V37M58.3 63V95M60.4 5V37M60.4 63V95M62.5 5V37M62.5 63V95" stroke="#7b2f3c" stroke-width="1.5" fill="none"/><path d="M63.9 5V37M63.9 63V95M66 5V37M66 63V95M68.1 5V37M68.1 63V95M70.2 5V37M70.2 63V95M72.3 5V37M72.3 63V95M74.4 5V37M74.4 63V95M76.5 5V37M76.5 63V95M78.6 5V37M78.6 63V95M80.7 5V37M80.7 63V95M82.8 5V37M82.8 63V95M84.9 5V37M84.9 63V95M87 5V37M87 63V95" stroke="#c25a2e" stroke-width="1.5" fill="none"/><path d="M88.5 5V37M88.5 63V95M90.6 5V37M90.6 63V95M92.7 5V37M92.7 63V95M94.8 5V37M94.8 63V95M96.9 5V37M96.9 63V95M99 5V37M99 63V95M101.1 5V37M101.1 63V95M103.2 5V37M103.2 63V95M105.3 5V37M105.3 63V95M107.4 5V37M107.4 63V95M109.5 5V37M109.5 63V95M111.6 5V37M111.6 63V95" stroke="#c99a35" stroke-width="1.5" fill="none"/><path d="M113.1 5V37M113.1 63V95M115.2 5V37M115.2 63V95M117.3 5V37M117.3 63V95M119.4 5V37M119.4 63V95M121.5 5V37M121.5 63V95M123.6 5V37M123.6 63V95M125.7 5V37M125.7 63V95M127.8 5V37M127.8 63V95M129.9 5V37M129.9 63V95M132 5V37M132 63V95M134.1 5V37M134.1 63V95M136.2 5V37M136.2 63V95" stroke="#c25a2e" stroke-width="1.5" fill="none"/><path d="M137.7 5V37M137.7 63V95M139.8 5V37M139.8 63V95M141.9 5V37M141.9 63V95M144 5V37M144 63V95M146.1 5V37M146.1 63V95M148.2 5V37M148.2 63V95M150.3 5V37M150.3 63V95M152.4 5V37M152.4 63V95M154.5 5V37M154.5 63V95M156.6 5V37M156.6 63V95M158.7 5V37M158.7 63V95M160.8 5V37M160.8 63V95" stroke="#7b2f3c" stroke-width="1.5" fill="none"/><path d="M162.2 5V37M162.2 63V95M164.3 5V37M164.3 63V95M166.4 5V37M166.4 63V95M168.5 5V37M168.5 63V95M170.6 5V37M170.6 63V95M172.7 5V37M172.7 63V95M174.8 5V37M174.8 63V95M176.9 5V37M176.9 63V95M179 5V37M179 63V95M181.1 5V37M181.1 63V95M183.2 5V37M183.2 63V95M185.3 5V37M185.3 63V95" stroke="#2f5d5c" stroke-width="1.5" fill="none"/><path d="M14 6H186M14 94H186" stroke="#2a2f33" stroke-width="1.2"/><rect x="0" y="0" width="14" height="100" rx="2" fill="url(#bamS)" stroke="#8a744a" stroke-width="1.2"/><rect x="186" y="0" width="14" height="100" rx="2" fill="url(#bamS)" stroke="#8a744a" stroke-width="1.2"/><path d="M10 4V96M190 4V96" stroke="#3a3f44" stroke-width="1.2"/><rect x="8" y="36" width="184" height="28" rx="3" fill="url(#bam)" stroke="#8a744a" stroke-width="1.4"/><path d="M14 39H186" stroke="#fffaf0" stroke-width="1.4" opacity=".8"/><g stroke="#8a4a1c" stroke-width="1.3" fill="none" stroke-linecap="round" opacity=".85"><path d="M70 58C80 52 86 46 96 47C104 48 106 54 114 50"/><path d="M84 56C90 50 96 50 100 54"/><path d="M98 46C102 42 108 42 110 45"/><path d="M118 44l3 2M124 43l3 2M126 47l2 1"/></g></svg>
+<canvas id="dish" width="400" height="240" hidden></canvas>
+<svg id="grip" viewBox="0 0 64 64" hidden><circle cx="32" cy="32" r="24" stroke="rgba(0,0,0,.45)"/><circle id="gripF" cx="32" cy="32" r="24" stroke="#ffffff" stroke-dasharray="151" stroke-dashoffset="151" transform="rotate(-90 32 32)"/><circle cx="32" cy="32" r="4" fill="#fff" stroke="rgba(0,0,0,.5)" stroke-width="1.5"/></svg>
+<div id="pops"></div>
+<div id="ouch"></div>
+
+<div id="hud" hidden>
+  <div class="stat" id="sCust"><span class="lb" data-en="GUEST">손님</span><b id="vCust">1/25</b></div>
+  <div class="stat" id="sPat"><span class="lb" data-en="PATIENCE">인내심</span><div class="bar" id="bPat"><i id="iPat"></i></div></div>
+  <div class="stat" id="sWh"><span class="lb" data-en="WHITE">흰머리</span><b id="vWh">0</b></div>
+  <div class="stat" id="sCoin"><span class="lb" data-en="COIN">코인</span><b id="vCoin">0</b></div>
+  <div class="spacer"></div>
+  <div class="togs">
+    <button class="tog wide" id="tShop"><b data-en="SHOP">상점</b></button>
+    <button class="tog wide" id="tDex"><b data-en="DEX">도감</b></button>
+    <button class="tog" id="tHow" aria-label="HOW TO PLAY"><b>?</b></button>
+    <button class="tog" id="tBgm" aria-label="BGM"><svg viewBox="0 0 24 24"><path d="M9 17.5V5.5l11-2.5v12" fill="none" stroke="#1d2430" stroke-width="2.6" stroke-linejoin="round"/><ellipse cx="6.3" cy="17.8" rx="3.4" ry="2.7" fill="#1d2430"/><ellipse cx="17.3" cy="15.3" rx="3.4" ry="2.7" fill="#1d2430"/></svg></button>
+    <button class="tog" id="tSfx" aria-label="SFX"><svg viewBox="0 0 24 24"><path d="M3 9h4l5-4.5v15L7 15H3z" fill="#1d2430"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13" fill="none" stroke="#1d2430" stroke-width="2.4" stroke-linecap="round"/></svg></button>
+  </div>
+</div>
+<div id="tools" hidden>
+  <button class="btn comb sm" id="bRub"><span data-en="RUB">주무르기</span> <span id="vRub">0</span></button>
+  <button class="btn comb sm" id="bComb"><span data-en="COMB">참빗</span></button>
+</div>
+<div id="keys" hidden data-en="Drag a hair: pluck · Drag empty space / right drag: turn · Wheel: zoom · C: comb · R: rub">머리카락 끌기: 뽑기 · 빈 곳 끌기·오른쪽 끌기: 돌리기 · 휠: 확대 · C 참빗 · R 주무르기</div>
+<div id="skip" hidden data-en="TAP TO SKIP">눌러서 넘기기</div>
+
+<div id="title">
+  <div id="logo"></div>
+  <div class="row" id="tMain">
+    <button class="btn" id="bStart"><span>START</span></button>
+    <button class="btn" id="bCont" hidden><span data-en="CONTINUE">이어하기</span></button>
+    <button class="btn" id="bNew" hidden><span data-en="NEW GAME">처음부터</span></button>
+  </div>
+  <div class="row" id="tSub">
+    <button class="btn sm" id="bShopT"><span data-en="SHOP">상점</span></button>
+    <button class="btn sm" id="bDexT"><span data-en="DEX">도감</span></button>
+  </div>
+</div>
+
+<div class="ov" id="how" hidden><div class="sheet">
+  <h2>HOW TO PLAY</h2>
+  <div class="how">
+    <div class="c"><canvas width="440" height="300" id="h1"></canvas><p data-en="Grab near the root and pull. The tip snaps">흰머리 뿌리 가까이 집고 쭉 당겨요. 끝을 잡으면 끊어져요</p></div>
+    <div class="c"><canvas width="440" height="300" id="h2"></canvas><p data-en="Pull a black hair and it hurts">검은 머리를 뽑으면 손님이 아파해요</p></div>
+    <div class="c"><canvas width="440" height="300" id="h3"></canvas><p data-en="Smooth it with the fine comb to find hidden white hairs">참빗으로 곱게 빗으면 숨은 흰머리가 보여요</p></div>
+  </div>
+  <div class="howKeys" id="howKeys"></div>
+  <div class="btns"><button class="btn" id="bHowOk"><span>OK</span></button></div>
+</div></div>
+
+<div class="ov" id="res" hidden><div class="sheet">
+  <div class="big">CLEAR</div>
+  <div class="lines" id="resL"></div>
+  <div class="btns"><button class="btn sm" id="bShopR"><span data-en="SHOP">상점</span></button><button class="btn" id="bNext"><span>NEXT</span></button></div>
+</div></div>
+
+<div class="ov" id="over" hidden><div class="sheet">
+  <div class="big">GAME OVER</div>
+  <div class="btns"><button class="btn sm" id="bHomeO"><span data-en="HOME">처음 화면</span></button><button class="btn" id="bRetry"><span>RETRY</span></button></div>
+</div></div>
+
+<div class="ov" id="shop" hidden><div class="sheet">
+  <h2 data-en="SHOP">상점</h2>
+  <button class="tog x" id="xShop" aria-label="close"><b>✕</b></button>
+  <div class="coinsLine" id="shopCoin"></div>
+  <div class="shop" id="shopL"></div>
+</div></div>
+
+<div class="ov" id="dexW" hidden><div class="sheet">
+  <h2 data-en="DEX">도감</h2>
+  <button class="tog x" id="xDex" aria-label="close"><b>✕</b></button>
+  <div class="dex" id="dexL"></div>
+</div></div>
+
+<div class="ov" id="end" hidden><div class="sheet">
+  <div class="big">THE END</div>
+  <img id="endImg" alt="">
+  <div class="btns"><button class="btn sm" id="bSave"><span data-en="SAVE">저장</span></button><button class="btn sm" id="bShare"><span data-en="SHARE">공유</span></button><button class="btn" id="bEndHome"><span data-en="HOME">처음으로</span></button></div>
+</div></div>
+
+<div id="rotate" hidden><div class="sheet"><svg viewBox="0 0 64 64" width="84" height="84"><rect x="20" y="6" width="24" height="44" rx="5" fill="none" stroke="#1d2430" stroke-width="4"/><circle cx="32" cy="43" r="2.5" fill="#1d2430"/><path d="M50 30a20 20 0 0 1-12 22M38 52l7 1-2-7" fill="none" stroke="#d4302a" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg><h2 data-en="Please turn your phone upright">폰을 세로로 돌려 주세요</h2></div></div>
+<div id="fade"></div>
+<div id="toast"></div>
+
+<script src="js/lang.js?v=2"></script>
+<script src="assets/game-home.js" data-top="6" data-left="6" data-fullscreen="1" defer></script>
+<script src="lib/three.min.js"></script>
+<script src="js/data.js?v=1"></script>
+<script src="js/audio.js?v=1"></script>
+<script src="js/scene.js?v=1"></script>
+<script src="js/head.js?v=1"></script>
+<script src="js/how.js?v=1"></script>
+<script src="js/card.js?v=1"></script>
+<script src="js/ui.js?v=1"></script>
+<script src="js/game.js?v=1"></script>
+<script>UI.boot();</script>
+<script src="/assets/visit.js?v=17" defer></script>
+<script src="/assets/game-events.js" defer></script>
+</body>
+</html>
