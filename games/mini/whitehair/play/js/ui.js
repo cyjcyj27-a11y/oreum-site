@@ -151,9 +151,10 @@
     D.SHOP.forEach((it) => {
       if (it.use) { // 쓰는 것: 가진 개수 + 하나 사기
         const e = document.createElement('div'); e.className = 'item';
-        e.innerHTML = '<div class="nm"></div><div class="lv"></div><div class="pips"></div>';
+        e.innerHTML = '<div class="nm"></div><div class="ds"></div><div class="lv"></div><div class="pips"></div>';
         e.querySelector('.nm').textContent = L(it.ko, it.en);
-        e.querySelector('.lv').textContent = L('인내심 +', 'Patience +') + it.heal + L(' · 가진 것 ', ' · Have ') + S.items[it.id];
+        e.querySelector('.ds').textContent = L(it.dko, it.den);
+        e.querySelector('.lv').textContent = L('가진 것 ', 'Have ') + S.items[it.id];
         const b = document.createElement('button'); b.className = 'btn sm';
         b.innerHTML = '<span></span>'; b.firstChild.textContent = it.cost.toLocaleString(); if (S.coins < it.cost) b.classList.add('poor');
         b.onclick = () => { if (S.coins < it.cost) { SND.fail(); return; } S.coins -= it.cost; S.items[it.id]++; G.save(); SND.coin(); drawShop(); U.hud(); };
@@ -161,12 +162,13 @@
       }
       const lv = S.gear[it.id], nx = it.lv[lv + 1];
       const e = document.createElement('div'); e.className = 'item';
-      e.innerHTML = '<div class="nm"></div><div class="lv"></div><div class="pips"></div>';
+      e.innerHTML = '<div class="nm"></div><div class="ds"></div><div class="lv"></div><div class="pips"></div>';
       e.querySelector('.nm').textContent = L(it.ko, it.en);
+      e.querySelector('.ds').textContent = L(it.dko, it.den);
       e.querySelector('.lv').textContent = L(it.lv[lv].ko, it.lv[lv].en) + (nx ? ' → ' + L(nx.ko, nx.en) : '');
       for (let i = 1; i < it.lv.length; i++) { const p = document.createElement('i'); if (i <= lv) p.className = 'on'; e.querySelector('.pips').appendChild(p); }
       const b = document.createElement('button'); b.className = 'btn sm';
-      if (nx) { b.innerHTML = '<span></span>'; b.firstChild.textContent = nx.cost.toLocaleString(); if (S.coins < nx.cost) b.classList.add('poor'); b.onclick = () => { if (S.coins < nx.cost) { SND.fail(); return; } S.coins -= nx.cost; S.gear[it.id]++; G.save(); SND.coin(); drawShop(); U.hud(); }; }
+      if (nx) { b.innerHTML = '<span></span>'; b.firstChild.textContent = nx.cost.toLocaleString(); if (S.coins < nx.cost) b.classList.add('poor'); b.onclick = () => { if (S.coins < nx.cost) { SND.fail(); return; } S.coins -= nx.cost; S.gear[it.id]++; G.save(); SND.coin(); drawShop(); U.hud(); if (it.id === 'lamp' && G.mode === 'play') G.light(); }; }
       else { b.innerHTML = '<span>MAX</span>'; b.disabled = true; b.style.opacity = 0.6; }
       e.appendChild(b); L0.appendChild(e);
     });

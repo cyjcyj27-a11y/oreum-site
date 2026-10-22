@@ -56,30 +56,30 @@
 
   // 상점: lv 0 은 처음부터 가진 것
   D.SHOP = [
-    { id: 'tweez', ko: '족집게', en: 'Tweezers', lv: [
+    { id: 'tweez', ko: '족집게', en: 'Tweezers', dko: '덜 끊기고, 옆 검은 머리가 덜 딸려 옴', den: 'Fewer snaps, fewer black hairs dragged along', lv: [
       { ko: '맨손가락', en: 'Fingers', cost: 0 },
       { ko: '쇠 족집게', en: 'Steel Tweezers', cost: 900 },
       { ko: '뾰족 족집게', en: 'Pointed Tweezers', cost: 2600 },
       { ko: '장인 족집게', en: 'Master Tweezers', cost: 6500 }] },
-    { id: 'comb', ko: '참빗', en: 'Fine Comb', lv: [
+    { id: 'comb', ko: '참빗', en: 'Fine Comb', dko: '한 번에 더 넓게 빗김', den: 'Combs a wider strip at once', lv: [
       { ko: '작은 참빗', en: 'Small Fine Comb', cost: 0 },
       { ko: '참빗', en: 'Fine Comb', cost: 1400 },
       { ko: '큰 참빗', en: 'Large Fine Comb', cost: 3600 }] },
-    { id: 'lamp', ko: '조명', en: 'Lamp', lv: [
+    { id: 'lamp', ko: '조명', en: 'Lamp', dko: '가게가 밝아져 숨은 흰머리가 잘 보임', den: 'Brighter shop, hidden white hairs show up', lv: [
       { ko: '형광등', en: 'Ceiling Light', cost: 0 },
       { ko: '스탠드', en: 'Desk Lamp', cost: 1100 },
       { ko: '링 조명', en: 'Ring Light', cost: 3200 }] },
-    { id: 'loupe', ko: '돋보기', en: 'Loupe', lv: [
+    { id: 'loupe', ko: '돋보기', en: 'Loupe', dko: '머리를 더 가까이 확대', den: 'Zoom in closer', lv: [
       { ko: '맨눈', en: 'Bare Eyes', cost: 0 },
       { ko: '돋보기', en: 'Magnifier', cost: 1000 },
       { ko: '확대경', en: 'Head Loupe', cost: 2800 }] },
-    { id: 'chair', ko: '의자', en: 'Chair', lv: [
+    { id: 'chair', ko: '의자', en: 'Chair', dko: '손님이 편해서 고개를 덜 움직임', den: 'Customer moves their head less', lv: [
       { ko: '나무 의자', en: 'Wooden Chair', cost: 0 },
       { ko: '쿠션 의자', en: 'Cushion Chair', cost: 1700 },
       { ko: '안마 의자', en: 'Massage Chair', cost: 4600 }] },
     // 쓰는 것(사장님 10/22 "사자마자 발효되는게 아니라 사용하게"): 살 때마다 하나씩 쌓이고, 손님 받다가 단추로 하나씩 씀
-    { id: 'tea', use: true, ko: '차 대접', en: 'Tea', cost: 500, heal: 60 },
-    { id: 'rub', use: true, ko: '어깨 주무르기', en: 'Shoulder Rub', cost: 300, heal: 35 },
+    { id: 'tea', use: true, ko: '차 대접', en: 'Tea', dko: '단추로 써서 인내심 +60', den: 'Use it to restore 60 patience', cost: 500, heal: 60 },
+    { id: 'rub', use: true, ko: '어깨 주무르기', en: 'Shoulder Rub', dko: '단추로 써서 인내심 +35', den: 'Use it to restore 35 patience', cost: 300, heal: 35 },
   ];
   // 단계별 값
   D.GEAR = {

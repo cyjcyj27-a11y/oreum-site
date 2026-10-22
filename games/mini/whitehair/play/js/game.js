@@ -17,6 +17,8 @@
   const gv = (k) => (k === 'combR' ? Math.max(40, Math.min(420, gv0(k) * pxPerCm())) : gv0(k));
   G.gv = gv;
 
+  // 조명 단계 → 가게 빛·머리카락 밝기(상점에서 사면 그 자리에서 바로 다시 부름)
+  G.light = () => { RND.salonLight(gv('expo')); H.hairMat.uniforms.uExpo.value = 0.92 + (gv('expo') - 1) * 0.7; };
   G.mode = 'title';
   let cust = null, pat = 100, patMax = 100, combo = 0, clearT = -1;
   const tally = { white: 0, gold: 0, black: 0, nice: 0, snap: 0 }; // 이번 손님 정산할 가닥 수 + 팁 따질 실수
@@ -35,8 +37,7 @@
     cam.az = cam.taz = 2.5 + (i % 3) * 0.3; cam.pol = cam.tpol = 0.72; cam.dist = cam.tdist = 38;
     Object.assign(hm, { pitch: 0, yaw: 0, roll: 0, vp: 0, vy: 0, vr: 0, tp: 0, ty: 0, tr: 0, ev: 4, evT: 0, kind: '' });
     H.tent.h.value = 0; drop();
-    RND.scene = RND.salon; RND.salonLight(gv('expo')); RND.neck.material.color.copy(H.earMat.color);
-    H.hairMat.uniforms.uExpo.value = 0.92 + (gv('expo') - 1) * 0.7;
+    RND.scene = RND.salon; G.light(); RND.neck.material.color.copy(H.earMat.color);
     G.mode = 'play'; S.started = true; G.save();
     // 첫 집기 멈칫 막기: 화면 좌표 칸을 미리 만들고 한 번 찾아 둠
     updCam(1); prep(); H.near(innerWidth / 2, innerHeight / 2, 10);
