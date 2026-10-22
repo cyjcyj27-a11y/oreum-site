@@ -403,6 +403,20 @@
   G.tally = () => tally;
   G._fill = () => { pat = patMax; }; // 시험용
   G.rubLeft = () => rubLeft;
+  // 손님 받는 중에 상점에서 사면 지금 손님한테도 바로 적용(차는 늘어난 만큼 인내심을 채우고, 주무르기는 늘어난 횟수를 넣음)
+  G.gearUp = function (id, it) {
+    if (G.mode !== 'play' || !cust) return;
+    const nm = L(it.ko, it.en);
+    if (id === 'tea') {
+      const nx = gv('patMax'), add = nx - patMax; if (add <= 0) return;
+      patMax = nx; pat = Math.min(patMax, pat + add); UI.pat(pat / patMax);
+      UI.boughtLater(nm, L('인내심 +', 'Patience +') + add, true);
+    } else if (id === 'rub') {
+      const add = gv('rub') - D.GEAR.rub[S.gear.rub - 1]; if (add <= 0) return;
+      rubLeft += add; UI.hud();
+      UI.boughtLater(L('어깨 주무르기', 'Shoulder Rub'), L('주무르기 +', 'Rub +') + add);
+    }
+  };
 
   // 족집게 세 가지(사장님 10/22 다이소 족집게 사진들 "족집게종류 모양 다르게"). 원점 = 집는 끝, 뒤로 갈수록 +y.
   // 반쪽 다리 바깥선(끝→뒤) + 안쪽선(뒤→끝), 색은 끝에서부터 길이로 칠함

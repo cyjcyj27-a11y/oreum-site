@@ -145,6 +145,13 @@
   U.shop = function () {
     $('shop').hidden = false; drawShop();
   };
+  // 상점 창이 칭찬 글자를 가리니, 산 것 알림은 모아 뒀다가 창을 닫을 때 띄움
+  const bought = [];
+  U.boughtLater = (a, b, pat) => bought.push([a, b, pat]);
+  function closeShop() {
+    $('shop').hidden = true;
+    bought.splice(0).forEach(([a, b, pat], i) => setTimeout(() => { if (pat) flash('sPat'); U.praise(a, b, 'nice', innerWidth / 2, innerHeight * 0.4 + i * 70); }, i * 250));
+  }
   function drawShop() {
     $('shopCoin').textContent = L('코인 ', 'COIN ') + S.coins.toLocaleString();
     const L0 = $('shopL'); L0.innerHTML = '';
@@ -156,7 +163,7 @@
       e.querySelector('.lv').textContent = L(it.lv[lv].ko, it.lv[lv].en) + (nx ? ' → ' + L(nx.ko, nx.en) : '');
       for (let i = 1; i < it.lv.length; i++) { const p = document.createElement('i'); if (i <= lv) p.className = 'on'; e.querySelector('.pips').appendChild(p); }
       const b = document.createElement('button'); b.className = 'btn sm';
-      if (nx) { b.innerHTML = '<span></span>'; b.firstChild.textContent = nx.cost.toLocaleString(); if (S.coins < nx.cost) b.classList.add('poor'); b.onclick = () => { if (S.coins < nx.cost) { SND.fail(); return; } S.coins -= nx.cost; S.gear[it.id]++; G.save(); SND.coin(); drawShop(); U.hud(); }; }
+      if (nx) { b.innerHTML = '<span></span>'; b.firstChild.textContent = nx.cost.toLocaleString(); if (S.coins < nx.cost) b.classList.add('poor'); b.onclick = () => { if (S.coins < nx.cost) { SND.fail(); return; } S.coins -= nx.cost; S.gear[it.id]++; G.save(); SND.coin(); drawShop(); U.hud(); G.gearUp(it.id, nx); }; }
       else { b.innerHTML = '<span>MAX</span>'; b.disabled = true; b.style.opacity = 0.6; }
       e.appendChild(b); L0.appendChild(e);
     });
@@ -215,7 +222,7 @@
     const swap = (f) => { U.fade(1); setTimeout(() => { f(); setTimeout(() => U.fade(0), 60); }, 380); };
     click('bNext', () => { $('res').hidden = true; swap(() => G.next()); });
     click('bShopR', U.shop);
-    click('xShop', () => ($('shop').hidden = true)); click('xDex', () => ($('dexW').hidden = true));
+    click('xShop', closeShop); click('xDex', () => ($('dexW').hidden = true));
     click('bRetry', () => { $('over').hidden = true; swap(() => G.retry()); });
     click('bHomeO', () => { $('over').hidden = true; U.show('title'); });
     click('bComb', () => setComb(!G.combMode));
@@ -224,7 +231,7 @@
     click('bShare', () => { const r = CARD.share(); if (r === 'copied') U.toast(L('주소를 복사했습니다', 'Link copied')); });
     click('bEndHome', () => { $('end').hidden = true; G._endShown = false; U.show('title'); });
     addEventListener('keydown', (e) => {
-      if (G.mode !== 'play' || U.paused()) { if (e.key === 'Escape') { $('shop').hidden = true; $('dexW').hidden = true; } if (e.key === 'Enter' && !$('how').hidden) closeHow(); return; }
+      if (G.mode !== 'play' || U.paused()) { if (e.key === 'Escape') { if (!$('shop').hidden) closeShop(); $('dexW').hidden = true; } if (e.key === 'Enter' && !$('how').hidden) closeHow(); return; }
       const k = e.key.toLowerCase();
       if (k === 'c') setComb(!G.combMode);
       if (k === 'r') G.rub();
