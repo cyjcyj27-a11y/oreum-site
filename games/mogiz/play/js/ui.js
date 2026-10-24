@@ -183,5 +183,7 @@
     $('end').hidden = false;
   };
 
-  window.addEventListener('load', () => { GAME.init(); U.init(); });
+  // 그림·글꼴을 다 기다리지 않고 글 읽기가 끝나면 바로 준비(load 보다 빠름)
+  const boot = () => { GAME.init(); U.init(); };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
 })();

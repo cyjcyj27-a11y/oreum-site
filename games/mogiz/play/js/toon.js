@@ -22,10 +22,16 @@
 
   // 모서리 있는 도형도 윤곽선이 갈라지지 않게: 같은 자리 꼭짓점의 법선을 평균낸 onrm
   T.onrm = function (geo) {
-    const p = geo.attributes.position, n = geo.attributes.normal, map = new Map(), out = new Float32Array(p.count * 3);
-    const key = (i) => Math.round(p.getX(i) * 1e4) + ',' + Math.round(p.getY(i) * 1e4) + ',' + Math.round(p.getZ(i) * 1e4);
-    for (let i = 0; i < p.count; i++) { const k = key(i); let a = map.get(k); if (!a) map.set(k, (a = [0, 0, 0])); a[0] += n.getX(i); a[1] += n.getY(i); a[2] += n.getZ(i); }
-    for (let i = 0; i < p.count; i++) { const a = map.get(key(i)), l = Math.hypot(a[0], a[1], a[2]) || 1; out[i * 3] = a[0] / l; out[i * 3 + 1] = a[1] / l; out[i * 3 + 2] = a[2] / l; }
+    const P = geo.attributes.position.array, N = geo.attributes.normal.array, cnt = P.length / 3, out = new Float32Array(cnt * 3);
+    // 자리 열쇠는 숫자로(문자열보다 열 배 빠름): 도형 크기에 맞춰 0~99999 칸으로 나눔
+    let x0 = Infinity, y0 = Infinity, z0 = Infinity, x1 = -Infinity, y1 = -Infinity, z1 = -Infinity;
+    for (let i = 0; i < P.length; i += 3) { const x = P[i], y = P[i + 1], z = P[i + 2]; if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; if (z < z0) z0 = z; if (z > z1) z1 = z; }
+    const q = 99999 / Math.max(x1 - x0, y1 - y0, z1 - z0, 1e-9), key = new Float64Array(cnt), map = new Map();
+    for (let i = 0; i < cnt; i++) {
+      const k = Math.round((P[i * 3] - x0) * q) * 1e10 + Math.round((P[i * 3 + 1] - y0) * q) * 1e5 + Math.round((P[i * 3 + 2] - z0) * q);
+      key[i] = k; let a = map.get(k); if (!a) map.set(k, (a = [0, 0, 0])); a[0] += N[i * 3]; a[1] += N[i * 3 + 1]; a[2] += N[i * 3 + 2];
+    }
+    for (let i = 0; i < cnt; i++) { const a = map.get(key[i]), l = Math.hypot(a[0], a[1], a[2]) || 1; out[i * 3] = a[0] / l; out[i * 3 + 1] = a[1] / l; out[i * 3 + 2] = a[2] / l; }
     geo.setAttribute('onrm', new THREE.BufferAttribute(out, 3));
     return geo;
   };
@@ -50,34 +56,33 @@
   T.Batch = function () { this.pos = []; this.nor = []; this.onr = []; this.col = []; };
   // geo 는 버려도 되는 도형. color 는 '#hex' 또는 (x,y,z,c)=>{} 로 색을 고르는 함수. jitter 는 밝기 흔들기
   T.Batch.prototype.add = function (geo, color, mat4, jitter) {
-    let g2 = geo.index ? geo.toNonIndexed() : geo;
-    if (!g2.attributes.onrm) T.onrm(g2);
-    const P = g2.attributes.position, N = g2.attributes.normal, O = g2.attributes.onrm;
+    // 윤곽 법선은 이음매가 적은 원래(색인) 도형에서 먼저 구하고 펼친다
+    if (!geo.attributes.onrm) T.onrm(geo);
+    const g2 = geo.index ? geo.toNonIndexed() : geo;
+    const P = g2.attributes.position.array, N = g2.attributes.normal.array, O = g2.attributes.onrm.array;
     _m.copy(mat4 || new THREE.Matrix4()); _n.getNormalMatrix(_m);
+    const e = _m.elements, ne = _n.elements;
     const fn = typeof color === 'function' ? color : null;
     if (!fn) _c.set(color);
-    const j = jitter || 0;
-    for (let i = 0; i < P.count; i += 3) {
+    const j = jitter || 0, pos = this.pos, nor = this.nor, onr = this.onr, col = this.col, cnt = P.length / 3;
+    const tn = (arr, q, out) => { const x = arr[q], y = arr[q + 1], z = arr[q + 2]; let a = ne[0] * x + ne[3] * y + ne[6] * z, b = ne[1] * x + ne[4] * y + ne[7] * z, c = ne[2] * x + ne[5] * y + ne[8] * z; const l = Math.hypot(a, b, c) || 1; out.push(a / l, b / l, c / l); };
+    for (let i = 0; i < cnt; i += 3) {
       // 면(삼각형)마다 같은 색 흔들기 → 손으로 칠한 얼룩
       const k = j ? 1 + (Math.random() - 0.5) * j : 1;
-      const p0 = this.pos.length;
+      const p0 = pos.length;
       for (let t = 0; t < 3; t++) {
-        const q = i + t;
-        _v.set(P.getX(q), P.getY(q), P.getZ(q)).applyMatrix4(_m); this.pos.push(_v.x, _v.y, _v.z);
-        _v.set(N.getX(q), N.getY(q), N.getZ(q)).applyMatrix3(_n).normalize(); this.nor.push(_v.x, _v.y, _v.z);
-        _v.set(O.getX(q), O.getY(q), O.getZ(q)).applyMatrix3(_n).normalize(); this.onr.push(_v.x, _v.y, _v.z);
+        const q = (i + t) * 3, x = P[q], y = P[q + 1], z = P[q + 2];
+        pos.push(e[0] * x + e[4] * y + e[8] * z + e[12], e[1] * x + e[5] * y + e[9] * z + e[13], e[2] * x + e[6] * y + e[10] * z + e[14]);
+        tn(N, q, nor); tn(O, q, onr);
       }
-      // 색 함수는 면 가운데 자리·법선으로 한 번(무늬가 면 단위로 또렷하게)
       if (fn && fn.pv) {
         // 꼭짓점마다 색(둥근 몸의 줄무늬가 삼각형으로 깨지지 않게)
-        for (let t = 0; t < 3; t++) { const a = this.pos, q = p0 + t * 3; fn(a[q], a[q + 1], a[q + 2], _c); this.col.push(_c.r * k, _c.g * k, _c.b * k); }
+        for (let t = 0; t < 3; t++) { const q = p0 + t * 3; fn(pos[q], pos[q + 1], pos[q + 2], _c); col.push(_c.r * k, _c.g * k, _c.b * k); }
         continue;
       }
-      if (fn) {
-        const a = this.pos, cx = (a[p0] + a[p0 + 3] + a[p0 + 6]) / 3, cy = (a[p0 + 1] + a[p0 + 4] + a[p0 + 7]) / 3, cz = (a[p0 + 2] + a[p0 + 5] + a[p0 + 8]) / 3, nn = this.nor;
-        fn(cx, cy, cz, _c, nn[p0], nn[p0 + 1], nn[p0 + 2]);
-      }
-      for (let t = 0; t < 3; t++) this.col.push(_c.r * k, _c.g * k, _c.b * k);
+      // 색 함수는 면 가운데 자리·법선으로 한 번(무늬가 면 단위로 또렷하게)
+      if (fn) fn((pos[p0] + pos[p0 + 3] + pos[p0 + 6]) / 3, (pos[p0 + 1] + pos[p0 + 4] + pos[p0 + 7]) / 3, (pos[p0 + 2] + pos[p0 + 5] + pos[p0 + 8]) / 3, _c, nor[p0], nor[p0 + 1], nor[p0 + 2]);
+      for (let t = 0; t < 3; t++) col.push(_c.r * k, _c.g * k, _c.b * k);
     }
     return this;
   };

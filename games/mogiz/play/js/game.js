@@ -13,17 +13,18 @@
   G.hasSave = function () { try { const s = JSON.parse(localStorage.getItem(KEY) || 'null'); return !!(s && (s.life > 1 || s.started) && !s.ended); } catch (e) { return false; } };
 
   G.init = function () {
+    const tm = (window.__tm = { start: performance.now() }), mk = (k) => (tm[k] = Math.round(performance.now() - tm.start));
     G.load();
-    RND.init(document.getElementById('cv'));
-    WORLD.build(RND.scene);
-    PEOPLE.build(RND.scene);
+    RND.init(document.getElementById('cv')); mk('render');
+    WORLD.build(RND.scene); mk('world');
+    PEOPLE.build(RND.scene); mk('people');
     MOSQ.build(RND.scene);
-    FX.init(RND.scene);
+    FX.init(RND.scene); mk('mosq');
     MOSQ.pos.copy(WORLD.spawn); MOSQ.setBelly(0);
     G.st = DATA.stats(G.S.cards, G.S.life);
     // 처음 보는 재질·그림자를 미리 한 번 그려 둔다(첫 장면 멈칫 막기)
     G.showAll = true; PEOPLE.list.forEach((c) => (c.root.visible = true));
-    titleCam(0); RND.renderer.compile(RND.scene, RND.camera); RND.render(); G.showAll = false;
+    titleCam(0); RND.renderer.compile(RND.scene, RND.camera); mk('compile'); RND.render(); mk('firstDraw'); G.showAll = false;
     G.last = performance.now(); G.t = 0;
     requestAnimationFrame(G.loop);
   };
