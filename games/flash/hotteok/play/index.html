@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>호떡만들기 게임</title>
+<style>
+/* 단추 소재 = 호떡 노점 물건
+   주 단추: 노릇하게 구운 호떡(갈색 둥근 알약, 가장자리 짙게 탄 테, 기름 반짝, 씨앗 점), 누르면 누르개에 눌린 듯 납작
+   보조 단추: 하얀 종이컵 종이(위 둥근 말림 테 + 빨간 세로 줄무늬 인쇄), 빨간 글자
+   상단 알약: 골판지 차림표 조각(골 무늬 + 매직 글씨)
+   둥근 단추: 스테인리스 누르개 원판(동심원 결 + 가운데 기호)
+   창: 위에 주황 천막 물결 띠를 두른 기름종이 판 */
+@font-face{font-family:'Ttl';src:url('fonts/title.woff2?v=3') format('woff2');font-display:block}
+@font-face{font-family:'Ui';src:url('fonts/ui.woff2?v=3') format('woff2');font-display:swap}
+:root{--brown:#3a1a06;--gold:#e0a24a;--red:#c8261e;--paper:#fbf6ea;--card:#b98b55;--ink:#2a1a10}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+html,body{width:100%;height:100%;overflow:hidden;background:#0d0f18;color:var(--ink);font-family:'Ui','Malgun Gothic',sans-serif;
+  user-select:none;-webkit-user-select:none;touch-action:none;-webkit-text-size-adjust:100%;text-size-adjust:100%;word-break:keep-all}
+#cv{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
+
+/* ---------- 주 단추: 구운 호떡 ---------- */
+.btn{position:relative;border:0;cursor:pointer;font:30px/1 'Ttl','Ui',sans-serif;white-space:nowrap;color:#fff5dc;
+  padding:0 40px;min-width:190px;height:62px;border-radius:31px/29px;margin:0 6px;letter-spacing:.02em;
+  -webkit-text-stroke:6px #5a2408;paint-order:stroke fill;
+  background:
+    radial-gradient(ellipse 5px 2.6px at 22% 30%,#e9dcb6 60%,transparent 70%),
+    radial-gradient(ellipse 5px 2.6px at 78% 70%,#6a8a3c 60%,transparent 70%),
+    radial-gradient(ellipse 4px 3px at 70% 26%,#d39a5c 60%,transparent 70%),
+    radial-gradient(ellipse 60% 40% at 38% 28%,rgba(255,240,200,.55),rgba(255,240,200,0) 70%),
+    radial-gradient(ellipse 90% 80% at 50% 45%,#f0b860 0,#d68a36 52%,#a8581c 80%,#6a300c 100%);
+  box-shadow:inset 0 0 0 3px #5a2408,inset 0 -6px 10px rgba(70,25,5,.45),inset 0 4px 0 rgba(255,235,190,.5),0 5px 0 #4a1c06,0 9px 16px rgba(0,0,0,.4);
+  transition:transform .24s cubic-bezier(.34,1.56,.64,1),box-shadow .2s,filter .15s}
+.btn:hover{filter:brightness(1.07)}
+.btn:active{transform:translateY(3px) scale(1.03,.92);box-shadow:inset 0 0 0 3px #5a2408,inset 0 -4px 8px rgba(70,25,5,.45),inset 0 3px 0 rgba(255,235,190,.5),0 2px 0 #4a1c06;transition-duration:.04s}
+/* 보조 단추: 종이컵 */
+.btn.cup{color:var(--red);-webkit-text-stroke:0;font-size:24px;height:54px;min-width:0;padding:0 28px;border-radius:8px 8px 14px 14px;
+  background:linear-gradient(90deg,var(--red) 0 9px,transparent 9px calc(100% - 9px),var(--red) calc(100% - 9px)),linear-gradient(180deg,#ffffff,#f1ece0);
+  box-shadow:inset 0 5px 0 #fff,inset 0 7px 0 rgba(0,0,0,.12),inset 0 0 0 2px #a8a092,inset 0 -3px 0 #f2c53a,0 4px 0 #8a8274,0 8px 12px rgba(0,0,0,.3)}
+.btn.cup:active{box-shadow:inset 0 5px 0 #fff,inset 0 0 0 2px #a8a092,0 1px 0 #8a8274;transform:translateY(3px) scale(.97)}
+.btn.sm{font-size:21px;height:46px;padding:0 22px}
+.btn.poor{color:#9a9088}
+.btn.poor span{text-decoration:line-through}
+
+/* ---------- 상단바: 골판지 조각 ---------- */
+#hud{position:fixed;top:0;left:0;right:0;z-index:5;display:flex;align-items:center;gap:7px;pointer-events:none;
+  padding:calc(6px + env(safe-area-inset-top)) calc(8px + env(safe-area-inset-right)) 6px calc(104px + env(safe-area-inset-left));
+  background:linear-gradient(180deg,rgba(10,8,14,.55),rgba(0,0,0,0))}
+.stat{position:relative;display:flex;align-items:center;gap:6px;padding:4px 11px;min-height:38px;white-space:nowrap;color:var(--ink);font-size:17px;
+  border-radius:3px 6px 4px 7px;
+  background:repeating-linear-gradient(90deg,rgba(90,60,30,.16) 0 2px,rgba(0,0,0,0) 2px 7px),linear-gradient(180deg,#d2a46a,#b98b55);
+  box-shadow:inset 0 0 0 2px #7a5430,inset 0 2px 0 rgba(255,240,210,.45),0 3px 0 rgba(0,0,0,.35)}
+.stat .lb{font-size:12px;color:#5a3a1c}
+.stat b{font:22px/1 'Ttl','Ui',sans-serif;color:#1a0f08}
+.bar{position:relative;width:70px;height:12px;border-radius:6px;background:#3a2a1a;overflow:hidden;box-shadow:inset 0 0 0 1.5px #1a0f08}
+.bar i{position:absolute;inset:0;transform-origin:left center;background:linear-gradient(180deg,#ffe28a,#e8a92a)}
+.bar.low i{background:linear-gradient(180deg,#ff8a7a,#d43a2a);animation:low .5s steps(2) infinite}
+@keyframes low{50%{opacity:.35}}
+.stat.flash{animation:fl .45s}
+@keyframes fl{30%{transform:scale(1.12);filter:brightness(1.3)}}
+#vAngry{display:flex;gap:3px}
+#vAngry i{width:14px;height:16px;border-radius:2px 2px 5px 5px;background:#f6efe0;box-shadow:inset 0 0 0 1.5px #7a5430}
+#vAngry i.on{background:#d43a2a;box-shadow:inset 0 0 0 1.5px #5a1a0a}
+.spacer{flex:1;order:6}
+#g2{display:contents}#sDay{order:1}#sCoin{order:2}#sLeft{order:3}#sAngry{order:4}#sOil{order:5}.togs{order:7}
+.togs{display:flex;gap:6px}
+/* 둥근 단추: 누르개 원판 */
+.tog{pointer-events:auto;width:40px;height:40px;border-radius:50%;border:0;cursor:pointer;position:relative;flex:none;
+  background:repeating-radial-gradient(circle at 50% 50%,rgba(255,255,255,0) 0 3px,rgba(255,255,255,.18) 3px 4px),radial-gradient(circle at 38% 32%,#ffffff,#c9cfd5 55%,#868e96);
+  box-shadow:inset 0 0 0 2px #eef1f3,inset 0 0 0 4px #6c747c,0 3px 0 #2a2a2a,0 5px 8px rgba(0,0,0,.35);transition:transform .2s cubic-bezier(.34,1.56,.64,1)}
+.tog svg{width:22px;height:22px;position:absolute;left:9px;top:9px}
+.tog:active{transform:translateY(2px) scale(.92)}
+.tog.off{opacity:.6}
+.tog.off::after{content:'';position:absolute;left:24%;right:24%;top:50%;height:2px;margin-top:-1px;background:#2a1a10;border-radius:1px;transform:rotate(-40deg)}
+.tog b{font:22px/40px 'Ttl',sans-serif;color:var(--ink)}
+body.playing #oreumFs{display:none}
+#oilHint{color:#5a3a1c}
+#oilHint.on{color:#c8261e;animation:low .5s steps(2) infinite}
+
+/* 꿀단지(PERFECT 다섯 개면 가득) */
+#honeyB{position:fixed;right:calc(10px + env(safe-area-inset-right));top:calc(58px + env(safe-area-inset-top));z-index:6;width:64px;height:74px;border:0;background:none;cursor:pointer;pointer-events:auto}
+#honeyB .jar{position:absolute;inset:8px 4px 0;border-radius:14px 14px 18px 18px;overflow:hidden;background:rgba(255,250,235,.35);box-shadow:inset 0 0 0 3px #f6ead0,0 3px 0 rgba(0,0,0,.35)}
+#honeyB .jar i{position:absolute;inset:0;transform-origin:bottom;background:linear-gradient(180deg,#ffd45a,#e89a1a)}
+#honeyB .lid{position:absolute;left:10px;right:10px;top:0;height:12px;border-radius:4px;background:#c8261e;box-shadow:inset 0 2px 0 rgba(255,255,255,.4)}
+#honeyB b{position:absolute;left:0;right:0;bottom:-20px;font:15px/1 'Ttl',sans-serif;color:#fff;-webkit-text-stroke:4px #5a2408;paint-order:stroke fill;white-space:nowrap}
+#honeyB.ready{animation:jar .7s ease-in-out infinite}
+#honeyB.ready .jar{box-shadow:inset 0 0 0 3px #fff,0 0 18px #ffd45a,0 3px 0 rgba(0,0,0,.35)}
+#honeyB.run .jar i{animation:low .4s steps(2) infinite}
+@keyframes jar{50%{transform:scale(1.12) rotate(-4deg)}}
+body.honeyT #cv{filter:saturate(1.25) brightness(1.08)}
+
+/* 철판 익힘 고리 */
+#rings{position:fixed;inset:0;z-index:3;pointer-events:none}
+.ring{position:absolute;left:0;top:0;width:36px;height:36px}
+.ring svg{width:100%;height:100%;filter:drop-shadow(0 1px 2px rgba(0,0,0,.6))}
+.ring .bg{fill:rgba(20,14,10,.55);stroke:rgba(0,0,0,.55);stroke-width:6}
+.ring .fg{fill:none;stroke-width:6;stroke-linecap:round}
+.ring .dot{stroke:#fff;stroke-width:1.5}
+.ring.good svg{animation:rg .5s ease-in-out infinite}
+.ring.hot svg{animation:rg .18s steps(2) infinite}
+@keyframes rg{50%{transform:scale(1.18)}}
+
+/* 손님 말풍선: 종이컵 종이 */
+#bubs{position:fixed;inset:0;z-index:4;pointer-events:none}
+.bub{position:absolute;left:0;top:0;padding:6px 8px 9px;border-radius:14px;background:var(--paper);box-shadow:inset 0 0 0 2px #a8a092,0 4px 0 rgba(0,0,0,.25),0 6px 12px rgba(0,0,0,.3);min-width:64px;transition:filter .15s}
+.bub::after{content:'';position:absolute;left:50%;bottom:-9px;margin-left:-8px;border:9px solid transparent;border-top-color:var(--paper);border-bottom:0}
+.bub.side::after{left:-9px;top:50%;bottom:auto;margin:-8px 0 0;border:9px solid transparent;border-right-color:var(--paper);border-left:0}
+.bub .its{display:flex;gap:2px;justify-content:center}
+.bub .it{position:relative;width:52px;height:52px}
+.bub .it canvas{width:100%;height:100%}
+.bub .it b{position:absolute;right:-4px;bottom:-2px;font:19px/1 'Ttl',sans-serif;color:var(--red);-webkit-text-stroke:4px #fff;paint-order:stroke fill}
+.bub .it.done{opacity:.35}
+.bub .it.done::after{content:'✔';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:30px;color:#2f9a3a;opacity:1}
+.bub .pat{height:6px;margin-top:4px;border-radius:3px;background:rgba(0,0,0,.15);overflow:hidden}
+.bub .pat i{display:block;height:100%;transform-origin:left;background:#4fb24a}
+.bub.low .pat i{background:#d43a2a}
+.bub.low{animation:shake .3s steps(2) infinite}
+.bub.hi{filter:drop-shadow(0 0 8px #ffd45a) brightness(1.06)}
+.bub.nope{animation:nope .45s}
+.bub.happy .its,.bub.mad .its{height:52px;align-items:center}
+.bub .heart{width:34px;height:30px;background:radial-gradient(circle at 30% 35%,#ff7a96 0 9px,transparent 10px),radial-gradient(circle at 70% 35%,#ff7a96 0 9px,transparent 10px),linear-gradient(45deg,transparent 50%,#ff7a96 50%) 50% 100%/0 0;position:relative}
+.bub .heart::after{content:'';position:absolute;left:7px;top:12px;width:20px;height:20px;background:#ff7a96;transform:rotate(45deg);border-radius:0 0 3px 0}
+.bub .madk{font:22px/1 'Ttl',sans-serif;color:var(--red)}
+@keyframes shake{50%{margin-left:2px}}
+@keyframes nope{20%{margin-left:-8px}40%{margin-left:8px}60%{margin-left:-6px}80%{margin-left:4px}}
+
+/* 칭찬 글자 */
+#pops{position:fixed;inset:0;z-index:7;pointer-events:none;overflow:hidden}
+.pop{position:absolute;transform:translate(-50%,-50%);text-align:center;white-space:nowrap;animation:pop 1.15s ease-out forwards}
+.pop b{display:block;font:32px/1 'Ttl',sans-serif;color:#fff5dc;-webkit-text-stroke:7px #5a2408;paint-order:stroke fill}
+.pop i{display:block;font:24px/1.3 'Ttl',sans-serif;font-style:normal;color:#ffd45a;-webkit-text-stroke:5px #5a2408;paint-order:stroke fill}
+.pop.perfect b{color:#ffd45a;font-size:42px}
+.pop.bad b{color:#ff8a6a;font-size:34px}
+.pop.meh b{color:#e6ddd0}
+.pop.small b{font-size:24px}
+@keyframes pop{0%{opacity:0;transform:translate(-50%,-30%) scale(.6)}15%{opacity:1;transform:translate(-50%,-60%) scale(1.12)}30%{transform:translate(-50%,-62%) scale(1)}100%{opacity:0;transform:translate(-50%,-150%) scale(1)}}
+.nopeSpot{position:absolute;width:90px;height:90px;margin:-45px 0 0 -45px;border-radius:50%;box-shadow:0 0 0 4px #ff6a5a,inset 0 0 18px rgba(255,90,70,.6);animation:np .7s ease-out forwards}
+@keyframes np{from{transform:scale(.6);opacity:1}to{transform:scale(1.2);opacity:0}}
+
+/* 날 시작 띠 */
+#dayB{position:fixed;left:0;right:0;top:34%;z-index:8;pointer-events:none;text-align:center}
+#dayB.go{animation:dayb 2.3s ease-out forwards}
+#dayN{font:clamp(54px,14vw,96px)/1 'Ttl',sans-serif;color:#ffd45a;-webkit-text-stroke:10px #5a2408;paint-order:stroke fill;text-shadow:0 6px 0 rgba(0,0,0,.3)}
+#daySub{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:8px;font:26px/1 'Ttl',sans-serif;color:#fff5dc;-webkit-text-stroke:6px #5a2408;paint-order:stroke fill}
+#daySub canvas{width:64px;height:64px}
+@keyframes dayb{0%{opacity:0;transform:scale(.7)}12%{opacity:1;transform:scale(1.08)}22%{transform:scale(1)}80%{opacity:1}100%{opacity:0;transform:translateY(-30px)}}
+
+#keys{position:fixed;left:50%;transform:translateX(-50%);bottom:8px;z-index:4;pointer-events:none;font-size:13px;line-height:1.5;text-align:center;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.9);opacity:.75;white-space:nowrap}
+#fade{position:fixed;inset:0;z-index:40;background:#1a1008;opacity:0;pointer-events:none;transition:opacity .38s}
+#toast{position:fixed;left:50%;top:22%;transform:translateX(-50%);z-index:50;padding:10px 18px;border-radius:8px;font-size:18px;color:#fff;background:#2a1a10;opacity:0;transition:opacity .3s;pointer-events:none}
+#toast.on{opacity:1}
+
+/* ---------- 타이틀: 단추 위, 제목 맨 아래 ---------- */
+#title{position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:16px;padding:0 16px calc(4vh + env(safe-area-inset-bottom))}
+#logo{text-align:center;order:2}
+#logo .a{display:inline-block;font:clamp(40px,10.5vw,104px)/1 'Ttl',sans-serif;white-space:nowrap;color:#ffcf6a;letter-spacing:.02em;padding:16px 34px 20px;border-radius:20px;
+  -webkit-text-stroke:12px #5a2408;paint-order:stroke fill;text-shadow:0 7px 0 #3a1404;
+  background:radial-gradient(ellipse at 50% 30%,#d8342a,#a81e16);box-shadow:inset 0 0 0 4px #f7d24a,inset 0 0 0 8px #a81e16,inset 0 0 0 10px #f7d24a,0 8px 0 #5a1208,0 14px 26px rgba(0,0,0,.5)}
+#logo .b{margin-top:10px;font:20px/1 'Ui',sans-serif;color:#fff;text-shadow:0 1px 3px #000;letter-spacing:.2em}
+.row{display:flex;gap:16px;justify-content:center;align-items:center;flex-wrap:wrap;order:1}
+
+/* ---------- 창: 천막 띠 + 기름종이 ---------- */
+.ov{position:fixed;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;background:rgba(14,8,4,.55);padding:14px}
+.sheet{position:relative;width:min(640px,96vw);max-height:92vh;overflow:auto;border-radius:10px 10px 18px 18px;padding:40px 22px 22px;color:var(--ink);
+  background:radial-gradient(ellipse 40px 26px at 85% 70%,rgba(200,140,60,.13),transparent 70%),radial-gradient(ellipse 60px 30px at 15% 40%,rgba(200,140,60,.1),transparent 70%),linear-gradient(180deg,#fbf6ea,#efe4cc);
+  box-shadow:inset 0 0 0 3px #d9c7a4,0 8px 0 #6a4a2a,0 18px 34px rgba(0,0,0,.5);animation:pin .2s cubic-bezier(.34,1.56,.64,1)}
+.sheet::before{content:'';position:absolute;left:0;right:0;top:0;height:28px;border-radius:10px 10px 0 0;
+  background:radial-gradient(circle at 16px 28px,transparent 13px,rgba(0,0,0,0) 13px),repeating-linear-gradient(90deg,#f08a2a 0 32px,#e8622a 32px 64px);
+  -webkit-mask:radial-gradient(circle at 16px 28px,transparent 12px,#000 12.5px) 0 0/32px 28px;mask:radial-gradient(circle at 16px 28px,transparent 12px,#000 12.5px) 0 0/32px 28px}
+@keyframes pin{from{transform:scale(.86);opacity:0}}
+.sheet h2{font:34px/1.1 'Ttl',sans-serif;text-align:center;margin:0 0 14px;color:var(--red)}
+.sheet .x{position:absolute;right:12px;top:34px}
+.sheet .btns{display:flex;gap:14px;justify-content:center;margin-top:18px;flex-wrap:wrap}
+.big{font:60px/1 'Ttl',sans-serif;text-align:center;color:#ffcf6a;-webkit-text-stroke:9px #5a2408;paint-order:stroke fill;text-shadow:0 5px 0 rgba(0,0,0,.2)}
+.lines{margin:14px auto 0;max-width:340px;font-size:20px}
+.lines div{display:flex;justify-content:space-between;padding:6px 2px;border-bottom:1.5px dashed rgba(60,30,10,.28)}
+.lines b{font:22px/1 'Ttl',sans-serif}
+#resStars{display:flex;justify-content:center;gap:10px;margin-top:12px}
+#resStars i{width:44px;height:44px;background:#d9c7a4;clip-path:polygon(50% 0,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%)}
+#resStars i.on{background:#f2b22a}
+.coinsLine,#resCoin{text-align:center;font:22px/1 'Ttl',sans-serif;margin-top:12px}
+/* HOW TO PLAY */
+.how{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.how .c{background:rgba(255,255,255,.5);border-radius:10px;padding:8px;box-shadow:inset 0 0 0 2px rgba(90,60,30,.2);text-align:center}
+.how canvas{width:100%;aspect-ratio:22/15;border-radius:6px;display:block}
+.how p{font-size:16px;line-height:1.35;margin-top:7px}
+/* 상점 */
+.shop{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.item{display:flex;flex-direction:column;gap:4px;padding:10px 12px;border-radius:8px;background:rgba(255,255,255,.55);box-shadow:inset 0 0 0 2px rgba(90,60,30,.2)}
+.item .nm{font:21px/1.1 'Ttl',sans-serif;color:var(--red)}
+.item .ds{font-size:14px;line-height:1.3;color:#6a4a30}
+.item .lv{font-size:15px}
+.item .pips{display:flex;gap:4px;margin-bottom:4px}
+.item .pips i{width:18px;height:7px;border-radius:3px;background:rgba(90,60,30,.18)}
+.item .pips i.on{background:#e0a24a}
+.item .btn{align-self:flex-start;margin-left:0}
+#endImg{display:block;width:min(300px,62vw);margin:10px auto 0;border-radius:10px;box-shadow:0 0 0 3px #7a4a24,0 6px 14px rgba(0,0,0,.3)}
+#rotate{position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;background:rgba(14,8,4,.9);padding:14px}
+#rotate .sheet{width:auto;text-align:center;padding:40px 34px 20px}
+#rotate h2{margin:6px 0 0;font-size:26px}
+
+/* ---------- 폰 ---------- */
+@media (max-width:700px){
+  #g2{display:flex;gap:5px;position:absolute;left:calc(8px + env(safe-area-inset-left));top:calc(52px + env(safe-area-inset-top))}
+  .togs{gap:5px}#vAngry i{width:11px;height:13px}.stat .lb{font-size:11px}
+  .tog{width:36px;height:36px}.tog svg{left:7px;top:7px}.tog b{line-height:36px}
+  .stat{font-size:15px;min-height:32px;padding:3px 7px;gap:4px}
+  .stat b{font-size:19px}
+  .bar{width:42px}
+  .how{grid-template-columns:1fr}
+  .how .c{display:grid;grid-template-columns:46% 1fr;align-items:center;gap:10px;text-align:left}
+  .how p{margin:0;font-size:15px}
+  .shop{grid-template-columns:1fr 1fr}
+  .item{padding:8px 9px}.item .nm{font-size:18px}.item .ds{font-size:13px}
+  .btn{font-size:26px;min-width:150px;height:56px}
+  .btn.sm{font-size:19px;height:44px}
+  #honeyB{top:calc(92px + env(safe-area-inset-top))}
+  .bub .it{width:44px;height:44px}
+  .sheet{padding:38px 14px 16px}
+}
+@media (max-height:480px){
+  .stat{padding:3px 8px;min-height:32px}.bar{width:48px}
+  #title{padding-bottom:3vh;gap:2vh}
+  #logo .a{font-size:15vh;padding:1.6vh 4vh 2vh}
+  .row{margin-bottom:6vh}
+  .btn{height:13vh;font-size:5.6vh}
+  .sheet{max-height:94vh;padding:32px 22px 3vh;width:min(760px,92vw)}
+  .sheet h2{font-size:6.4vh;margin:0 0 1.6vh}
+  .how .c{display:block}.how canvas{aspect-ratio:22/12}.how p{font-size:3.6vh}
+  .big{font-size:12vh}
+  .shop{grid-template-columns:1fr 1fr 1fr}
+}
+</style>
+</head>
+<body>
+<canvas id="cv"></canvas>
+<div id="rings"></div>
+<div id="bubs"></div>
+<div id="pops"></div>
+
+<div id="hud" hidden>
+  <div class="stat" id="sCoin"><span class="lb" data-en="COIN">코인</span><b id="vCoin">0</b></div>
+  <div id="g2">
+    <div class="stat" id="sDay"><b id="vDay">1일차</b></div>
+    <div class="stat" id="sLeft"><span class="lb" data-en="GUESTS">손님</span><b id="vLeft">0</b></div>
+    <div class="stat" id="sAngry"><span class="lb" data-en="ANGRY">화남</span><span id="vAngry"><i></i><i></i><i></i></span></div>
+    <div class="stat" id="sOil"><span class="lb" id="oilHint" data-en="OIL">기름</span><div class="bar" id="bOil"><i id="iOil"></i></div></div>
+  </div>
+  <div class="spacer"></div>
+  <div class="togs">
+    <button class="tog" id="tHow" aria-label="HOW TO PLAY"><b>?</b></button>
+    <button class="tog" id="tBgm" aria-label="BGM"><svg viewBox="0 0 24 24"><path d="M9 17.5V5.5l11-2.5v12" fill="none" stroke="#2a1a10" stroke-width="2.6" stroke-linejoin="round"/><ellipse cx="6.3" cy="17.8" rx="3.4" ry="2.7" fill="#2a1a10"/><ellipse cx="17.3" cy="15.3" rx="3.4" ry="2.7" fill="#2a1a10"/></svg></button>
+    <button class="tog" id="tSfx" aria-label="SFX"><svg viewBox="0 0 24 24"><path d="M3 9h4l5-4.5v15L7 15H3z" fill="#2a1a10"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13" fill="none" stroke="#2a1a10" stroke-width="2.4" stroke-linecap="round"/></svg></button>
+  </div>
+</div>
+<button id="honeyB" hidden aria-label="HONEY TIME"><span class="lid"></span><span class="jar"><i id="iHoney"></i></span><b data-en="HONEY">꿀타임</b></button>
+<div id="keys" hidden data-en="Click: tubs·tools · Drag: move · Hold: press · Circle: wrap · O: oil · Space: honey time">누르기: 통·도구 · 끌기: 옮기기 · 꾹: 누르개 · 동그랗게: 오므리기 · O 기름 · Space 꿀타임</div>
+<div id="dayB" hidden><div id="dayN"></div><div id="daySub"></div></div>
+
+<div id="title">
+  <div id="logo"><div class="a" data-en="HOTTEOK MAKER">호떡만들기 게임</div></div>
+  <div class="row">
+    <button class="btn" id="bStart"><span>START</span></button>
+    <button class="btn" id="bCont" hidden><span data-en="CONTINUE">이어하기</span></button>
+    <button class="btn cup" id="bNew" hidden><span data-en="NEW GAME">처음부터</span></button>
+  </div>
+</div>
+
+<div class="ov" id="how" hidden><div class="sheet">
+  <h2>HOW TO PLAY</h2>
+  <div class="how">
+    <div class="c"><canvas width="440" height="300" id="h1"></canvas><p data-en="Drag dough to the tray, add 2 spoons of sugar, then rub in circles to wrap it">반죽을 판으로 옮기고 설탕 두 숟갈, 동그랗게 문질러 오므려요</p></div>
+    <div class="c"><canvas width="440" height="300" id="h2"></canvas><p data-en="Put it on the griddle. Tap to flip when the ring is green, hold to press it flat">철판에 올리고 고리가 초록이면 톡 뒤집어요. 꾹 누르면 납작해져요</p></div>
+    <div class="c"><canvas width="440" height="300" id="h3"></canvas><p data-en="Swipe on the tray to cut, tap the seed tub, then drag it to the guest">쟁반에서 쓱 갈라 씨앗을 넣고 손님에게 끌어다 줘요</p></div>
+  </div>
+  <div class="btns"><button class="btn" id="bHowOk"><span>OK</span></button></div>
+</div></div>
+
+<div class="ov" id="res" hidden><div class="sheet">
+  <div class="big" id="resDay">CLEAR</div>
+  <div id="resStars"></div>
+  <div class="lines" id="resL"></div>
+  <div id="resCoin"></div>
+  <div class="btns"><button class="btn cup" id="bShopR"><span data-en="SHOP">상점</span></button><button class="btn" id="bNext"><span>NEXT</span></button></div>
+</div></div>
+
+<div class="ov" id="over" hidden><div class="sheet">
+  <div class="big">GAME OVER</div>
+  <div class="btns"><button class="btn cup" id="bHomeO"><span data-en="HOME">처음 화면</span></button><button class="btn" id="bRetry"><span>RETRY</span></button></div>
+</div></div>
+
+<div class="ov" id="shop" hidden><div class="sheet">
+  <h2 data-en="SHOP">상점</h2>
+  <button class="tog x" id="xShop" aria-label="close"><b>✕</b></button>
+  <div class="coinsLine" id="shopCoin"></div>
+  <div class="shop" id="shopL" style="margin-top:12px"></div>
+</div></div>
+
+<div class="ov" id="end" hidden><div class="sheet">
+  <div class="big">THE END</div>
+  <img id="endImg" alt="">
+  <div class="btns"><button class="btn cup sm" id="bSave"><span data-en="SAVE">저장</span></button><button class="btn cup sm" id="bShare"><span data-en="SHARE">공유</span></button><button class="btn" id="bEndHome"><span data-en="HOME">처음으로</span></button></div>
+</div></div>
+
+<div id="rotate" hidden><div class="sheet"><svg viewBox="0 0 64 64" width="84" height="84"><rect x="20" y="6" width="24" height="44" rx="5" fill="none" stroke="#2a1a10" stroke-width="4"/><circle cx="32" cy="43" r="2.5" fill="#2a1a10"/><path d="M50 30a20 20 0 0 1-12 22M38 52l7 1-2-7" fill="none" stroke="#c8261e" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg><h2 data-en="Please turn your phone upright">폰을 세로로 돌려 주세요</h2></div></div>
+<div id="fade"></div>
+<div id="toast"></div>
+
+<script src="js/lang.js?v=1"></script>
+<script src="assets/game-home.js" data-top="6" data-left="6" data-fullscreen="1" defer></script>
+<script src="lib/three.min.js"></script>
+<script src="js/data.js?v=3"></script>
+<script src="js/audio.js?v=4"></script>
+<script src="js/scene.js?v=5"></script>
+<script src="js/hotteok.js?v=1"></script>
+<script src="js/folk.js?v=1"></script>
+<script src="js/people.js?v=2"></script>
+<script src="js/how.js?v=1"></script>
+<script src="js/card.js?v=1"></script>
+<script src="js/ui.js?v=2"></script>
+<script src="js/game.js?v=4"></script>
+<script>UI.boot();</script>
+<script src="/assets/visit.js?v=17" defer></script>
+<script src="/assets/game-events.js" defer></script>
+</body>
+</html>
