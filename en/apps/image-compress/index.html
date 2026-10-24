@@ -134,10 +134,26 @@
   },
   {
    "@type": "Question",
+   "name": "Can I compress several photos at once?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "Yes. Add several photos and they are compressed one by one. When it is done, download them all as one ZIP or one at a time from the list."
+   }
+  },
+  {
+   "@type": "Question",
    "name": "Why do PNG screenshots barely shrink?",
    "acceptedAnswer": {
     "@type": "Answer",
     "text": "PNG has no quality setting, so there is little room to squeeze. Leave Save as on automatic (or pick JPG or WEBP) and the file gets much smaller. Keep PNG only when you need transparency."
+   }
+  },
+  {
+   "@type": "Question",
+   "name": "What if I only want to make it smaller in pixels?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "Set a generous target size and just pick a max long side. To only change the format, use Image Converter; to keep only part of a photo, use Crop Image."
    }
   }
  ]
@@ -359,7 +375,9 @@
         <details><summary>Can it compress a photo to exactly under 200KB?</summary><p>Yes, that is the point of the tool. Choose a target and it finds the best quality that still fits underneath. Use Custom to type any size in KB.</p></details>
         <details><summary>Will the quality drop a lot?</summary><p>It keeps the best quality that fits your target. With a generous target like 1MB the difference is hard to see; with a very small target like 100KB some softness is unavoidable.</p></details>
         <details><summary>What if a photo cannot reach the target?</summary><p>That can happen with very large photos and very small targets. Leave “Shrink width and height too” on and the dimensions are reduced until it fits. Turn it off and the original dimensions are kept, with a note that the target was missed.</p></details>
+        <details><summary>Can I compress several photos at once?</summary><p>Yes. Add several photos and they are compressed one by one. When it is done, download them all as one ZIP or one at a time from the list.</p></details>
         <details><summary>Why do PNG screenshots barely shrink?</summary><p>PNG has no quality setting, so there is little room to squeeze. Leave Save as on automatic (or pick JPG or WEBP) and the file gets much smaller. Keep PNG only when you need transparency.</p></details>
+        <details><summary>What if I only want to make it smaller in pixels?</summary><p>Set a generous target size and just pick a max long side. To only change the format, use <a href="/en/apps/image-convert/">Image Converter</a>; to keep only part of a photo, use <a href="/en/apps/image-crop/">Crop Image</a>.</p></details>
       </section>
     </div>
   </section>
