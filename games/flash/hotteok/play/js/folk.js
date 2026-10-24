@@ -4,6 +4,7 @@
   const F = (window.FOLK = {});
   const W = 512, H = 640;
   F.W = W; F.H = H;
+  F.neckY = (p) => dims(p).neckY - 6; // 머리가 도는 축(목 위)
 
   // ---------- 색 도우미 ----------
   function hex(c) { const n = parseInt(c.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; }
@@ -222,16 +223,21 @@
   }
 
   // ---------- 한 장 ----------
-  F.draw = function (p, mood, style, cv) {
+  // layer: 'back'(뒷머리) · 'body'(몸·목) · 'head'(귀·얼굴·앞머리) — 머리를 따로 움직이려고 세 장으로 나눠 굽는다(10/24 "너무 종이인형"). 없으면 한 장에 다
+  F.draw = function (p, mood, style, cv, layer) {
     ST = style || F.style || 'cel'; seed = p.seed || 3;
     const c = cv || document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d');
     g.clearRect(0, 0, W, H);
     const d = dims(p), { cx, cy, hw, hh, nw, neckY } = d;
-    hairBack(g, p, d);
+    const L = (k) => !layer || layer === k;
+    if (L('back')) hairBack(g, p, d);
+    if (L('body')) {
     body(g, p, d);
     // 목 + 턱 그늘
     part(g, () => { g.beginPath(); g.moveTo(cx - nw, cy + hh * 0.5); g.lineTo(cx - nw - 2, neckY + 10); g.quadraticCurveTo(cx, neckY + 24, cx + nw + 2, neckY + 10); g.lineTo(cx + nw, cy + hh * 0.5); g.closePath(); }, p.skin, { box: [cx - nw - 10, cy + hh * 0.4, nw * 2 + 20, neckY - cy], sx: nw * 0.6, sy: 0, lw: 4, rim: 0.3 });
     fill(g, 'rgba(110,50,30,.32)', () => g.ellipse(cx + 4, cy + hh * 0.97, nw * 1.25, 13, 0, 0, Math.PI));
+    }
+    if (!L('head')) return c;
     // 귀
     [-1, 1].forEach((k) => { part(g, () => { g.beginPath(); g.ellipse(cx + k * (hw - 2), cy + hh * 0.22, 15, 22, k * 0.25, 0, 7); }, p.skin, { box: [cx + k * (hw - 2) - 18, cy, 36, 50], sx: k > 0 ? 6 : 2, sy: 2, lw: 4, rim: k > 0 ? 0.6 : 0 }); stroke(g, 2.5, 'rgba(150,70,50,.5)', () => g.arc(cx + k * (hw - 2), cy + hh * 0.22, 8, k > 0 ? -1.2 : 1.9, k > 0 ? 1.2 : 4.3)); });
     // 얼굴: 위가 넓고 볼이 통통한 모양
