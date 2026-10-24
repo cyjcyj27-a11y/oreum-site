@@ -506,6 +506,15 @@ h1, h2, h3 { line-height: 1.3; letter-spacing: -.02em; margin: 0; }
 .footer-nav .mailbtn { color: var(--ink-2); font-size:17px; text-decoration: none; }
 .footer-nav .mailbtn:hover { color: var(--green-lit); text-decoration: underline; }
 
+/* 대문 소개 문단 안의 공유하기 단추 */
+.sharebtn {
+  display: inline-flex; align-items: center; gap: .3em; vertical-align: baseline;
+  margin: 0 .15em; padding: .12em .7em; border: 1px solid var(--green-edge); border-radius: 999px;
+  background: var(--green-soft); color: var(--green-lit); font: inherit; font-weight: 700; cursor: pointer;
+}
+.sharebtn .share-ico { height: 1.25em; width: auto; display: block; }
+.sharebtn:hover { background: var(--green-lit); color: #fff; border-color: var(--green-lit); }
+
 
 /* 개발자 한마디 — 스튜디오 바로 아래, 편지처럼 읽히게 */
 .devnote p { margin: 0 0 16px; max-width: 720px; font-size:16.8px; line-height: 1.85; color: var(--ink-2); }
