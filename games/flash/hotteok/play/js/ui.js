@@ -223,10 +223,17 @@
     $('res').hidden = false; $('hud').hidden = true; RND.setSpots(G.gv('griddle'));
   };
   U.over = function () { $('over').hidden = false; $('hud').hidden = true; };
-  U.shop = function () { $('shop').hidden = false; drawShop(); };
+  U.shop = function () { if (U.cancelAct) U.cancelAct(); $('shop').hidden = false; drawShop(); };
+  // 장사 중에 열면 상단바 코인(오늘 번 돈 포함)으로 산다: 모아 둔 코인 → 오늘 팁 → 오늘 판 돈 순으로 냄(10/24 상단바 상점)
+  const wallet = () => { const T = G.mode === 'play' && G.T(); return S.coins + (T ? T.earn + T.tips : 0); };
+  function pay(cost) {
+    let r = cost; const a = Math.min(S.coins, r); S.coins -= a; r -= a;
+    const T = G.mode === 'play' && G.T(); if (r > 0 && T) { const b = Math.min(T.tips, r); T.tips -= b; r -= b; T.earn -= r; }
+    U.hud();
+  }
   function drawShop() {
     S = G.S;
-    $('shopCoin').textContent = L('코인 ', 'COIN ') + S.coins.toLocaleString();
+    $('shopCoin').textContent = L('코인 ', 'COIN ') + wallet().toLocaleString();
     const L0 = $('shopL'); L0.innerHTML = '';
     D.SHOP.forEach((it) => {
       const lv = S.gear[it.id], nx = lv + 1 < it.lv.length ? lv + 1 : -1;
@@ -237,7 +244,7 @@
       e.querySelector('.lv').textContent = it.fmt(it.lv[lv]) + (nx > 0 ? ' → ' + it.fmt(it.lv[nx]) : '');
       for (let i = 1; i < it.lv.length; i++) { const p = document.createElement('i'); if (i <= lv) p.className = 'on'; e.querySelector('.pips').appendChild(p); }
       const b = document.createElement('button'); b.className = 'btn cup sm';
-      if (nx > 0) { const cost = it.cost[nx]; b.innerHTML = '<span></span>'; b.firstChild.textContent = cost.toLocaleString(); if (S.coins < cost) b.classList.add('poor'); b.onclick = () => { if (S.coins < cost) { SND.no(); return; } S.coins -= cost; S.gear[it.id]++; G.save(); SND.coin(); drawShop(); G.applyGear(); }; }
+      if (nx > 0) { const cost = it.cost[nx]; b.innerHTML = '<span></span>'; b.firstChild.textContent = cost.toLocaleString(); if (wallet() < cost) b.classList.add('poor'); b.onclick = () => { if (wallet() < cost) { SND.no(); return; } pay(cost); S.gear[it.id]++; G.save(); SND.coin(); drawShop(); G.applyGear(); }; }
       else { b.innerHTML = '<span>MAX</span>'; b.disabled = true; b.style.opacity = 0.6; }
       e.appendChild(b); L0.appendChild(e);
     });
@@ -265,6 +272,7 @@
     click('bHowOk', closeHow);
     click('bNext', () => { $('res').hidden = true; swap(() => G.next()); });
     click('bShopR', U.shop);
+    click('tShop', U.shop);
     click('xShop', () => { $('shop').hidden = true; });
     click('bRetry', () => { $('over').hidden = true; swap(() => G.retry()); });
     click('bHomeO', () => { $('over').hidden = true; G.title(); G.titleCust(); U.show('title'); });
