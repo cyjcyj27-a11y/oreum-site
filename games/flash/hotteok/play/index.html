@@ -93,7 +93,8 @@ body.honeyT #cv{filter:saturate(1.25) brightness(1.08)}
 
 /* 철판 익힘 고리 */
 #rings{position:fixed;inset:0;z-index:3;pointer-events:none}
-.ring{position:absolute;left:0;top:0;width:36px;height:36px}
+.ring{position:absolute;left:0;top:0;width:42px;height:42px}
+.ring.big{width:58px;height:58px}
 .ring svg{width:100%;height:100%;filter:drop-shadow(0 1px 2px rgba(0,0,0,.6))}
 .ring .bg{fill:rgba(20,14,10,.55);stroke:rgba(0,0,0,.55);stroke-width:6}
 .ring .fg{fill:none;stroke-width:6;stroke-linecap:round}
@@ -259,7 +260,7 @@ body.honeyT #cv{filter:saturate(1.25) brightness(1.08)}
   </div>
 </div>
 <button id="honeyB" hidden aria-label="HONEY TIME"><span class="lid"></span><span class="jar"><i id="iHoney"></i></span><b data-en="HONEY">꿀타임</b></button>
-<div id="keys" hidden data-en="Click: tubs·tools · Drag: move · Hold: press · Circle: wrap · O: oil · Space: honey time">누르기: 통·도구 · 끌기: 옮기기 · 꾹: 누르개 · 동그랗게: 오므리기 · O 기름 · Space 꿀타임</div>
+<div id="keys" hidden data-en="Click: tubs·tools · Drag: move · Drag the press and hold: press · Circle: wrap · O: oil · Space: honey time">누르기: 통·도구 · 끌기: 옮기기 · 누르개 끌어다 꾹: 누르기 · 동그랗게: 오므리기 · O 기름 · Space 꿀타임</div>
 <div id="dayB" hidden><div id="dayN"></div><div id="daySub"></div></div>
 
 <div id="title">
@@ -276,7 +277,7 @@ body.honeyT #cv{filter:saturate(1.25) brightness(1.08)}
   <div class="how">
     <div class="c"><canvas width="440" height="300" id="h1"></canvas><p data-en="Drag dough to the tray, add 2 spoons of sugar, then rub in circles to wrap it">반죽을 판으로 옮기고 설탕 두 숟갈, 동그랗게 문질러 오므려요</p></div>
     <div class="c"><canvas width="440" height="300" id="h2"></canvas><p data-en="Put it on the griddle and tap to flip when the ring turns green">철판에 올리고 고리가 초록이 되면 톡 눌러 뒤집어요</p></div>
-    <div class="c"><canvas width="440" height="300" id="h3"></canvas><p data-en="Hold to press it flat and let go on green. Press too long and it bursts">꾹 누르고 있으면 납작해져요. 초록에서 떼요. 너무 오래 누르면 터져요</p></div>
+    <div class="c"><canvas width="440" height="300" id="h3"></canvas><p data-en="Grab the press, hold it on the hotteok and let go on green. Too long and it bursts">누르개를 잡아 호떡 위에서 꾹, 초록에서 떼요. 너무 오래 누르면 터져요</p></div>
     <div class="c"><canvas width="440" height="300" id="h4"></canvas><p data-en="Swipe on the tray to cut, tap the seed tub, then drag it to the guest">쟁반에서 쓱 갈라 씨앗을 넣고 손님에게 끌어다 줘요</p></div>
   </div>
   <div class="btns"><button class="btn" id="bHowOk"><span>OK</span></button></div>
@@ -321,10 +322,10 @@ body.honeyT #cv{filter:saturate(1.25) brightness(1.08)}
 <script src="js/hotteok.js?v=1"></script>
 <script src="js/folk.js?v=1"></script>
 <script src="js/people.js?v=2"></script>
-<script src="js/how.js?v=3"></script>
+<script src="js/how.js?v=4"></script>
 <script src="js/card.js?v=1"></script>
-<script src="js/ui.js?v=2"></script>
-<script src="js/game.js?v=4"></script>
+<script src="js/ui.js?v=3"></script>
+<script src="js/game.js?v=5"></script>
 <script>UI.boot();</script>
 <script src="/assets/visit.js?v=17" defer></script>
 <script src="/assets/game-events.js" defer></script>

@@ -182,8 +182,11 @@
     const e = ringEls[i]; if (!e) return;
     if (!h || G.mode !== 'play') { if (!e.hidden) e.hidden = true; return; }
     e.hidden = false;
-    const P = RND.POS, p = RND.toScreen(new THREE.Vector3(RND.SPOTS[i].x + 0.075, P.grid.y + 0.02, RND.SPOTS[i].z + 0.075));
-    e.style.transform = 'translate(' + Math.round(p[0]) + 'px,' + Math.round(p[1]) + 'px) translate(-50%,-50%)';
+    // 호떡 위쪽(10/24 사장님 "그래프를 위로 올려서 잘 보이게"): 손가락·누르개에 안 가리게, 누르는 중엔 누르개 손잡이보다 위
+    const P = RND.POS, c = RND.toScreen(new THREE.Vector3(RND.SPOTS[i].x, P.grid.y + 0.02, RND.SPOTS[i].z)), s = RND.toScreen(new THREE.Vector3(RND.SPOTS[i].x + 0.1, P.grid.y + 0.02, RND.SPOTS[i].z));
+    const rp = Math.abs(s[0] - c[0]), up = rp * (h.pressShow ? 1.75 : 1.2) + 22;
+    e.style.transform = 'translate(' + Math.round(c[0]) + 'px,' + Math.round(c[1] - up) + 'px) translate(-50%,-50%)';
+    e.classList.toggle('big', !!h.pressShow);
     const pressing = h.pressShow;
     let f, col;
     if (pressing) { f = Math.min(1, h.flat / 1.06); col = h.flat > D.PRESS.good1 + 0.02 ? '#e2412a' : h.flat >= D.PRESS.good0 - G.gv('press') ? '#4fc24a' : '#4aa8e8'; }
@@ -295,6 +298,8 @@
       const sx = e.clientX, sy = e.clientY;
       const p0 = R.pick(sx, sy, 0.01), pg = R.pick(sx, sy, P.grid.y + 0.01);
       const now = performance.now();
+      // 누르개: 집어서 호떡 위로 끌고 가 그대로 꾹
+      if (hitObj(sx, sy, R.press) || (p0 && near(p0, P.press, 0.09))) { G.pressGrab(); G.pressMove(pg); act = { t: 'press', i: -1, over: 0, id: e.pointerId }; return; }
       // 철판 위 호떡
       for (let i = 0; i < 6; i++) { const h = G.spots[i]; if (h && pg && near(pg, R.SPOTS[i], (h.R || 0.07) + 0.03)) { act = { t: 'grid', i, h, sx, sy, t0: now, moved: false, id: e.pointerId }; return; } }
       // 쟁반 위 호떡
@@ -318,7 +323,11 @@
     cv.addEventListener('pointermove', (e) => {
       if (!act || e.pointerId !== act.id) return;
       const sx = e.clientX, sy = e.clientY;
-      if (act.t === 'grid') {
+      if (act.t === 'press') {
+        const pg = R.pick(sx, sy, P.grid.y + 0.01); G.pressMove(pg);
+        let i = -1; if (pg) for (let k = 0; k < 6; k++) { const h = G.spots[k]; if (h && near(pg, R.SPOTS[k], (h.R || 0.07) + 0.04)) { i = k; break; } }
+        if (i !== act.i) { if (act.pressing) G.pressEnd(); if (act.h) act.h.pressShow = false; act.pressing = false; act.i = i; act.h = i >= 0 ? G.spots[i] : null; act.over = 0; }
+      } else if (act.t === 'grid') {
         if (!act.pressing && Math.hypot(sx - act.sx, sy - act.sy) > 14) { act.moved = true; if (G.spots[act.i] === act.h && act.h.flipT === undefined) { G.pickUp(act.h, 'spot', act.i); act.t = 'held'; G.moveHeld(sx, sy); } }
       } else if (act.t === 'tray') {
         const p = R.pick(sx, sy, 0.01); if (!p) return;
@@ -335,18 +344,20 @@
     });
     const up = (e) => {
       if (!act || e.pointerId !== act.id) return;
-      if (act.t === 'grid') { if (act.pressing) { G.pressEnd(); act.h.pressShow = false; } else if (!act.moved) G.flip(act.i); }
+      if (act.t === 'press') { if (act.h) act.h.pressShow = false; G.pressDrop(); }
+      if (act.t === 'grid' && !act.moved && performance.now() - act.t0 < 500) G.flip(act.i); // 톡 = 뒤집기(오래 짚었다 떼면 안 뒤집음)
       if (act.t === 'held') G.dropHeld();
       act = null;
     };
     cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up);
-    // 꾹 누르고 있기 = 누르개
+    // 누르개를 호떡 위에 올린 채 손을 대고 있기 = 꾹
     RND.hooks.push((dt) => {
-      if (!act || act.t !== 'grid' || act.moved || G.mode !== 'play' || U.paused()) return;
-      act.hold = (act.hold || 0) + dt;
-      if (!act.pressing && act.hold > 0.22 && act.h.flipT === undefined) { act.pressing = true; act.h.pressShow = true; G.pressStart(act.i); }
+      if (!act || act.t !== 'press' || act.i < 0 || G.mode !== 'play' || U.paused()) return;
+      if (G.spots[act.i] !== act.h) { act.i = -1; act.h = null; act.pressing = false; return; } // 그새 옮겨지거나 건네짐
+      act.over += dt;
+      if (!act.pressing && act.over > 0.12 && act.h.flipT === undefined) { act.pressing = true; act.h.pressShow = true; G.pressStart(act.i); }
       if (act.pressing) G.pressHold(act.i, dt);
     });
-    U.cancelAct = () => { if (act && act.t === 'held') G.dropHeld(); if (act && act.pressing) G.pressEnd(); act = null; };
+    U.cancelAct = () => { if (act && act.t === 'held') G.dropHeld(); if (act && act.t === 'press') { if (act.h) act.h.pressShow = false; G.pressDrop(); } act = null; };
   }
 })();

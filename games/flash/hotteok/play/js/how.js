@@ -53,27 +53,31 @@
     const lift = T > 2.6 && T < 3.0 ? Math.sin((T - 2.6) / 0.4 * PI) * 26 : 0, sq = T > 2.6 && T < 3.0 ? Math.abs(Math.cos((T - 2.6) / 0.4 * PI)) : 1;
     cake(g, x, y - lift, 34, flipped ? 0.92 : 0.15 + cc * 0.15, sq);
     for (let i = 0; i < 10; i++) { const a = i * 0.63 + t * 3, rr = 40 + (i % 3) * 4; g.fillStyle = 'rgba(255,240,200,.6)'; g.beginPath(); g.arc(x + Math.cos(a) * rr, y + Math.sin(a) * rr * 0.9, 2.2, 0, 7); g.fill(); }
-    if (!flipped) ring(g, x + 52, y + 46, Math.min(1, cc / 1.32), cc >= 0.75 ? '#4fc24a' : cc > 0.55 ? '#f2c33a' : '#f6efe0');
+    if (!flipped) ring(g, x, y - 62, Math.min(1, cc / 1.32), cc >= 0.75 ? '#4fc24a' : cc > 0.55 ? '#f2c33a' : '#f6efe0');
     if (T > 2.3 && T < 2.9) finger(g, x, y, T > 2.45);
   }
-  // 3. 꾹 누르고 있으면 누르개가 내려와 납작하게(초록에서 떼기). 너무 오래 누르면 속이 터져 흐름
+  // 3. 누르개를 집어 호떡 위로 끌고 와 꾹(초록에서 떼기). 너무 오래 누르면 속이 터져 흐름. 고리는 호떡 위에
   function stepPress(g, t) {
-    const w = 440, h = 300; steel(g, w, h); iron(g, 40, 40, 360, 220);
-    const T = t % 8, x = 200, y = 150, over = T > 3.6;
-    const u = over ? T - 3.6 : T; // 앞: 알맞게 누르고 떼기, 뒤: 너무 오래 눌러 터짐
-    const pressing = over ? u > 0.4 : u > 0.4 && u < 2.4;
-    const k = Math.max(0, Math.min(over ? 1.25 : 0.82, (u - 0.5) / 1.8));
+    const w = 440, h = 300; steel(g, w, h); iron(g, 40, 40, 300, 220);
+    const T = t % 9, x = 170, y = 175, hx = 392, hy = 120, over = T > 4.5;
+    const u = over ? T - 4.5 : T; // 앞: 알맞게 누르고 떼기, 뒤: 너무 오래 눌러 터짐
+    const mv = Math.max(0, Math.min(1, (u - 0.5) / 0.6)), e = mv * mv * (3 - 2 * mv); // 0.5~1.1초: 누르개를 집어 옮김
+    const pressing = over ? u > 1.2 : u > 1.2 && u < 3.3;
+    const k = Math.max(0, Math.min(over ? 1.25 : 0.82, (u - 1.25) / 1.8));
     const r = 34 + 22 * Math.min(1, k) + (k > 1 ? (k - 1) * 30 : 0);
     if (over && k > 1.06) { g.fillStyle = 'rgba(40,16,4,.9)'; const pr = 20 + (k - 1.06) * 400; for (let i = 0; i < 7; i++) { const a = i * 0.9 + 0.3; g.beginPath(); g.ellipse(x + Math.cos(a) * (r - 4), y + Math.sin(a) * (r - 4) * 0.9, Math.min(26, pr * 0.3), Math.min(16, pr * 0.2), a, 0, 7); g.fill(); } }
     cake(g, x, y, r, 0.92);
-    const f = k / 1.06, col = k > 1.02 ? '#e2412a' : k >= 0.66 ? '#4fc24a' : '#4aa8e8';
-    ring(g, x + 70, y + 54, Math.min(1, f), col);
+    // 누르개: 제자리 → 손가락 따라 호떡 위 → 다 누르면 제자리로
+    const back = !over && u >= 3.3 ? Math.min(1, (u - 3.3) / 0.5) : 0;
+    const px = hx + (x - hx) * e + (hx - x) * back, py = hy + (y - hy) * e + (hy - y) * back, pr2 = 52 + Math.max(0, r - 56) * 0.4;
+    g.fillStyle = 'rgba(220,226,232,' + (pressing ? 0.5 : 0.85) + ')'; g.beginPath(); g.arc(px, py, pr2, 0, 7); g.fill(); g.strokeStyle = '#fff'; g.lineWidth = 3; g.stroke();
+    g.fillStyle = '#7a4a24'; g.beginPath(); g.roundRect ? g.roundRect(px - 30, py - 8, 60, 16, 8) : g.rect(px - 30, py - 8, 60, 16); g.fill();
     if (pressing) {
-      g.fillStyle = 'rgba(220,226,232,.45)'; g.beginPath(); g.arc(x, y, 62 + Math.max(0, r - 56) * 0.5, 0, 7); g.fill(); g.strokeStyle = '#fff'; g.lineWidth = 3; g.stroke();
-      g.fillStyle = '#7a4a24'; g.beginPath(); g.roundRect ? g.roundRect(x - 34, y - 9, 68, 18, 9) : g.rect(x - 34, y - 9, 68, 18); g.fill();
-      finger(g, x + 6, y - 4, true);
-    } else if (!over && u >= 2.4) finger(g, x + 30, y - 40, false);
-    if (over && k > 1.06) { g.fillStyle = '#ff6a5a'; g.font = '900 34px sans-serif'; g.textAlign = 'center'; g.fillText('X', x + 120, y - 70); }
+      const f = k / 1.06, col = k > 1.02 ? '#e2412a' : k >= 0.66 ? '#4fc24a' : '#4aa8e8';
+      ring(g, x, y - r - 46, Math.min(1, f), col);
+    }
+    if (u > 0.3 && (over || u < 3.3)) finger(g, px + 4, py - 4, u > 0.5);
+    if (over && k > 1.06) { g.fillStyle = '#ff6a5a'; g.font = '900 34px sans-serif'; g.textAlign = 'center'; g.fillText('X', x + 110, y - 90); }
   }
   // 4. 쟁반에서 쓱 갈라 씨앗을 넣고, 손님에게 끌어다 주기
   function step3(g, t) {

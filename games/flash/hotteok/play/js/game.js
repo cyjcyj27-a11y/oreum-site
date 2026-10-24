@@ -314,7 +314,7 @@
   }
 
   // 도구 움직임(누르개·숟가락·국자·가위·기름병)
-  const anim = { press: null, spoon: 0, scoop: 0, oil: 0, scis: 0 };
+  const anim = { press: null, grab: false, grabPos: new V3(), spoon: 0, scoop: 0, oil: 0, scis: 0 };
   function updTools(dt) {
     // 누르개: 누르는 호떡 위로 내려왔다가 제자리로
     const pr = R.press;
@@ -322,7 +322,8 @@
       const h = anim.press; const tgt = new V3(h.grp.position.x, P.grid.y + (h.top || 0.02) + 0.004, h.grp.position.z);
       pr.position.lerp(tgt, Math.min(1, dt * 18));
       pr.rotation.z = Math.sin(simT * 30) * 0.01;
-    } else { pr.position.lerp(R.pressHome, Math.min(1, dt * 10)); pr.rotation.z = 0; }
+    } else if (anim.grab) { pr.position.lerp(anim.grabPos, Math.min(1, dt * 24)); pr.rotation.z = 0; } // 손에 든 누르개: 손가락 따라 철판 위로
+    else { pr.position.lerp(R.pressHome, Math.min(1, dt * 10)); pr.rotation.z = 0; }
     // 숟가락: 통 → 반죽 위로 기울였다가 돌아감
     if (anim.spoon > 0) {
       anim.spoon -= dt / 0.55; const k = 1 - Math.max(0, anim.spoon), b = G.board;
@@ -406,6 +407,10 @@
     if (!h.burst && h.fill && (h.flat > burstAt || (h.spoons >= D.FILL[h.fill].burst && h.flat > 0.78))) burst(h);
   };
   G.pressEnd = function () { anim.press = null; };
+  // 누르개를 손으로 집어 옮기기(10/24 사장님 "누르개를 직접 터치해서 누르게")
+  G.pressGrab = function () { anim.grab = true; anim.grabPos.copy(R.press.position).setY(0.06); SND.ui(); };
+  G.pressMove = function (p) { if (p) anim.grabPos.set(p.x, P.grid.y + 0.05, p.z); };
+  G.pressDrop = function () { anim.grab = false; anim.press = null; };
   function burst(h) {
     h.burst = 1; G.S.stats.burst++; SND.burst();
     h.puddle.visible = true; h.puddleR = 0.05; h.puddle.scale.setScalar(0.05); h.puddle.position.x += 0.02; h.puddle.position.z += 0.015;
