@@ -254,7 +254,7 @@
     const cc = $('combCur');
     let combX = -999, combY = -999, combA = Math.PI / 2;
     // 참빗은 빗살이 움직이는 쪽을 보게(몸통은 움직임과 직각), 폭 = 빗질 폭
-    const placeComb = () => { const w = G.gv('combR') * 2, h = w * 0.5; cc.style.width = w + 'px'; cc.style.height = h + 'px'; cc.style.transform = 'translate(' + (combX - w / 2) + 'px,' + (combY - h / 2) + 'px) rotate(' + (combA + Math.PI / 2) + 'rad)'; };
+    const placeComb = () => { const lv = String(Math.min(2, G.S.gear.comb || 0)); if (cc.getAttribute('data-lv') !== lv) cc.setAttribute('data-lv', lv); const w = G.gv('combR') * 2, h = w * 0.5; cc.style.width = w + 'px'; cc.style.height = h + 'px'; cc.style.transform = 'translate(' + (combX - w / 2) + 'px,' + (combY - h / 2) + 'px) rotate(' + (combA + Math.PI / 2) + 'rad)'; };
     U.combAngle = (a) => { combA = a; placeComb(); };
     cv.addEventListener('contextmenu', (e) => e.preventDefault());
     cv.addEventListener('pointerdown', (e) => {

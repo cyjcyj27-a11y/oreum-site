@@ -96,8 +96,31 @@
     }
     // 숨은 새싹: 참빗이 지나가 머리가 납작하게 눕으면 위로 드러남
     if (cx > 270) { for (const x of [205, 238]) hair(g, x, sy(h, x, 0, -999), -Math.PI / 2 + (x - 220) * 0.012, 46, '#f2f0ea', 5, 0); }
-    // 참빗: 대나무 몸통 + 가운데 등대 + 양쪽 가는 빗살
+    // 참빗: 지금 가진 단계 그림(1 갈색 나무 참빗 · 2 노란 대나무 참빗 · 3 색 띠 참빗, 사장님 10/24 사진)
     g.save(); g.translate(cx, h * 0.5);
+    const lv = Math.min(2, (window.GAME && GAME.S && GAME.S.gear.comb) || 0);
+    if (lv === 0) {
+      const wd = g.createLinearGradient(-44, 0, 44, 0); wd.addColorStop(0, '#6e4838'); wd.addColorStop(0.5, '#5a382a'); wd.addColorStop(1, '#462a1f');
+      g.strokeStyle = wd;
+      g.lineWidth = 1.6; for (let y = -70; y <= 70; y += 2.6) { g.beginPath(); g.moveTo(-41, y); g.lineTo(-11, y); g.stroke(); }
+      g.lineWidth = 2.3; for (let y = -70; y <= 70; y += 4) { g.beginPath(); g.moveTo(11, y); g.lineTo(41, y); g.stroke(); }
+      g.fillStyle = wd; g.strokeStyle = '#3a2219'; g.lineWidth = 2;
+      g.beginPath(); g.roundRect(-44, -86, 88, 14, [9, 9, 0, 0]); g.fill(); g.stroke();
+      g.beginPath(); g.roundRect(-44, 72, 88, 14, [0, 0, 9, 9]); g.fill(); g.stroke();
+      g.fillRect(-12, -74, 24, 148); g.strokeRect(-12, -74, 24, 148);
+      g.strokeStyle = 'rgba(46,26,18,.55)'; g.lineWidth = 1.2; g.beginPath(); g.moveTo(-4, -70); g.bezierCurveTo(-7, -20, 0, 20, -5, 70); g.moveTo(5, -70); g.bezierCurveTo(7, -30, 2, 30, 6, 70); g.stroke();
+      g.restore();
+    } else if (lv === 1) {
+      const bm = g.createLinearGradient(-13, 0, 13, 0); bm.addColorStop(0, '#cdb98a'); bm.addColorStop(0.35, '#fbf4de'); bm.addColorStop(1, '#bfa874');
+      g.fillStyle = '#231915'; g.fillRect(-41, -74, 82, 148);
+      g.strokeStyle = '#3b2a22'; g.lineWidth = 1; for (let y = -72; y <= 72; y += 2) { g.beginPath(); g.moveTo(-41, y); g.lineTo(41, y); g.stroke(); }
+      g.strokeStyle = '#e8d8a8'; g.lineWidth = 2.4; g.beginPath(); g.moveTo(-41, -64); g.lineTo(41, -64); g.moveTo(-41, 64); g.lineTo(41, 64); g.stroke();
+      g.fillStyle = '#e9d9ae'; g.strokeStyle = '#8a744a'; g.lineWidth = 2;
+      g.fillRect(-44, -86, 88, 14); g.strokeRect(-44, -86, 88, 14); g.fillRect(-44, 72, 88, 14); g.strokeRect(-44, 72, 88, 14);
+      g.fillStyle = bm; g.beginPath(); g.roundRect(-13, -80, 26, 160, 12); g.fill(); g.stroke();
+      g.strokeStyle = 'rgba(255,250,240,.85)'; g.lineWidth = 2; g.beginPath(); g.moveTo(-6, -74); g.lineTo(-6, 74); g.stroke();
+      g.restore();
+    } else {
     const bam = g.createLinearGradient(-12, 0, 12, 0); bam.addColorStop(0, '#e9d9ae'); bam.addColorStop(0.5, '#fbf4de'); bam.addColorStop(1, '#cdb98a');
     // 빗살: 사진 속 참빗처럼 청록·자주·주황·노랑 색 띠
     const band = ['#2f5d5c', '#7b2f3c', '#c25a2e', '#c99a35', '#c25a2e', '#7b2f3c', '#2f5d5c'];
@@ -108,6 +131,7 @@
     g.fillRect(-44, -84, 88, 12); g.strokeRect(-44, -84, 88, 12); g.fillRect(-44, 72, 88, 12); g.strokeRect(-44, 72, 88, 12);
     g.strokeStyle = 'rgba(138,74,28,.85)'; g.lineWidth = 1.6; g.beginPath(); g.moveTo(4, -30); g.bezierCurveTo(-6, -18, 6, -6, -2, 8); g.moveTo(-4, 20); g.lineTo(2, 26); g.stroke();
     g.restore();
+    }
     if (T > 1.9 && T < 3.0) { g.font = '900 34px Ttl,sans-serif'; g.textAlign = 'center'; g.lineWidth = 7; g.strokeStyle = '#1d2430'; g.strokeText('!', 222, 120); g.fillStyle = '#ffe27a'; g.fillText('!', 222, 120); }
   }
   function frame() {
