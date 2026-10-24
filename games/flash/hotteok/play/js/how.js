@@ -45,26 +45,37 @@
     }
   }
   // 2. 철판에 올려 고리가 초록이면 톡 뒤집고, 꾹 눌러 납작하게
+  // 2. 철판에 올려 고리가 초록이면 톡 뒤집기
   function step2(g, t) {
     const w = 440, h = 300; steel(g, w, h); iron(g, 40, 40, 360, 220);
-    const T = t % 6.5, x = 200, y = 150;
-    let c = Math.min(1.0, T / 2.2) * 0.95, r = 34, sq = 1;
-    const flipped = T > 2.8;
-    if (flipped) c = 0.1 + Math.min(0.85, (T - 2.8) / 3);
-    if (T > 3.4) { const k = Math.min(1, (T - 3.4) / 1.6); r = 34 + 22 * k; }
-    if (T > 2.4 && T < 2.8) { sq = Math.abs(Math.cos((T - 2.4) / 0.4 * PI)); }
-    cake(g, x, y - (T > 2.4 && T < 2.8 ? Math.sin((T - 2.4) / 0.4 * PI) * 26 : 0), r, flipped ? 0.92 : 0.15 + c * 0.2, sq);
-    for (let i = 0; i < 10; i++) { const a = i * 0.63 + t * 3, rr = r + 6 + (i % 3) * 4; g.fillStyle = 'rgba(255,240,200,.6)'; g.beginPath(); g.arc(x + Math.cos(a) * rr, y + Math.sin(a) * rr * 0.9, 2.2, 0, 7); g.fill(); }
-    if (T < 2.8) { const cc = T / 2.2 * 0.9; ring(g, x + 52, y + 46, Math.min(1, cc / 1.32), cc >= 0.75 ? '#4fc24a' : cc > 0.55 ? '#f2c33a' : '#f6efe0'); if (T > 2.1) finger(g, x, y, T > 2.25); }
-    else if (T > 3.4) { // 누르개
-      const k = Math.min(1, (T - 3.4) / 1.6);
-      ring(g, x + 70, y + 54, k * 0.9, k > 0.66 ? '#4fc24a' : '#4aa8e8');
-      g.fillStyle = 'rgba(220,226,232,.85)'; g.beginPath(); g.arc(x, y, 58, 0, 7); g.fill(); g.strokeStyle = '#fff'; g.lineWidth = 3; g.stroke();
+    const T = t % 4.4, x = 200, y = 150, flipped = T > 3.0;
+    const cc = flipped ? 0.1 : Math.min(1.0, T / 2.4) * 0.92;
+    const lift = T > 2.6 && T < 3.0 ? Math.sin((T - 2.6) / 0.4 * PI) * 26 : 0, sq = T > 2.6 && T < 3.0 ? Math.abs(Math.cos((T - 2.6) / 0.4 * PI)) : 1;
+    cake(g, x, y - lift, 34, flipped ? 0.92 : 0.15 + cc * 0.15, sq);
+    for (let i = 0; i < 10; i++) { const a = i * 0.63 + t * 3, rr = 40 + (i % 3) * 4; g.fillStyle = 'rgba(255,240,200,.6)'; g.beginPath(); g.arc(x + Math.cos(a) * rr, y + Math.sin(a) * rr * 0.9, 2.2, 0, 7); g.fill(); }
+    if (!flipped) ring(g, x + 52, y + 46, Math.min(1, cc / 1.32), cc >= 0.75 ? '#4fc24a' : cc > 0.55 ? '#f2c33a' : '#f6efe0');
+    if (T > 2.3 && T < 2.9) finger(g, x, y, T > 2.45);
+  }
+  // 3. 꾹 누르고 있으면 누르개가 내려와 납작하게(초록에서 떼기). 너무 오래 누르면 속이 터져 흐름
+  function stepPress(g, t) {
+    const w = 440, h = 300; steel(g, w, h); iron(g, 40, 40, 360, 220);
+    const T = t % 8, x = 200, y = 150, over = T > 3.6;
+    const u = over ? T - 3.6 : T; // 앞: 알맞게 누르고 떼기, 뒤: 너무 오래 눌러 터짐
+    const pressing = over ? u > 0.4 : u > 0.4 && u < 2.4;
+    const k = Math.max(0, Math.min(over ? 1.25 : 0.82, (u - 0.5) / 1.8));
+    const r = 34 + 22 * Math.min(1, k) + (k > 1 ? (k - 1) * 30 : 0);
+    if (over && k > 1.06) { g.fillStyle = 'rgba(40,16,4,.9)'; const pr = 20 + (k - 1.06) * 400; for (let i = 0; i < 7; i++) { const a = i * 0.9 + 0.3; g.beginPath(); g.ellipse(x + Math.cos(a) * (r - 4), y + Math.sin(a) * (r - 4) * 0.9, Math.min(26, pr * 0.3), Math.min(16, pr * 0.2), a, 0, 7); g.fill(); } }
+    cake(g, x, y, r, 0.92);
+    const f = k / 1.06, col = k > 1.02 ? '#e2412a' : k >= 0.66 ? '#4fc24a' : '#4aa8e8';
+    ring(g, x + 70, y + 54, Math.min(1, f), col);
+    if (pressing) {
+      g.fillStyle = 'rgba(220,226,232,.45)'; g.beginPath(); g.arc(x, y, 62 + Math.max(0, r - 56) * 0.5, 0, 7); g.fill(); g.strokeStyle = '#fff'; g.lineWidth = 3; g.stroke();
       g.fillStyle = '#7a4a24'; g.beginPath(); g.roundRect ? g.roundRect(x - 34, y - 9, 68, 18, 9) : g.rect(x - 34, y - 9, 68, 18); g.fill();
       finger(g, x + 6, y - 4, true);
-    }
+    } else if (!over && u >= 2.4) finger(g, x + 30, y - 40, false);
+    if (over && k > 1.06) { g.fillStyle = '#ff6a5a'; g.font = '900 34px sans-serif'; g.textAlign = 'center'; g.fillText('X', x + 120, y - 70); }
   }
-  // 3. 쟁반에서 쓱 갈라 씨앗을 넣고, 손님에게 끌어다 주기
+  // 4. 쟁반에서 쓱 갈라 씨앗을 넣고, 손님에게 끌어다 주기
   function step3(g, t) {
     const w = 440, h = 300; g.fillStyle = '#1d1a2a'; g.fillRect(0, 0, w, 120);
     for (let i = 0; i < 18; i++) { g.fillStyle = ['rgba(255,190,110,.35)', 'rgba(120,200,255,.3)', 'rgba(255,110,90,.3)'][i % 3]; g.beginPath(); g.arc((i * 71) % w, 20 + (i * 37) % 80, 12, 0, 7); g.fill(); }
@@ -89,13 +100,13 @@
     else if (T > 4.0 && T < 5.4) finger(g, x + 4, y + 4, true);
     if (T > 5.4) { g.fillStyle = '#ff6a8a'; const k = (T - 5.4); g.save(); g.translate(350, 70 - k * 20); g.scale(1.2, 1.2); g.beginPath(); g.moveTo(0, 6); g.bezierCurveTo(-14, -6, -6, -16, 0, -8); g.bezierCurveTo(6, -16, 14, -6, 0, 6); g.fill(); g.restore(); }
   }
-  const steps = [step1, step2, step3];
+  const steps = [step1, step2, stepPress, step3];
   H.start = function () {
     t0 = performance.now(); cancelAnimationFrame(raf);
-    const cvs = [1, 2, 3].map((i) => document.getElementById('h' + i));
+    const cvs = [1, 2, 3, 4].map((i) => document.getElementById('h' + i));
     const f = () => { const t = (performance.now() - t0) / 1000; cvs.forEach((c, i) => { const g = c.getContext('2d'); g.save(); g.clearRect(0, 0, 440, 300); steps[i](g, t); g.restore(); }); raf = requestAnimationFrame(f); };
     f();
   };
   H.stop = function () { cancelAnimationFrame(raf); };
-  H.draw = function (t) { [1, 2, 3].forEach((i, k) => { const g = document.getElementById('h' + i).getContext('2d'); g.clearRect(0, 0, 440, 300); steps[k](g, t); }); };
+  H.draw = function (t) { [1, 2, 3, 4].forEach((i, k) => { const g = document.getElementById('h' + i).getContext('2d'); g.clearRect(0, 0, 440, 300); steps[k](g, t); }); };
 })();

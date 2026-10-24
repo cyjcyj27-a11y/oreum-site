@@ -12,8 +12,8 @@
    상단 알약: 골판지 차림표 조각(골 무늬 + 매직 글씨)
    둥근 단추: 스테인리스 누르개 원판(동심원 결 + 가운데 기호)
    창: 위에 주황 천막 물결 띠를 두른 기름종이 판 */
-@font-face{font-family:'Ttl';src:url('fonts/title.woff2?v=3') format('woff2');font-display:block}
-@font-face{font-family:'Ui';src:url('fonts/ui.woff2?v=3') format('woff2');font-display:swap}
+@font-face{font-family:'Ttl';src:url('fonts/title.woff2?v=4') format('woff2');font-display:block}
+@font-face{font-family:'Ui';src:url('fonts/ui.woff2?v=4') format('woff2');font-display:swap}
 :root{--brown:#3a1a06;--gold:#e0a24a;--red:#c8261e;--paper:#fbf6ea;--card:#b98b55;--ink:#2a1a10}
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 [hidden]{display:none!important}
@@ -182,7 +182,9 @@ body.honeyT #cv{filter:saturate(1.25) brightness(1.08)}
 #resStars i.on{background:#f2b22a}
 .coinsLine,#resCoin{text-align:center;font:22px/1 'Ttl',sans-serif;margin-top:12px}
 /* HOW TO PLAY */
-.how{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.how{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+#how .sheet{width:min(720px,96vw)}
+@media (min-width:900px){.how{grid-template-columns:repeat(4,1fr)}#how .sheet{width:min(1120px,96vw)}}
 .how .c{background:rgba(255,255,255,.5);border-radius:10px;padding:8px;box-shadow:inset 0 0 0 2px rgba(90,60,30,.2);text-align:center}
 .how canvas{width:100%;aspect-ratio:22/15;border-radius:6px;display:block}
 .how p{font-size:16px;line-height:1.35;margin-top:7px}
@@ -210,7 +212,8 @@ body.honeyT #cv{filter:saturate(1.25) brightness(1.08)}
   .stat b{font-size:19px}
   .bar{width:42px}
   .how{grid-template-columns:1fr}
-  .how .c{display:grid;grid-template-columns:46% 1fr;align-items:center;gap:10px;text-align:left}
+  .how{gap:8px}
+  .how .c{display:grid;grid-template-columns:46% 1fr;align-items:center;gap:10px;text-align:left;padding:6px}
   .how p{margin:0;font-size:15px}
   .shop{grid-template-columns:1fr 1fr}
   .item{padding:8px 9px}.item .nm{font-size:18px}.item .ds{font-size:13px}
@@ -228,7 +231,7 @@ body.honeyT #cv{filter:saturate(1.25) brightness(1.08)}
   .btn{height:13vh;font-size:5.6vh}
   .sheet{max-height:94vh;padding:32px 22px 3vh;width:min(760px,92vw)}
   .sheet h2{font-size:6.4vh;margin:0 0 1.6vh}
-  .how .c{display:block}.how canvas{aspect-ratio:22/12}.how p{font-size:3.6vh}
+  .how{grid-template-columns:repeat(4,1fr)}.how .c{display:block}.how canvas{aspect-ratio:22/12}.how p{font-size:3.4vh}
   .big{font-size:12vh}
   .shop{grid-template-columns:1fr 1fr 1fr}
 }
@@ -272,8 +275,9 @@ body.honeyT #cv{filter:saturate(1.25) brightness(1.08)}
   <h2>HOW TO PLAY</h2>
   <div class="how">
     <div class="c"><canvas width="440" height="300" id="h1"></canvas><p data-en="Drag dough to the tray, add 2 spoons of sugar, then rub in circles to wrap it">반죽을 판으로 옮기고 설탕 두 숟갈, 동그랗게 문질러 오므려요</p></div>
-    <div class="c"><canvas width="440" height="300" id="h2"></canvas><p data-en="Put it on the griddle. Tap to flip when the ring is green, hold to press it flat">철판에 올리고 고리가 초록이면 톡 뒤집어요. 꾹 누르면 납작해져요</p></div>
-    <div class="c"><canvas width="440" height="300" id="h3"></canvas><p data-en="Swipe on the tray to cut, tap the seed tub, then drag it to the guest">쟁반에서 쓱 갈라 씨앗을 넣고 손님에게 끌어다 줘요</p></div>
+    <div class="c"><canvas width="440" height="300" id="h2"></canvas><p data-en="Put it on the griddle and tap to flip when the ring turns green">철판에 올리고 고리가 초록이 되면 톡 눌러 뒤집어요</p></div>
+    <div class="c"><canvas width="440" height="300" id="h3"></canvas><p data-en="Hold to press it flat and let go on green. Press too long and it bursts">꾹 누르고 있으면 납작해져요. 초록에서 떼요. 너무 오래 누르면 터져요</p></div>
+    <div class="c"><canvas width="440" height="300" id="h4"></canvas><p data-en="Swipe on the tray to cut, tap the seed tub, then drag it to the guest">쟁반에서 쓱 갈라 씨앗을 넣고 손님에게 끌어다 줘요</p></div>
   </div>
   <div class="btns"><button class="btn" id="bHowOk"><span>OK</span></button></div>
 </div></div>
@@ -317,7 +321,7 @@ body.honeyT #cv{filter:saturate(1.25) brightness(1.08)}
 <script src="js/hotteok.js?v=1"></script>
 <script src="js/folk.js?v=1"></script>
 <script src="js/people.js?v=2"></script>
-<script src="js/how.js?v=1"></script>
+<script src="js/how.js?v=3"></script>
 <script src="js/card.js?v=1"></script>
 <script src="js/ui.js?v=2"></script>
 <script src="js/game.js?v=4"></script>
