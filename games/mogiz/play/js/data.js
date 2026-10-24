@@ -5,13 +5,13 @@
   // alert: 놓친 뒤 찾아다니는 초, hunt: 찾을 때 휘두르는 사이 간격, ul: 피 1초가 몇 ㎕
   D.ORDER = ['cat', 'dog', 'baby', 'teen', 'mom', 'dad', 'grandpa'];
   D.T = {
-    cat: { ko: '고양이', en: 'Cat', need: 2.2, itch: 0.28, wind: 0.9, alert: 5, hunt: 1.6, ul: 1.0, col: '#f0a24a' },
-    dog: { ko: '강아지', en: 'Dog', need: 2.6, itch: 0.33, wind: 0.8, alert: 6, hunt: 1.4, ul: 1.2, col: '#f4efe4' },
-    baby: { ko: '아기', en: 'Baby', need: 2.4, itch: 0.18, wind: 1.2, alert: 3, hunt: 2.4, ul: 0.9, col: '#ffd95a', harmless: true },
-    teen: { ko: '남고딩', en: 'High schooler', need: 3.6, itch: 0.4, wind: 0.62, alert: 9, hunt: 1.1, ul: 1.6, col: '#2b2d38' },
-    mom: { ko: '엄마', en: 'Mom', need: 3.8, itch: 0.42, wind: 0.62, alert: 9, hunt: 1.5, ul: 1.6, col: '#e98aa2' },
-    dad: { ko: '아빠', en: 'Dad', need: 4.2, itch: 0.45, wind: 0.6, alert: 10, hunt: 1.2, ul: 1.8, col: '#3a69b8' },
-    grandpa: { ko: '할아버지', en: 'Grandpa', need: 4.8, itch: 0.55, wind: 0.5, alert: 13, hunt: 0.95, ul: 1.7, col: '#efeee6' },
+    cat: { ko: '고양이', en: 'Cat', need: 2.8, itch: 0.32, wind: 0.85, alert: 6, hunt: 1.4, ul: 1.0, col: '#f0a24a' },
+    dog: { ko: '강아지', en: 'Dog', need: 3.2, itch: 0.38, wind: 0.75, alert: 7.5, hunt: 1.2, ul: 1.2, col: '#f4efe4' },
+    baby: { ko: '아기', en: 'Baby', need: 3.0, itch: 0.21, wind: 1.2, alert: 4, hunt: 2.4, ul: 0.9, col: '#ffd95a', harmless: true },
+    teen: { ko: '남고딩', en: 'High schooler', need: 4.5, itch: 0.46, wind: 0.57, alert: 11, hunt: 0.95, ul: 1.6, col: '#2b2d38' },
+    mom: { ko: '엄마', en: 'Mom', need: 4.8, itch: 0.48, wind: 0.57, alert: 11, hunt: 1.3, ul: 1.6, col: '#e98aa2' },
+    dad: { ko: '아빠', en: 'Dad', need: 5.2, itch: 0.52, wind: 0.55, alert: 12.5, hunt: 1.0, ul: 1.8, col: '#3a69b8' },
+    grandpa: { ko: '할아버지', en: 'Grandpa', need: 6.0, itch: 0.63, wind: 0.47, alert: 16, hunt: 0.8, ul: 1.7, col: '#efeee6' },
   };
   D.BASE = { speed: 1.15, vert: 0.9, suck: 1, itchMul: 1, cap: 3.0, digest: 0.35, annoy: 1, alertMul: 1, detach: 0.12, pop: 0.7, toxin: 1, coilImmune: false, hitbox: 1, heavy: 0.35, dash: 0, dashCd: 3.2, reticle: 0.22, decay: 0.25, eye: 0, slowmo: 0, boost: 0, greedy: 0 };
   // 진화 카드: g = 금테
@@ -48,7 +48,7 @@
     { id: 'gKing', g: 1, ko: '대왕 침', en: 'King Needle', dk: '빠는 속도 +50%, 배 용량 +30%', de: 'Suck +50%, belly +30%', f: (s) => { s.suck *= 1.5; s.cap *= 1.3; } },
   ];
   D.CARD = {}; D.CARDS.forEach((c) => (D.CARD[c.id] = c));
-  // 환생할수록 물린 자리가 덜 부어오름(= 덜 간지러움): 한 번 환생마다 8%, 가장 적게 62%까지
-  D.swell = (life) => Math.max(0.62, Math.pow(0.92, Math.max(0, (life || 1) - 1)));
+  // 환생할수록 물린 자리가 덜 부어오름(= 덜 간지러움): 한 번 환생마다 5%, 가장 적게 72%까지(10/24 사장님 6번 만에 엔딩 → 난이도 올림, 옛 8%·62%)
+  D.swell = (life) => Math.max(0.72, Math.pow(0.95, Math.max(0, (life || 1) - 1)));
   D.stats = function (ids, life) { const s = Object.assign({}, D.BASE); (ids || []).forEach((id) => D.CARD[id] && D.CARD[id].f(s)); s.swell = D.swell(life); s.itchMul *= s.swell; return s; };
 })();
