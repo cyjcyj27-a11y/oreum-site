@@ -27,7 +27,7 @@
 <meta property="og:locale" content="en_US">
 <meta name="twitter:card" content="summary_large_image">
 
-<link rel="stylesheet" href="/style.css?v=47">
+<link rel="stylesheet" href="/style.css?v=48">
 <!-- HOME:style -->
 <style>
 .shelf-head{display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap;margin:44px 0 16px;padding-bottom:10px;border-bottom:2px solid var(--line)}
@@ -2031,7 +2031,7 @@
           <span class="mbody"><b>Image Tools</b><i>Convert · Compress · Crop in one</i></span>
         </a>
       </div>
-      <p class="lede">Oreum Games makes free web games you play right in your browser, with nothing to install. No sign-up, no payment, and your progress is saved in your browser. We are working to make games in every genre: puzzle, simulation, adventure, defense, FPS, horror and more. Have fun, and leave a review on our <a href="/en/board/">board</a>. If you find a bug, or there is a game you would love to play as a web game, let us know on the <a href="/en/board/">board</a>. Thanks for stopping by today.</p>
+      <p class="lede">Oreum Games makes free web games you play right in your browser, with nothing to install. No sign-up, no payment, and your progress is saved in your browser. We are working to make games in every genre: puzzle, simulation, adventure, defense, FPS, horror and more. If you find a bug, or there is a game you would love to play as a web game, let us know on the <a href="/en/board/">board</a>. If you enjoyed it, please share it with the people around you. <button type="button" class="js-share sharebtn"><img src="/assets/logo-symbol.png" alt="" class="share-ico">Share</button> Everything inside Oreum Games' games is free to use commercially. You can stream it or make videos of it, and we warmly welcome its use on monetized channels and in TV and radio broadcasts. Thanks for stopping by today.</p>
       <!-- HOME:end -->
     </div>
   </section>
@@ -2073,6 +2073,24 @@
 <script src="/assets/board-new.js?v=13" defer></script>
 <script src="/assets/mail.js" defer></script>
 <script src="/assets/install.js?v=7" defer></script>
+<script>
+// Share button in the intro paragraph — share sheet on phones, copy the link on PCs without one
+(function () {
+  var b = document.querySelector('.js-share');
+  if (!b) return;
+  var url = 'https://oreumgames.com/en/';
+  function toast(t) {
+    var d = document.createElement('div'); d.textContent = t;
+    d.style.cssText = 'position:fixed;left:50%;bottom:28px;transform:translateX(-50%);background:#1f2a22;color:#fff;padding:12px 20px;border-radius:18px;font-size:16px;z-index:9999;box-shadow:0 6px 24px rgba(0,0,0,.3)';
+    document.body.appendChild(d); setTimeout(function () { d.remove(); }, 2500);
+  }
+  b.addEventListener('click', function () {
+    if (navigator.share) { navigator.share({ title: document.title, url: url }).catch(function () {}); return; }
+    if (navigator.clipboard) navigator.clipboard.writeText(url).then(function () { toast('Link copied'); }, function () { toast(url); });
+    else toast(url);
+  });
+})();
+</script>
 <script src="/assets/search.js?v=57" defer></script>
 </body>
 </html>
