@@ -45,8 +45,11 @@
       noise(g0, 0.03, 900, 500, 0.9, gv * 0.35, 'bandpass'); // 부서지는 몸통
     }
   }
-  // 쿠키가 떨어질 때: 작은 톡 + 바사삭
-  A.drop = function (k) { if (!ok()) return; const t = ctx.currentTime; tone(150, t, 0.07, 'sine', 0.16, 80); crunch(t, 0.22, 1.0, 5); };
+  // 쿠키가 떨어질 때: 상큼한 딩동(배경음과 같은 다장조 높은 미→도, 짧고 맑은 종소리)
+  function bell(f, t, vol) {
+    tone(f, t, 0.28, 'sine', vol); tone(f * 2, t, 0.09, 'sine', vol * 0.12); tone(f * 0.5, t, 0.12, 'triangle', vol * 0.15);
+  }
+  A.drop = function (k) { if (!ok()) return; const t = ctx.currentTime; bell(1318.5, t, 0.2); bell(1046.5, t + 0.085, 0.19); };
   // 잘린 조각이 부서질 때: 더 길고 굵은 바사삭
   A.cut = function (k) { if (!ok()) return; const t = ctx.currentTime + 0.02; crunch(t, 0.24 + (k || 0.5) * 0.12, 0.8, 6); };
   A.land = function () { if (!ok()) return; const t = ctx.currentTime; tone(110, t, 0.12, 'sine', 0.22, 55); noise(t, 0.06, 600, 200, 1, 0.12, 'lowpass'); };
@@ -54,7 +57,6 @@
   const PEN = [0, 2, 4, 7, 9, 12, 14, 16, 19, 21, 24, 26, 28, 31];
   A.perfect = function (c) {
     if (!ok()) return; const t = ctx.currentTime;
-    A.drop(1);
     const f = 523.25 * Math.pow(2, PEN[Math.min(PEN.length - 1, c - 1)] / 12);
     tone(f, t + 0.02, 0.5, 'sine', 0.3); tone(f * 2, t + 0.02, 0.2, 'sine', 0.06); tone(f * 1.5, t + 0.09, 0.4, 'sine', 0.12);
   };
