@@ -1,7 +1,7 @@
 // 소리: 전부 코드로. 점토 철퍽·잘림·PERFECT 실로폰(연속일수록 음이 오름)·받침 쿵·배경음(마림바 네 마디 돌림).
 (function () {
   const A = (window.SND = {});
-  let ctx = null, master = null, sfxG = null, bgmG = null;
+  let ctx = null, master = null, sfxG = null, bgmG = null, rawG = null;
   A.sfx = localStorage.getItem('cookiestack.snd') !== '0';
   A.bgm = localStorage.getItem('cookiestack.bgm') !== '0';
   function ensure() {
@@ -9,14 +9,16 @@
     const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return false;
     ctx = new AC();
     master = ctx.createGain(); master.gain.value = 0.9; master.connect(ctx.destination);
+    // 녹음 소리는 바삭한 높은 소리를 살리려고 거름망을 안 거친다
+    rawG = ctx.createGain(); rawG.gain.value = A.sfx ? 1 : 0; rawG.connect(master);
     // 밝기 2kHz 아래로 눌러 귀가 편하게
     const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 5200; lp.connect(master);
     sfxG = ctx.createGain(); sfxG.gain.value = A.sfx ? 1 : 0; sfxG.connect(lp);
     bgmG = ctx.createGain(); bgmG.gain.value = A.bgm ? 0.32 : 0; bgmG.connect(lp);
     return true;
   }
-  A.unlock = function () { ensure(); if (A.bgm) startBgm(); };
-  A.setSfx = function (on) { A.sfx = on; try { localStorage.setItem('cookiestack.snd', on ? '1' : '0'); } catch (e) {} if (sfxG) sfxG.gain.value = on ? 1 : 0; };
+  A.unlock = function () { ensure(); if (ctx) loadCrunch(); if (A.bgm) startBgm(); };
+  A.setSfx = function (on) { A.sfx = on; try { localStorage.setItem('cookiestack.snd', on ? '1' : '0'); } catch (e) {} if (sfxG) sfxG.gain.value = on ? 1 : 0; if (rawG) rawG.gain.value = on ? 1 : 0; };
   A.setBgm = function (on) { A.bgm = on; try { localStorage.setItem('cookiestack.bgm', on ? '1' : '0'); } catch (e) {} if (bgmG) bgmG.gain.setTargetAtTime(on ? 0.32 : 0, ctx.currentTime, 0.1); if (on) { ensure(); startBgm(); } };
   function noiseBuf() { if (A._nb) return A._nb; const n = ctx.sampleRate * 0.6, b = ctx.createBuffer(1, n, ctx.sampleRate), d = b.getChannelData(0); for (let i = 0; i < n; i++) d[i] = Math.random() * 2 - 1; return (A._nb = b); }
   function ok() { return A.sfx && ensure(); }
@@ -33,22 +35,25 @@
     s.connect(bf); bf.connect(g); g.connect(sfxG); s.start(t); s.stop(t + dur + 0.05);
   }
   // 점토가 철퍽 붙는 소리: 낮은 퉁 + 짧은 젖은 소리
-  // 바사삭: 짧은 바삭 알갱이를 '바·사·삭' 세 덩이로 흩뿌린다(앞이 제일 세고 점점 잦아듦)
-  function crunch(t, len, vol, n) {
-    const groups = [0, 0.38, 0.72];
-    for (let gi = 0; gi < 3; gi++) {
-      const g0 = t + groups[gi] * len, gv = vol * [1, 0.72, 0.5][gi];
-      for (let i = 0; i < n; i++) {
-        const tt = g0 + Math.random() * len * 0.22, d = 0.008 + Math.random() * 0.02, f = 1500 + Math.random() * 1300;
-        noise(tt, d, f, f * 0.6, 1.3, gv * (0.5 + Math.random() * 0.5));
-      }
-      noise(g0, 0.03, 900, 500, 0.9, gv * 0.35, 'bandpass'); // 부서지는 몸통
-    }
+  // 쿠키가 떨어질 때: 사장님이 녹음한 바삭 부서지는 소리(js/sfx_data.js). 뽁·코드 바사삭은 뺌
+  let crunchBuf = null;
+  function loadCrunch() {
+    if (crunchBuf || !window.SFX_DATA) return;
+    const bin = atob(window.SFX_DATA.crunch), u8 = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
+    crunchBuf = 'loading';
+    ctx.decodeAudioData(u8.buffer, (b) => { crunchBuf = b; }, () => { crunchBuf = null; });
   }
-  // 쿠키가 떨어질 때: 뽁(물방울처럼 음이 짧게 치솟음). 사장님이 후보 넷(뽁·띠링·마림바·팅) 중 고름
-  A.drop = function (k) { if (!ok()) return; const t = ctx.currentTime; tone(520, t, 0.09, 'sine', 0.24, 1250); tone(1250, t + 0.06, 0.12, 'sine', 0.07); };
-  // 잘린 조각이 부서질 때: 더 길고 굵은 바사삭
-  A.cut = function (k) { if (!ok()) return; const t = ctx.currentTime + 0.02; crunch(t, 0.24 + (k || 0.5) * 0.12, 0.8, 6); };
+  A.drop = function (k) {
+    if (!ok()) return;
+    loadCrunch();
+    if (!crunchBuf || crunchBuf === 'loading') return;
+    const s = ctx.createBufferSource(), g = ctx.createGain();
+    s.buffer = crunchBuf; s.playbackRate.value = 0.96 + Math.random() * 0.08; // 매번 똑같지 않게 아주 조금
+    g.gain.value = 0.45; s.connect(g); g.connect(rawG); s.start();
+  };
+  // 잘린 조각 소리는 따로 안 냄(떨어뜨릴 때 바삭 소리 하나로)
+  A.cut = function () {};
   A.land = function () { if (!ok()) return; const t = ctx.currentTime; tone(110, t, 0.12, 'sine', 0.22, 55); noise(t, 0.06, 600, 200, 1, 0.12, 'lowpass'); };
   // PERFECT: 실로폰 음이 연속마다 한 칸씩 오른다(펜타토닉)
   const PEN = [0, 2, 4, 7, 9, 12, 14, 16, 19, 21, 24, 26, 28, 31];
