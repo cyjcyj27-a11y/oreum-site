@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>쿠키쌓기</title>
+<style>
+/* 단추 소재 = 점토 놀이 도구
+   주 단추: 나무 밀대(가운데 연한 나무 몸통 + 결, 양끝 짙은 손잡이), 누르면 밀리듯 납작
+   보조 단추: 은색 쿠키 모양틀(두꺼운 금속 테, 속은 형광 점토 살짝)
+   상단 알약: 형광 플라스틱 점토 통 옆면(세로 골) · 둥근 단추: 점토 통 뚜껑(톱니 테)
+   창: 연보라 실리콘 작업 매트(도톰한 테 + 점 눈금) */
+@font-face{font-family:'Ttl';src:url('fonts/title.woff2?v=3') format('woff2');font-display:block}
+@font-face{font-family:'Ui';src:url('fonts/ui.woff2?v=3') format('woff2');font-display:swap}
+:root{--wood:#f0c98a;--woodD:#b9874a;--woodK:#6a4220;--ink:#3a1a5a;--mat:#d8c8ff;--matD:#9a82e0;--pink:#ff3fa4;--yel:#ffe62e;--cyan:#18e8ff;--lime:#7dff3a}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+html,body{width:100%;height:100%;overflow:hidden;background:#7cc8f2;color:var(--ink);font-family:'Ui','Malgun Gothic',sans-serif;
+  user-select:none;-webkit-user-select:none;touch-action:none;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+#cv{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
+
+/* ---------- 주 단추: 나무 밀대 ---------- */
+.btn{position:relative;border:0;cursor:pointer;font:400 25px/1 'Ttl','Ui',sans-serif;white-space:nowrap;color:var(--woodK);
+  padding:16px 34px 15px;min-width:180px;margin:0 22px;border-radius:999px;
+  background:
+    repeating-linear-gradient(90deg,rgba(150,95,40,0) 0 17px,rgba(150,95,40,.16) 17px 19px,rgba(150,95,40,0) 19px 31px,rgba(150,95,40,.1) 31px 32px),
+    linear-gradient(180deg,#fff0d0 0%,#f6d9a4 22%,var(--wood) 52%,#d9a868 80%,var(--woodD) 100%);
+  box-shadow:inset 0 0 0 3px var(--woodK),inset 0 5px 0 rgba(255,255,255,.55),inset 0 -5px 0 rgba(120,70,20,.22),0 5px 0 var(--woodK),0 10px 16px rgba(40,20,60,.35);
+  text-shadow:0 2px 0 rgba(255,255,255,.6);
+  transition:transform .24s cubic-bezier(.34,1.56,.64,1),box-shadow .2s,filter .15s}
+/* 손잡이 */
+.btn::before,.btn::after{content:'';position:absolute;top:22%;width:26px;height:56%;border-radius:12px;
+  background:linear-gradient(180deg,#d9a060,#a86a32 55%,#7a4a22);box-shadow:inset 0 0 0 3px var(--woodK),inset 0 3px 0 rgba(255,255,255,.35),0 4px 0 var(--woodK)}
+.btn::before{left:-21px}.btn::after{right:-21px}
+.btn span{position:relative}
+.btn:hover{filter:brightness(1.06)}
+.btn:active{transform:translateY(3px) scale(1.03,.9);box-shadow:inset 0 0 0 3px var(--woodK),inset 0 5px 0 rgba(255,255,255,.55),inset 0 -5px 0 rgba(120,70,20,.22),0 2px 0 var(--woodK);transition-duration:.04s}
+/* 보조 단추: 쿠키 모양틀 */
+.btn.cut{margin:0;padding:13px 24px 13px;min-width:0;font-size:20px;color:var(--ink);border-radius:18px;text-shadow:0 1px 0 rgba(255,255,255,.7);
+  background:linear-gradient(180deg,rgba(255,255,255,.5),rgba(255,255,255,0) 40%),linear-gradient(135deg,#ffd3ef,#ffb2e0);
+  box-shadow:inset 0 0 0 3px #5a5a6a,inset 0 0 0 7px #e8eaf0,inset 0 0 0 8px #9a9aaa,inset 2px 3px 0 8px rgba(255,255,255,.8),0 4px 0 #5a5a6a,0 8px 12px rgba(40,20,60,.3)}
+.btn.cut::before,.btn.cut::after{display:none}
+.btn.cut.c2{background:linear-gradient(180deg,rgba(255,255,255,.5),rgba(255,255,255,0) 40%),linear-gradient(135deg,#d6fbff,#a8f2ff)}
+.btn.cut.c3{background:linear-gradient(180deg,rgba(255,255,255,.5),rgba(255,255,255,0) 40%),linear-gradient(135deg,#f6ffc8,#e6ff8a)}
+.btn.cut:active{transform:translateY(3px) scale(.96);box-shadow:inset 0 0 0 3px #5a5a6a,inset 0 0 0 7px #e8eaf0,inset 0 0 0 8px #9a9aaa,0 1px 0 #5a5a6a}
+
+/* ---------- 상단바: 형광 점토 통 ---------- */
+#hud{position:fixed;top:0;left:0;right:0;z-index:5;display:flex;align-items:center;gap:7px;pointer-events:none;
+  padding:calc(6px + env(safe-area-inset-top)) calc(8px + env(safe-area-inset-right)) 6px calc(104px + env(safe-area-inset-left));
+  background:linear-gradient(180deg,rgba(30,10,60,.28),rgba(0,0,0,0))}
+.stat{position:relative;display:flex;align-items:center;gap:7px;padding:6px 12px 7px;min-height:36px;border-radius:12px;white-space:nowrap;color:#fff;font-size:15px;
+  background:repeating-linear-gradient(90deg,rgba(255,255,255,0) 0 6px,rgba(255,255,255,.22) 6px 8px,rgba(0,0,0,.06) 8px 10px),linear-gradient(180deg,#ff8ad0,var(--pink) 50%,#d81c84);
+  box-shadow:inset 0 0 0 2.5px var(--ink),inset 0 3px 0 rgba(255,255,255,.45),0 3px 0 var(--ink);
+  -webkit-text-stroke:3.5px var(--ink);paint-order:stroke fill}
+.stat b{font:400 18px 'Ttl','Ui',sans-serif}
+.stat.cy{background:repeating-linear-gradient(90deg,rgba(255,255,255,0) 0 6px,rgba(255,255,255,.25) 6px 8px,rgba(0,0,0,.06) 8px 10px),linear-gradient(180deg,#9af6ff,var(--cyan) 50%,#08a8c8)}
+.spacer{flex:1}
+.togs{display:flex;gap:6px}
+/* 둥근 단추: 점토 통 뚜껑 */
+.tog{pointer-events:auto;width:40px;height:40px;border-radius:50%;border:0;cursor:pointer;position:relative;flex:none;color:#fff;font:400 22px/40px 'Ttl','Ui',sans-serif;
+  background:radial-gradient(circle at 36% 30%,#d8ffa0,var(--lime) 45%,#3aa818 100%);
+  box-shadow:inset 0 0 0 2.5px var(--ink),inset 0 0 0 5px rgba(255,255,255,.35),0 3px 0 var(--ink),0 5px 8px rgba(0,0,0,.25);transition:transform .2s cubic-bezier(.34,1.56,.64,1)}
+.tog::before{content:'';position:absolute;inset:-3px;border-radius:50%;background:repeating-conic-gradient(var(--ink) 0 5deg,rgba(0,0,0,0) 5deg 15deg);
+  -webkit-mask:radial-gradient(circle,transparent 19px,#000 19.5px);mask:radial-gradient(circle,transparent 19px,#000 19.5px);opacity:.75}
+.tog svg{width:22px;height:22px;position:absolute;left:9px;top:9px;filter:drop-shadow(0 1.5px 0 var(--ink))}
+.tog.q{-webkit-text-stroke:4px var(--ink);paint-order:stroke fill;background:radial-gradient(circle at 36% 30%,#fff7a8,var(--yel) 45%,#d8b800 100%)}
+.tog.s{background:radial-gradient(circle at 36% 30%,#c8faff,var(--cyan) 45%,#0898b8 100%)}
+.tog:active{transform:translateY(2px) scale(.94)}
+.tog.off{opacity:.6}
+.tog.off::after{content:'';position:absolute;left:24%;right:24%;top:50%;height:2px;margin-top:-1px;background:#fff;border-radius:1px;transform:rotate(-40deg)}
+body.playing #oreumFs{display:none}
+
+/* ---------- 큰 층 숫자 ---------- */
+#big{position:fixed;left:0;right:0;top:calc(62px + env(safe-area-inset-top));z-index:4;text-align:center;pointer-events:none;color:#fff;
+  font:400 76px/1 'Ttl','Ui',sans-serif;-webkit-text-stroke:9px var(--ink);paint-order:stroke fill;text-shadow:0 5px 0 var(--ink)}
+#big small{font-size:32px;-webkit-text-stroke:6px var(--ink);vertical-align:8px;margin-left:2px;opacity:.95}
+#bigK{display:inline-block}
+#bigK.bump{animation:bump .3s cubic-bezier(.34,1.56,.64,1)}
+@keyframes bump{0%{transform:scale(1.35,.75)}100%{transform:scale(1)}}
+#fWrap{width:132px;height:12px;margin:8px auto 0;border-radius:7px;background:rgba(40,20,70,.45);box-shadow:inset 0 0 0 2.5px var(--ink);overflow:hidden}
+#fBar{height:100%;transform-origin:left;background:linear-gradient(180deg,#fff7a8,var(--yel));border-radius:7px;transition:transform .25s;box-shadow:inset 0 0 0 2.5px var(--ink)}
+#pop{position:fixed;left:0;right:0;top:34%;z-index:4;text-align:center;pointer-events:none;color:var(--yel);font:400 46px/1 'Ttl','Ui',sans-serif;-webkit-text-stroke:8px var(--ink);paint-order:stroke fill;text-shadow:0 4px 0 var(--ink);opacity:0}
+#pop.go{animation:pop .9s ease-out}
+@keyframes pop{0%{opacity:0;transform:scale(.4) translateY(10px)}15%{opacity:1;transform:scale(1.18)}30%{transform:scale(1)}75%{opacity:1}100%{opacity:0;transform:translateY(-24px)}}
+#banner{position:fixed;left:0;right:0;top:40%;z-index:6;text-align:center;pointer-events:none}
+#bnA{display:block;color:#fff;font:400 54px/1.05 'Ttl','Ui',sans-serif;-webkit-text-stroke:10px var(--ink);paint-order:stroke fill;text-shadow:0 6px 0 var(--ink)}
+#banner.cl #bnA{color:var(--yel);font-size:60px}
+#bnB{display:block;margin-top:10px;color:#fff;font:400 26px/1 'Ui',sans-serif;-webkit-text-stroke:6px var(--ink);paint-order:stroke fill}
+#banner.go{animation:bn 1.3s ease-out forwards}
+#banner.cl.go{animation:bn 1.9s ease-out forwards}
+@keyframes bn{0%{opacity:0;transform:scale(.5)}12%{opacity:1;transform:scale(1.12,.92)}22%{transform:scale(.96,1.05)}32%{transform:scale(1)}80%{opacity:1}100%{opacity:0}}
+
+/* ---------- 창: 연보라 실리콘 매트 ---------- */
+.dim{position:fixed;inset:0;z-index:10;display:flex;align-items:center;justify-content:center;background:rgba(20,8,40,.42);padding:16px}
+.sheet{position:relative;width:min(560px,100%);max-height:calc(100% - 20px);overflow:auto;border-radius:30px;padding:24px 22px 22px;text-align:center;
+  background:radial-gradient(circle,rgba(90,60,170,.2) 1.6px,rgba(0,0,0,0) 2.2px) 0 0/22px 22px,linear-gradient(180deg,#e8dcff,var(--mat));
+  box-shadow:inset 0 0 0 3px var(--ink),inset 0 0 0 10px #c2adff,inset 0 0 0 12px rgba(58,26,90,.35),inset 0 6px 0 12px rgba(255,255,255,.4),0 8px 0 var(--ink),0 16px 30px rgba(0,0,0,.35);
+  animation:in .22s cubic-bezier(.34,1.56,.64,1)}
+@keyframes in{from{transform:scale(.85);opacity:0}}
+.sheet h2{font:400 34px/1.1 'Ttl','Ui',sans-serif;color:#fff;-webkit-text-stroke:7px var(--ink);paint-order:stroke fill;text-shadow:0 4px 0 var(--ink);margin:4px 0 14px}
+.row{display:flex;gap:12px;justify-content:center;align-items:center;flex-wrap:wrap;margin-top:16px}
+/* HOW TO PLAY */
+.hcs{display:flex;flex-direction:column;gap:10px}
+.hc{display:flex;align-items:center;gap:12px;text-align:left;background:rgba(255,255,255,.55);border-radius:18px;padding:8px;box-shadow:inset 0 0 0 2.5px rgba(58,26,90,.5)}
+.hc canvas{width:120px;height:100px;border-radius:12px;flex:none;box-shadow:0 0 0 2.5px var(--ink)}
+.hc p{font-size:18px;line-height:1.35;color:var(--ink);word-break:keep-all}
+@media (min-width:900px){.sheet.wide{width:min(880px,100%)}.sheet.wide .hcs{flex-direction:row}.sheet.wide .hc{flex-direction:column;text-align:center;flex:1}.sheet.wide .hc canvas{width:100%;height:auto;aspect-ratio:12/10}}
+#oSt{font:400 22px 'Ttl','Ui',sans-serif;color:var(--ink)}
+/* 모드 고르기: 모드마다 한 줄(주 단추 + 처음부터) */
+.mrow{display:flex;flex-direction:column;align-items:center;gap:8px;margin:14px 0}
+.mrow .btn.cut{min-width:0;font-size:16px;padding:8px 18px}
+.mrow .btn{min-width:230px}
+.mrow .btn small{display:block;font:400 14px 'Ui',sans-serif;margin-top:5px;color:#7a4a22;text-shadow:none}
+.mrow.hard .btn{background:repeating-linear-gradient(90deg,rgba(60,25,10,0) 0 17px,rgba(60,25,10,.18) 17px 19px,rgba(60,25,10,0) 19px 31px),linear-gradient(180deg,#b07a4a 0%,#8a5430 50%,#5e3418 100%);color:#fff3dc;text-shadow:0 2px 0 rgba(0,0,0,.35)}
+.mrow.hard .btn small{color:#ffd9a8}
+.mrow.normal .btn{background:repeating-linear-gradient(90deg,rgba(150,95,40,0) 0 17px,rgba(150,95,40,.16) 17px 19px,rgba(150,95,40,0) 19px 31px),linear-gradient(180deg,#f6d9a4 0%,#e0aa66 50%,#b97a3e 100%)}
+#oK{font:400 64px/1 'Ttl','Ui',sans-serif;color:var(--yel);-webkit-text-stroke:9px var(--ink);paint-order:stroke fill;text-shadow:0 5px 0 var(--ink);margin:6px 0 2px}
+#endImg{width:min(300px,62vw);border-radius:16px;box-shadow:0 0 0 3px var(--ink),0 6px 0 var(--ink);display:block;margin:0 auto}
+#endName{font:400 26px 'Ttl','Ui',sans-serif;color:#fff;-webkit-text-stroke:6px var(--ink);paint-order:stroke fill;margin-top:12px}
+#toast{position:fixed;left:50%;bottom:16%;transform:translateX(-50%);z-index:20;padding:10px 18px;border-radius:14px;background:rgba(30,10,60,.82);color:#fff;font-size:17px;pointer-events:none}
+
+/* ---------- 타이틀 ---------- */
+#title{position:fixed;inset:0;z-index:8;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:calc(13vh + env(safe-area-inset-top)) 16px calc(12vh + env(safe-area-inset-bottom));pointer-events:none}
+#title > *{pointer-events:auto}
+#logo{display:flex;gap:.02em;font:400 clamp(64px,19vw,140px)/1 'Ttl','Ui',sans-serif;pointer-events:none}
+#logo i{font-style:normal;display:inline-block;color:var(--c);-webkit-text-stroke:.11em var(--ink);paint-order:stroke fill;
+  text-shadow:0 .03em 0 var(--d),0 .06em 0 var(--d),0 .09em 0 var(--ink),0 .14em .1em rgba(30,10,60,.35);animation:bob 2.4s ease-in-out infinite}
+#logo i:nth-child(1){--c:#ff4fb8;--d:#b8146e;transform:rotate(-6deg)}
+#logo i:nth-child(2){--c:#ffe62e;--d:#c8a400;animation-delay:.15s;transform:rotate(4deg)}
+#logo i:nth-child(3){--c:#7dff3a;--d:#3aa818;animation-delay:.3s;transform:rotate(-3deg)}
+#logo i:nth-child(4){--c:#18e8ff;--d:#0890b0;animation-delay:.45s;transform:rotate(5deg)}
+@keyframes bob{50%{transform:translateY(-.06em) scale(1.02,.98)}}
+#title .btns{display:flex;flex-direction:column;align-items:center;gap:18px}
+.keys{position:fixed;right:12px;bottom:10px;z-index:4;font-size:13px;color:rgba(255,255,255,.9);-webkit-text-stroke:3px rgba(40,20,70,.55);paint-order:stroke fill;pointer-events:none}
+body.touch .keys{display:none}
+
+/* 폰 가로: 단추는 아래 26vh 위, 한 줄로 */
+@media (max-height:480px){
+  #title{justify-content:flex-start;gap:5vh;padding:7vh 16px 26vh}
+  #logo{font-size:22vh}
+  #title .btns{flex-direction:row;gap:30px}
+  .btn{font-size:6vh;padding:3vh 6vh;min-width:0}
+  .btn.cut{font-size:5vh;padding:2.6vh 4vh}
+  #big{top:46px;font-size:54px}
+  #big small{font-size:24px}
+  #fWrap{margin-top:4px}
+  #pop{top:30%;font-size:36px}
+  .hcs{flex-direction:row}.hc{flex-direction:column;text-align:center;flex:1;padding:6px}.hc canvas{width:auto;height:30vh;aspect-ratio:12/10;margin:0 auto}.hc p{font-size:14px}
+  .sheet{padding:12px 16px 14px;width:min(820px,100%)}
+  .sheet h2{font-size:26px;margin:0 0 6px}
+  #how .sheet h2{text-align:left;padding-left:120px}
+  #how .row{position:absolute;right:20px;top:10px;margin:0}
+  #endWrap{display:flex;gap:20px;align-items:center}
+  #endImg{width:auto;height:62vh}
+  #modeRows{display:flex;gap:26px;justify-content:center;align-items:flex-start}.mrow{margin:6px 0}.mrow .btn{min-width:170px}
+}
+</style>
+</head>
+<body>
+<canvas id="cv"></canvas>
+
+<div id="hud" hidden>
+  <div class="stat cy"><b id="sMode">EASY</b></div>
+  <div class="stat"><b id="sNum">1/10</b><span id="sName"></span></div>
+  <div class="spacer"></div>
+  <div class="togs">
+    <button class="tog q" id="tHelp" aria-label="HOW TO PLAY">?</button>
+    <button class="tog" id="tBgm" aria-label="BGM"><svg viewBox="0 0 24 24"><path d="M9 17.5V5.5l11-2.5v12" fill="none" stroke="#fff" stroke-width="2.6" stroke-linejoin="round"/><ellipse cx="6.3" cy="17.8" rx="3.4" ry="2.7" fill="#fff"/><ellipse cx="17.3" cy="15.3" rx="3.4" ry="2.7" fill="#fff"/></svg></button>
+    <button class="tog s" id="tSfx" aria-label="SFX"><svg viewBox="0 0 24 24"><path d="M3 9h4l5-4.5v15L7 15H3z" fill="#fff"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg></button>
+  </div>
+</div>
+<div id="big" hidden><span id="bigK">0</span><small id="bigN">/10</small><div id="fWrap"><div id="fBar"></div></div></div>
+<div id="pop" hidden>PERFECT</div>
+<div id="banner" hidden><span id="bnA"></span><span id="bnB"></span></div>
+
+<div id="title">
+  <div id="logo"><i>쿠</i><i>키</i><i>쌓</i><i>기</i></div>
+  <div class="btns">
+    <button class="btn" id="bStart"><span>시작</span></button>
+  </div>
+</div>
+
+<div class="dim" id="how" hidden>
+  <div class="sheet wide">
+    <h2>HOW TO PLAY</h2>
+    <div class="hcs">
+      <div class="hc"><canvas id="hw1" width="240" height="200"></canvas><p data-ko="화면을 누르면 오가던 쿠키가 떨어져요" data-en="Tap to drop the sliding cookie"></p></div>
+      <div class="hc"><canvas id="hw2" width="240" height="200"></canvas><p data-ko="삐져나온 만큼 잘려 나가요" data-en="The overhang gets cut off"></p></div>
+      <div class="hc"><canvas id="hw3" width="240" height="200"></canvas><p data-ko="딱 맞추면 PERFECT, 10 STAGE 위엔 달" data-en="Line it up for PERFECT, the moon waits above STAGE 10"></p></div>
+    </div>
+    <div class="row"><button class="btn" id="bHowOk"><span>OK</span></button></div>
+  </div>
+</div>
+
+<div class="dim" id="modes" hidden>
+  <div class="sheet">
+    <h2>MODE</h2>
+    <div id="modeRows"></div>
+  </div>
+</div>
+
+<div class="dim" id="over" hidden>
+  <div class="sheet">
+    <h2>GAME OVER</h2>
+    <div id="oSt">STAGE 1</div>
+    <div id="oK">0 / 10</div>
+    <div class="row"><button class="btn" id="bRetry"><span>RETRY</span></button><button class="btn cut" id="bHome"><span data-ko="처음 화면" data-en="TITLE">처음 화면</span></button></div>
+  </div>
+</div>
+
+<div class="dim" id="end" hidden>
+  <div class="sheet">
+    <h2>THE END</h2>
+    <div id="endWrap">
+      <img id="endImg" alt="">
+      <div>
+        <div id="endName"></div>
+        <div class="row"><button class="btn cut c3" id="bSave"><span data-ko="저장" data-en="SAVE">저장</span></button><button class="btn cut c2" id="bShare"><span data-ko="공유" data-en="SHARE">공유</span></button></div>
+        <div class="row"><button class="btn" id="bEndHome"><span data-ko="처음 화면" data-en="TITLE">처음 화면</span></button></div>
+      </div>
+    </div>
+  </div>
+</div>
+<div id="toast" hidden></div>
+<div class="keys" data-ko="스페이스 · 클릭 떨어뜨리기 / M 음악 · K 효과음" data-en="SPACE · CLICK drop / M music · K sound"></div>
+
+<script src="js/lang.js?v=1"></script>
+<script src="assets/game-home.js" data-top="6" data-left="6" data-fullscreen="1" defer></script>
+<script src="lib/three.min.js"></script>
+<script src="js/clay.js?v=2"></script>
+<script src="js/cookie.js?v=2"></script>
+<script src="js/data.js?v=2"></script>
+<script src="js/scene.js?v=6"></script>
+<script src="js/fx.js?v=2"></script>
+<script src="js/audio.js?v=2"></script>
+<script src="js/how.js?v=2"></script>
+<script src="js/card.js?v=3"></script>
+<script src="js/ui.js?v=4"></script>
+<script src="js/game.js?v=5"></script>
+<script>
+if ('ontouchstart' in window || navigator.maxTouchPoints > 0) document.body.classList.add('touch');
+if (window.EN) { const l = document.getElementById('logo'); l.innerHTML = '<i>COO</i><i>KIE</i><i>STA</i><i>CK</i>'; l.style.fontSize = 'clamp(48px,13vw,110px)'; }
+GAME.init();
+UI.init();
+</script>
+<script src="/assets/visit.js?v=17" defer></script>
+<script src="/assets/game-events.js" defer></script>
+</body>
+</html>
