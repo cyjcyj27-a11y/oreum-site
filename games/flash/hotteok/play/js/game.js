@@ -44,6 +44,7 @@
   }
 
   G.startDay = function () {
+    G.hideTitleCust();   // 10/25 사장님 "호떡손님 주문도 안하고 계속서있네": 시작 단추와 하루 시작 사이(0.38초 어둡게)에 손님 그림 불러오기가 끝나면 타이틀 손님 둘이 다시 세워져 장사 내내 서 있었다
     clearAll();
     const d = D.DAY[G.S.day];
     T = { day: G.S.day, queue: makeOrders(G.S.day), cust: [null, null, null], spawnT: 1.2, angry: 0, earn: 0, tips: 0, sold: 0, perfect: 0, stars: [], streak: 0, honey: G.S.honeyKeep || 0, honeyT: 0, oil: 1, over: false, served: 0 };
@@ -511,6 +512,7 @@
   };
   G.hideTitleSet = function () { if (G.titleSet) { G.titleSet.forEach((h) => HOT.dispose(h)); G.titleSet = null; } };
   G.titleCust = function () { // 타이틀에 손님 둘
+    if (G.mode !== 'title') return;
     Object.values(PEOPLE.ready).forEach((p) => { if (!p.busy) p.root.visible = false; });
     const ids = ['halmae', 'boy'];
     ids.forEach((id, i) => { const p = PEOPLE.ready[id]; if (!p || p.busy) return; p.root.visible = true; p.root.position.set(R.SLOTS[i * 2] * 0.9, -0.9, R.CUST_Z); p.root.rotation.y = i ? -0.2 : 0.2; p.play('idle'); });
