@@ -33,10 +33,22 @@
     s.connect(bf); bf.connect(g); g.connect(sfxG); s.start(t); s.stop(t + dur + 0.05);
   }
   // 점토가 철퍽 붙는 소리: 낮은 퉁 + 짧은 젖은 소리
-  // 쿠키가 톡 얹히는 소리: 낮은 톡 + 짧은 바삭
-  A.drop = function (k) { if (!ok()) return; const t = ctx.currentTime; tone(170, t, 0.12, 'sine', 0.5, 80); noise(t, 0.05, 1800, 900, 1.4, 0.22); noise(t + 0.03, 0.04, 1500, 700, 1.4, 0.14); };
-  // 바사삭 부서지는 소리(짧은 알갱이 여러 번)
-  A.cut = function (k) { if (!ok()) return; const t = ctx.currentTime; for (let i = 0; i < 5; i++) noise(t + i * 0.025 + Math.random() * 0.01, 0.035, 1900 - i * 120, 800, 1.6, 0.2 - i * 0.025); };
+  // 바사삭: 짧은 바삭 알갱이를 '바·사·삭' 세 덩이로 흩뿌린다(앞이 제일 세고 점점 잦아듦)
+  function crunch(t, len, vol, n) {
+    const groups = [0, 0.38, 0.72];
+    for (let gi = 0; gi < 3; gi++) {
+      const g0 = t + groups[gi] * len, gv = vol * [1, 0.72, 0.5][gi];
+      for (let i = 0; i < n; i++) {
+        const tt = g0 + Math.random() * len * 0.22, d = 0.008 + Math.random() * 0.02, f = 1500 + Math.random() * 1300;
+        noise(tt, d, f, f * 0.6, 1.3, gv * (0.5 + Math.random() * 0.5));
+      }
+      noise(g0, 0.03, 900, 500, 0.9, gv * 0.35, 'bandpass'); // 부서지는 몸통
+    }
+  }
+  // 쿠키가 떨어질 때: 작은 톡 + 바사삭
+  A.drop = function (k) { if (!ok()) return; const t = ctx.currentTime; tone(150, t, 0.07, 'sine', 0.16, 80); crunch(t, 0.22, 1.0, 5); };
+  // 잘린 조각이 부서질 때: 더 길고 굵은 바사삭
+  A.cut = function (k) { if (!ok()) return; const t = ctx.currentTime + 0.02; crunch(t, 0.24 + (k || 0.5) * 0.12, 0.8, 6); };
   A.land = function () { if (!ok()) return; const t = ctx.currentTime; tone(110, t, 0.12, 'sine', 0.22, 55); noise(t, 0.06, 600, 200, 1, 0.12, 'lowpass'); };
   // PERFECT: 실로폰 음이 연속마다 한 칸씩 오른다(펜타토닉)
   const PEN = [0, 2, 4, 7, 9, 12, 14, 16, 19, 21, 24, 26, 28, 31];
