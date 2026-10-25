@@ -45,11 +45,8 @@
       noise(g0, 0.03, 900, 500, 0.9, gv * 0.35, 'bandpass'); // 부서지는 몸통
     }
   }
-  // 쿠키가 떨어질 때: 상큼한 딩동(높은 도→라, 짧고 맑은 종소리. 처음 미→도는 너무 높다고 해서 장3도 내림)
-  function bell(f, t, vol) {
-    tone(f, t, 0.28, 'sine', vol); tone(f * 2, t, 0.09, 'sine', vol * 0.12); tone(f * 0.5, t, 0.12, 'triangle', vol * 0.15);
-  }
-  A.drop = function (k) { if (!ok()) return; const t = ctx.currentTime; bell(1046.5, t, 0.21); bell(880, t + 0.085, 0.2); };
+  // 쿠키가 떨어질 때: 뽁(물방울처럼 음이 짧게 치솟음). 사장님이 후보 넷(뽁·띠링·마림바·팅) 중 고름
+  A.drop = function (k) { if (!ok()) return; const t = ctx.currentTime; tone(520, t, 0.09, 'sine', 0.24, 1250); tone(1250, t + 0.06, 0.12, 'sine', 0.07); };
   // 잘린 조각이 부서질 때: 더 길고 굵은 바사삭
   A.cut = function (k) { if (!ok()) return; const t = ctx.currentTime + 0.02; crunch(t, 0.24 + (k || 0.5) * 0.12, 0.8, 6); };
   A.land = function () { if (!ok()) return; const t = ctx.currentTime; tone(110, t, 0.12, 'sine', 0.22, 55); noise(t, 0.06, 600, 200, 1, 0.12, 'lowpass'); };
