@@ -103,6 +103,8 @@ def body_html(md):
             except Exception:
                 pass
             out.append('      <figure class="note-fig"><img src="%s" alt="%s"%s loading="lazy" decoding="async"></figure>' % (html.escape(src), html.escape(m.group(1)), wh))
+        elif b.startswith("> "):   # 10/20 크게 박는 한 줄(개발일지 2 첫 줄 "개같은 게임 누가 만들었냐")
+            out.append('      <p class="note-big">%s</p>' % inline(" ".join(l.strip().lstrip(">").strip() for l in b.splitlines())))
         elif b.startswith("## "):
             out.append("      <h2>%s</h2>" % inline(b[3:].strip()))
         else:
@@ -156,6 +158,7 @@ ARTICLE_STYLE = """.note-page h1{ font-size:clamp(18px,2.4vw,24px); line-height:
 .note-date{ margin:8px 0 22px; font-size:13px; color:var(--muted); }
 .note-page h2{ font-size:21px; margin:30px 0 4px; }
 .note-page p > strong:only-child{ font-size:calc(1em + 2pt); }
+.note-page .note-big{ margin:26px 0 22px; font-size:clamp(30px,5.2vw,48px); line-height:1.25; font-weight:900; letter-spacing:-.02em; color:var(--ink); }
 .note-page .gp-body a{ text-decoration:underline; text-underline-offset:3px; }
 .note-page .gp-cta{ margin-top:30px; }
 .note-fig{ margin:18px 0 4px; }

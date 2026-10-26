@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>홈리스1999 인디게임 개발일지 2, 피씨방에서 켜 보니 버그가 쏟아졌다 — 오름게임즈 인디게임 개발뉴스</title>
+<meta name="description" content="인디게임 홈리스1999의 개발일지. 스팀 PC판을 압축 파일 하나로 들고 피씨방에 가서 직접 해 보니 일본어판에 영어가 섞이고, 경마장 문이 벽으로 막혀 있었다. 그날 찾은 버그와 고친 과정, 그리고 너무 힘들어서 바꾼 규칙들.">
+<meta name="keywords" content="홈리스1999, 인디게임 개발, 개발일지, 스팀 인디게임, 버그 수정">
+<link rel="canonical" href="https://oreumgames.com/news/homeless1999-devlog-02/">
+<link rel="alternate" hreflang="ko" href="https://oreumgames.com/news/homeless1999-devlog-02/">
+<link rel="alternate" hreflang="en" href="https://oreumgames.com/en/news/homeless1999-devlog-02/">
+<link rel="alternate" hreflang="x-default" href="https://oreumgames.com/news/homeless1999-devlog-02/">
+<meta name="naver-site-verification" content="4ecba4003fbcbe564918ffd2c33d606f1eaae11a" />
+<meta name="google-site-verification" content="BG736F-J65BHS-viz8rkCjKJ53pxgIhSlPpzVnpGlt4" />
+<meta name="theme-color" content="#f8f5ec">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" href="/assets/icon-512.png" type="image/png" sizes="512x512">
+<link rel="apple-touch-icon" href="/assets/icon-180.png">
+<link rel="manifest" href="/manifest.webmanifest">
+
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="오름게임즈">
+<meta property="og:title" content="홈리스1999 인디게임 개발일지 2, 피씨방에서 켜 보니 버그가 쏟아졌다">
+<meta property="og:description" content="인디게임 홈리스1999의 개발일지. 스팀 PC판을 압축 파일 하나로 들고 피씨방에 가서 직접 해 보니 일본어판에 영어가 섞이고, 경마장 문이 벽으로 막혀 있었다. 그날 찾은 버그와 고친 과정, 그리고 너무 힘들어서 바꾼 규칙들.">
+<meta property="og:url" content="https://oreumgames.com/news/homeless1999-devlog-02/">
+<meta property="og:image" content="https://oreumgames.com/assets/og-image.jpg?v=4">
+<meta property="og:locale" content="ko_KR">
+<meta name="twitter:card" content="summary_large_image">
+
+<link rel="stylesheet" href="/style.css?v=47">
+<style>
+.note-page h1{ font-size:clamp(18px,2.4vw,24px); line-height:1.4; margin:22px 0 0; letter-spacing:-.02em; }
+@media (min-width:900px){ .note-page h1{ white-space:nowrap; } }
+.note-kicker{ margin:22px 0 0; font-size:clamp(28px,4.6vw,44px); line-height:1.2; letter-spacing:-.01em; color:var(--ink); font-weight:900; padding-bottom:12px; border-bottom:3px solid var(--ink); }
+.note-kicker a{ color:inherit; text-decoration:none; }
+.note-sub{ margin:10px 0 0; font-size:17px; line-height:1.6; color:var(--ink-2); }
+.note-date{ margin:8px 0 22px; font-size:13px; color:var(--muted); }
+.note-page h2{ font-size:21px; margin:30px 0 4px; }
+.note-page p > strong:only-child{ font-size:calc(1em + 2pt); }
+.note-page .note-big{ margin:26px 0 22px; font-size:clamp(30px,5.2vw,48px); line-height:1.25; font-weight:900; letter-spacing:-.02em; color:var(--ink); }
+.note-page .gp-body a{ text-decoration:underline; text-underline-offset:3px; }
+.note-page .gp-cta{ margin-top:30px; }
+.note-fig{ margin:18px 0 4px; }
+.note-fig img{ display:block; width:auto; max-width:100%; max-height:560px; height:auto; border-radius:12px; }
+</style>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "Article", "headline": "홈리스1999 인디게임 개발일지 2, 피씨방에서 켜 보니 버그가 쏟아졌다", "description": "인디게임 홈리스1999의 개발일지. 스팀 PC판을 압축 파일 하나로 들고 피씨방에 가서 직접 해 보니 일본어판에 영어가 섞이고, 경마장 문이 벽으로 막혀 있었다. 그날 찾은 버그와 고친 과정, 그리고 너무 힘들어서 바꾼 규칙들.", "datePublished": "2026-10-26", "dateModified": "2026-10-26", "inLanguage": "ko", "mainEntityOfPage": "https://oreumgames.com/news/homeless1999-devlog-02/", "image": "https://oreumgames.com/assets/og-image.jpg?v=4", "author": {"@type": "Organization", "name": "오름게임즈", "url": "https://oreumgames.com/"}, "publisher": {"@type": "Organization", "name": "오름게임즈", "url": "https://oreumgames.com/", "logo": {"@type": "ImageObject", "url": "https://oreumgames.com/assets/icon-512.png"}}}</script>
+</head>
+
+<body>
+
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="/">
+      <img src="/assets/logo-full.webp?v=1" alt="오름게임즈" width="78" height="74">
+    </a>
+    <div class="brand-copy">
+      <p class="brandname">오름게임즈</p>
+      <p class="factory">인디게임팩토리</p>
+    </div>
+    <ul class="values">
+      <li><span>설치 없이</span> 링크 하나로 바로 시작</li>
+      <li><span>회원가입 없이</span> 기록은 브라우저에 저장</li>
+    </ul>
+    <nav class="nav" aria-label="주요 메뉴">
+      <a class="navsearch" href="/games/">SEARCH</a>
+      <a href="/games/">GAMES</a>
+      <a href="/apps/">APPS</a>
+      <a href="/news/">NEWS</a>
+      <a href="/board/">COMMUNITY</a>
+      <a href="/en/news/homeless1999-devlog-02/" lang="en" hreflang="en">EN</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+  <section class="showcase">
+    <div class="wrap game-page note-page">
+      <a class="backlink" href="/games/">← 게임 목록</a>
+      <p class="note-kicker"><a href="/news/">오름게임즈 인디게임 개발뉴스</a></p>
+      <h1>홈리스1999 인디게임 개발일지 2, 피씨방에서 켜 보니 버그가 쏟아졌다</h1>
+      <p class="note-sub">집 컴퓨터로 스크린샷만 찍을 땐 몰랐던 것들, 남의 컴퓨터에서 직접 하며 하루 동안 고친 이야기</p>
+      <p class="note-date"><time datetime="2026-10-26">2026년 10월 26일</time> · 오름게임즈</p>
+
+      <h2>압축 파일 하나 들고 피씨방에 갔다</h2>
+      <p class="gp-body">홈리스1999는 스팀에 낼 PC 게임이다. 그러면 손님은 내 컴퓨터가 아니라 자기 컴퓨터에서 게임을 켠다. 그래서 PC판을 압축 파일 하나로 묶어서 피씨방에 들고 갔다. 남의 컴퓨터에서 압축을 풀고, 손님이 하듯이 그냥 해 보기로 했다.</p>
+      <p class="gp-body">집에서도 매일 게임을 켰지만, 그건 스크린샷을 찍거나 고친 곳을 확인하려고 켠 것이었다. 손님처럼 며칠씩 이어서 해 본 건 거의 처음이었다. 그렇게 하니까 버그가 줄줄이 나왔다.</p>
+      <h2>일본어판인데 영어가 나왔다</h2>
+      <p class="gp-body">그날 막 게임을 9개 언어로 번역한 참이었다. 그래서 피씨방에서는 일부러 일본어로 켰다. 메뉴와 알림은 일본어로 잘 나왔다. 그런데 사람에게 말을 걸자 영어 대사가 나왔다. 도감의 사람 이름도 영어였다.</p>
+      <p class="gp-body">번역이 빠진 걸 찾는 검사 도구가 있었는데, 그 도구는 화면에 뜬 글만 모았다. 말을 걸어야 나오는 대사나 아직 만나지 못한 사람의 물음표 칸은 화면에 안 뜨니까 검사에서도 빠졌다. 그렇게 빠진 글이 107줄이었다.</p>
+      <p class="gp-body">그래서 코드 안에 한국어와 영어가 짝으로 적힌 곳을 전부 훑는 방법으로 다시 찾았다. 빠진 107줄을 일곱 개 언어로 모두 채웠고, 번역 사전은 686줄이 됐다.</p>
+      <h2>바닥에 노란 네모가 깔려 있었다</h2>
+      <p class="gp-body">공원 잔디에 노란 네모가 점점이 박혀 있었다. 은행잎이라고 깔아 둔 것이었는데, 피씨방 모니터로 보니 아무리 봐도 은행잎이 아니라 노란 네모였다.</p>
+      <figure class="note-fig"><img src="/assets/news/1026-homeless-devlog-pc-c.webp" alt="공원 잔디밭 곳곳에 작은 노란 네모가 흩어져 있는 장면" width="800" height="600" loading="lazy" decoding="async"></figure>
+      <p class="gp-body">노란 네모를 빼고 부채꼴 은행잎을 네 가지 색으로 그려서 다시 깔았다. 나무 둘레에 110장, 공원에 900장이다. 겨울에는 보이지 않게 했다.</p>
+      <h2>강아지는 뒤에 있는데 먹을 것을 내밀었다</h2>
+      <p class="gp-body">공중전화 앞에 서 있는데 먹을 것 내밀기가 떴다. 강아지는 주인공 등 뒤 저만치에 앉아 있었다. 가까이만 있으면 어느 쪽에 있든 내밀 수 있게 되어 있었던 것이다.</p>
+      <figure class="note-fig"><img src="/assets/news/1026-homeless-devlog-pc-d.webp" alt="공중전화 부스 앞에 선 주인공 뒤쪽에 강아지가 앉아 있고, 화면에 먹을 것 내밀기 표시가 떠 있는 장면" width="800" height="600" loading="lazy" decoding="async"></figure>
+      <p class="gp-body">이제는 주인공이 바라보는 쪽에 강아지가 있을 때만 내밀 수 있다. 강아지와 친해져서 더 줄 것이 없을 때는 이름이 쓰다듬기로 바뀐다.</p>
+      <h2>양복 입은 사람이 길바닥에 쭈그려 있었다</h2>
+      <p class="gp-body">밤길 인도에 양복 입은 남자가 쭈그려 앉아 있었다. 새우잡이배로 데려가는 소개꾼이다. 그런데 광장 노숙인 자리에 섞여 있어서, 그냥 길에 앉은 이상한 사람처럼 보였다.</p>
+      <figure class="note-fig"><img src="/assets/news/1026-homeless-devlog-pc-e.webp" alt="밤길 인도 가운데 양복 차림의 남자가 쭈그려 앉아 있고, 그 옆을 주인공이 카트를 끌고 지나가는 장면" width="800" height="600" loading="lazy" decoding="async"></figure>
+      <p class="gp-body">소개꾼은 광장에서 빼고 경마장 문 옆으로 옮겼다. 오전 10시부터 밤 11시까지 거기 서 있고, 따라가면 새우잡이배 엔딩이다.(*스포일러 주의 근데 이 글을 몇명이나 읽을지 생각하면 딱히 스포일러가 될거같지도 않아서 쓴다 ㅋㅋ)</p>
+      <h2>경마장은 문이 벽이었다</h2>
+      <p class="gp-body">경마장 앞에 갔더니 문이 회색 벽으로 막혀 있었다. 안에서는 멀쩡히 보이는데, 밖에서 보면 문 자리에 벽이 서 있었다. 상가 1층을 통째로 한 덩어리로 만들어서, 그 바깥면이 문을 덮고 있었던 것이다. 덩어리를 셋으로 나눠서 문이 보이게 했다.</p>
+      <figure class="note-fig"><img src="/assets/news/1026-homeless-devlog-pc-f.webp" alt="경마장 입구 양옆 유리창 너머로 경주 그림이 보이는데 가운데 문 자리가 회색 벽으로 막혀 있는 장면" width="800" height="600" loading="lazy" decoding="async"></figure>
+      <p class="gp-body">안에서도 하나가 더 있었다. 경주가 끝나고 베팅 창이 열린 채로 남으면, 의자에서 일어날 수가 없었다. 이제는 앉은 채로 E나 방향키를 누르면 일어난다.</p>
+      <figure class="note-fig"><img src="/assets/news/1026-homeless-devlog-pc-b.webp" alt="경마장 안 대형 화면에 5번 말 LOSE 마이너스 2,000이 떠 있고 그 앞에 주인공과 강아지가 서 있는 장면" width="800" height="600" loading="lazy" decoding="async"></figure>
+      <h2>버그보다 더 큰 문제, 30만원 모으기가 너무 힘들었다</h2>
+      <p class="gp-body">버그를 하나씩 적다 보니 더 큰 게 보였다. 게임이 너무 힘들었다. 30만 원을 모으기가 너무 힘들었다. 그래서 길에서 자다 도둑맞거나 술에 취해 쓰러져 잃는 돈을 1만 원, 1만 5천 원, 2만 원 가운데 하나로 줄였다.</p>
+      <p class="gp-body">박스를 모아 박스집을 짓고 자는 설정은 아예 뺐다. 대신 지하도에서 박스를 깔고 잔다. 걷는 속도는 1.3배 빠르게 했다. 마트 카트는 빼고, 5천 원짜리 장바구니 카트만 있어도 박스를 주울 수 있게 했다. 마음이 바닥이면 노가다를 나갈 수 없게도 했다.</p>
+      <h2>집에서는 안 보였다</h2>
+      <p class="gp-body">스크린샷을 찍으려고 켤 때는 카메라를 세워 둘 자리만 보고, 정작 그 거리를 걸어 다니며 살아 보지는 않았다. 피씨방에서 손님처럼 며칠을 살아 보니 그제야 보였다.</p>
+      <p class="gp-body">어제 고친 PC판을 들고 오늘 다시 피씨방에 간다.</p>
+      <p class="gp-cta"><a class="btn btn-primary" href="/games/">🎮 게임 목록 보기</a></p>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <div class="footer-brand">
+      <img src="/assets/logo-full.webp?v=1" alt="" width="52" height="50">
+      <span>오름게임즈 <em>Oreum Games</em></span>
+    </div>
+    <p class="footer-motto">오름게임즈는 오릅니다</p>
+    <nav class="footer-nav" aria-label="푸터 메뉴">
+      <a href="/support/">고객지원</a>
+      <a href="/privacy/">개인정보처리방침</a>
+      <a href="https://www.youtube.com/@Oreumgames" rel="me noopener" target="_blank">유튜브</a>
+      <a href="https://www.tiktok.com/@oreumgames" rel="me noopener" target="_blank">틱톡</a>
+      <button type="button" class="js-mail mailbtn" data-u="cyjcyj27" data-d="gmail.com" data-go="gmail">협업 문의</button>
+      <button type="button" class="js-install mailbtn" hidden><img src="/assets/logo-symbol.png" alt="" class="install-ico">바탕화면에 바로가기 만들기</button>
+    </nav>
+    <p class="copy" id="visitCount" hidden></p>
+    <p class="copy">oreumgames.com · © 2026 오름게임즈. All rights reserved.</p>
+  </div>
+</footer>
+
+<script src="/assets/visit.js?v=17" defer></script>
+<script src="/assets/board-new.js?v=14" defer></script>
+<script src="/assets/mail.js" defer></script>
+<script src="/assets/install.js?v=7" defer></script>
+<script src="/assets/search.js?v=59" defer></script>
+</body>
+</html>

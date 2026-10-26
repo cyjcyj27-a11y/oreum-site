@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HOMELESS 1999 indie game devlog 2, I ran it at a PC bang and the bugs came pouring out — Oreum Games Indie Dev News</title>
+<meta name="description" content="A devlog for the indie game HOMELESS 1999. I took the Steam PC build to a Korean PC bang as a single zip file and just played it. The Japanese version spoke English, the door to the betting parlor was a solid wall, and the bugs kept coming. What I found that day, how I fixed it, and the rules I changed because the game was simply too hard.">
+<meta name="keywords" content="HOMELESS 1999, indie game dev, devlog, Steam indie game, bug fixing">
+<link rel="canonical" href="https://oreumgames.com/en/news/homeless1999-devlog-02/">
+<link rel="alternate" hreflang="ko" href="https://oreumgames.com/news/homeless1999-devlog-02/">
+<link rel="alternate" hreflang="en" href="https://oreumgames.com/en/news/homeless1999-devlog-02/">
+<link rel="alternate" hreflang="x-default" href="https://oreumgames.com/news/homeless1999-devlog-02/">
+<meta name="naver-site-verification" content="4ecba4003fbcbe564918ffd2c33d606f1eaae11a" />
+<meta name="google-site-verification" content="BG736F-J65BHS-viz8rkCjKJ53pxgIhSlPpzVnpGlt4" />
+<meta name="theme-color" content="#f8f5ec">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" href="/assets/icon-512.png" type="image/png" sizes="512x512">
+<link rel="apple-touch-icon" href="/assets/icon-180.png">
+<link rel="manifest" href="/manifest.webmanifest">
+
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Oreum Games">
+<meta property="og:title" content="HOMELESS 1999 indie game devlog 2, I ran it at a PC bang and the bugs came pouring out">
+<meta property="og:description" content="A devlog for the indie game HOMELESS 1999. I took the Steam PC build to a Korean PC bang as a single zip file and just played it. The Japanese version spoke English, the door to the betting parlor was a solid wall, and the bugs kept coming. What I found that day, how I fixed it, and the rules I changed because the game was simply too hard.">
+<meta property="og:url" content="https://oreumgames.com/en/news/homeless1999-devlog-02/">
+<meta property="og:image" content="https://oreumgames.com/assets/og-image.jpg?v=4">
+<meta property="og:locale" content="en_US">
+<meta name="twitter:card" content="summary_large_image">
+
+<link rel="stylesheet" href="/style.css?v=47">
+<style>
+.note-page h1{ font-size:clamp(18px,2.4vw,24px); line-height:1.4; margin:22px 0 0; letter-spacing:-.02em; }
+@media (min-width:900px){ .note-page h1{ white-space:nowrap; } }
+.note-kicker{ margin:22px 0 0; font-size:clamp(28px,4.6vw,44px); line-height:1.2; letter-spacing:-.01em; color:var(--ink); font-weight:900; padding-bottom:12px; border-bottom:3px solid var(--ink); }
+.note-kicker a{ color:inherit; text-decoration:none; }
+.note-sub{ margin:10px 0 0; font-size:17px; line-height:1.6; color:var(--ink-2); }
+.note-date{ margin:8px 0 22px; font-size:13px; color:var(--muted); }
+.note-page h2{ font-size:21px; margin:30px 0 4px; }
+.note-page p > strong:only-child{ font-size:calc(1em + 2pt); }
+.note-page .note-big{ margin:26px 0 22px; font-size:clamp(30px,5.2vw,48px); line-height:1.25; font-weight:900; letter-spacing:-.02em; color:var(--ink); }
+.note-page .gp-body a{ text-decoration:underline; text-underline-offset:3px; }
+.note-page .gp-cta{ margin-top:30px; }
+.note-fig{ margin:18px 0 4px; }
+.note-fig img{ display:block; width:auto; max-width:100%; max-height:560px; height:auto; border-radius:12px; }
+</style>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "Article", "headline": "HOMELESS 1999 indie game devlog 2, I ran it at a PC bang and the bugs came pouring out", "description": "A devlog for the indie game HOMELESS 1999. I took the Steam PC build to a Korean PC bang as a single zip file and just played it. The Japanese version spoke English, the door to the betting parlor was a solid wall, and the bugs kept coming. What I found that day, how I fixed it, and the rules I changed because the game was simply too hard.", "datePublished": "2026-10-26", "dateModified": "2026-10-26", "inLanguage": "en", "mainEntityOfPage": "https://oreumgames.com/en/news/homeless1999-devlog-02/", "image": "https://oreumgames.com/assets/og-image.jpg?v=4", "author": {"@type": "Organization", "name": "Oreum Games", "url": "https://oreumgames.com/en/"}, "publisher": {"@type": "Organization", "name": "Oreum Games", "url": "https://oreumgames.com/", "logo": {"@type": "ImageObject", "url": "https://oreumgames.com/assets/icon-512.png"}}}</script>
+</head>
+
+<body>
+
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="/en/">
+      <img src="/assets/logo-full.webp?v=1" alt="Oreum Games" width="78" height="74">
+    </a>
+    <div class="brand-copy">
+      <p class="brandname">Oreum Games</p>
+      <p class="factory">INDIE GAME FACTORY</p>
+    </div>
+    <ul class="values">
+      <li><span>No install</span> one link and you are in</li>
+      <li><span>No sign-up</span> saves stay in your browser</li>
+    </ul>
+    <nav class="nav" aria-label="Main menu">
+      <a class="navsearch" href="/en/games/">SEARCH</a>
+      <a href="/en/games/">GAMES</a>
+      <a href="/en/apps/">APPS</a>
+      <a href="/en/news/">NEWS</a>
+      <a href="/en/board/">COMMUNITY</a>
+      <a href="/news/homeless1999-devlog-02/" lang="ko" hreflang="ko">한국어</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+  <section class="showcase">
+    <div class="wrap game-page note-page">
+      <a class="backlink" href="/en/games/">← All games</a>
+      <p class="note-kicker"><a href="/en/news/">Oreum Games Indie Dev News</a></p>
+      <h1>HOMELESS 1999 indie game devlog 2, I ran it at a PC bang and the bugs came pouring out</h1>
+      <p class="note-sub">Things I never noticed while taking screenshots at home, and how I fixed them in a day after playing on a stranger's computer</p>
+      <p class="note-date"><time datetime="2026-10-26">October 26, 2026</time> · Oreum Games</p>
+
+      <h2>I took a zip file to a PC bang</h2>
+      <p class="gp-body">HOMELESS 1999 is a PC game headed for Steam. That means players won't run it on my computer, they'll run it on theirs. So I packed the PC build into a single zip file and took it to a PC bang, one of the internet cafes you find on every street in Korea. I unzipped it on someone else's computer and just played, the way a player would.</p>
+      <p class="gp-body">I launch the game at home every day, but always to take screenshots or to check something I just fixed. This was almost the first time I actually lived in it for several days in a row like a player. And the bugs came out one after another.</p>
+      <h2>The Japanese version spoke English</h2>
+      <p class="gp-body">I had just finished translating the game into nine languages that day, so at the PC bang I deliberately started it in Japanese. Menus and notices came up in Japanese just fine. Then I talked to someone and the dialogue was in English. The names in the collection book were in English too.</p>
+      <p class="gp-body">I did have a tool that checks for missing translations, but it only collected text that showed up on screen. Lines you only see after talking to someone, and the question mark slots for people you haven't met yet, never appear on screen, so the check missed them too. That came to 107 lines.</p>
+      <p class="gp-body">So I searched again a different way, going through every place in the code where a Korean line sits next to its English pair. I filled in all 107 missing lines in seven languages, and the translation dictionary grew to 686 lines.</p>
+      <h2>Yellow squares all over the ground</h2>
+      <p class="gp-body">The park lawn was dotted with little yellow squares. They were supposed to be ginkgo leaves, but on the PC bang monitor there was no way to see them as anything but yellow squares.</p>
+      <figure class="note-fig"><img src="/assets/news/1026-homeless-devlog-pc-c.webp" alt="Small yellow squares scattered across the park lawn" width="800" height="600" loading="lazy" decoding="async"></figure>
+      <p class="gp-body">I removed the squares and drew fan shaped ginkgo leaves in four colors instead. 110 around the trees and 900 across the park. They disappear in winter.</p>
+      <h2>Offering food to a dog that was behind me</h2>
+      <p class="gp-body">I was standing at a pay phone when the prompt to hold out food popped up. The dog was sitting well behind the hero's back. As long as it was close, you could offer food no matter which way it was.</p>
+      <figure class="note-fig"><img src="/assets/news/1026-homeless-devlog-pc-d.webp" alt="The hero standing at a pay phone booth with the dog sitting behind him and the hold out food prompt on screen" width="800" height="600" loading="lazy" decoding="async"></figure>
+      <p class="gp-body">Now you can only offer food when the dog is in front of where the hero is facing. Once you're close to the dog and have nothing left to give, the prompt changes to petting.</p>
+      <h2>A man in a suit squatting on the sidewalk</h2>
+      <p class="gp-body">On a sidewalk at night, a man in a suit was squatting on the ground. He's the recruiter who takes you to a shrimp fishing boat. But he was mixed in with the homeless men around the station square, so he just looked like a strange guy sitting in the street.</p>
+      <figure class="note-fig"><img src="/assets/news/1026-homeless-devlog-pc-e.webp" alt="A man in a suit squatting in the middle of a sidewalk at night while the hero walks past pulling a cart" width="800" height="600" loading="lazy" decoding="async"></figure>
+      <p class="gp-body">I took the recruiter out of the square and moved him next to the door of the betting parlor. He stands there from 10 a.m. to 11 p.m., and if you follow him you get the shrimp boat ending. (Spoiler warning, though given how many people will actually read this, I doubt it spoils anything, lol.)</p>
+      <h2>The betting parlor door was a wall</h2>
+      <p class="gp-body">When I walked up to the off track betting parlor, the door was blocked by a gray wall. From the inside it looked fine, but from the street there was a wall where the door should be. I had built the whole ground floor of the shopping building as one solid block, and its outer face was covering the door. I split the block into three so the door shows.</p>
+      <figure class="note-fig"><img src="/assets/news/1026-homeless-devlog-pc-f.webp" alt="The betting parlor entrance with race pictures behind the windows on both sides and a gray wall where the door should be" width="800" height="600" loading="lazy" decoding="async"></figure>
+      <p class="gp-body">There was one more inside. If a race ended and the betting window stayed open, you couldn't get up from your seat. Now pressing E or a movement key while seated stands you up.</p>
+      <figure class="note-fig"><img src="/assets/news/1026-homeless-devlog-pc-b.webp" alt="The big screen in the betting parlor showing horse 5 LOSE minus 2,000 with the hero and the dog standing in front of it" width="800" height="600" loading="lazy" decoding="async"></figure>
+      <h2>A bigger problem than bugs, saving 300,000 won was just too hard</h2>
+      <p class="gp-body">As I wrote the bugs down one by one, I noticed something bigger. The game was too hard. Saving up 300,000 won was way too hard. So the money you lose to a thief while sleeping on the street, or when you pass out drunk, is now one of 10,000, 15,000 or 20,000 won.</p>
+      <p class="gp-body">I cut the cardboard box house completely, building it and sleeping in it. Now you lay down boxes and sleep in the underpass instead. Walking is 1.3 times faster. I removed the big supermarket cart, and a 5,000 won shopping trolley is now enough to pick up boxes. And if your spirit hits bottom, you can't go out for day labor.</p>
+      <h2>I couldn't see any of it at home</h2>
+      <p class="gp-body">When I launched the game for screenshots, I only looked at where to put the camera. I never actually walked those streets and lived in them. It took a few days of living there like a player at a PC bang before I finally saw it.</p>
+      <p class="gp-body">Today I'm taking the build I fixed yesterday back to the PC bang.</p>
+      <p class="gp-cta"><a class="btn btn-primary" href="/en/games/">🎮 See all games</a></p>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <div class="footer-brand">
+      <img src="/assets/logo-full.webp?v=1" alt="" width="52" height="50">
+      <span>Oreum Games <em>오름게임즈</em></span>
+    </div>
+    <p class="footer-motto">Oreum Games keeps climbing</p>
+    <nav class="footer-nav" aria-label="Footer menu">
+      <a href="/en/support/">Support</a>
+      <a href="/en/privacy/">Privacy Policy</a>
+      <a href="https://www.youtube.com/@Oreumgames" rel="me noopener" target="_blank">YouTube</a>
+      <a href="https://www.tiktok.com/@oreumgames" rel="me noopener" target="_blank">TikTok</a>
+      <button type="button" class="js-mail mailbtn" data-u="cyjcyj27" data-d="gmail.com" data-go="gmail">Ads &amp; partnerships</button>
+      <button type="button" class="js-install mailbtn" hidden><img src="/assets/logo-symbol.png" alt="" class="install-ico">Add a shortcut</button>
+    </nav>
+    <p class="copy" id="visitCount" hidden></p>
+    <p class="copy">oreumgames.com · © 2026 Oreum Games. All rights reserved.</p>
+  </div>
+</footer>
+
+<script src="/assets/visit.js?v=17" defer></script>
+<script src="/assets/board-new.js?v=14" defer></script>
+<script src="/assets/mail.js" defer></script>
+<script src="/assets/install.js?v=7" defer></script>
+<script src="/assets/search.js?v=59" defer></script>
+</body>
+</html>
