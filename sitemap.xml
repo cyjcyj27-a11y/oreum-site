@@ -6,7 +6,7 @@
     <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/"/>
-    <lastmod>2026-10-26</lastmod>
+    <lastmod>2026-10-28</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
@@ -2182,6 +2182,16 @@
   <url>
     <loc>https://oreumgames.com/games/genre/</loc>
     <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/games/genre/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/games/genre/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/games/genre/"/>
+    <lastmod>2026-10-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://oreumgames.com/en/games/genre/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/games/genre/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/games/genre/"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/games/genre/"/>
     <lastmod>2026-10-28</lastmod>
     <changefreq>weekly</changefreq>
@@ -2190,6 +2200,16 @@
   <url>
     <loc>https://oreumgames.com/games/genre/2player/</loc>
     <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/games/genre/2player/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/games/genre/2player/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/games/genre/2player/"/>
+    <lastmod>2026-10-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://oreumgames.com/en/games/genre/2player/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/games/genre/2player/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/games/genre/2player/"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/games/genre/2player/"/>
     <lastmod>2026-10-28</lastmod>
     <changefreq>weekly</changefreq>
@@ -2198,6 +2218,16 @@
   <url>
     <loc>https://oreumgames.com/games/genre/action/</loc>
     <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/games/genre/action/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/games/genre/action/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/games/genre/action/"/>
+    <lastmod>2026-10-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://oreumgames.com/en/games/genre/action/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/games/genre/action/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/games/genre/action/"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/games/genre/action/"/>
     <lastmod>2026-10-28</lastmod>
     <changefreq>weekly</changefreq>
@@ -2206,6 +2236,16 @@
   <url>
     <loc>https://oreumgames.com/games/genre/adventure/</loc>
     <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/games/genre/adventure/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/games/genre/adventure/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/games/genre/adventure/"/>
+    <lastmod>2026-10-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://oreumgames.com/en/games/genre/adventure/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/games/genre/adventure/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/games/genre/adventure/"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/games/genre/adventure/"/>
     <lastmod>2026-10-28</lastmod>
     <changefreq>weekly</changefreq>
@@ -2214,6 +2254,16 @@
   <url>
     <loc>https://oreumgames.com/games/genre/arcade/</loc>
     <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/games/genre/arcade/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/games/genre/arcade/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/games/genre/arcade/"/>
+    <lastmod>2026-10-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://oreumgames.com/en/games/genre/arcade/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/games/genre/arcade/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/games/genre/arcade/"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/games/genre/arcade/"/>
     <lastmod>2026-10-28</lastmod>
     <changefreq>weekly</changefreq>
@@ -2222,6 +2272,16 @@
   <url>
     <loc>https://oreumgames.com/games/genre/board/</loc>
     <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/games/genre/board/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/games/genre/board/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/games/genre/board/"/>
+    <lastmod>2026-10-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://oreumgames.com/en/games/genre/board/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/games/genre/board/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/games/genre/board/"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/games/genre/board/"/>
     <lastmod>2026-10-28</lastmod>
     <changefreq>weekly</changefreq>
@@ -2230,6 +2290,16 @@
   <url>
     <loc>https://oreumgames.com/games/genre/defense/</loc>
     <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/games/genre/defense/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/games/genre/defense/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/games/genre/defense/"/>
+    <lastmod>2026-10-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://oreumgames.com/en/games/genre/defense/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/games/genre/defense/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/games/genre/defense/"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/games/genre/defense/"/>
     <lastmod>2026-10-28</lastmod>
     <changefreq>weekly</changefreq>
@@ -2238,6 +2308,16 @@
   <url>
     <loc>https://oreumgames.com/games/genre/horror/</loc>
     <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/games/genre/horror/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/games/genre/horror/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/games/genre/horror/"/>
+    <lastmod>2026-10-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://oreumgames.com/en/games/genre/horror/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/games/genre/horror/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/games/genre/horror/"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/games/genre/horror/"/>
     <lastmod>2026-10-28</lastmod>
     <changefreq>weekly</changefreq>
@@ -2246,6 +2326,16 @@
   <url>
     <loc>https://oreumgames.com/games/genre/idle/</loc>
     <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/games/genre/idle/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/games/genre/idle/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/games/genre/idle/"/>
+    <lastmod>2026-10-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://oreumgames.com/en/games/genre/idle/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/games/genre/idle/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/games/genre/idle/"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/games/genre/idle/"/>
     <lastmod>2026-10-28</lastmod>
     <changefreq>weekly</changefreq>
@@ -2254,6 +2344,16 @@
   <url>
     <loc>https://oreumgames.com/games/genre/puzzle/</loc>
     <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/games/genre/puzzle/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/games/genre/puzzle/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/games/genre/puzzle/"/>
+    <lastmod>2026-10-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://oreumgames.com/en/games/genre/puzzle/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/games/genre/puzzle/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/games/genre/puzzle/"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/games/genre/puzzle/"/>
     <lastmod>2026-10-28</lastmod>
     <changefreq>weekly</changefreq>
@@ -2262,6 +2362,16 @@
   <url>
     <loc>https://oreumgames.com/games/genre/quiz/</loc>
     <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/games/genre/quiz/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/games/genre/quiz/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/games/genre/quiz/"/>
+    <lastmod>2026-10-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://oreumgames.com/en/games/genre/quiz/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/games/genre/quiz/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/games/genre/quiz/"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/games/genre/quiz/"/>
     <lastmod>2026-10-28</lastmod>
     <changefreq>weekly</changefreq>
@@ -2270,6 +2380,16 @@
   <url>
     <loc>https://oreumgames.com/games/genre/roguelike/</loc>
     <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/games/genre/roguelike/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/games/genre/roguelike/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/games/genre/roguelike/"/>
+    <lastmod>2026-10-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://oreumgames.com/en/games/genre/roguelike/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/games/genre/roguelike/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/games/genre/roguelike/"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/games/genre/roguelike/"/>
     <lastmod>2026-10-28</lastmod>
     <changefreq>weekly</changefreq>
@@ -2278,6 +2398,16 @@
   <url>
     <loc>https://oreumgames.com/games/genre/shooting/</loc>
     <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/games/genre/shooting/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/games/genre/shooting/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/games/genre/shooting/"/>
+    <lastmod>2026-10-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://oreumgames.com/en/games/genre/shooting/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/games/genre/shooting/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/games/genre/shooting/"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/games/genre/shooting/"/>
     <lastmod>2026-10-28</lastmod>
     <changefreq>weekly</changefreq>
@@ -2286,6 +2416,16 @@
   <url>
     <loc>https://oreumgames.com/games/genre/simulation/</loc>
     <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/games/genre/simulation/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/games/genre/simulation/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/games/genre/simulation/"/>
+    <lastmod>2026-10-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://oreumgames.com/en/games/genre/simulation/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/games/genre/simulation/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/games/genre/simulation/"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/games/genre/simulation/"/>
     <lastmod>2026-10-28</lastmod>
     <changefreq>weekly</changefreq>
@@ -2294,6 +2434,16 @@
   <url>
     <loc>https://oreumgames.com/games/genre/sports/</loc>
     <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/games/genre/sports/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/games/genre/sports/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/games/genre/sports/"/>
+    <lastmod>2026-10-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://oreumgames.com/en/games/genre/sports/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/games/genre/sports/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/games/genre/sports/"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/games/genre/sports/"/>
     <lastmod>2026-10-28</lastmod>
     <changefreq>weekly</changefreq>
@@ -2302,6 +2452,16 @@
   <url>
     <loc>https://oreumgames.com/games/genre/traditional/</loc>
     <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/games/genre/traditional/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/games/genre/traditional/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/games/genre/traditional/"/>
+    <lastmod>2026-10-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://oreumgames.com/en/games/genre/traditional/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/games/genre/traditional/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/games/genre/traditional/"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/games/genre/traditional/"/>
     <lastmod>2026-10-28</lastmod>
     <changefreq>weekly</changefreq>
@@ -2310,6 +2470,16 @@
   <url>
     <loc>https://oreumgames.com/games/genre/tycoon/</loc>
     <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/games/genre/tycoon/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/games/genre/tycoon/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/games/genre/tycoon/"/>
+    <lastmod>2026-10-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://oreumgames.com/en/games/genre/tycoon/</loc>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://oreumgames.com/games/genre/tycoon/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://oreumgames.com/en/games/genre/tycoon/"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://oreumgames.com/games/genre/tycoon/"/>
     <lastmod>2026-10-28</lastmod>
     <changefreq>weekly</changefreq>
