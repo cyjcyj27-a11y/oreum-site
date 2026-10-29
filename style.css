@@ -1121,3 +1121,8 @@ body{ font-size:19px; }
 @media (max-width:380px){
   .nav a{ padding-left:7px; padding-right:7px; }
 }
+
+/* 꼬리말 누적 방문·누적 플레이 (2026-10-29, 자체 카운터) */
+.footer-counts { display: flex; flex-wrap: nowrap; gap: 8px; margin: 14px 0 10px; }
+.count-pill { display: inline-block; padding: 5px 12px; border: 1px solid var(--line-2); border-radius: 999px; background: var(--panel); font-size: 14px; color: var(--ink-2); white-space: nowrap; }
+.count-pill[hidden] { display: none; }

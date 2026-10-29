@@ -26,6 +26,8 @@
   var useAbacus = ds.abacus !== '0', useAuto = ds.auto !== '0';
   var base = 'https://abacus.jasoncameron.dev/hit/oreumgames/';
   function hit(k) { if (local) return; try { fetch(base + k, { mode: 'cors' }).catch(function () {}); } catch (e) {} }
+  // 우리 자체 카운터(functions/api/play.js) — 누적 플레이 시간. Abacus 가 멈춰도 안 빠지게 따로 센다(2026-10-29)
+  function playMin() { if (local) { try { if (localStorage.getItem('oreum.ptest') !== '1') return; } catch (e) { return; } } try { fetch('/api/play', { method: 'POST', body: game, keepalive: true }).catch(function () {}); } catch (e) {} }
   function ga(name, p) { try { if (window.gtag && !local) window.gtag('event', name, p); } catch (e) {} }
   function ymd() { return new Date(Date.now() + 9 * 3600 * 1000).toISOString().slice(0, 10); }
   function onceToday(flag, key) {
@@ -68,7 +70,7 @@
   function engaged() { return eng + (engAt ? (Date.now() - engAt) / 1000 : 0); }
   function tickDwell() {
     var sec = engaged();
-    while (mins < Math.floor(sec / 60)) { mins++; hit('game_minutes'); hit('min_' + game); ga('play_minute', { game: game, minute: mins }); }
+    while (mins < Math.floor(sec / 60)) { mins++; hit('game_minutes'); hit('min_' + game); playMin(); ga('play_minute', { game: game, minute: mins }); }
     while (bi < BUCKETS.length && sec >= BUCKETS[bi][0]) { if (useAbacus || bi >= 3) hit(BUCKETS[bi][1]); bi++; }   // 루루냥은 1·3·10분을 자체로 세니 30분부터만
   }
   document.addEventListener('visibilitychange', function () {

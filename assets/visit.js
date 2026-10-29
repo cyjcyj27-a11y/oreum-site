@@ -174,20 +174,40 @@
   // 첫 방문자가 '사람 없는 사이트'로 보고 나가지 않게, 열 때마다 진짜로 1 오르는 숫자를 보여 줍니다.
   // pvall 은 오늘부터 세는 칸이라, 그 전까지의 누적(페이지별 pv_* 칸의 합, 2026-09-21 기준)을 PV_BASE 로 더합니다.
   // 열 때마다 hit 응답의 값을 그대로 씁니다. 남이 연 것까지 살아서 오르는 건 아닙니다(카운터 서비스 10초 30번 제한).
-  var PV_BASE = 16199;
+  var EN = /^en/i.test(document.documentElement.lang || '');
+  // 2026-10-29부터 꼬리말 숫자는 우리 자체 카운터(functions/api/pv.js, D1 pv_all)가 셉니다 — Abacus 가 멈춰 숫자가 사라진 10/28 뒤.
+  // 시작값은 그때의 PV_BASE + pvall 로 넣었습니다. Abacus pvall 은 지표(stats.html)용으로 그대로 셉니다.
+  // (예전 PV_BASE = 16199, stats.html 에도 같은 수)
   (function () {
     var el = document.getElementById('visitCount');
-    var url = base + (local ? 'get' : 'hit') + '/oreumgames/pvall';
-    if (!el && local) return;
-    get(url).then(function (v) {
-      if (!el || !v || typeof v.value !== 'number') return;
-      var n = PV_BASE + v.value;
+    if (!local) { try { fetch(base + 'hit/oreumgames/pvall', { mode: 'cors' }).catch(function () {}); } catch (e) {} }
+    if (local) { try { if (localStorage.getItem('oreum.ptest') !== '1') return; } catch (e) { return; } }
+    var req;
+    try { req = fetch('/api/pv', { method: 'POST', keepalive: true }); } catch (e) { return; }
+    req.then(function (r) { return r.status === 200 ? r.json() : null; }).catch(function () { return null; }).then(function (v) {
+      if (!el || !v || typeof v.value !== 'number' || !v.value) return;
       var num = document.createElement('strong');
       el.textContent = '';
-      // 한글판도 영어로 "16,207 visits" (사장님 2026-09-21 "걍 영어로 쓰자")
-      el.appendChild(num); el.appendChild(document.createTextNode(' visits'));
+      // 2026-10-29 사장님 "누적방문 누적플레이로 하자" — 한글판 "누적 방문 N회", 영문판 "Total views N" (그 전엔 둘 다 "N visits")
+      el.appendChild(document.createTextNode(EN ? 'Total views ' : '누적 방문 ')); el.appendChild(num); if (!EN) el.appendChild(document.createTextNode('회'));
       el.hidden = false;
-      num.textContent = n.toLocaleString('ko-KR');   // 올라가는 연출 없이 숫자만(사장님 2026-09-21 "슬롯처럼 올라가는 애니는 빼")
+      num.textContent = v.value.toLocaleString('ko-KR');   // 올라가는 연출 없이 숫자만(사장님 2026-09-21 "슬롯처럼 올라가는 애니는 빼")
+    });
+  })();
+
+  // ⏱ 누적 플레이 — 대문 꼬리말 #playTime(2026-10-29 사장님 "누적방문 누적플레이로 하자", 게임 전체 합계). 한글 "N시간", 영문 "N h".
+  // Abacus 가 아니라 우리 자체 카운터(functions/api/playtime.js, D1)를 읽습니다. 시간은 내림(깎아 올리지 않음).
+  (function () {
+    var el = document.getElementById('playTime');
+    if (!el) return;
+    get('/api/playtime').then(function (v) {
+      if (!v || typeof v.minutes !== 'number' || !v.minutes) return;
+      var num = document.createElement('strong');
+      el.textContent = '';
+      var h = Math.floor(v.minutes / 60).toLocaleString('ko-KR');   // 시간만(사장님 "단위는 시간으로만"), 내림
+      el.appendChild(document.createTextNode(EN ? 'Total play time ' : '누적 플레이 ')); el.appendChild(num);
+      num.textContent = EN ? h + ' h' : h + '시간';
+      el.hidden = false;
     });
   })();
 
