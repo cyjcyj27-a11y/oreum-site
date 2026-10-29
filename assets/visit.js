@@ -175,6 +175,13 @@
   // pvall 은 오늘부터 세는 칸이라, 그 전까지의 누적(페이지별 pv_* 칸의 합, 2026-09-21 기준)을 PV_BASE 로 더합니다.
   // 열 때마다 hit 응답의 값을 그대로 씁니다. 남이 연 것까지 살아서 오르는 건 아닙니다(카운터 서비스 10초 30번 제한).
   var EN = /^en/i.test(document.documentElement.lang || '');
+  // 대문 알약 두 칸은 늘 한 줄(사장님 10/29). 숫자가 커져 자리가 모자라면 줄바꿈 대신 글자를 줄인다(사장님 "글자폰트를 줄이면 되지").
+  function fitCounts() {
+    var box = document.querySelector('.footer-counts'); if (!box) return;
+    var s = 14; box.style.fontSize = '';
+    while (box.scrollWidth > box.clientWidth + 1 && s > 8) { s -= 0.5; box.style.fontSize = s + 'px'; }
+  }
+  window.addEventListener('resize', fitCounts);
   // 2026-10-29부터 꼬리말 숫자는 우리 자체 카운터(functions/api/pv.js, D1 pv_all)가 셉니다 — Abacus 가 멈춰 숫자가 사라진 10/28 뒤.
   // 시작값은 그때의 PV_BASE + pvall 로 넣었습니다. Abacus pvall 은 지표(stats.html)용으로 그대로 셉니다.
   // (예전 PV_BASE = 16199, stats.html 에도 같은 수)
@@ -192,6 +199,7 @@
       el.appendChild(document.createTextNode(EN ? 'Total views ' : '누적 방문 ')); el.appendChild(num); if (!EN) el.appendChild(document.createTextNode('회'));
       el.hidden = false;
       num.textContent = v.value.toLocaleString('ko-KR');   // 올라가는 연출 없이 숫자만(사장님 2026-09-21 "슬롯처럼 올라가는 애니는 빼")
+      fitCounts();
     });
   })();
 
@@ -208,6 +216,7 @@
       el.appendChild(document.createTextNode(EN ? 'Total play time ' : '누적 플레이 ')); el.appendChild(num);
       num.textContent = EN ? h + ' h' : h + '시간';
       el.hidden = false;
+      fitCounts();
     });
   })();
 

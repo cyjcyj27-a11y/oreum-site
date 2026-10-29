@@ -1123,6 +1123,6 @@ body{ font-size:19px; }
 }
 
 /* 꼬리말 누적 방문·누적 플레이 (2026-10-29, 자체 카운터) */
-.footer-counts { display: flex; flex-wrap: nowrap; gap: 8px; margin: 14px 0 10px; }
-.count-pill { display: inline-block; padding: 5px 12px; border: 1px solid var(--line-2); border-radius: 999px; background: var(--panel); font-size: 14px; color: var(--ink-2); white-space: nowrap; }
+.footer-counts { display: flex; flex-wrap: nowrap; gap: .57em; margin: 14px 0 10px; font-size: 14px; min-width: 0; max-width: 100%; overflow: hidden; }   /* 자리가 모자라면 visit.js 가 글자를 줄인다 */
+.count-pill { display: inline-block; padding: .36em .86em; border: 1px solid var(--line-2); border-radius: 999px; background: var(--panel); font-size: inherit; color: var(--ink-2); white-space: nowrap; }
 .count-pill[hidden] { display: none; }
