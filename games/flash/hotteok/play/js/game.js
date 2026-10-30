@@ -196,10 +196,10 @@
     const g = grade(h, it);
     const price = D.KIND[it.kind].price;
     const pay = Math.round(price * [0.25, 0.55, 0.8, 1][g.stars] / 10) * 10;
-    let tip = 0;
-    if (g.perfect) { tip = Math.round(D.TIP * G.gv('bulb') * (T.honeyT > 0 ? 2 : 1)); T.perfect++; G.S.stats.perfect++; T.streak++; G.S.stats.best = Math.max(G.S.stats.best, T.streak); if (T.honeyT <= 0) { T.honey = Math.min(D.PERFECT_FOR_HONEY, T.honey + 1); UI.honey(T.honey, 0); } }
+    let tip = 0; // 바삭하게 PERFECT 는 팁 2배
+    if (g.perfect) { tip = Math.round(D.TIP * G.gv('bulb') * (T.honeyT > 0 ? 2 : 1) * (it.crispy ? 2 : 1)); T.perfect++; G.S.stats.perfect++; T.streak++; G.S.stats.best = Math.max(G.S.stats.best, T.streak); if (T.honeyT <= 0) { T.honey = Math.min(D.PERFECT_FOR_HONEY, T.honey + 1); UI.honey(T.honey, 0); } }
     else T.streak = 0;
-    if (h.cookA > D.COOK.burnt || h.cookB > D.COOK.burnt) G.S.stats.burnt++;
+    if (g.why.includes('burnt')) G.S.stats.burnt++; // 바삭은 탐 기준이 0.12 높음
     T.earn += pay; T.tips += tip; T.sold++;
     if (T.sold >= 3) R.setSnow(1); T.stars.push(g.stars); G.S.stats.served++;
     c.hop = 0.5;
