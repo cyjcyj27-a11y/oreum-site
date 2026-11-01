@@ -230,7 +230,7 @@
     const sp = Math.hypot(H.v.x, H.v.z);
     H.step += dt * sp * 2.6;
     // 몸 방향: 겨누는 중이면 카메라 쪽, 아니면 가는 쪽
-    const aiming = IN.spray || H.swing > 0 || (act && act.kind === 'bag');
+    const aiming = IN.spray || H.swing > 0 || !!act;
     if (aiming) H.faceT = 0.6; else H.faceT = Math.max(0, H.faceT - dt);
     let wy = H.yaw;
     if (H.faceT > 0) wy = CAM.yaw + Math.PI; else if (sp > 0.3) wy = Math.atan2(H.v.x, H.v.z);
@@ -263,8 +263,8 @@
     const hpitch = Math.atan2(nozzleTarget.y - 1.15, Math.hypot(nozzleTarget.x - H.p.x, nozzleTarget.z - H.p.z));
     H.pitch += (hpitch - H.pitch) * Math.min(1, dt * 12);
     if (H.swing > 0) H.swing = Math.max(0, H.swing - dt * 3.2);
-    H.hold += ((act && act.kind === 'bag' ? 1 : 0) - (H.hold || 0)) * Math.min(1, dt * 12);
-    ACT.pose(hero, H.step, Math.min(1, sp / 3.15), H.aim * (1 - H.hold), act && act.kind === 'bag' && act.pitch != null ? act.pitch : Math.max(-0.6, Math.min(1.2, H.pitch)), H.swing > 0 ? 1 - H.swing : 0, H.hold);
+    H.hold += ((act ? 1 : 0) - (H.hold || 0)) * Math.min(1, dt * 12);
+    ACT.pose(hero, H.step, Math.min(1, sp / 3.15), H.aim * (1 - H.hold), act && act.pitch != null ? act.pitch : Math.max(-0.6, Math.min(1.2, H.pitch)), H.swing > 0 ? 1 - H.swing : 0, H.hold);
     hero.updateMatrixWorld(true);
     hero.userData.nozzle.getWorldPosition(nozzle);
     sprayD.copy(nozzleTarget).sub(nozzle).normalize();
@@ -357,7 +357,7 @@
       }
       if (best.kind === 'bag' && (best.n.vigor > 0.3 || (best.n.queen && best.n.queen.alive))) { if (!G._nope || performance.now() - G._nope > 500) { G._nope = performance.now(); AU.play('nope'); best.n.shake = 1; best.n.alarm = 1; UI.flashBar('vigor'); } return; }
       act = { kind: best.kind, n: best.n, t: 0, dur: best.kind === 'box' ? 2.4 : g.bag, lock: true };
-      if (best.kind === 'bag') AU.play('bagUp');
+      AU.play('bagUp'); // 벌집도 꿀벌도 장대를 뻗어 씌운다
     }
     if (act) {
       if (!IN.actHeld) { act = null; bagPole.visible = false; return; }
@@ -366,8 +366,8 @@
       // 몸을 집 쪽으로
       CAM.yaw += 0; H.faceT = 0.6;
       const wy = Math.atan2(n.c.x - H.p.x, n.c.z - H.p.z); let dy = wy - H.yaw; dy = Math.atan2(Math.sin(dy), Math.cos(dy)); H.yaw += dy * Math.min(1, dt * 10);
-      if (act.kind === 'bag') {
-        // 손에서 벌집 쪽으로 장대를 뻗어 올림(봉투는 끝에 달려 벌집을 감쌈)
+      {
+        // 손에서 벌집(꿀벌 덩어리) 쪽으로 장대를 뻗어 올림(봉투는 끝에 달려 감쌈)
         bagPole.visible = true;
         const hand = poleHand.set(H.p.x + Math.sin(H.yaw) * 0.45, 1.2, H.p.z + Math.cos(H.yaw) * 0.45);
         const tgt = poleTgt.set(n.c.x, n.c.y + 0.05 * n.size, n.c.z);
