@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>햄스런</title>
+<style>
+/* 단추 소재 = 햄스터 용품
+   주 단추: 반투명 주황 플라스틱 햄스터 집(둥근 지붕, 위에 숨구멍 줄, 유광 띠), 누르면 말랑하게 눌림
+   보조 단추: 우드칩 톱밥 판(크림 나무에 칩 조각 점)
+   상단 알약: 해바라기씨 껍질(짙은 회색에 크림 줄)
+   둥근 단추: 민트 쳇바퀴(바퀴살 + 테)
+   창: 햄스터 케이지(크림 바닥 + 흰 철망 살 + 민트 받침 테) */
+@font-face{font-family:'Ttl';src:url('fonts/title.woff2?v=3') format('woff2');font-display:block}
+@font-face{font-family:'Ui';src:url('fonts/ui.woff2?v=3') format('woff2');font-display:swap}
+:root{--or:#ff9a2e;--orD:#d8661a;--ink:#4a2a14;--mint:#5fd0b8;--mintD:#2a9a84;--cream:#fff6e4;--wood:#f0d6a4;--seed:#3a3634}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+html,body{width:100%;height:100%;overflow:hidden;background:#f6e7d2;color:var(--ink);font-family:'Ui','Malgun Gothic',sans-serif;
+  user-select:none;-webkit-user-select:none;touch-action:none;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+#cv{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
+
+/* ---------- 주 단추: 플라스틱 햄스터 집 ---------- */
+.btn{position:relative;border:0;cursor:pointer;font:400 26px/1 'Ttl','Ui',sans-serif;white-space:nowrap;color:#fff;
+  padding:22px 40px 15px;min-width:190px;border-radius:46px 46px 16px 16px;
+  background:
+    radial-gradient(circle,rgba(120,50,0,.35) 2.6px,rgba(0,0,0,0) 3.2px) 50% 7px/13px 9px repeat-x,
+    linear-gradient(180deg,rgba(255,255,255,.55),rgba(255,255,255,0) 34%),
+    linear-gradient(180deg,#ffc070 0%,var(--or) 45%,var(--orD) 100%);
+  box-shadow:inset 0 0 0 3px var(--ink),inset 0 -6px 0 rgba(150,60,0,.28),inset 10px 0 14px -8px rgba(255,255,255,.45),0 6px 0 var(--ink),0 12px 18px rgba(74,42,20,.3);
+  -webkit-text-stroke:6px var(--ink);paint-order:stroke fill;text-shadow:0 3px 0 var(--ink);
+  transition:transform .24s cubic-bezier(.34,1.56,.64,1),box-shadow .2s,filter .15s}
+.btn span{position:relative}
+.btn:hover{filter:brightness(1.06)}
+.btn:active{transform:translateY(4px) scale(1.04,.9);box-shadow:inset 0 0 0 3px var(--ink),inset 0 -6px 0 rgba(150,60,0,.28),0 2px 0 var(--ink);transition-duration:.04s}
+/* 보조 단추: 우드칩 판 */
+.btn.chip{padding:13px 22px 12px;min-width:0;font-size:19px;color:var(--ink);border-radius:14px;-webkit-text-stroke:0;text-shadow:0 1px 0 rgba(255,255,255,.6);
+  background:
+    radial-gradient(ellipse 5px 2px at 20% 30%,#c89a5a 60%,rgba(0,0,0,0) 70%) 0 0/23px 17px,
+    radial-gradient(ellipse 4px 2px at 70% 70%,#d8b070 60%,rgba(0,0,0,0) 70%) 0 0/19px 13px,
+    radial-gradient(ellipse 3px 1.5px at 40% 80%,#b8884a 60%,rgba(0,0,0,0) 70%) 0 0/29px 21px,
+    linear-gradient(180deg,#fff2d6,var(--wood));
+  box-shadow:inset 0 0 0 3px #8a5a2a,inset 0 3px 0 rgba(255,255,255,.6),0 4px 0 #8a5a2a,0 8px 12px rgba(74,42,20,.25)}
+.btn.chip:active{transform:translateY(3px) scale(.97);box-shadow:inset 0 0 0 3px #8a5a2a,0 1px 0 #8a5a2a}
+
+/* ---------- 상단바: 해바라기씨 알약 ---------- */
+#hud{position:fixed;top:0;left:0;right:0;z-index:5;display:flex;align-items:center;gap:7px;pointer-events:none;flex-wrap:wrap;
+  padding:calc(6px + env(safe-area-inset-top)) calc(8px + env(safe-area-inset-right)) 6px calc(104px + env(safe-area-inset-left))}
+.stat{display:flex;align-items:center;gap:7px;padding:6px 14px 6px 12px;min-height:36px;border-radius:999px 999px 999px 999px / 999px 999px 999px 999px;white-space:nowrap;color:#fff;font-size:15px;
+  background:
+    linear-gradient(90deg,rgba(0,0,0,0) 22%,rgba(255,248,230,.16) 22% 25%,rgba(0,0,0,0) 25% 48%,rgba(255,248,230,.16) 48% 51%,rgba(0,0,0,0) 51% 74%,rgba(255,248,230,.16) 74% 77%,rgba(0,0,0,0) 77%),
+    linear-gradient(180deg,#5a5450,var(--seed) 55%,#24201e);
+  box-shadow:inset 0 0 0 2px #1a1614,inset 0 3px 0 rgba(255,255,255,.18),0 3px 0 #1a1614}
+.stat b{font:400 18px 'Ttl','Ui',sans-serif}
+.stat small{opacity:.85;font-size:13px}
+.seedI{width:12px;height:18px;border-radius:50% 50% 50% 50%/60% 60% 40% 40%;flex:none;transform:rotate(18deg);
+  background:linear-gradient(90deg,#2a2624 0 26%,#f2efe6 26% 34%,#2a2624 34% 46%,#f2efe6 46% 54%,#2a2624 54% 66%,#f2efe6 66% 74%,#2a2624 74%);box-shadow:0 0 0 1.5px #fff6e4}
+.seedI.g{background:linear-gradient(90deg,#e8a81a,#ffe27a 50%,#e8a81a)}
+.meter{width:56px;height:8px;border-radius:5px;background:rgba(255,255,255,.18);overflow:hidden;box-shadow:inset 0 0 0 1.5px rgba(0,0,0,.4)}
+.meter i{display:block;height:100%;width:0;background:linear-gradient(180deg,#ffe8a0,#ffc81e);border-radius:5px;transition:width .2s}
+.meter.full i{background:linear-gradient(180deg,#ffb0b0,#ff5a5a)}
+.spacer{flex:1}
+.togs{display:flex;gap:6px}
+/* 둥근 단추: 쳇바퀴 */
+.tog{pointer-events:auto;width:42px;height:42px;border-radius:50%;border:0;cursor:pointer;position:relative;flex:none;color:#fff;font:400 22px/42px 'Ttl','Ui',sans-serif;
+  background:radial-gradient(circle,var(--mintD) 0 9px,rgba(0,0,0,0) 9.5px),repeating-conic-gradient(rgba(255,255,255,.55) 0 4deg,rgba(0,0,0,0) 4deg 30deg),radial-gradient(circle at 40% 35%,#9af0dc,var(--mint) 60%,var(--mintD));
+  box-shadow:inset 0 0 0 3px var(--ink),inset 0 0 0 7px #e8fff8,inset 0 0 0 8.5px var(--mintD),0 3px 0 var(--ink),0 5px 8px rgba(0,0,0,.2);transition:transform .25s cubic-bezier(.34,1.56,.64,1)}
+.tog svg{width:22px;height:22px;position:absolute;left:10px;top:10px;filter:drop-shadow(0 0 2px var(--ink)) drop-shadow(0 1px 0 var(--ink))}
+.tog.q{-webkit-text-stroke:4.5px var(--ink);paint-order:stroke fill}
+.tog:active{transform:rotate(40deg) scale(.94)}
+.tog.off{opacity:.6}
+.tog.off::after{content:'';position:absolute;left:24%;right:24%;top:50%;height:2px;margin-top:-1px;background:#fff;border-radius:1px;transform:rotate(-40deg);box-shadow:0 0 0 1px var(--ink)}
+body.playing #oreumFs{display:none}
+
+/* ---------- 큰 글자 ---------- */
+#banner{position:fixed;left:0;right:0;top:30%;z-index:6;text-align:center;pointer-events:none}
+#bnA{display:block;color:#fff;font:400 54px/1.05 'Ttl','Ui',sans-serif;-webkit-text-stroke:10px var(--ink);paint-order:stroke fill;text-shadow:0 6px 0 var(--ink)}
+#banner.cl #bnA{color:#ffd23a;font-size:58px}
+#bnB{display:block;margin-top:10px;color:#fff;font:400 26px/1 'Ui',sans-serif;-webkit-text-stroke:6px var(--ink);paint-order:stroke fill}
+#banner.cl #bnB{font:400 40px/1 'Ttl','Ui',sans-serif;color:#ffe8a0;-webkit-text-stroke:8px var(--ink)}
+#banner.go{animation:bn 1.6s ease-out forwards}
+@keyframes bn{0%{opacity:0;transform:scale(.5)}12%{opacity:1;transform:scale(1.12,.92)}22%{transform:scale(.96,1.05)}32%{transform:scale(1)}80%{opacity:1}100%{opacity:0}}
+.fl{position:fixed;z-index:4;pointer-events:none;transform:translate(-50%,-50%);font:400 28px/1 'Ttl','Ui',sans-serif;color:#fff;-webkit-text-stroke:6px var(--ink);paint-order:stroke fill;animation:fl .8s ease-out forwards}
+.fl.gold{color:#ffd23a;font-size:36px}
+.fl.full{color:#ff8a7a;font-size:22px}
+@keyframes fl{0%{opacity:0;transform:translate(-50%,-30%) scale(.5)}20%{opacity:1;transform:translate(-50%,-60%) scale(1.15)}100%{opacity:0;transform:translate(-50%,-160%) scale(1)}}
+
+/* ---------- 창: 햄스터 케이지 ---------- */
+.dim{position:fixed;inset:0;z-index:10;display:flex;align-items:center;justify-content:center;background:rgba(60,30,10,.38);padding:16px}
+.sheet{position:relative;width:min(560px,100%);max-height:calc(100% - 20px);overflow:auto;border-radius:30px 30px 22px 22px;padding:26px 22px 26px;text-align:center;
+  background:repeating-linear-gradient(90deg,rgba(255,255,255,0) 0 21px,rgba(255,255,255,.9) 21px 23px,rgba(190,200,205,.5) 23px 24px),linear-gradient(180deg,#fffaf0,var(--cream));
+  box-shadow:inset 0 0 0 3px var(--ink),inset 0 0 0 9px #e9eef0,inset 0 0 0 11px #b8c4ca,inset 0 -18px 0 11px var(--mint),inset 0 -21px 0 11px var(--mintD),0 7px 0 var(--ink),0 16px 30px rgba(0,0,0,.3);
+  animation:in .22s cubic-bezier(.34,1.56,.64,1)}
+@keyframes in{from{transform:scale(.85);opacity:0}}
+.sheet h2{font:400 34px/1.1 'Ttl','Ui',sans-serif;color:#fff;-webkit-text-stroke:7px var(--ink);paint-order:stroke fill;text-shadow:0 4px 0 var(--ink);margin:4px 0 14px}
+.row{display:flex;gap:14px;justify-content:center;align-items:center;flex-wrap:wrap;margin-top:16px}
+.hcs{display:flex;flex-direction:column;gap:10px}
+.hc{display:flex;align-items:center;gap:12px;text-align:left;background:rgba(255,255,255,.75);border-radius:18px;padding:8px;box-shadow:inset 0 0 0 2.5px rgba(74,42,20,.4)}
+.hc canvas{width:120px;height:100px;border-radius:12px;flex:none;box-shadow:0 0 0 2.5px var(--ink)}
+.hc p{font-size:18px;line-height:1.35;color:var(--ink);word-break:keep-all}
+@media (min-width:900px){.sheet.wide{width:min(880px,100%)}.sheet.wide .hcs{flex-direction:row}.sheet.wide .hc{flex-direction:column;text-align:center;flex:1}.sheet.wide .hc canvas{width:100%;height:auto;aspect-ratio:12/10}}
+.big{font:400 26px 'Ttl','Ui',sans-serif;color:var(--ink)}
+.num{font:400 54px/1 'Ttl','Ui',sans-serif;color:#ffd23a;-webkit-text-stroke:8px var(--ink);paint-order:stroke fill;text-shadow:0 4px 0 var(--ink);margin:6px 0 2px;display:flex;align-items:center;justify-content:center;gap:12px}
+.num .seedI{width:22px;height:32px}
+/* 햄스터 고르기 */
+#grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.cell{position:relative;border-radius:16px;padding:6px 4px 8px;cursor:pointer;background:rgba(255,255,255,.8);box-shadow:inset 0 0 0 2.5px rgba(74,42,20,.45),0 3px 0 rgba(74,42,20,.35);transition:transform .2s cubic-bezier(.34,1.56,.64,1)}
+.cell:active{transform:scale(.95)}
+.cell canvas{width:100%;aspect-ratio:1;display:block}
+.cell .nm{font-size:14px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cell .pr{display:inline-flex;align-items:center;gap:4px;margin-top:4px;font:400 16px 'Ttl','Ui',sans-serif}
+.cell .pr .seedI{width:9px;height:13px}
+.cell.sel{background:#fff1c8;box-shadow:inset 0 0 0 3.5px var(--or),0 3px 0 var(--orD)}
+.cell.lock canvas{filter:brightness(0) opacity(.25)}
+.cell.poor .pr{color:#d83a2a}
+#bankLine{display:flex;align-items:center;justify-content:center;gap:8px;font:400 22px 'Ttl','Ui',sans-serif;margin:-4px 0 12px}
+#endImg{width:min(300px,62vw);border-radius:16px;box-shadow:0 0 0 3px var(--ink),0 6px 0 var(--ink);display:block;margin:0 auto}
+#toast{position:fixed;left:50%;bottom:16%;transform:translateX(-50%);z-index:20;padding:10px 18px;border-radius:14px;background:rgba(60,30,10,.85);color:#fff;font-size:17px;pointer-events:none}
+
+/* ---------- 타이틀 ---------- */
+#title{position:fixed;inset:0;z-index:8;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:calc(10vh + env(safe-area-inset-top)) 16px calc(9vh + env(safe-area-inset-bottom));pointer-events:none}
+#title > *{pointer-events:auto}
+#logo{display:flex;flex-direction:column;align-items:center;line-height:.9;pointer-events:none}
+#logo .a,#logo .b{display:flex;gap:.02em;font:400 clamp(58px,15vw,118px)/1 'Ttl','Ui',sans-serif}
+#logo .b{font-size:clamp(46px,11vw,88px);margin-top:.08em}
+#logo.one .a{font-size:clamp(84px,22vw,160px)}
+#logo i{font-style:normal;display:inline-block;color:var(--c);-webkit-text-stroke:.12em var(--ink);paint-order:stroke fill;
+  text-shadow:0 .04em 0 var(--d),0 .08em 0 var(--ink),0 .14em .1em rgba(74,42,20,.3);animation:bob 2.2s ease-in-out infinite}
+#logo .a i{--c:#ffb04a;--d:#d8661a}
+#logo .a i:nth-child(2){--c:#fff2d6;--d:#d8b070;animation-delay:.12s}
+#logo .a i:nth-child(3){--c:#ffb04a;--d:#d8661a;animation-delay:.24s}
+#logo .b i{--c:#7fe0c8;--d:#2a9a84}
+#logo .b i:nth-child(2){animation-delay:.12s}#logo .b i:nth-child(3){animation-delay:.24s}
+#logo i:nth-child(odd){transform:rotate(-4deg)}#logo i:nth-child(even){transform:rotate(4deg)}
+@keyframes bob{50%{translate:0 -.06em;scale:1.03 .97}}
+#title .btns{display:flex;flex-direction:column;align-items:center;gap:16px}
+.keys{position:fixed;right:12px;bottom:10px;z-index:4;font-size:13px;color:#fff;-webkit-text-stroke:3px rgba(74,42,20,.6);paint-order:stroke fill;pointer-events:none}
+body.touch .keys{display:none}
+
+/* 폰 세로: 상단바 작게(구역 이름 빼고) */
+@media (max-width:520px){
+  #hud{gap:5px}
+  .stat{padding:4px 9px;min-height:30px;gap:5px}
+  .stat b{font-size:16px}
+  .stat small{display:none}
+  .meter{width:34px}
+  .togs{width:100%;justify-content:flex-end}
+  .tog{width:36px;height:36px;line-height:36px;font-size:19px}
+  .tog svg{width:18px;height:18px;left:9px;top:9px}
+  #bnA{font-size:42px}#banner.cl #bnA{font-size:44px}
+}
+/* 폰 가로: 단추는 아래 26vh 위, 한 줄로 */
+@media (max-height:480px){
+  #title{justify-content:flex-start;gap:5vh;padding:5vh 16px 26vh}
+  #logo{flex-direction:row;gap:.2em;align-items:flex-end}
+  #logo .a{font-size:20vh}#logo .b{font-size:16vh;margin:0}#logo.one .a{font-size:26vh}
+  #title .btns{flex-direction:row;gap:22px}
+  .btn{font-size:6vh;padding:3.6vh 6vh 2.4vh;min-width:0}
+  .btn.chip{font-size:5vh;padding:2.6vh 4vh}
+  #banner{top:24%}
+  #bnA{font-size:44px}#banner.cl #bnA{font-size:46px}
+  .hcs{flex-direction:row}.hc{flex-direction:column;text-align:center;flex:1;padding:6px}.hc canvas{width:auto;height:30vh;aspect-ratio:12/10;margin:0 auto}.hc p{font-size:14px}
+  .sheet{padding:12px 16px 22px;width:min(820px,100%)}
+  .sheet h2{font-size:26px;margin:0 0 6px}
+  #how .sheet h2,#shop .sheet h2{text-align:left;padding-left:120px}
+  #how .row{position:absolute;right:20px;top:10px;margin:0}
+  #shop .x{position:absolute;right:20px;top:10px;margin:0}
+  #grid{grid-template-columns:repeat(8,1fr);gap:6px}
+  .cell .nm{font-size:11px}
+  #endWrap{display:flex;gap:20px;align-items:center}
+  #endImg{width:auto;height:62vh}
+  .num{font-size:40px}
+}
+</style>
+</head>
+<body>
+<canvas id="cv"></canvas>
+
+<div id="hud" hidden>
+  <div class="stat"><b id="sSt">1/10</b><small id="sZn"></small></div>
+  <div class="stat"><span class="seedI"></span><b id="sCk">0/12</b><span class="meter" id="sMt"><i></i></span></div>
+  <div class="stat"><span class="seedI g"></span><b id="sBk">0</b></div>
+  <div class="spacer"></div>
+  <div class="togs">
+    <button class="tog q" id="tHelp" aria-label="HOW TO PLAY">?</button>
+    <button class="tog" id="tBgm" aria-label="BGM"><svg viewBox="0 0 24 24"><path d="M9 17.5V5.5l11-2.5v12" fill="none" stroke="#fff" stroke-width="2.6" stroke-linejoin="round"/><ellipse cx="6.3" cy="17.8" rx="3.4" ry="2.7" fill="#fff"/><ellipse cx="17.3" cy="15.3" rx="3.4" ry="2.7" fill="#fff"/></svg></button>
+    <button class="tog" id="tSfx" aria-label="SFX"><svg viewBox="0 0 24 24"><path d="M3 9h4l5-4.5v15L7 15H3z" fill="#fff"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg></button>
+  </div>
+</div>
+<div id="banner" hidden><span id="bnA"></span><span id="bnB"></span></div>
+
+<div id="title">
+  <div id="logo" class="one"><div class="a"><i>햄</i><i>스</i><i>런</i></div></div>
+  <div class="btns">
+    <button class="btn" id="bStart"><span>START</span></button>
+    <button class="btn chip" id="bShop"><span data-ko="햄스터" data-en="HAMSTERS">햄스터</span></button>
+  </div>
+</div>
+
+<div class="dim" id="cont" hidden>
+  <div class="sheet">
+    <h2>START</h2>
+    <div class="row"><button class="btn" id="bCont"><span id="bContT">STAGE 2</span></button></div>
+    <div class="row"><button class="btn chip" id="bNew"><span data-ko="처음부터" data-en="NEW GAME">처음부터</span></button></div>
+  </div>
+</div>
+
+<div class="dim" id="how" hidden>
+  <div class="sheet wide">
+    <h2>HOW TO PLAY</h2>
+    <div class="hcs">
+      <div class="hc"><canvas id="hw1" width="240" height="200"></canvas><p data-ko="누르면 앞으로, 밀면 그쪽으로 콩" data-en="Tap to hop forward, swipe to hop that way"></p></div>
+      <div class="hc"><canvas id="hw2" width="240" height="200"></canvas><p data-ko="해바라기씨는 볼에 넣고, 은신처에 쏟으면 내 것" data-en="Stuff seeds in your cheeks, empty them at the hideout to keep them"></p></div>
+      <div class="hc"><canvas id="hw3" width="240" height="200"></canvas><p data-ko="꾸물대면 고양이가 덮쳐요" data-en="Dawdle and the cat pounces"></p></div>
+    </div>
+    <div class="row"><button class="btn" id="bHowOk"><span>OK</span></button></div>
+  </div>
+</div>
+
+<div class="dim" id="shop" hidden>
+  <div class="sheet wide">
+    <h2 data-ko="햄스터" data-en="HAMSTERS">햄스터</h2>
+    <div id="bankLine"><span class="seedI g"></span><span id="shBank">0</span></div>
+    <div id="grid"></div>
+    <div class="row x"><button class="btn chip" id="bShopX"><span>OK</span></button></div>
+  </div>
+</div>
+
+<div class="dim" id="over" hidden>
+  <div class="sheet">
+    <h2>GAME OVER</h2>
+    <div class="big" id="oSt">STAGE 1</div>
+    <div class="num"><span class="seedI g"></span><span id="oBk">0</span></div>
+    <div class="row"><button class="btn" id="bRetry"><span>RETRY</span></button></div>
+    <div class="row"><button class="btn chip" id="bOShop"><span data-ko="햄스터" data-en="HAMSTERS">햄스터</span></button><button class="btn chip" id="bHome"><span data-ko="처음 화면" data-en="TITLE">처음 화면</span></button></div>
+  </div>
+</div>
+
+<div class="dim" id="end" hidden>
+  <div class="sheet">
+    <h2>THE END</h2>
+    <div id="endWrap">
+      <img id="endImg" alt="">
+      <div>
+        <div class="row"><button class="btn chip" id="bSave"><span data-ko="저장" data-en="SAVE">저장</span></button><button class="btn chip" id="bShare"><span data-ko="공유" data-en="SHARE">공유</span></button></div>
+        <div class="row"><button class="btn" id="bEndHome"><span data-ko="처음 화면" data-en="TITLE">처음 화면</span></button></div>
+      </div>
+    </div>
+  </div>
+</div>
+<div id="toast" hidden></div>
+<div class="keys" data-ko="↑↓←→ · WASD 이동 / M 음악 · K 효과음" data-en="↑↓←→ · WASD move / M music · K sound"></div>
+
+<script src="js/lang.js?v=1"></script>
+<script src="assets/game-home.js" data-top="6" data-left="6" data-fullscreen="1" defer></script>
+<script src="lib/three.min.js"></script>
+<script src="js/data.js?v=2"></script>
+<script src="js/hmodel.js?v=1"></script>
+<script src="js/models.js?v=5"></script>
+<script src="js/world.js?v=2"></script>
+<script src="js/audio.js?v=3"></script>
+<script src="js/portrait.js?v=2"></script>
+<script src="js/how.js?v=4"></script>
+<script src="js/card.js?v=1"></script>
+<script src="js/ui.js?v=2"></script>
+<script src="js/game.js?v=7"></script>
+<script>
+if ('ontouchstart' in window || navigator.maxTouchPoints > 0) document.body.classList.add('touch');
+if (window.EN) { document.title = 'Hamsrun'; const l = document.getElementById('logo'); l.classList.remove('one'); l.innerHTML = '<div class="a"><i>HAMS</i><i>RUN</i></div>'; }
+GAME.init();
+UI.init();
+</script>
+<script src="/assets/visit.js?v=21" defer></script>
+<script src="/assets/game-events.js" defer></script>
+</body>
+</html>

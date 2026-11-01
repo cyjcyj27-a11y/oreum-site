@@ -18,6 +18,7 @@ import io, os, re, sys
 
 # slug, 한국어 경로, 영어 경로, 한국어 이름, 한국어 장르 앵커, 영어 이름, 영어 장르 앵커, 태그
 GAMES = [
+    ("hamster",       "/games/mini/hamster/",        "/en/games/mini/hamster/",        "햄스런",            "햄스터 길건너기게임",               "HAMSRUN",               "hamster road crossing game",    {"casual", "3d", "arcade", "animal"}),
     ("cookiestack",   "/games/flash/cookiestack/",   "/en/games/flash/cookiestack/",   "쿠키쌓기", "3D 탑쌓기게임",           "COOKIE STACK",           "stack game online",    {"arcade", "3d", "casual", "food"}),
     ("mogiz",         "/games/mogiz/",               "/en/games/mogiz/",               "모기즈",            "모기가 되는 3D 인디게임",             "MOGIZ",                 "play as a mosquito game",       {"3d", "action", "sim", "funny"}),
     ("hotteok",       "/games/flash/hotteok/",       "/en/games/flash/hotteok/",       "호떡만들기 게임", "호떡 만들기 3D 장사게임",           "HOTTEOK MAKER",           "korean pancake making game",    {"sim", "tycoon", "3d", "casual", "food", "korean"}),
