@@ -52,6 +52,23 @@
     rows.forEach((c, i) => { g.fillStyle = c; g.fillRect(0, i * h / rows.length, w, h / rows.length + 1); });
   }
   function car(g, x, y, c) { g.fillStyle = c; g.beginPath(); g.roundRect(x - 26, y - 12, 52, 22, 8); g.fill(); g.fillStyle = '#bfe8ff'; g.fillRect(x - 12, y - 18, 22, 8); g.fillStyle = '#2a2a2e'; g.beginPath(); g.arc(x - 15, y + 11, 6, 0, 7); g.arc(x + 15, y + 11, 6, 0, 7); g.fill(); }
+  // 폰: 왼쪽 아래 조이스틱 손잡이를 위로, 다음엔 오른쪽으로 미는 그림
+  function joyPic(g, ph) {
+    const cx = 48, cy = 150, R = 34;
+    const k = ph < 1.4 ? Math.max(0, Math.min(1, (ph - 0.3) / 0.2)) * (ph < 0.9 ? 1 : 0) : Math.max(0, Math.min(1, (ph - 1.7) / 0.2)) * (ph < 2.3 ? 1 : 0);
+    const kx = ph < 1.4 ? 0 : k * 15, ky = ph < 1.4 ? -k * 15 : 0;
+    g.globalAlpha = 0.95; g.lineWidth = 2.5; g.strokeStyle = '#4a2a14';
+    g.fillStyle = 'rgba(255,248,230,.55)'; g.beginPath(); g.arc(cx, cy, R, 0, 7); g.fill(); g.stroke();
+    g.fillStyle = '#fff';
+    for (const [dx, dy, a] of [[0, -1, 0], [1, 0, 1], [0, 1, 2], [-1, 0, 3]]) {
+      const on = k > 0.5 && ((ph < 1.4 && a === 0) || (ph >= 1.4 && a === 1));
+      g.save(); g.translate(cx + dx * 24, cy + dy * 24); g.rotate(a * Math.PI / 2); g.fillStyle = on ? '#ffd84a' : '#fff';
+      g.beginPath(); g.moveTo(0, -5); g.lineTo(5, 3); g.lineTo(-5, 3); g.closePath(); g.fill(); g.restore();
+    }
+    g.fillStyle = '#5fd6b8'; g.beginPath(); g.arc(cx + kx, cy + ky, 15, 0, 7); g.fill(); g.stroke();
+    g.fillStyle = '#2a9a80'; g.beginPath(); g.arc(cx + kx, cy + ky, 5, 0, 7); g.fill();
+    g.globalAlpha = 1;
+  }
   function frame(now) {
     const t = (now - t0) / 1000;
     const b = DATA.BREEDS[0];
@@ -63,13 +80,14 @@
     if (ph < 1.4) { const k = hopK((ph - 0.5) / 0.25); hy = 160 - k * 80; sq = Math.sin(k * Math.PI) * -0.15; }
     else { const k = hopK((ph - 2.0) / 0.25); hy = 80; hx = 120 + k * 60; sq = Math.sin(k * Math.PI) * -0.15; }
     HM.draw(g, hx, hy - Math.sin(Math.min(1, Math.max(0, ph < 1.4 ? (ph - 0.5) / 0.25 : (ph - 2) / 0.25)) * Math.PI) * 14, 0.7, b, 0, sq);
+    if (document.body.classList.contains('touch')) { joyPic(g, ph); } else {
     // 손가락
     const fx = ph < 1.4 ? 70 : 60 + hopK((ph - 1.7) / 0.3) * 50, fy = 150, press = ph < 1.4 ? (ph > 0.3 && ph < 0.6) : (ph > 1.7 && ph < 2.0);
     g.globalAlpha = 0.9; g.fillStyle = '#ffe2c8'; g.strokeStyle = '#4a2a14'; g.lineWidth = 2.5;
     g.beginPath(); g.ellipse(fx, fy + (press ? 4 : 0), 11, 15, 0, 0, 7); g.fill(); g.stroke();
     if (press) { g.beginPath(); g.arc(fx, fy - 12, 18, 0, 7); g.strokeStyle = 'rgba(255,255,255,.9)'; g.stroke(); }
     if (ph >= 1.4) { g.strokeStyle = '#fff'; g.lineWidth = 4; g.beginPath(); g.moveTo(40, 185); g.lineTo(130, 185); g.lineTo(120, 178); g.moveTo(130, 185); g.lineTo(120, 192); g.stroke(); }
-    g.globalAlpha = 1;
+    g.globalAlpha = 1; }
     // 2) 씨 → 볼 빵빵 → 은신처
     c = document.getElementById('hw2'); g = c.getContext('2d'); g.clearRect(0, 0, 240, 200);
     bg(g, 240, 200, ['#9fd36b', '#8cc65c']);
@@ -95,6 +113,9 @@
     g.beginPath(); g.ellipse(120, py - 4, 34, 24, 0, 0, 7); g.fill();
     raf = requestAnimationFrame(frame);
   }
-  H.start = function () { cancelAnimationFrame(raf); t0 = performance.now(); raf = requestAnimationFrame(frame); };
+  H.start = function () {
+    const tp = document.getElementById('hw1').nextElementSibling; // 폰은 조이스틱만 써서 첫 칸 글도 바꿈
+    if (document.body.classList.contains('touch')) tp.textContent = L('조이스틱을 밀면 그쪽으로 콩', 'Push the joystick to hop that way');
+    cancelAnimationFrame(raf); t0 = performance.now(); raf = requestAnimationFrame(frame); };
   H.stop = function () { cancelAnimationFrame(raf); };
 })();

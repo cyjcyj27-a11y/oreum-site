@@ -343,7 +343,7 @@
     });
     const cv = document.getElementById('cv');
     let sx = 0, sy = 0, st = 0, id = null, done = false;
-    cv.addEventListener('pointerdown', (e) => { id = e.pointerId; sx = e.clientX; sy = e.clientY; st = performance.now(); done = false; SND.unlock(); });
+    cv.addEventListener('pointerdown', (e) => { if (e.pointerType === 'touch') return; id = e.pointerId; sx = e.clientX; sy = e.clientY; st = performance.now(); done = false; SND.unlock(); });
     cv.addEventListener('pointermove', (e) => {
       if (e.pointerId !== id || done || S.mode !== 'play') return;
       const dx = e.clientX - sx, dy = e.clientY - sy, th = Math.max(26, Math.min(innerWidth, innerHeight) * 0.05);
