@@ -351,6 +351,28 @@
     });
     cv.addEventListener('pointerup', (e) => { if (e.pointerId !== id) return; id = null; if (!done && S.mode === 'play') GAME.move('up'); done = true; });
     cv.addEventListener('pointercancel', () => { id = null; });
+    // 폰 원형 조이스틱: 민 쪽으로 바로 한 칸, 계속 밀고 있으면 착지할 때마다 이어서 콩
+    const jy = document.getElementById('joy'), jk = document.getElementById('joyK'), ars = { up: jy.querySelector('.u'), down: jy.querySelector('.d'), left: jy.querySelector('.l'), right: jy.querySelector('.r') };
+    let jid = null;
+    const touchOn = () => document.body.classList.add('touch');
+    if (matchMedia('(pointer:coarse)').matches) touchOn();
+    window.addEventListener('pointerdown', (e) => { if (e.pointerType === 'touch') touchOn(); }, true);
+    const jset = (d) => { if (d === GAME.joyDir) return; GAME.joyDir = d; for (const k in ars) ars[k].classList.toggle('on', k === d); if (d) GAME.move(d); };
+    const jmove = (e) => {
+      const b = jy.getBoundingClientRect(), R = b.width / 2;
+      let dx = e.clientX - (b.left + R), dy = e.clientY - (b.top + R); const L = Math.hypot(dx, dy), m = R * 0.42;
+      if (L > m) { dx *= m / L; dy *= m / L; }
+      jk.style.transform = 'translate(' + dx + 'px,' + dy + 'px)';
+      jset(L < R * 0.22 ? null : Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'right' : 'left') : (dy > 0 ? 'down' : 'up'));
+    };
+    const jend = (e) => { if (e.pointerId !== jid) return; jid = null; jk.style.transform = ''; jset(null); };
+    jy.addEventListener('pointerdown', (e) => { e.preventDefault(); if (jid !== null) return; jid = e.pointerId; try { jy.setPointerCapture(jid); } catch (_) {} SND.unlock(); jmove(e); });
+    jy.addEventListener('pointermove', (e) => { if (e.pointerId === jid) jmove(e); });
+    jy.addEventListener('pointerup', jend); jy.addEventListener('pointercancel', jend);
+    GAME.joyStep = () => {
+      jy.classList.toggle('off', S.mode === 'title' || UI.sheetOpen());
+      if (GAME.joyDir && S.mode === 'play' && !H.hop && !H.dead) GAME.move(GAME.joyDir);
+    };
   }
 
   GAME.toTitle = function () {
@@ -374,14 +396,14 @@
     GAME.toTitle();
     bindInput();
     window.addEventListener('resize', () => W.resize());
-    const loop = (t) => { GAME.frame(t); requestAnimationFrame(loop); };
+    const loop = (t) => { GAME.joyStep(); GAME.frame(t); requestAnimationFrame(loop); };
     requestAnimationFrame(loop);
   };
   // 시험 손잡이
   let fakeT = 0;
   window.__hm = {
     S, H, W, GAME, get paw() { return paw; },
-    tick(n, dt) { dt = dt || 1 / 60; if (!fakeT) fakeT = last || 1; for (let i = 0; i < n; i++) { fakeT += dt * 1000; GAME.frame(fakeT); } },
+    tick(n, dt) { dt = dt || 1 / 60; if (!fakeT) fakeT = last || 1; for (let i = 0; i < n; i++) { fakeT += dt * 1000; GAME.joyStep(); GAME.frame(fakeT); } },
     async shot(name) { const d = W.renderer.domElement.toDataURL('image/png'); const r = await fetch('/save?name=' + name, { method: 'POST', body: d }); return r.text(); }
   };
 })();
