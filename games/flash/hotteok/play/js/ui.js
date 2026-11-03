@@ -153,19 +153,28 @@
     g.fillStyle = 'rgba(255,255,255,.4)'; g.beginPath(); g.ellipse(-12, puff ? -14 : -4, 12, 4, -0.2, 0, 7); g.fill();
     // 한 입 베어 문 자리 + 속
     if (bite && K.fill && !(k === 'seed' || k === 'seed2')) {
-      const fc = { sugar: ['#5a2a0c', '#8a4a18'], bean: ['#4a1418', '#7a2a30'], cheese: ['#ffe58a', '#f2b81a'], japchae: ['#a07a40', '#3c7a2a'] }[K.fill];
+      const fc = { sugar: ['#e8901c', '#ffd25a'], bean: ['#2a0a1a', '#8a1c30'], cheese: ['#ffe58a', '#f2b81a'], japchae: ['#a07a40', '#3c7a2a'] }[K.fill];
       g.save(); g.beginPath(); g.ellipse(26, 2, 15, 13, 0, 0, 7); g.clip();
       g.fillStyle = fc[0]; g.fillRect(8, -14, 36, 32);
       if (K.fill === 'cheese') { g.fillStyle = fc[1]; [[18, -2], [24, 6], [30, -4], [22, 12]].forEach(([x, y]) => { g.beginPath(); g.arc(x, y, 3, 0, 7); g.fill(); }); }
       else if (K.fill === 'japchae') { g.strokeStyle = '#d8b880'; g.lineWidth = 2; for (let i = 0; i < 5; i++) { g.beginPath(); g.moveTo(12, -8 + i * 5); g.quadraticCurveTo(22, -12 + i * 5, 34, -6 + i * 5); g.stroke(); } g.fillStyle = fc[1]; g.fillRect(20, 0, 6, 3); g.fillStyle = '#e8762a'; g.fillRect(26, -6, 5, 3); }
-      else { g.fillStyle = fc[1]; g.beginPath(); g.ellipse(22, 0, 6, 3, 0.3, 0, 7); g.fill(); }
+      else if (K.fill === 'bean') { [[16, -4], [24, 4], [31, -6], [19, 9], [30, 10], [36, 2]].forEach(([x, y]) => { g.fillStyle = fc[1]; g.beginPath(); g.ellipse(x, y, 3.6, 2.8, 0.4, 0, 7); g.fill(); g.fillStyle = 'rgba(255,240,230,.85)'; g.fillRect(x - 0.6, y - 1.4, 1.2, 2.2); }); }
+      else { g.fillStyle = fc[1]; g.beginPath(); g.ellipse(20, -2, 7, 4, 0.3, 0, 7); g.fill(); g.fillStyle = 'rgba(255,255,255,.7)'; g.beginPath(); g.ellipse(18, -4, 3, 1.5, 0.3, 0, 7); g.fill(); }
       g.restore();
       g.strokeStyle = c[3]; g.lineWidth = 2.5; g.beginPath(); g.ellipse(26, 2, 15, 13, 0, Math.PI * 0.55, Math.PI * 1.45); g.stroke();
+      // 꿀: 베어 문 자리에서 반죽 위로 흘러내림
+      if (K.fill === 'sugar') { g.fillStyle = fc[0]; g.beginPath(); g.moveTo(14, 10); g.quadraticCurveTo(12, 22, 16, 28); g.arc(14.5, 28, 3.6, 0, Math.PI); g.quadraticCurveTo(9, 20, 9, 9); g.fill(); g.fillStyle = 'rgba(255,240,170,.8)'; g.fillRect(12, 14, 1.6, 8); }
     }
     if (k === 'seed' || k === 'seed2') {
-      g.fillStyle = '#3a1806'; g.beginPath(); g.ellipse(0, 6, 24, k === 'seed2' ? 7 : 5, 0, 0, 7); g.fill();
-      const n = k === 'seed2' ? 26 : 13, hh = k === 'seed2' ? 26 : 16;
-      for (let i = 0; i < n; i++) { const u = (i / n - 0.5) * 1.8, x = u * 22 + Math.sin(i * 7) * 3, y = 4 - (1 - u * u) * hh * (0.4 + (i % 3) * 0.25); g.save(); g.translate(x, y); g.rotate(i * 1.3); g.fillStyle = ['#d8cba5', '#5f7e38', '#c99358'][i % 3]; g.beginPath(); g.ellipse(0, 0, 5.5, 2.8, 0, 0, 7); g.fill(); g.strokeStyle = 'rgba(60,40,20,.5)'; g.lineWidth = 1; g.stroke(); g.restore(); }
+      const big = k === 'seed2';
+      g.fillStyle = '#3a1806'; g.beginPath(); g.ellipse(0, 6, big ? 26 : 18, big ? 8 : 3.5, 0, 0, 7); g.fill();
+      const sd = (x, y, r) => { g.save(); g.translate(x, y); g.rotate(r); g.fillStyle = ['#d8cba5', '#5f7e38', '#c99358'][Math.abs(Math.round(r * 3)) % 3]; g.beginPath(); g.ellipse(0, 0, 5.5, 2.8, 0, 0, 7); g.fill(); g.strokeStyle = 'rgba(60,40,20,.5)'; g.lineWidth = 1; g.stroke(); g.restore(); };
+      if (!big) { for (let i = 0; i < 6; i++) sd(-13 + i * 5.2, 4 + Math.sin(i * 5) * 1.2, i * 1.3 + 0.2); }
+      else {
+        // 씨앗 듬뿍: 수북한 산 + 넘쳐 떨어진 씨앗
+        for (let i = 0; i < 44; i++) { const u = ((i * 0.618) % 1 - 0.5) * 1.9, x = u * 24 + Math.sin(i * 7) * 2, y = 5 - (1 - u * u) * 34 * (0.25 + ((i * 0.37) % 1) * 0.75); sd(x, y, i * 1.3); }
+        [[-34, 26], [-26, 30], [30, 27], [37, 22], [22, 31]].forEach(([x, y], i) => sd(x, y, i * 2.1 + 0.4));
+      }
     }
     if (puff) { g.strokeStyle = 'rgba(255,255,255,.75)'; g.lineWidth = 3; g.beginPath(); g.arc(0, 2, 24, Math.PI * 1.15, Math.PI * 1.5); g.stroke(); }
     if (crisp) { g.strokeStyle = '#e8502a'; g.lineWidth = 4; g.lineCap = 'round'; [[-22, -22], [0, -28], [22, -22]].forEach(([x, y]) => { g.beginPath(); g.moveTo(x, y + 12); g.quadraticCurveTo(x - 7, y + 4, x, y - 2); g.quadraticCurveTo(x + 7, y + 4, x, y + 12); g.stroke(); }); }
