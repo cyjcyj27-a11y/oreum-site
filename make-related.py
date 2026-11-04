@@ -18,6 +18,7 @@ import io, os, re, sys
 
 # slug, 한국어 경로, 영어 경로, 한국어 이름, 한국어 장르 앵커, 영어 이름, 영어 장르 앵커, 태그
 GAMES = [
+    ("pinball",       "/games/mini/pinball/",        "/en/games/mini/pinball/",        "핀볼",              "3D 핀볼게임",                       "PINBALL",               "3D pinball game",               {"casual", "3d", "arcade"}),
     ("wasp",          "/games/wasp/",                "/en/games/wasp/",                "말벌아저씨", "말벌아저씨 3D게임",           "MR. HORNET",           "3D wasp game online",    {"action", "3d", "sim", "korean"}),
     ("hamster",       "/games/mini/hamster/",        "/en/games/mini/hamster/",        "햄스런",            "햄스터 길건너기게임",               "HAMSRUN",               "hamster road crossing game",    {"casual", "3d", "arcade", "animal"}),
     ("cookiestack",   "/games/flash/cookiestack/",   "/en/games/flash/cookiestack/",   "쿠키쌓기", "3D 탑쌓기게임",           "COOKIE STACK",           "stack game online",    {"arcade", "3d", "casual", "food"}),
