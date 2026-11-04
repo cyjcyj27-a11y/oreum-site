@@ -271,7 +271,7 @@
 <div id="act"></div>
 <div id="praise"></div>
 <div id="card"><span class="nw">NEW</span><img alt=""><div class="nm"></div><div class="ct"></div></div>
-<div id="keys">← → ↑ ↓ 이동 · Shift 달리기 · E 행동·들기<br>WASD 시점 · B 도감 · I 가방 · T 지도 · R(꾹) 리스폰 · K 효과음</div>
+<div id="keys">WASD 이동 · Shift 달리기 · E 행동·들기<br>← → ↑ ↓ 시점 · B 도감 · I 가방 · T 지도 · R(꾹) 리스폰 · K 효과음</div>
 <div id="pauseOv">❚❚</div>
 <div id="cap"><div id="capTxt"></div></div>
 
@@ -382,7 +382,7 @@
     document.getElementById('btnCont').textContent = 'ПРОДОЛЖИТЬ';
     document.getElementById('btnGo').textContent = 'ПРОДОЛЖИТЬ';
     document.getElementById('bJump').textContent = 'ПРЫЖОК';
-    document.getElementById('keys').innerHTML = '← → ↑ ↓ Идти · Shift Бег · E Действие · взять<br>WASD Камера · B Альбом · I Сумка · T Карта · R(держать) Назад · K Звук';
+    document.getElementById('keys').innerHTML = 'WASD Идти · Shift Бег · E Действие · взять<br>← → ↑ ↓ Камера · B Альбом · I Сумка · T Карта · R(держать) Назад · K Звук';
     document.getElementById('rotMsg').textContent = 'В эту игру играют горизонтально';
     document.getElementById('rotGo').textContent = 'Повернуть';
     document.getElementById('rotSub').textContent = 'Если кнопка не сработала, отключите блокировку поворота и положите телефон набок';
@@ -399,7 +399,7 @@
     document.getElementById('btnStart').textContent = 'START';
     document.getElementById('btnCont').textContent = 'CONTINUE';
     document.getElementById('bJump').textContent = 'JUMP';
-    document.getElementById('keys').innerHTML = '← → ↑ ↓ Move · Shift Run · E Action · pick up<br>WASD Camera · B Book · I Bag · T Map · R(hold) Respawn · K Sound';
+    document.getElementById('keys').innerHTML = 'WASD Move · Shift Run · E Action · pick up<br>← → ↑ ↓ Camera · B Book · I Bag · T Map · R(hold) Respawn · K Sound';
     document.getElementById('rotMsg').textContent = 'This game plays in landscape';
     document.getElementById('rotGo').textContent = 'Turn to landscape';
     document.getElementById('rotSub').textContent = 'If the button does nothing, turn off rotation lock and lay your phone sideways';
@@ -441,7 +441,7 @@
 <script src="/assets/game-events.js?v=4" defer></script>
 <script src="lib/three.min.js"></script>
 <script src="lib/GLTFLoader.global.js"></script>
-<script src="js/ru.js?v=37"></script>
+<script src="js/ru.js?v=38"></script>
 <script src="js/core.js?v=27"></script>
 <script src="js/terrain.js?v=10"></script>
 <script src="js/sky.js?v=4"></script>
@@ -460,15 +460,15 @@
 <script src="js/fishing.js?v=22"></script>
 <script src="js/play.js?v=14"></script>
 <script src="js/places.js?v=4"></script>
-<script src="js/ride.js?v=10"></script>
+<script src="js/ride.js?v=11"></script>
 <script src="js/cook.js?v=96"></script>
 <script src="js/island.js?v=13"></script>
 <script src="js/hunt.js?v=10"></script>
 <script src="js/tools.js?v=8"></script>
 <script src="js/audio.js?v=13"></script>
 <script src="js/fx.js?v=2"></script>
-<script src="js/hud.js?v=43"></script>
-<script src="js/game.js?v=53"></script>
+<script src="js/hud.js?v=44"></script>
+<script src="js/game.js?v=54"></script>
 <script>
   window.__LOAD.set(0.04);
   GAME.boot().catch(function (e) { console.error(e); document.getElementById('ldPct').textContent = 'ERROR ' + e.message; });

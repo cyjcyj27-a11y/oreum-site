@@ -3,10 +3,10 @@
   const EN = DATA.EN, W = 880, H = 640;
   const touch = () => document.body.classList.contains('touch');
   const TX = EN ? {
-    k: ['Pick an outlaw on the WANTED board<br>Arrow keys ride, follow the yellow arrow', 'Hold Space, the ring sweeps out and back<br>Let go when it turns gold', 'Drag your catch to the JAIL for the bounty<br>Catch every outlaw on the board'],
+    k: ['Pick an outlaw on the WANTED board<br>WASD rides, follow the yellow arrow', 'Hold Space, the ring sweeps out and back<br>Let go when it turns gold', 'Drag your catch to the JAIL for the bounty<br>Catch every outlaw on the board'],
     t: ['Pick an outlaw on the WANTED board<br>Left stick rides, follow the yellow arrow', 'Hold the lasso button, the ring sweeps out and back<br>Let go when it turns gold']
   } : {
-    k: ['마을 게시판에서 수배범을 골라요<br>방향키로 말을 몰아 노란 화살을 따라가요', 'Space 를 누르고 있으면 땅의 동그라미가 멀어졌다 가까워져요<br>수배범에 겹쳐 금색이 되면 놓아요', '묶은 수배범을 감옥(JAIL)까지 끌고 오면 현상금을 받아요<br>게시판의 수배범을 모두 잡아요'],
+    k: ['마을 게시판에서 수배범을 골라요<br>WASD 로 말을 몰아 노란 화살을 따라가요', 'Space 를 누르고 있으면 땅의 동그라미가 멀어졌다 가까워져요<br>수배범에 겹쳐 금색이 되면 놓아요', '묶은 수배범을 감옥(JAIL)까지 끌고 오면 현상금을 받아요<br>게시판의 수배범을 모두 잡아요'],
     t: ['마을 게시판에서 수배범을 골라요<br>왼쪽 원판으로 말을 몰아 노란 화살을 따라가요', '올가미 단추를 누르고 있으면 땅의 동그라미가 멀어졌다 가까워져요<br>수배범에 겹쳐 금색이 되면 놓아요']
   };
   const imgs = [1, 2, 3].map(n => { const i = new Image(); i.src = 'assets/how/' + n + '.webp'; return i; });
@@ -47,7 +47,7 @@
     if (touch()) {
       c.beginPath(); c.arc(132, 520, 84, 0, Math.PI * 2); c.fillStyle = 'rgba(38,23,12,.35)'; c.fill(); c.lineWidth = 5; c.strokeStyle = 'rgba(38,23,12,.8)'; c.stroke();
       const ky = down ? -44 * ease((s - 0.3) / 0.2) : 0; brass(c, 132, 520 + ky, 36, false);
-    } else key(c, 70, 496, 100, 100, '↑', down, 52);
+    } else key(c, 70, 496, 100, 100, 'W', down, 52);
   }
   // 2칸: 누르고 있으면 동그라미가 멀어졌다 가까워지고, 표적에 겹쳐 금색일 때 놓으면 고리가 몸을 조인다
   const A = [300, 500], F = [536, 177], O = [489, 242], HAND = [338, 404];

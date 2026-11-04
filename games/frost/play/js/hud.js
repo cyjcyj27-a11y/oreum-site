@@ -29,7 +29,7 @@
     addEventListener('keyup', e => { keys[e.code] = false; if (e.code === 'Space') IN.upHeld = false; });
     addEventListener('blur', () => { for (const k in keys) keys[k] = false; IN.upHeld = false; });
 
-    // 화면을 눌러도 마우스를 잠그지 않는다 (사장님 2026-10-01 "마우스고정 없애주고") — 시점은 끌거나 WASD 로
+    // 화면을 눌러도 마우스를 잠그지 않는다 (사장님 2026-10-01 "마우스고정 없애주고") — 시점은 끌거나 방향키로
     document.addEventListener('pointerlockchange', () => { locked = document.pointerLockElement === cv; });
     addEventListener('mousemove', e => { if (locked) CAMERA.look(e.movementX, e.movementY); });
     // 잠그지 않았을 때는 끌어서 시점
@@ -384,10 +384,11 @@
   const KEY_YAW = 2.3, KEY_PITCH = 1.3, AIM_KEY = 0.3;
   function read() {
     if (window.__hold || (touch && !Object.values(keys).some(Boolean))) return;
-    IN.f = (keys.ArrowUp ? 1 : 0) - (keys.ArrowDown ? 1 : 0);
-    IN.r = (keys.ArrowRight ? 1 : 0) - (keys.ArrowLeft ? 1 : 0);
-    let ly = (keys.KeyD ? 1 : 0) - (keys.KeyA ? 1 : 0), lp = (keys.KeyS ? 1 : 0) - (keys.KeyW ? 1 : 0);
-    // 장총을 겨누는 동안(F)엔 방향키도 조준을 움직인다 — 걷지 않고 겨눈 채로 (사장님 2026-09-27 "F누른상태에서 조준시점이동은 이동키로")
+    // 이동 WASD, 시점 방향키 (11/4 게시판 플레이어 "화면전환을 화살표로, 이동을 wsad 로" → 사장님 "둘 다 바꿔")
+    IN.f = (keys.KeyW ? 1 : 0) - (keys.KeyS ? 1 : 0);
+    IN.r = (keys.KeyD ? 1 : 0) - (keys.KeyA ? 1 : 0);
+    let ly = (keys.ArrowRight ? 1 : 0) - (keys.ArrowLeft ? 1 : 0), lp = (keys.ArrowDown ? 1 : 0) - (keys.ArrowUp ? 1 : 0);
+    // 장총을 겨누는 동안(F)엔 이동키(WASD)도 조준을 움직인다 — 걷지 않고 겨눈 채로 (사장님 2026-09-27 "F누른상태에서 조준시점이동은 이동키로")
     if (PL.aim) { ly += IN.r; lp -= IN.f; ly = U.clamp(ly, -1, 1); lp = U.clamp(lp, -1, 1); IN.f = IN.r = 0; }
     if (ly || lp) {
       const dt = Math.min(T.dt || 0.016, 0.05);
@@ -403,8 +404,8 @@
   let rHold = 0;
   // 아래 키 안내: 헤엄·잠수 중엔 물속 키로 바꾼다 (사장님 2026-09-19 "수영할 때 키 안내를 해줘")
   let keyMode = '', keyLand = null;
-  const KEY_SWIM = ['← → ↑ ↓ 헤엄 · Shift 빨리 · Space 잠수<br>WASD 시점 · R(꾹) 리스폰', '← → ↑ ↓ Swim · Shift Fast · Space Dive<br>WASD Camera · R(hold) Respawn'];
-  const KEY_DIVE = ['← → ↑ ↓ 헤엄 · W S 위·아래 · Space 떠오르기 · Shift 빨리', '← → ↑ ↓ Swim · W S Up/Down · Space Rise · Shift Fast'];
+  const KEY_SWIM = ['WASD 헤엄 · Shift 빨리 · Space 잠수<br>← → ↑ ↓ 시점 · R(꾹) 리스폰', 'WASD Swim · Shift Fast · Space Dive<br>← → ↑ ↓ Camera · R(hold) Respawn'];
+  const KEY_DIVE = ['WASD 헤엄 · ← → ↑ ↓ 시점 · Space 떠오르기 · Shift 빨리', 'WASD Swim · ← → ↑ ↓ Camera · Space Rise · Shift Fast'];
   const KEY_SPEAR = [' · E 작살', ' · E Spear'];
   const KEY_AIM = ['마우스 왼쪽 또는 쏘기 단추 · F 겨누기 끄기<br>마우스 · ← → ↑ ↓ · WASD 조준', 'Left click or the FIRE button · F Stop aiming<br>Mouse · ← → ↑ ↓ · WASD Aim'];
   function keyHelp() {

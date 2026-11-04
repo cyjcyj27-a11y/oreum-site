@@ -181,7 +181,7 @@
     if (T.mode === 'title') { CAM.yaw = PL.yaw + Math.PI; CAM.pitch = 0.22; }
     T.mode = 'play'; T.paused = false;
     HUD.show(true);
-    // 시작할 때 마우스를 잠그지 않는다 (사장님 2026-10-01 "게임시작할때 마우스가 화면에 붙어있지않게") — 시점은 끌거나 WASD 로
+    // 시작할 때 마우스를 잠그지 않는다 (사장님 2026-10-01 "게임시작할때 마우스가 화면에 붙어있지않게") — 시점은 끌거나 방향키로
     if (window.gtag) try { gtag('event', 'game_start', { game: 'fernflower' }); } catch (e) { }
   }
 

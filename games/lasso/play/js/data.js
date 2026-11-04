@@ -25,9 +25,9 @@
     loop:   { v: [1.3, 1.6, 1.95, 2.3],         p: [150, 600, 1800] },       // 올가미 반지름(m)
     gloves: { v: [1, 1.3, 1.65, 2.1],           p: [200, 700, 2000] }        // 당기는 힘
   };
-  const T = EN ? { title: 'LASSO SISTER', cont: 'CONTINUE', land: 'ROTATE', ride: 'RIDE', off: 'OFF', board: 'WANTED', store: 'BUY HORSE', stable: 'STABLE', keys: 'Arrows Move · WASD Look · Space Lasso · E Ride<br>Drag Look · Wheel Zoom · H Horse',
+  const T = EN ? { title: 'LASSO SISTER', cont: 'CONTINUE', land: 'ROTATE', ride: 'RIDE', off: 'OFF', board: 'WANTED', store: 'BUY HORSE', stable: 'STABLE', keys: 'WASD Move · Arrows Look · Space Lasso · E Ride<br>Drag Look · Wheel Zoom · H Horse',
       rope: 'ROPE', horse: 'HORSE', loop: 'LOOP', gloves: 'GLOVES', fry: 'Drifter', guard: 'Henchman', petty: 'Petty Thief', hench: 'Henchman', newHorse: 'NEW HORSE', horseDown: 'HORSE DOWN', retry: 'RETRY' }
-    : { title: '올가미 언니', cont: '이어하기', land: '가로로 보기', ride: '타기', off: '내리기', board: '현상수배', store: '말 사기', stable: '마구간', keys: '방향키 이동 · WASD 시점 · Space 올가미 · E 타기<br>마우스 끌기 시점 · 휠 확대 · H 말 부르기',
+    : { title: '올가미 언니', cont: '이어하기', land: '가로로 보기', ride: '타기', off: '내리기', board: '현상수배', store: '말 사기', stable: '마구간', keys: 'WASD 이동 · 방향키 시점 · Space 올가미 · E 타기<br>마우스 끌기 시점 · 휠 확대 · H 말 부르기',
       rope: '밧줄', horse: '말', loop: '올가미', gloves: '장갑', fry: '좀도둑', guard: '부하', petty: '좀도둑', hench: '부하', newHorse: '새 말', horseDown: '말이 쓰러졌다', retry: '다시하기' };
   window.DATA = { OUTLAWS, TIER_NEED, UP, T, EN, FRY_BOUNTY: 20, GUARD_BOUNTY: 100, HORSE_PRICE: 300 };
 })();

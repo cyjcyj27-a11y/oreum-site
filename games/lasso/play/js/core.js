@@ -124,8 +124,8 @@
   addEventListener('keydown', e => { if (e.code === 'Space' || e.code.startsWith('Arrow')) e.preventDefault(); const rep = IN.keys[e.code]; IN.keys[e.code] = true; if (!rep && IN.onKey) IN.onKey(e); });
   addEventListener('keyup', e => { IN.keys[e.code] = false; if (IN.onKeyUp) IN.onKeyUp(e); });
   addEventListener('blur', () => { const was = IN.keys; IN.keys = {}; if (was.Space && IN.onKeyUp) IN.onKeyUp({ code: 'Space' }); });
-  // 시점 키: A·D 좌우 돌리기, W·S 위아래(이동은 방향키). Z·C 도 좌우
-  function keyCam(dt) { const k = IN.keys; if (k.KeyA || k.KeyZ) CAM.rot(2.3 * dt); if (k.KeyD || k.KeyC) CAM.rot(-2.3 * dt); if (k.KeyW) CAM.tilt(-1.3 * dt); if (k.KeyS) CAM.tilt(1.3 * dt); }
+  // 시점 키: ← → 좌우 돌리기, ↑ ↓ 위아래(이동은 WASD, 11/4 게시판 플레이어 요청 → 사장님 "둘 다 바꿔"). Z·C 도 좌우
+  function keyCam(dt) { const k = IN.keys; if (k.ArrowLeft || k.KeyZ) CAM.rot(2.3 * dt); if (k.ArrowRight || k.KeyC) CAM.rot(-2.3 * dt); if (k.ArrowUp) CAM.tilt(-1.3 * dt); if (k.ArrowDown) CAM.tilt(1.3 * dt); }
 
   // ── 모델: http 면 fetch, file:// 면 옆의 .glb.js 사본(window.GLBJS) ──
   const cache = {};

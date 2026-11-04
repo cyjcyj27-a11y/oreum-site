@@ -41,7 +41,7 @@
   const JOY = { x: 0, y: 0, on: false };
   function moveInput() {
     const k = IN.keys; let x = 0, y = 0;
-    if (k.ArrowUp) y += 1; if (k.ArrowDown) y -= 1; if (k.ArrowLeft) x -= 1; if (k.ArrowRight) x += 1; // 이동은 방향키, WASD 는 시점(core.js keyCam)
+    if (k.KeyW) y += 1; if (k.KeyS) y -= 1; if (k.KeyA) x -= 1; if (k.KeyD) x += 1; // 이동은 WASD, 방향키는 시점(core.js keyCam)
     let m = Math.hypot(x, y); if (m > 0) { x /= m; y /= m; m = (k.ShiftLeft || k.ShiftRight) ? 0.4 : 1; }
     if (JOY.on) { const L = Math.hypot(JOY.x, JOY.y); m = L < 0.16 ? 0 : Math.min(1, L); x = L > 0.01 ? JOY.x / L : 0; y = L > 0.01 ? JOY.y / L : 0; }
     return { x, y, m };
