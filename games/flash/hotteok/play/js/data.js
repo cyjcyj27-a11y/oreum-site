@@ -66,7 +66,7 @@
   D.ANGRY_LIMIT = 3; // 하루에 이만큼 화나 떠나면 GAME OVER
 
   // 굽기 기준(한 면): 이 값 사이가 노릇
-  D.COOK = { raw: 0.55, good0: 0.72, good1: 1.15, burnt: 1.4, crisp0: 1.1, crisp1: 1.38 };
+  D.COOK = { raw: 0.55, good0: 0.72, good1: 1.15, burnt: 1.4, crisp0: 1.1, crisp1: 1.4, warn: 1.32 }; // warn: 타기 약 1초 전 고리 깜빡임
   D.PRESS = { good0: 0.7, good1: 1.0, burst: 1.06, gonggal: 0.3 };
   D.PERFECT_FOR_HONEY = 5; // PERFECT 다섯 개면 꿀단지 가득
 

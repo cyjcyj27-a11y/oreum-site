@@ -199,12 +199,13 @@
     const pressing = h.pressShow;
     let f, col;
     if (pressing) { f = Math.min(1, h.flat / 1.06); col = h.flat > D.PRESS.good1 + 0.02 ? '#e2412a' : h.flat >= D.PRESS.good0 - G.gv('press') ? '#4fc24a' : '#4aa8e8'; }
-    else { const c = h.down ? h.cookB : h.cookA; f = Math.min(1, c / D.COOK.burnt); col = c > D.COOK.burnt ? '#2a1a12' : c > D.COOK.good1 ? '#e2412a' : c >= D.COOK.good0 ? '#4fc24a' : c > D.COOK.raw ? '#f2c33a' : '#f6efe0'; }
+    else { const c = h.down ? h.cookB : h.cookA; f = Math.min(1, c / D.COOK.burnt); col = c > D.COOK.burnt ? '#2a1a12' : c > D.COOK.warn ? '#e2412a' : c > D.COOK.good1 ? '#f28a1e' : c >= D.COOK.good0 ? '#4fc24a' : c > D.COOK.raw ? '#f2c33a' : '#f6efe0'; }
     const fg = e.children[0].children[1]; fg.setAttribute('stroke-dashoffset', (94.25 * (1 - f)).toFixed(1)); fg.setAttribute('stroke', col);
     // 가운데 점 = 아랫면 색
     const c3 = HOT.cookCol(h.down ? h.cookB : h.cookA); e.children[0].children[2].setAttribute('fill', 'rgb(' + c3.map((v) => Math.round(v * 255)).join(',') + ')');
-    e.classList.toggle('good', !pressing && col === '#4fc24a');
-    e.classList.toggle('hot', !pressing && (col === '#e2412a' || col === '#2a1a12'));
+    e.classList.toggle('good', !pressing && (col === '#4fc24a' || col === '#f28a1e')); // 초록 보통, 주황 바삭
+    e.classList.toggle('warn', !pressing && col === '#e2412a'); // 곧 탐
+    e.classList.toggle('hot', !pressing && col === '#2a1a12');
   };
 
   // ---------- 칭찬 글자 ----------

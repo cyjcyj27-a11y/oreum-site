@@ -47,7 +47,7 @@
       const lfo = ctx.createOscillator(); lfo.type = 'square'; lfo.frequency.value = 17; const lg = ctx.createGain(); lg.gain.value = 0; lfo.connect(lg); lg.connect(g.gain);
       s.connect(hp); hp.connect(g); g.connect(sfx); s.start(); lfo.start(); siz = { g, lg, hp };
     }
-    const v = Math.min(0.11, k * 0.035);
+    const v = Math.min(0.15, k * 0.035);
     siz.g.gain.setTargetAtTime(v, ctx.currentTime, 0.2); siz.lg.gain.setTargetAtTime(v * 0.35, ctx.currentTime, 0.2);
   };
   // 반죽 철퍽

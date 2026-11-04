@@ -101,6 +101,8 @@ body.honeyT #cv{filter:saturate(1.25) brightness(1.08)}
 .ring .dot{stroke:#fff;stroke-width:1.5}
 .ring.good svg{animation:rg .5s ease-in-out infinite}
 .ring.hot svg{animation:rg .18s steps(2) infinite}
+.ring.warn svg{animation:rw .22s steps(2) infinite}
+@keyframes rw{50%{transform:scale(1.3);opacity:.35}}
 @keyframes rg{50%{transform:scale(1.18)}}
 
 /* 손님 말풍선: 종이컵 종이 */
@@ -317,16 +319,16 @@ body.honeyT #cv{filter:saturate(1.25) brightness(1.08)}
 <script src="js/lang.js?v=1"></script>
 <script src="assets/game-home.js" data-top="6" data-left="6" data-fullscreen="1" defer></script>
 <script src="lib/three.min.js"></script>
-<script src="js/data.js?v=3"></script>
-<script src="js/audio.js?v=4"></script>
+<script src="js/data.js?v=4"></script>
+<script src="js/audio.js?v=5"></script>
 <script src="js/scene.js?v=5"></script>
 <script src="js/hotteok.js?v=1"></script>
 <script src="js/folk.js?v=2"></script>
 <script src="js/people.js?v=3"></script>
 <script src="js/how.js?v=4"></script>
 <script src="js/card.js?v=1"></script>
-<script src="js/ui.js?v=5"></script>
-<script src="js/game.js?v=7"></script>
+<script src="js/ui.js?v=6"></script>
+<script src="js/game.js?v=8"></script>
 <script>UI.boot();</script>
 <script src="/assets/visit.js?v=21" defer></script>
 <script src="/assets/game-events.js?v=4" defer></script>

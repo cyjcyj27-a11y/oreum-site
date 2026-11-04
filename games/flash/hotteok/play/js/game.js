@@ -167,7 +167,7 @@
     let s = 3, perfect = true; const why = [];
     const cw = it.crispy ? [C.crisp0, C.crisp1] : [C.good0, C.good1];
     [h.cookA, h.cookB].forEach((c) => {
-      if (c > C.burnt + (it.crispy ? 0.12 : 0)) { s -= 1.5; perfect = false; why.push('burnt'); }
+      if (c > C.burnt) { s -= 1.5; perfect = false; why.push('burnt'); }
       else if (c < C.raw) { s -= 1.5; perfect = false; why.push('raw'); }
       else if (c < cw[0] || c > cw[1]) { s -= 0.5; perfect = false; }
     });
@@ -305,7 +305,9 @@
     });
     for (let i = 0; i < 6; i++) if (!G.spots[i] || G.spots[i] === (G.held && G.held.h)) UI.cookRing(i, null);
     R.heat.intensity = 0.25 + onGrid * 0.12;
-    SND.sizzle(onGrid * (0.4 + T.oil * 0.6));
+    // 타기 직전 호떡이 있으면 지글 소리가 커짐
+    const warn = G.spots.filter((h) => h && h !== (G.held && G.held.h) && (h.down ? h.cookB : h.cookA) > D.COOK.warn).length;
+    SND.sizzle(onGrid * (0.4 + T.oil * 0.6) + warn * 2);
     // 쟁반 위 호떡: 김, 씨앗
     if (G.tray && G.tray.cut > 0 && G.tray.cut < 1) { G.tray.cut = Math.min(1, G.tray.cut + dt / 0.38); HOT.shape(G.tray); }
     if (G.tray) { if (Math.random() < dt * 2) R.emit('steam', G.tray.grp.position.x, 0.05, G.tray.grp.position.z, 1); if (HOT.updSeeds(G.tray, dt)) {} }
