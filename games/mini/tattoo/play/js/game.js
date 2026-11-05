@@ -197,6 +197,7 @@
     pola(P);
     UI.praise(L('완성!', 'DONE!'), '', 'perfect', innerWidth / 2, innerHeight * 0.35); SND.clear();
     G.mode = 'wait'; step.P = P; frameArm(P.job);
+    UI.prog(); // 획을 대자마자 끝나면 숫자가 94% 로 남던 것
     showDone();
     G.save();
   }
