@@ -190,7 +190,13 @@ html.ol-land #rotate{display:none!important}
   .hc canvas{max-width:30vh}.hc p{font-size:3.8vh}
   .spec{width:28vh;min-height:52vh;padding:9vh 2vh 2vh}.spec canvas{width:16vh;height:16vh}.spec b{font-size:4.4vh}.spec p{font-size:3.4vh}
   #pad{width:150px;height:150px}#bBite{width:84px;height:84px}
-  .stat{font-size:15px;min-height:32px;padding:3px 22px 3px 9px}.stat b{font-size:16px}
+  /* 11/5 폰 가로 780 이하에서 소리 단추가 화면 밖으로 밀림: 줄여서 한 줄에 넣고, 그래도 넘치면 밑줄로(잘리지 않게) */
+  #hud{gap:8px;flex-wrap:wrap}
+  .stat{font-size:15px;min-height:32px;padding:3px 17px 3px 8px;gap:5px}.stat b{font-size:16px}
+  .stat::after{width:16px;right:-7px}
+  #drops{gap:2px}#drops i{width:11px;height:15px}
+  .tog{width:36px;height:36px}.tog svg{inset:7px}
+  #tDex{width:70px}#tDex b{left:34px;font-size:15px}
   .bar{width:170px;height:11px}.gg{font-size:13px}
   #cardImg{width:34vh}#endSide h2{font-size:9vh}#endTxt{font-size:3.6vh}
   .onom{font-size:38px}
