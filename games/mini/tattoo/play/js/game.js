@@ -146,18 +146,26 @@
     needle.last = cur;
     UI.prog();
   }
+  // 폰은 손가락이라 여유를 화면 px 로 잡음(11/5 사장님 "모바일에서 그리니까 안끝나": 폰은 PC 의 절반인 3.8px 뿐이라 떨림 10px 면 세 바퀴에 88%, 여섯 바퀴 넘게 걸림)
+  const FINGER_HIT = 10, FINGER_SLIP = 16;
+  function lineMargin() {
+    const hit = gv('lineHit'), slip = gv('slip');
+    if (!document.body.classList.contains('touch')) return { hit, slip };
+    const c = RND.camera, k = innerHeight / (2 * Math.tan((c.fov * Math.PI) / 360) * cam.dist); // 살갗 1cm 가 화면 몇 px 인지
+    return { hit: Math.min(0.24, hit * Math.max(1, FINGER_HIT / k / D.GEAR.lineHit[0])), slip: Math.min(0.45, slip * Math.max(1, FINGER_SLIP / k / D.GEAR.slip[0])) };
+  }
   // from → to 사이를 0.025cm 마다 찍음
   function stamp(a, b, d) {
     const P = step.P, n = Math.max(1, Math.ceil(d / 0.025)), fast = needle.vS > gv('vFast'), keep = fast ? Math.max(0.12, 1 - (needle.vS - gv('vFast')) / gv('vFast')) : 1;
-    const color = P.phase === 'color';
+    const color = P.phase === 'color', mg = lineMargin();
     for (let i = 1; i <= n; i++) {
       const t = i / n, s = a.s + (b.s - a.s) * t, x = a.x + (b.x - a.x) * t, stepL = d / n;
       if (Math.random() < 0.05 * gv('smudge')) ARM.smudge(s, x, color ? 0.8 : 1);
       if (!color) {
         const near = ARM.near(s, x, 0.5);
-        ARM.inkDot(s, x, gv('lineR'), fast && Math.random() > keep, gv('lineHit'));
-        if (near > gv('slip')) { needle.offRun += stepL; if (needle.offRun > 0.22 && !needle.offCounted) { needle.offCounted = true; tally.off++; S.stats.offs++; UI.praise(L('삐끗', 'SLIP'), '-' + D.MISS.off, 'minus', needle.px, needle.py); SND.bad(); } }
-        else if (near < gv('slip') - 0.05) { needle.offRun = 0; needle.offCounted = false; }
+        ARM.inkDot(s, x, gv('lineR'), fast && Math.random() > keep, mg.hit);
+        if (near > mg.slip) { needle.offRun += stepL; if (needle.offRun > 0.22 && !needle.offCounted) { needle.offCounted = true; tally.off++; S.stats.offs++; UI.praise(L('삐끗', 'SLIP'), '-' + D.MISS.off, 'minus', needle.px, needle.py); SND.bad(); } }
+        else if (near < mg.slip - 0.05) { needle.offRun = 0; needle.offCounted = false; }
       } else {
         const r = ARM.colorDot(s, x, gv('brushR'), G.color, gv('brushHit'));
         if (r.wrong) { needle.wrongRun += stepL; if (needle.wrongRun > 0.45) { needle.wrongRun = 0; tally.spill++; S.stats.spills++; UI.praise(L('다른 색', 'WRONG INK'), '-' + D.MISS.spill, 'minus', needle.px, needle.py); SND.bad(); } }
