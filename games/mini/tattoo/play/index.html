@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>타투샵</title>
+<style>
+/* 단추·창 소재 = 타투샵 물건(올드스쿨 플래시 도안)
+   주 단추: 도안에 그리는 빨간 리본 띠(검은 굵은 테 + 접힌 끝)
+   보조 단추: 누런 도안 종이 딱지
+   상단 알약: 검은 도안 이름표(크림 안줄)
+   둥근 단추: 잉크 컵(흰 테 + 잉크)
+   창: 바랜 도안 종이(검은 두 줄 테 + 귀퉁이 별) */
+@font-face{font-family:'Ttl';src:url('fonts/title.woff2?v=2') format('woff2');font-display:block}
+@font-face{font-family:'Ui';src:url('fonts/uib.woff?v=1') format('woff');font-display:swap}
+:root{--ink:#18171b;--red:#c8312b;--redD:#7e1c18;--paper:#f3e5bf;--paperD:#e2cc96;--yel:#f0bf2e;--grn:#2e8a4c;--blu:#2a6aa6}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+html,body{width:100%;height:100%;overflow:hidden;background:#1d1716;color:var(--ink);font-family:'Ui','Malgun Gothic',sans-serif;
+  user-select:none;-webkit-user-select:none;touch-action:none;-webkit-text-size-adjust:100%;text-size-adjust:100%;word-break:keep-all}
+#cv{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
+#vig{position:fixed;inset:0;z-index:1;pointer-events:none;background:radial-gradient(ellipse at 50% 50%,rgba(0,0,0,0) 58%,rgba(20,10,8,.42) 100%)}
+
+/* ---------- 주 단추: 빨간 리본 띠 ---------- */
+.btn{position:relative;border:0;cursor:pointer;font:30px/1 'Ttl','Ui',serif;white-space:nowrap;color:var(--paper);letter-spacing:.02em;
+  padding:0 34px;min-width:190px;height:58px;margin:0 22px;border-radius:3px;
+  background:linear-gradient(180deg,#e04a3e 0,var(--red) 45%,#a8261f 100%);
+  box-shadow:inset 0 0 0 3.5px var(--ink),inset 0 6px 0 rgba(255,255,255,.22),0 5px 0 var(--ink);
+  -webkit-text-stroke:5px var(--ink);paint-order:stroke fill;
+  transition:transform .22s cubic-bezier(.34,1.56,.64,1),filter .15s}
+.btn::before,.btn::after{content:'';position:absolute;top:12px;width:30px;height:46px;z-index:-1;background:var(--redD);
+  box-shadow:inset 0 0 0 3.5px var(--ink)}
+.btn::before{left:-22px;clip-path:polygon(0 0,100% 0,100% 100%,0 100%,38% 50%)}
+.btn::after{right:-22px;clip-path:polygon(0 0,100% 0,62% 50%,100% 100%,0 100%)}
+.btn span{position:relative;z-index:1}
+.btn:hover{filter:brightness(1.08)}
+.btn:active{transform:translateY(4px) scale(.97);box-shadow:inset 0 0 0 3.5px var(--ink),inset 0 6px 0 rgba(255,255,255,.22),0 1px 0 var(--ink);transition-duration:.04s}
+/* 보조 단추: 도안 종이 딱지 */
+.btn.sm{font-size:22px;height:48px;min-width:0;padding:0 22px;margin:0 6px;color:var(--ink);-webkit-text-stroke:0;
+  background:linear-gradient(180deg,#fbf1d4,var(--paper) 60%,var(--paperD));border-radius:4px;
+  box-shadow:inset 0 0 0 3px var(--ink),inset 0 0 0 6px var(--paper),inset 0 0 0 7.5px var(--ink),0 4px 0 var(--ink)}
+.btn.sm::before,.btn.sm::after{display:none}
+.btn.sm:active{box-shadow:inset 0 0 0 3px var(--ink),inset 0 0 0 6px var(--paper),inset 0 0 0 7.5px var(--ink),0 1px 0 var(--ink)}
+.btn.sm.on{background:linear-gradient(180deg,#ffe58a,var(--yel))}
+.btn.poor{opacity:.55}
+.btn.sm .n{display:inline-block;margin-left:6px;min-width:24px;padding:3px 6px;border-radius:12px;background:var(--ink);color:var(--paper);font:15px/1 'Ui',sans-serif}
+
+/* ---------- 상단바: 검은 도안 이름표 ---------- */
+#hud{position:fixed;top:0;left:0;right:0;z-index:5;display:flex;align-items:center;gap:7px;pointer-events:none;
+  padding:calc(6px + env(safe-area-inset-top)) calc(8px + env(safe-area-inset-right)) 6px calc(104px + env(safe-area-inset-left));
+  background:linear-gradient(180deg,rgba(15,8,6,.5),rgba(0,0,0,0))}
+.stat{position:relative;display:flex;align-items:center;gap:7px;padding:4px 12px;min-height:38px;border-radius:5px;white-space:nowrap;color:var(--paper);font-size:17px;
+  background:var(--ink);box-shadow:inset 0 0 0 2px var(--ink),inset 0 0 0 3.5px var(--paper),0 3px 0 rgba(0,0,0,.45)}
+.stat .lb{font-size:12px;color:#d8c99c;letter-spacing:.04em}
+.stat b{font:20px/1 'Ttl','Ui',serif;letter-spacing:.03em}
+.bar{position:relative;width:84px;height:12px;border-radius:2px;background:#3a3236;overflow:hidden;box-shadow:inset 0 0 0 1.5px var(--paper)}
+.bar i{position:absolute;inset:0;transform-origin:left center;background:var(--grn)}
+.bar.mid i{background:var(--yel)}
+.bar.low i{background:var(--red);animation:low .5s steps(2) infinite}
+@keyframes low{50%{opacity:.35}}
+.stat.flash{animation:fl .45s}
+@keyframes fl{30%{transform:scale(1.12);filter:brightness(1.5)}}
+#sBreath b{min-width:52px;text-align:center}
+#sBreath.inh b{color:#ff8a7a}#sBreath.exh b{color:#8ff0a0}
+.spacer{flex:1}
+.togs{display:flex;gap:6px}
+/* 둥근 단추: 잉크 컵 */
+.tog{pointer-events:auto;width:40px;height:40px;border-radius:50%;border:0;cursor:pointer;position:relative;flex:none;
+  background:radial-gradient(circle at 50% 50%,var(--paper) 0 56%,#fff 58% 70%,#d9d2c2 72%);
+  box-shadow:inset 0 0 0 3px var(--ink),0 3px 0 rgba(0,0,0,.5);transition:transform .2s cubic-bezier(.34,1.56,.64,1)}
+.tog svg{width:22px;height:22px;position:absolute;left:9px;top:9px}
+.tog:active{transform:translateY(2px) scale(.94)}
+.tog.off{opacity:.55}
+.tog.off::after{content:'';position:absolute;left:24%;right:24%;top:50%;height:2.5px;margin-top:-1px;background:var(--red);border-radius:1px;transform:rotate(-40deg)}
+.tog b{font:22px/40px 'Ttl',serif;color:var(--ink)}
+.tog.wide{width:auto;padding:0 13px;border-radius:20px;background:linear-gradient(180deg,#fbf1d4,var(--paper))}
+.tog.wide b{font:17px/40px 'Ui',sans-serif}
+body.playing #oreumFs{display:none}
+
+/* ---------- 놀이 화면 ---------- */
+#tools{position:fixed;right:calc(12px + env(safe-area-inset-right));bottom:calc(14px + env(safe-area-inset-bottom));z-index:6;display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;justify-content:flex-end}
+#ticket{position:fixed;left:calc(10px + env(safe-area-inset-left));top:calc(56px + env(safe-area-inset-top));z-index:4;width:132px;padding:7px 7px 5px;border-radius:4px;pointer-events:none;
+  background:linear-gradient(180deg,#f6ead0,var(--paper));box-shadow:inset 0 0 0 2.5px var(--ink),0 4px 10px rgba(0,0,0,.4);transform:rotate(-2deg)}
+#ticket canvas{display:block;width:100%;aspect-ratio:1}
+#ticket p{font:14px/1.25 'Ui',sans-serif;text-align:center;margin-top:3px}
+/* 잉크 컵 고르기 */
+#doneW{position:fixed;left:0;right:0;bottom:calc(22px + env(safe-area-inset-bottom));z-index:7;display:flex;justify-content:center;pointer-events:none}
+#doneW .btn{pointer-events:auto;animation:doneIn .35s cubic-bezier(.34,1.56,.64,1)}
+@keyframes doneIn{from{transform:translateY(30px) scale(.8);opacity:0}to{transform:none;opacity:1}}
+#caps{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(14px + env(safe-area-inset-bottom));z-index:6;display:flex;gap:10px;padding:8px 12px;border-radius:30px;background:rgba(24,23,27,.72);box-shadow:inset 0 0 0 2px var(--paper)}
+.cap{width:50px;height:50px;border-radius:50%;border:0;cursor:pointer;position:relative;background:radial-gradient(circle,var(--c) 0 52%,#fbf8f0 55% 72%,#cfc8b8 74%);box-shadow:inset 0 0 0 3px var(--ink),0 4px 0 #000;transition:transform .18s cubic-bezier(.34,1.56,.64,1)}
+.cap.on{transform:translateY(-8px) scale(1.08);box-shadow:inset 0 0 0 3px var(--ink),0 0 0 4px var(--yel),0 8px 0 #000}
+.cap.need::after{content:'';position:absolute;left:50%;bottom:-9px;width:7px;height:7px;margin-left:-3.5px;border-radius:50%;background:var(--paper)}
+#keys{position:fixed;left:50%;transform:translateX(-50%);bottom:8px;z-index:4;pointer-events:none;font-size:13px;line-height:1.5;text-align:center;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.9);opacity:.75;white-space:nowrap}
+body.touch #keys{display:none}
+body.colorphase #keys{display:none}
+#towel{position:fixed;z-index:6;left:0;top:0;width:96px;height:80px;margin:-40px 0 0 -48px;pointer-events:none;display:none;filter:drop-shadow(0 4px 4px rgba(0,0,0,.4))}
+body.wiping #towel{display:block}
+#grip{position:fixed;z-index:6;width:70px;height:70px;margin:-35px 0 0 -35px;pointer-events:none}
+#grip circle{fill:none;stroke-width:6;stroke-linecap:round}
+#pops{position:fixed;inset:0;z-index:7;pointer-events:none;overflow:hidden}
+.pop{position:absolute;transform:translate(-50%,-50%);text-align:center;white-space:nowrap;animation:pop 1.05s ease-out forwards}
+.pop b{display:block;font:34px/1 'Ttl',serif;color:var(--paper);-webkit-text-stroke:7px var(--ink);paint-order:stroke fill;letter-spacing:.02em}
+.pop i{display:block;font:22px/1.3 'Ttl',serif;font-style:normal;color:var(--yel);-webkit-text-stroke:5px var(--ink);paint-order:stroke fill}
+.pop.perfect b{color:var(--yel);font-size:40px}
+.pop.snap b{color:#d8d2c4;font-size:26px}
+.pop.minus b{color:#ff7a6a;font-size:30px}.pop.minus i{color:#ff7a6a}
+@keyframes pop{0%{opacity:0;transform:translate(-50%,-30%) scale(.6)}15%{opacity:1;transform:translate(-50%,-60%) scale(1.12)}30%{transform:translate(-50%,-62%) scale(1)}100%{opacity:0;transform:translate(-50%,-140%) scale(1)}}
+#ouch{position:fixed;z-index:7;pointer-events:none;left:50%;top:22%;transform:translate(-50%,-50%);font:54px/1 'Ttl',serif;color:var(--red);-webkit-text-stroke:8px var(--paper);paint-order:stroke fill;opacity:0}
+#ouch.on{animation:ouch .8s ease-out}
+@keyframes ouch{0%{opacity:0;transform:translate(-50%,-50%) scale(.4) rotate(-8deg)}20%{opacity:1;transform:translate(-50%,-50%) scale(1.2) rotate(4deg)}40%{transform:translate(-50%,-50%) scale(1) rotate(-2deg)}100%{opacity:0;transform:translate(-50%,-80%) scale(1)}}
+#hurtV{position:fixed;inset:0;z-index:3;pointer-events:none;opacity:0;background:radial-gradient(ellipse at center,rgba(255,0,0,0) 50%,rgba(200,30,20,.55) 100%);transition:opacity .4s}
+#fade{position:fixed;inset:0;z-index:40;background:#120c0b;opacity:0;pointer-events:none;transition:opacity .55s}
+#skip{position:fixed;right:16px;bottom:16px;z-index:9;color:#fff;font-size:15px;opacity:.7;text-shadow:0 1px 2px #000;pointer-events:none}
+
+/* ---------- 타이틀 ---------- */
+#title{position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:18px;padding:0 16px calc(7vh + env(safe-area-inset-bottom))}
+#logo{margin-bottom:auto;margin-top:calc(8vh + env(safe-area-inset-top));text-align:center}
+#logo canvas{width:min(560px,90vw);height:auto;display:block;filter:drop-shadow(0 10px 18px rgba(0,0,0,.55))}
+.row{display:flex;gap:16px;justify-content:center;align-items:center;flex-wrap:wrap}
+
+/* ---------- 창: 바랜 도안 종이 ---------- */
+.ov{position:fixed;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;background:rgba(12,6,5,.55);padding:14px}
+.sheet{position:relative;width:min(660px,96vw);max-height:92vh;overflow:auto;border-radius:6px;padding:24px 24px 22px;color:var(--ink);
+  background:radial-gradient(ellipse at 50% 40%,rgba(255,250,230,.6),rgba(255,250,230,0) 70%),radial-gradient(ellipse at 50% 50%,rgba(150,100,40,0) 60%,rgba(150,100,40,.25) 100%),var(--paper);
+  box-shadow:inset 0 0 0 4px var(--ink),inset 0 0 0 9px var(--paper),inset 0 0 0 11px var(--ink),0 10px 0 rgba(0,0,0,.45),0 18px 34px rgba(0,0,0,.5);
+  animation:pin .2s cubic-bezier(.34,1.56,.64,1)}
+.sheet::before,.sheet::after{content:'';position:absolute;top:15px;width:20px;height:20px;background:var(--red);clip-path:polygon(50% 0,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%)}
+.sheet::before{left:15px}.sheet::after{right:15px}
+@keyframes pin{from{transform:scale(.86);opacity:0}}
+.sheet h2{font:34px/1.1 'Ttl',serif;text-align:center;margin:4px 0 14px;letter-spacing:.02em}
+.sheet .x{position:absolute;right:16px;top:44px;z-index:2}
+.sheet .btns{display:flex;gap:10px;justify-content:center;margin-top:18px;flex-wrap:wrap;padding:0 18px}
+.big{font:68px/1 'Ttl',serif;text-align:center;color:var(--red);-webkit-text-stroke:3px var(--ink);paint-order:stroke fill;text-shadow:0 4px 0 rgba(0,0,0,.18)}
+.lines{margin:14px auto 0;max-width:380px;font-size:19px}
+.lines div{display:flex;justify-content:space-between;gap:12px;padding:5px 2px;border-bottom:1.5px dashed rgba(24,23,27,.3)}
+.lines b{font:23px/1 'Ttl',serif}
+.lines div.neg b{color:var(--red)}
+.lines div.jack b{color:#b8860b;font-size:30px;animation:jack .5s 3}
+@keyframes jack{50%{transform:scale(1.25)}}
+.lines div.sum{border-top:2.5px solid var(--ink);border-bottom:0;margin-top:4px}
+.lines div.sum b{font-size:28px}
+.back{font:21px/1.3 'Ttl',serif;color:var(--grn);text-align:center;margin:4px 0 8px}
+/* 주문서 */
+.order{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.order .c{width:170px;text-align:center;padding:8px;border-radius:4px;background:rgba(255,255,255,.45);box-shadow:inset 0 0 0 2px rgba(24,23,27,.4)}
+.order canvas{width:100%;aspect-ratio:1;display:block}
+.order p{font-size:15px;margin-top:4px}
+.order p b{font:19px/1.2 'Ttl',serif;display:block}
+/* HOW TO PLAY */
+.how{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.how .c{background:rgba(255,255,255,.45);border-radius:6px;padding:8px;box-shadow:inset 0 0 0 2px rgba(24,23,27,.3);text-align:center}
+.how canvas{width:100%;aspect-ratio:22/15;border-radius:4px;display:block;background:#e3b494}
+.how p{font-size:15px;line-height:1.35;margin-top:7px}
+.howKeys{text-align:center;font-size:14px;margin-top:12px;opacity:.8}
+/* 상점 */
+.shop{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.item{display:flex;flex-direction:column;gap:5px;padding:10px 12px;border-radius:4px;background:rgba(255,255,255,.45);box-shadow:inset 0 0 0 2px rgba(24,23,27,.3)}
+.item .nm{font:21px/1.1 'Ttl',serif}
+.item .ds{font-size:13px;line-height:1.3;color:#6a3a16}
+.item .lv{font-size:14px;opacity:.85}
+.item .pips{display:flex;gap:4px}
+.item .pips i{width:16px;height:6px;border-radius:2px;background:rgba(24,23,27,.2)}
+.item .pips i.on{background:var(--red)}
+.item .btn{align-self:flex-start;margin-left:0}
+.coinsLine{text-align:center;font:24px/1 'Ttl',serif;margin-bottom:12px}
+/* 도감: 폴라로이드 벽 */
+.dex{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.dex .d{text-align:center;padding:7px 7px 6px;background:#fbf8f0;box-shadow:0 3px 6px rgba(0,0,0,.25),inset 0 0 0 1px rgba(0,0,0,.12);font-size:13px}
+.dex .d:nth-child(odd){transform:rotate(-2deg)}.dex .d:nth-child(3n){transform:rotate(2.5deg)}
+.dex canvas{width:100%;aspect-ratio:1;display:block;background:#e3b494}
+.dex .d.no canvas{filter:brightness(.18) sepia(.4)}
+.dex .d b{display:block;font:15px/1.2 'Ttl',serif;margin-top:4px}
+.dexH{font:22px/1 'Ttl',serif;margin:14px 0 8px;text-align:center}
+/* 엔딩 */
+#endImg{display:block;width:min(300px,62vw);margin:0 auto;border-radius:4px;box-shadow:0 0 0 3px var(--ink),0 6px 14px rgba(0,0,0,.3)}
+#toast{position:fixed;left:50%;top:22%;transform:translateX(-50%);z-index:50;padding:10px 18px;border-radius:4px;font-size:17px;color:var(--paper);background:var(--ink);box-shadow:inset 0 0 0 2px var(--paper);opacity:0;transition:opacity .3s;pointer-events:none}
+#toast.on{opacity:1}
+
+/* ---------- 폰 세로 ---------- */
+@media (max-width:700px){
+  #hud{flex-wrap:wrap;row-gap:5px;padding-left:calc(98px + env(safe-area-inset-left))}
+  #hud .spacer{display:block;order:3;flex:0 0 100%;height:0}
+  #sCust{order:1}#sProg{order:2}#sCoin{order:3}
+  #sPat{order:4;flex:1 1 160px;margin-left:calc(-90px - env(safe-area-inset-left))}
+  #sPat .bar{flex:1;width:auto}
+  #sBreath{order:4}
+  #hud .togs{order:5}
+  .tog{width:36px;height:36px}.tog svg{left:7px;top:7px}.tog b{line-height:36px}
+  .tog.wide{padding:0 9px}.tog.wide b{font-size:14px;line-height:36px}
+  .stat{font-size:14px;min-height:32px;padding:3px 9px}
+  .stat b{font-size:17px}
+  .bar{width:58px}
+  #ticket{top:calc(104px + env(safe-area-inset-top));width:92px}
+  #ticket p{font-size:12px}
+  .how{grid-template-columns:1fr}
+  .how .c{display:grid;grid-template-columns:44% 1fr;align-items:center;gap:10px;text-align:left}
+  .how p{margin:0}
+  .shop{grid-template-columns:1fr}
+  .order .c{width:140px}
+  .btn{font-size:26px;min-width:150px;height:54px}
+  .btn.sm{font-size:19px;height:46px;padding:0 15px}
+  #tools{gap:7px;right:calc(8px + env(safe-area-inset-right))}
+  .cap{width:46px;height:46px}
+  #caps{gap:8px;padding:7px 10px;bottom:calc(76px + env(safe-area-inset-bottom))}
+}
+/* 폰 가로: 높이에 맞춘 한 벌 */
+@media (max-height:480px){
+  #hud{gap:5px}
+  .stat{padding:3px 8px;min-height:34px;font-size:14px;gap:5px}.stat b{font-size:17px}.stat .lb{font-size:11px}
+  .bar{width:56px}
+  .tog{width:34px;height:34px}.tog svg{left:6px;top:6px;width:22px;height:22px}.tog b{line-height:34px}
+  .tog.wide{padding:0 9px}.tog.wide b{font-size:14px;line-height:34px}
+  #title{justify-content:flex-end;padding-bottom:12vh;gap:2.4vh}
+  #logo{margin-top:4vh}#logo canvas{width:auto;height:40vh}
+  .btn{height:13vh;font-size:6vh;min-width:0;padding:0 6vh}
+  .btn::before,.btn::after{top:2.4vh;height:12vh}
+  .btn.sm{height:11vh;font-size:4.4vh}
+  .sheet{max-height:94vh;padding:3.5vh 26px;width:min(780px,92vw)}
+  .sheet h2{font-size:6.4vh;margin:0 0 2vh}
+  .how .c{display:block}
+  .how canvas{aspect-ratio:22/12}
+  .how p{font-size:3.8vh}
+  .big{font-size:12vh}
+  .lines{font-size:4.2vh;margin-top:1vh}
+  .lines div{padding:.6vh 2px}
+  .sheet .btns{margin-top:2.6vh}
+  .shop{grid-template-columns:1fr 1fr 1fr;gap:8px}
+  .item{padding:1.6vh 10px}
+  .item .nm{font-size:4.6vh}.item .lv{font-size:3.4vh}.item .ds{font-size:3vh}
+  .order .c{width:30vh}
+  #ticket{width:80px;top:calc(50px + env(safe-area-inset-top))}
+  #ticket p{font-size:11px}
+  .cap{width:42px;height:42px}
+  #endImg{width:auto;height:44vh}
+  .dex{grid-template-columns:repeat(6,1fr)}
+}
+</style>
+</head>
+<body>
+<canvas id="cv"></canvas>
+<div id="vig"></div>
+<div id="hurtV"></div>
+<svg id="towel" viewBox="0 0 96 80"><path d="M10 18 C26 6 58 4 84 12 C92 26 90 52 82 68 C58 76 30 76 12 66 C4 50 4 32 10 18 Z" fill="#f8f6f0" stroke="#18171b" stroke-width="3"/><path d="M18 26 C34 20 56 20 76 24 M16 40 C36 36 58 36 80 40 M18 54 C36 52 58 52 78 56" fill="none" stroke="#cfc8b8" stroke-width="2"/><path d="M60 60 C66 52 72 50 80 52" fill="none" stroke="#b8302a" stroke-width="2" opacity=".5"/></svg>
+<svg id="grip" viewBox="0 0 70 70" hidden><circle cx="35" cy="35" r="27" stroke="rgba(0,0,0,.5)"/><circle id="gripF" cx="35" cy="35" r="27" stroke="#f3e5bf" stroke-dasharray="170" stroke-dashoffset="170" transform="rotate(-90 35 35)"/></svg>
+<div id="pops"></div>
+<div id="ouch"></div>
+
+<div id="hud" hidden>
+  <div class="stat" id="sCust"><span class="lb" data-en="GUEST">손님</span><b id="vCust">1/25</b></div>
+  <div class="stat" id="sPat"><span class="lb" data-en="PATIENCE">인내심</span><div class="bar" id="bPat"><i id="iPat"></i></div></div>
+  <div class="stat" id="sProg"><span class="lb" id="lProg" data-en="LINE">선</span><b id="vProg">0%</b></div>
+  <div class="stat" id="sBreath" hidden><span class="lb" data-en="BREATH">숨</span><b id="vBreath"></b></div>
+  <div class="stat" id="sCoin"><span class="lb" data-en="COIN">코인</span><b id="vCoin">0</b></div>
+  <div class="spacer"></div>
+  <div class="togs">
+    <button class="tog wide" id="tShop"><b data-en="SHOP">상점</b></button>
+    <button class="tog wide" id="tDex"><b data-en="DEX">도감</b></button>
+    <button class="tog" id="tHow" aria-label="HOW TO PLAY"><b>?</b></button>
+    <button class="tog" id="tBgm" aria-label="BGM"><svg viewBox="0 0 24 24"><path d="M9 17.5V5.5l11-2.5v12" fill="none" stroke="#18171b" stroke-width="2.6" stroke-linejoin="round"/><ellipse cx="6.3" cy="17.8" rx="3.4" ry="2.7" fill="#18171b"/><ellipse cx="17.3" cy="15.3" rx="3.4" ry="2.7" fill="#18171b"/></svg></button>
+    <button class="tog" id="tSfx" aria-label="SFX"><svg viewBox="0 0 24 24"><path d="M3 9h4l5-4.5v15L7 15H3z" fill="#18171b"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13" fill="none" stroke="#18171b" stroke-width="2.4" stroke-linecap="round"/></svg></button>
+  </div>
+</div>
+<div id="ticket" hidden><canvas width="240" height="240" id="tkC"></canvas><p id="tkP"></p></div>
+<div id="caps" hidden></div>
+<div id="tools" hidden>
+  <button class="btn sm" id="bCandy"><span data-en="CANDY">사탕</span><span class="n" id="vCandy">0</span></button>
+  <button class="btn sm" id="bCream"><span data-en="CREAM">크림</span><span class="n" id="vCream">0</span></button>
+  <button class="btn sm" id="bWipe"><span data-en="WIPE">닦기</span></button>
+</div>
+<div id="doneW" hidden><button class="btn" id="bDone"><span>NEXT</span></button></div>
+<div id="keys" hidden data-en="Drag on skin: ink · Drag empty space / right drag: tilt · Wheel: zoom · W: wipe · 1-6: ink · C: cream · V: candy">살갗 끌기: 바늘 · 빈 곳 끌기·오른쪽 끌기: 기울이기 · 휠: 확대 · W 닦기 · 1~6 잉크 · C 크림 · V 사탕</div>
+<div id="skip" hidden data-en="TAP TO SKIP">눌러서 넘기기</div>
+
+<div id="title">
+  <div id="logo"><canvas id="logoC" width="1120" height="620"></canvas></div>
+  <div class="row" id="tMain">
+    <button class="btn" id="bStart"><span>START</span></button>
+    <button class="btn" id="bCont" hidden><span data-en="CONTINUE">이어하기</span></button>
+    <button class="btn sm" id="bNew" hidden><span data-en="NEW GAME">처음부터</span></button>
+  </div>
+</div>
+
+<div class="ov" id="orderW" hidden><div class="sheet">
+  <h2 id="orderH"></h2>
+  <div class="order" id="orderL"></div>
+  <div class="btns"><button class="btn" id="bGo"><span data-en="START">시작</span></button></div>
+</div></div>
+
+<div class="ov" id="how" hidden><div class="sheet">
+  <h2>HOW TO PLAY</h2>
+  <div class="how">
+    <div class="c"><canvas width="440" height="300" id="h1"></canvas><p data-en="Trace the purple stencil with the needle. Too fast and the line breaks">보라색 스텐실 선을 바늘로 따라 그어요. 너무 빨리 그으면 선이 끊겨요</p></div>
+    <div class="c"><canvas width="440" height="300" id="h2"></canvas><p data-en="When the arm trembles, lift the needle. It is about to flinch">팔이 부르르 떨리면 바늘을 떼요. 곧 움찔해요</p></div>
+    <div class="c"><canvas width="440" height="300" id="h3"></canvas><p data-en="Piercing: hold on the dot and push while they breathe out">피어싱은 점을 꾹 눌러요. 숨을 내쉴 때 들어가게</p></div>
+  </div>
+  <div class="howKeys" id="howKeys"></div>
+  <div class="btns"><button class="btn" id="bHowOk"><span>OK</span></button></div>
+</div></div>
+
+<div class="ov" id="res" hidden><div class="sheet">
+  <div class="big">CLEAR</div>
+  <div class="lines" id="resL"></div>
+  <div class="btns"><button class="btn sm" id="bShopR"><span data-en="SHOP">상점</span></button><button class="btn" id="bNext"><span>NEXT</span></button></div>
+</div></div>
+
+<div class="ov" id="over" hidden><div class="sheet">
+  <div class="big">GAME OVER</div>
+  <div class="back" id="overBack" hidden></div>
+  <div class="btns"><button class="btn sm" id="bHomeO"><span data-en="HOME">처음 화면</span></button><button class="btn" id="bRetry"><span>RETRY</span></button></div>
+</div></div>
+
+<div class="ov" id="shop" hidden><div class="sheet">
+  <h2 data-en="SHOP">상점</h2>
+  <button class="tog x" id="xShop" aria-label="close"><b>X</b></button>
+  <div class="coinsLine" id="shopCoin"></div>
+  <div class="shop" id="shopL"></div>
+</div></div>
+
+<div class="ov" id="dexW" hidden><div class="sheet">
+  <h2 data-en="DEX">도감</h2>
+  <button class="tog x" id="xDex" aria-label="close"><b>X</b></button>
+  <div id="dexL"></div>
+</div></div>
+
+<div class="ov" id="end" hidden><div class="sheet">
+  <div class="big">THE END</div>
+  <img id="endImg" alt="">
+  <div class="btns"><button class="btn sm" id="bSave"><span data-en="SAVE">저장</span></button><button class="btn sm" id="bShare"><span data-en="SHARE">공유</span></button><button class="btn" id="bEndHome"><span data-en="HOME">처음으로</span></button></div>
+</div></div>
+<div id="fade"></div>
+<div id="toast"></div>
+
+<script src="js/lang.js?v=1"></script>
+<script src="assets/game-home.js" data-top="6" data-left="6" data-fullscreen="1" defer></script>
+<script src="lib/three.min.js"></script>
+<script src="js/flash.js?v=2"></script>
+<script src="js/data.js?v=4"></script>
+<script src="js/audio.js?v=2"></script>
+<script src="js/scene.js?v=6"></script>
+<script src="js/arm.js?v=6"></script>
+<script src="js/ear.js?v=1"></script>
+<script src="js/how.js?v=1"></script>
+<script src="js/card.js?v=2"></script>
+<script src="js/ui.js?v=3"></script>
+<script src="js/game.js?v=5"></script>
+<script>UI.boot();</script>
+<script src="/assets/visit.js?v=21" defer></script>
+<script src="/assets/game-events.js" defer></script>
+</body>
+</html>
