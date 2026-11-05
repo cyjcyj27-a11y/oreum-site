@@ -24,7 +24,7 @@
   // 날갯소리 크기·높이
   A.buzz = function (sp, vol) {
     if (!ac) return; const t = ac.currentTime, k = Math.min(1.6, sp);
-    buzzG.gain.setTargetAtTime(vol * (0.02 + k * 0.025), t, 0.05);
+    buzzG.gain.setTargetAtTime(vol * 0.7 * (0.02 + k * 0.025), t, 0.05);   // 0.7 = 사장님 11/5 "모기소리가 너무 크니까 30%만 줄이자"
     buzzO[0].frequency.setTargetAtTime(440 + k * 120, t, 0.08); buzzO[1].frequency.setTargetAtTime(452 + k * 122, t, 0.08);
   };
   A.suck = function (on) { if (ac) suckG.gain.setTargetAtTime(on ? 0.12 : 0, ac.currentTime, 0.04); };
