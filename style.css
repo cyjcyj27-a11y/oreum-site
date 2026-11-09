@@ -336,6 +336,7 @@ h1, h2, h3 { line-height: 1.3; letter-spacing: -.02em; margin: 0; }
 .footer-nav a { color: var(--ink-2); font-size:17px; text-decoration: none; }
 .footer-nav a:hover { color: var(--green-lit); text-decoration: underline; }
 .copy { margin: 0; font-size:16px; color: var(--muted); }
+@media (max-width:600px){ .site-footer .copy{ white-space:nowrap; font-size:min(16px,3.5vw); } }
 
 /* ── 본문 페이지 (가이드·지원·개인정보) ── */
 .doc { padding: 60px 0 92px; }
