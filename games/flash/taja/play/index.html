@@ -144,10 +144,13 @@
   .mode b { display: block; font-weight: normal; font-size: min(8vw, 38px); color: #fff; text-shadow: 0 3px 0 rgba(0,0,0,.25); margin-top: 4px; }
   .mode:active { transform: translateY(5px); box-shadow: 0 2px 0 #173f78; }
   .mode:hover { filter: brightness(1.08); }
+  body.en .modes { gap: 12px; } body.en .mode { width: min(44vw, 230px); } body.en .mode b { font-size: min(4.9vw, 27px); }
   @media (max-height: 520px) { .mode { padding: 6px 10px; } .mode i { font-size: 30px; } .mode b { font-size: 22px; }
     /* 가로로 든 낮은 폰(360px)에서 모드 단추가 화면 아래로 잘려 나갔다 — 제목과 여백을 줄인다. 왼쪽 아래 전체화면 알약보다 위에 오게 (2026-09-19 점검) */
     #title { padding: calc(40px + env(safe-area-inset-top)) 16px calc(46px + env(safe-area-inset-bottom)); }
     #title h1 { font-size: min(17vw, 150px, 19vh); -webkit-text-stroke-width: 10px; } }
+  @media (max-height: 520px) { body.en .mode b { font-size: 22px; } }
+  @media (max-width: 760px) { body.en .pm b { font-size: min(5vw, 22px); } }
 
   /* 연습 메뉴 */
   body.practicing #topbar .stat { display: none; }
@@ -330,7 +333,7 @@
 <script src="js/art.js?v=2"></script>
 <script src="js/audio.js?v=1"></script>
 <script src="js/game.js?v=5"></script>
-<script src="js/practice.js?v=2"></script>
+<script src="js/practice.js?v=3"></script>
 <script src="/assets/visit.js?v=21" defer></script>
 <script src="/assets/game-events.js?v=4" defer></script>
 </body>

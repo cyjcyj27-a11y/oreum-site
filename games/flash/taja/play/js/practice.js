@@ -223,7 +223,10 @@
     var ln = $('pLine'); ln.innerHTML = spans(t, st.cls);
     ln.style.fontSize = '';
     var base = parseFloat(getComputedStyle(ln).fontSize), maxW = $('pText').clientWidth - 24;
-    ln.style.fontSize = base + 'px'; if (ln.scrollWidth > maxW) ln.style.fontSize = Math.max(18, base * maxW / ln.scrollWidth) + 'px';
+    ln.style.whiteSpace = ''; ln.style.wordBreak = ''; ln.style.lineHeight = '';
+    ln.style.fontSize = base + 'px';
+    // 폰처럼 좁은 화면에서 긴 줄은 줄여도 다 안 들어가 오른쪽이 잘렸다 — 20px 아래로 줄어야 하면 줄이지 않고 낱말 사이에서 줄을 바꾼다
+    if (ln.scrollWidth > maxW) { var fit = base * maxW / ln.scrollWidth; if (fit >= 20) ln.style.fontSize = fit + 'px'; else { ln.style.fontSize = '22px'; ln.style.whiteSpace = 'normal'; ln.style.wordBreak = 'keep-all'; ln.style.lineHeight = '1.55'; } }
     var nx = PR.items.slice(PR.idx + 1, PR.idx + (PR.mode === 'word' ? 6 : 3));
     $('pNext').innerHTML = nx.map(esc).join(PR.mode === 'word' ? '  ·  ' : '<br>');
     // 다음 누를 자리
