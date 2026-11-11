@@ -3,9 +3,13 @@
 #       (넣으면 아래 규칙과 합쳐져 max-age 가 두 개가 된다). 글·게임 코드는 Pages 기본값이
 #       이미 "항상 새로 받기(max-age=0, must-revalidate)" 라 그대로 두면 된다.
 
+# 남의 사이트가 우리 페이지를 iframe 으로 끼워 자기 주소에서 돌리지 못하게 막는다 (2026-11-11 사장님 "다 막는게 맞아")
+# 우리 주소 안에서 끼워 쓰는 것은 그대로 된다. 되돌릴 땐 X-Frame-Options, Content-Security-Policy 두 줄만 지운다.
 /*
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
+  X-Frame-Options: SAMEORIGIN
+  Content-Security-Policy: frame-ancestors 'self'
 
 # 사이트 공용 파일 — 주소 뒤 ?v= 를 올려서 바꾼다
 /assets/*
