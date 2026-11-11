@@ -8,26 +8,51 @@
     g.fillStyle = gr; g.beginPath(); g.arc(x, y, r, 0, 7); g.fill();
   }
   function shade(hex, k) { const c = parseInt(hex.slice(1), 16); let r = (c >> 16) & 255, gg = (c >> 8) & 255, b = c & 255; r = Math.min(255, r * k); gg = Math.min(255, gg * k); b = Math.min(255, b * k); return 'rgb(' + (r | 0) + ',' + (gg | 0) + ',' + (b | 0) + ')'; }
+  // 벌 그림: 종마다 배 무늬(bands)·몸매(sh)·털(fuzz)·다리(legs, dangle)가 다르다. 머리가 위(-y).
   function bee(g, x, y, s, sp, ang, dead) {
+    const sh = sp.sh || [1, 1, 1, 1], aw = 9 * sh[0], al = 15 * sh[1], tr = 7.5 * sh[2], hr = 6.5 * sh[3];
+    const ay = tr * 0.75 + al - 2, hy = -(tr * 0.7 + hr * 0.75);
     g.save(); g.translate(x, y); g.rotate(ang || 0); g.scale(s, s);
+    g.lineCap = 'round';
+    // 다리
+    g.strokeStyle = dead ? '#555' : (sp.legs || '#3a2410'); g.lineWidth = 1.6;
+    for (let i = -1; i <= 1; i++) for (const d of [-1, 1]) { g.beginPath(); g.moveTo(d * tr * 0.6, i * 3); g.lineTo(d * (tr + 5), i * 6 + 1); g.lineTo(d * (tr + 7), i * 6 + 6); g.stroke(); }
+    if (sp.dangle) { g.lineWidth = 1.8; for (const d of [-1, 1]) { g.beginPath(); g.moveTo(d * 3, 4); g.lineTo(d * (aw + 5), ay - 2); g.lineTo(d * (aw + 3), ay + al + 6); g.stroke(); } }
+    // 더듬이
+    g.strokeStyle = dead ? '#444' : '#1a140c'; g.lineWidth = 1.3;
+    for (const d of [-1, 1]) { g.beginPath(); g.moveTo(d * 2, hy - hr * 0.6); g.quadraticCurveTo(d * 5, hy - hr - 7, d * 9, hy - hr - 5); g.stroke(); }
     // 날개
     g.fillStyle = 'rgba(255,255,255,.7)'; g.strokeStyle = 'rgba(80,80,90,.5)'; g.lineWidth = 1;
-    g.beginPath(); g.ellipse(-4, -12, 6, 13, -0.5, 0, 7); g.fill(); g.stroke();
-    g.beginPath(); g.ellipse(4, -12, 6, 13, 0.5, 0, 7); g.fill(); g.stroke();
-    // 배(줄무늬)
-    g.save(); g.beginPath(); g.ellipse(0, 14, 9, 15, 0, 0, 7); g.clip();
-    ball(g, 0, 14, 16, dead ? '#666666' : sp.col);
-    g.fillStyle = 'rgba(26,20,12,.92)'; for (let i = 0; i < 3; i++) g.fillRect(-12, 9 + i * 7, 24, 3.2);
+    g.beginPath(); g.ellipse(-tr - 3, 6, 5.5, 14, 0.75, 0, 7); g.fill(); g.stroke();
+    g.beginPath(); g.ellipse(tr + 3, 6, 5.5, 14, -0.75, 0, 7); g.fill(); g.stroke();
+    // 배(종마다 무늬)
+    g.save(); g.beginPath(); g.ellipse(0, ay, aw, al, 0, 0, 7); g.clip();
+    g.fillStyle = dead ? '#777777' : sp.col; g.fillRect(-aw, ay - al, aw * 2, al * 2);
+    (sp.bands || [[0.2, 0.32, '#1a140c'], [0.48, 0.6, '#1a140c'], [0.76, 0.88, '#1a140c']]).forEach(([a, b, c]) => {
+      g.fillStyle = dead ? '#444444' : c; const y0 = ay - al + a * al * 2, y1 = ay - al + b * al * 2;
+      if (sp.wavy) { g.beginPath(); g.moveTo(-aw, y0); for (let xx = -aw; xx <= aw; xx += 1) g.lineTo(xx, y1 + Math.sin(xx / aw * Math.PI * 2.5) * 1.3); g.lineTo(aw, y0); g.fill(); }
+      else g.fillRect(-aw, y0, aw * 2, y1 - y0);
+    });
+    // 둥근 명암
+    const gr = g.createRadialGradient(-aw * 0.35, ay - al * 0.3, 1, 0, ay, al * 1.1);
+    gr.addColorStop(0, 'rgba(255,255,255,.35)'); gr.addColorStop(0.5, 'rgba(255,255,255,0)'); gr.addColorStop(1, 'rgba(0,0,0,.4)');
+    g.fillStyle = gr; g.fillRect(-aw, ay - al, aw * 2, al * 2);
     g.restore();
-    ball(g, 0, 0, 7.5, dead ? '#555555' : sp.tho);
-    ball(g, 0, -10, 6.5, dead ? '#777777' : sp.head);
-    g.fillStyle = '#16120e'; g.beginPath(); g.ellipse(-3.4, -11, 2.2, 3, 0.3, 0, 7); g.ellipse(3.4, -11, 2.2, 3, -0.3, 0, 7); g.fill();
+    // 가슴(털보·꿀벌은 털)
+    if (sp.fuzz) { g.strokeStyle = dead ? '#555' : shade(sp.tho, 1.25); g.lineWidth = 1.4; for (let i = 0; i < 22; i++) { const t = i / 22 * 6.283; g.beginPath(); g.moveTo(Math.cos(t) * tr * 0.8, Math.sin(t) * tr * 0.8); g.lineTo(Math.cos(t) * (tr + 2.6), Math.sin(t) * (tr + 2.6)); g.stroke(); } }
+    ball(g, 0, 0, tr, dead ? '#555555' : sp.tho);
+    ball(g, 0, hy, hr, dead ? '#777777' : sp.head);
+    g.fillStyle = '#16120e'; g.beginPath(); g.ellipse(-hr * 0.55, hy - 1, hr * 0.34, hr * 0.48, 0.3, 0, 7); g.ellipse(hr * 0.55, hy - 1, hr * 0.34, hr * 0.48, -0.3, 0, 7); g.fill();
     g.restore();
   }
   H.drawBee = function (cv, sp, unknown) {
+    cv.width = 240; cv.height = 180;
     const g = cv.getContext('2d'); g.clearRect(0, 0, cv.width, cv.height);
     if (unknown) { g.globalAlpha = 0.25; g.filter = 'brightness(0)'; }
-    bee(g, cv.width / 2, cv.height / 2 - 4, 2.2 * Math.min(1.25, 0.75 + sp.size * 0.2), sp, Math.PI / 2);
+    // 머리 끝(더듬이)부터 배 끝(늘어진 다리)까지 재서 칸 가운데에 오게
+    const sh = sp.sh || [1, 1, 1, 1], tail = 7.5 * sh[2] * 0.75 + 30 * sh[1] - 2 + (sp.dangle ? 7 : 0), front = 7.5 * sh[2] * 0.7 + 6.5 * sh[3] * 1.75 + 7;
+    const sc = Math.min(3.1 * Math.min(1.16, 0.86 + sp.size * 0.1), 222 / (tail + front));
+    bee(g, cv.width / 2 + sc * (tail - front) / 2, cv.height / 2, sc, sp, Math.PI / 2);
     g.globalAlpha = 1; g.filter = 'none';
   };
   function ground(g, W, Hh) { g.fillStyle = '#f3e2bc'; g.fillRect(0, 0, W, Hh); g.fillStyle = '#9cc66a'; g.fillRect(0, Hh * 0.78, W, Hh); }

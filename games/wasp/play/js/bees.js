@@ -9,13 +9,29 @@
 
   B.init = function (sc) {
     scene = sc; P = ACT.waspParts(MAX);
-    Object.values(P).forEach((m) => sc.add(m));
+    B.meshes = Object.values(P).filter((m) => m.isInstancedMesh).concat(Object.values(P.abd));
+    B.meshes.forEach((m) => sc.add(m));
     // 부품마다 몸 기준 자리(앞 = +z)
     const L = (x, y, z, rx, ry, rz) => new THREE.Matrix4().compose(new THREE.Vector3(x, y, z), new THREE.Quaternion().setFromEuler(new THREE.Euler(rx || 0, ry || 0, rz || 0)), new THREE.Vector3(1, 1, 1));
     B.local = { abd: L(0, 0, -0.1, 0.35), tho: L(0, 0, 0), head: L(0, 0.005, 0.055), eyeL: L(-0.022, 0.012, 0.07), eyeR: L(0.022, 0.012, 0.07) };
     B.wingUp = [L(-0.04, 0.035, 0, 0, 0, 0.75), L(0.04, 0.035, 0, 0, 0, -0.75)];
     B.wingDn = [L(-0.04, 0.03, 0, 0, 0, -0.25), L(0.04, 0.03, 0, 0, 0, 0.25)];
     B.wingRest = [L(-0.03, 0.03, -0.03, 0, 0.5, 0.05), L(0.03, 0.03, -0.03, 0, -0.5, -0.05)];
+    // 종마다 몸매: 배 굵기·길이, 가슴, 머리 크기, 다리 길이
+    const SCM = (m, x, y, z) => m.clone().multiply(new THREE.Matrix4().makeScale(x, y, z));
+    B.shape = {};
+    Object.keys(DATA.SP).forEach((k) => {
+      const sh = DATA.SP[k].sh || [1, 1, 1, 1], hs = sh[3], ts = sh[2];
+      const hz = 0.02 * (ts - 1) + 0.012 * (hs - 1), ex = 0.022 * hs, ez = 0.055 + 0.015 * hs + hz;
+      B.shape[k] = {
+        abd: SCM(L(0, 0, -0.1 + 0.05 * (1 - sh[1]) - 0.03 * (ts - 1), 0.35), sh[0], sh[0], sh[1]),
+        tho: SCM(L(0, 0, 0), ts, ts, ts),
+        head: SCM(L(0, 0.005, 0.055 + hz), hs, hs, hs),
+        eyeL: SCM(L(-ex, 0.012, ez), hs, hs, hs),
+        eyeR: SCM(L(ex, 0.012, ez), hs, hs, hs),
+        legs: SCM(L(0, -0.02 * ts, -0.01, DATA.SP[k].dangle ? -0.9 : -0.35), 1, DATA.SP[k].dangle ? 1.9 : 0.75, 1),
+      };
+    });
   };
   B.reset = function () {
     list.length = 0;
@@ -266,28 +282,29 @@
   function draw() {
     let k = 0;
     const now = performance.now() * 0.001;
+    const ak = B._ak || (B._ak = {}); for (const key in P.abd) ak[key] = 0;
     for (let i = 0; i < list.length && k < MAX; i++) {
       const a = list[i];
       if (!a.alive && !a.dead) continue;
       E.set(a.pitch, a.yaw, a.roll); Q.setFromEuler(E); SC.setScalar(a.s);
       MB.compose(a.p, Q, SC);
-      P.abd.setMatrixAt(k, M.multiplyMatrices(MB, B.local.abd));
-      P.tho.setMatrixAt(k, M.multiplyMatrices(MB, B.local.tho));
-      P.head.setMatrixAt(k, M.multiplyMatrices(MB, B.local.head));
-      P.eyeL.setMatrixAt(k, M.multiplyMatrices(MB, B.local.eyeL));
-      P.eyeR.setMatrixAt(k, M.multiplyMatrices(MB, B.local.eyeR));
+      const sp = a.sp, S = B.shape[a.sk] || B.shape.ssang, am = P.abd[a.sk] || P.abd.ssang, j = ak[a.sk] || 0;
+      const dim = a.dead ? 0.6 : 0.45 + 0.55 * Math.max(0, a.hp);
+      if (j < am.instanceMatrix.count) { am.setMatrixAt(j, M.multiplyMatrices(MB, S.abd)); am.setColorAt(j, col.setScalar(dim)); ak[a.sk] = j + 1; }
+      P.tho.setMatrixAt(k, M.multiplyMatrices(MB, S.tho));
+      P.head.setMatrixAt(k, M.multiplyMatrices(MB, S.head));
+      P.eyeL.setMatrixAt(k, M.multiplyMatrices(MB, S.eyeL));
+      P.eyeR.setMatrixAt(k, M.multiplyMatrices(MB, S.eyeR));
+      P.legs.setMatrixAt(k, M.multiplyMatrices(MB, S.legs));
       let w;
       if (a.dead && a.onGround) w = B.wingRest; else w = Math.sin(now * 90 + a.phase) > 0 ? B.wingUp : B.wingDn;
       P.wingL.setMatrixAt(k, M.multiplyMatrices(MB, w[0]));
       P.wingR.setMatrixAt(k, M.multiplyMatrices(MB, w[1]));
-      if (a.ck !== a.sk + (a.dead ? 1 : 0)) {
-        a.ck = a.sk + (a.dead ? 1 : 0);
-      }
-      const sp = a.sp, dim = a.dead ? 0.6 : 0.45 + 0.55 * Math.max(0, a.hp);
-      P.abd.setColorAt(k, col.set(sp.col).multiplyScalar(dim)); P.tho.setColorAt(k, col.set(sp.tho).multiplyScalar(dim)); P.head.setColorAt(k, col.set(sp.head).multiplyScalar(dim));
+      P.tho.setColorAt(k, col.set(sp.tho).multiplyScalar(dim)); P.head.setColorAt(k, col.set(sp.head).multiplyScalar(dim)); P.legs.setColorAt(k, col.set(sp.legs || '#3a2410').multiplyScalar(dim));
       k++;
     }
-    for (const key in P) { P[key].count = k; P[key].instanceMatrix.needsUpdate = true; if (P[key].instanceColor) P[key].instanceColor.needsUpdate = true; }
+    for (const key in P) { const m = P[key]; if (!m.isInstancedMesh) continue; m.count = k; m.instanceMatrix.needsUpdate = true; if (m.instanceColor) m.instanceColor.needsUpdate = true; }
+    for (const key in P.abd) { const m = P.abd[key]; m.count = ak[key]; if (ak[key]) { m.instanceMatrix.needsUpdate = true; if (m.instanceColor) m.instanceColor.needsUpdate = true; } }
   }
 
   // ---------- 셈 ----------

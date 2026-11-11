@@ -192,17 +192,21 @@
 
   // ---------- 벌 ----------
   // 줄무늬 그림(배) — 노랑·검정. 종마다 instanceColor 로 물들인다.
-  function stripeTex() {
-    const cv = document.createElement('canvas'); cv.width = 16; cv.height = 64; const g = cv.getContext('2d');
-    g.fillStyle = '#ffffff'; g.fillRect(0, 0, 16, 64);
-    g.fillStyle = '#1a140c';
-    [[6, 13], [22, 29], [38, 45], [54, 64]].forEach(([a, b]) => g.fillRect(0, a, 16, b - a));
-    const t = new THREE.CanvasTexture(cv); t.colorSpace = THREE.SRGBColorSpace; return t;
+  function stripeTex(sp) {
+    const cv = document.createElement('canvas'); cv.width = 32; cv.height = 128; const g = cv.getContext('2d');
+    g.fillStyle = sp.col; g.fillRect(0, 0, 32, 128);
+    // 그림 맨 위 = 배 끝, 맨 아래 = 허리
+    (sp.bands || []).forEach(([a, b, c]) => {
+      g.fillStyle = c; const y0 = (1 - b) * 128, y1 = (1 - a) * 128;
+      if (sp.wavy) { g.beginPath(); for (let x = 0; x <= 32; x += 2) g.lineTo(x, y0 + Math.sin(x / 32 * Math.PI * 6) * 2.5); g.lineTo(32, y1); g.lineTo(0, y1); g.fill(); }
+      else g.fillRect(0, y0, 32, y1 - y0);
+    });
+    const t = new THREE.CanvasTexture(cv); t.colorSpace = THREE.SRGBColorSpace; t.wrapS = THREE.RepeatWrapping; return t;
   }
   A.waspParts = function (max) {
-    const st = stripeTex();
     const nt = CLAY.normalTex();
-    const abdM = new THREE.MeshStandardMaterial({ map: st, roughness: 0.4, normalMap: nt, normalScale: new THREE.Vector2(0.3, 0.3) });
+    const abdMs = {}; Object.keys(DATA.SP).forEach((k) => { abdMs[k] = CLAY.patch(new THREE.MeshStandardMaterial({ map: stripeTex(DATA.SP[k]), roughness: 0.4, normalMap: nt, normalScale: new THREE.Vector2(0.3, 0.3) }), 6, 0.5); });
+    const legM = new THREE.MeshStandardMaterial({ roughness: 0.5 });
     const thoM = new THREE.MeshStandardMaterial({ roughness: 0.45, normalMap: nt, normalScale: new THREE.Vector2(0.4, 0.4) });
     const eyeM = new THREE.MeshStandardMaterial({ color: '#16120e', roughness: 0.15 });
     const wingM = new THREE.MeshStandardMaterial({ color: '#ffffff', roughness: 0.2, transparent: true, opacity: 0.55, side: THREE.DoubleSide, depthWrite: false });
@@ -213,12 +217,16 @@
     const headG = new THREE.SphereGeometry(0.034, 10, 8);
     const eyeG = new THREE.SphereGeometry(0.02, 8, 6);
     const wingG = new THREE.CircleGeometry(0.07, 12); wingG.scale(0.38, 1, 1); wingG.rotateX(-Math.PI / 2); wingG.translate(0, 0, -0.06);
-    [abdM, thoM].forEach((m) => CLAY.patch(m, 6, 0.5));
+    CLAY.patch(thoM, 6, 0.5);
+    // 다리: 양쪽으로 벌어져 아래로 늘어진 가는 막대 둘(쌍살벌은 길게)
+    const legG = (() => { const a = new THREE.CylinderGeometry(0.004, 0.003, 0.09, 5); a.translate(0, -0.045, 0); const b = a.clone(); a.rotateZ(0.35); a.translate(0.018, 0, 0); b.rotateZ(-0.35); b.translate(-0.018, 0, 0); const pos = new Float32Array(a.attributes.position.array.length * 2); pos.set(a.attributes.position.array); pos.set(b.attributes.position.array, a.attributes.position.array.length); const nor = new Float32Array(pos.length); nor.set(a.attributes.normal.array); nor.set(b.attributes.normal.array, a.attributes.normal.array.length); const n = a.attributes.position.count; const idx = []; for (const i of a.index.array) idx.push(i); for (const i of b.index.array) idx.push(i + n); const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(pos, 3)); g.setAttribute('normal', new THREE.BufferAttribute(nor, 3)); g.setIndex(idx); return g; })();
     const mk = (geo, mat, n) => { const m = new THREE.InstancedMesh(geo, mat, n); m.instanceMatrix.setUsage(THREE.DynamicDrawUsage); m.count = 0; m.castShadow = true; m.frustumCulled = false; return m; };
-    const P = { abd: mk(abdG, abdM, max), tho: mk(thoG, thoM, max), head: mk(headG, thoM, max), eyeL: mk(eyeG, eyeM, max), eyeR: mk(eyeG, eyeM, max), wingL: mk(wingG, wingM, max), wingR: mk(wingG, wingM, max) };
+    const P = { legs: mk(legG, legM, max), tho: mk(thoG, thoM, max), head: mk(headG, thoM, max), eyeL: mk(eyeG, eyeM, max), eyeR: mk(eyeG, eyeM, max), wingL: mk(wingG, wingM, max), wingR: mk(wingG, wingM, max) };
     P.wingL.castShadow = P.wingR.castShadow = false; P.eyeL.castShadow = P.eyeR.castShadow = false;
     const col = new THREE.Color();
-    for (let i = 0; i < max; i++) { P.abd.setColorAt(i, col.set('#ffcc22')); P.tho.setColorAt(i, col.set('#3a2a18')); P.head.setColorAt(i, col.set('#f0a020')); }
+    P.legs.castShadow = false;
+    P.abd = {}; Object.keys(abdMs).forEach((k) => { P.abd[k] = mk(abdG, abdMs[k], k === 'queen' ? 2 : max); P.abd[k].setColorAt(0, col.set('#ffffff')); });
+    for (let i = 0; i < max; i++) { P.legs.setColorAt(i, col.set('#3a2410')); P.tho.setColorAt(i, col.set('#3a2a18')); P.head.setColorAt(i, col.set('#f0a020')); }
     return P;
   };
 
