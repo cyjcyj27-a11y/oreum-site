@@ -291,6 +291,9 @@
     if (how !== 'poison' && how !== 'snap') MOSQ.body.scale.set(2.3, 0.35, 2.3);
     G.save();
     document.body.classList.remove('playing');
+    // 환생 카드를 눌러 고를 수 있게 마우스 잠금을 푼다(안 풀면 커서가 숨어 카드가 안 눌림). 카드를 누를 때 다시 잠근다.
+    try { document.exitPointerLock(); } catch (e) {}
+    IN.clear();
   };
   function dead(dt, rdt) {
     G.deadT += rdt;

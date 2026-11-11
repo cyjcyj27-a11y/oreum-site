@@ -141,7 +141,7 @@
       const t = document.createElement('b'); t.textContent = L(cd.ko, cd.en); b.appendChild(t);
       const p = document.createElement('p'); p.textContent = L(cd.dk, cd.de); b.appendChild(p);
       if (!GAME.S.dex[cd.id]) { const n = document.createElement('span'); n.className = 'new'; n.textContent = 'NEW'; b.appendChild(n); }
-      b.onclick = () => { if (picked) return; picked = true; AU.sfx('btn'); $('cards').hidden = true; GAME.pickCard(cd.id); };
+      b.onclick = () => { if (picked) return; picked = true; AU.sfx('btn'); $('cards').hidden = true; IN.lock(); GAME.pickCard(cd.id); };
       row.appendChild(b);
       setTimeout(() => { b.classList.add('show'); AU.sfx(cd.g ? 'gold' : 'card'); }, 300 + i * 260);
     });
