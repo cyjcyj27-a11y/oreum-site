@@ -106,8 +106,14 @@
   }
   // 서 있어도 되는 자리인가. 바다·건물 안이 아니고 '도로 위'도 아니어야 한다.
   // (2026-09-10: 관광지 행인이 도로를 가리지 않고 돌아다녀서 차에 치였다. 시내 행인은 원래 인도로 걷는다)
+  // 절벽·골짜기 비탈(3m 사이 2.5m 넘게 오르내림)은 사람이 안 선다 — 쇠소깍 골짜기 비탈에 구경꾼이 걸어 다녔다(2026-11-16)
+  function steep(x, z) { const h = I.H(x, z); return Math.abs(I.H(x + 3, z) - h) > 2.5 || Math.abs(I.H(x - 3, z) - h) > 2.5 || Math.abs(I.H(x, z + 3) - h) > 2.5 || Math.abs(I.H(x, z - 3) - h) > 2.5; }
+  function pathOK(x0, z0, x1, z1) { const L = Math.hypot(x1 - x0, z1 - z0), n = Math.ceil(L / 3); for (let k = 1; k < n; k++) { const t = k / n; { const px = x0 + (x1 - x0) * t, pz = z0 + (z1 - z0) * t; if (steep(px, pz) || inGorge(px, pz)) return false; } } return true; }
+  // 쇠소깍 골짜기 안(물길 축에서 16m 안)도 사람 자리가 아니다 — 바닥이 평평해 비탈 검사에 안 걸린다
+  const RV = I.RIVER, RVx = RV.b.x - RV.a.x, RVz = RV.b.z - RV.a.z, RV2 = RVx * RVx + RVz * RVz;
+  function inGorge(x, z) { let t = ((x - RV.a.x) * RVx + (z - RV.a.z) * RVz) / RV2; if (t <= -0.15 || t >= 1.15) return false; t = Math.max(0, Math.min(1, t)); return Math.hypot(x - RV.a.x - RVx * t, z - RV.a.z - RVz * t) < 16; }
   function landOK(x, z) {
-    if (I.coastDist(x, z) <= 4 || PLAYER.insideBox(x, z, 0.6)) return false;
+    if (I.coastDist(x, z) <= 4 || PLAYER.insideBox(x, z, 0.6) || steep(x, z) || inGorge(x, z)) return false;
     const n = window.ROADS && ROADS.nearest(x, z);
     return !(n && n.e && n.d < 1.5);
   }
@@ -135,7 +141,7 @@
     a.s += 5; if (a.s >= e.len) a.s = 0;   // 양쪽 다 막혔으면 그 자리를 지나쳐 간다
   }
   function pickWander(a) {
-    for (let k = 0; k < 12; k++) { const an = R() * 6.28, d = R() * a.area.r; const x = a.area.cx + Math.cos(an) * d, z = a.area.cz + Math.sin(an) * d; if (landOK(x, z)) { a.tx = x; a.tz = z; return; } }
+    for (let k = 0; k < 12; k++) { const an = R() * 6.28, d = R() * a.area.r; const x = a.area.cx + Math.cos(an) * d, z = a.area.cz + Math.sin(an) * d; if (landOK(x, z) && pathOK(a.x, a.z, x, z)) { a.tx = x; a.tz = z; return; } }
     a.tx = a.x; a.tz = a.z;
   }
   function init(scene) {
@@ -146,7 +152,8 @@
       const n = s.kind === 'shop' ? 24 : s.beach ? 14 : s.kind === 'food' ? 14 : 5 + Math.floor(R() * 5);
       const area = { cx: s.x, cz: s.z, r: s.beach ? 45 : 26 };
       for (let k = 0; k < n; k++) {
-        let x = s.x, z = s.z; for (let q = 0; q < 10; q++) { const an = R() * 6.28, d = R() * area.r; x = s.x + Math.cos(an) * d; z = s.z + Math.sin(an) * d; if (landOK(x, z)) break; }
+        let x = s.x, z = s.z, ok = false; for (let q = 0; q < 10; q++) { const an = R() * 6.28, d = R() * area.r; x = s.x + Math.cos(an) * d; z = s.z + Math.sin(an) * d; if (landOK(x, z)) { ok = true; break; } }
+        if (!ok && (steep(x, z) || inGorge(x, z))) continue;   // 설 자리가 비탈·골짜기뿐이면 세우지 않는다
         if (PLAYER.insideBox(x, z, 0.5)) { const e3 = escapeBox(x, z); if (e3) { x = e3.x; z = e3.z; } }
         const a = add('wander', x, z, { area, shirt: s.beach && R() < 0.5 ? [0xff6b6b, 0x4ecdc4, 0xffe66d, 0xf7fff7][Math.floor(R() * 4)] : undefined, pants: s.beach && R() < 0.5 ? [0x1a535c, 0xff6b6b, 0xf7fff7][Math.floor(R() * 3)] : undefined });
         if (s.beach) a.hat = R() < 0.6 ? 1 : 0;

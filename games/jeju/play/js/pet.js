@@ -473,7 +473,7 @@
     return true;
   }
   function gfSay(kind) {
-    if (!GF.g) return false;
+    if (!GF.g || (window.LUX && LUX.gone)) return false;
     const nw = (window.ESTATE && ESTATE.netWorth) ? ESTATE.netWorth() : 0;
     let pool = GF_SAY.filter(function (l) { return l.k === kind && nw >= l.w[0] && nw < l.w[1] && GF_SEEN.indexOf(l.s) < 0; });
     if (!pool.length) pool = GF_SAY.filter(function (l) { return l.k === kind && nw >= l.w[0] && nw < l.w[1]; });
@@ -613,6 +613,7 @@
   }
   function gfUpdate(dt) {
     if (!GF.g || !gfRoot) return;
+    if (window.LUX && LUX.gone) { gfRoot.visible = false; GF.on = false; return; }   // 가방 안 사 줘서 떠났다(사장님 2026-11-16)
     if (!S.onFoot) {                                   // 차에 타면 조수석에 앉는다
       const seat = SEAT[PLAYER.veh];
       if (!seat || !GF.sitAct) { gfRoot.visible = false; GF.on = false; return; }

@@ -61,6 +61,18 @@
     }
     return p;
   }
+  // 쇠소깍 골짜기 비켜 가기 — 물길 축(A 바다 쪽 → B 위쪽 끝) 근처 점을 B 너머로 민다. 옆 거리는 그대로 두어 끝을 빙 돈다.
+  function avoidRiver(pts) {
+    const A = I.RIVER.a, B = I.RIVER.b, dx = B.x - A.x, dz = B.z - A.z, L = Math.hypot(dx, dz), ux = dx / L, uz = dz / L;
+    const R0 = 46, tEnd = L * 1.1 + 40;   // 골짜기 끝(t=1.1)에서 40m 더
+    for (const p of pts) {
+      const px = p[0] - A.x, pz = p[1] - A.z, s = px * ux + pz * uz, e = -px * uz + pz * ux;
+      if (s < -L * 0.1 - 30 || s > tEnd || Math.abs(e) > R0) continue;
+      const w = Math.min(1, (R0 - Math.abs(e)) / 14);   // 골짜기에서 멀수록 덜 민다(이음이 부드럽게)
+      const ns = s + (tEnd - s) * w;
+      p[0] = A.x + ux * ns - uz * e; p[1] = A.z + uz * ns + ux * e;
+    }
+  }
   // 길을 구불구불하게 — 진행 방향과 직각으로 느린 물결을 준다.
   // 자로 쟰 듯한 길은 제주 같지 않다 (사장님 2026-09-11 "도로는 구불구불해야 제맛이지")
   // 고리(closed)는 이음매가 틀어지지 않게 파장을 둘레 길이에 딱 떨어지게 맞춘다.
@@ -142,7 +154,10 @@
     easeGrade(ring, true, 26, { drift: 130, coastMin: 30, coastMax: 260 });     // 절벽은 피해 등고선을 탄다
     ring = wiggle(ring, 10, 320, true, 1.7); ring = smoothPts(ring, true, 1); ring = resample(ring, 40, true); ring.forEach(p => inland(p, 32));
     easeGrade(ring, true, 14, { drift: 70, coastMin: 34, coastMax: 280 }); ring = smoothPts(ring, true, 1);
-    ring = resample(ring, 25, true); ring.forEach(p => inland(p, 36));   // 마지막에 다시 초초히 — 점 사이가 멀면 그 사이 직선이 해안을 물어 간선이 지워진다   // 마지막은 물가 밀어내기 — 문지르다 바다로 다시 들어가지 않게
+    ring = resample(ring, 25, true); ring.forEach(p => inland(p, 36));
+    // 쇠소깍 물길(깊이 60m 골짜기)을 가로지르지 않게 위쪽 끝으로 돌아간다 — 차·사람이 절벽 아래로 빠졌다(루루 2026-11-12 "도로에 싱크홀")
+    for (let pass = 0; pass < 2; pass++) { avoidRiver(ring); ring = smoothPts(ring, true, 2); ring = resample(ring, 20, true); }
+    // 마지막에 다시 초초히 — 점 사이가 멀면 그 사이 직선이 해안을 물어 간선이 지워진다   // 마지막은 물가 밀어내기 — 문지르다 바다로 다시 들어가지 않게
     // 마을을 지날 땐 마을 가운데 줄로 (격자 노드에 맞춘다)
     for (const t of R.towns) {
       const zRow = t.z0 + t.mainRow * t.cell;

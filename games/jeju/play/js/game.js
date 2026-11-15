@@ -56,7 +56,7 @@
     TRAFFIC.init(scene, spawn); await step(0.95);
     PLAYER.init(scene, spawn); ACT.init(scene); await step(0.97);
     ESTATE.init(scene); await step(0.99);
-    NPC.init(scene); PEOPLE.init(scene, renderer); PET.init(scene); PROPS.init(scene);
+    NPC.init(scene); PEOPLE.init(scene, renderer); PET.init(scene); PROPS.init(scene); if (window.LUX) LUX.init(scene);
     LOAD.set(1);
     ready = true; document.body.classList.add('ready');
     // 막 지우고 들어온 판(?reset=1)에서는 이어하기를 숨긴다 — 지웠는데 이어하기가 보이면 헷갈린다
@@ -271,7 +271,7 @@
     if (KEYS[e.code]) { e.preventDefault(); input.keys[e.code] = true; if (!started) start(!!loadPos()); }
     if (INTRO.on && !INTRO.called) { introSkip(); return; }
     if (e.repeat) return;
-    if ((e.code === 'KeyE' || e.code === 'Enter') && started) { if (!ACT.near && !ACT.cur && ESTATE.near && !ESTATE.near.b) ESTATE.act(); else if (!ACT.near && !ACT.cur && PET.canToggle()) foot(); else ACT.act(); }
+    if ((e.code === 'KeyE' || e.code === 'Enter') && started) { if (window.LUX && LUX.near) LUX.act(); else if (!ACT.near && !ACT.cur && ESTATE.near && !ESTATE.near.b) ESTATE.act(); else if (!ACT.near && !ACT.cur && PET.canToggle()) foot(); else ACT.act(); }
     if (e.code === 'KeyF' && started) foot();
     if (e.code === 'KeyT' && started) ACT.toggleMap();
     if (e.code === 'KeyR' && started) { if (ACT.cur) ACT.abort(); else PLAYER.respawn(); }
@@ -339,7 +339,7 @@
   btnSfx.addEventListener('click', () => { AUDIO.init(); AUDIO.toggle(); syncTog(); });
   $('btnBgm').addEventListener('click', () => { AUDIO.init(); AUDIO.radioToggle(); syncTog(); });
   $('btnNext').addEventListener('click', () => { AUDIO.init(); const r = AUDIO.radioNext(); toast('♪ ' + r.title, 3.2); });
-  $('act').addEventListener('click', () => { if (!ACT.near && !ACT.cur && ESTATE.near && !ESTATE.near.b) ESTATE.act(); else ACT.act(); });
+  $('act').addEventListener('click', () => { if (window.LUX && LUX.near) LUX.act(); else if (!ACT.near && !ACT.cur && ESTATE.near && !ESTATE.near.b) ESTATE.act(); else ACT.act(); });
   $('act2').addEventListener('click', () => ESTATE.sellNear());   // 내 땅 앞에서 바로 팔기
   $('buildClose').addEventListener('click', () => ESTATE.close());
   $('btnMap').addEventListener('click', () => { if (started) ACT.toggleMap(); });
@@ -398,7 +398,7 @@
       const onFoot = PET.onFoot; if (onFoot) { const k = input.keys; PET.control({ throttle: raw.throttle, brake: raw.brake, steer: raw.steer, pad: !!(input.padF || input.padS), run: !!(k.ShiftLeft || k.ShiftRight || input.horn), jump: !!(k.Space || input.brake) }); }
       const inp = onFoot ? { throttle: 0, brake: 0, steer: 0, hb: true, horn: false, up: false, dn: false } : raw;
       if (INTRO.on) introTick(dt);
-      else if (!paused) { PLAYER.update(dt, inp); ACT.update(dt, elapsed); ESTATE.update(dt, elapsed); }
+      else if (!paused) { PLAYER.update(dt, inp); ACT.update(dt, elapsed); ESTATE.update(dt, elapsed); if (window.LUX) LUX.update(dt); }
       posT += dt; if (posT > 2) { posT = 0; savePos(); }
       checkCalls();
       TRAFFIC.update(paused ? 0 : dt, PLAYER, camera.position); NPC.update(paused ? 0 : dt, elapsed, PLAYER, camera.position); PEOPLE.update(paused ? 0 : dt, elapsed, camera.position); PET.update(paused ? 0 : dt, elapsed); PROPS.update(paused ? 0 : dt);
