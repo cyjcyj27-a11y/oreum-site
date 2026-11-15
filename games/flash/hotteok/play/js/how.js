@@ -1,4 +1,4 @@
-// HOW TO PLAY: 실제 조리대 모양을 위에서 본 움직이는 그림 세 칸
+// HOW TO PLAY: 실제 조리대 모양을 위에서 본 움직이는 그림 다섯 칸
 (function () {
   const H = (window.HOW = {});
   let raf = 0, t0 = 0;
@@ -104,13 +104,38 @@
     else if (T > 4.0 && T < 5.4) finger(g, x + 4, y + 4, true);
     if (T > 5.4) { g.fillStyle = '#ff6a8a'; const k = (T - 5.4); g.save(); g.translate(350, 70 - k * 20); g.scale(1.2, 1.2); g.beginPath(); g.moveTo(0, 6); g.bezierCurveTo(-14, -6, -6, -16, 0, -8); g.bezierCurveTo(6, -16, 14, -6, 0, 6); g.fill(); g.restore(); }
   }
-  const steps = [step1, step2, stepPress, step3];
+  // 5. 탄 호떡은 왼쪽 버리는 통으로 끌어다 버리기
+  function stepBin(g, t) {
+    const w = 440, h = 300; steel(g, w, h); iron(g, 170, 40, 250, 220);
+    const bx = 82, by = 150, br = 52;
+    // 버리는 통(위에서 본 스테인리스 통 + 파란 비닐)
+    g.fillStyle = 'rgba(0,0,0,.3)'; g.beginPath(); g.arc(bx + 4, by + 6, br + 4, 0, 7); g.fill();
+    g.fillStyle = '#d8dde2'; g.beginPath(); g.arc(bx, by, br + 4, 0, 7); g.fill();
+    g.fillStyle = '#5a8ee0'; g.beginPath(); g.arc(bx, by, br - 4, 0, 7); g.fill();
+    g.strokeStyle = '#3a7ad8'; g.lineWidth = 7; g.beginPath(); g.arc(bx, by, br - 2, 0, 7); g.stroke();
+    g.fillStyle = 'rgba(20,40,90,.35)'; g.beginPath(); g.arc(bx + 6, by + 6, br - 14, 0, 7); g.fill();
+    const T = t % 5, sx = 295, sy = 150;
+    let x = sx, y = sy, r = 36, show = true;
+    if (T > 1.4 && T < 2.9) { const k = (T - 1.4) / 1.5, e = k * k * (3 - 2 * k); x = sx + (bx - sx) * e; y = sy + (by - sy) * e - Math.sin(k * PI) * 30; }
+    else if (T >= 2.9 && T < 3.5) { const k = (T - 2.9) / 0.6; x = bx; y = by; r = 36 * (1 - k * 0.7); }
+    else if (T >= 3.5) show = false;
+    if (show) {
+      cake(g, x, y, r, 1.6);
+      { const gr = g.createRadialGradient(x - r * 0.2, y - r * 0.2, r * 0.1, x, y, r); gr.addColorStop(0, 'rgba(10,6,4,.35)'); gr.addColorStop(0.7, 'rgba(10,6,4,.7)'); gr.addColorStop(1, 'rgba(6,4,2,.95)'); g.fillStyle = gr; g.beginPath(); g.arc(x, y, r, 0, 7); g.fill();
+        g.fillStyle = 'rgba(4,3,2,.9)'; [[0.35, -0.3, 0.32], [-0.4, 0.25, 0.28], [0.1, 0.45, 0.22]].forEach(([u, v, s]) => { g.beginPath(); g.arc(x + u * r, y + v * r, s * r, 0, 7); g.arc(x + u * r + s * r * 0.6, y + v * r + s * r * 0.3, s * r * 0.7, 0, 7); g.fill(); }); }
+      if (T < 1.4) ring(g, x - 70, y - 40, 1, Math.floor(t * 4) % 2 ? '#e2412a' : '#141010');
+      if (T < 2.9) for (let i = 0; i < 4; i++) { const a = t * 1.3 + i * 1.6, yy = ((t * 30 + i * 22) % 60); g.fillStyle = 'rgba(70,70,70,' + (0.5 - yy / 130) + ')'; g.beginPath(); g.arc(x + Math.cos(a) * 14, y - 30 - yy, 9 + yy * 0.15, 0, 7); g.fill(); }
+    }
+    if (T > 0.9 && T < 2.9) finger(g, x + 4, y + 4, T > 1.2);
+    if (T > 2.4 && T < 2.9) { g.strokeStyle = 'rgba(255,255,255,.8)'; g.lineWidth = 3; g.setLineDash([6, 6]); g.beginPath(); g.arc(bx, by, br + 12, 0, 7); g.stroke(); g.setLineDash([]); }
+  }
+  const steps = [step1, step2, stepPress, step3, stepBin];
   H.start = function () {
     t0 = performance.now(); cancelAnimationFrame(raf);
-    const cvs = [1, 2, 3, 4].map((i) => document.getElementById('h' + i));
+    const cvs = [1, 2, 3, 4, 5].map((i) => document.getElementById('h' + i));
     const f = () => { const t = (performance.now() - t0) / 1000; cvs.forEach((c, i) => { const g = c.getContext('2d'); g.save(); g.clearRect(0, 0, 440, 300); steps[i](g, t); g.restore(); }); raf = requestAnimationFrame(f); };
     f();
   };
   H.stop = function () { cancelAnimationFrame(raf); };
-  H.draw = function (t) { [1, 2, 3, 4].forEach((i, k) => { const g = document.getElementById('h' + i).getContext('2d'); g.clearRect(0, 0, 440, 300); steps[k](g, t); }); };
+  H.draw = function (t) { [1, 2, 3, 4, 5].forEach((i, k) => { const g = document.getElementById('h' + i).getContext('2d'); g.clearRect(0, 0, 440, 300); steps[k](g, t); }); };
 })();
