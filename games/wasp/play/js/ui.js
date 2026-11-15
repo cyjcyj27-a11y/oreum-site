@@ -99,7 +99,7 @@
     U._howThen = then; show('how', true);
     const touch = document.body.classList.contains('touch');
     $('h1').innerHTML = touch ? L('<b>SPRAY</b> 단추를 누르고 있으면 겨눈 곳에 뿌려요. <b>NET</b> 으로 휘둘러 잡아요', 'Hold <b>SPRAY</b> to spray where you aim. Swing the <b>NET</b> to catch') : L('<b>왼쪽 클릭</b>을 누르고 있으면 겨눈 곳에 뿌려요. <b>F</b> 는 포충망', 'Hold <b>left click</b> to spray where you aim. <b>F</b> swings the net');
-    $('h2').innerHTML = touch ? L('벌집에 뿌려 <b>기세</b>를 줄이고, 가까이서 <b>E</b> 단추를 누르고 있으면 봉투로 떼어 내요', 'Spray the nest to weaken it, then hold <b>E</b> nearby to bag it') : L('벌집에 뿌려 <b>기세</b>를 줄이고, 가까이서 <b>E</b> 를 누르고 있으면 봉투로 떼어 내요', 'Spray the nest to weaken it, then hold <b>E</b> nearby to bag it');
+    $('h2').innerHTML = touch ? L('벌집에 뿌려 <b>기세</b>를 줄이고, 가까이서 <b>봉투</b> 단추를 누르고 있으면 떼어 내요', 'Spray the nest to weaken it, then hold <b>BAG</b> nearby to bag it') : L('벌집에 뿌려 <b>기세</b>를 줄이고, 가까이서 <b>E</b> 를 누르고 있으면 봉투로 떼어 내요', 'Spray the nest to weaken it, then hold <b>E</b> nearby to bag it');
     $('h3').innerHTML = L('집이 안 보이면 <b>날아가는 벌</b>을 따라가요. 캔은 <b>차</b>나 <b>파란 상자</b>에서 갈고, 꿀벌은 쏘지 말고 벌통에!', 'No nest in sight? <b>Follow the wasps</b>. Swap cans at the <b>truck</b> or <b>blue box</b>. Never spray honeybees!');
     HOW.start();
   }
@@ -133,13 +133,13 @@
   };
   U.prompt = function (best, P, g) {
     const el = $('prompt'), ba = $('bAct');
-    if (!best) { el.hidden = true; ba.classList.add('dim'); ba.querySelector('span').textContent = 'E'; return; }
+    if (!best) { el.hidden = true; ba.classList.add('dim'); ba.querySelector('span').textContent = document.body.classList.contains('touch') ? L('봉투', 'BAG') : 'E'; return; }
     el.hidden = false; ba.classList.remove('dim');
     let t = '', k = '';
     if (best.kind === 'can') { t = L('새 캔', 'NEW CAN') + ' (' + S().cans + ')'; k = L('캔', 'CAN'); el.classList.toggle('no', P.can >= P.canMax || (S().cans <= 0 && S().coins >= GAME.CAN_COST)); }
     else if (best.kind === 'bag') { t = L('벌집 떼기', 'BAG NEST'); k = L('봉투', 'BAG'); el.classList.toggle('no', best.n.vigor > 0.3 || !!(best.n.queen && best.n.queen.alive)); }
     else { t = L('벌통에 담기', 'BOX BEES'); k = L('벌통', 'BOX'); el.classList.remove('no'); }
-    el.innerHTML = '<b>E</b>' + t;
+    el.innerHTML = '<b>' + (document.body.classList.contains('touch') ? k : 'E') + '</b>' + t;
     ba.querySelector('span').textContent = k;
   };
   // 꿀벌 덩어리 위에 뜨는 안내: 멀리서도 어떻게 담는지 보이게
@@ -150,7 +150,7 @@
     tagV.copy(p).project(RND.camera);
     if (tagV.z > 1 || Math.abs(tagV.x) > 1.1 || Math.abs(tagV.y) > 1.1) { el.hidden = true; return; }
     const touch = document.body.classList.contains('touch');
-    const html = touch ? L('꿀벌은 뿌리지 말고 밑에서 <b>E</b> 단추 꾹', 'No spray! Hold <b>E</b> under the bees') : L('꿀벌은 뿌리지 말고 밑에서 <b>E</b> 꾹', 'No spray! Hold <b>E</b> under the bees');
+    const html = touch ? L('꿀벌은 뿌리지 말고 밑에서 <b>벌통</b> 단추 꾹', 'No spray! Hold <b>BOX</b> under the bees') : L('꿀벌은 뿌리지 말고 밑에서 <b>E</b> 꾹', 'No spray! Hold <b>E</b> under the bees');
     if (el._h !== html) { el.innerHTML = html; el._h = html; }
     el.hidden = false;
     el.style.transform = 'translate(' + Math.round((tagV.x * 0.5 + 0.5) * innerWidth) + 'px,' + Math.round((-tagV.y * 0.5 + 0.5) * innerHeight) + 'px) translate(-50%,-100%)';

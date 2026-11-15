@@ -95,7 +95,7 @@ body.playing #oreumFs{display:none}
 #ring{position:fixed;left:50%;top:50%;width:56px;height:56px;margin:-28px 0 0 -28px;z-index:4;pointer-events:none}
 #ring circle{fill:none;stroke-width:6;stroke-linecap:round}
 #prompt{position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:5;pointer-events:none;font-size:20px;color:#fff;padding:8px 16px 8px 8px;border-radius:999px;background:rgba(29,42,68,.82);box-shadow:inset 0 0 0 2px #0f1628,0 3px 0 rgba(0,0,0,.3);display:flex;align-items:center;gap:10px}
-#prompt b{font-weight:400;display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:7px;background:linear-gradient(180deg,#fff1a0,#ffc414);color:var(--ink);box-shadow:inset 0 0 0 2px #5a3a06}
+#prompt b{font-weight:400;display:inline-flex;align-items:center;justify-content:center;min-width:30px;padding:0 7px;box-sizing:border-box;height:30px;border-radius:7px;background:linear-gradient(180deg,#fff1a0,#ffc414);color:var(--ink);box-shadow:inset 0 0 0 2px #5a3a06}
 #prompt.no{opacity:.55}
 #tag{position:fixed;left:0;top:0;z-index:4;pointer-events:none;font-size:18px;color:#fff;padding:6px 14px 6px 6px;border-radius:999px;background:rgba(29,42,68,.82);box-shadow:inset 0 0 0 2px #0f1628,0 3px 0 rgba(0,0,0,.3);display:flex;align-items:center;gap:8px;white-space:nowrap}
 #tag b{font-weight:400;display:inline-flex;align-items:center;justify-content:center;min-width:26px;height:26px;padding:0 5px;border-radius:7px;background:linear-gradient(180deg,#fff1a0,#ffc414);color:var(--ink);box-shadow:inset 0 0 0 2px #5a3a06}
@@ -317,7 +317,7 @@ body.touch #ctl{display:block}
   <div id="pad"><div id="knob"></div></div>
   <button class="tb" id="bSpray"><span>SPRAY</span></button>
   <button class="tb" id="bNet"><span>NET</span></button>
-  <button class="tb" id="bAct" class="dim"><span>E</span></button>
+  <button class="tb dim" id="bAct"><span data-en="BAG">봉투</span></button>
 </div>
 <div id="pops"></div>
 
@@ -419,7 +419,7 @@ body.touch #ctl{display:block}
 <script src="js/input.js?v=2"></script>
 <script src="js/how.js?v=11"></script>
 <script src="js/card.js?v=4"></script>
-<script src="js/ui.js?v=4"></script>
+<script src="js/ui.js?v=5"></script>
 <script src="js/game.js?v=10"></script>
 <script>
 if (window.EN) { document.title = 'Mr. Hornet'; document.getElementById('logoF').textContent = document.getElementById('logoL').textContent = 'MR. HORNET'; }
