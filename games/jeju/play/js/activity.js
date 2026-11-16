@@ -351,6 +351,7 @@
       g.beginPath(); NAV.pts.forEach((p, i) => i ? g.lineTo(X(p.x), Z(p.z)) : g.moveTo(X(p.x), Z(p.z))); g.stroke();
     }
     if (window.ESTATE) ESTATE.drawMap(g, X, Z, sc, fs);   // 매물·내 땅·건물
+    if (window.LUX && LUX.drawMap) LUX.drawMap(g, X, Z, sc, fs);   // 명품관(2026-11-16)
     // 내려서 걸어 다니면 세워 둔 차 자리를 따로 찍는다 — 멀리 걸어가면 차를 못 찾았다 (사장님 2026-09-13)
     if (window.PET && PET.onFoot) {
       const cx = X(PLAYER.x), cy = Z(PLAYER.z), r = fs * 0.95;

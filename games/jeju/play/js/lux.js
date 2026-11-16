@@ -182,7 +182,31 @@
     b.innerHTML = '👜 여친 가방 <b>명품관</b> ' + fmt(bagPrice()) + ' <span class="t">' + Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0') + '</span>';
     b.classList.add('show');
   }
-  function dest() { if (L.store) ACT.setDest({ id: 'lux', name: '명품관', icon: '👜', x: L.store.door.x, z: L.store.door.z }); }
+  // 목적지 물건은 하나만 쓴다 — 지도에서 같은 것을 또 누르면 끄는 토글이 ACT.dest === 같은 물건 으로 판단한다
+  function destObj() { if (!L.store) return null; if (!L.dObj) L.dObj = { id: 'lux', name: '명품관', icon: '👜', x: L.store.door.x, z: L.store.door.z }; return L.dObj; }
+  function dest() { const d = destObj(); if (d) ACT.setDest(d); }
+
+  // 지도 표시 — 검은 판에 금테·금글씨 '명품관'(이모지 아님). 누르면 목적지(사장님 2026-11-16 "명품관어딨냐")
+  function roundRect(g, x, y, w, h, r) { g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); }
+  function drawMap(g, X, Z, sc, fs) {
+    const st = L.store; if (!st) return;
+    const x = X(st.x), y = Z(st.z); if (x < -60 || y < -60 || x > g.canvas.width + 60 || y > g.canvas.height + 60) return;
+    const d = destObj(), on = ACT.dest === d;
+    const txt = typeof window.L === 'function' ? window.L('명품관') : '명품관';
+    // 표식은 점 오른쪽에 둔다 — 위에 두면 옆 매물(특급호텔 부지) 카드를 가린다. 그림은 빼고 글자만(작으면 가방이 자물쇠처럼 보였다)
+    const f = Math.round(fs * 0.8), pad = f * 0.5;
+    g.font = '900 ' + f + 'px "Ria", "Griun", "Malgun Gothic", sans-serif';
+    const w = g.measureText(txt).width + pad * 2, h = f + pad * 1.0, bx = x + fs * 0.55, by = y - h / 2;
+    if (on) { g.fillStyle = 'rgba(255,60,40,0.35)'; g.beginPath(); g.arc(x, y, fs * 1.1, 0, 6.29); g.fill(); g.strokeStyle = '#ff3b2a'; g.lineWidth = 3; g.stroke(); }
+    g.fillStyle = 'rgba(0,0,0,0.35)'; roundRect(g, bx + 1.5, by + 2, w, h, h * 0.3); g.fill();
+    g.fillStyle = '#111014'; roundRect(g, bx, by, w, h, h * 0.3); g.fill();
+    g.beginPath(); g.moveTo(bx + 1, y - fs * 0.2); g.lineTo(bx + 1, y + fs * 0.2); g.lineTo(x + fs * 0.12, y); g.closePath(); g.fill();
+    g.strokeStyle = '#e0b45a'; g.lineWidth = 2; roundRect(g, bx + 1, by + 1, w - 2, h - 2, h * 0.28); g.stroke();
+    g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillStyle = '#f3d27a';
+    g.fillText(txt, bx + w / 2, by + h / 2 + 1);
+    g.fillStyle = '#e0b45a'; g.beginPath(); g.arc(x, y, Math.max(3, fs * 0.16), 0, 6.29); g.fill();
+    if (window.ESTATE && ESTATE.mapHit) ESTATE.mapHit.push({ p: d, x0: x - fs * 0.4, y0: by, x1: bx + w, y1: by + h });
+  }
   function ask() {
     const st = L.store; let sec = 180;
     if (st && ESTATE.dealSec) sec = ESTATE.dealSec({ x: st.door.x, z: st.door.z, side: 0 }) + SLACK;
@@ -257,7 +281,7 @@
     }
   }
   function act() { if (L.near) buy(); }
-  window.LUX = Object.defineProperties({ init, update, act, state: L }, {
+  window.LUX = Object.defineProperties({ init, update, act, drawMap, state: L }, {
     gone: { get: () => L.gone }, near: { get: () => L.near }, store: { get: () => L.store },
   });
 })();
