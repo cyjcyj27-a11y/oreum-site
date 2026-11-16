@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, viewport-fit=cover">
+<title>절벽 잔도공</title>
+<style>
+  @font-face { font-family: 'Climate'; src: url('fonts/title.woff2') format('woff2'); font-display: block; }
+  @font-face { font-family: 'Gmarket'; src: url('fonts/ui.woff2') format('woff2'); font-display: swap; }
+  :root { --lac: #b8261c; --lac-hi: #d8402c; --lac-lo: #7e140c; --lac-edge: #4a0c06; --gold: #f2cf72; --gold-lo: #a8802a; --stone: #cbb291; --stone-lo: #8d7458; --stone-edge: #4e3c2a; --ink: #3a2614; }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #c4c4c2; font-family: 'Gmarket', 'Malgun Gothic', sans-serif; color: #f6efe2; user-select: none; -webkit-user-select: none; }
+  #c { display: block; width: 100vw; height: 100vh; touch-action: none; }
+  #vig { position: fixed; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 50% 46%, rgba(0,0,0,0) 55%, rgba(20,14,10,.45) 100%); }
+
+  /* 현판 단추: 옻칠 빨강 몸통 + 안쪽 금선 + 두께 */
+  .btn { position: relative; font-family: 'Gmarket', sans-serif; font-weight: 700; font-size: 22px; letter-spacing: 2px; color: var(--gold); padding: 13px 30px 12px; border: 3px solid var(--gold-lo); border-radius: 4px; cursor: pointer; touch-action: manipulation;
+    background: linear-gradient(180deg, var(--lac-hi) 0%, var(--lac) 46%, var(--lac-lo) 100%);
+    box-shadow: inset 0 3px 0 rgba(255,220,180,.28), inset 0 0 0 4px var(--lac-lo), inset 0 0 0 5.5px rgba(242,207,114,.75), inset 0 -4px 0 rgba(0,0,0,.18), 0 5px 0 var(--lac-edge), 0 8px 14px rgba(0,0,0,.3);
+    text-shadow: 0 2px 0 #4a0c06; transition: transform .22s cubic-bezier(.34,1.56,.64,1), box-shadow .22s, filter .15s; }
+  .btn:hover { filter: brightness(1.08); }
+  .btn:active { transform: translateY(3px); box-shadow: inset 0 3px 0 rgba(255,220,180,.28), inset 0 0 0 4px var(--lac-lo), inset 0 0 0 5.5px rgba(242,207,114,.75), inset 0 -4px 0 rgba(0,0,0,.18), 0 2px 0 var(--lac-edge), 0 3px 6px rgba(0,0,0,.3); transition-duration: .04s; }
+  /* 사암 돌판: 보조 단추·알약·창 */
+  .stone { background: radial-gradient(circle at 20% 30%, rgba(255,255,255,.18) 0 1px, transparent 2px) 0 0/9px 11px, radial-gradient(circle at 70% 60%, rgba(60,40,20,.18) 0 1px, transparent 2px) 0 0/13px 7px, linear-gradient(180deg, #dcc4a2 0%, var(--stone) 50%, #b39674 100%);
+    color: var(--ink); border: 2px solid var(--stone-edge); box-shadow: inset 0 2px 0 rgba(255,250,235,.45), inset 0 -3px 0 rgba(70,50,30,.22), 0 4px 0 var(--stone-edge), 0 6px 10px rgba(0,0,0,.25); }
+  .btn.stone { color: var(--ink); text-shadow: 0 1px 0 rgba(255,250,235,.6); font-size: 18px; padding: 11px 22px 10px; }
+  .btn.stone:active { box-shadow: inset 0 2px 0 rgba(255,250,235,.45), inset 0 -3px 0 rgba(70,50,30,.22), 0 1px 0 var(--stone-edge); }
+
+  /* 상단 바 */
+  #topbar { position: fixed; left: 0; right: 0; top: 0; height: calc(48px + env(safe-area-inset-top)); padding: env(safe-area-inset-top) 10px 0 calc(104px + env(safe-area-inset-left)); display: flex; align-items: center; gap: 8px; background: linear-gradient(180deg, rgba(30,20,14,.45), rgba(30,20,14,0)); pointer-events: none; z-index: 5; opacity: 0; transition: opacity .6s; }
+  body.playing #topbar { opacity: 1; }
+  body.pz #topbar { z-index: 21; }
+  .stat { display: inline-flex; align-items: baseline; gap: 5px; padding: 5px 11px 4px; border-radius: 6px; font-size: 13px; white-space: nowrap; }
+  .stat b { font-size: 18px; font-weight: 700; } .stat small { font-size: 11px; opacity: .75; }
+  #btnDex { pointer-events: auto; cursor: pointer; font-family: inherit; margin: 0; } #btnDex small { display: inline !important; } #btnDex:active { transform: translateY(2px); }
+  .spacer { flex: 1; }
+  .tog { position: relative; pointer-events: auto; width: 38px; height: 38px; border-radius: 50%; padding: 0; border: 2px solid var(--gold-lo); cursor: pointer; background: radial-gradient(circle at 40% 30%, var(--lac-hi), var(--lac) 55%, var(--lac-lo)); box-shadow: inset 0 0 0 2px rgba(242,207,114,.6), 0 3px 0 var(--lac-edge); touch-action: manipulation; }
+  .tog svg { width: 20px; height: 20px; display: block; margin: auto; }
+  .tog:active { transform: translateY(2px); box-shadow: inset 0 0 0 2px rgba(242,207,114,.6), 0 1px 0 var(--lac-edge); }
+  .tog.off { opacity: .6; } .tog.off::after { content: ''; position: absolute; left: 24%; right: 24%; top: 50%; height: 2px; margin-top: -1px; background: #fff; border-radius: 1px; transform: rotate(-40deg); }
+  #coinFx { position: fixed; top: calc(52px + env(safe-area-inset-top)); left: 50%; transform: translateX(-50%); font-weight: 700; font-size: 26px; color: var(--gold); text-shadow: 0 2px 0 #4a0c06, 0 0 12px rgba(0,0,0,.4); opacity: 0; pointer-events: none; z-index: 6; }
+  #coinFx.bad { color: #ff8a70; }
+  #coinFx.on { animation: coinup 1.1s ease-out; }
+  @keyframes coinup { 0% { opacity: 0; transform: translate(-50%, 10px) scale(.8); } 15% { opacity: 1; transform: translate(-50%, 0) scale(1.1); } 70% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -16px); } }
+  #msg { position: fixed; left: 50%; top: 30%; transform: translate(-50%, 0); font-family: 'Climate', 'Gmarket', sans-serif; font-size: 46px; letter-spacing: 3px; color: var(--gold); -webkit-text-stroke: 5px var(--lac-lo); paint-order: stroke fill; opacity: 0; pointer-events: none; z-index: 6; }
+  #msg.on { animation: pop .9s ease-out; }
+  @keyframes pop { 0% { opacity: 0; transform: translate(-50%, 0) scale(.5); } 18% { opacity: 1; transform: translate(-50%, 0) scale(1.12); } 30% { transform: translate(-50%, 0) scale(1); } 75% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -14px); } }
+  #keys { position: fixed; right: 18px; bottom: 14px; font-size: 12px; line-height: 1.7; text-align: right; opacity: .7; pointer-events: none; text-shadow: 0 1px 2px rgba(0,0,0,.7); display: none; }
+  body.playing #keys { display: block; } body.touch #keys { display: none !important; }
+
+  /* DAY 카드 */
+  #dayCard { position: fixed; left: 50%; top: 24%; transform: translateX(-50%); padding: 12px 34px 10px; border-radius: 4px; opacity: 0; pointer-events: none; z-index: 7; text-align: center; }
+  #dayCard b { font-family: 'Climate', sans-serif; font-weight: 400; font-size: 44px; letter-spacing: 4px; color: var(--gold); text-shadow: 0 3px 0 #4a0c06; }
+  #dayCard.show { animation: daycard 2.4s ease-in-out forwards; }
+  @keyframes daycard { 0% { opacity: 0; transform: translate(-50%, -12px); } 15%, 75% { opacity: 1; transform: translate(-50%, 0); } 100% { opacity: 0; transform: translate(-50%, 0); } }
+
+  /* 창 */
+  .sheet { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(30,18,10,.35); opacity: 0; pointer-events: none; transition: opacity .25s; z-index: 20; }
+  .sheet.show { opacity: 1; pointer-events: auto; }
+  .panel { padding: 18px 30px 24px; border-radius: 6px; text-align: center; min-width: 280px; transform: scale(.85); transition: transform .18s cubic-bezier(.34,1.56,.64,1); }
+  .sheet.show .panel { transform: scale(1); }
+  .panel h2 { margin: 0 0 6px; font-family: 'Climate', sans-serif; font-weight: 400; font-size: 40px; letter-spacing: 2px; color: var(--lac); -webkit-text-stroke: 1px var(--lac-lo); }
+  .panel .row { display: flex; justify-content: center; gap: 22px; margin: 6px 0 16px; font-size: 15px; }
+  .panel .row b { display: block; font-size: 28px; color: var(--lac-lo); }
+  /* 상점 (DAY CLEAR 창) */
+  #shop { display: flex; justify-content: center; gap: 10px; margin: 0 0 16px; }
+  .up { position: relative; width: 118px; padding: 8px 6px 7px; border-radius: 6px; cursor: pointer; font-family: inherit; display: flex; flex-direction: column; align-items: center; gap: 3px; touch-action: manipulation; transition: transform .12s; }
+  .up:active { transform: translateY(2px); }
+  .up .ic { display: block; width: 46px; height: 32px; } .up .ic svg { width: 100%; height: 100%; display: block; }
+  .up .ic.t0 { color: #8b9098; } .up .ic.t1 { color: #d9773a; } .up .ic.t2 { color: #f2c230; }
+  .up b { font-size: 15px; } .up small { font-size: 12px; opacity: .85; white-space: nowrap; }
+  .up em { font-style: normal; font-weight: 700; font-size: 16px; color: var(--gold); background: var(--lac); border-radius: 4px; padding: 2px 10px 1px; box-shadow: inset 0 0 0 1.5px rgba(242,207,114,.7), 0 2px 0 var(--lac-edge); min-width: 56px; }
+  .up.max em { display: none; } .up.max small { color: var(--lac-lo); font-weight: 700; }
+  .up.poor em { filter: grayscale(1); opacity: .55; }
+  .up .pip { display: flex; gap: 4px; } .up .pip u { width: 9px; height: 9px; border-radius: 50%; border: 1.5px solid var(--stone-edge); background: rgba(70,50,30,.15); } .up .pip u.on { background: var(--lac); }
+  .up.no { animation: upno .3s; } @keyframes upno { 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+  .up.got { animation: upgot .5s cubic-bezier(.34,1.56,.64,1); } @keyframes upgot { 0% { transform: scale(1.18); filter: brightness(1.5); } 100% { transform: scale(1); filter: none; } }
+  /* 도감 · 주웠을 때 알림 */
+  #dex .panel { padding: 14px 18px 18px; cursor: pointer; }
+  #dex h3 { margin: 0 0 10px; font-size: 20px; } #dex h3 b { color: var(--lac); margin-left: 6px; }
+  #dexGrid { display: grid; grid-template-columns: repeat(6, 92px); gap: 8px; }
+  #dexGrid .cell { background: rgba(255,250,235,.4); border: 2px solid var(--stone-edge); border-radius: 5px; padding: 4px 2px 5px; display: flex; flex-direction: column; align-items: center; }
+  #dexGrid img, #dexGrid i { width: 72px; height: 72px; display: block; } #dexGrid i { font-style: normal; font-size: 34px; line-height: 72px; opacity: .3; }
+  #dexGrid span { font-size: 11.5px; line-height: 1.25; text-align: center; word-break: keep-all; min-height: 2.5em; display: flex; align-items: center; } #dexGrid .no { background: rgba(70,50,30,.16); }
+  #relicPop { position: fixed; left: 50%; top: calc(112px + env(safe-area-inset-top)); transform: translate(-50%, -12px); display: flex; align-items: center; gap: 10px; padding: 6px 18px 6px 8px; border-radius: 6px; opacity: 0; pointer-events: none; z-index: 9; }
+  #relicPop img { width: 64px; height: 64px; display: block; } #relicPop b { display: block; font-size: 19px; } #relicPop small { font-size: 14px; color: var(--lac-lo); font-weight: 700; }
+  #relicPop.on { animation: relicpop 3s ease-out forwards; } @keyframes relicpop { 0% { opacity: 0; transform: translate(-50%, -12px) scale(.9); } 8% { opacity: 1; transform: translate(-50%, 0) scale(1.05); } 14% { transform: translate(-50%, 0) scale(1); } 85% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -8px); } }
+  body.ending #relicPop { display: none; }
+  /* 엔딩 결과표 */
+  #ending { transition: opacity 1.2s; }
+  #ending .panel { display: flex; align-items: center; gap: 18px; padding: 14px 18px; min-width: 0; }
+  #endCard { display: block; height: min(78vh, 640px); aspect-ratio: 4 / 5; border-radius: 4px; box-shadow: 0 3px 10px rgba(0,0,0,.35); }
+  #ending .side { display: flex; flex-direction: column; gap: 12px; }
+  body.ending #topbar, body.ending #keys, body.ending #pad, body.ending .tbtn, body.ending #dayCard, body.ending #tut { display: none !important; }
+  #pause { background: rgba(30,18,10,.45); }
+  #pause h2 { font-family: 'Climate', sans-serif; font-weight: 400; font-size: 54px; letter-spacing: 8px; color: var(--gold); -webkit-text-stroke: 5px var(--lac-lo); paint-order: stroke fill; }
+
+  /* 타이틀: 제목은 아래, 단추는 그 위 한 줄 */
+  #title { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; padding-bottom: 5vh; background: linear-gradient(180deg, rgba(20,14,10,0) 45%, rgba(20,14,10,.38) 100%); transition: opacity 1s; z-index: 10; }
+  #title.hide { opacity: 0; pointer-events: none; }
+  #title .btns { display: flex; gap: 14px; margin-bottom: 18px; }
+  #title h1 { margin: 0; font-family: 'Climate', sans-serif; font-weight: 400; font-size: min(15vw, 150px); line-height: 1; letter-spacing: 2px; white-space: nowrap; color: var(--lac); -webkit-text-stroke: 7px var(--gold); paint-order: stroke fill; text-shadow: 0 6px 0 var(--lac-edge), 0 10px 30px rgba(0,0,0,.45); }
+
+  /* 튜토리얼 한 줄 (돌판) */
+  #tut { position: fixed; left: 50%; top: calc(56px + env(safe-area-inset-top)); transform: translateX(-50%); width: min(720px, 82vw); padding: 10px 40px 10px 16px; border-radius: 6px; z-index: 8; display: none; align-items: center; gap: 10px; font-size: 17px; line-height: 1.4; }
+  #tut.show { display: flex; } #tut.pop { animation: tutpop .35s cubic-bezier(.34,1.56,.64,1); }
+  @keyframes tutpop { 0% { transform: translateX(-50%) scale(.9); } 100% { transform: translateX(-50%) scale(1); } }
+  #tutN { flex: none; font-size: 13px; padding: 3px 8px; border-radius: 4px; background: var(--lac); color: var(--gold); }
+  #tutX { position: absolute; right: 6px; top: 50%; margin-top: -16px; width: 32px; height: 32px; border: 0; background: none; color: var(--ink); font-size: 18px; cursor: pointer; }
+  /* 폰 조작 */
+  #pad { display: none; position: fixed; left: calc(14px + env(safe-area-inset-left)); bottom: calc(48px + env(safe-area-inset-bottom)); width: 186px; height: 186px; border-radius: 50%; border: 2px solid rgba(255,255,255,.45); background: rgba(30,20,14,.32); touch-action: none; z-index: 6; }
+  #knob { position: absolute; left: 50%; top: 50%; width: 72px; height: 72px; margin: -36px 0 0 -36px; border-radius: 50%; border: 2px solid rgba(255,255,255,.75); background: rgba(255,255,255,.3); pointer-events: none; }
+  #pad.on #knob { background: rgba(255,255,255,.5); }
+  .tbtn { display: none; position: fixed; z-index: 6; border-radius: 50%; touch-action: none; font-family: 'Gmarket', sans-serif; font-weight: 700; padding: 0; }
+  #bAct { right: calc(16px + env(safe-area-inset-right)); bottom: calc(26px + env(safe-area-inset-bottom)); width: 92px; height: 92px; font-size: 19px; }
+  #bJump { right: calc(122px + env(safe-area-inset-right)); bottom: calc(22px + env(safe-area-inset-bottom)); width: 64px; height: 64px; font-size: 14px; letter-spacing: 0; }
+  .tbtn.on { transform: translateY(3px); filter: brightness(1.15); }
+  .tbtn.btn { padding: 0 !important; letter-spacing: 0; white-space: nowrap; line-height: 1; }
+  body.touch.playing #pad, body.touch.playing .tbtn { display: block; }
+  body.playing #oreumFs { display: none; }
+  #rotate { position: fixed; inset: 0; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 12px; background: rgba(30,20,14,.95); z-index: 40; text-align: center; font-size: 17px; padding: 8vw; }
+  #rotate .ph { width: 64px; height: 110px; border: 5px solid var(--gold); border-radius: 12px; animation: turnph 1.6s ease-in-out infinite; }
+  @keyframes turnph { 0%, 20% { transform: rotate(0); } 60%, 100% { transform: rotate(-90deg); } }
+  #rotate.off { display: none !important; }
+  @media (orientation: portrait) { body.touch #rotate { display: flex; } }
+  html.ol-land body.touch #rotate { display: none; }
+
+  @media (max-width: 700px) { .stat { padding: 4px 8px 3px; } .stat b { font-size: 15px; } .stat small { display: none; } #topbar { gap: 5px; } }
+  /* 폰 가로 */
+  @media (max-height: 480px) {
+    #title { justify-content: flex-end; padding-bottom: 3vh; }
+    #title .btns { margin-bottom: 3vh; }
+    #title h1 { font-size: 19vh; -webkit-text-stroke: 5px var(--gold); }
+    .btn { font-size: 5.4vh; padding: 2.4vh 6vh 2.1vh; }
+    .btn.stone { font-size: 4.4vh; padding: 2vh 4.6vh 1.8vh; }
+    #title { padding-bottom: 2vh; } #title .btns { position: absolute; bottom: 30vh; margin: 0; }
+    #pad { width: 156px; height: 156px; left: calc(10px + env(safe-area-inset-left)); bottom: calc(26px + env(safe-area-inset-bottom)); }
+    #knob { width: 60px; height: 60px; margin: -30px 0 0 -30px; }
+    #bAct { width: 80px; height: 80px; font-size: 17px; bottom: calc(18px + env(safe-area-inset-bottom)); }
+    #bJump { width: 58px; height: 58px; right: calc(106px + env(safe-area-inset-right)); bottom: calc(14px + env(safe-area-inset-bottom)); }
+    #tut { top: calc(46px + env(safe-area-inset-top)); font-size: 4.4vh; padding: 1.6vh 36px 1.6vh 12px; width: min(620px, 74vw); } #tutN { font-size: 3.4vh; }
+    #msg { font-size: 34px; top: 26%; } #dayCard b { font-size: 32px; } #dayCard { top: 34%; }
+    #shop { margin: 0 0 2.5vh; gap: 8px; } .up { width: 104px; padding: 1.2vh 4px; gap: 1px; } .up .ic { height: 6vh; } .up b { font-size: 3.6vh; } .up small { font-size: 3vh; } .up em { font-size: 3.8vh; }
+    #dexGrid { grid-template-columns: repeat(6, 19vh); gap: 1.4vh; } #dexGrid img, #dexGrid i { width: 14vh; height: 14vh; } #dexGrid i { line-height: 14vh; font-size: 8vh; } #dexGrid span { font-size: 3vh; } #dex h3 { font-size: 4.6vh; margin-bottom: 1.5vh; }
+    .panel { padding: 3vh 5vh 4vh; } .panel h2 { font-size: 9vh; } .panel .row { margin: 1vh 0 3vh; } .panel .row b { font-size: 7vh; }
+  }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="vig"></div>
+<div id="topbar">
+  <div class="stat stone"><small>DAY</small><b id="sDay">1</b></div>
+  <div class="stat stone"><svg width="18" height="12" viewBox="0 0 18 12" style="align-self:center"><rect x="1" y="2" width="16" height="8" rx="1" fill="#9a6a3c" stroke="#3a2614" stroke-width="1.4"/><path d="M1 6h16" stroke="#3a2614" stroke-width="1"/></svg><b id="sPlank">0/6</b></div>
+  <div class="stat stone"><b id="sH">260</b><small>m</small></div>
+  <div class="stat stone"><small data-en="COIN">코인</small><b id="sCoin">0</b></div>
+  <button id="btnDex" class="stat stone" title="B"><small data-en="RELICS">도감</small><b id="sDex">0/12</b></button>
+  <div class="spacer"></div>
+  <button id="btnPause" class="tog" title="PAUSE"><svg viewBox="0 0 24 24"><rect x="6" y="5" width="4" height="14" rx="1" fill="#f2cf72"/><rect x="14" y="5" width="4" height="14" rx="1" fill="#f2cf72"/></svg></button>
+  <button id="btnMusic" class="tog" title="BGM"><svg viewBox="0 0 24 24"><path d="M9 17.5V5.5l11-2.5v12" fill="none" stroke="#fff" stroke-width="2.6" stroke-linejoin="round"/><ellipse cx="6.3" cy="17.8" rx="3.4" ry="2.7" fill="#fff"/><ellipse cx="17.3" cy="15.3" rx="3.4" ry="2.7" fill="#fff"/></svg></button>
+  <button id="btnSfx" class="tog" title="SFX"><svg viewBox="0 0 24 24"><path d="M3 9h4l5-4.5v15L7 15H3z" fill="#fff"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg></button>
+</div>
+<div id="coinFx"></div>
+<div id="msg"></div>
+<div id="dayCard" class="btn"><b>DAY 1</b></div>
+<div id="tut" class="stone"><span id="tutN">1/10</span><span id="tutTxt"></span><button id="tutX" aria-label="close">✕</button></div>
+<div id="keys" data-en="WASD Move · Mouse View · Shift Run<br>E / Click Work · Space Jump · Esc Pause · B Relics · M Music · K Sound">WASD 이동 · 마우스 시점 · Shift 달리기<br>E / 클릭 작업 · Space 점프 · Esc 멈춤 · B 도감 · M 음악 · K 효과음</div>
+<div id="pad"><div id="knob"></div></div>
+<button id="bJump" class="tbtn btn stone" data-en="JUMP">점프</button>
+<button id="bAct" class="tbtn btn" data-en="WORK">작업</button>
+
+<div id="clear" class="sheet"><div class="panel stone">
+  <h2><span id="clrDay">DAY 1</span> CLEAR</h2>
+  <div class="row"><div><span data-en="COIN">코인</span><b id="clrCoin">+0</b></div><div><span data-en="HEIGHT">높이</span><b id="clrH">0m</b></div><div><span data-en="HAVE">가진 코인</span><b id="clrHave">0</b></div></div>
+  <div id="shop"></div>
+  <button id="bNext" class="btn">NEXT</button>
+</div></div>
+<div id="ending" class="sheet"><div class="panel stone">
+  <img id="endCard" alt="">
+  <div class="side">
+    <button id="bEndSave" class="btn" data-en="SAVE">저장</button>
+    <button id="bEndShare" class="btn stone" data-en="SHARE">공유</button>
+    <button id="bAgain" class="btn stone">RETRY</button>
+  </div>
+</div></div>
+<div id="over" class="sheet"><div class="panel stone">
+  <h2>GAME OVER</h2>
+  <div class="row"><div><span data-en="HEIGHT">높이</span><b id="overH">0m</b></div></div>
+  <button id="bRetry" class="btn">RETRY</button>
+</div></div>
+<div id="dex" class="sheet"><div class="panel stone"><h3><span data-en="LEFT BEHIND">옛 잔도공의 물건</span> <b id="dexN">0/12</b></h3><div id="dexGrid"></div></div></div>
+<div id="relicPop" class="stone"><img alt=""><div><b></b><small></small></div></div>
+<div id="pause" class="sheet"><h2>PAUSE</h2></div>
+
+<div id="title">
+  <div class="btns"><button id="bStart" class="btn" data-en="START">시작</button><button id="bNew" class="btn stone" hidden data-en="NEW GAME">새로 시작</button></div>
+  <h1 data-en="CLIFF WALKER">절벽 잔도공</h1>
+</div>
+<div id="rotate"><div class="ph"></div><p data-en="This game plays in landscape">가로 화면에서 하는 게임입니다</p><button type="button" id="rotGo" class="btn" data-en="Turn to landscape">가로로 돌리기</button></div>
+
+<script>
+  (function () {
+    var en = (new URLSearchParams(location.search).get('lang') || '').toLowerCase() === 'en';
+    if (en) { document.documentElement.lang = 'en'; document.title = 'Cliff Walker'; document.querySelectorAll('[data-en]').forEach(function (el) { el.innerHTML = el.dataset.en; }); }
+  })();
+</script>
+<script src="assets/landscape.js"></script>
+<script>(function () { var g = document.getElementById('rotGo'); if (g) g.addEventListener('click', function () { if (window.OL) OL.go(); }); })();</script>
+<script src="assets/game-home.js" data-top="6" data-left="6" data-fullscreen="1" defer></script>
+<script src="lib/three.min.js"></script>
+<script src="lib/GLTFLoader.global.js"></script>
+<script src="js/hero_joints.js"></script>
+<script src="js/sfx.js"></script>
+<script src="js/noise.js"></script>
+<script src="js/terrain.js"></script>
+<script src="js/physics.js"></script>
+<script src="js/path.js"></script>
+<script src="js/props.js"></script>
+<script src="js/relics.js"></script>
+<script src="js/world.js"></script>
+<script src="js/body.js"></script>
+<script src="js/hero.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/game.js"></script>
+<script src="/assets/visit.js?v=21" defer></script>
+<script src="/assets/game-events.js?v=4" defer></script>
+</body>
+</html>

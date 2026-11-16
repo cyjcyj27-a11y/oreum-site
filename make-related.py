@@ -18,6 +18,7 @@ import io, os, re, sys
 
 # slug, 한국어 경로, 영어 경로, 한국어 이름, 한국어 장르 앵커, 영어 이름, 영어 장르 앵커, 태그
 GAMES = [
+    ("jando",         "/games/jando/",               "/en/games/jando/",               "절벽 잔도공", "잔도공 3D 건설게임",          "CLIFF WALKER",         "3D cliff path building game", {"3d", "sim", "action"}),
     ("otteok",        "/games/otteok/",              "/en/games/otteok/",              "오떡닷컴",          "떡집 경영게임",                     "OTTEOK.COM",            "idle factory tycoon game",      {"casual", "3d", "sim", "korean"}),
     ("tattoo",        "/games/mini/tattoo/",         "/en/games/mini/tattoo/",         "타투샵",            "3D 타투게임",                       "TATTOO SHOP",           "3D tattoo game",                {"casual", "3d", "sim"}),
     ("pinball",       "/games/mini/pinball/",        "/en/games/mini/pinball/",        "핀볼",              "3D 핀볼게임",                       "PINBALL",               "3D pinball game",               {"casual", "3d", "arcade"}),
