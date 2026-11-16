@@ -641,7 +641,10 @@
     // 판자 내밀기 → 떼면 떨어뜨린다
     if (PL.carry) {
       // 쉽게 놓기(사장님 10/7): 누르고 있으면 판자가 쇠기둥 한가운데까지만 나가고 멈춘다. 거기서 떼면 얹히고, 일찍 떼면 떨어뜨리지 않고 도로 거둔다
-      if (WK.target === 'lay' && held) { PL.ext = Math.min(2.3, PL.ext + dt * 1.05); const over = layU(); if (over > 0) PL.ext = Math.max(0, PL.ext - over / 0.95); }
+      if (WK.target === 'lay' && held) {
+        // 사장님 11/16 "두번째 판자가 안놔져": 길 방향에서 45도 넘게 돌아서 있으면 판자가 허공으로 나갔다. 누르고 있는 동안 몸을 짓는 칸 쪽으로 돌린다
+        if (PL.mode === 'walk' && PATH.S.work) { const tn = PATH.seg(PATH.S.work.i).tan, ty = Math.atan2(tn.x, tn.z); let d = ty - PL.yaw; d = Math.atan2(Math.sin(d), Math.cos(d)); PL.yaw += d * Math.min(1, dt * 14); }
+        PL.ext = Math.min(2.3, PL.ext + dt * 1.05); const over = layU(); if (over > 0) PL.ext = Math.max(0, PL.ext - over / 0.95); }
       else if (PL.ext > 0 && !held) { if (layOK()) releasePlank(false); else PL.ext = 0; }
     }
     // 판자가 자리 잡는 중
