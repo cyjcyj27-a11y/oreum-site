@@ -539,6 +539,22 @@
     e._bv = bver; e._bl = bl;
     return bl;
   }
+  // 차로 한쪽이라도 무언가(폭포 절벽·건물 모서리)가 먹고 들어온 길. 막힌 길은 아니라 지나갈 수는 있지만
+  // 네비가 그런 골목으로 안내하면 이상하다(사장님 2026-11-16 "명품관 가려는데 이상한길로 안내하네" — 중문 천제연폭포 옆 골목)
+  function edgeSqueezed(e) {
+    if (e._sv === bver) return e._sq;
+    // 가로등·표지판 같은 작은 기둥은 어느 골목에나 있다 — 차로 칸의 10% 넘게 막힌 길만 '좁아진 길'로 친다
+    let hit = 0, all = 0;
+    if (window.PLAYER && PLAYER.blockedAt) {
+      const half = Math.max(1.5, Math.min((e.w || 8) / 2 - 1.2, 6)), n = Math.max(1, Math.ceil((e.len || 1) / 2.5));
+      for (let s = 0; s <= n; s++) {
+        const t = s / n, cx = e.a.x + (e.b.x - e.a.x) * t, cz = e.a.z + (e.b.z - e.a.z) * t;
+        for (let off = -half; off <= half + 1e-6; off += 1.5) { all++; if (PLAYER.blockedAt(cx + e.right.x * off, cz + e.right.z * off, 1.1)) hit++; }
+      }
+    }
+    e._sv = bver; e._sq = all > 0 && hit / all > 0.1;
+    return e._sq;
+  }
   function route(ax, az, bx, bz) {
     // 막힌 길을 피해서 먼저 찾고, 그래야만 닿는 곳(목적지 마디가 막힌 길 끝)이면 옛 방식으로 찾는다
     return routeOn(ax, az, bx, bz, true) || routeOn(ax, az, bx, bz, false);
@@ -557,7 +573,8 @@
       for (const e of u.out) {
         const v = e.b; if (done.has(v)) continue;
         if (avoid && edgeBlocked(e)) continue;
-        const w = du + (e.len || Math.hypot(v.x - u.x, v.z - u.z));
+        const ln = e.len || Math.hypot(v.x - u.x, v.z - u.z);
+        const w = du + ln + (avoid && edgeSqueezed(e) ? 400 + ln * 3 : 0);   // 좁아진 길은 400m 돌아가는 셈 치고 피한다
         if (!dist.has(v) || w < dist.get(v)) { dist.set(v, w); prev.set(v, u); q.push(v); }
       }
     }

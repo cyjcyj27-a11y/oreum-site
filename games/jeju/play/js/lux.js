@@ -274,7 +274,7 @@
     }
     // 문 앞에 서면 사 주기 단추
     L.near = false;
-    const st = L.store; if (!st || L.gone || ACT.cur) return;
+    const st = L.store; if (!st || L.gone || ACT.cur || !L.pend) return;   // 조를 때만 단추 — 사 주고 나면 사라진다
     const hp = (window.PET && PET.onFoot) ? PET.hero() : PLAYER;
     if (Math.hypot(hp.x - st.door.x, hp.z - st.door.z) < 16 && PLAYER.kmh < 12 && !ESTATE.near) {
       L.near = true; const b = el('act'); b.textContent = '👜 가방 사 주기 · ' + fmt(bagPrice()); b.classList.add('show');
