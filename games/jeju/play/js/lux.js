@@ -1,6 +1,6 @@
 // 명품관 · 여친 가방 사 주기 (사장님 2026-11-16)
 // "빽 사러 가는 명품관을 해수욕장 근처에 하나" — 고양이 츄르는 같은 날 뺐다("고양이 츄르는 빼자")
-// "자산 10억 플러스될 때마다 여친한테 빽 사 주기가 뜬다. 안 사 주면 여친이 떠나 버림"
+// "자산 10억 플러스될 때마다 여친한테 빽 사 주기가 뜬다. 안 사 주면 여친이 떠나 버림" → 같은 날 다섯 번만 조르기로 바꿈
 (function () {
   const I = ISLAND, H = I.H;
   const KEY = 'jeju.lux';
@@ -9,6 +9,9 @@
   // "처음에 10억 늘 때 천, 100억 늘 때 2천, 200억 늘 때 3천, 300억 늘 때 5천, 500억 늘 때 7천" → 500억은 1억으로(같은 날 "500억은 1억으로 하자") (만원 단위)
   const START = 1000000;
   const TIERS = [[5000000, 10000], [3000000, 5000], [2000000, 3000], [1000000, 2000], [0, 1000]];   // [늘어난 자산, 가방 값]
+  // 조르는 때는 다섯 번뿐 — 늘어난 자산 10억·100억·200억·300억·500억(사장님 2026-11-16 "150억인데 왜 자꾸 빽사달라하노" → "다섯 번만 조르기")
+  const MILES = [[100000, 1000], [1000000, 2000], [2000000, 3000], [3000000, 5000], [5000000, 10000]];
+  const passed = nw => { let k = 0; while (k < MILES.length && nw - START >= MILES[k][0]) k++; return k; };
   const priceAt = nw => { const g = nw - START; for (const t of TIERS) if (g >= t[0]) return t[1]; return 1000; };
   const bagPrice = () => L.pend && L.pend.price ? L.pend.price : priceAt(ESTATE.netWorth());
   const SLACK = 45;             // 길 따라 걸리는 시간에 얹어 주는 여유(초)
@@ -16,8 +19,8 @@
   const el = id => document.getElementById(id);
   const fmt = v => (window.ESTATE && ESTATE.fmt) ? ESTATE.fmt(v) : String(v);
 
-  function load() { try { const j = JSON.parse(localStorage.getItem(KEY) || '{}'); L.gone = !!j.gone; L.s700 = !!j.s700; L.bags = j.bags || 0; L.next = j.next || 0; L.pend = j.pend || null; } catch (e) {} }
-  function save() { try { localStorage.setItem(KEY, JSON.stringify({ gone: L.gone, s700: L.s700, bags: L.bags, next: L.next, pend: L.pend })); } catch (e) {} }
+  function load() { try { const j = JSON.parse(localStorage.getItem(KEY) || '{}'); L.gone = !!j.gone; L.s700 = !!j.s700; L.bags = j.bags || 0; L.next = j.next || 0; L.k = typeof j.k === 'number' ? j.k : -1; L.pend = j.pend || null; } catch (e) {} }
+  function save() { try { localStorage.setItem(KEY, JSON.stringify({ gone: L.gone, s700: L.s700, bags: L.bags, next: L.next, k: L.k, pend: L.pend })); } catch (e) {} }
   if (new URLSearchParams(location.search).get('reset')) { try { localStorage.removeItem(KEY); } catch (e) {} }
 
   // ── 명품관 자리: 중문 색달해변 곁, 길에 붙은 평지 ──
@@ -207,10 +210,10 @@
     g.fillStyle = '#e0b45a'; g.beginPath(); g.arc(x, y, Math.max(3, fs * 0.16), 0, 6.29); g.fill();
     if (window.ESTATE && ESTATE.mapHit) ESTATE.mapHit.push({ p: d, x0: x - fs * 0.4, y0: by, x1: bx + w, y1: by + h });
   }
-  function ask() {
+  function ask(price) {
     const st = L.store; let sec = 180;
     if (st && ESTATE.dealSec) sec = ESTATE.dealSec({ x: st.door.x, z: st.door.z, side: 0 }) + SLACK;
-    L.pend = { left: Math.max(90, sec), price: priceAt(ESTATE.netWorth()) };   // 조른 그 순간 값으로 묶는다
+    L.pend = { left: Math.max(90, sec), price: price || priceAt(ESTATE.netWorth()) };   // 조른 그 순간 값으로 묶는다
     save(); bar(); dest();
     AUDIO.init(); AUDIO.ping(1320); setTimeout(() => AUDIO.ping(1560), 160);
     const pool = ASK[L.pend.price] || ASK[1000];
@@ -236,19 +239,32 @@
   }
 
   // 여친 왼손에 가장 최근 가방 — 산 순간 눈에 보이게 (상점은 즉시 보상)
-  let held = null;
+  // 손잡이를 손바닥에 걸고 가방은 늘 아래로 늘어진다(사장님 2026-11-16 "가방을 손에 들게 해줘봐" — 전엔 손목 위 허리 옆에 떠 있었음)
+  let held = null, hand = null, finger = null, hips = null;
+  const _a = new THREE.Vector3(), _b = new THREE.Vector3(), _c = new THREE.Vector3();
   function holdBag(force) {
     const gf = window.PET && PET.gfM; if (!gf || !gf.g || L.bags <= 0 || L.gone) return;
     if (held && !force) return;
-    const hand = gf.g.getObjectByName('mixamorigLeftHand') || gf.g.getObjectByName('LeftHand'); if (!hand) return;
+    hand = gf.g.getObjectByName('mixamorigLeftHand') || gf.g.getObjectByName('LeftHand'); if (!hand) return;
+    finger = gf.g.getObjectByName('mixamorigLeftHandMiddle1') || gf.g.getObjectByName('LeftHandMiddle1');
+    hips = gf.g.getObjectByName('mixamorigHips') || gf.g.getObjectByName('Hips');
     if (held && held.parent) held.parent.remove(held);
-    held = bagMesh(BAG_COL[(L.bags - 1) % BAG_COL.length], 1);
-    // 손뼈 축척을 되돌려 실제 크기로 든다
-    hand.updateWorldMatrix(true, false); const ws = new THREE.Vector3(); hand.getWorldScale(ws); const gs = new THREE.Vector3(); gf.g.parent.getWorldScale(gs);
-    held.scale.setScalar((gs.x || 1) / (ws.x || 1));
-    held.position.set(0, -0.12 / (ws.x || 1) * (gs.x || 1), 0);
-    held.rotation.set(Math.PI, 0, 0);
-    hand.add(held);
+    held = bagMesh(BAG_COL[(L.bags - 1) % BAG_COL.length], 0.9);
+    L.scene.add(held);
+  }
+  function placeBag() {
+    if (!held) return;
+    const gf = window.PET && PET.gfM;
+    let vis = !L.gone && !!(gf && gf.g && hand);
+    for (let o = hand; vis && o; o = o.parent) if (!o.visible) vis = false;
+    held.visible = vis; if (!vis) return;
+    hand.updateWorldMatrix(true, false); hand.getWorldPosition(_a);
+    if (finger) { finger.updateWorldMatrix(true, false); finger.getWorldPosition(_b); _a.lerp(_b, 0.7); }   // 손바닥 가운데
+    // 몸에서 바깥쪽으로 조금 띄워 허벅지를 뚫지 않게
+    if (hips) { hips.getWorldPosition(_c); _c.subVectors(_a, _c); _c.y = 0; const d = _c.length(); if (d > 1e-4) _a.addScaledVector(_c, 0.045 / d); }
+    gf.g.getWorldDirection(_b);
+    held.position.set(_a.x, _a.y - 0.33 * 0.9, _a.z);   // 손잡이 꼭대기가 손바닥에
+    held.rotation.set(0, Math.atan2(_b.x, _b.z) + Math.PI / 2, 0);   // 넓은 면이 바깥을 보게
   }
 
   function init(scene) {
@@ -258,9 +274,9 @@
   let chk = 0;
   function update(dt) {
     if (!window.ESTATE || !ESTATE.ready || !(window.__jj && __jj.started && __jj.started())) return;
-    holdBag(false);
+    holdBag(false); placeBag();
     const nw = ESTATE.netWorth();
-    if (!L.ready) { L.ready = true; if (!L.next) { L.next = (Math.floor(nw / STEP) + 1) * STEP; save(); } if (L.pend) { bar(); dest(); } }
+    if (!L.ready) { L.ready = true; if (L.k < 0) { L.k = passed(nw); save(); } if (L.pend) { bar(); dest(); } }   // 이미 지난 단계는 조르지 않는다
     if (L.pend) {
       L.pend.left -= dt; chk += dt; if (chk > 1) { chk = 0; save(); }
       if (L.pend.left <= 0) leave(); else bar();
@@ -268,9 +284,9 @@
       // 700억이 되면 여친이 더는 가방을 조르지 않고, 주인공이 혼잣말을 한다(사장님 2026-11-16 문구 그대로)
       L.s700 = true; save();
       if (window.PET && PET.say) PET.say(window.LANG && LANG.en ? 'Me' : '나', '이상하다 왜 가방사달라고 안하지....', 6, false);
-    } else if (!L.gone && !L.s700 && nw >= L.next) {
-      L.next = (Math.floor(nw / STEP) + 1) * STEP;
-      ask();
+    } else if (!L.gone && !L.s700 && L.k < MILES.length && passed(nw) > L.k) {
+      const k = passed(nw); L.k = k;   // 한꺼번에 여러 단계를 넘어도 한 번만 조른다
+      ask(MILES[k - 1][1]);
     }
     // 문 앞에 서면 사 주기 단추
     L.near = false;
