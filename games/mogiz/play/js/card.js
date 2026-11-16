@@ -31,7 +31,7 @@
     for (let i = 0; i < 70; i++) { g.fillStyle = 'rgba(255,255,255,' + (0.3 + Math.random() * 0.6) + ')'; g.fillRect(Math.random() * W, Math.random() * H * 0.4, 3, 3); }
     // 제목
     txt(g, 'MOGIZ', W / 2, 108, '150px Jal, sans-serif', '#ff4d6d', INK, 26);
-    txt(g, L('모기즈', 'THE END'), W / 2, 214, '60px Jal, sans-serif', '#ffffff', INK, 14);
+    txt(g, L('모기즈', 'THE END') + '  ' + (S.diff || 'easy').toUpperCase(), W / 2, 214, '60px Jal, sans-serif', '#ffffff', INK, 14);
     // 장면 사진(알 낳는 대야)
     const ph = { x: 90, y: 270, w: 900, h: 470 };
     rr(g, ph.x - 12, ph.y - 12, ph.w + 24, ph.h + 24, 26); g.fillStyle = INK; g.fill();

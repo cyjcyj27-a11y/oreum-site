@@ -643,7 +643,7 @@
       else if (this.alert > 0 && this.cool <= 0 && !G.att) {
         const tl = this.root.worldToLocal(_b.copy(MOSQ.pos));
         const reach = this.arms.reduce((m, a) => Math.max(m, a.L1 + a.L2 + (a.tipL && a.hold.visible ? a.tipL : 0) + 0.15 - a.S.distanceTo(tl)), -1);
-        if (reach > 0 || (this.id === 'mom' && this.armed && _a.distanceTo(MOSQ.pos) < 1.6) || (this.snapHead && _a.distanceTo(MOSQ.pos) < 0.35)) { this.strike('hunt', G); this.cool = this.D.hunt; }
+        if (reach > 0 || (this.id === 'mom' && this.armed && _a.distanceTo(MOSQ.pos) < DATA.dif.sprayR) || (this.snapHead && _a.distanceTo(MOSQ.pos) < 0.35)) { this.strike('hunt', G); this.cool = this.D.hunt; }
       }
     }
     if (this.alert > 0) { this.alert -= dt; if (this.alert <= 0) { this.alert = 0; if (!this.act) this.hold(false); } }

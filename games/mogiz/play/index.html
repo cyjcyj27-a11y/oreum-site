@@ -117,6 +117,10 @@ body.touch.playing #ctl{display:block}
 body.playing #oreumFs{display:none!important}
 
 /* ---------- 타이틀 ---------- */
+#haze{position:fixed;inset:0;z-index:3;pointer-events:none;opacity:0;background:radial-gradient(ellipse at center,rgba(190,225,160,.25) 0%,rgba(150,200,120,.6) 55%,rgba(90,140,70,.85) 100%);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
+#tBtns.dif{display:flex;gap:14px;flex-wrap:wrap;justify-content:center}
+#tBtns .btn small{display:block;font:400 14px/1 'Ui',sans-serif;margin-top:4px;opacity:.75}
+.btn.d-normal{filter:hue-rotate(-22deg) saturate(1.2)}.btn.d-hard{filter:hue-rotate(-40deg) saturate(1.8) brightness(.88)}
 #title{position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:0 16px calc(9vh + env(safe-area-inset-bottom));gap:14px;pointer-events:none}
 #title > *{pointer-events:auto}
 #logo{position:absolute;left:0;right:0;top:20vh;text-align:center;pointer-events:none}
@@ -209,6 +213,7 @@ html.ol-land #rotate{display:none!important}
 <div id="onoms"></div>
 <div id="ret" hidden></div>
 <div id="flash"></div>
+<div id="haze" hidden></div>
 <div id="hud" hidden>
   <div class="stat"><small id="lifeL">모기</small><b id="lifeN">1</b></div>
   <div class="stat"><svg id="arrow" viewBox="0 0 20 20"><path d="M10 2 L17 16 L10 12.5 L3 16 Z" fill="#ff4d6d" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/></svg><b id="tgtN">고양이</b><small id="tgtD">3m</small></div>
@@ -284,17 +289,17 @@ html.ol-land #rotate{display:none!important}
 <script src="lib/three.min.js"></script>
 <script src="js/toon.js?v=2"></script>
 <script src="js/render.js?v=1"></script>
-<script src="js/data.js?v=2"></script>
-<script src="js/world.js?v=1"></script>
-<script src="js/people.js?v=1"></script>
+<script src="js/data.js?v=3"></script>
+<script src="js/world.js?v=2"></script>
+<script src="js/people.js?v=2"></script>
 <script src="js/mosq.js?v=1"></script>
 <script src="js/fx.js?v=1"></script>
 <script src="js/audio.js?v=2"></script>
 <script src="js/input.js?v=1"></script>
 <script src="js/how.js?v=1"></script>
-<script src="js/card.js?v=1"></script>
-<script src="js/game.js?v=3"></script>
-<script src="js/ui.js?v=3"></script>
+<script src="js/card.js?v=2"></script>
+<script src="js/game.js?v=4"></script>
+<script src="js/ui.js?v=4"></script>
 <script src="/assets/visit.js?v=21" defer></script>
 <script src="/assets/game-events.js?v=4" defer></script>
 </body>

@@ -34,7 +34,7 @@
     { id: 'nose', ko: '피 냄새', en: 'Blood Scent', dk: '살을 찾는 거리 +40%', de: 'Skin lock range +40%', f: (s) => (s.reticle *= 1.4) },
     { id: 'pop', ko: '침 빼기 달인', en: 'Pop Out', dk: '침 빼고 튕기는 힘 +45%', de: 'Pull-out push +45%', f: (s) => (s.pop *= 1.45) },
     { id: 'calm', ko: '느긋한 숨', en: 'Slow Breath', dk: '떼면 간지러움이 두 배 빨리 가라앉음', de: 'Itch fades 2x faster', f: (s) => (s.decay *= 2) },
-    { id: 'coil', ko: '모기향 적응', en: 'Coil Proof', dk: '모기향 연기 무시', de: 'Ignore mosquito coil smoke', f: (s) => (s.coilImmune = true) },
+    { id: 'coil', ko: '모기향 적응', en: 'Coil Proof', dk: '모기향 연기 무시', dkH: '모기향 독 -50%', de: 'Ignore mosquito coil smoke', deH: 'Coil poison -50%', f: (s) => (s.coilImmune = true) },
     { id: 'whisper', ko: '귓가 속삭임', en: 'Whisper', dk: '귓가에서 덜 들킴 -40%', de: 'Ear buzz notice -40%', f: (s) => (s.annoy *= 0.6) },
     { id: 'hide', ko: '그림자 숨기', en: 'Shadow Hide', dk: '찾아다니는 시간 -30%', de: 'Search time -30%', f: (s) => (s.alertMul *= 0.7) },
     { id: 'tank', ko: '피 저장고', en: 'Blood Tank', dk: '배 무게 -25%', de: 'Belly weight -25%', f: (s) => (s.heavy *= 0.75) },
@@ -49,6 +49,25 @@
   ];
   D.CARD = {}; D.CARDS.forEach((c) => (D.CARD[c.id] = c));
   // 환생할수록 물린 자리가 덜 부어오름(= 덜 간지러움): 한 번 환생마다 5%, 가장 적게 72%까지(10/24 사장님 6번 만에 엔딩 → 난이도 올림, 옛 8%·62%)
-  D.swell = (life) => Math.max(0.72, Math.pow(0.95, Math.max(0, (life || 1) - 1)));
-  D.stats = function (ids, life) { const s = Object.assign({}, D.BASE); (ids || []).forEach((id) => D.CARD[id] && D.CARD[id].f(s)); s.swell = D.swell(life); s.itchMul *= s.swell; return s; };
+  // ---------- 난이도(11/16 노말·하드 추가, 이지 = 그 전 판 그대로) ----------
+  // need·alert: 곱, wind: 빼기(초), coils: 모기향 자리 이름, coilR: 연기 반경(m), coilTop: 연기 높이(m, 0 이면 바닥 근처만),
+  // decay: 독 빠지는 속도(1초), decaySuckOnly: 붙어서 빨 때만 빠짐, slow: [독 몇부터, 속도 몇 배] 목록, haze: 독 50%부터 화면 뿌옇게,
+  // coilProof: 모기향 적응 카드가 모기향 독을 몇 배로(0 = 무시), swellStep·swellMin: 환생 부기 줄어드는 양, gold: 금테 확률,
+  // share: 들키면 옆 사람도 같이 찾음, momHunt·sprayR: 엄마 스프레이 간격 배수·거리, drift: 연기가 바람 따라 흔들림, fan: 거실 선풍기
+  D.DIFF = {
+    easy: { need: 1, alert: 1, wind: 0, coils: ['living'], coilR: 0.55, coilTop: 0, decay: 0.22, slow: [[0.5, 0.85]], coilProof: 0, swellStep: 0.95, swellMin: 0.72, gold: 0.12, momHunt: 1, sprayR: 1.6 },
+    normal: { need: 1.2, alert: 1.25, wind: 0.05, coils: ['living', 'grandpa', 'baby'], coilR: 1.0, coilTop: 2.4, decay: 0.11, slow: [[0.5, 0.85], [0.7, 0.65]], coilProof: 0, swellStep: 0.97, swellMin: 0.82, gold: 0.12, momHunt: 1, sprayR: 1.6 },
+    hard: { need: 1.4, alert: 1.5, wind: 0.1, coils: ['living', 'grandpa', 'baby', 'teen', 'kitchen'], coilR: 1.3, coilTop: 2.4, decay: 0.11, decaySuckOnly: true, slow: [[0.5, 0.65]], haze: true, coilProof: 0.5, swellStep: 0.98, swellMin: 0.9, gold: 0.06, share: true, momHunt: 0.65, sprayR: 2.1, drift: true, fan: true },
+  };
+  D.diff = 'easy'; D.dif = D.DIFF.easy;
+  const T0 = {}; for (const k in D.T) T0[k] = Object.assign({}, D.T[k]);
+  D.setDiff = function (name) {
+    D.diff = D.DIFF[name] ? name : 'easy'; const d = (D.dif = D.DIFF[D.diff]);
+    for (const k in D.T) {
+      const b = T0[k], t = D.T[k];
+      t.need = b.need * d.need; t.alert = b.alert * d.alert; t.wind = Math.max(0.3, b.wind - d.wind); t.hunt = k === 'mom' ? b.hunt * d.momHunt : b.hunt;
+    }
+  };
+  D.swell = (life) => Math.max(D.dif.swellMin, Math.pow(D.dif.swellStep, Math.max(0, (life || 1) - 1)));
+  D.stats = function (ids, life) { const s = Object.assign({}, D.BASE); (ids || []).forEach((id) => D.CARD[id] && D.CARD[id].f(s)); s.coilMul = s.coilImmune ? D.dif.coilProof : 1; s.swell = D.swell(life); s.itchMul *= s.swell; return s; };
 })();

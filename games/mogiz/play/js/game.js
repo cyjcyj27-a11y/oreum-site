@@ -7,8 +7,10 @@
   G.cam = { yaw: 0, pitch: 0.28, arm: 0.17 };
   G.clouds = [];
   // ---------- 저장 ----------
-  function fresh() { return { life: 1, cards: [], dex: {}, deaths: 0, ul: 0, sec: 0, ended: 0, teenKilled: 0, how: 0, dodges: 0, bites: 0, hits: {}, endings: 0 }; }
-  G.load = function () { try { const s = JSON.parse(localStorage.getItem(KEY) || 'null'); G.S = s && s.life ? Object.assign(fresh(), s) : fresh(); } catch (e) { G.S = fresh(); } };
+  function fresh() { return { diff: 'easy', life: 1, cards: [], dex: {}, deaths: 0, ul: 0, sec: 0, ended: 0, teenKilled: 0, how: 0, dodges: 0, bites: 0, hits: {}, endings: 0 }; }
+  G.load = function () { try { const s = JSON.parse(localStorage.getItem(KEY) || 'null'); G.S = s && s.life ? Object.assign(fresh(), s) : fresh(); } catch (e) { G.S = fresh(); } G.applyDiff(); };
+  // 난이도: 사람 숫자·모기향·선풍기를 한꺼번에 맞춤
+  G.applyDiff = function () { DATA.setDiff(G.S.diff); if (window.WORLD && WORLD.setDiff && WORLD.fan) WORLD.setDiff(); };
   G.save = function () { try { localStorage.setItem(KEY, JSON.stringify(G.S)); } catch (e) {} };
   G.hasSave = function () { try { const s = JSON.parse(localStorage.getItem(KEY) || 'null'); return !!(s && (s.life > 1 || s.started) && !s.ended); } catch (e) { return false; } };
 
@@ -16,7 +18,7 @@
     const tm = (window.__tm = { start: performance.now() }), mk = (k) => (tm[k] = Math.round(performance.now() - tm.start));
     G.load();
     RND.init(document.getElementById('cv')); mk('render');
-    WORLD.build(RND.scene); mk('world');
+    WORLD.build(RND.scene); WORLD.setDiff(); mk('world');
     PEOPLE.build(RND.scene); mk('people');
     MOSQ.build(RND.scene);
     FX.init(RND.scene); mk('mosq');
@@ -30,9 +32,9 @@
   };
 
   // ---------- 판 시작 ----------
-  G.newGame = function () { const d = G.S.dex, e = G.S.endings, how = G.S.how; G.S = fresh(); G.S.dex = d; G.S.endings = e; G.S.how = how; G.save(); };
+  G.newGame = function (diff) { const d = G.S.dex, e = G.S.endings, how = G.S.how; G.S = fresh(); G.S.dex = d; G.S.endings = e; G.S.how = how; G.S.diff = diff || 'easy'; G.applyDiff(); G.save(); };
   G.startLife = function () {
-    G.S.started = 1; G.st = DATA.stats(G.S.cards, G.S.life);
+    G.S.started = 1; G.applyDiff(); G.st = DATA.stats(G.S.cards, G.S.life);
     PEOPLE.list.forEach((c) => c.reset());
     G.ti = 0; G.att = null; G.alive = true; G.toxin = 0; G.dashT = 0; G.boostT = 0; G.landing = null; G.detachT = 0; G.clouds.length = 0;
     G.lifeT = 0; G.ts = 1; G.home = false; G.biteCd = 0; G.biteWas = false; MOSQ.attQ = null;
@@ -121,8 +123,10 @@
     // 독
     let tox = 0;
     for (const cl of G.clouds) if (MOSQ.pos.distanceTo(cl.p) < cl.r) tox += 0.85;
-    if (!st.coilImmune && MOSQ.pos.distanceTo(WORLD.coil) < 0.55 && MOSQ.pos.y < 1.1) tox += 0.32;
-    if (tox > 0) G.toxin += tox * st.toxin * dt; else G.toxin = Math.max(0, G.toxin - 0.22 * dt);
+    tox += WORLD.coilTox(MOSQ.pos) * st.coilMul;
+    const dif = DATA.dif, suckingNow = G.att && G.detachT <= 0 && IN.bite;
+    if (tox > 0) G.toxin += tox * st.toxin * dt;
+    else if (!dif.decaySuckOnly || suckingNow) G.toxin = Math.max(0, G.toxin - dif.decay * dt);
     if (G.toxin >= 1) { G.kill(null, 'poison'); return; }
     // 배 소화
     const sucking = G.att && G.detachT <= 0 && IN.bite;
@@ -135,12 +139,14 @@
     if (G.home && MOSQ.pos.distanceTo(WORLD.basin) < 0.32 && MOSQ.pos.y < WORLD.basin.y + 0.2) startLay();
   }
 
+  // 독이 쌓이면 날개가 느려짐(난이도마다 문턱·세기)
+  G.toxSlow = function () { let k = 1; for (const s of DATA.dif.slow) if (G.toxin > s[0]) k = s[1]; return k; };
   function fly(dt, st, cy, cp) {
     const fp = cp - 0.22;
     _f.set(-Math.sin(cy) * Math.cos(fp), -Math.sin(fp), -Math.cos(cy) * Math.cos(fp));
     _r.set(Math.cos(cy), 0, -Math.sin(cy));
     G.boostT -= dt; G.dashT -= dt; G.biteCd = (G.biteCd || 0) - dt; G.dashCd = (G.dashCd || 0) - dt;
-    let sp = st.speed * (1 - st.heavy * MOSQ.belly) * (G.boostT > 0 ? 1 + st.boost : 1) * (G.toxin > 0.5 ? 0.85 : 1);
+    let sp = st.speed * (1 - st.heavy * MOSQ.belly) * (G.boostT > 0 ? 1 + st.boost : 1) * G.toxSlow();
     _w.set(0, 0, 0).addScaledVector(_f, -IN.mz * sp).addScaledVector(_r, IN.mx * sp);
     _w.y += IN.my * st.vert * (1 - st.heavy * MOSQ.belly * 0.5);
     if (IN.takeDash() && st.dash > 0 && G.dashCd <= 0) {
@@ -312,7 +318,7 @@
   G.dealCards = function () {
     const pool = DATA.CARDS.slice(), out = [];
     while (out.length < 3 && pool.length) {
-      const gold = Math.random() < 0.12;
+      const gold = Math.random() < DATA.dif.gold;
       let cand = pool.filter((c) => !!c.g === gold); if (!cand.length) cand = pool;
       // 아직 못 본 카드를 조금 더 자주
       const w = cand.map((c) => (G.S.dex[c.id] ? 1 : 1.8)); let s = w.reduce((a, b) => a + b, 0) * Math.random(), i = 0;
@@ -326,6 +332,11 @@
   G.onStrike = function (c, act) {
     if (act.kind === 'kill') return;
     AU.sfx(act.type === 'spray' ? 'shake' : 'wind');
+    // 하드: 소리 듣고 3.5m 안 옆 사람도 같이 찾아다님(아기는 빼고)
+    if (DATA.dif.share && G.mode === 'play') for (const o of PEOPLE.list) {
+      if (o === c || o.D.harmless || o.alert > 0 || o.root.position.distanceTo(c.root.position) > 3.5) continue;
+      o.alert = o.D.alert * G.st.alertMul * 0.7; o.hold(true); FX.onom(L('어디야?', 'WHERE?'), o.headWorld(new V3()).add(_t.set(0, 0.15, 0)), '#ffffff', 0.6);
+    }
     if (G.st.slowmo > 0 && MOSQ.pos.distanceTo(act.tgtW) < 0.6 && G.mode === 'play') G.ts = 0.42;
   };
   G.onDodge = function (c) {

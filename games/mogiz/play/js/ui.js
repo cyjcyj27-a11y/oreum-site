@@ -61,10 +61,15 @@
     $('title').hidden = false; $('hud').hidden = true; $('gauges').hidden = true; $('keys').hidden = true; $('ret').hidden = true;
     const b = $('tBtns'); b.innerHTML = '';
     const mk = (txt, cls, f) => { const e = document.createElement('button'); e.className = 'btn ' + (cls || ''); e.innerHTML = '<span>' + txt + '</span>'; click(e, f); b.appendChild(e); };
+    const diffs = () => {
+      b.innerHTML = ''; b.classList.add('dif');
+      [['easy', 'EASY'], ['normal', 'NORMAL'], ['hard', 'HARD']].forEach((d) => mk(d[1], 'd-' + d[0], () => { GAME.newGame(d[0]); go(); }));
+    };
+    b.classList.remove('dif');
     if (GAME.hasSave()) {
-      mk(L('이어하기', 'CONTINUE'), '', () => go());
-      mk(L('새로 시작', 'NEW GAME'), 'net', () => { GAME.newGame(); go(); });
-    } else mk('START', '', () => { if (GAME.S.ended) GAME.newGame(); go(); });
+      mk(L('이어하기', 'CONTINUE') + '<small>' + GAME.S.diff.toUpperCase() + '</small>', '', () => go());
+      mk(L('새로 시작', 'NEW GAME'), 'net', diffs);
+    } else diffs();
     U.fadeIn();
   };
   function go() {
@@ -75,6 +80,7 @@
   U.onLife = function () {
     $('hud').hidden = false; $('keys').hidden = false;
     $('lifeN').textContent = L(GAME.S.life + '호', '#' + GAME.S.life);
+    $('lifeL').textContent = L('모기', 'MOSQ') + ' · ' + GAME.S.diff.toUpperCase();
     $('bDash').hidden = !(GAME.st.dash > 0);
     if (GAME.st.dash > 0) $('keys').innerHTML = $('keys').innerHTML.replace(L('침 · E 대시', 'stab · E dash'), L('침 · E 대시', 'stab · E dash'));
   };
@@ -83,7 +89,7 @@
   const _v = new V3(), _t = new V3();
   U.frame = function () {
     const G = GAME;
-    if (G.mode !== 'play' && G.mode !== 'hatch') { $('ret').hidden = true; $('gauges').hidden = true; return; }
+    if (G.mode !== 'play' && G.mode !== 'hatch') { $('ret').hidden = true; $('gauges').hidden = true; $('haze').hidden = true; return; }
     // 대상 표시
     const tg = G.target();
     if (tg) { tg.headWorld(_t); $('tgtN').textContent = L(tg.D.ko, tg.D.en); } else { _t.copy(WORLD.basin); $('tgtN').textContent = L('풀숲', 'Grass'); }
@@ -104,6 +110,9 @@
     if (a) { $('gBlood').firstChild.style.width = (Math.min(1, a.c.blood / a.c.D.need) * 100) + '%'; $('gItch').firstChild.style.width = (Math.min(1, a.c.itch) * 100) + '%'; }
     $('gBelly').firstChild.style.width = (MOSQ.belly * 100) + '%';
     $('gTox').firstChild.style.width = (Math.min(1, G.toxin) * 100) + '%';
+    // 하드: 독 50%부터 화면이 뿌옇게
+    const hz = DATA.dif.haze ? Math.max(0, Math.min(1, (G.toxin - 0.5) / 0.5)) * 0.85 : 0;
+    $('haze').hidden = hz <= 0; $('haze').style.opacity = hz;
   };
 
   // ---------- 알림·연출 ----------
@@ -123,6 +132,8 @@
     $('howOk').onclick = () => { AU.init(); AU.sfx('btn'); $('how').hidden = true; HOW.stop(); cb && cb(); };
   };
 
+  // 카드 설명: 하드에선 바뀌는 카드(모기향 적응)가 있음
+  const cdText = (cd) => (DATA.dif.coilProof && cd.dkH ? L(cd.dkH, cd.deH) : L(cd.dk, cd.de));
   // ---------- 진화 카드 ----------
   U.openCards = function () {
     $('hud').hidden = true; $('gauges').hidden = true; $('keys').hidden = true;
@@ -139,7 +150,7 @@
       const cv = document.createElement('canvas'); cv.width = cv.height = 128; HOW.cardArt(cv, cd);
       b.appendChild(cv);
       const t = document.createElement('b'); t.textContent = L(cd.ko, cd.en); b.appendChild(t);
-      const p = document.createElement('p'); p.textContent = L(cd.dk, cd.de); b.appendChild(p);
+      const p = document.createElement('p'); p.textContent = cdText(cd); b.appendChild(p);
       if (!GAME.S.dex[cd.id]) { const n = document.createElement('span'); n.className = 'new'; n.textContent = 'NEW'; b.appendChild(n); }
       b.onclick = () => { if (picked) return; picked = true; AU.sfx('btn'); $('cards').hidden = true; IN.lock(); GAME.pickCard(cd.id); };
       row.appendChild(b);
@@ -155,7 +166,7 @@
       const d = document.createElement('div'); d.className = 'dx' + (cd.g ? ' g' : '') + (seen ? '' : ' no');
       const cv = document.createElement('canvas'); cv.width = cv.height = 96; HOW.cardArt(cv, cd, !seen); d.appendChild(cv);
       const t = document.createElement('div'); t.textContent = seen ? L(cd.ko, cd.en) : '?'; d.appendChild(t);
-      if (seen) { d.title = L(cd.dk, cd.de); const sm = document.createElement('small'); sm.textContent = L(cd.dk, cd.de); d.appendChild(sm); }
+      if (seen) { d.title = cdText(cd); const sm = document.createElement('small'); sm.textContent = cdText(cd); d.appendChild(sm); }
       L2.appendChild(d);
     });
     $('dexN').textContent = n + ' / ' + DATA.CARDS.length;

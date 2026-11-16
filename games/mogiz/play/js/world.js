@@ -179,6 +179,32 @@
     BF.add(new THREE.TorusGeometry(0.06, 0.008, 6, 20).rotateX(Math.PI / 2), '#3d7a3c', TOON.M(3.12, 0.058, -3.75), 0);
     BF.add(new THREE.TorusGeometry(0.035, 0.008, 6, 16).rotateX(Math.PI / 2), '#3d7a3c', TOON.M(3.12, 0.058, -3.75), 0);
     W.coil = V(3.12, 0.06, -3.75);
+    // 노말·하드에서 더 켜지는 모기향(방마다 사람 곁 1.2~1.4m 바닥). 거실 것은 위 합친 덩어리라 늘 보임
+    W.COILS = { living: W.coil, baby: V(3.0, 0.06, -6.3), grandpa: V(-3.05, 0.06, -5.45), teen: V(-1.2, 0.06, -5.9), kitchen: V(-4.4, 0.06, -1.4) };
+    W.coilMesh = {};
+    for (const k in W.COILS) {
+      if (k === 'living') continue;
+      const q = W.COILS[k], gp = new THREE.Group(); gp.position.set(q.x, 0, q.z); gp.visible = false;
+      const base = TOON.mesh(new THREE.CylinderGeometry(0.09, 0.09, 0.05, 16), '#c9ccd2'); base.position.y = 0.025; gp.add(base);
+      const r1 = TOON.mesh(new THREE.TorusGeometry(0.06, 0.008, 6, 20).rotateX(Math.PI / 2), '#3d7a3c', false); r1.position.y = 0.058; gp.add(r1);
+      const r2 = TOON.mesh(new THREE.TorusGeometry(0.035, 0.008, 6, 16).rotateX(Math.PI / 2), '#3d7a3c', false); r2.position.y = 0.058; gp.add(r2);
+      scene.add(gp); W.coilMesh[k] = gp;
+    }
+    // 하드: 거실 선풍기(고개를 좌우로 돌림, 연기가 바람 따라 흔들림)
+    {
+      const f = new THREE.Group(); f.position.set(2.15, 0, -3.35); f.visible = false;
+      const b = TOON.mesh(new THREE.CylinderGeometry(0.17, 0.2, 0.05, 20), '#eef1f4'); b.position.y = 0.025; f.add(b);
+      const pole = TOON.mesh(new THREE.CylinderGeometry(0.022, 0.022, 0.85, 10), '#dfe3e8'); pole.position.y = 0.47; f.add(pole);
+      const head = new THREE.Group(); head.position.y = 0.92; f.add(head);
+      const mot = TOON.mesh(new THREE.CylinderGeometry(0.06, 0.07, 0.12, 14).rotateX(Math.PI / 2), '#eef1f4'); mot.position.z = -0.05; head.add(mot);
+      const cage = TOON.mesh(new THREE.TorusGeometry(0.2, 0.01, 6, 28), '#9fb4c8', false); cage.position.z = 0.05; head.add(cage);
+      const hub = TOON.mesh(new THREE.SphereGeometry(0.035, 10, 8), '#4a8fd8'); hub.position.z = 0.055; head.add(hub);
+      const bl = new THREE.Group(); bl.position.z = 0.05; head.add(bl);
+      for (let i = 0; i < 3; i++) { const w = TOON.mesh(new THREE.BoxGeometry(0.075, 0.17, 0.008), '#7fc0f2', false); w.position.set(0, 0.095, 0); const pv = new THREE.Group(); pv.rotation.z = (i / 3) * Math.PI * 2; pv.add(w); w.rotation.y = 0.35; bl.add(pv); }
+      scene.add(f); W.fan = f;
+      W.anim.push((t, dt) => { if (!f.visible) return; bl.rotation.z -= dt * 22; head.rotation.y = 2.0 + Math.sin(t * 0.55) * 0.7; });
+    }
+    W.coilsOn = [{ k: 'living', p: W.coil }];
     // TV 장 + TV(앞벽 쪽, 화면이 소파를 봄)
     furn(3.9, 0, -0.5, 5.3, 0.45, -0.15, '#5a4030'); furn(3.95, 0.45, -0.38, 5.25, 1.25, -0.28, '#1e1e24');
     const tvM = new THREE.MeshBasicMaterial({ color: '#7fb6ff' });
@@ -341,20 +367,67 @@
     const m = new THREE.Mesh(g, TOON.mat({ vertexColors: true, side: THREE.DoubleSide }));
     m.receiveShadow = true; scene.add(m); W.grass = m;
   }
-  // 모기향 연기: 미리 만든 판 몇 장을 돌려 씀
+  // 모기향 연기: 미리 만든 판 몇 장을 돌려 씀. 이지는 바닥 근처 작은 연기(옛 그대로), 노말·하드는 천장까지 피어오르는 기둥
   function buildSmoke(scene) {
     const tex = (() => { const cv = document.createElement('canvas'); cv.width = cv.height = 64; const g = cv.getContext('2d'); const gr = g.createRadialGradient(32, 32, 4, 32, 32, 30); gr.addColorStop(0, 'rgba(235,235,240,.75)'); gr.addColorStop(1, 'rgba(235,235,240,0)'); g.fillStyle = gr; g.fillRect(0, 0, 64, 64); return new THREE.CanvasTexture(cv); })();
     W.puffTex = tex;
-    const ps = [];
-    for (let i = 0; i < 14; i++) { const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false, opacity: 0.5 })); s.userData.t = i / 14; scene.add(s); ps.push(s); }
+    const sets = {};
+    for (const k in W.COILS) {
+      const n = 34, ps = [];
+      for (let i = 0; i < n; i++) { const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false, opacity: 0.5 })); s.userData.t = i / n; s.userData.a = Math.random() * 6.28; s.userData.r = Math.sqrt(Math.random()); s.visible = k === 'living' && i < 14; scene.add(s); ps.push(s); }
+      sets[k] = ps;
+    }
     W.anim.push((t, dt) => {
-      ps.forEach((s, i) => {
-        s.userData.t = (s.userData.t + dt * 0.12) % 1; const k = s.userData.t;
-        s.position.set(W.coil.x + Math.sin(k * 9 + i) * 0.08 * k, W.coil.y + k * 1.0, W.coil.z + Math.cos(k * 7 + i) * 0.08 * k);
-        const sc = 0.06 + k * 0.32; s.scale.set(sc, sc, 1); s.material.opacity = 0.55 * (1 - k);
-      });
+      W.tNow = t;
+      const d = DATA.dif, top = d.coilTop;
+      for (const k in sets) {
+        const on = W.coilsOn.some((c) => c.k === k), q = W.COILS[k], ps = sets[k];
+        ps.forEach((s, i) => {
+          if (!on || (!top && i >= 14)) { s.visible = false; return; }
+          s.visible = true;
+          if (!top) { // 이지: 옛 연기 그대로
+            s.userData.t = (s.userData.t + dt * 0.12) % 1; const kk = s.userData.t;
+            s.position.set(q.x + Math.sin(kk * 9 + i) * 0.08 * kk, q.y + kk * 1.0, q.z + Math.cos(kk * 7 + i) * 0.08 * kk);
+            const sc = 0.06 + kk * 0.32; s.scale.set(sc, sc, 1); s.material.opacity = 0.55 * (1 - kk); s.material.color.setRGB(1, 1, 1);
+            return;
+          }
+          s.userData.t = (s.userData.t + dt * 0.07) % 1; const kk = s.userData.t, R = d.coilR;
+          W.coilDrift(k, t, _dr);
+          const spread = R * 0.72 * Math.min(1, 0.25 + kk * 2.2) * s.userData.r, a = s.userData.a + kk * 2.0;
+          s.position.set(q.x + Math.cos(a) * spread + _dr.x * kk, q.y + kk * top, q.z + Math.sin(a) * spread + _dr.z * kk);
+          const sc = R * (0.5 + kk * 0.9); s.scale.set(sc, sc, 1);
+          s.material.opacity = 0.5 * Math.min(1, kk * 6) * (1 - kk * 0.5); s.material.color.setRGB(0.86, 0.95, 0.82);
+        });
+      }
     });
   }
+  const _dr = new THREE.Vector3();
+  // 하드: 바람에 연기 꼭대기가 흔들리는 양(바닥은 모기향 자리에 붙어 있음)
+  W.coilDrift = function (k, t, out) {
+    if (!DATA.dif.drift) return out.set(0, 0, 0);
+    const i = Object.keys(W.COILS).indexOf(k);
+    return out.set(Math.sin(t * 0.55 + i * 1.7) * 0.6, 0, Math.cos(t * 0.41 + i * 2.3) * 0.45);
+  };
+  // 난이도에 맞춰 모기향·선풍기 켜기
+  W.setDiff = function () {
+    const d = DATA.dif;
+    W.coilsOn = d.coils.map((k) => ({ k, p: W.COILS[k] }));
+    for (const k in W.coilMesh) W.coilMesh[k].visible = d.coils.indexOf(k) >= 0;
+    W.fan.visible = !!d.fan;
+  };
+  // 이 자리에서 모기향 독이 1초에 얼마나 쌓이나(가운데 진하고 가장자리 옅음)
+  W.coilTox = function (p) {
+    const d = DATA.dif; let tox = 0;
+    for (const c of W.coilsOn) {
+      const q = c.p;
+      if (!d.coilTop) { if (p.distanceTo(q) < d.coilR && p.y < 1.1) tox += 0.32; continue; }
+      if (p.y < q.y - 0.05 || p.y > q.y + d.coilTop) continue;
+      W.coilDrift(c.k, W.tNow || 0, _dr); const h = (p.y - q.y) / d.coilTop;
+      const dx = p.x - q.x - _dr.x * h, dz = p.z - q.z - _dr.z * h, dd = Math.hypot(dx, dz);
+      if (dd < d.coilR) tox += 0.32 * (0.4 + 0.9 * (1 - dd / d.coilR));
+    }
+    return tox;
+  };
 
   W.update = function (t, dt) { for (const f of W.anim) f(t, dt); };
 
