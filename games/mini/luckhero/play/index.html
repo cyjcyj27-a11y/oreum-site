@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>용사님럭키</title>
+<meta name="description" content="용사님럭키 - 주사위 운빨로 싸우는 덱빌딩 로그라이크 웹게임">
+<link rel="icon" href="assets/logo-oreum.svg">
+<style>
+@font-face{font-family:'Galmuri11';src:url('fonts/Galmuri11-Bold.woff2') format('woff2');font-display:swap}
+@font-face{font-family:'Mulmaru';src:url('fonts/Mulmaru.woff2') format('woff2');font-display:swap}
+html,body{margin:0;height:100%;background:#0e0a16;overflow:hidden;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+#cv{position:fixed;left:0;top:0;display:block;image-rendering:pixelated}
+#tb{position:fixed;top:calc(6px + env(safe-area-inset-top));right:calc(8px + env(safe-area-inset-right));display:flex;gap:8px;z-index:5}
+.tog{position:relative;width:36px;height:36px;border-radius:50%;border:2px solid #c8b06a;background:#4e5a38;box-shadow:0 3px 0 #161a10,inset 0 3px 0 rgba(255,240,210,.22);display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;color:#fff;font:16px Galmuri11,monospace}
+.tog::before{content:'';position:absolute;inset:-6px}
+.tog svg{width:19px;height:19px}
+.tog.off{opacity:.6}
+.tog.off::after{content:'';position:absolute;left:24%;right:24%;top:50%;height:2px;margin-top:-1px;background:#fff;border-radius:1px;transform:rotate(-40deg)}
+body.playing #oreumFs{display:none!important}
+#rotate{position:fixed;inset:0;background:#0e0a16;color:#fff;display:none;flex-direction:column;align-items:center;justify-content:center;gap:18px;z-index:20;font:18px Galmuri11,monospace;pointer-events:auto}
+#rotate button{font:18px Galmuri11,monospace;color:#fff;background:#b4503e;border:3px solid #d4b060;border-radius:8px;padding:10px 22px;box-shadow:0 4px 0 #140e1c}
+@media (orientation:portrait){#rotate{display:flex}}
+html.ol-land #rotate{display:none!important}
+</style>
+</head>
+<body>
+<canvas id="cv"></canvas>
+<div id="tb">
+  <button class="tog" id="bHow" aria-label="help">?</button>
+  <button class="tog" id="bPause" aria-label="pause">❚❚</button>
+  <button class="tog" id="bBgm" aria-label="music"><svg viewBox="0 0 24 24"><path d="M9 17.5V5.5l11-2.5v12" fill="none" stroke="#fff" stroke-width="2.6" stroke-linejoin="round"/><ellipse cx="6.3" cy="17.8" rx="3.4" ry="2.7" fill="#fff"/><ellipse cx="17.3" cy="15.3" rx="3.4" ry="2.7" fill="#fff"/></svg></button>
+  <button class="tog" id="bSfx" aria-label="sound"><svg viewBox="0 0 24 24"><path d="M3 9h4l5-4.5v15L7 15H3z" fill="#fff"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg></button>
+</div>
+<div id="rotate"><div id="rotTxt">가로로 돌려 주세요</div><button onclick="OL.go()" id="rotBtn">가로로 보기</button></div>
+<script src="assets/landscape.js"></script>
+<script src="assets/game-home.js" data-top="6" data-left="6" data-fullscreen="1" defer></script>
+<script src="js/atlas.js?v=4"></script>
+<script src="js/sprites.js?v=8"></script>
+<script src="js/bgart.js?v=4"></script>
+<script src="js/data.js?v=6"></script>
+<script src="js/sfx.js?v=2"></script>
+<script src="js/core.js?v=5"></script>
+<script src="js/main.js?v=28"></script>
+<script>if(window.EN){document.documentElement.lang='en';document.title='LUCKY HERO';rotTxt.textContent='Turn your phone sideways';rotBtn.textContent='LANDSCAPE';}</script>
+<script src="/assets/visit.js?v=21" defer></script>
+<script src="/assets/game-events.js" defer></script>
+</body>
+</html>
