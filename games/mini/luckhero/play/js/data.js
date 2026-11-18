@@ -14,7 +14,7 @@
   card('coin', { n: ['행운의 동전', 'Lucky Coin'], cost: 0, type: 'luck', art: 'c_coin', d: ['다음 주사위 +2', 'Next DIE +2'], run: (G) => { G.p.bonus += 2; } });
 
   card('bash', { n: ['강타', 'Bash'], cost: 2, type: 'atk', art: 'c_big', tgt: 1, dice: 1, d: ['피해 8+주사위x2', 'Deal 8+DIEx2'], run: (G, v, m, t) => G.hit(t, (8 + v * 2) * m) });
-  card('twin', { n: ['연속 베기', 'Twin Slash'], cost: 1, type: 'atk', art: 'c_sword', tgt: 1, dice: 1, d: ['피해 2+주사위 두 번', 'Deal 2+DIE twice'], run: async (G, v, m, t) => { await G.hit(t, (2 + v) * m); await G.hit(t, (2 + v) * m); } });
+  card('twin', { n: ['연속 베기', 'Twin Slash'], cost: 1, type: 'atk', art: 'c_sword', tgt: 1, dice: 1, d: ['피해 2+주사위\n두 번 때림', 'Deal 2+DIE twice'], run: async (G, v, m, t) => { await G.hit(t, (2 + v) * m); await G.hit(t, (2 + v) * m); } });
   card('shbash', { n: ['방패 치기', 'Shield Bash'], cost: 1, type: 'atk', art: 'c_shield', tgt: 1, d: ['내 방어만큼 피해', 'Deal damage = your Block'], run: (G, v, m, t) => G.hit(t, G.p.blk, 1) });
   card('wall', { n: ['철벽', 'Iron Wall'], cost: 2, type: 'def', art: 'c_shield', dice: 1, d: ['방어 8+주사위x2', 'Block 8+DIEx2'], run: (G, v, m) => G.block((8 + v * 2) * m) });
   card('flip', { n: ['동전 던지기', 'Coin Flip'], cost: 1, type: 'atk', art: 'c_coin', tgt: 1, d: ['앞면: 피해 16 / 뒷면: 잎 2', 'Heads: Deal 16 / Tails: 2 leaves'], run: (G, v, m, t) => G.flip(t) });
@@ -29,7 +29,7 @@
   card('counter', { n: ['반격 자세', 'Counter'], cost: 1, type: 'def', art: 'c_shield', dice: 1, d: ['방어 3+주사위\n이번 턴 맞으면 반격 4', 'Block 3+DIE\nRetaliate 4 this turn'], run: (G, v, m) => { G.block((3 + v) * m); G.p.ctr += 4; } });
   card('charm', { n: ['행운 부적', 'Lucky Charm'], cost: 1, type: 'power', art: 'c_clover', d: ['턴마다 잎 1', 'Each turn: 1 leaf'], run: (G) => { G.p.pw.charm = (G.p.pw.charm || 0) + 1; } });
   card('eye', { n: ['도박사의 눈', "Gambler's Eye"], cost: 1, type: 'power', art: 'c_eye', d: ['대박이 나오면 카드 1장', 'On CRIT: draw 1'], run: (G) => { G.p.pw.eye = (G.p.pw.eye || 0) + 1; } });
-  card('dance', { n: ['칼춤', 'Blade Dance'], cost: 1, type: 'atk', art: 'c_spin', tgt: 1, dice: 1, d: ['피해 2를 주사위 번', 'Deal 2, DIE times'], run: async (G, v, m, t) => { for (let i = 0; i < v * m; i++) { if (!G.alive(t)) t = G.firstFoe(); if (!t) break; await G.hit(t, 2, 0, 90); } } });
+  card('dance', { n: ['칼춤', 'Blade Dance'], cost: 1, type: 'atk', art: 'c_spin', tgt: 1, dice: 1, d: ['주사위 눈만큼\n피해 2씩 때림', 'Hit for 2,\nDIE times'], run: async (G, v, m, t) => { for (let i = 0; i < v * m; i++) { if (!G.alive(t)) t = G.firstFoe(); if (!t) break; await G.hit(t, 2, 0, 90); } } });
   card('whirl', { n: ['회전 베기', 'Whirlwind'], cost: 1, type: 'atk', art: 'c_spin', all: 1, dice: 1, d: ['모든 적 피해 2+주사위', 'Deal 2+DIE to ALL'], run: (G, v, m) => G.hitAll((2 + v) * m) });
   card('leech', { n: ['흡혈', 'Leech'], cost: 2, type: 'atk', art: 'c_heart', tgt: 1, dice: 1, d: ['피해 5+주사위\n준 피해 절반 회복', 'Deal 5+DIE\nHeal half dealt'], run: async (G, v, m, t) => { const d = await G.hit(t, (5 + v) * m); G.heal(Math.floor(d / 2)); } });
   card('shout', { n: ['기합', 'Battle Cry'], cost: 1, type: 'power', art: 'c_bolt', d: ['힘 2\n(공격 피해 +2)', 'Strength 2\n(+2 attack damage)'], run: (G) => G.status(G.p, 'str', 2) });
