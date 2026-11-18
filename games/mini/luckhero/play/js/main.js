@@ -1112,7 +1112,15 @@
     step(dt);
     requestAnimationFrame(frame);
   }
+  // 왼쪽 위 OREUM GAMES 알약·오른쪽 위 단추 줄의 실제 크기를 재서 HUD 가 그 밖에 오게(폰마다 글자 크기가 달라 고정값으로는 겹친다)
+  function measurePads() {
+    const a = document.getElementById('oreumHome'), tb = document.getElementById('tb');
+    const ar = a ? a.getBoundingClientRect() : null, tr = tb ? tb.getBoundingClientRect() : null;
+    padL = (Math.max(104, ar && ar.width ? ar.right + 10 : 0) * DPR) / S;
+    padR = (Math.max(178, tr && tr.width ? innerWidth - tr.left + 10 : 0) * DPR) / S;
+  }
   function step(dt) {
+    measurePads();
     let gdt = dt;
     if (ANIM.stop > 0) { ANIM.stop -= dt; gdt = dt * 0.12; }
     if (!paused) G.tickTime(gdt);
