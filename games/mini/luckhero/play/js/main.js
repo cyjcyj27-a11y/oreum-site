@@ -1045,10 +1045,11 @@
   function drawHow(dt) {
     howT += dt;
     if (G.run) drawBg(G.run.act, 0.75); else drawBg(0, 0.75);
-    const pw = Math.min(W - 40, 620), ph = H - 40, px = W / 2 - pw / 2, py = 20;
+    const tbEl = document.getElementById('tb'), tbB = tbEl ? (tbEl.getBoundingClientRect().bottom * DPR) / S : 0;   // 오른쪽 위 단추 줄 아래에서 창을 시작(OK 가 안 가리게)
+    const py = Math.max(20, tbB + 6), pw = Math.min(W - 40, 620), ph = H - py - 14, px = W / 2 - pw / 2;
     panel(px, py, pw, ph);
     txt('HOW TO PLAY', px + 18, py + 22, 18, '#e8c860');
-    button(Math.min(px + pw - 90, W - padR - 86), py + 8, 76, 28, 'OK', () => { SFX.play('click'); if (howNext === 'map') goMap(); else scr = howNext || 'title'; howNext = null; }, { fs: 14 });
+    button(px + pw - 90, py + 8, 76, 28, 'OK', () => { SFX.play('click'); if (howNext === 'map') goMap(); else scr = howNext || 'title'; howNext = null; }, { fs: 14 });
     const cw = (pw - 46) / 4, cy = py + 48, chh = ph - 64;
     const L = [
       [T('카드를 두 번 누르면 쓴다. 주황 다이아가 에너지', 'Tap a card twice to play. Orange gem = energy')],
