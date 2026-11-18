@@ -1046,7 +1046,8 @@
     howT += dt;
     if (G.run) drawBg(G.run.act, 0.75); else drawBg(0, 0.75);
     const tbEl = document.getElementById('tb'), tbB = tbEl ? (tbEl.getBoundingClientRect().bottom * DPR) / S : 0;   // 오른쪽 위 단추 줄 아래에서 창을 시작(OK 가 안 가리게)
-    const py = Math.max(20, tbB + 6), pw = Math.min(W - 40, 620), ph = H - py - 14, px = W / 2 - pw / 2;
+    const pbot = innerHeight <= 480 ? H * 0.74 - 4 : H - 14;   // 폰 가로: 안드로이드 전체화면 알림(아래 26%) 위에서 끝나게
+    const py = Math.max(20, tbB + 6), pw = Math.min(W - 40, 620), ph = pbot - py, px = W / 2 - pw / 2;
     panel(px, py, pw, ph);
     txt('HOW TO PLAY', px + 18, py + 22, 18, '#e8c860');
     button(px + pw - 90, py + 8, 76, 28, 'OK', () => { SFX.play('click'); if (howNext === 'map') goMap(); else scr = howNext || 'title'; howNext = null; }, { fs: 14 });
@@ -1060,7 +1061,11 @@
     for (let i = 0; i < 4; i++) {
       const x = px + 14 + i * (cw + 6);
       box(x, cy, cw, chh, '#283020', '#161a10');
-      const ax = x + cw / 2, ay = cy + chh * 0.4, t = (howT / 1000) % 3;
+      // 창이 낮으면(폰 가로) 그림만 S 를 줄여 작게 그린다: 좌표를 f 로 나누고 S 에 f 를 곱하면 (ax, ay) 둘레로 줄어든다
+      const f = Math.min(1, (chh - 52) / 143), S0 = S;
+      const ay0 = f < 1 ? cy + (chh - 52) / 2 - 5.5 * f : cy + chh * 0.4;
+      S = S0 * f; LT();
+      const ax = (x + cw / 2) / f, ay = ay0 / f, t = (howT / 1000) % 3;
       if (i === 0) {
         spr(SP.get('slime'), ax + 34, ay + 30, 1.1); drawEnergy(ax - 40, ay - 40, t >= 1.2 ? 2 : 3, 3);
         const tap = t < 0.6 ? 0 : t < 1.2 ? 1 : 2;
@@ -1083,6 +1088,7 @@
         drawClover(ax, ay, n, 4);
         if (n >= 4) txt('JACKPOT x3', ax, ay + 40, 18, '#a8c878', 'center');
       }
+      S = S0; LT();
       const lines = wrap(L[i][0], 12, cw - 12);
       lines.forEach((l, k) => txt(l, x + cw / 2, cy + chh - 16 - (lines.length - 1 - k) * 16, 12, '#fff', 'center'));
     }
