@@ -18,6 +18,7 @@ import io, os, re, sys
 
 # slug, 한국어 경로, 영어 경로, 한국어 이름, 한국어 장르 앵커, 영어 이름, 영어 장르 앵커, 태그
 GAMES = [
+    ("luddite",       "/games/luddite/",             "/en/games/luddite/",             "러다이트교",        "교주 경영시뮬레이션 게임",          "LUDDITE CHURCH",        "cult tycoon simulator game",    {"sim", "tycoon", "story", "funny", "korean"}),
     ("luckhero",      "/games/mini/luckhero/",       "/en/games/mini/luckhero/",       "용사님럭키",        "주사위 덱빌딩게임",                 "LUCKY HERO",            "dice roguelike deckbuilder",    {"casual", "board", "strategy", "funny"}),
     ("jando",         "/games/jando/",               "/en/games/jando/",               "절벽 잔도공", "잔도공 3D 건설게임",          "CLIFF WALKER",         "3D cliff path building game", {"3d", "sim", "action"}),
     ("otteok",        "/games/otteok/",              "/en/games/otteok/",              "오떡닷컴",          "떡집 경영게임",                     "OTTEOK.COM",            "idle factory tycoon game",      {"casual", "3d", "sim", "korean"}),
