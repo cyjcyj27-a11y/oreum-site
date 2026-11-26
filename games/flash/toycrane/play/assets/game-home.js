@@ -32,10 +32,12 @@
 
     // 말은 문서 언어를 따르되, 주소에 ?lang= 이 있으면 그쪽이 우선입니다
     var ko = (document.documentElement.lang || 'ko').toLowerCase().indexOf('en') !== 0;
+    var zh = false;   // ?lang=zh 중국어판
     try {
       var q = new URLSearchParams(location.search).get('lang');
       if (q === 'en') ko = false;
       else if (q === 'ko') ko = true;
+      else if (q === 'zh') zh = true;
     } catch (e) {}
 
     var css = document.createElement('style');
@@ -84,10 +86,10 @@
 
     var a = document.createElement('a');
     a.id = 'oreumHome';
-    a.href = ko ? '/' : '/en/';
+    a.href = zh ? '/zh/' : ko ? '/' : '/en/';
     a.target = '_blank';
     a.rel = 'noopener';
-    a.setAttribute('aria-label', ko ? '오름게임즈 홈페이지' : 'Oreum Games home');
+    a.setAttribute('aria-label', zh ? 'Oreum Games 首页' : ko ? '오름게임즈 홈페이지' : 'Oreum Games home');
     /* 글자는 언어와 상관없이 영문 브랜드로 고정한다 — 게임마다 달라 보이지 않게(2026-08-23 사용자) */
     a.innerHTML = '<span>OREUM GAMES</span>';
     document.body.appendChild(a);
@@ -114,7 +116,7 @@
     var open = kakao ? 'kakaotalk://web/openExternal?url=' + encodeURIComponent(url)
              : android ? 'intent://' + location.host + location.pathname + location.search + '#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=' + encodeURIComponent(url) + ';end'
              : 'x-safari-' + url;
-    var label = android || kakao ? (ko ? '크롬으로 열기' : 'Open in Chrome') : (ko ? '사파리로 열기' : 'Open in Safari');
+    var label = android || kakao ? (zh ? '用 Chrome 打开' : ko ? '크롬으로 열기' : 'Open in Chrome') : (zh ? '用 Safari 打开' : ko ? '사파리로 열기' : 'Open in Safari');
     function go(e) { if (e) { e.preventDefault(); e.stopPropagation(); } try { location.href = open; } catch (err) {} }
 
     // (1) 가로 안내 단추가 있는 게임(메이킹김치·야간자율학습·SAAB): 단추를 바꿔치기
@@ -123,13 +125,13 @@
       rg.textContent = label;
       rg.addEventListener('click', go, true);
       var h = document.getElementById('rotHint');
-      if (h) h.textContent = ko ? '앱 안 브라우저에서는 전체화면이 안 됩니다. 크롬으로 열거나, 폰을 옆으로 돌려 주세요.' : 'In-app browsers cannot go fullscreen. Open in Chrome, or turn your phone sideways.';
+      if (h) h.textContent = zh ? 'App 内置浏览器无法全屏。请用 Chrome 打开，或把手机横过来。' : ko ? '앱 안 브라우저에서는 전체화면이 안 됩니다. 크롬으로 열거나, 폰을 옆으로 돌려 주세요.' : 'In-app browsers cannot go fullscreen. Open in Chrome, or turn your phone sideways.';
     }
     // (2) 모든 게임: 위쪽 안내 띠
     var bar = document.createElement('div');
     bar.id = 'oreumInApp';
     bar.setAttribute('style', 'position:fixed;left:0;right:0;top:0;z-index:2147483000;display:flex;align-items:center;justify-content:center;gap:10px;padding:8px 12px calc(8px + env(safe-area-inset-top));padding-top:calc(8px + env(safe-area-inset-top));background:rgba(20,26,20,.92);color:#fff;font:600 13px/1.3 -apple-system,"Malgun Gothic",sans-serif;pointer-events:auto');
-    bar.innerHTML = '<span>' + (ko ? '앱 안에서는 가로 화면이 안 됩니다' : 'Landscape mode is unavailable in this in-app browser') + '</span>' +
+    bar.innerHTML = '<span>' + (zh ? 'App 内无法横屏' : ko ? '앱 안에서는 가로 화면이 안 됩니다' : 'Landscape mode is unavailable in this in-app browser') + '</span>' +
       '<a href="' + open.replace(/"/g, '&quot;') + '" style="flex:none;background:#7fbf4d;color:#0f2a12;text-decoration:none;font-weight:800;padding:7px 12px;border-radius:999px">' + label + '</a>' +
       '<button type="button" aria-label="close" style="flex:none;background:none;border:0;color:#fff;font-size:18px;line-height:1;padding:0 4px">×</button>';
     bar.querySelector('a').addEventListener('click', go);
@@ -159,8 +161,8 @@
 
     function on(){ return !!(document.fullscreenElement || document.webkitFullscreenElement); }
     function paint(){
-      var t = on() ? (ko ? '전체화면 끄기' : 'Exit full screen')
-                   : (ko ? '전체화면'      : 'Full screen');
+      var t = on() ? (zh ? '退出全屏' : ko ? '전체화면 끄기' : 'Exit full screen')
+                   : (zh ? '全屏' : ko ? '전체화면'      : 'Full screen');
       /* 전체화면일 때는 글자 없이 네모만 (2026-09-06 사장님: "전체화면일때 전체화면보기글씨를 빼고 네모만") */
       b.innerHTML = on() ? OUT : IN + '<span>' + t + '</span>';
       b.classList.toggle('on', on());
