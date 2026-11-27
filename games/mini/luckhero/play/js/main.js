@@ -4,6 +4,7 @@
   const cv = document.getElementById('cv'), ctx = cv.getContext('2d');
   let S = 1, W = 640, H = 360, DPR = 1, padL = 100, padR = 170;
   const FONT = 'Galmuri11, monospace';
+  const ZH = /[?&]lang=zh/.test(location.search);
   const UI = (G.ui = {});
 
   // ───────── 화면 맞추기 ─────────
@@ -28,7 +29,43 @@
     ctx.fillStyle = col || '#fff'; ctx.fillText(s, x, y);
   }
   function tw(s, size) { ctx.font = `${size}px ${FONT}`; return ctx.measureText(s).width; }
+  // Chinese: break between characters, keep number/latin runs whole, keep punctuation on the previous line,
+  // then narrow the width while the line count stays the same so lines come out even
+  const zhWrapCache = new Map();
+  function zhGreedy(toks, size, maxW) {
+    const out = [];
+    let line = '';
+    for (const t of toks) {
+      if (t.trim() === '' && !line) continue;
+      if (!line || tw(line + t, size) <= maxW) line += t;
+      else { out.push(line.trimEnd()); line = t.trim() === '' ? '' : t; }
+    }
+    out.push(line.trimEnd());
+    return out;
+  }
+  function wrapZh(s, size, maxW) {
+    const key = s + '|' + size + '|' + maxW;
+    const hit = zhWrapCache.get(key);
+    if (hit) return hit;
+    const out = [];
+    for (const para of String(s).split('\n')) {
+      const toks = para.match(/[\x21-\x7e]+[，。！？、；：）…]*| +|[^\x00-\x7f][，。！？、；：）…!?]*/g) || [''];
+      let best = zhGreedy(toks, size, maxW);
+      if (best.length > 1) {
+        for (let w = maxW * 0.96; w > maxW * 0.4; w *= 0.96) {
+          const tr = zhGreedy(toks, size, w);
+          if (tr.length !== best.length || tr.some((l) => tw(l, size) > w + 0.5)) break;
+          best = tr;
+        }
+      }
+      out.push(...best);
+    }
+    if (zhWrapCache.size > 500) zhWrapCache.clear();
+    zhWrapCache.set(key, out);
+    return out;
+  }
   function wrap(s, size, maxW) {
+    if (ZH) return wrapZh(s, size, maxW);
     const out = [];
     for (const para of String(s).split('\n')) {
       const words = para.split(' ');
@@ -468,7 +505,7 @@
       }
       box(rx, ry, rw, rh, '#f4e09a', '#161a10'); box(rx + 3, ry + 3, rw - 6, rh - 6, '#d4b060', '#d4b060', 'rgba(255,250,220,0.5)');
       // 제목 + 도트 하트
-      const tsz = EN ? 34 : 40; ctx.font = `${tsz}px Mulmaru, Galmuri11`; const tww = ctx.measureText(title).width, hs = 30, gap = 6;
+      const tsz = EN ? 34 : ZH ? 37 : 40; ctx.font = `${tsz}px Mulmaru, Galmuri11`; const tww = ctx.measureText(title).width, hs = 30, gap = 6;
       txt(title, cx - (hs + gap) / 2, cy + 2, tsz, '#2c4a38', 'center', { olw: 6, olc: '#f4e09a', font: 'Mulmaru, Galmuri11' });
       icon('c_heart', cx - (hs + gap) / 2 + tww / 2 + gap + hs / 2, cy + 1 + Math.sin(G.time / 220) * 1.5, hs);
       drawDie(rx - 4, ry - 6, 22, face, Math.sin(G.time / 300) * 0.3); drawDie(rx + rw + 4, ry - 6, 22, 7 - face, -Math.sin(G.time / 300) * 0.3);
@@ -1032,7 +1069,7 @@
     SFX.play('click');
     try { const a = document.createElement('a'); a.download = 'luckhero.png'; a.href = resultCv.toDataURL('image/png'); document.body.appendChild(a); a.click(); a.remove(); } catch (e) { }
   }
-  function shareUrl() { return EN ? 'https://oreumgames.com/en/games/mini/luckhero/' : 'https://oreumgames.com/games/mini/luckhero/'; }
+  function shareUrl() { return ZH ? 'https://oreumgames.com/zh/games/mini/luckhero/' : EN ? 'https://oreumgames.com/en/games/mini/luckhero/' : 'https://oreumgames.com/games/mini/luckhero/'; }
   function shareCard() {
     SFX.play('click');
     const e = ending, text = T('용사님!럭키♥ ' + titleOf(e) + ' 잭팟 ' + e.stats.jack + '번', 'LUCKY HERO ' + titleOf(e) + ' ' + e.stats.jack + ' jackpots');

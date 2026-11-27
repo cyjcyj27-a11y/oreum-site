@@ -1,7 +1,8 @@
 // 운빨용사 데이터: 카드·부적·괴물·막 구성. 글은 한·영 둘 다.
 (function () {
   const EN = /[?&]lang=en/.test(location.search);
-  const T = (window.T = (ko, en) => (EN ? en : ko));
+  const ZHL = /[?&]lang=zh/.test(location.search) && !!window.ZHT;
+  const T = (window.T = (ko, en) => (EN ? en : ZHL ? window.ZHT(ko, en) : ko));
   window.EN = EN;
   const D = (window.DATA = {});
 
