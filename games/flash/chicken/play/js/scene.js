@@ -101,7 +101,7 @@ function partsStep(dt) {
 var OILY = 0.36, BATY = 0.52;
 function matTop(base, w, d) { var m = base.clone(); m.map = base.map.clone(); m.map.needsUpdate = true; topTex(m.map, w, d); return m; }
 /* 벽: 옛날 치킨집 전단지를 다닥다닥 붙인 벽(사장님 10/2 "찌라시 느낌"). 글은 ?lang=en 이면 영어 */
-var EN = /[?&]lang=en\b/.test(location.search), WF = "'Ria','Malgun Gothic',sans-serif";
+var EN = /[?&]lang=en\b/.test(location.search), ZH = !EN && /[?&]lang=zh\b/.test(location.search), WF = "'Ria','Malgun Gothic',sans-serif";
 function wtxt(x, s, px, py, size, col, al, sc, maxw) {
   x.font = '900 ' + size + 'px ' + WF; while (maxw && size > 8 && x.measureText(s).width > maxw) { size -= 1; x.font = '900 ' + size + 'px ' + WF; }
   x.textAlign = al || 'left'; x.textBaseline = 'middle';
@@ -130,6 +130,9 @@ function wallDraw(x, w, h, day) {
   var Rn = A.rng(77), i, T = EN ? {
     crash: 'PRICE CRASH', fr: 'FRIED', yn: 'SPICY', sv: 'FREE: RADISH + COLA', big: 'CHICKEN', out: 'TAKE OUT OK', no1: 'No.1', nw: 'NEW', soy: 'SOY CHICKEN', pa: 'SCALLIONS', cp: '10 COUPONS = 1 FREE', fresh: 'FRESH EVERY DAY', oil: 'NEW OIL DAILY', crispy: 'SO CRISPY',
     band: ['PRICE CRASH', 'FRIED', 'SPICY', 'SOY', 'TAKE OUT']
+  } : ZH ? {
+    crash: '跳楼价', fr: '原味炸鸡', yn: '甜辣炸鸡', sv: '赠送：腌萝卜 + 可乐', big: '炸鸡', out: '外带 外卖 OK', no1: '元祖', nw: '新品', soy: '酱油炸鸡', pa: '加葱丝', cp: '集10张券 = 送一只', fresh: '当天现杀鲜鸡', oil: '每天换新油', crispy: '香脆酥',
+    band: ['跳楼价', '原味炸鸡', '甜辣炸鸡', '酱油炸鸡', '外带外卖']
   } : {
     crash: '가격파괴', fr: '후라이드', yn: '양념치킨', sv: '써비스: 치킨무 + 콜라', big: '치킨', out: '포장 배달 OK', no1: '원조', nw: '신메뉴', soy: '간장치킨', pa: '파채 추가', cp: '쿠폰 10장 = 한 마리', fresh: '당일 잡은 생닭', oil: '기름 매일 교체', crispy: '바삭바삭',
     band: ['가격파괴', '후라이드', '양념치킨', '간장치킨', '포장 배달']
@@ -410,7 +413,7 @@ function build() {
 function setDay(day, un, nf) {
   O.day = day; var x = O.wallC.getContext('2d'); x.setTransform(2, 0, 0, 2, 0, 0); wallDraw(x, 1024, 640, day); O.wallT.needsUpdate = true;
   /* 전단지 글꼴이 늦게 오면 그때 다시 그린다 */
-  if (!O.wf && document.fonts && document.fonts.load) { O.wf = 1; document.fonts.load("900 40px 'Ria'", '가').then(function () { setDay.again = 1; var y = O.wallC.getContext('2d'); y.setTransform(2, 0, 0, 2, 0, 0); wallDraw(y, 1024, 640, O.day); O.wallT.needsUpdate = true; }); }
+  if (!O.wf && document.fonts && document.fonts.load) { O.wf = 1; document.fonts.load("900 40px 'Ria'", ZH ? '炸鸡' : '가').then(function () { setDay.again = 1; var y = O.wallC.getContext('2d'); y.setTransform(2, 0, 0, 2, 0, 0); wallDraw(y, 1024, 640, O.day); O.wallT.needsUpdate = true; }); }
   ['yang', 'soy', 'pa', 'cheese', 'mu', 'cola', 'trash'].forEach(function (id, k) { var u = O.strip[k].userData; u.fu.visible = !!un[id]; u.em.visible = !un[id]; });
   // 튀김기가 하나면 통 전체를 넓게 쓴다
   L.nf = nf; L.FW = nf < 2 ? 3.48 : 1.6; L.fry[0].x = LAY[L.wide ? 'wide' : 'tall'].fry[0] + (nf < 2 ? 0.94 : 0); O.fryOne.visible = nf < 2; O.fryTwo.visible = nf >= 2;

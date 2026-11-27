@@ -1,26 +1,37 @@
 /* 치킨집 3D — 게임 */
 (function () {
 'use strict';
-var EN = /[?&]lang=en\b/.test(location.search);
+var EN = /[?&]lang=en\b/.test(location.search), ZH = !EN && /[?&]lang=zh\b/.test(location.search);
 if (EN) document.documentElement.lang = 'en';
+if (ZH) {
+  document.documentElement.lang = 'zh-CN';
+  /* 중국어판: 한글 글꼴에 없는 한자는 시스템 중국어 글꼴로 */
+  (function () {
+    var zf = "local('PingFang SC'),local('PingFangSC-Regular'),local('Microsoft YaHei'),local('Microsoft YaHei UI'),local('Noto Sans SC'),local('Noto Sans CJK SC'),local('Source Han Sans SC')";
+    var ur = 'U+2E80-2FFF,U+3000-303F,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF';
+    var st = document.createElement('style');
+    st.textContent = ['Hanna', 'Ria'].map(function (f) { return "@font-face{font-family:'" + f + "';src:" + zf + ';unicode-range:' + ur + '}'; }).join('') + 'html[lang=zh-CN] *{word-break:normal!important}html[lang=zh-CN]:not(.wide) #signT{font-size:calc(var(--u)*70)}';
+    document.head.appendChild(st);
+  })();
+}
 var A = ART, TAU = Math.PI * 2, $ = function (id) { return document.getElementById(id); }, L3 = K3.L, NS = K3.NS, TB = K3.TB;
-function L(a) { return a[EN ? 1 : 0]; }
+function L(a) { return ZH && a[2] ? a[2] : a[EN ? 1 : 0]; }
 var TX = {
-  title: ['개발자치킨집', 'DEV CHICKEN SHOP'],
+  title: ['개발자치킨집', 'DEV CHICKEN SHOP', '程序员炸鸡店'],
   // 엔딩 글: 한글은 사장님이 준 글자 그대로(2026-10-02), 영문은 옮긴 것
   end: [
-    ['나는 인디게임개발자였다', 'I was an indie game developer.'],
-    ['공대를 졸업하고 게임회사를 다녔는데 회사 게임이 슈퍼 초대박을 터뜨렸음에도', 'I graduated from engineering school and joined a game company. Its game became a monster hit,'],
-    ['인센티브가 제대로 지급되지않아서 회사를 그만두고', 'but the bonuses were never paid properly, so I quit'],
-    ['인디게임개발을 시작했다.', 'and started making indie games.'],
-    ['7년동안 공들여서 폴리싱을 거듭하고 발표한 게임', 'Seven years of polishing went into the game I released.'],
-    ['찜회수 3만2천개', '32,000 wishlists.'],
-    ['그러나 최종판매된건 겨우 300장이었다.', 'But in the end it sold only 300 copies.'],
-    ['결국 어머니는 홧병으로 돌아가시고', 'My mother fell ill from the heartache and passed away,'],
-    ['나는 엄마가 돌아가시며 남긴 보험금으로 치킨집을 차렸다.', 'and with the insurance money she left behind, I opened a chicken shop.'],
-    ['어머니...................................................', 'Mom...................................................']
+    ['나는 인디게임개발자였다', 'I was an indie game developer.', '我曾是一名独立游戏开发者'],
+    ['공대를 졸업하고 게임회사를 다녔는데 회사 게임이 슈퍼 초대박을 터뜨렸음에도', 'I graduated from engineering school and joined a game company. Its game became a monster hit,', '工科毕业进了游戏公司，公司游戏明明大爆了，'],
+    ['인센티브가 제대로 지급되지않아서 회사를 그만두고', 'but the bonuses were never paid properly, so I quit', '奖金却一直没好好发，于是我辞了职'],
+    ['인디게임개발을 시작했다.', 'and started making indie games.', '开始做独立游戏。'],
+    ['7년동안 공들여서 폴리싱을 거듭하고 발표한 게임', 'Seven years of polishing went into the game I released.', '花了7年反复打磨才发布的游戏'],
+    ['찜회수 3만2천개', '32,000 wishlists.', '愿望单3万2千个'],
+    ['그러나 최종판매된건 겨우 300장이었다.', 'But in the end it sold only 300 copies.', '可最后只卖出了区区300份。'],
+    ['결국 어머니는 홧병으로 돌아가시고', 'My mother fell ill from the heartache and passed away,', '最终母亲积郁成疾，离开了人世'],
+    ['나는 엄마가 돌아가시며 남긴 보험금으로 치킨집을 차렸다.', 'and with the insurance money she left behind, I opened a chicken shop.', '我用妈妈去世时留下的保险金，开了一家炸鸡店。'],
+    ['어머니...................................................', 'Mom...................................................', '妈妈...................................................']
   ],
-  shop: { fire: ['화력', 'Heat'], fryer: ['튀김기', 'Fryer'], chair: ['의자', 'Chairs'], tip: ['팁 통', 'Tip Jar'], knife: ['식칼', 'Cleaver'], heart: ['하트', 'Heart'] }
+  shop: { fire: ['화력', 'Heat', '火力'], fryer: ['튀김기', 'Fryer', '炸锅'], chair: ['의자', 'Chairs', '椅子'], tip: ['팁 통', 'Tip Jar', '小费罐'], knife: ['식칼', 'Cleaver', '菜刀'], heart: ['하트', 'Heart', '爱心'] }
 };
 var FONT = "'Hanna','Ria',sans-serif";
 
@@ -726,7 +737,7 @@ window.addEventListener('resize', resize);
 /* ---------- 돌리기 ---------- */
 var lastTs = 0;
 function frame(ts) { var dt = lastTs ? Math.min(0.05, (ts - lastTs) / 1000) : 0; lastTs = ts; if (!document.hidden) { step(dt); draw(); } requestAnimationFrame(frame); }
-document.title = L(TX.title); $('signT').textContent = EN ? TX.title[1] : '개발자 치킨집';   /* 제목 그림에서는 띄어 쓴다(사장님 10/2) */
+document.title = L(TX.title); $('signT').textContent = EN ? TX.title[1] : ZH ? TX.title[2] : '개발자 치킨집';   /* 제목 그림에서는 띄어 쓴다(사장님 10/2) */
 (function () { var a = $('coinI').getContext('2d'); a.translate(22, 21); A.coin(a, 18); var b = $('cearnI').getContext('2d'); b.translate(22, 21); A.coin(b, 18); })();
 CK.init();
 /* 첫 칼질이 끊기지 않게 자르는 셈을 미리 몇 번 돌려 둔다 */
