@@ -194,29 +194,29 @@
   <div class="stat"><b id="hWall">0%</b><span>DEMOLISH</span></div>
   <div class="stat"><b id="hBall">●●●</b><span>BALL</span></div>
   <div class="btns">
-    <button id="btnBgm" title="음악">🎵</button>
-    <button id="btnSnd" title="소리">🔊</button>
-    <button id="btnPause" title="일시정지">⏸</button>
+    <button id="btnBgm" title="음악" data-zh-title="音乐">🎵</button>
+    <button id="btnSnd" title="소리" data-zh-title="音效">🔊</button>
+    <button id="btnPause" title="일시정지" data-zh-title="暂停">⏸</button>
   </div>
 </div>
 
 <!-- 시작 화면 -->
 <div id="veilTitle" class="veil bright on">
-  <h1>BREAK IT <em>ALL</em></h1>
-  <p class="tagline" data-en="100 buildings · from a straw hut to a <b>nuclear bunker</b>">건물 100채 · 초가집부터 <b>핵방공호까지</b></p>
+  <h1 data-zh="全部<em>打碎</em>">BREAK IT <em>ALL</em></h1>
+  <p class="tagline" data-zh="100 栋建筑 · 从茅草屋拆到<b>核防空洞</b>" data-en="100 buildings · from a straw hut to a <b>nuclear bunker</b>">건물 100채 · 초가집부터 <b>핵방공호까지</b></p>
   <div class="title-btns">
     <button class="act primary" id="btnContinue" style="display:none">이어하기</button>
-    <button class="act primary" id="btnStart" data-en="Start">시작하기</button>
-    <button class="act ghost" id="btnHow" data-en="How to play">게임 방법</button>
+    <button class="act primary" id="btnStart" data-zh="开始游戏" data-en="Start">시작하기</button>
+    <button class="act ghost" id="btnHow" data-zh="玩法说明" data-en="How to play">게임 방법</button>
   </div>
-  <p class="title-note" data-en="PC &amp; mobile · portrait · sound on">PC·모바일 겸용 · 세로 화면 · 소리 있음</p>
+  <p class="title-note" data-zh="电脑·手机通用 · 竖屏 · 有声音" data-en="PC &amp; mobile · portrait · sound on">PC·모바일 겸용 · 세로 화면 · 소리 있음</p>
 </div>
 
 <!-- 게임 방법 -->
 <div id="veilHow" class="veil">
   <div class="card">
-    <h2 data-en="How to play">게임 방법</h2>
-    <div class="rules" data-en="🏓 The <b>paddle</b> follows your finger or mouse<br>🔨 Each hit cracks a block: <b>crack → split → break</b><br>🏛 Break a <b>pillar</b> and the floors above come down — aim for the weak spot<br>🧱 Rubble breaks when it collides, or when it <b>falls off the building</b><br>🏚 Dig out the <b>base</b> and everything above pours down at once<br>💣 Bomb blocks take their neighbours with them<br>💥 Clear <b>75%</b> of the building to finish the stage<br>🔧 Your <b>ball and paddle grow stronger</b> as the stages climb">
+    <h2 data-zh="玩法说明" data-en="How to play">게임 방법</h2>
+    <div class="rules" data-zh="🏓 <b>挡板</b>会跟着手指·鼠标左右移动<br>🔨 球打到墙上，会按 <b>裂缝 → 裂开 → 粉碎</b> 的顺序破坏<br>🏛 打断<b>柱子</b>，上面的楼层会整个塌下来 — 瞄准要害<br>🧱 碎块互相撞击，或<b>掉到建筑下方</b>，就会碎掉<br>🏚 打掉<b>底部</b>，上面会整个倾泻下来<br>💣 炸弹砖块会把周围一起炸飞<br>💥 拆除率达到 <b>75%</b> 就过关<br>🔧 关卡越往后，<b>球和挡板会自动变强</b>" data-en="🏓 The <b>paddle</b> follows your finger or mouse<br>🔨 Each hit cracks a block: <b>crack → split → break</b><br>🏛 Break a <b>pillar</b> and the floors above come down — aim for the weak spot<br>🧱 Rubble breaks when it collides, or when it <b>falls off the building</b><br>🏚 Dig out the <b>base</b> and everything above pours down at once<br>💣 Bomb blocks take their neighbours with them<br>💥 Clear <b>75%</b> of the building to finish the stage<br>🔧 Your <b>ball and paddle grow stronger</b> as the stages climb">
       🏓 <b>패들</b>은 손가락·마우스를 따라 좌우로 움직입니다<br>
       🔨 공이 벽에 맞으면 <b>균열 → 금 → 파괴</b> 순서로 부서집니다<br>
       🏛 <b>기둥</b>을 부수면 위층이 통째로 무너집니다 — 급소를 노리세요<br>
@@ -226,7 +226,7 @@
       💥 파괴율 <b>75%</b>를 채우면 판이 끝납니다<br>
       🔧 판이 오르면 <b>공과 패들이 저절로 강해집니다</b>
     </div>
-    <div class="row"><button class="act primary" id="btnHowOk" data-en="Got it">알겠어요</button></div>
+    <div class="row"><button class="act primary" id="btnHowOk" data-zh="知道了" data-en="Got it">알겠어요</button></div>
   </div>
 </div>
 
@@ -235,8 +235,8 @@
   <div class="card">
     <h2>PAUSE</h2>
     <div class="row">
-      <button class="act primary" id="btnResume" data-en="Resume">계속하기</button>
-      <button class="act" id="btnQuit" data-en="Title screen">처음으로</button>
+      <button class="act primary" id="btnResume" data-zh="继续" data-en="Resume">계속하기</button>
+      <button class="act" id="btnQuit" data-zh="回到标题" data-en="Title screen">처음으로</button>
     </div>
   </div>
 </div>
@@ -250,8 +250,8 @@
     <p style="margin:2px 0 0">SCORE</p>
     <p id="overBest" style="margin-top:8px"></p>
     <div class="row">
-      <button class="act primary" id="btnRetry" data-en="Continue">이어하기</button>
-      <button class="act" id="btnRestart" data-en="From stage 1">처음부터</button>
+      <button class="act primary" id="btnRetry" data-zh="接着挑战" data-en="Continue">이어하기</button>
+      <button class="act" id="btnRestart" data-zh="从头开始" data-en="From stage 1">처음부터</button>
     </div>
   </div>
 </div>
@@ -260,16 +260,16 @@
 <div id="veilEnd" class="veil bright">
   <div class="card">
     <h2>ALL <em>CLEAR!</em></h2>
-    <p id="endMsg" data-en="All 100 buildings are down! 🎉">건물 100채를 모두 부쉈습니다! 🎉</p>
+    <p id="endMsg" data-zh="100 栋建筑全部拆光了！🎉" data-en="All 100 buildings are down! 🎉">건물 100채를 모두 부쉈습니다! 🎉</p>
     <div class="big" id="endScore">0</div>
     <p style="margin:2px 0 0">SCORE</p>
-    <div class="row"><button class="act primary" id="btnEndRetry" data-en="Play again">처음부터 다시</button></div>
+    <div class="row"><button class="act primary" id="btnEndRetry" data-zh="从头再来" data-en="Play again">처음부터 다시</button></div>
   </div>
 </div>
 
 <audio id="bgm" src="audio/bgm.mp3?v=2" loop preload="auto"></audio>
 <div id="toast"></div>
-<div id="rotate"><div class="ico">📱</div><span data-en="Please turn your phone upright">세로로 돌려 주세요</span></div>
+<div id="rotate"><div class="ico">📱</div><span data-zh="请把手机竖过来" data-en="Please turn your phone upright">세로로 돌려 주세요</span></div>
 
 <script src="lib/matter.min.js"></script>
 <script>
@@ -277,9 +277,24 @@
 /* ── 말(한국어·영어) ──
    `?lang=en` 이면 영어로 바꾼다. 한국어가 원본이고 영어를 덧씌우는 방식이다.
    ⚠ `L` 이라는 이름을 함수 안에서 다시 쓰지 말 것 (페어붐에서 통째로 터진 적 있다) */
-const EN_MODE = (new URLSearchParams(location.search).get('lang') || '').toLowerCase() === 'en';
-const L = (ko, en) => EN_MODE ? en : ko;
+const LANG_Q = (new URLSearchParams(location.search).get('lang') || '').toLowerCase();
+const EN_MODE = LANG_Q === 'en';
+const ZH_MODE = LANG_Q === 'zh';
+const L = (ko, en, zh) => EN_MODE ? en : (ZH_MODE && zh != null ? zh : ko);
 function applyLang(){
+  if (ZH_MODE){
+    document.documentElement.lang = 'zh-CN';
+    document.title = '全部打碎 — 免费打砖块游戏';
+    /* 글꼴에 한자가 없을 때 시스템 중국어 글꼴로 채운다 */
+    const zf = "local('PingFang SC'),local('PingFangSC-Regular'),local('Microsoft YaHei'),local('Microsoft YaHei UI'),local('Noto Sans SC'),local('Noto Sans CJK SC'),local('Source Han Sans SC')";
+    const ur = 'U+2E80-2FFF,U+3000-303F,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF';
+    const st = document.createElement('style');
+    st.textContent = `@font-face{font-family:'Jua';src:${zf};unicode-range:${ur}}` + 'html[lang=zh-CN] *{word-break:normal!important}';
+    document.head.appendChild(st);
+    document.querySelectorAll('[data-zh]').forEach(el => { el.innerHTML = el.dataset.zh; });
+    document.querySelectorAll('[data-zh-title]').forEach(el => { el.title = el.dataset.zhTitle; });
+    return;
+  }
   if (!EN_MODE) return;
   document.documentElement.lang = 'en';
   document.title = 'BREAK IT ALL — free brick breaker game';
@@ -610,6 +625,24 @@ const BUILDINGS = [
   { ko:'초고층빌딩', en:'Skyscraper', cols:7,  fl:[6,8], roof:'step',  era:[4,4], ex:['antenna'] },
   { ko:'핵방공호', en:'Nuclear Bunker',   cols:9,  fl:[3,4], roof:'flat',  era:[4,4], ex:['antenna','tank'], wall:'steel' },
 ];
+/* 건물 이름 중국어 — 한국어 이름을 키로 찾는다 */
+const ZH_BLD = {
+  '초가집':'茅草屋', '서당':'私塾', '주막':'小酒馆', '기와집':'瓦房', '여인숙':'小旅店', '양조장':'酿酒厂', '정미소':'碾米厂', '한의원':'韩医馆',
+  '비닐하우스':'塑料大棚', '단독주택':'独栋住宅', '연립주택':'联排住宅', '협소주택':'窄小住宅', '통나무집':'小木屋', '농가':'农舍', '축사':'牲口棚', '방앗간':'磨坊',
+  '풍차':'风车', '교회':'教堂', '한옥':'韩屋', '사찰':'寺庙', '창고':'仓库', '여관':'旅馆', '대장간':'铁匠铺', '별장':'别墅',
+  '학교':'学校', '상가':'商铺', '은행':'银行', '도서관':'图书馆', '우체국':'邮局', '경찰서':'警察局', '시장':'市场', '빵집':'面包店',
+  '목욕탕':'澡堂', '공장':'工厂', '등대':'灯塔', '급수탑':'水塔', '시계탑':'钟楼', '박물관':'博物馆', '식당':'饭馆', '카페':'咖啡馆',
+  '서점':'书店', '약국':'药店', '정비소':'修车厂', '세탁소':'洗衣店', '시청':'市政厅', '법원':'法院', '병원':'医院', '빌라':'多户住宅',
+  '체육관':'体育馆', '마트':'超市', '백화점':'百货商场', '기차역':'火车站', '버스터미널':'汽车站', '대학교':'大学', '기숙사':'宿舍', '유치원':'幼儿园',
+  '요양원':'养老院', '온실':'温室', '격납고':'机库', '발전소':'发电厂', '물류창고':'物流仓库', '주유소':'加油站', '소방서':'消防站', '수영장':'游泳馆',
+  '교도소':'监狱', '호텔':'酒店', '아파트':'公寓楼', '오피스텔':'商住楼', '오피스':'写字楼', '펜트하우스':'顶层豪宅', '주차타워':'立体停车楼', '방송국':'电视台',
+  '데이터센터':'数据中心', '연구소':'研究所', '컨벤션센터':'会展中心', '경기장':'体育场', '쇼핑몰':'购物中心', '관제탑':'塔台', '전망대':'观景塔', '정유소':'炼油厂',
+  '편의점':'便利店', '꽃집':'花店', '정육점':'肉铺', '철물점':'五金店', '미용실':'美发店', '사진관':'照相馆', '문방구':'文具店', '부동산':'房产中介',
+  '어시장':'鱼市场', '구청':'区政府', '세무서':'税务局', '대사관':'大使馆', '미술관':'美术馆', '영화관':'电影院', '콘서트홀':'音乐厅', '아쿠아리움':'水族馆',
+  '식물원':'植物园', '천문대':'天文台', '학원':'补习班', '독서실':'自习室', '어린이집':'托儿所', '치과':'牙科诊所', '동물병원':'宠物医院', '헬스장':'健身房',
+  '볼링장':'保龄球馆', '노래방':'KTV', '피시방':'网吧', '변전소':'变电站', '정수장':'自来水厂', '소각장':'焚烧厂', '제철소':'钢铁厂', '증권사':'证券公司',
+  '지하벙커':'地下掩体', '금고':'金库', '초고층빌딩':'摩天大楼', '핵방공호':'核防空洞',
+};
 /* 지붕이 잡아먹는 줄 수 — 칸 높이를 미리 계산하려면 필요하다 */
 function roofRows(roof, cols){
   switch (roof){
@@ -839,7 +872,7 @@ function buildStage(n){
   bombLeft   = Math.min(1 + Math.floor(n / 20), 4);
   hardN      = n;
   curHpBonus = n >= 90 ? 1 : 0;   // 단단함은 재료가 말한다 — 마지막 담금질만 숫자로
-  S.structName = L(spec.ko, spec.en);
+  S.structName = L(spec.ko, spec.en, ZH_BLD[spec.ko]);
 
   const cols = genSpec(spec, floors);
   /* 주춧돌 — 맨 아랫줄은 더 단단하다(초반 +1, 20판부터 +2).
@@ -1198,17 +1231,17 @@ function dropBall(be){
   updateHud();
   sfx.lost();
   if (S.stock <= 0) gameOver();
-  else { spawnBalls(); toast(L(`남은 공 ${S.stock}`, `${S.stock} ball${S.stock>1?'s':''} left`)); }
+  else { spawnBalls(); toast(L(`남은 공 ${S.stock}`, `${S.stock} ball${S.stock>1?'s':''} left`, `还剩 ${S.stock} 个球`)); }
 }
 function gameOver(){
   S.mode = 'over';
   const rate = S.runTotal ? Math.round(S.runDestroyed / S.runTotal * 100) : 0;
-  document.getElementById('overInfo').textContent = L(`STAGE ${S.stage} · 파괴율 ${rate}%`, `STAGE ${S.stage} · ${rate}% demolished`);
+  document.getElementById('overInfo').textContent = L(`STAGE ${S.stage} · 파괴율 ${rate}%`, `STAGE ${S.stage} · ${rate}% demolished`, `STAGE ${S.stage} · 拆除率 ${rate}%`);
   document.getElementById('overScore').textContent = S.score.toLocaleString();
   const prev = +(localStorage.getItem('wc_best') || 0);
   if (S.score > prev){
     localStorage.setItem('wc_best', S.score);
-    document.getElementById('overBest').innerHTML = L('🎉 <b style="color:var(--pink)">최고 기록!</b>', '🎉 <b style="color:var(--pink)">New best!</b>');
+    document.getElementById('overBest').innerHTML = L('🎉 <b style="color:var(--pink)">최고 기록!</b>', '🎉 <b style="color:var(--pink)">New best!</b>', '🎉 <b style="color:var(--pink)">新纪录！</b>');
   } else {
     document.getElementById('overBest').textContent = `BEST ${prev.toLocaleString()}`;
   }
@@ -1647,7 +1680,7 @@ function draw(){
       ctx.font = "22px 'Jua','Malgun Gothic',sans-serif";
       ctx.textAlign = 'center'; ctx.fillStyle = '#fff';
       ctx.shadowColor = 'rgba(15,50,33,.5)'; ctx.shadowOffsetY = 2;
-      ctx.fillText(L('눌러서 발사!', 'Tap to launch!'), paddle.position.x, p.y - r - 16);
+      ctx.fillText(L('눌러서 발사!', 'Tap to launch!', '点击发射！'), paddle.position.x, p.y - r - 16);
       ctx.shadowColor = 'transparent';
     }
   }
@@ -1771,7 +1804,7 @@ function refreshContinue(){
   const sv = loadRun();
   if (sv && sv.stage > 1 && sv.stage <= TOTAL_STAGES){
     btnContinue.style.display = '';
-    btnContinue.textContent = L(`이어하기 (${sv.stage}판)`, `Continue (stage ${sv.stage})`);
+    btnContinue.textContent = L(`이어하기 (${sv.stage}판)`, `Continue (stage ${sv.stage})`, `继续游戏（第 ${sv.stage} 关）`);
   } else btnContinue.style.display = 'none';
 }
 applyLang();
@@ -1919,7 +1952,7 @@ if (location.hash.startsWith('#auto')){
 }
 </script>
 <!-- 오름게임즈 알약(왼쪽 위) + 전체화면(왼쪽 아래) — 모든 게임 기본 탑재 -->
-<script src="/assets/game-home.js?v=7" data-top="4" data-left="4" data-fullscreen="1" defer></script>
+<script src="/assets/game-home.js?v=8" data-top="4" data-left="4" data-fullscreen="1" defer></script>
 <script>
 /* file:// 로 그냥 열었을 때를 위한 예비 줄 — /assets/… 절대경로는 서버가 있어야 잡힌다.
    서버로 열면 위 줄이 이미 붙여 놓으므로 여기선 아무 일도 안 한다.
@@ -1928,7 +1961,7 @@ if (location.hash.startsWith('#auto')){
   function f(){
     if (document.getElementById('oreumHome')) return;
     var s = document.createElement('script');
-    s.src = '../../../../assets/game-home.js?v=7';
+    s.src = '../../../../assets/game-home.js?v=8';
     s.setAttribute('data-top','4'); s.setAttribute('data-left','4');
     s.setAttribute('data-fullscreen','1');
     document.body.appendChild(s);
