@@ -114,8 +114,8 @@
   function goalShort(g) {
     if (g.type === 'collect') return Cats.nameOf(g.color);
     if (g.type === 'jelly')   return T('ch.2');            // 오름
-    if (g.type === 'drop')    return isEn() ? 'tangerines' : '감귤';
-    return isEn() ? 'points' : '점';
+    if (g.type === 'drop')    return T('short.drop');
+    return T('short.score');
   }
 
   function goalIcon(g, px) {

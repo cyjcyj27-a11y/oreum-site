@@ -16,7 +16,7 @@
     try {
       var q = new URLSearchParams(location.search).get('lang');
       try { localStorage.removeItem(KEY); } catch (e) {}
-      return q === 'en' ? 'en' : 'ko';
+      return q === 'en' || q === 'zh' ? q : 'ko';
     } catch (e) { return 'ko'; }
   }
 
@@ -195,13 +195,103 @@
     'ch.0': 'Alleyway',        'ch.1': 'Harbour',    'ch.2': 'Oreum',
     'ch.3': 'Tangerine grove', 'ch.4': 'Haenyeo sea', 'ch.5': 'Gotjawal forest',
     'ch.6': 'Seongsan sunrise','ch.7': 'Mt. Hallasan','ch.8': 'Starry night',
-    'ch.9': 'Cat star'
+    'ch.9': 'Cat star',
+
+    'short.drop': 'tangerines', 'short.score': 'points'
+  };
+
+  var ZH = {
+    'app.title':    '小岳猫 - 猫咪三消解谜 200关',
+    'app.sub':      '小岳猫 · 猫咪三消解谜 200关',
+    'btn.play':     '开始游戏',
+    'btn.howto':    '玩法说明',
+    'btn.gotit':    '知道了',
+    'btn.start':    '出发！',
+    'btn.map':      '地图',
+    'btn.retry':    '重来',
+    'btn.next':     '下一关',
+    'nav.stages':   '关卡',
+    'hud.moves':    '剩余步数',
+    'hud.score':    '分数',
+    'tool.shuffle': '洗牌',
+    'tool.hint':    '提示',
+    'aria.back':    '返回',
+    'aria.exit':    '退出',
+    'aria.music':   '音乐开关',
+    'aria.sfx':     '音效开关',
+    'aria.lang':    '切换语言',
+    'tip.first':    '三只以上同样的猫连成一排，砰！',
+    'tip.progress': '已通关 {n} 关 · 星星 {stars} 颗',
+    'credit':       '音效 · Kenney (kenney.nl) · Pixabay · OpenGameArt',
+
+    'howto.title':  '玩法说明',
+    'howto.1':      '用手指交换相邻的两只猫。',
+    'howto.2':      '同样的猫横着或竖着排成 <b>3只以上</b>，就会砰地消失。',
+    'howto.3':      '连 4 只生出 <b>火箭喵</b>（整行清掉），拼成 L 形、T 形生出 <b>炸弹喵</b>（周围 9 格），一排连 5 只生出 <b>彩虹喵</b>（同色全清）。',
+    'howto.4':      '两只特殊猫互换，会炸得更猛。',
+    'howto.5':      '在规定的 <b>步数内</b> 完成上方的目标就算通关。',
+    'howto.obs':    '<b>捣乱的家伙</b>',
+    'howto.oreum':  '<b>小岳</b> 垫在猫咪下面的土层。在那一格上消除，就能往上爬一层。',
+    'howto.wall':   '<b>石墙</b> 一动不动的玄武岩墙。在旁边消除就会倒塌。',
+    'howto.carrot': '<b>胡萝卜</b> 猫被埋进胡萝卜地，动不了。在旁边消除把它救出来。',
+    'howto.fruit':  '<b>柑橘</b> 送到最下面一行就算收获！清掉柑橘下面的格子，它就会掉下来。',
+
+    'stage.n':      '第{n}关',
+    'stage.boss':   '第{n}关 · BOSS',
+    'chapter.n':    '第{n}章',
+    'card.moves':   '可移动 {n} 步',
+    'goal.done':    '完成',
+
+    'goal.score':   '拿到 {n} 分',
+    'goal.collect': '收集 {cat} {n} 只',
+    'goal.jelly':   '爬完全部 {n} 处小岳',
+    'goal.drop':    '把 {n} 个柑橘送到底部收获',
+    'goal.left':    '{name}还差 {n}',
+
+    'note.boss':    'BOSS 关！稍微难一点哦。',
+    'note.oreum':   '新障碍：小岳 - 在那一格上消除猫咪，就能爬上一层。',
+    'note.wall':    '新障碍：石墙 - 在旁边消除就会倒塌。',
+    'note.carrot':  '新障碍：胡萝卜地 - 猫被埋住动不了。在旁边消除把它救出来。',
+    'note.fruit':   '新目标：柑橘 - 送到最底下就是收获。',
+    'note.oreum2':  '小岳变成两层了，要爬两次才行。',
+    'note.shape':   '棋盘形状要变了。',
+    'note.colors':  '猫咪种类变多了。',
+
+    'fx.rocket':    '火箭喵！',
+    'fx.bomb':      '炸弹喵！',
+    'fx.rainbow':   '彩虹喵！',
+    'fx.rainbowBig':'彩虹大爆炸！',
+    'fx.rainbowMix':'彩虹合体！',
+    'fx.cross':     '十字爆炸！',
+    'fx.big':       '大爆炸！',
+    'fx.mega':      '超级炸弹！',
+    'fx.combo3':    '3 连锁！',
+    'fx.comboN':    '{n} 连锁！！',
+    'fx.harvest':   '柑橘收获！',
+    'fx.noMove':    '没地方可走了，重新洗牌！',
+    'fx.shuffled':  '洗好了！',
+
+    'end.clear':    '通关！',
+    'end.all':      '200关全部通关！',
+    'end.fail':     '可惜了',
+    'end.score':    '{n} 分',
+    'end.toStar':   '离 ★★★ 还差 {n} 分',
+    'end.perfect':  '完美！',
+    'end.remain':   '还没完成：{list}',
+
+    'cat.0': '柑橘喵', 'cat.1': '山茶喵', 'cat.2': '大海喵', 'cat.3': '森林喵',
+    'cat.4': '星夜喵', 'cat.5': '晚霞喵', 'cat.6': '云朵喵',
+
+    'ch.0': '小巷', 'ch.1': '港口', 'ch.2': '小岳', 'ch.3': '柑橘园', 'ch.4': '海女之海',
+    'ch.5': '原始森林', 'ch.6': '城山日出', 'ch.7': '汉拿山', 'ch.8': '星夜', 'ch.9': '喵星国',
+
+    'short.drop': '柑橘', 'short.score': '分数'
   };
 
   /* 문구 하나 꺼내기. {n} 같은 자리에 값을 끼워 넣습니다.
      {s} 는 영어에서 여럿일 때 붙는 s 입니다 (1개면 안 붙습니다). */
   function T(key, vars) {
-    var dict = lang === 'en' ? EN : KO;
+    var dict = lang === 'en' ? EN : lang === 'zh' ? ZH : KO;
     var s = dict[key];
     if (s == null) s = KO[key];
     if (s == null) return key;
@@ -225,7 +315,17 @@
 
   /* 화면에 박혀 있는 글자들을 바꿔 끼웁니다 (data-t 가 붙은 것) */
   global.applyStatic = function () {
-    document.documentElement.lang = lang;
+    document.documentElement.lang = lang === 'zh' ? 'zh-CN' : lang;
+    if (lang === 'zh' && !document.getElementById('zh-font')) {
+      // Chinese glyphs for the game font, limited to CJK ranges
+      var zf = "local('PingFang SC'),local('PingFangSC-Regular'),local('Microsoft YaHei'),local('Microsoft YaHei UI'),local('Noto Sans SC'),local('Noto Sans CJK SC'),local('Source Han Sans SC')";
+      var ur = 'U+2E80-2FFF,U+3000-303F,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF';
+      var st = document.createElement('style'); st.id = 'zh-font';
+      st.textContent = ['Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR'].map(function (fm) {
+        return "@font-face{font-family:'" + fm + "';src:" + zf + ';unicode-range:' + ur + '}';
+      }).join('') + 'html[lang=zh-CN] *{word-break:normal!important}';
+      document.head.appendChild(st);
+    }
     document.querySelectorAll('[data-t]').forEach(function (el) {
       var k = el.getAttribute('data-t');
       if (el.hasAttribute('data-t-html')) el.innerHTML = T(k);
