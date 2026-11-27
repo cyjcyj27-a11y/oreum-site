@@ -405,6 +405,32 @@
     document.getElementById('rotSub').textContent = 'If the button does nothing, turn off rotation lock and lay your phone sideways';
     document.getElementById('rotSkip').textContent = 'Play in portrait anyway';
   }
+  if (/[?&]lang=zh/.test(location.search)) {
+    document.documentElement.lang = 'zh-CN';
+    // Chinese system fonts for CJK glyphs in each game font family
+    var zf = "local('PingFang SC'),local('PingFangSC-Regular'),local('Microsoft YaHei'),local('Microsoft YaHei UI'),local('Noto Sans SC'),local('Noto Sans CJK SC'),local('Source Han Sans SC')";
+    var ur = 'U+2E80-2FFF,U+3000-303F,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF';
+    var zs = document.createElement('style');
+    zs.textContent = "@font-face{font-family:'FernTitle';src:" + zf + ";unicode-range:" + ur + "}" +
+      "@font-face{font-family:'Ria';src:" + zf + ";unicode-range:" + ur + "}" +
+      "html[lang=zh-CN] *{word-break:normal!important}";
+    document.head.appendChild(zs);
+    document.title = '冰雪爷爷';
+    var tz = document.getElementById('ttl');
+    tz.textContent = '冰雪爷爷';
+    tz.style.fontFamily = "'Microsoft YaHei', 'PingFang SC', 'Noto Sans SC', sans-serif"; tz.style.fontWeight = '900';
+    var lz = document.getElementById('ldTtl');
+    lz.textContent = '冰雪爷爷';
+    lz.style.fontFamily = "'Microsoft YaHei', 'PingFang SC', 'Noto Sans SC', sans-serif"; lz.style.fontWeight = '700';
+    document.getElementById('btnStart').textContent = '开始';
+    document.getElementById('btnCont').textContent = '继续';
+    document.getElementById('bJump').textContent = '跳跃';
+    document.getElementById('keys').innerHTML = 'WASD 移动 · Shift 奔跑 · E 互动·拿起<br>← → ↑ ↓ 视角 · B 图鉴 · I 背包 · T 地图 · R(长按) 重生 · K 音效';
+    document.getElementById('rotMsg').textContent = '这款游戏需要横屏玩';
+    document.getElementById('rotGo').textContent = '切换横屏';
+    document.getElementById('rotSub').textContent = '如果按钮没反应，请关闭手机的屏幕旋转锁定，把手机横过来';
+    document.getElementById('rotSkip').textContent = '仍然竖屏玩';
+  }
 </script>
 <script>
   // 단추 글자가 칸을 넘치면 배치는 그대로 두고 글자만 줄여 맞춘다 — 러시아어·영어는 낱말이 길다
@@ -436,13 +462,14 @@
   })();
 </script>
 <script src="assets/landscape.js?v=2"></script>
-<script src="assets/game-home.js?v=2" data-top="6" data-left="6" data-fullscreen="1" defer></script>
+<script src="assets/game-home.js?v=3" data-top="6" data-left="6" data-fullscreen="1" defer></script>
 <script src="/assets/visit.js?v=21" defer></script>
 <script src="/assets/game-events.js?v=4" defer></script>
 <script src="lib/three.min.js"></script>
 <script src="lib/GLTFLoader.global.js"></script>
 <script src="js/ru.js?v=38"></script>
-<script src="js/core.js?v=27"></script>
+<script src="js/zh.js?v=1"></script>
+<script src="js/core.js?v=28"></script>
 <script src="js/terrain.js?v=10"></script>
 <script src="js/sky.js?v=4"></script>
 <script src="js/col.js?v=3"></script>
@@ -468,7 +495,7 @@
 <script src="js/audio.js?v=13"></script>
 <script src="js/fx.js?v=2"></script>
 <script src="js/hud.js?v=44"></script>
-<script src="js/game.js?v=54"></script>
+<script src="js/game.js?v=55"></script>
 <script>
   window.__LOAD.set(0.04);
   GAME.boot().catch(function (e) { console.error(e); document.getElementById('ldPct').textContent = 'ERROR ' + e.message; });

@@ -5,7 +5,7 @@
     dt: 0, time: 0, paused: true, mode: 'load',   // load | title | play | over
     save: 'fernflower',
     sfx: true,
-    lang: (location.search.match(/[?&]lang=(en|ru)/) || [0, 'ko'])[1],
+    lang: (location.search.match(/[?&]lang=(en|ru|zh)/) || [0, 'ko'])[1],
 
     // 진행
     coins: 0,
@@ -93,7 +93,7 @@
   function wipe() { try { localStorage.removeItem(T.save + '.prog'); localStorage.removeItem(T.save + '.photos'); } catch (e) { } }
 
   // 한·영 낱말
-  function L(ko, en) { return T.lang === 'ko' ? ko : (T.lang === 'ru' ? ((window.RU && RU[ko]) || en) : en); }
+  function L(ko, en) { return T.lang === 'ko' ? ko : (T.lang === 'ru' ? ((window.RU && RU[ko]) || en) : (T.lang === 'zh' ? ((window.ZH && ZH[ko]) || en) : en)); }
 
   window.T = T;
   window.U = { clamp, lerp, damp, TAU, angDiff, smoothstep, mulberry, save, loadSave, wipe, L };

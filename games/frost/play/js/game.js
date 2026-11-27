@@ -155,7 +155,7 @@
   };
   function intro(after, book) {
     book = book || STORY;
-    const lines = T.lang === 'ru' ? book.ko.map((k, i) => U.L(k, book.en[i])) : book[T.lang];
+    const lines = (T.lang === 'ru' || T.lang === 'zh') ? book.ko.map((k, i) => U.L(k, book.en[i])) : book[T.lang];
     let i = 0;
     const el = $('intro'), tx = $('introTxt');
     const done = () => { el.classList.remove('show'); el.onclick = null; removeEventListener('keydown', key); after(); };
