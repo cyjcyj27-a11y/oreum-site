@@ -175,6 +175,7 @@
   // pvall 은 오늘부터 세는 칸이라, 그 전까지의 누적(페이지별 pv_* 칸의 합, 2026-09-21 기준)을 PV_BASE 로 더합니다.
   // 열 때마다 hit 응답의 값을 그대로 씁니다. 남이 연 것까지 살아서 오르는 건 아닙니다(카운터 서비스 10초 30번 제한).
   var EN = /^en/i.test(document.documentElement.lang || '');
+  var ZH = /^zh/i.test(document.documentElement.lang || '');   // 중국어 페이지
   // 대문 알약 두 칸은 늘 한 줄(사장님 10/29). 숫자가 커져 자리가 모자라면 줄바꿈 대신 글자를 줄인다(사장님 "글자폰트를 줄이면 되지").
   function fitCounts() {
     var box = document.querySelector('.footer-counts'); if (!box) return;
@@ -196,7 +197,7 @@
       var num = document.createElement('strong');
       el.textContent = '';
       // 2026-10-29 사장님 "누적방문 누적플레이로 하자" — 한글판 "누적 방문 N회", 영문판 "Total views N" (그 전엔 둘 다 "N visits")
-      el.appendChild(document.createTextNode(EN ? 'Total views ' : '누적 방문 ')); el.appendChild(num); if (!EN) el.appendChild(document.createTextNode('회'));
+      el.appendChild(document.createTextNode(ZH ? '累计访问 ' : EN ? 'Total views ' : '누적 방문 ')); el.appendChild(num); if (ZH) el.appendChild(document.createTextNode(' 次')); else if (!EN) el.appendChild(document.createTextNode('회'));
       el.hidden = false;
       num.textContent = v.value.toLocaleString('ko-KR');   // 올라가는 연출 없이 숫자만(사장님 2026-09-21 "슬롯처럼 올라가는 애니는 빼")
       fitCounts();
@@ -213,8 +214,8 @@
       var num = document.createElement('strong');
       el.textContent = '';
       var h = Math.floor(v.minutes / 60).toLocaleString('ko-KR');   // 시간만(사장님 "단위는 시간으로만"), 내림
-      el.appendChild(document.createTextNode(EN ? 'Total play time ' : '누적 플레이 ')); el.appendChild(num);
-      num.textContent = EN ? h + ' h' : h + '시간';
+      el.appendChild(document.createTextNode(ZH ? '累计游玩 ' : EN ? 'Total play time ' : '누적 플레이 ')); el.appendChild(num);
+      num.textContent = ZH ? h + ' 小时' : EN ? h + ' h' : h + '시간';
       el.hidden = false;
       fitCounts();
     });
