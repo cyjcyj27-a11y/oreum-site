@@ -112,7 +112,7 @@
   add(TOY.rbox(5.2, 1.7, 0.3, 0.8), M('#ff8fb1', { gloss: 0.6, rough: 0.35 }), 0, 0, 0, signG);
   const signTxt = add(new THREE.PlaneGeometry(4.6, 1.5), new THREE.MeshBasicMaterial({ transparent: true, map: TOY.label(L('오떡', 'OTTEOK'), { size: 170, color: '#ffffff', stroke: '#d9547e', sw: 22 }) }), 0, 0, 0.17, signG);
   signTxt.castShadow = false; signTxt.receiveShadow = false;
-  R.setSign = function (txt) { if (window.EN) txt = { '오떡': 'OTTEOK', '오떡닷컴': 'otteok.com', '(주)오떡': 'OTTEOK Inc.' }[txt] || txt; signTxt.material.map = TOY.label(txt, { size: txt.length > 4 ? 110 : 170, color: '#ffffff', stroke: '#d9547e', sw: 22 }); signTxt.material.needsUpdate = true; };
+  R.setSign = function (txt) { if (window.EN) txt = { '오떡': 'OTTEOK', '오떡닷컴': 'otteok.com', '(주)오떡': 'OTTEOK Inc.' }[txt] || txt; else if (window.ZHM) txt = ZT(txt); signTxt.material.map = TOY.label(txt, { size: txt.length > 4 ? 110 : 170, color: '#ffffff', stroke: '#d9547e', sw: 22 }); signTxt.material.needsUpdate = true; };
 
   // ---------- 작업대 ----------
   const B = R.BENCH;

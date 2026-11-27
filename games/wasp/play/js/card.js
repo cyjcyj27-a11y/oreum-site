@@ -30,8 +30,8 @@
     // 제목(부푼 글씨 두 겹)
     const tt = L('말벌아저씨', 'MR. HORNET');
     g.font = fit(g, tt, 128, 'TtlF, Ui, sans-serif', 900);
-    txt(g, tt, W / 2, 104, g.font, '#ffcf1f');
-    txt(g, tt, W / 2, 104, g.font.replace('TtlF', 'Ttl'), '#3a2210');
+    if (window.ZH) txt(g, tt, W / 2, 104, 'bold ' + g.font, '#ffcf1f', '#3a2210', 16);
+    else { txt(g, tt, W / 2, 104, g.font, '#ffcf1f'); txt(g, tt, W / 2, 104, g.font.replace('TtlF', 'Ttl'), '#3a2210'); }
     txt(g, 'THE END', W / 2, 198, '52px Ui, sans-serif', '#3a2210');
     // 장면 사진
     const ph = { x: 90, y: 246, w: 900, h: 500 };
@@ -61,13 +61,13 @@
     g.font = '36px Ui, sans-serif'; const sw2 = g.measureText('oreumgames.com').width, lw = 62, bx = W / 2 - (sw2 + lw + 14) / 2;
     if (lg) { try { g.drawImage(lg, bx, 1302, lw, 30); } catch (e) {} }
     txt(g, 'oreumgames.com', bx + lw + 14, 1318, '36px Ui, sans-serif', '#3a2210', null, 0, 'left');
-    shareLine = L('말벌아저씨 20번 출동 끝! 잡은 벌 ' + (st.kills + st.nets) + '마리, 쏘인 횟수 ' + st.stings + '번 · ' + name, 'Mr. Hornet cleared! ' + (st.kills + st.nets) + ' wasps, ' + st.stings + ' stings · ' + name);
+    shareLine = window.ZH ? '马蜂大叔 20 次出动全部完成！抓到 ' + (st.kills + st.nets) + ' 只蜂，被蜇 ' + st.stings + ' 次 · ' + name : L('말벌아저씨 20번 출동 끝! 잡은 벌 ' + (st.kills + st.nets) + '마리, 쏘인 횟수 ' + st.stings + '번 · ' + name, 'Mr. Hornet cleared! ' + (st.kills + st.nets) + ' wasps, ' + st.stings + ' stings · ' + name);
     try { url = c.toDataURL('image/png'); } catch (e) { url = null; }
     return url;
   };
   C.save = function () { if (!url) return; const a = document.createElement('a'); a.href = url; a.download = L('malbeol-ajeossi-end.png', 'mr-hornet-end.png'); document.body.appendChild(a); a.click(); a.remove(); };
   C.share = function () {
-    const link = location.protocol === 'file:' ? '' : location.origin + location.pathname.replace(/play\/?(index\.html)?$/, '') + (window.EN ? '?lang=en' : '');
+    const link = location.protocol === 'file:' ? '' : location.origin + location.pathname.replace(/play\/?(index\.html)?$/, '') + (window.EN ? '?lang=en' : window.ZH ? '?lang=zh' : '');
     if (navigator.share) { navigator.share({ title: L('말벌아저씨', 'Mr. Hornet'), text: shareLine, url: link || undefined }).catch(() => {}); return; }
     try { navigator.clipboard.writeText(shareLine + (link ? '\n' + link : '')); } catch (e) {}
   };

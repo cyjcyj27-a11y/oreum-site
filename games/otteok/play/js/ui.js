@@ -7,7 +7,7 @@
   const fmt = (U.fmt = function (n) {
     n = Math.round(n);
     const a = Math.abs(n);
-    if (!EN) { if (a >= 1e12) return (n / 1e12).toFixed(a >= 1e13 ? 1 : 2) + '조'; if (a >= 1e8) return (n / 1e8).toFixed(a >= 1e10 ? 0 : a >= 1e9 ? 1 : 2) + '억'; }
+    if (!EN) { if (a >= 1e12) return (n / 1e12).toFixed(a >= 1e13 ? 1 : 2) + (window.ZHM ? '万亿' : '조'); if (a >= 1e8) return (n / 1e8).toFixed(a >= 1e10 ? 0 : a >= 1e9 ? 1 : 2) + (window.ZHM ? '亿' : '억'); }
     else { if (a >= 1e12) return (n / 1e12).toFixed(2) + 'T'; if (a >= 1e9) return (n / 1e9).toFixed(2) + 'B'; }
     return n.toLocaleString('en-US');
   });
@@ -21,6 +21,8 @@
     bShop: ['상점', 'SHOP'], shT: ['상점', 'SHOP'], bShopX: ['닫기', 'CLOSE'], ovL: ['별 하나 리뷰', '1-star reviews'], ccL1: ['매출', 'Sales'], ccL2: ['가맹점', 'Stores'], lVal: ['기업가치', 'VALUE'], lRate: ['공장', 'FACTORY'], deL6: ['공장 수입', 'Factory'], deL7: ['로열티', 'Royalties'], wL1: ['기업가치', 'Value'], wL2: ['로열티/일', 'Royalty/day'], wL3: ['가맹점', 'Stores'], bWorldX: ['닫기', 'CLOSE'], keys: ['클릭 · 끌기 · 스페이스', 'Click · Drag · Space'] };
   Object.keys(T).forEach((k) => { const el = $(k); if (el) el.textContent = L(T[k][0], T[k][1]); });
     if (window.EN) { document.title = 'otteok.com'; const la = document.querySelector('#logo .a'); if (la) la.textContent = 'OTTEOK'; }
+    if (window.ZHM) { const w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT); let n; while ((n = w.nextNode())) { const t = n.nodeValue.trim(); if (/[가-힣]/.test(t)) n.nodeValue = n.nodeValue.replace(t, ZT(t)); } }
+    if (window.ZHM) { document.title = '年糕网 OTTEOK.COM'; const la = document.querySelector('#logo .a'); if (la) la.textContent = '年糕网'; }
 
   // ---------- 떡 그림(주문서용, 코드로) ----------
   U.icon = function (type, s) {
@@ -249,7 +251,7 @@
     if (nx) {
       const v = BIZ.value(), lock = nx.ipo && v < nx.ipo;
       item(box, { cls: 'step', pink: true, tag: L('다음 단계', 'NEXT STEP'), name: L(nx.ko, nx.en), own: G.stepOwned(), price: nx.cost, lock,
-        desc: nx.ipo ? L('기업가치 ', 'Value ') + fmt(v) + ' / ' + fmt(nx.ipo) : nx.n === 2 ? L('택배 주문 사이트를 연다', 'Open the delivery website') : nx.n === 4 ? L('대형 공장을 짓는다', 'Build a big factory') : nx.n === 5 ? L('전국 가맹 지도가 열린다', 'Open the franchise map') : nx.n === 6 ? L('세계 지도가 열린다', 'Open the world map') : L('가맹점 ' + fmt(nx.shops) + '곳', fmt(nx.shops) + ' stores'),
+        desc: nx.ipo ? L('기업가치 ', 'Value ') + fmt(v) + ' / ' + fmt(nx.ipo) : nx.n === 2 ? L('택배 주문 사이트를 연다', 'Open the delivery website') : nx.n === 4 ? L('대형 공장을 짓는다', 'Build a big factory') : nx.n === 5 ? L('전국 가맹 지도가 열린다', 'Open the franchise map') : nx.n === 6 ? L('세계 지도가 열린다', 'Open the world map') : L('가맹점 ' + fmt(nx.shops) + '곳', fmt(nx.shops) + ' stores', '加盟店 ' + fmt(nx.shops) + ' 家'),
         buy() { G.save.coins -= nx.cost; G.save.step = ch + 1; G.store(); } });
     }
     // 6장: 기업가치 5천억을 넘으면 사모펀드 칸이 뜬다(누르면 M&A 로 곧장 나스닥)
@@ -275,7 +277,7 @@
       // 레일 추가: 빈자리 8칸까지
       const t = BIZ.free()[0], k = BIZ.lines().length;
       item(box, { sec: 1, name: L('레일 추가', 'Add Rail'), desc: L('레일 ', 'Rails ') + k + '/' + BIZ.MAX + L('  1초 +', '  +') + fmt(BIZ.rate(true)) + L('', '/s') });
-      if (t) item(box, { name: L(D.DDEOK[t].ko + ' 레일', D.DDEOK[t].en + ' Rail'), desc: L('1초 +', '+') + fmt(BIZ.lineRate(k) * BIZ.mul()) + L('', '/s'), price: BIZ.lineCost(),
+      if (t) item(box, { name: L(D.DDEOK[t].ko + ' 레일', D.DDEOK[t].en + ' Rail', ZT(D.DDEOK[t].ko) + '生产线'), desc: L('1초 +', '+') + fmt(BIZ.lineRate(k) * BIZ.mul()) + L('', '/s'), price: BIZ.lineCost(),
         buy() { BIZ.buyLine(); built.push({ line: t }); } });
       else item(box, { name: L('레일 8칸 모두 가동', 'All 8 rails running'), own: true });
       // 기계 추가: 레일 전체에 붙는 설비
@@ -424,7 +426,7 @@
     g.font = "120px 'Ttl',sans-serif"; g.lineWidth = 26; g.strokeStyle = '#d9547e'; g.strokeText(L('오떡닷컴', 'otteok.com'), 540, 110); g.fillStyle = '#fff'; g.fillText(L('오떡닷컴', 'otteok.com'), 540, 110);
     g.font = "64px 'Ttl',sans-serif"; g.lineWidth = 16; g.strokeText(L('나스닥 상장', 'NASDAQ IPO'), 540, 840); g.fillStyle = '#fff'; g.fillText(L('나스닥 상장', 'NASDAQ IPO'), 540, 840);
     g.fillStyle = '#fff'; rr(110, 900, 860, 300, 34); g.fill();
-    const rows = [[L('기업가치', 'Company value'), fmt(info.value)], [L('총 출고', 'Boxes shipped'), fmt(info.boxes) + L('상자', '')], [L('세계 가맹점', 'Stores worldwide'), fmt(info.shops) + L('곳', '')], [L('진출 나라', 'Countries'), info.nations + L('개국', '')]];
+    const rows = [[L('기업가치', 'Company value'), fmt(info.value)], [L('총 출고', 'Boxes shipped'), fmt(info.boxes) + L('상자', '', '箱')], [L('세계 가맹점', 'Stores worldwide'), fmt(info.shops) + L('곳', '')], [L('진출 나라', 'Countries'), info.nations + L('개국', '')]];
     rows.forEach(([a, b], i) => { const x = i % 2 ? 760 : 320, y = 975 + Math.floor(i / 2) * 140; g.fillStyle = '#a07b90'; g.font = "36px 'Ui',sans-serif"; g.fillText(a, x, y); g.fillStyle = '#4a2f43'; g.font = "64px 'Ttl',sans-serif"; g.fillText(b, x, y + 62); });
     g.font = "58px 'Ttl',sans-serif"; g.lineWidth = 14; g.strokeStyle = '#d9547e'; g.strokeText(info.title, 540, 1255); g.fillStyle = '#fff'; g.fillText(info.title, 540, 1255);
     g.font = "32px 'Ui',sans-serif"; g.fillStyle = '#d9547e'; g.fillText('oreumgames.com', 540, 1318);
@@ -443,7 +445,7 @@
       S('click');
       const info = U.cardInfo();
       const url = window.OT_SHARE_URL || location.href.split('?')[0].split('#')[0];
-      const text = L('오떡닷컴 나스닥 상장! 기업가치 ' + fmt(info.value) + ' ' + info.title, 'otteok.com is on NASDAQ! Value ' + fmt(info.value) + ' ' + info.title);
+      const text = L('오떡닷컴 나스닥 상장! 기업가치 ' + fmt(info.value) + ' ' + info.title, 'otteok.com is on NASDAQ! Value ' + fmt(info.value) + ' ' + info.title, '年糕网纳斯达克上市！企业估值 ' + fmt(info.value) + ' ' + info.title);
       try { if (navigator.share) { await navigator.share({ title: L('오떡닷컴', 'otteok.com'), text, url }); return; } } catch (e) { return; }
       try { await navigator.clipboard.writeText(text + ' ' + url); } catch (e) {}
       U.banner(L('주소를 복사했습니다', 'Link copied'), '');

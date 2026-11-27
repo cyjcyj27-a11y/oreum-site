@@ -232,7 +232,7 @@
           FX.tw(0.55, (u) => l.g.scale.setScalar(Math.max(0.01, u)), null, FX.ease.back);
           FX.burst(new V3(p.x, 1.2, p.z), { n: 24, kind: 'star', color: ['#fff3a0', '#ffd1e0', '#c9f0ff', '#ffffff'], size: 0.28, speed: 4, up: 3, glow: true });
           FX.ring(new V3(p.x, 0.1, p.z), { color: '#ffd1e0', size: 1.5, to: 7 });
-          UI.banner(L(DATA.DDEOK[b.line].ko + ' 레일 가동', DATA.DDEOK[b.line].en + ' rail online'), '+' + UI.fmt(BIZ.lineRate(lines.length - 1) * BIZ.mul()) + L('/초', '/s'));
+          UI.banner(L(DATA.DDEOK[b.line].ko + ' 레일 가동', DATA.DDEOK[b.line].en + ' rail online', ZT(DATA.DDEOK[b.line].ko) + '生产线启动'), '+' + UI.fmt(BIZ.lineRate(lines.length - 1) * BIZ.mul()) + L('/초', '/s'));
           FX.wait(1.9, next);
         });
       } else {

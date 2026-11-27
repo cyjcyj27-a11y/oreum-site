@@ -21,6 +21,7 @@
  */
 (function () {
   'use strict';
+  var zh = false;   // ?lang=zh 중국어판
 
   function init() {
     if (document.getElementById('oreumHome')) return;      // 두 번 붙지 않게
@@ -32,7 +33,7 @@
 
     // 말은 문서 언어를 따르되, 주소에 ?lang= 이 있으면 그쪽이 우선입니다
     var ko = (document.documentElement.lang || 'ko').toLowerCase().indexOf('en') !== 0;
-    var zh = false;   // ?lang=zh 중국어판
+    zh = false;
     try {
       var q = new URLSearchParams(location.search).get('lang');
       if (q === 'en') ko = false;

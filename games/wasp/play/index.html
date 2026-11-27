@@ -404,8 +404,8 @@ body.touch #ctl{display:block}
 
 <div id="rotate"><div data-en="Please rotate your phone">폰을 가로로 돌려 주세요</div><button class="btn" id="rotBtn"><span data-en="LANDSCAPE">가로로 보기</span></button></div>
 
-<script src="js/lang.js?v=1"></script>
-<script src="assets/game-home.js" data-top="6" data-left="6" data-fullscreen="1" defer></script>
+<script src="js/lang.js?v=2"></script>
+<script src="assets/game-home.js?v=3" data-top="6" data-left="6" data-fullscreen="1" defer></script>
 <script src="lib/three.min.js"></script>
 <script src="js/clay.js?v=1"></script>
 <script src="js/render.js?v=1"></script>
@@ -418,11 +418,12 @@ body.touch #ctl{display:block}
 <script src="js/audio.js?v=1"></script>
 <script src="js/input.js?v=2"></script>
 <script src="js/how.js?v=11"></script>
-<script src="js/card.js?v=4"></script>
-<script src="js/ui.js?v=5"></script>
+<script src="js/card.js?v=5"></script>
+<script src="js/ui.js?v=6"></script>
 <script src="js/game.js?v=10"></script>
 <script>
 if (window.EN) { document.title = 'Mr. Hornet'; document.getElementById('logoF').textContent = document.getElementById('logoL').textContent = 'MR. HORNET'; }
+else if (window.ZH) { document.title = '马蜂大叔'; document.getElementById('logoF').textContent = document.getElementById('logoL').textContent = '马蜂大叔'; }
 GAME.init();
 </script>
 <script src="/assets/visit.js?v=21" defer></script>
