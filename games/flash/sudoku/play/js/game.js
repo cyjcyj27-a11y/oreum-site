@@ -4,9 +4,17 @@
   var PZ = window.SDK_PUZZLES, N = PZ.length;
   var QS = location.search;
   var EN = /[?&]lang=en(&|$)/.test(QS), SHOT = /[?&]shot=1/.test(QS);
+  var ZH = !EN && /[?&]lang=zh(&|$)/.test(QS);
+  // 중국어 사전: 한국어 문구 -> 간체 중국어
+  var ZD = {
+    '입문': '入门', '초급': '初级', '중급': '中级', '고급': '高级', '전문가': '专家', '달인': '大师',
+    '스도쿠': '数独', '푼 판 ': '已解 ', '이어하기': '继续', '시작': '开始', '최고 ': '最佳 ', '모두 합쳐 ': '总计 ',
+    '지우개': '橡皮', '메모': '笔记', '처음부터': '重来', '판 고르기': '选关', '잠깐': '暂停', '계속': '继续',
+    '1~9 숫자 · 방향키 이동 · N 메모 · Backspace 지우개 · Z 되돌리기': '1~9 数字 · 方向键 移动 · N 笔记 · Backspace 橡皮 · Z 撤销'
+  };
   function qp(k) { var m = new RegExp('[?&]' + k + '=([^&]*)').exec(QS); return m ? decodeURIComponent(m[1]) : null; }
   var TIER_KO = window.SDK_TIERS, TIER_EN = ['BEGINNER', 'EASY', 'MEDIUM', 'HARD', 'EXPERT', 'MASTER'];
-  function T(ko, en) { return EN ? en : ko; }
+  function T(ko, en) { return EN ? en : ZH && ZD[ko] != null ? ZD[ko] : ko; }
   var tierOf = PZ.map(function (p) { return p[2]; });
   var tierFirst = [], tierCount = [], numIn = [];
   tierOf.forEach(function (t, i) {
@@ -308,7 +316,7 @@
     ctx.lineWidth = Math.max(1, r * 0.04); ctx.beginPath(); ctx.arc(0, 0, r * 0.82, 0, Math.PI * 2); ctx.stroke();
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     ctx.font = (r * (EN ? 0.36 : 0.42)) + 'px Allim';
-    ctx.fillText(EN ? 'GREAT' : '참 잘', 0, -r * 0.22); ctx.fillText(EN ? 'JOB' : '했어요', 0, r * 0.26);
+    ctx.fillText(EN ? 'GREAT' : ZH ? '做得' : '참 잘', 0, -r * 0.22); ctx.fillText(EN ? 'JOB' : ZH ? '真棒' : '했어요', 0, r * 0.26);
     ctx.restore();
   }
   function titleData() {
@@ -648,6 +656,17 @@
     document.body.classList.add('en'); document.documentElement.lang = 'en'; document.title = 'SUDOKU';
     document.querySelectorAll('[data-en]').forEach(function (el) { el.textContent = el.getAttribute('data-en'); });
     $('stampT').innerHTML = 'GREAT<br>JOB';
+  }
+  // ---------- 중국어 ----------
+  if (ZH) {
+    document.documentElement.lang = 'zh-CN'; document.title = '数独';
+    var zf = "local('PingFang SC'),local('PingFangSC-Regular'),local('Microsoft YaHei'),local('Microsoft YaHei UI'),local('Noto Sans SC'),local('Noto Sans CJK SC'),local('Source Han Sans SC')";
+    var ur = 'U+2E80-2FFF,U+3000-303F,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF';
+    var zst = document.createElement('style');
+    zst.textContent = ['Kku', 'Allim', 'Nadeuri'].map(function (f) { return "@font-face{font-family:'" + f + "';src:" + zf + ';unicode-range:' + ur + '}'; }).join('') + 'html[lang=zh-CN] *{word-break:normal!important}';
+    document.head.appendChild(zst);
+    document.querySelectorAll('[data-en]').forEach(function (el) { var k = el.textContent; if (ZD[k] != null) el.textContent = ZD[k]; });
+    $('stampT').innerHTML = '做得<br>真棒';
   }
 
   // ---------- 시작 ----------
