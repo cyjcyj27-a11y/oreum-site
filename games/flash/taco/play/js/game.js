@@ -1,15 +1,24 @@
 /* 타코 만들기 — 게임 */
 (function () {
 'use strict';
-var EN = /[?&]lang=en\b/.test(location.search);
+var EN = /[?&]lang=en\b/.test(location.search), ZH = !EN && /[?&]lang=zh\b/.test(location.search);
 if (EN) document.documentElement.lang = 'en';
+if (ZH) {
+  document.documentElement.lang = 'zh-CN';
+  /* 중국어 글자는 게임 글꼴에 없으므로 시스템 중국어 글꼴을 같은 이름으로 덧붙인다 */
+  var zf = "local('PingFang SC'),local('PingFangSC-Regular'),local('Microsoft YaHei'),local('Microsoft YaHei UI'),local('Noto Sans SC'),local('Noto Sans CJK SC'),local('Source Han Sans SC')";
+  var ur = 'U+2E80-2FFF,U+3000-303F,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF';
+  var zst = document.createElement('style');
+  zst.textContent = "@font-face{font-family:'Taco';src:" + zf + ";unicode-range:" + ur + "}@font-face{font-family:'Ria';src:" + zf + ";unicode-range:" + ur + "}html[lang=zh-CN] *{word-break:normal!important}";
+  document.head.appendChild(zst);
+}
 var A = ART, TAU = Math.PI * 2, $ = function (id) { return document.getElementById(id); };
-function L(a) { return a[EN ? 1 : 0]; }
+function L(a) { return a[EN ? 1 : ZH ? 2 : 0]; }
 var TX = {
-  title: ['VIVA 타코스', 'VIVA TACOS'],
-  stops: [['선인장 사막', 'Cactus Desert'], ['오아시스 마을', 'Oasis Village'], ['야자수 해변', 'Palm Beach'], ['등대 항구', 'Lighthouse Harbor'], ['옥수수 밭', 'Corn Field'], ['붉은 협곡', 'Red Canyon'],
-    ['분수 광장', 'Fountain Plaza'], ['시장 골목', 'Market Street'], ['화산 기슭', 'Volcano Foothills'], ['정글 유적', 'Jungle Ruins'], ['밤의 도시', 'City Night'], ['타코 축제', 'Taco Fiesta']],
-  shop: { fire: ['화력', 'Heat'], burner: ['화구', 'Burner'], parasol: ['파라솔', 'Parasol'], tip: ['팁 통', 'Tip Jar'], pinata: ['피냐타', 'Piñata'], heart: ['하트', 'Heart'] }
+  title: ['VIVA 타코스', 'VIVA TACOS', '塔可万岁'],
+  stops: [['선인장 사막', 'Cactus Desert', '仙人掌沙漠'], ['오아시스 마을', 'Oasis Village', '绿洲小镇'], ['야자수 해변', 'Palm Beach', '椰林海滩'], ['등대 항구', 'Lighthouse Harbor', '灯塔港口'], ['옥수수 밭', 'Corn Field', '玉米田'], ['붉은 협곡', 'Red Canyon', '红色峡谷'],
+    ['분수 광장', 'Fountain Plaza', '喷泉广场'], ['시장 골목', 'Market Street', '集市小巷'], ['화산 기슭', 'Volcano Foothills', '火山脚下'], ['정글 유적', 'Jungle Ruins', '丛林遗迹'], ['밤의 도시', 'City Night', '不夜城'], ['타코 축제', 'Taco Fiesta', '塔可节']],
+  shop: { fire: ['화력', 'Heat', '火力'], burner: ['화구', 'Burner', '加灶'], parasol: ['파라솔', 'Parasol', '遮阳伞'], tip: ['팁 통', 'Tip Jar', '小费罐'], pinata: ['피냐타', 'Piñata', '皮纳塔'], heart: ['하트', 'Heart', '爱心'] }
 };
 var FONT = "'Taco','Ria',sans-serif";
 
@@ -595,7 +604,7 @@ window.addEventListener('resize', resize);
 /* ---------- 돌리기 ---------- */
 var lastTs = 0;
 function frame(ts) { var dt = lastTs ? Math.min(0.05, (ts - lastTs) / 1000) : 0; lastTs = ts; if (!document.hidden) { step(dt); draw(); } requestAnimationFrame(frame); }
-$('ttl').innerHTML = '<span class="v">VIVA</span><span class="k">' + (EN ? 'TACOS' : '타코스') + '</span>';
+$('ttl').innerHTML = '<span class="v">VIVA</span><span class="k">' + (EN ? 'TACOS' : ZH ? '塔可万岁' : '타코스') + '</span>';
 document.title = L(TX.title);
 (function () { var a = $('coinI').getContext('2d'); a.translate(22, 21); A.coin(a, 18); var b = $('cearnI').getContext('2d'); b.translate(22, 21); A.coin(b, 18); })();
 SND.music(1);
