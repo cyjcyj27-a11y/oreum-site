@@ -11,6 +11,20 @@
     document.title = 'Game for Cat';
     document.getElementById('h1').innerHTML = 'GAME<br>FOR CAT';
   }
+  var ZH = !EN && new URLSearchParams(location.search).get('lang') === 'zh';
+  if (ZH) {
+    document.documentElement.lang = 'zh-CN';
+    document.title = '给猫玩的游戏';
+    document.getElementById('h1').innerHTML = '给猫玩的<br>游戏';
+    document.getElementById('sndTog').title = '音效';
+    // 게임 글꼴엔 한자가 없다: 같은 이름에 중국어 기기 글꼴을 한자 범위로만 덧붙인다
+    var zf = "local('PingFang SC'),local('PingFangSC-Regular'),local('Microsoft YaHei'),local('Microsoft YaHei UI'),local('Noto Sans SC'),local('Noto Sans CJK SC'),local('Source Han Sans SC')";
+    var zb = "local('PingFang SC Semibold'),local('PingFangSC-Semibold'),local('Microsoft YaHei Bold'),local('Microsoft YaHei UI Bold'),local('Noto Sans SC Bold'),local('NotoSansSC-Bold'),local('Source Han Sans SC Bold')," + zf;
+    var ur = 'U+2E80-2FFF,U+3000-303F,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF';
+    var zst = document.createElement('style');
+    zst.textContent = "@font-face{font-family:'Bagel';src:" + zb + ";unicode-range:" + ur + "}@font-face{font-family:'Ria';src:" + zb + ";unicode-range:" + ur + "}html[lang=zh-CN] *{word-break:normal!important}";
+    document.head.appendChild(zst);
+  }
 
   var cv = document.getElementById('c'), ctx = cv.getContext('2d');
   var W = 0, H = 0, DPR = 1;
@@ -442,7 +456,7 @@
         draw();
         ctx.save(); ctx.translate(w / 2, h * .44); ctx.rotate(-4 * Math.PI / 180);
         var fs = Math.round(h * .21); ctx.font = fs + 'px Bagel'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round';
-        var lines = en ? ['GAME', 'FOR CAT'] : ['고양이용', '게임'];
+        var lines = en === 'zh' ? ['给猫玩的', '游戏'] : en ? ['GAME', 'FOR CAT'] : ['고양이용', '게임'];
         lines.forEach(function (ln, i) {
           var y = (i - (lines.length - 1) / 2) * fs * 1.08;
           ctx.fillStyle = 'rgba(0,0,0,.25)'; ctx.fillText(ln, 0, y + fs * .11);
