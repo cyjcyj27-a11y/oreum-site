@@ -350,16 +350,17 @@
 </div>
 
 <script>
-  window.__V = '137';
+  window.__V = '138';
   // 영문판: 로딩 화면 제목은 lang.js 가 불리기 전에 보이므로 여기서 먼저 바꾼다
   if (/[?&]lang=en(&|$)/i.test(location.search)) { document.querySelector('#load .ttl').textContent = 'UENO ZZANG'; document.title = 'UENO ZZANG'; }
+  if (/[?&]lang=zh(&|$)/i.test(location.search)) { document.querySelector('#load .ttl').textContent = '上野最强'; document.title = '上野最强'; }
   window.__LOAD = (function () {
     var p = 0, bar = document.getElementById('ldBar'), pct = document.getElementById('ldPct');
     return { set: function (v) { if (v > p) { p = Math.min(1, v); bar.style.width = (p * 100) + '%'; pct.textContent = Math.round(p * 100) + '%'; } } };
   })();
 </script>
 <script src="assets/landscape.js?v=1"></script>
-<script src="assets/game-home.js" data-top="6" data-left="6" data-fullscreen="1" defer></script>
+<script src="assets/game-home.js?v=2" data-top="6" data-left="6" data-fullscreen="1" defer></script>
 <script type="importmap">{ "imports": { "three": "./lib/three.module.js" } }</script>
 <script type="module">
   import * as THREE from 'three';
