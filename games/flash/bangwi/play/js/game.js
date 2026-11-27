@@ -15,6 +15,25 @@
     document.getElementById('rotHelp').textContent = 'If the button does nothing, unlock screen rotation and turn your phone';
     document.getElementById('rotSkip').textContent = 'Play in portrait anyway';
   }
+  var ZH = !EN && /[?&]lang=zh/i.test(location.search);
+  if (ZH) {
+    document.documentElement.lang = 'zh-CN';
+    document.title = '偷偷放屁';
+    document.getElementById('h1').textContent = '偷偷放屁';
+    document.getElementById('rotTitle').textContent = '这个游戏要横屏玩';
+    document.getElementById('rotGo').textContent = '切换横屏';
+    document.getElementById('rotHelp').textContent = '按钮没反应？请解除旋转锁定，把手机横过来';
+    document.getElementById('rotSkip').textContent = '还是竖屏玩';
+    document.getElementById('tPause').title = '暂停';
+    document.getElementById('tSnd').title = '音效';
+    // Game fonts lack Chinese glyphs: add system Chinese fonts for CJK ranges only
+    var zf = "local('PingFang SC'),local('PingFangSC-Regular'),local('Microsoft YaHei'),local('Microsoft YaHei UI'),local('Noto Sans SC'),local('Noto Sans CJK SC'),local('Source Han Sans SC')";
+    var zb = "local('PingFang SC Semibold'),local('PingFangSC-Semibold'),local('Microsoft YaHei Bold'),local('Microsoft YaHei UI Bold'),local('Noto Sans SC Bold'),local('NotoSansSC-Bold'),local('Source Han Sans SC Bold')," + zf;
+    var ur = 'U+2E80-2FFF,U+3000-303F,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF';
+    var st = document.createElement('style');
+    st.textContent = "@font-face{font-family:'Dongle';src:" + zb + ";unicode-range:" + ur + "}@font-face{font-family:'Ria';src:" + zb + ";unicode-range:" + ur + "}html[lang=zh-CN] *{word-break:normal!important}html[lang=zh-CN] #title h1{font-size:clamp(52px,min(12vw,24vh),132px);line-height:1.15;-webkit-text-stroke:3px #3b5a12}";
+    document.head.appendChild(st);
+  }
 
   var $ = function (id) { return document.getElementById(id); };
   var cv = $('cv'), g = cv.getContext('2d');
