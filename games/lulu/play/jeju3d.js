@@ -2487,7 +2487,7 @@ function updateNet(dt, t) {
 function formatWon(n) {
   n = Math.round(n);
   // 영어 모드에서는 ₩1,234,567 꼴로 적습니다 — 만·억 단위는 한국어에만 있으니까요
-  if (window.GAME_LANG === 'en') {
+  if (window.GAME_LANG === 'en' || window.GAME_LANG === 'zh') {
     return (n < 0 ? '-' : '') + '₩' + Math.abs(n).toLocaleString('en-US');
   }
   if (n === 0) return '0원';
@@ -6990,6 +6990,8 @@ function gameClock() {
   const h12 = h % 12 === 0 ? 12 : h % 12;
   const text = (window.GAME_LANG === 'en')
     ? `${h12} ${h < 12 ? 'AM' : 'PM'}`
+    : (window.GAME_LANG === 'zh')
+    ? `${h < 12 ? '上午' : '下午'}${h12}点`
     : `${h < 12 ? '오전' : '오후'} ${h12}시`;
   return { day: dayCount, h, m, text };
 }
@@ -7404,7 +7406,7 @@ function updateDayNight(dt) {
       // 달력 그림과 숫자를 한 덩어리로 두면, 폰이 뒤따르는 "1"까지 이모지 글꼴로
       // 그려서 혼자 시커멓게 나옵니다. 그림을 따로 감싸 글자와 떼어놓습니다.
       clockBadge.innerHTML = `<span class="cbIcon">\u{1F5D3}\u{FE0F}</span>` +
-        (window.GAME_LANG === 'en' ? `Day ${c.day} · ${c.text}` : `${c.day}일차 · ${c.text}`);
+        (window.GAME_LANG === 'en' ? `Day ${c.day} · ${c.text}` : window.GAME_LANG === 'zh' ? `第${c.day}天 · ${c.text}` : `${c.day}일차 · ${c.text}`);
       clockBadge.classList.toggle('night', isNight());
     }
   }

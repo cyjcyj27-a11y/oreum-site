@@ -7,11 +7,12 @@
   // ----- 언어는 주소로만 정한다(?lang=en 일 때만 영어, 없으면 한국어) — 기억하거나 폰 언어를 따르면 한국어 페이지에서 들어와도 영어로 뜬다(2026-09-29) -----
   let lang = 'ko';
   try {
-    lang = new URLSearchParams(location.search).get('lang') === 'en' ? 'en' : 'ko';
+    const q = new URLSearchParams(location.search).get('lang');
+    lang = (q === 'en' || q === 'zh') ? q : 'ko';
     localStorage.removeItem('lulu_lang');
   } catch (e) {}
   window.GAME_LANG = lang;
-  document.documentElement.lang = lang;
+  document.documentElement.lang = lang === 'zh' ? 'zh-CN' : lang;
   // 아래 바꿔치기는 화면(body) 안에서만 일어납니다. 브라우저 탭 이름과 즐겨찾기에 쓰이는
   // 제목은 <head> 안에 있어서 손이 안 닿으므로, 영어판이면 여기서 직접 바꿔 줍니다.
   if (lang === 'en') {
@@ -23,9 +24,32 @@
       for (var i = 0; i < links.length; i++) links[i].href = 'https://oreumgames.com/en/';
     });
   }
+  // 중국어판: 탭 제목·홈 링크를 바꾸고, 한국어 글꼴 이름에 중국어 시스템 글꼴을 한자 범위로만 덧붙인다
+  if (lang === 'zh') {
+    document.title = '猫咪露露的济州生活 | Oreum Games';
+    document.addEventListener('DOMContentLoaded', function () {
+      var links = document.querySelectorAll('a[href="https://oreumgames.com/"]');
+      for (var i = 0; i < links.length; i++) links[i].href = 'https://oreumgames.com/zh/';
+      var gh = document.getElementById('gameHomeLink');
+      if (gh) gh.href = '/zh/';
+    });
+    (function () {
+      var zf = "local('PingFang SC'),local('PingFangSC-Regular'),local('Microsoft YaHei'),local('Microsoft YaHei UI'),local('Noto Sans SC'),local('Noto Sans CJK SC'),local('Source Han Sans SC')";
+      var ur = 'U+2E80-2FFF,U+3000-303F,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF';
+      var css = '';
+      ['맑은 고딕', 'Malgun Gothic'].forEach(function (f) {
+        css += "@font-face{font-family:'" + f + "';src:" + zf + ";unicode-range:" + ur + "}";
+      });
+      css += 'html[lang=zh-CN] *{word-break:normal!important}';
+      var st = document.createElement('style');
+      st.textContent = css;
+      document.head.appendChild(st);
+    })();
+  }
+  const ZH = (lang === 'zh' && window.LULU_ZH) ? window.LULU_ZH : null;
 
   // ----- 사전 1: 문구가 토씨 하나 안 바뀌고 그대로 나오는 것들 (줄 단위) -----
-  const DICT = {
+  const DICT_EN = {
     // 시작 화면·상단
     '루루냥의': "Lulu's",
     '제주살이': 'Jeju Life',
@@ -615,7 +639,7 @@
 
   // ----- 사전 2: 숫자·돈·버튼 이름이 끼어 있는 문구 -----
   // 숫자와 돈(₩), 버튼 이름, 밭·씨앗 이름을 #으로 바꾼 뒤 찾습니다.
-  const PDICT = {
+  const PDICT_EN = {
     '#등! 상금 #을 받았어요': 'First place! You won #2',
     '이장님 상점에서 #': '# at the store',
     '# 씨앗이 없어요': 'No # seeds',
@@ -784,7 +808,7 @@
 
   // 숫자·돈·버튼·고유 이름을 #으로 바꾸면서 원래 값을 챙겨둡니다
   const TOKEN_RE = /₩[\d,.]+|-?\d[\d,.]*|행동 버튼으로|행동 버튼|F로|(^|[\s(])F(?=$|[\s)을를])|동쪽땅|서쪽땅|남쪽땅|북쪽땅|메밀|감자|월동무|차나무|문어|해삼|전복|소라|미역|황금향|한라봉|천혜향|감귤/g;
-  const TOKEN_EN = {
+  const TOKEN_EN0 = {
     '행동 버튼으로': 'the action button', '행동 버튼': 'the action button', 'F로': 'F',
     '동쪽땅': 'the east field', '서쪽땅': 'the west field', '남쪽땅': 'the south field', '북쪽땅': 'the north field',
     '메밀': 'buckwheat', '감자': 'potato', '월동무': 'winter radish', '차나무': 'tea tree',
@@ -793,11 +817,16 @@
   };
 
   // "물건이름 + 정해진 꼬리" 꼴 — 이름(가구·페인트 색)만 사전에서 바꿉니다
-  const NAME_RULES = [
+  const NAME_RULES_EN = [
     [/^(.+?) 구입! 집 안에 놓아뒀어요$/, '$ purchased! Placed inside the house'],
     [/^(.+?) 구입! 집 마당에 심어뒀어요$/, '$ purchased! Set up in the yard'],
     [/^(.+?) 페인트 구입! 집 앞에서 칠해보세요$/, '$ paint purchased! Try painting your house'],
   ];
+
+  const DICT = ZH ? ZH.DICT : DICT_EN;
+  const PDICT = ZH ? ZH.PDICT : PDICT_EN;
+  const TOKEN_EN = ZH ? ZH.TOKEN : TOKEN_EN0;
+  const NAME_RULES = ZH ? ZH.NAME_RULES : NAME_RULES_EN;
 
   function trLine(line) {
     const t = line.trim();
@@ -820,6 +849,7 @@
     // "색이름 바닥재/벽지 시공 완료!" — 색과 종류를 각각 사전에서 바꿉니다
     const fw = t.match(/^(.+?) (바닥재|벽지) 시공 완료! 집이 바뀌었어요$/);
     if (fw && DICT[fw[1]] !== undefined) {
+      if (ZH) return line.replace(t, DICT[fw[1]] + (fw[2] === '바닥재' ? '地板' : '壁纸') + '铺好了！家里焕然一新');
       return line.replace(t, DICT[fw[1]] + (fw[2] === '바닥재' ? ' flooring' : ' wallpaper') + ' installed! The house looks new');
     }
     // 씨앗 봉지 목록 ("🌾 메밀 2봉지 · 🥔 감자 1봉지") — 이름과 개수를 하나씩 바꿉니다
@@ -847,7 +877,7 @@
   }
 
   function T(s) {
-    if (window.GAME_LANG !== 'en' || typeof s !== 'string' || !/[가-힣]/.test(s)) return s;
+    if ((window.GAME_LANG !== 'en' && window.GAME_LANG !== 'zh') || typeof s !== 'string' || !/[가-힣]/.test(s)) return s;
     // 대사처럼 여러 줄이 한 덩어리인 문장은 통짜로 먼저 찾습니다
     const whole = DICT[s] !== undefined ? DICT[s] : DICT[s.trim()];
     if (whole !== undefined) return whole;
@@ -861,7 +891,7 @@
   }
   window.T = T;
 
-  if (lang !== 'en') {
+  if (lang === 'ko') {
     // 한국어면 화면 번역기 없이 토글 버튼만 답니다
     addEventListener('DOMContentLoaded', setupLangButton);
     return;
