@@ -4,9 +4,11 @@
   let W = 960; const H = 540;
   const $ = id => document.getElementById(id);
   const canvas = $('c'), ctx = canvas.getContext('2d');
-  const EN = (() => { try { return new URLSearchParams(location.search).get('lang') === 'en'; } catch (_) { return false; } })();
+  const LQ = (() => { try { return new URLSearchParams(location.search).get('lang'); } catch (_) { return null; } })();
+  const EN = LQ === 'en', ZHD = LQ === 'zh' && window.ZH ? window.ZH : null;
   if (EN) { document.documentElement.lang = 'en'; document.title = 'FARM ON MARS — Oreum Games'; document.querySelectorAll('[data-en]').forEach(e => { e.innerHTML = e.getAttribute('data-en'); }); var sb = document.querySelector('#title .sub'); if (sb) sb.hidden = true; }
-  const T = (ko, en) => EN ? en : ko;
+  if (ZHD) { document.documentElement.lang = 'zh-CN'; document.title = '火星农场 — Oreum Games'; document.querySelectorAll('[data-en]').forEach(e => { const k = e.innerHTML.trim(); if (ZHD[k] !== undefined) e.innerHTML = ZHD[k]; }); document.querySelectorAll('[title]').forEach(e => { const k = e.getAttribute('title'); if (ZHD[k] !== undefined) e.setAttribute('title', ZHD[k]); }); }
+  const T = (ko, en, zh) => ZHD ? (zh !== undefined ? zh : ZHD[ko] !== undefined ? ZHD[ko] : en) : EN ? en : ko;
   const isTouch = ('ontouchstart' in window) && matchMedia('(pointer: coarse)').matches;
   if (isTouch) document.body.classList.add('touch');
   const rnd = (a, b) => a + Math.random() * (b - a), clamp = (v, a, b) => v < a ? a : v > b ? b : v, lerp = (a, b, t) => a + (b - a) * t, pick = a => a[Math.floor(Math.random() * a.length)];
@@ -350,7 +352,7 @@
   const fmtAway = s => { const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60); return h ? h + 'h ' + m + 'm' : m + 'm'; };
   function showBack(o) {
     const ic = CROPS[S.up.seed][0];
-    $('backRow').innerHTML = '⏱ ' + fmtAway(o.away) + '<br>🌾 ' + T('밭 ' + o.plots + '칸이 다 익었다', 'All ' + o.plots + ' plots are ripe') + ' <b>' + ic + ' ~' + o.crop + '</b>'
+    $('backRow').innerHTML = '⏱ ' + fmtAway(o.away) + '<br>🌾 ' + T('밭 ' + o.plots + '칸이 다 익었다', 'All ' + o.plots + ' plots are ripe', o.plots + ' 块田全都熟了') + ' <b>' + ic + ' ~' + o.crop + '</b>'
       + (o.mess.dust || o.mess.bug ? '<br>' + (o.mess.dust ? '🌫️ ' + o.mess.dust + '  ' : '') + (o.mess.bug ? '🐛 ' + o.mess.bug : '') : '');
     const bb = $('backBonus');
     if (o.bonus) { bb.hidden = false; bb.innerHTML = o.bonus.ic + ' ' + T(o.bonus.ko, o.bonus.en) + ' <b>' + (o.bonus.matN ? '🧱 +' + o.bonus.matN : ic + ' +' + o.bonus.cropN) + '</b>'; }
@@ -438,32 +440,33 @@
     const wcap = (res, dam) => 40 + 150 * res + 1000 * dam;
     const trip = (port, dish) => Math.max(6, 15 * Math.pow(.9, port) * Math.pow(.85, dish));
     const rate = (hab, sky) => 1 + .1 * hab + .2 * sky;
-    const A = (ko, en) => T(ko, en);
+    const A = (ko, en, zh) => T(ko, en, zh);
     switch (it.id) {
-      case 'plot': return A('밭 ' + S.plots.length + '칸 → ' + (S.plots.length + 1) + '칸', 'Plots ' + S.plots.length + ' → ' + (S.plots.length + 1));
+      case 'plot': return A('밭 ' + S.plots.length + '칸 → ' + (S.plots.length + 1) + '칸', 'Plots ' + S.plots.length + ' → ' + (S.plots.length + 1), '农田 ' + S.plots.length + ' 块 → ' + (S.plots.length + 1) + ' 块');
       case 'yield': return A('한 판 수확 ' + yld(u.seed, u.solar, u.yield, C('lab'), C('park')) + ' → ' + yld(u.seed, u.solar, u.yield + 1, C('lab'), C('park')),
-                             'Harvest ' + yld(u.seed, u.solar, u.yield, C('lab'), C('park')) + ' → ' + yld(u.seed, u.solar, u.yield + 1, C('lab'), C('park')));
+                             'Harvest ' + yld(u.seed, u.solar, u.yield, C('lab'), C('park')) + ' → ' + yld(u.seed, u.solar, u.yield + 1, C('lab'), C('park')), '每茬收获 ' + yld(u.seed, u.solar, u.yield, C('lab'), C('park')) + ' → ' + yld(u.seed, u.solar, u.yield + 1, C('lab'), C('park')));
       case 'solar': return A('한 판 수확 ' + yld(u.seed, u.solar, u.yield, C('lab'), C('park')) + ' → ' + yld(u.seed, u.solar + 1, u.yield, C('lab'), C('park')),
-                             'Harvest ' + yld(u.seed, u.solar, u.yield, C('lab'), C('park')) + ' → ' + yld(u.seed, u.solar + 1, u.yield, C('lab'), C('park')));
+                             'Harvest ' + yld(u.seed, u.solar, u.yield, C('lab'), C('park')) + ' → ' + yld(u.seed, u.solar + 1, u.yield, C('lab'), C('park')), '每茬收获 ' + yld(u.seed, u.solar, u.yield, C('lab'), C('park')) + ' → ' + yld(u.seed, u.solar + 1, u.yield, C('lab'), C('park')));
       case 'seed': { const a = CROPS[u.seed], b = CROPS[Math.min(CROPS.length - 1, u.seed + 1)];
         return A(a[0] + ' ' + a[1] + ' → ' + b[0] + ' ' + b[1] + ' · 단가 ' + r1(PRICE[u.seed]) + ' → ' + r1(PRICE[Math.min(4, u.seed + 1)]),
-                 a[0] + ' ' + a[2] + ' → ' + b[0] + ' ' + b[2] + ' · price ' + r1(PRICE[u.seed]) + ' → ' + r1(PRICE[Math.min(4, u.seed + 1)])); }
+                 a[0] + ' ' + a[2] + ' → ' + b[0] + ' ' + b[2] + ' · price ' + r1(PRICE[u.seed]) + ' → ' + r1(PRICE[Math.min(4, u.seed + 1)]),
+                 a[0] + ' ' + T(a[1], a[2]) + ' → ' + b[0] + ' ' + T(b[1], b[2]) + ' · 单价 ' + r1(PRICE[u.seed]) + ' → ' + r1(PRICE[Math.min(4, u.seed + 1)])); }
       case 'drill': return A('물 회복 ' + r1(regen(u.drill, u.res, u.dam)) + ' → ' + r1(regen(u.drill + 1, u.res, u.dam)) + '/초',
-                             'Water ' + r1(regen(u.drill, u.res, u.dam)) + ' → ' + r1(regen(u.drill + 1, u.res, u.dam)) + '/s');
-      case 'res': return A('물통 ' + wcap(u.res, u.dam) + ' → ' + wcap(u.res + 1, u.dam), 'Tank ' + wcap(u.res, u.dam) + ' → ' + wcap(u.res + 1, u.dam));
-      case 'dam': return A('물통 ' + wcap(u.res, u.dam) + ' → ' + wcap(u.res, u.dam + 1), 'Tank ' + wcap(u.res, u.dam) + ' → ' + wcap(u.res, u.dam + 1));
-      case 'cargo': return A('자루 ' + CAP() + ' → ' + Math.round(60 * Math.pow(1.5, u.cargo + 1)), 'Bay ' + CAP() + ' → ' + Math.round(60 * Math.pow(1.5, u.cargo + 1)));
-      case 'wheels': return A('이동 ' + SPEED() + ' → ' + (70 + 35 * (u.wheels + 1)), 'Speed ' + SPEED() + ' → ' + (70 + 35 * (u.wheels + 1)));
-      case 'dish': return A('로켓 왕복 ' + s1(trip(C('port'), u.dish)) + '초 → ' + s1(trip(C('port'), u.dish + 1)) + '초', 'Trip ' + s1(trip(C('port'), u.dish)) + 's → ' + s1(trip(C('port'), u.dish + 1)) + 's');
-      case 'port': return A('로켓 왕복 ' + s1(trip(C('port'), u.dish)) + '초 → ' + s1(trip(C('port') + 1, u.dish)) + '초', 'Trip ' + s1(trip(C('port'), u.dish)) + 's → ' + s1(trip(C('port') + 1, u.dish)) + 's');
+                             'Water ' + r1(regen(u.drill, u.res, u.dam)) + ' → ' + r1(regen(u.drill + 1, u.res, u.dam)) + '/s', '水恢复 ' + r1(regen(u.drill, u.res, u.dam)) + ' → ' + r1(regen(u.drill + 1, u.res, u.dam)) + '/秒');
+      case 'res': return A('물통 ' + wcap(u.res, u.dam) + ' → ' + wcap(u.res + 1, u.dam), 'Tank ' + wcap(u.res, u.dam) + ' → ' + wcap(u.res + 1, u.dam), '水箱 ' + wcap(u.res, u.dam) + ' → ' + wcap(u.res + 1, u.dam));
+      case 'dam': return A('물통 ' + wcap(u.res, u.dam) + ' → ' + wcap(u.res, u.dam + 1), 'Tank ' + wcap(u.res, u.dam) + ' → ' + wcap(u.res, u.dam + 1), '水箱 ' + wcap(u.res, u.dam) + ' → ' + wcap(u.res, u.dam + 1));
+      case 'cargo': return A('자루 ' + CAP() + ' → ' + Math.round(60 * Math.pow(1.5, u.cargo + 1)), 'Bay ' + CAP() + ' → ' + Math.round(60 * Math.pow(1.5, u.cargo + 1)), '货袋 ' + CAP() + ' → ' + Math.round(60 * Math.pow(1.5, u.cargo + 1)));
+      case 'wheels': return A('이동 ' + SPEED() + ' → ' + (70 + 35 * (u.wheels + 1)), 'Speed ' + SPEED() + ' → ' + (70 + 35 * (u.wheels + 1)), '移速 ' + SPEED() + ' → ' + (70 + 35 * (u.wheels + 1)));
+      case 'dish': return A('로켓 왕복 ' + s1(trip(C('port'), u.dish)) + '초 → ' + s1(trip(C('port'), u.dish + 1)) + '초', 'Trip ' + s1(trip(C('port'), u.dish)) + 's → ' + s1(trip(C('port'), u.dish + 1)) + 's', '火箭往返 ' + s1(trip(C('port'), u.dish)) + '秒 → ' + s1(trip(C('port'), u.dish + 1)) + '秒');
+      case 'port': return A('로켓 왕복 ' + s1(trip(C('port'), u.dish)) + '초 → ' + s1(trip(C('port') + 1, u.dish)) + '초', 'Trip ' + s1(trip(C('port'), u.dish)) + 's → ' + s1(trip(C('port') + 1, u.dish)) + 's', '火箭往返 ' + s1(trip(C('port'), u.dish)) + '秒 → ' + s1(trip(C('port') + 1, u.dish)) + '秒');
       case 'auto': return A('자루가 차면 알아서 발사', 'Auto-launch when full');
       case 'wall': return A('모래폭풍에 밭이 안 덮인다', 'Storms cannot bury plots');
       case 'drone': return A('벌레를 알아서 쫓는다', 'Zaps bugs for you');
-      case 'hab': return A('작물 값 ×' + r1(rate(C('hab'), C('sky'))) + ' → ×' + r1(rate(C('hab') + 1, C('sky'))), 'Crop value ×' + r1(rate(C('hab'), C('sky'))) + ' → ×' + r1(rate(C('hab') + 1, C('sky'))));
-      case 'sky': return A('작물 값 ×' + r1(rate(C('hab'), C('sky'))) + ' → ×' + r1(rate(C('hab'), C('sky') + 1)), 'Crop value ×' + r1(rate(C('hab'), C('sky'))) + ' → ×' + r1(rate(C('hab'), C('sky') + 1)));
-      case 'lab': return A('한 판 수확 ' + yld(u.seed, u.solar, u.yield, C('lab'), C('park')) + ' → ' + yld(u.seed, u.solar, u.yield, C('lab') + 1, C('park')) + ' (+5%)', 'Harvest +5%');
-      case 'park': return A('한 판 수확 ' + yld(u.seed, u.solar, u.yield, C('lab'), C('park')) + ' → ' + yld(u.seed, u.solar, u.yield, C('lab'), C('park') + 1) + ' (+5%)', 'Harvest +5%');
-      case 'factory': return A('10초마다 🧱 ' + Math.round(1.5 * C('factory')) + ' → ' + Math.round(1.5 * (C('factory') + 1)), 'Bricks per 10s ' + Math.round(1.5 * C('factory')) + ' → ' + Math.round(1.5 * (C('factory') + 1)));
+      case 'hab': return A('작물 값 ×' + r1(rate(C('hab'), C('sky'))) + ' → ×' + r1(rate(C('hab') + 1, C('sky'))), 'Crop value ×' + r1(rate(C('hab'), C('sky'))) + ' → ×' + r1(rate(C('hab') + 1, C('sky'))), '作物价值 ×' + r1(rate(C('hab'), C('sky'))) + ' → ×' + r1(rate(C('hab') + 1, C('sky'))));
+      case 'sky': return A('작물 값 ×' + r1(rate(C('hab'), C('sky'))) + ' → ×' + r1(rate(C('hab'), C('sky') + 1)), 'Crop value ×' + r1(rate(C('hab'), C('sky'))) + ' → ×' + r1(rate(C('hab'), C('sky') + 1)), '作物价值 ×' + r1(rate(C('hab'), C('sky'))) + ' → ×' + r1(rate(C('hab'), C('sky') + 1)));
+      case 'lab': return A('한 판 수확 ' + yld(u.seed, u.solar, u.yield, C('lab'), C('park')) + ' → ' + yld(u.seed, u.solar, u.yield, C('lab') + 1, C('park')) + ' (+5%)', 'Harvest +5%', '每茬收获 ' + yld(u.seed, u.solar, u.yield, C('lab'), C('park')) + ' → ' + yld(u.seed, u.solar, u.yield, C('lab') + 1, C('park')) + ' (+5%)');
+      case 'park': return A('한 판 수확 ' + yld(u.seed, u.solar, u.yield, C('lab'), C('park')) + ' → ' + yld(u.seed, u.solar, u.yield, C('lab'), C('park') + 1) + ' (+5%)', 'Harvest +5%', '每茬收获 ' + yld(u.seed, u.solar, u.yield, C('lab'), C('park')) + ' → ' + yld(u.seed, u.solar, u.yield, C('lab'), C('park') + 1) + ' (+5%)');
+      case 'factory': return A('10초마다 🧱 ' + Math.round(1.5 * C('factory')) + ' → ' + Math.round(1.5 * (C('factory') + 1)), 'Bricks per 10s ' + Math.round(1.5 * C('factory')) + ' → ' + Math.round(1.5 * (C('factory') + 1)), '每10秒 🧱 ' + Math.round(1.5 * C('factory')) + ' → ' + Math.round(1.5 * (C('factory') + 1)));
       case 'pine': return A('화성이 초록으로 물든다 (경치)', 'Greens the planet (scenery)');
     }
     return '';
