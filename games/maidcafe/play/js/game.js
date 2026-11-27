@@ -1,9 +1,20 @@
 /* 모에모에 메이드카페 — 게임 본체 (방치형 메이드카페 경영) */
 (function () {
   'use strict';
-  const EN = (() => { try { return new URLSearchParams(location.search).get('lang') === 'en'; } catch (_) { return false; } })();
+  const LQ = (() => { try { return new URLSearchParams(location.search).get('lang'); } catch (_) { return null; } })();
+  const EN = LQ === 'en', ZHL = LQ === 'zh';
   if (EN) { document.documentElement.lang = 'en'; document.title = 'Moe Moe Maid Cafe — Oreum Games'; document.querySelectorAll('[data-en]').forEach(e => { e.innerHTML = e.getAttribute('data-en'); }); }
-  const L = (ko, en) => EN ? en : ko;
+  // 중국어판: 화면 글자·제목·글꼴
+  const ZH = ZHL ? {"테이블": "餐桌", "자리 +1": "座位 +1", "주방": "厨房", "조리 속도": "烹饪速度", "메뉴": "菜单", "파르페 · 케이크 · 스페셜": "芭菲·蛋糕·特供", "인테리어": "装修", "팁 +15%": "小费 +15%", "간판": "招牌", "손님 더 자주": "客人来得更勤", "마네키네코": "招财猫", "자동 수금": "自动收钱", "손님 10명": "接待10位客人", "코인 1,000": "赚1,000金币", "메이드 3명": "3名女仆", "테이블 4개": "4张餐桌", "하트 500": "500颗爱心", "주문 받기 30번": "点单30次", "PERFECT 20번": "PERFECT 20次", "SSR 메이드": "招到SSR女仆", "아키바 6위": "秋叶原第6名", "메이드 레벨 10": "女仆升到10级", "손님 500명": "接待500位客人", "메이드 12명 전원": "集齐12名女仆", "현재 ": "当前第", "위": "名", "아키바 ": "秋叶原第", "모에모에큥♡": "萌萌啾♡", "팬레터!": "粉丝来信！", "신입 메이드 모집": "招募新女仆", "아키바 최고의 메이드를 찾습니다.<br>뽑을 때마다 새 메이드": "寻找秋叶原最棒的女仆。<br>每次招募都是新女仆", "12명 전원 모집 완료": "12名女仆全部招齐", "남은 메이드 ": "剩余女仆 ", "스카우트": "招募", "좋아하는 것: ": "喜欢：", "취미: ": "爱好：", "저장된 가게를 지우고 새로 시작할까요?": "要删掉存档里的店，重新开始吗？", "유이": "由依", "린": "凛", "미오": "美绪", "하나": "花", "사키": "咲", "네네": "宁宁", "아오이": "葵", "모모": "桃桃", "레이나": "丽奈", "쿠로": "小黑", "시로": "小白", "아카리": "明里", "딸기 파르페": "草莓芭菲", "블랙커피": "黑咖啡", "오므라이스": "蛋包饭", "단팥빵": "红豆面包", "카레": "咖喱", "우유 푸딩": "牛奶布丁", "말차 케이크": "抹茶蛋糕", "복숭아 소다": "桃子苏打", "홍차": "红茶", "에너지 드링크": "能量饮料", "솜사탕": "棉花糖", "유부초밥": "稻荷寿司", "노래방": "K歌", "독서": "看书", "축구": "踢足球", "꽃꽂이": "插花", "검도": "剑道", "낮잠": "睡午觉", "서예": "书法", "피아노": "弹钢琴", "인형 모으기": "收集玩偶", "게임": "打游戏", "별 보기": "看星星", "축제": "逛祭典", "건강함": "元气满满", "쿨함": "高冷", "활발함": "活泼", "온화함": "温柔", "씩씩함": "英气", "느긋함": "慢悠悠", "단아함": "端庄", "몽글몽글": "软萌", "아가씨": "大小姐", "밤샘": "夜猫子", "천사": "天使", "여우": "狐狸", "걸음 +15%": "步速 +15%", "걸음 +35%": "步速 +35%", "조리 +25%": "烹饪 +25%", "조리 +45%": "烹饪 +45%", "조리 +70%": "烹饪 +70%", "손님 참을성 +30%": "客人耐心 +30%", "하트 +40%": "爱心 +40%", "하트 +60%": "爱心 +60%", "하트 +90%": "爱心 +90%", "단가 +25%": "单价 +25%", "단가 +50%": "单价 +50%", "PERFECT 구간 2배": "PERFECT 区间×2"} : null;
+  if (ZHL) {
+    document.documentElement.lang = 'zh-CN'; document.title = '萌萌女仆咖啡厅 — Oreum Games';
+    document.querySelectorAll('[data-zh]').forEach(e => { e.innerHTML = e.getAttribute('data-zh'); });
+    const tb = document.getElementById('btnBgm'), ts = document.getElementById('btnSfx'); if (tb) tb.title = '音乐'; if (ts) ts.title = '音效';
+    const zf = "local('PingFang SC'),local('PingFangSC-Regular'),local('Microsoft YaHei'),local('Microsoft YaHei UI'),local('Noto Sans SC'),local('Noto Sans CJK SC'),local('Source Han Sans SC')";
+    const ur = 'U+2E80-2FFF,U+3000-303F,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF';
+    const st = document.createElement('style'); st.textContent = ['Griun', 'Ria', 'SingleDay'].map(f => "@font-face{font-family:'" + f + "';src:" + zf + ';unicode-range:' + ur + '}').join('') + 'html[lang=zh-CN] *{word-break:normal!important}'; document.head.appendChild(st);
+  }
+  const L = (ko, en) => EN ? en : ZHL ? (ZH[ko] !== undefined ? ZH[ko] : ko) : ko;
   const $ = id => document.getElementById(id);
   const W = 1280, H = 720;
   const c = $('c'), ctx = c.getContext('2d');
