@@ -5,6 +5,9 @@
   const TX = EN ? {
     k: ['Pick an outlaw on the WANTED board<br>WASD rides, follow the yellow arrow', 'Hold Space, the ring sweeps out and back<br>Let go when it turns gold', 'Drag your catch to the JAIL for the bounty<br>Catch every outlaw on the board'],
     t: ['Pick an outlaw on the WANTED board<br>Left stick rides, follow the yellow arrow', 'Hold the lasso button, the ring sweeps out and back<br>Let go when it turns gold']
+  } : DATA.ZH ? {
+    k: ['在镇上告示板选个通缉犯<br>用 WASD 骑马，追黄色箭头', '按住 Space，地上的圈忽远忽近<br>圈住通缉犯变金色时松开', '把犯人拖到监狱(JAIL)领赏金<br>抓光告示板上所有通缉犯'],
+    t: ['在镇上告示板选个通缉犯<br>用左摇杆骑马，追黄色箭头', '按住套索按钮，圈会忽远忽近<br>圈住通缉犯变金色时松开']
   } : {
     k: ['마을 게시판에서 수배범을 골라요<br>WASD 로 말을 몰아 노란 화살을 따라가요', 'Space 를 누르고 있으면 땅의 동그라미가 멀어졌다 가까워져요<br>수배범에 겹쳐 금색이 되면 놓아요', '묶은 수배범을 감옥(JAIL)까지 끌고 오면 현상금을 받아요<br>게시판의 수배범을 모두 잡아요'],
     t: ['마을 게시판에서 수배범을 골라요<br>왼쪽 원판으로 말을 몰아 노란 화살을 따라가요', '올가미 단추를 누르고 있으면 땅의 동그라미가 멀어졌다 가까워져요<br>수배범에 겹쳐 금색이 되면 놓아요']
