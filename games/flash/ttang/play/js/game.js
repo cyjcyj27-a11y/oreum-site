@@ -19,6 +19,18 @@
   var G = { mode: 'title', p2: false, stage: 1, turn: 0, taken: [0, 0], stones: [], T: null, mv: null, anim: null, slide: null, aiTimer: 0, aiPlan: null, pause: 0, result: -1, floats: [] };
   var drag = null, glow = 0, isTouch = false;
   var EN = /[?&]lang=en/i.test(location.search);
+  var ZH = !EN && /[?&]lang=zh/i.test(location.search);
+  if (ZH) {
+    // 중국어판: 한글 문구를 중국어로, 글꼴에 중국어 시스템 글꼴을 덧붙인다
+    document.documentElement.lang = 'zh-CN'; document.title = '抢地盘';
+    var ZT = { '땅따먹기': '抢地盘', '시작': '开始', 'K 효과음': 'K 音效' };
+    Array.prototype.forEach.call(document.querySelectorAll('[data-en]'), function (el) { var k = el.textContent.trim(); if (ZT[k]) el.textContent = ZT[k]; });
+    var zf = "local('PingFang SC'),local('PingFangSC-Regular'),local('Microsoft YaHei'),local('Microsoft YaHei UI'),local('Noto Sans SC'),local('Noto Sans CJK SC'),local('Source Han Sans SC')";
+    var ur = 'U+2E80-2FFF,U+3000-303F,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF';
+    var zs = document.createElement('style');
+    zs.textContent = ['Gamja', 'Ria'].map(function (n) { return "@font-face{font-family:'" + n + "';src:" + zf + ';unicode-range:' + ur + '}'; }).join('') + 'html[lang=zh-CN] *{word-break:normal!important}';
+    document.head.appendChild(zs);
+  }
   if (EN) { document.documentElement.lang = 'en'; document.body.classList.add('en'); document.title = 'Land Grab'; Array.prototype.forEach.call(document.querySelectorAll('[data-en]'), function (el) { el.textContent = el.getAttribute('data-en'); }); }
 
   // ── 기록 — 가장 멀리 간 스테이지 ──
