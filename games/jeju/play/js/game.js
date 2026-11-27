@@ -442,8 +442,9 @@
       { const kh = PET.onFoot ? PET.hero().kmh : PLAYER.kmh; if (kh !== lastKmh) { lastKmh = kh; speedEl.firstChild.textContent = kh; } }
     }
     const en = window.LANG && LANG.en;
-    const c = (ESTATE.monthNo ? (en ? EN_MON[(ESTATE.monthNo() - 1) % 12] + ' ' + ESTATE.monthDay() + ' · ' : ESTATE.monthNo() + '월 ' + ESTATE.monthDay() + '일 ')
-                              : (en ? 'Day ' + (ESTATE.day || 1) + ' · ' : (ESTATE.day || 1) + '일 ')) + SKY.clock(); if (c !== lastClock) { lastClock = c; clockEl.textContent = c; }   // 며칠째인지 함께 — 시세는 하루가 지날 때 오른다
+    const zh = window.LANG && LANG.zh;
+    const c = (ESTATE.monthNo ? (en ? EN_MON[(ESTATE.monthNo() - 1) % 12] + ' ' + ESTATE.monthDay() + ' · ' : zh ? ESTATE.monthNo() + '月' + ESTATE.monthDay() + '日 ' : ESTATE.monthNo() + '월 ' + ESTATE.monthDay() + '일 ')
+                              : (en ? 'Day ' + (ESTATE.day || 1) + ' · ' : zh ? '第' + (ESTATE.day || 1) + '天 ' : (ESTATE.day || 1) + '일 ')) + SKY.clock(); if (c !== lastClock) { lastClock = c; clockEl.textContent = c; }   // 며칠째인지 함께 — 시세는 하루가 지날 때 오른다
     POST.render(scene, camera, dt);
   }
   function loop(ts) { frame(ts); requestAnimationFrame(loop); }

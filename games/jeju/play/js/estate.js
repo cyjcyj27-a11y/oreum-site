@@ -74,11 +74,13 @@
   function fmt(v) {
     if (window.LANG && LANG.en) return fmtEn(v);
     v = Math.round(v); const s = v < 0 ? '-' : ''; v = Math.abs(v);
-    if (v >= 1e8) return s + (Math.floor(v / 1e6) / 100).toFixed(2).replace(/\.?0+$/, '') + '조';
+    if (v >= 1e8) return zhU(s + (Math.floor(v / 1e6) / 100).toFixed(2).replace(/\.?0+$/, '') + '조');
     // 억은 소수 한 자리까지 **내림**. 반올림하면 110억 5천이 '111억', 999.96억이 '1000억'으로 보여 엔딩이 안 뜨는데 1,000억이라고 떴다 (2026-09-13)
-    if (v >= 10000) { const a = Math.floor(v / 1000) / 10; return s + (a >= 1000 ? Math.floor(a) : a.toFixed(1).replace(/\.0$/, '')) + '억'; }
-    return s + v.toLocaleString() + '만';
+    if (v >= 10000) { const a = Math.floor(v / 1000) / 10; return zhU(s + (a >= 1000 ? Math.floor(a) : a.toFixed(1).replace(/\.0$/, '')) + '억'); }
+    return zhU(s + v.toLocaleString() + '만');
   }
+  // 중국어판은 같은 큰 단위(万·亿)를 쓰므로 글자만 바꾼다
+  function zhU(t) { return window.LANG && LANG.zh ? t.replace(/조/g, '万亿').replace(/억/g, '亿').replace(/천/g, '千').replace(/만/g, '万') : t; }
   // 자산 창처럼 자리가 넉넉한 곳에서 쓰는 긴 표기: 365000 → '36억 5천', 1120000 → '112억' (사장님 2026-09-09 "매입가 36억5천")
   function fmtLong(v) {
     if (window.LANG && LANG.en) return fmtEn(v, 1);
@@ -86,8 +88,8 @@
     const jo = Math.floor(v / 1e8), r = v % 1e8, eok = Math.floor(r / 10000), man = r % 10000, out = [];
     if (jo) out.push(jo + '조');
     if (eok) out.push(eok + '억');
-    if (man) out.push(man % 1000 === 0 ? (man / 1000) + '천' : man.toLocaleString() + '만');
-    return sg + (out.join(' ') || '0');
+    if (man) out.push(man % 1000 === 0 ? (man / 1000) + (window.LANG && LANG.zh ? '천만' : '천') : man.toLocaleString() + '만');
+    return zhU(sg + (out.join(' ') || '0'));
   }
   // ── 시세(사장님 2026-09-09 "전부 가격이 시간 지나면 오르게, 랜덤으로") ──
   // 부지마다 하루 상승폭(rise)이 0.4~3.2% 로 다르다. mk 는 처음 값 대비 배수, 판 값·현재가 계산에 쓴다
@@ -760,7 +762,20 @@
     'The owner at {n} is moving to Seoul, asking {v}. I am ringing others too.',
     'Telling you first. {n} {b} site, {v}. Come before Tamna Development smells it.',
   ];
-  const DEAL_CALL = (window.LANG && LANG.en ? DEAL_LINES_EN : DEAL_LINES).map(function (t) { return function (n, b, v, p) { return t.replace('{n}', n).replace('{b}', b).replace('{v}', v).replace('{p}', p); }; });
+  // 중국어판 대사 — 땅 이름·건물 이름은 한국어로 끼워 넣고 화면에 나올 때 사전이 바꾼다
+  const DEAL_LINES_ZH = [
+    '呵呵，小伙子！{n}有块{b}用地急售。{v}就卖。快过来！',
+    '听我说，{n}的地主急着用钱。{b}用地只要{v}。半价啊。',
+    '房产中介这边。{n}来了个{v}的急售，有兴趣吗？',
+    '呵呵呵，我第一个就打给你了。{n}的{b}用地，原价{p}，现在{v}就卖。',
+    '你现在在哪？{n}急售，{v}。消息一传开马上就没了。',
+    '呵呵，{n}的地价跌到{v}了。盖个{b}正合适。',
+    '有户人家急需用钱。{n}的{b}用地，{v}。今天不来就没了。',
+    '呵呵，这种好事一年也碰不上一回。{n}，{v}。错过就亏了。',
+    '{n}的地主要搬去首尔，{v}就卖。我也在给别人打电话呢。',
+    '只先告诉你一个人。{n}的{b}用地，{v}。赶在耽罗国开发闻到味儿之前来吧。',
+  ];
+  const DEAL_CALL = (window.LANG && LANG.en ? DEAL_LINES_EN : window.LANG && LANG.zh ? DEAL_LINES_ZH : DEAL_LINES).map(function (t) { return function (n, b, v, p) { return t.replace('{n}', n).replace('{b}', b).replace('{v}', v).replace('{p}', p); }; });
   // 제한시간 = 그 땅까지 길을 따라 달리는 어림 시간 + 주차 몫. 75초 고정이던 때는 거리를 안 봐서
   // 먼 곳이 아무리 밟아도 못 닿았다(사장님 2026-09-11). 거리로 재면 멀수록 길게, 가까우면 짧게 잡힌다.
   const CAR_TOP = 39.6, CAR_LAT = 6.5, CAR_BRAKE = 10;   // 오픈카 끝속도(m/s)·코너 옆가속·브레이크 — player.js 물리에서 잰 값

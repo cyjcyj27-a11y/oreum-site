@@ -283,7 +283,7 @@
     } else if (!L.gone && !L.s700 && nw >= 7000000) {
       // 700억이 되면 여친이 더는 가방을 조르지 않고, 주인공이 혼잣말을 한다(사장님 2026-11-16 문구 그대로)
       L.s700 = true; save();
-      if (window.PET && PET.say) PET.say(window.LANG && LANG.en ? 'Me' : '나', '이상하다 왜 가방사달라고 안하지....', 6, false);
+      if (window.PET && PET.say) PET.say(window.LANG && LANG.en ? 'Me' : window.LANG && LANG.zh ? '我' : '나', '이상하다 왜 가방사달라고 안하지....', 6, false);
     } else if (!L.gone && !L.s700 && L.k < MILES.length && passed(nw) > L.k) {
       const k = passed(nw); L.k = k;   // 한꺼번에 여러 단계를 넘어도 한 번만 조른다
       ask(MILES[k - 1][1]);

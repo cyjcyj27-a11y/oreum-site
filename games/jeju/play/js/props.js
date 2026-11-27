@@ -142,6 +142,7 @@
   function won(v) {
     v = Math.round(v);
     if (EN() && window.ESTATE && ESTATE.fmt) return ESTATE.fmt(v);
+    if (window.LANG && LANG.zh && window.ESTATE && ESTATE.fmt) return ESTATE.fmt(v) + '韩元';
     const eok = Math.floor(v / 10000), man = v % 10000;
     return (eok ? eok + '억' + (man ? ' ' : '') : '') + (man || !eok ? man.toLocaleString() + '만' : '') + '원';
   }
@@ -173,6 +174,11 @@
       if (B.wallM) parts.push(B.wallM + 'm of wall'); if (B.lamp) parts.push(pl(B.lamp, 'lamp')); if (B.signal) parts.push(pl(B.signal, 'traffic light'));
       if (B.car) parts.push(pl(B.car, 'car')); if (B.street) parts.push(pl(B.street, 'tree')); if (B.orch) parts.push(pl(B.orch, 'tangerine tree') + (B.orange ? ' + ' + pl(B.orange, 'tangerine') : ''));
       return B.nag + ' Babe, the repair bill is ' + won(B.sum) + '! (' + parts.join(' · ') + ')';
+    }
+    if (window.LANG && LANG.zh) {
+      if (B.wallM) parts.push('石墙 ' + B.wallM + 'm'); if (B.lamp) parts.push('路灯 ' + B.lamp + '个'); if (B.signal) parts.push('红绿灯 ' + B.signal + '个');
+      if (B.car) parts.push('车 ' + B.car + '辆'); if (B.street) parts.push('行道树 ' + B.street + '棵'); if (B.orch) parts.push('橘子树 ' + B.orch + '棵' + (B.orange ? '·橘子 ' + B.orange + '个' : ''));
+      return B.nag + ' 亲爱的，修理费要 ' + won(B.sum) + '！（' + parts.join(' · ') + '）';
     }
     if (B.wallM) parts.push('돌담 ' + B.wallM + 'm'); if (B.lamp) parts.push('가로등 ' + B.lamp + '개'); if (B.signal) parts.push('신호등 ' + B.signal + '개');
     if (B.car) parts.push('차 ' + B.car + '대'); if (B.street) parts.push('가로수 ' + B.street + '그루'); if (B.orch) parts.push('귤나무 ' + B.orch + '그루' + (B.orange ? '·귤 ' + B.orange + '알' : ''));
