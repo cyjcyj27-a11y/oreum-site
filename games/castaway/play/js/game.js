@@ -6,7 +6,33 @@
   const isTouch = ('ontouchstart' in window) && matchMedia('(pointer: coarse)').matches;
   if (isTouch) document.body.classList.add('touch');
   if (EN) { document.documentElement.lang = 'en'; document.querySelectorAll('[data-en]').forEach(el => el.innerHTML = el.getAttribute('data-en')); document.title = 'Open Sea — Oreum Games'; }
-  const T = (ko, en) => EN ? en : ko;
+  // 중국어판: ?lang=zh 일 때만. 한국어 글을 열쇠로 한 사전
+  const ZHL = /[?&]lang=zh(&|$)/.test(location.search) && !EN;
+  const ZH = {
+    '스페이스 · 꾹 던지기 / 걸기 / 연타 감기<br>끌기 · 시점 · 휠 · 당겨 보기 · B 미끼 · D 물고기 · K 효과음': '空格 · 长按抛竿 / 提竿 / 连按收线<br>拖动 · 视角 · 滚轮 · 拉近 · B 鱼饵 · D 鱼 · K 音效',
+    '던지기': '抛竿', '걸기': '提竿', '감기': '收线', '신기록': '新纪录', '썰기': '切块', '미끼': '鱼饵',
+    '가로 화면에서 하는 게임입니다': '这款游戏需要横屏玩', '가로로 돌리기': '切换横屏',
+    '단추가 안 먹으면 폰의 화면 회전 잠금을 풀고 눕혀 주세요': '按钮没反应的话，请关闭手机的屏幕旋转锁定，再把手机横过来',
+    '그래도 세로로 하기': '还是竖屏玩', '망망대해': '大海漂流', '이어하기': '继续', '새로 시작': '新游戏',
+    '도감': '图鉴', '최고': '最大', '물고기': '鱼类', '효과음': '音效', '물고기 ': '鱼类 ', '최고 ': '最大 '
+  };
+  const ZHF = { anchovy: '鳀鱼', damsel: '雀鲷', scad: '竹荚鱼', sardine: '沙丁鱼', mackerel: '青花鱼', gizzard: '斑鰶', rockfish: '黑鲪', filefish: '马面鱼', halfbeak: '针鱼', puffer: '河豚', cutlass: '带鱼', bream: '黑鲷', beakfish: '条石鲷', opaleye: '斑鱾', snapper: '真鲷', flounder: '牙鲆', seabass: '鲈鱼', conger: '星鳗', spanish: '马鲛鱼', croaker: '鮸鱼', cod: '鳕鱼', grouper: '石斑鱼', dorado: '鬼头刀', yellowtail: '鰤鱼', amberjack: '黄条鰤', sailfish: '旗鱼', tuna: '蓝鳍金枪鱼', marlin: '蓝枪鱼', swordfish: '剑鱼', giant: '大白鲨' };
+  const NM = sp => EN ? sp.en : ZHL ? (ZHF[sp.id] || sp.en) : sp.ko;
+  if (ZHL) {
+    document.documentElement.lang = 'zh-CN'; document.title = '大海漂流 — Oreum Games';
+    document.querySelectorAll('body *').forEach(el => {
+      if (el.hasAttribute('title') && ZH[el.getAttribute('title')]) el.setAttribute('title', ZH[el.getAttribute('title')]);
+      if (el.children.length && el.id !== 'keys') return;
+      const k = el.innerHTML.trim(); if (ZH[k]) el.innerHTML = ZH[k];
+    });
+    // 게임 글꼴(Griun·Ria)엔 한자가 없다 → 같은 이름에 중국어 기기 글꼴을 한자 범위로만 덧붙인다
+    const zf = "local('PingFang SC'),local('PingFangSC-Regular'),local('Microsoft YaHei'),local('Microsoft YaHei UI'),local('Noto Sans SC'),local('Noto Sans CJK SC'),local('Source Han Sans SC')";
+    const ur = 'U+2E80-2FFF,U+3000-303F,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF';
+    const st = document.createElement('style');
+    st.textContent = `@font-face{font-family:'Griun';src:${zf};unicode-range:${ur}}@font-face{font-family:'Ria';src:${zf};unicode-range:${ur}}html[lang=zh-CN] *{word-break:normal!important}`;
+    document.head.appendChild(st);
+  }
+  const T = (ko, en) => EN ? en : ZHL && ZH[ko] !== undefined ? ZH[ko] : ko;
 
   const canvas = $('c');
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
@@ -149,7 +175,7 @@
     f.fightPos = new V(); f.thrash = 1;
   }
   function loseFish(why) {
-    const f = L.fish; const lostTxt = f && why === 'snap' ? (EN ? f.sp.en : f.sp.ko) + ' ' + Math.round(f.len * 100) + 'cm' : null;   // 끊겨 달아난 고기의 이름과 크기 — 아쉽게
+    const f = L.fish; const lostTxt = f && why === 'snap' ? NM(f.sp) + ' ' + Math.round(f.len * 100) + 'cm' : null;   // 끊겨 달아난 고기의 이름과 크기 — 아쉽게
     if (f) { f.state = 'flee'; f.fightPos = null; F.active = null; }
     L.fish = null; L.st = 'idle'; L.hold = false; W.setRodBend(0); W.setPose('idle');
     useBait();
@@ -161,7 +187,7 @@
     const cm = Math.round(f.len * 100); G.caught++;
     const rec = cm > G.bestCm; G.bestCm = Math.max(G.bestCm, cm); if (cm > best.cm) { best.cm = cm; saveBest(); }
     A.catchFan(Math.min(3, f.sp.tier)); A.splash(1 + f.len);
-    const name = EN ? f.sp.en : f.sp.ko;
+    const name = NM(f.sp);
     const first = dexRecord(f.sp.id, cm);
     if (first) { toast('NEW!', name + ' ' + cm + 'cm', false, 2.8); }
     else toast('CATCH!', name + ' ' + cm + 'cm' + (rec && G.caught > 1 ? ' · ' + T('신기록', 'NEW RECORD') : ''), false, 2.6);
@@ -205,13 +231,13 @@
     for (const id of BAIT_ORDER) {
       const sp = F.BY[id], n = G.box[id] || 0; if (n <= 0) continue;
       const b = document.createElement('button'); b.type = 'button'; b.className = 'pc' + (G.bait > 0 && G.baitSp === id ? ' cur' : ''); b.dataset.id = id;
-      b.innerHTML = pieceSvg(sp, 62) + '<span class="nm">' + (EN ? sp.en : sp.ko) + '</span><b class="n">×' + n + '</b>';
+      b.innerHTML = pieceSvg(sp, 62) + '<span class="nm">' + NM(sp) + '</span><b class="n">×' + n + '</b>';
       b.addEventListener('click', () => hangPiece(id, b)); pr.appendChild(b);
     }
     for (const id of BAIT_ORDER) {
       const sp = F.BY[id], n = G.inv[id] || 0; if (n <= 0) continue;
       const b = document.createElement('button'); b.type = 'button'; b.className = 'fs' + (bbHi === id ? ' hi' : ''); b.dataset.id = id;
-      b.innerHTML = '<img src="' + F.thumb(id) + '" alt=""><span class="nm">' + (EN ? sp.en : sp.ko) + '</span><b class="n">×' + n + '</b><span class="cutN">' + CUT_SVG + '<b>×' + sp.cut + '</b></span>';
+      b.innerHTML = '<img src="' + F.thumb(id) + '" alt=""><span class="nm">' + NM(sp) + '</span><b class="n">×' + n + '</b><span class="cutN">' + CUT_SVG + '<b>×' + sp.cut + '</b></span>';
       b.dataset.cut = T('썰기', 'CUT');
       b.addEventListener('click', e => { e.stopPropagation(); if (bbArm === id) { disarm(); cutFish(id, b); } else armFish(id, b); }); fr.appendChild(b);
     }
@@ -279,7 +305,7 @@
       const d = DEX[sp.id], n = G.inv[sp.id] || 0; const card = document.createElement('div'); card.className = 'card' + (n > 0 ? ' have' : d ? ' seen' : ' no');
       const img = document.createElement('img'); img.src = F.thumb(sp.id); img.alt = ''; card.appendChild(img);
       if (n > 0) { const b = document.createElement('b'); b.className = 'n'; b.textContent = '×' + n; card.appendChild(b); }
-      const nm = document.createElement('div'); nm.className = 'nm'; nm.textContent = d ? (EN ? sp.en : sp.ko) : '???'; card.appendChild(nm);
+      const nm = document.createElement('div'); nm.className = 'nm'; nm.textContent = d ? NM(sp) : '???'; card.appendChild(nm);
       if (n > 0) {   // 먹기 · 미끼 고르기
         const acts = document.createElement('div'); acts.className = 'acts';
         const bE = document.createElement('button'); bE.type = 'button'; bE.className = 'act eat'; bE.innerHTML = '🍖 <b>+' + sp.food + '</b>'; bE.addEventListener('click', () => eat(sp.id)); acts.appendChild(bE);
