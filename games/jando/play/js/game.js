@@ -1,8 +1,38 @@
 // 메인 — 걷기·매달리기·작업(드릴·망치·판자), 카메라, 날(DAY), 화면 글
 (function () {
   const T = TERRAIN;
-  const EN = (new URLSearchParams(location.search).get('lang') || '').toLowerCase() === 'en';
-  const TX = (ko, en) => EN ? en : ko;
+  const LQ = (new URLSearchParams(location.search).get('lang') || '').toLowerCase();
+  const EN = LQ === 'en', ZHL = LQ === 'zh';
+  // 중국어판: 한국어 문장을 열쇠로 중국어를 찾는다
+  const ZH = {
+    '드릴': '电钻', '망치': '锤子', '안전줄': '安全绳', '속도 1.5배': '速度 x1.5', '속도 2.2배': '速度 x2.2', '한 방': '一锤到底', '안 휨': '不会弯', '70초': '70秒', '100초': '100秒',
+    '한 번도 안 떨어진 잔도공': '一次都没掉过的栈道工', '줄을 믿는 잔도공': '相信绳子的栈道工', '줄에 매달려 사는 잔도공': '吊在绳上过日子的栈道工', '떨어지는 게 일인 잔도공': '掉下去就是日常的栈道工',
+    '개통': '开通', '판자': '木板', '높이': '高度', '추락': '坠落', '옛 물건': '遗物', '절벽 잔도공': '悬崖栈道工', '링크 복사': '链接已复制', '이어하기': '继续',
+    '녹슨 고리': '生锈的挂环', '낡은 삿갓': '破旧斗笠', '부적': '符纸', '호리병': '葫芦瓶', '짚신 한 짝': '一只草鞋', '부러진 망치': '断掉的锤子', '꺼진 등': '熄灭的灯笼', '엽전 꾸러미': '一串铜钱', '놋쇠 방울': '黄铜铃铛', '곰방대': '旱烟袋', '이 빠진 밥그릇': '缺了口的饭碗', '부치지 못한 편지': '没寄出的信',
+    '공구함 앞에서 E 를 두 번 눌러 드릴과 망치를 집으세요': '在工具箱前按两次 E，拿起电钻和锤子',
+    '공구함 앞에서 작업 단추를 두 번 눌러 드릴과 망치를 집으세요': '在工具箱前按两次干活键，拿起电钻和锤子',
+    '벽의 흰 X 앞에 서서 E 를 누르고 있으면 드릴로 구멍을 뚫습니다': '站在墙上的白色 X 前按住 E，用电钻打孔',
+    '벽의 흰 X 앞에 서서 작업 단추를 누르고 있으면 드릴로 구멍을 뚫습니다': '站在墙上的白色 X 前按住干活键，用电钻打孔',
+    '구멍에 쇠기둥이 꽂혔습니다. E 를 누르고 있으면 망치로 박습니다': '铁桩插进孔里了。按住 E 用锤子把它钉进去',
+    '구멍에 쇠기둥이 꽂혔습니다. 작업 단추를 누르고 있으면 망치로 박습니다': '铁桩插进孔里了。按住干活键用锤子把它钉进去',
+    '옆의 흰 X 도 똑같이 뚫고 박으세요': '旁边的白色 X 也一样打孔、钉桩',
+    '판자 더미 앞에서 E 를 눌러 판자를 드세요': '在木板堆前按 E 拿起木板',
+    '판자 더미 앞에서 작업 단추를 눌러 판자를 드세요': '在木板堆前按干活键拿起木板',
+    '쇠기둥 앞 바위턱 끝에 서서 E 를 누르고 있으면 판자를 내밉니다. 쇠기둥 위에 오면 떼세요': '站在铁桩前的岩石边上按住 E 把木板往外推，到铁桩上方就松开',
+    '쇠기둥 앞 바위턱 끝에 서서 작업 단추를 누르고 있으면 판자를 내밉니다. 쇠기둥 위에 오면 떼세요': '站在铁桩前的岩石边上按住干活键把木板往外推，到铁桩上方就松开',
+    '끝 고리 밑에서 E 를 눌러 안전줄을 거세요. 안 걸고 떨어지면 마지막으로 건 고리까지 미끄러져 내려갑니다': '在最前面的挂环下按 E 挂上安全绳。没挂就掉下去的话，会滑回最后挂的那个环',
+    '끝 고리 밑에서 작업 단추를 눌러 안전줄을 거세요. 안 걸고 떨어지면 마지막으로 건 고리까지 미끄러져 내려갑니다': '在最前面的挂环下按干活键挂上安全绳。没挂就掉下去的话，会滑回最后挂的那个环',
+    '다음 칸 X 두 개도 뚫고 박으세요. 손이 안 닿는 X 는 판자 끝에서 걸어 나가 떨어지면 안전줄에 매달려서 합니다': '下一格的两个 X 也要打孔钉桩。够不着的 X，就从木板尽头走出去掉下，吊在安全绳上干',
+    '매달린 채 A D 로 벽을 딛고 X 앞으로, W S 로 줄 높이를 맞추고 E 를 누르고 있으세요': '吊着用 A D 蹬墙移到 X 前，用 W S 调好绳子高度，再按住 E',
+    '매달린 채 패드 좌우로 벽을 딛고 X 앞으로, 패드 위아래로 줄 높이를 맞추고 작업 단추를 누르고 있으세요': '吊着用摇杆左右蹬墙移到 X 前，用摇杆上下调好绳子高度，再按住干活键',
+    'W 로 줄을 감아 올라가거나 판자 가까이에서 Space 로 올라서세요': '按 W 收绳往上爬，或在木板旁按 Space 爬上去',
+    '패드 위로 줄을 감아 올라가거나 판자 가까이에서 점프 단추로 올라서세요': '摇杆往上收绳往上爬，或在木板旁按跳键爬上去',
+    '판자를 하나 더 가져와 잔도 끝에서 E 를 누르고 있다가 쇠기둥 위에서 떼세요': '再拿一块木板，在栈道尽头按住 E，到铁桩上方就松开',
+    '판자를 하나 더 가져와 잔도 끝에서 작업 단추를 누르고 있다가 쇠기둥 위에서 떼세요': '再拿一块木板，在栈道尽头按住干活键，到铁桩上方就松开',
+    '이렇게 한 칸씩 이어 가면 됩니다. 오늘은 여섯 칸!': '就这样一格一格接下去。今天六格！'
+  };
+  const ZT = s => ZHL && ZH[s] ? ZH[s] : s;
+  const TX = (ko, en) => EN ? en : ZT(ko);
   const canvas = document.getElementById('c');
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
@@ -735,7 +765,7 @@
     let el, txt, cnt;
     // 화살표 (할 곳 위에서 오르내림)
     const arrow = (function () { const c = document.createElement('canvas'); c.width = 64; c.height = 96; const g = c.getContext('2d'); g.fillStyle = '#f2cf72'; g.strokeStyle = '#7e140c'; g.lineWidth = 6; g.lineJoin = 'round'; g.beginPath(); g.moveTo(32, 90); g.lineTo(6, 52); g.lineTo(21, 52); g.lineTo(21, 6); g.lineTo(43, 6); g.lineTo(43, 52); g.lineTo(58, 52); g.closePath(); g.stroke(); g.fill(); const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(c), depthTest: false, transparent: true })); sp.scale.set(0.26, 0.39, 1); sp.renderOrder = 20; sp.visible = false; scene.add(sp); return sp; })();
-    function show() { const s = STEPS[S.i]; txt.textContent = s.t(); cnt.textContent = (S.i + 1) + '/' + STEPS.length; el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop'); AUDIO.play('click', 0.5, 1.3); }
+    function show() { const s = STEPS[S.i]; txt.textContent = ZT(s.t()); cnt.textContent = (S.i + 1) + '/' + STEPS.length; el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop'); AUDIO.play('click', 0.5, 1.3); }
     function stop() { S.on = false; el.classList.remove('show'); arrow.visible = false; try { localStorage.setItem('jando.tut', '1'); } catch (e) { } }
     function start() {
       el = $('tut'); txt = $('tutTxt'); cnt = $('tutN');
@@ -924,7 +954,7 @@
   }
   document.getElementById('bEndSave').addEventListener('click', () => { if (!endCardCv) return; const a = document.createElement('a'); a.download = 'cliffwalker.png'; a.href = endCardCv.toDataURL('image/png'); document.body.appendChild(a); a.click(); a.remove(); });
   document.getElementById('bEndShare').addEventListener('click', () => {
-    const url = EN ? 'https://oreumgames.com/en/games/jando/' : 'https://oreumgames.com/games/jando/', text = TX('절벽 잔도공 개통! 판자 ' + PATH.S.built + '개, 추락 ' + G.falls + '번', 'Cliff Walker: road opened! ' + PATH.S.built + ' planks, ' + G.falls + ' falls');
+    const url = EN ? 'https://oreumgames.com/en/games/jando/' : ZHL ? 'https://oreumgames.com/games/jando/play/?lang=zh' : 'https://oreumgames.com/games/jando/', text = ZHL ? '悬崖栈道工 开通！木板 ' + PATH.S.built + ' 块，坠落 ' + G.falls + ' 次' : TX('절벽 잔도공 개통! 판자 ' + PATH.S.built + '개, 추락 ' + G.falls + '번', 'Cliff Walker: road opened! ' + PATH.S.built + ' planks, ' + G.falls + ' falls');
     if (navigator.share) navigator.share({ title: TX('절벽 잔도공', 'Cliff Walker'), text, url }).catch(() => { });
     else { try { navigator.clipboard.writeText(text + ' ' + url); popMsg(TX('링크 복사', 'COPIED')); } catch (e) { } }
   });

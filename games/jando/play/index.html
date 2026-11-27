@@ -154,8 +154,8 @@
   <div class="stat stone"><small>DAY</small><b id="sDay">1</b></div>
   <div class="stat stone"><svg width="18" height="12" viewBox="0 0 18 12" style="align-self:center"><rect x="1" y="2" width="16" height="8" rx="1" fill="#9a6a3c" stroke="#3a2614" stroke-width="1.4"/><path d="M1 6h16" stroke="#3a2614" stroke-width="1"/></svg><b id="sPlank">0/6</b></div>
   <div class="stat stone"><b id="sH">260</b><small>m</small></div>
-  <div class="stat stone"><small data-en="COIN">코인</small><b id="sCoin">0</b></div>
-  <button id="btnDex" class="stat stone" title="B"><small data-en="RELICS">도감</small><b id="sDex">0/12</b></button>
+  <div class="stat stone"><small data-en="COIN" data-zh="金币">코인</small><b id="sCoin">0</b></div>
+  <button id="btnDex" class="stat stone" title="B"><small data-en="RELICS" data-zh="图鉴">도감</small><b id="sDex">0/12</b></button>
   <div class="spacer"></div>
   <button id="btnPause" class="tog" title="PAUSE"><svg viewBox="0 0 24 24"><rect x="6" y="5" width="4" height="14" rx="1" fill="#f2cf72"/><rect x="14" y="5" width="4" height="14" rx="1" fill="#f2cf72"/></svg></button>
   <button id="btnMusic" class="tog" title="BGM"><svg viewBox="0 0 24 24"><path d="M9 17.5V5.5l11-2.5v12" fill="none" stroke="#fff" stroke-width="2.6" stroke-linejoin="round"/><ellipse cx="6.3" cy="17.8" rx="3.4" ry="2.7" fill="#fff"/><ellipse cx="17.3" cy="15.3" rx="3.4" ry="2.7" fill="#fff"/></svg></button>
@@ -165,49 +165,60 @@
 <div id="msg"></div>
 <div id="dayCard" class="btn"><b>DAY 1</b></div>
 <div id="tut" class="stone"><span id="tutN">1/10</span><span id="tutTxt"></span><button id="tutX" aria-label="close">✕</button></div>
-<div id="keys" data-en="WASD Move · Mouse View · Shift Run<br>E / Click Work · Space Jump · Esc Pause · B Relics · M Music · K Sound">WASD 이동 · 마우스 시점 · Shift 달리기<br>E / 클릭 작업 · Space 점프 · Esc 멈춤 · B 도감 · M 음악 · K 효과음</div>
+<div id="keys" data-en="WASD Move · Mouse View · Shift Run<br>E / Click Work · Space Jump · Esc Pause · B Relics · M Music · K Sound" data-zh="WASD 移动 · 鼠标 视角 · Shift 跑<br>E / 点击 干活 · Space 跳 · Esc 暂停 · B 图鉴 · M 音乐 · K 音效">WASD 이동 · 마우스 시점 · Shift 달리기<br>E / 클릭 작업 · Space 점프 · Esc 멈춤 · B 도감 · M 음악 · K 효과음</div>
 <div id="pad"><div id="knob"></div></div>
-<button id="bJump" class="tbtn btn stone" data-en="JUMP">점프</button>
-<button id="bAct" class="tbtn btn" data-en="WORK">작업</button>
+<button id="bJump" class="tbtn btn stone" data-en="JUMP" data-zh="跳">점프</button>
+<button id="bAct" class="tbtn btn" data-en="WORK" data-zh="干活">작업</button>
 
 <div id="clear" class="sheet"><div class="panel stone">
   <h2><span id="clrDay">DAY 1</span> CLEAR</h2>
-  <div class="row"><div><span data-en="COIN">코인</span><b id="clrCoin">+0</b></div><div><span data-en="HEIGHT">높이</span><b id="clrH">0m</b></div><div><span data-en="HAVE">가진 코인</span><b id="clrHave">0</b></div></div>
+  <div class="row"><div><span data-en="COIN" data-zh="金币">코인</span><b id="clrCoin">+0</b></div><div><span data-en="HEIGHT" data-zh="高度">높이</span><b id="clrH">0m</b></div><div><span data-en="HAVE" data-zh="持有金币">가진 코인</span><b id="clrHave">0</b></div></div>
   <div id="shop"></div>
   <button id="bNext" class="btn">NEXT</button>
 </div></div>
 <div id="ending" class="sheet"><div class="panel stone">
   <img id="endCard" alt="">
   <div class="side">
-    <button id="bEndSave" class="btn" data-en="SAVE">저장</button>
-    <button id="bEndShare" class="btn stone" data-en="SHARE">공유</button>
+    <button id="bEndSave" class="btn" data-en="SAVE" data-zh="保存">저장</button>
+    <button id="bEndShare" class="btn stone" data-en="SHARE" data-zh="分享">공유</button>
     <button id="bAgain" class="btn stone">RETRY</button>
   </div>
 </div></div>
 <div id="over" class="sheet"><div class="panel stone">
   <h2>GAME OVER</h2>
-  <div class="row"><div><span data-en="HEIGHT">높이</span><b id="overH">0m</b></div></div>
+  <div class="row"><div><span data-en="HEIGHT" data-zh="高度">높이</span><b id="overH">0m</b></div></div>
   <button id="bRetry" class="btn">RETRY</button>
 </div></div>
-<div id="dex" class="sheet"><div class="panel stone"><h3><span data-en="LEFT BEHIND">옛 잔도공의 물건</span> <b id="dexN">0/12</b></h3><div id="dexGrid"></div></div></div>
+<div id="dex" class="sheet"><div class="panel stone"><h3><span data-en="LEFT BEHIND" data-zh="老栈道工的遗物">옛 잔도공의 물건</span> <b id="dexN">0/12</b></h3><div id="dexGrid"></div></div></div>
 <div id="relicPop" class="stone"><img alt=""><div><b></b><small></small></div></div>
 <div id="pause" class="sheet"><h2>PAUSE</h2></div>
 
 <div id="title">
-  <div class="btns"><button id="bStart" class="btn" data-en="START">시작</button><button id="bNew" class="btn stone" hidden data-en="NEW GAME">새로 시작</button></div>
-  <h1 data-en="CLIFF WALKER">절벽 잔도공</h1>
+  <div class="btns"><button id="bStart" class="btn" data-en="START" data-zh="开始">시작</button><button id="bNew" class="btn stone" hidden data-en="NEW GAME" data-zh="重新开始">새로 시작</button></div>
+  <h1 data-en="CLIFF WALKER" data-zh="悬崖栈道工">절벽 잔도공</h1>
 </div>
-<div id="rotate"><div class="ph"></div><p data-en="This game plays in landscape">가로 화면에서 하는 게임입니다</p><button type="button" id="rotGo" class="btn" data-en="Turn to landscape">가로로 돌리기</button></div>
+<div id="rotate"><div class="ph"></div><p data-en="This game plays in landscape" data-zh="这个游戏要横屏玩">가로 화면에서 하는 게임입니다</p><button type="button" id="rotGo" class="btn" data-en="Turn to landscape" data-zh="切换横屏">가로로 돌리기</button></div>
 
 <script>
   (function () {
     var en = (new URLSearchParams(location.search).get('lang') || '').toLowerCase() === 'en';
     if (en) { document.documentElement.lang = 'en'; document.title = 'Cliff Walker'; document.querySelectorAll('[data-en]').forEach(function (el) { el.innerHTML = el.dataset.en; }); }
+    var zh = (new URLSearchParams(location.search).get('lang') || '').toLowerCase() === 'zh';
+    if (zh) {
+      document.documentElement.lang = 'zh-CN'; document.title = '悬崖栈道工';
+      document.querySelectorAll('[data-zh]').forEach(function (el) { el.innerHTML = el.dataset.zh; });
+      // 게임 글꼴에 없는 한자는 시스템 중국어 글꼴로 채운다
+      var zf = "local('PingFang SC'),local('PingFangSC-Regular'),local('Microsoft YaHei'),local('Microsoft YaHei UI'),local('Noto Sans SC'),local('Noto Sans CJK SC'),local('Source Han Sans SC')";
+      var ur = 'U+2E80-2FFF,U+3000-303F,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF';
+      var st = document.createElement('style');
+      st.textContent = ['Climate', 'Gmarket'].map(function (f) { return "@font-face{font-family:'" + f + "';src:" + zf + ";unicode-range:" + ur + "}"; }).join('') + 'html[lang=zh-CN] *{word-break:normal!important}';
+      document.head.appendChild(st);
+    }
   })();
 </script>
 <script src="assets/landscape.js"></script>
 <script>(function () { var g = document.getElementById('rotGo'); if (g) g.addEventListener('click', function () { if (window.OL) OL.go(); }); })();</script>
-<script src="assets/game-home.js" data-top="6" data-left="6" data-fullscreen="1" defer></script>
+<script src="assets/game-home.js?v=3" data-top="6" data-left="6" data-fullscreen="1" defer></script>
 <script src="lib/three.min.js"></script>
 <script src="lib/GLTFLoader.global.js"></script>
 <script src="js/hero_joints.js"></script>
@@ -222,7 +233,7 @@
 <script src="js/body.js"></script>
 <script src="js/hero.js"></script>
 <script src="js/audio.js"></script>
-<script src="js/game.js?v=2"></script>
+<script src="js/game.js?v=3"></script>
 <script src="/assets/visit.js?v=21" defer></script>
 <script src="/assets/game-events.js?v=4" defer></script>
 </body>
