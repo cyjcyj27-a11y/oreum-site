@@ -170,9 +170,10 @@
       if (v >= 1e6) return unit(v, 1e6, 'M');
       if (v >= 1e5) return unit(v, 1e3, 'K');
     } else {
-      if (v >= 1e12) return unit(v, 1e12, '조');
-      if (v >= 1e8) return unit(v, 1e8, '억');
-      if (v >= 1e4) return unit(v, 1e4, '만');
+      var U = T.units || ['조', '억', '만'];
+      if (v >= 1e12) return unit(v, 1e12, U[0]);
+      if (v >= 1e8) return unit(v, 1e8, U[1]);
+      if (v >= 1e4) return unit(v, 1e4, U[2]);
     }
     return v.toLocaleString('en-US');
   }
