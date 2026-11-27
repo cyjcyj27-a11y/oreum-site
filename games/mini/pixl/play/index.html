@@ -314,7 +314,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;touch-
   </div>
 </section>
 
-<script src="/assets/game-home.js?v=7" data-top="4" data-left="4" data-fullscreen="1" defer></script>
+<script src="/assets/game-home.js?v=8" data-top="4" data-left="4" data-fullscreen="1" defer></script>
 <script>
 /* 왼쪽 위 OREUM GAMES 배지와 왼쪽 아래 전체화면 단추는 /assets/game-home.js 가 붙여 준다.
    그런데 파일을 그냥 두 번 눌러 여는 경우(file://) 맨 앞이 / 인 주소를 못 찾아 둘 다 안 나온다.
@@ -323,7 +323,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;touch-
   function fallback(){
     if(document.getElementById('oreumHome')) return;      // 이미 붙었으면 그만
     var s=document.createElement('script');
-    s.src='../../../../assets/game-home.js?v=7';
+    s.src='../../../../assets/game-home.js?v=8';
     s.setAttribute('data-top','4'); s.setAttribute('data-left','4');
     s.setAttribute('data-fullscreen','1');
     document.body.appendChild(s);
@@ -345,38 +345,38 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;touch-
 
 /* ── 그림 목록 ── */
 var PICS = [
- {id:'01',ko:'야자수 언덕',   en:'Palm Hillside'},
- {id:'02',ko:'정글의 사자',   en:'Jungle Lion'},
- {id:'03',ko:'꽃 덮인 폭포',  en:'Blossom Falls'},
- {id:'04',ko:'우는 아기곰',   en:'Teary Cub'},
- {id:'05',ko:'정글 그림지도', en:'Jungle Map'},
- {id:'06',ko:'덤불 속 사자',  en:'Lion in Ferns'},
- {id:'07',ko:'흰 꽃 개울',    en:'White Creek'},
- {id:'08',ko:'눈물의 아기곰', en:'Crying Cub'},
- {id:'09',ko:'해바라기밭',    en:'Sunflower Field'},
- {id:'10',ko:'정글 오솔길',   en:'Jungle Path'},
- {id:'11',ko:'노을 진 야자수',en:'Palm Sunset'},
- {id:'12',ko:'꽃밭의 아기여우',en:'Fox and Flowers'},
- {id:'13',ko:'악기들의 방',   en:'Music Room'},
- {id:'14',ko:'꽃밭 너머 바다',en:'Shore Blooms'},
- {id:'15',ko:'나비와 여우',   en:'Butterfly Fox'},
- {id:'16',ko:'석양의 표범',   en:'Dusk Panther'},
- {id:'17',ko:'언덕 위 표범',  en:'Ridge Panther'},
- {id:'24',ko:'호랑이와 친구들',en:'Tiger and Friends'},
- {id:'25',ko:'초원의 카우보이',en:'Cowboy Ride'},
- {id:'26',ko:'노을 진 헛간',  en:'Sunset Barn'},
- {id:'27',ko:'두 사람의 초상',en:'Two Portraits'},
- {id:'28',ko:'돌담과 밭',     en:'Stone Wall Fields'},
- {id:'29',ko:'밀짚모자 고양이',en:'Straw Hat Cat'},
- {id:'18',ko:'황금 드럼',     en:'Golden Drum'},
- {id:'19',ko:'비 오는 드럼',  en:'Rain Drum'},
- {id:'20',ko:'콩가와 그림자', en:'Conga Shadow'},
- {id:'21',ko:'노란 벽의 콩가',en:'Yellow Wall'},
- {id:'22',ko:'콧수염 드럼',   en:'Moustache Drum'},
- {id:'23',ko:'콧수염 물방울', en:'Drop Fellow'},
- {id:'30',ko:'정장 입은 고양이',en:'Cat in a Suit'},
- {id:'31',ko:'붉은 하트',     en:'Crystal Heart'},
- {id:'32',ko:'분홍 하트',     en:'Pink Hearts'}
+ {id:'01',ko:'야자수 언덕',   en:'Palm Hillside',zh:'棕榈山坡'},
+ {id:'02',ko:'정글의 사자',   en:'Jungle Lion',zh:'丛林狮子'},
+ {id:'03',ko:'꽃 덮인 폭포',  en:'Blossom Falls',zh:'繁花瀑布'},
+ {id:'04',ko:'우는 아기곰',   en:'Teary Cub',zh:'哭泣的小熊'},
+ {id:'05',ko:'정글 그림지도', en:'Jungle Map',zh:'丛林手绘地图'},
+ {id:'06',ko:'덤불 속 사자',  en:'Lion in Ferns',zh:'草丛里的狮子'},
+ {id:'07',ko:'흰 꽃 개울',    en:'White Creek',zh:'白花溪流'},
+ {id:'08',ko:'눈물의 아기곰', en:'Crying Cub',zh:'泪汪汪的小熊'},
+ {id:'09',ko:'해바라기밭',    en:'Sunflower Field',zh:'向日葵花田'},
+ {id:'10',ko:'정글 오솔길',   en:'Jungle Path',zh:'丛林小径'},
+ {id:'11',ko:'노을 진 야자수',en:'Palm Sunset',zh:'晚霞棕榈'},
+ {id:'12',ko:'꽃밭의 아기여우',en:'Fox and Flowers',zh:'花丛里的小狐狸'},
+ {id:'13',ko:'악기들의 방',   en:'Music Room',zh:'乐器房间'},
+ {id:'14',ko:'꽃밭 너머 바다',en:'Shore Blooms',zh:'花海那边的大海'},
+ {id:'15',ko:'나비와 여우',   en:'Butterfly Fox',zh:'蝴蝶与狐狸'},
+ {id:'16',ko:'석양의 표범',   en:'Dusk Panther',zh:'夕阳下的豹子'},
+ {id:'17',ko:'언덕 위 표범',  en:'Ridge Panther',zh:'山坡上的豹子'},
+ {id:'24',ko:'호랑이와 친구들',en:'Tiger and Friends',zh:'老虎和朋友们'},
+ {id:'25',ko:'초원의 카우보이',en:'Cowboy Ride',zh:'草原牛仔'},
+ {id:'26',ko:'노을 진 헛간',  en:'Sunset Barn',zh:'晚霞中的谷仓'},
+ {id:'27',ko:'두 사람의 초상',en:'Two Portraits',zh:'两人的肖像'},
+ {id:'28',ko:'돌담과 밭',     en:'Stone Wall Fields',zh:'石墙与田野'},
+ {id:'29',ko:'밀짚모자 고양이',en:'Straw Hat Cat',zh:'草帽猫'},
+ {id:'18',ko:'황금 드럼',     en:'Golden Drum',zh:'金色鼓'},
+ {id:'19',ko:'비 오는 드럼',  en:'Rain Drum',zh:'雨中的鼓'},
+ {id:'20',ko:'콩가와 그림자', en:'Conga Shadow',zh:'康加鼓与影子'},
+ {id:'21',ko:'노란 벽의 콩가',en:'Yellow Wall',zh:'黄墙前的康加鼓'},
+ {id:'22',ko:'콧수염 드럼',   en:'Moustache Drum',zh:'小胡子鼓'},
+ {id:'23',ko:'콧수염 물방울', en:'Drop Fellow',zh:'小胡子水滴'},
+ {id:'30',ko:'정장 입은 고양이',en:'Cat in a Suit',zh:'穿西装的猫'},
+ {id:'31',ko:'붉은 하트',     en:'Crystal Heart',zh:'红色爱心'},
+ {id:'32',ko:'분홍 하트',     en:'Pink Hearts',zh:'粉色爱心'}
 ];
 /* 난이도 — 원본이 정사각형이라 조각도 정사각형이 되게 n×n 으로 나눈다 */
 var LEVELS = [
@@ -387,14 +387,44 @@ var LEVELS = [
 ];
 
 /* ── 말 ── */
+var ZHM=false;
+try{ ZHM=(new URLSearchParams(location.search).get('lang')==='zh'); }catch(e){}
 var KO = (function(){
+  if(ZHM) return false;
   var l = (document.documentElement.lang||'ko').toLowerCase().indexOf('en')!==0;
   try{ var q=new URLSearchParams(location.search).get('lang');
        if(q==='en') l=false; else if(q==='ko') l=true; }catch(e){}
   return l;
 })();
-if(!KO) document.documentElement.lang='en';
-var T = KO ? {
+/* 이름 고르기 — 한국어·영어·중국어 */
+function NM(o){ return KO?o.ko:(ZHM?o.zh:o.en); }
+if(ZHM){
+  document.documentElement.lang='zh-CN';
+  document.title='PIXL 拼图';
+  /* 중국어판은 시스템 중국어 글꼴을 앞에 둔다 */
+  var zst=document.createElement('style');
+  zst.textContent='html[lang=zh-CN],html[lang=zh-CN] body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei","Microsoft YaHei UI","Noto Sans SC","Noto Sans CJK SC","Source Han Sans SC",sans-serif}'
+    +'html[lang=zh-CN] *{word-break:normal!important}';
+  document.head.appendChild(zst);
+}
+else if(!KO) document.documentElement.lang='en';
+var T = ZHM ? {
+  tag:'拼图', picture:'PICTURE', clear:'完成',
+  prog:function(a,b){return '已完成 <b>'+a+'</b> / '+b;},
+  foot:function(n,t){ return '共 '+n+' 张图 × 4 种难度 = '+t+' 局。纪录只保存在本浏览器中。'; },
+  pieces:'块', loading:'正在打开图片…',
+  complete:'完成', best:'最佳纪录', newbest:'新纪录',
+  ach:'完成作品', tabPic:'选择图片', tabAch:'完成作品', achPage:function(a,b){ return a+' / '+b+' 页'; },
+  achTip:function(n,c,t){ return n+' · '+c+' 块'+(t?' · '+t:''); },
+  pieces2:function(n){ return n+' 块'; },
+  resume:'继续拼', dropRun:'重新开始',
+  runLine:function(a,b,t){ return '已拼好 '+a+' / '+b+' 块 · '+t; },
+  picsDone:function(a,b){ return '图片 '+a+' / '+b; },
+  bestLb:'最佳纪录', noRec:'暂无纪录',
+  retry:'再次挑战', tryIt:'开始挑战', close:'关闭',
+  cut:function(s,o){ return '上次纪录 '+o+' → 快了 '+s+' 秒'; },
+  none:'—'
+} : KO ? {
   tag:'직소퍼즐', picture:'PICTURE', clear:'완성',
   prog:function(a,b){return '완성한 판 <b>'+a+'</b> / '+b;},
   foot:function(n,t){ return '그림 '+n+'장 × 난이도 4단계 = '+t+'판. 기록은 이 브라우저에만 저장됩니다.'; },
@@ -512,13 +542,13 @@ var sfx={
    브라우저가 첫 손짓 전에는 소리를 막으므로 실제로 받아오는 것도 그때고,
    한 번에 한 곡씩만 받는다. 꺼 두면 아예 안 받는다. */
 var TRACKS=[
- {f:'01-chopin-nocturne.mp3',      ko:'쇼팽 · 녹턴 Op.9 No.2',        en:'Chopin · Nocturne Op.9 No.2'},
- {f:'02-beethoven-moonlight.mp3',  ko:'베토벤 · 월광 소나타 1악장',    en:'Beethoven · Moonlight Sonata, I'},
- {f:'03-debussy-clair-de-lune.mp3',ko:'드뷔시 · 달빛',                en:'Debussy · Clair de Lune'},
- {f:'04-satie-gymnopedie-1.mp3',   ko:'사티 · 짐노페디 1번',          en:'Satie · Gymnopédie No.1'},
- {f:'05-pachelbel-canon.mp3',      ko:'파헬벨 · 캐논',                en:'Pachelbel · Canon in D'},
- {f:'06-vivaldi-spring.mp3',       ko:'비발디 · 사계 「봄」 1악장',    en:'Vivaldi · Spring, Allegro'},
- {f:'07-bach-violin-concerto.mp3', ko:'바흐 · 바이올린 협주곡 가단조 3악장', en:'Bach · Violin Concerto in A minor, III'}
+ {f:'01-chopin-nocturne.mp3',      ko:'쇼팽 · 녹턴 Op.9 No.2',        en:'Chopin · Nocturne Op.9 No.2', zh:'肖邦 · 夜曲 Op.9 No.2'},
+ {f:'02-beethoven-moonlight.mp3',  ko:'베토벤 · 월광 소나타 1악장',    en:'Beethoven · Moonlight Sonata, I', zh:'贝多芬 · 月光奏鸣曲 第一乐章'},
+ {f:'03-debussy-clair-de-lune.mp3',ko:'드뷔시 · 달빛',                en:'Debussy · Clair de Lune', zh:'德彪西 · 月光'},
+ {f:'04-satie-gymnopedie-1.mp3',   ko:'사티 · 짐노페디 1번',          en:'Satie · Gymnopédie No.1', zh:'萨蒂 · 吉姆诺佩迪 第1号'},
+ {f:'05-pachelbel-canon.mp3',      ko:'파헬벨 · 캐논',                en:'Pachelbel · Canon in D', zh:'帕赫贝尔 · D大调卡农'},
+ {f:'06-vivaldi-spring.mp3',       ko:'비발디 · 사계 「봄」 1악장',    en:'Vivaldi · Spring, Allegro', zh:'维瓦尔第 · 四季「春」第一乐章'},
+ {f:'07-bach-violin-concerto.mp3', ko:'바흐 · 바이올린 협주곡 가단조 3악장', en:'Bach · Violin Concerto in A minor, III', zh:'巴赫 · A小调小提琴协奏曲 第三乐章'}
 ];
 var bgm=null, bgmFade=0, order=[], cur=0, badTracks=0;
 function bgmWant(){
@@ -547,7 +577,7 @@ function nextTrack(){
 var npTimer=0;
 function showNP(){
   var el=document.getElementById('np'); if(!el||!save.opt.bgm) return;
-  el.textContent='♪  '+(KO?TRACKS[order[cur]].ko:TRACKS[order[cur]].en);
+  el.textContent='♪  '+NM(TRACKS[order[cur]]);
   el.classList.add('show');
   clearTimeout(npTimer);
   npTimer=setTimeout(function(){ el.classList.remove('show'); },4200);
@@ -661,7 +691,7 @@ function paintSel(){
     var best=save.best[bkey(p.id,lev)];
     b.innerHTML='<img src="img/t'+p.id+'.webp" alt="" loading="lazy" width="288" height="288">'+
       (best!=null?'<span class="rec clr">'+fmt(best)+'</span>':'')+
-      '<span class="cap">'+(KO?p.ko:p.en)+'</span>';
+      '<span class="cap">'+NM(p)+'</span>';
     b.onclick=function(){ sfx.tap(); start(p.id,lev); };
     li.appendChild(b); g.appendChild(li);
   });
@@ -688,7 +718,7 @@ function paintResume(){
   /* 다 맞췄거나, 아직 한 조각도 안 건드린 판은 띠를 안 띄운다 */
   if(done>=n || (done===0 && !(r.loose||[]).length)){ el.hidden=true; return; }
   $('#rsImg').src='img/t'+pic.id+'.webp';
-  $('#rsName').textContent=KO?pic.ko:pic.en;
+  $('#rsName').textContent=NM(pic);
   $('#rsSub').textContent=T.runLine(done,n,fmt(r.t||0));
   $('#rsGo').textContent=T.resume;
   $('#rsDrop').textContent=T.dropRun;
@@ -751,7 +781,7 @@ function paintAch(){
     var best=save.best[bkey(pic.id,sl.l)], got=(best!=null);
     var b=document.createElement('button');
     b.type='button'; b.className='slot'+(got?' done':'');
-    b.title=T.achTip(KO?pic.ko:pic.en, n, got?fmt(best):'');
+    b.title=T.achTip(NM(pic), n, got?fmt(best):'');
     b.innerHTML=(got?'<img src="img/t'+pic.id+'.webp" alt="" loading="lazy" width="288" height="288">':'')
       +'<span class="lv">'+T.pieces2(n)+'</span>';
     b.onclick=function(){ sfx.tap(); openSlot(sl.p,sl.l); };
@@ -774,7 +804,7 @@ function openSlot(pi,li){
   var pic=PICS[pi], n=LEVELS[li].cols*LEVELS[li].cols;
   var best=save.best[bkey(pic.id,li)], got=(best!=null);
   $('#sdImg').src='img/t'+pic.id+'.webp';
-  $('#sdName').textContent=KO?pic.ko:pic.en;
+  $('#sdName').textContent=NM(pic);
   $('#sdSub').textContent=LEVELS[li].tag+' · '+T.pieces2(n);
   $('#sdRecLb').textContent=got?T.bestLb:T.noRec;
   $('#sdRec').textContent=got?fmt(best):'—';
@@ -805,7 +835,7 @@ function start(picId,levIdx,run){
   selEl.hidden=true; gameEl.hidden=false; $('#done').hidden=true; pushGameState();
   $('#load').hidden=false; $('#load').textContent=T.loading;
   $('#lbName').textContent=T.picture;
-  $('#vName').textContent=KO?pic.ko:pic.en;
+  $('#vName').textContent=NM(pic);
   resize();
 
   var img=new Image();
@@ -1252,7 +1282,7 @@ function finish(){
   clearRun();  store();
   for(var pi=0;pi<PICS.length;pi++) if(PICS[pi].id===G.pic.id) lastDone=G.lev*PICS.length+pi;
   $('#dTitle').textContent=T.complete;
-  $('#dName').textContent=(KO?G.pic.ko:G.pic.en)+' · '+G.pieces.length;
+  $('#dName').textContent=NM(G.pic)+' · '+G.pieces.length;
   $('#dTime').textContent=fmt(secs);
   $('#dBest').textContent=fmt(save.best[k]);
   $('#dNew').hidden=!isNew;
