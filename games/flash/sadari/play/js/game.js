@@ -1,7 +1,7 @@
 // 사다리타기(사다리2) — 화이트보드에 마커로 긋는 사다리, 2~50명
 (function () {
   'use strict';
-  var QS = location.search, EN = /[?&]lang=en(&|$)/.test(QS);
+  var QS = location.search, EN = /[?&]lang=en(&|$)/.test(QS), ZH = !EN && /[?&]lang=zh(&|$)/.test(QS);
   var LOCAL = location.protocol === 'file:' || /^(localhost|127\.0\.0\.1)$/.test(location.hostname); // 시험용 갈고리는 내 컴퓨터에서만
   var UP = new URLSearchParams(QS);
   function qp(k) { return LOCAL ? UP.get(k) : null; }
@@ -11,13 +11,17 @@
   var D = { '시작': 'START', '인원': 'Players', '결과': 'Results', '당첨·꽝': 'Win / Pass', '당첨': 'Win', '꽝': 'Pass', '순위': 'Ranks', '지우기': 'Clear',
     '섞기': 'Shuffle', '전체 결과': 'Reveal All', '설정': 'Setup', '복사': 'Copy', '링크': 'Link', '한 번 더': 'Again', '사다리타기': 'LADDER GAME', '이름': 'Name', '이름과 당첨 항목을 적어주세요.': 'Write the names and the prizes.',
     '복사했습니다': 'Copied', '링크를 복사했습니다': 'Link copied' };
-  function T(s) { return (EN && D[s]) || s; }
+  var Z = { '시작': '开始', '인원': '人数', '결과': '结果', '당첨·꽝': '中奖·没中', '당첨': '中奖', '꽝': '没中', '순위': '排名', '지우기': '清空',
+    '섞기': '打乱', '전체 결과': '全部揭晓', '설정': '设置', '복사': '复制', '링크': '链接', '한 번 더': '再来一次', '사다리타기': '爬梯子', '이름': '名字', '이름과 당첨 항목을 적어주세요.': '填好名字和奖项吧。',
+    '복사했습니다': '已复制', '링크를 복사했습니다': '链接已复制' };
+  function T(s) { return (EN && D[s]) || (ZH && Z[s]) || s; }
   function rankName(i) {
+    if (ZH) return '第' + (i + 1) + '名';
     if (!EN) return (i + 1) + '등';
     var n = i + 1, s = (n % 100 >= 11 && n % 100 <= 13) ? 'th' : (['th', 'st', 'nd', 'rd'][n % 10] || 'th');
     return n + s;
   }
-  var MISS = /^(꽝|통과|패스|면제|없음|세이프|-|x|pass|miss|blank|none|safe|free)$/i;
+  var MISS = /^(꽝|没中|未中|통과|패스|면제|없음|세이프|-|x|pass|miss|blank|none|safe|free)$/i;
 
   function ls(k, v) { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } }
 
@@ -65,7 +69,7 @@
   function shareURL() {
     var u = location.href.split('?')[0].split('#')[0];
     var q = 's=' + b64e(JSON.stringify({ n: S.names.slice(0, S.n), r: S.results.slice(0, S.n), k: S.seed }));
-    return u + '?' + (EN ? 'lang=en&' : '') + q;
+    return u + '?' + (EN ? 'lang=en&' : ZH ? 'lang=zh&' : '') + q;
   }
 
   // 씨앗 난수
@@ -513,7 +517,7 @@
 
   // ---- 타이틀 낙서: 작은 사다리 4줄이 혼자 계속 타 내려감 ----
   var DN = 4, dRes = [], dNext = 0, dHold = 0;
-  var dfn = { name: function (i) { return EN ? 'ABCDEF'[i] : '가나다라마바'[i]; }, res: function (e) { return dRes[e]; }, win: function (e) { return dRes[e] === T('당첨'); } };
+  var dfn = { name: function (i) { return EN ? 'ABCDEF'[i] : ZH ? '甲乙丙丁戊己'[i] : '가나다라마바'[i]; }, res: function (e) { return dRes[e]; }, win: function (e) { return dRes[e] === T('당첨'); } };
   function newDoodle() {
     var w = (Math.random() * DN) | 0; dRes = []; for (var i = 0; i < DN; i++) dRes.push(i === w ? T('당첨') : T('꽝'));
     DM = newModel(buildLadder(DN, (Math.random() * 1e9) | 0), makeLayout(300, 300, DN, 'v'), dfn);
@@ -572,6 +576,16 @@
     document.body.classList.add('en'); document.documentElement.lang = 'en'; document.title = 'LADDER GAME';
     Array.prototype.forEach.call(document.querySelectorAll('[data-t]'), function (el) { el.textContent = T(el.getAttribute('data-t')); });
   }
+  if (ZH) {
+    // 중국어: 글꼴에 없는 한자는 시스템 중국어 글꼴로 채운다
+    var zf = "local('PingFang SC'),local('PingFangSC-Regular'),local('Microsoft YaHei'),local('Microsoft YaHei UI'),local('Noto Sans SC'),local('Noto Sans CJK SC'),local('Source Han Sans SC')";
+    var ur = 'U+2E80-2FFF,U+3000-303F,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF';
+    var zst = document.createElement('style');
+    zst.textContent = "@font-face{font-family:'Barunpen';src:" + zf + ";unicode-range:" + ur + "}@font-face{font-family:'Goding';src:" + zf + ";unicode-range:" + ur + "}html[lang=zh-CN] *{word-break:normal!important}";
+    document.head.appendChild(zst);
+    document.body.classList.add('zh'); document.documentElement.lang = 'zh-CN'; document.title = '爬梯子';
+    Array.prototype.forEach.call(document.querySelectorAll('[data-t]'), function (el) { el.textContent = T(el.getAttribute('data-t')); });
+  }
   window.addEventListener('resize', function () { if (view === 'play') sizeBoard(); if (view === 'title') sizeDoodle(); });
   load();
   var shared = UP.get('s'), fromLink = false;
@@ -588,6 +602,7 @@
 
   // 시험 갈고리(내 컴퓨터에서만): ?view=setup|play|res &n=50 &demo=1(이름 채움) &run=all|0..n &at=ms &force=v|h &mute=1
   var DEMO = ['민준', '서연', '도윤', '하은', '시우', '지우', '주원', '서윤', '하준', '지아', '예준', '수아', '건우', '아린', '우진', '채원', '선우', '다은', '현우', '윤서', '김부장', '이과장', '박대리', '최사원', '정팀장'];
+  if (ZH) DEMO = ['小明', '小红', '阿杰', '婷婷', '浩然', '欣怡', '子轩', '雨涵', '博文', '诗琪', '俊杰', '佳怡', '宇航', '梓萱', '天佑', '思雨', '一鸣', '可馨', '志强', '晓雯', '王经理', '李主管', '张组长', '刘专员', '陈总'];
   function hooks() {
     if (qp('shot')) {
       document.body.classList.add('shot'); show('title'); DN = 6;
