@@ -16,6 +16,22 @@
     $('keys').textContent = '←→ Move · J Hammer (hold) · K Kick · L Grab';
     $('h1').textContent = 'ODAESU GAME'; document.title = 'Odaesu Game'; document.documentElement.lang = 'en';
   }
+  var ZHL = /[?&]lang=zh\b/.test(location.search);
+  if (ZHL) {
+    $('rotTitle').textContent = '这个游戏需要横屏玩';
+    $('rotGo').textContent = '切换到横屏';
+    $('rotHelp').textContent = '按钮没反应的话，请解除屏幕旋转锁定，把手机横过来';
+    $('rotSkip').textContent = '还是用竖屏玩';
+    $('keys').textContent = '←→ 移动 · J 锤子（长按） · K 踢腿 · L 抓人';
+    $('tPause').title = '暂停'; $('tMus').title = '音乐'; $('tSnd').title = '音效';
+    $('h1').textContent = '吴大洙游戏'; document.title = '吴大洙游戏'; document.documentElement.lang = 'zh-CN';
+    var zf = "local('PingFang SC'),local('PingFangSC-Regular'),local('Microsoft YaHei'),local('Microsoft YaHei UI'),local('Noto Sans SC'),local('Noto Sans CJK SC'),local('Source Han Sans SC')";
+    var ur = 'U+2E80-2FFF,U+3000-303F,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF';
+    var zs = document.createElement('style');
+    zs.textContent = ['Brush', 'Ria'].map(function (f) { return "@font-face{font-family:'" + f + "';src:" + zf + ';unicode-range:' + ur + '}'; }).join('') +
+      'html[lang=zh-CN] *{word-break:normal!important}html[lang=zh-CN] #title h1{font-size:clamp(56px,12.5vw,165px);font-weight:700;letter-spacing:.06em;line-height:1.15}';
+    document.head.appendChild(zs);
+  }
 
   // ── 저장 ──
   var save = { stage: 1, best: 0, ko: 0, ended: false };
