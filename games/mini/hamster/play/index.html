@@ -252,22 +252,23 @@ body.touch .keys{display:none}
 <div id="toast" hidden></div>
 <div class="keys" data-ko="↑↓←→ · WASD 이동 / M 음악 · K 효과음" data-en="↑↓←→ · WASD move / M music · K sound"></div>
 
-<script src="js/lang.js?v=1"></script>
-<script src="assets/game-home.js" data-top="6" data-left="6" data-fullscreen="1" defer></script>
+<script src="js/lang.js?v=2"></script>
+<script src="assets/game-home.js?v=2" data-top="6" data-left="6" data-fullscreen="1" defer></script>
 <script src="lib/three.min.js"></script>
-<script src="js/data.js?v=3"></script>
+<script src="js/data.js?v=4"></script>
 <script src="js/hmodel.js?v=1"></script>
 <script src="js/models.js?v=5"></script>
 <script src="js/world.js?v=2"></script>
 <script src="js/audio.js?v=3"></script>
 <script src="js/portrait.js?v=2"></script>
 <script src="js/how.js?v=6"></script>
-<script src="js/card.js?v=1"></script>
-<script src="js/ui.js?v=2"></script>
+<script src="js/card.js?v=2"></script>
+<script src="js/ui.js?v=3"></script>
 <script src="js/game.js?v=10"></script>
 <script>
 if ('ontouchstart' in window || navigator.maxTouchPoints > 0) document.body.classList.add('touch');
 if (window.EN) { document.title = 'Hamsrun'; const l = document.getElementById('logo'); l.classList.remove('one'); l.innerHTML = '<div class="a"><i>HAMS</i><i>RUN</i></div>'; }
+else if (window.ZH) { document.title = '仓鼠快跑'; document.querySelector('#logo .a').innerHTML = '<i>仓</i><i>鼠</i><i>快</i><i>跑</i>'; }
 GAME.init();
 UI.init();
 </script>

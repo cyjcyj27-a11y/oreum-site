@@ -41,5 +41,5 @@
     { id: 'robo', ko: '로보로프스키', en: 'ROBOROVSKI', price: 300, top: 0xd9a96a, belly: 0xffffff, cheek: 0xffffff, stripe: null, brow: 0xffffff, small: true },
     { id: 'black', ko: '블랙', en: 'BLACK', price: 400, top: 0x3a3330, belly: 0x5a504a, cheek: 0x5a504a, stripe: null }
   ];
-  D.name = (o) => (window.EN ? o.en : o.ko);
+  D.name = (o) => (window.EN ? o.en : window.ZH ? L(o.ko, o.en) : o.ko);
 })();

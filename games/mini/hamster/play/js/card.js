@@ -75,7 +75,7 @@
   };
   C.save = function () { if (!url) return; const a = document.createElement('a'); a.href = url; a.download = 'hamster-end.png'; document.body.appendChild(a); a.click(); a.remove(); };
   C.share = function () {
-    const link = location.protocol === 'file:' ? '' : location.origin + location.pathname.replace(/play\/?(index\.html)?$/, '') + (window.EN ? '?lang=en' : '');
+    const link = location.protocol === 'file:' ? '' : location.origin + location.pathname.replace(/play\/?(index\.html)?$/, '') + (window.EN ? '?lang=en' : window.ZH ? '?lang=zh' : '');
     if (navigator.share) { navigator.share({ title: L('햄스런', 'Hamsrun'), text: shareLine, url: link || undefined }).catch(() => {}); return; }
     try { navigator.clipboard.writeText(shareLine + (link ? '\n' + link : '')); UI.toast(L('주소를 복사했습니다', 'Link copied')); } catch (e) {}
   };
