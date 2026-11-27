@@ -63,7 +63,7 @@ S.play = function (cb) {
 function next() {
   i++; if (i >= S.LINES.length) return S.end();
   var l = S.LINES[i], w = WHO[l.who];
-  document.getElementById('subWho').textContent = SB.EN ? w[1] : w[0]; document.getElementById('subTxt').textContent = SB.EN ? l.en : l.ko;
+  document.getElementById('subWho').textContent = SB.L(w[0], w[1]); document.getElementById('subTxt').textContent = SB.L(l.ko, l.en);
   document.getElementById('sub').className = 'who-' + l.who; SND.voice(SB.EN ? l.id + '_en' : l.id);
   if (!shot || shot.n !== l.shot) { shot = { n: l.shot, s: SHOTS[l.shot] }; shotT = 0; }
   if (l.id === 'f2' || l.id === 'f3') father.rotation.y = Math.atan2(-1.15, 1.0);

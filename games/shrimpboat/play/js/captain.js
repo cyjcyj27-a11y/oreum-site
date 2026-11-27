@@ -53,7 +53,7 @@ C.at = function (x, z, ya) { C.st = 'stage'; path = []; root.rotation.set(0, ya,
 C.goTo = function (names, st, spd) { path = names.map(function (n) { return N[n]; }); pi = 0; C.st = st; speed = spd || 1.2; root.rotation.x = 0; root.position.y = D; play('walk'); };
 C.say = function (k) {
   var now = performance.now(); if (lastSay[k] && now - lastSay[k] < 6000) return; lastSay[k] = now;
-  var l = LINES[k]; if (!l) return; SB.ui.bubble(SB.EN ? l[1] : l[0]); SND.voice(SB.EN ? k + '_en' : k); sayT = 2.6;
+  var l = LINES[k]; if (!l) return; SB.ui.bubble(SB.L(l[0], l[1])); SND.voice(SB.EN ? k + '_en' : k); sayT = 2.6;
 };
 /* 그물을 찢었다: 선장이 뛰어와 따귀 두 대(사장님 10/4 "그물 찢어지면 선장이 난리쳐야 되는데, 선장한테 맞는 거로 하자") */
 var pun = null, arm = null, _ht = new T.Vector3(), _po = new T.Vector3();

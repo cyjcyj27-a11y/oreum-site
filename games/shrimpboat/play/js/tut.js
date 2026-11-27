@@ -37,7 +37,7 @@ U.off = function () { SEEN.off = true; keep(); show(null); };
 function show(st) {
   var card = document.getElementById('tut');
   if (!st) { card.hidden = true; cur = null; return; }
-  var tx = st.text ? st.text() : st.t, touch = document.body.classList.contains('touch'), s = SB.EN ? (touch ? tx.ent : tx.en) : (touch ? tx.kot : tx.ko);
+  var tx = st.text ? st.text() : st.t, touch = document.body.classList.contains('touch'), s = SB.EN ? (touch ? tx.ent : tx.en) : SB.L(touch ? tx.kot : tx.ko);
   var el = document.getElementById('tutTxt'); if (el.textContent !== s) { el.textContent = s; card.classList.remove('pop'); void card.offsetWidth; card.classList.add('pop'); }
   card.hidden = false; cur = st;
 }

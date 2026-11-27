@@ -3,8 +3,9 @@
 'use strict';
 var T = THREE, D = SB.D, PI = Math.PI, $ = function (id) { return document.getElementById(id); };
 var KEY = 'shrimpboat.save', DAYS = 30, EYE = 1.6, DAYH = 36, NIGHTH = 25, WALK = 2.6, RUN = 4.4;
-var EN = SB.EN = /[?&]lang=en/.test(location.search); SB.L = function (ko, en) { return EN ? en : ko; }; var L = SB.L;
+var EN = SB.EN = /[?&]lang=en/.test(location.search), ZH = SB.ZH = !!window.SBZH; SB.L = function (ko, en) { return EN ? en : ZH ? (window.SBZH[ko] !== undefined ? window.SBZH[ko] : ko) : ko; }; var L = SB.L;
 if (EN) { document.body.classList.add('en'); document.documentElement.lang = 'en'; document.title = 'Shrimp Boat'; }
+if (ZH) document.querySelectorAll('.ko').forEach(function (e) { e.textContent = L(e.textContent); });
 var G = SB.G = { mode: 'title', day: 1, t: 4, tasks: [], inv: {}, parts: {}, taken: {}, dropped: {}, flags: {}, carry: null, holding: null, P: { x: 4.6, z: -1.3, yaw: PI / 2, pitch: 0, face: -PI / 2 }, idle: 0, view: 3 };
 function third() { return G.mode === 'day' || G.mode === 'night'; }                 // 3인칭 하나로(사장님 10/3 "걍 3인칭으로 통일하자")
 SB.third = third;
