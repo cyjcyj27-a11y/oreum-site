@@ -20,8 +20,25 @@
 
   var EN = /[?&]lang=en/i.test(location.search);
   if (EN) { document.documentElement.lang = 'en'; document.body.classList.add('en'); document.title = 'CHESS'; Array.prototype.forEach.call(document.querySelectorAll('[data-en]'), function (el) { el.textContent = el.getAttribute('data-en'); }); }
-  function rankName(L) { return (EN ? RANKS_EN : RANKS)[L]; }
-  var TXT = EN ? { check: 'CHECK', mate: 'CHECKMATE', stale: 'STALEMATE', white: 'WHITE', black: 'BLACK', why: { stalemate: 'STALEMATE', repetition: 'REPETITION', fifty: '50 MOVES', material: 'INSUFFICIENT', mate: 'CHECKMATE', resign: 'RESIGN' } }
+  // 중국어: ?lang=zh 일 때만. 한국어 문구를 열쇠로 바꾼다
+  var ZH = !EN && /[?&]lang=zh(&|$)/i.test(location.search);
+  var RANKS_ZH = RANKS.map(function (s) { return s.replace('급', '级').replace('단', '段'); });
+  if (ZH) {
+    var ZD = { '체스': '国际象棋', '시작': '开始', '기권': '认输', '승격': '升变', '급수': '等级', 'K 효과음': 'K 音效' };
+    document.documentElement.lang = 'zh-CN'; document.body.classList.add('zh'); document.title = ZD['체스'];
+    Array.prototype.forEach.call(document.querySelectorAll('[data-en]'), function (el) { var k = el.textContent.trim(); if (ZD[k]) el.textContent = ZD[k]; });
+    $('flash').textContent = '将军';
+    // 게임 글꼴엔 한자가 없다: 같은 이름에 중국어 기기 글꼴을 한자 범위로만 덧붙인다
+    var zf = "local('PingFang SC'),local('PingFangSC-Regular'),local('Microsoft YaHei'),local('Microsoft YaHei UI'),local('Noto Sans SC'),local('Noto Sans CJK SC'),local('Source Han Sans SC')";
+    var zb = "local('PingFang SC Semibold'),local('PingFangSC-Semibold'),local('Microsoft YaHei Bold'),local('Microsoft YaHei UI Bold'),local('Noto Sans SC Bold'),local('NotoSansSC-Bold'),local('Source Han Sans SC Bold')," + zf;
+    var ur = 'U+2E80-2FFF,U+3000-303F,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF';
+    var zst = document.createElement('style');
+    zst.textContent = "@font-face{font-family:'RIDI';src:" + zb + ";unicode-range:" + ur + "}@font-face{font-family:'Ria';src:" + zb + ";unicode-range:" + ur + "}html[lang=zh-CN] *{word-break:normal!important}";
+    document.head.appendChild(zst);
+  }
+  function rankName(L) { return (EN ? RANKS_EN : ZH ? RANKS_ZH : RANKS)[L]; }
+  var TXT = ZH ? { check: '将军', mate: '将死', stale: '逼和', white: '白', black: '黑', why: { stalemate: 'STALEMATE', repetition: 'REPETITION', fifty: '50 MOVES', material: 'INSUFFICIENT', mate: 'CHECKMATE', resign: 'RESIGN' } }
+          : EN ? { check: 'CHECK', mate: 'CHECKMATE', stale: 'STALEMATE', white: 'WHITE', black: 'BLACK', why: { stalemate: 'STALEMATE', repetition: 'REPETITION', fifty: '50 MOVES', material: 'INSUFFICIENT', mate: 'CHECKMATE', resign: 'RESIGN' } }
                 : { check: '체크', mate: '체크메이트', stale: '스테일메이트', white: '백', black: '흑', why: { stalemate: 'STALEMATE', repetition: 'REPETITION', fifty: '50 MOVES', material: 'INSUFFICIENT', mate: 'CHECKMATE', resign: 'RESIGN' } };
 
   function loadBest() { try { return Math.max(0, Math.min(TOP, parseInt(localStorage.getItem('chess.lv') || '0', 10) || 0)); } catch (e) { return 0; } }
@@ -30,7 +47,7 @@
   function savePick(n) { try { localStorage.setItem('chess.pick', String(n)); } catch (e) {} }
   function showRec() {
     $('rec').textContent = rankName(G.level);
-    var b = loadBest(); $('best').textContent = b > 0 ? (EN ? 'BEST ' : '최고 ') + rankName(b) : '';
+    var b = loadBest(); $('best').textContent = b > 0 ? (EN ? 'BEST ' : ZH ? '最高 ' : '최고 ') + rankName(b) : '';
     Array.prototype.forEach.call($('rk').children, function (w, i) { w.classList.toggle('on', i === G.level); });
   }
   function setLevel(n) { n = Math.max(0, Math.min(TOP, n)); if (n === G.level) return; G.level = n; savePick(n); showRec(); updHud(); A.pick(); }
@@ -307,7 +324,7 @@
     var Rz = G.result, w = Rz.winner, big = $('ores'), btn = $('btnRetryT'), rec = $('orec'), why = $('owhy');
     rec.textContent = ''; why.textContent = w === 0 ? (TXT.why[Rz.why] || '') : (Rz.why === 'mate' ? TXT.why.mate : Rz.why === 'resign' ? TXT.why.resign : '');
     if (w === 0) { $('oh').textContent = G.p2 ? '' : rankName(G.level); big.textContent = 'DRAW'; big.className = 'res p2'; btn.textContent = 'RETRY'; A.draw(); }
-    else if (G.p2) { $('oh').textContent = 'WINNER'; big.textContent = w === WHITE ? TXT.white : TXT.black; big.className = 'res p2'; btn.textContent = 'RETRY'; A.win(); }
+    else if (G.p2) { $('oh').textContent = 'WINNER'; big.textContent = ZH ? (w === WHITE ? '白方' : '黑方') : w === WHITE ? TXT.white : TXT.black; big.className = 'res p2'; btn.textContent = 'RETRY'; A.win(); }
     else if (w === G.human) {
       $('oh').textContent = rankName(G.level); big.textContent = 'CLEAR'; big.className = 'res win'; A.win();
       if (G.level < TOP) { btn.textContent = 'NEXT'; rec.textContent = '▲ ' + rankName(G.level + 1); if (G.level + 1 > loadBest()) saveBest(G.level + 1); }
