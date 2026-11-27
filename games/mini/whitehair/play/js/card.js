@@ -62,7 +62,7 @@
   };
   C.save = function () { if (!url) return; const a = document.createElement('a'); a.href = url; a.download = 'whitehair-end.png'; document.body.appendChild(a); a.click(); a.remove(); };
   C.share = function () {
-    const link = location.protocol === 'file:' ? '' : location.origin + location.pathname.replace(/play\/?(index\.html)?$/, '') + (window.EN ? '?lang=en' : '');
+    const link = location.protocol === 'file:' ? '' : location.origin + location.pathname.replace(/play\/?(index\.html)?$/, '').replace(/^\//, window.ZH ? '/zh/' : '/') + (window.EN ? '?lang=en' : '');
     if (navigator.share) { navigator.share({ title: L('흰머리뽑기방', 'White Hair Shop'), text: shareLine, url: link || undefined }).catch(() => {}); return 'shared'; }
     try { navigator.clipboard.writeText(shareLine + (link ? '\n' + link : '')); } catch (e) {}
     return 'copied';

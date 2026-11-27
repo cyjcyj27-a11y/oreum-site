@@ -305,9 +305,9 @@
     g.strokeStyle = 'rgba(255,255,255,.6)'; g.lineWidth = 3; g.strokeRect(20, 20, W - 40, Hh - 40);
     [['#c9a23a', 34], ['#3a8a6a', 42], ['#b8352c', 50]].forEach(([cl, x0]) => { g.fillStyle = cl; g.fillRect(x0, 28, 5, Hh - 56); });
     // 글씨: 조각마다 색을 바꿔 한 줄로
-    const parts = window.EN ? [['WHITE HAIR ', '#2c4a7e'], ['SHOP', '#b8352c']] : [['흰머리', '#2c4a7e'], ['뽑기', '#b8352c'], ['방', '#2c4a7e']];
+    const parts = window.EN ? [['WHITE HAIR ', '#2c4a7e'], ['SHOP', '#b8352c']] : window.ZH ? [['拔', '#b8352c'], ['白头发', '#2c4a7e'], ['店', '#2c4a7e']] : [['흰머리', '#2c4a7e'], ['뽑기', '#b8352c'], ['방', '#2c4a7e']];
     const lc = cv2(W, Hh), lg = lc.getContext('2d');
-    let px = 250, gap = 0; const fnt = () => `${px}px Sign, Ttl, sans-serif`;
+    let px = 250, gap = 0; const fnt = () => `${window.ZH ? 'bold ' : ''}${px}px Sign, Ttl, sans-serif`;
     lg.font = fnt(); const full = () => parts.reduce((s, p) => s + lg.measureText(p[0]).width, 0);
     while (full() > 1500 && px > 60) { px -= 6; lg.font = fnt(); }
     gap = window.EN ? 0 : px * 0.12; // 사진처럼 글자 사이를 넉넉히
