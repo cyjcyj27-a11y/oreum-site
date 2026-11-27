@@ -9,15 +9,16 @@
   var cv = $('cv'), c = cv.getContext('2d');
   var PI = Math.PI, FY = 484, K = 0.6;                 // K: 시트 픽셀 → 월드 배율(주인공 키 400px → 240)
   var EN = /[?&]lang=en\b/.test(location.search);
+  var ZH = !EN && new URLSearchParams(location.search).get('lang') === 'zh';
   var STAGES = [
-    { name: '저택 앞', en: 'MANSION GATE', boss: '도적 두목', bossEn: 'BANDIT CHIEF' },
-    { name: '저잣거리', en: 'MARKET STREET', boss: '왈패 대장', bossEn: 'MARKET BULLY' },
-    { name: '거지 골목', en: 'BEGGAR ALLEY', boss: '거지 왕초', bossEn: 'BEGGAR KING' },
-    { name: '도박장', en: 'GAMBLING DEN', boss: '도박장 주인', bossEn: 'DEN MASTER' },
-    { name: '나루터', en: 'RIVER DOCK', boss: '뱃사공 거인', bossEn: 'GIANT BOATMAN' },
-    { name: '산길', en: 'MOUNTAIN PASS', boss: '산적 두목', bossEn: 'MOUNTAIN BANDIT' },
-    { name: '관아', en: 'MAGISTRATE', boss: '장군', bossEn: 'THE GENERAL' },
-    { name: '무술대회', en: 'TOURNAMENT', boss: '흑의 고수', bossEn: 'BLACK MASTER' }
+    { name: '저택 앞', en: 'MANSION GATE', zh: '大宅门前', boss: '도적 두목', bossEn: 'BANDIT CHIEF', bossZh: '盗贼头目' },
+    { name: '저잣거리', en: 'MARKET STREET', zh: '集市大街', boss: '왈패 대장', bossEn: 'MARKET BULLY', bossZh: '地痞老大' },
+    { name: '거지 골목', en: 'BEGGAR ALLEY', zh: '乞丐巷', boss: '거지 왕초', bossEn: 'BEGGAR KING', bossZh: '乞丐王' },
+    { name: '도박장', en: 'GAMBLING DEN', zh: '赌坊', boss: '도박장 주인', bossEn: 'DEN MASTER', bossZh: '赌坊老板' },
+    { name: '나루터', en: 'RIVER DOCK', zh: '渡口', boss: '뱃사공 거인', bossEn: 'GIANT BOATMAN', bossZh: '巨人船夫' },
+    { name: '산길', en: 'MOUNTAIN PASS', zh: '山道', boss: '산적 두목', bossEn: 'MOUNTAIN BANDIT', bossZh: '山贼头子' },
+    { name: '관아', en: 'MAGISTRATE', zh: '衙门', boss: '장군', bossEn: 'THE GENERAL', bossZh: '将军' },
+    { name: '무술대회', en: 'TOURNAMENT', zh: '武林大会', boss: '흑의 고수', bossEn: 'BLACK MASTER', bossZh: '黑衣高手' }
   ];
   if (EN) {
     $('rotTitle').textContent = 'This game is played in landscape';
@@ -27,6 +28,25 @@
     $('keys').textContent = '←→ Move (double-tap: dash) · J Punch (hold: uppercut) · K Kick · J+K Wine Blast · L Drink · S Guard (crouch)';
     $('h1').innerHTML = '<span class="top">DRUNKEN FIST</span>SOCHAN<span class="seal">醉拳</span>'; $('h1').className = 'en'; document.title = 'Drunken Fist: Sochan'; document.documentElement.lang = 'en';
     $('endT').textContent = 'CHAMPION'; $('endT').style.fontFamily = 'Ria';
+  }
+
+  if (ZH) {
+    // 게임 글꼴(Batang·Ria)엔 한자가 없다: 같은 이름에 중국어 기기 글꼴을 한자 범위로만 덧붙인다
+    var zf = "local('PingFang SC'),local('PingFangSC-Regular'),local('Microsoft YaHei'),local('Microsoft YaHei UI'),local('Noto Sans SC'),local('Noto Sans CJK SC'),local('Source Han Sans SC')";
+    var zb = "local('PingFang SC Semibold'),local('PingFangSC-Semibold'),local('Microsoft YaHei Bold'),local('Microsoft YaHei UI Bold'),local('Noto Sans SC Bold'),local('NotoSansSC-Bold'),local('Source Han Sans SC Bold')," + zf;
+    var ur = 'U+2E80-2FFF,U+3000-303F,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF';
+    var zst = document.createElement('style');
+    zst.textContent = "@font-face{font-family:'Batang';src:" + zb + ";unicode-range:" + ur + "}@font-face{font-family:'Ria';src:" + zb + ";unicode-range:" + ur + "}html[lang=zh-CN] *{word-break:normal!important}";
+    document.head.appendChild(zst);
+    document.documentElement.lang = 'zh-CN'; document.title = '天下第一小灿 醉拳';
+    $('rotTitle').textContent = '这款游戏需要横屏玩';
+    $('rotGo').textContent = '切换到横屏';
+    $('rotHelp').textContent = '按钮没反应的话，请解除手机的屏幕旋转锁定，再把手机横过来';
+    $('rotSkip').textContent = '还是竖着玩';
+    $('keys').textContent = '←→ 移动（连按两下＝冲刺） · J 出拳（按住＝上勾拳） · K 踢腿 · J+K 喷酒 · L 喝酒 · S 格挡（蹲下）';
+    $('h1').innerHTML = '<span class="top" style="letter-spacing:.25em">天下第一</span>小灿<span class="seal" style="font-family:\'Malgun Gothic\',\'Microsoft YaHei\',\'PingFang SC\',serif">醉拳</span>';
+    $('endT').textContent = '武状元';
+    $('tPause').title = '暂停'; $('tMus').title = '音乐'; $('tSnd').title = '音效';
   }
 
   // ── 저장 ──
@@ -129,7 +149,7 @@
     var si = stageInfo(n);
     $('stg').textContent = 'STAGE ' + n;
     $('stageT').textContent = 'STAGE ' + n;
-    $('stageN').textContent = EN ? si.en : si.name;
+    $('stageN').textContent = EN ? si.en : ZH ? si.zh : si.name;
     showPanel('stage');
     document.body.classList.remove('title');
     G.loaded = false; loadStage(n, function () { if (G && G.stage === n) G.loaded = true; });
@@ -244,7 +264,7 @@
     P.wine--; P.drunk = Math.min(100, P.drunk + 34); P.hp = Math.min(P.max, P.hp + 10);   // 한 병 = 그래프 3분의 1, 세 병이면 꽉 차서 취권
     SND.gulp(); pop('🍶', P.x, FY - 260, 'wine');
     for (var i = 0; i < 6; i++) G.parts.push({ t: 'w', x: P.x + P.face * 14, y: FY - 232, vx: (Math.random() - .5) * 140, vy: -60 - Math.random() * 140, r: 2 + Math.random() * 2, life: .6 });
-    if (P.drunk >= 100) { P.chwi = 5; P.move = null; P.rot = 0; SND.burp(); SND.gong && SND.gong(); pop(EN ? 'DRUNKEN FIST' : '취권', P.x, FY - 300, 'big'); }   // 3병 = 취권
+    if (P.drunk >= 100) { P.chwi = 5; P.move = null; P.rot = 0; SND.burp(); SND.gong && SND.gong(); pop(EN ? 'DRUNKEN FIST' : ZH ? '醉拳' : '취권', P.x, FY - 300, 'big'); }   // 3병 = 취권
     else P.hold = 5;                      // 한 모금이면 취기가 5초는 간다 — 취권이 이 게임의 핵심
     hud();
   }
@@ -466,7 +486,7 @@
       var B = BOSSES[bossIdx(G.stage)];
       e.hp = e.max = K0.hp + Math.floor((G.stage - 1) * 22) + loop * 120;
       e.reach = B.reach; e.dmg = Math.round(B.dmg * (G.stage <= 2 ? 0.75 : G.stage <= 5 ? 0.85 : 0.95)) + loop * 4; e.spd = B.spd; e.w = B.w || K0.w; e.girth = B.girth || K0.girth; e.big = B.big; e.bigCd = 3 + Math.random() * 2;
-      G.boss = e; $('boss').classList.add('on'); $('bossN').textContent = EN ? stageInfo(G.stage).bossEn : stageInfo(G.stage).boss;
+      G.boss = e; $('boss').classList.add('on'); $('bossN').textContent = EN ? stageInfo(G.stage).bossEn : ZH ? stageInfo(G.stage).bossZh : stageInfo(G.stage).boss;
       SND.gong();
     } else { e.hp = e.max = Math.round(K0.hp * (1 + loop * 0.5)); e.dmg = K0.dmg + loop * 3; }
     G.enemies.push(e);
