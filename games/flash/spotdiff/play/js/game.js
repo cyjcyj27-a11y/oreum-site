@@ -12,13 +12,33 @@
     h.classList.add('en');
     $('start').textContent = 'START';
   }
+  // 중국어판: ?lang=zh
+  const ZH = !EN && new URLSearchParams(location.search).get('lang') === 'zh';
+  if (ZH) {
+    document.documentElement.lang = 'zh-CN';
+    document.title = '找不同';
+    // 게임 글꼴엔 한자가 없다 → 같은 이름에 중국어 기기 글꼴을 한자 범위로만 덧붙인다
+    const zf = "local('PingFang SC'),local('PingFangSC-Regular'),local('Microsoft YaHei'),local('Microsoft YaHei UI'),local('Noto Sans SC'),local('Noto Sans CJK SC'),local('Source Han Sans SC')";
+    const zb = "local('PingFang SC Semibold'),local('PingFangSC-Semibold'),local('Microsoft YaHei Bold'),local('Microsoft YaHei UI Bold'),local('Noto Sans SC Bold'),local('NotoSansSC-Bold'),local('Source Han Sans SC Bold')," + zf;
+    const ur = 'U+2E80-2FFF,U+3000-303F,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF';
+    const zs = document.createElement('style');
+    zs.textContent = `@font-face{font-family:'Sunflower';src:${zb};unicode-range:${ur}}@font-face{font-family:'Ria';src:${zb};unicode-range:${ur}}html[lang=zh-CN] *{word-break:normal!important}`;
+    document.head.appendChild(zs);
+    const h = document.querySelector('#title h1');
+    h.textContent = '找不同';
+    h.setAttribute('data-txt', '找不同');
+    $('start').textContent = '开始';
+    $('tPause').title = '暂停';
+    $('tMus').title = '音乐';
+    $('tSnd').title = '音效';
+  }
   const SCENES = [
-    { id: 'bedroom', ko: '아이 방', en: 'Kids Room' },
-    { id: 'kitchen', ko: '부엌', en: 'Kitchen' },
-    { id: 'cafe', ko: '카페', en: 'Cafe' },
-    { id: 'school', ko: '교실', en: 'Classroom' },
-    { id: 'camp', ko: '캠핑장', en: 'Campsite' },
-    { id: 'beach', ko: '바닷가', en: 'Beach' },
+    { id: 'bedroom', ko: '아이 방', en: 'Kids Room', zh: '儿童房' },
+    { id: 'kitchen', ko: '부엌', en: 'Kitchen', zh: '厨房' },
+    { id: 'cafe', ko: '카페', en: 'Cafe', zh: '咖啡馆' },
+    { id: 'school', ko: '교실', en: 'Classroom', zh: '教室' },
+    { id: 'camp', ko: '캠핑장', en: 'Campsite', zh: '露营地' },
+    { id: 'beach', ko: '바닷가', en: 'Beach', zh: '海边' },
   ];
   const PER = 5;   // 방마다 5판(2026-09-17 사장님 "방마다 5판으로 줄여줘", 옛 10판)
   const TOTAL = SCENES.length * PER;
@@ -424,7 +444,7 @@
       for (let k = 1; k <= PER; k++) sum += prog.stars[ri * PER + k] || 0;
       const h = document.createElement('div');
       h.className = 'room';
-      h.innerHTML = '<img src="' + thumb(ri) + '"><span>' + (document.documentElement.lang === 'en' ? sc.en : sc.ko) + '</span><span class="st">⭐ ' + sum + '/' + PER * 3 + '</span>';
+      h.innerHTML = '<img src="' + thumb(ri) + '"><span>' + (EN ? sc.en : ZH ? sc.zh : sc.ko) + '</span><span class="st">⭐ ' + sum + '/' + PER * 3 + '</span>';
       L.appendChild(h);
       const gr = document.createElement('div');
       gr.className = 'grid';
@@ -482,7 +502,7 @@
   $('start').onclick = () => { AU.unlock(); AU.play('click'); startStage(Math.min(prog.last, prog.open) || 1); };
   $('toList').onclick = () => { AU.unlock(); AU.play('click'); openList(); };
   $('toList').hidden = prog.open <= 1;
-  if (prog.last > 1 || prog.open > 1) $('start').textContent = document.documentElement.lang === 'en' ? 'CONTINUE' : '이어하기';
+  if (prog.last > 1 || prog.open > 1) $('start').textContent = EN ? 'CONTINUE' : ZH ? '继续' : '이어하기';
   drawTitle();
   document.addEventListener('pointerdown', () => AU.unlock(), { once: true });
 })();
