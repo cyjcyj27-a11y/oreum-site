@@ -26,6 +26,19 @@
   // ── 말: ?lang=en 이면 영어. 한국어가 원본이고 영어를 덧씌운다 ──
   var EN = /[?&]lang=en/i.test(location.search);
   if (EN) { document.documentElement.lang = 'en'; document.body.classList.add('en'); document.title = 'Alkkagi — free flick stone game'; Array.prototype.forEach.call(document.querySelectorAll('[data-en]'), function (el) { el.textContent = el.getAttribute('data-en'); }); }
+  var ZH = !EN && /[?&]lang=zh(&|$)/i.test(location.search);
+  if (ZH) {
+    var ZD = { '알까기': '弹棋子', '시작': '开始', '이어하기': '继续', 'K 효과음': 'K 音效' };
+    document.documentElement.lang = 'zh-CN'; document.body.classList.add('zh'); document.title = ZD['알까기'];
+    Array.prototype.forEach.call(document.querySelectorAll('[data-en]'), function (el) { var k = el.textContent.trim(); if (ZD[k]) el.textContent = ZD[k]; });
+    // 게임 글꼴엔 한자가 없다: 같은 이름에 중국어 기기 글꼴을 한자 범위로만 덧붙인다
+    var zf = "local('PingFang SC'),local('PingFangSC-Regular'),local('Microsoft YaHei'),local('Microsoft YaHei UI'),local('Noto Sans SC'),local('Noto Sans CJK SC'),local('Source Han Sans SC')";
+    var zb = "local('PingFang SC Semibold'),local('PingFangSC-Semibold'),local('Microsoft YaHei Bold'),local('Microsoft YaHei UI Bold'),local('Noto Sans SC Bold'),local('NotoSansSC-Bold'),local('Source Han Sans SC Bold')," + zf;
+    var ur = 'U+2E80-2FFF,U+3000-303F,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF';
+    var zst = document.createElement('style');
+    zst.textContent = "@font-face{font-family:'Griun';src:" + zf + ";unicode-range:" + ur + "}@font-face{font-family:'Ria';src:" + zb + ";unicode-range:" + ur + "}html[lang=zh-CN] *{word-break:normal!important}";
+    document.head.appendChild(zst);
+  }
 
   // ── 기록 (브라우저에 저장) — 가장 멀리 간 스테이지 ──
   function loadBest() { try { return Math.max(1, parseInt(localStorage.getItem('alkkagi.best') || '1', 10) || 1); } catch (e) { return 1; } }
