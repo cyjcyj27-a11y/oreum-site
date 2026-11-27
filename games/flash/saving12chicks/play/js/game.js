@@ -9,7 +9,9 @@
   var cv = $('cv'), c = cv.getContext('2d');
   var FY = ART.FY, PI = Math.PI, ZONES = ART.ZONES;
   var EN = /[?&]lang=en\b/.test(location.search);
-  var T = EN ? { title: 'SAVING 12 CHICKS', map: 'MAP', close: 'CLOSE', keys: '←→ Move · Shift Run · Space Jump (hold to glide) · X Peck', home: 'HOME', end: 'THE END' }
+  var ZH = !EN && /[?&]lang=zh\b/.test(location.search);
+  var T = ZH ? { title: '拯救12只小鸡', map: '地图', close: '关闭', keys: '←→ 移动 · Shift 奔跑 · 空格 跳跃（按住滑翔） · X 啄', home: '家', end: 'THE END' }
+        : EN ? { title: 'SAVING 12 CHICKS', map: 'MAP', close: 'CLOSE', keys: '←→ Move · Shift Run · Space Jump (hold to glide) · X Peck', home: 'HOME', end: 'THE END' }
              : { title: '병아리 일이병구하기', map: '지도', close: '닫기', keys: '←→ 이동 · Shift 달리기 · 스페이스 점프(누르면 활강) · X 쪼기', home: '집', end: 'THE END' };
   if (EN) {
     $('rotTitle').textContent = 'This game is played in landscape';
@@ -18,6 +20,22 @@
     $('rotSkip').textContent = 'Play in portrait anyway';
     $('h1').textContent = T.title; document.title = 'Saving 12 Chicks'; document.documentElement.lang = 'en';
     $('mapBtn').textContent = T.map; $('mapClose').textContent = T.close; $('mapH').textContent = T.map; $('keys').textContent = T.keys; $('endH').textContent = T.home;
+  }
+  if (ZH) {
+    var zf = "local('PingFang SC'),local('PingFangSC-Regular'),local('Microsoft YaHei'),local('Microsoft YaHei UI'),local('Noto Sans SC'),local('Noto Sans CJK SC'),local('Source Han Sans SC')";
+    var zb = "local('PingFang SC Semibold'),local('PingFangSC-Semibold'),local('Microsoft YaHei Bold'),local('Microsoft YaHei UI Bold'),local('Noto Sans SC Bold'),local('NotoSansSC-Bold'),local('Source Han Sans SC Bold')," + zf;
+    var ur = 'U+2E80-2FFF,U+3000-303F,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF';
+    var zst = document.createElement('style');   // Chinese system fonts for the Korean-only game fonts
+    zst.textContent = "@font-face{font-family:'Melody';src:" + zb + ";unicode-range:U+0030-0039," + ur + "}@font-face{font-family:'Ria';src:" + zb + ";unicode-range:" + ur + "}html[lang=zh-CN] *{word-break:normal!important}";
+    document.head.appendChild(zst);
+    document.documentElement.lang = 'zh-CN'; document.title = '拯救12只小鸡';
+    $('rotTitle').textContent = '这款游戏需要横屏玩';
+    $('rotGo').textContent = '切换横屏';
+    $('rotHelp').textContent = '按钮没反应的话，请关闭手机的屏幕旋转锁定，再把手机横过来';
+    $('rotSkip').textContent = '还是竖屏玩';
+    $('h1').textContent = T.title;
+    $('mapBtn').textContent = T.map; $('mapClose').textContent = T.close; $('mapH').textContent = T.map; $('keys').textContent = T.keys; $('endH').textContent = T.home;
+    $('tPause').title = '暂停'; $('tMus').title = '音乐'; $('tSnd').title = '音效';
   }
   var LAST = 60, TOTAL = 12, HEART_FOOD = 3;   // 먹이 HEART_FOOD 개 먹으면 하트 1칸 회복
 
@@ -563,7 +581,7 @@
     chicks = []; trail = [];
     titleChicks = [{ x: 170, y: FY, face: 1, ph: 0, hop: 0 }, { x: 300, y: FY, face: -1, ph: 0, hop: 0 }, { x: 330, y: FY, face: 1, ph: 0, hop: 0 }];
     $('best').textContent = save.cleared ? 'STAGE ' + save.cleared + ' · 🐥 ' + save.chicks.length + '/' + TOTAL : '';
-    $('start').textContent = save.cleared ? (EN ? 'CONTINUE' : '이어하기') : 'START';
+    $('start').textContent = save.cleared ? (ZH ? '继续游戏' : EN ? 'CONTINUE' : '이어하기') : 'START';
     document.body.classList.add('title'); showPanel('title'); hud();
   }
   function titleStep(dt) {
