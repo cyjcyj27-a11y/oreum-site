@@ -8,6 +8,25 @@
   var body = document.body;
   var EN = /[?&]lang=en/.test(location.search);
   if (EN) { body.classList.add('en'); document.documentElement.lang = 'en'; document.title = 'MEOWSQUAD'; [].forEach.call(document.querySelectorAll('[data-en]'), function (el) { el.textContent = el.getAttribute('data-en'); }); }
+  // 중국어판: 한국어 문구를 열쇠로 바꿔 끼운다
+  var ZH = !EN && /[?&]lang=zh/.test(location.search);
+  var ZHT = {
+    '야옹 편대': '喵喵战队', '←→↑↓ 이동 · B 폭탄 · P 일시정지 · M 음악 · K 효과음': '←→↑↓ 移动 · B 炸弹 · P 暂停 · M 音乐 · K 音效',
+    '시작': '开始', '이어하기': '继续游戏', '🐱 도감': '🐱 图鉴', '상점': '商店', '계속': '继续',
+    '연사': '连射', '탄': '散弹', '방패': '护盾', '자석': '磁铁', '폭탄': '炸弹', '폭탄 강화': '炸弹强化', '목숨': '生命',
+    '치즈': '橘猫', '고등어': '狸花猫', '턱시도': '奶牛猫', '삼색이': '三花猫', '샴': '暹罗猫', '흰냥이': '小白',
+    '까망이': '小黑', '러시안블루': '俄罗斯蓝猫', '스코티시': '折耳猫', '벵갈': '孟加拉猫', '페르시안': '波斯猫', '노랑둥이': '小黄'
+  };
+  function T(ko, en) { return EN ? en : ZH ? (ZHT[ko] || ko) : ko; }
+  if (ZH) {
+    body.classList.add('zh'); document.documentElement.lang = 'zh-CN'; document.title = '喵喵战队';
+    [].forEach.call(document.querySelectorAll('[data-en]'), function (el) { var k = el.textContent.trim(); if (ZHT[k]) el.textContent = ZHT[k]; });
+    var zf = "local('PingFang SC'),local('PingFangSC-Regular'),local('Microsoft YaHei'),local('Microsoft YaHei UI'),local('Noto Sans SC'),local('Noto Sans CJK SC'),local('Source Han Sans SC')";
+    var ur = 'U+2E80-2FFF,U+3000-303F,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF';
+    var zst = document.createElement('style');
+    zst.textContent = "@font-face{font-family:'SingleDay';src:" + zf + ";unicode-range:" + ur + "}@font-face{font-family:'Ria';src:" + zf + ";unicode-range:" + ur + "}html[lang=zh-CN] *{word-break:normal!important}";
+    document.head.appendChild(zst);
+  }
   if (window.matchMedia && matchMedia('(pointer: coarse)').matches) body.classList.add('touch');
 
   ART.init();
@@ -485,7 +504,7 @@
       var d = document.createElement('div'); d.className = 'card' + (max ? ' max' : '') + (!max && G.coins < cost ? ' no' : '');
       var ic = itemIcon(it.id), cc = document.createElement('canvas'); cc.width = ic.width; cc.height = ic.height; cc.getContext('2d').drawImage(ic, 0, 0);
       d.appendChild(cc);
-      var nm = document.createElement('div'); nm.className = 'nm'; nm.textContent = EN ? it.en : it.ko; d.appendChild(nm);
+      var nm = document.createElement('div'); nm.className = 'nm'; nm.textContent = T(it.ko, it.en); d.appendChild(nm);
       var lvd = document.createElement('div'); lvd.className = 'lv';
       lvd.textContent = it.id === 'life' ? '♥ ' + lv + '/' + it.max : it.id === 'bombs' ? '💣 ' + lv + '/' + it.max : (max ? 'MAX' : 'LV ' + lv + ' → ' + (lv + 1));
       d.appendChild(lvd);
@@ -514,7 +533,7 @@
       if (have) ART.catHead(g, 36, 40, 22, c);
       else { ART.catHead(g, 36, 40, 22, c); g.globalCompositeOperation = 'source-atop'; g.fillStyle = '#1a1030'; g.fillRect(0, 0, 72, 72); }
       d.appendChild(cc);
-      var nm = document.createElement('div'); nm.textContent = have ? (EN ? c.en : c.ko) : '???'; d.appendChild(nm);
+      var nm = document.createElement('div'); nm.textContent = have ? T(c.ko, c.en) : '???'; d.appendChild(nm);
       grid.appendChild(d);
     });
     $('dexTitle').textContent = '🐱 ' + dexAll.length + '/12';
