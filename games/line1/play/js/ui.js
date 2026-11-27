@@ -12,6 +12,11 @@
     document.documentElement.lang = 'en'; document.title = L('1호선 빌런'); document.body.classList.add('en');
     $('logoT').textContent = L('1호선 빌런'); $('rotT').textContent = L('1호선 빌런'); $('rotBtn').textContent = L('가로로 보기');
     $('routeH').textContent = L('노선도'); $('tabV').textContent = L('빌런'); $('tabC').textContent = L('카드');
+  } else if (window.L1_LANG === 'zh') {
+    document.documentElement.lang = 'zh-CN'; document.title = L('1호선 빌런');
+    $('logoT').textContent = '号线恶人'; $('rotT').textContent = L('1호선 빌런'); $('rotBtn').textContent = L('가로로 보기');
+    $('routeH').textContent = L('노선도'); $('tabV').textContent = L('빌런'); $('tabC').textContent = L('카드');
+    $('sSta').textContent = L('소요산'); $('sRank').textContent = L('순경');
   }
   L1D.init($('cv'));
   function layout() { L1D.resize(); }

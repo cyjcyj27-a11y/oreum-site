@@ -206,7 +206,18 @@
     { id: 'night', name: '야간 수당', v: '정차 +30 코인', max: 1, g: 1 }
   ];
   var LIVES = 5;
-  try { window.L1_LANG = /[?&]lang=en(&|$)/.test(location.search) ? 'en' : 'ko'; } catch (e) { window.L1_LANG = 'ko'; }
+  try { var lq = new URLSearchParams(location.search).get('lang'); window.L1_LANG = lq === 'en' || lq === 'zh' ? lq : 'ko'; } catch (e) { window.L1_LANG = 'ko'; }
+  // 중국어판: 한글 글꼴에 중국어 시스템 글꼴을 덧대고 낱말 끊기를 풀어 준다
+  if (window.L1_LANG === 'zh') {
+    try {
+      document.documentElement.lang = 'zh-CN';
+      var zf = "local('PingFang SC'),local('PingFangSC-Regular'),local('Microsoft YaHei'),local('Microsoft YaHei UI'),local('Noto Sans SC'),local('Noto Sans CJK SC'),local('Source Han Sans SC')";
+      var ur = 'U+2E80-2FFF,U+3000-303F,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF';
+      var zs = document.createElement('style');
+      zs.textContent = ['DOSSaemmul', 'DOSGothic'].map(function (fm) { return "@font-face{font-family:'" + fm + "';src:" + zf + ';unicode-range:' + ur + '}'; }).join('') + 'html[lang=zh-CN] *{word-break:normal!important}';
+      document.head.appendChild(zs);
+    } catch (e) {}
+  }
   var EN = {
     '1호선 빌런': 'LINE 1 VILLAINS', '가로로 보기': 'LANDSCAPE', '민원': 'Complaint', '검거': 'Caught', '도감': 'BOOK', '노선도': 'ROUTE', '카드': 'CARDS', '빌런': 'VILLAINS',
     '소요산~동두천': 'Soyosan~Dongducheon', '의정부~도봉산': 'Uijeongbu~Dobongsan', '청량리~종로': 'Cheongnyangni~Jongno', '서울역': 'Seoul Station', '구로~영등포': 'Guro~Yeongdeungpo', '수원~병점': 'Suwon~Byeongjeom', '천안~신창': 'Cheonan~Sinchang',
@@ -219,6 +230,18 @@
     '70판 근무 완료': '70 runs on duty'
   };
   var ENST = { '소요산': 'Soyosan', '동두천': 'Dongducheon', '보산': 'Bosan', '동두천중앙': 'Dongducheon Jungang', '지행': 'Jihaeng', '덕정': 'Deokjeong', '덕계': 'Deokgye', '양주': 'Yangju', '녹양': 'Nogyang', '가능': 'Ganeung', '의정부': 'Uijeongbu', '회룡': 'Hoeryong', '망월사': 'Mangwolsa', '도봉산': 'Dobongsan', '도봉': 'Dobong', '방학': 'Banghak', '창동': 'Chang-dong', '녹천': 'Nokcheon', '월계': 'Wolgye', '광운대': 'Kwangwoon Univ.', '석계': 'Seokgye', '신이문': 'Sinimun', '외대앞': 'HUFS', '회기': 'Hoegi', '청량리': 'Cheongnyangni', '제기동': 'Jegi-dong', '신설동': 'Sinseol-dong', '동묘앞': 'Dongmyo', '동대문': 'Dongdaemun', '종로5가': 'Jongno 5-ga', '종로3가': 'Jongno 3-ga', '종각': 'Jonggak', '시청': 'City Hall', '남영': 'Namyeong', '용산': 'Yongsan', '노량진': 'Noryangjin', '대방': 'Daebang', '신길': 'Singil', '영등포': 'Yeongdeungpo', '신도림': 'Sindorim', '구로': 'Guro', '가산디지털단지': 'Gasan Digital', '독산': 'Doksan', '금천구청': 'Geumcheon-gu Office', '석수': 'Seoksu', '관악': 'Gwanak', '안양': 'Anyang', '명학': 'Myeonghak', '금정': 'Geumjeong', '군포': 'Gunpo', '당정': 'Dangjeong', '의왕': 'Uiwang', '성균관대': 'Sungkyunkwan Univ.', '화서': 'Hwaseo', '수원': 'Suwon', '세류': 'Seryu', '병점': 'Byeongjeom', '세마': 'Sema', '오산': 'Osan', '진위': 'Jinwi', '송탄': 'Songtan', '서정리': 'Seojeong-ri', '평택': 'Pyeongtaek', '성환': 'Seonghwan', '직산': 'Jiksan', '두정': 'Dujeong', '천안': 'Cheonan', '봉명': 'Bongmyeong', '쌍용': 'Ssangyong', '아산': 'Asan', '배방': 'Baebang', '온양온천': 'Onyang Oncheon', '신창': 'Sinchang' };
-  function L(s) { return window.L1_LANG === 'en' ? (EN[s] || ENST[s] || s) : s; }
+  var ZH = {
+    '1호선 빌런': '1号线恶人', '가로로 보기': '横屏查看', '민원': '投诉', '검거': '抓获', '도감': '图鉴', '노선도': '线路图', '카드': '卡牌', '빌런': '恶人',
+    '소요산~동두천': '逍遥山~东豆川', '의정부~도봉산': '议政府~道峰山', '청량리~종로': '清凉里~钟路', '서울역': '首尔站', '구로~영등포': '九老~永登浦', '수원~병점': '水原~饼店', '천안~신창': '天安~新昌',
+    '사회복무요원': '社会服务员', '역무원': '站务员', '안전펜스': '安全护栏', '안내방송': '广播员', '보안관': '保安', '청소 여사님': '保洁阿姨', '철도경찰': '铁路警察',
+    '예수천국 전도사': '耶稣天国传教士', '잡상인': '小贩', '등산객': '登山客', '등산복 취객': '登山服醉汉', '쩍벌남': '岔腿男', '트로트 할아버지': '外放老歌大爷', '드러누운 아저씨': '躺座大叔', '스피커폰 아줌마': '外放电话大妈', '비둘기': '鸽子', '치킨 청년': '炸鸡小伙', '회에 소주 아저씨': '生鱼片烧酒大叔', '훈계 할아버지': '说教大爷', '웃통 아저씨': '光膀子大叔', '철봉남': '吊环引体男', '트렁크 팬티 아저씨': '大裤衩大叔', '강아지 승객': '遛狗乘客',
+    '등산 동호회': '登山社团', '황금 갑옷 장군': '黄金铠甲将军', '전도대장': '传教队长', '잡상인 왕': '小贩之王', '비둘기 왕': '鸽子王', '단소살인마': '短箫杀人魔', '1호선 대악마': '1号线大恶魔',
+    '순경': '巡警', '경장': '警长', '경사': '警士', '경위': '警卫', '경감': '警监', '경정': '警正', '총경': '总警',
+    '출근 수당': '通勤补贴', '호루라기 교체': '换新哨子', '공익 간식': '公益零食', '무술 단련': '武术修炼', '튼튼한 펜스': '结实护栏', '확성기': '扩音器', '믹스커피': '速溶咖啡', '정산 서류': '结算文件', '정차 수당': '停站补贴', '또렷한 방송': '清晰广播', '고화질 CCTV': '高清 CCTV', '새 대걸레': '新拖把', '철도경찰 지원': '铁警支援', '예산 절감': '预算节省', '공익 충원': '公益增员', '검거 포상': '抓获奖金', '민원 담당관': '投诉专员', '특별 상여금': '特别奖金', '보스 전담반': 'BOSS 专案组', '사기 충천': '士气高涨', '펜스 지원': '护栏支援', '결정적 한 방': '致命一击', '베테랑': '老手', '야간 수당': '夜班补贴',
+    '시작 코인 +40': '初始金币 +40', '역무원 +12%': '站务员 +12%', '사회복무요원 +15%': '社会服务员 +15%', '보안관 +12%': '保安 +12%', '펜스 체력 +1': '护栏耐久 +1', '사거리 +6%': '射程 +6%', '공격 속도 +6%': '攻速 +6%', '판매 +10%': '出售 +10%', '정차 +10 코인': '停站 +10 金币', '안내방송 감속 +8%': '广播减速 +8%', 'CCTV 표식 +10%': 'CCTV 标记 +10%', '청소 범위 +10%': '清扫范围 +10%', '철도경찰 +12%': '铁路警察 +12%', '업그레이드 -8%': '升级 -8%', '사회복무요원 -5 코인': '社会服务员 -5 金币', '검거 코인 +10%': '抓获金币 +10%', '민원 한도 +1': '投诉上限 +1', '시작 코인 +150': '初始金币 +150', '보스에게 +25%': '对 BOSS +25%', '모든 공격 +15%': '全部攻击 +15%', '안전펜스 공짜': '安全护栏免费', '10% 두 배 공격': '10% 双倍攻击', '처음 업그레이드 공짜': '首次升级免费', '정차 +30 코인': '停站 +30 金币',
+    '70판 근무 완료': '70 关执勤完成'
+  };
+  var ZHST = { '소요산': '逍遥山', '동두천': '东豆川', '보산': '保山', '동두천중앙': '东豆川中央', '지행': '智行', '덕정': '德亭', '덕계': '德溪', '양주': '杨州', '녹양': '绿杨', '가능': '佳陵', '의정부': '议政府', '회룡': '回龙', '망월사': '望月寺', '도봉산': '道峰山', '도봉': '道峰', '방학': '放鹤', '창동': '仓洞', '녹천': '鹿川', '월계': '月溪', '광운대': '光云大学', '석계': '石溪', '신이문': '新里门', '외대앞': '外大前', '회기': '回基', '청량리': '清凉里', '제기동': '祭基洞', '신설동': '新设洞', '동묘앞': '东庙前', '동대문': '东大门', '종로5가': '钟路5街', '종로3가': '钟路3街', '종각': '钟阁', '시청': '市厅', '남영': '南营', '용산': '龙山', '노량진': '鹭梁津', '대방': '大方', '신길': '新吉', '영등포': '永登浦', '신도림': '新道林', '구로': '九老', '가산디지털단지': '加山数码园区', '독산': '秃山', '금천구청': '衿川区厅', '석수': '石水', '관악': '冠岳', '안양': '安养', '명학': '鸣鹤', '금정': '衿井', '군포': '军浦', '당정': '堂井', '의왕': '义王', '성균관대': '成均馆大学', '화서': '华西', '수원': '水原', '세류': '细柳', '병점': '饼店', '세마': '洗马', '오산': '乌山', '진위': '振威', '송탄': '松炭', '서정리': '西井里', '평택': '平泽', '성환': '成欢', '직산': '稷山', '두정': '斗井', '천안': '天安', '봉명': '凤鸣', '쌍용': '双龙', '아산': '牙山', '배방': '排芳', '온양온천': '温阳温泉', '신창': '新昌' };
+  function L(s) { return window.L1_LANG === 'en' ? (EN[s] || ENST[s] || s) : window.L1_LANG === 'zh' ? (ZH[s] || ZHST[s] || s) : s; }
   window.L1_DATA = { LIVES: LIVES, L: L, HPB: HPB, BB: BB, EARLY: EARLY, HPK: HPK, BBZ: BBZ, HPT: HPT, LATE: LATE, ZONEHP: ZONEHP, KZ: KZ, MAPS: MAPS, STATIONS: STATIONS, TOWERS: TOWERS, TORDER: TORDER, ENEMIES: ENEMIES, VILLAINS: VILLAINS, BOSSES: BOSSES, FIRST: FIRST, STAGES: STAGES, CARDS: CARDS, RANKS: RANKS, zoneOf: zoneOf, eq: eq, waves: waves, hpMul: hpMul, bossMul: bossMul, startCoins: startCoins, rnd: rnd };
 })();
