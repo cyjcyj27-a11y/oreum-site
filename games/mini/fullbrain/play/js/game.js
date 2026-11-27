@@ -13,7 +13,23 @@
     document.querySelectorAll('[data-en]').forEach(el => { el.innerHTML = el.getAttribute('data-en'); });
     const t = document.getElementById('ttl'); if (t) t.innerHTML = '<span class="t1">FULL</span><span class="t2"> BRAIN</span>';
   }
-  const L = (ko, en) => EN ? en : ko;
+  // 중국어판: ?lang=zh 이면 한국어 글자를 중국어로 덧씌운다
+  const ZHL = new URLSearchParams(location.search).get('lang') === 'zh';
+  const ZH = { '풀가동!': '火力全开!', '일시정지': '暂停', '음악': '音乐', '효과음': '音效' };
+  if (ZHL) {
+    document.documentElement.lang = 'zh-CN'; document.title = '满分大脑';
+    const zf = "local('PingFang SC'),local('PingFangSC-Regular'),local('Microsoft YaHei'),local('Microsoft YaHei UI'),local('Noto Sans SC'),local('Noto Sans CJK SC'),local('Source Han Sans SC')";
+    const zb = "local('Microsoft YaHei Bold'),local('MicrosoftYaHei-Bold'),local('PingFangSC-Semibold'),local('Noto Sans SC Bold'),local('NotoSansSC-Bold'),local('Source Han Sans SC Bold')";
+    const ur = 'U+2E80-2FFF,U+3000-303F,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF';
+    const st = document.createElement('style');
+    st.textContent = `@font-face{font-family:'NG';src:${zf};unicode-range:${ur};font-weight:400}@font-face{font-family:'NG';src:${zb};unicode-range:${ur};font-weight:900}@font-face{font-family:'Ria';src:${zf};unicode-range:${ur}}html[lang=zh-CN] *{word-break:normal!important}#title h1 .t1,#title h1 .t2,#ending h1,#ending .congrats{font-weight:900}`;
+    document.head.appendChild(st);
+    const t = document.getElementById('ttl'); if (t) t.innerHTML = '<span class="t1">满分</span><span class="t2">大脑</span>';
+    const c = document.querySelector('#ending .congrats'); if (c) c.textContent = '恭喜你！';
+    const h = document.querySelector('#ending h1'); if (h) h.innerHTML = '你就是<br>大脑之王';
+    document.querySelectorAll('[title]').forEach(el => { const v = ZH[el.getAttribute('title')]; if (v) el.setAttribute('title', v); });
+  }
+  const L = (ko, en) => ZHL ? (ZH[ko] || en) : EN ? en : ko;
 
   // ---------------------------------------------------------------- 저장
   let prog = { stage: 1, stars: {}, ended: false, bestInf: 0, bestScore: 0 };
