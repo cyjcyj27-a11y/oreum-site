@@ -318,7 +318,7 @@
   R.drawStreet = function () {
     const g = streetC.getContext('2d'), w = 2048, h = 900; seed = 99;
     const sky = g.createLinearGradient(0, 0, 0, h); sky.addColorStop(0, '#0a0c1c'); sky.addColorStop(0.55, '#1d1a2c'); sky.addColorStop(1, '#2a1c18'); g.fillStyle = sky; g.fillRect(0, 0, w, h);
-    const signs = EN ? ['GUKBAP', 'PHARMACY', 'KARAOKE', 'CAFE', 'FISH', 'HOTEL', 'BIFF', 'BBQ', 'NAMPO', 'SNACK', 'CINEMA'] : ['국밥', '약국', '노래방', '다방', '횟집', '호텔', 'BIFF', '갈비', '남포동', '분식', '극장'];
+    const signs = window.ZH ? window.SIGNS_ZH : EN ? ['GUKBAP', 'PHARMACY', 'KARAOKE', 'CAFE', 'FISH', 'HOTEL', 'BIFF', 'BBQ', 'NAMPO', 'SNACK', 'CINEMA'] : ['국밥', '약국', '노래방', '다방', '횟집', '호텔', 'BIFF', '갈비', '남포동', '분식', '극장'];
     const cols = ['#ff4a5a', '#3ae0ff', '#ffd23a', '#ff7af0', '#7aff8a', '#ffffff', '#ff8a2a'];
     // 건물
     let x = -40;

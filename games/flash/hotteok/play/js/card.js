@@ -58,7 +58,7 @@
   };
   C.save = function () { if (!url) return; const a = document.createElement('a'); a.href = url; a.download = 'hotteok-end.png'; document.body.appendChild(a); a.click(); a.remove(); };
   C.share = function () {
-    const link = location.protocol === 'file:' ? '' : location.origin + location.pathname.replace(/play\/?(index\.html)?$/, '').replace(/index\.html$/, '') + (window.EN ? '?lang=en' : '');
+    const link = location.protocol === 'file:' ? '' : location.origin + (window.ZH ? '/zh' : '') + location.pathname.replace(/play\/?(index\.html)?$/, '').replace(/index\.html$/, '') + (window.EN ? '?lang=en' : '');
     if (navigator.share) { navigator.share({ title: L('호떡만들기 게임', 'Hotteok Maker'), text: shareLine, url: link || undefined }).catch(() => {}); return 'shared'; }
     try { navigator.clipboard.writeText(shareLine + (link ? '\n' + link : '')); } catch (e) {}
     return 'copied';
