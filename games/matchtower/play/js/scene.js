@@ -379,7 +379,7 @@
         x.fillStyle = '#2f9ad8'; x.fillRect(ox + 32, 84, SW - 64, SH - 106);
         x.fillStyle = '#fff'; x.textAlign = 'center'; x.textBaseline = 'middle';
         x.font = '900 46px Title, "Malgun Gothic", sans-serif';
-        x.fillText('초원다방', ox + SW / 2, 118);
+        x.fillText(window.LANG === 'zh' ? '草原茶馆' : '초원다방', ox + SW / 2, 118);
         x.fillStyle = '#ffe9a0'; x.fillRect(ox + 58, 142, SW - 116, 3);
         // 가운데 작은 커피잔
         x.fillStyle = '#fff';
@@ -447,8 +447,8 @@
     tx.fillStyle = '#fff4d8'; tx.textAlign = 'center'; tx.textBaseline = 'middle';
     tx.font = '900 ' + (0.5 * px2 | 0) + 'px Title, "Malgun Gothic", sans-serif';
     const ap = (RI + 0.71) * Math.cos(Math.PI / 8) * px2;
-    tx.fillText('초원다방', C0, C0 + ap);
-    tx.fillText('성냥', C0, C0 - ap);
+    tx.fillText(window.LANG === 'zh' ? '草原茶馆' : '초원다방', C0, C0 + ap);
+    tx.fillText(window.LANG === 'zh' ? '火柴' : '성냥', C0, C0 - ap);
     // 윗면 판: 가운데가 뚫린 팔각 고리. UV 는 월드 (x, z) 를 판 (가로, 세로)에 그대로
     const pos = [], uv = [], idx = [];
     for (let k = 0; k < 8; k++) {
