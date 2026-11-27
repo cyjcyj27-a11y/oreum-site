@@ -27,7 +27,22 @@
   // ── 말: ?lang=en 이면 영어 ──
   var EN = /[?&]lang=en/i.test(location.search);
   if (EN) { document.documentElement.lang = 'en'; document.body.classList.add('en'); document.title = 'Baduk — Go'; Array.prototype.forEach.call(document.querySelectorAll('[data-en]'), function (el) { el.textContent = el.getAttribute('data-en'); }); }
-  function rankName(L) { return (EN ? RANKS_EN : RANKS)[L]; }
+  // ?lang=zh: Chinese text, ranks and fonts
+  var ZH = !EN && /[?&]lang=zh(&|$)/i.test(location.search);
+  var RANKS_ZH = RANKS.map(function (s) { return s.replace('급', '级').replace('단', '段'); });
+  if (ZH) {
+    document.documentElement.lang = 'zh-CN'; document.body.classList.add('zh'); document.title = '围棋';
+    var ZHT = { '바둑': '围棋', '18급': '18级', '시작': '开始', '급수': '级别', 'P 패스 · K 효과음': 'P 停一手 · K 音效' };
+    Array.prototype.forEach.call(document.querySelectorAll('[data-en]'), function (el) { var k = el.textContent.trim(); if (ZHT[k]) el.textContent = ZHT[k]; });
+    var zf = "local('PingFang SC'),local('PingFangSC-Regular'),local('Microsoft YaHei'),local('Microsoft YaHei UI'),local('Noto Sans SC'),local('Noto Sans CJK SC'),local('Source Han Sans SC')";
+    var ur = 'U+2E80-2FFF,U+3000-303F,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF';
+    var zs = document.createElement('style');
+    zs.textContent = ['Myeongjo', 'Ria'].map(function (f) { return "@font-face{font-family:'" + f + "';src:" + zf + ';unicode-range:' + ur + '}'; }).join('') +
+      'html[lang=zh-CN] *{word-break:normal!important}' +
+      'body.zh #title h1{font-weight:700;letter-spacing:10px}';
+    document.head.appendChild(zs);
+  }
+  function rankName(L) { return (EN ? RANKS_EN : ZH ? RANKS_ZH : RANKS)[L]; }
 
   // ── 기록 — 오른 급수 ──
   function loadBest() { try { return Math.max(0, Math.min(TOP, parseInt(localStorage.getItem('baduk.rank') || '0', 10) || 0)); } catch (e) { return 0; } }
@@ -36,7 +51,7 @@
   function savePick(n) { try { localStorage.setItem('baduk.pick', String(n)); } catch (e) {} }
   function showRec() {
     $('rec').textContent = rankName(G.level);
-    var b = loadBest(); $('best').textContent = b > 0 ? (EN ? 'BEST ' : '최고 ') + rankName(b) : '';
+    var b = loadBest(); $('best').textContent = b > 0 ? (EN ? 'BEST ' : ZH ? '最高 ' : '최고 ') + rankName(b) : '';
     Array.prototype.forEach.call($('rk').children, function (w, i) { w.classList.toggle('on', i === G.level); });
   }
   function setLevel(n) { n = Math.max(0, Math.min(TOP, n)); if (n === G.level) return; G.level = n; savePick(n); showRec(); updHud(); A.stone(); }
