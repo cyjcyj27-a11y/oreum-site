@@ -2,14 +2,43 @@
 (function () {
 'use strict';
 const $ = s => document.querySelector(s);
-const LANG = /[?&]lang=en/.test(location.search) ? 'en' : 'ko';
+const LANG = /[?&]lang=en/.test(location.search) ? 'en' : /[?&]lang=zh/.test(location.search) ? 'zh' : 'ko';
+const LI = LANG === 'en' ? 1 : LANG === 'zh' ? 2 : 0;
 const DICT = {
   ko: { start: '시작', levelup: 'LEVEL UP', pause: 'PAUSE', resume: '계속', home: '처음으로', time: 'TIME', level: 'LEVEL', kills: 'KILL', unlock: 'NEW', t1: '요괴', t2: '라이크', dawn: '새벽', over: 'GAME OVER', evo: '진화', max: 'MAX', newW: '새 무기', newP: '새 아이템', locked: '잠김', heal: '회복', shop: '상점', dex: '도감', coin: '코인', close: '닫기', tabE: '요괴', tabW: '무기', tabI: '아이템', tabG: '소녀', unknown: '아직 못 봤습니다', hint: 'WASD / ←↑↓→ 이동 · SPACE 불꽃 · Esc 일시정지' },
   en: { start: 'START', levelup: 'LEVEL UP', pause: 'PAUSE', resume: 'RESUME', home: 'HOME', time: 'TIME', level: 'LEVEL', kills: 'KILL', unlock: 'NEW', t1: 'YOKAI', t2: 'LIKE', dawn: 'DAWN', over: 'GAME OVER', evo: 'EVOLVE', max: 'MAX', newW: 'NEW WEAPON', newP: 'NEW ITEM', locked: 'LOCKED', heal: 'HEAL', shop: 'SHOP', dex: 'COLLECTION', coin: 'COIN', close: 'CLOSE', tabE: 'YOKAI', tabW: 'WEAPONS', tabI: 'ITEMS', tabG: 'GIRLS', unknown: 'Not seen yet', hint: 'WASD / Arrows move · SPACE firework · Esc pause' },
+  zh: { start: '开始', levelup: 'LEVEL UP', pause: 'PAUSE', resume: '继续', home: '主菜单', time: 'TIME', level: 'LEVEL', kills: 'KILL', unlock: 'NEW', t1: '妖怪', t2: '幸存者', dawn: '天亮了', over: 'GAME OVER', evo: '进化', max: 'MAX', newW: '新武器', newP: '新道具', locked: '未解锁', heal: '回复', shop: '商店', dex: '图鉴', coin: '金币', close: '关闭', tabE: '妖怪', tabW: '武器', tabI: '道具', tabG: '少女', unknown: '还没见过', hint: 'WASD / ←↑↓→ 移动 · SPACE 烟花 · Esc 暂停' },
 };
+// 중국어: 한국어 원문을 열쇠로 쓰는 사전
+const ZH = {
+  '아야메': '菖蒲', '히마리': '阳葵', '미코토': '美琴', '사쿠야': '咲夜', '나츠키': '夏希', '루리카': '琉璃花', '시오리': '栞', '모모': '桃桃',
+  '죽도': '竹刀', '불꽃 죽도': '火焰竹刀', '금붕어': '金鱼', '금붕어 떼': '金鱼群', '부적': '符咒', '여우불 부적': '狐火符咒', '쟁반': '托盘', '뜨거운 쟁반': '滚烫托盘',
+  '고무공': '皮球', '왕 고무공': '巨型皮球', '양산': '阳伞', '등롱 양산': '灯笼阳伞', '책': '书', '주문서': '魔导书', '고양이 펀치': '猫猫拳', '네코마타 펀치': '猫又拳',
+  '불꽃': '烟花', '큰 불꽃': '大烟花', '등롱': '灯笼', '큰 등롱': '大灯笼', '여우 가면': '狐狸面具', '가면 행렬': '面具游行', '타코야키': '章鱼烧', '왕 타코야키': '巨型章鱼烧',
+  '사과사탕': '苹果糖', '초코바나나': '巧克力香蕉', '라무네': '波子汽水', '공격 +12%': '攻击 +12%', '최대 체력 +25': '最大HP +25', '이동 속도 +8%': '移速 +8%',
+  '앞뒤 베기': '前后斩击', '튀어 다님': '四处弹跳', '가까운 요괴를 쫓음': '追踪最近的妖怪', '던졌다 돌아옴': '扔出后飞回', '주위를 돎': '绕身旋转', '부채꼴 발사': '扇形发射',
+  '가까운 요괴 연타': '连打附近妖怪', '하늘에서 떨어짐': '从天而降', '주위 지속 피해': '周围持续伤害', '맞으면 느려짐': '命中减速', '터지는 타코야키': '会爆炸的章鱼烧',
+  '자동사냥': '自动狩猎', '알아서 피하고 줍기': '自动躲避和拾取', '사과사탕 묶음': '苹果糖礼包', '공격 +6%': '攻击 +6%', '초코바나나 묶음': '巧克力香蕉礼包', '최대 체력 +10': '最大HP +10',
+  '라무네 묶음': '波子汽水礼包', '이동 속도 +3%': '移速 +3%', '영혼불 자석 +20': '魂火吸取范围 +20', '폭죽 상자': '烟花箱', '폭죽 게이지 +12%': '烟花槽 +12%', '부적 다발': '一叠符咒', '영혼불 경험치 +6%': '魂火经验 +6%',
+  '가라카사': '唐伞妖', '외눈 동자': '独眼小僧', '갓파': '河童', '혼불': '鬼火', '여우': '狐狸', '놋페라보': '无脸怪', '네코마타': '猫又', '꼬마 오니': '小鬼', '너구리': '狸猫', '텐구': '天狗', '큰 우산': '巨伞妖',
+  '깡충깡충 뛰는 우산 요괴': '蹦蹦跳跳的伞妖', '빠르게 다가오는 외눈 동자': '飞快逼近的独眼小僧', '잡으면 가끔 타코야키를 떨어뜨림': '打倒后偶尔掉章鱼烧', '떠다니는 혼불': '飘来飘去的鬼火',
+  '단단한 여우': '皮糙肉厚的狐狸', '얼굴 없는 유령': '没有脸的幽灵', '빠르고 단단한 고양이 요괴': '又快又硬的猫妖', '느리지만 아픈 꼬마 오니': '慢吞吞但打人很疼的小鬼',
+  '3분·11분 보스, 덩치': '3分和11分的BOSS，大块头', '6분·11분 30초 보스, 돌진': '6分和11分30秒的BOSS，会冲撞', '9분 보스, 작은 우산을 불러냄': '9分的BOSS，会召唤小伞妖',
+  '보스': 'BOSS', '마지막 보스': '最终BOSS', '체력 +50': 'HP +50', '피해 2배': '伤害 x2', '피해 +25%': '伤害 +25%',
+};
+// 한국어·영어·중국어 중 하나 고르기
+const T = (ko, en) => LANG === 'en' ? en : LANG === 'zh' ? (ZH[ko] || en) : ko;
 const L = k => DICT[LANG][k];
 document.querySelectorAll('[data-l]').forEach(e => { const v = L(e.dataset.l); if (typeof v === 'string') e.textContent = v; });
-document.title = LANG === 'en' ? 'Yokai Like' : '요괴라이크';
+document.title = LANG === 'en' ? 'Yokai Like' : LANG === 'zh' ? '妖怪幸存者' : '요괴라이크';
+if (LANG === 'zh') {
+  document.documentElement.lang = 'zh-CN';
+  const zf = "local('PingFang SC'),local('PingFangSC-Regular'),local('Microsoft YaHei'),local('Microsoft YaHei UI'),local('Noto Sans SC'),local('Noto Sans CJK SC'),local('Source Han Sans SC')";
+  const ur = 'U+2E80-2FFF,U+3000-303F,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF';
+  const st = document.createElement('style');
+  st.textContent = ['Galmuri', 'NeoDGM'].map(f => "@font-face{font-family:'" + f + "';src:" + zf + ";unicode-range:" + ur + "}").join('') + 'html[lang=zh-CN] *{word-break:normal!important}';
+  document.head.appendChild(st);
+}
 const GIRLS = [
   { ko: '아야메', en: 'Ayame', w: 'shinai' }, { ko: '히마리', en: 'Himari', w: 'goldfish' }, { ko: '미코토', en: 'Mikoto', w: 'ofuda' }, { ko: '사쿠야', en: 'Sakuya', w: 'tray' },
   { ko: '나츠키', en: 'Natsuki', w: 'ball' }, { ko: '루리카', en: 'Rurika', w: 'parasol' }, { ko: '시오리', en: 'Shiori', w: 'book' }, { ko: '모모', en: 'Momo', w: 'paw' }];
@@ -75,6 +104,11 @@ const shopLv = k => SAVE.shop[k] || 0;
 const shopCost = (it, lv) => Math.round(it.base * Math.pow(1.6, lv));
 const ENAMES = { kasa: ['가라카사', 'Karakasa'], hitotsume: ['외눈 동자', 'One-eyed Boy'], kappa: ['갓파', 'Kappa'], hitodama: ['혼불', 'Soul Flame'], kitsune: ['여우', 'Fox'], noppera: ['놋페라보', 'Noppera-bo'], nekomata: ['네코마타', 'Nekomata'], oni: ['꼬마 오니', 'Little Oni'], tanuki: ['너구리', 'Tanuki'], tengu: ['텐구', 'Tengu'], bigkasa: ['큰 우산', 'Giant Umbrella'] };
 const EDESC = { kasa: ['깡충깡충 뛰는 우산 요괴', 'Hopping umbrella yokai'], hitotsume: ['빠르게 다가오는 외눈 동자', 'Fast one-eyed boy'], kappa: ['잡으면 가끔 타코야키를 떨어뜨림', 'Sometimes drops takoyaki'], hitodama: ['떠다니는 혼불', 'Drifting soul flame'], kitsune: ['단단한 여우', 'A tough fox'], noppera: ['얼굴 없는 유령', 'Faceless ghost'], nekomata: ['빠르고 단단한 고양이 요괴', 'Fast, tough cat yokai'], oni: ['느리지만 아픈 꼬마 오니', 'Slow but hits hard'], tanuki: ['3분·11분 보스, 덩치', '3:00 and 11:00 boss, big'], tengu: ['6분·11분 30초 보스, 돌진', '6:00 and 11:30 boss, charges'], bigkasa: ['9분 보스, 작은 우산을 불러냄', '9:00 boss, summons umbrellas'] };
+if (LANG === 'zh') {
+  const z = k => ZH[k] || k;
+  [GIRLS, Object.values(WEAPONS), Object.values(PASSIVES), SHOP].forEach(a => a.forEach(o => { o.zh = z(o.ko); }));
+  [Object.values(WEAPONS).map(w => w.evo), Object.values(PASSIVES).map(p => p.d), SHOP.map(o => o.d), Object.values(WDESC), Object.values(ENAMES), Object.values(EDESC)].forEach(a => a.forEach(r => { r[2] = z(r[0]); }));
+}
 function seen(k) { if (!SAVE.seen[k]) { SAVE.seen[k] = 1; save(); } }
 function save() { try { localStorage.setItem('yokailike.save', JSON.stringify(SAVE)); } catch (e) {} }
 
@@ -152,13 +186,13 @@ function spawnEnemy(key, x, y) {
   const d = ENEMIES[key]; const min = G.time / 60; const mul = 1 + min * 0.13;
   if (x == null) { const vw = W / ZOOM / 2 + 80, vh = H / ZOOM / 2 + 80; const side = Math.floor(Math.random() * 4); x = G.cam.x + (side === 0 ? -vw : side === 1 ? vw : rnd(-vw, vw)); y = G.cam.y + (side === 2 ? -vh : side === 3 ? vh : rnd(-vh, vh)); }
   const e = { key, def: d, x, y, hp: d.hp * mul, maxhp: d.hp * mul, sp: d.sp * (1 + min * 0.015), dmg: d.dmg, r: d.r, xp: d.xp, h: d.h, boss: !!d.boss, flash: 0, kx: 0, slow: 0, hitCd: 0, face: 1, ft: rnd(0, 2), dashT: rnd(2, 4), sumT: 3 };
-  G.E.push(e); if (e.boss) { SND.roar(); G.shake = 0.4; toast(LANG === 'en' ? 'BOSS' : '보스'); } return e;
+  G.E.push(e); if (e.boss) { SND.roar(); G.shake = 0.4; toast(T('보스', 'BOSS')); } return e;
 }
 function updateEnemies(dt) {
   const P = G.P; const min = G.time / 60;
   // 나오기
   G.spawnT -= dt; if (G.spawnT <= 0 && G.E.length < 230) { const pool = WAVES[Math.min(WAVES.length - 1, Math.floor(min / 2.2))]; const n = 1 + Math.floor(min / 2.5); for (let i = 0; i < n; i++) spawnEnemy(pool[Math.floor(Math.random() * pool.length)]); G.spawnT = Math.max(0.22, 1.0 - min * 0.07); }
-  while (G.bossI < BOSS_AT.length && G.time >= BOSS_AT[G.bossI][0]) { spawnEnemy(BOSS_AT[G.bossI][1]); G.bossI++; if (G.bossI === BOSS_AT.length && G.auto) { G.autoLock = true; syncAuto(); if (G.AI) G.AI.hold = 0; G.sp = false; setTimeout(() => { if (G.phase === 'play') toast((LANG === 'en' ? 'LAST BOSS' : '마지막 보스') + ' · AUTO OFF'); }, 1200); } }   /* 빌런라이크처럼 마지막 보스는 손으로 */
+  while (G.bossI < BOSS_AT.length && G.time >= BOSS_AT[G.bossI][0]) { spawnEnemy(BOSS_AT[G.bossI][1]); G.bossI++; if (G.bossI === BOSS_AT.length && G.auto) { G.autoLock = true; syncAuto(); if (G.AI) G.AI.hold = 0; G.sp = false; setTimeout(() => { if (G.phase === 'play') toast(T('마지막 보스', 'LAST BOSS') + ' · AUTO OFF'); }, 1200); } }   /* 빌런라이크처럼 마지막 보스는 손으로 */
   // 움직임 + 간단한 밀어내기(격자)
   const grid = new Map(); const CS = 48;
   for (const e of G.E) { const k = ((e.x / CS) | 0) + ',' + ((e.y / CS) | 0); (grid.get(k) || grid.set(k, []).get(k)).push(e); }
@@ -223,8 +257,8 @@ function openLevelUp() {
     const def = c.kind === 'w' ? WEAPONS[c.k] : c.kind === 'p' ? PASSIVES[c.k] : null;
     const ic = document.createElement('canvas'); ic.width = ic.height = 112; drawIcon(ic, def ? def.icon : 'i_takoyaki'); el.appendChild(ic);
     const t = document.createElement('div'); t.className = 't';
-    const name = c.kind === 'heal' ? L('heal') : c.evo ? def.evo[LANG === 'en' ? 1 : 0] : def[LANG];
-    const desc = c.kind === 'heal' ? (LANG === 'en' ? 'HP +50' : '체력 +50') : c.kind === 'p' ? def.d[LANG === 'en' ? 1 : 0] : c.lv === 1 ? WDESC[def.type][LANG === 'en' ? 1 : 0] : c.evo ? (LANG === 'en' ? 'DAMAGE x2' : '피해 2배') : (LANG === 'en' ? 'DAMAGE +25%' : '피해 +25%');
+    const name = c.kind === 'heal' ? L('heal') : c.evo ? def.evo[LI] : def[LANG];
+    const desc = c.kind === 'heal' ? T('체력 +50', 'HP +50') : c.kind === 'p' ? def.d[LI] : c.lv === 1 ? WDESC[def.type][LI] : c.evo ? T('피해 2배', 'DAMAGE x2') : T('피해 +25%', 'DAMAGE +25%');
     const tag = c.kind === 'heal' ? '' : c.evo ? L('evo') : c.lv === 1 ? (c.kind === 'w' ? L('newW') : L('newP')) : 'LV ' + c.lv;
     t.innerHTML = '<div class="n">' + name + '</div><div class="d">' + desc + '</div>'; const lv = document.createElement('div'); lv.className = 'lv'; lv.textContent = tag;
     el.append(t, lv); el.onclick = () => { applyCard(c); $('#levelup').hidden = true; G.phase = 'play'; SND.duck(false); SND.blip(); }; box.appendChild(el);
@@ -395,7 +429,7 @@ function openShop() {
     const lv = shopLv(it.k), mx = it.max || SHOP_MAX, max = lv >= mx, cost = max ? 0 : shopCost(it, lv);
     const el = document.createElement('div'); el.className = 'card shoprow' + (max ? ' max' : (SAVE.coins < cost ? ' poor' : ''));
     const ic = document.createElement('canvas'); ic.width = ic.height = 112; drawIcon(ic, it.icon); el.appendChild(ic);
-    const t = document.createElement('div'); t.className = 't'; t.innerHTML = '<div class="n">' + it[LANG] + '</div><div class="d">' + it.d[LANG === 'en' ? 1 : 0] + ' × ' + lv + '</div>';
+    const t = document.createElement('div'); t.className = 't'; t.innerHTML = '<div class="n">' + it[LANG] + '</div><div class="d">' + it.d[LI] + ' × ' + lv + '</div>';
     const r = document.createElement('div'); r.className = 'lv'; r.innerHTML = (max ? L('max') : cost.toLocaleString()) + '<b>LV ' + lv + '/' + mx + '</b>';
     el.append(t, r);
     el.onclick = () => { if (max) { SND.back(); return; } if (SAVE.coins < cost) { SND.back(); toast(L('coin') + ' ' + cost); return; } SAVE.coins -= cost; SAVE.shop[it.k] = lv + 1; if (it.k === 'auto') SAVE.autoOn = 1; save(); SND.levelup(); openShop(); buildTitle(); syncAuto(); };
@@ -405,9 +439,9 @@ function openShop() {
 // ---------- 도감 ----------
 const DEX_TABS = ['E', 'W', 'I', 'G']; let dexTab = 'E';
 function dexItems(tab) {
-  if (tab === 'E') return Object.keys(ENEMIES).map(k => ({ icon: ENEMIES[k].boss ? 'b_' + k : 'y_' + k + '_a', name: ENAMES[k][LANG === 'en' ? 1 : 0], desc: EDESC[k][LANG === 'en' ? 1 : 0], ok: !!SAVE.seen['e_' + k] }));
-  if (tab === 'W') return Object.keys(WEAPONS).map(k => { const w = WEAPONS[k], evo = !!SAVE.seen['w_' + k + '_evo']; return { icon: w.icon, name: evo ? w.evo[LANG === 'en' ? 1 : 0] : w[LANG], desc: WDESC[w.type][LANG === 'en' ? 1 : 0] + (evo ? '' : ' · ' + L('evo') + ': ' + w.evo[LANG === 'en' ? 1 : 0]), ok: !!SAVE.seen['w_' + k], evo }; });
-  if (tab === 'I') return Object.keys(PASSIVES).map(k => ({ icon: PASSIVES[k].icon, name: PASSIVES[k][LANG], desc: PASSIVES[k].d[LANG === 'en' ? 1 : 0], ok: !!SAVE.seen['i_' + k] }));
+  if (tab === 'E') return Object.keys(ENEMIES).map(k => ({ icon: ENEMIES[k].boss ? 'b_' + k : 'y_' + k + '_a', name: ENAMES[k][LI], desc: EDESC[k][LI], ok: !!SAVE.seen['e_' + k] }));
+  if (tab === 'W') return Object.keys(WEAPONS).map(k => { const w = WEAPONS[k], evo = !!SAVE.seen['w_' + k + '_evo']; return { icon: w.icon, name: evo ? w.evo[LI] : w[LANG], desc: WDESC[w.type][LI] + (evo ? '' : ' · ' + L('evo') + ': ' + w.evo[LI]), ok: !!SAVE.seen['w_' + k], evo }; });
+  if (tab === 'I') return Object.keys(PASSIVES).map(k => ({ icon: PASSIVES[k].icon, name: PASSIVES[k][LANG], desc: PASSIVES[k].d[LI], ok: !!SAVE.seen['i_' + k] }));
   return GIRLS.map((g, i) => ({ icon: 'p_g' + (i + 1) + '_stand', name: g[LANG], desc: WEAPONS[g.w][LANG] + (SAVE.best[i] ? ' · BEST ' + fmt(SAVE.best[i]) : ''), ok: !!(SAVE.unlock & (1 << i)) }));
 }
 function openDex(tab) {
@@ -447,7 +481,7 @@ addEventListener('keydown', e => {
 });
 addEventListener('keyup', e => { G.keys[e.key] = false; if (e.key === ' ') G.sp = false; });
 addEventListener('blur', () => { G.keys = {}; G.pad.x = G.pad.y = 0; G.sp = false; });
-$('#tAuto').onclick = () => { if (!hasAuto()) return; SND.unlock(); if (G.autoLock && G.phase === 'play') { SND.back(); toast((LANG === 'en' ? 'LAST BOSS' : '마지막 보스') + ' · AUTO OFF'); return; } SAVE.autoOn = SAVE.autoOn ? 0 : 1; save(); syncAuto(); SND.levelup(); toast('AUTO ' + (G.auto ? 'ON' : 'OFF')); };
+$('#tAuto').onclick = () => { if (!hasAuto()) return; SND.unlock(); if (G.autoLock && G.phase === 'play') { SND.back(); toast(T('마지막 보스', 'LAST BOSS') + ' · AUTO OFF'); return; } SAVE.autoOn = SAVE.autoOn ? 0 : 1; save(); syncAuto(); SND.levelup(); toast('AUTO ' + (G.auto ? 'ON' : 'OFF')); };
 syncAuto();
 const actB = $('#act'); if (actB) { actB.addEventListener('pointerdown', e => { e.preventDefault(); SND.unlock(); G.sp = true; try { actB.setPointerCapture(e.pointerId); } catch (x) {} }); const aEnd = () => { G.sp = false; }; actB.addEventListener('pointerup', aEnd); actB.addEventListener('pointercancel', aEnd); }
 // 폰 패드
