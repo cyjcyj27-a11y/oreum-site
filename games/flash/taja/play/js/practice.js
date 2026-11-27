@@ -4,8 +4,19 @@
   'use strict';
   var A = window.TJAudio, HG = window.HG;
   var $ = function (id) { return document.getElementById(id); };
-  var EN = /[?&]lang=en/i.test(location.search);
-  function L(ko, en) { return EN ? en : ko; }
+  var EN = /[?&]lang=en/i.test(location.search), ZH = /[?&]lang=zh/i.test(location.search);
+  // 중국어판 화면 글(단계 이름은 한글·영어 이름 둘 다 열쇠로)
+  var ZHD = {
+    '자리 연습': '键位练习', '낱말 연습': '单词练习', '짧은 글 연습': '短句练习', '긴 글 연습': '长文练习', '타': 'KPM', '최고 기록!': '新纪录！', '최고 ': '最高 ',
+    '기본 자리': '基本键位', '윗줄': '上排', '아랫줄': '下排', '쌍자음': '双辅音', '숫자': '数字', '전체': '全部',
+    'Home row': '基本键位', 'Top row': '上排', 'Bottom row': '下排', 'Capitals': '大写', 'Numbers': '数字', 'All': '全部',
+    '문장 1': '句子 1', '문장 2': '句子 2', '속담': '俗语', '긴 문장': '长句', '기호': '符号',
+    'Sentences 1': '句子 1', 'Sentences 2': '句子 2', 'Proverbs': '谚语', 'Long': '长句', 'Symbols': '符号',
+    '토끼와 거북이': '龟兔赛跑', '금도끼 은도끼': '金斧头银斧头', '개미와 베짱이': '蚂蚁和蝈蝈', '해님 달님': '日月兄妹', '흥부와 놀부': '兴夫和孬夫', '견우와 직녀': '牛郎织女',
+    'The Tortoise and the Hare': '龟兔赛跑', 'The Ant and the Grasshopper': '蚂蚁和蚱蜢', 'The Lion and the Mouse': '狮子和老鼠', 'The Boy Who Cried Wolf': '狼来了', 'The Honest Woodcutter': '诚实的樵夫', 'The Sun and the Wind': '北风和太阳'
+  };
+  function L(ko, en) { return ZH ? (ZHD[ko] || en) : EN ? en : ko; }
+  function LV(s) { return ZH && ZHD[s] ? ZHD[s] : s; }
 
   // ── 키보드: [코드, 한글, 한글+Shift, 영어, 영어+Shift, 손가락(0~7, 8 엄지), 너비] ──
   var ROWS = [
@@ -66,7 +77,7 @@
   };
 
   // ── 상태 ──
-  var PR = null, lang = EN ? 'en' : 'ko', tick = null;
+  var PR = null, lang = EN || ZH ? 'en' : 'ko', tick = null;
   var best = (function () { try { return JSON.parse(localStorage.getItem('taja.prac') || '{}') || {}; } catch (e) { return {}; } })();
   function saveBest() { try { localStorage.setItem('taja.prac', JSON.stringify(best)); } catch (e) {} }
   function unit() { return lang === 'en' ? 'WPM' : L('타', 'KPM'); }
@@ -164,7 +175,7 @@
     // 단계 칩
     var lvBox = $('pLv'); lvBox.innerHTML = '<b>' + modeName(mode) + '</b>';
     lvs.forEach(function (x, i) {
-      var ch = document.createElement('span'); ch.className = 'plv' + (i === lv ? ' on' : ''); ch.textContent = x[0];
+      var ch = document.createElement('span'); ch.className = 'plv' + (i === lv ? ' on' : ''); ch.textContent = LV(x[0]);
       ch.onclick = function () { A.click(); start(mode, i); };
       lvBox.appendChild(ch);
     });

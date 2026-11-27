@@ -5,12 +5,34 @@
   'use strict';
   var A = window.TJAudio, ART = window.TJArt, HG = window.HG;
   var $ = function (id) { return document.getElementById(id); };
-  var EN = /[?&]lang=en/i.test(location.search), LANG = EN ? 'en' : 'ko';
-  function L(ko, en) { return EN ? en : ko; }
+  var EN = /[?&]lang=en/i.test(location.search), ZH = /[?&]lang=zh/i.test(location.search);
+  // 중국어판: 화면 글은 중국어, 치는 글은 영어판과 같다
+  var ENC = EN || ZH, LANG = ENC ? 'en' : 'ko';
+  var ZHD = {
+    '타자연습': '打字练习', '달리기': '赛跑', '이어하기': '继续游戏', '처음부터 하기': '重新开始', '처음으로': '返回标题',
+    '1등': '第1名', '다음 코스': '下一关', '다시': '再来', '코스': '赛道', '계속': '继续', '한글': '韩文', '영어': '英文',
+    '자리 연습': '键位练习', '낱말 연습': '单词练习', '짧은 글 연습': '短句练习', '긴 글 연습': '长文练习', '연습': '菜单', '다음 단계': '下一级',
+    '좋아!': '不错！', '멋져!': '漂亮！', '최고!': '太棒了！', '최고 기록 ': '最高纪录 ', '정말 처음부터 하기': '确定重新开始？',
+    '최고 기록!': '新纪录！', '다음 판': '下一关', '챔피언': '冠军'
+  };
+  function L(ko, en) { return ZH ? (ZHD[ko] || en) : EN ? en : ko; }
+  function rankName(n) { return EN ? ['1ST', '2ND', '3RD', '4TH'][n - 1] : ZH ? '第' + n + '名' : n + '등'; }
   if (EN) {
     document.documentElement.lang = 'en'; document.body.classList.add('en'); document.title = 'Typing Race';
     Array.prototype.forEach.call(document.querySelectorAll('[data-en]'), function (el) { el.textContent = el.getAttribute('data-en'); });
     $('uCpm').textContent = 'WPM'; $('rUnit').textContent = 'WPM';
+  }
+  if (ZH) {
+    document.documentElement.lang = 'zh-CN'; document.title = '打字赛跑';
+    Array.prototype.forEach.call(document.querySelectorAll('[data-en]'), function (el) { var k = el.textContent.trim(); if (ZHD[k]) el.textContent = ZHD[k]; });
+    document.querySelector('#title h1').innerHTML = '打字<br><em>赛跑</em>'; $('plKo').textContent = '韩文';
+    ['uCpm', 'rUnit', 'pUnit', 'prUnit'].forEach(function (id) { $(id).textContent = 'WPM'; });
+    // 글꼴에 없는 한자는 시스템 중국어 글꼴로
+    var zf = "local('PingFang SC'),local('PingFangSC-Regular'),local('Microsoft YaHei'),local('Microsoft YaHei UI'),local('Noto Sans SC'),local('Noto Sans CJK SC'),local('Source Han Sans SC')";
+    var ur = 'U+2E80-2FFF,U+3000-303F,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF';
+    var zs = document.createElement('style');
+    zs.textContent = ['Poor', 'Ria'].map(function (f) { return "@font-face{font-family:'" + f + "';src:" + zf + ';unicode-range:' + ur + '}'; }).join('') + 'html[lang=zh-CN] *{word-break:normal!important}';
+    document.head.appendChild(zs);
   }
 
   // ── 코스 ──
@@ -19,7 +41,7 @@
   // 스테이지 60 = 코스 12곳 × 5판. 코스마다 5번째 판에 그 코스 대장이 나온다
   var NCOURSE = 12, PER = 5, NS = NCOURSE * PER, SCENE_H = 600, START_X = 150;
   // 가장 빠른 상대의 빠르기(1분에 몇 타). 1스테이지 40타 → 60스테이지 460타. 영어는 글자 수 기준이라 조금 낮다
-  var LO = EN ? 32 : 40, HI = EN ? 350 : 460;
+  var LO = ENC ? 32 : 40, HI = ENC ? 350 : 460;
   function stageSpd(si) { return Math.round(LO + (HI - LO) * Math.pow(si / (NS - 1), 1.1)); }
   function courseOf(si) { return Math.floor(si / PER); }
   function isBoss(si) { return si % PER === PER - 1; }
@@ -43,8 +65,8 @@
   function unlocked(i) { return i === 0 || P.medal[i - 1] >= 1; }
   function owned(k) { return k === 'dog' || P.medal[BOSS.indexOf(k) * PER + PER - 1] === 3; }
   if (!owned(P.runner)) P.runner = 'dog';
-  function speedLabel(cpm) { return EN ? String(Math.round(cpm / 5)) : String(Math.round(cpm)); }
-  function unitLabel() { return EN ? ' WPM' : '타'; }
+  function speedLabel(cpm) { return ENC ? String(Math.round(cpm / 5)) : String(Math.round(cpm)); }
+  function unitLabel() { return ENC ? ' WPM' : '타'; }
 
   // ── 화면 ──
   var cv = $('c'), ctx = cv.getContext('2d'), inp = $('inp'), panel = $('panel');
@@ -224,7 +246,7 @@
     // 기록이 있으면 이어하기(금메달 아직인 첫 판) · 처음부터 하기
     var has = hasSave();
     $('btnCont').hidden = !has; $('btnNew').hidden = !has; newArmed(false);
-    if (has) $('btnCont').textContent = L('이어하기 · ' + (nowStage() + 1) + '판', 'CONTINUE · STAGE ' + (nowStage() + 1));
+    if (has) $('btnCont').textContent = (ZH ? '继续 · 第' + (nowStage() + 1) + '关' : L('이어하기 · ' + (nowStage() + 1) + '판', 'CONTINUE · STAGE ' + (nowStage() + 1)));
   }
   // 처음부터 하기: 한 번 누르면 빨갛게 바뀌고, 3초 안에 또 누르면 달리기 기록을 지운다
   var newT = 0;
@@ -304,7 +326,7 @@
     if (close) { R.slow = 0.3; R.slowT = 1.2; }
     A.cheer(R.rank === 1); if (R.rank === 1) { R.confT = S.T; A.win(); } else if (R.rank === 4) A.lose();
     me.mood = R.rank === 1 ? 'cheer' : R.rank === 4 ? 'sad' : 'happy';
-    flash(EN ? ['1ST', '2ND', '3RD', '4TH'][R.rank - 1] : R.rank + '등', R.rank === 1 ? 'go' : '', 1400);
+    flash(rankName(R.rank), R.rank === 1 ? 'go' : '', 1400);
     S.mode = 'finish'; R.endT = 0;
     $('panel').style.opacity = '.5';
   }
@@ -317,7 +339,7 @@
     if (newBest) P.best[si] = Math.round(cpm);
     var topNew = cpm > P.top; if (topNew) P.top = Math.round(cpm);
     persist();
-    var rr = $('rRank'); rr.textContent = EN ? ['1ST', '2ND', '3RD', '4TH'][rank - 1] : rank + '등'; rr.className = 'r' + rank;
+    var rr = $('rRank'); rr.textContent = rankName(rank); rr.className = 'r' + rank;
     $('rCpm').textContent = speedLabel(cpm); $('rAcc').textContent = acc;
     $('rNew').textContent = topNew && P.races > 1 ? L('최고 기록!', 'NEW RECORD') : '';
     var un = $('rUnlock'); un.innerHTML = '';
