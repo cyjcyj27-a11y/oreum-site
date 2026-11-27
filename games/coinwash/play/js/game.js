@@ -4,9 +4,57 @@
   const W = 640, H = 360;
   const $ = id => document.getElementById(id);
   const canvas = $('c'), ctx = canvas.getContext('2d'); canvas.width = W * 2; canvas.height = H * 2; ctx.scale(2, 2); ctx.imageSmoothingEnabled = false;
-  const EN = (() => { try { return new URLSearchParams(location.search).get('lang') === 'en'; } catch (_) { return false; } })();
+  const LG = (() => { try { const q = new URLSearchParams(location.search).get('lang'); return q === 'en' || q === 'zh' ? q : 'ko'; } catch (_) { return 'ko'; } })();
+  const EN = LG === 'en', ZHL = LG === 'zh';
+  // Simplified Chinese strings keyed by the Korean original
+  const ZH = {
+    '코인빨래방': '投币洗衣店24', '음악': '音乐', '효과음': '音效',
+    '클릭 행동 · B 상점<br>M 음악 · K 효과음': '点击行动 · B 商店<br>M 音乐 · K 音效',
+    '상점': '商店', '단골': '熟客', '빚 갚기': '还债', '닫기': '关闭', '받기': '领取', '계속하기': '继续', '새로 시작': '新游戏', '지우고 새로': '清档重来',
+    '가로 화면에서 하는 게임입니다': '这款游戏需要横屏玩', '가로로 돌리기': '切换横屏',
+    '단추가 안 먹으면 폰의 화면 회전 잠금을 풀고 눕혀 주세요': '按钮没反应的话，请关闭手机的旋转锁定，再把手机横过来',
+    '그래도 세로로 하기': '还是竖屏玩',
+    '지수': '智秀', '순자': '顺子', '민준': '敏俊', '서연': '书妍', '하늘': '夏恩', '도윤': '道允', '은지': '恩智', '태호': '泰浩', '미영': '美英', '준호': '俊浩',
+    '세탁기 +1': '洗衣机 +1', '고속 모터': '高速电机', '고급 세제': '高级洗衣液', '큰 동전통': '大号投币箱', '튼튼한 세탁기': '耐用洗衣机', '동전 카트': '硬币推车',
+    '공구함': '工具箱', '대걸레': '拖把', '운동화': '运动鞋', '자판기': '自动售货机', '벤치 +1': '长椅 +1', '빨래 탁자 +1': '叠衣桌 +1', 'CCTV': 'CCTV',
+    '네온 간판': '霓虹招牌', '화분': '盆栽', '빨래 개는 기계': '叠衣机', '야간 전단지': '夜间传单', '4호점': '4号店',
+    '사장님, 빚 다 갚으셨다면서요! 축하드려요!': '老板，听说你债都还清了！恭喜恭喜！',
+    '빚 거의 다 갚으셨네요. 조금만 더!': '债快还完了吧，再加把劲！',
+    '이 시간엔 취객 조심하세요…': '这个点要小心醉汉哦…',
+    '밤에도 오셨네요. 저도 야간이에요.': '大半夜也来啦，我也是上夜班的。',
+    '아침이네요. 밤새 고생하셨어요.': '天亮了，熬了一夜辛苦啦。',
+    '낮에 오시는 건 드물죠? 한가해요.': '白天很少来吧？现在挺闲的。',
+    '저녁이라 슬슬 바쁘시겠어요.': '到晚上了，要开始忙了吧。',
+    '비 오면 빨래방 손님 늘죠?': '下雨天洗衣店客人会变多吧？',
+    '눈 오는 날엔 이불 손님 많대요.': '听说下雪天来洗被子的人特别多。',
+    '벚꽃 피니까 좋네요.': '樱花开了，真好。',
+    '덥죠? 음료 시원해요.': '很热吧？饮料是冰的哦。',
+    '낙엽 쓸기 귀찮아요.': '扫落叶好烦啊。',
+    '춥죠. 감기 조심하세요.': '好冷啊，小心别感冒。',
+    '신상 컵라면 들어왔어요.': '新口味杯面到货了。',
+    '점장님이 또 잔소리해요.': '店长又在唠叨了。',
+    '저도 코인빨래방 자주 가요.': '我也经常去投币洗衣店。',
+    '졸려요… 커피 한 잔 해야겠어요.': '好困…得来杯咖啡了。',
+    '사장님은 단골이니까 싸게 드려요.': '老板是熟客，给你便宜点。',
+    '사장님 오시면 하루가 좋아요.': '老板一来，我一天心情都好。',
+    '세탁기 안에 지폐가 있었다': '洗衣机里有张纸币',
+    '단골이 선물을 두고 갔다': '熟客留下了礼物',
+    '밤새 자고 간 손님이 팁을 두고 갔다': '睡了一夜的客人留下了小费',
+    '빨래에서 반지가 나왔다': '衣服里掉出一枚戒指',
+  };
+  const zhOf = ko => { if (ZH[ko] != null) return ZH[ko]; const m = /^(\d+)호점$/.exec(ko); return m ? m[1] + '号店' : ko; };
   if (EN) { document.documentElement.lang = 'en'; document.title = 'Coin Laundry 24 — Oreum Games'; document.querySelectorAll('[data-en]').forEach(e => { e.innerHTML = e.getAttribute('data-en'); }); }
-  const T = (ko, en) => EN ? en : ko;
+  if (ZHL) {
+    document.documentElement.lang = 'zh-CN'; document.title = '投币洗衣店24 — Oreum Games';
+    document.querySelectorAll('[data-en]').forEach(e => { const k = e.innerHTML.trim(); if (ZH[k] != null) e.innerHTML = ZH[k]; });
+    document.querySelectorAll('[title]').forEach(e => { const k = e.getAttribute('title'); if (ZH[k] != null) e.setAttribute('title', ZH[k]); });
+    const zf = "local('PingFang SC'),local('PingFangSC-Regular'),local('Microsoft YaHei'),local('Microsoft YaHei UI'),local('Noto Sans SC'),local('Noto Sans CJK SC'),local('Source Han Sans SC')";
+    const ur = 'U+2E80-2FFF,U+3000-303F,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF';
+    const st = document.createElement('style');
+    st.textContent = ['Griun', 'Ria'].map(f => "@font-face{font-family:'" + f + "';src:" + zf + ';unicode-range:' + ur + '}').join('') + 'html[lang=zh-CN] *{word-break:normal!important}';
+    document.head.appendChild(st);
+  }
+  const T = (ko, en) => EN ? en : ZHL ? zhOf(ko) : ko;
   const isTouch = ('ontouchstart' in window) && matchMedia('(pointer: coarse)').matches;
   if (isTouch) document.body.classList.add('touch');
   const rnd = (a, b) => a + Math.random() * (b - a), pick = a => a[Math.floor(Math.random() * a.length)], clamp = (v, a, b) => v < a ? a : v > b ? b : v;
