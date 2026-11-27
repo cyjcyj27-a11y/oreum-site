@@ -24,7 +24,21 @@
   // ── 말: ?lang=en 이면 영어 ──
   var EN = /[?&]lang=en/i.test(location.search);
   if (EN) { document.documentElement.lang = 'en'; document.body.classList.add('en'); document.title = 'GOMOKU'; Array.prototype.forEach.call(document.querySelectorAll('[data-en]'), function (el) { el.textContent = el.getAttribute('data-en'); }); }
-  function rankName(L) { return (EN ? RANKS_EN : RANKS)[L]; }
+  var ZH = !EN && /[?&]lang=zh(&|$)/i.test(location.search);
+  var RANKS_ZH = RANKS.map(function (s) { return s.replace('급', '级').replace('단', '段'); });
+  if (ZH) {
+    var ZD = { '오목': '五子棋', '시작': '开始', 'K 효과음': 'K 音效' };
+    document.documentElement.lang = 'zh-CN'; document.body.classList.add('zh'); document.title = ZD['오목'];
+    Array.prototype.forEach.call(document.querySelectorAll('[data-en]'), function (el) { var k = el.textContent.trim(); if (ZD[k]) el.textContent = ZD[k]; });
+    // 게임 글꼴엔 한자가 없다: 같은 이름에 중국어 기기 글꼴을 한자 범위로만 덧붙인다
+    var zf = "local('PingFang SC'),local('PingFangSC-Regular'),local('Microsoft YaHei'),local('Microsoft YaHei UI'),local('Noto Sans SC'),local('Noto Sans CJK SC'),local('Source Han Sans SC')";
+    var zb = "local('PingFang SC Semibold'),local('PingFangSC-Semibold'),local('Microsoft YaHei Bold'),local('Microsoft YaHei UI Bold'),local('Noto Sans SC Bold'),local('NotoSansSC-Bold'),local('Source Han Sans SC Bold')," + zf;
+    var ur = 'U+2E80-2FFF,U+3000-303F,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF';
+    var zst = document.createElement('style');
+    zst.textContent = "@font-face{font-family:'DoHyeon';src:" + zb + ";unicode-range:" + ur + "}@font-face{font-family:'Ria';src:" + zb + ";unicode-range:" + ur + "}html[lang=zh-CN] *{word-break:normal!important}";
+    document.head.appendChild(zst);
+  }
+  function rankName(L) { return (EN ? RANKS_EN : ZH ? RANKS_ZH : RANKS)[L]; }
 
   // ── 기록 — 오른 급수 ──
   function loadBest() {
