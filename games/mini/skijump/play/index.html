@@ -161,7 +161,7 @@
     <button id="padR" type="button" aria-label="RIGHT"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4l8 8-8 8"/></svg></button>
   </div>
 </div>
-<script src="/assets/game-home.js?v=7" data-top="4" data-left="4" data-fullscreen="1" defer></script>
+<script src="/assets/game-home.js?v=8" data-top="4" data-left="4" data-fullscreen="1" defer></script>
 <script>
 /* ─────────────────────────────────────────────────────────────
  * SKI JUMP — 점프대를 밟고 날아오르는 스키. 오름게임즈.
@@ -179,11 +179,43 @@
 
 /* ── 말(한국어·영어) ── `?lang=en` 이면 영어를 덧씌운다. 한국어가 원본이다.
    ⚠ `L` 은 이 파일 안에서 지역 변수로 이미 쓰여서 `T` 로 부른다. 함수 안에서 다시 정의하지 말 것 */
-const EN_MODE = (new URLSearchParams(location.search).get('lang') || '').toLowerCase() === 'en';
-const T = (ko, en) => EN_MODE ? en : ko;
+const LANG_Q = (new URLSearchParams(location.search).get('lang') || '').toLowerCase();
+const EN_MODE = LANG_Q === 'en';
+const ZH_MODE = LANG_Q === 'zh';
+/* 중국어(간체) — 한국어 원문을 키로 찾는다. 셋째 인자가 있으면 그것을 쓴다(숫자가 섞인 문장) */
+const ZH = {
+  '아래 화살표 단추로 방향을 바꿉니다': '用下方的箭头按钮转向',
+  '← → 로 방향을 바꿉니다': '用 ← → 转向',
+  '이어하기': '继续游戏',
+  '처음부터': '从头开始',
+  '지우고 시작': '清除并开始',
+  '취소': '取消',
+  '동전': '金币',
+};
+const T = (ko, en, zh) => EN_MODE ? en : ZH_MODE ? (zh != null ? zh : (ZH[ko] != null ? ZH[ko] : ko)) : ko;
 if (EN_MODE) {
   document.documentElement.lang = 'en';
   document.title = 'SKI JUMP — free ski jump game';
+}
+if (ZH_MODE) {
+  document.documentElement.lang = 'zh-CN';
+  document.title = '跳台滑雪 — 免费滑雪跳台游戏';
+  const md = document.querySelector('meta[name=description]');
+  if (md) md.content = '踩上跳台腾空飞起的滑雪游戏。只用两个方向键就能玩。';
+  /* 글꼴에 한자가 없을 때 시스템 중국어 글꼴로 채운다 */
+  const zf = "local('PingFang SC'),local('PingFangSC-Regular'),local('Microsoft YaHei'),local('Microsoft YaHei UI'),local('Noto Sans SC'),local('Noto Sans CJK SC'),local('Source Han Sans SC')";
+  const ur = 'U+2E80-2FFF,U+3000-303F,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF';
+  const st = document.createElement('style');
+  st.textContent = ['Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic'].map(f =>
+    [600, 700, 800, 900].map(w => `@font-face{font-family:'${f}';src:${zf};font-weight:${w};unicode-range:${ur}}`).join('')).join('')
+    + 'html[lang=zh-CN] *{word-break:normal!important}'
+    /* 좁은 판에서도 한자 제목·큰 글자·단추가 한 줄에 들어가게 */
+    + '#title{white-space:nowrap;font-size:min(clamp(40px,13vw,72px),calc((min(100vw,56.25dvh) - 52px) / 4.2))}'
+    + '#lead .over{font-size:min(clamp(30px,9vw,50px),calc((min(100vw,56.25dvh) - 60px) / 4.6))}'
+    + '#go,#go2{white-space:nowrap;padding-left:24px;padding-right:24px}';
+  document.head.appendChild(st);
+  const tt = document.getElementById('title');
+  if (tt) tt.innerHTML = '跳台滑雪<small>OREUM GAMES</small>';
 }
 
 /* 논리 판 폭은 고정, 높이는 화면 비율을 그대로 받는다.
@@ -1606,7 +1638,8 @@ function showWipe() {
   veilShow({
     lead: '<span class="over">' + T('처음부터', 'NEW GAME') + '</span>',
     sub:  T('깬 ' + Math.max(0, unlocked - 1) + '판 기록과 모은 동전 ' + coinTotal + '개가 지워집니다',
-            'Erases ' + Math.max(0, unlocked - 1) + ' cleared stages and ' + coinTotal + ' coins'),
+            'Erases ' + Math.max(0, unlocked - 1) + ' cleared stages and ' + coinTotal + ' coins',
+            '已通关 ' + Math.max(0, unlocked - 1) + ' 关的纪录和收集的 ' + coinTotal + ' 枚金币将被清除'),
     go:   T('지우고 시작', 'ERASE & START'),
     go2:  T('취소', 'CANCEL')
   });
@@ -1908,7 +1941,7 @@ requestAnimationFrame(frame);
   function f(){
     if (document.getElementById('oreumHome')) return;
     var s = document.createElement('script');
-    s.src = '../../../../assets/game-home.js?v=7';
+    s.src = '../../../../assets/game-home.js?v=8';
     s.setAttribute('data-top','4'); s.setAttribute('data-left','4');
     s.setAttribute('data-fullscreen','1');
     document.body.appendChild(s);
