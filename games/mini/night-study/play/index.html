@@ -272,18 +272,73 @@
 /* ── 말(한국어·영어) ──
    `?lang=en` 이면 영어로 바꾼다. 한국어가 원본이고 영어를 덧씌우는 방식이다.
    ⚠ `L` 이라는 이름을 함수 안에서 다시 쓰지 말 것 */
-const EN_MODE = (new URLSearchParams(location.search).get('lang') || '').toLowerCase() === 'en';
-const L = (ko, en) => EN_MODE ? en : ko;
+const LANG_Q = (new URLSearchParams(location.search).get('lang') || '').toLowerCase();
+const EN_MODE = LANG_Q === 'en';
+const ZH_MODE = LANG_Q === 'zh';
+/* 중국어(간체) — 한국어 원문을 키로 찾는다. 셋째 인자가 있으면 그것을 쓴다(숫자가 섞인 문장). */
+const ZH = {
+  '시험지':'试卷','손전등':'手电筒','숨':'呼吸','줍기':'拾取','달리기':'奔跑',
+  '가로 화면에서 하는 게임입니다':'本游戏需横屏游玩','가로로 돌리기':'切换横屏',
+  '단추가 안 먹으면 폰의 <b>화면 회전 잠금</b>을 풀고 눕혀 주세요':'按钮没反应的话，请关闭手机的<b>屏幕旋转锁定</b>，再把手机横过来',
+  '그래도 세로로 하기':'仍然竖屏游玩',
+  '야 간 자 율 학 습':'晚 自 习',
+  '야자하다 엎드려 잠들었다. 눈을 뜨니 학교엔 아무도 없다.<br> 흩어진 <b>시험지 6장</b>을 모아 1층 현관으로 나가라.<br> <b style="color:#c9b7b7">복도에 소복 입은 무언가가 있다.</b> 들키면 뛰어야 한다.':
+    '上晚自习时趴在桌上睡着了。睁开眼，学校里一个人也没有。<br>收集散落各处的<b>6 张试卷</b>，从一楼正门逃出去。<br><b style="color:#c9b7b7">走廊里有个一身白衣的东西。</b>被它发现就得跑。',
+  '왼쪽 아래 스틱':'左下摇杆','밀면 걷기 · 끝까지 밀면 달리기':'推动行走 · 推到底奔跑',
+  '달리기 단추':'奔跑键','누르고 있으면 달리기 (숨이 찬다)':'按住奔跑（会喘不上气）',
+  '화면 문지르기':'滑动屏幕','둘러보기':'环顾四周',
+  '손전등 단추':'手电筒键','밝지만 귀신 눈에 두 배로 띈다':'很亮，但鬼在两倍远的地方就能看见你',
+  '줍기 단추':'拾取键','시험지 줍기 · 사물함에 숨기':'捡试卷 · 躲进储物柜',
+  '왼쪽 위 II':'左上 II','잠깐 멈추기':'暂停',
+  'W A S D · 방향키':'W A S D · 方向键','걷기':'行走','마우스':'鼠标',
+  '달리기 (숨이 찬다)':'奔跑（会喘不上气）','손전등 — 밝지만 들키기 쉽다':'手电筒 — 很亮，但容易被发现',
+  '줍기 · 사물함에 숨기':'拾取 · 躲进储物柜',
+  '쉬움':'简单','보통':'普通','어려움':'困难',
+  '그림자 켜기':'阴影：开','그림자 끄기':'阴影：关','소리 켜기':'声音：开','소리 끄기':'声音：关',
+  '들어가기':'进入',
+  '붙 잡 혔 다':'被 抓 住 了','차가운 손이 어깨를 잡았다.':'一只冰冷的手抓住了你的肩膀。','다시 하기':'再试一次',
+  '탈 출':'逃 脱','다음 날 밤':'下一夜','한 번 더':'再来一次',
+  '꿈이었다':'原来是梦','처음부터':'从头开始',
+  '잠 깐 멈 춤':'暂 停','화면을 누르면 이어서 합니다.':'点击屏幕继续。','이어 하기':'继续',
+  '준비하는 중…':'准备中…',
+  '손전등을 켰다 — 멀리서도 보인다':'打开了手电筒 — 远处也能看见你','손전등을 껐다':'关掉了手电筒',
+  '다 모았다. 현관으로!':'全部集齐了。去正门！','시험지를 주웠다  ':'捡到试卷  ','건전지를 주웠다':'捡到电池',
+  '봤다. 들켰다.':'她看见了。被发现了。',
+  '교실에서 잠이 들었다… 학교엔 아무도 없다':'在教室里睡着了… 学校里一个人也没有',
+  ' 탈출. 교문 밖은 아직 캄캄했다.<br>걸린 시간 <b>':' 逃脱。校门外依旧一片漆黑。<br>用时 <b>',
+  '분 ':'分 ','초</b>':'秒</b>','한 번도 손전등을 켜지 않았다':'一次都没开过手电筒',
+  '손전등이 나갔다':'手电筒没电了','들켰다 — 뛰어!':'被发现了 — 快跑！','사물함 문이 열렸다.':'储物柜的门被拉开了。',
+  '사물함에서 나오기':'离开储物柜','시험지 줍기':'捡起试卷','건전지 줍기':'捡起电池','사물함에 숨기':'躲进储物柜',
+  '나오기':'出来','숨기':'躲藏',' 들어가기':' 进入',
+};
+const L = (ko, en, zh) => EN_MODE ? en : ZH_MODE ? (zh != null ? zh : (ZH[ko] != null ? ZH[ko] : ko)) : ko;
 (function applyLang(){
-  if (!EN_MODE) return;
-  document.documentElement.lang = 'en';
-  document.title = 'NIGHT STUDY — free horror escape game';
-  document.querySelectorAll('[data-en]').forEach(el => { el.innerHTML = el.dataset.en; });
+  if (EN_MODE){
+    document.documentElement.lang = 'en';
+    document.title = 'NIGHT STUDY — free horror escape game';
+    document.querySelectorAll('[data-en]').forEach(el => { el.innerHTML = el.dataset.en; });
+    return;
+  }
+  if (!ZH_MODE) return;
+  document.documentElement.lang = 'zh-CN';
+  document.title = '晚自习 NIGHT STUDY — 免费恐怖逃脱游戏';
+  /* 한글 글꼴 이름에 한자 범위만 시스템 중국어 글꼴로 채운다 */
+  const zf = "local('PingFang SC'),local('PingFangSC-Regular'),local('Microsoft YaHei'),local('Microsoft YaHei UI'),local('Noto Sans SC'),local('Noto Sans CJK SC'),local('Source Han Sans SC')";
+  const ur = 'U+2E80-2FFF,U+3000-303F,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF';
+  const st = document.createElement('style');
+  st.textContent = ['Pretendard','Apple SD Gothic Neo','Malgun Gothic'].map(f =>
+      [400,600,700,800,900].map(w => `@font-face{font-family:'${f}';src:${zf};font-weight:${w};unicode-range:${ur}}`).join('')).join('')
+    + 'html[lang=zh-CN] *{word-break:normal!important}';
+  document.head.appendChild(st);
+  document.querySelectorAll('[data-en]').forEach(el => {
+    const k = el.innerHTML.replace(/\s+/g,' ').trim();
+    if (ZH[k] != null) el.innerHTML = ZH[k];
+  });
 })();
 </script>
 
 <!-- 오름게임즈 알약(왼쪽 위) + 전체화면(왼쪽 아래) — 모든 게임 기본 탑재 -->
-<script src="/assets/game-home.js?v=7" data-top="4" data-left="4" data-fullscreen="1" defer></script>
+<script src="/assets/game-home.js?v=8" data-top="4" data-left="4" data-fullscreen="1" defer></script>
 <script>
 /* file:// 로 그냥 열었을 때를 위한 예비 줄 — /assets/… 절대경로는 서버가 있어야 잡힌다.
    ../ 개수는 이 파일에서 사이트 뿌리까지의 깊이대로 (games/mini/night-study/play/ 기준) */
@@ -291,7 +346,7 @@ const L = (ko, en) => EN_MODE ? en : ko;
   function f(){
     if (document.getElementById('oreumHome')) return;
     var s = document.createElement('script');
-    s.src = '../../../../assets/game-home.js?v=7';
+    s.src = '../../../../assets/game-home.js?v=8';
     s.setAttribute('data-top','4'); s.setAttribute('data-left','4');
     s.setAttribute('data-fullscreen','1');
     document.body.appendChild(s);
@@ -471,10 +526,11 @@ function makeBoardTex(){
     g.strokeStyle='rgba(230,230,220,'+rnd(.02,.09).toFixed(2)+')'; g.lineWidth=rnd(2,9);
     g.beginPath(); g.moveTo(rnd(0,512),rnd(0,256)); g.lineTo(rnd(0,512),rnd(0,256)); g.stroke();
   }
-  g.font='900 52px sans-serif'; g.fillStyle='rgba(240,238,228,.72)';
+  g.font='900 52px '+(ZH_MODE?'"Microsoft YaHei","PingFang SC","Noto Sans SC",':'')+'sans-serif'; g.fillStyle='rgba(240,238,228,.72)';
   g.textAlign='center';
   g.fillText(pick(L(['집에 가지 마','아직 안 끝났어','한 명이 모자라','같이 있어 줘'],
-                   ["don't go home","it isn't over yet","one of you is missing","stay with me"])), 256, 150);
+                   ["don't go home","it isn't over yet","one of you is missing","stay with me"],
+                   ['别回家','还没结束','少了一个人','陪着我'])), 256, 150);
   g.fillStyle='#6b5636'; g.fillRect(0,238,512,18);
   return tex(c);
 }
@@ -1332,7 +1388,7 @@ function dayGlow(day){ return 1 - 0.88*(day-1)/(LAST_DAY-1); }
 const DAY_KEY='nightstudy.day';
 function savedDay(){ try{ const d=+localStorage.getItem(DAY_KEY); return d>=1&&d<=LAST_DAY ? d : 1; }catch(e){ return 1; } }
 function saveDay(d){ try{ localStorage.setItem(DAY_KEY, String(d)); }catch(e){} }
-function dayName(d){ return L(d+'일째 밤', 'Night '+d); }
+function dayName(d){ return L(d+'일째 밤', 'Night '+d, '第'+d+'夜'); }
 
 const $ = id => document.getElementById(id);
 const el = {
@@ -1379,7 +1435,7 @@ function startGame(day){
   Snd.start();
   if(!TOUCH) canvas.requestPointerLock();
   toast(S.day>1
-    ? dayName(S.day)+L(' — 또 잠들었다… 시험지 '+S.needed+'장',' — You dozed off again… '+S.needed+' papers')
+    ? dayName(S.day)+L(' — 또 잠들었다… 시험지 '+S.needed+'장',' — You dozed off again… '+S.needed+' papers',' — 又睡着了… 试卷 '+S.needed+' 张')
     : L('교실에서 잠이 들었다… 학교엔 아무도 없다','You fell asleep in class… No one is left in the school'));
 }
 function pauseGame(){
@@ -1702,7 +1758,8 @@ function updateWorld(dt){
     if(S.papers>=S.needed) winGame();
     else if(!el.hint.textContent){
       el.hint.textContent=L('잠겨 있다 — 시험지 '+(S.needed-S.papers)+'장이 더 필요하다',
-        'Locked — '+(S.needed-S.papers)+(S.needed-S.papers===1?' more exam paper':' more exam papers')+' needed');
+        'Locked — '+(S.needed-S.papers)+(S.needed-S.papers===1?' more exam paper':' more exam papers')+' needed',
+        '门锁着 — 还需要 '+(S.needed-S.papers)+' 张试卷');
       el.hint.style.opacity='1';
     }
   }
