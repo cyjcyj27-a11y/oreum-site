@@ -441,7 +441,7 @@
 </style>
 <!-- Pixabay 효과음 꾸러미 (출처·라이선스는 audio/출처.txt) -->
 <script src="audio/sfx-data.js?v=4"></script>
-<script src="/assets/game-home.js?v=7" data-top="4" data-left="4" data-fullscreen="1" defer></script>
+<script src="/assets/game-home.js?v=8" data-top="4" data-left="4" data-fullscreen="1" defer></script>
 </head>
 <body>
 
@@ -841,14 +841,112 @@ const LANG = (function(){
   try{
     const q = new URLSearchParams(location.search).get('lang');
     try { localStorage.removeItem('pairboom_lang'); } catch (e) {}
-    return q === 'en' ? 'en' : 'ko';   // 언어는 주소로만 정한다(?lang=en 일 때만 영어, 없으면 한국어) — 기억하거나 폰 언어를 따르면 한국어 페이지에서 들어와도 영어로 뜬다(2026-09-29)
+    return q === 'en' ? 'en' : q === 'zh' ? 'zh' : 'ko';   // 언어는 주소로만 정한다(?lang=en 일 때만 영어, 없으면 한국어) — 기억하거나 폰 언어를 따르면 한국어 페이지에서 들어와도 영어로 뜬다(2026-09-29)
   }catch(e){ return 'ko'; }
 })();
 const EN = (LANG === 'en');
 /* 글월 하나를 고르는 도우미. L('한국어', 'English') */
-const L = (ko, en) => EN ? en : ko;
+const ZHM = (LANG === 'zh');
+/* 중국어(간체) — 한국어 원문을 키로 찾는다 */
+const ZH = {
+  '음악을 받는 중…': '正在加载音乐…',
+  '배경음악 끄기': '关闭背景音乐',
+  '배경음악 켜기': '开启背景音乐',
+  '판을 만드는 중…': '正在生成棋盘…',
+  '길이 막혔습니다 · 꺾임 2번까지만': '路被挡住了 · 最多拐 2 次弯',
+  '지울 짝이 없어 알아서 섞습니다': '没有能消的对子，自动打乱',
+  '섞을 방법을 못 찾았습니다': '找不到打乱的方法',
+  '지울 짝이 없습니다': '没有能消的对子',
+  '모든 단계를 깼습니다!': '全部关卡通关！',
+  '효과음 끄기': '关闭音效',
+  '효과음 켜기': '开启音效',
+};
+const L = (ko, en) => EN ? en : ZHM ? (ZH[ko] != null ? ZH[ko] : ko) : ko;
+
+function applyZh(){
+  document.documentElement.lang = 'zh-CN';
+  document.title = '配对爆炸 - 免费配对消除益智游戏，100关 | Oreum Games';
+  const md = document.querySelector('meta[name=description]');
+  if (md) md.content = '配对爆炸 - 把两个相同的图案连起来就 BOOM！无需安装、无需注册，在浏览器里直接玩的配对消除益智游戏。共100关，每关2分50秒起。';
+  /* 글꼴에 한자가 없을 때 시스템 중국어 글꼴로 채운다 */
+  const zf = "local('PingFang SC'),local('PingFangSC-Regular'),local('Microsoft YaHei'),local('Microsoft YaHei UI'),local('Noto Sans SC'),local('Noto Sans CJK SC'),local('Source Han Sans SC')";
+  const ur = 'U+2E80-2FFF,U+3000-303F,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF';
+  const st = document.createElement('style');
+  st.textContent = ['Supermagic', 'WaterDrop'].map(f =>
+    `@font-face{font-family:'${f}';src:${zf};font-weight:400;unicode-range:${ur}}`).join('')
+    + 'html[lang=zh-CN] *{word-break:normal!important}'
+    /* 획이 많은 한자는 짙은 그림자가 겹치면 뭉개져서 카드 제목만 그림자를 옅게 */
+    + 'html[lang=zh-CN] .card h2{text-shadow:0 3px 0 rgba(14,59,70,.18)}';
+  document.head.appendChild(st);
+
+  const $$ = s => document.querySelector(s);
+  const html = (s, v) => { const e = $$(s); if (e) e.innerHTML = v; };
+  const btn  = (id, t, a) => { const e = $(id); if (e){ e.title = t; e.setAttribute('aria-label', a || t); } };
+
+  html('#veilTitle h1', '配对爆炸<em>!!</em>');
+  html('header h2', '配对爆炸<em>!!</em>');
+  document.querySelectorAll('.tagline').forEach(e => {
+    e.innerHTML = '把两个相同的图案连起来就 <b>BOOM!!!</b>';
+  });
+  html('#btnStart', '开始游戏');
+  html('#btnHowto', '玩法说明');
+
+  btn('btnReset', '从第1关重新开始');
+  btn('btnNew',   '重玩本关 (N)', '重玩本关');
+  btn('btnHint',  '提示');
+  btn('btnPause', '暂停 (空格)', '暂停');
+  btn('btnSound', '关闭音效', '音效');
+  btn('btnMusic', '开启背景音乐', '背景音乐');
+  btn('btnHelp',  '规则');
+
+  const labels = ['关卡', '剩余对数', '剩余时间', '得分', '连击', '最高关卡'];
+  document.querySelectorAll('.stats .stat span').forEach((e, i) => { if (labels[i]) e.textContent = labels[i]; });
+
+  html('.foot', '<kbd>N</kbd> 重玩本关 · <kbd>H</kbd> 提示 · <kbd>空格</kbd> 暂停');
+
+  html('#veilPause .card',
+    '<h2>暂停中</h2>' +
+    '<p>棋盘原样保留，时间也停住了。</p>' +
+    '<div class="row"><button class="primary" id="btnResume">继续游戏</button></div>');
+
+  html('#winTitle', '全部消完！');
+  html('#btnNext', '下一关');
+  html('#btnAgain', '再来一局');
+
+  html('#veilLose .lose-stat',
+    '第 <b id="loseStage">1</b> 关 · 还剩 <b id="loseLeft">0</b> 对');
+  html('#btnRetry', '再试一次');
+
+  html('#veilReset .card',
+    '<h2>要从头开始吗？</h2>' +
+    '<p>你已经到了第 <b id="resetNow">1</b> 关。点下去会回到<b>第1关</b>。</p>' +
+    '<p>最高关卡记录会保留。</p>' +
+    '<div class="row">' +
+      '<button class="primary" id="btnResetYes">回到第1关</button>' +
+      '<button id="btnResetNo">算了</button>' +
+    '</div>');
+
+  html('#veilHelp .card',
+    '<h2>怎么玩</h2>' +
+    '<div class="rules">' +
+      '<p>点两个相同的图案就能消掉。不过不是随时都能消。</p>' +
+      '<p><b>1.</b> 连接两个图案的路线只能经过<b>空格子</b>。<br>' +
+      '<b>2.</b> 路线最多只能<b>拐 2 次弯</b>（最多三段直线）。<br>' +
+      '<b>3.</b> 路线可以<b>绕到棋盘外面</b>。所以边上的图案更好消。</p>' +
+      '<p>没有能消的对子时，剩下的图案会<b>自动打乱</b>。所以绝不会卡关。</p>' +
+      '<p><b>第1关到第100关</b>一路连下去。每过一关<b>图案种类就会变多</b>，' +
+      '同样的图案越来越少，找对子也一点点变难。图案<b>一共48种</b>，' +
+      '第100关里<b>48种图案各只有一对</b>。</p>' +
+      '<p>棋盘不只会变大，也有<b>棋盘变窄的关卡</b>。那是图案种类增加的关卡。' +
+      '棋盘越窄，同样的图案越稀少，<b>反而更难</b>。</p>' +
+      '<p>每关<b>2分50秒</b>。时间用完就算失败，再来一次就行。' +
+      '对子特别多的后期关卡会多给时间。</p>' +
+    '</div>' +
+    '<div class="row"><button class="primary" id="btnCloseHelp">知道了</button></div>');
+}
 
 function applyLang(){
+  if (ZHM) { applyZh(); return; }
   if (!EN) return;
   document.documentElement.lang = 'en';
   document.title = 'PAIRBOOM!! - free match-and-clear puzzle, 100 stages | Oreum Games';
@@ -1597,6 +1695,9 @@ function boardLine(st, w, h, pairs, kinds){
   if (EN){
     return 'Stage ' + st + ' · ' + w + '×' + h + ' · ' + pairs + ' pairs · ' + kinds + ' shapes';
   }
+  if (ZHM){
+    return '第' + st + '关 · ' + w + '×' + h + ' · ' + pairs + ' 对 · ' + kinds + ' 种图案';
+  }
   return st + '단계 · ' + w + '×' + h + ' · 짝 ' + pairs + '개 · 그림 ' + kinds + '종';
 }
 
@@ -1828,6 +1929,9 @@ function win(){
   $('winLine').textContent  = EN
     ? ('Stage ' + done + ' · ' + (W*H/2) + ' pairs · took ' + fmtTime(elapsed) +
        ' · ' + spare + ' left, bonus ' + bonus.toLocaleString())
+    : ZHM
+    ? ('第' + done + '关 · ' + (W*H/2) + ' 对 · 用时 ' + fmtTime(elapsed) +
+       ' · 剩余 ' + spare + '，奖励 ' + bonus.toLocaleString() + ' 分')
     : (done + '단계 · ' + (W*H/2) + '짝 · 걸린 시간 ' + fmtTime(elapsed) +
        ' · 남은 시간 ' + spare + ' 로 보너스 ' + bonus.toLocaleString() + '점');
 
@@ -1836,15 +1940,17 @@ function win(){
     $('winTitle').textContent = L('모든 단계를 깼습니다!', 'You beat every stage!');
     $('winBest').textContent  = EN
       ? ('You cleared all ' + LAST + ' stages. Impressive.')
+      : ZHM ? ('直到最后第' + LAST + '关全部消完了。太厉害了！')
       : ('마지막 ' + LAST + '단계까지 전부 지웠습니다. 대단합니다.');
     nextBtn.style.display = 'none';
   } else {
     const ns = stageAt(stage);
-    $('winTitle').textContent = EN ? ('Stage ' + done + ' clear!') : (done + '단계 통과!');
+    $('winTitle').textContent = EN ? ('Stage ' + done + ' clear!') : ZHM ? ('第' + done + '关通过！') : (done + '단계 통과!');
     $('winBest').textContent  = EN
       ? ('Next: ' + boardLine(stage, ns.w, ns.h, ns.w*ns.h/2, ns.kinds))
+      : ZHM ? ('下一关：' + boardLine(stage, ns.w, ns.h, ns.w*ns.h/2, ns.kinds))
       : ('다음은 ' + boardLine(stage, ns.w, ns.h, ns.w*ns.h/2, ns.kinds));
-    nextBtn.textContent = EN ? ('To stage ' + stage) : (stage + '단계로');
+    nextBtn.textContent = EN ? ('To stage ' + stage) : ZHM ? ('前往第' + stage + '关') : (stage + '단계로');
     nextBtn.style.display = '';
   }
 
@@ -1856,7 +1962,8 @@ function togglePause(){
   if (!running) return;
   paused = !paused;
   $('veilPause').classList.toggle('on', paused);
-  $('btnPause').title = paused ? '이어서 하기 (스페이스)' : '멈춤 (스페이스)';
+  $('btnPause').title = ZHM ? (paused ? '继续游戏 (空格)' : '暂停 (空格)')
+    : paused ? '이어서 하기 (스페이스)' : '멈춤 (스페이스)';
   bgmApply();                                  // 멈추면 음악도 멈춥니다
 }
 
@@ -1908,6 +2015,7 @@ applyLang();          // 영어면 화면 글을 갈아 끼웁니다
   b.href = EN ? '?lang=ko' : '?lang=en';
   b.textContent = EN ? '한' : 'EN';
   b.title = EN ? '한국어로 보기' : 'View in English';
+  if (ZHM) b.title = '查看英文版';
   b.setAttribute('aria-label', b.title);
 })();
 loadProgress();
@@ -1959,6 +2067,10 @@ $('titleNote').innerHTML = EN
   ? (bestStage > 1
       ? ('Best <b>stage ' + bestStage + '</b> so far · resuming at stage ' + stage)
       : ('<b>' + LAST + ' stages</b> in all · 2:50 per stage and up'))
+  : ZHM
+  ? (bestStage > 1
+      ? ('目前最高到 <b>第' + bestStage + '关</b> · 从第' + stage + '关继续')
+      : ('一共 <b>' + LAST + ' 关</b> · 每关 2分50秒起'))
   : (bestStage > 1
       ? ('지금까지 <b>' + bestStage + '단계</b>까지 오셨습니다 · 이어서 ' + stage + '단계부터')
       : ('모두 <b>' + LAST + '단계</b>입니다 · 한 판에 2분 50초부터'));
