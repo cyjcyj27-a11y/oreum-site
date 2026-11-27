@@ -14,6 +14,30 @@
     document.documentElement.lang = 'en'; document.body.classList.add('en'); document.title = 'Boa — snake eats an elephant';
     Array.prototype.forEach.call(document.querySelectorAll('[data-en]'), function (el) { el.textContent = el.getAttribute('data-en'); });
   }
+  // ?lang=zh 이면 중국어. 한국어 문장을 열쇠로 찾아 바꾼다
+  var ZH = !EN && /[?&]lang=zh(&|#|$)/i.test(location.search);
+  var ZD = {
+    '보아뱀': '吞大象的蟒蛇', '시작': '开始',
+    '정글': '丛林', '왕의 별': '国王的星球', '술꾼의 별': '酒鬼的星球', '사업가의 별': '商人的星球', '점등인의 별': '点灯人的星球', '지구': '地球',
+    '↑↓←→ 이동 · 스페이스 돌진 · P 일시정지 · K 효과음': '↑↓←→ 移动 · 空格 冲刺 · P 暂停 · K 音效',
+    '가로 화면에서 하는 게임입니다': '这个游戏要横屏玩',
+    '가로로 돌리기': '切换横屏',
+    '단추가 안 먹으면 폰의 화면 회전 잠금을 풀고 눕혀 주세요': '按钮没反应的话，请关闭手机的屏幕旋转锁定，再把手机横过来',
+    '그래도 세로로 하기': '还是竖屏玩'
+  };
+  function stName(st) { return EN ? st.en : ZH && ZD[st.ko] ? ZD[st.ko] : st.ko; }
+  if (ZH) {
+    document.documentElement.lang = 'zh-CN'; document.body.classList.add('zh'); document.title = '吞大象的蟒蛇 — Boa';
+    Array.prototype.forEach.call(document.querySelectorAll('[data-en]'), function (el) { var k = el.textContent.trim(); if (ZD[k]) el.textContent = ZD[k]; });
+    // 게임 글꼴(Griun·Ria)엔 한자가 없다 → 같은 이름에 중국어 기기 글꼴을 한자 범위로만 덧붙인다
+    var zf = "local('PingFang SC'),local('PingFangSC-Regular'),local('Microsoft YaHei'),local('Microsoft YaHei UI'),local('Noto Sans SC'),local('Noto Sans CJK SC'),local('Source Han Sans SC')";
+    var zb = "local('PingFang SC Semibold'),local('PingFangSC-Semibold'),local('Microsoft YaHei Bold'),local('Microsoft YaHei UI Bold'),local('Noto Sans SC Bold'),local('NotoSansSC-Bold'),local('Source Han Sans SC Bold')," + zf;
+    var ur = 'U+2E80-2FFF,U+3000-303F,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF';
+    var zst = document.createElement('style');
+    zst.textContent = "@font-face{font-family:'Griun';src:" + zf + ";unicode-range:" + ur + "}@font-face{font-family:'Ria';src:" + zb + ";unicode-range:" + ur + "}html[lang=zh-CN] *{word-break:normal!important}" +
+      "body.zh #title h1{font-size:min(13vw,108px);letter-spacing:2px}body.zh #card .nm{font-size:min(10vw,72px)}@media(max-width:420px){body.zh #stg .nm{font-size:12px}}";
+    document.head.appendChild(zst);
+  }
 
   function load(k) { try { return localStorage.getItem(KEY + '.' + k); } catch (e) { return null; } }
   function save(k, v) { try { localStorage.setItem(KEY + '.' + k, String(v)); } catch (e) {} }
@@ -257,7 +281,7 @@
     if (S.id === 'lamp') obs.push({ type: 'lamp', x: ARENA.cx, y: ARENA.cy, r: 14 });
     if (S.id === 'earth') { obs.push({ type: 'well', x: ARENA.cx + ARENA.w * 0.25, y: ARENA.cy + ARENA.h * 0.18, r: 26 }); fox = { x0: ARENA.x + ARENA.w - 46, y0: ARENA.y + 44 }; newSnake(); }
     fillFoods();
-    $('cardEm').textContent = S.ic; $('cardNm').textContent = EN ? S.en : S.ko; $('cardNo').textContent = 'STAGE ' + (i + 1);
+    $('cardEm').textContent = S.ic; $('cardNm').textContent = stName(S); $('cardNo').textContent = 'STAGE ' + (i + 1);
     $('card').classList.add('show'); $('over').classList.remove('show'); $('title').classList.add('hide');
     document.body.classList.add('play');
     state = 'card'; waitT = 1.6;
@@ -514,7 +538,7 @@
   function setT(id, v) { if (hudCache[id] !== v) { hudCache[id] = v; $(id).textContent = v; } }
   function hud(force) {
     if (force) hudCache = {};
-    setT('stgIc', S.ic); setT('stgNm', EN ? S.en : S.ko);
+    setT('stgIc', S.ic); setT('stgNm', stName(S));
     var eleP = ate >= S.quota;
     setT('fdIc', eleP ? '🐘' : S.id === 'king' ? KING_FOODS[king.order] : S.food);
     setT('fdN', String(eleP ? elesEaten : ate)); setT('fdQ', '/' + (eleP ? S.eles : S.quota));
