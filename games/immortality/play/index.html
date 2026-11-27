@@ -449,20 +449,105 @@ const UI = {
   en:{ title:"The Price of Immortality", sub:"영생의 가격", part:"Part 1 · Prologue",
        start:"Start", musicOff:"Music off", musicOn:"Music on",
        pause:"Pause", resume:"Resume", hint:"Tap to continue", endTitle:"End of Part 1 · Prologue", endSub:"To be continued in Part 2",
-       demo:"Oreum Games", other:"한국어" }
+       demo:"Oreum Games", other:"한국어" },
+  zh:{ title:"永生的代价", sub:"THE PRICE OF IMMORTALITY", part:"第一部 · 序章",
+       start:"开始", musicOff:"关闭音乐", musicOn:"打开音乐",
+       pause:"暂停", resume:"继续播放", hint:"点击继续", endTitle:"第一部 · 序章 完", endSub:"第二部待续",
+       demo:"Oreum Games", other:"ENGLISH" }
 };
+/* 중국어(?lang=zh): 장면의 한국어 줄을 줄바꿈으로 이은 글 → 중국어 줄, 영상 자막·띠의 한국어 글 → 중국어 글 */
+const ZH_LINES = {
+  "신은 얼마나 재밌을까?": ["当神，","该有多好玩？"],
+  "빛이 있으라 하매 빛이 있으니": ["神说：要有光，", "就有了光。"],
+  "서기 2030년": ["公元2030年"],
+  "AI의 지적능력에 특이점이 도래하고\nAI는 마침내 인류의 노화를 되돌릴\n유전자조작 방법을 발견했다.": ["AI的智能迎来了奇点，", "AI终于找到了逆转人类衰老的", "基因改造方法。"],
+  "더이상은 암도 없고 치매도 없다.": ["再也没有癌症，也没有痴呆。"],
+  "노화라는 질병을 정복한 것이다.": ["人类征服了名为衰老的疾病。"],
+  "죽음은 더 이상\n자연의 법칙이 아니다.": ["死亡", "不再是自然法则。"],
+  "하지만 시간이 지날수록\n새로운 문제가 나타난다.": ["但随着时间流逝，", "新的问题出现了。"],
+  "사람은 죽지 않는데\n아이는 계속 태어난다는 것이다.": ["人不会死，", "孩子却还在不断出生。"],
+  "서기 2070년 — 설정 1년": ["公元2070年 — 设定1年"],
+  "수십 년 만에 인류는\n지구의 수용 한계를 넘어선다.": ["短短几十年，人类", "就超出了地球的承载极限。"],
+  "식량과 에너지는 AI와 로봇이 해결했지만,\n공간은 해결하지 못했다.": ["粮食和能源，AI和机器人都解决了，", "空间却解决不了。"],
+  "지구 인구의 폭발적 증가를 해결하기 위해\n사람들은 인공지능에게 질문을 했다.": ["为了解决地球人口的爆炸式增长，", "人们向人工智能提出了问题。"],
+  "인공지능들이 인간은 알 수 없는\n0과 1로 이루어진 로직으로 긴 시간 연산을 했고\n자기들끼리 회의까지 했다.": ["人工智能用人类无法理解的、", "由0和1组成的逻辑运算了很久，", "它们之间甚至还开了会。"],
+  "인간은 그 회의를 알아들을 수도 없었고,\n대화에 끼어들 수도 없었다.": ["人类既听不懂那场会议，", "也插不进那场对话。"],
+  "그저 인간의 언어로 번역된\n결과물만을 출력받았을 뿐이다.": ["人类拿到的，", "只是翻译成人类语言的输出结果。"],
+  "인공지능은 사람들에게 수명 시계를 달아\n인구를 조절하는 방법을 제안했다.": ["人工智能提出了一个办法：", "给每个人装上寿命时钟，以此调节人口。"],
+  "인간은 그것을 수용했다.": ["人类接受了。"],
+  "AI 판결이 이미 오래전부터\n정의로 자리잡았던 덕분에,\n사람들은 이번에도 받아들였다.": ["AI的判决早已", "被当成了正义本身，", "所以这一次，人们也接受了。"],
+  "마이크로칩의 최초도입은\n시민의 건강 관리와 범죄 예방, 신원 인증이었다.": ["微芯片最初引入，", "是为了公民健康管理、预防犯罪和身份认证。"],
+  "하지만 칩은 건강만 관리하는\n장치로 머물러있지않았다.": ["但芯片并没有一直", "只当一个管理健康的装置。"],
+  "영생이 시작된 이래\n국가는 화폐를 시간으로 정했다.": ["自从永生开始，", "国家就把时间定为了货币。"],
+  "마이크로칩에는 인간의 모든 정보와 함께\n‘잔여 수명’이 기록된다.": ["微芯片里记录着一个人的全部信息，", "还有“剩余寿命”。"],
+  "시간은 무엇으로든 바꿀 수 있다.": ["时间可以换成任何东西。"],
+  "고급 자동차도, 펜트하우스도\n시간으로 값이 매겨진다.": ["豪车也好，顶层豪宅也好，", "都用时间来标价。"],
+  "시간이 화폐니까.": ["因为时间就是货币。"],
+  "결제창은 이미 만들어져 있었다.": ["支付系统早就建好了。"],
+  "50년 전 물류회사로 시작해\n식량생산, 전기, 엔터, 통신, 위성, 데이터센터까지\n전방위적 영역확장으로 글로벌기업 1위가 된 회사가\n만든 결제 시스템.": ["五十年前从一家物流公司起家，", "一路扩张到粮食生产、电力、娱乐、", "通信、卫星、数据中心，", "最终成为全球第一大企业，", "正是这家公司打造的支付系统。"],
+  "LIFE LOGISTICS\nLIFE PAY\n시간을 결제합니다": ["LIFE LOGISTICS", "LIFE PAY", "为您结算时间"],
+  "영생하는 인류의 모든 시간이 화폐로 변화한 날,\n인류의 잔여 수명은 그 결제망 위로 옮겨졌다.": ["永生人类的全部时间变成货币的那一天，", "人类的剩余寿命被转移到了那张支付网络上。"],
+  "그날 이후 사람이 숨 쉬는 모든 순간은\nLIFE LOGISTICS의 시스템으로 처리된다.": ["从那天起，人呼吸的每一刻，", "都由LIFE LOGISTICS的系统处理。"],
+  "죽음은 이제 질병이 아니라\n행정 시스템이 관리하는 숫자가 된다.": ["死亡不再是疾病，", "而是行政系统管理的一个数字。"],
+  "협약이 발효된 해를 원년으로,\n인류는 새 연호를 쓰기 시작했다.": ["以协约生效的那一年为元年，", "人类开始使用新的纪年。"],
+  "설정이 세팅된 2070년 1월 1일\n지구상에 존재하는 모든 사람에게\n공평하게 100년의 시간이란 화폐가 주어졌다.": ["“设定”启动的2070年1月1日，", "地球上的每一个人，", "都公平地获得了100年的时间货币。"],
+  "돈은 사라지고\n진짜 부자는 시간을 가진 사람이 되었다.": ["金钱消失了，", "真正的富人，成了拥有时间的人。"],
+  "사람은 태어나는 순간\n공평하게 100년을 부여받지만": ["人一出生，", "都会公平地获得100年，"],
+  "시간이 지나면서\n시간은 공평하게 줄어들지 않았다.": ["可随着岁月流逝，", "时间并没有公平地减少。"],
+  "범죄를 저질러 깎인 사람들.": ["因为犯罪被扣掉时间的人。"],
+  "좋은 일 하느라 기부해서 줄어든 사람들.": ["为了做好事捐出时间、越来越少的人。"],
+  "그리고 사기를 당해 뺏긴 사람들.": ["还有被骗走时间的人。"],
+  "그리고 230년이 지났다": ["然后，230年过去了"],
+  "서기 2300년 · 설정 231년\n서울, 대한민국": ["公元2300年 · 设定231年", "韩国，首尔"],
+  "수백 년의 수명을 가진 사람들은\n그것을 자녀에게 상속한다.": ["拥有数百年寿命的人，", "会把它传给子女。"],
+  "과거에는 부동산을 상속받았다면,\n미래에는 500년의 생존권을 상속받는다.": ["过去继承的是房产，", "未来继承的是500年的生存权。"],
+  "부는 시간으로 축적되고,\n시간은 다시 권력이 된다.": ["财富以时间积累，", "时间又变成了权力。"],
+  "돈은 더 이상 최고의 자산이 아니다.": ["金钱不再是最重要的资产。"],
+  "진짜 부자는 시간을 가진 사람이다.": ["真正的富人，是拥有时间的人。"],
+  "AI가 모든 재화와 서비스를 제공하는 시대에도\n인간은 여전히 노동을 한다.": ["即便在AI提供一切商品和服务的时代，", "人类依然在劳动。"],
+  "돈을 벌기 위해서가 아니다.": ["不是为了赚钱。"],
+  "시간을 벌기 위해서다.": ["而是为了赚时间。"],
+};
+const ZH_CUES = {
+  "서기 2070년 · 설정 1년": "公元2070年 · 设定1年",
+  "“오늘 세계 정상회의는<b>전 인류 생명관리협약을 만장일치로 통과시켰습니다.”": "“今天，世界首脑会议<b>全票通过了《全人类生命管理协约》。”",
+  "“모든 시민은 건강 관리용 신경칩을<b>무상으로 이식받게 됩니다.”": "“所有公民都将免费植入<b>用于健康管理的神经芯片。”",
+  "“시민들이 신경칩을 맞기 위해<b>오픈런을 하고 있습니다.”": "“为了植入神经芯片，<b>市民们一大早就在门口排起了长队。”",
+  "“전 인류는 팔목정맥에 나노마이크로칩을<b>무상으로 이식받게 되었습니다.": "“全人类都将在手腕静脉里<b>免费植入纳米微芯片。",
+  "마이크로칩은 바이러스만큼 작고<b>인간의 체액에서 전기를 얻어 스스로 작동합니다.<b>배터리도, 충전도 필요 없이 영구히 작동하죠.”": "芯片小得像病毒一样，<b>靠人体体液发电，自己就能运转。<b>不用电池，也不用充电，可以永久工作。”",
+  "“빨리 맞고 싶어서 새벽 6시부터 와서 줄섰어요.": "“我想早点打上，凌晨六点就来排队了。",
+  "제가 혈당관리를 하고 있거든요.”": "因为我平时得控制血糖。”",
+  "“LIFE LOGISTICS에 오신 여러분을 환영합니다.”": "“欢迎各位来到LIFE LOGISTICS。”",
+  "“여러분들이 하실 일은 아주 단순합니다.”": "“各位要做的事情非常简单。”",
+  "“크기별로 분류만 하면 되는 작업입니다.”": "“只需要按大小分类就行。”",
+  "“인간에게는 쉬운 일이지만 로봇은 못하는 일이죠.”": "“对人类来说很简单，机器人却做不到。”",
+  "흥청망청 시간을 써서 고급차를 사고<b>펜트하우스의 사치를 부린 사람들.": "挥霍时间买豪车、<b>在顶层豪宅里纸醉金迷的人。",
+};
+
 
 /* 언어는 주소로만 정한다(?lang=en 일 때만 영어, 없으면 한국어) — 기억하거나 폰 언어를 따르면 한국어 페이지에서 들어와도 영어로 뜬다(2026-09-29) */
 let lang = "ko";
 try{
-  lang = new URLSearchParams(location.search).get("lang") === "en" ? "en" : "ko";
+  const lq = new URLSearchParams(location.search).get("lang");
+  lang = (lq === "en" || lq === "zh") ? lq : "ko";
   localStorage.removeItem("tpoi_lang");
 }catch(e){}
 
 /* 장면 하나에서 지금 언어에 맞는 줄을 꺼낸다 (영어가 없으면 한국어 그대로) */
-function linesOf(sc){ return (lang === "en" && sc.en) ? sc.en : sc.lines; }
+function linesOf(sc){
+  if(lang === "zh") return ZH_LINES[sc.lines.join("\n")] || sc.en || sc.lines;
+  return (lang === "en" && sc.en) ? sc.en : sc.lines;
+}
 /* 영상 자막 한 줄에서 지금 언어에 맞는 글을 꺼낸다 */
-function cueText(c){ return (lang === "en" && c[3]) ? c[3] : c[2]; }
+function cueText(c){
+  if(lang === "zh") return ZH_CUES[c[2]] || c[3] || c[2];
+  return (lang === "en" && c[3]) ? c[3] : c[2];
+}
+/* 영상 위 띠 글씨 */
+function chyronText(ch){
+  if(lang === "zh") return ZH_CUES[ch.text] || ch.en || ch.text;
+  return (lang === "en" && ch.en) ? ch.en : ch.text;
+}
 
 /* ═══════════════ 재생 엔진 ═══════════════ */
 
@@ -650,7 +735,7 @@ function playVideo(sc){
     const t = v.currentTime;
 
     if(sc.chyron){
-      chyron.textContent = (lang==="en" && sc.chyron.en) ? sc.chyron.en : sc.chyron.text;
+      chyron.textContent = chyronText(sc.chyron);
       chyron.classList.toggle("on", t < sc.chyron.until);
     }
 
@@ -691,11 +776,29 @@ function finish(){
 }
 
 /* ── 한국어 / English 전환 ── */
+const BASE_TITLE = document.title;
+/* 중국어일 때만: 한글 글꼴에 없는 한자를 중국어 시스템 글꼴로 채우고 줄바꿈 규칙을 푼다 */
+function zhFonts(){
+  if(lang !== "zh" || document.getElementById("zhFont")) return;
+  const zf = "local('PingFang SC'),local('PingFangSC-Regular'),local('Microsoft YaHei'),local('Microsoft YaHei UI'),local('Noto Sans SC'),local('Noto Sans CJK SC'),local('Source Han Sans SC')";
+  const ur = "U+2E80-2FFF,U+3000-303F,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF";
+  const st = document.createElement("style");
+  st.id = "zhFont";
+  const sf = "local('Songti SC'),local('STSong'),local('Noto Serif SC'),local('Noto Serif CJK SC'),local('Source Han Serif SC')," + zf;
+  st.textContent = `@font-face{font-family:'ZhSans';src:${zf};unicode-range:${ur}}`
+    + `@font-face{font-family:'ZhSerif';src:${sf};unicode-range:${ur}}`
+    + `html[lang=zh-CN]{--sans:'ZhSans',"Noto Sans KR",-apple-system,BlinkMacSystemFont,sans-serif;--serif:'ZhSerif',"Noto Serif KR",serif}`
+    + "html[lang=zh-CN] *{word-break:normal!important}"
+    + "html[lang=zh-CN] #txt .ln,html[lang=zh-CN] #cue,html[lang=zh-CN] #chyron{text-wrap:balance}";
+  document.head.appendChild(st);
+}
 const langBtn = $("lang"), langWrap = $("langbtn");
 
 function applyLang(){
   const t = UI[lang];
-  document.documentElement.lang = lang;
+  document.documentElement.lang = (lang === "zh") ? "zh-CN" : lang;
+  document.title = (lang === "zh") ? "永生的代价 — 第一部 序章 | Oreum Games" : BASE_TITLE;
+  zhFonts();
   $("gTitle").textContent = t.title;
   $("gEn").textContent    = t.sub;
   $("gSub").textContent   = t.part;
@@ -714,7 +817,7 @@ function applyLang(){
 langBtn.addEventListener("click", e=>{
   e.stopPropagation();
   clickSound();
-  lang = (lang === "ko") ? "en" : "ko";
+  lang = (lang === "en") ? "ko" : "en";
   try{ const u = new URL(location.href); u.searchParams.set("lang", lang); history.replaceState(null, "", u.toString()); }catch(err){}   /* 기억하지 않고 주소만 바꾼다 */
   applyLang();
   /* 보고 있던 장면을 그 언어로 다시 그린다 */
@@ -724,7 +827,7 @@ langBtn.addEventListener("click", e=>{
       const cs = sc.cues || [];
       const t = curVid ? curVid.currentTime : 0;
       for(const c of cs){ if(t >= c[0] && t < c[1]){ cue.innerHTML = cueText(c); break; } }
-      if(sc.chyron) chyron.textContent = (lang==="en" && sc.chyron.en) ? sc.chyron.en : sc.chyron.text;
+      if(sc.chyron) chyron.textContent = chyronText(sc.chyron);
     }else{
       txt.innerHTML = linesOf(sc)
         .map((l,n)=>`<div class="ln" style="animation-delay:${(n*LINE_STAGGER/1000).toFixed(2)}s">${l}</div>`)
@@ -790,7 +893,7 @@ document.addEventListener("visibilitychange", ()=>{
     if(curVid && curVid.currentTime < curVid.duration) curVid.play().catch(()=>{});
   }
 });
-$("eDemo").addEventListener("click", e=>{ e.stopPropagation(); location.href="https://oreumgames.com"; });
+$("eDemo").addEventListener("click", e=>{ e.stopPropagation(); location.href = (lang === "zh") ? "https://oreumgames.com/zh/" : "https://oreumgames.com"; });
 
 /* 전체 재생시간 (화면에는 안 띄운다 — 개발 중 확인용)
    콘솔에서 totalSeconds() 를 치면 초 단위로 나온다 */
