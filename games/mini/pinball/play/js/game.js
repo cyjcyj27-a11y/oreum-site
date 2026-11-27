@@ -382,7 +382,7 @@
   function roundRect(g, x, y, w, h, r) { g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); }
   function saveCard() { if (!cardURL) return; const a = document.createElement('a'); a.href = cardURL; a.download = 'pinball.png'; document.body.appendChild(a); a.click(); a.remove(); }
   function shareCard() {
-    const url = EN ? 'https://oreumgames.com/en/games/mini/pinball/' : 'https://oreumgames.com/games/mini/pinball/';
+    const url = EN ? 'https://oreumgames.com/en/games/mini/pinball/' : window.ZH ? 'https://oreumgames.com/zh/games/mini/pinball/' : 'https://oreumgames.com/games/mini/pinball/';
     if (navigator.share) { navigator.share({ title: L('title'), text: shareTxt, url }).catch(() => { }); return; }
     const s = shareTxt + ' ' + url;
     (navigator.clipboard ? navigator.clipboard.writeText(s) : Promise.reject()).catch(() => { const t = document.createElement('textarea'); t.value = s; document.body.appendChild(t); t.select(); try { document.execCommand('copy'); } catch (e) { } t.remove(); });
