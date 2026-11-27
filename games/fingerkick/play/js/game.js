@@ -20,11 +20,24 @@
   // ── 말: ?lang=en 이면 영어. 한국어가 원본이고 영어를 덧씌운다 ──
   var EN = /[?&]lang=en/i.test(location.search);
   if (EN) { document.documentElement.lang = 'en'; document.body.classList.add('en'); document.title = 'Finger Kick — free flick soccer game'; Array.prototype.forEach.call(document.querySelectorAll('[data-en]'), function (el) { el.textContent = el.getAttribute('data-en'); }); }
+  // ?lang=zh 이면 중국어: 한국어 글자를 바꾸고 중국어 글꼴을 덧붙인다
+  var ZH = new URLSearchParams(location.search).get('lang') === 'zh';
+  if (ZH) {
+    document.documentElement.lang = 'zh-CN'; document.title = '手指足球 — Finger Kick';
+    var zf = "local('PingFang SC'),local('PingFangSC-Regular'),local('Microsoft YaHei'),local('Microsoft YaHei UI'),local('Noto Sans SC'),local('Noto Sans CJK SC'),local('Source Han Sans SC')";
+    var ur = 'U+2E80-2FFF,U+3000-303F,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF';
+    var zst = document.createElement('style');
+    zst.textContent = "@font-face{font-family:'Griun';src:" + zf + ";unicode-range:" + ur + "}@font-face{font-family:'Ria';src:" + zf + ";unicode-range:" + ur + "}html[lang=zh-CN] *{word-break:normal!important}";
+    document.head.appendChild(zst);
+    $('title').querySelector('h1').textContent = '手指足球';
+    $('btnStart').textContent = '开始';
+    $('keys').textContent = 'M 音乐 · K 音效';
+  }
 
   // ── 전적 (브라우저에 저장) ──
   function loadRec() { try { var r = JSON.parse(localStorage.getItem('fingerkick.rec') || '{}'); return { w: r.w | 0, d: r.d | 0, l: r.l | 0 }; } catch (e) { return { w: 0, d: 0, l: 0 }; } }
   function saveRec(r) { try { localStorage.setItem('fingerkick.rec', JSON.stringify(r)); } catch (e) {} }
-  function recText(r) { if (!(r.w + r.d + r.l)) return ''; return EN ? r.w + 'W ' + r.d + 'D ' + r.l + 'L' : r.w + '승 ' + r.d + '무 ' + r.l + '패'; }
+  function recText(r) { if (!(r.w + r.d + r.l)) return ''; return ZH ? r.w + '胜 ' + r.d + '平 ' + r.l + '负' : EN ? r.w + 'W ' + r.d + 'D ' + r.l + 'L' : r.w + '승 ' + r.d + '무 ' + r.l + '패'; }
   function showRec() { var t = recText(loadRec()); $('rec').textContent = t; $('rec2').textContent = t; }
 
   // ── 화면 맞추기 ──
