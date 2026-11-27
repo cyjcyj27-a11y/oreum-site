@@ -1,9 +1,10 @@
-// 영문판: 주소에 ?lang=en 이 있을 때만 화면 글자를 영어로 바꾼다(기억·폰 언어는 쓰지 않는다)
+// 영문판·중국어판: 주소에 ?lang=en 또는 ?lang=zh 가 있을 때만 화면 글자를 바꾼다(기억·폰 언어는 쓰지 않는다)
 (function () {
-  const EN = new URLSearchParams(location.search).get('lang') === 'en';
-  window.LANG = EN ? 'en' : 'ko';
-  if (!EN) return;
-  const D = {
+  const Q = new URLSearchParams(location.search).get('lang');
+  const LG = Q === 'en' || Q === 'zh' ? Q : 'ko';
+  window.LANG = LG;
+  if (LG === 'ko') return;
+  const EN = {
     '포켓볼': 'POCKET BALL', '포켓': 'POCKET ', '볼': 'BALL', '플레이': 'PLAY', '레슨': 'LESSON', '홈': 'HOME', '나': 'YOU', '상대': 'RIVAL',
     '선승': 'RACE TO',
     '동네 형': 'Guy Next Door', '알바생 지수': 'Jisu the Part Timer', '동아리 회장': 'Club President', '퇴근한 김 과장': 'Mr. Kim After Work',
@@ -15,12 +16,25 @@
     '내 공(1~7 또는 9~15)을 다 넣고 8번을 넣으면 이겨요': 'Pocket all your balls (1 to 7 or 9 to 15), then the 8 ball to win',
     '흰 공이 빠지면 상대가 흰 공을 놓아요': 'If the cue ball drops, your rival places it anywhere',
   };
+  const ZH = {
+    '포켓볼': '台球 8号球', '포켓': '台球 ', '볼': '8号球', '플레이': '开始', '레슨': '教学', '홈': '首页', '나': '我', '상대': '对手',
+    '동네 형': '隔壁大哥', '알바생 지수': '打工妹智秀', '동아리 회장': '社团会长', '퇴근한 김 과장': '下班的金科长',
+    'PC방 사장님': '网吧老板', '단골 할아버지': '常客老大爷', '체대생 민호': '体院生民浩', '야간 동호회장': '夜场球会会长',
+    '구청장배 우승자': '区长杯冠军', '프로 지망생': '职业预备生', '은퇴한 프로': '退役职业选手', '당구장 사장님': '台球厅老板',
+    '당구장 사장님이 큐를 내려놓았다': '台球厅老板放下了球杆', '오늘부터 이 동네 1등은 나다': '从今天起，这片儿的第一就是我',
+    '당구대를 끌어 큐 방향을 정해요': '拖动球台调整方向', '바퀴를 돌리면 조금씩 움직여요': '转动滚轮可以微调',
+    '옆에 세운 큐 막대를 당겼다 놓으면 쳐요': '把旁边的球杆拉开再松手就能击球', '많이 당길수록 세게 나가요': '拉得越多力道越大', '흰 공 단추를 누르면 회전을 줘요': '点白球按钮加旋转', '당겨서 쳐요': '拉开击球', '끌어서 옮겨요': '拖动摆放',
+    '내 공(1~7 또는 9~15)을 다 넣고 8번을 넣으면 이겨요': '把自己的球（1~7 或 9~15）全部打进，再打进8号球就赢',
+    '흰 공이 빠지면 상대가 흰 공을 놓아요': '白球落袋，由对手摆放白球',
+  };
+  const D = LG === 'zh' ? ZH : EN;
   const keys = Object.keys(D).sort((a, b) => b.length - a.length);
   const esc = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const RE = new RegExp(keys.map(esc).join('|'), 'g');
   const tr = (s) => {
     if (!/[가-힣]/.test(s)) return s;
-    s = s.replace(/(\d+)회차/g, 'RUN $1');
+    if (LG === 'zh') s = s.replace(/(\d+)회차/g, '第⁠$1⁠轮').replace(/선승 (\d+)/g, '抢$1');
+    else s = s.replace(/(\d+)회차/g, 'RUN $1');
     return s.replace(RE, (m) => D[m]);
   };
   window.L = tr;
@@ -29,9 +43,17 @@
     if (n.nodeType !== 1 || n.tagName === 'SCRIPT' || n.tagName === 'STYLE') return;
     for (const c of n.childNodes) walk(c);
   }
-  document.documentElement.lang = 'en';
+  document.documentElement.lang = LG === 'zh' ? 'zh-CN' : 'en';
+  if (LG === 'zh') {
+    // 게임 글꼴(Ttl·Ui)엔 한자가 없다 → 같은 이름에 중국어 기기 글꼴을 한자 범위로만 덧붙인다
+    const zf = "local('PingFang SC'),local('PingFangSC-Regular'),local('Microsoft YaHei'),local('Microsoft YaHei UI'),local('Noto Sans SC'),local('Noto Sans CJK SC'),local('Source Han Sans SC')";
+    const ur = 'U+2E80-2FFF,U+3000-303F,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF';
+    const st = document.createElement('style');
+    st.textContent = `@font-face{font-family:'Ttl';src:${zf};unicode-range:${ur}}@font-face{font-family:'Ui';src:${zf};unicode-range:${ur};font-weight:700}@font-face{font-family:'Ui';src:${zf};unicode-range:${ur};font-weight:900}html[lang=zh-CN] *{word-break:normal!important}html[lang=zh-CN] .btn.wood.sm{padding-right:46px}@media (max-height:480px){html[lang=zh-CN] .btn.wood.sm{padding-right:10.5vh}}`;
+    document.head.appendChild(st);
+  }
   document.addEventListener('DOMContentLoaded', () => {
-    document.title = 'POCKET BALL';
+    document.title = LG === 'zh' ? '台球 8号球' : 'POCKET BALL';
     walk(document.body);
     new MutationObserver((ms) => ms.forEach((m) => { m.addedNodes.forEach(walk); if (m.type === 'characterData') walk(m.target); }))
       .observe(document.body, { childList: true, subtree: true, characterData: true });
