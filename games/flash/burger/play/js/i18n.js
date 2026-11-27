@@ -66,10 +66,51 @@
     rotHelp: "If the button does nothing, turn off your phone's rotation lock and lay it sideways",
     rotSkip: 'Play in portrait anyway'
   };
+  var ZH = {
+    title: '王中王汉堡', start: '开始', cont: '继续', fresh: '重新开始', freshSure: '确定重新开始', shop: '商店', book: '菜单', next: '下一天',
+    sign: '汉堡', max: '满级', lock: '???', newMenu: '新菜单',
+    dayN: function (n) { return '第' + n + '天'; }, dayEnd: function (n) { return '第' + n + '天 营业结束'; },
+    menus: ['汉堡', '芝士汉堡', '烤肉汉堡', '培根汉堡', '双层芝士汉堡', '鸡蛋汉堡',
+      '鲜虾汉堡', '鸡排汉堡', '墨西哥辣椒汉堡', '牛油果汉堡', '韩牛汉堡', '巨塔汉堡'],
+    ing: { cheese: '芝士', lettuce: '生菜', tomato: '番茄', onion: '洋葱', pickle: '酸黄瓜', bacon: '培根',
+      egg: '鸡蛋', jalapeno: '墨西哥辣椒', avocado: '牛油果', ketchup: '番茄酱', mustard: '芥末酱', mayo: '蛋黄酱',
+      bulgogi: '烤肉酱', sriracha: '是拉差酱', beef: '肉饼', chicken: '鸡排', shrimp: '虾排' },
+    done: { rare: '三分熟', medium: '五分熟', well: '全熟' },
+    up: { grill: '烤盘', heat: '火力', fryer: '炸锅', basket: '炸篮', wait: '等候座', sign: '招牌' },
+    ranks: ['美食车', '巷口汉堡店', '手作汉堡店', '汉堡名店', '汉堡世家'],
+    words: ['', '不太行', '还行吧', '不错', '好吃！', '绝了！'],
+    tNo: function (k) { return ZH.ing[k] + ' ✕'; },
+    tAdd: function (k) { return ZH.ing[k] + ' +'; },
+    tSauce: function (k) { return '→ ' + ZH.ing[k]; },
+    tLots: function (k) { return ZH.ing[k] + ' ×2'; },
+    tPatty: '肉饼 +', tFries: '薯条', bunB: '底层面包', bunT: '顶层面包',
+    noL: function (k) { return '不要' + ZH.ing[k]; }, addL: function (k) { return ZH.ing[k]; }, swapL: function (k) { return '换成' + ZH.ing[k]; }, lotsL: function (k) { return '多加' + ZH.ing[k]; },
+    sDone: function (d) { return '要' + ZH.done[d] + '的'; },
+    sNo: function (k) { return '不要放' + ZH.ing[k]; },
+    sAdd: function (k) { return ZH.ing[k] + '也加上'; },
+    sSauce: function (k) { return '酱换成' + ZH.ing[k]; },
+    sLots: function (k) { return ZH.ing[k] + '多放点'; },
+    sPatty: '再加块肉饼', sFries: '还要薯条',
+    hello: ['你好！', '饿死了', '来一个', '要好吃哦！'],
+    rotTitle: '这个游戏要横屏玩', rotGo: '切换横屏',
+    rotHelp: '按钮没反应的话，请关掉旋转锁定再把手机横过来', rotSkip: '还是竖屏玩'
+  };
   var q = new URLSearchParams(location.search).get('lang');
-  var en = q === 'en';
-  window.T = en ? EN : KO;
+  var en = q === 'en', zh = q === 'zh';
+  window.T = en ? EN : zh ? ZH : KO;
   window.T.en = en;
+  if (zh) {
+    document.documentElement.lang = 'zh-CN';
+    document.title = ZH.title;
+    // 게임 글꼴엔 한자가 없어 같은 이름에 중국어 기기 글꼴을 한자 범위로만 덧붙인다
+    var zf = "local('PingFang SC Semibold'),local('PingFangSC-Semibold'),local('Microsoft YaHei Bold'),local('Microsoft YaHei UI Bold'),local('Noto Sans SC Bold'),local('NotoSansSC-Bold'),local('Source Han Sans SC Bold'),local('PingFang SC'),local('PingFangSC-Regular'),local('Microsoft YaHei'),local('Microsoft YaHei UI'),local('Noto Sans SC'),local('Noto Sans CJK SC'),local('Source Han Sans SC')";
+    var ur = 'U+2E80-2FFF,U+3000-303F,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF';
+    var css = ['YeonSung', 'Gaegu', 'Ria'].map(function (fm) { return "@font-face{font-family:'" + fm + "';src:" + zf + ';unicode-range:' + ur + '}'; }).join('');
+    var st = document.createElement('style'); st.textContent = css + 'html[lang=zh-CN] *{word-break:normal!important}#title h1.zh{font-size:min(14vw,30vh)}'; document.head.appendChild(st);
+    var hz = document.querySelector('#title h1'); if (hz) { hz.textContent = ZH.title; hz.setAttribute('data-txt', ZH.title); hz.classList.add('zh'); }
+    var tips = { tPause: '暂停', tMus: '音乐', tSnd: '音效' };
+    for (var id in tips) { var b = document.getElementById(id); if (b) b.title = tips[id]; }
+  }
   if (en) {
     document.documentElement.lang = 'en';
     document.title = 'Kingwangzzang';

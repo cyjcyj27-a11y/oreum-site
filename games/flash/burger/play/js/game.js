@@ -509,7 +509,7 @@
     g.fillStyle = '#2b2622'; g.fillRect(0, 0, W, H);
     g.setTransform(dpr * sc, 0, 0, dpr * sc, dpr * ox, dpr * oy);
     var t = R.t, x0 = -ox / sc - 2, y0 = -oy / sc - 2, ww = W / sc + 4;
-    if (R.phase === 'ending') { ART.ending(g, x0, y0, ww, H / sc + 4, R.endT, t, R.endCust, T.en ? 'KINGWANGZZANG' : '킹왕짱버거', 'Gaegu'); return; }
+    if (R.phase === 'ending') { ART.ending(g, x0, y0, ww, H / sc + 4, R.endT, t, R.endCust, T.title, 'Gaegu'); return; }
     var u = unlockedSet();
 
     ART.wall(g, x0, y0, ww, 300 - y0, S.rank, t);
@@ -1059,7 +1059,7 @@
     R.phase = 'ending'; R.endT = 0; R.endLit = 0;
     R.endCust = []; for (var i = 0; i < 12; i++) R.endCust.push({ skin: rnd(4), hair: rnd(7), style: rnd(6), shirt: rnd(8), glasses: Math.random() < 0.25, kid: Math.random() < 0.15, seed: Math.random() * 99 });
     document.body.classList.remove('playing');
-    try { document.fonts.load('118px Gaegu', T.en ? 'KINGWANGZZANG' : '킹왕짱버거'); } catch (e) {}
+    try { document.fonts.load('118px Gaegu', T.title); } catch (e) {}
     if (window.OG) OG.over({ result: 'ENDING', score: S.total, day: S.day - 1 });
     SND.play('clear');
   }
