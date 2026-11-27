@@ -3,8 +3,24 @@
   'use strict';
   const D = window.BB, A = window.BBA, ST = window.BBS;
   const EN = /[?&]lang=en/.test(location.search);
-  const L = s => Array.isArray(s) ? s[EN ? 1 : 0] : s;
-  const t = (ko, en) => EN ? en : ko;
+  const ZHL = !EN && /[?&]lang=zh/.test(location.search);
+  const ZH = window.ZH || {};
+  const zhOf = (ko, en) => Array.isArray(ko) ? ko.map((k, i) => zhOf(k, en && en[i])) : (ZH[ko] != null ? ZH[ko] : (en != null ? en : ko));
+  const L = s => Array.isArray(s) ? (ZHL ? zhOf(s[0], s[1]) : s[EN ? 1 : 0]) : s;
+  const t = (ko, en, zh) => EN ? en : ZHL ? (zh != null ? zh : zhOf(ko, en)) : ko;
+  const kn = s => ZHL ? (ZH[s] || s) : s;   // Korean member name -> Chinese name in zh
+  if (ZHL) {
+    document.documentElement.lang = 'zh-CN'; document.title = '独立乐队经纪人 — Oreum Games';
+    // Chinese system fonts for CJK glyphs in each game font family
+    const zf = "local('PingFang SC'),local('PingFangSC-Regular'),local('Microsoft YaHei'),local('Microsoft YaHei UI'),local('Noto Sans SC'),local('Noto Sans CJK SC'),local('Source Han Sans SC')";
+    const ur = 'U+2E80-2FFF,U+3000-303F,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF';
+    const zs = document.createElement('style');
+    zs.textContent = ['Pretendard Variable', 'Pretendard', 'Ria', 'Nanum Pen Script'].map(f => `@font-face{font-family:'${f}';src:${zf};unicode-range:${ur}}`).join('') +
+      'html[lang=zh-CN] *{word-break:normal!important}';
+    document.head.appendChild(zs);
+    document.querySelectorAll('[data-en]').forEach(e => { const k = e.innerHTML.trim(); if (ZH[k]) e.innerHTML = ZH[k]; });
+    document.querySelectorAll('[data-en-ph]').forEach(e => { if (ZH[e.placeholder]) e.placeholder = ZH[e.placeholder]; });
+  }
   if (EN) { document.documentElement.lang = 'en'; document.title = 'Hotshot Indie — Oreum Games'; document.querySelectorAll('[data-en]').forEach(e => { e.innerHTML = e.getAttribute('data-en'); }); document.querySelectorAll('[data-en-ph]').forEach(e => { e.placeholder = e.getAttribute('data-en-ph'); }); }
 
   const rnd = (a, b) => Math.random() * (b - a) + a, rndi = (a, b) => Math.floor(rnd(a, b + 1));
@@ -76,7 +92,7 @@
     STATS.forEach(s => m[s.k] = c.stats[s.k]);
     return m;
   }
-  const disp = m => EN ? m.en : m.kr;
+  const disp = m => EN ? m.en : kn(m.kr);
   const leader = () => S.members.find(m => m.id === S.leaderId);
   const alive = () => S.members.filter(m => !m.out);
   const IV = '?v=4';   // 그림을 다시 자르면 올린다(브라우저 캐시)
@@ -235,7 +251,7 @@
       return `<div class="card pick ${on ? 'sel' : ''}" style="--acc:${a.acc};--tint:${a.tint}" data-id="${a.id}">
         ${on ? '<span class="tag joined">JOINED</span>' : '<span class="tag ask">TALK</span>'}
         <div class="chead">${avatar(a)}<div>
-          <div class="nm">${a.en}<span class="kr">${a.kr}</span></div>
+          <div class="nm">${a.en}<span class="kr">${kn(a.kr)}</span></div>
           <div class="pos">${a.age}${t('세', '')} ${a.height} ${a.mbti} ${L(a.role)}<br><span style="color:var(--cream)">${'★'.repeat(a.pot)}${'☆'.repeat(5 - a.pot)}</span></div></div></div>
         ${statBars(a)}
         ${bar(['홍대병', 'Indie'], a.hong, '#8e6fd0')}
@@ -296,7 +312,7 @@
         <div class="ph" style="--p0:${m.pal[0]};--p1:${m.pal[1]}"><img src="${imgBody(m)}" alt=""></div>
         <div>
           <div class="num" style="font-size:62.4px;letter-spacing:6px">${m.en}</div>
-          <div style="font-size:28.8px;color:var(--dim);margin:2px 0 14px">${m.kr}</div>
+          <div style="font-size:28.8px;color:var(--dim);margin:2px 0 14px">${kn(m.kr)}</div>
           <div class="prow"><span>AGE</span>${m.age}${t('세', '')}</div>
           <div class="prow"><span>HEIGHT</span>${m.height}</div>
           <div class="prow"><span>MBTI</span>${m.mbti}</div>
@@ -515,7 +531,7 @@
 
     if (earned) { notes.push(good('🪙 +' + Math.round(earned))); A.sfx.coin(); }
     if (fameGain >= 1) notes.push(good('🔥 +' + fameGain.toFixed(1)));
-    if (shaky) notes.push(bad(t(`멘탈 위험 ${shaky}`, `${shaky} at risk`)));
+    if (shaky) notes.push(bad(t(`멘탈 위험 ${shaky}`, `${shaky} at risk`, `心态危险 ${shaky}`)));
     notes.forEach(n => addLog(n));
 
     const lines = [];
@@ -626,7 +642,7 @@
     const talker = a.find(x => x.key === 'doyun') || Ld;
     return [
       { id: 'scout', cond: () => S.hype > 18, who: m, e: 'sad', t: t('타 기획사의 접촉', 'Another label calls'),
-        b: t(`${n}에게 대형 기획사 명함이 들어왔다.`, `A big label slid ${n} a card.`),
+        b: t(`${n}에게 대형 기획사 명함이 들어왔다.`, `A big label slid ${n} a card.`, `大型经纪公司给${n}递了名片。`),
         say: t('"솔로로 오면 바로 데뷔시켜 준대요." …저 어떡하죠', '"Come solo, we debut you now," they said. ...What do I do.'),
         o: [{ t: t('보내준다', 'Let him go'), s: t('🪙 +250 GAME OVER', '🪙 +250, GAME OVER'),
               f: () => { S.money += 250; dropOut(m); S.doom = true; addLog(good('🪙 +250') + ' ' + bad('GAME OVER')); },   // 넷 중 하나라도 보내면 끝(사장님, 2026-09-08)
@@ -635,7 +651,7 @@
               f: () => { S.team = clamp(S.team + 14, 0, 100); m.mental = clamp(m.mental + 18, 0, 100); m.bond = clamp(m.bond + 8, 0, 100); heart(8); addLog(`<b>${n}</b> ${good(t('잔류 호흡 +14', 'stays, Team +14'))}`); },
               reply: { e: 'joy', t: ['…남을게요  여기가 제 팀이에요', "...I'll stay. This is my team."] } }] },
       { id: 'injury', cond: () => a.some(x => x.stamina / x.maxStam < .35), who: tiredOne(), e: 'sad', t: t('손목 부상', 'Wrist injury'),
-        b: () => { const h = tiredOne(); return t(`${disp(h)}이(가) 합주 중에 손목을 감쌌다. 부어 있다.`, `${disp(h)} grabbed his wrist mid-jam. It's swollen.`); },
+        b: () => { const h = tiredOne(); return t(`${disp(h)}이(가) 합주 중에 손목을 감쌌다. 부어 있다.`, `${disp(h)} grabbed his wrist mid-jam. It's swollen.`, `${disp(h)}合奏时捂住了手腕。已经肿起来了。`); },
         say: t('괜찮아요. 할 수 있어요. …진짜로요.', "I'm fine. I can do it. ...Really."),
         o: [{ t: t('바로 병원', 'Hospital now'), s: t('🪙 -150, 체력 완전 회복, ♥ +6', '🪙 -150, full stamina, ♥ +6'),
               f: () => { const h = tiredOne(); S.money -= 150; h.stamina = h.maxStam; h.mental = clamp(h.mental + 10, 0, 100); h.bond = clamp(h.bond + 6, 0, 100); heart(6); addLog(`${good(disp(h) + ' OK')} ${bad('🪙 -150')}`); } },
@@ -649,7 +665,7 @@
             { t: t('거절하고 연습', 'Decline, practice'), s: t('전원 랜덤 스탯 +3', 'Everyone random stat +3'),
               f: () => { alive().forEach(x => { const k = pick(STATS).k; x[k] = clamp(x[k] + 3, 0, 100); }); addLog(good(t('전원 +3', 'Everyone +3'))); } }] },
       { id: 'fight', cond: () => a.length >= 2 && S.team < 55, who: a[1], e: 'mad', t: t('파트 분배 충돌', 'Fight over parts'),
-        b: t(`${disp(a[0])}과(와) ${disp(a[1])}이(가) 타이틀곡 편곡을 두고 붙었다.`, `${disp(a[0])} and ${disp(a[1])} clashed over the title-track arrangement.`),
+        b: t(`${disp(a[0])}과(와) ${disp(a[1])}이(가) 타이틀곡 편곡을 두고 붙었다.`, `${disp(a[0])} and ${disp(a[1])} clashed over the title-track arrangement.`, `${disp(a[0])}和${disp(a[1])}为了主打歌编曲吵起来了。`),
         say: t('이 파트는 제 거예요. 양보 못 해요.', "This part is mine. I won't give it up."),
         o: [{ t: t('리더에게 맡긴다', 'Leave it to the leader'), s: t('리더 끼 55 이상이면 수습', 'Works if leader Charm ≥ 55'),
               f: () => { if (!Ld.out && Ld.charm >= 55) { S.team = clamp(S.team + 12, 0, 100); addLog(`<b>${disp(Ld)}</b> ${good(t('호흡 +12', 'Team +12'))}`); } else { S.team = clamp(S.team - 8, 0, 100); addLog(bad(t('호흡 -8', 'Team -8'))); A.sfx.bad(); } } },
@@ -691,7 +707,7 @@
             { t: t('아직은 이르다', 'Not yet'), s: t('호흡 +6 전원 멘탈 +6', 'Team +6, all mind +6'),
               f: () => { S.team = clamp(S.team + 6, 0, 100); alive().forEach(x => x.mental = clamp(x.mental + 6, 0, 100)); addLog(good(t('호흡 +6', 'Team +6'))); } }] },
       { id: 'slump', cond: () => a.some(x => x.mental < 45), who: lowOne(), e: 'sad', t: t('슬럼프', 'Slump'),
-        b: () => { const h = lowOne(); return t(`${disp(h)}이(가) 거울 앞에 두 시간째 서 있다.`, `${disp(h)} has stood at the mirror for two hours.`); },
+        b: () => { const h = lowOne(); return t(`${disp(h)}이(가) 거울 앞에 두 시간째 서 있다.`, `${disp(h)} has stood at the mirror for two hours.`, `${disp(h)}已经在镜子前站了两个小时。`); },
         say: t('…제가 여기 있어도 되는 사람일까요', '...Do I even belong here?'),
         o: [{ t: t('통째로 쉬게 한다', 'Full rest'), s: t('멘탈 +35 체력 회복 ♥ +6', 'Mind +35, stamina full, ♥ +6'),
               f: () => { const h = lowOne(); h.mental = clamp(h.mental + 35, 0, 100); h.stamina = h.maxStam; h.bond = clamp(h.bond + 6, 0, 100); heart(6); addLog(good(`${disp(h)} ${t('멘탈 +35', 'mind +35')}`)); } },
@@ -794,7 +810,7 @@
       const total = STATS.reduce((s, st) => s + m[st.k], 0);
       const bestSt = STATS.map(st => [L(st.n), m[st.k]]).sort((x, y) => y[1] - x[1])[0];
       const epi = ST.EPILOGUE[m.key][m.bond >= 60 ? 0 : 1];
-      return `<div class="li"><b>${m.en}</b> <span style="color:var(--dim);font-size:26.4px">${m.kr}</span> ${L(m.pos)} ${m.id === S.leaderId ? '👑' : ''} <span style="color:var(--pink)" class="num">♥ ${Math.round(m.bond)}</span><span style="color:var(--dim)">, ${L(m.trait.n)}</span><br>
+      return `<div class="li"><b>${m.en}</b> <span style="color:var(--dim);font-size:26.4px">${kn(m.kr)}</span> ${L(m.pos)} ${m.id === S.leaderId ? '👑' : ''} <span style="color:var(--pink)" class="num">♥ ${Math.round(m.bond)}</span><span style="color:var(--dim)">, ${L(m.trait.n)}</span><br>
         <span style="font-size:27.6px;color:var(--dim)" class="num">${STATS.map(st => `${L(st.n)} ${Math.round(m[st.k])}`).join(' / ')}, TOTAL <b style="color:var(--gold)">${Math.round(total)}</b>, ${good(bestSt[0])}</span><br>
         <span style="font-size:33.6px;color:var(--txt)">${L(epi)}</span></div>`;
     }).join('');
