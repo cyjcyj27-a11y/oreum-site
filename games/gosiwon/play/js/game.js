@@ -3,7 +3,7 @@
 'use strict';
 var T = THREE, W = GS.world, CH = GS.chores, PI = Math.PI, $ = function (id) { return document.getElementById(id); };
 var KEY = 'gosiwon.save', HS = 60, DAYS = 30, PASSLINE = 80, STUDY = 1200, WAGE = 15000, EYE = 1.55, DAYMIN = 960;
-var EN = /[?&]lang=en/.test(location.search), KO = {}, L = function (ko, en) { if (EN) KO[en] = ko; return EN ? en : ko; };   // KO: 영어 → 한글(영문판 칸 크기를 한글판과 같게 재려고, 10/4 사장님 영문판 검수)
+var EN = /[?&]lang=en/.test(location.search), ZH = GS.ZH, KO = {}, L = function (ko, en) { if (EN) KO[en] = ko; return EN ? en : ZH ? GS.Z(ko) : ko; };   // KO: 영어 → 한글(영문판 칸 크기를 한글판과 같게 재려고, 10/4 사장님 영문판 검수)
 if (EN) { document.body.classList.add('en'); document.documentElement.lang = 'en'; document.title = 'Gosiwon Manager'; }
 var G = GS.G = { mode: 'title', day: 1, t: 0, pass: 50, coin: 0, items: {}, gloves: false, carry: null, tasks: [], neglect: {}, stock: 8, study: null, last: null, riceAt: 0, P: { x: 3.9, y: 0, z: -1.35, yaw: -2.29, pitch: 0 } };
 var ITEMS = [
@@ -50,7 +50,7 @@ GS.save = save; GS.left = function () { return left(); };
 var ui = GS.ui = {};
 function clockStr(t) {
   var m = Math.floor(Math.min(DAYMIN, t)), h = 8 + Math.floor(m / 60), mm = m % 60, pm = h >= 12 && h < 24, h12 = h % 12 || 12, s = h12 + ':' + (mm < 10 ? '0' : '') + mm;
-  return EN ? s + (pm ? ' PM' : ' AM') : (pm ? '오후 ' : '오전 ') + s;
+  return EN ? s + (pm ? ' PM' : ' AM') : ZH ? (pm ? '下午 ' : '上午 ') + s : (pm ? '오후 ' : '오전 ') + s;
 }
 function fmt1(v) { return (Math.round(v * 10) / 10).toFixed(1); }
 function predict() { var h = Math.max(0, (DAYMIN - G.t) / 60) * studyMult(); return { h: h, d: Math.round((1 + (h - 8)) * 10) / 10 }; }
@@ -122,7 +122,7 @@ function fitBar() {                                    // 상단바: 한글판�
   if (barRows(bar) !== want) st.forEach(function (e) { e.style.fontSize = ''; });   // 줄여도 안 맞으면 원래 크기로 둔다
 }
 function fitAct() {                                    // 폰 오른쪽 아래 동그란 단추: 낱말이 동그라미보다 넓으면 줄인다(줄바꿈은 한글판처럼 그대로)
-  var a = $('act'); a.style.fontSize = ''; if (!EN || !a.offsetWidth) return;
+  var a = $('act'); a.style.fontSize = ''; if (!(EN || ZH) || !a.offsetWidth) return;
   var f0 = parseFloat(getComputedStyle(a).fontSize), f = f0, rg = document.createRange(), r;
   for (;;) { rg.selectNodeContents(a); r = rg.getBoundingClientRect(); if ((r.width <= a.clientWidth - 8 && r.height <= a.clientHeight - 12) || f <= f0 * 0.45) break; f -= 0.5; a.style.fontSize = f + 'px'; }
 }
@@ -146,7 +146,7 @@ var LBL = { '고무장갑': 'Rubber gloves', '책상': 'Desk', '휴지통': 'Tra
   '음식물': 'Food waste', '냉장고': 'Fridge', '밥솥': 'Rice cooker', '라면 상자': 'Ramen box', '선반': 'Shelf', '김치': 'Kimchi', '도마': 'Cutting board',
   '쪽지': 'Note', '메모': 'Memo', '메모 붙이기': 'Stick a note', '귀마개': 'Earplugs', '형광등': 'Light tube', '형광등 갈기': 'Replace the light', '박카스': 'Energy drink',
   '독촉장 붙이기': 'Post the notice', '보일러': 'Boiler', '쓰레기': 'Trash', '이불': 'Blanket', '저금통': 'Coin jar' };
-function lbl(k) { if (!EN || !k) return k; var m = /^(\d+)호$/.exec(k); return m ? 'Room ' + m[1] : LBL[k] || GS.loot.en(k) || k; }
+function lbl(k) { if (ZH && k) return GS.Z(k); if (!EN || !k) return k; var m = /^(\d+)호$/.exec(k); return m ? 'Room ' + m[1] : LBL[k] || GS.loot.en(k) || k; }
 function setMode(m) { G.mode = m; document.body.className = document.body.className.replace(/\bm-\w+/g, '').trim() + ' m-' + m; document.body.classList.toggle('playing', m === 'day' || m === 'study'); }
 function show(id, on) { $(id).hidden = !on; }
 function shopDraw() {
@@ -181,18 +181,22 @@ function inspTick() {
   var I = G.insp; if (!I || G.mode !== 'day' && G.mode !== 'study') return;
   if (G.mode === 'study') { if (G.study && I.sent && !I.res && G.study.at + (DAYMIN - G.study.at) * (1 - Math.max(0, studyRem()) / STUDY) >= INSP_DUE) inspResolve(); return; }
   var fl = (I.k + 2) + L('층', 'F');
-  if (!I.sent && G.t >= INSP_AT) { I.sent = true; phone(L('오늘 오후 3시에 들른다\n' + fl + ' 화장실 본다', 'Dropping by at 3 PM today.\nChecking the ' + fl + ' restrooms.')); ui.tasks(); save(); }
+  if (!I.sent && G.t >= INSP_AT) { I.sent = true; phone(ZH ? '今天下午3点过去\n看看' + fl + '厕所' : L('오늘 오후 3시에 들른다\n' + fl + ' 화장실 본다', 'Dropping by at 3 PM today.\nChecking the ' + fl + ' restrooms.')); ui.tasks(); save(); }
   if (I.sent && !I.res && G.t >= INSP_DUE) inspResolve();
 }
 /* 10/8 3시 전에 일을 다 끝내고 책상에 앉으면 공부 중엔 inspTick 이 안 돌아 결과 문자가 빠졌다(사장님 7일차) → 공부 시계로도 3시에 판정. 껐다 켜서 3시를 건너뛰면 다음 날 아침에 문자 */
+function inspMsg(fl, ok) {                             // inspection result message
+  if (ZH) return ok ? fl + '挺干净 辛苦了\n多给你一万韩元' : fl + '这也叫打扫过?\n工资扣一万韩元';
+  return ok ? L(fl + ' 깨끗하네. 수고했다\n만원 더 넣었다', fl + ' looks clean. Good job.\nAdded 10,000 won.') : L(fl + ' 이게 청소한 거냐?\n월급에서 만원 깐다', 'You call ' + fl + ' clean?\n10,000 won off your pay.');
+}
 function inspResolve(late) {
   var I = G.insp, fl = (I.k + 2) + L('층', 'F');
   if (late) { I.res = inspOk() ? 'ok' : 'bad'; if (I.res === 'ok') G.coin += INSP_PAY; else G.coin = Math.max(0, G.coin - INSP_PAY);
-    G.inspLate = I.res === 'ok' ? L(fl + ' 깨끗하네. 수고했다\n만원 더 넣었다', fl + ' looks clean. Good job.\nAdded 10,000 won.') : L(fl + ' 이게 청소한 거냐?\n월급에서 만원 깐다', 'You call ' + fl + ' clean?\n10,000 won off your pay.'); return; }
+    G.inspLate = I.res === 'ok' ? inspMsg(fl, 1) : inspMsg(fl, 0); return; }
   {
     I.res = inspOk() ? 'ok' : 'bad'; ui.tasks();
-    if (I.res === 'ok') { phone(L(fl + ' 깨끗하네. 수고했다\n만원 더 넣었다', fl + ' looks clean. Good job.\nAdded 10,000 won.')); setTimeout(function () { GS.coin(INSP_PAY); }, 900); }
-    else { phone(L(fl + ' 이게 청소한 거냐?\n월급에서 만원 깐다', 'You call ' + fl + ' clean?\n10,000 won off your pay.')); G.coin = Math.max(0, G.coin - INSP_PAY); setTimeout(function () { GS.snd('down'); }, 900); }
+    if (I.res === 'ok') { phone(inspMsg(fl, 1)); setTimeout(function () { GS.coin(INSP_PAY); }, 900); }
+    else { phone(inspMsg(fl, 0)); G.coin = Math.max(0, G.coin - INSP_PAY); setTimeout(function () { GS.snd('down'); }, 900); }
     save();
   }
 }

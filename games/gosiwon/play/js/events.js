@@ -4,7 +4,7 @@
 GS.ev = (function () {
 'use strict';
 var T = THREE, PI = Math.PI, W, CH, G, grp, CW = 0.75, FH = GS.FH, WH = GS.WH;
-var EN = /[?&]lang=en/.test(location.search), L = function (ko, en) { return EN ? en : ko; };
+var EN = /[?&]lang=en/.test(location.search), ZH = GS.ZH, L = function (ko, en) { return EN ? en : ZH ? GS.Z(ko) : ko; };
 var $ = function (id) { return document.getElementById(id); };
 /* ---------- 일정 ---------- */
 var DAY = { fridge: 2, fridge2: 3, ramen: 3, jar: 4, snore: 4, snore2: 5, hair: 6, lamp: 8, exam: 10, bac: 13, parcel: 11, praise: 15, rent: 16, rent2: 17, boiler: 17 };
@@ -295,7 +295,7 @@ function rows() {
     h += '<div class="evrow' + (s.done ? ' done' : '') + '"><span>' + ROW[id] + '</span><span>' + right + '</span></div>';
   });
   var mo = moveOf(G.day); if (mo && has(mo.key) && st(mo.key).sent) { var S = st(mo.key), tot = JUNK.length + (S.loot ? S.loot.length : 3);
-    h += '<div class="evrow' + (S.done ? ' done' : '') + '"><span>' + L(mo.n + '호 정리', 'Clean ' + mo.n) + '</span><span>' + (S.done ? '&#10004;' : (S.n || 0) + '/' + tot) + '</span></div>'; }
+    h += '<div class="evrow' + (S.done ? ' done' : '') + '"><span>' + (ZH ? '清理' + mo.n + '号' : L(mo.n + '호 정리', 'Clean ' + mo.n)) + '</span><span>' + (S.done ? '&#10004;' : (S.n || 0) + '/' + tot) + '</span></div>'; }
   return h;
 }
 // 하루가 끝날 때: 그날 받은 민원을 안 했으면 내일 꾸중
