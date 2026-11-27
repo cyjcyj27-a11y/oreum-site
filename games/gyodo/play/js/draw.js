@@ -116,7 +116,7 @@
     if (e.hit > 0) spr(def.spr, f, px, py + (def.under && !e.rev ? 4 : 0), flip, 0.75, true, sink);
     if (def.under) mound(px, py - 6, 0, true);
     if ((def.hidden || def.under) && e.rev) { P(px - 1, py - 50, 3, 7, '#ff3b30'); P(px - 1, py - 41, 3, 3, '#ff3b30'); }
-    if (def.boss) { ctx.font = '10px DungGeunMo, monospace'; ctx.textAlign = 'center'; var tw2 = 34; P(px - tw2 / 2, py - 66, tw2, 12, '#9b1c16'); P(px - tw2 / 2, py - 66, tw2, 1, '#e0453a'); ctx.fillStyle = '#ffe8a0'; ctx.fillText(window.GY_LANG === 'en' ? 'KING' : '탈옥왕', px, py - 57); }
+    if (def.boss) { ctx.font = '10px DungGeunMo, monospace'; ctx.textAlign = 'center'; var tw2 = 34; P(px - tw2 / 2, py - 66, tw2, 12, '#9b1c16'); P(px - tw2 / 2, py - 66, tw2, 1, '#e0453a'); ctx.fillStyle = '#ffe8a0'; ctx.fillText(window.GY_LANG === 'en' ? 'KING' : window.GY_LANG === 'zh' ? '越狱王' : '탈옥왕', px, py - 57); }
     if (e.hp < e.max) {
       var bw = def.boss ? 34 : 16, h = Math.max(0, e.hp / e.max);
       P(px - bw / 2 - 1, py - 47, bw + 2, 4, '#1b1d21'); P(px - bw / 2, py - 46, Math.round(bw * h), 2, h > 0.5 ? '#7bd14a' : h > 0.25 ? '#f2c744' : '#ff4d3a');
@@ -151,7 +151,7 @@
       ctx.save(); ctx.globalAlpha = a2; ctx.translate(Math.round(x), Math.round(y)); ctx.rotate(-0.12); ctx.scale(sc2, sc2);
       ctx.fillStyle = 'rgba(255,240,220,.85)'; ctx.fillRect(-30, -13, 60, 26);
       ctx.fillStyle = '#c9302a'; ctx.fillRect(-30, -13, 60, 3); ctx.fillRect(-30, 10, 60, 3); ctx.fillRect(-30, -13, 3, 26); ctx.fillRect(27, -13, 3, 26);
-      ctx.font = (window.GY_LANG === 'en' ? '14px' : '18px') + ' Mulmaru, DungGeunMo, monospace'; ctx.textAlign = 'center'; ctx.fillText(window.GY_LANG === 'en' ? 'CAUGHT' : '검거', 0, 7); ctx.restore();
+      ctx.font = (window.GY_LANG === 'en' ? '14px' : '18px') + ' Mulmaru, DungGeunMo, monospace'; ctx.textAlign = 'center'; ctx.fillText(window.GY_LANG === 'en' ? 'CAUGHT' : window.GY_LANG === 'zh' ? '抓获' : '검거', 0, 7); ctx.restore();
     } else if (f.k === 'found') {
       ctx.font = '14px Mulmaru, DungGeunMo, monospace'; ctx.textAlign = 'center';
       ctx.fillStyle = '#1b1d21'; ctx.fillText('!', x + 1, y - u * 8 + 1); ctx.fillStyle = '#ff3b30'; ctx.fillText('!', x, y - u * 8);

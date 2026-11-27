@@ -136,7 +136,7 @@
 
   var LIVES = 5;
   // 영문판: 주소에 ?lang=en 일 때만(기억·폰 언어 안 봄)
-  try { window.GY_LANG = /[?&]lang=en(&|$)/.test(location.search) ? 'en' : 'ko'; } catch (e) { window.GY_LANG = 'ko'; }
+  try { window.GY_LANG = /[?&]lang=en(&|$)/.test(location.search) ? 'en' : /[?&]lang=zh(&|$)/.test(location.search) ? 'zh' : 'ko'; } catch (e) { window.GY_LANG = 'ko'; }
   var EN = {
     '1동 감방': 'Cell Block 1', '식당': 'Mess Hall', '운동장': 'Yard', '작업장': 'Workshop', '정문': 'Main Gate',
     '교도관': 'Guard', '철문': 'Iron Door', '경비견': 'K9 Dog', 'CCTV': 'CCTV', '탐조등': 'Searchlight', '진압조': 'Riot Squad',
@@ -144,6 +144,15 @@
     '수감자': 'Inmate', '날쌘돌이': 'Sprinter', '덩치': 'Brute', '땅굴꾼': 'Digger', '변장범': 'Impostor', '폭동꾼': 'Rioter', '탈옥왕': 'Escape King',
     '근무표': 'ROSTER', '검거': 'Caught', '탈옥': 'Escaped', '30일 근무 완료': '30 days on duty', '교도관24시': 'PRISON GUARD 24', '가로로 보기': 'LANDSCAPE'
   };
-  function L(s) { return window.GY_LANG === 'en' ? (EN[s] || s) : s; }
+  // 중국어판(간체): ?lang=zh 일 때만
+  var ZH = {
+    '1동 감방': '1号监区', '식당': '食堂', '운동장': '操场', '작업장': '劳动车间', '정문': '正门',
+    '교도관': '狱警', '철문': '铁门', '경비견': '警犬', 'CCTV': 'CCTV', '탐조등': '探照灯', '진압조': '防暴队',
+    '교도': '警员', '교사': '警司', '교위': '警督', '교감': '警监', '교정': '总警监',
+    '수감자': '囚犯', '날쌘돌이': '飞毛腿', '덩치': '大块头', '땅굴꾼': '挖地道的', '변장범': '伪装犯', '폭동꾼': '暴动犯', '탈옥왕': '越狱王',
+    '근무표': '值班表', '검거': '抓获', '탈옥': '越狱', '30일 근무 완료': '30天值班完成', '교도관24시': '狱警24小时', '가로로 보기': '横屏'
+  };
+  function L(s) { return window.GY_LANG === 'en' ? (EN[s] || s) : window.GY_LANG === 'zh' ? (ZH[s] || s) : s; }
+
   window.GY_DATA = { LIVES: LIVES, L: L, LATE: LATE, ZONEHP: ZONEHP, kingMul: kingMul, KZ: KZ, KSMOKE: KSMOKE, MAPS: MAPS, TOWERS: TOWERS, TORDER: TORDER, ENEMIES: ENEMIES, FIRST: FIRST, SLOTS: SLOTS, waves: waves, hpMul: hpMul, RANKS: RANKS, DAYS: 30 };
 })();

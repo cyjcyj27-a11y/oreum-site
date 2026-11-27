@@ -15,6 +15,20 @@
     document.querySelector('#days h2').textContent = L('근무표');
     $('rotBtn').textContent = L('가로로 보기'); $('rotate').firstElementChild.textContent = L('교도관24시');
   }
+  if (window.GY_LANG === 'zh') {
+    document.documentElement.lang = 'zh-CN'; document.title = L('교도관24시');
+    // 글꼴에 한자가 없으므로 한자 범위만 시스템 중국어 글꼴로 채운다
+    var zf = "local('PingFang SC'),local('PingFangSC-Regular'),local('Microsoft YaHei'),local('Microsoft YaHei UI'),local('Noto Sans SC'),local('Noto Sans CJK SC'),local('Source Han Sans SC')";
+    var ur = 'U+2E80-2FFF,U+3000-303F,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF';
+    var zst = document.createElement('style');
+    zst.textContent = ['Mulmaru', 'DungGeunMo'].map(function (f) { return '@font-face{font-family:' + f + ';src:' + zf + ';unicode-range:' + ur + '}'; }).join('') + 'html[lang=zh-CN] *{word-break:normal!important}';
+    document.head.appendChild(zst);
+    document.querySelector('#title .logo').textContent = L('교도관24시');
+    document.querySelector('#days h2').textContent = L('근무표');
+    $('rotBtn').textContent = L('가로로 보기'); $('rotate').firstElementChild.textContent = L('교도관24시');
+    var zl = { bPause: '暂停', bSpd: '倍速', bBgm: '音乐', bSnd: '音效' };
+    for (var zk in zl) $(zk).setAttribute('aria-label', zl[zk]);
+  }
 
   GYD.init($('cv'));
   function layout() { GYD.resize(); }
