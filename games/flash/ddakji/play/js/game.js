@@ -4,8 +4,8 @@
   var $ = function (id) { return document.getElementById(id); };
   var TY = D.TYPES, BY = D.BYID, EN = window.LANG === 'en';
   S.init($('cv'));
-  function nm(t) { return EN ? t.en : t.ko; }
-  function onm(o) { return EN ? o.en : o.ko; }
+  function nm(t) { return EN ? t.en : L(t.ko); }
+  function onm(o) { return EN ? o.en : L(o.ko); }
   function rnd(a, b) { return a + Math.random() * (b - a); }
   function randn() { return (Math.random() + Math.random() + Math.random() - 1.5) / 0.5; }
   function clamp(x, a, b) { return x < a ? a : x > b ? b : x; }
@@ -35,7 +35,7 @@
   }
   // ── 화면 글 ──
   var bubT = 0;
-  function say(txt, s) { var b = $('bub'); b.textContent = txt; b.classList.add('on'); bubT = s || 1.6; }
+  function say(txt, s) { var b = $('bub'); b.textContent = EN ? txt : L(txt); b.classList.add('on'); bubT = s || 1.6; }
   function big(txt, cls) { var b = $('big'); b.textContent = txt; b.className = ''; void b.offsetWidth; b.className = 'on ' + (cls || ''); }
   function show(id) { ['map', 'pick', 'bag', 'dex', 'pause', 'over', 'end'].forEach(function (k) { $(k).classList.toggle('hide', k !== id); }); }
   function hud(on) { $('topbar').classList.toggle('hide', !on); $('mine').classList.toggle('hide', !on); }
