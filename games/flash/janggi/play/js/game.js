@@ -12,9 +12,9 @@
   var HANGUL = { 1: ['', '초', '한'], 2: '차', 3: '포', 4: '마', 5: '상', 6: '사', 7: '졸' };
   var COL = ['', '#1b6e3a', '#b8281c'], COLD = ['', '#0d3e20', '#6e130c'];
   // 급수 사다리 — 이기면 한 칸 오르고 지면 그 자리(오목·바둑과 같은 27단계)
-  var RANKS = [], RANKS_EN = [], r;
-  for (r = 18; r >= 1; r--) { RANKS.push(r + '급'); RANKS_EN.push(r + 'K'); }
-  for (r = 1; r <= 9; r++) { RANKS.push(r + '단'); RANKS_EN.push(r + 'D'); }
+  var RANKS = [], RANKS_EN = [], RANKS_ZH = [], r;
+  for (r = 18; r >= 1; r--) { RANKS.push(r + '급'); RANKS_EN.push(r + 'K'); RANKS_ZH.push(r + '级'); }
+  for (r = 1; r <= 9; r++) { RANKS.push(r + '단'); RANKS_EN.push(r + 'D'); RANKS_ZH.push(r + '段'); }
   var TOP = RANKS.length - 1, DAN = 18;
 
   var cv = document.getElementById('c'), ctx = cv.getContext('2d');
@@ -27,8 +27,26 @@
   // ── 말: ?lang=en 이면 영어(기물 글자는 그대로 한자) ──
   var EN = /[?&]lang=en/i.test(location.search);
   if (EN) { document.documentElement.lang = 'en'; document.body.classList.add('en'); document.title = 'JANGGI'; Array.prototype.forEach.call(document.querySelectorAll('[data-en]'), function (el) { el.textContent = el.getAttribute('data-en'); }); }
-  function rankName(L) { return (EN ? RANKS_EN : RANKS)[L]; }
-  var TXT = EN ? { check: 'CHECK', esc: 'ESCAPE', bik: 'BIKJANG', pass: 'PASS', cho: 'CHO', han: 'HAN', hj: 'HAN', hjOff: '漢字' } : { check: '장군', esc: '멍군', bik: '빅장', pass: '한수쉼', cho: '초', han: '한', hj: '한글', hjOff: '漢字' };
+  // ?lang=zh 이면 중국어: data-zh 글자로 바꾸고, 기물은 한자로만 둔다(한글 전환 단추 숨김)
+  var ZH = !EN && /[?&]lang=zh/i.test(location.search);
+  if (ZH) {
+    document.documentElement.lang = 'zh-CN'; document.body.classList.add('zh'); document.title = '韩国象棋';
+    var ZHT = { '초': '楚', '한': '汉', '18급': '18级', '시작': '开始', '장기': '韩国象棋', '기권': '认输', '한수쉼': '停一手', 'P 한수쉼 · H 한글 · K 효과음': 'P 停一手 · K 音效', '장군': '将军', '차림': '布阵', '급수': '级别' };
+    Array.prototype.forEach.call(document.querySelectorAll('[data-en]'), function (el) { var k = el.textContent.trim(); if (ZHT[k]) el.textContent = ZHT[k]; });
+    ['lbC', 'lbH', 'rec', 'flash'].forEach(function (id) { var el = $(id); if (el && ZHT[el.textContent]) el.textContent = ZHT[el.textContent]; });
+    hangul = false; $('tgHj').style.display = 'none';
+    var zf = "local('PingFang SC'),local('PingFangSC-Regular'),local('Microsoft YaHei'),local('Microsoft YaHei UI'),local('Noto Sans SC'),local('Noto Sans CJK SC'),local('Source Han Sans SC')";
+    var ur = 'U+2E80-2FFF,U+3000-303F,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF';
+    var zs = document.createElement('style');
+    zs.textContent = ['KDG', 'Ria'].map(function (f) { return "@font-face{font-family:'" + f + "';src:" + zf + ';unicode-range:' + ur + '}'; }).join('') +
+      'html[lang=zh-CN] *{word-break:normal!important}' +
+      'body.zh #title h1{font-size:min(13vw,140px);letter-spacing:8px;font-weight:700}' +
+      'body.shot.zh #title h1{font-size:min(19vw,150px);letter-spacing:10px}' +
+      '@media (max-height:480px){body.zh #title h1{font-size:13vh;letter-spacing:4px}}';
+    document.head.appendChild(zs);
+  }
+  function rankName(L) { return (EN ? RANKS_EN : ZH ? RANKS_ZH : RANKS)[L]; }
+  var TXT = ZH ? { check: '将军', esc: '解将', bik: '王见王', pass: '停一手', cho: '楚', han: '汉', hj: '漢字', hjOff: '漢字' } : EN ? { check: 'CHECK', esc: 'ESCAPE', bik: 'BIKJANG', pass: 'PASS', cho: 'CHO', han: 'HAN', hj: 'HAN', hjOff: '漢字' } : { check: '장군', esc: '멍군', bik: '빅장', pass: '한수쉼', cho: '초', han: '한', hj: '한글', hjOff: '漢字' };
 
   function loadBest() { try { return Math.max(0, Math.min(TOP, parseInt(localStorage.getItem('janggi.lv') || '0', 10) || 0)); } catch (e) { return 0; } }
   function saveBest(n) { try { localStorage.setItem('janggi.lv', String(n)); } catch (e) {} }
@@ -36,7 +54,7 @@
   function savePick(n) { try { localStorage.setItem('janggi.pick', String(n)); } catch (e) {} }
   function showRec() {
     $('rec').textContent = rankName(G.level);
-    var b = loadBest(); $('best').textContent = b > 0 ? (EN ? 'BEST ' : '최고 ') + rankName(b) : '';
+    var b = loadBest(); $('best').textContent = b > 0 ? (EN ? 'BEST ' : ZH ? '最高 ' : '최고 ') + rankName(b) : '';
     Array.prototype.forEach.call($('rk').children, function (w, i) { w.classList.toggle('on', i === G.level); });
   }
   function setLevel(n) { n = Math.max(0, Math.min(TOP, n)); if (n === G.level) return; G.level = n; savePick(n); showRec(); updHud(); A.pick(); }
@@ -412,7 +430,7 @@
   function toggleHj() { hangul = !hangul; try { localStorage.setItem('janggi.hj', hangul ? '1' : '0'); } catch (e) {} iconCache = {}; updHud(); dirty = true; if (G.mode === 'setup') buildOpts(); }
   window.addEventListener('keydown', function (e) {
     if (e.key === 'k' || e.key === 'K') { A.init(); A.toggleSnd(); syncTog(); }
-    else if (e.key === 'h' || e.key === 'H') toggleHj();
+    else if ((e.key === 'h' || e.key === 'H') && !ZH) toggleHj();
     else if ((e.key === 'p' || e.key === 'P') && humanTurn() && G.g.canPass()) doPass();
     else if (e.key === 'Escape') { G.sel = -1; dirty = true; $('ranks').classList.remove('show'); }
     else if (G.mode === 'title' && (e.key === 'ArrowLeft' || e.key === 'ArrowDown')) setLevel(G.level - 1);
