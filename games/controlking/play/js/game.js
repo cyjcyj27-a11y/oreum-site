@@ -4,7 +4,11 @@
   const L = window.LV, PH = window.PH, P = PH.P, ART = window.ART, AU = window.AU;
   const $ = id => document.getElementById(id);
   const EN = /[?&]lang=en\b/.test(location.search);
-  const NAMES = EN ? L.NAMES_EN : L.NAMES;
+  const ZH = !EN && /[?&]lang=zh\b/.test(location.search);
+  const NAMES_ZH = ['井底', '青苔墙', '吊桶', '井口', '酱缸台', '茅草屋顶', '柿子树', '竹林', '风之丘', '瀑布', '云朵', '山顶',
+    '暴风云', '彩虹', '放风筝', '天空岛', '飘云', '闪闪星', '极光', '冰云', '鹊桥', '银河', '登月之路', '月亮'];
+  const NAMES = EN ? L.NAMES_EN : ZH ? NAMES_ZH : L.NAMES;
+  const T3 = (ko, en, zh) => EN ? en : ZH ? zh : ko;
   const cv = $('cv'), cx = cv.getContext('2d');
   const isTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
   if (isTouch) document.body.classList.add('touch');
@@ -304,7 +308,7 @@
       crow.t += dt;
       if (crow.mode === 'fly' && !crow.leave) {
         const dx = crow.tx - crow.x, dy = crow.ty - crow.y, d = Math.hypot(dx, dy);
-        if (d < 6) { crow.x = crow.tx; crow.y = crow.ty; crow.mode = 'laugh'; crow.t = 0; AU.S.crow(); crow.face = f.x > crow.x ? 1 : -1; pop(EN ? 'CAW CAW' : '깍깍', crow.x, crow.y + 70, '#fff8dc'); }
+        if (d < 6) { crow.x = crow.tx; crow.y = crow.ty; crow.mode = 'laugh'; crow.t = 0; AU.S.crow(); crow.face = f.x > crow.x ? 1 : -1; pop(T3('깍깍', 'CAW CAW', '嘎嘎'), crow.x, crow.y + 70, '#fff8dc'); }
         else { const v = Math.min(d, 420 * dt); crow.x += dx / d * v; crow.y += dy / d * v; }
       } else if (crow.mode === 'laugh') { if (crow.t > 0.9) { crow.mode = 'sit'; crow.t = 0; } }
       else if (crow.mode === 'sit') { crow.face = f.x > crow.x ? 1 : -1; if (crow.t > 1.4 || Math.abs(f.y - crow.y) > 400) { crow.mode = 'fly'; crow.leave = true; crow.t = 0; } }
@@ -452,7 +456,7 @@
   function pickChar(c) { if (CHAR === c) return; AU.init(); CHAR = c; try { localStorage.setItem('controlking.char', c); } catch (e) {} paintChars(); if (c === 'dog') AU.S.beep(); else AU.S.ribbit(); showTitle(); }
   $('cFrog').onclick = () => pickChar('frog'); $('cDog').onclick = () => pickChar('dog');
   paintChars();
-  $('bNew').onclick = () => ask(EN ? 'Start over?' : '처음부터 할까요?', () => {
+  $('bNew').onclick = () => ask(T3('처음부터 할까요?', 'Start over?', '要重新开始吗？'), () => {
     try { localStorage.removeItem(SAVEKEY()); } catch (e) {}
     S = fresh(); w.magicOn = FX.magicOn = w.magic2On = FX.magic2On = false; placeFrog(S.x, S.y); camY = titleCam(); startPlay();
   });
@@ -530,7 +534,7 @@
     setTimeout(() => {
       const s = Math.floor(S.time), tt = Math.floor(s / 3600) + ':' + String(Math.floor(s / 60) % 60).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
       const st = (lab, v) => '<div class="stat"><b>' + lab + ' ' + v + '</b></div>';
-      $('endSt').innerHTML = st(EN ? 'TIME' : '시간', tt) + st(EN ? 'JUMPS' : '점프', S.jumps) + st(EN ? 'FALLS' : '추락', S.falls) + st(CHAR === 'dog' ? (EN ? 'BATTERIES' : '배터리') : (EN ? 'FLIES' : '파리'), flyN() + '/' + L.flies.length);
+      $('endSt').innerHTML = st(T3('시간', 'TIME', '时间'), tt) + st(T3('점프', 'JUMPS', '跳跃'), S.jumps) + st(T3('추락', 'FALLS', '摔落'), S.falls) + st(CHAR === 'dog' ? T3('배터리', 'BATTERIES', '电池') : T3('파리', 'FLIES', '苍蝇'), flyN() + '/' + L.flies.length);
       $('topbar').classList.add('hide');
       $('endUI').classList.add('on');
     }, 2600);
@@ -560,6 +564,19 @@
     $('tH').textContent = 'CONTROL KING'; $('bNew').textContent = 'NEW GAME'; $('bResume').textContent = 'RESUME'; $('bMap').textContent = 'MAP';
     $('bHome').textContent = 'TITLE'; $('mapH').textContent = 'MAP'; $('bMapX').textContent = 'CLOSE'; $('askN').textContent = 'CANCEL'; $('askY').textContent = 'OK';
     $('cFrog').firstChild.textContent = 'FROG'; $('cDog').firstChild.textContent = 'ROBO DOG'; $('bEnd').textContent = 'TITLE'; $('keys').textContent = '←→ Move · Space Jump · P Pause';
+  }
+  // 중국어판 글자와 글꼴
+  if (ZH) {
+    document.documentElement.lang = 'zh-CN'; document.title = '操作之王';
+    const zf = "local('PingFang SC'),local('PingFangSC-Regular'),local('Microsoft YaHei'),local('Microsoft YaHei UI'),local('Noto Sans SC'),local('Noto Sans CJK SC'),local('Source Han Sans SC')";
+    const ur = 'U+2E80-2FFF,U+3000-303F,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF';
+    const zs = document.createElement('style');
+    zs.textContent = ['Ria', 'TitleF'].map(n => "@font-face{font-family:'" + n + "';src:" + zf + ';unicode-range:' + ur + '}').join('') + 'html[lang=zh-CN] *{word-break:normal!important}@media (max-width:420px){html[lang=zh-CN] .zrow{font-size:14px}}';
+    document.head.appendChild(zs);
+    $('tH').textContent = '操作之王'; $('bNew').textContent = '重新开始'; $('bResume').textContent = '继续'; $('bMap').textContent = '地图';
+    $('bHome').textContent = '返回标题'; $('mapH').textContent = '地图'; $('bMapX').textContent = '关闭'; $('askN').textContent = '取消'; $('askY').textContent = '确定';
+    $('askT').textContent = '要重新开始吗？';
+    $('cFrog').firstChild.textContent = '青蛙'; $('cDog').firstChild.textContent = '机器狗'; $('bEnd').textContent = '返回标题'; $('keys').textContent = '←→ 移动 · 空格 跳跃 · P 暂停';
   }
   showTitle();
   requestAnimationFrame(loop);
