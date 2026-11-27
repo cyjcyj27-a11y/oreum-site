@@ -6,10 +6,33 @@
       const q = new URLSearchParams(location.search).get('lang');
       // 언어는 주소로만 정한다(?lang=en 일 때만 영어). 기억해 두면 한국어 페이지에서 들어와도 영어로 뜬다(9/29 사장님 폰)
       try { localStorage.removeItem('button5.lang'); } catch (e) {}
-      return q === 'en' ? 'en' : 'ko';
+      return q === 'en' || q === 'zh' ? q : 'ko';
     } catch (e) { return 'ko'; }
   })();
-  const T = (ko, en) => (LANG === 'en' ? en : ko);
+  // 중국어판: 한국어 원문을 열쇠로 찾는다
+  const ZH = {
+    '긁기': '刮', '세기': '数数', '파기': '挖', '쌓기': '堆', '걷기': '走', '혼잣말': '自言自语', '조각': '雕刻',
+    '선': '线', '수': '数', '돌': '石', '층': '层', '낱말': '词', '조각상': '雕像',
+    '치킨': '炸鸡', '강아지': '小狗', '원룸': '单间', '중고차': '二手车', '드라이브': '兜风', '해외여행': '出国旅行', '바다': '大海',
+    '오피스텔': '公寓', '명품 시계': '名表', '초침': '秒针', '아파트': '高层住宅', '스포츠카': '跑车', '질주': '飙车',
+    '펜트하우스': '顶层豪宅', '빌딩': '大楼', '무인도': '无人岛',
+    '여기 누가 또 왔구나.': '又有人来了啊。',
+    '나도 백만 원 때문에 눌렀다. 너도 그랬겠지.': '我也是为了一百万才按的。你也一样吧。',
+    '돌아가면 다 잊는다. 그래서 바닥에 새긴다.': '回去就全忘了。所以刻在地上。',
+    '처음 천만 년은 울었다. 다음 천만 년은 웃었다.': '头一千万年在哭。后一千万年在笑。',
+    '바닥은 긁으면 파인다. 아주 천천히.': '地面刮了会凹下去。非常慢。',
+    '숫자를 끝까지 세 보려 했다. 끝은 없었다.': '我想把数一直数到头。没有头。',
+    '네가 쌓은 탑을 봤다. 잘 쌓았더라.': '看到你堆的塔了。堆得不错。',
+    '버튼 값은 누를수록 오른다. 그쪽은 우리가 계속 누르길 바란다.': '按钮的价钱越按越高。那边希望我们一直按下去。',
+    '바깥 우주는 백삼십팔억 년 되었다고 들었다.': '听说外面的宇宙有一百三十八亿年了。',
+    '여기 쌓인 시간이 그보다 길어지면 무슨 일이 생길까.': '这里攒下的时间比那还长的话，会发生什么？',
+    '나는 스물일곱 번 눌렀다. 한 번이 모자랐다.': '我按了二十七次。差了一次。',
+    '마지막은 네가 눌러 줘. 여기서 기다릴게.': '最后一次你帮我按吧。我在这里等。',
+    '138억': '138亿', '흔적': '痕迹', '이어하기': '继续', '처음부터 할까요?': '要从头开始吗？', '그리기': '画画',
+    '1~7 행동 · D 그리기 · Q~Y 기억 · Tab 강화': '1~7 行动 · D 画画 · Q~Y 回忆 · Tab 强化',
+    '벽화': '壁画', '그림 ': '画 ', '벽화 ': '壁画 ', '상점': '商店', '구매': '购买', '원': ''
+  };
+  const T = (ko, en) => (LANG === 'en' ? en : LANG === 'zh' && ko in ZH ? ZH[ko] : ko);
 
   const YEARS_PER_TRIP = 5e8;          // 한 번 누를 때마다 5억 년
   const UNIVERSE = 1.38e10;            // 우주의 나이 138억 년
@@ -93,6 +116,14 @@
       if (n >= 1e6) return '₩' + trim(n / 1e6) + 'M';
       return '₩' + Math.floor(n).toLocaleString('en-US');
     }
+    if (LANG === 'zh') {
+      if (n >= 1e8) {
+        const yi = Math.floor(n / 1e8), wan = Math.floor((n % 1e8) / 1e4);
+        return yi.toLocaleString('zh-CN') + '亿' + (wan ? wan.toLocaleString('zh-CN') + '万' : '') + '韩元';
+      }
+      if (n >= 1e4) return Math.floor(n / 1e4).toLocaleString('zh-CN') + '万韩元';
+      return Math.floor(n).toLocaleString('zh-CN') + '韩元';
+    }
     if (n >= 1e8) {
       const eok = Math.floor(n / 1e8), man = Math.floor((n % 1e8) / 1e4);
       return eok.toLocaleString('ko-KR') + '억' + (man ? ' ' + man.toLocaleString('ko-KR') + '만' : '') + '원';
@@ -104,12 +135,12 @@
   function yearsShort(y) { // 누적 표기: 32억 년
     if (LANG === 'en') return trim(y / 1e9) + 'B';
     const e = y / 1e8;
-    return (e >= 100 ? Math.floor(e) : trim(e)) + '억 년';
+    return (e >= 100 ? Math.floor(e) : trim(e)) + (LANG === 'zh' ? '亿年' : '억 년');
   }
   function yearsFull(y) {
-    return Math.floor(y).toLocaleString(LANG === 'en' ? 'en-US' : 'ko-KR') + (LANG === 'en' ? ' yrs' : '년');
+    return Math.floor(y).toLocaleString(LANG === 'en' ? 'en-US' : LANG === 'zh' ? 'zh-CN' : 'ko-KR') + (LANG === 'en' ? ' yrs' : LANG === 'zh' ? '年' : '년');
   }
-  function num(n) { return Math.floor(n).toLocaleString(LANG === 'en' ? 'en-US' : 'ko-KR'); }
+  function num(n) { return Math.floor(n).toLocaleString(LANG === 'en' ? 'en-US' : LANG === 'zh' ? 'zh-CN' : 'ko-KR'); }
 
   window.B5D = { LANG, T, YEARS_PER_TRIP, UNIVERSE, offer, ACTS, RES_NAME, MAX_LV, upCost, lvGain, lvAuto,
     BORE_UP, BORE_DOWN, BORE_CUT, TRIP_SEC, F_TAP, F_AUTO, F_DECAY, F_MIN, SHOP, MEM_COOL, houseMult, MSGS, won, yearsShort, yearsFull, num };

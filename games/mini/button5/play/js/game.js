@@ -544,7 +544,7 @@
     R.t += dt;
     fadeStep(now || performance.now());
     if (R.scene === 'title') {
-      const box = ART.drawTitle(ctx, R.cw, R.ch, R.t, D.won(D.offer(0)).replace('원', T('원', '')));
+      const box = ART.drawTitle(ctx, R.cw, R.ch, R.t, D.won(D.offer(0)).replace(D.LANG === 'zh' ? '韩元' : '원', T('원', '')));
       R.hit.box = box;
       return;
     }
@@ -655,6 +655,19 @@
     document.querySelector('#title h1').innerHTML = '500 MILLION<br>YEAR BUTTON';
     $('bShop').textContent = 'SHOP'; $('bLog').textContent = 'TRACES'; $('tabAct').firstChild.textContent = 'ACT'; $('tabUp').firstChild.textContent = 'UPGRADE';
     $('bNew').textContent = 'NEW GAME'; $('drawDone').textContent = 'DONE'; $('askN').textContent = 'CANCEL'; $('askY').textContent = 'OK'; $('bEnd').textContent = 'TITLE';
+  }
+  // 중국어판 글자와 글꼴
+  if (D.LANG === 'zh') {
+    document.documentElement.lang = 'zh-CN'; document.title = '5亿年按钮';
+    document.querySelector('#title h1').textContent = '5亿年按钮';
+    $('bShop').textContent = '商店'; $('bLog').textContent = '痕迹'; $('tabAct').firstChild.textContent = '行动'; $('tabUp').firstChild.textContent = '强化';
+    $('bNew').textContent = '从头开始'; $('drawDone').textContent = '完成'; $('askN').textContent = '取消'; $('askY').textContent = '确定'; $('bEnd').textContent = '回到标题';
+    $('shopT').textContent = '商店'; $('logT').textContent = '痕迹';
+    const zf = "local('PingFang SC'),local('PingFangSC-Regular'),local('Microsoft YaHei'),local('Microsoft YaHei UI'),local('Noto Sans SC'),local('Noto Sans CJK SC'),local('Source Han Sans SC')";
+    const ur = 'U+2E80-2FFF,U+3000-303F,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF';
+    const st = document.createElement('style');
+    st.textContent = ['Ria', 'TitleF'].map(f => `@font-face{font-family:'${f}';src:${zf};unicode-range:${ur}}`).join('') + 'html[lang=zh-CN] *{word-break:normal!important}';
+    document.head.appendChild(st);
   }
   showTitle();
   requestAnimationFrame(loop);
