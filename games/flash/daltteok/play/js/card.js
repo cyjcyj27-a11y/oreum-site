@@ -5,16 +5,19 @@
   var PI2 = Math.PI * 2, W2 = 1080, H2 = 1350, NAVY = '#1f3a7a', DEEP = '#14285a';
   var NAMES = {
     ko: ['콩', '경단', '꿀떡', '쑥떡', '송편', '인절미', '무지개떡', '딸기찹쌀떡', '호박떡', '백설기', '보름달'],
-    en: ['Bean', 'Dango', 'Honey Cake', 'Mugwort Cake', 'Songpyeon', 'Injeolmi', 'Rainbow Cake', 'Strawberry Mochi', 'Pumpkin Cake', 'Snow Cake', 'Full Moon']
+    en: ['Bean', 'Dango', 'Honey Cake', 'Mugwort Cake', 'Songpyeon', 'Injeolmi', 'Rainbow Cake', 'Strawberry Mochi', 'Pumpkin Cake', 'Snow Cake', 'Full Moon'],
+    zh: ['豆子', '糯米团', '蜂蜜糕', '艾草糕', '松饼', '打糕', '彩虹糕', '草莓糯米糍', '南瓜糕', '白雪糕', '满月']
   };
   // 그 판에서 만든 제일 큰 떡으로 정하는 칭호
   var TITLES = {
     ko: ['콩알 초보', '경단 초보', '꿀떡 견습', '쑥떡 견습', '송편 솜씨', '인절미 솜씨', '무지개떡 장인', '찹쌀떡 장인', '호박떡 명인', '백설기 명인', '보름달 떡방앗간'],
-    en: ['Bean Rookie', 'Dango Rookie', 'Honey Apprentice', 'Mugwort Apprentice', 'Songpyeon Hand', 'Injeolmi Hand', 'Rainbow Artisan', 'Mochi Artisan', 'Pumpkin Master', 'Snow Cake Master', 'Full Moon Mill']
+    en: ['Bean Rookie', 'Dango Rookie', 'Honey Apprentice', 'Mugwort Apprentice', 'Songpyeon Hand', 'Injeolmi Hand', 'Rainbow Artisan', 'Mochi Artisan', 'Pumpkin Master', 'Snow Cake Master', 'Full Moon Mill'],
+    zh: ['豆粒新手', '糯米团新手', '蜂蜜糕学徒', '艾草糕学徒', '松饼好手', '打糕好手', '彩虹糕匠人', '糯米糍匠人', '南瓜糕大师', '白雪糕大师', '满月年糕坊']
   };
   var L = {
     ko: { title: '달떡 합치기', score: '점수', best: '최고 기록', today: '오늘 최고', moon: '보름달', top: '제일 큰 떡', newb: 'NEW', hook: '너는 몇 점까지 합칠 수 있을까?', site: 'oreumgames.com', cnt: function (n) { return n + '개'; }, copied: '주소를 복사했어요' },
-    en: { title: 'Moon Mochi Merge', score: 'SCORE', best: 'BEST', today: 'TODAY', moon: 'FULL MOON', top: 'BIGGEST', newb: 'NEW', hook: 'How far can you merge?', site: 'oreumgames.com', cnt: function (n) { return 'x ' + n; }, copied: 'Link copied' }
+    en: { title: 'Moon Mochi Merge', score: 'SCORE', best: 'BEST', today: 'TODAY', moon: 'FULL MOON', top: 'BIGGEST', newb: 'NEW', hook: 'How far can you merge?', site: 'oreumgames.com', cnt: function (n) { return 'x ' + n; }, copied: 'Link copied' },
+    zh: { title: '月亮年糕合成', score: '分数', best: '最高纪录', today: '今日最高', moon: '满月', top: '最大的年糕', newb: 'NEW', hook: '你能合成到多少分？', site: 'oreumgames.com', cnt: function (n) { return n + '个'; }, copied: '链接已复制' }
   };
   function rng(seed) { var a = seed >>> 0; return function () { a = (a + 0x6D2B79F5) | 0; var t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
   function rrect(c, x, y, w, h, r) { c.beginPath(); if (c.roundRect) c.roundRect(x, y, w, h, r); else c.rect(x, y, w, h); }
@@ -59,7 +62,7 @@
   }
 
   function draw(c, X, logo) {
-    var G = X.G, EN = X.EN, T = EN ? L.en : L.ko, NM = EN ? NAMES.en : NAMES.ko, TT = EN ? TITLES.en : TITLES.ko;
+    var G = X.G, EN = X.EN, LK = EN ? 'en' : X.ZH ? 'zh' : 'ko', T = L[LK], NM = NAMES[LK], TT = TITLES[LK];
     var top = Math.max(1, Math.min(11, G.top || 1)), i, rnd = rng(20261016);
     var TK = 'Tokki, Ria, sans-serif', RIA = 'Ria, sans-serif';
     // 밤하늘
@@ -158,7 +161,7 @@
     });
   }
   function toBlob(c) { return new Promise(function (r) { c.toBlob(r, 'image/png'); }); }
-  function fname(X) { return (X.EN ? 'moon-mochi-' : 'daltteok-') + X.G.score + '.png'; }
+  function fname(X) { return (X.EN || X.ZH ? 'moon-mochi-' : 'daltteok-') + X.G.score + '.png'; }
   function download(b, name) {
     var a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = name;
     document.body.appendChild(a); a.click();
@@ -178,7 +181,7 @@
     }
     e.textContent = t; e.style.opacity = '1'; clearTimeout(e.__t); e.__t = setTimeout(function () { e.style.opacity = '0'; }, 2600);
   }
-  function T() { return window.__dtCard().EN ? L.en : L.ko; }
+  function T() { var X = window.__dtCard(); return X.EN ? L.en : X.ZH ? L.zh : L.ko; }
   function copyLink(X, t) {
     var full = X.text + (X.url ? String.fromCharCode(10) + X.url : '');
     var ok = function () { toast(t.copied); };

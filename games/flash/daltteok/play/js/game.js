@@ -3,10 +3,24 @@
   'use strict';
   var EN = /[?&]lang=en\b/.test(location.search);
   if (EN) document.documentElement.lang = 'en';
+  var ZH = /[?&]lang=zh\b/.test(location.search) && !EN;
+  if (ZH) {
+    // 중국어: 글꼴에 없는 한자를 시스템 중문 글꼴로 채운다
+    document.documentElement.lang = 'zh-CN';
+    var zf = "local('PingFang SC Semibold'),local('PingFangSC-Semibold'),local('Microsoft YaHei Bold'),local('Microsoft YaHei UI Bold'),local('Noto Sans SC Bold'),local('NotoSansSC-Bold'),local('Source Han Sans SC Bold'),local('PingFang SC'),local('Microsoft YaHei'),local('Microsoft YaHei UI'),local('Noto Sans SC'),local('Noto Sans CJK SC'),local('Source Han Sans SC')";
+    var ur = 'U+2E80-2FFF,U+3000-303F,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF';
+    var zst = document.createElement('style');
+    zst.textContent = "@font-face{font-family:'Tokki';src:" + zf + ";unicode-range:" + ur + "}@font-face{font-family:'Ria';src:" + zf + ";unicode-range:" + ur + "}html[lang=zh-CN] *{word-break:normal!important}";
+    document.head.appendChild(zst);
+  }
   var T = EN ? {
     t1: 'Moon Mochi', t2: 'Merge', today: 'TODAY', share: 'SHARE', save: 'SAVE', copied: 'COPIED',
     moon: function (n) { return 'x ' + n; },
     msg: function (s, m) { return 'Moon Mochi Merge ' + s + ' pts' + (m ? ' / full moon x' + m : ''); }
+  } : ZH ? {
+    t1: '月亮年糕', t2: '合成', today: '今日', share: '分享', save: '保存', copied: '已复制',
+    moon: function (n) { return n + '个'; },
+    msg: function (s, m) { return '月亮年糕合成 ' + s + '分' + (m ? ' 满月 ' + m + '个' : ''); }
   } : {
     t1: '달떡', t2: '합치기', today: '오늘', share: '공유', save: '저장', copied: '복사됨',
     moon: function (n) { return n + '개'; },
@@ -424,7 +438,7 @@
     $('share').textContent = T.share; $('tbestN').textContent = G.best; $('best').textContent = G.best;
     $('over').hidden = false;
   }
-  function shareUrl() { return location.protocol === 'file:' ? '' : (window.DT_SHARE_URL || location.origin + location.pathname + (EN ? '?lang=en' : '')); }
+  function shareUrl() { return location.protocol === 'file:' ? '' : (window.DT_SHARE_URL || location.origin + location.pathname + (EN ? '?lang=en' : ZH ? '?lang=zh' : '')); }
   // 공유·저장은 결과 카드 그림 한 장(js/card.js). 손님 기기 안에서 그려 공유창으로 바로 가고 서버에는 남지 않는다.
   function share() {
     DTA.sfx('tap');
@@ -441,7 +455,7 @@
   }
   // 카드가 쓰는 값(그릴 때마다 지금 값으로)
   window.__dtCard = function () {
-    return { G: G, SPR: SPR, R: R, cv: cv, EN: EN, s: s, ox: ox, dpr: dpr, SS: SS, floorY: floorY, lineY: lineY, BL: BL, BR: BR, W: W, url: shareUrl(), text: T.msg(G.score, G.moons) };
+    return { G: G, SPR: SPR, R: R, cv: cv, EN: EN, ZH: ZH, s: s, ox: ox, dpr: dpr, SS: SS, floorY: floorY, lineY: lineY, BL: BL, BR: BR, W: W, url: shareUrl(), text: T.msg(G.score, G.moons) };
   };
 
   // ---------- 그리기 ----------
@@ -595,7 +609,7 @@
   $('ttl').innerHTML = T.t1 + '<span>' + T.t2 + '</span>';
   $('otodayL').textContent = T.today; $('share').textContent = T.share; $('save').textContent = T.save;
   $('tbestN').textContent = G.best; $('best').textContent = G.best;
-  document.title = EN ? 'Moon Mochi Merge' : '달떡 합치기';
+  document.title = EN ? 'Moon Mochi Merge' : ZH ? '月亮年糕合成' : '달떡 합치기';
   resize();
   window.addEventListener('resize', resize);
   // 타이틀 뒤에 쌓여 있는 떡
