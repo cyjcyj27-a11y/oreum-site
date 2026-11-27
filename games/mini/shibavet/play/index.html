@@ -105,28 +105,28 @@
   <div class="stat" id="stageH">STAGE 1</div>
   <div class="stat"><span class="ic">⏱</span><b id="time">0:00.0</b></div>
   <div class="stat" id="ind"><span id="indIco">🐕</span><span class="arrow">➜</span></div>
-  <div class="stat item" id="btnTreat" title="간식"><span class="ic">🦴</span><b id="invTreat">0</b></div>
-  <div class="stat item" id="btnToy" title="장난감"><span class="ic">🎾</span><b id="invToy">0</b></div>
+  <div class="stat item" id="btnTreat" title="간식" data-zh-title="零食"><span class="ic">🦴</span><b id="invTreat">0</b></div>
+  <div class="stat item" id="btnToy" title="장난감" data-zh-title="玩具"><span class="ic">🎾</span><b id="invToy">0</b></div>
   <div class="stat" id="carry" hidden><span class="ic">🐾</span><div class="bar"><div id="carryBar"></div></div></div>
   <div class="spacer"></div>
-  <button id="btnSfx" class="tog" title="효과음">🔊</button>
+  <button id="btnSfx" class="tog" title="효과음" data-zh-title="音效">🔊</button>
 </div>
 <div id="hud"></div>
 <div id="cross"></div>
-<div id="keys" data-en="WASD move · Mouse / ←→ look · Shift run · C sneak<br>Space grab · E door · 1 treat · 2 toy · K sound">WASD 이동 · 마우스 / ←→ 시점 · Shift 달리기 · C 살금살금<br>스페이스 잡기 · E 문 · 1 간식 · 2 장난감 · K 효과음</div>
+<div id="keys" data-zh="WASD 移动 · 鼠标 / ←→ 视角 · Shift 奔跑 · C 悄悄走<br>空格 抓 · E 开关门 · 1 零食 · 2 玩具 · K 音效" data-en="WASD move · Mouse / ←→ look · Shift run · C sneak<br>Space grab · E door · 1 treat · 2 toy · K sound">WASD 이동 · 마우스 / ←→ 시점 · Shift 달리기 · C 살금살금<br>스페이스 잡기 · E 문 · 1 간식 · 2 장난감 · K 효과음</div>
 
 <div id="joy"><div id="joyKnob"></div></div>
-<button id="btnGrab" class="tbtn" data-en="GRAB">잡기</button>
-<button id="btnDoor" class="tbtn" data-en="DOOR">문</button>
-<button id="btnRun" class="tbtn" data-en="RUN">달리기</button>
-<button id="btnSneak" class="tbtn" data-en="SNEAK">살금살금</button>
+<button id="btnGrab" class="tbtn" data-zh="抓" data-en="GRAB">잡기</button>
+<button id="btnDoor" class="tbtn" data-zh="门" data-en="DOOR">문</button>
+<button id="btnRun" class="tbtn" data-zh="奔跑" data-en="RUN">달리기</button>
+<button id="btnSneak" class="tbtn" data-zh="悄悄" data-en="SNEAK">살금살금</button>
 <div id="pad"><div id="knob"></div></div>
 <div id="rotate">
   <div>
-    <p data-en="This game plays in landscape">가로 화면에서 하는 게임입니다</p>
-    <button type="button" id="rotGo" data-en="Turn to landscape">가로로 돌리기</button>
-    <p class="sub"><span data-en="If the button does nothing, turn off your phone's rotation lock and lay it sideways">단추가 안 먹으면 폰의 화면 회전 잠금을 풀고 눕혀 주세요</span><br>
-      <a href="#" id="rotSkip" data-en="Play in portrait anyway">그래도 세로로 하기</a></p>
+    <p data-zh="本游戏需要横屏玩" data-en="This game plays in landscape">가로 화면에서 하는 게임입니다</p>
+    <button type="button" id="rotGo" data-zh="切换横屏" data-en="Turn to landscape">가로로 돌리기</button>
+    <p class="sub"><span data-zh="按钮没反应的话，请关闭手机的屏幕旋转锁定，再把手机横过来" data-en="If the button does nothing, turn off your phone's rotation lock and lay it sideways">단추가 안 먹으면 폰의 화면 회전 잠금을 풀고 눕혀 주세요</span><br>
+      <a href="#" id="rotSkip" data-zh="还是竖屏玩" data-en="Play in portrait anyway">그래도 세로로 하기</a></p>
   </div>
 </div>
 <button id="btnTreat" class="tbtn">🦴 0</button>
@@ -134,12 +134,12 @@
 
 <div id="title">
   <div class="brand"><img src="assets/logo-oreum.svg" alt="">OREUM GAMES</div>
-  <h1 data-en="SHIBA<br>VET DAY">시바<br>병원 가는 날</h1>
+  <h1 data-zh="柴犬<br>兽医的一天" data-en="SHIBA<br>VET DAY">시바<br>병원 가는 날</h1>
   <div class="tag" data-en="CATCH THE SHIBA">SHIBA VET DAY</div>
   <div class="stage" id="stageT">STAGE 1</div>
   <div class="best" id="titleBest"></div>
   <div class="items" id="titleItems"></div>
-  <div class="go" data-en="START">시작</div>
+  <div class="go" data-zh="开始" data-en="START">시작</div>
 </div>
 
 <div id="over">
@@ -148,13 +148,13 @@
   <div class="stage" id="overStage">STAGE 1</div>
   <h2>CONGRATULATIONS</h2>
   <p><span id="overTime">0:00.0</span></p>
-  <p><small data-en="BEST">최고</small><span id="overBest">0:00.0</span></p>
+  <p><small data-zh="最佳" data-en="BEST">최고</small><span id="overBest">0:00.0</span></p>
   <p class="gain" id="overItems"></p>
   <p class="again">NEXT</p>
   </div>
 </div>
 
-<script src="/assets/game-home.js?v=7" data-top="6" data-left="6" data-fullscreen="1" defer></script>
+<script src="/assets/game-home.js?v=8" data-top="6" data-left="6" data-fullscreen="1" defer></script>
 <script src="/assets/landscape.js?v=1"></script>
 <script src="lib/three.min.js"></script>
 <script src="js/world.js?v=15"></script>
@@ -162,7 +162,7 @@
 <script src="js/items.js?v=3"></script>
 <script src="js/dog.js?v=22"></script>
 <script src="js/player.js?v=16"></script>
-<script src="js/game.js?v=45"></script>
+<script src="js/game.js?v=46"></script>
 <script>
 </script>
 <script src="/assets/game-events.js?v=4" defer></script>

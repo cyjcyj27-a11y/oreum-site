@@ -1,11 +1,22 @@
 /* game.js — 장면·입력·카메라·규칙·HUD */
 (function () {
   const W = window.WORLD, A = window.AUDIO;
-  const EN = /[?&]lang=en/.test(location.search);
+  const LQ = new URLSearchParams(location.search).get('lang'); const EN = LQ === 'en', ZH = LQ === 'zh';
   const $ = id => document.getElementById(id);
   const isTouch = ('ontouchstart' in window) && matchMedia('(pointer: coarse)').matches;
   if (isTouch) document.body.classList.add('touch');
   if (EN) { document.documentElement.lang = 'en'; document.querySelectorAll('[data-en]').forEach(el => el.innerHTML = el.getAttribute('data-en')); document.title = 'Shiba Vet Day — Oreum Games'; }
+  if (ZH) {   // 중국어판: data-zh 글자로 바꾸고, 한글 글꼴에 없는 한자는 시스템 중국어 글꼴로 채운다
+    document.documentElement.lang = 'zh-CN';
+    document.querySelectorAll('[data-zh]').forEach(el => el.innerHTML = el.getAttribute('data-zh'));
+    document.querySelectorAll('[data-zh-title]').forEach(el => el.title = el.getAttribute('data-zh-title'));
+    document.title = '柴犬兽医的一天 — Oreum Games';
+    const zf = "local('PingFang SC'),local('PingFangSC-Regular'),local('Microsoft YaHei'),local('Microsoft YaHei UI'),local('Noto Sans SC'),local('Noto Sans CJK SC'),local('Source Han Sans SC')";
+    const ur = 'U+2E80-2FFF,U+3000-303F,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF';
+    const st = document.createElement('style');
+    st.textContent = ['Griun', 'Ria'].map(f => `@font-face{font-family:'${f}';src:${zf};unicode-range:${ur}}`).join('') + 'html[lang=zh-CN] *{word-break:normal!important}';
+    document.head.appendChild(st);
+  }
 
   const canvas = $('c');
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
