@@ -114,6 +114,8 @@ def body_html(md):
             out.append('      <figure class="note-fig"><img src="%s" alt="%s"%s loading="lazy" decoding="async"></figure>' % (html.escape(src), html.escape(m.group(1)), wh))
         elif b.startswith("> "):   # 10/20 크게 박는 한 줄(개발일지 2 첫 줄 "개같은 게임 누가 만들었냐")
             out.append('      <p class="note-big">%s</p>' % inline(" ".join(l.strip().lstrip(">").strip() for l in b.splitlines())))
+        elif all(l.strip().startswith("* ") for l in b.splitlines()):   # 점 목록
+            out.append('      <ul class="note-list">\n%s\n      </ul>' % "\n".join('        <li>%s</li>' % inline(l.strip()[2:].strip()) for l in b.splitlines()))
         elif b.startswith("## "):
             out.append("      <h2>%s</h2>" % inline(b[3:].strip()))
         else:
@@ -165,11 +167,14 @@ ARTICLE_STYLE = """.note-page h1{ font-size:clamp(18px,2.4vw,24px); line-height:
 .note-kicker a{ color:inherit; text-decoration:none; }
 .note-sub{ margin:10px 0 0; font-size:17px; line-height:1.6; color:var(--ink-2); }
 .note-date{ margin:8px 0 22px; font-size:13px; color:var(--muted); }
+.note-date.note-upd{ margin-top:-18px; }
 .note-page h2{ font-size:21px; margin:30px 0 4px; }
 .note-page p > strong:only-child{ font-size:calc(1em + 2pt); }
 .note-page .note-big{ margin:26px 0 22px; font-size:clamp(30px,5.2vw,48px); line-height:1.25; font-weight:900; letter-spacing:-.02em; color:var(--ink); }
 .note-page .gp-body a{ text-decoration:underline; text-underline-offset:3px; }
 .note-page .gp-cta{ margin-top:30px; }
+.note-page .note-list{ margin:12px 0 14px; padding-left:1.3em; font-size:17px; line-height:1.75; }
+.note-page .note-list li{ margin:4px 0; }
 .note-fig{ margin:18px 0 4px; }
 .note-fig img{ display:block; width:auto; max-width:100%; max-height:560px; height:auto; border-radius:12px; }"""
 
@@ -215,6 +220,15 @@ def alternates(ko_url, en_url):
     return "\n".join(out)
 
 
+def updated_line(meta, L):
+    # 원고 머리말에 updated: 가 있으면 발행일 아래에 최종 업데이트 줄
+    u = meta.get("updated")
+    if not u:
+        return ""
+    word = "Last updated" if L["lang"] == "en" else "최종 업데이트"
+    return '\n      <p class="note-date note-upd">%s <time datetime="%s">%s</time></p>' % (word, u, kdate(u, L["lang"]))
+
+
 def render_article(meta, L, ch, pair):
     header, footer, scripts, verif, css = ch
     url = "%s/%s/%s/" % (SITE, L["out"], meta["slug"])
@@ -239,7 +253,7 @@ def render_article(meta, L, ch, pair):
       <p class="note-kicker"><a href="/%s/">%s</a></p>
       <h1>%s</h1>
       <p class="note-sub">%s</p>
-      <p class="note-date"><time datetime="%s">%s</time> · %s</p>
+      <p class="note-date"><time datetime="%s">%s</time> · %s</p>%s
 
 %s
       <p class="gp-cta"><a class="btn btn-primary" href="%s">%s</a></p>
@@ -247,7 +261,7 @@ def render_article(meta, L, ch, pair):
   </section>
 </main>
 """ % (L["back_href"], L["back"], L["out"], L["section"], html.escape(meta["title"], quote=False), inline(meta.get("sub", "")),
-       meta["date"], kdate(meta["date"], L["lang"]), L["by"], body_html(meta["body"]), L["cta_href"], L["cta"])
+       meta["date"], kdate(meta["date"], L["lang"]), L["by"], updated_line(meta, L), body_html(meta["body"]), L["cta_href"], L["cta"])
     return head + body + "\n" + footer + "\n\n" + scripts + "\n</body>\n</html>\n"
 
 
