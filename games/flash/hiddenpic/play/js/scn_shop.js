@@ -19,7 +19,7 @@
       c.fillStyle = '#d8382a'; c.fillRect(0, 0, W, H);
       c.strokeStyle = '#fff4d0'; c.lineWidth = 8; c.strokeRect(10, 10, W - 20, H - 20);
       c.fillStyle = '#fff4d0'; c.font = 'bold 74px sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle';
-      c.fillText('문방구', W / 2, H / 2 + 4);
+      c.fillText(/[?&]lang=zh/i.test(location.search) ? '文具店' : '문방구', W / 2, H / 2 + 4);
     });
     const sg = mesh(rbox(3.2, 0.8, 0.14, 0.04), [mat('#b8301e'), mat('#b8301e'), mat('#b8301e'), mat('#b8301e'), new T.MeshStandardMaterial({ map: sign, roughness: 0.6, emissive: night ? 0x331010 : 0 }), mat('#b8301e')], -0.55, 5.35, -4.88, root);
     sg.castShadow = false;

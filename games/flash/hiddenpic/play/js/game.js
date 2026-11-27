@@ -1,8 +1,42 @@
 // 숨은그림찾기: 진행·화면·입력
 (function () {
   const $ = (id) => document.getElementById(id);
-  const EN = /[?&]lang=en/i.test(location.search);
-  const T2 = (ko, en) => (EN ? en : ko);
+  const LQ = new URLSearchParams(location.search).get('lang');
+  const EN = LQ === 'en';
+  const ZH = LQ === 'zh';
+  // 중국어판 사전: 한국어 문구를 열쇠로 찾는다
+  const ZD = {
+    '다락방': '阁楼', '문방구': '文具店', '할머니 댁': '奶奶家', '차고': '车库', '도서관': '图书馆', '온실': '温室',
+    '냐옹!': '喵～!', '도감 ': '图鉴 ', '이어하기': '继续', '시작': '开始',
+    '열쇠': '钥匙', '숟가락': '勺子', '고무 오리': '小黄鸭', '사과': '苹果', '바나나': '香蕉', '당근': '胡萝卜',
+    '버섯': '蘑菇', '안경': '眼镜', '가위': '剪刀', '망치': '锤子', '연필': '铅笔', '머그컵': '马克杯',
+    '모자': '帽子', '운동화': '运动鞋', '전구': '灯泡', '종': '铃铛', '자명종': '闹钟', '모래시계': '沙漏',
+    '돋보기': '放大镜', '물고기': '鱼', '별': '星星', '하트': '爱心', '주사위': '骰子', '체스 말': '棋子',
+    '왕관': '王冠', '트로피': '奖杯', '양초': '蜡烛', '사진기': '相机', '전화기': '电话', '헤드폰': '耳机',
+    '풍선': '气球', '아이스크림': '冰淇淋', '도넛': '甜甜圈', '막대사탕': '棒棒糖', '컵케이크': '纸杯蛋糕',
+    '유리병': '玻璃瓶', '종이비행기': '纸飞机', '붓': '毛笔', '자석': '磁铁', '나침반': '指南针', '손전등': '手电筒',
+    '곰인형': '泰迪熊', '공': '皮球', '우산': '雨伞', '달': '月亮', '편지': '信件', '단풍잎': '枫叶',
+    '로켓': '火箭', '기타': '吉他', '고양이': '猫咪',
+  };
+  const T2 = (ko, en) => (EN ? en : ZH ? (ZD[ko] || en) : ko);
+  if (ZH) {
+    document.documentElement.lang = 'zh-CN';
+    document.title = '找东西';
+    // 글꼴에 중국어 글자가 없어서 시스템 중국어 글꼴을 같은 이름으로 덧붙인다
+    const zf = "local('PingFang SC'),local('PingFangSC-Regular'),local('Microsoft YaHei'),local('Microsoft YaHei UI'),local('Noto Sans SC'),local('Noto Sans CJK SC'),local('Source Han Sans SC')";
+    const ur = 'U+2E80-2FFF,U+3000-303F,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF';
+    const zs = document.createElement('style');
+    zs.textContent = ['Tmon', 'Dan'].map((n) => "@font-face{font-family:'" + n + "';src:" + zf + ';unicode-range:' + ur + '}').join('') +
+      'html[lang=zh-CN] *{word-break:normal!important}';
+    document.head.appendChild(zs);
+    $('h1').textContent = '找东西';
+    $('start').firstChild.textContent = '开始';
+    $('toDex').firstChild.textContent = '图鉴';
+    $('endingDex').firstChild.textContent = '图鉴';
+    $('dexTitle').textContent = '图鉴';
+    $('rotTitle').textContent = '找东西';
+    $('rotBtn').firstChild.textContent = '横屏查看';
+  }
   if (EN) {
     document.documentElement.lang = 'en';
     document.title = 'Hidden Objects';
