@@ -46,10 +46,9 @@
 /* 사이트 글꼴은 한국어 글꼴이라 간체 글자가 섞여 나옴 → 중국어 글꼴로 */
 body{word-break:normal}
 main,.values,.nav,.footer-nav{font-family:"PingFang SC","Microsoft YaHei","Noto Sans SC","Source Han Sans SC",sans-serif}
-.zh-intro{background:#fff;border:2px solid var(--line);border-radius:14px;padding:16px 20px;margin:4px 0 8px;font-size:16px;line-height:1.75;color:var(--ink)}
-.zh-intro p{margin:0}
-.zh-intro .note{margin-top:6px;font-size:14px;color:var(--muted)}
 </style>
+<link rel="stylesheet" href="/assets/langpick.css?v=1">
+<script src="/assets/langpick.js?v=1" defer></script>
 </head>
 <body>
 
@@ -68,8 +67,14 @@ main,.values,.nav,.footer-nav{font-family:"PingFang SC","Microsoft YaHei","Noto 
     </ul>
     <nav class="nav" aria-label="主菜单">
       <a href="/zh/">游戏</a>
-      <a href="/en/" lang="en" hreflang="en">English</a>
-      <a href="/" lang="ko" hreflang="ko">한국어</a>
+      <div class="langpick">
+        <button type="button" class="langbtn" aria-label="选择语言 Language" aria-haspopup="true" aria-expanded="false"></button>
+        <div class="langmenu" hidden>
+          <a href="/" lang="ko" hreflang="ko">한국어</a>
+          <a href="/en/" lang="en" hreflang="en">English</a>
+          <a href="/zh/" lang="zh-CN" hreflang="zh-Hans" aria-current="page">中文</a>
+        </div>
+      </div>
     </nav>
   </div>
 </header>
@@ -78,10 +83,6 @@ main,.values,.nav,.footer-nav{font-family:"PingFang SC","Microsoft YaHei","Noto 
   <section class="showcase">
     <div class="wrap">
       <div class="list-head"><h1>免费网页游戏</h1></div>
-      <div class="zh-intro">
-        <p>韩国独立游戏团队 Oreum Games 制作的免费网页游戏。无需安装，无需注册，手机和电脑都能直接玩。</p>
-        <p class="note">点击游戏会打开英文版。游戏内的文字是英文的，不过大部分游戏看画面就能上手。</p>
-      </div>
       <div class="shelf-head"><h2>大型游戏<small>33</small></h2><p>可以玩很久的大作</p></div>
       <div class="grid">
         <a class="mini" href="/zh/games/jando/" target="_blank" rel="noopener">

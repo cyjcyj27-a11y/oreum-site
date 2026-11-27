@@ -67,6 +67,8 @@
   ]
 }
 </script>
+<link rel="stylesheet" href="/assets/langpick.css?v=1">
+<script src="/assets/langpick.js?v=1" defer></script>
 </head>
 <body>
 
@@ -89,7 +91,14 @@
       <a href="/en/apps/">APPS</a>
       <a href="/en/news/">NEWS</a>
       <a href="/en/board/">COMMUNITY</a>
-      <a href="/games/skyrider/" lang="ko" hreflang="ko">한국어</a>
+      <div class="langpick">
+        <button type="button" class="langbtn" aria-label="Language" aria-haspopup="true" aria-expanded="false"></button>
+        <div class="langmenu" hidden>
+          <a href="/games/skyrider/" lang="ko" hreflang="ko">한국어</a>
+          <a href="/en/games/skyrider/" lang="en" hreflang="en" aria-current="page">English</a>
+          <a href="/zh/games/skyrider/" lang="zh-CN" hreflang="zh-Hans">中文</a>
+        </div>
+      </div>
     </nav>
   </div>
 </header>

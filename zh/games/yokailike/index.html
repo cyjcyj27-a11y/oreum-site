@@ -145,6 +145,8 @@ body{word-break:normal}
   ]
 }
 </script>
+<link rel="stylesheet" href="/assets/langpick.css?v=1">
+<script src="/assets/langpick.js?v=1" defer></script>
 </head>
 
 <body>
@@ -164,8 +166,14 @@ body{word-break:normal}
     </ul>
     <nav class="nav" aria-label="主菜单">
       <a href="/zh/">游戏</a>
-      <a href="/en/games/yokailike/" lang="en" hreflang="en">English</a>
-      <a href="/games/yokailike/" lang="ko" hreflang="ko">한국어</a>
+      <div class="langpick">
+        <button type="button" class="langbtn" aria-label="选择语言 Language" aria-haspopup="true" aria-expanded="false"></button>
+        <div class="langmenu" hidden>
+          <a href="/games/yokailike/" lang="ko" hreflang="ko">한국어</a>
+          <a href="/en/games/yokailike/" lang="en" hreflang="en">English</a>
+          <a href="/zh/games/yokailike/" lang="zh-CN" hreflang="zh-Hans" aria-current="page">中文</a>
+        </div>
+      </div>
     </nav>
   </div>
 </header>

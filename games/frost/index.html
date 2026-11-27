@@ -135,6 +135,8 @@
   ]
 }
 </script>
+<link rel="stylesheet" href="/assets/langpick.css?v=1">
+<script src="/assets/langpick.js?v=1" defer></script>
 </head>
 
 <body>
@@ -158,8 +160,15 @@
       <a href="/apps/">APPS</a>
       <a href="/news/">NEWS</a>
       <a href="/board/">COMMUNITY</a>
-      <a href="/en/games/frost/" lang="en" hreflang="en">EN</a>
-      <a href="/ru/games/frost/" lang="ru" hreflang="ru">RU</a>
+      <div class="langpick">
+        <button type="button" class="langbtn" aria-label="언어 선택 Language" aria-haspopup="true" aria-expanded="false"></button>
+        <div class="langmenu" hidden>
+          <a href="/games/frost/" lang="ko" hreflang="ko" aria-current="page">한국어</a>
+          <a href="/en/games/frost/" lang="en" hreflang="en">English</a>
+          <a href="/zh/games/frost/" lang="zh-CN" hreflang="zh-Hans">中文</a>
+          <a href="/ru/games/frost/" lang="ru" hreflang="ru">Русский</a>
+        </div>
+      </div>
     </nav>
   </div>
 </header>

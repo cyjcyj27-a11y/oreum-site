@@ -39,7 +39,7 @@ LANG = {
         list_title="오름게임즈 인디게임 개발뉴스 — 설치 없이 하는 인디게임을 만드는 이야기",
         list_desc="한국의 작은 인디게임 스튜디오 오름게임즈의 개발뉴스. 설치 없이 브라우저에서 바로 하는 인디게임을 어떻게 만들고, 무엇을 배우고, 어디에 내는지 기록합니다.",
         list_keywords="인디게임, 인디게임 개발, 인디게임 뉴스, 인디게임 사이트, 웹게임 개발, 오름게임즈",
-        other_lang_link='<a href="/en/news/{slug}" lang="en" hreflang="en">EN</a>',
+        other_lang_link='/en/news/{slug}',
     ),
     "en": dict(
         posts="posts-en", out="en/news", section="Oreum Games Indie Dev News", lang="en", locale="en_US",
@@ -48,7 +48,7 @@ LANG = {
         list_title="Oreum Games Indie Dev News — making indie games you play with no install",
         list_desc="Dev news from Oreum Games, a very small indie studio in Korea: how we make browser games that start with no install, what we learn, and where we put them.",
         list_keywords="indie game, indie game dev, indie dev news, browser games, web game development, Oreum Games",
-        other_lang_link='<a href="/news/{slug}" lang="ko" hreflang="ko">한국어</a>',
+        other_lang_link='/news/{slug}',
     ),
 }
 
@@ -56,8 +56,10 @@ LANG = {
 def chrome(L):
     s = io.open(L["template"], encoding="utf-8").read()
     header = re.search(r"<header.*?</header>", s, re.S).group(0)
-    # 언어 전환 링크는 글마다 바꾼다 — 자리표시자로
-    header = re.sub(r'<a href="[^"]*" lang="(?:en|ko)" hreflang="(?:en|ko)">[^<]*</a>', "{OTHER_LANG}", header)
+    # 지구본 언어 목록의 주소는 글마다 바꾼다 — 자리표시자로
+    header = re.sub(r'<a href="[^"]*" lang="ko" hreflang="ko"[^>]*>', '<a href="{KO_HREF}" lang="ko" hreflang="ko"{KO_CUR}>', header)
+    header = re.sub(r'<a href="[^"]*" lang="en" hreflang="en"[^>]*>', '<a href="{EN_HREF}" lang="en" hreflang="en"{EN_CUR}>', header)
+    header = re.sub(r'<a href="[^"]*" lang="zh-CN" hreflang="zh-Hans"[^>]*>', '<a href="/zh/" lang="zh-CN" hreflang="zh-Hans">', header)
     apps = '<a href="/apps/">APPS</a>' if L["lang"] == "ko" else '<a href="/en/apps/">APPS</a>'
     news = '<a href="/news/">NEWS</a>' if L["lang"] == "ko" else '<a href="/en/news/">NEWS</a>'
     if news not in header:
@@ -65,8 +67,15 @@ def chrome(L):
     footer = re.search(r"<footer.*?</footer>", s, re.S).group(0)
     scripts = "\n".join(re.findall(r'<script[^>]+src="[^"]+"[^>]*></script>', s))
     verif = "\n".join(re.findall(r'<meta name="(?:naver|google)-site-verification"[^>]*/?>', s))
-    css = re.search(r'<link rel="stylesheet" href="[^"]+">', s).group(0)
+    css = "\n".join(re.findall(r'<link rel="stylesheet" href="[^"]+">', s))
     return header, footer, scripts, verif, css
+
+
+def langfill(header, L, self_href, other_href):
+    ko, en = (self_href, other_href) if L["lang"] == "ko" else (other_href, self_href)
+    cur = ' aria-current="page"'
+    return (header.replace("{KO_HREF}", ko).replace("{EN_HREF}", en)
+            .replace("{KO_CUR}", cur if L["lang"] == "ko" else "").replace("{EN_CUR}", cur if L["lang"] == "en" else ""))
 
 
 def parse(path):
@@ -221,7 +230,7 @@ def render_article(meta, L, ch, pair):
     head = HEAD.format(lang=L["lang"], title=html.escape(title_full, quote=True), desc=html.escape(meta["desc"], quote=True), keywords=html.escape(meta.get("keywords", ""), quote=True),
                        url=url, alternates=alternates(ko_url, en_url), verif=verif, ogtype="article", site_name=L["by"], ogtitle=html.escape(meta["title"], quote=True), SITE=SITE, locale=L["locale"],
                        css=css, style=ARTICLE_STYLE, ld='<script type="application/ld+json">%s</script>' % json.dumps(ld, ensure_ascii=False),
-                       header=header.replace("{OTHER_LANG}", other))
+                       header=langfill(header, L, "/%s/%s/" % (L["out"], meta["slug"]), other))
     body = """
 <main id="main">
   <section class="showcase">
@@ -278,7 +287,7 @@ def render_list(posts, L, ch, pair_list):
     head = HEAD.format(lang=L["lang"], title=L["list_title"], desc=L["list_desc"], keywords=L["list_keywords"],
                        url=url, alternates=alternates(ko_url, en_url), verif=verif, ogtype="website", site_name=L["by"], ogtitle=L["section"], SITE=SITE, locale=L["locale"],
                        css=css, style=LIST_STYLE, ld='<script type="application/ld+json">%s</script>' % json.dumps(ld, ensure_ascii=False),
-                       header=header.replace("{OTHER_LANG}", other))
+                       header=langfill(header, L, "/%s/" % L["out"], other))
     body = """
 <main id="main">
   <section class="showcase">
