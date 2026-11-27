@@ -2,7 +2,7 @@
 (function () {
   'use strict';
   var QS = location.search;
-  var EN = /[?&]lang=en(&|$)/.test(QS), SHOT = /[?&]shot=1/.test(QS);
+  var EN = /[?&]lang=en(&|$)/.test(QS), ZH = /[?&]lang=zh(&|$)/.test(QS), SHOT = /[?&]shot=1/.test(QS);
   function qp(k) { var m = new RegExp('[?&]' + k + '=([^&]*)').exec(QS); return m ? decodeURIComponent(m[1]) : null; }
   var LOCAL = location.protocol === 'file:' || /^(localhost|127\.0\.0\.1)$/.test(location.hostname); // 시험 갈고리는 내 컴퓨터에서만
   if (!LOCAL) qp = function () { return null; };
@@ -577,7 +577,7 @@
     $('szG').textContent = r0.clr ? 'CLEAR' : 'GOAL ' + GOAL[G.n];
     $('szLab').classList.toggle('clr', !!r0.clr);
     $('best').textContent = r0.best ? 'BEST ' + fmt(r0.best) : '';
-    $('btnStart').textContent = loadGame(G.n) ? (EN ? 'CONTINUE' : '이어하기') : (EN ? 'START' : '시작');
+    $('btnStart').textContent = loadGame(G.n) ? (EN ? 'CONTINUE' : ZH ? '继续游戏' : '이어하기') : (EN ? 'START' : ZH ? '开始' : '시작');
     layout(); titleBoard();
   }
   function goTitle() { show(null); paused = false; AU.pause(false); setScene('title'); refreshTitle(); }
@@ -669,6 +669,15 @@
   if (EN) {
     document.body.classList.add('en'); document.documentElement.lang = 'en';
     document.querySelectorAll('[data-en]').forEach(function (el) { el.textContent = el.getAttribute('data-en'); });
+  }
+  if (ZH) {
+    document.documentElement.lang = 'zh-CN';
+    var zf = "local('PingFang SC'),local('PingFangSC-Regular'),local('Microsoft YaHei'),local('Microsoft YaHei UI'),local('Noto Sans SC'),local('Noto Sans CJK SC'),local('Source Han Sans SC')";
+    var ur = 'U+2E80-2FFF,U+3000-303F,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF';
+    var zs = document.createElement('style');
+    zs.textContent = "@font-face{font-family:'Miso';src:" + zf + ";unicode-range:" + ur + "}html[lang=zh-CN] *{word-break:normal!important}";
+    document.head.appendChild(zs);
+    document.querySelectorAll('[data-zh]').forEach(function (el) { el.textContent = el.getAttribute('data-zh'); });
   }
   if (qp('still')) document.body.classList.add('still');
   if (SHOT) document.body.classList.add('shot');
