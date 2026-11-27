@@ -361,8 +361,24 @@
 /* ─────────────────────────── 언어 ─────────────────────────── */
 var qs = new URLSearchParams(location.search);
 var LANG = qs.get('lang');
-if (LANG !== 'en') LANG = 'ko';   // 언어는 주소로만 정한다(?lang=en 일 때만 영어, 없으면 한국어) — 기억하거나 폰 언어를 따르면 한국어 페이지에서 들어와도 영어로 뜬다(2026-09-29)
-document.documentElement.lang = LANG;
+if (LANG !== 'en' && LANG !== 'zh') LANG = 'ko';   // 언어는 주소로만 정한다(?lang=en 일 때만 영어, 없으면 한국어) — 기억하거나 폰 언어를 따르면 한국어 페이지에서 들어와도 영어로 뜬다(2026-09-29)
+document.documentElement.lang = LANG === 'zh' ? 'zh-CN' : LANG;
+if (LANG === 'zh'){
+  /* 중국어판: 제목·설명, 한글 글꼴에 없는 한자를 시스템 중국어 글꼴로 채운다 */
+  document.title = '石墙方块 · DOLDAM';
+  var zmd = document.querySelector('meta[name=description]');
+  if (zmd) zmd.content = '特殊方块会爆炸的免费网页解谜游戏。填满的行先锁定，放下一块时崩塌，连出 COMBO。无需安装，直接开玩。';
+  var zf = "local('PingFang SC'),local('PingFangSC-Regular'),local('Microsoft YaHei'),local('Microsoft YaHei UI'),local('Noto Sans SC'),local('Noto Sans CJK SC'),local('Source Han Sans SC')";
+  var zur = 'U+2E80-2FFF,U+3000-303F,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF';
+  var zst = document.createElement('style'), zcss = '';
+  ['Pretendard','Apple SD Gothic Neo','Malgun Gothic'].forEach(function(f){
+    [400,600,700,800,900].forEach(function(w){
+      zcss += "@font-face{font-family:'" + f + "';src:" + zf + ";font-weight:" + w + ";unicode-range:" + zur + "}";
+    });
+  });
+  zst.textContent = zcss + 'html[lang=zh-CN] *{word-break:normal!important}';
+  document.head.appendChild(zst);
+}
 
 var T = {
   ko:{
@@ -436,6 +452,40 @@ var T = {
       '<div class="sp"><span class="ico">❄️</span><span><b>Frost</b> — frozen 3 turns; its row cannot lock.</span></div>'+
       '<h4>The field</h4>'+
       '<p>After five cleared rows it starts pushing up, more and more often.</p>'
+  },
+
+  zh:{
+    sub:'', len:'墙长', best:'BEST', score:'SCORE', bestScore:'BEST', next:'NEXT', rise:'RISE',
+    back:'← 列表', riseOff:'—',
+    keys:'<b>← →</b> 移动<br><b>↑ / X</b> 旋转<br><b>↓</b> 加速<br><b>SPACE</b> 暂停',
+    musicOff:'关闭音乐', musicOn:'开启音乐', sfxOff:'关闭音效', sfxOn:'开启音效',
+    over:'GAME OVER', overSub:'', again:'RETRY', howto:'规则',
+    paused:'PAUSE', pausedSub:'', resume:'RESUME',
+    newBest:'NEW BEST', newBestScore:'NEW BEST!', firstScore:'首次记录',
+    prevBest:'之前', toBest:'距 BEST', pt:'', beat:'NEW BEST 刷新中',
+    unlock1:'RISE ON', unlock2:'NEW STONES', unlock3:'RISE UP', rush:'RISE MAX',
+    chain:'COMBO', wipeAll:'ALL CLEAR',
+    walls:['LEVEL 1','LEVEL 2','LEVEL 3','LEVEL 4','LEVEL 5','LEVEL 6','LEVEL 7','LEVEL 8'],
+    stageWord:'', nextIn:'', maxed:'MAX',
+    wallUp:'LEVEL UP',
+    helpHTML:
+      '<h3>石墙方块 · DOLDAM</h3>'+
+      '<h4>RULES</h4>'+
+      '<ul>'+
+      '<li>填满一整行会<b>锁定</b>（变成金色）</li>'+
+      '<li>锁定的行在<b>放下一块石头时</b>崩塌</li>'+
+      '<li>崩塌后又填满一行就是 <b>COMBO</b></li>'+
+      '<li>消除 5 行后开始 <b>RISE</b>：下方会有新行往上推</li>'+
+      '</ul>'+
+      '<h4>SPECIAL</h4>'+
+      '<div class="sp"><span class="ico">💣</span><span><b>BOMB</b> — 周围 8 格</span></div>'+
+      '<div class="sp"><span class="ico">⬍</span><span><b>LASER</b> — 纵向一整列</span></div>'+
+      '<div class="sp"><span class="ico">⬇</span><span><b>GRAVITY</b> — 左右 3 列往下压</span></div>'+
+      '<div class="sp"><span class="ico">🔥</span><span><b>BURN</b> — 相连的一整块</span></div>'+
+      '<div class="sp"><span class="ico">▤</span><span><b>SWEEP</b> — 最底下一行</span></div>'+
+      '<div class="sp"><span class="ico">❄</span><span><b>FREEZE</b> — 3 回合内不会锁定</span></div>'+
+      '<h4>SCORE</h4>'+
+      '<p>行数 × COMBO² × 10。每次 LEVEL UP 有额外奖励。目标是<b>打破 BEST</b>。</p>'
   }
 }[LANG];
 
@@ -1501,7 +1551,7 @@ document.getElementById('ovBtn2').addEventListener('click', function(){ openHelp
 /* ─────────────────────────── 도움말 ─────────────────────────── */
 var helpEl = document.getElementById('help');
 document.getElementById('helpIn').innerHTML = T.helpHTML +
-  '<button class="close" type="button" id="helpClose">'+(LANG==='ko'?'닫고 시작':'Close')+'</button>';
+  '<button class="close" type="button" id="helpClose">'+(LANG==='ko'?'닫고 시작':LANG==='zh'?'关闭并开始':'Close')+'</button>';
 function openHelp(){ helpEl.classList.add('on'); duckBgm(); if (!over && !paused && !busy) paused = true; }
 function closeHelp(){
   helpEl.classList.remove('on');
@@ -1606,7 +1656,7 @@ document.getElementById('lblNext').textContent = T.next;
 document.getElementById('lblRise').textContent = T.rise;
 document.getElementById('keyHelp').innerHTML = T.keys;
 document.getElementById('backLink').textContent = T.back;
-document.getElementById('backLink').href = LANG === 'en' ? '/en/games/mini/' : '/games/mini/';
+document.getElementById('backLink').href = LANG === 'en' ? '/en/games/mini/' : LANG === 'zh' ? '/zh/' : '/games/mini/';
 document.getElementById('btnLang').textContent = LANG === 'ko' ? 'EN' : 'KO';
 paintSoundBtns();
 
@@ -1671,7 +1721,7 @@ window.DOLDAM = {
 })();
 </script>
 <!-- 왼쪽 위 '오름게임즈' 링크 + 왼쪽 아래 '전체화면' 알약 (오름냥·페어붐과 같은 공용 스크립트) -->
-<script src="/assets/game-home.js?v=7" data-top="4" data-left="4" data-fullscreen="1" defer></script>
+<script src="/assets/game-home.js?v=8" data-top="4" data-left="4" data-fullscreen="1" defer></script>
 <script src="/assets/game-events.js?v=4" defer></script>
 </body>
 </html>
