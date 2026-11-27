@@ -1,8 +1,81 @@
 // ?lang=en 이면 화면 글자를 영어로 (사전 + MutationObserver)
 (function () {
-  const EN = /[?&]lang=en\b/.test(location.search);
-  window.LANG = EN ? 'en' : 'ko';
-  const D = {
+  const Q = new URLSearchParams(location.search).get('lang');
+  const LG = Q === 'en' || Q === 'zh' ? Q : 'ko';
+  const EN = LG === 'en', ZHL = LG === 'zh';
+  window.LANG = LG;
+  // 중국어: 한국어 원문을 열쇠로
+  const ZH = {
+    '제주카트레이싱': '济州卡丁车',
+    '제주': '济州',
+    '카트레이싱': '卡丁车',
+    '카트': '卡丁车',
+    '코스': '赛道',
+    '상점': '商店',
+    '미션': '任务',
+    '장착': '装备',
+    '사용 중': '使用中',
+    '홈': '首页',
+    '나': '我',
+    '냥이': '喵喵', '토리': '兔兔', '판이': '团团', '여리': '狐狐',
+    '애월 해안도로': '涯月海岸公路',
+    '감귤밭 돌담길': '橘园石墙路',
+    '협재 해변': '挟才海滩',
+    '제주 시내': '济州市区',
+    '녹차밭': '绿茶园',
+    '유채꽃 들판': '油菜花田',
+    '산굼부리 억새밭': '山君不离芒草地',
+    '풍차 해안': '风车海岸',
+    '용두암 바윗가': '龙头岩礁石',
+    '성산일출봉': '城山日出峰',
+    '한라산 숲길': '汉拿山林道',
+    '밤의 탑동': '夜晚塔洞',
+    '감귤컵': '柑橘杯', '돌담컵': '石墙杯', '오름컵': '火山丘杯', '한라산컵': '汉拿山杯',
+    '파랑 씽씽': '蓝色嗖嗖', '분홍 토끼': '粉红兔', '초록 거북': '绿乌龟', '노랑 부릉': '黄色轰轰',
+    '속도': '速度', '접지': '抓地',
+    ' 우승': '夺冠', '우승': '夺冠',
+    '등': '名',
+    '1등 하기': '拿下第1名',
+    '코스 5개 1등': '5条赛道拿第1',
+    '코스 12개 모두 1등': '12条赛道全拿第1',
+    '드리프트 3단 30번': '3段漂移30次',
+    '한라봉 명중 30번': '丑橘命中30次',
+    '아이템 150개': '拿到150个道具',
+    '100바퀴 달리기': '跑满100圈',
+    '한 번도 안 맞고 1등': '零中弹拿第1',
+    '카트 2대 모으기': '收集2辆卡丁车',
+    '카트 3대 모으기': '收集3辆卡丁车',
+    '카트 4대 모두': '集齐4辆卡丁车',
+    '4컵 모두 우승': '4个杯赛全夺冠',
+    '계속': '继续',
+    '가로로 돌려 주세요': '请把手机横过来',
+    '전체화면보기': '全屏',
+    '누르면 조준(← → 과녁 바꾸기), 떼면 발사': '按住瞄准(← → 换目标)，松开发射',
+    '급출발': '冲刺',
+    '이어하기': '继续游戏', '새로하기': '重新开始',
+    '처음부터 다시 할까요?': '要从头开始吗？', '미션·기록이 모두 지워져요': '任务和记录都会被清除', '확인': '确定', '취소': '取消',
+    '캐릭터': '角色',
+    '드리프트 달인': '漂移达人', '번개 뒷발': '闪电后腿', '튼튼한 몸': '铁打身板', '꼬리 바람': '顺风尾巴',
+    '드리프트 부스트가 1.5배 빨리 모여요': '漂移加速蓄得快1.5倍',
+    '↑↑ 부스터를 6초마다 쓸 수 있어요 (다른 선수는 10초)': '每6秒就能用一次 ↑↑ 加速（其他选手10秒）',
+    '아이템에 맞아도 금방 털고 일어나요 (도는 시간·느려지는 시간 절반)': '被道具打中也能马上恢复（打转和减速时间减半）',
+    '최고 속도가 6% 더 빨라요': '最高速度快6%',
+    '무한 모드': '无限模式',
+    '조향': '转向', '가속': '加速', '브레이크': '刹车', '드리프트': '漂移', '아이템': '道具',
+    '1컵': '第1杯',
+  };
+  if (ZHL) {
+    document.documentElement.lang = 'zh-CN';
+    document.title = '济州卡丁车';
+    // 게임 글꼴(JejuT·Ria)엔 한자가 없다 → 같은 이름에 중국어 기기 글꼴을 한자 범위로만 덧붙인다
+    // 게임 글꼴이 굵은 글꼴이라 한자도 굵은 면을 먼저 찾는다
+    const zf = "local('PingFangSC-Semibold'),local('Microsoft YaHei Bold'),local('MicrosoftYaHei-Bold'),local('Noto Sans SC Bold'),local('NotoSansSC-Bold'),local('PingFang SC'),local('PingFangSC-Regular'),local('Microsoft YaHei'),local('Microsoft YaHei UI'),local('Noto Sans SC'),local('Noto Sans CJK SC'),local('Source Han Sans SC')";
+    const ur = 'U+2E80-2FFF,U+3000-303F,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF';
+    const st = document.createElement('style');
+    st.textContent = `@font-face{font-family:'JejuT';src:${zf};unicode-range:${ur}}@font-face{font-family:'Ria';src:${zf};unicode-range:${ur}}html[lang=zh-CN] *{word-break:normal!important}`;
+    document.head.appendChild(st);
+  }
+  const D = ZHL ? ZH : {
     '제주카트레이싱': 'JEJU KART RACING',
     '제주': 'JEJU',
     '카트레이싱': 'KART RACING',
@@ -64,14 +137,17 @@
     '1컵': 'CUP 1',
   };
   const keys = Object.keys(D).sort((a, b) => b.length - a.length);
-  const re = new RegExp(keys.map((k) => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|'), 'g');
+  // 중국어는 '숫자+등'(등수)을 '第N名'으로 — 사전 낱말 뒤에 둔다
+  const re = new RegExp(keys.map((k) => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|') + (ZHL ? '|\\d+등' : ''), 'g');
   window.L = function (s) {
-    if (!EN || s == null) return s;
-    return String(s).replace(re, (m) => D[m]);
+    if (LG === 'ko' || s == null) return s;
+    return String(s).replace(re, (m) => (D[m] !== undefined ? D[m] : '第' + m.slice(0, -1) + '名'));
   };
-  if (!EN) return;
-  document.documentElement.lang = 'en';
-  document.title = 'JEJU KART RACING';
+  if (LG === 'ko') return;
+  if (EN) {
+    document.documentElement.lang = 'en';
+    document.title = 'JEJU KART RACING';
+  }
   const fix = (n) => {
     if (n.nodeType === 3) {
       if (/[가-힣]/.test(n.nodeValue)) { const v = window.L(n.nodeValue); if (v !== n.nodeValue) n.nodeValue = v; }
