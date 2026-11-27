@@ -2,7 +2,7 @@
  * 정신이 온전치 않아 여기저기 떠돌다 갑자기 코앞에 나타나 소리치고, 알 수 없는 말을 남기고 비틀비틀 사라진다.
  * 동작은 믹사모에서 받은 낚시·기도·소리치기·비틀걷기·이상한 손짓(assets/acts_u.glb)을 이 모델 뼈에 구워 쓴다(acts.js). */
 (function () {
-  const W = window.WORLD, EN = /[?&]lang=en/.test(location.search);
+  const W = window.WORLD, EN = /[?&]lang=en/.test(location.search), ZT = window.ZT || (v => v);
   const bank = (z, s, off) => W.cx(z) + s * (W.hw(z) + off);
   const CAMP_Z = W.CAMP_Z, CAMP_S = -1;
   const U = { root: null, holder: null, mixer: null, act: {}, cur: '', state: 'camp', t: 0, spot: -1, fire: null };
@@ -39,7 +39,7 @@
     ['나를 믿지 마라', '이제 나도 누가 물 위에 서 있는지 모르겠다'],
     ['이 강이 데려간 사람들 이름을 나는 다 안다', '다음 이름은 네 것이다'],
     ['돌아보지 마라', '방금 네 뒤에 서 있던 건 내가 아니다'],
-  ];
+  ].map(ZT);
 
   // ── 모델 ──
   U.init = function (scene) {

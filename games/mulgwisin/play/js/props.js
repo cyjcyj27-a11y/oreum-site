@@ -3,7 +3,7 @@
  * 석등 셋에 불 붙이기(퍼즐 → 쉼터), 수문 바퀴 돌려 급류 잠재우기(퍼즐) */
 (function () {
   const W = window.WORLD;
-  const EN = /[?&]lang=en/.test(location.search);
+  const EN = /[?&]lang=en/.test(location.search), ZT = window.ZT || (v => v), SF = window.ZHON ? '"Microsoft YaHei","PingFang SC","Noto Sans SC"' : '"Malgun Gothic"';
   const PR = {};
   W.used = new Set(); W.props = [];
 
@@ -41,13 +41,13 @@
       const g = c.createLinearGradient(0, 0, w, h); g.addColorStop(0, 'rgba(255,255,255,.12)'); g.addColorStop(1, 'rgba(60,40,20,.28)'); c.fillStyle = g; c.fillRect(0, 0, w, h);
       c.strokeStyle = '#b8231b'; c.lineWidth = 12; c.strokeRect(10, 10, w - 20, h - 20);
       c.fillStyle = '#b8231b'; c.textAlign = 'center'; c.textBaseline = 'middle';
-      c.font = '900 ' + (EN ? 38 : 52) + 'px "Malgun Gothic", sans-serif'; c.fillText(big, w / 2, 66);
-      c.fillStyle = '#26221c'; c.font = '700 ' + (EN ? 20 : 24) + 'px "Malgun Gothic", sans-serif'; c.fillText(small, w / 2, 122);
+      c.font = '900 ' + (EN ? 38 : 52) + 'px ' + SF + ', sans-serif'; c.fillText(big, w / 2, 66);
+      c.fillStyle = '#26221c'; c.font = '700 ' + (EN ? 20 : 24) + 'px ' + SF + ', sans-serif'; c.fillText(small, w / 2, 122);
       for (let i = 0; i < 26; i++) { c.fillStyle = 'rgba(90,50,20,' + (Math.random() * .25) + ')'; c.beginPath(); c.arc(Math.random() * w, Math.random() * h, 1 + Math.random() * 6, 0, 6.283); c.fill(); }   // 녹물 얼룩
     });
   }
-  const SIGN_SWIM = signTex(EN ? 'NO SWIMMING' : '수영금지', EN ? 'DROWNINGS REPORTED' : '익사사고 다발지역');
-  const SIGN_RAPID = signTex(EN ? 'DANGER' : '급류 위험', EN ? 'STRONG CURRENT' : '물살이 셉니다');
+  const SIGN_SWIM = signTex(EN ? 'NO SWIMMING' : ZT('수영금지'), EN ? 'DROWNINGS REPORTED' : ZT('익사사고 다발지역'));
+  const SIGN_RAPID = signTex(EN ? 'DANGER' : ZT('급류 위험'), EN ? 'STRONG CURRENT' : ZT('물살이 셉니다'));
   // 콘크리트 — 물때 줄과 아래쪽 이끼
   const concTex = canvasTex(128, 128, (c, w, h) => {
     c.fillStyle = '#8b8f89'; c.fillRect(0, 0, w, h);
@@ -83,7 +83,7 @@
   const buoyMat = L(0xffffff, { map: buoyTex });
   // 비석 새김 글씨 — 석등 퍼즐 힌트(2026-09-16 사장님 "비석에서 힌트를 줘야 돼, 어두워서 안 보인다")
   // 한글은 옛 비석처럼 세로쓰기(오른쪽 줄부터), 영문은 가로. 글꼴(Griun)을 받은 뒤 다시 그린다
-  const STELE_LINES = EN ? ['LIGHT', 'THE THREE', 'DARK', 'LANTERNS', 'WITH', 'YOUR FLAME'] : ['꺼진 석등 셋', '등불로 밝히면', '넋이 쉬어 가리라'];
+  const STELE_LINES = EN ? ['LIGHT', 'THE THREE', 'DARK', 'LANTERNS', 'WITH', 'YOUR FLAME'] : ZT(['꺼진 석등 셋', '등불로 밝히면', '넋이 쉬어 가리라']);
   function drawStele(c, w, h) {
     c.fillStyle = '#000'; c.fillRect(0, 0, w, h);
     c.fillStyle = '#ffd89a'; c.shadowColor = 'rgba(255,190,110,.9)'; c.shadowBlur = 6; c.textAlign = 'center'; c.textBaseline = 'middle';
@@ -100,7 +100,7 @@
     }
   }
   const steleTex = canvasTex(256, 512, drawStele);
-  if (document.fonts && document.fonts.load) document.fonts.load('40px Griun', '석등').then(() => { drawStele(steleTex.image.getContext('2d'), 256, 512); steleTex.needsUpdate = true; }).catch(() => { });
+  if (document.fonts && document.fonts.load) document.fonts.load('40px Griun', window.ZHON ? '石灯' : '석등').then(() => { drawStele(steleTex.image.getContext('2d'), 256, 512); steleTex.needsUpdate = true; }).catch(() => { });
   const steleMat = new THREE.MeshLambertMaterial({ color: 0x4e504b, emissive: 0xffffff, emissiveMap: steleTex, emissiveIntensity: .5 });   // 캄캄해도 글씨가 희미하게 읽힌다
   const starTex = canvasTex(64, 64, (c) => { c.translate(32, 32); const g = c.createRadialGradient(0, 0, 0, 0, 0, 30); g.addColorStop(0, 'rgba(255,255,255,1)'); g.addColorStop(.25, 'rgba(255,245,210,.6)'); g.addColorStop(1, 'rgba(255,240,200,0)'); c.fillStyle = g; for (const a of [0, Math.PI / 2]) { c.save(); c.rotate(a); c.beginPath(); c.moveTo(-30, 0); c.lineTo(0, -3); c.lineTo(30, 0); c.lineTo(0, 3); c.fill(); c.restore(); } c.beginPath(); c.arc(0, 0, 9, 0, 6.283); c.fill(); });
 
@@ -202,7 +202,7 @@
     ['네 번째 동전이다', '이 동전... 내가 떨어뜨린 건데?'],
     ['네 번째 머리핀이다', '분명히 방금 전에도 봤다'],
     ['네 번째 손목시계다', '시계가 멈춘 시간이 모두 같다'],
-  ];
+  ].map(ZT);
 
   PR.relicCount = () => RELICS.reduce((n, r) => n + (W.used.has(r.id) ? 1 : 0), 0);
 
@@ -480,7 +480,7 @@
   // c = { P, G, dt, t, lit, frozen, A, toast, save, setLamp }
   PR.tick = function (c) {
     const { P, G, dt, A } = c;
-    const NM = o => EN ? o.en : o.ko;
+    const NM = o => EN ? o.en : ZT(o.ko);
     G.wheel = null;   // 곁에 선 수문 바퀴 — 아래에서 다시 채운다
     for (const e of W.props) {
       const d = Math.hypot(P.x - e.x, P.z - e.z);
@@ -503,7 +503,7 @@
             if (n >= 3 && !W.used.has(e.site.id)) {
               W.used.add(e.site.id); setTimeout(() => A.clear(), 350); c.addSalt(3); G.shake = Math.max(G.shake || 0, .35);
               if (e.site.st.z > G.cpZ) { G.cpX = e.site.st.x - e.site.s * 3.2; G.cpZ = e.site.st.z - 1.5; }   // 비석 바로 앞 물가에서 다시 시작
-              c.toast((EN ? 'STONE LANTERNS' : '석등') + '  🧂 +3');
+              c.toast((EN ? 'STONE LANTERNS' : ZT('석등')) + '  🧂 +3');
             } else c.toast(n + '/3');
             c.save();
           }
@@ -514,7 +514,7 @@
         case 'crank':
           if (!W.used.has(e.id) && d < 1.6 && !c.frozen) {   // 손잡이를 주워 바퀴에 끼운다
             W.used.add(e.id); e.bar.visible = false; e.star.visible = false; e.grip.visible = true;
-            A.pick(); if (c.act) c.act('pick', 1.9); c.toast(EN ? '🔧 CRANK' : '🔧 손잡이'); c.save();
+            A.pick(); if (c.act) c.act('pick', 1.9); c.toast(EN ? '🔧 CRANK' : ZT('🔧 손잡이')); c.save();
           }
           break;
         case 'wheel':
@@ -524,7 +524,7 @@
             if (e.turn > 0) {
               sl.prog = Math.min(1, sl.prog + e.turn * .085); e.wheel.rotation.y -= e.turn * .62; e.turn = 0;
               sl.creakT = (sl.creakT || 0) - dt; if (sl.creakT <= 0) { sl.creakT = .22; A.creak(); }
-              if (sl.prog >= 1) { W.used.add(e.id); G.wheel = null; A.clunk(); G.shake = Math.max(G.shake || 0, .6); c.toast(EN ? 'SLUICE GATE' : '수문'); c.save(); }
+              if (sl.prog >= 1) { W.used.add(e.id); G.wheel = null; A.clunk(); G.shake = Math.max(G.shake || 0, .6); c.toast(EN ? 'SLUICE GATE' : ZT('수문')); c.save(); }
             } else sl.creakT = (sl.creakT || 0) - dt;
           }
           break;

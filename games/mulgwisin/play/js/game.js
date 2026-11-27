@@ -7,7 +7,7 @@
   if (isTouch) document.body.classList.add('touch');
   if (/[?&]shot=1/.test(location.search)) document.body.classList.add('shot');
   if (EN) { document.documentElement.lang = 'en'; document.querySelectorAll('[data-en]').forEach(el => el.innerHTML = el.getAttribute('data-en')); document.title = 'Mulgwisin — Oreum Games'; }
-  const NM = m => EN ? m.en : m.ko;
+  const NM = m => EN ? m.en : ZT(m.ko);
 
   // ── 렌더러·장면 ──
   const canvas = $('c');
@@ -255,6 +255,7 @@
     torch: ['우리 집 손전등이다', '아직 켜져 있다'], coat: ['동생 노란 비옷이다', '그날 입고 나갔던'], charm: ['부적을 찾았다'],
     shrine: ['서낭당입니다', '여기서는 불을 꺼도 귀신이 나타나지 않습니다'],   // 사장님이 정한 안내(2026-09-16)
   };
+  if (!EN) Object.assign(SUBS, ZT(SUBS));
   function subtitle(key, dur) {
     const lines = Array.isArray(key) ? key.map((s, i, a) => (i === 0 ? '“' : '') + s + (i === a.length - 1 ? '”' : '')) : key && key.lines ? key.lines : SUBS[key]; if (!lines) return;   // {lines} 는 따옴표 없는 혼잣말   // 배열이면 사람이 한 말
     el.sub.innerHTML = ''; lines.slice(0, 2).forEach(s => { const sp = document.createElement('span'); sp.textContent = s; el.sub.appendChild(sp); });
@@ -491,8 +492,8 @@
     ['다음 날도 그다음 날도……'],
     ['소년은 여동생을 찾으러'],
     ['어두운 강가로 나선다'],
-  ];
-  const STORM = STORY.findIndex(p => /폭우|pouring storm/.test(p[0]));   // 번개가 치는 장
+  ].map(ZT);
+  const STORM = STORY.findIndex(p => /폭우|pouring storm|暴雨/.test(p[0]));   // 번개가 치는 장
   const SS = { on: false, page: -1, t: 0, hold: 0, done: null, drops: [], raf: 0, flashT: 0 };
   const storyEl = $('story'), storyText = $('storyText'), rainCv = $('rain'), rainC = rainCv.getContext('2d');
   function showStory(done) {
@@ -508,7 +509,7 @@
     if (i >= STORY.length) return endStory();
     const lines = STORY[i]; let chars = 0;
     lines.forEach((s, k) => { const sp = document.createElement('span'); sp.textContent = s; storyText.appendChild(sp); setTimeout(() => { if (SS.on && SS.page === i) sp.classList.add('on'); }, (delay + k * 1.1) * 1000); chars += s.length; });
-    SS.t = 0; SS.hold = delay + (lines.length - 1) * 1.1 + 1.6 + chars * (EN ? .045 : .075);   // 읽을 만큼 머문다
+    SS.t = 0; SS.hold = delay + (lines.length - 1) * 1.1 + 1.6 + chars * (EN ? .045 : ZHON ? .12 : .075);   // 읽을 만큼 머문다
     if (i === STORM) setTimeout(() => { if (SS.on && SS.page === STORM) { SS.flashT = .5; A.thunder(); } }, 300);   // 폭우 — 번개
   }
   function nextPage() {
@@ -1087,7 +1088,7 @@
         toast('👣 ' + G.items + '/' + W.TRACE_N); subtitle(it.userData.item.k); memoryEcho(it.position.x, it.position.z);
         if (G.items === 3 || G.items === 5) armStrike(9 + Math.random() * 6);
         el.trace.classList.remove('hot'); void el.trace.offsetWidth; el.trace.classList.add('hot');
-        if (G.items >= W.TRACE_N && G.charms >= W.CHARM_N) setTimeout(() => toast(EN ? 'THE SOURCE' : '발원지로'), 2200);
+        if (G.items >= W.TRACE_N && G.charms >= W.CHARM_N) setTimeout(() => toast(EN ? 'THE SOURCE' : ZT('발원지로')), 2200);
         saveRun();
       }
       // 부적 — 주울 때마다 물귀신이 곧바로 찾아온다
@@ -1097,7 +1098,7 @@
         el.charm.classList.add('hot'); setTimeout(() => el.charm.classList.remove('hot'), 1200);
         A.lamp(); A.whisper(); toast('📜 ' + G.charms + '/' + W.CHARM_N); subtitle('charm');
         G.shake = Math.max(G.shake, .5);
-        if (G.charms >= W.CHARM_N) { A.clear(); if (G.items >= W.TRACE_N) setTimeout(() => toast(EN ? 'THE SOURCE' : '발원지로'), 1500); }
+        if (G.charms >= W.CHARM_N) { A.clear(); if (G.items >= W.TRACE_N) setTimeout(() => toast(EN ? 'THE SOURCE' : ZT('발원지로')), 1500); }
         if (G.charms % 2 === 0) armStrike(6 + Math.random() * 7);   // 짝수 번째 부적 — 결정적인 순간
         saveRun();
       }

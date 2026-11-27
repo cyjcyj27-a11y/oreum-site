@@ -2,7 +2,7 @@
  * 지도: 물길을 왼쪽(집)→오른쪽(발원지)으로 눕혀 그린다. 할 일은 회색 점, 해내면 색이 찬다.
  * 인벤토리: 부적 8 · 흔적 5 · 유품 28 칸. 못 찾은 칸은 회색. (2026-09-16 사장님) */
 (function () {
-  const W = window.WORLD, EN = /[?&]lang=en/.test(location.search);
+  const W = window.WORLD, EN = /[?&]lang=en/.test(location.search), ZT = window.ZT || (v => v);
   const $ = id => document.getElementById(id);
   const MG = () => window.__mg;
   const box = $('menu'), cv = $('mapCv'), inv = $('invBox');
@@ -114,10 +114,10 @@
   // 인벤토리 — 부적 8(윗줄)·흔적 5(둘째 줄)는 큰 칸, 유품 28 은 아래 작은 칸(2026-09-17 사장님). 화면에 꽉 차게 칸 크기를 고른다
   function drawInv() {
     const PR = window.PROPS, charms = [], traces = [], relics = [];
-    const charmName = EN ? 'TALISMAN' : '부적';
+    const charmName = EN ? 'TALISMAN' : ZT('부적');
     for (let i = 0; i < W.CHARM_N; i++) charms.push(slot('📜', charmName, W.charmTaken.has(i)));
-    for (const m of W.MARKS) if (m.item) traces.push(slot(TRACE_IC[m.item.k] || '👣', EN ? m.item.en.replace(/^A /, '') : m.item.ko, W.taken.has(m.i)));
-    for (const r of PR.RELICS) relics.push(slot(RELIC_IC[r.kind.en] || '💍', EN ? r.kind.en : r.kind.ko, W.used.has(r.id)));
+    for (const m of W.MARKS) if (m.item) traces.push(slot(TRACE_IC[m.item.k] || '👣', EN ? m.item.en.replace(/^A /, '') : ZT(m.item.ko), W.taken.has(m.i)));
+    for (const r of PR.RELICS) relics.push(slot(RELIC_IC[r.kind.en] || '💍', EN ? r.kind.en : ZT(r.kind.ko), W.used.has(r.id)));
     const R = inv.getBoundingClientRect(), bw = Math.max(200, R.width), bh = Math.max(150, R.height), gap = 6, sep = 22, K = .5;
     const bc = Math.max(charms.length, traces.length);
     // 큰 칸 두 줄 + 작은 칸 n 줄이 높이에 들어가게 — 작은 칸은 큰 칸의 절반까지
