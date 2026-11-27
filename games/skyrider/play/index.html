@@ -34,6 +34,7 @@
   #arrow { display: none !important; }
   #vert.sink::after { content: '  ▼ 가라앉는 중'; color: #ff9a7a; }
   html[lang="en"] #vert.sink::after { content: '  ▼ SINKING'; }
+  html[lang="zh-CN"] #vert.sink::after { content: '  ▼ 正在下沉'; }
   #arrow { position: fixed; left: 50%; top: 84px; margin-left: -22px; font-size: 44px; line-height: 1; color: #ffd27a; text-shadow: 0 2px 8px rgba(0,0,0,.6); opacity: 0; transition: opacity .3s; pointer-events: none; transform-origin: 50% 50%; }
   #pkg { font-size: 14px; opacity: .8; }
   /* 상단 바 — 오름 알약(왼쪽 위 93px) 오른쪽부터 */
@@ -311,12 +312,26 @@
 <script>
 (function(){ var g=document.getElementById('rotGo'), k=document.getElementById('rotSkip'); if(g) g.addEventListener('click', function(){ if(window.OL) OL.go(); }); if(k) k.addEventListener('click', function(e){ e.preventDefault(); document.getElementById('rotate').classList.add('off'); }); })();
 </script>
-<script src="/assets/game-home.js?v=7" data-top="6" data-left="6" data-fullscreen="1" defer></script>
+<script src="/assets/game-home.js?v=8" data-top="6" data-left="6" data-fullscreen="1" defer></script>
+<script src="js/zh.js?v=1"></script>
 <script>
 /* ── 말(한국어·영어) ── `?lang=en` 이면 영어를 덧씌운다. 한국어가 원본이다.
    ⚠ 이 게임은 L(기울기 벡터)·T(TERRAIN)를 이미 쓰고 있어 번역 함수 이름을 TX 로 지었다. 함수 안에서 TX 를 다시 정의하지 말 것 */
-const EN_MODE = (new URLSearchParams(location.search).get('lang') || '').toLowerCase() === 'en';
-const TX = (ko, en) => EN_MODE ? en : ko;
+const LANG_Q = (new URLSearchParams(location.search).get('lang') || '').toLowerCase();
+const EN_MODE = LANG_Q === 'en';
+const ZH_MODE = LANG_Q === 'zh' && !!window.ZHT;
+const TX = (ko, en) => ZH_MODE ? window.ZHT(ko) : EN_MODE ? en : ko;
+if (ZH_MODE) {
+  document.documentElement.lang = 'zh-CN';
+  document.title = '天空骑手 — SKY RIDER';
+  const zf = "local('PingFang SC'),local('PingFangSC-Regular'),local('Microsoft YaHei'),local('Microsoft YaHei UI'),local('Noto Sans SC'),local('Noto Sans CJK SC'),local('Source Han Sans SC')";
+  const ur = 'U+2E80-2FFF,U+3000-303F,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF';
+  const st = document.createElement('style');
+  st.textContent = `@font-face{font-family:'Griun';src:${zf};unicode-range:${ur}}@font-face{font-family:'Ria';src:${zf};unicode-range:${ur}}html[lang=zh-CN] *{word-break:normal!important}`;
+  document.head.appendChild(st);
+  document.querySelectorAll('[data-en]').forEach(el => { const z = window.ZH_HTML[el.dataset.en.replace(/ /g, '&nbsp;')]; if (z !== undefined) el.innerHTML = z; });
+  document.querySelectorAll('[data-en-title]').forEach(el => { const z = window.ZH_HTML[el.dataset.enTitle]; if (z !== undefined) el.title = z; });
+}
 if (EN_MODE) {
   document.documentElement.lang = 'en';
   document.title = 'SKY RIDER — free sky delivery motorbike game';
