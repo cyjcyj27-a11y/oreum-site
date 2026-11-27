@@ -8,11 +8,21 @@
 'use strict';
 var EN = /[?&]lang=en\b/.test(location.search);
 if (EN) { document.documentElement.lang = 'en'; document.body.classList.add('en'); }
-function L(a) { return a[EN ? 1 : 0]; }
+var ZH = !EN && new URLSearchParams(location.search).get('lang') === 'zh';
+if (ZH) {
+  document.documentElement.lang = 'zh-CN';
+  /* 중국어: 게임 글꼴에 없는 한자는 기기 중국어 글꼴로 */
+  var zf = "local('PingFang SC'),local('PingFangSC-Regular'),local('Microsoft YaHei'),local('Microsoft YaHei UI'),local('Noto Sans SC'),local('Noto Sans CJK SC'),local('Source Han Sans SC')";
+  var ur = 'U+2E80-2FFF,U+3000-303F,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF';
+  var zst = document.createElement('style');
+  zst.textContent = "@font-face{font-family:'Summer';src:" + zf + ";unicode-range:" + ur + "}@font-face{font-family:'Plg';src:" + zf + ";unicode-range:" + ur + "}html[lang=zh-CN] *{word-break:normal!important}";
+  document.head.appendChild(zst);
+}
+function L(a) { return ZH && a[2] != null ? a[2] : a[EN ? 1 : 0]; }
 function $(id) { return document.getElementById(id); }
 var V3 = THREE.Vector3, PI = Math.PI;
 var LANE = 2.4;
-var TX = { title: ['서프런 게임', 'SURF RUN'], best: ['BEST ', 'BEST '], nice: ['NICE', 'NICE'], close: ['CLOSE', 'CLOSE'], mission: ['MISSION', 'MISSION'] };
+var TX = { title: ['서프런 게임', 'SURF RUN', '冲浪跑酷'], best: ['BEST ', 'BEST '], nice: ['NICE', 'NICE'], close: ['CLOSE', 'CLOSE'], mission: ['MISSION', 'MISSION'] };
 function rnd(a, b) { return a + Math.random() * (b - a); }
 function pick(a) { return a[Math.floor(Math.random() * a.length)]; }
 function clamp(v, a, b) { return v < a ? a : v > b ? b : v; }
@@ -678,14 +688,14 @@ function tutDo(k) {
 /* ====================================================================== 미션: 셋씩, 끝내면 배수 +1(영구) */
 var MIS_ORDER = { c50: 1, m500: 1, j10: 2, d8: 2, cl5: 3, o5: 3, c150: 4, m1200: 4, dol1: 5, mg1: 5, sd1: 5, j25: 6, d20: 6, c300: 7, m2500: 7, cl15: 7, o15: 7, dol2: 8, m4000: 9 };
 var MIS = [
-  { id: 'c50', k: 'coins', n: 50, t: ['코인 50', 'Coins 50'] }, { id: 'c150', k: 'coins', n: 150, t: ['코인 150', 'Coins 150'] }, { id: 'c300', k: 'coins', n: 300, t: ['코인 300', 'Coins 300'] },
-  { id: 'j10', k: 'jumps', n: 10, t: ['점프 10', 'Jumps 10'] }, { id: 'j25', k: 'jumps', n: 25, t: ['점프 25', 'Jumps 25'] },
-  { id: 'd8', k: 'ducks', n: 8, t: ['덕다이브 8', 'Duck dives 8'] }, { id: 'd20', k: 'ducks', n: 20, t: ['덕다이브 20', 'Duck dives 20'] },
+  { id: 'c50', k: 'coins', n: 50, t: ['코인 50', 'Coins 50', '金币 50'] }, { id: 'c150', k: 'coins', n: 150, t: ['코인 150', 'Coins 150', '金币 150'] }, { id: 'c300', k: 'coins', n: 300, t: ['코인 300', 'Coins 300', '金币 300'] },
+  { id: 'j10', k: 'jumps', n: 10, t: ['점프 10', 'Jumps 10', '跳跃 10'] }, { id: 'j25', k: 'jumps', n: 25, t: ['점프 25', 'Jumps 25', '跳跃 25'] },
+  { id: 'd8', k: 'ducks', n: 8, t: ['덕다이브 8', 'Duck dives 8', '下潜 8'] }, { id: 'd20', k: 'ducks', n: 20, t: ['덕다이브 20', 'Duck dives 20', '下潜 20'] },
   { id: 'm500', k: 'dist', n: 500, t: ['500m', '500m'] }, { id: 'm1200', k: 'dist', n: 1200, t: ['1200m', '1200m'] }, { id: 'm2500', k: 'dist', n: 2500, t: ['2500m', '2500m'] }, { id: 'm4000', k: 'dist', n: 4000, t: ['4000m', '4000m'] },
   { id: 'cl5', k: 'close', n: 5, t: ['CLOSE 5', 'Close calls 5'] }, { id: 'cl15', k: 'close', n: 15, t: ['CLOSE 15', 'Close calls 15'] },
-  { id: 'o5', k: 'over', n: 5, t: ['장애물 넘기 5', 'Jump over 5'] }, { id: 'o15', k: 'over', n: 15, t: ['장애물 넘기 15', 'Jump over 15'] },
-  { id: 'dol1', k: 'dolphin', n: 1, t: ['돌고래 1', 'Dolphin 1'] }, { id: 'dol2', k: 'dolphin', n: 2, t: ['돌고래 2', 'Dolphin 2'] },
-  { id: 'mg1', k: 'magnet', n: 1, t: ['자석 1', 'Magnet 1'] }, { id: 'sd1', k: 'shield', n: 1, t: ['보드 1', 'Shield 1'] }
+  { id: 'o5', k: 'over', n: 5, t: ['장애물 넘기 5', 'Jump over 5', '跳过障碍 5'] }, { id: 'o15', k: 'over', n: 15, t: ['장애물 넘기 15', 'Jump over 15', '跳过障碍 15'] },
+  { id: 'dol1', k: 'dolphin', n: 1, t: ['돌고래 1', 'Dolphin 1', '海豚 1'] }, { id: 'dol2', k: 'dolphin', n: 2, t: ['돌고래 2', 'Dolphin 2', '海豚 2'] },
+  { id: 'mg1', k: 'magnet', n: 1, t: ['자석 1', 'Magnet 1', '磁铁 1'] }, { id: 'sd1', k: 'shield', n: 1, t: ['보드 1', 'Shield 1', '护盾板 1'] }
 ];
 function misLoad() { var ids = null; try { ids = JSON.parse(localStorage.getItem('surf3.mis') || 'null'); } catch (e) {} G.mis = []; if (ids) ids.forEach(function (id) { var m = MIS.filter(function (q) { return q.id === id; })[0]; if (m) G.mis.push(m); }); while (G.mis.length < 3 && misDraw()); }
 /* 새 미션 뽑기. 깬 미션은 저장소와 메모리(MIS_DONE) 둘 다 보고, 이번 판 기록으로 이미 채운 미션은 뽑지 않는다.
@@ -818,24 +828,24 @@ function fx(text, kind) {
 /* ====================================================================== 상점: 보드 색 · 상어 색 · 시작 아이템 */
 var SHOP = {
   board: [
-    { id: 'white', n: ['화이트', 'WHITE'], p: 0, deck: 0xfbf7ef, st: 0xff5a3c },
-    { id: 'coral', n: ['코랄', 'CORAL'], p: 300, deck: 0xff6a4d, st: 0xfbf7ef },
-    { id: 'mint', n: ['민트', 'MINT'], p: 500, deck: 0x7fe0c8, st: 0x0b3a45 },
-    { id: 'navy', n: ['네이비', 'NAVY'], p: 800, deck: 0x1d3f7a, st: 0xffc21f },
-    { id: 'black', n: ['블랙', 'BLACK'], p: 1200, deck: 0x1b1d22, st: 0xff3b6b },
-    { id: 'gold', n: ['골드', 'GOLD'], p: 2500, deck: 0xf2c14e, st: 0x8a5a14, metal: 1 }
+    { id: 'white', n: ['화이트', 'WHITE', '白色'], p: 0, deck: 0xfbf7ef, st: 0xff5a3c },
+    { id: 'coral', n: ['코랄', 'CORAL', '珊瑚'], p: 300, deck: 0xff6a4d, st: 0xfbf7ef },
+    { id: 'mint', n: ['민트', 'MINT', '薄荷'], p: 500, deck: 0x7fe0c8, st: 0x0b3a45 },
+    { id: 'navy', n: ['네이비', 'NAVY', '藏青'], p: 800, deck: 0x1d3f7a, st: 0xffc21f },
+    { id: 'black', n: ['블랙', 'BLACK', '黑色'], p: 1200, deck: 0x1b1d22, st: 0xff3b6b },
+    { id: 'gold', n: ['골드', 'GOLD', '金色'], p: 2500, deck: 0xf2c14e, st: 0x8a5a14, metal: 1 }
   ],
   outfit: [
-    { id: 'o_white', n: ['화이트', 'WHITE'], p: 0, c: 0xffffff },
-    { id: 'o_pink', n: ['핑크', 'PINK'], p: 400, c: 0xff7fb0 },
-    { id: 'o_red', n: ['레드', 'RED'], p: 600, c: 0xe8352c },
-    { id: 'o_sky', n: ['스카이', 'SKY'], p: 800, c: 0x6fc4ff },
-    { id: 'o_yellow', n: ['옐로', 'YELLOW'], p: 1000, c: 0xffd84a },
-    { id: 'o_black', n: ['블랙', 'BLACK'], p: 1500, c: 0x2a2a30 }
+    { id: 'o_white', n: ['화이트', 'WHITE', '白色'], p: 0, c: 0xffffff },
+    { id: 'o_pink', n: ['핑크', 'PINK', '粉色'], p: 400, c: 0xff7fb0 },
+    { id: 'o_red', n: ['레드', 'RED', '红色'], p: 600, c: 0xe8352c },
+    { id: 'o_sky', n: ['스카이', 'SKY', '天蓝'], p: 800, c: 0x6fc4ff },
+    { id: 'o_yellow', n: ['옐로', 'YELLOW', '黄色'], p: 1000, c: 0xffd84a },
+    { id: 'o_black', n: ['블랙', 'BLACK', '黑色'], p: 1500, c: 0x2a2a30 }
   ],
   item: [
-    { id: 'shield', n: ['시작 보드', 'START SHIELD'], p: 150 },
-    { id: 'magnet', n: ['시작 자석', 'START MAGNET'], p: 200 }
+    { id: 'shield', n: ['시작 보드', 'START SHIELD', '开局护盾板'], p: 150 },
+    { id: 'magnet', n: ['시작 자석', 'START MAGNET', '开局磁铁'], p: 200 }
   ]
 };
 var shopTab = 'board';
@@ -1036,6 +1046,7 @@ togInit('bgmB', 'bgm', SFX.setBgm); togInit('sfxB', 'snd', SFX.setSnd);
 document.addEventListener('visibilitychange', function () { if (document.hidden && G.mode === 'play') pause(); });
 window.addEventListener('pointerdown', function () { SFX.unlock(); }, { once: true });
 document.title = L(TX.title); $('logo').textContent = L(TX.title);
+if (ZH) { $('tab_board').firstChild.textContent = '冲浪板'; $('tab_outfit').firstChild.textContent = '颜色'; $('tab_item').firstChild.textContent = '道具'; }
 if (EN) { $('tab_board').firstChild.textContent = 'BOARD'; $('tab_outfit').firstChild.textContent = 'COLOR'; $('tab_item').firstChild.textContent = 'ITEM'; }
 window.addEventListener('resize', resize);
 resize();
