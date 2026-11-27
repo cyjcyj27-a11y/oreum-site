@@ -74,7 +74,8 @@ def main():
 
     # 한국어판 기준으로 짝을 짓습니다 (/games/lulu/ 와 /en/games/lulu/ 는 한 쌍)
     #   러시아어판(/ru/…)은 얼음할아버지처럼 있는 게임만 — 한국어 짝에 붙여 세 언어를 한 묶음으로 적습니다 (2026-10-01)
-    ko = [p for p in pages if not p.startswith("/en/") and p != "/en/" and not p.startswith("/ru/")]
+    #   중국어판(/zh/…)도 한국어 짝에 붙입니다. /zh/ 는 대문(/)의 짝 (2026-11-28)
+    ko = [p for p in pages if not p.startswith("/en/") and p != "/en/" and not p.startswith("/ru/") and not p.startswith("/zh/")]
     today = datetime.date.today().isoformat()
 
     body = []
@@ -83,8 +84,10 @@ def main():
         has_en = e in pages and k not in NO_EN
         r = "/ru" + k
         has_ru = r in pages
+        z = "/zh" + k
+        has_zh = z in pages
         pri = priority_of(k)
-        for loc in ([k] + ([e] if has_en else []) + ([r] if has_ru else [])):
+        for loc in ([k] + ([e] if has_en else []) + ([r] if has_ru else []) + ([z] if has_zh else [])):
             mod = lastmod_of(loc, today)
             body.append(
 f"""  <url>
@@ -94,6 +97,8 @@ f"""  <url>
     <xhtml:link rel="alternate" hreflang="en" href="{BASE}{e}"/>""" if has_en else "")
 + (f"""
     <xhtml:link rel="alternate" hreflang="ru" href="{BASE}{r}"/>""" if has_ru else "")
++ (f"""
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="{BASE}{z}"/>""" if has_zh else "")
 + f"""
     <xhtml:link rel="alternate" hreflang="x-default" href="{BASE}{k}"/>
     <lastmod>{mod}</lastmod>
@@ -101,6 +106,18 @@ f"""  <url>
     <priority>{pri}</priority>
   </url>
 """)
+
+    orphan_zh = [p for p in pages if p.startswith("/zh/") and p[3:] not in ko]
+    for z in orphan_zh:
+        body.append(f"""  <url>
+    <loc>{BASE}{z}</loc>
+    <lastmod>{lastmod_of(z, today)}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>{priority_of(z[3:])}</priority>
+  </url>
+""")
+    if orphan_zh:
+        print("  zh without ko pair:", orphan_zh)
 
     xml = ('<?xml version="1.0" encoding="UTF-8"?>\n'
            '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"\n'
