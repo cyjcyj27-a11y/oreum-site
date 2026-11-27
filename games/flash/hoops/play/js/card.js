@@ -86,7 +86,7 @@
     const a = document.createElement('a'); a.href = url; a.download = 'arcade-hoops-champion.png'; document.body.appendChild(a); a.click(); a.remove();
   };
   C.share = function () {
-    const link = location.protocol === 'file:' ? '' : location.origin + location.pathname + (window.EN ? '?lang=en' : '');
+    const link = location.protocol === 'file:' ? '' : location.origin + location.pathname + (window.EN ? '?lang=en' : window.ZH ? '?lang=zh' : '');
     const text = L('오락실 농구 30판 다 깼다! 너도 해 봐', 'I beat all 30 stages of Arcade Hoops! Try it') + (link ? '\n' + link : '');
     if (navigator.share) { navigator.share({ text }).catch(() => {}); return; }
     try { navigator.clipboard.writeText(text); } catch (e) {}
