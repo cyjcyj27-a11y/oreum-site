@@ -34,6 +34,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--ink);font
 .end.card h2{font-size:clamp(18px,5.6vw,30px);white-space:nowrap}
 .end .rank.stay{color:var(--ink)}
 .end .rank.en{font-size:clamp(30px,9vw,56px)}
+.end .rank.zh{font-size:clamp(40px,14vw,84px)}
 .stat i{width:1px;align-self:stretch;background:var(--line)}
 /* 단추 */
 .btn{font-family:inherit;font-weight:800;font-size:17px;color:var(--ink);background:var(--card);border:0;border-radius:16px;cursor:pointer;
@@ -146,7 +147,7 @@ body[data-mode=title] #ov{align-items:flex-end;background:linear-gradient(rgba(2
   .tiles{grid-template-columns:repeat(10,minmax(0,1fr));gap:6px}.tile b{font-size:18px}.st{width:8px;height:8px}
   .tabs{margin-bottom:2vh;grid-template-columns:repeat(10,minmax(0,1fr))}.tab{padding:6px 0;font-size:14px}.tab::before{display:none}
   .clr h2,.end h2{font-size:11vh;margin-bottom:1vh}.st.big{width:9vh;height:9vh}.clr .stars{margin:0 0 1vh}
-  .clr .res .v{font-size:6vh}.end .rank{font-size:16vh;margin:1vh 0}.end.card h2{font-size:7vh}.clr .time{font-size:7vh;margin:0 0 .3vh}.clr .stars{margin:0}.st.big{width:8vh;height:8vh}.tile em{display:none}
+  .clr .res .v{font-size:6vh}.end .rank{font-size:16vh;margin:1vh 0}.end .rank.zh{font-size:16vh}.end.card h2{font-size:7vh}.clr .time{font-size:7vh;margin:0 0 .3vh}.clr .stars{margin:0}.st.big{width:8vh;height:8vh}.tile em{display:none}
   .chip small{font-size:9px}
 }
 /* 좁은 폰(380px 아래): 아래 단추는 그림을 빼고 글자만, 글자·시계·창 단추를 화면 폭에 맞춰 */
@@ -177,11 +178,11 @@ body[data-mode=title] #ov{align-items:flex-end;background:linear-gradient(rgba(2
 </div>
 <div id="hint"></div>
 <div id="ov" class="hide"><div id="panel"></div></div>
-<script src="assets/game-home.js" data-top="6" data-left="6" data-fullscreen="1" defer></script>
+<script src="assets/game-home.js?v=2" data-top="6" data-left="6" data-fullscreen="1" defer></script>
 <script src="lib/three.min.js"></script>
 <script src="js/levels.js?v=4"></script>
-<script src="js/look.js?v=3"></script>
-<script src="js/sfx.js?v=8"></script><script src="js/game1.js?v=10"></script><script src="js/world.js?v=10"></script><script src="js/game3.js?v=8"></script><script src="js/ui.js?v=11"></script>
+<script src="js/look.js?v=4"></script>
+<script src="js/sfx.js?v=8"></script><script src="js/game1.js?v=11"></script><script src="js/world.js?v=10"></script><script src="js/game3.js?v=8"></script><script src="js/ui.js?v=12"></script>
 <script>
 (function(){
   // 세로 화면에서는 단추 줄을 판 아래로, 가로 화면에서는 왼쪽 칸 안으로
@@ -193,6 +194,8 @@ body[data-mode=title] #ov{align-items:flex-end;background:linear-gradient(rgba(2
   if(EN){ document.documentElement.lang = 'en'; document.title = 'Double Parking Escape';
     document.querySelectorAll('[data-en]').forEach(e => e.textContent = e.dataset.en);
     document.querySelectorAll('[data-en-label]').forEach(e => e.setAttribute('aria-label', e.dataset.enLabel)); }
+  if(ZH){ document.querySelectorAll('[data-en]').forEach(e => e.textContent = L(e.textContent));
+    document.querySelectorAll('[data-en-label]').forEach(e => e.setAttribute('aria-label', L(e.getAttribute('aria-label')))); }
   UI.title(); requestAnimationFrame(CTRL.tick);
   window.__dp = { W, DP, CTRL, UI, SFX, R };
 })();

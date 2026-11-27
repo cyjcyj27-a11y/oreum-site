@@ -42,7 +42,7 @@ function starsFor(S){ const m = S.moves, n = S.min; return m <= n + 2 ? 3 : m <=
 /* 한 판 = 출근하는 하루. 1월 1일부터 하루씩(10/9 사장님 "1월 1일"), 요일은 안 씀 */
 function dateOf(idx){ const d = new Date(2027, 0, 1 + idx); return { m:d.getMonth() + 1, d:d.getDate() }; }
 const MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-function dateText(idx){ const t = dateOf(idx); return L(`${t.m}월 ${t.d}일`, `${MON[t.m - 1]} ${t.d}`); }
+function dateText(idx){ const t = dateOf(idx); return ZH ? `${t.m}月${t.d}日` : L(`${t.m}월 ${t.d}일`, `${MON[t.m - 1]} ${t.d}`); }
 /* 출근 시계: 판마다 1분 30초(10/9 사장님). 시작하면 08:58:30 부터 진짜 초로 흐르고 09:00:00 을 넘기면 지각 */
 const LIMIT = 90;
 function limitOf(){ return LIMIT; }

@@ -60,8 +60,8 @@ function ending(){
   document.body.dataset.mode = 'ending';
   let tot = 0; for(let i = 0; i < LEVELS.length; i++) tot += DP.prog.stars[i] || 0;
   const late = DP.lateDays(), a = DP.dateOf(0), b = DP.dateOf(LEVELS.length - 1);
-  show(`<div class="end card"><h3>${DP.dateText(0)} – ${DP.dateText(LEVELS.length - 1)}</h3><h2>${DP.rankOf(late) === '사원' ? L('이번엔 사원 그대로', 'Still on staff') : L('승진을 축하합니다', 'You got promoted!')}</h2><div class="rank${DP.rankOf(late) === '사원' ? ' stay' : ''}${EN ? ' en' : ''}">${DP.rankName(DP.rankOf(late))}</div>
-    <p>${L(`지각 ${late}일`, `Late ${late} day${late === 1 ? '' : 's'}`)} · <i class="st on"></i> ${tot} / ${LEVELS.length*3}</p>
+  show(`<div class="end card"><h3>${DP.dateText(0)} – ${DP.dateText(LEVELS.length - 1)}</h3><h2>${DP.rankOf(late) === '사원' ? L('이번엔 사원 그대로', 'Still on staff') : L('승진을 축하합니다', 'You got promoted!')}</h2><div class="rank${DP.rankOf(late) === '사원' ? ' stay' : ''}${EN ? ' en' : ZH ? ' zh' : ''}">${DP.rankName(DP.rankOf(late))}</div>
+    <p>${ZH ? `迟到 ${late} 天` : L(`지각 ${late}일`, `Late ${late} day${late === 1 ? '' : 's'}`)} · <i class="st on"></i> ${tot} / ${LEVELS.length*3}</p>
     <div class="row"><button class="btn main" id="bT">TITLE</button></div></div>`);
   $('bT').onclick = () => { SFX.click(); title(); };
 }
