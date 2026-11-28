@@ -1901,7 +1901,7 @@ const EVENTS={
   dance:{slot:'beachA', n:'챌린지 춤', sc:6, mood:1, draw:(P,t,X)=>{
     efig(P,PAL('#f3c9a6','#6a3a1a','#7ad3ff','#f4f4f4','#fff'),X,.92,1,Object.assign(danceP(t,.0065),{body:'w'}),t); }},
   /* ── 해변 오른쪽 — 드문 것 ── */
-  trunks:{slot:'beachB', n:'80대 트렁크 체조', sc:48, mood:-1, draw:(P,t,X)=>{ const up=kf(cyc(t,3600),[[0,0],[.3,1],[.45,1],[.75,0],[1,0]]);   // 하나 둘 — 팔을 천천히 올렸다 내리며 무릎을 굽힌다
+  trunks:{slot:'beachB', n:'80대 트렁크 체조', sc:96, mood:-1, draw:(P,t,X)=>{ const up=kf(cyc(t,3600),[[0,0],[.3,1],[.45,1],[.75,0],[1,0]]);   // 하나 둘 — 팔을 천천히 올렸다 내리며 무릎을 굽힌다
     efig(P,PAL(OLD,'#e6e6e2',OLD,OLD,'#d49f7c'),X,.97,-1,{th1:.12+.12*(1-up),kn1:-.1-.3*(1-up),th2:-.12+.12*(1-up),kn2:-.1-.3*(1-up),ar1:.25+up*2.6,el1:.1+.15*(1-up),ar2:.2+up*2.6,el2:.1+.15*(1-up),rot:.02,curl:.15+.1*(1-up),neck:-.12+.22*up,body:'g',swim:P.mono?0:{trunk:'#1f6fd6'}},t,FLOOR-21*FIG*.97-1+6*(1-up)); }},
   castle:{slot:'beachB', n:'할아버지 모래성', sc:89, mood:-1, draw:(P,t,X)=>{ const d=kf(cyc(t,1500),[[0,0],[.22,1],[.35,1],[.6,0],[1,0]]);   // 토닥토닥
     x.fillStyle=P.mono?'#0d0d0c':'#d9b877'; for(const [cx,cw,ch] of [[X-78,20,34],[X-56,26,48],[X-30,20,30]]){ x.fillRect(cx,FLOOR-ch,cw,ch); for(let k=0;k<3;k++) x.fillRect(cx+k*cw/3,FLOOR-ch-5,cw/5,5); }

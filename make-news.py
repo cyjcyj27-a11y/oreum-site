@@ -145,7 +145,7 @@ HEAD = """<!DOCTYPE html>
 <meta property="og:title" content="{ogtitle}">
 <meta property="og:description" content="{desc}">
 <meta property="og:url" content="{url}">
-<meta property="og:image" content="{SITE}/assets/og-image.jpg?v=4">
+{ogimage}
 <meta property="og:locale" content="{locale}">
 <meta name="twitter:card" content="summary_large_image">
 
@@ -229,6 +229,26 @@ def updated_line(meta, L):
     return '\n      <p class="note-date note-upd">%s <time datetime="%s">%s</time></p>' % (word, u, kdate(u, L["lang"]))
 
 
+DEFAULT_OG = '<meta property="og:image" content="%s/assets/og-image.jpg?v=4">'
+
+
+def cover_tags(meta):
+    # 원고 머리말 cover: 가 있으면 그 사진을 대표 사진으로, 큰 사진 미리보기 허락까지(디스커버용, 2026-11-28)
+    c = meta.get("cover")
+    if not c:
+        return DEFAULT_OG % SITE, SITE + "/assets/og-image.jpg?v=4"
+    url = SITE + c
+    wh = ""
+    try:
+        from PIL import Image
+        w, h = Image.open(os.path.join(ROOT, c.lstrip("/"))).size
+        wh = '\n<meta property="og:image:width" content="%d">\n<meta property="og:image:height" content="%d">' % (w, h)
+    except Exception:
+        pass
+    return ('<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">\n'
+            '<meta property="og:image" content="%s">%s' % (url, wh)), url
+
+
 def render_article(meta, L, ch, pair):
     header, footer, scripts, verif, css = ch
     url = "%s/%s/%s/" % (SITE, L["out"], meta["slug"])
@@ -238,10 +258,10 @@ def render_article(meta, L, ch, pair):
     other = L["other_lang_link"].format(slug=meta["slug"] + "/") if pair else L["other_lang_link"].format(slug="")
     ld = {"@context": "https://schema.org", "@type": "Article", "headline": meta["title"], "description": meta["desc"],
           "datePublished": meta["date"], "dateModified": meta.get("updated", meta["date"]), "inLanguage": L["lang"], "mainEntityOfPage": url,
-          "image": SITE + "/assets/og-image.jpg?v=4",
+          "image": cover_tags(meta)[1],
           "author": {"@type": "Organization", "name": L["by"], "url": SITE + "/" if L["lang"] == "ko" else SITE + "/en/"},
           "publisher": {"@type": "Organization", "name": L["by"], "url": SITE + "/", "logo": {"@type": "ImageObject", "url": SITE + "/assets/icon-512.png"}}}
-    head = HEAD.format(lang=L["lang"], title=html.escape(title_full, quote=True), desc=html.escape(meta["desc"], quote=True), keywords=html.escape(meta.get("keywords", ""), quote=True),
+    head = HEAD.format(ogimage=cover_tags(meta)[0], lang=L["lang"], title=html.escape(title_full, quote=True), desc=html.escape(meta["desc"], quote=True), keywords=html.escape(meta.get("keywords", ""), quote=True),
                        url=url, alternates=alternates(ko_url, en_url), verif=verif, ogtype="article", site_name=L["by"], ogtitle=html.escape(meta["title"], quote=True), SITE=SITE, locale=L["locale"],
                        css=css, style=ARTICLE_STYLE, ld='<script type="application/ld+json">%s</script>' % json.dumps(ld, ensure_ascii=False),
                        header=langfill(header, L, "/%s/%s/" % (L["out"], meta["slug"]), other))
@@ -298,7 +318,7 @@ def render_list(posts, L, ch, pair_list):
     other = L["other_lang_link"].format(slug="")
     ld = {"@context": "https://schema.org", "@type": "CollectionPage", "name": L["section"], "description": L["list_desc"], "url": url,
           "mainEntity": {"@type": "ItemList", "itemListElement": ld_items}}
-    head = HEAD.format(lang=L["lang"], title=L["list_title"], desc=L["list_desc"], keywords=L["list_keywords"],
+    head = HEAD.format(ogimage=DEFAULT_OG % SITE, lang=L["lang"], title=L["list_title"], desc=L["list_desc"], keywords=L["list_keywords"],
                        url=url, alternates=alternates(ko_url, en_url), verif=verif, ogtype="website", site_name=L["by"], ogtitle=L["section"], SITE=SITE, locale=L["locale"],
                        css=css, style=LIST_STYLE, ld='<script type="application/ld+json">%s</script>' % json.dumps(ld, ensure_ascii=False),
                        header=langfill(header, L, "/%s/" % L["out"], other))
