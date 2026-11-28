@@ -10,7 +10,17 @@
   var FY = ART.FY, PI = Math.PI, ZONES = ART.ZONES;
   var EN = /[?&]lang=en\b/.test(location.search);
   var ZH = !EN && /[?&]lang=zh\b/.test(location.search);
-  var T = ZH ? { title: '拯救12只小鸡', map: '地图', close: '关闭', keys: '←→ 移动 · Shift 奔跑 · 空格 跳跃（按住滑翔） · X 啄', home: '家', end: 'THE END' }
+  var LQ = (location.search.match(/[?&]lang=(ja|pt|ru)\b/) || [])[1];
+  var L3 = !EN && !ZH && LQ ? LQ : '';
+  var T3 = {
+    ja: { title: 'ヒヨコ12羽を救え', map: 'マップ', close: 'とじる', keys: '←→ 移動 · Shift ダッシュ · スペース ジャンプ（長押しで滑空） · X つつく', home: 'おうち', end: 'THE END',
+          cont: 'つづきから', rot: ['このゲームは横画面で遊びます', '横画面にする', 'ボタンが効かないときは、画面の回転ロックを解除してスマホを横にしてください', '縦画面のまま遊ぶ'], tips: ['一時停止', '音楽', '効果音'] },
+    pt: { title: 'Salve os 12 Pintinhos', map: 'MAPA', close: 'FECHAR', keys: '←→ Mover · Shift Correr · Espaço Pular (segure para planar) · X Bicar', home: 'LAR', end: 'THE END',
+          cont: 'CONTINUAR', rot: ['Este jogo é jogado na horizontal', 'Girar para horizontal', 'Se o botão não funcionar, desative o bloqueio de rotação e vire o celular', 'Jogar na vertical mesmo assim'], tips: ['Pausar', 'Música', 'Efeitos sonoros'] },
+    ru: { title: 'Спаси 12 цыплят', map: 'КАРТА', close: 'ЗАКРЫТЬ', keys: '←→ Ходьба · Shift Бег · Пробел Прыжок (удерживай — планирование) · X Клевать', home: 'ДОМ', end: 'THE END',
+          cont: 'ПРОДОЛЖИТЬ', rot: ['В эту игру играют в горизонтальном режиме', 'Повернуть экран', 'Если кнопка не работает, отключи блокировку поворота и поверни телефон', 'Всё равно играть вертикально'], tips: ['Пауза', 'Музыка', 'Звуки'] }
+  };
+  var T = L3 ? T3[L3] : ZH ? { title: '拯救12只小鸡', map: '地图', close: '关闭', keys: '←→ 移动 · Shift 奔跑 · 空格 跳跃（按住滑翔） · X 啄', home: '家', end: 'THE END' }
         : EN ? { title: 'SAVING 12 CHICKS', map: 'MAP', close: 'CLOSE', keys: '←→ Move · Shift Run · Space Jump (hold to glide) · X Peck', home: 'HOME', end: 'THE END' }
              : { title: '병아리 일이병구하기', map: '지도', close: '닫기', keys: '←→ 이동 · Shift 달리기 · 스페이스 점프(누르면 활강) · X 쪼기', home: '집', end: 'THE END' };
   if (EN) {
@@ -36,6 +46,28 @@
     $('h1').textContent = T.title;
     $('mapBtn').textContent = T.map; $('mapClose').textContent = T.close; $('mapH').textContent = T.map; $('keys').textContent = T.keys; $('endH').textContent = T.home;
     $('tPause').title = '暂停'; $('tMus').title = '音乐'; $('tSnd').title = '音效';
+  }
+  if (L3) {
+    var lst = document.createElement('style');   // system fonts for glyphs missing from the Korean-only game fonts
+    if (L3 === 'ja') {
+      var jf = "local('Hiragino Sans'),local('Hiragino Kaku Gothic ProN'),local('Yu Gothic UI'),local('Yu Gothic'),local('Yu Gothic Medium'),local('YuGothic-Medium'),local('Yu Gothic Regular'),local('YuGothic-Regular'),local('Yu Gothic Bold'),local('YuGothic-Bold'),local('MS PGothic'),local('MS Gothic'),local('Meiryo'),local('Noto Sans JP'),local('Noto Sans CJK JP'),local('Source Han Sans JP')";
+      var jb = "local('Hiragino Sans W6'),local('HiraginoSans-W6'),local('Hiragino Kaku Gothic ProN W6'),local('Yu Gothic UI Bold'),local('Yu Gothic Bold'),local('Meiryo Bold'),local('Noto Sans JP Bold'),local('NotoSansJP-Bold'),local('Source Han Sans JP Bold')," + jf;
+      var jr = 'U+2E80-2FFF,U+3000-30FF,U+31F0-31FF,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF';
+      lst.textContent = "@font-face{font-family:'Melody';src:" + jb + ";unicode-range:U+0030-0039," + jr + "}@font-face{font-family:'Ria';src:" + jb + ";unicode-range:" + jr + "}html[lang=ja] *{word-break:normal!important}";
+    } else {
+      var lf = "local('Segoe UI'),local('Roboto'),local('Arial'),local('Helvetica Neue'),local('Helvetica')";
+      var lr = 'U+00A0-024F,U+0400-04FF,U+1E00-1EFF,U+2010-2027';
+      lst.textContent = "@font-face{font-family:'Melody';src:" + lf + ";unicode-range:" + lr + "}@font-face{font-family:'Ria';src:" + lf + ";unicode-range:" + lr + "}";
+    }
+    document.head.appendChild(lst);
+    document.documentElement.lang = L3 === 'pt' ? 'pt-BR' : L3; document.title = T.title;
+    $('rotTitle').textContent = T.rot[0];
+    $('rotGo').textContent = T.rot[1];
+    $('rotHelp').textContent = T.rot[2];
+    $('rotSkip').textContent = T.rot[3];
+    $('h1').textContent = T.title;
+    $('mapBtn').textContent = T.map; $('mapClose').textContent = T.close; $('mapH').textContent = T.map; $('keys').textContent = T.keys; $('endH').textContent = T.home;
+    $('tPause').title = T.tips[0]; $('tMus').title = T.tips[1]; $('tSnd').title = T.tips[2];
   }
   var LAST = 60, TOTAL = 12, HEART_FOOD = 3;   // 먹이 HEART_FOOD 개 먹으면 하트 1칸 회복
 
@@ -581,7 +613,7 @@
     chicks = []; trail = [];
     titleChicks = [{ x: 170, y: FY, face: 1, ph: 0, hop: 0 }, { x: 300, y: FY, face: -1, ph: 0, hop: 0 }, { x: 330, y: FY, face: 1, ph: 0, hop: 0 }];
     $('best').textContent = save.cleared ? 'STAGE ' + save.cleared + ' · 🐥 ' + save.chicks.length + '/' + TOTAL : '';
-    $('start').textContent = save.cleared ? (ZH ? '继续游戏' : EN ? 'CONTINUE' : '이어하기') : 'START';
+    $('start').textContent = save.cleared ? (L3 ? T.cont : ZH ? '继续游戏' : EN ? 'CONTINUE' : '이어하기') : 'START';
     document.body.classList.add('title'); showPanel('title'); hud();
   }
   function titleStep(dt) {

@@ -72,7 +72,7 @@
   #flash.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
   #flash.red { color: #ff8a73; }
   #flash.soft { font-size: min(13vw, 64px); }
-  body.en #flash { font-size: min(16vw, 90px); letter-spacing: 4px; }
+  body.en #flash, body.pt #flash, body.ru #flash { font-size: min(16vw, 90px); letter-spacing: 4px; }
   #flash.long { font-size: min(11vw, 64px) !important; letter-spacing: 3px; }
 
   /* 타이틀: 제목은 맨 아래, 단추는 그 위 */
@@ -80,7 +80,10 @@
   #title.hide { display: none; }
   #title h1 { font-family: 'RIDI', serif; font-weight: 400; font-size: min(34vw, 190px); margin: 6px 0 0; line-height: 1; color: #fff3d0; -webkit-text-stroke: 5px #1a1208; paint-order: stroke fill; text-shadow: 0 10px 30px rgba(0,0,0,.7); letter-spacing: 12px; }
   body.en #title h1 { font-size: min(24vw, 150px); letter-spacing: 8px; }
-  body.zh #title h1 { font-size: min(17vw, 124px); letter-spacing: 8px; -webkit-text-stroke-width: 4px; }
+  body.zh #title h1, body.ja #title h1 { font-size: min(17vw, 124px); letter-spacing: 8px; -webkit-text-stroke-width: 4px; }
+  body.pt #title h1 { font-size: min(17vw, 120px); letter-spacing: 6px; }
+  body.ru #title h1 { font-size: min(13vw, 100px); letter-spacing: 4px; -webkit-text-stroke-width: 4px; }
+  body.ru .sheet h3 { font-size: 26px; letter-spacing: 2px; }
   .rec { font-size: 20px; letter-spacing: 2px; color: #ffe066; text-shadow: 0 1px 4px rgba(0,0,0,.9); margin: 0 0 16px; min-height: 18px; }
   .rec:empty { display: none; }
   /* 출발 급수 고르기: ◀ 급수 ▶ (급수 글자를 누르면 27칸 표) */
@@ -99,7 +102,9 @@
   body.shot #title { padding-bottom: 16vh; }
   body.shot #title h1 { font-size: min(30vw, 200px); letter-spacing: 20px; }
   body.shot.en #title h1 { font-size: min(22vw, 150px); letter-spacing: 10px; }
-  body.shot.zh #title h1 { font-size: min(19vw, 150px); letter-spacing: 12px; }
+  body.shot.zh #title h1, body.shot.ja #title h1 { font-size: min(19vw, 150px); letter-spacing: 12px; }
+  body.shot.pt #title h1 { font-size: min(17vw, 130px); letter-spacing: 8px; }
+  body.shot.ru #title h1 { font-size: min(13vw, 110px); letter-spacing: 6px; }
 
   /* 창 — 초록 펠트 판 + 황동 테 */
   .sheet { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%) scale(.85); opacity: 0; pointer-events: none; visibility: hidden; z-index: 11; padding: 18px 22px 22px; width: min(94vw, 520px); max-height: 92vh; overflow: hidden; color: #efe6d2; border-radius: 8px;
@@ -124,7 +129,7 @@
   @media (max-height: 480px) {
     #title { padding-bottom: 1vh; }
     #title h1 { font-size: 15vh; letter-spacing: 8px; margin-top: 0; }
-    body.en #title h1 { font-size: 13vh; } body.zh #title h1 { font-size: 13vh; }
+    body.en #title h1 { font-size: 13vh; } body.zh #title h1, body.ja #title h1, body.pt #title h1, body.ru #title h1 { font-size: 13vh; }
     #title .btns { margin-bottom: 11vh; }
     .rec { font-size: 4.2vh; margin-bottom: 1.5vh; }
     .pick { margin-bottom: 1.5vh; gap: 8px; }
@@ -200,10 +205,10 @@
   <h1 data-en="CHESS">체스</h1>
 </div>
 
-<script src="assets/game-home.js?v=2" data-top="6" data-left="6" data-fullscreen="1" defer></script>
+<script src="assets/game-home.js?v=3" data-top="6" data-left="6" data-fullscreen="1" defer></script>
 <script src="js/engine.js?v=20261003"></script>
 <script src="js/audio.js?v=20261003"></script>
-<script src="js/game.js?v=20261127zh"></script>
+<script src="js/game.js?v=20261128l3"></script>
 <script src="/assets/touchlock.js?v=1"></script>
 <script src="/assets/visit.js?v=21" defer></script>
 <script src="/assets/game-events.js?v=4" defer></script>

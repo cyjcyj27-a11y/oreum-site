@@ -18,11 +18,29 @@ if (ZH) {
   zst.textContent = "@font-face{font-family:'Summer';src:" + zf + ";unicode-range:" + ur + "}@font-face{font-family:'Plg';src:" + zf + ";unicode-range:" + ur + "}html[lang=zh-CN] *{word-break:normal!important}";
   document.head.appendChild(zst);
 }
-function L(a) { return ZH && a[2] != null ? a[2] : a[EN ? 1 : 0]; }
+var QL = new URLSearchParams(location.search).get('lang');
+var JA = !EN && !ZH && QL === 'ja', PT = !EN && !ZH && QL === 'pt', RU = !EN && !ZH && QL === 'ru';
+var LI = JA ? 3 : PT ? 4 : RU ? 5 : -1;
+var WIDEL = EN || PT || RU;   /* 긴 라틴·키릴 글자: 영문 배치 */
+if (LI > 0) {
+  document.documentElement.lang = JA ? 'ja' : PT ? 'pt-BR' : 'ru';
+  if (WIDEL && !EN) document.body.classList.add('en');
+  var jf = JA ? "local('Hiragino Sans'),local('Hiragino Kaku Gothic ProN'),local('Yu Gothic UI'),local('Yu Gothic'),local('Yu Gothic Medium'),local('YuGothic-Medium'),local('Yu Gothic Regular'),local('YuGothic-Regular'),local('Yu Gothic Bold'),local('YuGothic-Bold'),local('MS PGothic'),local('MS Gothic'),local('Meiryo'),local('Noto Sans JP'),local('Noto Sans CJK JP'),local('Source Han Sans JP')"
+    : "local('Segoe UI'),local('Roboto'),local('Arial'),local('Helvetica Neue'),local('Helvetica')";
+  var jr = JA ? 'U+2E80-2FFF,U+3000-30FF,U+31F0-31FF,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF' : 'U+00A0-024F,U+0400-04FF,U+1E00-1EFF,U+2010-2027';
+  var jst = document.createElement('style');
+  jst.textContent = "@font-face{font-family:'Summer';src:" + jf + ";unicode-range:" + jr + "}@font-face{font-family:'Plg';src:" + jf + ";unicode-range:" + jr + "}" + (JA ? "html[lang=ja] *{word-break:normal!important}" : "");
+  document.head.appendChild(jst);
+}
+/* 글 배열: [한국어, 영어, 중국어, 일본어, 포르투갈어, 러시아어]. ja·pt·ru 에 글이 없으면 한글이 아닌 첫 칸, 그다음 영어 */
+function L(a) {
+  if (LI > 0) return a[LI] != null ? a[LI] : /[가-힣]/.test(a[0]) ? a[1] : a[0];
+  return ZH && a[2] != null ? a[2] : a[EN ? 1 : 0];
+}
 function $(id) { return document.getElementById(id); }
 var V3 = THREE.Vector3, PI = Math.PI;
 var LANE = 2.4;
-var TX = { title: ['서프런 게임', 'SURF RUN', '冲浪跑酷'], best: ['BEST ', 'BEST '], nice: ['NICE', 'NICE'], close: ['CLOSE', 'CLOSE'], mission: ['MISSION', 'MISSION'] };
+var TX = { title: ['서프런 게임', 'SURF RUN', '冲浪跑酷', 'サーフラン', 'SURF RUN', 'SURF RUN'], best: ['BEST ', 'BEST '], nice: ['NICE', 'NICE'], close: ['CLOSE', 'CLOSE'], mission: ['MISSION', 'MISSION'] };
 function rnd(a, b) { return a + Math.random() * (b - a); }
 function pick(a) { return a[Math.floor(Math.random() * a.length)]; }
 function clamp(v, a, b) { return v < a ? a : v > b ? b : v; }
@@ -688,14 +706,14 @@ function tutDo(k) {
 /* ====================================================================== 미션: 셋씩, 끝내면 배수 +1(영구) */
 var MIS_ORDER = { c50: 1, m500: 1, j10: 2, d8: 2, cl5: 3, o5: 3, c150: 4, m1200: 4, dol1: 5, mg1: 5, sd1: 5, j25: 6, d20: 6, c300: 7, m2500: 7, cl15: 7, o15: 7, dol2: 8, m4000: 9 };
 var MIS = [
-  { id: 'c50', k: 'coins', n: 50, t: ['코인 50', 'Coins 50', '金币 50'] }, { id: 'c150', k: 'coins', n: 150, t: ['코인 150', 'Coins 150', '金币 150'] }, { id: 'c300', k: 'coins', n: 300, t: ['코인 300', 'Coins 300', '金币 300'] },
-  { id: 'j10', k: 'jumps', n: 10, t: ['점프 10', 'Jumps 10', '跳跃 10'] }, { id: 'j25', k: 'jumps', n: 25, t: ['점프 25', 'Jumps 25', '跳跃 25'] },
-  { id: 'd8', k: 'ducks', n: 8, t: ['덕다이브 8', 'Duck dives 8', '下潜 8'] }, { id: 'd20', k: 'ducks', n: 20, t: ['덕다이브 20', 'Duck dives 20', '下潜 20'] },
+  { id: 'c50', k: 'coins', n: 50, t: ['코인 50', 'Coins 50', '金币 50', 'コイン 50', 'Moedas 50', 'Монеты 50'] }, { id: 'c150', k: 'coins', n: 150, t: ['코인 150', 'Coins 150', '金币 150', 'コイン 150', 'Moedas 150', 'Монеты 150'] }, { id: 'c300', k: 'coins', n: 300, t: ['코인 300', 'Coins 300', '金币 300', 'コイン 300', 'Moedas 300', 'Монеты 300'] },
+  { id: 'j10', k: 'jumps', n: 10, t: ['점프 10', 'Jumps 10', '跳跃 10', 'ジャンプ 10', 'Pulos 10', 'Прыжки 10'] }, { id: 'j25', k: 'jumps', n: 25, t: ['점프 25', 'Jumps 25', '跳跃 25', 'ジャンプ 25', 'Pulos 25', 'Прыжки 25'] },
+  { id: 'd8', k: 'ducks', n: 8, t: ['덕다이브 8', 'Duck dives 8', '下潜 8', 'ダックダイブ 8', 'Mergulhos 8', 'Нырки 8'] }, { id: 'd20', k: 'ducks', n: 20, t: ['덕다이브 20', 'Duck dives 20', '下潜 20', 'ダックダイブ 20', 'Mergulhos 20', 'Нырки 20'] },
   { id: 'm500', k: 'dist', n: 500, t: ['500m', '500m'] }, { id: 'm1200', k: 'dist', n: 1200, t: ['1200m', '1200m'] }, { id: 'm2500', k: 'dist', n: 2500, t: ['2500m', '2500m'] }, { id: 'm4000', k: 'dist', n: 4000, t: ['4000m', '4000m'] },
   { id: 'cl5', k: 'close', n: 5, t: ['CLOSE 5', 'Close calls 5'] }, { id: 'cl15', k: 'close', n: 15, t: ['CLOSE 15', 'Close calls 15'] },
-  { id: 'o5', k: 'over', n: 5, t: ['장애물 넘기 5', 'Jump over 5', '跳过障碍 5'] }, { id: 'o15', k: 'over', n: 15, t: ['장애물 넘기 15', 'Jump over 15', '跳过障碍 15'] },
-  { id: 'dol1', k: 'dolphin', n: 1, t: ['돌고래 1', 'Dolphin 1', '海豚 1'] }, { id: 'dol2', k: 'dolphin', n: 2, t: ['돌고래 2', 'Dolphin 2', '海豚 2'] },
-  { id: 'mg1', k: 'magnet', n: 1, t: ['자석 1', 'Magnet 1', '磁铁 1'] }, { id: 'sd1', k: 'shield', n: 1, t: ['보드 1', 'Shield 1', '护盾板 1'] }
+  { id: 'o5', k: 'over', n: 5, t: ['장애물 넘기 5', 'Jump over 5', '跳过障碍 5', '障害物ジャンプ 5', 'Pular obstáculos 5', 'Перепрыгни 5'] }, { id: 'o15', k: 'over', n: 15, t: ['장애물 넘기 15', 'Jump over 15', '跳过障碍 15', '障害物ジャンプ 15', 'Pular obstáculos 15', 'Перепрыгни 15'] },
+  { id: 'dol1', k: 'dolphin', n: 1, t: ['돌고래 1', 'Dolphin 1', '海豚 1', 'イルカ 1', 'Golfinho 1', 'Дельфин 1'] }, { id: 'dol2', k: 'dolphin', n: 2, t: ['돌고래 2', 'Dolphin 2', '海豚 2', 'イルカ 2', 'Golfinho 2', 'Дельфин 2'] },
+  { id: 'mg1', k: 'magnet', n: 1, t: ['자석 1', 'Magnet 1', '磁铁 1', 'マグネット 1', 'Ímã 1', 'Магнит 1'] }, { id: 'sd1', k: 'shield', n: 1, t: ['보드 1', 'Shield 1', '护盾板 1', 'シールド 1', 'Escudo 1', 'Щит 1'] }
 ];
 function misLoad() { var ids = null; try { ids = JSON.parse(localStorage.getItem('surf3.mis') || 'null'); } catch (e) {} G.mis = []; if (ids) ids.forEach(function (id) { var m = MIS.filter(function (q) { return q.id === id; })[0]; if (m) G.mis.push(m); }); while (G.mis.length < 3 && misDraw()); }
 /* 새 미션 뽑기. 깬 미션은 저장소와 메모리(MIS_DONE) 둘 다 보고, 이번 판 기록으로 이미 채운 미션은 뽑지 않는다.
@@ -828,24 +846,24 @@ function fx(text, kind) {
 /* ====================================================================== 상점: 보드 색 · 상어 색 · 시작 아이템 */
 var SHOP = {
   board: [
-    { id: 'white', n: ['화이트', 'WHITE', '白色'], p: 0, deck: 0xfbf7ef, st: 0xff5a3c },
-    { id: 'coral', n: ['코랄', 'CORAL', '珊瑚'], p: 300, deck: 0xff6a4d, st: 0xfbf7ef },
-    { id: 'mint', n: ['민트', 'MINT', '薄荷'], p: 500, deck: 0x7fe0c8, st: 0x0b3a45 },
-    { id: 'navy', n: ['네이비', 'NAVY', '藏青'], p: 800, deck: 0x1d3f7a, st: 0xffc21f },
-    { id: 'black', n: ['블랙', 'BLACK', '黑色'], p: 1200, deck: 0x1b1d22, st: 0xff3b6b },
-    { id: 'gold', n: ['골드', 'GOLD', '金色'], p: 2500, deck: 0xf2c14e, st: 0x8a5a14, metal: 1 }
+    { id: 'white', n: ['화이트', 'WHITE', '白色', 'ホワイト', 'BRANCA', 'БЕЛАЯ'], p: 0, deck: 0xfbf7ef, st: 0xff5a3c },
+    { id: 'coral', n: ['코랄', 'CORAL', '珊瑚', 'コーラル', 'CORAL', 'КОРАЛЛ'], p: 300, deck: 0xff6a4d, st: 0xfbf7ef },
+    { id: 'mint', n: ['민트', 'MINT', '薄荷', 'ミント', 'MENTA', 'МЯТА'], p: 500, deck: 0x7fe0c8, st: 0x0b3a45 },
+    { id: 'navy', n: ['네이비', 'NAVY', '藏青', 'ネイビー', 'MARINHO', 'СИНЯЯ'], p: 800, deck: 0x1d3f7a, st: 0xffc21f },
+    { id: 'black', n: ['블랙', 'BLACK', '黑色', 'ブラック', 'PRETA', 'ЧЁРНАЯ'], p: 1200, deck: 0x1b1d22, st: 0xff3b6b },
+    { id: 'gold', n: ['골드', 'GOLD', '金色', 'ゴールド', 'DOURADA', 'ЗОЛОТАЯ'], p: 2500, deck: 0xf2c14e, st: 0x8a5a14, metal: 1 }
   ],
   outfit: [
-    { id: 'o_white', n: ['화이트', 'WHITE', '白色'], p: 0, c: 0xffffff },
-    { id: 'o_pink', n: ['핑크', 'PINK', '粉色'], p: 400, c: 0xff7fb0 },
-    { id: 'o_red', n: ['레드', 'RED', '红色'], p: 600, c: 0xe8352c },
-    { id: 'o_sky', n: ['스카이', 'SKY', '天蓝'], p: 800, c: 0x6fc4ff },
-    { id: 'o_yellow', n: ['옐로', 'YELLOW', '黄色'], p: 1000, c: 0xffd84a },
-    { id: 'o_black', n: ['블랙', 'BLACK', '黑色'], p: 1500, c: 0x2a2a30 }
+    { id: 'o_white', n: ['화이트', 'WHITE', '白色', 'ホワイト', 'BRANCO', 'БЕЛЫЙ'], p: 0, c: 0xffffff },
+    { id: 'o_pink', n: ['핑크', 'PINK', '粉色', 'ピンク', 'ROSA', 'РОЗОВЫЙ'], p: 400, c: 0xff7fb0 },
+    { id: 'o_red', n: ['레드', 'RED', '红色', 'レッド', 'VERMELHO', 'КРАСНЫЙ'], p: 600, c: 0xe8352c },
+    { id: 'o_sky', n: ['스카이', 'SKY', '天蓝', 'スカイ', 'CÉU', 'ГОЛУБОЙ'], p: 800, c: 0x6fc4ff },
+    { id: 'o_yellow', n: ['옐로', 'YELLOW', '黄色', 'イエロー', 'AMARELO', 'ЖЁЛТЫЙ'], p: 1000, c: 0xffd84a },
+    { id: 'o_black', n: ['블랙', 'BLACK', '黑色', 'ブラック', 'PRETO', 'ЧЁРНЫЙ'], p: 1500, c: 0x2a2a30 }
   ],
   item: [
-    { id: 'shield', n: ['시작 보드', 'START SHIELD', '开局护盾板'], p: 150 },
-    { id: 'magnet', n: ['시작 자석', 'START MAGNET', '开局磁铁'], p: 200 }
+    { id: 'shield', n: ['시작 보드', 'START SHIELD', '开局护盾板', 'スタートシールド', 'ESCUDO INICIAL', 'ЩИТ НА СТАРТ'], p: 150 },
+    { id: 'magnet', n: ['시작 자석', 'START MAGNET', '开局磁铁', 'スタートマグネット', 'ÍMÃ INICIAL', 'МАГНИТ НА СТАРТ'], p: 200 }
   ]
 };
 var shopTab = 'board';
@@ -1018,7 +1036,7 @@ function resetRun(demo) {
   for (var i = 0; i < PART_N; i++) parts[i].life = 0;
   hudCache = {}; hud();
 }
-function setMode(m) { G.mode = m; setTimeout(function () { if (typeof tutShow === 'function') tutShow(); }, m === 'play' ? 600 : 0); document.body.className = (EN ? 'en ' : '') + 'm-' + m; $('title').hidden = m !== 'title'; $('shop').hidden = m !== 'shop'; $('pause').hidden = m !== 'pause'; $('over').hidden = m !== 'over'; $('loading').hidden = m !== 'load'; }
+function setMode(m) { G.mode = m; setTimeout(function () { if (typeof tutShow === 'function') tutShow(); }, m === 'play' ? 600 : 0); document.body.className = (WIDEL ? 'en ' : '') + 'm-' + m; $('title').hidden = m !== 'title'; $('shop').hidden = m !== 'shop'; $('pause').hidden = m !== 'pause'; $('over').hidden = m !== 'over'; $('loading').hidden = m !== 'load'; }
 function toTitle() { resetRun(true); setMode('title'); $('best').textContent = TX.best[0] + Math.floor(G.best); }
 function startRun() { SFX.unlock(); resetRun(false); misLoad(); setMode('play');
   /* 산 시작 아이템은 한 판에 하나씩 저절로 쓴다 */
@@ -1047,6 +1065,9 @@ document.addEventListener('visibilitychange', function () { if (document.hidden 
 window.addEventListener('pointerdown', function () { SFX.unlock(); }, { once: true });
 document.title = L(TX.title); $('logo').textContent = L(TX.title);
 if (ZH) { $('tab_board').firstChild.textContent = '冲浪板'; $('tab_outfit').firstChild.textContent = '颜色'; $('tab_item').firstChild.textContent = '道具'; }
+if (JA) { $('tab_board').firstChild.textContent = 'ボード'; $('tab_outfit').firstChild.textContent = 'カラー'; $('tab_item').firstChild.textContent = 'アイテム'; }
+if (PT) { $('tab_board').firstChild.textContent = 'PRANCHA'; $('tab_outfit').firstChild.textContent = 'COR'; $('tab_item').firstChild.textContent = 'ITENS'; }
+if (RU) { $('tab_board').firstChild.textContent = 'ДОСКА'; $('tab_outfit').firstChild.textContent = 'ЦВЕТ'; $('tab_item').firstChild.textContent = 'ВЕЩИ'; }
 if (EN) { $('tab_board').firstChild.textContent = 'BOARD'; $('tab_outfit').firstChild.textContent = 'COLOR'; $('tab_item').firstChild.textContent = 'ITEM'; }
 window.addEventListener('resize', resize);
 resize();

@@ -121,18 +121,28 @@ body:not(.playing) #keys{display:none}
   .rb.big{width:80px;height:80px;font-size:23px}.rb.mid{width:56px;height:56px}.rb.sm{width:44px;height:44px}
   #keys{font-size:12px}}
 /* 영문 간판 MATCHTOWER 는 열 글자 — 한국어 간판과 비슷한 폭이 되게 줄인다 */
-html[lang=en] #logo{font-size:clamp(34px,9vw,120px)}
-@media (min-aspect-ratio:1/1){html[lang=en] #logo{font-size:clamp(46px,6.6vw,128px)}}
-@media (max-height:480px){html[lang=en] #logo{font-size:13vh}}
+html[lang=en] #logo,html[lang=pt-BR] #logo,html[lang=ru] #logo{font-size:clamp(34px,9vw,120px)}
+@media (min-aspect-ratio:1/1){html[lang=en] #logo,html[lang=pt-BR] #logo,html[lang=ru] #logo{font-size:clamp(46px,6.6vw,128px)}}
+@media (max-height:480px){html[lang=en] #logo,html[lang=pt-BR] #logo,html[lang=ru] #logo{font-size:13vh}}
+/* 일본어 간판 マッチタワー 는 여섯 글자 — 한국어 네 글자 간판 폭에 맞춘다 */
+html[lang=ja] #logo{font-size:clamp(44px,11vw,134px)}
+@media (min-aspect-ratio:1/1){html[lang=ja] #logo{font-size:clamp(50px,7.6vw,146px)}}
+@media (max-height:480px){html[lang=ja] #logo{font-size:15vh}}
 /* 영문 단추 글자는 한글보다 길다 — 동그란 단추 안에 들게 (사장님 2026-09-28 "영문글씨 삐져나갔다") */
-html[lang=en] #bSubmit{font-size:13px;letter-spacing:0}
-html[lang=en] #bClear{font-size:15px;letter-spacing:0}
-html[lang=en] #bDrop{font-size:21px;letter-spacing:0}
-html[lang=en] .jr{grid-template-columns:6.2em 1fr 3em}
-html[lang=en] .jr .jl{font-size:.72em}
-@media (max-width:460px){html[lang=en] .jr{font-size:16px;grid-template-columns:6.2em 1fr 2.4em}}
-html[lang=en] #bSubmit{font-size:13px;width:78px;height:78px}
-@media (max-height:480px){html[lang=en] #bSubmit{font-size:11px;width:70px;height:70px}html[lang=en] #bClear{font-size:13px}html[lang=en] #bDrop{font-size:18px}}
+html[lang=en] #bSubmit,html[lang=pt-BR] #bSubmit,html[lang=ru] #bSubmit{font-size:13px;letter-spacing:0}
+html[lang=en] #bClear,html[lang=pt-BR] #bClear,html[lang=ru] #bClear{font-size:15px;letter-spacing:0}
+html[lang=en] #bDrop,html[lang=pt-BR] #bDrop,html[lang=ru] #bDrop{font-size:21px;letter-spacing:0}
+html[lang=en] .jr,html[lang=pt-BR] .jr,html[lang=ru] .jr{grid-template-columns:6.2em 1fr 3em}
+html[lang=en] .jr .jl,html[lang=pt-BR] .jr .jl,html[lang=ru] .jr .jl{font-size:.72em}
+@media (max-width:460px){html[lang=en] .jr,html[lang=pt-BR] .jr,html[lang=ru] .jr{font-size:16px;grid-template-columns:6.2em 1fr 2.4em}}
+html[lang=en] #bSubmit,html[lang=pt-BR] #bSubmit,html[lang=ru] #bSubmit{font-size:13px;width:78px;height:78px}
+@media (max-height:480px){html[lang=en] #bSubmit,html[lang=pt-BR] #bSubmit,html[lang=ru] #bSubmit{font-size:11px;width:70px;height:70px}html[lang=en] #bClear,html[lang=pt-BR] #bClear,html[lang=ru] #bClear{font-size:13px}html[lang=en] #bDrop,html[lang=pt-BR] #bDrop,html[lang=ru] #bDrop{font-size:18px}}
+/* 포르투갈어 SOLTAR 는 여섯 글자 — 놓기 단추 안에 들게 줄인다 */
+html[lang=pt-BR] #bDrop{font-size:16px}
+@media (max-height:480px){html[lang=pt-BR] #bDrop{font-size:14px}}
+/* 일본어 全部片付け 가 단추 테두리에 닿지 않게 줄인다 */
+html[lang=ja] #bClear{font-size:17px}
+@media (max-height:480px){html[lang=ja] #bClear{font-size:15px}}
 
 
 /* ---------- 제출·심사 ---------- */
@@ -230,14 +240,14 @@ body.holding #bSubmit,body.judging #ctl,body.judging #keys{display:none}
 <div id="pauseCover" hidden>❚❚<button class="btn" id="pHome">홈</button></div>
 <div id="loading">LOADING</div>
 
-<script src="js/lang.js?v=7"></script>
-<script src="assets/game-home.js?v=2" data-top="6" data-left="6" data-fullscreen="1" defer></script>
+<script src="js/lang.js?v=8"></script>
+<script src="assets/game-home.js?v=3" data-top="6" data-left="6" data-fullscreen="1" defer></script>
 <script src="lib/three.min.js"></script>
 <script src="lib/rapier.js"></script>
 <script src="js/audio.js?v=5"></script>
 <script src="js/pile.js?v=2"></script>
-<script src="js/scene.js?v=17"></script>
-<script src="js/game.js?v=19"></script>
+<script src="js/scene.js?v=18"></script>
+<script src="js/game.js?v=20"></script>
 <script src="/assets/visit.js?v=21" defer></script>
 <script src="/assets/game-events.js?v=4" defer></script>
 </body>

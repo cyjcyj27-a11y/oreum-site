@@ -70,13 +70,13 @@
     g.font = '36px Ui, sans-serif'; const sw2 = g.measureText('oreumgames.com').width, lw = 62, bx = W / 2 - (sw2 + lw + 14) / 2;
     if (lg) { try { g.drawImage(lg, bx, 1302, lw, 30); } catch (e) {} }
     txt(g, 'oreumgames.com', bx + lw + 14, 1318, '36px Ui, sans-serif', '#ffffff', null, 0, 'left');
-    shareLine = window.ZH ? '饼干叠叠乐 ' + DATA.M().name + ' 叠到月亮共 ' + st.floors + ' 层！PERFECT ' + st.perfect + ' 次，倒塌 ' + st.retry + ' 次 · ' + name : L('쿠키쌓기 ' + DATA.M().name + ' 달까지 ' + st.floors + '층! PERFECT ' + st.perfect + '번, 무너진 횟수 ' + st.retry + '번 · ' + name, 'Cookie Stack ' + DATA.M().name + ': ' + st.floors + ' floors to the moon! ' + st.perfect + ' PERFECT, ' + st.retry + ' falls · ' + name);
+    shareLine = window.LG3 ? SHARE3(DATA.M().name, st.floors, st.perfect, st.retry, name) : window.ZH ? '饼干叠叠乐 ' + DATA.M().name + ' 叠到月亮共 ' + st.floors + ' 层！PERFECT ' + st.perfect + ' 次，倒塌 ' + st.retry + ' 次 · ' + name : L('쿠키쌓기 ' + DATA.M().name + ' 달까지 ' + st.floors + '층! PERFECT ' + st.perfect + '번, 무너진 횟수 ' + st.retry + '번 · ' + name, 'Cookie Stack ' + DATA.M().name + ': ' + st.floors + ' floors to the moon! ' + st.perfect + ' PERFECT, ' + st.retry + ' falls · ' + name);
     try { url = c.toDataURL('image/png'); } catch (e) { url = null; }
     return url;
   };
   C.save = function () { if (!url) return; const a = document.createElement('a'); a.href = url; a.download = 'cookiestack-end.png'; document.body.appendChild(a); a.click(); a.remove(); };
   C.share = function () {
-    const link = location.protocol === 'file:' ? '' : location.origin + (window.ZH ? '/zh' : '') + location.pathname.replace(/play\/?(index\.html)?$/, '') + (window.EN ? '?lang=en' : '');
+    const link = location.protocol === 'file:' ? '' : location.origin + (window.ZH ? '/zh' : '') + location.pathname.replace(/play\/?(index\.html)?$/, '') + (window.EN ? '?lang=en' : window.LG3 ? 'play/?lang=' + window.LG3 : '');
     if (navigator.share) { navigator.share({ title: L('쿠키쌓기', 'Cookie Stack'), text: shareLine, url: link || undefined }).catch(() => {}); return; }
     try { navigator.clipboard.writeText(shareLine + (link ? '\n' + link : '')); UI.toast(L('복사됨', 'COPIED')); } catch (e) {}
   };

@@ -12,7 +12,7 @@
 
   U.init = function () {
     // 글 바꿔 끼우기(영어)
-    document.querySelectorAll('[data-en]').forEach((e) => { if (window.EN) e.innerHTML = e.getAttribute('data-en'); else if (window.ZH) e.innerHTML = L(e.textContent.trim(), e.getAttribute('data-en')); });
+    document.querySelectorAll('[data-en]').forEach((e) => { if (window.EN) e.innerHTML = e.getAttribute('data-en'); else if (window.ZH || window.LG3) e.innerHTML = L(e.textContent.trim(), e.getAttribute('data-en')); });
     $('bStart').onclick = () => { AU.unlock(); AU.play('click'); $('title').hidden = true; openBoard(); };
     $('bShop').onclick = () => { AU.play('click'); openShop(); };
     $('bDex').onclick = () => { AU.play('click'); openDex(); };

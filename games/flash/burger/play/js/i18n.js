@@ -95,10 +95,127 @@
     rotTitle: '这个游戏要横屏玩', rotGo: '切换横屏',
     rotHelp: '按钮没反应的话，请关掉旋转锁定再把手机横过来', rotSkip: '还是竖屏玩'
   };
+  var JA = {
+    title: '最強バーガー', start: 'はじめる', cont: 'つづきから', fresh: 'さいしょから', freshSure: '本当にさいしょから', shop: 'ショップ', book: 'メニュー', next: '次の日',
+    sign: 'バーガー', max: '完了', lock: '???', newMenu: '新メニュー',
+    dayN: function (n) { return n + '日目'; }, dayEnd: function (n) { return n + '日目 営業終了'; },
+    menus: ['ハンバーガー', 'チーズバーガー', 'プルコギバーガー', 'ベーコンバーガー', 'ダブルチーズバーガー', 'エッグバーガー',
+      'えびバーガー', 'チキンバーガー', 'ハラペーニョバーガー', 'アボカドバーガー', '韓牛バーガー', 'タワーバーガー'],
+    ing: { cheese: 'チーズ', lettuce: 'レタス', tomato: 'トマト', onion: 'オニオン', pickle: 'ピクルス', bacon: 'ベーコン',
+      egg: 'たまご', jalapeno: 'ハラペーニョ', avocado: 'アボカド', ketchup: 'ケチャップ', mustard: 'マスタード', mayo: 'マヨ',
+      bulgogi: 'プルコギソース', sriracha: 'シラチャー', beef: 'パティ', chicken: 'チキン', shrimp: 'えび' },
+    done: { rare: 'レア', medium: 'ミディアム', well: 'ウェルダン' },
+    up: { grill: 'グリル', heat: '火力', fryer: 'フライヤー', basket: 'フライバスケット', wait: '待合席', sign: '看板' },
+    ranks: ['キッチンカー', '路地裏バーガー', '手作りバーガー店', 'バーガーの名店', 'バーガーの名門'],
+    words: ['', 'イマイチ', 'まあまあ', 'いいね', 'おいしい！', '最高！'],
+    tNo: function (k) { return JA.ing[k] + ' ✕'; },
+    tAdd: function (k) { return JA.ing[k] + ' +'; },
+    tSauce: function (k) { return '→ ' + JA.ing[k]; },
+    tLots: function (k) { return JA.ing[k] + ' ×2'; },
+    tPatty: 'パティ +', tFries: 'ポテト', bunB: '下バンズ', bunT: '上バンズ',
+    noL: function (k) { return JA.ing[k] + '抜き'; }, addL: function (k) { return JA.ing[k]; }, swapL: function (k) { return JA.ing[k] + 'に変更'; }, lotsL: function (k) { return JA.ing[k] + '多め'; },
+    sDone: function (d) { return JA.done[d] + 'でお願い'; },
+    sNo: function (k) { return JA.ing[k] + '抜きでお願い'; },
+    sAdd: function (k) { return JA.ing[k] + 'も入れてね'; },
+    sSauce: function (k) { return 'ソースは' + JA.ing[k] + 'で'; },
+    sLots: function (k) { return JA.ing[k] + 'たっぷりで'; },
+    sPatty: 'パティ追加で', sFries: 'ポテトもね',
+    hello: ['こんにちは！', 'おなかすいた', 'ひとつください', 'おいしくね！'],
+    rotTitle: '横画面で遊ぶゲームです', rotGo: '横向きにする',
+    rotHelp: 'ボタンが効かないときは、画面の回転ロックを解除して横向きにしてください', rotSkip: 'このまま縦で遊ぶ'
+  };
+  // 문장 가운데에 넣을 때 첫 글자를 소문자로
+  function lc(s) { return s.charAt(0).toLowerCase() + s.slice(1); }
+  var PT = {
+    title: 'BURGER SUPREMO', start: 'COMEÇAR', cont: 'CONTINUAR', fresh: 'NOVO JOGO', freshSure: 'TOQUE DE NOVO', shop: 'LOJA', book: 'CARDÁPIO', next: 'PRÓXIMO',
+    sign: 'BURGER', max: 'MÁX', lock: '???', newMenu: 'NOVO',
+    dayN: function (n) { return 'DIA ' + n; }, dayEnd: function (n) { return 'FIM DO DIA ' + n; },
+    menus: ['Hambúrguer', 'Cheeseburger', 'Burger de Bulgogi', 'Burger de Bacon', 'Duplo Cheese', 'Burger de Ovo',
+      'Burger de Camarão', 'Burger de Frango', 'Burger Jalapeño', 'Burger de Abacate', 'Burger Hanwoo', 'Burger Torre'],
+    ing: { cheese: 'Queijo', lettuce: 'Alface', tomato: 'Tomate', onion: 'Cebola', pickle: 'Picles', bacon: 'Bacon',
+      egg: 'Ovo', jalapeno: 'Jalapeño', avocado: 'Abacate', ketchup: 'Ketchup', mustard: 'Mostarda', mayo: 'Maionese',
+      bulgogi: 'Molho bulgogi', sriracha: 'Sriracha', beef: 'Carne', chicken: 'Frango', shrimp: 'Camarão' },
+    done: { rare: 'Malpassado', medium: 'Ao ponto', well: 'Bem passado' },
+    up: { grill: 'Chapa', heat: 'Fogo', fryer: 'Fritadeira', basket: 'Cesto de Fritura', wait: 'Assentos', sign: 'Letreiro' },
+    ranks: ['Food Truck', 'Lanchonete de Esquina', 'Hamburgueria Artesanal', 'Hamburgueria Top', 'Lenda do Burger'],
+    words: ['', 'RUIM', 'OK', 'BOM', 'ÓTIMO', 'PERFEITO'],
+    tNo: function (k) { return PT.ing[k] + ' ✕'; },
+    tAdd: function (k) { return PT.ing[k] + ' +'; },
+    tSauce: function (k) { return '→ ' + PT.ing[k]; },
+    tLots: function (k) { return PT.ing[k] + ' ×2'; },
+    tPatty: 'Carne +', tFries: 'Fritas', bunB: 'Pão de Baixo', bunT: 'Pão de Cima',
+    noL: function (k) { return 'Sem ' + lc(PT.ing[k]); }, addL: function (k) { return PT.ing[k]; }, swapL: function (k) { return 'Troca: ' + lc(PT.ing[k]); }, lotsL: function (k) { return PT.ing[k] + ' extra'; },
+    sDone: function (d) { return PT.done[d] + ', por favor'; },
+    sNo: function (k) { return 'Sem ' + lc(PT.ing[k]) + ', por favor'; },
+    sAdd: function (k) { return 'Com ' + lc(PT.ing[k]) + ' também'; },
+    sSauce: function (k) { return 'Quero com ' + lc(PT.ing[k]) + ', por favor'; },
+    sLots: function (k) { return 'Bastante ' + lc(PT.ing[k]) + '!'; },
+    sPatty: 'Mais uma carne', sFries: 'Com fritas também',
+    hello: ['Oi!', 'Tô morrendo de fome', 'Um, por favor', 'Capricha, hein!'],
+    rotTitle: 'Este jogo é na horizontal', rotGo: 'Virar na horizontal',
+    rotHelp: 'Se o botão não funcionar, desative o bloqueio de rotação e deite o celular',
+    rotSkip: 'Jogar na vertical mesmo assim'
+  };
+  // 러시아어 격 변화: G = 생격(без, много), I = 조격(с)
+  var RU_G = { cheese: 'сыра', lettuce: 'салата', tomato: 'помидора', onion: 'лука', pickle: 'огурчиков', bacon: 'бекона',
+    egg: 'яйца', jalapeno: 'халапеньо', avocado: 'авокадо', ketchup: 'кетчупа', mustard: 'горчицы', mayo: 'майонеза',
+    bulgogi: 'соуса пулькоги', sriracha: 'шрирачи', beef: 'котлеты', chicken: 'курицы', shrimp: 'креветок' };
+  var RU_I = { cheese: 'сыром', lettuce: 'салатом', tomato: 'помидором', onion: 'луком', pickle: 'огурчиками', bacon: 'беконом',
+    egg: 'яйцом', jalapeno: 'халапеньо', avocado: 'авокадо', ketchup: 'кетчупом', mustard: 'горчицей', mayo: 'майонезом',
+    bulgogi: 'соусом пулькоги', sriracha: 'шрирачей', beef: 'котлетой', chicken: 'курицей', shrimp: 'креветками' };
+  var RU_DS = { rare: 'С кровью', medium: 'Средней прожарки', well: 'Хорошо прожаренную' };
+  var RU = {
+    title: 'ЧУМОВОЙ БУРГЕР', start: 'СТАРТ', cont: 'ПРОДОЛЖИТЬ', fresh: 'НОВАЯ ИГРА', freshSure: 'НАЖМИ ЕЩЁ', shop: 'МАГАЗИН', book: 'МЕНЮ', next: 'ДАЛЬШЕ',
+    sign: 'БУРГЕР', max: 'МАКС', lock: '???', newMenu: 'НОВОЕ',
+    dayN: function (n) { return 'ДЕНЬ ' + n; }, dayEnd: function (n) { return 'КОНЕЦ ДНЯ ' + n; },
+    menus: ['Гамбургер', 'Чизбургер', 'Бургер пулькоги', 'Бургер с беконом', 'Двойной чиз', 'Бургер с яйцом',
+      'Бургер с креветками', 'Чикенбургер', 'Бургер халапеньо', 'Бургер с авокадо', 'Бургер ханву', 'Бургер-башня'],
+    ing: { cheese: 'Сыр', lettuce: 'Салат', tomato: 'Помидор', onion: 'Лук', pickle: 'Огурчики', bacon: 'Бекон',
+      egg: 'Яйцо', jalapeno: 'Халапеньо', avocado: 'Авокадо', ketchup: 'Кетчуп', mustard: 'Горчица', mayo: 'Майонез',
+      bulgogi: 'Соус пулькоги', sriracha: 'Шрирача', beef: 'Котлета', chicken: 'Курица', shrimp: 'Креветки' },
+    done: { rare: 'С кровью', medium: 'Средняя', well: 'Прожаренная' },
+    up: { grill: 'Гриль', heat: 'Жар', fryer: 'Фритюр', basket: 'Корзина фри', wait: 'Места', sign: 'Вывеска' },
+    ranks: ['Фудтрак', 'Бургерная за углом', 'Крафтовая бургерная', 'Топовая бургерная', 'Легенда бургеров'],
+    words: ['', 'ПЛОХО', 'НОРМ', 'ХОРОШО', 'ОТЛИЧНО', 'ИДЕАЛЬНО'],
+    tNo: function (k) { return RU.ing[k] + ' ✕'; },
+    tAdd: function (k) { return RU.ing[k] + ' +'; },
+    tSauce: function (k) { return '→ ' + RU.ing[k]; },
+    tLots: function (k) { return RU.ing[k] + ' ×2'; },
+    tPatty: 'Котлета +', tFries: 'Фри', bunB: 'Низ булки', bunT: 'Верх булки',
+    noL: function (k) { return 'Без ' + RU_G[k]; }, addL: function (k) { return RU.ing[k]; }, swapL: function (k) { return 'Замена: ' + lc(RU.ing[k]); }, lotsL: function (k) { return 'Много ' + RU_G[k]; },
+    sDone: function (d) { return RU_DS[d] + ', пожалуйста'; },
+    sNo: function (k) { return 'Без ' + RU_G[k] + ', пожалуйста'; },
+    sAdd: function (k) { return 'И с ' + RU_I[k] + ', пожалуйста'; },
+    sSauce: function (k) { return 'Лучше с ' + RU_I[k]; },
+    sLots: function (k) { return 'Побольше ' + RU_G[k] + '!'; },
+    sPatty: 'Ещё котлетку', sFries: 'И картошку фри',
+    hello: ['Привет!', 'Умираю с голоду', 'Один, пожалуйста', 'Сделай повкуснее!'],
+    rotTitle: 'Эта игра для горизонтального экрана', rotGo: 'Повернуть экран',
+    rotHelp: 'Если кнопка не работает, отключи блокировку поворота и положи телефон боком',
+    rotSkip: 'Всё равно играть вертикально'
+  };
+  // 엔딩 간판 글자 수 (글자마다 하나씩 솟는 시간에 쓴다)
+  JA.titleN = Array.from(JA.title).length; PT.titleN = Array.from(PT.title).length; RU.titleN = Array.from(RU.title).length;
   var q = new URLSearchParams(location.search).get('lang');
-  var en = q === 'en', zh = q === 'zh';
-  window.T = en ? EN : zh ? ZH : KO;
+  var en = q === 'en', zh = q === 'zh', ja = q === 'ja', pt = q === 'pt', ru = q === 'ru';
+  window.T = en ? EN : zh ? ZH : ja ? JA : pt ? PT : ru ? RU : KO;
   window.T.en = en;
+  if (ja || pt || ru) {
+    var L3 = ja ? JA : pt ? PT : RU;
+    document.documentElement.lang = ja ? 'ja' : pt ? 'pt-BR' : 'ru';
+    document.title = ja ? '最強バーガー' : pt ? 'Burger Supremo' : 'Чумовой бургер';
+    // 게임 글꼴에 없는 글자(가나·한자, 악센트 라틴·키릴)를 기기 글꼴로 같은 이름에 덧붙인다
+    var jf = ja ? "local('Hiragino Sans'),local('Hiragino Kaku Gothic ProN'),local('Yu Gothic UI'),local('Yu Gothic'),local('Yu Gothic Medium'),local('YuGothic-Medium'),local('Yu Gothic Regular'),local('YuGothic-Regular'),local('Yu Gothic Bold'),local('YuGothic-Bold'),local('MS PGothic'),local('MS Gothic'),local('Meiryo'),local('Noto Sans JP'),local('Noto Sans CJK JP'),local('Source Han Sans JP')"
+      : "local('Segoe UI'),local('Roboto'),local('Arial'),local('Helvetica Neue'),local('Helvetica')";
+    var ur3 = ja ? 'U+2E80-2FFF,U+3000-30FF,U+31F0-31FF,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF'
+      : 'U+00A0-024F,U+0400-04FF,U+1E00-1EFF,U+2010-2027';
+    var css3 = ['YeonSung', 'Gaegu', 'Ria'].map(function (fm) { return "@font-face{font-family:'" + fm + "';src:" + jf + ';unicode-range:' + ur3 + '}'; }).join('');
+    if (ja) css3 += 'html[lang=ja] *{word-break:normal!important}#title h1.ja{font-size:min(14vw,30vh)}';
+    var st3 = document.createElement('style'); st3.textContent = css3; document.head.appendChild(st3);
+    var h3 = document.querySelector('#title h1'); if (h3) { h3.textContent = L3.title; h3.setAttribute('data-txt', L3.title); h3.classList.add(ja ? 'ja' : 'en'); }
+    var tips3 = ja ? { tPause: '一時停止', tMus: '音楽', tSnd: '効果音' } : pt ? { tPause: 'Pausar', tMus: 'Música', tSnd: 'Efeitos' } : { tPause: 'Пауза', tMus: 'Музыка', tSnd: 'Звуки' };
+    for (var id3 in tips3) { var b3 = document.getElementById(id3); if (b3) b3.title = tips3[id3]; }
+  }
   if (zh) {
     document.documentElement.lang = 'zh-CN';
     document.title = ZH.title;

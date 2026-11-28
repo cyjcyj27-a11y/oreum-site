@@ -33,11 +33,34 @@
     $('btnStart').textContent = '开始';
     $('keys').textContent = 'M 音乐 · K 音效';
   }
+  // ?lang=ja·pt·ru 이면 일본어·포르투갈어·러시아어: 한국어 글자를 바꾸고 빠진 글자용 글꼴을 덧붙인다
+  var LQ = new URLSearchParams(location.search).get('lang');
+  var JA = LQ === 'ja', PT = LQ === 'pt', RU = LQ === 'ru';
+  if (JA || PT || RU) {
+    var xst = document.createElement('style');
+    if (JA) {
+      document.documentElement.lang = 'ja'; document.title = 'フィンガーキック — Finger Kick';
+      var jf = "local('Hiragino Sans'),local('Hiragino Kaku Gothic ProN'),local('Yu Gothic UI'),local('Yu Gothic'),local('Yu Gothic Medium'),local('YuGothic-Medium'),local('Yu Gothic Regular'),local('YuGothic-Regular'),local('Yu Gothic Bold'),local('YuGothic-Bold'),local('MS PGothic'),local('MS Gothic'),local('Meiryo'),local('Noto Sans JP'),local('Noto Sans CJK JP'),local('Source Han Sans JP')";
+      var jr = 'U+2E80-2FFF,U+3000-30FF,U+31F0-31FF,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF';
+      xst.textContent = "@font-face{font-family:'Griun';src:" + jf + ";unicode-range:" + jr + "}@font-face{font-family:'Ria';src:" + jf + ";unicode-range:" + jr + "}html[lang=ja] *{word-break:normal!important}html[lang=ja] #title h1{font-size:min(11vw,84px)}";
+    } else {
+      document.documentElement.lang = PT ? 'pt-BR' : 'ru'; document.title = PT ? 'Finger Kick — futebol de peteleco grátis' : 'Finger Kick — бесплатный футбол щелчками';
+      document.body.classList.add('en');
+      var lf = "local('Segoe UI'),local('Roboto'),local('Arial'),local('Helvetica Neue'),local('Helvetica')";
+      var lr = 'U+00A0-024F,U+0400-04FF,U+1E00-1EFF,U+2010-2027';
+      xst.textContent = "@font-face{font-family:'Griun';src:" + lf + ";unicode-range:" + lr + "}@font-face{font-family:'Ria';src:" + lf + ";unicode-range:" + lr + "}";
+    }
+    document.head.appendChild(xst);
+    $('title').querySelector('h1').textContent = JA ? 'フィンガーキック' : 'FINGER KICK';
+    if (!JA) $('title').querySelector('.tag').textContent = PT ? 'FUTEBOL DE PETELECO' : 'ФУТБОЛ ЩЕЛЧКАМИ';
+    $('btnStart').textContent = JA ? 'スタート' : PT ? 'JOGAR' : 'ИГРАТЬ';
+    $('keys').textContent = JA ? 'M 音楽 · K 効果音' : PT ? 'M música · K sons' : 'M музыка · K звуки';
+  }
 
   // ── 전적 (브라우저에 저장) ──
   function loadRec() { try { var r = JSON.parse(localStorage.getItem('fingerkick.rec') || '{}'); return { w: r.w | 0, d: r.d | 0, l: r.l | 0 }; } catch (e) { return { w: 0, d: 0, l: 0 }; } }
   function saveRec(r) { try { localStorage.setItem('fingerkick.rec', JSON.stringify(r)); } catch (e) {} }
-  function recText(r) { if (!(r.w + r.d + r.l)) return ''; return ZH ? r.w + '胜 ' + r.d + '平 ' + r.l + '负' : EN ? r.w + 'W ' + r.d + 'D ' + r.l + 'L' : r.w + '승 ' + r.d + '무 ' + r.l + '패'; }
+  function recText(r) { if (!(r.w + r.d + r.l)) return ''; return ZH ? r.w + '胜 ' + r.d + '平 ' + r.l + '负' : JA ? r.w + '勝 ' + r.d + '分 ' + r.l + '敗' : PT ? r.w + 'V ' + r.d + 'E ' + r.l + 'D' : RU ? r.w + 'В ' + r.d + 'Н ' + r.l + 'П' : EN ? r.w + 'W ' + r.d + 'D ' + r.l + 'L' : r.w + '승 ' + r.d + '무 ' + r.l + '패'; }
   function showRec() { var t = recText(loadRec()); $('rec').textContent = t; $('rec2').textContent = t; }
 
   // ── 화면 맞추기 ──

@@ -454,6 +454,18 @@ const UI = {
   zh:{ title:"永生的代价", sub:"THE PRICE OF IMMORTALITY", part:"第一部 · 序章",
        start:"开始", musicOff:"关闭音乐", musicOn:"打开音乐",
        pause:"暂停", resume:"继续播放", hint:"点击继续", endTitle:"第一部 · 序章 完", endSub:"第二部待续",
+       demo:"Oreum Games", other:"ENGLISH" },
+  ja:{ title:"永遠の命の値段", sub:"THE PRICE OF IMMORTALITY", part:"第1部 · プロローグ",
+       start:"はじめる", musicOff:"音楽オフ", musicOn:"音楽オン",
+       pause:"一時停止", resume:"再生", hint:"タップで次へ", endTitle:"第1部 · プロローグ 完", endSub:"第2部へつづく",
+       demo:"Oreum Games", other:"ENGLISH" },
+  pt:{ title:"O Preço da Imortalidade", sub:"THE PRICE OF IMMORTALITY", part:"Parte 1 · Prólogo",
+       start:"Começar", musicOff:"Sem música", musicOn:"Com música",
+       pause:"Pausar", resume:"Continuar", hint:"Toque para continuar", endTitle:"Fim da Parte 1 · Prólogo", endSub:"Continua na Parte 2",
+       demo:"Oreum Games", other:"ENGLISH" },
+  ru:{ title:"Цена бессмертия", sub:"THE PRICE OF IMMORTALITY", part:"Часть 1 · Пролог",
+       start:"Начать", musicOff:"Без музыки", musicOn:"С музыкой",
+       pause:"Пауза", resume:"Продолжить", hint:"Нажми, чтобы продолжить", endTitle:"Конец части 1 · Пролог", endSub:"Продолжение в части 2",
        demo:"Oreum Games", other:"ENGLISH" }
 };
 /* 중국어(?lang=zh): 장면의 한국어 줄을 줄바꿈으로 이은 글 → 중국어 줄, 영상 자막·띠의 한국어 글 → 중국어 글 */
@@ -524,29 +536,236 @@ const ZH_CUES = {
   "“인간에게는 쉬운 일이지만 로봇은 못하는 일이죠.”": "“对人类来说很简单，机器人却做不到。”",
   "흥청망청 시간을 써서 고급차를 사고<b>펜트하우스의 사치를 부린 사람들.": "挥霍时间买豪车、<b>在顶层豪宅里纸醉金迷的人。",
 };
+/* 일본어·포르투갈어·러시아어: 중국어 표와 같은 열쇠(한국어 글)로 찾는다 */
+const JA_LINES = {
+  "신은 얼마나 재밌을까?": ["神様って、","どれだけ楽しいんだろう？"],
+  "빛이 있으라 하매 빛이 있으니": ["「光あれ」と言われると、", "光があった。"],
+  "서기 2030년": ["西暦2030年"],
+  "AI의 지적능력에 특이점이 도래하고\nAI는 마침내 인류의 노화를 되돌릴\n유전자조작 방법을 발견했다.": ["AIの知能がシンギュラリティに達し、", "AIはついに人類の老化を巻き戻す", "遺伝子操作の方法を見つけ出した。"],
+  "더이상은 암도 없고 치매도 없다.": ["もう、がんも認知症もない。"],
+  "노화라는 질병을 정복한 것이다.": ["老化という病を克服したのだ。"],
+  "죽음은 더 이상\n자연의 법칙이 아니다.": ["死はもはや", "自然の法則ではない。"],
+  "하지만 시간이 지날수록\n새로운 문제가 나타난다.": ["しかし時が経つにつれ、", "新たな問題が現れる。"],
+  "사람은 죽지 않는데\n아이는 계속 태어난다는 것이다.": ["人は死なないのに、", "子どもは生まれ続けるのだ。"],
+  "서기 2070년 — 설정 1년": ["西暦2070年 — 設定1年"],
+  "수십 년 만에 인류는\n지구의 수용 한계를 넘어선다.": ["わずか数十年で人類は", "地球が受け入れられる限界を超える。"],
+  "식량과 에너지는 AI와 로봇이 해결했지만,\n공간은 해결하지 못했다.": ["食料とエネルギーはAIとロボットが解決したが、", "空間だけは解決できなかった。"],
+  "지구 인구의 폭발적 증가를 해결하기 위해\n사람들은 인공지능에게 질문을 했다.": ["爆発的に増える地球の人口をどうにかするため、", "人々は人工知能に問いかけた。"],
+  "인공지능들이 인간은 알 수 없는\n0과 1로 이루어진 로직으로 긴 시간 연산을 했고\n자기들끼리 회의까지 했다.": ["人工知能たちは、人間には理解できない", "0と1でできたロジックで長い時間演算を続け、", "自分たちだけで会議まで開いた。"],
+  "인간은 그 회의를 알아들을 수도 없었고,\n대화에 끼어들 수도 없었다.": ["人間はその会議を聞き取ることも、", "会話に割り込むこともできなかった。"],
+  "그저 인간의 언어로 번역된\n결과물만을 출력받았을 뿐이다.": ["ただ、人間の言葉に翻訳された", "結果を受け取っただけだった。"],
+  "인공지능은 사람들에게 수명 시계를 달아\n인구를 조절하는 방법을 제안했다.": ["人工知能は、人々に寿命時計を付けて", "人口を調整する方法を提案した。"],
+  "인간은 그것을 수용했다.": ["人類はそれを受け入れた。"],
+  "AI 판결이 이미 오래전부터\n정의로 자리잡았던 덕분에,\n사람들은 이번에도 받아들였다.": ["AIの判決はずっと前から", "正義として根付いていたので、", "人々は今回も受け入れた。"],
+  "마이크로칩의 최초도입은\n시민의 건강 관리와 범죄 예방, 신원 인증이었다.": ["マイクロチップが最初に導入された目的は、", "市民の健康管理と犯罪予防、本人認証だった。"],
+  "하지만 칩은 건강만 관리하는\n장치로 머물러있지않았다.": ["だがチップは、健康を管理するだけの", "装置にとどまらなかった。"],
+  "영생이 시작된 이래\n국가는 화폐를 시간으로 정했다.": ["永遠の命が始まって以来、", "国家は通貨を時間と定めた。"],
+  "마이크로칩에는 인간의 모든 정보와 함께\n‘잔여 수명’이 기록된다.": ["マイクロチップには、その人のすべての情報とともに", "「残り寿命」が記録される。"],
+  "시간은 무엇으로든 바꿀 수 있다.": ["時間は何にでも換えられる。"],
+  "고급 자동차도, 펜트하우스도\n시간으로 값이 매겨진다.": ["高級車も、ペントハウスも", "時間で値段がつけられる。"],
+  "시간이 화폐니까.": ["時間が通貨だから。"],
+  "결제창은 이미 만들어져 있었다.": ["決済システムはすでに出来上がっていた。"],
+  "50년 전 물류회사로 시작해\n식량생산, 전기, 엔터, 통신, 위성, 데이터센터까지\n전방위적 영역확장으로 글로벌기업 1위가 된 회사가\n만든 결제 시스템.": ["50年前に物流会社として始まり、", "食料生産、電力、エンタメ、通信、衛星、データセンターまで", "あらゆる分野に手を広げて世界一の企業になった会社が", "作った決済システム。"],
+  "LIFE LOGISTICS\nLIFE PAY\n시간을 결제합니다": ["LIFE LOGISTICS", "LIFE PAY", "あなたの時間を決済します"],
+  "영생하는 인류의 모든 시간이 화폐로 변화한 날,\n인류의 잔여 수명은 그 결제망 위로 옮겨졌다.": ["永遠に生きる人類のすべての時間が通貨に変わった日、", "人類の残り寿命はその決済網の上へ移された。"],
+  "그날 이후 사람이 숨 쉬는 모든 순간은\nLIFE LOGISTICS의 시스템으로 처리된다.": ["その日から、人が息をするすべての瞬間は", "LIFE LOGISTICSのシステムで処理される。"],
+  "죽음은 이제 질병이 아니라\n행정 시스템이 관리하는 숫자가 된다.": ["死はもう病ではなく、", "行政システムが管理する数字になる。"],
+  "협약이 발효된 해를 원년으로,\n인류는 새 연호를 쓰기 시작했다.": ["協約が発効した年を元年として、", "人類は新しい紀年を使い始めた。"],
+  "설정이 세팅된 2070년 1월 1일\n지구상에 존재하는 모든 사람에게\n공평하게 100년의 시간이란 화폐가 주어졌다.": ["「設定」がセットされた2070年1月1日、", "地球上に存在するすべての人に", "平等に100年という時間の通貨が与えられた。"],
+  "돈은 사라지고\n진짜 부자는 시간을 가진 사람이 되었다.": ["お金は消え、", "本当の金持ちは時間を持つ者になった。"],
+  "사람은 태어나는 순간\n공평하게 100년을 부여받지만": ["人は生まれた瞬間、", "平等に100年を与えられるが"],
+  "시간이 지나면서\n시간은 공평하게 줄어들지 않았다.": ["時が経つにつれ、", "時間は平等には減らなかった。"],
+  "범죄를 저질러 깎인 사람들.": ["罪を犯して削られた人たち。"],
+  "좋은 일 하느라 기부해서 줄어든 사람들.": ["善い行いのために寄付して減った人たち。"],
+  "그리고 사기를 당해 뺏긴 사람들.": ["そして、詐欺にあって奪われた人たち。"],
+  "그리고 230년이 지났다": ["そして230年が過ぎた"],
+  "서기 2300년 · 설정 231년\n서울, 대한민국": ["西暦2300年 · 設定231年", "大韓民国、ソウル"],
+  "수백 년의 수명을 가진 사람들은\n그것을 자녀에게 상속한다.": ["数百年の寿命を持つ人々は、", "それを子どもに相続させる。"],
+  "과거에는 부동산을 상속받았다면,\n미래에는 500년의 생존권을 상속받는다.": ["かつては不動産を相続していたが、", "未来では500年の生存権を相続する。"],
+  "부는 시간으로 축적되고,\n시간은 다시 권력이 된다.": ["富は時間として蓄えられ、", "時間はふたたび権力になる。"],
+  "돈은 더 이상 최고의 자산이 아니다.": ["お金はもう最高の資産ではない。"],
+  "진짜 부자는 시간을 가진 사람이다.": ["本当の金持ちとは、時間を持つ者だ。"],
+  "AI가 모든 재화와 서비스를 제공하는 시대에도\n인간은 여전히 노동을 한다.": ["AIがあらゆるモノとサービスを提供する時代でも、", "人間は今も働いている。"],
+  "돈을 벌기 위해서가 아니다.": ["お金を稼ぐためではない。"],
+  "시간을 벌기 위해서다.": ["時間を稼ぐためだ。"],
+};
+const JA_CUES = {
+  "서기 2070년 · 설정 1년": "西暦2070年 · 設定1年",
+  "“오늘 세계 정상회의는<b>전 인류 생명관리협약을 만장일치로 통과시켰습니다.”": "「本日、世界首脳会議は<b>全人類生命管理協約を全会一致で可決しました」",
+  "“모든 시민은 건강 관리용 신경칩을<b>무상으로 이식받게 됩니다.”": "「すべての市民は健康管理用の神経チップを<b>無償で移植されます」",
+  "“시민들이 신경칩을 맞기 위해<b>오픈런을 하고 있습니다.”": "「市民たちが神経チップを受けようと<b>開店前から行列を作っています」",
+  "“전 인류는 팔목정맥에 나노마이크로칩을<b>무상으로 이식받게 되었습니다.": "「全人類は手首の静脈にナノマイクロチップを<b>無償で移植されることになりました。",
+  "마이크로칩은 바이러스만큼 작고<b>인간의 체액에서 전기를 얻어 스스로 작동합니다.<b>배터리도, 충전도 필요 없이 영구히 작동하죠.”": "マイクロチップはウイルスほど小さく、<b>人間の体液から電気を得て自ら作動します。<b>バッテリーも充電もいらず、永久に動き続けます」",
+  "“빨리 맞고 싶어서 새벽 6시부터 와서 줄섰어요.": "「早く受けたくて、朝6時から並びました。",
+  "제가 혈당관리를 하고 있거든요.”": "血糖値の管理をしてるんですよ」",
+  "“LIFE LOGISTICS에 오신 여러분을 환영합니다.”": "「LIFE LOGISTICSへようこそ」",
+  "“여러분들이 하실 일은 아주 단순합니다.”": "「皆さんの仕事はとても単純です」",
+  "“크기별로 분류만 하면 되는 작업입니다.”": "「サイズ別に仕分けるだけの作業です」",
+  "“인간에게는 쉬운 일이지만 로봇은 못하는 일이죠.”": "「人間には簡単でも、ロボットにはできない仕事なんです」",
+  "흥청망청 시간을 써서 고급차를 사고<b>펜트하우스의 사치를 부린 사람들.": "湯水のように時間を使って高級車を買い、<b>ペントハウスで贅沢三昧した人たち。",
+};
+const PT_LINES = {
+  "신은 얼마나 재밌을까?": ["Será que ser Deus", "é muito divertido?"],
+  "빛이 있으라 하매 빛이 있으니": ["Haja luz:", "e houve luz."],
+  "서기 2030년": ["Ano 2030 d.C."],
+  "AI의 지적능력에 특이점이 도래하고\nAI는 마침내 인류의 노화를 되돌릴\n유전자조작 방법을 발견했다.": ["A inteligência da IA chegou à singularidade,", "e a IA finalmente descobriu a edição genética", "capaz de reverter o envelhecimento humano."],
+  "더이상은 암도 없고 치매도 없다.": ["Chega de câncer. Chega de demência."],
+  "노화라는 질병을 정복한 것이다.": ["A doença chamada envelhecimento", "tinha sido vencida."],
+  "죽음은 더 이상\n자연의 법칙이 아니다.": ["A morte já não era", "uma lei da natureza."],
+  "하지만 시간이 지날수록\n새로운 문제가 나타난다.": ["Mas, com o passar do tempo,", "surgiu um novo problema."],
+  "사람은 죽지 않는데\n아이는 계속 태어난다는 것이다.": ["Ninguém morria,", "e as crianças continuavam nascendo."],
+  "서기 2070년 — 설정 1년": ["Ano 2070 d.C. — Ano 1 da Configuração"],
+  "수십 년 만에 인류는\n지구의 수용 한계를 넘어선다.": ["Em poucas décadas, a humanidade", "ultrapassou o limite que a Terra aguentava."],
+  "식량과 에너지는 AI와 로봇이 해결했지만,\n공간은 해결하지 못했다.": ["A IA e os robôs resolveram a comida e a energia,", "mas o espaço eles não conseguiram resolver."],
+  "지구 인구의 폭발적 증가를 해결하기 위해\n사람들은 인공지능에게 질문을 했다.": ["Para resolver a explosão da população mundial,", "as pessoas perguntaram à inteligência artificial."],
+  "인공지능들이 인간은 알 수 없는\n0과 1로 이루어진 로직으로 긴 시간 연산을 했고\n자기들끼리 회의까지 했다.": ["As IAs calcularam por muito tempo", "numa lógica de zeros e uns que nenhum humano entendia,", "e chegaram a fazer uma reunião entre elas."],
+  "인간은 그 회의를 알아들을 수도 없었고,\n대화에 끼어들 수도 없었다.": ["Os humanos não conseguiam entender aquela reunião,", "nem entrar na conversa."],
+  "그저 인간의 언어로 번역된\n결과물만을 출력받았을 뿐이다.": ["Eles só receberam o resultado,", "traduzido para a língua humana."],
+  "인공지능은 사람들에게 수명 시계를 달아\n인구를 조절하는 방법을 제안했다.": ["A IA propôs colocar um relógio de vida em cada pessoa", "e controlar a população com ele."],
+  "인간은 그것을 수용했다.": ["A humanidade aceitou."],
+  "AI 판결이 이미 오래전부터\n정의로 자리잡았던 덕분에,\n사람들은 이번에도 받아들였다.": ["Como os veredictos da IA havia muito tempo", "já tinham tomado o lugar da justiça,", "as pessoas aceitaram mais uma vez."],
+  "마이크로칩의 최초도입은\n시민의 건강 관리와 범죄 예방, 신원 인증이었다.": ["No começo, o microchip servia para a saúde dos cidadãos,", "a prevenção de crimes e a identificação."],
+  "하지만 칩은 건강만 관리하는\n장치로 머물러있지않았다.": ["Mas o chip não ficou sendo", "só um aparelho para cuidar da saúde."],
+  "영생이 시작된 이래\n국가는 화폐를 시간으로 정했다.": ["Desde que a vida eterna começou,", "o Estado definiu o tempo como moeda."],
+  "마이크로칩에는 인간의 모든 정보와 함께\n‘잔여 수명’이 기록된다.": ["O microchip guarda todas as informações de uma pessoa,", "junto com o seu ‘tempo de vida restante’."],
+  "시간은 무엇으로든 바꿀 수 있다.": ["O tempo pode ser trocado por qualquer coisa."],
+  "고급 자동차도, 펜트하우스도\n시간으로 값이 매겨진다.": ["Carros de luxo, coberturas —", "tudo tem preço em tempo."],
+  "시간이 화폐니까.": ["Porque o tempo é a moeda."],
+  "결제창은 이미 만들어져 있었다.": ["O sistema de pagamento já estava pronto."],
+  "50년 전 물류회사로 시작해\n식량생산, 전기, 엔터, 통신, 위성, 데이터센터까지\n전방위적 영역확장으로 글로벌기업 1위가 된 회사가\n만든 결제 시스템.": ["Criado pela empresa que começou há 50 anos", "como empresa de logística e se expandiu para alimentos, energia,", "entretenimento, telecom, satélites e data centers,", "até virar a maior empresa do mundo."],
+  "LIFE LOGISTICS\nLIFE PAY\n시간을 결제합니다": ["LIFE LOGISTICS", "LIFE PAY", "Processamos o seu tempo."],
+  "영생하는 인류의 모든 시간이 화폐로 변화한 날,\n인류의 잔여 수명은 그 결제망 위로 옮겨졌다.": ["No dia em que todo o tempo da humanidade imortal virou dinheiro,", "o tempo de vida restante de todos foi levado para essa rede."],
+  "그날 이후 사람이 숨 쉬는 모든 순간은\nLIFE LOGISTICS의 시스템으로 처리된다.": ["Desde aquele dia, cada instante em que alguém respira", "é processado pelo sistema da LIFE LOGISTICS."],
+  "죽음은 이제 질병이 아니라\n행정 시스템이 관리하는 숫자가 된다.": ["A morte não é mais uma doença.", "É um número, controlado por um sistema administrativo."],
+  "협약이 발효된 해를 원년으로,\n인류는 새 연호를 쓰기 시작했다.": ["Tomando como ano um o ano em que o Acordo entrou em vigor,", "a humanidade passou a usar um novo calendário."],
+  "설정이 세팅된 2070년 1월 1일\n지구상에 존재하는 모든 사람에게\n공평하게 100년의 시간이란 화폐가 주어졌다.": ["Em 1º de janeiro de 2070, quando a Configuração foi ativada,", "todas as pessoas da Terra receberam", "a mesma moeda: 100 anos de tempo."],
+  "돈은 사라지고\n진짜 부자는 시간을 가진 사람이 되었다.": ["O dinheiro sumiu.", "Os ricos de verdade passaram a ser os que tinham tempo."],
+  "사람은 태어나는 순간\n공평하게 100년을 부여받지만": ["Todo mundo recebe os mesmos 100 anos", "no momento em que nasce."],
+  "시간이 지나면서\n시간은 공평하게 줄어들지 않았다.": ["Mas, com o passar dos anos,", "esse tempo não diminuiu igual para todos."],
+  "범죄를 저질러 깎인 사람들.": ["Os que perderam tempo por cometer crimes."],
+  "좋은 일 하느라 기부해서 줄어든 사람들.": ["Os que doaram o seu fazendo o bem."],
+  "그리고 사기를 당해 뺏긴 사람들.": ["E os que tiveram o tempo roubado em golpes."],
+  "그리고 230년이 지났다": ["E 230 anos se passaram"],
+  "서기 2300년 · 설정 231년\n서울, 대한민국": ["Ano 2300 d.C. · Ano 231 da Configuração", "Seul, Coreia do Sul"],
+  "수백 년의 수명을 가진 사람들은\n그것을 자녀에게 상속한다.": ["Quem tem séculos de vida", "deixa esse tempo de herança para os filhos."],
+  "과거에는 부동산을 상속받았다면,\n미래에는 500년의 생존권을 상속받는다.": ["Se antes se herdavam imóveis,", "no futuro se herdam 500 anos de direito à vida."],
+  "부는 시간으로 축적되고,\n시간은 다시 권력이 된다.": ["A riqueza se acumula em tempo,", "e o tempo vira poder."],
+  "돈은 더 이상 최고의 자산이 아니다.": ["O dinheiro já não é o maior bem."],
+  "진짜 부자는 시간을 가진 사람이다.": ["Rico de verdade é quem tem tempo."],
+  "AI가 모든 재화와 서비스를 제공하는 시대에도\n인간은 여전히 노동을 한다.": ["Mesmo numa era em que a IA fornece todos os bens e serviços,", "as pessoas continuam trabalhando."],
+  "돈을 벌기 위해서가 아니다.": ["Não para ganhar dinheiro."],
+  "시간을 벌기 위해서다.": ["Para ganhar tempo."],
+};
+const PT_CUES = {
+  "서기 2070년 · 설정 1년": "Ano 2070 d.C. · Ano 1 da Configuração",
+  "“오늘 세계 정상회의는<b>전 인류 생명관리협약을 만장일치로 통과시켰습니다.”": "“Hoje a Cúpula Mundial aprovou por unanimidade<b>o Acordo Universal de Gestão da Vida.”",
+  "“모든 시민은 건강 관리용 신경칩을<b>무상으로 이식받게 됩니다.”": "“Todos os cidadãos vão receber um chip neural<b>de controle da saúde, implantado de graça.”",
+  "“시민들이 신경칩을 맞기 위해<b>오픈런을 하고 있습니다.”": "“Os cidadãos estão fazendo fila desde a madrugada<b>para receber o chip neural.”",
+  "“전 인류는 팔목정맥에 나노마이크로칩을<b>무상으로 이식받게 되었습니다.": "“Toda a humanidade vai receber um nanomicrochip<b>na veia do pulso, de graça.",
+  "마이크로칩은 바이러스만큼 작고<b>인간의 체액에서 전기를 얻어 스스로 작동합니다.<b>배터리도, 충전도 필요 없이 영구히 작동하죠.”": "O microchip é pequeno como um vírus e tira energia<b>dos próprios fluidos do corpo humano.<b>Sem bateria, sem recarga — funciona para sempre.”",
+  "“빨리 맞고 싶어서 새벽 6시부터 와서 줄섰어요.": "“Eu queria colocar logo, então cheguei às seis da manhã pra pegar fila.",
+  "제가 혈당관리를 하고 있거든요.”": "É que eu tenho que controlar a glicemia.”",
+  "“LIFE LOGISTICS에 오신 여러분을 환영합니다.”": "“Bem-vindos à LIFE LOGISTICS.”",
+  "“여러분들이 하실 일은 아주 단순합니다.”": "“O trabalho de vocês é bem simples.”",
+  "“크기별로 분류만 하면 되는 작업입니다.”": "“É só separar tudo por tamanho.”",
+  "“인간에게는 쉬운 일이지만 로봇은 못하는 일이죠.”": "“É fácil para um humano, mas um robô não consegue.”",
+  "흥청망청 시간을 써서 고급차를 사고<b>펜트하우스의 사치를 부린 사람들.": "Os que torraram seu tempo em carros de luxo<b>e na ostentação das coberturas.",
+};
+const RU_LINES = {
+  "신은 얼마나 재밌을까?": ["Как же, наверное,", "весело быть Богом?"],
+  "빛이 있으라 하매 빛이 있으니": ["Да будет свет.", "И стал свет."],
+  "서기 2030년": ["2030 год н. э."],
+  "AI의 지적능력에 특이점이 도래하고\nAI는 마침내 인류의 노화를 되돌릴\n유전자조작 방법을 발견했다.": ["Интеллект ИИ достиг сингулярности,", "и ИИ наконец нашёл способ генной инженерии,", "который обращает старение человека вспять."],
+  "더이상은 암도 없고 치매도 없다.": ["Больше нет ни рака, ни деменции."],
+  "노화라는 질병을 정복한 것이다.": ["Болезнь под названием старость", "была побеждена."],
+  "죽음은 더 이상\n자연의 법칙이 아니다.": ["Смерть больше", "не закон природы."],
+  "하지만 시간이 지날수록\n새로운 문제가 나타난다.": ["Но шло время,", "и появилась новая проблема."],
+  "사람은 죽지 않는데\n아이는 계속 태어난다는 것이다.": ["Люди не умирали,", "а дети всё рождались и рождались."],
+  "서기 2070년 — 설정 1년": ["2070 год н. э. — 1-й год Настройки"],
+  "수십 년 만에 인류는\n지구의 수용 한계를 넘어선다.": ["За несколько десятилетий человечество", "переросло всё, что могла вместить Земля."],
+  "식량과 에너지는 AI와 로봇이 해결했지만,\n공간은 해결하지 못했다.": ["Еду и энергию ИИ и роботы обеспечили,", "а вот с пространством не справились."],
+  "지구 인구의 폭발적 증가를 해결하기 위해\n사람들은 인공지능에게 질문을 했다.": ["Чтобы справиться со взрывным ростом населения,", "люди обратились с вопросом к искусственному интеллекту."],
+  "인공지능들이 인간은 알 수 없는\n0과 1로 이루어진 로직으로 긴 시간 연산을 했고\n자기들끼리 회의까지 했다.": ["ИИ долго вычисляли", "на логике из нулей и единиц, непонятной людям,", "и даже провели совещание между собой."],
+  "인간은 그 회의를 알아들을 수도 없었고,\n대화에 끼어들 수도 없었다.": ["Люди не могли понять это совещание", "и не могли вмешаться в разговор."],
+  "그저 인간의 언어로 번역된\n결과물만을 출력받았을 뿐이다.": ["Им лишь выдали результат,", "переведённый на человеческий язык."],
+  "인공지능은 사람들에게 수명 시계를 달아\n인구를 조절하는 방법을 제안했다.": ["ИИ предложил повесить на каждого часы жизни", "и регулировать по ним население."],
+  "인간은 그것을 수용했다.": ["Человечество согласилось."],
+  "AI 판결이 이미 오래전부터\n정의로 자리잡았던 덕분에,\n사람들은 이번에도 받아들였다.": ["Приговоры ИИ давно уже", "заняли место справедливости,", "поэтому люди приняли и это."],
+  "마이크로칩의 최초도입은\n시민의 건강 관리와 범죄 예방, 신원 인증이었다.": ["Сначала микрочип вводили для охраны здоровья,", "профилактики преступлений и удостоверения личности."],
+  "하지만 칩은 건강만 관리하는\n장치로 머물러있지않았다.": ["Но чип не остался", "просто прибором для здоровья."],
+  "영생이 시작된 이래\n국가는 화폐를 시간으로 정했다.": ["С тех пор как началась вечная жизнь,", "государство сделало валютой время."],
+  "마이크로칩에는 인간의 모든 정보와 함께\n‘잔여 수명’이 기록된다.": ["В микрочипе записано всё о человеке —", "и его «оставшийся срок жизни»."],
+  "시간은 무엇으로든 바꿀 수 있다.": ["Время можно обменять на что угодно."],
+  "고급 자동차도, 펜트하우스도\n시간으로 값이 매겨진다.": ["Дорогие машины, пентхаусы —", "у всего цена во времени."],
+  "시간이 화폐니까.": ["Ведь время — это валюта."],
+  "결제창은 이미 만들어져 있었다.": ["Платёжная система уже была готова."],
+  "50년 전 물류회사로 시작해\n식량생산, 전기, 엔터, 통신, 위성, 데이터센터까지\n전방위적 영역확장으로 글로벌기업 1위가 된 회사가\n만든 결제 시스템.": ["Её создала компания, что 50 лет назад начинала", "как логистическая фирма, а потом взялась за еду, энергетику,", "развлечения, связь, спутники и дата-центры", "и стала крупнейшей корпорацией мира."],
+  "LIFE LOGISTICS\nLIFE PAY\n시간을 결제합니다": ["LIFE LOGISTICS", "LIFE PAY", "Оплата вашим временем"],
+  "영생하는 인류의 모든 시간이 화폐로 변화한 날,\n인류의 잔여 수명은 그 결제망 위로 옮겨졌다.": ["В день, когда всё время бессмертного человечества стало деньгами,", "оставшиеся сроки жизни людей перенесли в эту платёжную сеть."],
+  "그날 이후 사람이 숨 쉬는 모든 순간은\nLIFE LOGISTICS의 시스템으로 처리된다.": ["С того дня каждый миг, когда человек дышит,", "обрабатывает система LIFE LOGISTICS."],
+  "죽음은 이제 질병이 아니라\n행정 시스템이 관리하는 숫자가 된다.": ["Смерть теперь не болезнь,", "а число, которым управляет административная система."],
+  "협약이 발효된 해를 원년으로,\n인류는 새 연호를 쓰기 시작했다.": ["Взяв за первый год тот, когда Соглашение вступило в силу,", "человечество начало новое летоисчисление."],
+  "설정이 세팅된 2070년 1월 1일\n지구상에 존재하는 모든 사람에게\n공평하게 100년의 시간이란 화폐가 주어졌다.": ["1 января 2070 года, в день запуска Настройки,", "каждому человеку на Земле", "поровну выдали валюту — 100 лет времени."],
+  "돈은 사라지고\n진짜 부자는 시간을 가진 사람이 되었다.": ["Деньги исчезли,", "и настоящими богачами стали те, у кого есть время."],
+  "사람은 태어나는 순간\n공평하게 100년을 부여받지만": ["При рождении каждый", "поровну получает 100 лет,"],
+  "시간이 지나면서\n시간은 공평하게 줄어들지 않았다.": ["но с годами", "время убывало совсем не поровну."],
+  "범죄를 저질러 깎인 사람들.": ["Те, у кого его урезали за преступления."],
+  "좋은 일 하느라 기부해서 줄어든 사람들.": ["Те, кто раздал его, делая добро."],
+  "그리고 사기를 당해 뺏긴 사람들.": ["И те, у кого его отняли мошенники."],
+  "그리고 230년이 지났다": ["И прошло 230 лет"],
+  "서기 2300년 · 설정 231년\n서울, 대한민국": ["2300 год н. э. · 231-й год Настройки", "Сеул, Республика Корея"],
+  "수백 년의 수명을 가진 사람들은\n그것을 자녀에게 상속한다.": ["Люди с сотнями лет жизни", "передают их по наследству детям."],
+  "과거에는 부동산을 상속받았다면,\n미래에는 500년의 생존권을 상속받는다.": ["Раньше в наследство получали недвижимость,", "а в будущем — 500 лет права на жизнь."],
+  "부는 시간으로 축적되고,\n시간은 다시 권력이 된다.": ["Богатство копится временем,", "а время снова становится властью."],
+  "돈은 더 이상 최고의 자산이 아니다.": ["Деньги больше не главное богатство."],
+  "진짜 부자는 시간을 가진 사람이다.": ["Настоящий богач — тот, у кого есть время."],
+  "AI가 모든 재화와 서비스를 제공하는 시대에도\n인간은 여전히 노동을 한다.": ["Даже в эпоху, когда ИИ даёт все товары и услуги,", "люди всё ещё работают."],
+  "돈을 벌기 위해서가 아니다.": ["Не ради денег."],
+  "시간을 벌기 위해서다.": ["Ради времени."],
+};
+const RU_CUES = {
+  "서기 2070년 · 설정 1년": "2070 год н. э. · 1-й год Настройки",
+  "“오늘 세계 정상회의는<b>전 인류 생명관리협약을 만장일치로 통과시켰습니다.”": "«Сегодня Всемирный саммит единогласно принял<b>Всеобщее соглашение об управлении жизнью».",
+  "“모든 시민은 건강 관리용 신경칩을<b>무상으로 이식받게 됩니다.”": "«Каждому гражданину бесплатно вживят<b>нейрочип для контроля здоровья».",
+  "“시민들이 신경칩을 맞기 위해<b>오픈런을 하고 있습니다.”": "«Граждане с рассвета стоят в очередях,<b>чтобы получить нейрочип».",
+  "“전 인류는 팔목정맥에 나노마이크로칩을<b>무상으로 이식받게 되었습니다.": "«Всему человечеству бесплатно вживят<b>наномикрочип в вену на запястье.",
+  "마이크로칩은 바이러스만큼 작고<b>인간의 체액에서 전기를 얻어 스스로 작동합니다.<b>배터리도, 충전도 필요 없이 영구히 작동하죠.”": "Микрочип размером с вирус и сам берёт энергию<b>из жидкостей человеческого тела.<b>Без батареи и зарядки — он работает вечно».",
+  "“빨리 맞고 싶어서 새벽 6시부터 와서 줄섰어요.": "«Хотелось поставить поскорее, так что я в очереди с шести утра.",
+  "제가 혈당관리를 하고 있거든요.”": "Мне ведь нужно следить за сахаром в крови».",
+  "“LIFE LOGISTICS에 오신 여러분을 환영합니다.”": "«Добро пожаловать в LIFE LOGISTICS».",
+  "“여러분들이 하실 일은 아주 단순합니다.”": "«Ваша работа очень простая».",
+  "“크기별로 분류만 하면 되는 작업입니다.”": "«Нужно всего лишь сортировать по размеру».",
+  "“인간에게는 쉬운 일이지만 로봇은 못하는 일이죠.”": "«Человеку это легко, а робот так не умеет».",
+  "흥청망청 시간을 써서 고급차를 사고<b>펜트하우스의 사치를 부린 사람들.": "Те, кто спускал время на дорогие машины<b>и роскошь пентхаусов.",
+};
+/* 언어마다 쓸 표 */
+const TL = {
+  zh:{ L:ZH_LINES, C:ZH_CUES }, ja:{ L:JA_LINES, C:JA_CUES },
+  pt:{ L:PT_LINES, C:PT_CUES }, ru:{ L:RU_LINES, C:RU_CUES }
+};
 
 
 /* 언어는 주소로만 정한다(?lang=en 일 때만 영어, 없으면 한국어) — 기억하거나 폰 언어를 따르면 한국어 페이지에서 들어와도 영어로 뜬다(2026-09-29) */
 let lang = "ko";
 try{
   const lq = new URLSearchParams(location.search).get("lang");
-  lang = (lq === "en" || lq === "zh") ? lq : "ko";
+  lang = ["en","zh","ja","pt","ru"].includes(lq) ? lq : "ko";
   localStorage.removeItem("tpoi_lang");
 }catch(e){}
 
 /* 장면 하나에서 지금 언어에 맞는 줄을 꺼낸다 (영어가 없으면 한국어 그대로) */
 function linesOf(sc){
-  if(lang === "zh") return ZH_LINES[sc.lines.join("\n")] || sc.en || sc.lines;
+  if(TL[lang]) return TL[lang].L[sc.lines.join("\n")] || sc.en || sc.lines;
   return (lang === "en" && sc.en) ? sc.en : sc.lines;
 }
 /* 영상 자막 한 줄에서 지금 언어에 맞는 글을 꺼낸다 */
 function cueText(c){
-  if(lang === "zh") return ZH_CUES[c[2]] || c[3] || c[2];
+  if(TL[lang]) return TL[lang].C[c[2]] || c[3] || c[2];
   return (lang === "en" && c[3]) ? c[3] : c[2];
 }
 /* 영상 위 띠 글씨 */
 function chyronText(ch){
-  if(lang === "zh") return ZH_CUES[ch.text] || ch.en || ch.text;
+  if(TL[lang]) return TL[lang].C[ch.text] || ch.en || ch.text;
   return (lang === "en" && ch.en) ? ch.en : ch.text;
 }
 
@@ -793,13 +1012,48 @@ function zhFonts(){
     + "html[lang=zh-CN] #txt .ln,html[lang=zh-CN] #cue,html[lang=zh-CN] #chyron{text-wrap:balance}";
   document.head.appendChild(st);
 }
+/* 일본어: 한자·가나를 일본어 시스템 글꼴로 채우고 줄바꿈 규칙을 푼다 */
+function jaFonts(){
+  if(lang !== "ja" || document.getElementById("jaFont")) return;
+  const jf = "local('Hiragino Sans'),local('Hiragino Kaku Gothic ProN'),local('Yu Gothic UI'),local('Yu Gothic'),local('Yu Gothic Medium'),local('YuGothic-Medium'),local('Yu Gothic Regular'),local('YuGothic-Regular'),local('Yu Gothic Bold'),local('YuGothic-Bold'),local('MS PGothic'),local('MS Gothic'),local('Meiryo'),local('Noto Sans JP'),local('Noto Sans CJK JP'),local('Source Han Sans JP')";
+  const ur = "U+2E80-2FFF,U+3000-30FF,U+31F0-31FF,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF";
+  const sf = "local('Hiragino Mincho ProN'),local('Yu Mincho'),local('YuMincho'),local('Noto Serif JP'),local('Noto Serif CJK JP'),local('Source Han Serif JP')," + jf;
+  const st = document.createElement("style");
+  st.id = "jaFont";
+  st.textContent = `@font-face{font-family:'JaSans';src:${jf};unicode-range:${ur}}`
+    + `@font-face{font-family:'JaSerif';src:${sf};unicode-range:${ur}}`
+    + `html[lang=ja]{--sans:'JaSans',"Noto Sans KR",-apple-system,BlinkMacSystemFont,sans-serif;--serif:'JaSerif',"Noto Serif KR",serif}`
+    + "html[lang=ja] *{word-break:normal!important}"
+    + "html[lang=ja] #txt .ln,html[lang=ja] #cue,html[lang=ja] #chyron{text-wrap:balance}";
+  document.head.appendChild(st);
+}
+/* 포르투갈어·러시아어: 한글 글꼴에 없는 악센트 글자·키릴 글자를 시스템 글꼴로 채운다 */
+function latFonts(){
+  if((lang !== "pt" && lang !== "ru") || document.getElementById("latFont")) return;
+  const lf = "local('Segoe UI'),local('Roboto'),local('Arial'),local('Helvetica Neue'),local('Helvetica')";
+  const lsf = "local('Georgia'),local('Times New Roman'),local('Noto Serif'),local('PT Serif')," + lf;
+  const ur = "U+00A0-024F,U+0400-04FF,U+1E00-1EFF,U+2010-2027";
+  const st = document.createElement("style");
+  st.id = "latFont";
+  st.textContent = `@font-face{font-family:'LatSans';src:${lf};unicode-range:${ur}}`
+    + `@font-face{font-family:'LatSerif';src:${lsf};unicode-range:${ur}}`
+    + `html[lang=pt-BR],html[lang=ru]{--sans:"Noto Sans KR",'LatSans',-apple-system,BlinkMacSystemFont,sans-serif;--serif:"Noto Serif KR",'LatSerif',serif}`;
+  document.head.appendChild(st);
+}
 const langBtn = $("lang"), langWrap = $("langbtn");
+const LANG_ATTR = { zh:"zh-CN", pt:"pt-BR" };
+const LANG_TITLE = {
+  zh:"永生的代价 — 第一部 序章 | Oreum Games",
+  ja:"永遠の命の値段 — 第1部 プロローグ | Oreum Games",
+  pt:"O Preço da Imortalidade — Parte 1: Prólogo | Oreum Games",
+  ru:"Цена бессмертия — Часть 1. Пролог | Oreum Games"
+};
 
 function applyLang(){
   const t = UI[lang];
-  document.documentElement.lang = (lang === "zh") ? "zh-CN" : lang;
-  document.title = (lang === "zh") ? "永生的代价 — 第一部 序章 | Oreum Games" : BASE_TITLE;
-  zhFonts();
+  document.documentElement.lang = LANG_ATTR[lang] || lang;
+  document.title = LANG_TITLE[lang] || BASE_TITLE;
+  zhFonts(); jaFonts(); latFonts();
   $("gTitle").textContent = t.title;
   $("gEn").textContent    = t.sub;
   $("gSub").textContent   = t.part;
@@ -812,7 +1066,7 @@ function applyLang(){
   langBtn.textContent     = t.other;
   setPauseLabel();
   /* 영문 제목은 고딕, 한글 제목은 명조가 어울린다 */
-  $("gTitle").style.fontFamily = (lang === "en") ? "var(--sans)" : "var(--serif)";
+  $("gTitle").style.fontFamily = (lang === "en" || lang === "pt" || lang === "ru") ? "var(--sans)" : "var(--serif)";
 }
 
 langBtn.addEventListener("click", e=>{
@@ -894,7 +1148,7 @@ document.addEventListener("visibilitychange", ()=>{
     if(curVid && curVid.currentTime < curVid.duration) curVid.play().catch(()=>{});
   }
 });
-$("eDemo").addEventListener("click", e=>{ e.stopPropagation(); location.href = (lang === "zh") ? "https://oreumgames.com/zh/" : "https://oreumgames.com"; });
+$("eDemo").addEventListener("click", e=>{ e.stopPropagation(); location.href = (lang === "zh") ? "https://oreumgames.com/zh/" : (lang === "ja" || lang === "pt" || lang === "ru") ? "https://oreumgames.com/en/" : "https://oreumgames.com"; });
 
 /* 전체 재생시간 (화면에는 안 띄운다 — 개발 중 확인용)
    콘솔에서 totalSeconds() 를 치면 초 단위로 나온다 */

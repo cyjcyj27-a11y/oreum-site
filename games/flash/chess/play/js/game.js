@@ -36,8 +36,38 @@
     zst.textContent = "@font-face{font-family:'RIDI';src:" + zb + ";unicode-range:" + ur + "}@font-face{font-family:'Ria';src:" + zb + ";unicode-range:" + ur + "}html[lang=zh-CN] *{word-break:normal!important}";
     document.head.appendChild(zst);
   }
-  function rankName(L) { return (EN ? RANKS_EN : ZH ? RANKS_ZH : RANKS)[L]; }
-  var TXT = ZH ? { check: '将军', mate: '将死', stale: '逼和', white: '白', black: '黑', why: { stalemate: 'STALEMATE', repetition: 'REPETITION', fifty: '50 MOVES', material: 'INSUFFICIENT', mate: 'CHECKMATE', resign: 'RESIGN' } }
+  // 일본어·포르투갈어·러시아어: ?lang=ja|pt|ru 일 때만. 한국어 문구를 열쇠로 바꾼다
+  var LQ = (location.search.match(/[?&]lang=(ja|pt|ru)(&|$)/i) || [])[1];
+  var L3 = !EN && !ZH && LQ ? LQ.toLowerCase() : '';
+  var D3 = {
+    ja: { '체스': 'チェス', '시작': 'スタート', '기권': '投了', '승격': 'プロモーション', '급수': '段級', 'K 효과음': 'K 効果音' },
+    pt: { '체스': 'XADREZ', '시작': 'JOGAR', '기권': 'DESISTIR', '승격': 'PROMOÇÃO', '급수': 'NÍVEL', 'K 효과음': 'K som' },
+    ru: { '체스': 'ШАХМАТЫ', '시작': 'ИГРАТЬ', '기권': 'СДАТЬСЯ', '승격': 'ПРЕВРАЩЕНИЕ', '급수': 'УРОВЕНЬ', 'K 효과음': 'K звук' }
+  };
+  var TXT3 = {
+    ja: { check: 'チェック', mate: 'チェックメイト', stale: 'ステイルメイト', white: '白', black: '黒', winW: '白番', winB: '黒番', best: '最高 ' },
+    pt: { check: 'XEQUE', mate: 'XEQUE-MATE', stale: 'AFOGADO', white: 'BRANCAS', black: 'PRETAS', winW: 'BRANCAS', winB: 'PRETAS', best: 'MELHOR ' },
+    ru: { check: 'ШАХ', mate: 'МАТ', stale: 'ПАТ', white: 'БЕЛЫЕ', black: 'ЧЁРНЫЕ', winW: 'БЕЛЫЕ', winB: 'ЧЁРНЫЕ', best: 'РЕКОРД ' }
+  };
+  var RANKS_L3 = !L3 ? null : RANKS.map(function (s) {
+    return L3 === 'ja' ? s.replace('급', '級').replace('단', '段') : L3 === 'ru' ? s.replace('급', 'кю').replace('단', 'дан') : s.replace('급', 'K').replace('단', 'D');
+  });
+  if (L3) {
+    var LD = D3[L3];
+    document.documentElement.lang = L3 === 'pt' ? 'pt-BR' : L3; document.body.classList.add(L3); document.title = L3 === 'ja' ? LD['체스'] : L3 === 'pt' ? 'Xadrez' : 'Шахматы';
+    Array.prototype.forEach.call(document.querySelectorAll('[data-en]'), function (el) { var k = el.textContent.trim(); if (LD[k]) el.textContent = LD[k]; });
+    $('flash').textContent = TXT3[L3].check;
+    // 게임 글꼴에 없는 글자(가나·한자 / 악센트 라틴·키릴)만 기기 글꼴로 덧붙인다
+    var lf = L3 === 'ja' ? "local('Hiragino Sans'),local('Hiragino Kaku Gothic ProN'),local('Yu Gothic UI'),local('Yu Gothic'),local('Yu Gothic Medium'),local('YuGothic-Medium'),local('Yu Gothic Regular'),local('YuGothic-Regular'),local('Yu Gothic Bold'),local('YuGothic-Bold'),local('MS PGothic'),local('MS Gothic'),local('Meiryo'),local('Noto Sans JP'),local('Noto Sans CJK JP'),local('Source Han Sans JP')"
+                         : "local('Segoe UI'),local('Roboto'),local('Arial'),local('Helvetica Neue'),local('Helvetica')";
+    var lr = L3 === 'ja' ? 'U+2E80-2FFF,U+3000-30FF,U+31F0-31FF,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF' : 'U+00A0-024F,U+0400-04FF,U+1E00-1EFF,U+2010-2027';
+    var lst = document.createElement('style');
+    lst.textContent = "@font-face{font-family:'RIDI';src:" + lf + ";unicode-range:" + lr + "}@font-face{font-family:'Ria';src:" + lf + ";unicode-range:" + lr + "}" + (L3 === 'ja' ? 'html[lang=ja] *{word-break:normal!important}' : '');
+    document.head.appendChild(lst);
+  }
+  function rankName(L) { return (EN ? RANKS_EN : ZH ? RANKS_ZH : L3 ? RANKS_L3 : RANKS)[L]; }
+  var TXT = L3 ? { check: TXT3[L3].check, mate: TXT3[L3].mate, stale: TXT3[L3].stale, white: TXT3[L3].white, black: TXT3[L3].black, why: { stalemate: 'STALEMATE', repetition: 'REPETITION', fifty: '50 MOVES', material: 'INSUFFICIENT', mate: 'CHECKMATE', resign: 'RESIGN' } }
+          : ZH ? { check: '将军', mate: '将死', stale: '逼和', white: '白', black: '黑', why: { stalemate: 'STALEMATE', repetition: 'REPETITION', fifty: '50 MOVES', material: 'INSUFFICIENT', mate: 'CHECKMATE', resign: 'RESIGN' } }
           : EN ? { check: 'CHECK', mate: 'CHECKMATE', stale: 'STALEMATE', white: 'WHITE', black: 'BLACK', why: { stalemate: 'STALEMATE', repetition: 'REPETITION', fifty: '50 MOVES', material: 'INSUFFICIENT', mate: 'CHECKMATE', resign: 'RESIGN' } }
                 : { check: '체크', mate: '체크메이트', stale: '스테일메이트', white: '백', black: '흑', why: { stalemate: 'STALEMATE', repetition: 'REPETITION', fifty: '50 MOVES', material: 'INSUFFICIENT', mate: 'CHECKMATE', resign: 'RESIGN' } };
 
@@ -47,7 +77,7 @@
   function savePick(n) { try { localStorage.setItem('chess.pick', String(n)); } catch (e) {} }
   function showRec() {
     $('rec').textContent = rankName(G.level);
-    var b = loadBest(); $('best').textContent = b > 0 ? (EN ? 'BEST ' : ZH ? '最高 ' : '최고 ') + rankName(b) : '';
+    var b = loadBest(); $('best').textContent = b > 0 ? (EN ? 'BEST ' : ZH ? '最高 ' : L3 ? TXT3[L3].best : '최고 ') + rankName(b) : '';
     Array.prototype.forEach.call($('rk').children, function (w, i) { w.classList.toggle('on', i === G.level); });
   }
   function setLevel(n) { n = Math.max(0, Math.min(TOP, n)); if (n === G.level) return; G.level = n; savePick(n); showRec(); updHud(); A.pick(); }
@@ -324,7 +354,7 @@
     var Rz = G.result, w = Rz.winner, big = $('ores'), btn = $('btnRetryT'), rec = $('orec'), why = $('owhy');
     rec.textContent = ''; why.textContent = w === 0 ? (TXT.why[Rz.why] || '') : (Rz.why === 'mate' ? TXT.why.mate : Rz.why === 'resign' ? TXT.why.resign : '');
     if (w === 0) { $('oh').textContent = G.p2 ? '' : rankName(G.level); big.textContent = 'DRAW'; big.className = 'res p2'; btn.textContent = 'RETRY'; A.draw(); }
-    else if (G.p2) { $('oh').textContent = 'WINNER'; big.textContent = ZH ? (w === WHITE ? '白方' : '黑方') : w === WHITE ? TXT.white : TXT.black; big.className = 'res p2'; btn.textContent = 'RETRY'; A.win(); }
+    else if (G.p2) { $('oh').textContent = 'WINNER'; big.textContent = ZH ? (w === WHITE ? '白方' : '黑方') : L3 ? (w === WHITE ? TXT3[L3].winW : TXT3[L3].winB) : w === WHITE ? TXT.white : TXT.black; big.className = 'res p2'; btn.textContent = 'RETRY'; A.win(); }
     else if (w === G.human) {
       $('oh').textContent = rankName(G.level); big.textContent = 'CLEAR'; big.className = 'res win'; A.win();
       if (G.level < TOP) { btn.textContent = 'NEXT'; rec.textContent = '▲ ' + rankName(G.level + 1); if (G.level + 1 > loadBest()) saveBest(G.level + 1); }

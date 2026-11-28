@@ -143,6 +143,8 @@
     v = Math.round(v);
     if (EN() && window.ESTATE && ESTATE.fmt) return ESTATE.fmt(v);
     if (window.LANG && LANG.zh && window.ESTATE && ESTATE.fmt) return ESTATE.fmt(v) + '韩元';
+    if (window.LANG && LANG.ja && window.ESTATE && ESTATE.fmt) return ESTATE.fmt(v) + 'ウォン';
+    if (window.LANG && (LANG.pt || LANG.ru) && window.ESTATE && ESTATE.fmt) return ESTATE.fmt(v);
     const eok = Math.floor(v / 10000), man = v % 10000;
     return (eok ? eok + '억' + (man ? ' ' : '') : '') + (man || !eok ? man.toLocaleString() + '만' : '') + '원';
   }
@@ -179,6 +181,24 @@
       if (B.wallM) parts.push('石墙 ' + B.wallM + 'm'); if (B.lamp) parts.push('路灯 ' + B.lamp + '个'); if (B.signal) parts.push('红绿灯 ' + B.signal + '个');
       if (B.car) parts.push('车 ' + B.car + '辆'); if (B.street) parts.push('行道树 ' + B.street + '棵'); if (B.orch) parts.push('橘子树 ' + B.orch + '棵' + (B.orange ? '·橘子 ' + B.orange + '个' : ''));
       return B.nag + ' 亲爱的，修理费要 ' + won(B.sum) + '！（' + parts.join(' · ') + '）';
+    }
+    if (window.LANG && LANG.ja) {
+      if (B.wallM) parts.push('石垣 ' + B.wallM + 'm'); if (B.lamp) parts.push('街灯 ' + B.lamp + '本'); if (B.signal) parts.push('信号機 ' + B.signal + '基');
+      if (B.car) parts.push('車 ' + B.car + '台'); if (B.street) parts.push('街路樹 ' + B.street + '本'); if (B.orch) parts.push('みかんの木 ' + B.orch + '本' + (B.orange ? '・みかん ' + B.orange + '個' : ''));
+      return B.nag + ' ねえ、修理代 ' + won(B.sum) + ' だって！（' + parts.join(' · ') + '）';
+    }
+    if (window.LANG && LANG.pt) {
+      const pl = (n, a, b) => n + ' ' + (n === 1 ? a : b);
+      if (B.wallM) parts.push(B.wallM + 'm de muro'); if (B.lamp) parts.push(pl(B.lamp, 'poste', 'postes')); if (B.signal) parts.push(pl(B.signal, 'semáforo', 'semáforos'));
+      if (B.car) parts.push(pl(B.car, 'carro', 'carros')); if (B.street) parts.push(pl(B.street, 'árvore', 'árvores')); if (B.orch) parts.push(pl(B.orch, 'pé de tangerina', 'pés de tangerina') + (B.orange ? ' + ' + pl(B.orange, 'tangerina', 'tangerinas') : ''));
+      return B.nag + ' Amor, o conserto deu ' + won(B.sum) + '! (' + parts.join(' · ') + ')';
+    }
+    if (window.LANG && LANG.ru) {
+      // 러시아어 수 붙임: 1 / 2~4 / 5~ 꼴이 다르다
+      const pl = (n, f) => { const a = n % 10, b = n % 100; return n + ' ' + (a === 1 && b !== 11 ? f[0] : a >= 2 && a <= 4 && (b < 12 || b > 14) ? f[1] : f[2]); };
+      if (B.wallM) parts.push(B.wallM + ' м стены'); if (B.lamp) parts.push(pl(B.lamp, ['фонарь', 'фонаря', 'фонарей'])); if (B.signal) parts.push(pl(B.signal, ['светофор', 'светофора', 'светофоров']));
+      if (B.car) parts.push(pl(B.car, ['машина', 'машины', 'машин'])); if (B.street) parts.push(pl(B.street, ['дерево', 'дерева', 'деревьев'])); if (B.orch) parts.push(pl(B.orch, ['мандариновое дерево', 'мандариновых дерева', 'мандариновых деревьев']) + (B.orange ? ' + ' + pl(B.orange, ['мандарин', 'мандарина', 'мандаринов']) : ''));
+      return B.nag + ' Милый, ремонт обошёлся в ' + won(B.sum) + '! (' + parts.join(' · ') + ')';
     }
     if (B.wallM) parts.push('돌담 ' + B.wallM + 'm'); if (B.lamp) parts.push('가로등 ' + B.lamp + '개'); if (B.signal) parts.push('신호등 ' + B.signal + '개');
     if (B.car) parts.push('차 ' + B.car + '대'); if (B.street) parts.push('가로수 ' + B.street + '그루'); if (B.orch) parts.push('귤나무 ' + B.orch + '그루' + (B.orange ? '·귤 ' + B.orange + '알' : ''));

@@ -140,7 +140,7 @@
     const r = $('wMap').getBoundingClientRect();
     el.style.left = Math.max(100, Math.min(r.width - 100, p[0])) + 'px'; el.style.top = Math.max(150, p[1] - 30) + 'px';
     $('wpN').textContent = L(c.ko, c.en);
-    $('wpD').textContent = L('가맹점 ' + fmt(c.stores) + '곳 · 로열티 하루 +' + fmt(c.roy), fmt(c.stores) + ' stores · +' + fmt(c.roy) + '/day', '加盟店 ' + fmt(c.stores) + ' 家 · 加盟费 每天 +' + fmt(c.roy));
+    $('wpD').textContent = L('가맹점 ' + fmt(c.stores) + '곳 · 로열티 하루 +' + fmt(c.roy), fmt(c.stores) + ' stores · +' + fmt(c.roy) + '/day', '加盟店 ' + fmt(c.stores) + ' 家 · 加盟费 每天 +' + fmt(c.roy), '加盟店 ' + fmt(c.stores) + '店 · ロイヤリティ 1日 +' + fmt(c.roy), fmt(c.stores) + ' lojas · +' + fmt(c.roy) + '/dia', fmt(c.stores) + ' ' + RUP(c.stores, 'точка', 'точки', 'точек') + ' · +' + fmt(c.roy) + '/день');
     const btn = $('wpBuy'); btn.innerHTML = '<i class="coinI"></i>'; btn.appendChild(document.createTextNode(fmt(c.price)));
     btn.classList.toggle('poor', G.save.coins < c.price);
   }

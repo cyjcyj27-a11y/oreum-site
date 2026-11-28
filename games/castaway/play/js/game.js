@@ -17,7 +17,40 @@
     '도감': '图鉴', '최고': '最大', '물고기': '鱼类', '효과음': '音效', '물고기 ': '鱼类 ', '최고 ': '最大 '
   };
   const ZHF = { anchovy: '鳀鱼', damsel: '雀鲷', scad: '竹荚鱼', sardine: '沙丁鱼', mackerel: '青花鱼', gizzard: '斑鰶', rockfish: '黑鲪', filefish: '马面鱼', halfbeak: '针鱼', puffer: '河豚', cutlass: '带鱼', bream: '黑鲷', beakfish: '条石鲷', opaleye: '斑鱾', snapper: '真鲷', flounder: '牙鲆', seabass: '鲈鱼', conger: '星鳗', spanish: '马鲛鱼', croaker: '鮸鱼', cod: '鳕鱼', grouper: '石斑鱼', dorado: '鬼头刀', yellowtail: '鰤鱼', amberjack: '黄条鰤', sailfish: '旗鱼', tuna: '蓝鳍金枪鱼', marlin: '蓝枪鱼', swordfish: '剑鱼', giant: '大白鲨' };
-  const NM = sp => EN ? sp.en : ZHL ? (ZHF[sp.id] || sp.en) : sp.ko;
+  // 일본어·포르투갈어·러시아어판: ?lang=ja / pt / ru 일 때만. 한국어 글을 열쇠로 한 사전
+  const L3 = !EN && !ZHL ? ((location.search.match(/[?&]lang=(ja|pt|ru)(&|$)/) || [])[1] || null) : null;
+  const D3 = {
+    ja: {
+      '스페이스 · 꾹 던지기 / 걸기 / 연타 감기<br>끌기 · 시점 · 휠 · 당겨 보기 · B 미끼 · D 물고기 · K 효과음': 'スペース · 長押しで投げる / 合わせ / 連打で巻く<br>ドラッグ · 視点 · ホイール · ズーム · B エサ · D 魚 · K 効果音',
+      '던지기': '投げる', '걸기': '合わせ', '감기': '巻く', '신기록': '新記録', '썰기': '切る', '미끼': 'エサ',
+      '가로 화면에서 하는 게임입니다': '横画面で遊ぶゲームです', '가로로 돌리기': '横向きにする',
+      '단추가 안 먹으면 폰의 화면 회전 잠금을 풀고 눕혀 주세요': 'ボタンが効かないときは、スマホの画面回転ロックを解除して横向きにしてください',
+      '그래도 세로로 하기': 'それでも縦で遊ぶ', '망망대해': '大海原', '이어하기': 'つづきから', '새로 시작': 'はじめから',
+      '도감': '図鑑', '최고': '最大', '물고기': '魚', '효과음': '効果音', '물고기 ': '魚 ', '최고 ': '最大 '
+    },
+    pt: {
+      '스페이스 · 꾹 던지기 / 걸기 / 연타 감기<br>끌기 · 시점 · 휠 · 당겨 보기 · B 미끼 · D 물고기 · K 효과음': 'Espaço · segure para lançar / fisgar / toque rápido para puxar<br>Arrastar · olhar · Roda · zoom · B isca · D peixes · K sons',
+      '던지기': 'LANÇAR', '걸기': 'FISGAR', '감기': 'PUXAR', '신기록': 'NOVO RECORDE', '썰기': 'CORTAR', '미끼': 'ISCA',
+      '가로 화면에서 하는 게임입니다': 'Este jogo é na horizontal', '가로로 돌리기': 'Virar na horizontal',
+      '단추가 안 먹으면 폰의 화면 회전 잠금을 풀고 눕혀 주세요': 'Se o botão não funcionar, desative o bloqueio de rotação do celular e vire-o de lado',
+      '그래도 세로로 하기': 'Jogar na vertical mesmo assim', '망망대해': 'MAR ABERTO', '이어하기': 'CONTINUAR', '새로 시작': 'NOVO JOGO',
+      '도감': 'PEIXES', '최고': 'MAIOR', '물고기': 'PEIXES', '효과음': 'Sons', '물고기 ': 'PEIXES ', '최고 ': 'MAIOR '
+    },
+    ru: {
+      '스페이스 · 꾹 던지기 / 걸기 / 연타 감기<br>끌기 · 시점 · 휠 · 당겨 보기 · B 미끼 · D 물고기 · K 효과음': 'Пробел · держи — заброс / подсечка / жми часто — подмотка<br>Тянуть · обзор · Колесо · зум · B наживка · D рыба · K звук',
+      '던지기': 'ЗАБРОС', '걸기': 'ПОДСЕЧЬ', '감기': 'МОТАТЬ', '신기록': 'НОВЫЙ РЕКОРД', '썰기': 'РЕЗАТЬ', '미끼': 'НАЖИВКА',
+      '가로 화면에서 하는 게임입니다': 'Эта игра для горизонтального экрана', '가로로 돌리기': 'Повернуть экран',
+      '단추가 안 먹으면 폰의 화면 회전 잠금을 풀고 눕혀 주세요': 'Если кнопка не работает, отключи блокировку поворота экрана и положи телефон боком',
+      '그래도 세로로 하기': 'Всё равно играть вертикально', '망망대해': 'ОТКРЫТОЕ МОРЕ', '이어하기': 'ДАЛЬШЕ', '새로 시작': 'НОВАЯ ИГРА',
+      '도감': 'РЫБЫ', '최고': 'РЕКОРД', '물고기': 'РЫБЫ', '효과음': 'Звук', '물고기 ': 'РЫБЫ ', '최고 ': 'РЕКОРД '
+    }
+  };
+  const F3 = {
+    ja: { anchovy: 'カタクチイワシ', damsel: 'スズメダイ', scad: 'アジ', sardine: 'マイワシ', mackerel: 'サバ', gizzard: 'コノシロ', rockfish: 'メバル', filefish: 'カワハギ', halfbeak: 'サヨリ', puffer: 'フグ', cutlass: 'タチウオ', bream: 'クロダイ', beakfish: 'イシダイ', opaleye: 'メジナ', snapper: 'マダイ', flounder: 'ヒラメ', seabass: 'スズキ', conger: 'アナゴ', spanish: 'サワラ', croaker: 'ホンニベ', cod: 'マダラ', grouper: 'マハタ', dorado: 'シイラ', yellowtail: 'ブリ', amberjack: 'ヒラマサ', sailfish: 'バショウカジキ', tuna: 'クロマグロ', marlin: 'クロカジキ', swordfish: 'メカジキ', giant: 'ホホジロザメ' },
+    pt: { anchovy: 'Anchova', damsel: 'Donzela', scad: 'Xixarro', sardine: 'Sardinha', mackerel: 'Cavalinha', gizzard: 'Savelha', rockfish: 'Peixe-pedra', filefish: 'Peixe-porco', halfbeak: 'Peixe-agulha', puffer: 'Baiacu', cutlass: 'Peixe-espada', bream: 'Pargo-negro', beakfish: 'Peixe-bico', opaleye: 'Girela', snapper: 'Pargo-vermelho', flounder: 'Linguado', seabass: 'Robalo', conger: 'Congro', spanish: 'Cavala', croaker: 'Corvina', cod: 'Bacalhau', grouper: 'Garoupa', dorado: 'Dourado-do-mar', yellowtail: 'Olho-de-boi', amberjack: 'Arabaiana', sailfish: 'Agulhão-vela', tuna: 'Atum-azul', marlin: 'Marlim-azul', swordfish: 'Espadarte', giant: 'Tubarão-branco' },
+    ru: { anchovy: 'Анчоус', damsel: 'Помацентр', scad: 'Ставрида', sardine: 'Сардина', mackerel: 'Скумбрия', gizzard: 'Пузанок', rockfish: 'Морской окунь', filefish: 'Спинорог', halfbeak: 'Полурыл', puffer: 'Фугу', cutlass: 'Рыба-сабля', bream: 'Морской карась', beakfish: 'Каменный окунь', opaleye: 'Гирелла', snapper: 'Красный пагр', flounder: 'Камбала', seabass: 'Лаврак', conger: 'Морской угорь', spanish: 'Макрель', croaker: 'Горбыль', cod: 'Треска', grouper: 'Групер', dorado: 'Корифена', yellowtail: 'Желтохвост', amberjack: 'Сериола', sailfish: 'Парусник', tuna: 'Синий тунец', marlin: 'Синий марлин', swordfish: 'Меч-рыба', giant: 'Белая акула' }
+  };
+  const NM = sp => EN ? sp.en : ZHL ? (ZHF[sp.id] || sp.en) : L3 ? (F3[L3][sp.id] || sp.en) : sp.ko;
   if (ZHL) {
     document.documentElement.lang = 'zh-CN'; document.title = '大海漂流 — Oreum Games';
     document.querySelectorAll('body *').forEach(el => {
@@ -32,7 +65,25 @@
     st.textContent = `@font-face{font-family:'Griun';src:${zf};unicode-range:${ur}}@font-face{font-family:'Ria';src:${zf};unicode-range:${ur}}html[lang=zh-CN] *{word-break:normal!important}`;
     document.head.appendChild(st);
   }
-  const T = (ko, en) => EN ? en : ZHL && ZH[ko] !== undefined ? ZH[ko] : ko;
+  if (L3) {
+    const D = D3[L3];
+    document.documentElement.lang = L3 === 'pt' ? 'pt-BR' : L3;
+    document.title = { ja: '大海原', pt: 'Mar Aberto', ru: 'Открытое море' }[L3] + ' — Oreum Games';
+    document.querySelectorAll('body *').forEach(el => {
+      if (el.hasAttribute('title') && D[el.getAttribute('title')]) el.setAttribute('title', D[el.getAttribute('title')]);
+      if (el.children.length && el.id !== 'keys') return;
+      const k = el.innerHTML.trim(); if (D[k]) el.innerHTML = D[k];
+    });
+    // 게임 글꼴(Griun·Ria)에 없는 글자는 같은 이름에 기기 글꼴을 그 글자 범위로만 덧붙인다
+    const ff = L3 === 'ja'
+      ? "local('Hiragino Sans'),local('Hiragino Kaku Gothic ProN'),local('Yu Gothic UI'),local('Yu Gothic'),local('Yu Gothic Medium'),local('YuGothic-Medium'),local('Yu Gothic Regular'),local('YuGothic-Regular'),local('Yu Gothic Bold'),local('YuGothic-Bold'),local('MS PGothic'),local('MS Gothic'),local('Meiryo'),local('Noto Sans JP'),local('Noto Sans CJK JP'),local('Source Han Sans JP')"
+      : "local('Segoe UI'),local('Roboto'),local('Arial'),local('Helvetica Neue'),local('Helvetica')";
+    const ur = L3 === 'ja' ? 'U+2E80-2FFF,U+3000-30FF,U+31F0-31FF,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF' : 'U+00A0-024F,U+0400-04FF,U+1E00-1EFF,U+2010-2027';
+    const st = document.createElement('style');
+    st.textContent = `@font-face{font-family:'Griun';src:${ff};unicode-range:${ur}}@font-face{font-family:'Ria';src:${ff};unicode-range:${ur}}` + (L3 === 'ja' ? 'html[lang=ja] *{word-break:normal!important}' : '');
+    document.head.appendChild(st);
+  }
+  const T = (ko, en) => EN ? en : ZHL && ZH[ko] !== undefined ? ZH[ko] : L3 ? (D3[L3][ko] !== undefined ? D3[L3][ko] : en) : ko;
 
   const canvas = $('c');
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });

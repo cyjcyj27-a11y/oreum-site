@@ -240,7 +240,9 @@
     x.shadowColor = '#ffcf4a'; x.shadowBlur = 24 * on; logo(x, 1050, 112, 40); x.shadowBlur = 0;
     x.fillStyle = 'rgba(255,243,196,' + on + ')'; x.shadowColor = '#ffb52e'; x.shadowBlur = 16 * on;
     x.textAlign = 'left';                                  // 간판 = 게임 제목(사장님 9/28 "간판도 뉴월드피자로")
-    if (EN) { x.font = "900 29px 'TitleF', 'Arial Black', sans-serif"; x.fillText('NEW', 1100, 100); x.fillText('WORLD', 1100, 132);
+    if (EN === 'ja') { x.font = "900 29px 'TitleF', sans-serif"; x.fillText('ニュー', 1100, 100); x.fillText('ワールド', 1100, 132);
+      x.font = "900 24px 'TitleF', sans-serif"; x.fillStyle = 'rgba(255,214,90,' + on + ')'; x.fillText('ピ ザ', 1104, 164); }
+    else if (EN) { x.font = "900 29px 'TitleF', 'Arial Black', sans-serif"; x.fillText('NEW', 1100, 100); x.fillText('WORLD', 1100, 132);
       x.font = "900 20px 'TitleF', sans-serif"; x.fillStyle = 'rgba(255,214,90,' + on + ')'; x.fillText('P I Z Z A', 1101, 162); }
     else { x.font = "900 40px 'TitleF', sans-serif"; x.fillText('뉴월드', 1098, 118);
       x.font = "900 30px 'TitleF', sans-serif"; x.fillStyle = 'rgba(255,214,90,' + on + ')'; x.fillText('피 자', 1104, 160); }

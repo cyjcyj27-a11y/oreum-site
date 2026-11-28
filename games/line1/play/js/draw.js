@@ -12,6 +12,8 @@
   var cv, ctx, sc = 1, ox = 0, oy = 0;
   var EN = function () { return window.L1_LANG === 'en'; };
   var ZH = function () { return window.L1_LANG === 'zh'; };
+  var LX = function () { return window.L1_LANG === 'pt' || window.L1_LANG === 'ru'; };
+  var STW = { ja: ['逮捕', '苦情'], pt: ['PRESO', 'QUEIXA'], ru: ['ПОЙМАН', 'ЖАЛОБА'] };
 
   function init(canvas) { cv = canvas; ctx = cv.getContext('2d'); }
   function resize() {
@@ -201,8 +203,8 @@
   function drawFx(f) {
     var x = f.x * T, y = f.y * T, u = f.t / f.life;
     if (f.k === 'coin') txt('+' + f.v, x, y - u * 16, '#ffd84a', 12);
-    else if (f.k === 'stamp') stampBox(x, y, u, EN() ? 'CAUGHT' : ZH() ? '抓获' : '검거', '#c9302a', EN());
-    else if (f.k === 'complain') stampBox(x, y, u, EN() ? 'COMPLAINT' : ZH() ? '投诉' : '민원', '#e0453a', EN());
+    else if (f.k === 'stamp') stampBox(x, y, u, EN() ? 'CAUGHT' : ZH() ? '抓获' : STW[window.L1_LANG] ? STW[window.L1_LANG][0] : '검거', '#c9302a', EN() || LX());
+    else if (f.k === 'complain') stampBox(x, y, u, EN() ? 'COMPLAINT' : ZH() ? '投诉' : STW[window.L1_LANG] ? STW[window.L1_LANG][1] : '민원', '#e0453a', EN() || LX());
     else if (f.k === 'nice') { var sc3 = u < 0.15 ? 0.6 + u / 0.15 * 0.5 : 1.1 - Math.min(0.1, (u - 0.15)); ctx.save(); ctx.globalAlpha = u > 0.75 ? (1 - u) / 0.25 : 1; ctx.translate(x, y); ctx.scale(sc3, sc3); txt('NICE', 0, 0, '#ffe04a', 34); ctx.restore(); }
     else if (f.k === 'found') txt('!', x, y - u * 8, '#ff3b30', 14);
     else if (f.k === 'miss') txt('MISS', x, y - u * 10, '#e8ecf0', 9);

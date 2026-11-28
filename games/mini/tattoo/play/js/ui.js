@@ -10,7 +10,7 @@
     G = GAME; S = G.S;
     if (touch) document.body.classList.add('touch');
     if (window.EN) document.querySelectorAll('[data-en]').forEach((e) => (e.textContent = e.dataset.en));
-    else if (window.LANG === 'zh') document.querySelectorAll('[data-en]').forEach((e) => (e.textContent = L(e.textContent.trim(), e.dataset.en)));
+    else if (window.LANG !== 'ko') document.querySelectorAll('[data-en]').forEach((e) => (e.textContent = L(e.textContent.trim(), e.dataset.en)));
     G.boot();
     const go = () => { RND.frontText(); drawLogo(); };
     (document.fonts ? Promise.all([document.fonts.load('60px Ttl'), document.fonts.load('20px Ui')]).then(go, go) : go());

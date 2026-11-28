@@ -5,6 +5,8 @@
   var QS = location.search;
   var EN = /[?&]lang=en(&|$)/.test(QS), SHOT = /[?&]shot=1/.test(QS);
   var ZH = !EN && /[?&]lang=zh(&|$)/.test(QS);
+  var JA = !EN && !ZH && /[?&]lang=ja(&|$)/.test(QS), PT = !EN && !ZH && /[?&]lang=pt(&|$)/.test(QS), RU = !EN && !ZH && /[?&]lang=ru(&|$)/.test(QS);
+  var LX = EN || PT || RU; // 라틴·키릴 글자 배치(영문과 같은 크기)
   // 중국어 사전: 한국어 문구 -> 간체 중국어
   var ZD = {
     '입문': '入门', '초급': '初级', '중급': '中级', '고급': '高级', '전문가': '专家', '달인': '大师',
@@ -12,9 +14,29 @@
     '지우개': '橡皮', '메모': '笔记', '처음부터': '重来', '판 고르기': '选关', '잠깐': '暂停', '계속': '继续',
     '1~9 숫자 · 방향키 이동 · N 메모 · Backspace 지우개 · Z 되돌리기': '1~9 数字 · 方向键 移动 · N 笔记 · Backspace 橡皮 · Z 撤销'
   };
+  // 일본어·포르투갈어·러시아어 사전: 한국어 문구 -> 그 언어
+  var JD = {
+    '입문': '入門', '초급': '初級', '중급': '中級', '고급': '上級', '전문가': '超上級', '달인': '達人',
+    '스도쿠': '数独', '푼 판 ': 'クリア ', '이어하기': 'つづきから', '시작': 'スタート', '최고 ': 'ベスト ', '모두 합쳐 ': '合計 ',
+    '지우개': '消しゴム', '메모': 'メモ', '처음부터': '最初から', '판 고르기': 'ステージ選択', '잠깐': 'ひと休み', '계속': 'つづける',
+    '1~9 숫자 · 방향키 이동 · N 메모 · Backspace 지우개 · Z 되돌리기': '1~9 数字 · 矢印キー 移動 · N メモ · Backspace 消しゴム · Z 元に戻す'
+  };
+  var PD = {
+    '입문': 'Iniciante', '초급': 'Fácil', '중급': 'Médio', '고급': 'Difícil', '전문가': 'Expert', '달인': 'Mestre',
+    '스도쿠': 'SUDOKU', '푼 판 ': 'RESOLVIDOS ', '이어하기': 'CONTINUAR', '시작': 'JOGAR', '최고 ': 'RECORDE ', '모두 합쳐 ': 'TOTAL ',
+    '지우개': 'BORRACHA', '메모': 'NOTAS', '처음부터': 'REINICIAR', '판 고르기': 'FASES', '잠깐': 'PAUSA', '계속': 'CONTINUAR',
+    '1~9 숫자 · 방향키 이동 · N 메모 · Backspace 지우개 · Z 되돌리기': '1-9 número · setas movem · N notas · Backspace borracha · Z desfazer'
+  };
+  var RD = {
+    '입문': 'Новичок', '초급': 'Лёгкий', '중급': 'Средний', '고급': 'Сложный', '전문가': 'Эксперт', '달인': 'Мастер',
+    '스도쿠': 'СУДОКУ', '푼 판 ': 'РЕШЕНО ', '이어하기': 'ДАЛЬШЕ', '시작': 'НАЧАТЬ', '최고 ': 'РЕКОРД ', '모두 합쳐 ': 'ВСЕГО ',
+    '지우개': 'ЛАСТИК', '메모': 'МЕТКИ', '처음부터': 'ЗАНОВО', '판 고르기': 'УРОВНИ', '잠깐': 'ПАУЗА', '계속': 'ДАЛЬШЕ',
+    '1~9 숫자 · 방향키 이동 · N 메모 · Backspace 지우개 · Z 되돌리기': '1-9 цифра · стрелки — ход · N метки · Backspace ластик · Z отмена'
+  };
+  var LD = JA ? JD : PT ? PD : RU ? RD : null;
   function qp(k) { var m = new RegExp('[?&]' + k + '=([^&]*)').exec(QS); return m ? decodeURIComponent(m[1]) : null; }
   var TIER_KO = window.SDK_TIERS, TIER_EN = ['BEGINNER', 'EASY', 'MEDIUM', 'HARD', 'EXPERT', 'MASTER'];
-  function T(ko, en) { return EN ? en : ZH && ZD[ko] != null ? ZD[ko] : ko; }
+  function T(ko, en) { if (LD) return LD[ko] != null ? LD[ko] : en; return EN ? en : ZH && ZD[ko] != null ? ZD[ko] : ko; }
   var tierOf = PZ.map(function (p) { return p[2]; });
   var tierFirst = [], tierCount = [], numIn = [];
   tierOf.forEach(function (t, i) {
@@ -242,7 +264,7 @@
       L.tS = St; L.tbx = (W - St) / 2; L.tby = top + 6 + St * 0.085;
       var ty0 = L.tby + St * 1.04 + 8;
       tt.style.cssText = 'left:0;width:' + W + 'px;top:' + ty0 + 'px;height:' + (H - ty0) + 'px;padding-bottom:46px;';
-      $('title').querySelector('h1').style.fontSize = Math.min(W * (EN ? 0.15 : 0.24), (H - ty0 - 46) * 0.34, 170) + 'px';
+      $('title').querySelector('h1').style.fontSize = Math.min(W * (LX ? 0.15 : 0.24), (H - ty0 - 46) * 0.34, 170) + 'px';
     } else {
       var St2 = Math.min((H - top - 50) / KY, W * 0.5, 600);
       var rightW = Math.min(W - St2 * KX - 60, 560);
@@ -251,7 +273,7 @@
       L.tS = St2; L.tbx = gx0 + St2 * 0.035; L.tby = top + (H - top - 50 - St2 * KY) / 2 + St2 * 0.085;
       var rx = gx0 + St2 * KX + 40;
       tt.style.cssText = 'left:' + rx + 'px;width:' + rightW + 'px;top:' + top + 'px;height:' + (H - top) + 'px;padding-bottom:' + Math.max(8, H * 0.03) + 'px;';
-      $('title').querySelector('h1').style.fontSize = Math.min(rightW * (EN ? (SHOT ? 0.2 : 0.19) : 0.3), H * (SHOT ? 0.26 : 0.22), SHOT ? 230 : 170) + 'px';
+      $('title').querySelector('h1').style.fontSize = Math.min(rightW * (LX ? (SHOT ? 0.2 : 0.19) : 0.3), H * (SHOT ? 0.26 : 0.22), SHOT ? 230 : 170) + 'px';
     }
     Array.prototype.forEach.call(pad.children, function (c) { c.querySelector('.k').style.fontSize = L.kfont + 'px'; });
     makeBg(); dirty = true;
@@ -315,8 +337,8 @@
     ctx.lineWidth = Math.max(2, r * 0.09); ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI * 2); ctx.stroke();
     ctx.lineWidth = Math.max(1, r * 0.04); ctx.beginPath(); ctx.arc(0, 0, r * 0.82, 0, Math.PI * 2); ctx.stroke();
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.font = (r * (EN ? 0.36 : 0.42)) + 'px Allim';
-    ctx.fillText(EN ? 'GREAT' : ZH ? '做得' : '참 잘', 0, -r * 0.22); ctx.fillText(EN ? 'JOB' : ZH ? '真棒' : '했어요', 0, r * 0.26);
+    ctx.font = (r * (LX ? 0.36 : JA ? 0.28 : 0.42)) + 'px Allim';
+    ctx.fillText(EN ? 'GREAT' : ZH ? '做得' : JA ? 'よく' : PT ? 'MUITO' : RU ? 'ВСЁ' : '참 잘', 0, -r * 0.22); ctx.fillText(EN ? 'JOB' : ZH ? '真棒' : JA ? 'できました' : PT ? 'BEM!' : RU ? 'ВЕРНО!' : '했어요', 0, r * 0.26);
     ctx.restore();
   }
   function titleData() {
@@ -520,7 +542,7 @@
     var st = $('stamp');
     st.style.left = (L.bx + L.S / 2) + 'px'; st.style.top = (L.by + L.S / 2) + 'px';
     var sz = Math.min(L.S * 0.62, 240); st.style.width = st.style.height = sz + 'px'; st.style.margin = (-sz / 2) + 'px 0 0 ' + (-sz / 2) + 'px';
-    st.style.fontSize = (sz * (EN ? 0.15 : 0.19)) + 'px';
+    st.style.fontSize = (sz * (LX ? 0.15 : JA ? 0.14 : 0.19)) + 'px';
     setTimeout(function () { st.className = 'show' + (allNow ? ' gold' : ''); AU.play('stamp'); }, fx.still ? 0 : 650);
     setTimeout(function () {
       $('cStage').textContent = label(G.st);
@@ -667,6 +689,20 @@
     document.head.appendChild(zst);
     document.querySelectorAll('[data-en]').forEach(function (el) { var k = el.textContent; if (ZD[k] != null) el.textContent = ZD[k]; });
     $('stampT').innerHTML = '做得<br>真棒';
+  }
+  // ---------- 일본어·포르투갈어·러시아어 ----------
+  if (LD) {
+    if (!JA) document.body.classList.add('en');
+    document.documentElement.lang = JA ? 'ja' : PT ? 'pt-BR' : 'ru';
+    document.title = JA ? '数独' : PT ? 'Sudoku' : 'Судоку';
+    var lf = JA ? "local('Hiragino Sans'),local('Hiragino Kaku Gothic ProN'),local('Yu Gothic UI'),local('Yu Gothic'),local('Yu Gothic Medium'),local('YuGothic-Medium'),local('Yu Gothic Regular'),local('YuGothic-Regular'),local('Yu Gothic Bold'),local('YuGothic-Bold'),local('MS PGothic'),local('MS Gothic'),local('Meiryo'),local('Noto Sans JP'),local('Noto Sans CJK JP'),local('Source Han Sans JP')"
+      : "local('Segoe UI'),local('Roboto'),local('Arial'),local('Helvetica Neue'),local('Helvetica')";
+    var lr = JA ? 'U+2E80-2FFF,U+3000-30FF,U+31F0-31FF,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF' : 'U+00A0-024F,U+0400-04FF,U+1E00-1EFF,U+2010-2027';
+    var lst = document.createElement('style');
+    lst.textContent = ['Kku', 'Allim', 'Nadeuri'].map(function (f) { return "@font-face{font-family:'" + f + "';src:" + lf + ';unicode-range:' + lr + '}'; }).join('') + (JA ? 'html[lang=ja] *{word-break:normal!important}' : '');
+    document.head.appendChild(lst);
+    document.querySelectorAll('[data-en]').forEach(function (el) { var k = el.textContent; if (LD[k] != null) el.textContent = LD[k]; });
+    $('stampT').innerHTML = JA ? 'よく<br>できました' : PT ? 'MUITO<br>BEM!' : 'ВСЁ<br>ВЕРНО!';
   }
 
   // ---------- 시작 ----------

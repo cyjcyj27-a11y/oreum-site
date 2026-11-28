@@ -30,6 +30,24 @@
     for (var zk in zl) $(zk).setAttribute('aria-label', zl[zk]);
   }
 
+  var XG = { ja: { lang: 'ja', aria: { bPause: '一時停止', bSpd: '倍速', bBgm: '音楽', bSnd: '効果音' } },
+             pt: { lang: 'pt-BR', aria: { bPause: 'Pausar', bSpd: 'Velocidade', bBgm: 'Música', bSnd: 'Efeitos sonoros' } },
+             ru: { lang: 'ru', aria: { bPause: 'Пауза', bSpd: 'Скорость', bBgm: 'Музыка', bSnd: 'Звуки' } } }[window.GY_LANG];
+  if (XG) {
+    document.documentElement.lang = XG.lang; document.title = L('교도관24시');
+    // 글꼴에 없는 글자(가나·한자, 악센트 라틴·키릴)만 시스템 글꼴로 채운다
+    var xf = window.GY_LANG === 'ja' ? "local('Hiragino Sans'),local('Hiragino Kaku Gothic ProN'),local('Yu Gothic UI'),local('Yu Gothic'),local('Yu Gothic Medium'),local('YuGothic-Medium'),local('Yu Gothic Regular'),local('YuGothic-Regular'),local('Yu Gothic Bold'),local('YuGothic-Bold'),local('MS PGothic'),local('MS Gothic'),local('Meiryo'),local('Noto Sans JP'),local('Noto Sans CJK JP'),local('Source Han Sans JP')"
+      : "local('Segoe UI'),local('Roboto'),local('Arial'),local('Helvetica Neue'),local('Helvetica')";
+    var xr = window.GY_LANG === 'ja' ? 'U+2E80-2FFF,U+3000-30FF,U+31F0-31FF,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF' : 'U+00A0-024F,U+0400-04FF,U+1E00-1EFF,U+2010-2027';
+    var xst = document.createElement('style');
+    xst.textContent = ['Mulmaru', 'DungGeunMo'].map(function (f) { return '@font-face{font-family:' + f + ';src:' + xf + ';unicode-range:' + xr + '}'; }).join('') + (window.GY_LANG === 'ja' ? 'html[lang=ja] *{word-break:normal!important}' : '');
+    document.head.appendChild(xst);
+    document.querySelector('#title .logo').textContent = L('교도관24시');
+    document.querySelector('#days h2').textContent = L('근무표');
+    $('rotBtn').textContent = L('가로로 보기'); $('rotate').firstElementChild.textContent = L('교도관24시');
+    for (var xk in XG.aria) $(xk).setAttribute('aria-label', XG.aria[xk]);
+  }
+
   GYD.init($('cv'));
   function layout() { GYD.resize(); }
   window.addEventListener('resize', function () { setTimeout(layout, 30); });

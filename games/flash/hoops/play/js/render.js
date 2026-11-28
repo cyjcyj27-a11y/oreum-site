@@ -397,6 +397,7 @@
     for (let i = 0; i < 40; i++) { g.fillStyle = i % 2 ? '#ffd23a' : '#fff4c0'; g.beginPath(); g.arc(24 + i * (w - 48) / 39, 22, 5, 0, 7); g.fill(); g.beginPath(); g.arc(24 + i * (w - 48) / 39, h - 22, 5, 0, 7); g.fill(); }
     g.textAlign = 'center'; g.textBaseline = 'middle';
     g.font = '130px "Ttl", sans-serif';
+    if (window.LG3) { let px = 130; while (px > 40 && g.measureText(R.TITLE || '').width > w - 60) { px -= 4; g.font = px + 'px "Ttl", sans-serif'; } }
     g.shadowColor = '#ff6a1a'; g.shadowBlur = 30; g.fillStyle = '#ffb35a'; g.fillText(R.TITLE || '오락실 농구', w / 2, h / 2 + 6);
     g.shadowBlur = 0; g.fillStyle = '#fff3d6'; g.fillText(R.TITLE || '오락실 농구', w / 2, h / 2 + 6);
   }

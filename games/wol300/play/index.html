@@ -315,7 +315,7 @@ if(ZH){ document.documentElement.lang='zh-CN'; document.querySelectorAll('[data-
   const st=document.createElement('style'); st.textContent="@font-face{font-family:'WolDokdo';src:"+zf+";unicode-range:"+ur+"}html[lang=zh-CN] *{word-break:normal!important}"; document.head.appendChild(st); }
 if(XD){ document.documentElement.lang=JA?'ja':PT?'pt-BR':'ru'; document.querySelectorAll('[data-en]').forEach(e=>{ const t=e.textContent; if(XD[t]!=null) e.textContent=XD[t]; });
   /* system fonts for glyphs missing from the Korean subset font: kana/kanji for ja, accented Latin and Cyrillic for pt/ru */
-  const jf="local('Hiragino Sans'),local('Hiragino Kaku Gothic ProN'),local('Yu Gothic UI'),local('Yu Gothic'),local('Meiryo'),local('Noto Sans JP'),local('Noto Sans CJK JP'),local('Source Han Sans JP')";
+  const jf="local('Hiragino Sans'),local('Hiragino Kaku Gothic ProN'),local('HiraginoSans-W6'),local('Yu Gothic Bold'),local('YuGothic-Bold'),local('Yu Gothic Regular'),local('YuGothic-Regular'),local('Yu Gothic UI'),local('Yu Gothic'),local('Yu Gothic Medium'),local('YuGothic-Medium'),local('Yu Gothic Regular'),local('YuGothic-Regular'),local('Yu Gothic Bold'),local('YuGothic-Bold'),local('MS PGothic'),local('MS Gothic'),local('Meiryo'),local('Noto Sans JP'),local('Noto Sans CJK JP'),local('NotoSansCJKjp-Regular'),local('Source Han Sans JP'),local('MS Gothic')";
   const lf="local('Segoe UI'),local('Roboto'),local('Arial'),local('Helvetica Neue'),local('Helvetica')";
   const st=document.createElement('style'); st.textContent=JA?"@font-face{font-family:'WolDokdo';src:"+jf+";unicode-range:U+2E80-2FFF,U+3000-30FF,U+31F0-31FF,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF}html[lang=ja] *{word-break:normal!important}"
     :"@font-face{font-family:'WolDokdo';src:"+lf+";unicode-range:U+00A0-024F,U+0400-04FF,U+1E00-1EFF,U+2010-2027}"; document.head.appendChild(st); }
@@ -2872,7 +2872,7 @@ window.__w={G,HERO,ACC,ROOMS,
     const r=await fetch('/save?name='+encodeURIComponent(name),{method:'POST',body:z.toDataURL('image/png')}); return r.text(); },
 };
 </script>
-<script src="assets/game-home.js?v=3" data-top="6" data-left="6" data-fullscreen="1" defer></script>
+<script src="assets/game-home.js?v=4" data-top="6" data-left="6" data-fullscreen="1" defer></script>
 <script src="/assets/visit.js?v=21" defer></script>
 <script src="/assets/game-events.js?v=4" defer></script>
 </body>

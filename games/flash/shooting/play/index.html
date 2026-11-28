@@ -90,7 +90,7 @@ html.touch body.aiming #pad,html.touch body.aiming #fireBtn{display:block}
   box-shadow:0 0 0 7px var(--gold),0 0 0 10px #6a4006,0 9px 0 4px #140408,0 12px 18px rgba(0,0,0,.5),inset 0 6px 0 rgba(255,220,190,.5),inset 0 -8px 0 rgba(60,0,0,.35);
   transition:transform .06s,box-shadow .06s}
 #fireBtn.on{transform:translateY(6px);box-shadow:0 0 0 7px var(--gold),0 0 0 10px #6a4006,0 3px 0 4px #140408,0 5px 10px rgba(0,0,0,.5),inset 0 4px 0 rgba(255,220,190,.35),inset 0 -4px 0 rgba(60,0,0,.35)}
-html[lang=en] #fireBtn{font-size:26px}
+html[lang=en] #fireBtn,html[lang=pt-BR] #fireBtn,html[lang=ru] #fireBtn{font-size:26px}
 
 /* ---------- 큰 글자 ---------- */
 #word{position:fixed;left:50%;top:40%;transform:translate(-50%,-50%) scale(.4);z-index:26;pointer-events:none;
@@ -113,14 +113,14 @@ html[lang=en] #fireBtn{font-size:26px}
 /* ---------- 타이틀 ---------- */
 #title{position:fixed;inset:0;z-index:30;display:flex;flex-direction:column;align-items:center;justify-content:space-between;
   padding:calc(58px + env(safe-area-inset-top)) 16px calc(28px + env(safe-area-inset-bottom));pointer-events:none}
-html[lang=en] #logo{white-space:normal;text-align:center;font-size:clamp(46px,8vw,96px);line-height:.95}
+html[lang=en] #logo,html[lang=pt-BR] #logo,html[lang=ru] #logo{white-space:normal;text-align:center;font-size:clamp(46px,8vw,96px);line-height:.95}
 #logo{font-family:'Round','Ria',sans-serif;font-size:clamp(64px,13vw,150px);line-height:1;color:#fff4d6;letter-spacing:.02em;white-space:nowrap;
   -webkit-text-stroke:.075em #8a1408;paint-order:stroke fill;transform:rotate(-3deg);
   text-shadow:0 .05em 0 #8a1408,0 .1em 0 #5a0a04,0 .15em 0 #3a0402,0 .25em .35em rgba(0,0,0,.55)}
 .menu{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;width:min(94vw,640px)}
 .menu #bStart{grid-column:1/-1;justify-self:center}
 .menu .btn:not(.main){min-width:0;padding:11px 8px;font-size:18px}
-html[lang=en] .menu .btn:not(.main){font-size:15px}
+html[lang=en] .menu .btn:not(.main),html[lang=pt-BR] .menu .btn:not(.main),html[lang=ru] .menu .btn:not(.main){font-size:15px}
 
 /* ---------- 끝 카드(큰 입장권) ---------- */
 #end{position:fixed;inset:0;z-index:45;display:flex;align-items:center;justify-content:center;background:rgba(10,2,8,.35);padding:16px}
@@ -228,12 +228,12 @@ html.ol-land #rotate{display:none!important}
 @media (max-height:480px){
   #title{justify-content:flex-start;gap:3vh;padding-top:calc(13vh + env(safe-area-inset-top));padding-bottom:26vh}
   #logo{font-size:17vh}
-  html[lang=en] #logo{font-size:12vh}
+  html[lang=en] #logo,html[lang=pt-BR] #logo,html[lang=ru] #logo{font-size:12vh}
   .menu{width:min(62vw,470px);gap:2.2vh 8px}
   .btn{font-size:4.6vh;padding:2vh 10px;min-width:0}
   .btn.main{font-size:7.4vh;padding:2.2vh 34px;min-width:0}
   .menu .btn:not(.main){font-size:4.4vh;padding:2vh 4px}
-  html[lang=en] .menu .btn:not(.main){font-size:3.6vh}
+  html[lang=en] .menu .btn:not(.main),html[lang=pt-BR] .menu .btn:not(.main),html[lang=ru] .menu .btn:not(.main){font-size:3.6vh}
   .btn::after{inset:1.4vh 12px}
   #end{align-items:flex-start;padding-top:9vh}
   .ecard{padding:3.5vh 36px 3vh;gap:1.8vh}
@@ -270,7 +270,9 @@ html.ol-land #rotate{display:none!important}
   #knob{width:15vh;height:15vh;margin:-7.5vh 0 0 -7.5vh}
   #knob::after{inset:4.8vh}
   #fireBtn{width:30vh;height:30vh;font-size:7.5vh;right:calc(6vh + env(safe-area-inset-right));bottom:calc(7vh + env(safe-area-inset-bottom))}
-  html[lang=en] #fireBtn{font-size:6.4vh}
+  html[lang=en] #fireBtn,html[lang=pt-BR] #fireBtn,html[lang=ru] #fireBtn{font-size:6.4vh}
+  html[lang=pt-BR] #fireBtn{font-size:5.6vh}
+  html[lang=pt-BR] .menu{width:min(70vw,540px)}
 }
 </style>
 </head>
@@ -364,9 +366,9 @@ html.ol-land #rotate{display:none!important}
 <div id="rotate"><div class="tix"><button class="btn main" onclick="window.OL&&OL.go()">가로로 보기</button></div></div>
 <div id="loading">LOADING</div>
 
-<script src="js/lang.js?v=5"></script>
+<script src="js/lang.js?v=7"></script>
 <script src="assets/landscape.js"></script>
-<script src="assets/game-home.js?v=2" data-top="6" data-left="6" data-fullscreen="1" defer></script>
+<script src="assets/game-home.js?v=3" data-top="6" data-left="6" data-fullscreen="1" defer></script>
 <script src="lib/three.min.js"></script>
 <script src="lib/rapier.js"></script>
 <script src="js/stages.js?v=2"></script>

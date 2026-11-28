@@ -318,7 +318,7 @@
   R.drawStreet = function () {
     const g = streetC.getContext('2d'), w = 2048, h = 900; seed = 99;
     const sky = g.createLinearGradient(0, 0, 0, h); sky.addColorStop(0, '#0a0c1c'); sky.addColorStop(0.55, '#1d1a2c'); sky.addColorStop(1, '#2a1c18'); g.fillStyle = sky; g.fillRect(0, 0, w, h);
-    const signs = window.ZH ? window.SIGNS_ZH : EN ? ['GUKBAP', 'PHARMACY', 'KARAOKE', 'CAFE', 'FISH', 'HOTEL', 'BIFF', 'BBQ', 'NAMPO', 'SNACK', 'CINEMA'] : ['국밥', '약국', '노래방', '다방', '횟집', '호텔', 'BIFF', '갈비', '남포동', '분식', '극장'];
+    const signs = window.SIGNS_LG ? window.SIGNS_LG : window.ZH ? window.SIGNS_ZH : EN ? ['GUKBAP', 'PHARMACY', 'KARAOKE', 'CAFE', 'FISH', 'HOTEL', 'BIFF', 'BBQ', 'NAMPO', 'SNACK', 'CINEMA'] : ['국밥', '약국', '노래방', '다방', '횟집', '호텔', 'BIFF', '갈비', '남포동', '분식', '극장'];
     const cols = ['#ff4a5a', '#3ae0ff', '#ffd23a', '#ff7af0', '#7aff8a', '#ffffff', '#ff8a2a'];
     // 건물
     let x = -40;
@@ -328,7 +328,7 @@
       for (let yy = top + 20; yy < h - 140; yy += 38) for (let xx = x + 14; xx < x + bw - 20; xx += 34) { if (rnd() < 0.45) { g.fillStyle = rnd() < 0.6 ? 'rgba(255,214,150,' + (0.45 + rnd() * 0.5) + ')' : 'rgba(170,210,255,' + (0.3 + rnd() * 0.4) + ')'; g.fillRect(xx, yy, 20, 24); } }
       // 세로 간판
       if (rnd() < 0.75) { const sx = x + bw * (0.2 + rnd() * 0.5), sy = top + 40 + rnd() * 120, s = signs[Math.floor(rnd() * signs.length)], c = cols[Math.floor(rnd() * cols.length)];
-        const vert = rnd() < 0.5 && !EN; g.save(); g.shadowColor = c; g.shadowBlur = 30; g.fillStyle = '#111'; const sw = vert ? 70 : 60 + s.length * 52, sh = vert ? 70 * s.length + 20 : 80; g.fillRect(sx - 6, sy - 6, sw + 12, sh + 12); g.strokeStyle = c; g.lineWidth = 6; g.strokeRect(sx, sy, sw, sh); g.fillStyle = c; g.font = '900 54px Ui, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
+        const vert = rnd() < 0.5 && !EN && !window.SIGNS_LAT; g.save(); g.shadowColor = c; g.shadowBlur = 30; g.fillStyle = '#111'; const sw = vert ? 70 : 60 + s.length * 52, sh = vert ? 70 * s.length + 20 : 80; g.fillRect(sx - 6, sy - 6, sw + 12, sh + 12); g.strokeStyle = c; g.lineWidth = 6; g.strokeRect(sx, sy, sw, sh); g.fillStyle = c; g.font = '900 54px Ui, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
           if (vert) [...s].forEach((ch, i) => g.fillText(ch, sx + sw / 2, sy + 45 + i * 70)); else g.fillText(s, sx + sw / 2, sy + sh / 2 + 3); g.restore(); }
       x += bw + 6;
     }
@@ -372,11 +372,11 @@
     const keys = DATA.KIND_KEYS;
     keys.forEach((k, i) => { const K = DATA.KIND[k], y = 140 + i * 48; g.globalAlpha = DATA.isOpen(k, day) ? 1 : 0.25; g.font = '900 36px Ui, sans-serif'; g.textAlign = 'left'; g.fillStyle = '#1a1410'; g.fillText(L(K.ko, K.en), 34, y); g.textAlign = 'right'; g.fillStyle = '#c8261e'; g.fillText(K.price.toLocaleString(), w - 30, y); g.globalAlpha = 1; });
     g.strokeStyle = '#c8261e'; g.lineWidth = 6; g.beginPath(); g.ellipse(w / 2, 600, 150, 26, -0.03, 0, 7); g.stroke();
-    g.font = '900 34px Ui, sans-serif'; g.textAlign = 'center'; g.fillStyle = '#c8261e'; g.fillText(L('부산 명물', 'Busan Classic'), w / 2, 602);
+    g.font = '900 34px Ui, sans-serif'; g.textAlign = 'center'; g.fillStyle = '#c8261e'; if (['ja', 'pt', 'ru'].includes(window.LG)) g.fillText(L('부산 명물', 'Busan Classic'), w / 2, 602, 260); else g.fillText(L('부산 명물', 'Busan Classic'), w / 2, 602);
     menuMat.map.needsUpdate = true;
   };
   // 오른쪽: 쌓인 씨앗 봉지·냅킨통(장식)
-  { const bag = canvas(256, 320, (g, w, h) => { g.fillStyle = '#e9e2cf'; g.fillRect(0, 0, w, h); g.fillStyle = '#3d7a3c'; g.fillRect(0, 60, w, 120); g.fillStyle = '#fff'; g.font = '900 54px Ui, sans-serif'; g.textAlign = 'center'; g.fillText(L('해바라기씨', 'SEEDS'), w / 2, 136); g.fillStyle = 'rgba(0,0,0,.15)'; g.fillRect(0, 0, w, 14); });
+  { const bag = canvas(256, 320, (g, w, h) => { g.fillStyle = '#e9e2cf'; g.fillRect(0, 0, w, h); g.fillStyle = '#3d7a3c'; g.fillRect(0, 60, w, 120); g.fillStyle = '#fff'; g.font = '900 54px Ui, sans-serif'; g.textAlign = 'center'; if (['ja', 'pt', 'ru'].includes(window.LG)) g.fillText(L('해바라기씨', 'SEEDS'), w / 2, 136, 210); else g.fillText(L('해바라기씨', 'SEEDS'), w / 2, 136); g.fillStyle = 'rgba(0,0,0,.15)'; g.fillRect(0, 0, w, 14); });
     const bm = new THREE.MeshStandardMaterial({ map: tex(bag), roughness: 0.75 });
     [[1.02, -0.45, 0.3], [1.1, -0.15, -0.2]].forEach(([x, z, r]) => { const m = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.22, 0.07), bm); m.position.set(x, 0.11, z); m.rotation.y = r; m.castShadow = true; scene.add(m); });
     const shelf = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.03, 0.9), steelMat); shelf.position.set(1.06, -0.015, -0.2); shelf.receiveShadow = true; scene.add(shelf);

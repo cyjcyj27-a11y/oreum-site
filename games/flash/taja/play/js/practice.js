@@ -5,6 +5,7 @@
   var A = window.TJAudio, HG = window.HG;
   var $ = function (id) { return document.getElementById(id); };
   var EN = /[?&]lang=en/i.test(location.search), ZH = /[?&]lang=zh/i.test(location.search);
+  var JA = /[?&]lang=ja/i.test(location.search), PT = /[?&]lang=pt/i.test(location.search), RU = /[?&]lang=ru/i.test(location.search);
   // 중국어판 화면 글(단계 이름은 한글·영어 이름 둘 다 열쇠로)
   var ZHD = {
     '자리 연습': '键位练习', '낱말 연습': '单词练习', '짧은 글 연습': '短句练习', '긴 글 연습': '长文练习', '타': 'KPM', '최고 기록!': '新纪录！', '최고 ': '最高 ',
@@ -15,8 +16,36 @@
     '토끼와 거북이': '龟兔赛跑', '금도끼 은도끼': '金斧头银斧头', '개미와 베짱이': '蚂蚁和蝈蝈', '해님 달님': '日月兄妹', '흥부와 놀부': '兴夫和孬夫', '견우와 직녀': '牛郎织女',
     'The Tortoise and the Hare': '龟兔赛跑', 'The Ant and the Grasshopper': '蚂蚁和蚱蜢', 'The Lion and the Mouse': '狮子和老鼠', 'The Boy Who Cried Wolf': '狼来了', 'The Honest Woodcutter': '诚实的樵夫', 'The Sun and the Wind': '北风和太阳'
   };
-  function L(ko, en) { return ZH ? (ZHD[ko] || en) : EN ? en : ko; }
-  function LV(s) { return ZH && ZHD[s] ? ZHD[s] : s; }
+  var JAD = {
+    '자리 연습': 'キー練習', '낱말 연습': '単語練習', '짧은 글 연습': '短文練習', '긴 글 연습': '長文練習', '타': 'KPM', '최고 기록!': '新記録！', '최고 ': 'ベスト ',
+    '기본 자리': 'ホームポジション', '윗줄': '上の段', '아랫줄': '下の段', '쌍자음': '濃音', '숫자': '数字', '전체': 'ぜんぶ',
+    'Home row': 'ホームポジション', 'Top row': '上の段', 'Bottom row': '下の段', 'Capitals': '大文字', 'Numbers': '数字', 'All': 'ぜんぶ',
+    '문장 1': '文 1', '문장 2': '文 2', '속담': 'ことわざ', '긴 문장': '長い文', '기호': '記号',
+    'Sentences 1': '文 1', 'Sentences 2': '文 2', 'Proverbs': 'ことわざ', 'Long': '長い文', 'Symbols': '記号',
+    '토끼와 거북이': 'ウサギとカメ', '금도끼 은도끼': '金の斧 銀の斧', '개미와 베짱이': 'アリとキリギリス', '해님 달님': 'お日さまとお月さま', '흥부와 놀부': 'フンブとノルブ', '견우와 직녀': '彦星と織姫',
+    'The Tortoise and the Hare': 'ウサギとカメ', 'The Ant and the Grasshopper': 'アリとキリギリス', 'The Lion and the Mouse': 'ライオンとネズミ', 'The Boy Who Cried Wolf': 'オオカミ少年', 'The Honest Woodcutter': '正直なきこり', 'The Sun and the Wind': '北風と太陽'
+  };
+  var PTD = {
+    '자리 연습': 'Teclas', '낱말 연습': 'Palavras', '짧은 글 연습': 'Frases', '긴 글 연습': 'Histórias', '타': 'KPM', '최고 기록!': 'NOVO RECORDE', '최고 ': 'RECORDE ',
+    '기본 자리': 'Linha base', '윗줄': 'Linha de cima', '아랫줄': 'Linha de baixo', '쌍자음': 'Consoantes duplas', '숫자': 'Números', '전체': 'Tudo',
+    'Home row': 'Linha base', 'Top row': 'Linha de cima', 'Bottom row': 'Linha de baixo', 'Capitals': 'Maiúsculas', 'Numbers': 'Números', 'All': 'Tudo',
+    '문장 1': 'Frases 1', '문장 2': 'Frases 2', '속담': 'Provérbios', '긴 문장': 'Frases longas', '기호': 'Símbolos',
+    'Sentences 1': 'Frases 1', 'Sentences 2': 'Frases 2', 'Proverbs': 'Provérbios', 'Long': 'Frases longas', 'Symbols': 'Símbolos',
+    '토끼와 거북이': 'A Lebre e a Tartaruga', '금도끼 은도끼': 'O Machado de Ouro', '개미와 베짱이': 'A Formiga e a Cigarra', '해님 달님': 'O Sol e a Lua', '흥부와 놀부': 'Heungbu e Nolbu', '견우와 직녀': 'O Pastor e a Tecelã',
+    'The Tortoise and the Hare': 'A Lebre e a Tartaruga', 'The Ant and the Grasshopper': 'A Formiga e a Cigarra', 'The Lion and the Mouse': 'O Leão e o Rato', 'The Boy Who Cried Wolf': 'O Menino e o Lobo', 'The Honest Woodcutter': 'O Lenhador Honesto', 'The Sun and the Wind': 'O Sol e o Vento'
+  };
+  var RUD = {
+    '자리 연습': 'Клавиши', '낱말 연습': 'Слова', '짧은 글 연습': 'Фразы', '긴 글 연습': 'Рассказы', '타': 'KPM', '최고 기록!': 'НОВЫЙ РЕКОРД', '최고 ': 'РЕКОРД ',
+    '기본 자리': 'Основной ряд', '윗줄': 'Верхний ряд', '아랫줄': 'Нижний ряд', '쌍자음': 'Двойные согласные', '숫자': 'Цифры', '전체': 'Все',
+    'Home row': 'Основной ряд', 'Top row': 'Верхний ряд', 'Bottom row': 'Нижний ряд', 'Capitals': 'Заглавные', 'Numbers': 'Цифры', 'All': 'Все',
+    '문장 1': 'Фразы 1', '문장 2': 'Фразы 2', '속담': 'Пословицы', '긴 문장': 'Длинные фразы', '기호': 'Символы',
+    'Sentences 1': 'Фразы 1', 'Sentences 2': 'Фразы 2', 'Proverbs': 'Пословицы', 'Long': 'Длинные фразы', 'Symbols': 'Символы',
+    '토끼와 거북이': 'Заяц и черепаха', '금도끼 은도끼': 'Золотой топор', '개미와 베짱이': 'Муравей и кузнечик', '해님 달님': 'Солнце и луна', '흥부와 놀부': 'Хынбу и Нольбу', '견우와 직녀': 'Пастух и ткачиха',
+    'The Tortoise and the Hare': 'Заяц и черепаха', 'The Ant and the Grasshopper': 'Муравей и кузнечик', 'The Lion and the Mouse': 'Лев и мышь', 'The Boy Who Cried Wolf': 'Мальчик и волк', 'The Honest Woodcutter': 'Честный дровосек', 'The Sun and the Wind': 'Солнце и ветер'
+  };
+  var XD = ZH ? ZHD : JA ? JAD : PT ? PTD : RU ? RUD : null;
+  function L(ko, en) { return XD ? (XD[ko] || en) : EN ? en : ko; }
+  function LV(s) { return XD && XD[s] ? XD[s] : s; }
 
   // ── 키보드: [코드, 한글, 한글+Shift, 영어, 영어+Shift, 손가락(0~7, 8 엄지), 너비] ──
   var ROWS = [
@@ -77,7 +106,7 @@
   };
 
   // ── 상태 ──
-  var PR = null, lang = EN || ZH ? 'en' : 'ko', tick = null;
+  var PR = null, lang = EN || ZH || JA || PT || RU ? 'en' : 'ko', tick = null;
   var best = (function () { try { return JSON.parse(localStorage.getItem('taja.prac') || '{}') || {}; } catch (e) { return {}; } })();
   function saveBest() { try { localStorage.setItem('taja.prac', JSON.stringify(best)); } catch (e) {} }
   function unit() { return lang === 'en' ? 'WPM' : L('타', 'KPM'); }

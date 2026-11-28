@@ -20,15 +20,17 @@
     ctx.fillStyle = 'rgba(255,255,255,.35)'; ctx.beginPath(); ctx.moveTo(x + 6, y + 6); ctx.lineTo(x + w * .5, y + 6); ctx.lineTo(x + 6, y + h * .5); ctx.closePath(); ctx.fill();
   }
   const ZHL = /[?&]lang=zh(&|$)/.test(location.search);
+  const XL = (/[?&]lang=(ja|pt|ru)(&|$)/.exec(location.search) || [])[1] || '';
+  const XM = { ja: ['オムライス', 'パフェ', 'ケーキ', 'コーヒー', '萌え萌えきゅん♡'], pt: ['Omurice', 'Parfait', 'Bolo', 'Café', 'moe moe kyun♡'], ru: ['Омурайсу', 'Парфе', 'Торт', 'Кофе', 'моэ моэ кюн♡'] }[XL];
   function chalkboard(ctx, x, y, w, h, EN) {
     rr(ctx, x, y, w, h, 6); ctx.fillStyle = '#7a5a3a'; ctx.fill(); rr(ctx, x + 6, y + 6, w - 12, h - 12, 3); ctx.fillStyle = '#2e4a3e'; ctx.fill();
     ctx.fillStyle = 'rgba(255,255,255,.06)'; for (let i = 0; i < 12; i++) ctx.fillRect(x + 8 + i * (w - 16) / 12, y + 8, 3, h - 16);
     ctx.textAlign = 'center'; ctx.fillStyle = '#fff2d8'; ctx.font = "bold 22px 'Ria', sans-serif"; ctx.fillText('MENU', x + w / 2, y + 36);
     ctx.strokeStyle = '#ffd0e0'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(x + 30, y + 44); ctx.lineTo(x + w - 30, y + 44); ctx.stroke();
     ctx.font = "15px 'Griun', sans-serif"; ctx.textAlign = 'left';
-    const items = ZHL ? [['omu', '蛋包饭'], ['parfait', '芭菲'], ['cake', '蛋糕'], ['coffee', '咖啡']] : EN ? [['omu', 'Omurice'], ['parfait', 'Parfait'], ['cake', 'Cake'], ['coffee', 'Coffee']] : [['omu', '오므라이스'], ['parfait', '파르페'], ['cake', '케이크'], ['coffee', '커피']];
+    const items = XM ? [['omu', XM[0]], ['parfait', XM[1]], ['cake', XM[2]], ['coffee', XM[3]]] : ZHL ? [['omu', '蛋包饭'], ['parfait', '芭菲'], ['cake', '蛋糕'], ['coffee', '咖啡']] : EN ? [['omu', 'Omurice'], ['parfait', 'Parfait'], ['cake', 'Cake'], ['coffee', 'Coffee']] : [['omu', '오므라이스'], ['parfait', '파르페'], ['cake', '케이크'], ['coffee', '커피']];
     items.forEach((it, i) => { const yy = y + 62 + i * 23; ART.drawFood(ctx, x + 32, yy + 2, it[0], 1.3); ctx.fillStyle = '#fff2d8'; ctx.fillText(it[1], x + 52, yy + 5); ctx.fillStyle = '#ffb8c8'; ctx.fillText('♥', x + w - 32, yy + 5); });
-    ctx.fillStyle = '#ffd0e0'; ctx.font = "13px 'Griun', sans-serif"; ctx.textAlign = 'center'; ctx.fillText(ZHL ? '萌萌啾♡' : EN ? 'moe moe kyun♡' : '모에모에큥♡', x + w / 2, y + h - 12);
+    ctx.fillStyle = '#ffd0e0'; ctx.font = "13px 'Griun', sans-serif"; ctx.textAlign = 'center'; ctx.fillText(XM ? XM[4] : ZHL ? '萌萌啾♡' : EN ? 'moe moe kyun♡' : '모에모에큥♡', x + w / 2, y + h - 12);
   }
   function windowView(ctx, x, y, w, h, t) { // 창 밖 거리 (아키바 풍 건물·간판)
     ctx.save(); rr(ctx, x, y, w, h, 8); ctx.clip();

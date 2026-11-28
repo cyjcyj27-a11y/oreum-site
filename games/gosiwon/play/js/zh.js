@@ -1,7 +1,11 @@
-/* Simplified Chinese (?lang=zh): Korean string -> Chinese dictionary, CJK font fallback */
+/* Simplified Chinese (?lang=zh), Japanese (?lang=ja), Portuguese (?lang=pt), Russian (?lang=ru): Korean string -> dictionary, font fallback */
 (function () {
 'use strict';
-GS.ZH = /[?&]lang=zh/.test(location.search);
+var Q = (/[?&]lang=(zh|ja|pt|ru)\b/.exec(location.search) || [])[1] || '';
+GS.LG = Q;                                   // zh / ja / pt / ru, or '' for ko and en
+GS.ZH = Q === 'zh';
+GS.XL = !!Q;                                 // text comes from a dictionary
+GS.LW = Q === 'pt' || Q === 'ru';            // long words: use the English layout
 var D = {
   // shop
   '철수세미': '钢丝球', '닦는 넓이 +40%': '擦拭范围 +40%', '락스': '漂白水', '닦는 힘 +55%': '擦拭力度 +55%',
@@ -64,13 +68,223 @@ var D = {
   '보일러 고쳐 주셔서\n뜨신 물로 씻었어요\n박카스 드세요\n- 206호 -': '谢谢你修好锅炉\n终于洗上热水澡了\n请你喝功能饮料\n- 206号 -',
   '총무님께': '给管理员', '선물': '礼物', '택배 ': '快递 ', '호': '号'
 };
+var JA = {
+  // shop
+  '철수세미': 'スチールたわし', '닦는 넓이 +40%': '拭く範囲 +40%', '락스': '漂白剤', '닦는 힘 +55%': '拭く力 +55%',
+  '운동화': 'スニーカー', '이동 +20%': '移動 +20%', '큰 바가지': '大きいひしゃく', '쌀과 물 x1.8': '米と水 x1.8',
+  '식칼': '包丁', '칼질 -1': '包丁回数 -1', '형광펜': '蛍光ペン', '한 장 1.5시간': '1ページ 1.5時間', '스탠드': 'デスクライト',
+  '공부 +5%': '勉強 +5%', '귀마개': '耳栓', '방석': '座布団', '믹스커피': 'スティックコーヒー', '기출문제집': '過去問題集', '공부 +10%': '勉強 +10%',
+  // tasks, HUD
+  '남자 화장실': '男子トイレ', '여자 화장실': '女子トイレ', '밥': 'ご飯', '주방': 'キッチン', '라면': 'ラーメン', '김치': 'キムチ',
+  '고무장갑': 'ゴム手袋', '원장 점검 ': 'オーナー点検 ', '고무장갑 벗기': 'ゴム手袋を外す', '공부': '勉強', '원': 'ウォン', '합격': '合格',
+  '원장님': 'オーナー', '층': '階', '불합격': '不合格', '닦기': '拭く', '도감': '図鑑', '고시원 총무': 'コシウォン管理人',
+  '남은 일': '残り', '휴지': 'トイペ', '가로로 보기': '横画面にする',
+  // interaction labels
+  '책상': '机', '휴지통': 'ゴミ箱', '변기': '便器', '꽁초': '吸い殻', '머리카락': '髪の毛', '대야': 'たらい',
+  '음식물': '生ゴミ', '냉장고': '冷蔵庫', '밥솥': '炊飯器', '라면 상자': 'ラーメンの箱', '선반': '棚', '도마': 'まな板',
+  '쪽지': '手紙', '메모': 'メモ', '메모 붙이기': 'メモを貼る', '형광등': '蛍光灯', '형광등 갈기': '蛍光灯を替える', '박카스': '栄養ドリンク',
+  '독촉장 붙이기': '督促状を貼る', '보일러': 'ボイラー', '쓰레기': 'ゴミ', '이불': '布団', '저금통': '貯金箱',
+  // signs and packages
+  '창고': '倉庫', '총무': '管理人', '정 숙': '静 粛', '출입문': '出入口', '옥상\n출입금지': '屋上\n立入禁止',
+  '오름식품': 'OREUM食品', '매운맛': '辛口', '김치 10kg': 'キムチ 10kg',
+  // collection items
+  '샴푸': 'シャンプー', '화장품': '化粧品', '과자': 'お菓子', '베개': '枕', '인형': 'ぬいぐるみ', '자전거': '自転車',
+  '컵라면': 'カップ麺', '전기포트': '電気ケトル', '우산': '傘', '선풍기': '扇風機', '수험서': '参考書', '기타': 'ギター', '아령': 'ダンベル',
+  '합격 +1%': '合格 +1%', '휴지 30m': 'トイペ 30m', '컵라면\n12개입': 'カップ麺\n12個入り', '기출\n문제집': '過去\n問題集', '핵심\n요약': '要点\nまとめ',
+  '중고 +2,000': '売却 +2,000', '휴지 +6': 'トイペ +6',
+  // notes and messages
+  '냉장고에 넣어둔 제 장조림\n누가 먹었어요??\n이름도 써 놨는데 ㅠㅠ\n- 203호 -': '冷蔵庫の私の牛肉の煮付け\n誰が食べたの??\n名前も書いたのに(泣)\n- 203号室 -',
+  '범인 아직 모름\n내 장조림...\n- 203호 -': '犯人まだ不明\n私の煮付け…\n- 203号室 -',
+  '먹지 마시오!!\n남의 반찬\n- 총무 -': '人のおかず\n食べるな!!\n- 管理人 -',
+  '라면이 왜 이렇게 빨리 없어지냐\n선반에 메모라도 붙여놔': 'ラーメンの減りが早すぎる\n棚にメモでも貼っとけ',
+  '라면 1개 500원\n양심 저금통': 'ラーメン 1個500ウォン\n良心の貯金箱',
+  '옆방 코골이 때문에\n사흘째 못 잤어요...\n305호 어떻게 좀 해 주세요\n- 306호 -': '隣のいびきのせいで\n3日も眠れてません…\n305号室なんとかして\n- 306号室 -',
+  '감사합니다 ㅠㅠ\n어젯밤 처음으로 잤어요\n- 306호 -': 'ありがとう(泣)\n昨夜やっと眠れました\n- 306号室 -',
+  '2층 여자 화장실 하수구\n머리카락 너무해요!!\n씻을 때마다 발에 감겨요': '2階女子トイレの排水口\n髪の毛ひどすぎ!!\n洗うたび足に絡まる',
+  '민원 들어온 거 봤다\nㅇㅋ 수고': '苦情の件 見たぞ\nOK おつかれ',
+  '3층 복도 불이\n계속 깜빡여요\n밤에 무서워요\n- 307호 -': '3階の廊下の電気が\nずっとチカチカしてます\n夜こわいです\n- 307号室 -',
+  '내일 시험이에요\n오늘 밤만 조용히\n부탁드려요\n- 302호 -': '明日試験なんです\n今夜だけ静かに\nお願いします\n- 302号室 -',
+  '쉿!\n302호 시험': 'シーッ!\n302号室 試験',
+  '붙었어요!!\n총무님도 꼭 붙으세요\n- 302호 -': '受かりました!!\n管理人さんも絶対受かって\n- 302号室 -',
+  '택배 온 거 각 방 앞에 놔둬\n203호, 305호, 402호': '届いた荷物 各部屋の前に置いとけ\n203、305、402号室',
+  '요즘 화장실 깨끗하더라\n이번 주는 일당 두 배다': '最近トイレきれいだな\n今週は日給2倍だ',
+  '304호 월세 두 달 밀렸다\n문에 독촉장 붙여라': '304号室 家賃2か月滞納だ\nドアに督促状貼っとけ',
+  '월세 납부 바랍니다\n- 총무실 -': '家賃をお支払いください\n- 管理室 -',
+  '다음 주에 꼭...\n진짜로...\n- 304 -': '来週には必ず…\n本当に…\n- 304 -',
+  '물이 차가워요 ㅠ': '水が冷たい(泣)', '온수 안 나와요!!!': 'お湯が出ない!!!', '샤워하다 얼어 죽는 줄': 'シャワーで凍え死ぬかと',
+  '205호 오늘 나갔다\n방 좀 치워놔라\n버리고 간 건 니가 가져도 된다': '205号室が今日出てった\n部屋片付けとけ\n置いてった物はお前のでいい',
+  '303호 짐 반은 두고 나갔다\n싹 치워': '303号室 荷物半分置いて出てった\n全部片付けろ',
+  '409호 사흘 만에 나갔다\n방 치워놔': '409号室 3日で出てった\n部屋片付けとけ',
+  '302호 합격해서 나갔다\n방 치워라': '302号室 合格して出てった\n部屋片付けろ',
+  '510호 월세 안 내고 잠수탔다\n방 비워라': '510号室 家賃払わずに飛んだ\n部屋空けとけ',
+  '407호 나갔다\n오늘 방 보러 오는 사람 있다': '407号室が出てった\n今日 内見の人が来る',
+  '309호 군대 간단다\n방 치워놔': '309号室 軍隊行くってさ\n部屋片付けとけ',
+  '503호 나갔다\n이번 달 마지막이다 치워놔': '503号室が出てった\n今月最後だ 片付けとけ',
+  '어제 민원 하나 안 했더라\n오천원 깐다': '昨日 苦情1件やってないな\n5千ウォン引く',
+  '합격 축하한다\n방 빼라 ㅋㅋ': '合格おめでとう\n部屋出てけ(笑)',
+  '수고했다\n다음 달도 총무 할래?': 'おつかれ\n来月も管理人やるか?',
+  '냉장고 메모': '冷蔵庫メモ', '라면 선반 메모': 'ラーメン棚メモ', '305호 귀마개': '305号室 耳栓', '2F 하수구': '2F 排水口',
+  '3F 형광등': '3F 蛍光灯', '택배': '荷物', '304호 독촉장': '304号室 督促状',
+  '하수구 뚫어 주셔서\n이제 발 안 감겨요\n휴지 남아서 드려요\n- 204호 -': '排水口直してくれて\nもう足に絡まりません\n余ったトイペどうぞ\n- 204号室 -',
+  '복도 불 고쳐 주셔서\n밤에 안 무서워요\n캔커피 드시고 힘내세요\n- 307호 -': '廊下の電気直してくれて\n夜こわくなくなりました\n缶コーヒーでがんばって\n- 307号室 -',
+  '보일러 고쳐 주셔서\n뜨신 물로 씻었어요\n박카스 드세요\n- 206호 -': 'ボイラー直してくれて\nお湯で洗えました\n栄養ドリンクどうぞ\n- 206号室 -',
+  '총무님께': '管理人さんへ', '선물': 'プレゼント', '택배 ': '荷物 ', '호': '号室'
+};
+var PT = {
+  // shop
+  '철수세미': 'Palha de aço', '닦는 넓이 +40%': 'Área +40%', '락스': 'Água sanitária', '닦는 힘 +55%': 'Força +55%',
+  '운동화': 'Tênis', '이동 +20%': 'Velocidade +20%', '큰 바가지': 'Concha grande', '쌀과 물 x1.8': 'Arroz e água x1.8',
+  '식칼': 'Faca', '칼질 -1': 'Cortes -1', '형광펜': 'Marca-texto', '한 장 1.5시간': '1,5h por página', '스탠드': 'Luminária',
+  '공부 +5%': 'Estudo +5%', '귀마개': 'Protetor de ouvido', '방석': 'Almofada', '믹스커피': 'Café solúvel', '기출문제집': 'Provas antigas', '공부 +10%': 'Estudo +10%',
+  // tasks, HUD
+  '남자 화장실': 'Masculino', '여자 화장실': 'Feminino', '밥': 'Arroz', '주방': 'Cozinha', '라면': 'Lámen', '김치': 'Kimchi',
+  '고무장갑': 'Luvas de borracha', '원장 점검 ': 'Vistoria ', '고무장갑 벗기': 'Tirar as luvas', '공부': 'Estudo', '원': ' wons', '합격': 'Aprovação',
+  '원장님': 'Chefe', '층': 'º andar', '불합격': 'Reprovado', '닦기': 'Esfregar', '도감': 'Coleção', '고시원 총무': 'Zelador do Gosiwon',
+  '남은 일': 'Tarefas', '휴지': 'Papel', '가로로 보기': 'Modo paisagem',
+  // interaction labels
+  '책상': 'Mesa', '휴지통': 'Lixeira', '변기': 'Vaso', '꽁초': 'Bituca', '머리카락': 'Cabelo', '대야': 'Bacia',
+  '음식물': 'Restos de comida', '냉장고': 'Geladeira', '밥솥': 'Panela de arroz', '라면 상자': 'Caixa de lámen', '선반': 'Prateleira', '도마': 'Tábua',
+  '쪽지': 'Bilhete', '메모': 'Recado', '메모 붙이기': 'Colar recado', '형광등': 'Lâmpada', '형광등 갈기': 'Trocar lâmpada', '박카스': 'Energético',
+  '독촉장 붙이기': 'Colar aviso', '보일러': 'Aquecedor', '쓰레기': 'Lixo', '이불': 'Cobertor', '저금통': 'Cofrinho',
+  // signs and packages
+  '창고': 'Depósito', '총무': 'Zelador', '정 숙': 'Silêncio', '출입문': 'Saída', '옥상\n출입금지': 'Terraço\nProibido',
+  '오름식품': 'OREUM ALIMENTOS', '매운맛': 'Picante', '김치 10kg': 'Kimchi 10kg',
+  // collection items
+  '샴푸': 'Xampu', '화장품': 'Cosméticos', '과자': 'Salgadinho', '베개': 'Travesseiro', '인형': 'Ursinho', '자전거': 'Bicicleta',
+  '컵라면': 'Lámen de copo', '전기포트': 'Chaleira elétrica', '우산': 'Guarda-chuva', '선풍기': 'Ventilador', '수험서': 'Apostilas', '기타': 'Violão', '아령': 'Halteres',
+  '합격 +1%': 'Aprovação +1%', '휴지 30m': 'Papel 30m', '컵라면\n12개입': 'Lámen de copo\n12 unid.', '기출\n문제집': 'Provas\nantigas', '핵심\n요약': 'Resumo\nessencial',
+  '중고 +2,000': 'Vendido +2,000', '휴지 +6': 'Papel +6',
+  // notes and messages
+  '냉장고에 넣어둔 제 장조림\n누가 먹었어요??\n이름도 써 놨는데 ㅠㅠ\n- 203호 -': 'Quem comeu minha carne\nda geladeira??\nTinha meu nome nela!!\n- Quarto 203 -',
+  '범인 아직 모름\n내 장조림...\n- 203호 -': 'Culpado ainda solto.\nMinha carne...\n- Quarto 203 -',
+  '먹지 마시오!!\n남의 반찬\n- 총무 -': 'NÃO COMA\na comida dos outros!!\n- Zelador -',
+  '라면이 왜 이렇게 빨리 없어지냐\n선반에 메모라도 붙여놔': 'Por que o lámen some tão rápido?\nCola um recado na prateleira.',
+  '라면 1개 500원\n양심 저금통': 'Lámen 500 wons cada\nCofrinho da honestidade',
+  '옆방 코골이 때문에\n사흘째 못 잤어요...\n305호 어떻게 좀 해 주세요\n- 306호 -': 'Faz 3 dias que não durmo\npor causa do ronco ao lado.\nPor favor, dá um jeito no 305...\n- Quarto 306 -',
+  '감사합니다 ㅠㅠ\n어젯밤 처음으로 잤어요\n- 306호 -': 'Muito obrigado!!\nFinalmente dormi ontem\n- Quarto 306 -',
+  '2층 여자 화장실 하수구\n머리카락 너무해요!!\n씻을 때마다 발에 감겨요': 'O ralo do banheiro feminino\ndo 2º andar tá cheio de cabelo!!\nEnrola no pé toda vez',
+  '민원 들어온 거 봤다\nㅇㅋ 수고': 'Vi que resolveu a reclamação.\nOK, bom trabalho.',
+  '3층 복도 불이\n계속 깜빡여요\n밤에 무서워요\n- 307호 -': 'A luz do corredor do 3º\nfica piscando\nDá medo à noite\n- Quarto 307 -',
+  '내일 시험이에요\n오늘 밤만 조용히\n부탁드려요\n- 302호 -': 'Minha prova é amanhã.\nSilêncio só hoje à noite,\npor favor.\n- Quarto 302 -',
+  '쉿!\n302호 시험': 'Shh!\nProva no 302',
+  '붙었어요!!\n총무님도 꼭 붙으세요\n- 302호 -': 'Passei!!\nVocê também vai passar!\n- Quarto 302 -',
+  '택배 온 거 각 방 앞에 놔둬\n203호, 305호, 402호': 'Deixa as encomendas em cada porta.\nQuartos 203, 305, 402.',
+  '요즘 화장실 깨끗하더라\n이번 주는 일당 두 배다': 'Os banheiros tão limpos.\nDiária em dobro esta semana.',
+  '304호 월세 두 달 밀렸다\n문에 독촉장 붙여라': 'O 304 tá dois meses sem pagar.\nCola um aviso na porta.',
+  '월세 납부 바랍니다\n- 총무실 -': 'Aluguel atrasado.\n- Zeladoria -',
+  '다음 주에 꼭...\n진짜로...\n- 304 -': 'Semana que vem, juro...\nSério...\n- 304 -',
+  '물이 차가워요 ㅠ': 'A água tá gelada', '온수 안 나와요!!!': 'SEM ÁGUA QUENTE!!!', '샤워하다 얼어 죽는 줄': 'Quase congelei no banho',
+  '205호 오늘 나갔다\n방 좀 치워놔라\n버리고 간 건 니가 가져도 된다': 'O 205 saiu hoje.\nArruma o quarto.\nO que deixaram é seu.',
+  '303호 짐 반은 두고 나갔다\n싹 치워': 'O 303 deixou metade das coisas.\nLimpa tudo.',
+  '409호 사흘 만에 나갔다\n방 치워놔': 'O 409 saiu depois de 3 dias.\nArruma o quarto.',
+  '302호 합격해서 나갔다\n방 치워라': 'O 302 passou e saiu.\nArruma o quarto.',
+  '510호 월세 안 내고 잠수탔다\n방 비워라': 'O 510 sumiu sem pagar.\nEsvazia o quarto.',
+  '407호 나갔다\n오늘 방 보러 오는 사람 있다': 'O 407 saiu.\nHoje vem gente ver o quarto.',
+  '309호 군대 간단다\n방 치워놔': 'O 309 vai pro exército.\nArruma o quarto.',
+  '503호 나갔다\n이번 달 마지막이다 치워놔': 'O 503 saiu.\nÚltimo do mês. Arruma.',
+  '어제 민원 하나 안 했더라\n오천원 깐다': 'Ontem você ignorou uma reclamação.\nVou descontar 5 mil wons.',
+  '합격 축하한다\n방 빼라 ㅋㅋ': 'Parabéns, passou.\nAgora desocupa o quarto kkkk',
+  '수고했다\n다음 달도 총무 할래?': 'Bom trabalho mesmo assim.\nQuer ser zelador mês que vem?',
+  '냉장고 메모': 'Recado na geladeira', '라면 선반 메모': 'Recado do lámen', '305호 귀마개': 'Protetor 305', '2F 하수구': 'Ralo 2F',
+  '3F 형광등': 'Lâmpada 3F', '택배': 'Encomendas', '304호 독촉장': 'Aviso 304',
+  '하수구 뚫어 주셔서\n이제 발 안 감겨요\n휴지 남아서 드려요\n- 204호 -': 'Valeu pelo ralo!\nNada de cabelo no pé\nSobrou papel, é seu\n- Quarto 204 -',
+  '복도 불 고쳐 주셔서\n밤에 안 무서워요\n캔커피 드시고 힘내세요\n- 307호 -': 'A luz do corredor voltou!\nNão dá mais medo à noite\nToma um café\n- Quarto 307 -',
+  '보일러 고쳐 주셔서\n뜨신 물로 씻었어요\n박카스 드세요\n- 206호 -': 'Valeu pelo aquecedor\nFinalmente banho quente\nToma um energético\n- Quarto 206 -',
+  '총무님께': 'Para o zelador', '선물': 'Presente', '택배 ': 'Encomenda ', '호': '',
+  // end screen
+  '합격!': 'APROVADO', '불합격!': 'REPROVADO'
+};
+var RU = {
+  // shop
+  '철수세미': 'Стальная губка', '닦는 넓이 +40%': 'Площадь +40%', '락스': 'Хлорка', '닦는 힘 +55%': 'Сила +55%',
+  '운동화': 'Кроссовки', '이동 +20%': 'Скорость +20%', '큰 바가지': 'Большой ковш', '쌀과 물 x1.8': 'Рис и вода x1.8',
+  '식칼': 'Нож', '칼질 -1': 'Нарезка -1', '형광펜': 'Маркер', '한 장 1.5시간': '1,5 ч на стр.', '스탠드': 'Лампа',
+  '공부 +5%': 'Учёба +5%', '귀마개': 'Беруши', '방석': 'Сидушка', '믹스커피': 'Кофе 3 в 1', '기출문제집': 'Сборник тестов', '공부 +10%': 'Учёба +10%',
+  // tasks, HUD
+  '남자 화장실': 'Мужской', '여자 화장실': 'Женский', '밥': 'Рис', '주방': 'Кухня', '라면': 'Рамён', '김치': 'Кимчи',
+  '고무장갑': 'Резиновые перчатки', '원장 점검 ': 'Проверка ', '고무장갑 벗기': 'Снять перчатки', '공부': 'Учёба', '원': ' вон', '합격': 'Шанс',
+  '원장님': 'Босс', '층': '-й этаж', '불합격': 'Не сдал', '닦기': 'Тереть', '도감': 'Коллекция', '고시원 총무': 'Комендант косивона',
+  '남은 일': 'Дела', '휴지': 'Бумага', '가로로 보기': 'Горизонтально',
+  // interaction labels
+  '책상': 'Стол', '휴지통': 'Мусорка', '변기': 'Унитаз', '꽁초': 'Окурок', '머리카락': 'Волосы', '대야': 'Таз',
+  '음식물': 'Пищевые отходы', '냉장고': 'Холодильник', '밥솥': 'Рисоварка', '라면 상자': 'Коробка рамёна', '선반': 'Полка', '도마': 'Доска',
+  '쪽지': 'Записка', '메모': 'Памятка', '메모 붙이기': 'Повесить записку', '형광등': 'Лампа', '형광등 갈기': 'Сменить лампу', '박카스': 'Энергетик',
+  '독촉장 붙이기': 'Повесить уведомление', '보일러': 'Бойлер', '쓰레기': 'Мусор', '이불': 'Одеяло', '저금통': 'Копилка',
+  // signs and packages
+  '창고': 'Склад', '총무': 'Комендант', '정 숙': 'Тишина', '출입문': 'Выход', '옥상\n출입금지': 'Крыша\nВход запрещён',
+  '오름식품': 'OREUM ПРОДУКТЫ', '매운맛': 'Острый', '김치 10kg': 'Кимчи 10 кг',
+  // collection items
+  '샴푸': 'Шампунь', '화장품': 'Косметика', '과자': 'Снеки', '베개': 'Подушка', '인형': 'Мишка', '자전거': 'Велосипед',
+  '컵라면': 'Лапша в стакане', '전기포트': 'Электрочайник', '우산': 'Зонт', '선풍기': 'Вентилятор', '수험서': 'Учебники', '기타': 'Гитара', '아령': 'Гантели',
+  '합격 +1%': 'Шанс +1%', '휴지 30m': 'Бумага 30 м', '컵라면\n12개입': 'Лапша\n12 шт.', '기출\n문제집': 'Сборник\nтестов', '핵심\n요약': 'Главное\nкратко',
+  '중고 +2,000': 'Продано +2,000', '휴지 +6': 'Бумага +6',
+  // notes and messages
+  '냉장고에 넣어둔 제 장조림\n누가 먹었어요??\n이름도 써 놨는데 ㅠㅠ\n- 203호 -': 'Кто съел мою говядину\nиз холодильника??\nТам же было моё имя!!\n- Комната 203 -',
+  '범인 아직 모름\n내 장조림...\n- 203호 -': 'Вор так и не найден.\nМоя говядина...\n- Комната 203 -',
+  '먹지 마시오!!\n남의 반찬\n- 총무 -': 'НЕ ЕШЬТЕ\nчужую еду!!\n- Комендант -',
+  '라면이 왜 이렇게 빨리 없어지냐\n선반에 메모라도 붙여놔': 'Почему рамён так быстро кончается?\nПовесь записку на полку.',
+  '라면 1개 500원\n양심 저금통': 'Рамён 500 вон за штуку\nКопилка совести',
+  '옆방 코골이 때문에\n사흘째 못 잤어요...\n305호 어떻게 좀 해 주세요\n- 306호 -': 'Третий день не сплю\nиз-за храпа за стеной.\nСделайте что-нибудь с 305...\n- Комната 306 -',
+  '감사합니다 ㅠㅠ\n어젯밤 처음으로 잤어요\n- 306호 -': 'Огромное спасибо!\nНаконец-то выспался\n- Комната 306 -',
+  '2층 여자 화장실 하수구\n머리카락 너무해요!!\n씻을 때마다 발에 감겨요': 'Слив в женском туалете\nна 2-м этаже забит волосами!!\nВечно наматываются на ноги',
+  '민원 들어온 거 봤다\nㅇㅋ 수고': 'Видел, жалобу решил.\nОК, молодец.',
+  '3층 복도 불이\n계속 깜빡여요\n밤에 무서워요\n- 307호 -': 'Свет в коридоре 3-го этажа\nвсё время мигает\nНочью страшно\n- Комната 307 -',
+  '내일 시험이에요\n오늘 밤만 조용히\n부탁드려요\n- 302호 -': 'Завтра у меня экзамен.\nПожалуйста, потише\nхотя бы этой ночью.\n- Комната 302 -',
+  '쉿!\n302호 시험': 'Тсс!\nЭкзамен в 302',
+  '붙었어요!!\n총무님도 꼭 붙으세요\n- 302호 -': 'Я сдал!!\nИ вы обязательно сдадите!\n- Комната 302 -',
+  '택배 온 거 각 방 앞에 놔둬\n203호, 305호, 402호': 'Разнеси посылки по дверям.\nКомнаты 203, 305, 402.',
+  '요즘 화장실 깨끗하더라\n이번 주는 일당 두 배다': 'Туалеты в последнее время чистые.\nНа этой неделе двойная оплата.',
+  '304호 월세 두 달 밀렸다\n문에 독촉장 붙여라': '304-я не платит уже два месяца.\nПовесь уведомление на дверь.',
+  '월세 납부 바랍니다\n- 총무실 -': 'Оплатите аренду.\n- Комендант -',
+  '다음 주에 꼭...\n진짜로...\n- 304 -': 'На следующей неделе...\nЧестно...\n- 304 -',
+  '물이 차가워요 ㅠ': 'Вода ледяная', '온수 안 나와요!!!': 'НЕТ ГОРЯЧЕЙ ВОДЫ!!!', '샤워하다 얼어 죽는 줄': 'Чуть не замёрз в душе',
+  '205호 오늘 나갔다\n방 좀 치워놔라\n버리고 간 건 니가 가져도 된다': '205-я сегодня съехала.\nУбери комнату.\nЧто бросили, забирай себе.',
+  '303호 짐 반은 두고 나갔다\n싹 치워': '303-я бросила полвещей.\nВычисти всё.',
+  '409호 사흘 만에 나갔다\n방 치워놔': '409-я съехала через 3 дня.\nУбери комнату.',
+  '302호 합격해서 나갔다\n방 치워라': '302-я сдала и съехала.\nУбери комнату.',
+  '510호 월세 안 내고 잠수탔다\n방 비워라': '510-я сбежала, не заплатив.\nОсвободи комнату.',
+  '407호 나갔다\n오늘 방 보러 오는 사람 있다': '407-я съехала.\nСегодня придут смотреть.',
+  '309호 군대 간단다\n방 치워놔': 'Жилец 309-й идёт в армию.\nУбери комнату.',
+  '503호 나갔다\n이번 달 마지막이다 치워놔': '503-я съехала.\nПоследняя в этом месяце. Убери.',
+  '어제 민원 하나 안 했더라\n오천원 깐다': 'Вчера ты не решил одну жалобу.\nМинус 5 тыс. вон.',
+  '합격 축하한다\n방 빼라 ㅋㅋ': 'Поздравляю, сдал.\nА теперь съезжай, лол',
+  '수고했다\n다음 달도 총무 할래?': 'Всё равно молодец.\nПобудешь комендантом ещё месяц?',
+  '냉장고 메모': 'Записка: холодильник', '라면 선반 메모': 'Записка: рамён', '305호 귀마개': 'Беруши 305', '2F 하수구': 'Слив 2F',
+  '3F 형광등': 'Лампа 3F', '택배': 'Посылки', '304호 독촉장': 'Уведомление 304',
+  '하수구 뚫어 주셔서\n이제 발 안 감겨요\n휴지 남아서 드려요\n- 204호 -': 'Спасибо за слив!\nВолосы больше не липнут\nВот вам лишняя бумага\n- Комната 204 -',
+  '복도 불 고쳐 주셔서\n밤에 안 무서워요\n캔커피 드시고 힘내세요\n- 307호 -': 'Свет в коридоре горит!\nНочью больше не страшно\nВыпейте кофе\n- Комната 307 -',
+  '보일러 고쳐 주셔서\n뜨신 물로 씻었어요\n박카스 드세요\n- 206호 -': 'Спасибо за бойлер\nНаконец горячий душ\nВот вам энергетик\n- Комната 206 -',
+  '총무님께': 'Коменданту', '선물': 'Подарок', '택배 ': 'Посылка ', '호': '',
+  // end screen
+  '합격!': 'СДАЛ!', '불합격!': 'НЕ СДАЛ'
+};
+var ROOM = { zh: function (n) { return n + '号'; }, ja: function (n) { return n + '号室'; }, pt: function (n) { return 'Quarto ' + n; }, ru: function (n) { return 'Комната ' + n; } };
+var DD = Q === 'ja' ? JA : Q === 'pt' ? PT : Q === 'ru' ? RU : D;
 GS.ZD = D;
-GS.Z = function (ko) { if (!GS.ZH || ko == null) return ko; var s = String(ko), m; if (D[s] != null) return D[s]; if ((m = /^(\d+)호$/.exec(s))) return m[1] + '号'; return s; };
-if (!GS.ZH) return;
-document.documentElement.lang = 'zh-CN'; document.title = '考试院管理员';
-var zf = "local('PingFang SC'),local('PingFangSC-Regular'),local('Microsoft YaHei'),local('Microsoft YaHei UI'),local('Noto Sans SC'),local('Noto Sans CJK SC'),local('Source Han Sans SC')";
-var ur = 'U+2E80-2FFF,U+3000-303F,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF';
+GS.LD = { zh: D, ja: JA, pt: PT, ru: RU };
+GS.Z = function (ko) { if (!GS.XL || ko == null) return ko; var s = String(ko), m; if (DD[s] != null) return DD[s]; if ((m = /^(\d+)호$/.exec(s))) return ROOM[Q](m[1]); return s; };
+var RV = {};                                 // translated text -> Korean (pt/ru layout measuring)
+Object.keys(DD).forEach(function (k) { if (DD[k] && RV[DD[k]] == null) RV[DD[k]] = k; });
+GS.ZK = function (s) { if (!GS.LW) return s; var m; if (RV[s] != null) return RV[s]; if ((m = /^(?:Quarto|Комната) (\d+)$/.exec(s))) return m[1] + '호'; return s; };
+if (!GS.XL) return;
+var css = '';
+if (Q === 'zh') {
+  document.documentElement.lang = 'zh-CN'; document.title = '考试院管理员';
+  var zf = "local('PingFang SC'),local('PingFangSC-Regular'),local('Microsoft YaHei'),local('Microsoft YaHei UI'),local('Noto Sans SC'),local('Noto Sans CJK SC'),local('Source Han Sans SC')";
+  var ur = 'U+2E80-2FFF,U+3000-303F,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF';
+  css = ['Eulji', 'Note', 'Ria'].map(function (f) { return "@font-face{font-family:'" + f + "';src:" + zf + ';unicode-range:' + ur + '}'; }).join('') + 'html[lang=zh-CN] *{word-break:normal!important}html[lang=zh-CN] #act{white-space:nowrap}';
+} else if (Q === 'ja') {
+  document.documentElement.lang = 'ja'; document.title = JA['고시원 총무'];
+  var jf = "local('Hiragino Sans'),local('Hiragino Kaku Gothic ProN'),local('Yu Gothic UI'),local('Yu Gothic'),local('Yu Gothic Medium'),local('YuGothic-Medium'),local('Yu Gothic Regular'),local('YuGothic-Regular'),local('Yu Gothic Bold'),local('YuGothic-Bold'),local('MS PGothic'),local('MS Gothic'),local('Meiryo'),local('Noto Sans JP'),local('Noto Sans CJK JP'),local('Source Han Sans JP')";
+  var jr = 'U+2E80-2FFF,U+3000-30FF,U+31F0-31FF,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF';
+  css = ['Eulji', 'Note', 'Ria'].map(function (f) { return "@font-face{font-family:'" + f + "';src:" + jf + ';unicode-range:' + jr + '}'; }).join('') + 'html[lang=ja] *{word-break:normal!important}html[lang=ja] #act{white-space:nowrap}html[lang=ja] #logo{font-size:min(12.5vw,17vh,110px)}';
+} else {
+  document.documentElement.lang = Q === 'pt' ? 'pt-BR' : 'ru'; document.title = DD['고시원 총무'];
+  var lf = "local('Segoe UI'),local('Roboto'),local('Arial'),local('Helvetica Neue'),local('Helvetica')";
+  var lr = 'U+00A0-024F,U+0400-04FF,U+1E00-1EFF,U+2010-2027';
+  css = ['Eulji', 'Note', 'Ria'].map(function (f) { return "@font-face{font-family:'" + f + "';src:" + lf + ';unicode-range:' + lr + '}'; }).join('');
+}
 var st = document.createElement('style');
-st.textContent = ['Eulji', 'Note', 'Ria'].map(function (f) { return "@font-face{font-family:'" + f + "';src:" + zf + ';unicode-range:' + ur + '}'; }).join('') + 'html[lang=zh-CN] *{word-break:normal!important}html[lang=zh-CN] #act{white-space:nowrap}';
+st.textContent = css;
 document.head.appendChild(st);
 })();

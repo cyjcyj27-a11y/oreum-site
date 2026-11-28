@@ -35,7 +35,33 @@
     zst.textContent = "@font-face{font-family:'WantedT';src:" + zb + ";unicode-range:" + ur + "}@font-face{font-family:'Ria';src:" + zb + ";unicode-range:" + ur + "}html[lang=zh-CN] *{word-break:normal!important}";
     document.head.appendChild(zst);
   }
-  function rankName(L) { return (EN ? RANKS_EN : ZH ? RANKS_ZH : RANKS)[L]; }
+  // 일본어·포르투갈어·러시아어: ?lang=ja|pt|ru 일 때만. 한국어 문구를 열쇠로 바꾼다
+  var LQ = (location.search.match(/[?&]lang=(ja|pt|ru)(&|$)/i) || [])[1];
+  var L3 = !EN && !ZH && LQ ? LQ.toLowerCase() : '';
+  var D3 = {
+    ja: { '체커': 'チェッカー', '시작': 'スタート', '급수': '段級', 'K 효과음': 'K 効果音', best: '最高 ', jump: '取って！', g: '級', d: '段' },
+    pt: { '체커': 'DAMAS', '시작': 'JOGAR', '급수': 'NÍVEL', 'K 효과음': 'K som', best: 'RECORDE ', jump: 'COMA!', g: ' kyu', d: ' dan' },
+    ru: { '체커': 'ШАШКИ', '시작': 'ИГРАТЬ', '급수': 'РАЗРЯД', 'K 효과음': 'K звук', best: 'РЕКОРД ', jump: 'БЕЙ!', g: ' кю', d: ' дан' }
+  };
+  var LD = L3 ? D3[L3] : null;
+  var RANKS_L3 = LD ? RANKS.map(function (s) { return s.replace('급', LD.g).replace('단', LD.d); }) : null;
+  if (LD) {
+    document.documentElement.lang = L3 === 'pt' ? 'pt-BR' : L3; document.body.classList.add(L3); document.title = L3 === 'ja' ? LD['체커'] : L3 === 'pt' ? 'Damas' : 'Шашки';
+    Array.prototype.forEach.call(document.querySelectorAll('[data-en]'), function (el) { var k = el.textContent.trim(); if (LD[k]) el.textContent = LD[k]; });
+    // 게임 글꼴에 없는 글자(가나·한자, 악센트 라틴·키릴)만 기기 글꼴로 덧붙인다
+    var lf, lr;
+    if (L3 === 'ja') {
+      lf = "local('Hiragino Sans'),local('Hiragino Kaku Gothic ProN'),local('Yu Gothic UI'),local('Yu Gothic'),local('Yu Gothic Medium'),local('YuGothic-Medium'),local('Yu Gothic Regular'),local('YuGothic-Regular'),local('Yu Gothic Bold'),local('YuGothic-Bold'),local('MS PGothic'),local('MS Gothic'),local('Meiryo'),local('Noto Sans JP'),local('Noto Sans CJK JP'),local('Source Han Sans JP')";
+      lr = 'U+2E80-2FFF,U+3000-30FF,U+31F0-31FF,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF';
+    } else {
+      lf = "local('Segoe UI'),local('Roboto'),local('Arial'),local('Helvetica Neue'),local('Helvetica')";
+      lr = 'U+00A0-024F,U+0400-04FF,U+1E00-1EFF,U+2010-2027';
+    }
+    var lst = document.createElement('style');
+    lst.textContent = "@font-face{font-family:'WantedT';src:" + lf + ";unicode-range:" + lr + "}@font-face{font-family:'Ria';src:" + lf + ";unicode-range:" + lr + "}" + (L3 === 'ja' ? "html[lang=ja] *{word-break:normal!important}" : "");
+    document.head.appendChild(lst);
+  }
+  function rankName(L) { return (EN ? RANKS_EN : ZH ? RANKS_ZH : LD ? RANKS_L3 : RANKS)[L]; }
 
   function loadBest() { try { return Math.max(0, Math.min(TOP, parseInt(localStorage.getItem('checkers.lv') || '0', 10) || 0)); } catch (e) { return 0; } }
   function saveBest(n) { try { localStorage.setItem('checkers.lv', String(n)); } catch (e) {} }
@@ -43,7 +69,7 @@
   function savePick(n) { try { localStorage.setItem('checkers.pick', String(n)); } catch (e) {} }
   function showRec() {
     $('rec').textContent = rankName(G.level);
-    var b = loadBest(); $('best').textContent = b > 0 ? (EN ? 'BEST ' : ZH ? '最高 ' : '최고 ') + rankName(b) : '';
+    var b = loadBest(); $('best').textContent = b > 0 ? (EN ? 'BEST ' : ZH ? '最高 ' : LD ? LD.best : '최고 ') + rankName(b) : '';
     Array.prototype.forEach.call($('rk').children, function (w, i) { w.classList.toggle('on', i === G.level); });
   }
   function setLevel(n) { n = Math.max(0, Math.min(TOP, n)); if (n === G.level) return; G.level = n; savePick(n); showRec(); updHud(); A.pick(); }
@@ -195,7 +221,7 @@
       if (can) { G.sel = sq; A.pick(); return; }
       if (G.moves[0].caps.length) {   // 잡을 수 있으면 반드시 잡는다 — 잡을 말들을 흔들어 보인다
         must = { t0: now(), sqs: G.moves.map(function (m) { return m.from; }) };
-        bad(sq); flash(EN ? 'JUMP' : ZH ? '必须吃子' : '잡기', 'bad'); return;
+        bad(sq); flash(EN ? 'JUMP' : ZH ? '必须吃子' : LD ? LD.jump : '잡기', 'bad'); return;
       }
       bad(sq); return;
     }

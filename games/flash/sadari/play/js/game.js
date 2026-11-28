@@ -2,6 +2,7 @@
 (function () {
   'use strict';
   var QS = location.search, EN = /[?&]lang=en(&|$)/.test(QS), ZH = !EN && /[?&]lang=zh(&|$)/.test(QS);
+  var XQ = (!EN && !ZH && (QS.match(/[?&]lang=(ja|pt|ru)(&|$)/) || [])[1]) || '', JA = XQ === 'ja', PT = XQ === 'pt', RU = XQ === 'ru';
   var LOCAL = location.protocol === 'file:' || /^(localhost|127\.0\.0\.1)$/.test(location.hostname); // 시험용 갈고리는 내 컴퓨터에서만
   var UP = new URLSearchParams(QS);
   function qp(k) { return LOCAL ? UP.get(k) : null; }
@@ -14,14 +15,28 @@
   var Z = { '시작': '开始', '인원': '人数', '결과': '结果', '당첨·꽝': '中奖·没中', '당첨': '中奖', '꽝': '没中', '순위': '排名', '지우기': '清空',
     '섞기': '打乱', '전체 결과': '全部揭晓', '설정': '设置', '복사': '复制', '링크': '链接', '한 번 더': '再来一次', '사다리타기': '爬梯子', '이름': '名字', '이름과 당첨 항목을 적어주세요.': '填好名字和奖项吧。',
     '복사했습니다': '已复制', '링크를 복사했습니다': '链接已复制' };
-  function T(s) { return (EN && D[s]) || (ZH && Z[s]) || s; }
+  var JD = { '시작': 'スタート', '인원': '人数', '결과': '結果', '당첨·꽝': '当たり・ハズレ', '당첨': '当たり', '꽝': 'ハズレ', '순위': '順位', '지우기': '消す',
+    '섞기': 'シャッフル', '전체 결과': '全員の結果', '설정': '設定', '복사': 'コピー', '링크': 'リンク', '한 번 더': 'もう一回', '사다리타기': 'あみだくじ', '이름': '名前', '이름과 당첨 항목을 적어주세요.': '名前と当たりを書いてね。',
+    '복사했습니다': 'コピーしました', '링크를 복사했습니다': 'リンクをコピーしました' };
+  var PD = { '시작': 'COMEÇAR', '인원': 'Jogadores', '결과': 'Resultados', '당첨·꽝': 'Prêmio / Nada', '당첨': 'Prêmio', '꽝': 'Nada', '순위': 'Posições', '지우기': 'Limpar',
+    '섞기': 'Embaralhar', '전체 결과': 'Ver todos', '설정': 'Ajustes', '복사': 'Copiar', '링크': 'Link', '한 번 더': 'De novo', '사다리타기': 'ESCADINHA', '이름': 'Nome', '이름과 당첨 항목을 적어주세요.': 'Escreva os nomes e os prêmios.',
+    '복사했습니다': 'Copiado', '링크를 복사했습니다': 'Link copiado' };
+  var RD = { '시작': 'СТАРТ', '인원': 'Игроки', '결과': 'Итоги', '당첨·꽝': 'Приз / Мимо', '당첨': 'Приз', '꽝': 'Мимо', '순위': 'Места', '지우기': 'Очистить',
+    '섞기': 'Смешать', '전체 결과': 'Все итоги', '설정': 'Настройки', '복사': 'Копировать', '링크': 'Ссылка', '한 번 더': 'Ещё раз', '사다리타기': 'ЛЕСЕНКА', '이름': 'Имя', '이름과 당첨 항목을 적어주세요.': 'Впиши имена и призы.',
+    '복사했습니다': 'Скопировано', '링크를 복사했습니다': 'Ссылка скопирована' };
+  var XD = JA ? JD : PT ? PD : RU ? RD : null;
+  function T(s) { return (EN && D[s]) || (ZH && Z[s]) || (XD && (XD[s] || D[s])) || s; }
   function rankName(i) {
     if (ZH) return '第' + (i + 1) + '名';
+    if (JA) return (i + 1) + '位';
+    if (PT) return (i + 1) + 'º';
+    if (RU) return (i + 1) + '-е';
     if (!EN) return (i + 1) + '등';
     var n = i + 1, s = (n % 100 >= 11 && n % 100 <= 13) ? 'th' : (['th', 'st', 'nd', 'rd'][n % 10] || 'th');
     return n + s;
   }
   var MISS = /^(꽝|没中|未中|통과|패스|면제|없음|세이프|-|x|pass|miss|blank|none|safe|free)$/i;
+  if (XD) MISS = /^(꽝|没中|未中|통과|패스|면제|없음|세이프|-|x|pass|miss|blank|none|safe|free|ハズレ|はずれ|なし|nada|passa|мимо|пусто|нет)$/i;
 
   function ls(k, v) { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } }
 
@@ -69,7 +84,7 @@
   function shareURL() {
     var u = location.href.split('?')[0].split('#')[0];
     var q = 's=' + b64e(JSON.stringify({ n: S.names.slice(0, S.n), r: S.results.slice(0, S.n), k: S.seed }));
-    return u + '?' + (EN ? 'lang=en&' : ZH ? 'lang=zh&' : '') + q;
+    return u + '?' + (EN ? 'lang=en&' : ZH ? 'lang=zh&' : XQ ? 'lang=' + XQ + '&' : '') + q;
   }
 
   // 씨앗 난수
@@ -517,7 +532,7 @@
 
   // ---- 타이틀 낙서: 작은 사다리 4줄이 혼자 계속 타 내려감 ----
   var DN = 4, dRes = [], dNext = 0, dHold = 0;
-  var dfn = { name: function (i) { return EN ? 'ABCDEF'[i] : ZH ? '甲乙丙丁戊己'[i] : '가나다라마바'[i]; }, res: function (e) { return dRes[e]; }, win: function (e) { return dRes[e] === T('당첨'); } };
+  var dfn = { name: function (i) { return EN ? 'ABCDEF'[i] : ZH ? '甲乙丙丁戊己'[i] : JA ? 'イロハニホヘ'[i] : PT ? 'ABCDEF'[i] : RU ? 'АБВГДЕ'[i] : '가나다라마바'[i]; }, res: function (e) { return dRes[e]; }, win: function (e) { return dRes[e] === T('당첨'); } };
   function newDoodle() {
     var w = (Math.random() * DN) | 0; dRes = []; for (var i = 0; i < DN; i++) dRes.push(i === w ? T('당첨') : T('꽝'));
     DM = newModel(buildLadder(DN, (Math.random() * 1e9) | 0), makeLayout(300, 300, DN, 'v'), dfn);
@@ -586,6 +601,18 @@
     document.body.classList.add('zh'); document.documentElement.lang = 'zh-CN'; document.title = '爬梯子';
     Array.prototype.forEach.call(document.querySelectorAll('[data-t]'), function (el) { el.textContent = T(el.getAttribute('data-t')); });
   }
+  if (XD) {
+    // 일본어는 시스템 일본어 글꼴, 포르투갈어·러시아어는 악센트·키릴 문자를 시스템 글꼴로 채운다
+    var xf = JA ? "local('Hiragino Sans'),local('Hiragino Kaku Gothic ProN'),local('Yu Gothic UI'),local('Yu Gothic'),local('Yu Gothic Medium'),local('YuGothic-Medium'),local('Yu Gothic Regular'),local('YuGothic-Regular'),local('Yu Gothic Bold'),local('YuGothic-Bold'),local('MS PGothic'),local('MS Gothic'),local('Meiryo'),local('Noto Sans JP'),local('Noto Sans CJK JP'),local('Source Han Sans JP')"
+      : "local('Segoe UI'),local('Roboto'),local('Arial'),local('Helvetica Neue'),local('Helvetica')";
+    var xr = JA ? 'U+2E80-2FFF,U+3000-30FF,U+31F0-31FF,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF' : 'U+00A0-024F,U+0400-04FF,U+1E00-1EFF,U+2010-2027';
+    var xst = document.createElement('style');
+    xst.textContent = "@font-face{font-family:'Barunpen';src:" + xf + ";unicode-range:" + xr + "}@font-face{font-family:'Goding';src:" + xf + ";unicode-range:" + xr + "}" + (JA ? 'html[lang=ja] *{word-break:normal!important}' : '');
+    document.head.appendChild(xst);
+    if (!JA) document.body.classList.add('en');
+    document.documentElement.lang = JA ? 'ja' : PT ? 'pt-BR' : 'ru'; document.title = T('사다리타기');
+    Array.prototype.forEach.call(document.querySelectorAll('[data-t]'), function (el) { el.textContent = T(el.getAttribute('data-t')); });
+  }
   window.addEventListener('resize', function () { if (view === 'play') sizeBoard(); if (view === 'title') sizeDoodle(); });
   load();
   var shared = UP.get('s'), fromLink = false;
@@ -603,6 +630,9 @@
   // 시험 갈고리(내 컴퓨터에서만): ?view=setup|play|res &n=50 &demo=1(이름 채움) &run=all|0..n &at=ms &force=v|h &mute=1
   var DEMO = ['민준', '서연', '도윤', '하은', '시우', '지우', '주원', '서윤', '하준', '지아', '예준', '수아', '건우', '아린', '우진', '채원', '선우', '다은', '현우', '윤서', '김부장', '이과장', '박대리', '최사원', '정팀장'];
   if (ZH) DEMO = ['小明', '小红', '阿杰', '婷婷', '浩然', '欣怡', '子轩', '雨涵', '博文', '诗琪', '俊杰', '佳怡', '宇航', '梓萱', '天佑', '思雨', '一鸣', '可馨', '志强', '晓雯', '王经理', '李主管', '张组长', '刘专员', '陈总'];
+  if (JA) DEMO = ['ハルト', 'ユイ', 'ソウタ', 'ヒナ', 'レン', 'メイ', 'ユウト', 'サクラ', 'リク', 'アオイ', 'ハル', 'ミオ', 'カイト', 'ユナ', 'タクミ', 'リン', 'ソラ', 'コハル', 'ダイキ', 'アカリ', '山田部長', '佐藤課長', '鈴木主任', '田中係長', '高橋さん'];
+  if (PT) DEMO = ['Lucas', 'Ana', 'Pedro', 'Júlia', 'Gabriel', 'Laura', 'Mateus', 'Beatriz', 'Rafael', 'Sofia', 'Gustavo', 'Larissa', 'Felipe', 'Camila', 'Bruno', 'Mariana', 'Thiago', 'Fernanda', 'Diego', 'Letícia', 'Chefe Paulo', 'Gerente Rita', 'Seu Carlos', 'Dona Márcia', 'Diretor Luís'];
+  if (RU) DEMO = ['Саша', 'Маша', 'Дима', 'Аня', 'Лёша', 'Катя', 'Миша', 'Оля', 'Ваня', 'Настя', 'Кирилл', 'Даша', 'Артём', 'Лена', 'Егор', 'Юля', 'Макс', 'Вика', 'Никита', 'Соня', 'Шеф Андрей', 'Ольга Сергеевна', 'Павел Ильич', 'Нина Петровна', 'Иван Петрович'];
   function hooks() {
     if (qp('shot')) {
       document.body.classList.add('shot'); show('title'); DN = 6;

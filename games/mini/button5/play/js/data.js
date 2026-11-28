@@ -6,7 +6,7 @@
       const q = new URLSearchParams(location.search).get('lang');
       // 언어는 주소로만 정한다(?lang=en 일 때만 영어). 기억해 두면 한국어 페이지에서 들어와도 영어로 뜬다(9/29 사장님 폰)
       try { localStorage.removeItem('button5.lang'); } catch (e) {}
-      return q === 'en' || q === 'zh' ? q : 'ko';
+      return ['en', 'zh', 'ja', 'pt', 'ru'].includes(q) ? q : 'ko';
     } catch (e) { return 'ko'; }
   })();
   // 중국어판: 한국어 원문을 열쇠로 찾는다
@@ -32,7 +32,76 @@
     '1~7 행동 · D 그리기 · Q~Y 기억 · Tab 강화': '1~7 行动 · D 画画 · Q~Y 回忆 · Tab 强化',
     '벽화': '壁画', '그림 ': '画 ', '벽화 ': '壁画 ', '상점': '商店', '구매': '购买', '원': ''
   };
-  const T = (ko, en) => (LANG === 'en' ? en : LANG === 'zh' && ko in ZH ? ZH[ko] : ko);
+  // 일본어·포르투갈어·러시아어판: 한국어 원문을 열쇠로 찾는다('원문|영문' 열쇠가 있으면 그쪽 먼저)
+  const JA = {
+    '긁기': '引っかく', '세기': '数える', '파기': '掘る', '쌓기': '積む', '걷기': '歩く', '혼잣말': '独り言', '조각': '彫刻',
+    '선': '線', '수': '数', '돌': '石', '층': '階', '낱말': '言葉', '조각상': '彫像',
+    '치킨': 'チキン', '강아지': '子犬', '원룸': 'ワンルーム', '중고차': '中古車', '드라이브': 'ドライブ', '해외여행': '海外旅行', '바다': '海',
+    '오피스텔': '1LDK', '명품 시계': '高級腕時計', '초침': '秒針', '아파트': 'マンション', '스포츠카': 'スポーツカー', '질주': '疾走',
+    '펜트하우스': 'ペントハウス', '빌딩': 'ビル', '무인도': '無人島',
+    '여기 누가 또 왔구나.': 'また誰か来たんだな。',
+    '나도 백만 원 때문에 눌렀다. 너도 그랬겠지.': '俺も百万ウォンのために押した。お前もそうだろう。',
+    '돌아가면 다 잊는다. 그래서 바닥에 새긴다.': '戻れば全部忘れる。だから床に刻む。',
+    '처음 천만 년은 울었다. 다음 천만 년은 웃었다.': '最初の一千万年は泣いた。次の一千万年は笑った。',
+    '바닥은 긁으면 파인다. 아주 천천히.': '床は引っかけば削れる。ものすごくゆっくり。',
+    '숫자를 끝까지 세 보려 했다. 끝은 없었다.': '数を最後まで数えようとした。終わりはなかった。',
+    '네가 쌓은 탑을 봤다. 잘 쌓았더라.': 'お前が積んだ塔を見た。うまく積んだな。',
+    '버튼 값은 누를수록 오른다. 그쪽은 우리가 계속 누르길 바란다.': 'ボタンの値段は押すたびに上がる。向こうは俺たちに押し続けてほしいんだ。',
+    '바깥 우주는 백삼십팔억 년 되었다고 들었다.': '外の宇宙は百三十八億年たったと聞いた。',
+    '여기 쌓인 시간이 그보다 길어지면 무슨 일이 생길까.': 'ここに積もった時間がそれより長くなったら、何が起きるんだろう。',
+    '나는 스물일곱 번 눌렀다. 한 번이 모자랐다.': '俺は二十七回押した。一回足りなかった。',
+    '마지막은 네가 눌러 줘. 여기서 기다릴게.': '最後はお前が押してくれ。ここで待ってる。',
+    '138억': '138億', '흔적': '痕跡', '이어하기': 'つづきから', '처음부터 할까요?': 'はじめからやり直しますか？', '그리기': '描く',
+    '1~7 행동 · D 그리기 · Q~Y 기억 · Tab 강화': '1~7 行動 · D 描く · Q~Y 記憶 · Tab 強化',
+    '벽화': '壁画', '그림 ': '絵 ', '벽화 ': '壁画 ', '상점': 'ショップ', '구매': '買う', '원': ''
+  };
+  const PT = {
+    '긁기': 'Riscar', '세기': 'Contar', '파기': 'Cavar', '쌓기': 'Empilhar', '걷기': 'Andar', '혼잣말': 'Murmurar', '조각': 'Esculpir',
+    '선': 'linhas', '수': 'contagem', '돌': 'pedras', '층': 'andares', '낱말': 'palavras', '조각상': 'estátuas',
+    '치킨': 'Frango frito', '강아지': 'Cachorrinho', '원룸': 'Kitnet', '중고차': 'Carro usado', '드라이브': 'Passeio', '해외여행': 'Viagem ao exterior', '바다': 'Mar',
+    '오피스텔': 'Flat', '명품 시계': 'Relógio de luxo', '초침': 'Tique-taque', '아파트': 'Apartamento', '스포츠카': 'Carro esportivo', '질주': 'Velocidade',
+    '펜트하우스': 'Cobertura', '빌딩': 'Prédio', '무인도': 'Ilha particular',
+    '여기 누가 또 왔구나.': 'Então chegou mais alguém.',
+    '나도 백만 원 때문에 눌렀다. 너도 그랬겠지.': 'Eu também apertei por um milhão de wons. Você também, né?',
+    '돌아가면 다 잊는다. 그래서 바닥에 새긴다.': 'Quando você volta, esquece tudo. Por isso eu gravo no chão.',
+    '처음 천만 년은 울었다. 다음 천만 년은 웃었다.': 'Nos primeiros dez milhões de anos, eu chorei. Nos dez milhões seguintes, eu ri.',
+    '바닥은 긁으면 파인다. 아주 천천히.': 'O chão cede se você riscar. Bem devagar.',
+    '숫자를 끝까지 세 보려 했다. 끝은 없었다.': 'Tentei contar até o fim. Não tinha fim.',
+    '네가 쌓은 탑을 봤다. 잘 쌓았더라.': 'Vi as torres que você empilhou. Ficaram boas.',
+    '버튼 값은 누를수록 오른다. 그쪽은 우리가 계속 누르길 바란다.': 'O preço do botão sobe a cada vez. Eles querem que a gente continue apertando.',
+    '바깥 우주는 백삼십팔억 년 되었다고 들었다.': 'Ouvi dizer que o universo lá fora tem 13,8 bilhões de anos.',
+    '여기 쌓인 시간이 그보다 길어지면 무슨 일이 생길까.': 'O que acontece quando o tempo acumulado aqui passar disso?',
+    '나는 스물일곱 번 눌렀다. 한 번이 모자랐다.': 'Eu apertei vinte e sete vezes. Faltou uma.',
+    '마지막은 네가 눌러 줘. 여기서 기다릴게.': 'Aperta a última por mim. Vou esperar aqui.',
+    '138억': '13,8 bi', '흔적': 'MARCAS', '흔적|TRACE': 'MARCA', '이어하기': 'CONTINUAR', '처음부터 할까요?': 'Começar do zero?', '그리기': 'Desenhar',
+    '1~7 행동 · D 그리기 · Q~Y 기억 · Tab 강화': '1-7 ação · D desenhar · Q-Y memória · Tab melhorar',
+    '벽화': 'M', '그림 ': '', '벽화 ': 'MURAL ', '상점': 'LOJA', '구매': 'COMPRAR', '원': ''
+  };
+  const RU = {
+    '긁기': 'Царапать', '세기': 'Считать', '파기': 'Копать', '쌓기': 'Класть', '걷기': 'Ходить', '혼잣말': 'Бормотать', '조각': 'Резьба',
+    '선': 'линии', '수': 'счёт', '돌': 'камни', '층': 'этажи', '낱말': 'слова', '조각상': 'статуи',
+    '치킨': 'Курица', '강아지': 'Щенок', '원룸': 'Комната', '중고차': 'Б/у авто', '드라이브': 'Поездка', '해외여행': 'Тур за рубеж', '바다': 'Море',
+    '오피스텔': 'Студия', '명품 시계': 'Люкс-часы', '초침': 'Тик-так', '아파트': 'Квартира', '스포츠카': 'Спорткар', '질주': 'Скорость',
+    '펜트하우스': 'Пентхаус', '빌딩': 'Здание', '무인도': 'Свой остров',
+    '여기 누가 또 왔구나.': 'Значит, ещё кто-то пришёл.',
+    '나도 백만 원 때문에 눌렀다. 너도 그랬겠지.': 'Я тоже нажал ради миллиона вон. Ты, наверное, тоже.',
+    '돌아가면 다 잊는다. 그래서 바닥에 새긴다.': 'Вернёшься — всё забудешь. Поэтому я вырезаю на полу.',
+    '처음 천만 년은 울었다. 다음 천만 년은 웃었다.': 'Первые десять миллионов лет я плакал. Следующие десять миллионов смеялся.',
+    '바닥은 긁으면 파인다. 아주 천천히.': 'Пол поддаётся, если царапать. Очень медленно.',
+    '숫자를 끝까지 세 보려 했다. 끝은 없었다.': 'Я пытался досчитать до конца. Конца не было.',
+    '네가 쌓은 탑을 봤다. 잘 쌓았더라.': 'Видел твои башни. Хорошо сложил.',
+    '버튼 값은 누를수록 오른다. 그쪽은 우리가 계속 누르길 바란다.': 'Цена кнопки растёт с каждым нажатием. Им нужно, чтобы мы жали дальше.',
+    '바깥 우주는 백삼십팔억 년 되었다고 들었다.': 'Слышал, что вселенной снаружи 13,8 миллиарда лет.',
+    '여기 쌓인 시간이 그보다 길어지면 무슨 일이 생길까.': 'Что будет, когда накопленное здесь время станет больше?',
+    '나는 스물일곱 번 눌렀다. 한 번이 모자랐다.': 'Я нажал двадцать семь раз. Одного не хватило.',
+    '마지막은 네가 눌러 줘. 여기서 기다릴게.': 'Последнее нажми за меня. Я подожду здесь.',
+    '138억': '13,8 млрд', '흔적': 'НАДПИСИ', '흔적|TRACE': 'НАДПИСЬ', '이어하기': 'ПРОДОЛЖИТЬ', '처음부터 할까요?': 'Начать заново?', '그리기': 'Рисовать',
+    '1~7 행동 · D 그리기 · Q~Y 기억 · Tab 강화': '1-7 действия · D рисовать · Q-Y память · Tab прокачка',
+    '벽화': 'Ф', '그림 ': '', '벽화 ': 'ФРЕСКА ', '상점': 'МАГАЗИН', '구매': 'КУПИТЬ', '원': ''
+  };
+  const DI = { ja: JA, pt: PT, ru: RU }[LANG];
+  const T = (ko, en) => (LANG === 'en' ? en : LANG === 'zh' && ko in ZH ? ZH[ko]
+    : DI ? ((ko + '|' + en) in DI ? DI[ko + '|' + en] : ko in DI ? DI[ko] : en) : ko);
 
   const YEARS_PER_TRIP = 5e8;          // 한 번 누를 때마다 5억 년
   const UNIVERSE = 1.38e10;            // 우주의 나이 138억 년
@@ -124,6 +193,20 @@
       if (n >= 1e4) return Math.floor(n / 1e4).toLocaleString('zh-CN') + '万韩元';
       return Math.floor(n).toLocaleString('zh-CN') + '韩元';
     }
+    if (LANG === 'ja') {
+      if (n >= 1e8) {
+        const ok = Math.floor(n / 1e8), man = Math.floor((n % 1e8) / 1e4);
+        return ok.toLocaleString('ja-JP') + '億' + (man ? man.toLocaleString('ja-JP') + '万' : '') + 'ウォン';
+      }
+      if (n >= 1e4) return Math.floor(n / 1e4).toLocaleString('ja-JP') + '万ウォン';
+      return Math.floor(n).toLocaleString('ja-JP') + 'ウォン';
+    }
+    if (LANG === 'pt' || LANG === 'ru') {
+      const pt = LANG === 'pt';
+      if (n >= 1e9) return '₩' + dec(n / 1e9) + (pt ? ' bi' : ' млрд');
+      if (n >= 1e6) return '₩' + dec(n / 1e6) + (pt ? ' mi' : ' млн');
+      return '₩' + num(n);
+    }
     if (n >= 1e8) {
       const eok = Math.floor(n / 1e8), man = Math.floor((n % 1e8) / 1e4);
       return eok.toLocaleString('ko-KR') + '억' + (man ? ' ' + man.toLocaleString('ko-KR') + '만' : '') + '원';
@@ -132,15 +215,25 @@
     return Math.floor(n).toLocaleString('ko-KR') + '원';
   }
   function trim(x) { return (Math.round(x * 10) / 10).toString(); }
+  function dec(x) { return trim(x).replace('.', ','); }   // 소수점을 쉼표로
+  const LOC = { en: 'en-US', zh: 'zh-CN', ja: 'ja-JP', pt: 'pt-BR', ru: 'ru-RU' }[LANG] || 'ko-KR';
+  function ruYears(n) { // 러시아어 복수형: 1 год, 2 года, 5 лет
+    const a = n % 10, b = n % 100;
+    return a === 1 && b !== 11 ? 'год' : a >= 2 && a <= 4 && (b < 12 || b > 14) ? 'года' : 'лет';
+  }
   function yearsShort(y) { // 누적 표기: 32억 년
     if (LANG === 'en') return trim(y / 1e9) + 'B';
+    if (LANG === 'pt') return dec(y / 1e9) + ' bi';
+    if (LANG === 'ru') return dec(y / 1e9) + ' млрд';
     const e = y / 1e8;
-    return (e >= 100 ? Math.floor(e) : trim(e)) + (LANG === 'zh' ? '亿年' : '억 년');
+    return (e >= 100 ? Math.floor(e) : trim(e)) + (LANG === 'zh' ? '亿年' : LANG === 'ja' ? '億年' : '억 년');
   }
   function yearsFull(y) {
-    return Math.floor(y).toLocaleString(LANG === 'en' ? 'en-US' : LANG === 'zh' ? 'zh-CN' : 'ko-KR') + (LANG === 'en' ? ' yrs' : LANG === 'zh' ? '年' : '년');
+    if (LANG === 'pt') return num(y) + ' anos';
+    if (LANG === 'ru') return num(y) + ' ' + ruYears(Math.floor(y));
+    return Math.floor(y).toLocaleString(LANG === 'en' ? 'en-US' : LANG === 'zh' ? 'zh-CN' : LANG === 'ja' ? 'ja-JP' : 'ko-KR') + (LANG === 'en' ? ' yrs' : LANG === 'zh' || LANG === 'ja' ? '年' : '년');
   }
-  function num(n) { return Math.floor(n).toLocaleString(LANG === 'en' ? 'en-US' : LANG === 'zh' ? 'zh-CN' : 'ko-KR'); }
+  function num(n) { return Math.floor(n).toLocaleString(LOC); }
 
   window.B5D = { LANG, T, YEARS_PER_TRIP, UNIVERSE, offer, ACTS, RES_NAME, MAX_LV, upCost, lvGain, lvAuto,
     BORE_UP, BORE_DOWN, BORE_CUT, TRIP_SEC, F_TAP, F_AUTO, F_DECAY, F_MIN, SHOP, MEM_COOL, houseMult, MSGS, won, yearsShort, yearsFull, num };

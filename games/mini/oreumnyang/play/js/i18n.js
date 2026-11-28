@@ -16,7 +16,7 @@
     try {
       var q = new URLSearchParams(location.search).get('lang');
       try { localStorage.removeItem(KEY); } catch (e) {}
-      return q === 'en' || q === 'zh' ? q : 'ko';
+      return ['en', 'zh', 'ja', 'pt', 'ru'].indexOf(q) >= 0 ? q : 'ko';
     } catch (e) { return 'ko'; }
   }
 
@@ -288,11 +288,282 @@
     'short.drop': '柑橘', 'short.score': '分数'
   };
 
+  var JA = {
+    'app.title':    'オルムニャン - ネコの3マッチパズル 200ステージ',
+    'app.sub':      'オルムニャン · ネコの3マッチパズル 200ステージ',
+    'btn.play':     'スタート',
+    'btn.howto':    '遊び方',
+    'btn.gotit':    'わかった',
+    'btn.start':    '出発！',
+    'btn.map':      'マップ',
+    'btn.retry':    'もう一回',
+    'btn.next':     '次へ',
+    'nav.stages':   'ステージ',
+    'hud.moves':    '残り手数',
+    'hud.score':    'スコア',
+    'tool.shuffle': 'シャッフル',
+    'tool.hint':    'ヒント',
+    'aria.back':    '戻る',
+    'aria.exit':    'やめる',
+    'aria.music':   '音楽オン・オフ',
+    'aria.sfx':     '効果音オン・オフ',
+    'aria.lang':    '言語を変える',
+    'tip.first':    '同じネコを3匹以上そろえてポン！',
+    'tip.progress': '{n}ステージクリア · 星{stars}個',
+    'credit':       'サウンド · Kenney (kenney.nl) · Pixabay · OpenGameArt',
+
+    'howto.title':  '遊び方',
+    'howto.1':      'となり合ったネコ2匹を指で入れ替えよう。',
+    'howto.2':      '同じネコが横か縦に<b>3匹以上</b>並ぶとポン！と消えるよ。',
+    'howto.3':      '4匹そろえると<b>ロケットにゃん</b>（1列まるごと）、L字・T字でそろえると<b>バクダンにゃん</b>（まわり9マス）、5匹を1列にそろえると<b>にじにゃん</b>（同じ色ぜんぶ）が生まれるよ。',
+    'howto.4':      'スペシャルネコ同士を入れ替えると、もっと大きく爆発するよ。',
+    'howto.5':      '決められた<b>手数以内</b>に上の目標をぜんぶ達成したらクリア！',
+    'howto.obs':    '<b>おじゃまキャラ</b>',
+    'howto.oreum':  '<b>オルム</b> ネコの下にしいてある層。そのマスの上で消すと1段ずつ登れるよ。',
+    'howto.wall':   '<b>石垣</b> 動かない玄武岩の石垣。すぐとなりで消すとくずれるよ。',
+    'howto.carrot': '<b>ニンジン</b> ネコがニンジン畑にうまって動けない。となりで消して助け出そう。',
+    'howto.fruit':  '<b>ミカン</b> いちばん下の段まで下ろせば収穫！ミカンの下をあけると落ちてくるよ。',
+
+    'stage.n':      'ステージ{n}',
+    'stage.boss':   'ステージ{n} · BOSS',
+    'chapter.n':    '第{n}章',
+    'card.moves':   '動かせる回数 {n}回',
+    'goal.done':    '完了',
+
+    'goal.score':   '{n}点を取る',
+    'goal.collect': '{cat}を{n}匹集める',
+    'goal.jelly':   'オルム{n}か所をぜんぶ登る',
+    'goal.drop':    'ミカン{n}個を下まで下ろして収穫',
+    'goal.left':    '{name} あと{n}',
+
+    'note.boss':    'BOSSステージ！ちょっと難しいよ',
+    'note.oreum':   '新しいおじゃま：オルム - そのマスの上でネコを消すと1段ずつ登れるよ',
+    'note.wall':    '新しいおじゃま：石垣 - すぐとなりで消すとくずれるよ',
+    'note.carrot':  '新しいおじゃま：ニンジン畑 - ネコがうまって動けない。となりで消して助け出そう',
+    'note.fruit':   '新しい目標：ミカン - いちばん下まで下ろせば収穫だよ',
+    'note.oreum2':  'オルムが2段になったよ。2回登らないとダメ',
+    'note.shape':   'ボードの形が変わるよ',
+    'note.colors':  'ネコの種類が増えたよ',
+
+    'fx.rocket':    'ロケットにゃん！',
+    'fx.bomb':      'バクダンにゃん！',
+    'fx.rainbow':   'にじにゃん！',
+    'fx.rainbowBig':'にじ大爆発！',
+    'fx.rainbowMix':'にじ合体！',
+    'fx.cross':     '十字爆発！',
+    'fx.big':       '大爆発！',
+    'fx.mega':      '超特大バクダン！',
+    'fx.combo3':    '3連鎖！',
+    'fx.comboN':    '{n}連鎖！！',
+    'fx.harvest':   'ミカン収穫！',
+    'fx.noMove':    '動かせる所がないよ。シャッフル！',
+    'fx.shuffled':  'シャッフルしたよ！',
+
+    'end.clear':    'クリア！',
+    'end.all':      '200ステージぜんぶクリア！',
+    'end.fail':     'ざんねん',
+    'end.score':    '{n}点',
+    'end.toStar':   '★★★まであと{n}点',
+    'end.perfect':  'パーフェクト！',
+    'end.remain':   '残りの目標：{list}',
+
+    'cat.0': 'ミカンにゃん', 'cat.1': 'ツバキにゃん', 'cat.2': 'ウミにゃん', 'cat.3': 'モリにゃん',
+    'cat.4': 'ホシゾラにゃん', 'cat.5': 'ユウヤケにゃん', 'cat.6': 'クモにゃん',
+
+    'ch.0': '路地裏', 'ch.1': '港', 'ch.2': 'オルム', 'ch.3': 'ミカン畑', 'ch.4': '海女の海',
+    'ch.5': 'コッチャワル', 'ch.6': '城山の日の出', 'ch.7': '漢拏山', 'ch.8': '星の夜', 'ch.9': 'にゃん星の国',
+
+    'short.drop': 'ミカン', 'short.score': 'スコア'
+  };
+
+  var PT = {
+    'app.title':    'Oreumnyang - quebra-cabeça de gatos 3 em linha, 200 fases',
+    'app.sub':      'Oreumnyang · gatos 3 em linha · 200 fases',
+    'btn.play':     'Jogar',
+    'btn.howto':    'Como jogar',
+    'btn.gotit':    'Entendi',
+    'btn.start':    'Vamos!',
+    'btn.map':      'Mapa',
+    'btn.retry':    'De novo',
+    'btn.next':     'Próxima',
+    'nav.stages':   'Fases',
+    'hud.moves':    'Jogadas',
+    'hud.score':    'Pontos',
+    'tool.shuffle': 'Misturar',
+    'tool.hint':    'Dica',
+    'aria.back':    'Voltar',
+    'aria.exit':    'Sair',
+    'aria.music':   'Ligar ou desligar a música',
+    'aria.sfx':     'Ligar ou desligar os efeitos sonoros',
+    'aria.lang':    'Mudar idioma',
+    'tip.first':    'Junte três ou mais gatos iguais e... pop!',
+    'tip.progress': '{n} fases concluídas · {stars} estrelas',
+    'credit':       'Som · Kenney (kenney.nl) · Pixabay · OpenGameArt',
+
+    'howto.title':  'Como jogar',
+    'howto.1':      'Troque dois gatos vizinhos de lugar com o dedo.',
+    'howto.2':      'Alinhe <b>três ou mais</b> gatos iguais na horizontal ou na vertical e eles estouram!',
+    'howto.3':      'Quatro em linha criam um <b>Gato-foguete</b> (limpa uma linha inteira). Em forma de L ou T, nasce um <b>Gato-bomba</b> (9 casas em volta). Cinco em linha criam um <b>Gato arco-íris</b> (todos da mesma cor).',
+    'howto.4':      'Troque dois gatos especiais entre si para uma explosão bem maior.',
+    'howto.5':      'Complete os objetivos lá em cima <b>dentro das jogadas</b> para passar de fase.',
+    'howto.obs':    '<b>Os atrapalhadores</b>',
+    'howto.oreum':  '<b>Oreum</b> Uma camada debaixo dos gatos. Estoure gatos em cima dela para subir uma camada.',
+    'howto.wall':   '<b>Muro de pedra</b> Um muro de basalto que não se mexe. Estoure bem do lado para derrubar.',
+    'howto.carrot': '<b>Cenoura</b> O gato ficou enterrado na horta e não se mexe. Estoure do lado para tirá-lo de lá.',
+    'howto.fruit':  '<b>Tangerina</b> Leve até a última linha para colher! Limpe as casas debaixo dela e ela desce.',
+
+    'stage.n':      'Fase {n}',
+    'stage.boss':   'Fase {n} · Chefão',
+    'chapter.n':    'Cap.{n}',
+    'card.moves':   '{n} jogadas',
+    'goal.done':    'feito',
+
+    'goal.score':   'Faça {n} pontos',
+    'goal.collect': 'Junte {n} {cat}',
+    'goal.jelly':   'Suba todos os {n} oreums',
+    'goal.drop':    'Leve tangerinas até o fundo: {n}',
+    'goal.left':    '{name}: mais {n}',
+
+    'note.boss':    'Fase do chefão! Um pouco mais difícil.',
+    'note.oreum':   'Novidade: Oreum - estoure os gatos em cima dele para subir uma camada',
+    'note.wall':    'Novidade: Muro de pedra - estoure bem do lado e ele desmorona',
+    'note.carrot':  'Novidade: Horta de cenoura - o gato fica preso. Estoure do lado para tirá-lo',
+    'note.fruit':   'Novo objetivo: Tangerina - leve até a última linha para colher',
+    'note.oreum2':  'Agora o oreum tem duas camadas. É preciso subir duas vezes.',
+    'note.shape':   'O tabuleiro muda de formato a partir daqui.',
+    'note.colors':  'Agora tem mais tipos de gato.',
+
+    'fx.rocket':    'Gato-foguete!',
+    'fx.bomb':      'Gato-bomba!',
+    'fx.rainbow':   'Gato arco-íris!',
+    'fx.rainbowBig':'Explosão arco-íris!',
+    'fx.rainbowMix':'Fusão arco-íris!',
+    'fx.cross':     'Explosão em cruz!',
+    'fx.big':       'Explosão gigante!',
+    'fx.mega':      'Megabomba!',
+    'fx.combo3':    'Combo de 3!',
+    'fx.comboN':    'Combo de {n}!!',
+    'fx.harvest':   'Tangerina colhida!',
+    'fx.noMove':    'Sem jogadas. Misturando!',
+    'fx.shuffled':  'Misturado!',
+
+    'end.clear':    'Passou!',
+    'end.all':      'Todas as 200 fases concluídas!',
+    'end.fail':     'Quase!',
+    'end.score':    '{n} pontos',
+    'end.toStar':   'Faltam {n} pontos para ★★★',
+    'end.perfect':  'Perfeito!',
+    'end.remain':   'Ainda falta: {list}',
+
+    'cat.0': 'gatos tangerina', 'cat.1': 'gatos camélia', 'cat.2': 'gatos do mar',
+    'cat.3': 'gatos da floresta', 'cat.4': 'gatos estrelados', 'cat.5': 'gatos do pôr do sol',
+    'cat.6': 'gatos nuvem',
+
+    'ch.0': 'Beco', 'ch.1': 'Porto', 'ch.2': 'Oreum',
+    'ch.3': 'Pomar de tangerinas', 'ch.4': 'Mar das haenyeo', 'ch.5': 'Floresta Gotjawal',
+    'ch.6': 'Amanhecer em Seongsan', 'ch.7': 'Monte Hallasan', 'ch.8': 'Noite estrelada',
+    'ch.9': 'Planeta dos gatos',
+
+    'short.drop': 'tangerinas', 'short.score': 'pontos'
+  };
+
+  var RU = {
+    'app.title':    'Oreumnyang - кошачья головоломка «три в ряд», 200 уровней',
+    'app.sub':      'Oreumnyang · коты «три в ряд» · 200 уровней',
+    'btn.play':     'Играть',
+    'btn.howto':    'Как играть',
+    'btn.gotit':    'Понятно',
+    'btn.start':    'Вперёд!',
+    'btn.map':      'Карта',
+    'btn.retry':    'Заново',
+    'btn.next':     'Далее',
+    'nav.stages':   'Уровни',
+    'hud.moves':    'Ходы',
+    'hud.score':    'Очки',
+    'tool.shuffle': 'Смешать',
+    'tool.hint':    'Подсказка',
+    'aria.back':    'Назад',
+    'aria.exit':    'Выйти',
+    'aria.music':   'Включить или выключить музыку',
+    'aria.sfx':     'Включить или выключить звуки',
+    'aria.lang':    'Сменить язык',
+    'tip.first':    'Собери трёх и больше одинаковых котов — и бах!',
+    'tip.progress': 'Пройдено уровней: {n} · звёзд: {stars}',
+    'credit':       'Звук · Kenney (kenney.nl) · Pixabay · OpenGameArt',
+
+    'howto.title':  'Как играть',
+    'howto.1':      'Меняй местами двух соседних котов пальцем.',
+    'howto.2':      'Выстрой <b>трёх и больше</b> одинаковых котов в ряд по горизонтали или вертикали — и они лопнут!',
+    'howto.3':      'Четыре в ряд дают <b>Кота-ракету</b> (убирает целую линию). Фигура L или T даёт <b>Кота-бомбу</b> (9 клеток вокруг). Пять в ряд дают <b>Радужного кота</b> (все коты одного цвета).',
+    'howto.4':      'Поменяй местами двух особых котов — взрыв будет намного больше.',
+    'howto.5':      'Выполни цели сверху <b>за отведённые ходы</b> — и уровень пройден.',
+    'howto.obs':    '<b>Помехи</b>',
+    'howto.oreum':  '<b>Орым</b> Слой под котами. Взрывай котов на этой клетке, чтобы подняться на один слой.',
+    'howto.wall':   '<b>Каменная стена</b> Неподвижная стена из базальта. Взорви котов прямо рядом — и она рухнет.',
+    'howto.carrot': '<b>Морковка</b> Кот закопан на грядке и не может двигаться. Взорви рядом, чтобы его вытащить.',
+    'howto.fruit':  '<b>Мандарин</b> Опусти его до самого нижнего ряда — урожай! Убери клетки под ним, и он спустится.',
+
+    'stage.n':      'Уровень {n}',
+    'stage.boss':   'Уровень {n} · Босс',
+    'chapter.n':    'Гл.{n}',
+    'card.moves':   'Ходов: {n}',
+    'goal.done':    'готово',
+
+    'goal.score':   'Набери очков: {n}',
+    'goal.collect': 'Собери: {cat} × {n}',
+    'goal.jelly':   'Поднимись на все орымы: {n}',
+    'goal.drop':    'Спусти мандарины вниз: {n}',
+    'goal.left':    '{name}: ещё {n}',
+
+    'note.boss':    'Уровень с боссом! Чуть сложнее.',
+    'note.oreum':   'Новое: Орым — взрывай котов на этой клетке, чтобы подняться на слой',
+    'note.wall':    'Новое: Каменная стена — взорви прямо рядом, и она рухнет',
+    'note.carrot':  'Новое: Морковная грядка — кот застрял. Взорви рядом, чтобы вытащить',
+    'note.fruit':   'Новая цель: Мандарин — опусти до самого низа, чтобы собрать урожай',
+    'note.oreum2':  'Теперь у орыма два слоя. Подниматься нужно дважды.',
+    'note.shape':   'Дальше поле меняет форму.',
+    'note.colors':  'Видов котов стало больше.',
+
+    'fx.rocket':    'Кот-ракета!',
+    'fx.bomb':      'Кот-бомба!',
+    'fx.rainbow':   'Радужный кот!',
+    'fx.rainbowBig':'Радужный взрыв!',
+    'fx.rainbowMix':'Радужное слияние!',
+    'fx.cross':     'Взрыв крестом!',
+    'fx.big':       'Большой взрыв!',
+    'fx.mega':      'Мегабомба!',
+    'fx.combo3':    'Цепочка ×3!',
+    'fx.comboN':    'Цепочка ×{n}!!',
+    'fx.harvest':   'Урожай мандаринов!',
+    'fx.noMove':    'Ходов нет. Перемешиваем!',
+    'fx.shuffled':  'Перемешано!',
+
+    'end.clear':    'Пройдено!',
+    'end.all':      'Все 200 уровней пройдены!',
+    'end.fail':     'Почти получилось',
+    'end.score':    'Очки: {n}',
+    'end.toStar':   'До ★★★ ещё очков: {n}',
+    'end.perfect':  'Идеально!',
+    'end.remain':   'Осталось: {list}',
+
+    'cat.0': 'мандариновые коты', 'cat.1': 'камелиевые коты', 'cat.2': 'морские коты',
+    'cat.3': 'лесные коты', 'cat.4': 'звёздные коты', 'cat.5': 'закатные коты',
+    'cat.6': 'облачные коты',
+
+    'ch.0': 'Переулок', 'ch.1': 'Гавань', 'ch.2': 'Орым',
+    'ch.3': 'Мандариновый сад', 'ch.4': 'Море хэнё', 'ch.5': 'Лес Котджавал',
+    'ch.6': 'Рассвет в Сонсане', 'ch.7': 'Гора Халласан', 'ch.8': 'Звёздная ночь',
+    'ch.9': 'Кошачья звезда',
+
+    'short.drop': 'мандарины', 'short.score': 'очки'
+  };
+
   /* 문구 하나 꺼내기. {n} 같은 자리에 값을 끼워 넣습니다.
      {s} 는 영어에서 여럿일 때 붙는 s 입니다 (1개면 안 붙습니다). */
   function T(key, vars) {
-    var dict = lang === 'en' ? EN : lang === 'zh' ? ZH : KO;
+    var dict = lang === 'en' ? EN : lang === 'zh' ? ZH : lang === 'ja' ? JA : lang === 'pt' ? PT : lang === 'ru' ? RU : KO;
     var s = dict[key];
+    if (s == null && (lang === 'ja' || lang === 'pt' || lang === 'ru')) s = EN[key];
     if (s == null) s = KO[key];
     if (s == null) return key;
     if (!vars) return s;
@@ -315,7 +586,28 @@
 
   /* 화면에 박혀 있는 글자들을 바꿔 끼웁니다 (data-t 가 붙은 것) */
   global.applyStatic = function () {
-    document.documentElement.lang = lang === 'zh' ? 'zh-CN' : lang;
+    document.documentElement.lang = lang === 'zh' ? 'zh-CN' : lang === 'pt' ? 'pt-BR' : lang;
+    var fams = ['Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR'];
+    if (lang === 'ja' && !document.getElementById('ja-font')) {
+      // Japanese glyphs for the game font, limited to CJK and kana ranges
+      var jf = "local('Hiragino Sans'),local('Hiragino Kaku Gothic ProN'),local('Yu Gothic UI'),local('Yu Gothic'),local('Yu Gothic Medium'),local('YuGothic-Medium'),local('Yu Gothic Regular'),local('YuGothic-Regular'),local('Yu Gothic Bold'),local('YuGothic-Bold'),local('MS PGothic'),local('MS Gothic'),local('Meiryo'),local('Noto Sans JP'),local('Noto Sans CJK JP'),local('Source Han Sans JP')";
+      var jr = 'U+2E80-2FFF,U+3000-30FF,U+31F0-31FF,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF';
+      var js = document.createElement('style'); js.id = 'ja-font';
+      js.textContent = fams.map(function (fm) {
+        return "@font-face{font-family:'" + fm + "';src:" + jf + ';unicode-range:' + jr + '}';
+      }).join('') + 'html[lang=ja] *{word-break:normal!important}';
+      document.head.appendChild(js);
+    }
+    if ((lang === 'pt' || lang === 'ru') && !document.getElementById('lat-font')) {
+      // Accented Latin and Cyrillic glyphs for the game font
+      var lf = "local('Segoe UI'),local('Roboto'),local('Arial'),local('Helvetica Neue'),local('Helvetica')";
+      var lr = 'U+00A0-024F,U+0400-04FF,U+1E00-1EFF,U+2010-2027';
+      var ls = document.createElement('style'); ls.id = 'lat-font';
+      ls.textContent = fams.map(function (fm) {
+        return "@font-face{font-family:'" + fm + "';src:" + lf + ';unicode-range:' + lr + '}';
+      }).join('');
+      document.head.appendChild(ls);
+    }
     if (lang === 'zh' && !document.getElementById('zh-font')) {
       // Chinese glyphs for the game font, limited to CJK ranges
       var zf = "local('PingFang SC'),local('PingFangSC-Regular'),local('Microsoft YaHei'),local('Microsoft YaHei UI'),local('Noto Sans SC'),local('Noto Sans CJK SC'),local('Source Han Sans SC')";

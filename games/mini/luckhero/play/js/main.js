@@ -5,6 +5,7 @@
   let S = 1, W = 640, H = 360, DPR = 1, padL = 100, padR = 170;
   const FONT = 'Galmuri11, monospace';
   const ZH = /[?&]lang=zh/.test(location.search);
+  const JA = window.LG3 === 'ja', PR = window.LG3 === 'pt' || window.LG3 === 'ru';
   const UI = (G.ui = {});
 
   // ───────── 화면 맞추기 ─────────
@@ -65,7 +66,7 @@
     return out;
   }
   function wrap(s, size, maxW) {
-    if (ZH) return wrapZh(s, size, maxW);
+    if (ZH || JA) return wrapZh(s, size, maxW);
     const out = [];
     for (const para of String(s).split('\n')) {
       const words = para.split(' ');
@@ -497,7 +498,7 @@
         ctx.fillStyle = '#7aac5e'; ctx.beginPath(); ctx.arc(cx + dx - 6, cy + dy - 6, 22, 0, 7); ctx.fill();
         ctx.fillStyle = 'rgba(255,255,230,0.35)'; ctx.fillRect(cx + dx - 18, cy + dy - 20, 10, 4);
       }
-      const rw = EN ? 360 : 330, rh = 46, rx = cx - rw / 2, ry = cy - rh / 2;
+      const rw = EN || PR ? 360 : 330, rh = 46, rx = cx - rw / 2, ry = cy - rh / 2;
       for (const sgn of [-1, 1]) {
         const ex = sgn < 0 ? rx - 26 : rx + rw + 26;
         ctx.fillStyle = '#161a10'; ctx.beginPath(); ctx.moveTo(sgn < 0 ? rx + 6 : rx + rw - 6, ry + 10); ctx.lineTo(ex, ry + 10); ctx.lineTo(ex + sgn * -12, ry + rh / 2 + 10); ctx.lineTo(ex, ry + rh + 10); ctx.lineTo(sgn < 0 ? rx + 6 : rx + rw - 6, ry + rh + 10); ctx.fill();
@@ -505,7 +506,10 @@
       }
       box(rx, ry, rw, rh, '#f4e09a', '#161a10'); box(rx + 3, ry + 3, rw - 6, rh - 6, '#d4b060', '#d4b060', 'rgba(255,250,220,0.5)');
       // 제목 + 도트 하트
-      const tsz = EN ? 34 : ZH ? 37 : 40; ctx.font = `${tsz}px Mulmaru, Galmuri11`; const tww = ctx.measureText(title).width, hs = 30, gap = 6;
+      let tsz = EN || PR ? 34 : ZH || JA ? 37 : 40; ctx.font = `${tsz}px Mulmaru, Galmuri11`;
+      // shrink the title until title + heart fit inside the ribbon
+      if (JA || PR) while (ctx.measureText(title).width + 36 > rw - 24 && tsz > 20) ctx.font = `${--tsz}px Mulmaru, Galmuri11`;
+      const tww = ctx.measureText(title).width, hs = 30, gap = 6;
       txt(title, cx - (hs + gap) / 2, cy + 2, tsz, '#2c4a38', 'center', { olw: 6, olc: '#f4e09a', font: 'Mulmaru, Galmuri11' });
       icon('c_heart', cx - (hs + gap) / 2 + tww / 2 + gap + hs / 2, cy + 1 + Math.sin(G.time / 220) * 1.5, hs);
       drawDie(rx - 4, ry - 6, 22, face, Math.sin(G.time / 300) * 0.3); drawDie(rx + rw + 4, ry - 6, 22, 7 - face, -Math.sin(G.time / 300) * 0.3);
@@ -1040,8 +1044,11 @@
     const T2 = (s, x, y, size, col, al) => { g.font = `${size}px ${FONT}`; g.textAlign = al || 'center'; g.textBaseline = 'middle'; g.lineJoin = 'round'; g.lineWidth = size / 5; g.strokeStyle = '#161a10'; g.strokeText(s, x, y); g.fillStyle = col; g.fillText(s, x, y); };
     const hi = SP.get('hero'), hw = SW(hi), hh = SH(hi); g.drawImage(hi, 300 - hw * 4, 690 - hh * 8, hw * 8, hh * 8);
     const di = SP.get('demonlord'); g.save(); g.translate(790, 690); g.rotate(-0.25); g.globalAlpha = 0.9; g.drawImage(di, -SW(di) * 2.6, -SH(di) * 5.2, SW(di) * 5.2, SH(di) * 5.2); g.restore();
-    T2(T('용사님!럭키', 'LUCKY HERO'), 500, 110, 104, '#e8c860');
-    { g.font = `104px ${FONT}`; const tw2 = g.measureText(T('용사님!럭키', 'LUCKY HERO')).width, hi2 = SP.get('c_heart'); g.drawImage(hi2, 500 + tw2 / 2 + 14, 110 - 46, 92, 92 * SH(hi2) / SW(hi2)); }
+    let rts = 104;
+    // shrink the card title so title + heart stay inside the card
+    if (JA || PR) { g.font = `${rts}px ${FONT}`; while (g.measureText(T('용사님!럭키', 'LUCKY HERO')).width > 840 && rts > 60) g.font = `${--rts}px ${FONT}`; }
+    T2(T('용사님!럭키', 'LUCKY HERO'), 500, 110, rts, '#e8c860');
+    { g.font = `${rts}px ${FONT}`; const tw2 = g.measureText(T('용사님!럭키', 'LUCKY HERO')).width, hi2 = SP.get('c_heart'); g.drawImage(hi2, 500 + tw2 / 2 + 14, 110 - 46, 92, 92 * SH(hi2) / SW(hi2)); }
     T2(e.tru ? T('진 엔딩 · 행운의 신', 'TRUE ENDING') : T('엔딩 · 마왕 토벌', 'ENDING · Demon Lord Defeated'), 540, 210, 46, e.tru ? '#a8c878' : '#ffffff');
     // 숫자
     g.fillStyle = '#e8c860'; g.fillRect(90, 760, 900, 6);
@@ -1069,7 +1076,7 @@
     SFX.play('click');
     try { const a = document.createElement('a'); a.download = 'luckhero.png'; a.href = resultCv.toDataURL('image/png'); document.body.appendChild(a); a.click(); a.remove(); } catch (e) { }
   }
-  function shareUrl() { return ZH ? 'https://oreumgames.com/zh/games/mini/luckhero/' : EN ? 'https://oreumgames.com/en/games/mini/luckhero/' : 'https://oreumgames.com/games/mini/luckhero/'; }
+  function shareUrl() { return ZH ? 'https://oreumgames.com/zh/games/mini/luckhero/' : EN || JA || PR ?'https://oreumgames.com/en/games/mini/luckhero/' : 'https://oreumgames.com/games/mini/luckhero/'; }
   function shareCard() {
     SFX.play('click');
     const e = ending, text = T('용사님!럭키♥ ' + titleOf(e) + ' 잭팟 ' + e.stats.jack + '번', 'LUCKY HERO ' + titleOf(e) + ' ' + e.stats.jack + ' jackpots');

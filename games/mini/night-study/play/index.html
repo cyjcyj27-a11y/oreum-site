@@ -45,6 +45,7 @@
   #touch #tAct{right:4vw;bottom:8%;width:21vh;height:21vh;max-width:82px;max-height:82px;font-size:15px}
   #touch #tTorch{right:calc(4vw + 92px);bottom:8%;width:16vh;height:16vh;
     max-width:60px;max-height:60px;font-size:12px}
+  html[lang=pt-BR] #touch #tTorch{font-size:10px;letter-spacing:0}
   #touch #tRun{right:4vw;bottom:calc(8% + 96px);width:16vh;height:16vh;max-width:60px;max-height:60px;font-size:12px}
   #touch #tRun.on{background:rgba(127,196,232,.42);border-color:#b6e2f7}
   #touch #tPause{top:calc(38px + env(safe-area-inset-top));
@@ -311,12 +312,255 @@ const ZH = {
   '사물함에서 나오기':'离开储物柜','시험지 줍기':'捡起试卷','건전지 줍기':'捡起电池','사물함에 숨기':'躲进储物柜',
   '나오기':'出来','숨기':'躲藏',' 들어가기':' 进入',
 };
-const L = (ko, en, zh) => EN_MODE ? en : ZH_MODE ? (zh != null ? zh : (ZH[ko] != null ? ZH[ko] : ko)) : ko;
+/* 일본어·포르투갈어(브라질)·러시아어 — ZH 와 같은 한국어 키. 없으면 영어로 보여 준다. */
+const XL_MODE = ['ja','pt','ru'].includes(LANG_Q);
+const JA = {
+  "시험지":"答案",
+  "손전등":"ライト",
+  "숨":"息",
+  "줍기":"拾う",
+  "달리기":"走る",
+  "가로 화면에서 하는 게임입니다":"横画面で遊ぶゲームです",
+  "가로로 돌리기":"横向きにする",
+  "단추가 안 먹으면 폰의 <b>화면 회전 잠금</b>을 풀고 눕혀 주세요":"ボタンが効かないときは、スマホの<b>画面回転ロック</b>を解除して横にしてください",
+  "그래도 세로로 하기":"それでも縦で遊ぶ",
+  "야 간 자 율 학 습":"夜 の 自 習",
+  "야자하다 엎드려 잠들었다. 눈을 뜨니 학교엔 아무도 없다.<br> 흩어진 <b>시험지 6장</b>을 모아 1층 현관으로 나가라.<br> <b style=\"color:#c9b7b7\">복도에 소복 입은 무언가가 있다.</b> 들키면 뛰어야 한다.":"夜の自習中、机に突っ伏して寝てしまった。目を覚ますと、学校には誰もいない。<br>散らばった<b>答案用紙6枚</b>を集めて、1階の玄関から脱出しろ。<br><b style=\"color:#c9b7b7\">廊下に白装束の何かがいる。</b>見つかったら走れ。",
+  "왼쪽 아래 스틱":"左下のスティック",
+  "밀면 걷기 · 끝까지 밀면 달리기":"倒すと歩く · 端まで倒すと走る",
+  "달리기 단추":"走るボタン",
+  "누르고 있으면 달리기 (숨이 찬다)":"押している間走る(息が切れる)",
+  "화면 문지르기":"画面をスワイプ",
+  "둘러보기":"見回す",
+  "손전등 단추":"ライトボタン",
+  "밝지만 귀신 눈에 두 배로 띈다":"明るいけど、幽霊に2倍遠くから見つかる",
+  "줍기 단추":"拾うボタン",
+  "시험지 줍기 · 사물함에 숨기":"答案を拾う · ロッカーに隠れる",
+  "왼쪽 위 II":"左上のII",
+  "잠깐 멈추기":"一時停止",
+  "W A S D · 방향키":"W A S D · 矢印キー",
+  "걷기":"歩く",
+  "마우스":"マウス",
+  "달리기 (숨이 찬다)":"走る(息が切れる)",
+  "손전등 — 밝지만 들키기 쉽다":"ライト — 明るいけど見つかりやすい",
+  "줍기 · 사물함에 숨기":"拾う · ロッカーに隠れる",
+  "쉬움":"かんたん",
+  "보통":"ふつう",
+  "어려움":"むずかしい",
+  "그림자 켜기":"影:オン",
+  "그림자 끄기":"影:オフ",
+  "소리 켜기":"サウンド:オン",
+  "소리 끄기":"サウンド:オフ",
+  "들어가기":"入る",
+  "붙 잡 혔 다":"捕 ま っ た",
+  "차가운 손이 어깨를 잡았다.":"冷たい手が肩をつかんだ。",
+  "다시 하기":"もう一度",
+  "탈 출":"脱 出",
+  "다음 날 밤":"次の夜",
+  "한 번 더":"もう一回",
+  "꿈이었다":"夢だった",
+  "처음부터":"最初から",
+  "잠 깐 멈 춤":"一 時 停 止",
+  "화면을 누르면 이어서 합니다.":"画面をタップすると再開します。",
+  "이어 하기":"続ける",
+  "준비하는 중…":"準備中…",
+  "손전등을 켰다 — 멀리서도 보인다":"ライトをつけた — 遠くからでも見える",
+  "손전등을 껐다":"ライトを消した",
+  "다 모았다. 현관으로!":"全部集めた。玄関へ!",
+  "시험지를 주웠다  ":"答案用紙を拾った  ",
+  "건전지를 주웠다":"電池を拾った",
+  "봤다. 들켰다.":"見られた。バレた。",
+  "교실에서 잠이 들었다… 학교엔 아무도 없다":"教室で眠ってしまった… 学校には誰もいない",
+  " 탈출. 교문 밖은 아직 캄캄했다.<br>걸린 시간 <b>":" 脱出。校門の外はまだ真っ暗だった。<br>かかった時間 <b>",
+  "분 ":"分 ",
+  "초</b>":"秒</b>",
+  "한 번도 손전등을 켜지 않았다":"一度もライトをつけなかった",
+  "손전등이 나갔다":"ライトが切れた",
+  "들켰다 — 뛰어!":"見つかった — 走れ!",
+  "사물함 문이 열렸다.":"ロッカーの扉が開いた。",
+  "사물함에서 나오기":"ロッカーから出る",
+  "시험지 줍기":"答案用紙を拾う",
+  "건전지 줍기":"電池を拾う",
+  "사물함에 숨기":"ロッカーに隠れる",
+  "나오기":"出る",
+  "숨기":"隠れる",
+  " 들어가기":"へ"
+};
+const PT = {
+  "시험지":"PROVAS",
+  "손전등":"LANTERNA",
+  "숨":"FÔLEGO",
+  "줍기":"PEGAR",
+  "달리기":"CORRER",
+  "가로 화면에서 하는 게임입니다":"Este jogo é na horizontal",
+  "가로로 돌리기":"Virar na horizontal",
+  "단추가 안 먹으면 폰의 <b>화면 회전 잠금</b>을 풀고 눕혀 주세요":"Se o botão não funcionar, desative o <b>bloqueio de rotação</b> do celular e vire ele de lado",
+  "그래도 세로로 하기":"Jogar na vertical mesmo assim",
+  "야 간 자 율 학 습":"E S T U D O &nbsp; N O T U R N O",
+  "야자하다 엎드려 잠들었다. 눈을 뜨니 학교엔 아무도 없다.<br> 흩어진 <b>시험지 6장</b>을 모아 1층 현관으로 나가라.<br> <b style=\"color:#c9b7b7\">복도에 소복 입은 무언가가 있다.</b> 들키면 뛰어야 한다.":"Você cochilou na carteira no estudo noturno. Ao acordar, a escola estava vazia.<br>Junte as <b>6 provas</b> espalhadas e saia pela porta da frente, no térreo.<br><b style=\"color:#c9b7b7\">Tem uma coisa vestida de branco no corredor.</b> Se ela te vir, corra.",
+  "왼쪽 아래 스틱":"Analógico (inferior esq.)",
+  "밀면 걷기 · 끝까지 밀면 달리기":"empurre para andar · até o fim para correr",
+  "달리기 단추":"Botão CORRER",
+  "누르고 있으면 달리기 (숨이 찬다)":"segure para correr (você perde o fôlego)",
+  "화면 문지르기":"Deslize na tela",
+  "둘러보기":"olhar em volta",
+  "손전등 단추":"Botão LANTERNA",
+  "밝지만 귀신 눈에 두 배로 띈다":"ilumina, mas ela te vê do dobro da distância",
+  "줍기 단추":"Botão PEGAR",
+  "시험지 줍기 · 사물함에 숨기":"pegar provas · se esconder no armário",
+  "왼쪽 위 II":"II (superior esq.)",
+  "잠깐 멈추기":"pausar",
+  "W A S D · 방향키":"W A S D · Setas",
+  "걷기":"andar",
+  "마우스":"Mouse",
+  "달리기 (숨이 찬다)":"correr (você perde o fôlego)",
+  "손전등 — 밝지만 들키기 쉽다":"lanterna — ilumina, mas te entrega fácil",
+  "줍기 · 사물함에 숨기":"pegar · se esconder no armário",
+  "쉬움":"FÁCIL",
+  "보통":"NORMAL",
+  "어려움":"DIFÍCIL",
+  "그림자 켜기":"SOMBRAS: SIM",
+  "그림자 끄기":"SOMBRAS: NÃO",
+  "소리 켜기":"SOM: SIM",
+  "소리 끄기":"SOM: NÃO",
+  "들어가기":"ENTRAR",
+  "붙 잡 혔 다":"P E G O",
+  "차가운 손이 어깨를 잡았다.":"Uma mão gelada agarrou seu ombro.",
+  "다시 하기":"TENTAR DE NOVO",
+  "탈 출":"F U G A",
+  "다음 날 밤":"PRÓXIMA NOITE",
+  "한 번 더":"JOGAR DE NOVO",
+  "꿈이었다":"Era um sonho",
+  "처음부터":"DO COMEÇO",
+  "잠 깐 멈 춤":"P A U S A",
+  "화면을 누르면 이어서 합니다.":"Toque na tela para continuar.",
+  "이어 하기":"CONTINUAR",
+  "준비하는 중…":"Carregando…",
+  "손전등을 켰다 — 멀리서도 보인다":"Lanterna acesa — dá pra te ver de longe",
+  "손전등을 껐다":"Lanterna apagada",
+  "다 모았다. 현관으로!":"Pegou todas. Para a porta da frente!",
+  "시험지를 주웠다  ":"Pegou uma prova  ",
+  "건전지를 주웠다":"Pegou uma pilha",
+  "봤다. 들켰다.":"Ela viu. Você foi descoberto.",
+  "교실에서 잠이 들었다… 학교엔 아무도 없다":"Você dormiu na sala… Não tem ninguém na escola",
+  " 탈출. 교문 밖은 아직 캄캄했다.<br>걸린 시간 <b>":" — você escapou. Lá fora, além do portão, ainda era breu total.<br>Tempo <b>",
+  "분 ":"min ",
+  "초</b>":"s</b>",
+  "한 번도 손전등을 켜지 않았다":"Nunca acendeu a lanterna",
+  "손전등이 나갔다":"A lanterna apagou",
+  "들켰다 — 뛰어!":"Ela te viu — CORRE!",
+  "사물함 문이 열렸다.":"A porta do armário se abriu.",
+  "사물함에서 나오기":"Sair do armário",
+  "시험지 줍기":"Pegar a prova",
+  "건전지 줍기":"Pegar a pilha",
+  "사물함에 숨기":"Se esconder no armário",
+  "나오기":"SAIR",
+  "숨기":"ESCONDER",
+  " 들어가기":" — ENTRAR"
+};
+const RU = {
+  "시험지":"ЛИСТЫ",
+  "손전등":"ФОНАРЬ",
+  "숨":"ДЫХАНИЕ",
+  "줍기":"ВЗЯТЬ",
+  "달리기":"БЕГ",
+  "가로 화면에서 하는 게임입니다":"Эта игра в горизонтальном режиме",
+  "가로로 돌리기":"Повернуть экран",
+  "단추가 안 먹으면 폰의 <b>화면 회전 잠금</b>을 풀고 눕혀 주세요":"Если кнопка не работает, отключи <b>блокировку поворота</b> и положи телефон боком",
+  "그래도 세로로 하기":"Всё равно играть вертикально",
+  "야 간 자 율 학 습":"Н О Ч Н А Я &nbsp; У Ч Ё Б А",
+  "야자하다 엎드려 잠들었다. 눈을 뜨니 학교엔 아무도 없다.<br> 흩어진 <b>시험지 6장</b>을 모아 1층 현관으로 나가라.<br> <b style=\"color:#c9b7b7\">복도에 소복 입은 무언가가 있다.</b> 들키면 뛰어야 한다.":"Ты уснул за партой на вечерних занятиях. Проснулся — а в школе никого.<br>Собери <b>6 экзаменационных листов</b> и выберись через главный вход на первом этаже.<br><b style=\"color:#c9b7b7\">В коридоре что-то в белом одеянии.</b> Если оно тебя заметит — беги.",
+  "왼쪽 아래 스틱":"Стик слева внизу",
+  "밀면 걷기 · 끝까지 밀면 달리기":"толкни — идти · до упора — бежать",
+  "달리기 단추":"Кнопка БЕГ",
+  "누르고 있으면 달리기 (숨이 찬다)":"удерживай — бег (сбивается дыхание)",
+  "화면 문지르기":"Свайп по экрану",
+  "둘러보기":"осмотреться",
+  "손전등 단추":"Кнопка ФОНАРЬ",
+  "밝지만 귀신 눈에 두 배로 띈다":"светло, но призрак видит тебя вдвое дальше",
+  "줍기 단추":"Кнопка ВЗЯТЬ",
+  "시험지 줍기 · 사물함에 숨기":"взять лист · спрятаться в шкафчик",
+  "왼쪽 위 II":"II слева вверху",
+  "잠깐 멈추기":"пауза",
+  "W A S D · 방향키":"W A S D · Стрелки",
+  "걷기":"идти",
+  "마우스":"Мышь",
+  "달리기 (숨이 찬다)":"бег (сбивается дыхание)",
+  "손전등 — 밝지만 들키기 쉽다":"фонарь — светло, но легко попасться",
+  "줍기 · 사물함에 숨기":"взять · спрятаться в шкафчик",
+  "쉬움":"ЛЕГКО",
+  "보통":"НОРМАЛЬНО",
+  "어려움":"СЛОЖНО",
+  "그림자 켜기":"ТЕНИ: ВКЛ",
+  "그림자 끄기":"ТЕНИ: ВЫКЛ",
+  "소리 켜기":"ЗВУК: ВКЛ",
+  "소리 끄기":"ЗВУК: ВЫКЛ",
+  "들어가기":"ВОЙТИ",
+  "붙 잡 혔 다":"П О Й М А Н",
+  "차가운 손이 어깨를 잡았다.":"Холодная рука схватила тебя за плечо.",
+  "다시 하기":"ЕЩЁ РАЗ",
+  "탈 출":"П О Б Е Г",
+  "다음 날 밤":"СЛЕДУЮЩАЯ НОЧЬ",
+  "한 번 더":"ЗАНОВО",
+  "꿈이었다":"Это был сон",
+  "처음부터":"С НАЧАЛА",
+  "잠 깐 멈 춤":"П А У З А",
+  "화면을 누르면 이어서 합니다.":"Нажми на экран, чтобы продолжить.",
+  "이어 하기":"ПРОДОЛЖИТЬ",
+  "준비하는 중…":"Загрузка…",
+  "손전등을 켰다 — 멀리서도 보인다":"Фонарь включён — тебя видно издалека",
+  "손전등을 껐다":"Фонарь выключен",
+  "다 모았다. 현관으로!":"Все собраны. К выходу!",
+  "시험지를 주웠다  ":"Подобран лист  ",
+  "건전지를 주웠다":"Подобрана батарейка",
+  "봤다. 들켰다.":"Она видела. Тебя заметили.",
+  "교실에서 잠이 들었다… 학교엔 아무도 없다":"Ты уснул в классе… В школе никого",
+  " 탈출. 교문 밖은 아직 캄캄했다.<br>걸린 시간 <b>":" — побег. За школьными воротами всё ещё была тьма.<br>Время <b>",
+  "분 ":"мин ",
+  "초</b>":"с</b>",
+  "한 번도 손전등을 켜지 않았다":"Ни разу не включил фонарь",
+  "손전등이 나갔다":"Фонарь сел",
+  "들켰다 — 뛰어!":"Тебя заметили — БЕГИ!",
+  "사물함 문이 열렸다.":"Дверца шкафчика открылась.",
+  "사물함에서 나오기":"Выйти из шкафчика",
+  "시험지 줍기":"Взять лист",
+  "건전지 줍기":"Взять батарейку",
+  "사물함에 숨기":"Спрятаться в шкафчик",
+  "나오기":"ВЫЙТИ",
+  "숨기":"УКРЫТЬСЯ",
+  " 들어가기":" — ВОЙТИ"
+};
+const XD = LANG_Q === 'ja' ? JA : LANG_Q === 'pt' ? PT : LANG_Q === 'ru' ? RU : {};
+/* 러시아어 수 붙임: 1 лист / 2 листа / 5 листов */
+const ruN = (n, one, few, many) => { const a = n % 10, b = n % 100; return n + ' ' + (a === 1 && b !== 11 ? one : a >= 2 && a <= 4 && (b < 12 || b > 14) ? few : many); };
+const L = (ko, en, zh, x) => EN_MODE ? en : ZH_MODE ? (zh != null ? zh : (ZH[ko] != null ? ZH[ko] : ko))
+  : XL_MODE ? (x && x[LANG_Q] != null ? x[LANG_Q] : (typeof ko === 'string' && XD[ko] != null ? XD[ko] : en)) : ko;
 (function applyLang(){
   if (EN_MODE){
     document.documentElement.lang = 'en';
     document.title = 'NIGHT STUDY — free horror escape game';
     document.querySelectorAll('[data-en]').forEach(el => { el.innerHTML = el.dataset.en; });
+    return;
+  }
+  if (XL_MODE){
+    document.documentElement.lang = LANG_Q === 'pt' ? 'pt-BR' : LANG_Q;
+    document.title = {ja:'夜の自習 NIGHT STUDY — 無料ホラー脱出ゲーム', pt:'Estudo Noturno NIGHT STUDY — jogo de terror e fuga grátis', ru:'Ночная учёба NIGHT STUDY — бесплатная хоррор-игра на побег'}[LANG_Q];
+    /* 글꼴 이름마다 일본어는 가나·한자 범위, 포르투갈어·러시아어는 악센트 라틴·키릴 범위를 시스템 글꼴로 채운다 */
+    const jf = LANG_Q === 'ja'
+      ? "local('Hiragino Sans'),local('Hiragino Kaku Gothic ProN'),local('Yu Gothic UI'),local('Yu Gothic'),local('Yu Gothic Medium'),local('YuGothic-Medium'),local('Yu Gothic Regular'),local('YuGothic-Regular'),local('Yu Gothic Bold'),local('YuGothic-Bold'),local('MS PGothic'),local('MS Gothic'),local('Meiryo'),local('Noto Sans JP'),local('Noto Sans CJK JP'),local('Source Han Sans JP')"
+      : "local('Segoe UI'),local('Roboto'),local('Arial'),local('Helvetica Neue'),local('Helvetica')";
+    const ur = LANG_Q === 'ja'
+      ? 'U+2E80-2FFF,U+3000-30FF,U+31F0-31FF,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF'
+      : 'U+00A0-024F,U+0400-04FF,U+1E00-1EFF,U+2010-2027';
+    const st = document.createElement('style');
+    st.textContent = ['Pretendard','Apple SD Gothic Neo','Malgun Gothic'].map(f =>
+        [400,600,700,800,900].map(w => `@font-face{font-family:'${f}';src:${jf};font-weight:${w};unicode-range:${ur}}`).join('')).join('')
+      + (LANG_Q === 'ja' ? 'html[lang=ja] *{word-break:normal!important}' : '');
+    document.head.appendChild(st);
+    document.querySelectorAll('[data-en]').forEach(el => {
+      const k = el.innerHTML.replace(/\s+/g,' ').trim();
+      el.innerHTML = XD[k] != null ? XD[k] : el.dataset.en;
+    });
     return;
   }
   if (!ZH_MODE) return;
@@ -338,7 +582,7 @@ const L = (ko, en, zh) => EN_MODE ? en : ZH_MODE ? (zh != null ? zh : (ZH[ko] !=
 </script>
 
 <!-- 오름게임즈 알약(왼쪽 위) + 전체화면(왼쪽 아래) — 모든 게임 기본 탑재 -->
-<script src="/assets/game-home.js?v=8" data-top="4" data-left="4" data-fullscreen="1" defer></script>
+<script src="/assets/game-home.js?v=9" data-top="4" data-left="4" data-fullscreen="1" defer></script>
 <script>
 /* file:// 로 그냥 열었을 때를 위한 예비 줄 — /assets/… 절대경로는 서버가 있어야 잡힌다.
    ../ 개수는 이 파일에서 사이트 뿌리까지의 깊이대로 (games/mini/night-study/play/ 기준) */
@@ -346,7 +590,7 @@ const L = (ko, en, zh) => EN_MODE ? en : ZH_MODE ? (zh != null ? zh : (ZH[ko] !=
   function f(){
     if (document.getElementById('oreumHome')) return;
     var s = document.createElement('script');
-    s.src = '../../../../assets/game-home.js?v=8';
+    s.src = '../../../../assets/game-home.js?v=9';
     s.setAttribute('data-top','4'); s.setAttribute('data-left','4');
     s.setAttribute('data-fullscreen','1');
     document.body.appendChild(s);
@@ -526,11 +770,14 @@ function makeBoardTex(){
     g.strokeStyle='rgba(230,230,220,'+rnd(.02,.09).toFixed(2)+')'; g.lineWidth=rnd(2,9);
     g.beginPath(); g.moveTo(rnd(0,512),rnd(0,256)); g.lineTo(rnd(0,512),rnd(0,256)); g.stroke();
   }
-  g.font='900 52px '+(ZH_MODE?'"Microsoft YaHei","PingFang SC","Noto Sans SC",':'')+'sans-serif'; g.fillStyle='rgba(240,238,228,.72)';
+  g.font='900 52px '+(ZH_MODE?'"Microsoft YaHei","PingFang SC","Noto Sans SC",':LANG_Q==='ja'?'"Yu Gothic","Meiryo","Hiragino Sans","Noto Sans JP",':'')+'sans-serif'; g.fillStyle='rgba(240,238,228,.72)';
   g.textAlign='center';
   g.fillText(pick(L(['집에 가지 마','아직 안 끝났어','한 명이 모자라','같이 있어 줘'],
                    ["don't go home","it isn't over yet","one of you is missing","stay with me"],
-                   ['别回家','还没结束','少了一个人','陪着我'])), 256, 150);
+                   ['别回家','还没结束','少了一个人','陪着我'],
+                   {ja:['家に帰らないで','まだ終わってない','ひとり足りない','一緒にいて'],
+                    pt:['não vá pra casa','ainda não acabou','falta um','fica comigo'],
+                    ru:['не уходи домой','ещё не конец','одного нет','останься со мной']})), 256, 150);
   g.fillStyle='#6b5636'; g.fillRect(0,238,512,18);
   return tex(c);
 }
@@ -1388,7 +1635,7 @@ function dayGlow(day){ return 1 - 0.88*(day-1)/(LAST_DAY-1); }
 const DAY_KEY='nightstudy.day';
 function savedDay(){ try{ const d=+localStorage.getItem(DAY_KEY); return d>=1&&d<=LAST_DAY ? d : 1; }catch(e){ return 1; } }
 function saveDay(d){ try{ localStorage.setItem(DAY_KEY, String(d)); }catch(e){} }
-function dayName(d){ return L(d+'일째 밤', 'Night '+d, '第'+d+'夜'); }
+function dayName(d){ return L(d+'일째 밤', 'Night '+d, '第'+d+'夜', {ja:d+'日目の夜', pt:'Noite '+d, ru:'Ночь '+d}); }
 
 const $ = id => document.getElementById(id);
 const el = {
@@ -1435,7 +1682,8 @@ function startGame(day){
   Snd.start();
   if(!TOUCH) canvas.requestPointerLock();
   toast(S.day>1
-    ? dayName(S.day)+L(' — 또 잠들었다… 시험지 '+S.needed+'장',' — You dozed off again… '+S.needed+' papers',' — 又睡着了… 试卷 '+S.needed+' 张')
+    ? dayName(S.day)+L(' — 또 잠들었다… 시험지 '+S.needed+'장',' — You dozed off again… '+S.needed+' papers',' — 又睡着了… 试卷 '+S.needed+' 张',
+        {ja:' — また眠ってしまった… 答案用紙 '+S.needed+'枚', pt:' — Você cochilou de novo… '+S.needed+(S.needed===1?' prova':' provas'), ru:' — Ты снова уснул… '+ruN(S.needed,'лист','листа','листов')})
     : L('교실에서 잠이 들었다… 학교엔 아무도 없다','You fell asleep in class… No one is left in the school'));
 }
 function pauseGame(){
@@ -1759,7 +2007,8 @@ function updateWorld(dt){
     else if(!el.hint.textContent){
       el.hint.textContent=L('잠겨 있다 — 시험지 '+(S.needed-S.papers)+'장이 더 필요하다',
         'Locked — '+(S.needed-S.papers)+(S.needed-S.papers===1?' more exam paper':' more exam papers')+' needed',
-        '门锁着 — 还需要 '+(S.needed-S.papers)+' 张试卷');
+        '门锁着 — 还需要 '+(S.needed-S.papers)+' 张试卷',
+        {ja:'鍵がかかっている — 答案用紙があと'+(S.needed-S.papers)+'枚必要', pt:'Trancada — '+((S.needed-S.papers)===1?'falta 1 prova':'faltam '+(S.needed-S.papers)+' provas'), ru:'Заперто — нужно ещё '+ruN(S.needed-S.papers,'лист','листа','листов')});
       el.hint.style.opacity='1';
     }
   }

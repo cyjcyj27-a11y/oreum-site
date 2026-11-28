@@ -38,7 +38,38 @@
     zst.textContent = "@font-face{font-family:'DoHyeon';src:" + zb + ";unicode-range:" + ur + "}@font-face{font-family:'Ria';src:" + zb + ";unicode-range:" + ur + "}html[lang=zh-CN] *{word-break:normal!important}";
     document.head.appendChild(zst);
   }
-  function rankName(L) { return (EN ? RANKS_EN : ZH ? RANKS_ZH : RANKS)[L]; }
+  // ja · pt · ru: 같은 방식으로 사전을 골라 글을 바꾼다
+  var QL = (location.search.match(/[?&]lang=([a-z]+)/i) || [])[1];
+  var LG3 = !EN && !ZH && ['ja', 'pt', 'ru'].indexOf((QL || '').toLowerCase()) >= 0 ? QL.toLowerCase() : '';
+  var L3D = {
+    ja: { '오목': '五目並べ', '시작': 'スタート', 'K 효과음': 'K 効果音' },
+    pt: { '오목': 'GOMOKU', '시작': 'JOGAR', 'K 효과음': 'K som' },
+    ru: { '오목': 'ГОМОКУ', '시작': 'ИГРАТЬ', 'K 효과음': 'K звук' }
+  };
+  var L3R = {
+    ja: RANKS.map(function (s) { return s.replace('급', '級').replace('단', '段'); }),
+    pt: RANKS.map(function (s) { return s.replace('급', ' kyu').replace('단', ' dan'); }),
+    ru: RANKS.map(function (s) { return s.replace('급', ' кю').replace('단', ' дан'); })
+  };
+  if (LG3) {
+    var LD = L3D[LG3];
+    document.documentElement.lang = LG3 === 'pt' ? 'pt-BR' : LG3; document.body.classList.add(LG3); document.title = LD['오목'];
+    Array.prototype.forEach.call(document.querySelectorAll('[data-en]'), function (el) { var k = el.textContent.trim(); if (LD[k]) el.textContent = LD[k]; });
+    // 게임 글꼴에 없는 글자(가나·한자, 악센트 라틴·키릴)를 기기 글꼴로 그 범위만 덧붙인다
+    var lsrc, lur, lcss = '';
+    if (LG3 === 'ja') {
+      lsrc = "local('Hiragino Sans'),local('Hiragino Kaku Gothic ProN'),local('Yu Gothic UI'),local('Yu Gothic'),local('Yu Gothic Medium'),local('YuGothic-Medium'),local('Yu Gothic Regular'),local('YuGothic-Regular'),local('Yu Gothic Bold'),local('YuGothic-Bold'),local('MS PGothic'),local('MS Gothic'),local('Meiryo'),local('Noto Sans JP'),local('Noto Sans CJK JP'),local('Source Han Sans JP')";
+      lur = 'U+2E80-2FFF,U+3000-30FF,U+31F0-31FF,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF';
+      lcss = 'html[lang=ja] *{word-break:normal!important}';
+    } else {
+      lsrc = "local('Segoe UI'),local('Roboto'),local('Arial'),local('Helvetica Neue'),local('Helvetica')";
+      lur = 'U+00A0-024F,U+0400-04FF,U+1E00-1EFF,U+2010-2027';
+    }
+    var lst = document.createElement('style');
+    lst.textContent = "@font-face{font-family:'DoHyeon';src:" + lsrc + ";unicode-range:" + lur + "}@font-face{font-family:'Ria';src:" + lsrc + ";unicode-range:" + lur + "}" + lcss;
+    document.head.appendChild(lst);
+  }
+  function rankName(L) { return (EN ? RANKS_EN : ZH ? RANKS_ZH : LG3 ? L3R[LG3] : RANKS)[L]; }
 
   // ── 기록 — 오른 급수 ──
   function loadBest() {

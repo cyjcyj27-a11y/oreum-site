@@ -164,11 +164,12 @@
   function unit(v, d, s) { var x = v / d; return (x >= 100 ? Math.round(x) : +x.toFixed(1)) + s; }
   function fmt(v) {
     v = Math.floor(v);
-    if (T.en) {
-      if (v >= 1e12) return unit(v, 1e12, 'T');
-      if (v >= 1e9) return unit(v, 1e9, 'B');
-      if (v >= 1e6) return unit(v, 1e6, 'M');
-      if (v >= 1e5) return unit(v, 1e3, 'K');
+    if (T.en || T.sfx) {
+      var X = T.sfx || ['T', 'B', 'M', 'K'];
+      if (v >= 1e12) return unit(v, 1e12, X[0]);
+      if (v >= 1e9) return unit(v, 1e9, X[1]);
+      if (v >= 1e6) return unit(v, 1e6, X[2]);
+      if (v >= 1e5) return unit(v, 1e3, X[3]);
     } else {
       var U = T.units || ['조', '억', '만'];
       if (v >= 1e12) return unit(v, 1e12, U[0]);

@@ -10,15 +10,16 @@
   var PI = Math.PI, FY = 484, K = 0.6;                 // K: 시트 픽셀 → 월드 배율(주인공 키 400px → 240)
   var EN = /[?&]lang=en\b/.test(location.search);
   var ZH = !EN && new URLSearchParams(location.search).get('lang') === 'zh';
+  var L3 = (function () { var q = new URLSearchParams(location.search).get('lang'); return !EN && ['ja', 'pt', 'ru'].indexOf(q) >= 0 ? q : ''; })();   // ja · pt · ru
   var STAGES = [
-    { name: '저택 앞', en: 'MANSION GATE', zh: '大宅门前', boss: '도적 두목', bossEn: 'BANDIT CHIEF', bossZh: '盗贼头目' },
-    { name: '저잣거리', en: 'MARKET STREET', zh: '集市大街', boss: '왈패 대장', bossEn: 'MARKET BULLY', bossZh: '地痞老大' },
-    { name: '거지 골목', en: 'BEGGAR ALLEY', zh: '乞丐巷', boss: '거지 왕초', bossEn: 'BEGGAR KING', bossZh: '乞丐王' },
-    { name: '도박장', en: 'GAMBLING DEN', zh: '赌坊', boss: '도박장 주인', bossEn: 'DEN MASTER', bossZh: '赌坊老板' },
-    { name: '나루터', en: 'RIVER DOCK', zh: '渡口', boss: '뱃사공 거인', bossEn: 'GIANT BOATMAN', bossZh: '巨人船夫' },
-    { name: '산길', en: 'MOUNTAIN PASS', zh: '山道', boss: '산적 두목', bossEn: 'MOUNTAIN BANDIT', bossZh: '山贼头子' },
-    { name: '관아', en: 'MAGISTRATE', zh: '衙门', boss: '장군', bossEn: 'THE GENERAL', bossZh: '将军' },
-    { name: '무술대회', en: 'TOURNAMENT', zh: '武林大会', boss: '흑의 고수', bossEn: 'BLACK MASTER', bossZh: '黑衣高手' }
+    { name: '저택 앞', en: 'MANSION GATE', zh: '大宅门前', boss: '도적 두목', bossEn: 'BANDIT CHIEF', bossZh: '盗贼头目', ja: '屋敷の前', pt: 'PORTÃO DA MANSÃO', ru: 'ВОРОТА УСАДЬБЫ', bossJa: '盗賊の頭', bossPt: 'CHEFE DOS BANDIDOS', bossRu: 'ГЛАВАРЬ РАЗБОЙНИКОВ' },
+    { name: '저잣거리', en: 'MARKET STREET', zh: '集市大街', boss: '왈패 대장', bossEn: 'MARKET BULLY', bossZh: '地痞老大', ja: '市場通り', pt: 'RUA DO MERCADO', ru: 'РЫНОЧНАЯ УЛИЦА', bossJa: 'ゴロツキの親分', bossPt: 'VALENTÃO DA FEIRA', bossRu: 'РЫНОЧНЫЙ ЗАДИРА' },
+    { name: '거지 골목', en: 'BEGGAR ALLEY', zh: '乞丐巷', boss: '거지 왕초', bossEn: 'BEGGAR KING', bossZh: '乞丐王', ja: '物乞い横丁', pt: 'BECO DOS MENDIGOS', ru: 'ПЕРЕУЛОК НИЩИХ', bossJa: '物乞いの親玉', bossPt: 'REI DOS MENDIGOS', bossRu: 'КОРОЛЬ НИЩИХ' },
+    { name: '도박장', en: 'GAMBLING DEN', zh: '赌坊', boss: '도박장 주인', bossEn: 'DEN MASTER', bossZh: '赌坊老板', ja: '賭場', pt: 'CASA DE APOSTAS', ru: 'ИГОРНЫЙ ДОМ', bossJa: '賭場の主', bossPt: 'DONO DA CASA', bossRu: 'ХОЗЯИН ПРИТОНА' },
+    { name: '나루터', en: 'RIVER DOCK', zh: '渡口', boss: '뱃사공 거인', bossEn: 'GIANT BOATMAN', bossZh: '巨人船夫', ja: '渡し場', pt: 'CAIS DO RIO', ru: 'РЕЧНАЯ ПРИСТАНЬ', bossJa: '巨人の船頭', bossPt: 'BARQUEIRO GIGANTE', bossRu: 'ЛОДОЧНИК-ВЕЛИКАН' },
+    { name: '산길', en: 'MOUNTAIN PASS', zh: '山道', boss: '산적 두목', bossEn: 'MOUNTAIN BANDIT', bossZh: '山贼头子', ja: '山道', pt: 'TRILHA DA MONTANHA', ru: 'ГОРНЫЙ ПЕРЕВАЛ', bossJa: '山賊の頭', bossPt: 'BANDIDO DA MONTANHA', bossRu: 'ГОРНЫЙ РАЗБОЙНИК' },
+    { name: '관아', en: 'MAGISTRATE', zh: '衙门', boss: '장군', bossEn: 'THE GENERAL', bossZh: '将军', ja: '奉行所', pt: 'TRIBUNAL', ru: 'УПРАВА', bossJa: '将軍', bossPt: 'O GENERAL', bossRu: 'ГЕНЕРАЛ' },
+    { name: '무술대회', en: 'TOURNAMENT', zh: '武林大会', boss: '흑의 고수', bossEn: 'BLACK MASTER', bossZh: '黑衣高手', ja: '武術大会', pt: 'TORNEIO', ru: 'ТУРНИР', bossJa: '黒衣の達人', bossPt: 'MESTRE DE PRETO', bossRu: 'МАСТЕР В ЧЁРНОМ' }
   ];
   if (EN) {
     $('rotTitle').textContent = 'This game is played in landscape';
@@ -47,6 +48,40 @@
     $('h1').innerHTML = '<span class="top" style="letter-spacing:.25em">天下第一</span>小灿<span class="seal" style="font-family:\'Malgun Gothic\',\'Microsoft YaHei\',\'PingFang SC\',serif">醉拳</span>';
     $('endT').textContent = '武状元';
     $('tPause').title = '暂停'; $('tMus').title = '音乐'; $('tSnd').title = '音效';
+  }
+
+  if (L3) {
+    // 게임 글꼴(Batang·Ria)엔 가나·라틴 확장·키릴 글자가 없다: 같은 이름에 기기 글꼴을 그 글자 범위로만 덧붙인다
+    var lf = L3 === 'ja'
+      ? "local('Hiragino Sans'),local('Hiragino Kaku Gothic ProN'),local('Yu Gothic UI'),local('Yu Gothic'),local('Yu Gothic Medium'),local('YuGothic-Medium'),local('Yu Gothic Regular'),local('YuGothic-Regular'),local('Yu Gothic Bold'),local('YuGothic-Bold'),local('MS PGothic'),local('MS Gothic'),local('Meiryo'),local('Noto Sans JP'),local('Noto Sans CJK JP'),local('Source Han Sans JP')"
+      : "local('Segoe UI'),local('Roboto'),local('Arial'),local('Helvetica Neue'),local('Helvetica')";
+    var lr = L3 === 'ja' ? 'U+2E80-2FFF,U+3000-30FF,U+31F0-31FF,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF' : 'U+00A0-024F,U+0400-04FF,U+1E00-1EFF,U+2010-2027';
+    var lst = document.createElement('style');
+    lst.textContent = "@font-face{font-family:'Batang';src:" + lf + ";unicode-range:" + lr + "}@font-face{font-family:'Ria';src:" + lf + ";unicode-range:" + lr + "}" + (L3 === 'ja' ? 'html[lang=ja] *{word-break:normal!important}' : '');
+    document.head.appendChild(lst);
+    var LT = {
+      ja: { lang: 'ja', title: '酔拳ソチャン', rot: ['このゲームは横画面で遊びます', '横画面にする', 'ボタンが反応しないときは、画面の回転ロックを解除してスマホを横にしてください', 'それでも縦画面で遊ぶ'],
+        keys: '←→ 移動（2回押し＝ダッシュ） · J パンチ（長押し＝アッパー） · K キック · J+K 酒吹き · L 酒を飲む · S ガード（しゃがみ）',
+        h1: '<span class="top" style="letter-spacing:.25em">酔拳</span>ソチャン<span class="seal" style="font-family:\'Malgun Gothic\',\'Yu Gothic\',\'Hiragino Sans\',serif">醉拳</span>', h1c: '',
+        end: '天下一', tog: ['一時停止', '音楽', '効果音'] },
+      pt: { lang: 'pt-BR', title: 'Punho Bêbado: Sochan', rot: ['Este jogo é jogado na horizontal', 'Girar para a horizontal', 'Se o botão não funcionar, desative o bloqueio de rotação e vire o celular', 'Jogar na vertical mesmo assim'],
+        keys: '←→ Mover (toque duplo: correr) · J Soco (segure: gancho) · K Chute · J+K Jato de vinho · L Beber · S Defender (agachar)',
+        h1: '<span class="top">PUNHO BÊBADO</span>SOCHAN<span class="seal">醉拳</span>', h1c: 'en',
+        end: 'CAMPEÃO', tog: ['Pausar', 'Música', 'Efeitos sonoros'] },
+      ru: { lang: 'ru', title: 'Пьяный кулак: Сочан', rot: ['В эту игру играют в горизонтальном режиме', 'Повернуть горизонтально', 'Если кнопка не работает, снимите блокировку поворота и поверните телефон', 'Всё равно играть вертикально'],
+        keys: '←→ Ход (двойное нажатие: рывок) · J Удар (удерживать: апперкот) · K Пинок · J+K Винный плевок · L Пить · S Блок (присесть)',
+        h1: '<span class="top">ПЬЯНЫЙ КУЛАК</span>СОЧАН<span class="seal">醉拳</span>', h1c: 'en',
+        end: 'ЧЕМПИОН', tog: ['Пауза', 'Музыка', 'Звуки'] }
+    }[L3];
+    document.documentElement.lang = LT.lang; document.title = LT.title;
+    $('rotTitle').textContent = LT.rot[0];
+    $('rotGo').textContent = LT.rot[1];
+    $('rotHelp').textContent = LT.rot[2];
+    $('rotSkip').textContent = LT.rot[3];
+    $('keys').textContent = LT.keys;
+    $('h1').innerHTML = LT.h1; if (LT.h1c) $('h1').className = LT.h1c;
+    $('endT').textContent = LT.end; if (L3 !== 'ja') $('endT').style.fontFamily = 'Ria';
+    $('tPause').title = LT.tog[0]; $('tMus').title = LT.tog[1]; $('tSnd').title = LT.tog[2];
   }
 
   // ── 저장 ──
@@ -149,7 +184,7 @@
     var si = stageInfo(n);
     $('stg').textContent = 'STAGE ' + n;
     $('stageT').textContent = 'STAGE ' + n;
-    $('stageN').textContent = EN ? si.en : ZH ? si.zh : si.name;
+    $('stageN').textContent = EN ? si.en : ZH ? si.zh : L3 ? si[L3] : si.name;
     showPanel('stage');
     document.body.classList.remove('title');
     G.loaded = false; loadStage(n, function () { if (G && G.stage === n) G.loaded = true; });
@@ -264,7 +299,7 @@
     P.wine--; P.drunk = Math.min(100, P.drunk + 34); P.hp = Math.min(P.max, P.hp + 10);   // 한 병 = 그래프 3분의 1, 세 병이면 꽉 차서 취권
     SND.gulp(); pop('🍶', P.x, FY - 260, 'wine');
     for (var i = 0; i < 6; i++) G.parts.push({ t: 'w', x: P.x + P.face * 14, y: FY - 232, vx: (Math.random() - .5) * 140, vy: -60 - Math.random() * 140, r: 2 + Math.random() * 2, life: .6 });
-    if (P.drunk >= 100) { P.chwi = 5; P.move = null; P.rot = 0; SND.burp(); SND.gong && SND.gong(); pop(EN ? 'DRUNKEN FIST' : ZH ? '醉拳' : '취권', P.x, FY - 300, 'big'); }   // 3병 = 취권
+    if (P.drunk >= 100) { P.chwi = 5; P.move = null; P.rot = 0; SND.burp(); SND.gong && SND.gong(); pop(EN ? 'DRUNKEN FIST' : ZH ? '醉拳' : L3 ? { ja: '酔拳', pt: 'PUNHO BÊBADO', ru: 'ПЬЯНЫЙ КУЛАК' }[L3] : '취권', P.x, FY - 300, 'big'); }   // 3병 = 취권
     else P.hold = 5;                      // 한 모금이면 취기가 5초는 간다 — 취권이 이 게임의 핵심
     hud();
   }
@@ -486,7 +521,7 @@
       var B = BOSSES[bossIdx(G.stage)];
       e.hp = e.max = K0.hp + Math.floor((G.stage - 1) * 22) + loop * 120;
       e.reach = B.reach; e.dmg = Math.round(B.dmg * (G.stage <= 2 ? 0.75 : G.stage <= 5 ? 0.85 : 0.95)) + loop * 4; e.spd = B.spd; e.w = B.w || K0.w; e.girth = B.girth || K0.girth; e.big = B.big; e.bigCd = 3 + Math.random() * 2;
-      G.boss = e; $('boss').classList.add('on'); $('bossN').textContent = EN ? stageInfo(G.stage).bossEn : ZH ? stageInfo(G.stage).bossZh : stageInfo(G.stage).boss;
+      G.boss = e; $('boss').classList.add('on'); $('bossN').textContent = EN ? stageInfo(G.stage).bossEn : ZH ? stageInfo(G.stage).bossZh : L3 ? stageInfo(G.stage)['boss' + L3.charAt(0).toUpperCase() + L3.charAt(1)] : stageInfo(G.stage).boss;
       SND.gong();
     } else { e.hp = e.max = Math.round(K0.hp * (1 + loop * 0.5)); e.dmg = K0.dmg + loop * 3; }
     G.enemies.push(e);

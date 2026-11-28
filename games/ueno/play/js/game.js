@@ -98,7 +98,7 @@
         return;
       }
       try { KEYS.forEach(k => localStorage.removeItem(k)); } catch (e) { }
-      location.href = location.pathname + (window.LANG && LANG.en ? '?lang=en' : window.LANG && LANG.zh ? '?lang=zh' : '');   // ?test=fin 같은 시험 주소도 떼고 새로 (영문판은 lang 만 달고 간다)
+      location.href = location.pathname + (window.LANG && LANG.en ? '?lang=en' : window.LANG && LANG.zh ? '?lang=zh' : window.LANG && LANG.ja ? '?lang=ja' : window.LANG && LANG.pt ? '?lang=pt' : window.LANG && LANG.ru ? '?lang=ru' : '');   // ?test=fin 같은 시험 주소도 떼고 새로 (영문판은 lang 만 달고 간다)
     };
 
     // 타이틀: 입구에서 주인공이 이쪽을 보고 서 있다

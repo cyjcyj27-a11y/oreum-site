@@ -6,8 +6,9 @@
   var A = window.TJAudio, ART = window.TJArt, HG = window.HG;
   var $ = function (id) { return document.getElementById(id); };
   var EN = /[?&]lang=en/i.test(location.search), ZH = /[?&]lang=zh/i.test(location.search);
+  var JA = /[?&]lang=ja/i.test(location.search), PT = /[?&]lang=pt/i.test(location.search), RU = /[?&]lang=ru/i.test(location.search);
   // 중국어판: 화면 글은 중국어, 치는 글은 영어판과 같다
-  var ENC = EN || ZH, LANG = ENC ? 'en' : 'ko';
+  var ENC = EN || ZH || JA || PT || RU, LANG = ENC ? 'en' : 'ko';
   var ZHD = {
     '타자연습': '打字练习', '달리기': '赛跑', '이어하기': '继续游戏', '처음부터 하기': '重新开始', '처음으로': '返回标题',
     '1등': '第1名', '다음 코스': '下一关', '다시': '再来', '코스': '赛道', '계속': '继续', '한글': '韩文', '영어': '英文',
@@ -15,8 +16,30 @@
     '좋아!': '不错！', '멋져!': '漂亮！', '최고!': '太棒了！', '최고 기록 ': '最高纪录 ', '정말 처음부터 하기': '确定重新开始？',
     '최고 기록!': '新纪录！', '다음 판': '下一关', '챔피언': '冠军'
   };
-  function L(ko, en) { return ZH ? (ZHD[ko] || en) : EN ? en : ko; }
-  function rankName(n) { return EN ? ['1ST', '2ND', '3RD', '4TH'][n - 1] : ZH ? '第' + n + '名' : n + '등'; }
+  var JAD = {
+    '타자연습': 'タイピング練習', '달리기': 'かけっこ', '이어하기': '続きから', '처음부터 하기': '最初から', '처음으로': 'タイトルへ',
+    '1등': '1位', '다음 코스': '次のコース', '다시': 'もう一回', '코스': 'コース', '계속': 'つづける', '한글': '韓国語', '영어': '英語',
+    '자리 연습': 'キー練習', '낱말 연습': '単語練習', '짧은 글 연습': '短文練習', '긴 글 연습': '長文練習', '연습': 'メニュー', '다음 단계': '次のレベル',
+    '좋아!': 'いいね！', '멋져!': 'すごい！', '최고!': '最高！', '최고 기록 ': 'ベスト ', '정말 처음부터 하기': '本当に最初から？',
+    '최고 기록!': '新記録！', '다음 판': '次のステージ', '챔피언': 'チャンピオン'
+  };
+  var PTD = {
+    '타자연습': 'TREINO', '달리기': 'CORRIDA', '이어하기': 'CONTINUAR', '처음부터 하기': 'NOVO JOGO', '처음으로': 'INÍCIO',
+    '1등': '1º', '다음 코스': 'PRÓXIMA', '다시': 'DE NOVO', '코스': 'PISTAS', '계속': 'CONTINUAR', '한글': 'Coreano', '영어': 'Inglês',
+    '자리 연습': 'Teclas', '낱말 연습': 'Palavras', '짧은 글 연습': 'Frases', '긴 글 연습': 'Histórias', '연습': 'MENU', '다음 단계': 'PRÓXIMO',
+    '좋아!': 'BOA!', '멋져!': 'ÓTIMO!', '최고!': 'INCRÍVEL!', '최고 기록 ': 'RECORDE ', '정말 처음부터 하기': 'RECOMEÇAR MESMO?',
+    '최고 기록!': 'NOVO RECORDE', '다음 판': 'PRÓXIMA', '챔피언': 'CAMPEÃO'
+  };
+  var RUD = {
+    '타자연습': 'ТРЕНИРОВКА', '달리기': 'ЗАБЕГ', '이어하기': 'ПРОДОЛЖИТЬ', '처음부터 하기': 'НОВАЯ ИГРА', '처음으로': 'В МЕНЮ',
+    '1등': '№1', '다음 코스': 'ДАЛЬШЕ', '다시': 'ЕЩЁ РАЗ', '코스': 'ТРАССЫ', '계속': 'ДАЛЬШЕ', '한글': 'Корейский', '영어': 'Английский',
+    '자리 연습': 'Клавиши', '낱말 연습': 'Слова', '짧은 글 연습': 'Фразы', '긴 글 연습': 'Рассказы', '연습': 'МЕНЮ', '다음 단계': 'ДАЛЬШЕ',
+    '좋아!': 'НЕПЛОХО!', '멋져!': 'КЛАСС!', '최고!': 'СУПЕР!', '최고 기록 ': 'РЕКОРД ', '정말 처음부터 하기': 'ТОЧНО ЗАНОВО?',
+    '최고 기록!': 'НОВЫЙ РЕКОРД', '다음 판': 'ДАЛЬШЕ', '챔피언': 'ЧЕМПИОН'
+  };
+  var XD = ZH ? ZHD : JA ? JAD : PT ? PTD : RU ? RUD : null;
+  function L(ko, en) { return XD ? (XD[ko] || en) : EN ? en : ko; }
+  function rankName(n) { return EN ? ['1ST', '2ND', '3RD', '4TH'][n - 1] : ZH ? '第' + n + '名' : JA ? n + '位' : PT ? n + 'º' : RU ? '№' + n : n + '등'; }
   if (EN) {
     document.documentElement.lang = 'en'; document.body.classList.add('en'); document.title = 'Typing Race';
     Array.prototype.forEach.call(document.querySelectorAll('[data-en]'), function (el) { el.textContent = el.getAttribute('data-en'); });
@@ -33,6 +56,24 @@
     var zs = document.createElement('style');
     zs.textContent = ['Poor', 'Ria'].map(function (f) { return "@font-face{font-family:'" + f + "';src:" + zf + ';unicode-range:' + ur + '}'; }).join('') + 'html[lang=zh-CN] *{word-break:normal!important}';
     document.head.appendChild(zs);
+  }
+  if (JA || PT || RU) {
+    // 일본어·포르투갈어·러시아어 화면 글. 치는 글은 영어판과 같다
+    document.documentElement.lang = JA ? 'ja' : PT ? 'pt-BR' : 'ru';
+    document.title = JA ? 'タイピングかけっこ' : PT ? 'Corrida de Digitação' : 'Гонки на клавишах';
+    if (!JA) document.body.classList.add('en');
+    Array.prototype.forEach.call(document.querySelectorAll('[data-en]'), function (el) { var k = el.textContent.trim(); if (XD[k]) el.textContent = XD[k]; });
+    document.querySelector('#title h1').innerHTML = JA ? 'タイピング<br><em>かけっこ</em>' : PT ? 'CORRIDA DE<br><em>DIGITAÇÃO</em>' : 'ГОНКИ НА<br><em>КЛАВИШАХ</em>';
+    $('plKo').textContent = XD['한글'];
+    ['uCpm', 'rUnit', 'pUnit', 'prUnit'].forEach(function (id) { $(id).textContent = 'WPM'; });
+    // 글꼴에 없는 글자는 시스템 글꼴로
+    var xf = JA ? "local('Hiragino Sans'),local('Hiragino Kaku Gothic ProN'),local('Yu Gothic UI'),local('Yu Gothic'),local('Yu Gothic Medium'),local('YuGothic-Medium'),local('Yu Gothic Regular'),local('YuGothic-Regular'),local('Yu Gothic Bold'),local('YuGothic-Bold'),local('MS PGothic'),local('MS Gothic'),local('Meiryo'),local('Noto Sans JP'),local('Noto Sans CJK JP'),local('Source Han Sans JP')"
+      : "local('Segoe UI'),local('Roboto'),local('Arial'),local('Helvetica Neue'),local('Helvetica')";
+    var xr = JA ? 'U+2E80-2FFF,U+3000-30FF,U+31F0-31FF,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF' : 'U+00A0-024F,U+0400-04FF,U+1E00-1EFF,U+2010-2027';
+    var xs = document.createElement('style');
+    xs.textContent = ['Poor', 'Ria'].map(function (f) { return "@font-face{font-family:'" + f + "';src:" + xf + ';unicode-range:' + xr + '}'; }).join('') +
+      (JA ? 'html[lang=ja] *{word-break:normal!important}' : 'html body.en #title h1{font-size:min(11vw,110px,18vh)}' + (PT ? "@font-face{font-family:PtT;src:local('Segoe UI Black'),local('Arial Black');unicode-range:U+00A0-024F}html[lang=pt-BR] #title h1{font-family:PtT,Ria,sans-serif}" : ''));
+    document.head.appendChild(xs);
   }
 
   // ── 코스 ──
@@ -246,7 +287,7 @@
     // 기록이 있으면 이어하기(금메달 아직인 첫 판) · 처음부터 하기
     var has = hasSave();
     $('btnCont').hidden = !has; $('btnNew').hidden = !has; newArmed(false);
-    if (has) $('btnCont').textContent = (ZH ? '继续 · 第' + (nowStage() + 1) + '关' : L('이어하기 · ' + (nowStage() + 1) + '판', 'CONTINUE · STAGE ' + (nowStage() + 1)));
+    if (has) $('btnCont').textContent = (ZH ? '继续 · 第' + (nowStage() + 1) + '关' : JA ? '続きから · ステージ' + (nowStage() + 1) : PT ? 'CONTINUAR · FASE ' + (nowStage() + 1) : RU ? 'ДАЛЬШЕ · ЭТАП ' + (nowStage() + 1) : L('이어하기 · ' + (nowStage() + 1) + '판', 'CONTINUE · STAGE ' + (nowStage() + 1)));
   }
   // 처음부터 하기: 한 번 누르면 빨갛게 바뀌고, 3초 안에 또 누르면 달리기 기록을 지운다
   var newT = 0;

@@ -3,9 +3,60 @@
    가게 앞에 Anonymous 가 몰려들면 리무진이 서지 않고 지나간다 — 탭해서 쫓는다. */
 (function () {
   'use strict';
-  const EN = (() => { try { return new URLSearchParams(location.search).get('lang') === 'en'; } catch (_) { return false; } })();
+  const LG = (() => { try { const q = new URLSearchParams(location.search).get('lang'); return ['en', 'ja', 'pt'].includes(q) ? q : 'ko'; } catch (_) { return 'ko'; } })();
+  const EN = LG === 'en';
+  // 일본어·포르투갈어 글(한국어 원문을 열쇠로)
+  const JA = {
+    '클릭 행동 · 스페이스 수금 · B 상점 · A 도감 · M 음악 · K 효과음': 'クリック 操作 · スペース 回収 · B ショップ · A 図鑑 · M 音楽 · K 効果音',
+    '상점': 'ショップ', '도감': '図鑑',
+    '가로 화면에서 하는 게임입니다': '横画面で遊ぶゲームです',
+    '가로로 돌리기': '横向きにする',
+    '단추가 안 먹으면 폰의 화면 회전 잠금을 풀고 눕혀 주세요': 'ボタンが効かないときは、スマホの画面回転ロックを解除して横に倒してください',
+    '그래도 세로로 하기': 'それでも縦で遊ぶ',
+    '뉴월드피자': 'ニューワールド<span>ピザ</span>',
+    '계속하기': 'つづきから', '새로 시작': 'はじめから', '취소': 'キャンセル',
+    '전부 열림': '全部解放', '새 피자: ': '新ピザ: ',
+    '치즈': 'チーズ', '페퍼로니': 'ペパロニ', '마르게리타': 'マルゲリータ', '하와이안': 'ハワイアン', '수프림': 'スプリーム', '트러플': 'トリュフ', '김치': 'キムチ',
+    '화덕': '窯', '화덕 +1': '窯 +1', '장작': '薪', '굽는 속도': '焼く速さアップ', '메뉴': 'メニュー',
+    '김치피자': 'キムチピザ', '새 피자: 김치': '新ピザ: キムチ', '금고': '金庫', '동전통 크게': 'コイン箱が大きくなる',
+    '네온 간판': 'ネオン看板', '리무진 더 자주': 'リムジンが増える', '인테리어': 'インテリア', '팁 +15%': 'チップ +15%',
+    '블라인드': 'ブラインド', 'Anonymous 덜 옴': 'Anonymousが減る', '자동 금고': '自動金庫', '자동 수금': '自動で回収',
+    '단체 주문': '団体注文', '저장된 가게를 지우고 새로 시작할까요?': 'セーブした店を消して、はじめからやり直しますか？',
+  };
+  const PT = {
+    '클릭 행동 · 스페이스 수금 · B 상점 · A 도감 · M 음악 · K 효과음': 'Clique agir · Espaço coletar · B loja · A álbum · M música · K som',
+    '상점': 'LOJA', '도감': 'ÁLBUM',
+    '가로 화면에서 하는 게임입니다': 'Este jogo é na tela deitada',
+    '가로로 돌리기': 'Virar a tela',
+    '단추가 안 먹으면 폰의 화면 회전 잠금을 풀고 눕혀 주세요': 'Se o botão não funcionar, desative o bloqueio de rotação do celular e vire-o de lado',
+    '그래도 세로로 하기': 'Jogar em pé mesmo assim',
+    '뉴월드피자': 'NEW WORLD<span>PIZZA</span>',
+    '계속하기': 'CONTINUAR', '새로 시작': 'NOVO JOGO', '취소': 'CANCELAR',
+    '전부 열림': 'Tudo liberado', '새 피자: ': 'Nova: ',
+    '치즈': 'Queijo', '페퍼로니': 'Pepperoni', '마르게리타': 'Marguerita', '하와이안': 'Havaiana', '수프림': 'Suprema', '트러플': 'Trufa', '김치': 'Kimchi',
+    '화덕': 'FORNO', '화덕 +1': 'Forno +1', '장작': 'LENHA', '굽는 속도': 'Assa mais rápido', '메뉴': 'CARDÁPIO',
+    '김치피자': 'PIZZA DE KIMCHI', '새 피자: 김치': 'Nova: Kimchi', '금고': 'COFRE', '동전통 크게': 'Cofre maior',
+    '네온 간판': 'LETREIRO NEON', '리무진 더 자주': 'Mais limusines', '인테리어': 'DECORAÇÃO', '팁 +15%': 'Gorjeta +15%',
+    '블라인드': 'PERSIANA', 'Anonymous 덜 옴': 'Menos Anonymous', '자동 금고': 'COFRE AUTO', '자동 수금': 'Coleta automática',
+    '단체 주문': 'PEDIDO EM GRUPO', '저장된 가게를 지우고 새로 시작할까요?': 'Apagar a pizzaria salva e começar de novo?',
+  };
+  const DL = LG === 'ja' ? JA : LG === 'pt' ? PT : null;
   if (EN) { document.documentElement.lang = 'en'; document.title = 'NEW WORLD PIZZA — Oreum Games'; document.querySelectorAll('[data-en]').forEach(e => { e.innerHTML = e.getAttribute('data-en'); }); }
-  const T = (ko, en) => EN ? en : ko;
+  if (DL) {
+    document.documentElement.lang = LG === 'ja' ? 'ja' : 'pt-BR';
+    document.title = LG === 'ja' ? 'ニューワールドピザ — Oreum Games' : 'NEW WORLD PIZZA — Oreum Games';
+    document.querySelectorAll('[data-en]').forEach(e => { const k = e.innerHTML.trim(); e.innerHTML = DL[k] != null ? DL[k] : e.getAttribute('data-en'); });
+    // 게임 글꼴에 없는 글자(가나·한자, 악센트 라틴 글자)는 시스템 글꼴로 채운다
+    const jf = "local('Hiragino Sans'),local('Hiragino Kaku Gothic ProN'),local('Yu Gothic UI'),local('Yu Gothic'),local('Yu Gothic Medium'),local('YuGothic-Medium'),local('Yu Gothic Regular'),local('YuGothic-Regular'),local('Yu Gothic Bold'),local('YuGothic-Bold'),local('MS PGothic'),local('MS Gothic'),local('Meiryo'),local('Noto Sans JP'),local('Noto Sans CJK JP'),local('Source Han Sans JP')";
+    const ur = 'U+2E80-2FFF,U+3000-30FF,U+31F0-31FF,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF';
+    const lf = "local('Segoe UI'),local('Roboto'),local('Arial'),local('Helvetica Neue'),local('Helvetica')";
+    const lr = 'U+00A0-024F,U+0400-04FF,U+1E00-1EFF,U+2010-2027';
+    const st = document.createElement('style');
+    st.textContent = ['Ria', 'TitleF'].map(f => LG === 'ja' ? `@font-face{font-family:'${f}';src:${jf};unicode-range:${ur}}` : `@font-face{font-family:'${f}';src:${lf};unicode-range:${lr}}`).join('') + (LG === 'ja' ? 'html[lang=ja] *{word-break:normal!important}' : '');
+    document.head.appendChild(st);
+  }
+  const T = (ko, en) => DL ? (DL[ko] != null ? DL[ko] : en) : EN ? en : ko;
+  const SIGN = LG === 'ja' ? 'ja' : (EN || LG === 'pt');   // 바깥 간판 글: 일본어 / 영어(영어·포르투갈어) / 한국어
   const $ = id => document.getElementById(id);
   const { W, H, L } = ART;
   const c = $('c'), ctx = c.getContext('2d');
@@ -357,7 +408,7 @@
   // ── 그리기 ──
   function draw() {
     ctx.drawImage(bgc, 0, 0, W, H);
-    ART.neon(ctx, gT, EN);
+    ART.neon(ctx, gT, SIGN);
     // 화덕
     L.OVENS.forEach((ox, i) => { const o = ovens[i] || {}; ART.oven(ctx, ox, L.OVEN_Y, { lock: i >= ovenCount(), fire: o.fire, kind: o.kind, t: gT + i }); if (o.cust) drawOvenBar(ox, o.prog); });
     ART.counter(ctx);
@@ -523,7 +574,7 @@
   function drawTitle(t) {
     gT = t;
     if (!S) { S = demoS; S.reg = 36; }
-    ctx.drawImage(bgc, 0, 0, W, H); ART.neon(ctx, t, EN);
+    ctx.drawImage(bgc, 0, 0, W, H); ART.neon(ctx, t, SIGN);
     L.OVENS.forEach((ox, i) => ART.oven(ctx, ox, L.OVEN_Y, { lock: i >= 2, fire: .5 + .5 * Math.sin(t * 2 + i), kind: i === 0 ? 'pepperoni' : null, t: t + i }));
     ART.counter(ctx); ART.register(ctx, 36, 60, t, false);
     ctx.save(); ctx.beginPath(); ctx.rect(L.DOORX + 12, 0, W, H); ctx.clip(); ART.limo(ctx, L.CURB, L.ROAD_Y, .82, 0); ctx.restore();

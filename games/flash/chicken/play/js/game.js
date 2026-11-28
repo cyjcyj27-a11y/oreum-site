@@ -2,7 +2,19 @@
 (function () {
 'use strict';
 var EN = /[?&]lang=en\b/.test(location.search), ZH = !EN && /[?&]lang=zh\b/.test(location.search);
+var LQ = (location.search.match(/[?&]lang=(ja|pt|ru)\b/) || [])[1], JA = !EN && !ZH && LQ === 'ja', PT = !EN && !ZH && LQ === 'pt', RU = !EN && !ZH && LQ === 'ru', LX = JA ? 3 : PT ? 4 : RU ? 5 : 0;
 if (EN) document.documentElement.lang = 'en';
+if (LX) {
+  document.documentElement.lang = JA ? 'ja' : PT ? 'pt-BR' : 'ru';
+  /* ja: 일본어 시스템 글꼴, pt·ru: 악센트 라틴·키릴 문자용 시스템 글꼴 */
+  (function () {
+    var src = JA ? "local('Hiragino Sans'),local('Hiragino Kaku Gothic ProN'),local('Yu Gothic UI'),local('Yu Gothic'),local('Yu Gothic Medium'),local('YuGothic-Medium'),local('Yu Gothic Regular'),local('YuGothic-Regular'),local('Yu Gothic Bold'),local('YuGothic-Bold'),local('MS PGothic'),local('MS Gothic'),local('Meiryo'),local('Noto Sans JP'),local('Noto Sans CJK JP'),local('Source Han Sans JP')" : "local('Segoe UI'),local('Roboto'),local('Arial'),local('Helvetica Neue'),local('Helvetica')";
+    var ur = JA ? 'U+2E80-2FFF,U+3000-30FF,U+31F0-31FF,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF' : 'U+00A0-024F,U+0400-04FF,U+1E00-1EFF,U+2010-2027';
+    var st = document.createElement('style');
+    st.textContent = ['Hanna', 'Ria'].map(function (f) { return "@font-face{font-family:'" + f + "';src:" + src + ';unicode-range:' + ur + '}'; }).join('') + (JA ? 'html[lang=ja] *{word-break:normal!important}html[lang=ja]:not(.wide) #signT{font-size:calc(var(--u)*70)}' : '');
+    document.head.appendChild(st);
+  })();
+}
 if (ZH) {
   document.documentElement.lang = 'zh-CN';
   /* 중국어판: 한글 글꼴에 없는 한자는 시스템 중국어 글꼴로 */
@@ -15,23 +27,23 @@ if (ZH) {
   })();
 }
 var A = ART, TAU = Math.PI * 2, $ = function (id) { return document.getElementById(id); }, L3 = K3.L, NS = K3.NS, TB = K3.TB;
-function L(a) { return ZH && a[2] ? a[2] : a[EN ? 1 : 0]; }
+function L(a) { return LX ? a[LX] || a[1] : ZH && a[2] ? a[2] : a[EN ? 1 : 0]; }
 var TX = {
-  title: ['개발자치킨집', 'DEV CHICKEN SHOP', '程序员炸鸡店'],
+  title: ['개발자치킨집', 'DEV CHICKEN SHOP', '程序员炸鸡店', '開発者チキン屋', 'FRANGO DO DEV', 'КУРОЧКА ОТ ПРОГЕРА'],
   // 엔딩 글: 한글은 사장님이 준 글자 그대로(2026-10-02), 영문은 옮긴 것
   end: [
-    ['나는 인디게임개발자였다', 'I was an indie game developer.', '我曾是一名独立游戏开发者'],
-    ['공대를 졸업하고 게임회사를 다녔는데 회사 게임이 슈퍼 초대박을 터뜨렸음에도', 'I graduated from engineering school and joined a game company. Its game became a monster hit,', '工科毕业进了游戏公司，公司游戏明明大爆了，'],
-    ['인센티브가 제대로 지급되지않아서 회사를 그만두고', 'but the bonuses were never paid properly, so I quit', '奖金却一直没好好发，于是我辞了职'],
-    ['인디게임개발을 시작했다.', 'and started making indie games.', '开始做独立游戏。'],
-    ['7년동안 공들여서 폴리싱을 거듭하고 발표한 게임', 'Seven years of polishing went into the game I released.', '花了7年反复打磨才发布的游戏'],
-    ['찜회수 3만2천개', '32,000 wishlists.', '愿望单3万2千个'],
-    ['그러나 최종판매된건 겨우 300장이었다.', 'But in the end it sold only 300 copies.', '可最后只卖出了区区300份。'],
-    ['결국 어머니는 홧병으로 돌아가시고', 'My mother fell ill from the heartache and passed away,', '最终母亲积郁成疾，离开了人世'],
-    ['나는 엄마가 돌아가시며 남긴 보험금으로 치킨집을 차렸다.', 'and with the insurance money she left behind, I opened a chicken shop.', '我用妈妈去世时留下的保险金，开了一家炸鸡店。'],
-    ['어머니...................................................', 'Mom...................................................', '妈妈...................................................']
+    ['나는 인디게임개발자였다', 'I was an indie game developer.', '我曾是一名独立游戏开发者', '私はインディーゲーム開発者だった', 'Eu era um desenvolvedor de jogos indie.', 'Я был инди-разработчиком игр.'],
+    ['공대를 졸업하고 게임회사를 다녔는데 회사 게임이 슈퍼 초대박을 터뜨렸음에도', 'I graduated from engineering school and joined a game company. Its game became a monster hit,', '工科毕业进了游戏公司，公司游戏明明大爆了，', '工学部を出てゲーム会社に勤めた。会社のゲームは超特大ヒットしたのに', 'Me formei em engenharia e entrei numa empresa de games. O jogo da empresa virou um sucesso gigantesco,', 'Окончил технический вуз и пошёл в игровую компанию. Игра компании стала суперхитом,'],
+    ['인센티브가 제대로 지급되지않아서 회사를 그만두고', 'but the bonuses were never paid properly, so I quit', '奖金却一直没好好发，于是我辞了职', 'インセンティブはまともに支払われず、会社を辞めて', 'mas o bônus nunca foi pago direito, então pedi demissão', 'но премию так толком и не выплатили, и я уволился'],
+    ['인디게임개발을 시작했다.', 'and started making indie games.', '开始做独立游戏。', 'インディーゲーム開発を始めた。', 'e comecei a fazer jogos indie.', 'и начал делать инди-игры.'],
+    ['7년동안 공들여서 폴리싱을 거듭하고 발표한 게임', 'Seven years of polishing went into the game I released.', '花了7年反复打磨才发布的游戏', '7年かけて磨きに磨いて発表したゲーム', 'Foram 7 anos polindo e repolindo o jogo que lancei.', 'Семь лет шлифовки и полировки — и я выпустил игру.'],
+    ['찜회수 3만2천개', '32,000 wishlists.', '愿望单3万2千个', 'ウィッシュリスト3万2千件', '32 mil na lista de desejos.', '32 тысячи в списках желаемого.'],
+    ['그러나 최종판매된건 겨우 300장이었다.', 'But in the end it sold only 300 copies.', '可最后只卖出了区区300份。', 'だが最終的に売れたのは、たった300本だった。', 'Mas, no fim, vendeu só 300 cópias.', 'Но в итоге продано всего 300 копий.'],
+    ['결국 어머니는 홧병으로 돌아가시고', 'My mother fell ill from the heartache and passed away,', '最终母亲积郁成疾，离开了人世', '結局、母は心労で倒れて亡くなり', 'No fim, minha mãe adoeceu de desgosto e faleceu,', 'В итоге мама слегла от горя и умерла,'],
+    ['나는 엄마가 돌아가시며 남긴 보험금으로 치킨집을 차렸다.', 'and with the insurance money she left behind, I opened a chicken shop.', '我用妈妈去世时留下的保险金，开了一家炸鸡店。', '私は母が遺した保険金でチキン屋を開いた。', 'e com o dinheiro do seguro que ela deixou, abri uma loja de frango frito.', 'а я на страховку, что она оставила, открыл закусочную с жареной курицей.'],
+    ['어머니...................................................', 'Mom...................................................', '妈妈...................................................', '母さん...................................................', 'Mãe...................................................', 'Мама...................................................']
   ],
-  shop: { fire: ['화력', 'Heat', '火力'], fryer: ['튀김기', 'Fryer', '炸锅'], chair: ['의자', 'Chairs', '椅子'], tip: ['팁 통', 'Tip Jar', '小费罐'], knife: ['식칼', 'Cleaver', '菜刀'], heart: ['하트', 'Heart', '爱心'] }
+  shop: { fire: ['화력', 'Heat', '火力', '火力', 'Fogo', 'Огонь'], fryer: ['튀김기', 'Fryer', '炸锅', 'フライヤー', 'Fritadeira', 'Фритюр'], chair: ['의자', 'Chairs', '椅子', 'イス', 'Cadeiras', 'Стулья'], tip: ['팁 통', 'Tip Jar', '小费罐', 'チップ箱', 'Gorjetas', 'Чаевые'], knife: ['식칼', 'Cleaver', '菜刀', '包丁', 'Cutelo', 'Тесак'], heart: ['하트', 'Heart', '爱心', 'ハート', 'Coração', 'Сердце'] }
 };
 var FONT = "'Hanna','Ria',sans-serif";
 
@@ -611,7 +623,7 @@ var SCR = ['title', 'mapScr', 'clear', 'over', 'end', 'confirm'];
 function ui(m) {
   var on = { title: 'title', map: 'mapScr', clear: 'clear', over: 'over', end: 'end' }[m];
   SCR.forEach(function (id) { $(id).hidden = id !== on; });
-  document.body.className = (m === 'title' ? 'm-title' : m === 'map' ? 'm-map' : m === 'end' ? 'm-end' : 'm-play') + (EN ? ' en' : '');
+  document.body.className = (m === 'title' ? 'm-title' : m === 'map' ? 'm-map' : m === 'end' ? 'm-end' : 'm-play') + (EN || PT || RU ? ' en' : '');
   hud();
 }
 function hud(pop) {
@@ -737,7 +749,7 @@ window.addEventListener('resize', resize);
 /* ---------- 돌리기 ---------- */
 var lastTs = 0;
 function frame(ts) { var dt = lastTs ? Math.min(0.05, (ts - lastTs) / 1000) : 0; lastTs = ts; if (!document.hidden) { step(dt); draw(); } requestAnimationFrame(frame); }
-document.title = L(TX.title); $('signT').textContent = EN ? TX.title[1] : ZH ? TX.title[2] : '개발자 치킨집';   /* 제목 그림에서는 띄어 쓴다(사장님 10/2) */
+document.title = L(TX.title); $('signT').textContent = LX ? L(TX.title) : EN ? TX.title[1] : ZH ? TX.title[2] : '개발자 치킨집';   /* 제목 그림에서는 띄어 쓴다(사장님 10/2) */
 (function () { var a = $('coinI').getContext('2d'); a.translate(22, 21); A.coin(a, 18); var b = $('cearnI').getContext('2d'); b.translate(22, 21); A.coin(b, 18); })();
 CK.init();
 /* 첫 칼질이 끊기지 않게 자르는 셈을 미리 몇 번 돌려 둔다 */

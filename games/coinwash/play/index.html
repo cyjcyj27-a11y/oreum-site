@@ -49,7 +49,7 @@
   #title { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding-top: 7vh; background: linear-gradient(180deg, rgba(10,14,26,.35), rgba(10,14,26,0) 45%, rgba(10,14,26,0) 70%, rgba(10,14,26,.5)); transition: opacity 1s; text-align: center; z-index: 10; }
   #title.hide { opacity: 0; pointer-events: none; }
   #title h1 { font-family: 'Ria', 'Griun', sans-serif; font-weight: 900; font-size: clamp(40px, 9vw, 96px); margin: 8px 0 0; letter-spacing: 6px; color: #fff4dc; text-shadow: 0 4px 0 #2a5a8a, 0 8px 24px rgba(0,0,0,.5); -webkit-text-stroke: 1.5px #14304a; paint-order: stroke fill; line-height: 1.1; }
-  html[lang="en"] #title h1 { font-size: clamp(30px, 7.2vw, 80px); letter-spacing: 3px; white-space: nowrap; }
+  html[lang="en"] #title h1, html[lang="ja"] #title h1, html[lang="pt-BR"] #title h1, html[lang="ru"] #title h1 { font-size: clamp(30px, 7.2vw, 80px); letter-spacing: 3px; white-space: nowrap; }
   #title .tag { font-family: 'Ria', sans-serif; letter-spacing: 8px; font-size: 18px; opacity: .9; margin-top: 8px; text-shadow: 0 1px 3px rgba(0,0,0,.6); }
   #title .brand { display: flex; align-items: center; gap: 8px; padding: 6px 14px 6px 8px; border-radius: 999px; background: rgba(255,253,247,.92); color: #2e6b39; font-size: 14px; letter-spacing: 1px; }
   #title .brand img { width: 30px; height: 15px; }
@@ -107,6 +107,8 @@
   #topbar .stat { min-width: 0; }
   #topbar .stat b { font-variant-numeric: tabular-nums; font-feature-settings: 'tnum' 1; }
   #topbar .stat .bar { flex: 0 1 auto; min-width: 14px; }
+  html[lang="ru"] .tbtn { font-size: 14px; letter-spacing: 0; } @media (max-height: 520px) { html[lang="ru"] .tbtn { font-size: 12px; } }
+  html[lang="ru"] .shop .item { gap: 6px; padding: 10px 9px; } html[lang="ru"] .shop .item .n { font-size: 13px; }
 </style>
 </head>
 <body>
@@ -160,10 +162,10 @@
   <p class="again" id="endGo" data-en="CONTINUE">계속하기</p>
 </div>
 
-<script src="assets/game-home.js?v=2" data-top="6" data-left="6" data-fullscreen="1" defer></script>
+<script src="assets/game-home.js?v=3" data-top="6" data-left="6" data-fullscreen="1" defer></script>
 <script src="assets/landscape.js?v=48"></script>
 <script src="js/audio.js?v=4"></script>
-<script src="js/game.js?v=39"></script>
+<script src="js/game.js?v=41"></script>
 <script src="/assets/touchlock.js?v=1"></script>
 <script src="/assets/visit.js?v=21" defer></script>
 <script src="/assets/game-events.js?v=4" defer></script>

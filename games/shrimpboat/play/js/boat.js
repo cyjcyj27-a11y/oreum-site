@@ -160,7 +160,7 @@ function interior(P, I) {
   P.box(-7.08, D + 0.85, 1.07, 0.48, 1.7, 0.74, { col: [0.55, 0.58, 0.58] }); solid(-7.33, -6.83, 0.69, 1.45, D, D + 1.7);
   P.box(-6.83, D + 0.85, 1.07, 0.02, 1.62, 0.02, { col: DK });
   /* 영문판은 사물함 글씨·배 이름도 영어(10/4 사장님 영문판 검수) */
-  I.lockerLabel = W.plane(SB.TEX.label(SB.EN ? 'LIFE VEST' : SB.L('구명동의'), { w: 256, h: 96, bg: '#f2f0e6', fg: '#c62a20', fs: 52, fit: SB.EN }), 0.36, 0.13, -6.82, D + 1.4, 1.07, PI / 2);
+  I.lockerLabel = W.plane(SB.TEX.label(SB.EN ? 'LIFE VEST' : SB.L('구명동의'), { w: 256, h: 96, bg: '#f2f0e6', fg: '#c62a20', fs: 52, fit: SB.WIDE }), 0.36, 0.13, -6.82, D + 1.4, 1.07, PI / 2);
   /* 노: 벽 고리에 걸림 */
   I.oarHook = [[-6.3, D + 1.5, 1.42], [-4.7, D + 1.5, 1.42]];
   I.oarHook.forEach(function (h) { P.box(h[0], h[1] - 0.04, h[2] - 0.04, 0.03, 0.03, 0.08, { col: [0.6, 0.6, 0.6] }); });
@@ -194,7 +194,7 @@ function roofGear(P, S, I, grp) {
   S.put(new T.CylinderGeometry(0.1, 0.12, 0.9, 12), -7.0, RT + 0.45, -0.8, { col: [0.12, 0.12, 0.12] });     // 연통
   P.box(-7.0, RT + 0.88, -0.8, 0.26, 0.04, 0.26, { col: [0.75, 0.2, 0.15] });
   /* 이름판 */
-  grp.add(W.plane(SB.TEX.label(SB.EN ? 'HAESEONG NO.7' : SB.L('제7해성호'), { w: 512, h: 96, bg: '#f4f1e6', fg: '#1d3f7a', fs: 66, fit: SB.EN }), 1.7, 0.3, WX1 + 0.205, D + WH2 + 0.05, 0, PI / 2));
+  grp.add(W.plane(SB.TEX.label(SB.EN ? 'HAESEONG NO.7' : SB.L('제7해성호'), { w: 512, h: 96, bg: '#f4f1e6', fg: '#1d3f7a', fs: 66, fit: SB.WIDE }), 1.7, 0.3, WX1 + 0.205, D + WH2 + 0.05, 0, PI / 2));
   /* 구명환: 옆벽 바깥 */
   var ringM = new T.MeshPhongMaterial({ color: 0xffffff, vertexColors: true, shininess: 50 });
   [WZ + 0.06, -WZ - 0.06].forEach(function (z) {

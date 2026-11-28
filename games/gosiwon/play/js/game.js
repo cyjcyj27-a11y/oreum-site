@@ -3,8 +3,9 @@
 'use strict';
 var T = THREE, W = GS.world, CH = GS.chores, PI = Math.PI, $ = function (id) { return document.getElementById(id); };
 var KEY = 'gosiwon.save', HS = 60, DAYS = 30, PASSLINE = 80, STUDY = 1200, WAGE = 15000, EYE = 1.55, DAYMIN = 960;
-var EN = /[?&]lang=en/.test(location.search), ZH = GS.ZH, KO = {}, L = function (ko, en) { if (EN) KO[en] = ko; return EN ? en : ZH ? GS.Z(ko) : ko; };   // KO: 영어 → 한글(영문판 칸 크기를 한글판과 같게 재려고, 10/4 사장님 영문판 검수)
+var EN = /[?&]lang=en/.test(location.search), ZH = GS.ZH, XL = GS.XL, LW = GS.LW, WD = EN || LW, LG = GS.LG, KO = {}, L = function (ko, en) { if (EN) KO[en] = ko; if (LW) KO[GS.Z(ko)] = ko; return EN ? en : XL ? GS.Z(ko) : ko; };   // KO: 영어 → 한글(영문판 칸 크기를 한글판과 같게 재려고, 10/4 사장님 영문판 검수)
 if (EN) { document.body.classList.add('en'); document.documentElement.lang = 'en'; document.title = 'Gosiwon Manager'; }
+if (LW) document.body.classList.add('en');   // pt/ru: English layout
 var G = GS.G = { mode: 'title', day: 1, t: 0, pass: 50, coin: 0, items: {}, gloves: false, carry: null, tasks: [], neglect: {}, stock: 8, study: null, last: null, riceAt: 0, P: { x: 3.9, y: 0, z: -1.35, yaw: -2.29, pitch: 0 } };
 var ITEMS = [
   { id: 'brush', n: L('철수세미', 'Steel Wool'), e: L('닦는 넓이 +40%', 'Scrub size +40%'), p: 30000 },
@@ -50,7 +51,7 @@ GS.save = save; GS.left = function () { return left(); };
 var ui = GS.ui = {};
 function clockStr(t) {
   var m = Math.floor(Math.min(DAYMIN, t)), h = 8 + Math.floor(m / 60), mm = m % 60, pm = h >= 12 && h < 24, h12 = h % 12 || 12, s = h12 + ':' + (mm < 10 ? '0' : '') + mm;
-  return EN ? s + (pm ? ' PM' : ' AM') : ZH ? (pm ? '下午 ' : '上午 ') + s : (pm ? '오후 ' : '오전 ') + s;
+  return EN ? s + (pm ? ' PM' : ' AM') : ZH ? (pm ? '下午 ' : '上午 ') + s : LG === 'ja' ? (pm ? '午後 ' : '午前 ') + s : LW ? (h % 24) + ':' + (mm < 10 ? '0' : '') + mm : (pm ? '오후 ' : '오전 ') + s;
 }
 function fmt1(v) { return (Math.round(v * 10) / 10).toFixed(1); }
 function predict() { var h = Math.max(0, (DAYMIN - G.t) / 60) * studyMult(); return { h: h, d: Math.round((1 + (h - 8)) * 10) / 10 }; }
@@ -65,7 +66,7 @@ ui.hud = function () {
   $('sClock').style.color = G.mode === 'day' && G.t > 420 ? '#d3121a' : '';
   $('vPass').textContent = Math.round(G.pass) + '%';
   var dl = $('vDelta'); dl.textContent = (pr.d > 0 ? '+' : '') + fmt1(pr.d); dl.className = pr.d > 0 ? 'up' : pr.d < 0 ? 'dn' : '';
-  if (EN) { var sg = $('topbar').textContent + innerWidth + 'x' + innerHeight + document.body.className; if (sg !== barSig) { barSig = sg; fitBar(); fitRows(); } }   // 영문판: 상단바 글이 바뀌면 다시 맞춤
+  if (WD) { var sg = $('topbar').textContent + innerWidth + 'x' + innerHeight + document.body.className; if (sg !== barSig) { barSig = sg; fitBar(); fitRows(); } }   // 영문판: 상단바 글이 바뀌면 다시 맞춤
 };
 ui.tasks = function () {
   var h = ''; if (G.mode !== 'day') { $('tasks').innerHTML = ''; return; }
@@ -88,6 +89,7 @@ ui.nope = function (kind) {
    칸 크기는 같은 자리에 한글을 잠깐 넣어 재서(한글판과 똑같은 칸) 고정하고, 영어를 넣은 뒤 그 칸에 맞춘다 */
 function koText(s) {
   if (KO[s] != null) return KO[s];
+  if (LW) { var z = /^(\d+):(\d\d)$/.exec(s); if (z) { var hh = +z[1]; return (hh >= 12 ? '오후 ' : '오전 ') + (hh % 12 || 12) + ':' + z[2]; } z = GS.ZK(s); if (z !== s) return z; return s.replace(/ (?:wons|вон)$/, '원'); }   // pt/ru: shown text -> Korean for measuring
   var m = /^(\d+:\d\d) (AM|PM)$/.exec(s); if (m) return (m[2] === 'PM' ? '오후 ' : '오전 ') + m[1];
   for (var i = 0; i < GS.loot.LIST.length; i++) if (GS.loot.LIST[i].en === s) return GS.loot.LIST[i].ko;
   return s.replace(/ won$/, '원').replace(/^Room (\d+)$/, '$1호');
@@ -98,13 +100,13 @@ function asKo(root) {                                  // root 안 글자를 잠
   return function () { back.forEach(function (b) { b[0].nodeValue = b[1]; }); };
 }
 function fitEl(el, min) {                              // 글자가 칸보다 넓으면 줄인다
-  el.style.fontSize = ''; if (!EN || !el.offsetWidth) return;
+  el.style.fontSize = ''; if (!WD || !el.offsetWidth) return;
   var f0 = parseFloat(getComputedStyle(el).fontSize), f = f0, lim = f0 * (min || 0.45);
   while (el.scrollWidth > el.clientWidth + 0.5 && f > lim) { f -= 0.5; el.style.fontSize = f + 'px'; }
 }
 GS.fitEl = fitEl;
 function fitBox(root, lock, fit) {                     // lock 칸들의 폭을 한글일 때 폭으로 고정하고 fit 글자들을 맞춘다
-  if (!EN || !root || !root.offsetWidth) return;
+  if (!WD || !root || !root.offsetWidth) return;
   var A = [].slice.call(root.querySelectorAll(lock)), F = [].slice.call(root.querySelectorAll(fit));
   A.forEach(function (e) { e.style.width = ''; }); F.forEach(function (e) { e.style.fontSize = ''; });
   var back = asKo(root), ws = A.map(function (e) { return e.offsetWidth; }); back();
@@ -122,23 +124,23 @@ function fitBar() {                                    // 상단바: 한글판�
   if (barRows(bar) !== want) st.forEach(function (e) { e.style.fontSize = ''; });   // 줄여도 안 맞으면 원래 크기로 둔다
 }
 function fitAct() {                                    // 폰 오른쪽 아래 동그란 단추: 낱말이 동그라미보다 넓으면 줄인다(줄바꿈은 한글판처럼 그대로)
-  var a = $('act'); a.style.fontSize = ''; if (!(EN || ZH) || !a.offsetWidth) return;
+  var a = $('act'); a.style.fontSize = ''; if (!(EN || XL) || !a.offsetWidth) return;
   var f0 = parseFloat(getComputedStyle(a).fontSize), f = f0, rg = document.createRange(), r;
   for (;;) { rg.selectNodeContents(a); r = rg.getBoundingClientRect(); if ((r.width <= a.clientWidth - 8 && r.height <= a.clientHeight - 12) || f <= f0 * 0.45) break; f -= 0.5; a.style.fontSize = f + 'px'; }
 }
 function fitRows() {                                   // 할 일 종이(폭 고정): 줄이 종이보다 길면 그 줄 글자만 줄인다
-  var t = $('tasks'); if (!EN || !t.offsetWidth) return;
+  var t = $('tasks'); if (!WD || !t.offsetWidth) return;
   [].forEach.call(t.children, function (d) { d.style.fontSize = ''; var f0 = parseFloat(getComputedStyle(d).fontSize), f = f0; while (d.scrollWidth > d.clientWidth + 0.5 && f > f0 * 0.45) { f -= 0.5; d.style.fontSize = f + 'px'; } });
 }
 function enFit() {                                     // 지금 보이는 창들을 다시 맞춘다(창이 열릴 때, 글이 바뀔 때, 화면 크기가 바뀔 때)
-  if (!EN) return;
+  if (!WD) return;
   fitBox($('morn'), '#mleft, #shop .item, #bDex', '#shop .item>span, #mres, #mcoin, #bDex');
   fitBox($('pause'), '#bDex2', '#bDex2');
   fitBox($('dex'), '.dx', '.dx span, .dx i');
   barSig = ''; fitRows(); fitAct(); fitEl($('phMsg'));
   [].forEach.call(document.querySelectorAll('#note .pap'), function (p) { fitEl(p); });
 }
-if (EN) window.addEventListener('resize', function () { setTimeout(enFit, 60); });
+if (WD) window.addEventListener('resize', function () { setTimeout(enFit, 60); });
 GS.coin = function (n) { G.coin += n; var p = $('cointoast'); p.textContent = '+' + n.toLocaleString(); p.classList.remove('on'); void p.offsetWidth; p.classList.add('on'); GS.snd('coin'); };
 GS.snd = function (n) { SND.play(n); };
 /* 물건 이름표(코드에선 한글 이름으로 찾으니 화면에 띄울 때만 영어로) */
@@ -146,7 +148,7 @@ var LBL = { '고무장갑': 'Rubber gloves', '책상': 'Desk', '휴지통': 'Tra
   '음식물': 'Food waste', '냉장고': 'Fridge', '밥솥': 'Rice cooker', '라면 상자': 'Ramen box', '선반': 'Shelf', '김치': 'Kimchi', '도마': 'Cutting board',
   '쪽지': 'Note', '메모': 'Memo', '메모 붙이기': 'Stick a note', '귀마개': 'Earplugs', '형광등': 'Light tube', '형광등 갈기': 'Replace the light', '박카스': 'Energy drink',
   '독촉장 붙이기': 'Post the notice', '보일러': 'Boiler', '쓰레기': 'Trash', '이불': 'Blanket', '저금통': 'Coin jar' };
-function lbl(k) { if (ZH && k) return GS.Z(k); if (!EN || !k) return k; var m = /^(\d+)호$/.exec(k); return m ? 'Room ' + m[1] : LBL[k] || GS.loot.en(k) || k; }
+function lbl(k) { if (XL && k) return GS.Z(k); if (!EN || !k) return k; var m = /^(\d+)호$/.exec(k); return m ? 'Room ' + m[1] : LBL[k] || GS.loot.en(k) || k; }
 function setMode(m) { G.mode = m; document.body.className = document.body.className.replace(/\bm-\w+/g, '').trim() + ' m-' + m; document.body.classList.toggle('playing', m === 'day' || m === 'study'); }
 function show(id, on) { $(id).hidden = !on; }
 function shopDraw() {
@@ -181,12 +183,15 @@ function inspTick() {
   var I = G.insp; if (!I || G.mode !== 'day' && G.mode !== 'study') return;
   if (G.mode === 'study') { if (G.study && I.sent && !I.res && G.study.at + (DAYMIN - G.study.at) * (1 - Math.max(0, studyRem()) / STUDY) >= INSP_DUE) inspResolve(); return; }
   var fl = (I.k + 2) + L('층', 'F');
-  if (!I.sent && G.t >= INSP_AT) { I.sent = true; phone(ZH ? '今天下午3点过去\n看看' + fl + '厕所' : L('오늘 오후 3시에 들른다\n' + fl + ' 화장실 본다', 'Dropping by at 3 PM today.\nChecking the ' + fl + ' restrooms.')); ui.tasks(); save(); }
+  if (!I.sent && G.t >= INSP_AT) { I.sent = true; phone(ZH ? '今天下午3点过去\n看看' + fl + '厕所' : LG === 'ja' ? '今日午後3時に寄る\n' + fl + 'のトイレを見る' : LG === 'pt' ? 'Passo aí hoje às 15h.\nVou ver os banheiros do ' + fl + '.' : LG === 'ru' ? 'Зайду сегодня в 15:00.\nПроверю туалеты: ' + fl + '.' : L('오늘 오후 3시에 들른다\n' + fl + ' 화장실 본다', 'Dropping by at 3 PM today.\nChecking the ' + fl + ' restrooms.')); ui.tasks(); save(); }
   if (I.sent && !I.res && G.t >= INSP_DUE) inspResolve();
 }
 /* 10/8 3시 전에 일을 다 끝내고 책상에 앉으면 공부 중엔 inspTick 이 안 돌아 결과 문자가 빠졌다(사장님 7일차) → 공부 시계로도 3시에 판정. 껐다 켜서 3시를 건너뛰면 다음 날 아침에 문자 */
 function inspMsg(fl, ok) {                             // inspection result message
   if (ZH) return ok ? fl + '挺干净 辛苦了\n多给你一万韩元' : fl + '这也叫打扫过?\n工资扣一万韩元';
+  if (LG === 'ja') return ok ? fl + 'きれいだな おつかれ\n1万ウォン多く入れといた' : fl + 'これで掃除したのか?\n給料から1万ウォン引く';
+  if (LG === 'pt') return ok ? 'O ' + fl + ' tá limpo. Bom trabalho.\nColoquei 10 mil wons a mais.' : 'Isso é o ' + fl + ' limpo?\n10 mil wons a menos no salário.';
+  if (LG === 'ru') return ok ? fl + ' чистый. Молодец.\nДобавил 10 тыс. вон.' : 'Это ' + fl + ' убран?\nМинус 10 тыс. вон из зарплаты.';
   return ok ? L(fl + ' 깨끗하네. 수고했다\n만원 더 넣었다', fl + ' looks clean. Good job.\nAdded 10,000 won.') : L(fl + ' 이게 청소한 거냐?\n월급에서 만원 깐다', 'You call ' + fl + ' clean?\n10,000 won off your pay.');
 }
 function inspResolve(late) {
@@ -352,7 +357,7 @@ function endDay(h, d) {
 function midnight() { if (CH.cur) CH.leave(); GS.snd('down'); setMode('sleep'); G.study = null; stPose = null; endDay(0, -7); }   // 'study' 로 두면 잠들기 직전 공부 손·20:00 종이가 잠깐 비쳤다(10/4)
 function ending() {
   var ok = G.pass >= PASSLINE; wipe(); setMode('end'); stPose = null; blend = 0; SND.music(0); SND.hum(0.12);
-  $('endW').textContent = ok ? L('합격', 'PASSED') : L('불합격', 'FAILED'); $('endW').className = ok ? '' : 'fail'; show('end', true); show('morn', false); $('fade').classList.remove('on'); GS.snd(ok ? 'pass' : 'fail'); GS.ev.final(ok);
+  $('endW').textContent = LW ? GS.Z(ok ? '합격!' : '불합격!') : ok ? L('합격', 'PASSED') : L('불합격', 'FAILED'); $('endW').className = ok ? '' : 'fail'; show('end', true); show('morn', false); $('fade').classList.remove('on'); GS.snd(ok ? 'pass' : 'fail'); GS.ev.final(ok);
   var st = W.tri.stand; G.P.x = st.x; G.P.z = st.z; G.P.y = 0; G.P.yaw = -2.29; G.P.pitch = -0.3; CH.obj.gloves.visible = true;
   if (!ok) { stPose = STUDYPOSE; blend = 1; }
 }

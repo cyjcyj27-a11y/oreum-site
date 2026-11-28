@@ -400,7 +400,7 @@
     if (R.paused || UI.open()) { SND.level(0, 0); return; }
     if (R.phase === 'ending') {                           // 엔딩: 간판이 올라가고 불꽃
       R.endT += dt;
-      var done = 2.6 + (T.en ? 13 : 5) * 0.32;
+      var done = 2.6 + (T.en ? 13 : T.titleN || 5) * 0.32;
       if (R.endT > done && !R.endLit) { R.endLit = 1; SND.play('rise'); }
       if (R.endLit && Math.random() < dt * 1.6) SND.play('pop');
       if (R.endT > done + 2.2) $('endingGo').hidden = false;

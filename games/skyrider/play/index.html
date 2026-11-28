@@ -35,6 +35,13 @@
   #vert.sink::after { content: '  ▼ 가라앉는 중'; color: #ff9a7a; }
   html[lang="en"] #vert.sink::after { content: '  ▼ SINKING'; }
   html[lang="zh-CN"] #vert.sink::after { content: '  ▼ 正在下沉'; }
+  html[lang="ja"] #vert.sink::after { content: '  ▼ 沈下中'; }
+  html[lang="pt-BR"] #vert.sink::after { content: '  ▼ AFUNDANDO'; }
+  html[lang="ru"] #vert.sink::after { content: '  ▼ СНИЖАЕМСЯ'; }
+  /* ja·pt·ru: 둥근 터치 단추 글자를 한 줄로, 단추 안에 맞춘다 */
+  html[lang="ja"] .tbtn, html[lang="pt-BR"] .tbtn, html[lang="ru"] .tbtn { letter-spacing: 0; white-space: nowrap; padding: 0; }
+  html[lang="ja"] #bo { font-size: 15px; }
+  @media (max-height: 520px) { html[lang="ja"] #bo { font-size: 13px; } }
   #arrow { position: fixed; left: 50%; top: 84px; margin-left: -22px; font-size: 44px; line-height: 1; color: #ffd27a; text-shadow: 0 2px 8px rgba(0,0,0,.6); opacity: 0; transition: opacity .3s; pointer-events: none; transform-origin: 50% 50%; }
   #pkg { font-size: 14px; opacity: .8; }
   /* 상단 바 — 오름 알약(왼쪽 위 93px) 오른쪽부터 */
@@ -312,15 +319,17 @@
 <script>
 (function(){ var g=document.getElementById('rotGo'), k=document.getElementById('rotSkip'); if(g) g.addEventListener('click', function(){ if(window.OL) OL.go(); }); if(k) k.addEventListener('click', function(e){ e.preventDefault(); document.getElementById('rotate').classList.add('off'); }); })();
 </script>
-<script src="/assets/game-home.js?v=8" data-top="6" data-left="6" data-fullscreen="1" defer></script>
+<script src="/assets/game-home.js?v=9" data-top="6" data-left="6" data-fullscreen="1" defer></script>
 <script src="js/zh.js?v=1"></script>
+<script src="js/lang3.js?v=1"></script>
 <script>
 /* ── 말(한국어·영어) ── `?lang=en` 이면 영어를 덧씌운다. 한국어가 원본이다.
    ⚠ 이 게임은 L(기울기 벡터)·T(TERRAIN)를 이미 쓰고 있어 번역 함수 이름을 TX 로 지었다. 함수 안에서 TX 를 다시 정의하지 말 것 */
 const LANG_Q = (new URLSearchParams(location.search).get('lang') || '').toLowerCase();
 const EN_MODE = LANG_Q === 'en';
 const ZH_MODE = LANG_Q === 'zh' && !!window.ZHT;
-const TX = (ko, en) => ZH_MODE ? window.ZHT(ko) : EN_MODE ? en : ko;
+const L3_MODE = ['ja', 'pt', 'ru'].includes(LANG_Q) && !!window.L3T;
+const TX = (ko, en) => ZH_MODE ? window.ZHT(ko) : L3_MODE ? window.L3T(LANG_Q, ko, en) : EN_MODE ? en : ko;
 if (ZH_MODE) {
   document.documentElement.lang = 'zh-CN';
   document.title = '天空骑手 — SKY RIDER';
@@ -331,6 +340,22 @@ if (ZH_MODE) {
   document.head.appendChild(st);
   document.querySelectorAll('[data-en]').forEach(el => { const z = window.ZH_HTML[el.dataset.en.replace(/ /g, '&nbsp;')]; if (z !== undefined) el.innerHTML = z; });
   document.querySelectorAll('[data-en-title]').forEach(el => { const z = window.ZH_HTML[el.dataset.enTitle]; if (z !== undefined) el.title = z; });
+}
+if (L3_MODE) {
+  const hl = { ja: 'ja', pt: 'pt-BR', ru: 'ru' }[LANG_Q];
+  document.documentElement.lang = hl;
+  document.title = { ja: 'スカイライダー — SKY RIDER', pt: 'SKY RIDER — entregas de moto pelo céu', ru: 'SKY RIDER — доставка на мотоцикле по небу' }[LANG_Q];
+  const jf = "local('Hiragino Sans'),local('Hiragino Kaku Gothic ProN'),local('Yu Gothic UI'),local('Yu Gothic'),local('Yu Gothic Medium'),local('YuGothic-Medium'),local('Yu Gothic Regular'),local('YuGothic-Regular'),local('Yu Gothic Bold'),local('YuGothic-Bold'),local('MS PGothic'),local('MS Gothic'),local('Meiryo'),local('Noto Sans JP'),local('Noto Sans CJK JP'),local('Source Han Sans JP')";
+  const jr = 'U+2E80-2FFF,U+3000-30FF,U+31F0-31FF,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF';
+  const lf = "local('Segoe UI'),local('Roboto'),local('Arial'),local('Helvetica Neue'),local('Helvetica')";
+  const lr = 'U+00A0-024F,U+0400-04FF,U+1E00-1EFF,U+2010-2027';
+  const src = LANG_Q === 'ja' ? jf : lf, ur = LANG_Q === 'ja' ? jr : lr;
+  const st = document.createElement('style');
+  st.textContent = `@font-face{font-family:'Griun';src:${src};unicode-range:${ur}}@font-face{font-family:'Ria';src:${src};unicode-range:${ur}}` + (LANG_Q === 'ja' ? 'html[lang=ja] *{word-break:normal!important}' : '');
+  document.head.appendChild(st);
+  const HT = window.L3_HTML[LANG_Q];
+  document.querySelectorAll('[data-en]').forEach(el => { const z = HT[el.dataset.en.replace(/\u00a0/g, '&nbsp;')]; el.innerHTML = z !== undefined ? z : el.dataset.en; });
+  document.querySelectorAll('[data-en-title]').forEach(el => { const z = HT[el.dataset.enTitle]; el.title = z !== undefined ? z : el.dataset.enTitle; });
 }
 if (EN_MODE) {
   document.documentElement.lang = 'en';

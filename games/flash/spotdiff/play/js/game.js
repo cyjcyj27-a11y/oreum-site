@@ -32,13 +32,48 @@
     $('tMus').title = '音乐';
     $('tSnd').title = '音效';
   }
+  // 일본어·포르투갈어·러시아어판: ?lang=ja / pt / ru
+  const Q3 = (EN || ZH) ? '' : (new URLSearchParams(location.search).get('lang') || '');
+  const JA = Q3 === 'ja', PT = Q3 === 'pt', RU = Q3 === 'ru';
+  const L3 = JA ? 'ja' : PT ? 'pt' : RU ? 'ru' : '';
+  const T3 = {
+    ja: { lang: 'ja', title: 'まちがいさがし', start: 'スタート', cont: 'つづきから', pause: '一時停止', mus: '音楽', snd: '効果音' },
+    pt: { lang: 'pt-BR', title: 'Encontre as Diferenças', start: 'Começar', cont: 'Continuar', pause: 'Pausar', mus: 'Música', snd: 'Efeitos sonoros' },
+    ru: { lang: 'ru', title: 'Найди отличия', start: 'Начать', cont: 'Продолжить', pause: 'Пауза', mus: 'Музыка', snd: 'Звуки' },
+  }[L3];
+  if (T3) {
+    document.documentElement.lang = T3.lang;
+    document.title = T3.title;
+    // 게임 글꼴에 없는 글자는 같은 이름에 기기 글꼴을 그 글자 범위로만 덧붙인다
+    let src, ur, extra = '';
+    if (JA) {
+      src = "local('Hiragino Sans'),local('Hiragino Kaku Gothic ProN'),local('Yu Gothic UI'),local('Yu Gothic'),local('Yu Gothic Medium'),local('YuGothic-Medium'),local('Yu Gothic Regular'),local('YuGothic-Regular'),local('Yu Gothic Bold'),local('YuGothic-Bold'),local('MS PGothic'),local('MS Gothic'),local('Meiryo'),local('Noto Sans JP'),local('Noto Sans CJK JP'),local('Source Han Sans JP')";
+      ur = 'U+2E80-2FFF,U+3000-30FF,U+31F0-31FF,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF';
+      extra = 'html[lang=ja] *{word-break:normal!important}';
+    } else {
+      src = "local('Segoe UI'),local('Roboto'),local('Arial'),local('Helvetica Neue'),local('Helvetica')";
+      ur = 'U+00A0-024F,U+0400-04FF,U+1E00-1EFF,U+2010-2027';
+      if (PT) extra = 'html[lang=pt-BR] #title h1.en{font-size:min(5.2vw,11vh);text-transform:uppercase}';
+    }
+    const fs3 = document.createElement('style');
+    fs3.textContent = `@font-face{font-family:'Sunflower';src:${src};unicode-range:${ur}}@font-face{font-family:'Ria';src:${src};unicode-range:${ur}}` + extra;
+    document.head.appendChild(fs3);
+    const h = document.querySelector('#title h1');
+    h.textContent = T3.title;
+    h.setAttribute('data-txt', T3.title);
+    if (!JA) h.classList.add('en');
+    $('start').textContent = T3.start;
+    $('tPause').title = T3.pause;
+    $('tMus').title = T3.mus;
+    $('tSnd').title = T3.snd;
+  }
   const SCENES = [
-    { id: 'bedroom', ko: '아이 방', en: 'Kids Room', zh: '儿童房' },
-    { id: 'kitchen', ko: '부엌', en: 'Kitchen', zh: '厨房' },
-    { id: 'cafe', ko: '카페', en: 'Cafe', zh: '咖啡馆' },
-    { id: 'school', ko: '교실', en: 'Classroom', zh: '教室' },
-    { id: 'camp', ko: '캠핑장', en: 'Campsite', zh: '露营地' },
-    { id: 'beach', ko: '바닷가', en: 'Beach', zh: '海边' },
+    { id: 'bedroom', ko: '아이 방', en: 'Kids Room', zh: '儿童房', ja: '子ども部屋', pt: 'Quarto infantil', ru: 'Детская' },
+    { id: 'kitchen', ko: '부엌', en: 'Kitchen', zh: '厨房', ja: 'キッチン', pt: 'Cozinha', ru: 'Кухня' },
+    { id: 'cafe', ko: '카페', en: 'Cafe', zh: '咖啡馆', ja: 'カフェ', pt: 'Cafeteria', ru: 'Кафе' },
+    { id: 'school', ko: '교실', en: 'Classroom', zh: '教室', ja: '教室', pt: 'Sala de aula', ru: 'Класс' },
+    { id: 'camp', ko: '캠핑장', en: 'Campsite', zh: '露营地', ja: 'キャンプ場', pt: 'Acampamento', ru: 'Кемпинг' },
+    { id: 'beach', ko: '바닷가', en: 'Beach', zh: '海边', ja: '海辺', pt: 'Praia', ru: 'Пляж' },
   ];
   const PER = 5;   // 방마다 5판(2026-09-17 사장님 "방마다 5판으로 줄여줘", 옛 10판)
   const TOTAL = SCENES.length * PER;
@@ -444,7 +479,7 @@
       for (let k = 1; k <= PER; k++) sum += prog.stars[ri * PER + k] || 0;
       const h = document.createElement('div');
       h.className = 'room';
-      h.innerHTML = '<img src="' + thumb(ri) + '"><span>' + (EN ? sc.en : ZH ? sc.zh : sc.ko) + '</span><span class="st">⭐ ' + sum + '/' + PER * 3 + '</span>';
+      h.innerHTML = '<img src="' + thumb(ri) + '"><span>' + (EN ? sc.en : ZH ? sc.zh : L3 ? sc[L3] : sc.ko) + '</span><span class="st">⭐ ' + sum + '/' + PER * 3 + '</span>';
       L.appendChild(h);
       const gr = document.createElement('div');
       gr.className = 'grid';
@@ -502,7 +537,7 @@
   $('start').onclick = () => { AU.unlock(); AU.play('click'); startStage(Math.min(prog.last, prog.open) || 1); };
   $('toList').onclick = () => { AU.unlock(); AU.play('click'); openList(); };
   $('toList').hidden = prog.open <= 1;
-  if (prog.last > 1 || prog.open > 1) $('start').textContent = EN ? 'CONTINUE' : ZH ? '继续' : '이어하기';
+  if (prog.last > 1 || prog.open > 1) $('start').textContent = EN ? 'CONTINUE' : ZH ? '继续' : T3 ? T3.cont : '이어하기';
   drawTitle();
   document.addEventListener('pointerdown', () => AU.unlock(), { once: true });
 })();

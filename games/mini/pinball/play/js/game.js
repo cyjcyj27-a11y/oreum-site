@@ -321,7 +321,7 @@
     G.mode = 'over'; A.over(); A.intense(false);
     if (G.score > SAVE.hi) SAVE.hi = G.score; store();
     $('overScore').textContent = fmt(G.score); $('overStage').textContent = L('stageN', { n: G.stage });
-    $('overCont').hidden = G.stage <= 1; $('overCont').querySelector('span').textContent = EN ? 'CONTINUE ' + G.stage : L('cont') + ' ' + L('stageN', { n: G.stage });
+    $('overCont').hidden = G.stage <= 1; $('overCont').querySelector('span').textContent = EN ? 'CONTINUE ' + G.stage : window.PT || window.RU ? L('cont') + ' ' + G.stage : L('cont') + ' ' + L('stageN', { n: G.stage });
     $('over').hidden = false; document.body.classList.remove('playing');
     makeCard(false);
   }
@@ -382,7 +382,7 @@
   function roundRect(g, x, y, w, h, r) { g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); }
   function saveCard() { if (!cardURL) return; const a = document.createElement('a'); a.href = cardURL; a.download = 'pinball.png'; document.body.appendChild(a); a.click(); a.remove(); }
   function shareCard() {
-    const url = EN ? 'https://oreumgames.com/en/games/mini/pinball/' : window.ZH ? 'https://oreumgames.com/zh/games/mini/pinball/' : 'https://oreumgames.com/games/mini/pinball/';
+    const url = EN || window.JA || window.PT || window.RU ? 'https://oreumgames.com/en/games/mini/pinball/' : window.ZH ? 'https://oreumgames.com/zh/games/mini/pinball/' : 'https://oreumgames.com/games/mini/pinball/';
     if (navigator.share) { navigator.share({ title: L('title'), text: shareTxt, url }).catch(() => { }); return; }
     const s = shareTxt + ' ' + url;
     (navigator.clipboard ? navigator.clipboard.writeText(s) : Promise.reject()).catch(() => { const t = document.createElement('textarea'); t.value = s; document.body.appendChild(t); t.select(); try { document.execCommand('copy'); } catch (e) { } t.remove(); });
@@ -454,7 +454,7 @@
   }
   function titleInfo() {
     $('hiTxt').textContent = SAVE.hi ? L('best') + ' ' + fmt(SAVE.hi) : '';
-    $('bCont').hidden = !(SAVE.stage > 1); $('bCont').querySelector('span').textContent = EN ? 'CONTINUE ' + SAVE.stage : L('cont') + ' ' + L('stageN', { n: SAVE.stage });
+    $('bCont').hidden = !(SAVE.stage > 1); $('bCont').querySelector('span').textContent = EN ? 'CONTINUE ' + SAVE.stage : window.PT || window.RU ? L('cont') + ' ' + SAVE.stage : L('cont') + ' ' + L('stageN', { n: SAVE.stage });
   }
   const click = (id, fn) => $(id).addEventListener('click', e => { A.init(); A.click(); fn(e); });
   click('bStart', () => { if (!SAVE.how) openHow(() => startGame(1)); else startGame(1); });

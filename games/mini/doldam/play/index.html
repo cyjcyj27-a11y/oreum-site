@@ -361,8 +361,8 @@
 /* ─────────────────────────── 언어 ─────────────────────────── */
 var qs = new URLSearchParams(location.search);
 var LANG = qs.get('lang');
-if (LANG !== 'en' && LANG !== 'zh') LANG = 'ko';   // 언어는 주소로만 정한다(?lang=en 일 때만 영어, 없으면 한국어) — 기억하거나 폰 언어를 따르면 한국어 페이지에서 들어와도 영어로 뜬다(2026-09-29)
-document.documentElement.lang = LANG === 'zh' ? 'zh-CN' : LANG;
+if (['en','zh','ja','pt','ru'].indexOf(LANG) < 0) LANG = 'ko';   // 언어는 주소로만 정한다(?lang=en 일 때만 영어, 없으면 한국어) — 기억하거나 폰 언어를 따르면 한국어 페이지에서 들어와도 영어로 뜬다(2026-09-29)
+document.documentElement.lang = LANG === 'zh' ? 'zh-CN' : LANG === 'pt' ? 'pt-BR' : LANG;
 if (LANG === 'zh'){
   /* 중국어판: 제목·설명, 한글 글꼴에 없는 한자를 시스템 중국어 글꼴로 채운다 */
   document.title = '石墙方块 · DOLDAM';
@@ -378,6 +378,32 @@ if (LANG === 'zh'){
   });
   zst.textContent = zcss + 'html[lang=zh-CN] *{word-break:normal!important}';
   document.head.appendChild(zst);
+}
+
+if (LANG === 'ja' || LANG === 'pt' || LANG === 'ru'){
+  /* 일본어·포르투갈어·러시아어판: 제목·설명, 한글 글꼴에 없는 글자를 시스템 글꼴로 채운다 */
+  document.title = {ja:'石垣ブロック · DOLDAM', pt:'Muro de Pedra · DOLDAM', ru:'Каменная стена · DOLDAM'}[LANG];
+  var lmd = document.querySelector('meta[name=description]');
+  if (lmd) lmd.content = {
+    ja:'特殊ブロックが炸裂する無料Webパズルゲーム。そろえたラインはロックされ、次のブロックで崩れてCOMBOがつながります。インストール不要ですぐ遊べます。',
+    pt:'Jogo de quebra-cabeça grátis no navegador com blocos especiais que explodem. Linhas completas travam e desmoronam no próximo bloco, encadeando COMBOS. Jogue já, sem instalar nada.',
+    ru:'Бесплатная браузерная головоломка со взрывными особыми блоками. Заполненные ряды блокируются и рушатся со следующим блоком, запуская COMBO. Играй сразу, без установки.'
+  }[LANG];
+  var lf = LANG === 'ja'
+    ? "local('Hiragino Sans'),local('Hiragino Kaku Gothic ProN'),local('Yu Gothic UI'),local('Yu Gothic'),local('Yu Gothic Medium'),local('YuGothic-Medium'),local('Yu Gothic Regular'),local('YuGothic-Regular'),local('Yu Gothic Bold'),local('YuGothic-Bold'),local('MS PGothic'),local('MS Gothic'),local('Meiryo'),local('Noto Sans JP'),local('Noto Sans CJK JP'),local('Source Han Sans JP')"
+    : "local('Segoe UI'),local('Roboto'),local('Arial'),local('Helvetica Neue'),local('Helvetica')";
+  var lur = LANG === 'ja'
+    ? 'U+2E80-2FFF,U+3000-30FF,U+31F0-31FF,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF'
+    : 'U+00A0-024F,U+0400-04FF,U+1E00-1EFF,U+2010-2027';
+  var lst = document.createElement('style'), lcss = '';
+  ['Pretendard','Apple SD Gothic Neo','Malgun Gothic'].forEach(function(f){
+    [400,600,700,800,900].forEach(function(w){
+      lcss += "@font-face{font-family:'" + f + "';src:" + lf + ";font-weight:" + w + ";unicode-range:" + lur + "}";
+    });
+  });
+  if (LANG === 'ja') lcss += 'html[lang=ja] *{word-break:normal!important}';
+  lst.textContent = lcss;
+  document.head.appendChild(lst);
 }
 
 var T = {
@@ -486,6 +512,108 @@ var T = {
       '<div class="sp"><span class="ico">❄</span><span><b>FREEZE</b> — 3 回合内不会锁定</span></div>'+
       '<h4>SCORE</h4>'+
       '<p>行数 × COMBO² × 10。每次 LEVEL UP 有额外奖励。目标是<b>打破 BEST</b>。</p>'
+  },
+
+  ja:{
+    sub:'', len:'石垣の長さ', best:'BEST', score:'SCORE', bestScore:'BEST', next:'NEXT', rise:'RISE',
+    back:'← 一覧', riseOff:'—',
+    keys:'<b>← →</b> 移動<br><b>↑ / X</b> 回転<br><b>↓</b> 高速落下<br><b>SPACE</b> 一時停止',
+    musicOff:'BGMオフ', musicOn:'BGMオン', sfxOff:'効果音オフ', sfxOn:'効果音オン',
+    over:'GAME OVER', overSub:'', again:'RETRY', howto:'ルール',
+    paused:'PAUSE', pausedSub:'', resume:'RESUME',
+    newBest:'NEW BEST', newBestScore:'NEW BEST!', firstScore:'初記録',
+    prevBest:'前回', toBest:'BESTまで', pt:'', beat:'NEW BEST 更新中',
+    unlock1:'RISE ON', unlock2:'NEW STONES', unlock3:'RISE UP', rush:'RISE MAX',
+    chain:'COMBO', wipeAll:'ALL CLEAR',
+    walls:['LEVEL 1','LEVEL 2','LEVEL 3','LEVEL 4','LEVEL 5','LEVEL 6','LEVEL 7','LEVEL 8'],
+    stageWord:'', nextIn:'', maxed:'MAX',
+    wallUp:'LEVEL UP',
+    helpHTML:
+      '<h3>石垣ブロック · DOLDAM</h3>'+
+      '<h4>RULES</h4>'+
+      '<ul>'+
+      '<li>横1ラインを埋めると<b>ロック</b>（金色）</li>'+
+      '<li>ロックされたラインは<b>次の石を置いたとき</b>に崩れる</li>'+
+      '<li>崩れてまたラインがそろうと<b>COMBO</b></li>'+
+      '<li>5ライン消すと<b>RISE</b>開始 — 下からラインがせり上がる</li>'+
+      '</ul>'+
+      '<h4>SPECIAL</h4>'+
+      '<div class="sp"><span class="ico">💣</span><span><b>BOMB</b> — 周囲8マス</span></div>'+
+      '<div class="sp"><span class="ico">⬍</span><span><b>LASER</b> — 縦1列</span></div>'+
+      '<div class="sp"><span class="ico">⬇</span><span><b>GRAVITY</b> — 左右3列を下に詰める</span></div>'+
+      '<div class="sp"><span class="ico">🔥</span><span><b>BURN</b> — つながったかたまり</span></div>'+
+      '<div class="sp"><span class="ico">▤</span><span><b>SWEEP</b> — 一番下のライン</span></div>'+
+      '<div class="sp"><span class="ico">❄</span><span><b>FREEZE</b> — 3ターンロックされない</span></div>'+
+      '<h4>SCORE</h4>'+
+      '<p>ライン数 × COMBO² × 10。LEVEL UPごとにボーナス。目標は<b>BEST更新</b>。</p>'
+  },
+
+  pt:{
+    sub:'', len:'Muro', best:'BEST', score:'SCORE', bestScore:'BEST', next:'NEXT', rise:'RISE',
+    back:'← Lista', riseOff:'—',
+    keys:'<b>← →</b> mover<br><b>↑ / X</b> girar<br><b>↓</b> descer rápido<br><b>SPACE</b> pausar',
+    musicOff:'Desligar música', musicOn:'Ligar música', sfxOff:'Desligar efeitos', sfxOn:'Ligar efeitos',
+    over:'GAME OVER', overSub:'', again:'RETRY', howto:'REGRAS',
+    paused:'PAUSE', pausedSub:'', resume:'RESUME',
+    newBest:'NEW BEST', newBestScore:'NEW BEST!', firstScore:'Primeiro recorde',
+    prevBest:'antes', toBest:'Faltam p/ o BEST', pt:'', beat:'Batendo o BEST',
+    unlock1:'RISE ON', unlock2:'NEW STONES', unlock3:'RISE UP', rush:'RISE MAX',
+    chain:'COMBO', wipeAll:'ALL CLEAR',
+    walls:['LEVEL 1','LEVEL 2','LEVEL 3','LEVEL 4','LEVEL 5','LEVEL 6','LEVEL 7','LEVEL 8'],
+    stageWord:'', nextIn:'', maxed:'MAX',
+    wallUp:'LEVEL UP',
+    helpHTML:
+      '<h3>Muro de Pedra · DOLDAM</h3>'+
+      '<h4>RULES</h4>'+
+      '<ul>'+
+      '<li>Complete uma linha e ela fica <b>travada</b> (dourada)</li>'+
+      '<li>A linha travada desmorona <b>quando você coloca a próxima pedra</b></li>'+
+      '<li>Se outra linha se completar na queda, é <b>COMBO</b></li>'+
+      '<li>A partir de 5 linhas vem o <b>RISE</b> — linhas sobem por baixo</li>'+
+      '</ul>'+
+      '<h4>SPECIAL</h4>'+
+      '<div class="sp"><span class="ico">💣</span><span><b>BOMB</b> — 8 casas ao redor</span></div>'+
+      '<div class="sp"><span class="ico">⬍</span><span><b>LASER</b> — uma coluna inteira</span></div>'+
+      '<div class="sp"><span class="ico">⬇</span><span><b>GRAVITY</b> — 3 colunas descem</span></div>'+
+      '<div class="sp"><span class="ico">🔥</span><span><b>BURN</b> — o grupo conectado</span></div>'+
+      '<div class="sp"><span class="ico">▤</span><span><b>SWEEP</b> — a linha de baixo</span></div>'+
+      '<div class="sp"><span class="ico">❄</span><span><b>FREEZE</b> — 3 turnos sem travar</span></div>'+
+      '<h4>SCORE</h4>'+
+      '<p>Linhas × COMBO² × 10. Bônus a cada LEVEL UP. O objetivo é <b>bater o BEST</b>.</p>'
+  },
+
+  ru:{
+    sub:'', len:'Стена', best:'BEST', score:'SCORE', bestScore:'BEST', next:'NEXT', rise:'RISE',
+    back:'← Список', riseOff:'—',
+    keys:'<b>← →</b> движение<br><b>↑ / X</b> поворот<br><b>↓</b> ускорить<br><b>SPACE</b> пауза',
+    musicOff:'Выключить музыку', musicOn:'Включить музыку', sfxOff:'Выключить звуки', sfxOn:'Включить звуки',
+    over:'GAME OVER', overSub:'', again:'RETRY', howto:'ПРАВИЛА',
+    paused:'PAUSE', pausedSub:'', resume:'RESUME',
+    newBest:'NEW BEST', newBestScore:'NEW BEST!', firstScore:'Первый рекорд',
+    prevBest:'было', toBest:'До BEST', pt:'', beat:'Бьёшь BEST',
+    unlock1:'RISE ON', unlock2:'NEW STONES', unlock3:'RISE UP', rush:'RISE MAX',
+    chain:'COMBO', wipeAll:'ALL CLEAR',
+    walls:['LEVEL 1','LEVEL 2','LEVEL 3','LEVEL 4','LEVEL 5','LEVEL 6','LEVEL 7','LEVEL 8'],
+    stageWord:'', nextIn:'', maxed:'MAX',
+    wallUp:'LEVEL UP',
+    helpHTML:
+      '<h3>Каменная стена · DOLDAM</h3>'+
+      '<h4>RULES</h4>'+
+      '<ul>'+
+      '<li>Заполни ряд целиком — он <b>заблокируется</b> (станет золотым)</li>'+
+      '<li>Заблокированный ряд рушится, <b>когда кладёшь следующий камень</b></li>'+
+      '<li>Если при обвале заполнится ещё ряд — это <b>COMBO</b></li>'+
+      '<li>После 5 рядов начинается <b>RISE</b> — снизу поднимаются ряды</li>'+
+      '</ul>'+
+      '<h4>SPECIAL</h4>'+
+      '<div class="sp"><span class="ico">💣</span><span><b>BOMB</b> — 8 клеток вокруг</span></div>'+
+      '<div class="sp"><span class="ico">⬍</span><span><b>LASER</b> — весь столбец</span></div>'+
+      '<div class="sp"><span class="ico">⬇</span><span><b>GRAVITY</b> — 3 столбца оседают вниз</span></div>'+
+      '<div class="sp"><span class="ico">🔥</span><span><b>BURN</b> — связанная группа</span></div>'+
+      '<div class="sp"><span class="ico">▤</span><span><b>SWEEP</b> — нижний ряд</span></div>'+
+      '<div class="sp"><span class="ico">❄</span><span><b>FREEZE</b> — 3 хода без блокировки</span></div>'+
+      '<h4>SCORE</h4>'+
+      '<p>Ряды × COMBO² × 10. Бонус за каждый LEVEL UP. Цель — <b>побить BEST</b>.</p>'
   }
 }[LANG];
 
@@ -1551,7 +1679,7 @@ document.getElementById('ovBtn2').addEventListener('click', function(){ openHelp
 /* ─────────────────────────── 도움말 ─────────────────────────── */
 var helpEl = document.getElementById('help');
 document.getElementById('helpIn').innerHTML = T.helpHTML +
-  '<button class="close" type="button" id="helpClose">'+(LANG==='ko'?'닫고 시작':LANG==='zh'?'关闭并开始':'Close')+'</button>';
+  '<button class="close" type="button" id="helpClose">'+(LANG==='ko'?'닫고 시작':LANG==='zh'?'关闭并开始':LANG==='ja'?'閉じてスタート':LANG==='pt'?'Fechar e jogar':LANG==='ru'?'Закрыть и играть':'Close')+'</button>';
 function openHelp(){ helpEl.classList.add('on'); duckBgm(); if (!over && !paused && !busy) paused = true; }
 function closeHelp(){
   helpEl.classList.remove('on');
@@ -1656,7 +1784,7 @@ document.getElementById('lblNext').textContent = T.next;
 document.getElementById('lblRise').textContent = T.rise;
 document.getElementById('keyHelp').innerHTML = T.keys;
 document.getElementById('backLink').textContent = T.back;
-document.getElementById('backLink').href = LANG === 'en' ? '/en/games/mini/' : LANG === 'zh' ? '/zh/' : '/games/mini/';
+document.getElementById('backLink').href = (LANG === 'en' || LANG === 'ja' || LANG === 'pt' || LANG === 'ru') ? '/en/games/mini/' : LANG === 'zh' ? '/zh/' : '/games/mini/';
 document.getElementById('btnLang').textContent = LANG === 'ko' ? 'EN' : 'KO';
 paintSoundBtns();
 
@@ -1721,7 +1849,7 @@ window.DOLDAM = {
 })();
 </script>
 <!-- 왼쪽 위 '오름게임즈' 링크 + 왼쪽 아래 '전체화면' 알약 (오름냥·페어붐과 같은 공용 스크립트) -->
-<script src="/assets/game-home.js?v=8" data-top="4" data-left="4" data-fullscreen="1" defer></script>
+<script src="/assets/game-home.js?v=9" data-top="4" data-left="4" data-fullscreen="1" defer></script>
 <script src="/assets/game-events.js?v=4" defer></script>
 </body>
 </html>

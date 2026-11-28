@@ -288,8 +288,8 @@
       const cost = lv < D.MAX_LV ? D.upCost(a, lv) : 0, canUp = lv < D.MAX_LV && S.res[a.up.res] >= cost;
       if (canUp) anyUp = true;
       if (R.tab === 'act') {
-        const v = D.LANG === 'en' ? D.num(S.res[a.res]) : `${D.RES_NAME[a.res]} ${D.num(S.res[a.res])}`;   // 영문은 낱말이 길어 숫자만
-        if (vl.textContent !== v) { vl.textContent = v; fitEl(vl); } lvEl.textContent = lv > 1 && D.LANG !== 'en' ? 'Lv' + lv : '';
+        const v = D.LANG === 'en' || D.LANG === 'pt' || D.LANG === 'ru' ? D.num(S.res[a.res]) : `${D.RES_NAME[a.res]} ${D.num(S.res[a.res])}`;   // 영문은 낱말이 길어 숫자만
+        if (vl.textContent !== v) { vl.textContent = v; fitEl(vl); } lvEl.textContent = lv > 1 && D.LANG !== 'en' && D.LANG !== 'pt' && D.LANG !== 'ru' ? 'Lv' + lv : '';
         bar.style.width = Math.round(R.bore[a.id] * 100) + '%'; bar.parentNode.style.visibility = '';
         el.classList.toggle('dim', !!(a.cost && S.res[a.cost.res] < a.cost.n)); el.classList.remove('can');
       } else {
@@ -544,7 +544,7 @@
     R.t += dt;
     fadeStep(now || performance.now());
     if (R.scene === 'title') {
-      const box = ART.drawTitle(ctx, R.cw, R.ch, R.t, D.won(D.offer(0)).replace(D.LANG === 'zh' ? '韩元' : '원', T('원', '')));
+      const box = ART.drawTitle(ctx, R.cw, R.ch, R.t, D.won(D.offer(0)).replace(D.LANG === 'zh' ? '韩元' : D.LANG === 'ja' ? 'ウォン' : '원', T('원', '')));
       R.hit.box = box;
       return;
     }
@@ -667,6 +667,30 @@
     const ur = 'U+2E80-2FFF,U+3000-303F,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF';
     const st = document.createElement('style');
     st.textContent = ['Ria', 'TitleF'].map(f => `@font-face{font-family:'${f}';src:${zf};unicode-range:${ur}}`).join('') + 'html[lang=zh-CN] *{word-break:normal!important}';
+    document.head.appendChild(st);
+  }
+  // 일본어·포르투갈어·러시아어판 글자와 글꼴
+  const L3 = {
+    ja: { lang: 'ja', title: '5億年ボタン', h1: '5億年ボタン', shop: 'ショップ', log: '痕跡', act: '行動', up: '強化', nw: 'はじめから', done: '完成', no: 'キャンセル', ok: 'OK', end: 'タイトルへ' },
+    pt: { lang: 'pt-BR', title: 'Botão de 500 Milhões de Anos', h1: 'BOTÃO DE 500<br>MILHÕES DE ANOS', shop: 'LOJA', log: 'MARCAS', act: 'AÇÃO', up: 'MELHORIAS', nw: 'NOVO JOGO', done: 'PRONTO', no: 'CANCELAR', ok: 'OK', end: 'INÍCIO' },
+    ru: { lang: 'ru', title: 'Кнопка на 500 миллионов лет', h1: 'КНОПКА НА<br>500 МЛН ЛЕТ', shop: 'МАГАЗИН', log: 'НАДПИСИ', act: 'ДЕЙСТВИЯ', up: 'ПРОКАЧКА', nw: 'НОВАЯ ИГРА', done: 'ГОТОВО', no: 'ОТМЕНА', ok: 'OK', end: 'В МЕНЮ' }
+  }[D.LANG];
+  if (L3) {
+    document.documentElement.lang = L3.lang; document.title = L3.title;
+    document.querySelector('#title h1').innerHTML = L3.h1;
+    $('bShop').textContent = L3.shop; $('bLog').textContent = L3.log; $('tabAct').firstChild.textContent = L3.act; $('tabUp').firstChild.textContent = L3.up;
+    $('bNew').textContent = L3.nw; $('drawDone').textContent = L3.done; $('askN').textContent = L3.no; $('askY').textContent = L3.ok; $('bEnd').textContent = L3.end;
+    $('shopT').textContent = L3.shop; $('logT').textContent = L3.log;
+    const st = document.createElement('style');
+    if (D.LANG === 'ja') {
+      const jf = "local('Hiragino Sans'),local('Hiragino Kaku Gothic ProN'),local('Yu Gothic UI'),local('Yu Gothic'),local('Yu Gothic Medium'),local('YuGothic-Medium'),local('Yu Gothic Regular'),local('YuGothic-Regular'),local('Yu Gothic Bold'),local('YuGothic-Bold'),local('MS PGothic'),local('MS Gothic'),local('Meiryo'),local('Noto Sans JP'),local('Noto Sans CJK JP'),local('Source Han Sans JP')";
+      const ur = 'U+2E80-2FFF,U+3000-30FF,U+31F0-31FF,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF';
+      st.textContent = ['Ria', 'TitleF'].map(f => `@font-face{font-family:'${f}';src:${jf};unicode-range:${ur}}`).join('') + 'html[lang=ja] *{word-break:normal!important}';
+    } else {
+      const lf = "local('Segoe UI'),local('Roboto'),local('Arial'),local('Helvetica Neue'),local('Helvetica')";
+      const ur = 'U+00A0-024F,U+0400-04FF,U+1E00-1EFF,U+2010-2027';
+      st.textContent = ['Ria', 'TitleF'].map(f => `@font-face{font-family:'${f}';src:${lf};unicode-range:${ur}}`).join('');
+    }
     document.head.appendChild(st);
   }
   showTitle();

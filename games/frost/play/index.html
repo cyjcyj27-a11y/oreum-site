@@ -431,6 +431,58 @@
     document.getElementById('rotSub').textContent = '如果按钮没反应，请关闭手机的屏幕旋转锁定，把手机横过来';
     document.getElementById('rotSkip').textContent = '仍然竖屏玩';
   }
+  if (/[?&]lang=ja/.test(location.search)) {
+    document.documentElement.lang = 'ja';
+    // Japanese system fonts for kana and kanji in each game font family
+    var jf = "local('Hiragino Sans'),local('Hiragino Kaku Gothic ProN'),local('Yu Gothic UI'),local('Yu Gothic'),local('Yu Gothic Medium'),local('YuGothic-Medium'),local('Yu Gothic Regular'),local('YuGothic-Regular'),local('Yu Gothic Bold'),local('YuGothic-Bold'),local('MS PGothic'),local('MS Gothic'),local('Meiryo'),local('Noto Sans JP'),local('Noto Sans CJK JP'),local('Source Han Sans JP')";
+    var jr = 'U+2E80-2FFF,U+3000-30FF,U+31F0-31FF,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF';
+    var js = document.createElement('style');
+    js.textContent = "@font-face{font-family:'FernTitle';src:" + jf + ";unicode-range:" + jr + "}" +
+      "@font-face{font-family:'Ria';src:" + jf + ";unicode-range:" + jr + "}" +
+      "html[lang=ja] *{word-break:normal!important}";
+    document.head.appendChild(js);
+    document.title = '氷のおじいさん';
+    var tj = document.getElementById('ttl');
+    tj.textContent = '氷のおじいさん';
+    tj.style.fontFamily = "'Hiragino Sans', 'Yu Gothic UI', 'Yu Gothic', 'Meiryo', 'Noto Sans JP', sans-serif"; tj.style.fontWeight = '900';
+    var lj = document.getElementById('ldTtl');
+    lj.textContent = '氷のおじいさん';
+    lj.style.fontFamily = "'Hiragino Sans', 'Yu Gothic UI', 'Yu Gothic', 'Meiryo', 'Noto Sans JP', sans-serif"; lj.style.fontWeight = '700';
+    document.getElementById('btnStart').textContent = 'スタート';
+    document.getElementById('btnCont').textContent = 'つづきから';
+    document.getElementById('bJump').textContent = 'ジャンプ';
+    document.getElementById('keys').innerHTML = 'WASD 移動 · Shift ダッシュ · E アクション・持つ<br>← → ↑ ↓ 視点 · B 図鑑 · I カバン · T 地図 · R(長押し) リスポーン · K 効果音';
+    document.getElementById('rotMsg').textContent = '横画面で遊ぶゲームです';
+    document.getElementById('rotGo').textContent = '横画面にする';
+    document.getElementById('rotSub').textContent = 'ボタンが効かないときは、画面の回転ロックを解除してスマホを横にしてください';
+    document.getElementById('rotSkip').textContent = 'それでも縦で遊ぶ';
+  }
+  if (/[?&]lang=pt/.test(location.search)) {
+    document.documentElement.lang = 'pt-BR';
+    // Latin fallback for accented letters missing in the game fonts
+    var pf = "local('Segoe UI'),local('Roboto'),local('Arial'),local('Helvetica Neue'),local('Helvetica')";
+    var pr = 'U+00A0-024F,U+0400-04FF,U+1E00-1EFF,U+2010-2027';
+    var ps = document.createElement('style');
+    ps.textContent = "@font-face{font-family:'FernTitle';src:" + pf + ";unicode-range:" + pr + "}" +
+      "@font-face{font-family:'Ria';src:" + pf + ";unicode-range:" + pr + "}";
+    document.head.appendChild(ps);
+    document.title = 'Vovô Gelo';
+    var tp = document.getElementById('ttl');
+    tp.textContent = 'VOVÔ GELO';
+    tp.style.fontFamily = "Georgia, 'Times New Roman', serif"; tp.style.fontWeight = '700';
+    tp.style.fontSize = 'clamp(52px, 8.6vw, 124px)'; tp.style.letterSpacing = '6px'; tp.style.lineHeight = '1.05';
+    var lp = document.getElementById('ldTtl');
+    lp.textContent = 'VOVÔ GELO';
+    lp.style.fontFamily = "Georgia, 'Times New Roman', serif"; lp.style.fontSize = '52px';
+    document.getElementById('btnStart').textContent = 'COMEÇAR';
+    document.getElementById('btnCont').textContent = 'CONTINUAR';
+    document.getElementById('bJump').textContent = 'PULAR';
+    document.getElementById('keys').innerHTML = 'WASD Andar · Shift Correr · E Ação · pegar<br>← → ↑ ↓ Câmera · B Álbum · I Mochila · T Mapa · R(segurar) Voltar · K Som';
+    document.getElementById('rotMsg').textContent = 'Este jogo é na horizontal';
+    document.getElementById('rotGo').textContent = 'Girar a tela';
+    document.getElementById('rotSub').textContent = 'Se o botão não funcionar, desative o bloqueio de rotação e deite o celular';
+    document.getElementById('rotSkip').textContent = 'Jogar na vertical mesmo assim';
+  }
 </script>
 <script>
   // 단추 글자가 칸을 넘치면 배치는 그대로 두고 글자만 줄여 맞춘다 — 러시아어·영어는 낱말이 길다
@@ -462,7 +514,7 @@
   })();
 </script>
 <script src="assets/landscape.js?v=2"></script>
-<script src="assets/game-home.js?v=3" data-top="6" data-left="6" data-fullscreen="1" defer></script>
+<script src="assets/game-home.js?v=4" data-top="6" data-left="6" data-fullscreen="1" defer></script>
 <script src="/assets/touchlock.js?v=1"></script>
 <script src="/assets/visit.js?v=21" defer></script>
 <script src="/assets/game-events.js?v=4" defer></script>
@@ -470,7 +522,9 @@
 <script src="lib/GLTFLoader.global.js"></script>
 <script src="js/ru.js?v=38"></script>
 <script src="js/zh.js?v=1"></script>
-<script src="js/core.js?v=28"></script>
+<script src="js/ja.js?v=1"></script>
+<script src="js/pt.js?v=1"></script>
+<script src="js/core.js?v=29"></script>
 <script src="js/terrain.js?v=10"></script>
 <script src="js/sky.js?v=4"></script>
 <script src="js/col.js?v=3"></script>
@@ -495,8 +549,8 @@
 <script src="js/tools.js?v=8"></script>
 <script src="js/audio.js?v=13"></script>
 <script src="js/fx.js?v=2"></script>
-<script src="js/hud.js?v=44"></script>
-<script src="js/game.js?v=55"></script>
+<script src="js/hud.js?v=45"></script>
+<script src="js/game.js?v=56"></script>
 <script>
   window.__LOAD.set(0.04);
   GAME.boot().catch(function (e) { console.error(e); document.getElementById('ldPct').textContent = 'ERROR ' + e.message; });

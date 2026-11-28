@@ -1,8 +1,147 @@
-// 언어: 주소에 ?lang=en 일 때 영어, ?lang=zh 일 때 중국어(간체). 그 밖엔 한국어.
+// 언어: 주소에 ?lang=en 일 때 영어, ?lang=zh 일 때 중국어(간체), ?lang=ja·pt·ru 일 때 일본어·포르투갈어·러시아어. 그 밖엔 한국어.
 (function () {
   const Q = new URLSearchParams(location.search).get('lang');
   const EN = (window.EN = Q === 'en');
   const ZHON = (window.ZH = Q === 'zh');
+  // 일본어·포르투갈어(브라질)·러시아어: 한국어 원문을 열쇠로 찾는다('한국어|영어' 열쇠가 먼저, 없으면 영어)
+  const L3 = (window.LG3 = ['ja', 'pt', 'ru'].includes(Q) ? Q : null);
+  window.JA = L3 === 'ja'; window.PT = L3 === 'pt'; window.RU = L3 === 'ru';
+  if (L3) {
+    const JA = {
+      '흰머리뽑기방': '白髪抜き屋',
+      '손님': 'お客', '인내심': 'ガマン', '흰머리': '白髪', '코인': 'コイン', '상점': 'ショップ', '도감': '図鑑',
+      '차': 'お茶', '주무르기': 'もみもみ', '참빗': 'すき櫛', '이어하기': 'つづきから', '처음부터': 'はじめから',
+      '처음 화면': 'タイトルへ', '저장': '保存', '공유': 'シェア', '처음으로': 'タイトルへ',
+      '눌러서 넘기기': 'タップでスキップ', '폰을 세로로 돌려 주세요': 'スマホを縦にしてください',
+      '머리카락 끌기: 뽑기 · 빈 곳 끌기·오른쪽 끌기: 돌리기 · 휠: 확대 · C 참빗 · T 차 · R 주무르기':
+        '髪をドラッグ：抜く · 空いた所をドラッグ／右ドラッグ：回す · ホイール：ズーム · C すき櫛 · T お茶 · R もみもみ',
+      '흰머리 뿌리 가까이 집고 쭉 당겨요. 끝을 잡으면 끊어져요': '白髪の根元近くをつまんで、スーッと引っぱろう。毛先をつまむと切れちゃう',
+      '검은 머리를 뽑으면 손님이 아파해요': '黒髪を抜くとお客さんが痛がるよ',
+      '참빗으로 곱게 빗으면 숨은 흰머리가 보여요': 'すき櫛でていねいにとかすと、隠れた白髪が見えてくる',
+      '빈 곳 끌기: 머리 돌리기 · 두 손가락: 확대': '空いた所をドラッグ：頭を回す · 2本指：ズーム',
+      '빈 곳 끌기·오른쪽 끌기: 머리 돌리기 · 휠: 확대 · C 참빗': '空いた所をドラッグ／右ドラッグ：頭を回す · ホイール：ズーム · C すき櫛',
+      '마지막': 'ラスト', '아야!': 'いてっ!', '인내심 가득': 'ガマン満タン', '후루룩': 'ずずっ', '시원하다': 'あ〜気持ちいい', '인내심 +': 'ガマン +',
+      '흰머리 ': '白髪 ', '황금 머리카락 ': '金の髪 ', '검은 머리 ': '黒髪 ', '팁': 'チップ', '합계': '合計',
+      '쓴 코인 돌려받음 +': '使ったコインを返金 +', '코인 ': 'コイン ', '가진 것 ': '所持 ', '주소를 복사했습니다': 'リンクをコピーしました',
+      '보통 흰머리': 'ふつうの白髪', '새싹 흰머리': '新芽の白髪', '반백 머리': 'ごま塩頭', '곱슬 흰머리': 'くせ毛の白髪',
+      '굵은 흰머리': '太い白髪', '은빛 긴 머리': '銀色の長い髪', '쌍둥이 흰머리': 'ふたごの白髪', '황금 머리카락': '金の髪',
+      '족집게': '毛抜き', '덜 끊기고, 옆 검은 머리가 덜 딸려 옴': '切れにくく、となりの黒髪もつられにくい',
+      '맨손가락': '素手', '쇠 족집게': '鉄の毛抜き', '뾰족 족집게': '先細の毛抜き', '장인 족집게': '職人の毛抜き',
+      '한 번에 더 넓게 빗김': '一度に広くとかせる', '작은 참빗': '小さいすき櫛', '큰 참빗': '大きいすき櫛',
+      '조명': '照明', '가게가 밝아져 숨은 흰머리가 잘 보임': '店が明るくなり、隠れた白髪が見やすい',
+      '형광등': '蛍光灯', '스탠드': 'デスクライト', '링 조명': 'リングライト',
+      '돋보기': '虫めがね', '머리를 더 가까이 확대': '頭をもっと近くまでズーム', '맨눈': '裸眼', '확대경': 'ヘッドルーペ',
+      '의자': 'イス', '손님이 편해서 고개를 덜 움직임': 'お客さんがくつろいで、頭をあまり動かさない', '나무 의자': '木のイス', '쿠션 의자': 'クッションチェア', '안마 의자': 'マッサージチェア',
+      '차 대접': 'お茶のおもてなし', '단추로 써서 인내심 +60': 'ボタンで使うとガマン +60',
+      '어깨 주무르기': '肩もみ', '단추로 써서 인내심 +35': 'ボタンで使うとガマン +35',
+      '번창하세요': '商売繁盛', '축 개업': '祝開店',
+      '털끝 하나 안 건드린 장인': '毛一本傷つけない職人', '동네 족집게 1등': '町いちばんの毛抜き名人', '흰머리 사냥꾼': '白髪ハンター', '초보 족집게': '見習い毛抜き',
+      '뽑은 흰머리': '抜いた白髪', '뿌리째': '根元から', '번 코인': '稼いだコイン', '검은 머리 실수': '黒髪ミス',
+      '너는 몇 가닥 뽑을 수 있을까?': 'キミは何本抜ける？',
+    };
+    const PT = {
+      '흰머리뽑기방': 'Salão dos Fios Brancos',
+      '흰머리뽑기방|WHITE HAIR': 'FIOS BRANCOS',
+      '손님': 'Cliente', '인내심': 'Paciência', '흰머리': 'Brancos', '코인': 'Moedas', '상점': 'Loja', '도감': 'Coleção',
+      '차': 'Chá', '주무르기': 'Massagem', '참빗': 'Pente fino', '이어하기': 'Continuar', '처음부터': 'Novo jogo',
+      '처음 화면': 'Início', '저장': 'Salvar', '공유': 'Compartilhar', '처음으로': 'Início',
+      '눌러서 넘기기': 'Toque para pular', '폰을 세로로 돌려 주세요': 'Vire o celular na vertical',
+      '머리카락 끌기: 뽑기 · 빈 곳 끌기·오른쪽 끌기: 돌리기 · 휠: 확대 · C 참빗 · T 차 · R 주무르기':
+        'Arraste um fio: arrancar · Arraste no vazio / botão direito: girar · Roda: zoom · C pente fino · T chá · R massagem',
+      '흰머리 뿌리 가까이 집고 쭉 당겨요. 끝을 잡으면 끊어져요': 'Pegue o fio branco perto da raiz e puxe de uma vez. Se pegar na ponta, ele quebra',
+      '검은 머리를 뽑으면 손님이 아파해요': 'Arrancou fio preto? O cliente sente dor',
+      '참빗으로 곱게 빗으면 숨은 흰머리가 보여요': 'Passe o pente fino com cuidado e os fios brancos escondidos aparecem',
+      '빈 곳 끌기: 머리 돌리기 · 두 손가락: 확대': 'Arraste no vazio: girar a cabeça · Dois dedos: zoom',
+      '빈 곳 끌기·오른쪽 끌기: 머리 돌리기 · 휠: 확대 · C 참빗': 'Arraste no vazio / botão direito: girar a cabeça · Roda: zoom · C pente fino',
+      '마지막': 'ÚLTIMO', '아야!': 'AI!', '인내심 가득': 'Paciência cheia', '후루룩': 'Slurp~', '시원하다': 'Que alívio~', '인내심 +': 'Paciência +',
+      '흰머리 ': 'Brancos ', '황금 머리카락 ': 'Dourados ', '검은 머리 ': 'Pretos ', '팁': 'Gorjeta', '합계': 'Total',
+      '쓴 코인 돌려받음 +': 'Moedas devolvidas +', '코인 ': 'Moedas ', '가진 것 ': 'Tem ', '주소를 복사했습니다': 'Link copiado',
+      '보통 흰머리': 'Fio branco comum', '새싹 흰머리': 'Broto branco', '반백 머리': 'Grisalho', '곱슬 흰머리': 'Branco cacheado',
+      '굵은 흰머리': 'Branco grosso', '은빛 긴 머리': 'Prateado longo', '쌍둥이 흰머리': 'Brancos gêmeos', '황금 머리카락': 'Fio dourado',
+      '족집게': 'Pinça', '덜 끊기고, 옆 검은 머리가 덜 딸려 옴': 'Quebra menos e puxa menos fios pretos junto',
+      '맨손가락': 'Dedos', '쇠 족집게': 'Pinça de aço', '뾰족 족집게': 'Pinça de ponta fina', '장인 족집게': 'Pinça de mestre',
+      '한 번에 더 넓게 빗김': 'Penteia uma faixa mais larga', '작은 참빗': 'Pente fino pequeno', '큰 참빗': 'Pente fino grande',
+      '조명': 'Luz', '가게가 밝아져 숨은 흰머리가 잘 보임': 'Salão mais claro, fios brancos escondidos aparecem melhor',
+      '형광등': 'Lâmpada fluorescente', '스탠드': 'Luminária', '링 조명': 'Ring light',
+      '돋보기': 'Lupa', '머리를 더 가까이 확대': 'Zoom mais de perto', '맨눈': 'Olho nu', '확대경': 'Lupa de cabeça',
+      '의자': 'Cadeira', '손님이 편해서 고개를 덜 움직임': 'Cliente confortável mexe menos a cabeça', '나무 의자': 'Cadeira de madeira', '쿠션 의자': 'Cadeira acolchoada', '안마 의자': 'Cadeira de massagem',
+      '차 대접': 'Servir chá', '단추로 써서 인내심 +60': 'Use no botão: paciência +60',
+      '어깨 주무르기': 'Massagem nos ombros', '단추로 써서 인내심 +35': 'Use no botão: paciência +35',
+      '번창하세요': 'SUCESSO!', '축 개업': 'INAUGURAÇÃO',
+      '털끝 하나 안 건드린 장인': 'Mestre sem nenhum erro', '동네 족집게 1등': 'Melhor pinça do bairro', '흰머리 사냥꾼': 'Caçador de fios brancos', '초보 족집게': 'Pinça iniciante',
+      '뽑은 흰머리': 'Fios brancos', '뿌리째': 'Com raiz', '번 코인': 'Moedas ganhas', '검은 머리 실수': 'Fios pretos',
+      '너는 몇 가닥 뽑을 수 있을까?': 'Quantos fios você consegue arrancar?',
+    };
+    const RU = {
+      '흰머리뽑기방': 'Салон седых волос',
+      '흰머리뽑기방|WHITE HAIR': 'СЕДИНА',
+      '손님': 'Клиент', '인내심': 'Терпение', '흰머리': 'Седые', '코인': 'Монеты', '상점': 'Магазин', '도감': 'Коллекция',
+      '차': 'Чай', '주무르기': 'Массаж', '참빗': 'Гребешок', '이어하기': 'Продолжить', '처음부터': 'Новая игра',
+      '처음 화면': 'В меню', '저장': 'Сохранить', '공유': 'Поделиться', '처음으로': 'В меню',
+      '눌러서 넘기기': 'Нажми, чтобы пропустить', '폰을 세로로 돌려 주세요': 'Поверни телефон вертикально',
+      '머리카락 끌기: 뽑기 · 빈 곳 끌기·오른쪽 끌기: 돌리기 · 휠: 확대 · C 참빗 · T 차 · R 주무르기':
+        'Тяни волос: выдернуть · Тяни по пустому месту / правой кнопкой: вращать · Колесо: зум · C гребешок · T чай · R массаж',
+      '흰머리 뿌리 가까이 집고 쭉 당겨요. 끝을 잡으면 끊어져요': 'Хватай седой волос у самого корня и тяни. Схватишь за кончик — порвётся',
+      '검은 머리를 뽑으면 손님이 아파해요': 'Выдернешь чёрный волос — клиенту больно',
+      '참빗으로 곱게 빗으면 숨은 흰머리가 보여요': 'Аккуратно причеши гребешком — и спрятанные седые волосы покажутся',
+      '빈 곳 끌기: 머리 돌리기 · 두 손가락: 확대': 'Тяни по пустому месту: вращать голову · Два пальца: зум',
+      '빈 곳 끌기·오른쪽 끌기: 머리 돌리기 · 휠: 확대 · C 참빗': 'Тяни по пустому месту / правой кнопкой: вращать голову · Колесо: зум · C гребешок',
+      '마지막': 'ФИНАЛ', '아야!': 'АЙ!', '인내심 가득': 'Терпение полное', '후루룩': 'Хлюп~', '시원하다': 'Кайф~', '인내심 +': 'Терпение +',
+      '흰머리 ': 'Седые ', '황금 머리카락 ': 'Золотые ', '검은 머리 ': 'Чёрные ', '팁': 'Чаевые', '합계': 'Итого',
+      '쓴 코인 돌려받음 +': 'Возврат монет +', '코인 ': 'Монеты: ', '가진 것 ': 'Есть: ', '주소를 복사했습니다': 'Ссылка скопирована',
+      '보통 흰머리': 'Обычный седой', '새싹 흰머리': 'Седой росток', '반백 머리': 'С проседью', '곱슬 흰머리': 'Кудрявый седой',
+      '굵은 흰머리': 'Толстый седой', '은빛 긴 머리': 'Длинный серебряный', '쌍둥이 흰머리': 'Седые близнецы', '황금 머리카락': 'Золотой волос',
+      '족집게': 'Пинцет', '덜 끊기고, 옆 검은 머리가 덜 딸려 옴': 'Реже рвёт и меньше цепляет чёрные волосы рядом',
+      '맨손가락': 'Пальцы', '쇠 족집게': 'Стальной пинцет', '뾰족 족집게': 'Острый пинцет', '장인 족집게': 'Пинцет мастера',
+      '한 번에 더 넓게 빗김': 'Прочёсывает шире за раз', '작은 참빗': 'Маленький гребешок', '큰 참빗': 'Большой гребешок',
+      '조명': 'Свет', '가게가 밝아져 숨은 흰머리가 잘 보임': 'В салоне светлее — спрятанные седые видно лучше',
+      '형광등': 'Лампа дневного света', '스탠드': 'Настольная лампа', '링 조명': 'Кольцевая лампа',
+      '돋보기': 'Лупа', '머리를 더 가까이 확대': 'Приближает голову сильнее', '맨눈': 'Без лупы', '확대경': 'Налобная лупа',
+      '의자': 'Кресло', '손님이 편해서 고개를 덜 움직임': 'Клиенту удобно, и он меньше вертит головой', '나무 의자': 'Деревянный стул', '쿠션 의자': 'Мягкое кресло', '안마 의자': 'Массажное кресло',
+      '차 대접': 'Угостить чаем', '단추로 써서 인내심 +60': 'Нажми кнопку: терпение +60',
+      '어깨 주무르기': 'Массаж плеч', '단추로 써서 인내심 +35': 'Нажми кнопку: терпение +35',
+      '번창하세요': 'УДАЧИ!', '축 개업': 'ОТКРЫТИЕ',
+      '털끝 하나 안 건드린 장인': 'Мастер без единой ошибки', '동네 족집게 1등': 'Лучший пинцет района', '흰머리 사냥꾼': 'Охотник на седину', '초보 족집게': 'Пинцет-новичок',
+      '뽑은 흰머리': 'Седых выдернуто', '뿌리째': 'С корнем', '번 코인': 'Заработано монет', '검은 머리 실수': 'Чёрных выдернуто',
+      '너는 몇 가닥 뽑을 수 있을까?': 'А ты сколько выдернешь?',
+    };
+    // 러시아어 복수형: 1 / 2~4 / 5~
+    const ruN = (n, a, b, c) => { const m = n % 100, k = n % 10; return m >= 11 && m <= 14 ? c : k === 1 ? a : k >= 2 && k <= 4 ? b : c; };
+    const SHARE = /^흰머리뽑기방 손님 (\d+)명 끝! 흰머리 (\d+)가닥, 뿌리째 (\d+)% · (.*)$/;
+    const PAT3 = {
+      ja: (m) => `白髪抜き屋 お客さん${m[1]}人クリア！白髪${m[2]}本、根元から${m[3]}% · ${m[4]}`,
+      pt: (m) => `Salão dos Fios Brancos: ${m[1]} clientes atendidos! ${m[2]} ${+m[2] === 1 ? 'fio branco' : 'fios brancos'}, ${m[3]}% com raiz · ${m[4]}`,
+      ru: (m) => `Салон седых волос: ${m[1]} ${ruN(+m[1], 'клиент обслужен', 'клиента обслужено', 'клиентов обслужено')}! ${m[2]} ${ruN(+m[2], 'седой волос', 'седых волоса', 'седых волос')}, с корнем ${m[3]}% · ${m[4]}`,
+    };
+    const D3 = { ja: JA, pt: PT, ru: RU }[L3];
+    window.L = (ko, en) => {
+      if (D3[ko + '|' + en] !== undefined) return D3[ko + '|' + en];
+      if (D3[ko] !== undefined) return D3[ko];
+      const m = SHARE.exec(ko); if (m) return PAT3[L3](m);
+      return en;
+    };
+    document.documentElement.lang = L3 === 'pt' ? 'pt-BR' : L3;
+    document.title = D3['흰머리뽑기방'];
+    const fam = ['Ttl', 'Sign', 'Ui'];
+    let css = '';
+    if (L3 === 'ja') {
+      // 게임 글꼴엔 가나·한자가 없다 → 같은 이름에 일본어 기기 글꼴을 그 범위로만 덧붙인다(굵기 범위는 원래 글꼴과 맞춤)
+      const jf = "local('Hiragino Sans'),local('Hiragino Kaku Gothic ProN'),local('Yu Gothic UI'),local('Yu Gothic'),local('Yu Gothic Medium'),local('YuGothic-Medium'),local('Yu Gothic Regular'),local('YuGothic-Regular'),local('Yu Gothic Bold'),local('YuGothic-Bold'),local('MS PGothic'),local('MS Gothic'),local('Meiryo'),local('Noto Sans JP'),local('Noto Sans CJK JP'),local('Source Han Sans JP')";
+      const jb = "local('Hiragino Sans W6'),local('HiraginoSans-W6'),local('Hiragino Kaku Gothic ProN W6'),local('Yu Gothic UI Bold'),local('Yu Gothic Bold'),local('YuGothic-Bold'),local('Meiryo Bold'),local('Noto Sans JP Bold'),local('NotoSansJP-Bold'),local('Noto Sans CJK JP Bold'),local('Source Han Sans JP Bold')," + jf;
+      const ur = 'U+2E80-2FFF,U+3000-30FF,U+31F0-31FF,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF';
+      css += fam.map((f) => `@font-face{font-family:'${f}';src:${jf};unicode-range:${ur};font-weight:100 500}@font-face{font-family:'${f}';src:${jb};unicode-range:${ur};font-weight:600 900}`).join('') +
+        'html[lang=ja] *{word-break:normal!important}';
+    } else {
+      // 게임 글꼴엔 악센트 라틴 글자·키릴 글자가 없다 → 같은 이름에 기기 글꼴을 그 범위로만 덧붙인다
+      const lf = "local('Segoe UI'),local('Roboto'),local('Arial'),local('Helvetica Neue'),local('Helvetica')";
+      const ur = 'U+00A0-024F,U+0400-04FF,U+1E00-1EFF,U+2010-2027';
+      css += fam.map((f) => `@font-face{font-family:'${f}';src:${lf};unicode-range:${ur};font-weight:100 900}`).join('');
+    }
+    const st = document.createElement('style');
+    st.textContent = css;
+    document.head.appendChild(st);
+    return;
+  }
   if (!ZHON) {
     window.L = (ko, en) => (EN ? en : ko);
     if (EN) { document.documentElement.lang = 'en'; document.title = 'WHITE HAIR SHOP'; }

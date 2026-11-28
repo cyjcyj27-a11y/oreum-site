@@ -3,13 +3,29 @@
   'use strict';
   const D = window.BB, A = window.BBA, ST = window.BBS;
   const EN = /[?&]lang=en/.test(location.search);
-  const ZHL = !EN && /[?&]lang=zh/.test(location.search);
-  const ZH = window.ZH || {};
+  const LX = EN ? '' : (['zh', 'ja', 'pt', 'ru'].find(l => new RegExp('[?&]lang=' + l).test(location.search)) || '');   // dictionary language
+  const ZHL = !!LX;
+  const ZH = (LX === 'ja' ? window.JA : LX === 'pt' ? window.PT : LX === 'ru' ? window.RU : window.ZH) || {};
   const zhOf = (ko, en) => Array.isArray(ko) ? ko.map((k, i) => zhOf(k, en && en[i])) : (ZH[ko] != null ? ZH[ko] : (en != null ? en : ko));
   const L = s => Array.isArray(s) ? (ZHL ? zhOf(s[0], s[1]) : s[EN ? 1 : 0]) : s;
-  const t = (ko, en, zh) => EN ? en : ZHL ? (zh != null ? zh : zhOf(ko, en)) : ko;
-  const kn = s => ZHL ? (ZH[s] || s) : s;   // Korean member name -> Chinese name in zh
-  if (ZHL) {
+  const t = (ko, en, zh, ja, pt, ru) => { if (EN) return en; if (!ZHL) return ko; const v = { zh, ja, pt, ru }[LX]; return v != null ? v : zhOf(ko, en); };
+  const kn = s => ZHL ? (ZH[s] || s) : s;   // Korean member name -> name in the dictionary language
+  const ruN = (n, a, b, c) => { const m = n % 10, h = n % 100; return m === 1 && h !== 11 ? a : m >= 2 && m <= 4 && (h < 12 || h > 14) ? b : c; };
+  const yrs = n => LX === 'ru' ? ' ' + ruN(n, 'год', 'года', 'лет') : t('세', '');   // age suffix
+  if (ZHL && LX !== 'zh') {
+    document.documentElement.lang = LX === 'pt' ? 'pt-BR' : LX;
+    document.title = { ja: 'デビューしてよ', pt: 'Estreiem Logo!', ru: 'Даёшь дебют!' }[LX] + ' — Oreum Games';
+    const ur = LX === 'ja' ? 'U+2E80-2FFF,U+3000-30FF,U+31F0-31FF,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF' : 'U+00A0-024F,U+0400-04FF,U+1E00-1EFF,U+2010-2027';
+    const jf = LX === 'ja' ? "local('Hiragino Sans'),local('Hiragino Kaku Gothic ProN'),local('Yu Gothic UI'),local('Yu Gothic'),local('Yu Gothic Medium'),local('YuGothic-Medium'),local('Yu Gothic Regular'),local('YuGothic-Regular'),local('Yu Gothic Bold'),local('YuGothic-Bold'),local('MS PGothic'),local('MS Gothic'),local('Meiryo'),local('Noto Sans JP'),local('Noto Sans CJK JP'),local('Source Han Sans JP')"
+      : "local('Segoe UI'),local('Roboto'),local('Arial'),local('Helvetica Neue'),local('Helvetica')";
+    const js = document.createElement('style');
+    js.textContent = ['Pretendard Variable', 'Pretendard', 'Ria', 'Nanum Pen Script'].map(f => `@font-face{font-family:'${f}';src:${jf};unicode-range:${ur}}`).join('') +
+      (LX === 'ja' ? 'html[lang=ja] *{word-break:normal!important}' : '');
+    document.head.appendChild(js);
+    document.querySelectorAll('[data-en]').forEach(e => { const k = e.innerHTML.trim(); if (ZH[k]) e.innerHTML = ZH[k]; });
+    document.querySelectorAll('[data-en-ph]').forEach(e => { if (ZH[e.placeholder]) e.placeholder = ZH[e.placeholder]; });
+  }
+  if (LX === 'zh') {
     document.documentElement.lang = 'zh-CN'; document.title = '独立乐队经纪人 — Oreum Games';
     // Chinese system fonts for CJK glyphs in each game font family
     const zf = "local('PingFang SC'),local('PingFangSC-Regular'),local('Microsoft YaHei'),local('Microsoft YaHei UI'),local('Noto Sans SC'),local('Noto Sans CJK SC'),local('Source Han Sans SC')";
@@ -252,7 +268,7 @@
         ${on ? '<span class="tag joined">JOINED</span>' : '<span class="tag ask">TALK</span>'}
         <div class="chead">${avatar(a)}<div>
           <div class="nm">${a.en}<span class="kr">${kn(a.kr)}</span></div>
-          <div class="pos">${a.age}${t('세', '')} ${a.height} ${a.mbti} ${L(a.role)}<br><span style="color:var(--cream)">${'★'.repeat(a.pot)}${'☆'.repeat(5 - a.pot)}</span></div></div></div>
+          <div class="pos">${a.age}${yrs(+a.age)} ${a.height} ${a.mbti} ${L(a.role)}<br><span style="color:var(--cream)">${'★'.repeat(a.pot)}${'☆'.repeat(5 - a.pot)}</span></div></div></div>
         ${statBars(a)}
         ${bar(['홍대병', 'Indie'], a.hong, '#8e6fd0')}
         <div class="divider"></div>
@@ -313,7 +329,7 @@
         <div>
           <div class="num" style="font-size:62.4px;letter-spacing:6px">${m.en}</div>
           <div style="font-size:28.8px;color:var(--dim);margin:2px 0 14px">${kn(m.kr)}</div>
-          <div class="prow"><span>AGE</span>${m.age}${t('세', '')}</div>
+          <div class="prow"><span>AGE</span>${m.age}${yrs(+m.age)}</div>
           <div class="prow"><span>HEIGHT</span>${m.height}</div>
           <div class="prow"><span>MBTI</span>${m.mbti}</div>
           <div class="prow"><span>ROLE</span>${L(m.role)}</div>
@@ -531,7 +547,7 @@
 
     if (earned) { notes.push(good('🪙 +' + Math.round(earned))); A.sfx.coin(); }
     if (fameGain >= 1) notes.push(good('🔥 +' + fameGain.toFixed(1)));
-    if (shaky) notes.push(bad(t(`멘탈 위험 ${shaky}`, `${shaky} at risk`, `心态危险 ${shaky}`)));
+    if (shaky) notes.push(bad(t(`멘탈 위험 ${shaky}`, `${shaky} at risk`, `心态危险 ${shaky}`, `メンタル危険 ${shaky}`, `${shaky}: mente em risco`, `${shaky}: психика на пределе`)));
     notes.forEach(n => addLog(n));
 
     const lines = [];
@@ -642,7 +658,7 @@
     const talker = a.find(x => x.key === 'doyun') || Ld;
     return [
       { id: 'scout', cond: () => S.hype > 18, who: m, e: 'sad', t: t('타 기획사의 접촉', 'Another label calls'),
-        b: t(`${n}에게 대형 기획사 명함이 들어왔다.`, `A big label slid ${n} a card.`, `大型经纪公司给${n}递了名片。`),
+        b: t(`${n}에게 대형 기획사 명함이 들어왔다.`, `A big label slid ${n} a card.`, `大型经纪公司给${n}递了名片。`, `${n}に大手事務所から名刺が届いた。`, `Uma grande agência entregou um cartão para ${n}.`, `Крупное агентство сунуло ${n} свою визитку.`),
         say: t('"솔로로 오면 바로 데뷔시켜 준대요." …저 어떡하죠', '"Come solo, we debut you now," they said. ...What do I do.'),
         o: [{ t: t('보내준다', 'Let him go'), s: t('🪙 +250 GAME OVER', '🪙 +250, GAME OVER'),
               f: () => { S.money += 250; dropOut(m); S.doom = true; addLog(good('🪙 +250') + ' ' + bad('GAME OVER')); },   // 넷 중 하나라도 보내면 끝(사장님, 2026-09-08)
@@ -651,7 +667,7 @@
               f: () => { S.team = clamp(S.team + 14, 0, 100); m.mental = clamp(m.mental + 18, 0, 100); m.bond = clamp(m.bond + 8, 0, 100); heart(8); addLog(`<b>${n}</b> ${good(t('잔류 호흡 +14', 'stays, Team +14'))}`); },
               reply: { e: 'joy', t: ['…남을게요  여기가 제 팀이에요', "...I'll stay. This is my team."] } }] },
       { id: 'injury', cond: () => a.some(x => x.stamina / x.maxStam < .35), who: tiredOne(), e: 'sad', t: t('손목 부상', 'Wrist injury'),
-        b: () => { const h = tiredOne(); return t(`${disp(h)}이(가) 합주 중에 손목을 감쌌다. 부어 있다.`, `${disp(h)} grabbed his wrist mid-jam. It's swollen.`, `${disp(h)}合奏时捂住了手腕。已经肿起来了。`); },
+        b: () => { const h = tiredOne(); return t(`${disp(h)}이(가) 합주 중에 손목을 감쌌다. 부어 있다.`, `${disp(h)} grabbed his wrist mid-jam. It's swollen.`, `${disp(h)}合奏时捂住了手腕。已经肿起来了。`, `${disp(h)}がセッション中に手首を押さえた。腫れている。`, `${disp(h)} segurou o pulso no meio do ensaio. Está inchado.`, `${disp(h)} схватился за запястье посреди джема. Оно опухло.`); },
         say: t('괜찮아요. 할 수 있어요. …진짜로요.', "I'm fine. I can do it. ...Really."),
         o: [{ t: t('바로 병원', 'Hospital now'), s: t('🪙 -150, 체력 완전 회복, ♥ +6', '🪙 -150, full stamina, ♥ +6'),
               f: () => { const h = tiredOne(); S.money -= 150; h.stamina = h.maxStam; h.mental = clamp(h.mental + 10, 0, 100); h.bond = clamp(h.bond + 6, 0, 100); heart(6); addLog(`${good(disp(h) + ' OK')} ${bad('🪙 -150')}`); } },
@@ -665,7 +681,7 @@
             { t: t('거절하고 연습', 'Decline, practice'), s: t('전원 랜덤 스탯 +3', 'Everyone random stat +3'),
               f: () => { alive().forEach(x => { const k = pick(STATS).k; x[k] = clamp(x[k] + 3, 0, 100); }); addLog(good(t('전원 +3', 'Everyone +3'))); } }] },
       { id: 'fight', cond: () => a.length >= 2 && S.team < 55, who: a[1], e: 'mad', t: t('파트 분배 충돌', 'Fight over parts'),
-        b: t(`${disp(a[0])}과(와) ${disp(a[1])}이(가) 타이틀곡 편곡을 두고 붙었다.`, `${disp(a[0])} and ${disp(a[1])} clashed over the title-track arrangement.`, `${disp(a[0])}和${disp(a[1])}为了主打歌编曲吵起来了。`),
+        b: t(`${disp(a[0])}과(와) ${disp(a[1])}이(가) 타이틀곡 편곡을 두고 붙었다.`, `${disp(a[0])} and ${disp(a[1])} clashed over the title-track arrangement.`, `${disp(a[0])}和${disp(a[1])}为了主打歌编曲吵起来了。`, `${disp(a[0])}と${disp(a[1])}がタイトル曲の編曲でぶつかった。`, `${disp(a[0])} e ${disp(a[1])} brigaram pelo arranjo da música principal.`, `${disp(a[0])} и ${disp(a[1])} сцепились из-за аранжировки заглавной песни.`),
         say: t('이 파트는 제 거예요. 양보 못 해요.', "This part is mine. I won't give it up."),
         o: [{ t: t('리더에게 맡긴다', 'Leave it to the leader'), s: t('리더 끼 55 이상이면 수습', 'Works if leader Charm ≥ 55'),
               f: () => { if (!Ld.out && Ld.charm >= 55) { S.team = clamp(S.team + 12, 0, 100); addLog(`<b>${disp(Ld)}</b> ${good(t('호흡 +12', 'Team +12'))}`); } else { S.team = clamp(S.team - 8, 0, 100); addLog(bad(t('호흡 -8', 'Team -8'))); A.sfx.bad(); } } },
@@ -707,7 +723,7 @@
             { t: t('아직은 이르다', 'Not yet'), s: t('호흡 +6 전원 멘탈 +6', 'Team +6, all mind +6'),
               f: () => { S.team = clamp(S.team + 6, 0, 100); alive().forEach(x => x.mental = clamp(x.mental + 6, 0, 100)); addLog(good(t('호흡 +6', 'Team +6'))); } }] },
       { id: 'slump', cond: () => a.some(x => x.mental < 45), who: lowOne(), e: 'sad', t: t('슬럼프', 'Slump'),
-        b: () => { const h = lowOne(); return t(`${disp(h)}이(가) 거울 앞에 두 시간째 서 있다.`, `${disp(h)} has stood at the mirror for two hours.`, `${disp(h)}已经在镜子前站了两个小时。`); },
+        b: () => { const h = lowOne(); return t(`${disp(h)}이(가) 거울 앞에 두 시간째 서 있다.`, `${disp(h)} has stood at the mirror for two hours.`, `${disp(h)}已经在镜子前站了两个小时。`, `${disp(h)}が鏡の前に二時間も立っている。`, `${disp(h)} está parado na frente do espelho há duas horas.`, `${disp(h)} уже два часа стоит перед зеркалом.`); },
         say: t('…제가 여기 있어도 되는 사람일까요', '...Do I even belong here?'),
         o: [{ t: t('통째로 쉬게 한다', 'Full rest'), s: t('멘탈 +35 체력 회복 ♥ +6', 'Mind +35, stamina full, ♥ +6'),
               f: () => { const h = lowOne(); h.mental = clamp(h.mental + 35, 0, 100); h.stamina = h.maxStam; h.bond = clamp(h.bond + 6, 0, 100); heart(6); addLog(good(`${disp(h)} ${t('멘탈 +35', 'mind +35')}`)); } },

@@ -66,7 +66,7 @@
     const a = document.createElement('a'); a.href = url; a.download = 'moonlit-outlaw-ending.png'; document.body.appendChild(a); a.click(); a.remove();
   };
   C.share = function () {
-    const link = location.protocol === 'file:' ? '' : location.origin + location.pathname.replace(/play\/(index\.html)?$/, '') + (window.EN ? '?lang=en' : window.ZHL ? '?lang=zh' : '');
+    const link = location.protocol === 'file:' ? '' : location.origin + location.pathname.replace(/play\/(index\.html)?$/, '') + (window.EN ? '?lang=en' : window.ZHL ? '?lang=zh' : window.LANG && window.LANG !== 'ko' ? '?lang=' + window.LANG : '');
     const text = L('달빛 의적 엔딩 봤다! 너도 사또를 혼내 줘', 'I beat the corrupt magistrate in Moonlit Outlaw! Try it') + (link ? '\n' + link : '');
     if (navigator.share) { navigator.share({ text }).catch(() => {}); return; }
     try { navigator.clipboard.writeText(text); G.pop && G.pop(L('주소 복사됨', 'LINK COPIED'), '#fff0c8'); } catch (e) {}

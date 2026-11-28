@@ -42,7 +42,32 @@
       'body.zh #title h1{font-weight:700;letter-spacing:10px}';
     document.head.appendChild(zs);
   }
-  function rankName(L) { return (EN ? RANKS_EN : ZH ? RANKS_ZH : RANKS)[L]; }
+  // ?lang=ja / pt / ru: own text, ranks and font fallbacks
+  var LM = !EN && !ZH && /[?&]lang=(ja|pt|ru)(&|$)/i.exec(location.search), LG = LM ? LM[1].toLowerCase() : '';
+  var RANKS_LG = {
+    ja: RANKS.map(function (s) { return s.replace('급', '級').replace('단', '段'); }),
+    pt: RANKS_EN,
+    ru: RANKS.map(function (s) { return s.replace('급', 'к').replace('단', 'д'); })
+  };
+  var LGT = {
+    ja: { '바둑': '囲碁', '18급': '18級', '시작': 'スタート', '급수': '段級', 'P 패스 · K 효과음': 'P パス · K 効果音' },
+    pt: { '바둑': 'GO', '18급': '18K', '시작': 'JOGAR', '급수': 'NÍVEL', 'P 패스 · K 효과음': 'P passar · K som' },
+    ru: { '바둑': 'ГО', '18급': '18к', '시작': 'ИГРАТЬ', '급수': 'УРОВЕНЬ', 'P 패스 · K 효과음': 'P пас · K звук' }
+  };
+  var LGB = { ja: '最高 ', pt: 'MELHOR ', ru: 'РЕКОРД ' };
+  if (LG) {
+    document.documentElement.lang = LG === 'pt' ? 'pt-BR' : LG; document.body.classList.add(LG);
+    document.title = { ja: '囲碁', pt: 'Go (Baduk)', ru: 'Го (бадук)' }[LG];
+    Array.prototype.forEach.call(document.querySelectorAll('[data-en]'), function (el) { var k = el.textContent.trim(); if (LGT[LG][k]) el.textContent = LGT[LG][k]; });
+    var lf = LG === 'ja' ? "local('Hiragino Sans'),local('Hiragino Kaku Gothic ProN'),local('Yu Gothic UI'),local('Yu Gothic'),local('Yu Gothic Medium'),local('YuGothic-Medium'),local('Yu Gothic Regular'),local('YuGothic-Regular'),local('Yu Gothic Bold'),local('YuGothic-Bold'),local('MS PGothic'),local('MS Gothic'),local('Meiryo'),local('Noto Sans JP'),local('Noto Sans CJK JP'),local('Source Han Sans JP')"
+      : "local('Segoe UI'),local('Roboto'),local('Arial'),local('Helvetica Neue'),local('Helvetica')";
+    var lr = LG === 'ja' ? 'U+2E80-2FFF,U+3000-30FF,U+31F0-31FF,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF' : 'U+00A0-024F,U+0400-04FF,U+1E00-1EFF,U+2010-2027';
+    var ls = document.createElement('style');
+    ls.textContent = ['Myeongjo', 'Ria'].map(function (f) { return "@font-face{font-family:'" + f + "';src:" + lf + ';unicode-range:' + lr + '}'; }).join('') +
+      (LG === 'ja' ? 'html[lang=ja] *{word-break:normal!important}body.ja #title h1{font-weight:700;letter-spacing:10px}' : '');
+    document.head.appendChild(ls);
+  }
+  function rankName(L) { return (EN ? RANKS_EN : ZH ? RANKS_ZH : LG ? RANKS_LG[LG] : RANKS)[L]; }
 
   // ── 기록 — 오른 급수 ──
   function loadBest() { try { return Math.max(0, Math.min(TOP, parseInt(localStorage.getItem('baduk.rank') || '0', 10) || 0)); } catch (e) { return 0; } }
@@ -51,7 +76,7 @@
   function savePick(n) { try { localStorage.setItem('baduk.pick', String(n)); } catch (e) {} }
   function showRec() {
     $('rec').textContent = rankName(G.level);
-    var b = loadBest(); $('best').textContent = b > 0 ? (EN ? 'BEST ' : ZH ? '最高 ' : '최고 ') + rankName(b) : '';
+    var b = loadBest(); $('best').textContent = b > 0 ? (EN ? 'BEST ' : ZH ? '最高 ' : LG ? LGB[LG] : '최고 ') + rankName(b) : '';
     Array.prototype.forEach.call($('rk').children, function (w, i) { w.classList.toggle('on', i === G.level); });
   }
   function setLevel(n) { n = Math.max(0, Math.min(TOP, n)); if (n === G.level) return; G.level = n; savePick(n); showRec(); updHud(); A.stone(); }

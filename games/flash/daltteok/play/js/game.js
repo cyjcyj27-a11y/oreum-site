@@ -13,11 +13,44 @@
     zst.textContent = "@font-face{font-family:'Tokki';src:" + zf + ";unicode-range:" + ur + "}@font-face{font-family:'Ria';src:" + zf + ";unicode-range:" + ur + "}html[lang=zh-CN] *{word-break:normal!important}";
     document.head.appendChild(zst);
   }
+  // ja · pt · ru: 그 언어 글과 시스템 글꼴 보충
+  var LQ = (/[?&]lang=(ja|pt|ru)\b/.exec(location.search) || [])[1];
+  var LX = !EN && !ZH && LQ ? LQ : '';
+  if (LX) {
+    document.documentElement.lang = LX === 'pt' ? 'pt-BR' : LX;
+    var xf = LX === 'ja' ? "local('Hiragino Sans'),local('Hiragino Kaku Gothic ProN'),local('Yu Gothic UI'),local('Yu Gothic'),local('Yu Gothic Medium'),local('YuGothic-Medium'),local('Yu Gothic Regular'),local('YuGothic-Regular'),local('Yu Gothic Bold'),local('YuGothic-Bold'),local('MS PGothic'),local('MS Gothic'),local('Meiryo'),local('Noto Sans JP'),local('Noto Sans CJK JP'),local('Source Han Sans JP')" : "local('Segoe UI'),local('Roboto'),local('Arial'),local('Helvetica Neue'),local('Helvetica')";
+    var xr = LX === 'ja' ? 'U+2E80-2FFF,U+3000-30FF,U+31F0-31FF,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF' : 'U+00A0-024F,U+0400-04FF,U+1E00-1EFF,U+2010-2027';
+    var xst = document.createElement('style');
+    xst.textContent = ['Tokki', 'Ria'].map(function (f) { return "@font-face{font-family:'" + f + "';src:" + xf + ";unicode-range:" + xr + "}"; }).join('') +
+      (LX === 'ja' ? 'html[lang=ja] *{word-break:normal!important}' :
+        'html[lang=pt-BR] #title h1{font-size:min(calc(var(--col) * .165),11vh)}html[lang=ru] #title h1{font-size:min(calc(var(--col) * .13),9vh)}' +
+        'html[lang=ru] .obtns .btn:not(.main){font-size:17px}@media (max-height:460px){html[lang=ru] .obtns .btn:not(.main){font-size:13px}}');
+    document.head.appendChild(xst);
+  }
+  // 러시아어 복수형: 1 очко / 2 очка / 5 очков
+  function ruN(n, a, b, c) { var m = n % 10, h = n % 100; return m === 1 && h !== 11 ? a : m >= 2 && m <= 4 && (h < 12 || h > 14) ? b : c; }
+  var TX = {
+    ja: {
+      t1: '月見もち', t2: '合体', today: '今日', share: 'シェア', save: '保存', copied: 'コピー済み',
+      moon: function (n) { return n + '個'; },
+      msg: function (s, m) { return '月見もち合体 ' + s + '点' + (m ? ' 満月 ' + m + '個' : ''); }
+    },
+    pt: {
+      t1: 'Mochi da Lua', t2: 'Fusão', today: 'Hoje', share: 'Enviar', save: 'Salvar', copied: 'Copiado',
+      moon: function (n) { return 'x ' + n; },
+      msg: function (s, m) { return 'Fusão Mochi da Lua: ' + s + ' pts' + (m ? ' / lua cheia x' + m : ''); }
+    },
+    ru: {
+      t1: 'Лунные моти', t2: 'Слияние', today: 'Сегодня', share: 'Поделиться', save: 'Сохранить', copied: 'Скопировано',
+      moon: function (n) { return 'x ' + n; },
+      msg: function (s, m) { return 'Лунные моти: слияние — ' + s + ' ' + ruN(s, 'очко', 'очка', 'очков') + (m ? ' / полных лун: ' + m : ''); }
+    }
+  };
   var T = EN ? {
     t1: 'Moon Mochi', t2: 'Merge', today: 'TODAY', share: 'SHARE', save: 'SAVE', copied: 'COPIED',
     moon: function (n) { return 'x ' + n; },
     msg: function (s, m) { return 'Moon Mochi Merge ' + s + ' pts' + (m ? ' / full moon x' + m : ''); }
-  } : ZH ? {
+  } : LX ? TX[LX] : ZH ? {
     t1: '月亮年糕', t2: '合成', today: '今日', share: '分享', save: '保存', copied: '已复制',
     moon: function (n) { return n + '个'; },
     msg: function (s, m) { return '月亮年糕合成 ' + s + '分' + (m ? ' 满月 ' + m + '个' : ''); }
@@ -438,7 +471,7 @@
     $('share').textContent = T.share; $('tbestN').textContent = G.best; $('best').textContent = G.best;
     $('over').hidden = false;
   }
-  function shareUrl() { return location.protocol === 'file:' ? '' : (window.DT_SHARE_URL || location.origin + location.pathname + (EN ? '?lang=en' : ZH ? '?lang=zh' : '')); }
+  function shareUrl() { return location.protocol === 'file:' ? '' : (window.DT_SHARE_URL || location.origin + location.pathname + (EN ? '?lang=en' : ZH ? '?lang=zh' : LX ? '?lang=' + LX : '')); }
   // 공유·저장은 결과 카드 그림 한 장(js/card.js). 손님 기기 안에서 그려 공유창으로 바로 가고 서버에는 남지 않는다.
   function share() {
     DTA.sfx('tap');
@@ -455,7 +488,7 @@
   }
   // 카드가 쓰는 값(그릴 때마다 지금 값으로)
   window.__dtCard = function () {
-    return { G: G, SPR: SPR, R: R, cv: cv, EN: EN, ZH: ZH, s: s, ox: ox, dpr: dpr, SS: SS, floorY: floorY, lineY: lineY, BL: BL, BR: BR, W: W, url: shareUrl(), text: T.msg(G.score, G.moons) };
+    return { G: G, SPR: SPR, R: R, cv: cv, EN: EN, ZH: ZH, LX: LX, s: s, ox: ox, dpr: dpr, SS: SS, floorY: floorY, lineY: lineY, BL: BL, BR: BR, W: W, url: shareUrl(), text: T.msg(G.score, G.moons) };
   };
 
   // ---------- 그리기 ----------
@@ -609,7 +642,7 @@
   $('ttl').innerHTML = T.t1 + '<span>' + T.t2 + '</span>';
   $('otodayL').textContent = T.today; $('share').textContent = T.share; $('save').textContent = T.save;
   $('tbestN').textContent = G.best; $('best').textContent = G.best;
-  document.title = EN ? 'Moon Mochi Merge' : ZH ? '月亮年糕合成' : '달떡 합치기';
+  document.title = EN ? 'Moon Mochi Merge' : ZH ? '月亮年糕合成' : LX ? { ja: '月見もち合体', pt: 'Fusão Mochi da Lua', ru: 'Лунные моти: слияние' }[LX] : '달떡 합치기';
   resize();
   window.addEventListener('resize', resize);
   // 타이틀 뒤에 쌓여 있는 떡

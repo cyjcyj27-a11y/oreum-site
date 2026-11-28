@@ -264,7 +264,7 @@
     stTex = TOY.tex(TOY.canvas(256, 256, (g, w, h) => {
       g.fillStyle = '#ff7aa8'; g.beginPath(); g.arc(128, 128, 124, 0, 7); g.fill();
       g.strokeStyle = '#ffffff'; g.lineWidth = 8; g.setLineDash([12, 10]); g.beginPath(); g.arc(128, 128, 104, 0, 7); g.stroke(); g.setLineDash([]);
-      g.fillStyle = '#ffffff'; g.font = "92px 'Ttl','Ui',sans-serif"; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(L('오떡', 'OT'), 128, 136);
+      g.fillStyle = '#ffffff'; g.font = "92px 'Ttl','Ui',sans-serif"; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(L('오떡', 'OT', undefined, 'OT', 'OT', 'OT'), 128, 136);
     }));
     return stTex;
   }

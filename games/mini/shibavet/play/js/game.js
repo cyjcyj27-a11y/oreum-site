@@ -17,6 +17,19 @@
     st.textContent = ['Griun', 'Ria'].map(f => `@font-face{font-family:'${f}';src:${zf};unicode-range:${ur}}`).join('') + 'html[lang=zh-CN] *{word-break:normal!important}';
     document.head.appendChild(st);
   }
+  if (['ja', 'pt', 'ru'].includes(LQ)) {   // 일본어·포르투갈어·러시아어판: data-<언어> 글자로 바꾸고, 글꼴에 없는 글자는 시스템 글꼴로 채운다
+    document.documentElement.lang = { ja: 'ja', pt: 'pt-BR', ru: 'ru' }[LQ];
+    document.querySelectorAll('[data-' + LQ + ']').forEach(el => el.innerHTML = el.getAttribute('data-' + LQ));
+    document.querySelectorAll('[data-' + LQ + '-title]').forEach(el => el.title = el.getAttribute('data-' + LQ + '-title'));
+    document.title = { ja: '柴犬、病院へ行く日', pt: 'Shiba no Veterinário', ru: 'Шиба едет к ветеринару' }[LQ] + ' — Oreum Games';
+    const lf = LQ === 'ja'
+      ? "local('Hiragino Sans'),local('Hiragino Kaku Gothic ProN'),local('Yu Gothic UI'),local('Yu Gothic'),local('Yu Gothic Medium'),local('YuGothic-Medium'),local('Yu Gothic Regular'),local('YuGothic-Regular'),local('Yu Gothic Bold'),local('YuGothic-Bold'),local('MS PGothic'),local('MS Gothic'),local('Meiryo'),local('Noto Sans JP'),local('Noto Sans CJK JP'),local('Source Han Sans JP')"
+      : "local('Segoe UI'),local('Roboto'),local('Arial'),local('Helvetica Neue'),local('Helvetica')";
+    const ur = LQ === 'ja' ? 'U+2E80-2FFF,U+3000-30FF,U+31F0-31FF,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF' : 'U+00A0-024F,U+0400-04FF,U+1E00-1EFF,U+2010-2027';
+    const st = document.createElement('style');
+    st.textContent = ['Griun', 'Ria'].map(f => `@font-face{font-family:'${f}';src:${lf};unicode-range:${ur}}`).join('') + (LQ === 'ja' ? 'html[lang=ja] *{word-break:normal!important}' : '');
+    document.head.appendChild(st);
+  }
 
   const canvas = $('c');
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });

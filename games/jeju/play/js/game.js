@@ -387,6 +387,8 @@
     if (avg > 0.022 && POST.scale > 0.6) POST.setScale(POST.scale - 0.1); else if (avg < 0.014 && POST.scale < 1) POST.setScale(POST.scale + 0.05);
   }
   const EN_MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];   // 영문판 날짜
+  const PT_MON = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];   // 포르투갈어판 날짜
+  const RU_MON = ['янв', 'фев', 'мар', 'апр', 'мая', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек'];   // 러시아어판 날짜
   const FOG_SEA = new THREE.Color(0.01, 0.07, 0.12);
   function frame(ts) {
     let dt = last ? (ts - last) / 1000 : 0.016; last = ts; if (dt > 0.1) dt = 0.1; if (dt < 0) dt = 0;   // 시각이 거꾸로 오면(시험용 tick 과 rAF 가 섞일 때) 0 으로
@@ -443,8 +445,11 @@
     }
     const en = window.LANG && LANG.en;
     const zh = window.LANG && LANG.zh;
-    const c = (ESTATE.monthNo ? (en ? EN_MON[(ESTATE.monthNo() - 1) % 12] + ' ' + ESTATE.monthDay() + ' · ' : zh ? ESTATE.monthNo() + '月' + ESTATE.monthDay() + '日 ' : ESTATE.monthNo() + '월 ' + ESTATE.monthDay() + '일 ')
-                              : (en ? 'Day ' + (ESTATE.day || 1) + ' · ' : zh ? '第' + (ESTATE.day || 1) + '天 ' : (ESTATE.day || 1) + '일 ')) + SKY.clock(); if (c !== lastClock) { lastClock = c; clockEl.textContent = c; }   // 며칠째인지 함께 — 시세는 하루가 지날 때 오른다
+    const ja = window.LANG && LANG.ja, pt = window.LANG && LANG.pt, ru = window.LANG && LANG.ru;
+    const c = (ESTATE.monthNo ? (en ? EN_MON[(ESTATE.monthNo() - 1) % 12] + ' ' + ESTATE.monthDay() + ' · ' : zh || ja ? ESTATE.monthNo() + '月' + ESTATE.monthDay() + '日 '
+                                : pt ? ESTATE.monthDay() + ' ' + PT_MON[(ESTATE.monthNo() - 1) % 12] + ' · ' : ru ? ESTATE.monthDay() + ' ' + RU_MON[(ESTATE.monthNo() - 1) % 12] + ' · ' : ESTATE.monthNo() + '월 ' + ESTATE.monthDay() + '일 ')
+                              : (en ? 'Day ' + (ESTATE.day || 1) + ' · ' : zh ? '第' + (ESTATE.day || 1) + '天 ' : ja ? (ESTATE.day || 1) + '日目 '
+                                : pt ? 'Dia ' + (ESTATE.day || 1) + ' · ' : ru ? 'День ' + (ESTATE.day || 1) + ' · ' : (ESTATE.day || 1) + '일 ')) + SKY.clock(); if (c !== lastClock) { lastClock = c; clockEl.textContent = c; }   // 며칠째인지 함께 — 시세는 하루가 지날 때 오른다
     POST.render(scene, camera, dt);
   }
   function loop(ts) { frame(ts); requestAnimationFrame(loop); }

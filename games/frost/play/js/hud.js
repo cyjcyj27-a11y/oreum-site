@@ -298,7 +298,7 @@
       const ic = [...zn.m.map(i => ({ url: ITEMS.ICONS.m[i], want: wantM.has(i) })), ...zn.f.map(i => ({ url: ITEMS.ICONS.f[i], want: wantF.has(i) })),
         ...(zn.e || []).map(gd => ({ emo: QUESTS.GOODS[gd].icon, want: wantG.has(gd) }))];
       const want = ic.some(o => o.want);
-      g.font = (T.lang === 'ru' ? fs * 0.68 | 0 : (T.lang === 'en' ? fs * 0.78 | 0 : fs)) + 'px "Ria", sans-serif';
+      g.font = (T.lang === 'ru' ? fs * 0.68 | 0 : ((T.lang === 'en' || T.lang === 'pt') ? fs * 0.78 | 0 : fs)) + 'px "Ria", sans-serif';
       g.lineWidth = 5; g.strokeStyle = 'rgba(20,16,10,.85)'; g.fillStyle = want ? '#ffd86a' : '#fff6e2';
       const ty = ic.length ? b - isz * 0.55 : b;
       g.strokeText(L(zn.ko, zn.en), a, ty); g.fillText(L(zn.ko, zn.en), a, ty);

@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Игра 2048 онлайн бесплатно — числовая головоломка с полями 3x3, 4x4, 5x5 и 6x6 и отменой хода</title>
+<meta name="description" content="2048 это бесплатная числовая головоломка: сдвигайте пластилиновые плитки с числами, чтобы одинаковые сливались, на полях 3x3, 4x4, 5x5 и 6x6, с тремя отменами за партию и автосохранением. Без скачивания, на телефоне и ПК.">
+<meta name="keywords" content="2048, игра 2048, 2048 онлайн, 2048 онлайн бесплатно, играть в 2048, 2048 5x5, 2048 6x6, числовая головоломка, браузерная игра, бесплатные онлайн игры">
+<link rel="canonical" href="https://oreumgames.com/ru/games/flash/2048/">
+<link rel="alternate" hreflang="ko" href="https://oreumgames.com/games/flash/2048/">
+<link rel="alternate" hreflang="en" href="https://oreumgames.com/en/games/flash/2048/">
+<link rel="alternate" hreflang="zh-Hans" href="https://oreumgames.com/zh/games/flash/2048/">
+<link rel="alternate" hreflang="ja" href="https://oreumgames.com/ja/games/flash/2048/">
+<link rel="alternate" hreflang="pt-BR" href="https://oreumgames.com/pt/games/flash/2048/">
+<link rel="alternate" hreflang="ru" href="https://oreumgames.com/ru/games/flash/2048/">
+<link rel="alternate" hreflang="x-default" href="https://oreumgames.com/games/flash/2048/">
+<meta name="naver-site-verification" content="4ecba4003fbcbe564918ffd2c33d606f1eaae11a" />
+<meta name="google-site-verification" content="BG736F-J65BHS-viz8rkCjKJ53pxgIhSlPpzVnpGlt4" />
+<meta name="theme-color" content="#f8f5ec">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" href="/assets/icon-512.png" type="image/png" sizes="512x512">
+<link rel="apple-touch-icon" href="/assets/icon-180.png">
+<link rel="manifest" href="/manifest.webmanifest">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Oreum Games">
+<meta property="og:title" content="Игра 2048 онлайн бесплатно — числовая головоломка с полями 3x3, 4x4, 5x5 и 6x6 и отменой хода">
+<meta property="og:description" content="2048 это бесплатная числовая головоломка: сдвигайте пластилиновые плитки с числами, чтобы одинаковые сливались, на полях 3x3, 4x4, 5x5 и 6x6, с тремя отменами за партию и автосохранением. Без скачивания, на телефоне и ПК.">
+<meta property="og:url" content="https://oreumgames.com/ru/games/flash/2048/">
+<meta property="og:image" content="https://oreumgames.com/assets/2048-og-en.webp?v=1">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="ru_RU">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Игра 2048 онлайн бесплатно — числовая головоломка с полями 3x3, 4x4, 5x5 и 6x6 и отменой хода">
+<meta name="twitter:description" content="2048 с пластилиновыми плитками, четыре поля и три отмены за партию. Бесплатная браузерная игра без скачивания.">
+
+<link rel="stylesheet" href="/style.css?v=54">
+<style>
+
+body{word-break:normal}
+</style>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "VideoGame",
+  "name": "2048",
+  "alternateName": [
+    "2048 Game",
+    "2048 Online",
+    "Игра 2048",
+    "Пластилиновая 2048"
+  ],
+  "url": "https://oreumgames.com/ru/games/flash/2048/",
+  "image": "https://oreumgames.com/assets/2048-og-en.webp?v=1",
+  "description": "На зелёном коврике для резки на деревянном столе лежат вылепленные вручную пластилиновые плитки, на каждой число, вдавленное как штамп. Проведите вверх, вниз, влево или вправо, и все плитки съедут как можно дальше. Когда сталкиваются две плитки с одинаковым числом, они сминаются в одну плитку с удвоенным числом, летят пластилиновые крошки, и растёт счёт. После каждого хода на пустой клетке появляется новая 2 или 4. Полей четыре: 3x3, 4x4, 5x5 и 6x6. Чтобы пройти поле, соберите 256 на 3x3, 2048 на 4x4, 4096 на 5x5 и 8192 на 6x6. Маленькие поля быстро заполняются и поэтому сложнее, большие требуют больше времени. Пройдите все четыре, чтобы увидеть финальный экран. За партию у вас три отмены, и даже если поле заклинило и ходов не осталось, оставшимися отменами можно вернуть ход назад. Незаконченная партия сохраняется в браузере и продолжается с того же места, а у каждого поля свой лучший счёт.",
+  "genre": [
+    "Puzzle",
+    "Casual"
+  ],
+  "playMode": "SinglePlayer",
+  "numberOfPlayers": {
+    "@type": "QuantitativeValue",
+    "minValue": 1,
+    "maxValue": 1
+  },
+  "applicationCategory": "GameApplication",
+  "operatingSystem": "Web browser",
+  "datePublished": "2026-10-05",
+  "dateModified": "2026-10-05",
+  "inLanguage": "ru",
+  "gamePlatform": "Web browser",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "isPartOf": {
+    "@type": "CollectionPage",
+    "name": "Бесплатные браузерные игры",
+    "url": "https://oreumgames.com/ru/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Oreum Games",
+    "url": "https://oreumgames.com/ru/"
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Как играть в 2048?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Проводите пальцем по экрану или нажимайте стрелки, чтобы сдвинуть все плитки в одну сторону. Две плитки с одинаковым числом при встрече складываются в одну. Каждый ход на пустую клетку падает 2 или 4, а игра заканчивается, когда поле заполнено и сдвинуть ничего нельзя."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Где появляются новые плитки?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "На одной из пустых клеток, выбранной с равной вероятностью. В девяти случаях из десяти это 2, в одном это 4. Мы выбросили по 30 000 плиток на каждом поле и проверили, что каждая клетка выпадает примерно одинаково часто."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Можно ли играть дальше после 2048?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Нет. Когда вы собираете целевую плитку, поле считается пройденным, и игра переходит к следующему. На титульном экране можно выбрать пройденное поле и начать его заново с нуля."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Сколько раз можно отменить ход?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Три раза за партию. Каждое нажатие возвращает один ход, подряд можно вернуть до трёх. Если начать НОВУЮ ИГРУ, снова даётся три отмены."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Почему на 3x3 цель всего 256?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Всего на девяти клетках поле заполняется так быстро, что собрать 2048 почти невозможно. Поэтому 3x3 заканчивается на 256, а на просторных полях 5x5 и 6x6 цель 4096 и 8192."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Есть ли 2048 5x5 и 6x6 онлайн?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Да. Выберите поле стрелками на титульном экране. Каждое поле сохраняется отдельно, так что можно переключиться с 4x4 на 6x6 и вернуться, не потеряв начатую партию."
+      }
+    }
+  ]
+}
+</script>
+<link rel="stylesheet" href="/assets/langpick.css?v=1">
+<script src="/assets/langpick.js?v=1" defer></script>
+</head>
+
+<body>
+
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="/ru/">
+      <img src="/assets/logo-full.webp?v=1" alt="Oreum Games" width="78" height="74">
+    </a>
+    <div class="brand-copy">
+      <p class="brandname">Oreum Games</p>
+      <p class="factory">INDIE GAME FACTORY</p>
+    </div>
+    <ul class="values">
+      <li><span>Без установки</span> Открыл ссылку и играешь</li>
+      <li><span>Без регистрации</span> Прогресс хранится в браузере</li>
+    </ul>
+    <nav class="nav" aria-label="Главное меню">
+      <a href="/ru/">Игры</a>
+      <div class="langpick">
+        <button type="button" class="langbtn" aria-label="Выбрать язык Language" aria-haspopup="true" aria-expanded="false"></button>
+        <div class="langmenu" hidden>
+          <a href="/games/flash/2048/" lang="ko" hreflang="ko">한국어</a>
+          <a href="/en/games/flash/2048/" lang="en" hreflang="en">English</a>
+          <a href="/zh/games/flash/2048/" lang="zh-Hans" hreflang="zh-Hans">中文</a>
+          <a href="/ja/games/flash/2048/" lang="ja" hreflang="ja">日本語</a>
+          <a href="/pt/games/flash/2048/" lang="pt-BR" hreflang="pt-BR">Português</a>
+          <a href="/ru/games/flash/2048/" lang="ru" hreflang="ru" aria-current="page">Русский</a>
+        </div>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+  <section class="showcase">
+    <div class="wrap game-page">
+      <a class="backlink" href="/ru/">← Все игры</a>
+      <div class="gp-shot"><img src="/assets/2048-shot-en.webp?v=1" alt="Пластилиновые плитки с числами 2, 4, 8, 256, 512 и 2048 на зелёном коврике для резки на деревянном столе, посередине название 2048 из красных, жёлтых, синих и зелёных пластилиновых плиток" width="1280" height="800"></div>
+      <h1><span style="white-space:nowrap">2048</span> <span style="white-space:nowrap">числовая головоломка</span></h1>
+      <p class="gp-cta"><a class="btn btn-primary" href="/games/flash/2048/play/?lang=ru&amp;v=20261005">🎮 Играть</a></p>
+      <p class="gp-line">2048 это бесплатная браузерная числовая головоломка: сдвигайте плитки, чтобы одинаковые числа сливались, и удваивайте их, пока не соберёте 2048. Игра работает в браузере, скачивать ничего не нужно.</p>
+      <p class="gp-body">На зелёном коврике для резки на деревянном столе лежат вылепленные вручную пластилиновые плитки, на каждой число, вдавленное как штамп. Проведите вверх, вниз, влево или вправо, и все плитки съедут как можно дальше. Когда сталкиваются две плитки с одинаковым числом, они сминаются в одну плитку с удвоенным числом, летят пластилиновые крошки, и растёт счёт. После каждого хода на пустой клетке появляется новая 2 или 4.</p>
+      <p class="gp-body">Полей четыре: 3x3, 4x4, 5x5 и 6x6. Чтобы пройти поле, соберите 256 на 3x3, 2048 на 4x4, 4096 на 5x5 и 8192 на 6x6. Маленькие поля быстро заполняются и поэтому сложнее, большие требуют больше времени. Пройдите все четыре, чтобы увидеть финальный экран.</p>
+      <p class="gp-body">За партию у вас три отмены, и даже если поле заклинило и ходов не осталось, оставшимися отменами можно вернуть ход назад. Незаконченная партия сохраняется в браузере и продолжается с того же места, а у каждого поля свой лучший счёт.</p>
+      <div class="talk"><p class="talk-title">Нашли баг или что-то неудобное? Напишите нам</p><p class="talk-go"><a href="/en/board/">В сообщество →</a></p></div>
+      <dl class="spec"><dt>Жанр</dt><dd>Числовая головоломка, игра 2048, инди-игра</dd>
+              <dt>Сделана за</dt><dd>1 день</dd>
+              <dt>Технологии</dt><dd>Canvas 2D, Web Audio, пластилиновые плитки нарисованы кодом</dd>
+              <dt>Игроки</dt><dd>1</dd>
+              <dt>Платформы</dt><dd>Телефон, ПК</dd>
+              <dt>Статус</dt><dd>Готова</dd>
+              <dt>Выход</dt><dd>2026-10-05</dd>
+              <dt>Последнее обновление</dt><dd>2026-10-05</dd></dl>
+      <p class="gp-for">Кому подойдёт — Тем, кто хочет пару минут подумать на телефоне, детям и взрослым, которые любят головоломки с числами, и фанатам 2048, которым хочется поле больше или меньше классического 4x4.</p>
+      <section class="faq">
+        <h2>Частые вопросы</h2>
+        <details><summary>Как играть в 2048?</summary><p>Проводите пальцем по экрану или нажимайте стрелки, чтобы сдвинуть все плитки в одну сторону. Две плитки с одинаковым числом при встрече складываются в одну. Каждый ход на пустую клетку падает 2 или 4, а игра заканчивается, когда поле заполнено и сдвинуть ничего нельзя.</p></details>
+        <details><summary>Где появляются новые плитки?</summary><p>На одной из пустых клеток, выбранной с равной вероятностью. В девяти случаях из десяти это 2, в одном это 4. Мы выбросили по 30 000 плиток на каждом поле и проверили, что каждая клетка выпадает примерно одинаково часто.</p></details>
+        <details><summary>Можно ли играть дальше после 2048?</summary><p>Нет. Когда вы собираете целевую плитку, поле считается пройденным, и игра переходит к следующему. На титульном экране можно выбрать пройденное поле и начать его заново с нуля.</p></details>
+        <details><summary>Сколько раз можно отменить ход?</summary><p>Три раза за партию. Каждое нажатие возвращает один ход, подряд можно вернуть до трёх. Если начать НОВУЮ ИГРУ, снова даётся три отмены.</p></details>
+        <details><summary>Почему на 3x3 цель всего 256?</summary><p>Всего на девяти клетках поле заполняется так быстро, что собрать 2048 почти невозможно. Поэтому 3x3 заканчивается на 256, а на просторных полях 5x5 и 6x6 цель 4096 и 8192.</p></details>
+        <details><summary>Есть ли 2048 5x5 и 6x6 онлайн?</summary><p>Да. Выберите поле стрелками на титульном экране. Каждое поле сохраняется отдельно, так что можно переключиться с 4x4 на 6x6 и вернуться, не потеряв начатую партию.</p></details>
+      </section>
+    </div>
+  </section>
+<!-- related:start -->
+  <section class="related" aria-label="Другие игры">
+    <div class="wrap game-page">
+      <h2>Другие игры</h2>
+      <ul class="related-list">
+      <li><a href="/ru/games/flash/sudoku/"><img src="/assets/sudoku-shot-en.webp" alt="" width="96" height="60" loading="lazy"><span class="related-txt"><b>Судоку</b><span>Судоку</span></span><em>PLAY ▸</em></a></li>
+      <li><a href="/ru/games/flash/daltteok/"><img src="/assets/daltteok-shot-en.webp" alt="" width="96" height="60" loading="lazy"><span class="related-txt"><b>Лунные моти: слияние</b><span>Слияние · Суйка-лайк</span></span><em>PLAY ▸</em></a></li>
+      <li><a href="/ru/games/mini/fullbrain/"><img src="/assets/fullbrain-shot-en.webp" alt="" width="96" height="60" loading="lazy"><span class="related-txt"><b>МОЗГ НА ПОЛНУЮ</b><span>Устный счёт · 60 уровней</span></span><em>PLAY ▸</em></a></li>
+      <li><a href="/ru/games/flash/spotdiff/"><img src="/assets/spotdiff-shot-en.webp" alt="" width="96" height="60" loading="lazy"><span class="related-txt"><b>Найди отличия</b><span>Найди отличия</span></span><em>PLAY ▸</em></a></li>
+      <li><a href="/ru/games/saab/"><img src="/assets/saab-shot.webp" alt="" width="96" height="60" loading="lazy"><span class="related-txt"><b>S.A.A.B.</b><span>FPS · 3D-шутер</span></span><em>PLAY ▸</em></a></li>
+      <li><a href="/ru/games/making-kimchi/"><img src="/assets/making-kimchi-shot.webp" alt="" width="96" height="60" loading="lazy"><span class="related-txt"><b>MAKING KIMCHI</b><span>Кимчи-лавка · Кулинария</span></span><em>PLAY ▸</em></a></li>
+      </ul>
+      <p class="related-more"><a href="/ru/">Все бесплатные игры</a> · <a href="/ru/">Главная Oreum Games</a></p>
+    </div>
+  </section>
+  <!-- related:end -->
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <div class="footer-brand">
+      <img src="/assets/logo-full.webp?v=1" alt="" width="52" height="50">
+      <span>Oreum Games</span>
+    </div>
+    <p class="footer-motto">Oreum Games keeps climbing</p>
+    <nav class="footer-nav" aria-label="Меню в подвале" style="row-gap:14px">
+      <a href="/en/support/">Поддержка</a>
+      <a href="/en/privacy/">Конфиденциальность</a>
+      <button type="button" class="js-mail mailbtn" data-u="cyjcyj27" data-d="gmail.com" data-go="gmail">Реклама и сотрудничество</button>
+    </nav>
+    <div class="footer-counts" style="margin:0"><span class="count-pill" id="visitCount" hidden></span><span class="count-pill" id="playTime" hidden></span></div>
+    <p class="copy">oreumgames.com © 2026 Oreum Games All rights reserved</p>
+  </div>
+</footer>
+<script src="/assets/visit.js?v=22" defer></script>
+<script>
+(function(){
+  if (/^(localhost|127\.0\.0\.1)$/.test(location.hostname) || location.protocol==='file:') return;
+  var b='https://abacus.jasoncameron.dev/hit/oreumgames/';
+  function h(k){ try{ fetch(b+k,{mode:'cors'}).catch(function(){}); }catch(e){} }
+  h('pageviews'); h('pv_2048_ru');
+})();
+</script>
+<script src="/assets/mail.js" defer></script>
+<script src="/assets/install.js?v=7" defer></script>
+</body>
+</html>

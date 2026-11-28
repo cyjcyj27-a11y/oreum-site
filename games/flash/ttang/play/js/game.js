@@ -31,6 +31,29 @@
     zs.textContent = ['Gamja', 'Ria'].map(function (n) { return "@font-face{font-family:'" + n + "';src:" + zf + ';unicode-range:' + ur + '}'; }).join('') + 'html[lang=zh-CN] *{word-break:normal!important}';
     document.head.appendChild(zs);
   }
+  var L3 = !EN && !ZH && /[?&]lang=(ja|pt|ru)(?:&|$)/i.exec(location.search);
+  L3 = L3 ? L3[1].toLowerCase() : '';
+  if (L3) {
+    // 일본어·포르투갈어·러시아어판: 한글 문구를 그 언어로, 글꼴에 시스템 글꼴을 덧붙인다
+    var L3D = {
+      ja: { t: '陣取り', h: 'ja', d: { '땅따먹기': '陣取り', '시작': 'スタート', 'K 효과음': 'K 効果音' } },
+      pt: { t: 'Território', h: 'pt-BR', d: { '땅따먹기': 'TERRITÓRIO', '시작': 'JOGAR', 'K 효과음': 'K som' } },
+      ru: { t: 'Захват земли', h: 'ru', d: { '땅따먹기': 'ЗАХВАТ ЗЕМЛИ', '시작': 'ИГРАТЬ', 'K 효과음': 'K звук' } }
+    }[L3];
+    document.documentElement.lang = L3D.h; document.title = L3D.t;
+    if (L3 !== 'ja') document.body.classList.add('en');
+    Array.prototype.forEach.call(document.querySelectorAll('[data-en]'), function (el) { var k = el.textContent.trim(); if (L3D.d[k]) el.textContent = L3D.d[k]; });
+    var lf = L3 === 'ja'
+      ? "local('Hiragino Sans'),local('Hiragino Kaku Gothic ProN'),local('Yu Gothic UI'),local('Yu Gothic'),local('Yu Gothic Medium'),local('YuGothic-Medium'),local('Yu Gothic Regular'),local('YuGothic-Regular'),local('Yu Gothic Bold'),local('YuGothic-Bold'),local('MS PGothic'),local('MS Gothic'),local('Meiryo'),local('Noto Sans JP'),local('Noto Sans CJK JP'),local('Source Han Sans JP')"
+      : "local('Segoe UI'),local('Roboto'),local('Arial'),local('Helvetica Neue'),local('Helvetica')";
+    var lr = L3 === 'ja' ? 'U+2E80-2FFF,U+3000-30FF,U+31F0-31FF,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF' : 'U+00A0-024F,U+0400-04FF,U+1E00-1EFF,U+2010-2027';
+    var ls = document.createElement('style');
+    ls.textContent = ['Gamja', 'Ria'].map(function (n) { return "@font-face{font-family:'" + n + "';src:" + lf + ';unicode-range:' + lr + '}'; }).join('') +
+      (L3 === 'ja' ? 'html[lang=ja] *{word-break:normal!important}' : '') +
+      (L3 === 'pt' ? 'body.en #title h1{font-size:min(15vw,130px);letter-spacing:-2px;font-family:\'Segoe UI\',Roboto,Arial,sans-serif;font-weight:900}' : '') +
+      (L3 === 'ru' ? 'body.en #title h1{font-size:min(11vw,100px);letter-spacing:-2px}' : '');
+    document.head.appendChild(ls);
+  }
   if (EN) { document.documentElement.lang = 'en'; document.body.classList.add('en'); document.title = 'Land Grab'; Array.prototype.forEach.call(document.querySelectorAll('[data-en]'), function (el) { el.textContent = el.getAttribute('data-en'); }); }
 
   // ── 기록 — 가장 멀리 간 스테이지 ──

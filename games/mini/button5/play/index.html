@@ -170,8 +170,10 @@
   #endUI h2 { font-family: 'TitleF'; font-weight: 700; font-size: clamp(60px, 14vw, 140px); margin: 0; color: #fff4dc; letter-spacing: 4px; text-shadow: 0 0 30px rgba(255,200,120,.6); }
   #endUI p { margin: 0 0 18px; font-family: 'TitleF'; font-size: clamp(22px, 4vw, 36px); color: #ffd9a0; }
 
-  html[lang=en] #title h1 { font-size: clamp(40px, 7.5vw, 88px); letter-spacing: 0; }
-  @media (max-height: 480px) { html[lang=en] #title h1 { font-size: 13vh; } }
+  html:is([lang=en],[lang=pt-BR],[lang=ru]) #title h1 { font-size: clamp(40px, 7.5vw, 88px); letter-spacing: 0; }
+  @media (max-height: 480px) { html:is([lang=en],[lang=pt-BR],[lang=ru]) #title h1 { font-size: 13vh; } }
+  /* 포르투갈어 제목 줄이 길어 가로 화면 오른쪽 칸에 맞게 줄인다 */
+  @media (orientation: landscape) { html[lang=pt-BR] #title h1 { font-size: min(5.8vw, 13vh, 88px); } }
   /* 넘치는 글자는 game.js fitEl 이 글자를 줄여 맞춘다 — 잴 수 있게 한 줄로 두고 칸 폭을 정해 둔다 */
   .row .nm { flex: 1 1 auto; min-width: 0; overflow: hidden; }
   .card .nm, .card .vl { white-space: nowrap; overflow: hidden; max-width: 100%; }
@@ -182,25 +184,25 @@
   #panel.tab-up .card .lv, #panel.tab-up .card .vl { align-self: center; margin-left: 0; margin-right: 0; text-align: center; }
   .mem, .tab, #roomP .btn, #drawDone, #title .btns .btn { text-align: center; }
   .mem { display: flex; align-items: center; justify-content: center; } .mem span { display: block; max-width: 100%; }
-  html[lang=en] #shopL { padding-left: 8px; padding-right: 8px; } html[lang=en] #shopL .row { gap: 6px; padding: 8px 8px 8px 10px; }
-  html[lang=en] #shopL .row .nm { -webkit-text-stroke-width: 3px; } html[lang=en] #shopL .row .btn { font-size: 16px; padding: 6px 10px; } html[lang=en] #shopL .row .own { min-width: 28px; }
+  html:is([lang=en],[lang=pt-BR],[lang=ru]) #shopL { padding-left: 8px; padding-right: 8px; } html:is([lang=en],[lang=pt-BR],[lang=ru]) #shopL .row { gap: 6px; padding: 8px 8px 8px 10px; }
+  html:is([lang=en],[lang=pt-BR],[lang=ru]) #shopL .row .nm { -webkit-text-stroke-width: 3px; } html:is([lang=en],[lang=pt-BR],[lang=ru]) #shopL .row .btn { font-size: 16px; padding: 6px 10px; } html:is([lang=en],[lang=pt-BR],[lang=ru]) #shopL .row .own { min-width: 28px; }
   #panel.land .card { padding-left: 5px; padding-right: 5px; }
 
   .tab, #roomP .btn, #drawDone, #title .btns .btn { overflow: hidden; white-space: nowrap; }
   .row .pr, .row .btn, .row .own { flex: 0 0 auto; }
-  html[lang=en] #title .btns .btn { font-size: 18px; padding: 11px 6px; min-width: 0; flex: 0 1 180px; -webkit-text-stroke-width: 4px; }
+  html:is([lang=en],[lang=pt-BR],[lang=ru]) #title .btns .btn { font-size: 18px; padding: 11px 6px; min-width: 0; flex: 0 1 180px; -webkit-text-stroke-width: 4px; }
   /* 가로 폰 카드는 2칸(영문 이름이 길다), 강화 탭은 Lv 를 모서리로 */
   #panel.tab-up .card { padding-top: 3px; padding-bottom: 8px; }
-  html[lang=en] #panel.tab-up .card .nm { font-size: 12px; }
+  html:is([lang=en],[lang=pt-BR],[lang=ru]) #panel.tab-up .card .nm { font-size: 12px; }
   #panel.tab-up .card .row2 { flex-direction: column; align-items: flex-start; gap: 0; margin-top: 0; }
   #panel.tab-up .card .lv { order: -1; margin-left: 0; position: static; font-size: 11px; line-height: 1.1; display: block !important; }
   #panel:not(.tab-up) .card .lv { display: none; }   /* 행동 탭은 숫자만(Lv 는 강화 탭에) */
   #panel.tab-up .card .nm { font-size: 16px; }
   #panel.tab-up .card .vl { font-size: 12px; line-height: 1.1; }
-  html[lang=en] #panel.tab-up .card .vl { font-size: 11px; }
-  html[lang=en] #panel.land #roomP .btn { font-size: 18px; padding: 10px 6px; }
-  html[lang=en] #roomP .btn { font-size: 21px; } html[lang=en] #panel .mem { font-size: 10px; letter-spacing: -.3px; } html[lang=en] #panel .card .nm { font-size: 13px; }
-  html[lang=en] #panel .card .vl { font-size: 12px; } html[lang=en] #panel .card .lv { font-size: 10px; }
+  html:is([lang=en],[lang=pt-BR],[lang=ru]) #panel.tab-up .card .vl { font-size: 11px; }
+  html:is([lang=en],[lang=pt-BR],[lang=ru]) #panel.land #roomP .btn { font-size: 18px; padding: 10px 6px; }
+  html:is([lang=en],[lang=pt-BR],[lang=ru]) #roomP .btn { font-size: 21px; } html:is([lang=en],[lang=pt-BR],[lang=ru]) #panel .mem { font-size: 10px; letter-spacing: -.3px; } html:is([lang=en],[lang=pt-BR],[lang=ru]) #panel .card .nm { font-size: 13px; }
+  html:is([lang=en],[lang=pt-BR],[lang=ru]) #panel .card .vl { font-size: 12px; } html:is([lang=en],[lang=pt-BR],[lang=ru]) #panel .card .lv { font-size: 10px; }
   .togs { display: inline-flex; gap: 6px; }
   body.playing #oreumFs, body.inroom #oreumFs { display: none !important; }
   @media (max-height: 480px) {
@@ -248,11 +250,11 @@
 <div id="msgPop"><div class="no" id="mpNo"></div><div class="tx" id="mpTx"></div></div>
 <div id="fade"></div>
 <div id="endUI"><h2>THE END</h2><p id="endYrs"></p><button class="btn main" id="bEnd">처음으로</button></div>
-<script src="js/data.js?v=8"></script>
+<script src="js/data.js?v=9"></script>
 <script src="js/audio.js?v=9"></script>
 <script src="js/art.js?v=24"></script>
-<script src="js/game.js?v=26"></script>
-<script src="assets/game-home.js?v=2" data-top="6" data-left="6" data-fullscreen="1" defer></script>
+<script src="js/game.js?v=27"></script>
+<script src="assets/game-home.js?v=3" data-top="6" data-left="6" data-fullscreen="1" defer></script>
 <script src="/assets/touchlock.js?v=1"></script>
 <script src="/assets/visit.js?v=21" defer></script>
 <script src="/assets/game-events.js?v=4" defer></script>

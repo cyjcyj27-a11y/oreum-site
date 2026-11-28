@@ -178,11 +178,11 @@ body[data-mode=title] #ov{align-items:flex-end;background:linear-gradient(rgba(2
 </div>
 <div id="hint"></div>
 <div id="ov" class="hide"><div id="panel"></div></div>
-<script src="assets/game-home.js?v=2" data-top="6" data-left="6" data-fullscreen="1" defer></script>
+<script src="assets/game-home.js?v=3" data-top="6" data-left="6" data-fullscreen="1" defer></script>
 <script src="lib/three.min.js"></script>
 <script src="js/levels.js?v=4"></script>
-<script src="js/look.js?v=4"></script>
-<script src="js/sfx.js?v=8"></script><script src="js/game1.js?v=11"></script><script src="js/world.js?v=10"></script><script src="js/game3.js?v=8"></script><script src="js/ui.js?v=12"></script>
+<script src="js/look.js?v=6"></script>
+<script src="js/sfx.js?v=8"></script><script src="js/game1.js?v=12"></script><script src="js/world.js?v=11"></script><script src="js/game3.js?v=8"></script><script src="js/ui.js?v=13"></script>
 <script>
 (function(){
   // 세로 화면에서는 단추 줄을 판 아래로, 가로 화면에서는 왼쪽 칸 안으로
@@ -194,7 +194,7 @@ body[data-mode=title] #ov{align-items:flex-end;background:linear-gradient(rgba(2
   if(EN){ document.documentElement.lang = 'en'; document.title = 'Double Parking Escape';
     document.querySelectorAll('[data-en]').forEach(e => e.textContent = e.dataset.en);
     document.querySelectorAll('[data-en-label]').forEach(e => e.setAttribute('aria-label', e.dataset.enLabel)); }
-  if(ZH){ document.querySelectorAll('[data-en]').forEach(e => e.textContent = L(e.textContent));
+  if(ZH || JA || PT || RU){ document.querySelectorAll('[data-en]').forEach(e => e.textContent = L(e.textContent));
     document.querySelectorAll('[data-en-label]').forEach(e => e.setAttribute('aria-label', L(e.getAttribute('aria-label')))); }
   UI.title(); requestAnimationFrame(CTRL.tick);
   window.__dp = { W, DP, CTRL, UI, SFX, R };

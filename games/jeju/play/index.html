@@ -272,6 +272,11 @@ body.shot #introv { display: none !important; }
     #assetList .nm b, #assetList .rt b { font-size: 19px; } #assetList .nm span, #assetList .rt { font-size: 14px; } #assetList .rt span { font-size: 13px; }
     #assetList button.sell { font-size: 16px; padding: 6px 12px; } #assetList .none { font-size: 18px; padding: 14px 6px; }
   }
+  /* 일본어·포르투갈어·러시아어: 둥근 터치 단추 글자를 한 줄로 원 안에 넣는다 */
+  html[lang=ja] body.touch .tbtn, html[lang=pt-BR] body.touch .tbtn, html[lang=ru] body.touch .tbtn { padding: 0; white-space: nowrap; }
+  html[lang=ja] body.touch #horn, html[lang=ja] body.touch #foot.show { font-size: 15px; }
+  html[lang=pt-BR] body.touch #horn, html[lang=pt-BR] body.touch #foot.show, html[lang=ru] body.touch #horn, html[lang=ru] body.touch #foot.show { font-size: 12px; }
+  html[lang=ru] body.touch #brake { font-size: 14px; }
 </style>
 </head>
 <body>
@@ -344,7 +349,7 @@ body.shot #introv { display: none !important; }
   })();
 </script>
 <script src="assets/landscape.js?v=54"></script>
-<script src="assets/game-home.js?v=2" data-top="6" data-left="6" data-fullscreen="1" defer></script>
+<script src="assets/game-home.js?v=3" data-top="6" data-left="6" data-fullscreen="1" defer></script>
 <script type="importmap">
 { "imports": { "three": "./lib/three.module.js" } }
 </script>
@@ -356,7 +361,7 @@ body.shot #introv { display: none !important; }
   window.THREE = THREE;
   window.GLTFLoaderClass = GLTFLoader;
   window.SkeletonClone = skeletonClone;
-  const V = '447';
+  const V = '449';
   const names = ['lang','noise','textures','spots','island','sky','post','roads','city','glb','vehicles','landmarks','traffic','player','audio','activity','blds','estate','npc','people','pet','props','lux','game'];
   (async () => {
     let done = 0;

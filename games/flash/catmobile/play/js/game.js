@@ -25,6 +25,31 @@
     zst.textContent = "@font-face{font-family:'Bagel';src:" + zb + ";unicode-range:" + ur + "}@font-face{font-family:'Ria';src:" + zb + ";unicode-range:" + ur + "}html[lang=zh-CN] *{word-break:normal!important}";
     document.head.appendChild(zst);
   }
+  // ── 일본어·포르투갈어(브라질)·러시아어 ──
+  var LQ = new URLSearchParams(location.search).get('lang');
+  var L3 = !EN && !ZH && (LQ === 'ja' || LQ === 'pt' || LQ === 'ru') ? LQ : '';
+  var L3T = {
+    ja: { lang: 'ja', title: 'ネコ用ゲーム', h1: 'ネコ用<br>ゲーム', snd: '効果音', lines: ['ネコ用', 'ゲーム'] },
+    pt: { lang: 'pt-BR', title: 'Jogo para Gato', h1: 'JOGO<br>PARA GATO', snd: 'Efeitos sonoros', lines: ['JOGO', 'PARA GATO'] },
+    ru: { lang: 'ru', title: 'Игра для кошки', h1: 'ИГРА<br>ДЛЯ КОШКИ', snd: 'Звуки', lines: ['ИГРА', 'ДЛЯ КОШКИ'] }
+  };
+  if (L3) {
+    var lt3 = L3T[L3];
+    document.documentElement.lang = lt3.lang;
+    document.title = lt3.title;
+    document.getElementById('h1').innerHTML = lt3.h1;
+    document.getElementById('sndTog').title = lt3.snd;
+    // 게임 글꼴에 없는 글자는 같은 이름에 기기 글꼴을 그 글자 범위로만 덧붙인다
+    var jf = "local('Hiragino Sans'),local('Hiragino Kaku Gothic ProN'),local('Yu Gothic UI'),local('Yu Gothic'),local('Yu Gothic Medium'),local('YuGothic-Medium'),local('Yu Gothic Regular'),local('YuGothic-Regular'),local('Yu Gothic Bold'),local('YuGothic-Bold'),local('MS PGothic'),local('MS Gothic'),local('Meiryo'),local('Noto Sans JP'),local('Noto Sans CJK JP'),local('Source Han Sans JP')";
+    var jr = 'U+2E80-2FFF,U+3000-30FF,U+31F0-31FF,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF';
+    var lf = "local('Segoe UI'),local('Roboto'),local('Arial'),local('Helvetica Neue'),local('Helvetica')";
+    var lr = 'U+00A0-024F,U+0400-04FF,U+1E00-1EFF,U+2010-2027';
+    var fs3 = L3 === 'ja' ? jf : lf, ur3 = L3 === 'ja' ? jr : lr;
+    var lst = document.createElement('style');
+    lst.textContent = "@font-face{font-family:'Bagel';src:" + fs3 + ";unicode-range:" + ur3 + "}@font-face{font-family:'Ria';src:" + fs3 + ";unicode-range:" + ur3 + "}" +
+      (L3 === 'ja' ? 'html[lang=ja] *{word-break:normal!important}' : '');
+    document.head.appendChild(lst);
+  }
 
   var cv = document.getElementById('c'), ctx = cv.getContext('2d');
   var W = 0, H = 0, DPR = 1;
@@ -456,7 +481,7 @@
         draw();
         ctx.save(); ctx.translate(w / 2, h * .44); ctx.rotate(-4 * Math.PI / 180);
         var fs = Math.round(h * .21); ctx.font = fs + 'px Bagel'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round';
-        var lines = en === 'zh' ? ['给猫玩的', '游戏'] : en ? ['GAME', 'FOR CAT'] : ['고양이용', '게임'];
+        var lines = L3T[en] ? L3T[en].lines : en === 'zh' ? ['给猫玩的', '游戏'] : en ? ['GAME', 'FOR CAT'] : ['고양이용', '게임'];
         lines.forEach(function (ln, i) {
           var y = (i - (lines.length - 1) / 2) * fs * 1.08;
           ctx.fillStyle = 'rgba(0,0,0,.25)'; ctx.fillText(ln, 0, y + fs * .11);

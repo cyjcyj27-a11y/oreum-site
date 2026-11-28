@@ -8,6 +8,15 @@
   } : DATA.ZH ? {
     k: ['在镇上告示板选个通缉犯<br>用 WASD 骑马，追黄色箭头', '按住 Space，地上的圈忽远忽近<br>圈住通缉犯变金色时松开', '把犯人拖到监狱(JAIL)领赏金<br>抓光告示板上所有通缉犯'],
     t: ['在镇上告示板选个通缉犯<br>用左摇杆骑马，追黄色箭头', '按住套索按钮，圈会忽远忽近<br>圈住通缉犯变金色时松开']
+  } : DATA.JA ? {
+    k: ['町の掲示板で賞金首を選ぼう<br>WASD で馬を走らせ、黄色い矢印について行こう', 'Space を押し続けると地面の輪が遠ざかったり近づいたりする<br>賞金首に重なって金色になったら離そう', '縛った賞金首を牢屋(JAIL)まで引きずれば賞金ゲット<br>掲示板の賞金首を全員捕まえよう'],
+    t: ['町の掲示板で賞金首を選ぼう<br>左のスティックで馬を走らせ、黄色い矢印について行こう', '投げ縄ボタンを押し続けると地面の輪が遠ざかったり近づいたりする<br>賞金首に重なって金色になったら離そう']
+  } : DATA.PT ? {
+    k: ['Escolha um procurado no quadro da cidade<br>Cavalgue com WASD e siga a seta amarela', 'Segure Space: o círculo no chão vai e volta<br>Solte quando ficar dourado em cima do procurado', 'Arraste o procurado amarrado até a cadeia (JAIL) pela recompensa<br>Pegue todos os procurados do quadro'],
+    t: ['Escolha um procurado no quadro da cidade<br>Cavalgue com o direcional esquerdo e siga a seta amarela', 'Segure o botão do laço: o círculo no chão vai e volta<br>Solte quando ficar dourado em cima do procurado']
+  } : DATA.RU ? {
+    k: ['Выбери преступника на доске розыска<br>Скачи на WASD за жёлтой стрелкой', 'Держи Space — круг на земле то удаляется, то приближается<br>Отпусти, когда он станет золотым на цели', 'Тащи пойманного в тюрьму (JAIL) за награду<br>Поймай всех с доски розыска'],
+    t: ['Выбери преступника на доске розыска<br>Скачи левым джойстиком за жёлтой стрелкой', 'Держи кнопку лассо — круг то удаляется, то приближается<br>Отпусти, когда он станет золотым на цели']
   } : {
     k: ['마을 게시판에서 수배범을 골라요<br>WASD 로 말을 몰아 노란 화살을 따라가요', 'Space 를 누르고 있으면 땅의 동그라미가 멀어졌다 가까워져요<br>수배범에 겹쳐 금색이 되면 놓아요', '묶은 수배범을 감옥(JAIL)까지 끌고 오면 현상금을 받아요<br>게시판의 수배범을 모두 잡아요'],
     t: ['마을 게시판에서 수배범을 골라요<br>왼쪽 원판으로 말을 몰아 노란 화살을 따라가요', '올가미 단추를 누르고 있으면 땅의 동그라미가 멀어졌다 가까워져요<br>수배범에 겹쳐 금색이 되면 놓아요']
@@ -104,7 +113,7 @@
     open() {
       const tx = touch() ? TX.t : [], ps = document.querySelectorAll('#howUI .step p');
       ps.forEach((p, i) => { p.innerHTML = '<b>' + (i + 1) + '</b><br>' + (tx[i] || TX.k[i]); });
-      document.getElementById('howUI').classList.toggle('en', EN);
+      document.getElementById('howUI').classList.toggle('en', EN || DATA.PT || DATA.RU);
       cvs = [...document.querySelectorAll('#howUI canvas')].map(e => e.getContext('2d'));
       t0 = performance.now(); cancelAnimationFrame(raf); raf = requestAnimationFrame(loop);
     },

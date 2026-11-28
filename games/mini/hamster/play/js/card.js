@@ -62,7 +62,7 @@
       txt(g, cc[0], cx, cy - 32, '32px Ui, sans-serif', '#4a2a14');
       txt(g, cc[1], cx, cy + 20, '62px Ttl, Ui, sans-serif', '#ffd23a', '#4a2a14', 11);
     });
-    txt(g, DATA.name(b) + L(' 햄스터', ' HAMSTER'), W / 2, P.y + P.h - 30, '32px Ui, sans-serif', '#8a5a2a');
+    txt(g, (window.LANG === 'pt' || window.LANG === 'ru') ? L(' 햄스터', ' HAMSTER').trim() + ' ' + DATA.name(b) : DATA.name(b) + L(' 햄스터', ' HAMSTER'), W / 2, P.y + P.h - 30, '32px Ui, sans-serif', '#8a5a2a');
     txt(g, L('너는 몇 번 잡히고 해바라기 밭에 닿을까?', 'How many catches to reach the sunflowers?'), W / 2, 1262, fit(g, L('너는 몇 번 잡히고 해바라기 밭에 닿을까?', 'How many catches to reach the sunflowers?'), 40, 'Ui, sans-serif', 960), '#4a2a14');
     const lg = await logo();
     g.font = '36px Ui, sans-serif'; const sw2 = g.measureText('oreumgames.com').width, lw = 62, bx = W / 2 - (sw2 + lw + 14) / 2;
@@ -75,7 +75,7 @@
   };
   C.save = function () { if (!url) return; const a = document.createElement('a'); a.href = url; a.download = 'hamster-end.png'; document.body.appendChild(a); a.click(); a.remove(); };
   C.share = function () {
-    const link = location.protocol === 'file:' ? '' : location.origin + location.pathname.replace(/play\/?(index\.html)?$/, '') + (window.EN ? '?lang=en' : window.ZH ? '?lang=zh' : '');
+    const link = location.protocol === 'file:' ? '' : location.origin + location.pathname.replace(/play\/?(index\.html)?$/, '') + (window.EN ? '?lang=en' : window.ZH ? '?lang=zh' : window.LX ? '?lang=' + window.LANG : '');
     if (navigator.share) { navigator.share({ title: L('햄스런', 'Hamsrun'), text: shareLine, url: link || undefined }).catch(() => {}); return; }
     try { navigator.clipboard.writeText(shareLine + (link ? '\n' + link : '')); UI.toast(L('주소를 복사했습니다', 'Link copied')); } catch (e) {}
   };

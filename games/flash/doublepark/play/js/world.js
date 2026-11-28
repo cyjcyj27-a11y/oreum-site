@@ -158,12 +158,14 @@ doorL.position.set(ELEV.x - .17, 0, ELEV.z + .08); doorR.position.set(ELEV.x + .
 const elevLamp = new T.Mesh(rbox(.16, .04, .06, .02, .01), new T.MeshStandardMaterial({ color:'#ffffff', emissive:'#ffd9a0', emissiveIntensity:0 }));
 elevLamp.position.set(ELEV.x, .9, ELEV.z + .09); lot.add(elevLamp);
 // 출구 안내판(오른벽 위쪽 끝)
+// 일본어·포르투갈어·러시아어: 글자가 화살표에 닿으면 글자 크기를 줄인다
+function signFit(g, t){ if(!(JA || PT || RU)) return; const w = g.measureText(t).width; if(w > 128) g.font = `800 ${Math.floor(52*128/w)}px Paperlogy, sans-serif`; }
 const signTex = canvasTex(256, 112, (g, w, h) => { g.fillStyle = '#2b2d31'; rrect(g, 0, 0, w, h, 22); g.fill();
-  g.fillStyle = '#fff'; g.font = '800 52px Paperlogy, sans-serif'; g.textBaseline = 'middle'; g.fillText(L('출구', 'EXIT'), 30, h/2 + 3);
+  g.fillStyle = '#fff'; g.font = '800 52px Paperlogy, sans-serif'; g.textBaseline = 'middle'; signFit(g, L('출구', 'EXIT')); g.fillText(L('출구', 'EXIT'), 30, h/2 + 3);
   g.beginPath(); g.moveTo(232, h/2); g.lineTo(196, h/2 - 26); g.lineTo(196, h/2 + 26); g.closePath(); g.fillStyle = ACCENT; g.fill(); g.fillRect(166, h/2 - 9, 34, 18); });
 // 폰 세로(출구가 위)용: 화살표가 위로
 const signTexUp = canvasTex(256, 112, (g, w, h) => { g.fillStyle = '#2b2d31'; rrect(g, 0, 0, w, h, 22); g.fill();
-  g.fillStyle = '#fff'; g.font = '800 52px Paperlogy, sans-serif'; g.textBaseline = 'middle'; g.fillText(L('출구', 'EXIT'), 30, h/2 + 3);
+  g.fillStyle = '#fff'; g.font = '800 52px Paperlogy, sans-serif'; g.textBaseline = 'middle'; signFit(g, L('출구', 'EXIT')); g.fillText(L('출구', 'EXIT'), 30, h/2 + 3);
   g.beginPath(); g.moveTo(198, 18); g.lineTo(172, 50); g.lineTo(224, 50); g.closePath(); g.fillStyle = ACCENT; g.fill(); g.fillRect(189, 48, 18, 44); });
 const sign = new T.Mesh(new T.PlaneGeometry(.72, .315), new T.MeshStandardMaterial({ map:signTex, roughness:.6 }));
 sign.position.set(5.0, 1.1, -1.24); sign.rotation.x = -.12; lot.add(sign);

@@ -10,10 +10,11 @@
     G = GAME; S = G.S;
     if (touch) document.body.classList.add('touch');
     if (window.EN) document.querySelectorAll('[data-en]').forEach((e) => (e.textContent = e.dataset.en));
-    if (window.ZH) document.querySelectorAll('[data-en]').forEach((e) => (e.textContent = L(e.textContent.trim(), e.dataset.en)));
+    if (window.ZH || window.LG3) document.querySelectorAll('[data-en]').forEach((e) => (e.textContent = L(e.textContent.trim(), e.dataset.en)));
     G.boot();
     const go = () => { RND.frontText(); };
-    (document.fonts ? Promise.all([document.fonts.load('900 60px Ttl', window.ZH ? '拔白头发店' : undefined), document.fonts.load(window.ZH ? 'bold 60px Sign' : '60px Sign', window.ZH ? '拔白头发店' : undefined)]).then(go, go) : go());
+    const ft = window.ZH ? '拔白头发店' : window.JA ? '白髪抜き屋' : window.PT ? 'SALÃO DOS FIOS BRANCOS' : window.RU ? 'САЛОН СЕДЫХ ВОЛОС' : undefined;
+    (document.fonts ? Promise.all([document.fonts.load('900 60px Ttl', ft), document.fonts.load(window.ZH || window.JA ? 'bold 60px Sign' : '60px Sign', ft)]).then(go, go) : go());
     togs(); wire(); input();
     checkRotate(); addEventListener('resize', checkRotate); addEventListener('orientationchange', () => setTimeout(checkRotate, 200));
     U.show('title');

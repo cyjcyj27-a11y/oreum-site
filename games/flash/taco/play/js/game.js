@@ -2,7 +2,19 @@
 (function () {
 'use strict';
 var EN = /[?&]lang=en\b/.test(location.search), ZH = !EN && /[?&]lang=zh\b/.test(location.search);
+var LQ = (location.search.match(/[?&]lang=(ja|pt|ru)\b/) || [])[1];
+var JA = !EN && !ZH && LQ === 'ja', PT = !EN && !ZH && LQ === 'pt', RU = !EN && !ZH && LQ === 'ru';
 if (EN) document.documentElement.lang = 'en';
+if (JA || PT || RU) {
+  document.documentElement.lang = JA ? 'ja' : PT ? 'pt-BR' : 'ru';
+  /* 게임 글꼴에 없는 일본어·라틴 악센트·키릴 글자를 시스템 글꼴로 같은 이름에 덧붙인다 */
+  var xf = JA ? "local('Hiragino Sans'),local('Hiragino Kaku Gothic ProN'),local('Yu Gothic UI'),local('Yu Gothic'),local('Yu Gothic Medium'),local('YuGothic-Medium'),local('Yu Gothic Regular'),local('YuGothic-Regular'),local('Yu Gothic Bold'),local('YuGothic-Bold'),local('MS PGothic'),local('MS Gothic'),local('Meiryo'),local('Noto Sans JP'),local('Noto Sans CJK JP'),local('Source Han Sans JP')"
+    : "local('Segoe UI'),local('Roboto'),local('Arial'),local('Helvetica Neue'),local('Helvetica')";
+  var xr = JA ? 'U+2E80-2FFF,U+3000-30FF,U+31F0-31FF,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF' : 'U+00A0-024F,U+0400-04FF,U+1E00-1EFF,U+2010-2027';
+  var xst = document.createElement('style');
+  xst.textContent = "@font-face{font-family:'Taco';src:" + xf + ";unicode-range:" + xr + "}@font-face{font-family:'Ria';src:" + xf + ";unicode-range:" + xr + "}" + (JA ? "html[lang=ja] *{word-break:normal!important}" : "");
+  document.head.appendChild(xst);
+}
 if (ZH) {
   document.documentElement.lang = 'zh-CN';
   /* 중국어 글자는 게임 글꼴에 없으므로 시스템 중국어 글꼴을 같은 이름으로 덧붙인다 */
@@ -13,12 +25,12 @@ if (ZH) {
   document.head.appendChild(zst);
 }
 var A = ART, TAU = Math.PI * 2, $ = function (id) { return document.getElementById(id); };
-function L(a) { return a[EN ? 1 : ZH ? 2 : 0]; }
+function L(a) { return a[EN ? 1 : ZH ? 2 : JA ? 3 : PT ? 4 : RU ? 5 : 0]; }
 var TX = {
-  title: ['VIVA 타코스', 'VIVA TACOS', '塔可万岁'],
-  stops: [['선인장 사막', 'Cactus Desert', '仙人掌沙漠'], ['오아시스 마을', 'Oasis Village', '绿洲小镇'], ['야자수 해변', 'Palm Beach', '椰林海滩'], ['등대 항구', 'Lighthouse Harbor', '灯塔港口'], ['옥수수 밭', 'Corn Field', '玉米田'], ['붉은 협곡', 'Red Canyon', '红色峡谷'],
-    ['분수 광장', 'Fountain Plaza', '喷泉广场'], ['시장 골목', 'Market Street', '集市小巷'], ['화산 기슭', 'Volcano Foothills', '火山脚下'], ['정글 유적', 'Jungle Ruins', '丛林遗迹'], ['밤의 도시', 'City Night', '不夜城'], ['타코 축제', 'Taco Fiesta', '塔可节']],
-  shop: { fire: ['화력', 'Heat', '火力'], burner: ['화구', 'Burner', '加灶'], parasol: ['파라솔', 'Parasol', '遮阳伞'], tip: ['팁 통', 'Tip Jar', '小费罐'], pinata: ['피냐타', 'Piñata', '皮纳塔'], heart: ['하트', 'Heart', '爱心'] }
+  title: ['VIVA 타코스', 'VIVA TACOS', '塔可万岁', 'VIVA タコス', 'VIVA TACOS', 'VIVA ТАКО'],
+  stops: [['선인장 사막', 'Cactus Desert', '仙人掌沙漠', 'サボテン砂漠', 'Deserto de Cactos', 'Кактусовая пустыня'], ['오아시스 마을', 'Oasis Village', '绿洲小镇', 'オアシスの村', 'Vila do Oásis', 'Деревня-оазис'], ['야자수 해변', 'Palm Beach', '椰林海滩', 'ヤシの木ビーチ', 'Praia dos Coqueiros', 'Пальмовый пляж'], ['등대 항구', 'Lighthouse Harbor', '灯塔港口', '灯台の港', 'Porto do Farol', 'Гавань с маяком'], ['옥수수 밭', 'Corn Field', '玉米田', 'トウモロコシ畑', 'Milharal', 'Кукурузное поле'], ['붉은 협곡', 'Red Canyon', '红色峡谷', '赤い峡谷', 'Cânion Vermelho', 'Красный каньон'],
+    ['분수 광장', 'Fountain Plaza', '喷泉广场', '噴水広場', 'Praça da Fonte', 'Площадь с фонтаном'], ['시장 골목', 'Market Street', '集市小巷', '市場通り', 'Rua do Mercado', 'Рыночная улица'], ['화산 기슭', 'Volcano Foothills', '火山脚下', '火山のふもと', 'Pé do Vulcão', 'Подножие вулкана'], ['정글 유적', 'Jungle Ruins', '丛林遗迹', 'ジャングル遺跡', 'Ruínas da Selva', 'Руины в джунглях'], ['밤의 도시', 'City Night', '不夜城', '夜の街', 'Cidade à Noite', 'Ночной город'], ['타코 축제', 'Taco Fiesta', '塔可节', 'タコス祭り', 'Festa do Taco', 'Фиеста тако']],
+  shop: { fire: ['화력', 'Heat', '火力', '火力', 'Fogo', 'Жар'], burner: ['화구', 'Burner', '加灶', '鉄板', 'Chapa', 'Плита'], parasol: ['파라솔', 'Parasol', '遮阳伞', 'パラソル', 'Guarda-sol', 'Зонт'], tip: ['팁 통', 'Tip Jar', '小费罐', 'チップ入れ', 'Caixinha', 'Чаевые'], pinata: ['피냐타', 'Piñata', '皮纳塔', 'ピニャータ', 'Piñata', 'Пиньята'], heart: ['하트', 'Heart', '爱心', 'ハート', 'Coração', 'Сердце'] }
 };
 var FONT = "'Taco','Ria',sans-serif";
 
@@ -604,7 +616,7 @@ window.addEventListener('resize', resize);
 /* ---------- 돌리기 ---------- */
 var lastTs = 0;
 function frame(ts) { var dt = lastTs ? Math.min(0.05, (ts - lastTs) / 1000) : 0; lastTs = ts; if (!document.hidden) { step(dt); draw(); } requestAnimationFrame(frame); }
-$('ttl').innerHTML = '<span class="v">VIVA</span><span class="k">' + (EN ? 'TACOS' : ZH ? '塔可万岁' : '타코스') + '</span>';
+$('ttl').innerHTML = '<span class="v">VIVA</span><span class="k">' + (EN ? 'TACOS' : ZH ? '塔可万岁' : JA ? 'タコス' : PT ? 'TACOS' : RU ? 'ТАКО' : '타코스') + '</span>';
 document.title = L(TX.title);
 (function () { var a = $('coinI').getContext('2d'); a.translate(22, 21); A.coin(a, 18); var b = $('cearnI').getContext('2d'); b.translate(22, 21); A.coin(b, 18); })();
 SND.music(1);

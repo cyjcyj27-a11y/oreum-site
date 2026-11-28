@@ -29,7 +29,37 @@
     const h = document.querySelector('#ending h1'); if (h) h.innerHTML = '你就是<br>大脑之王';
     document.querySelectorAll('[title]').forEach(el => { const v = ZH[el.getAttribute('title')]; if (v) el.setAttribute('title', v); });
   }
-  const L = (ko, en) => ZHL ? (ZH[ko] || en) : EN ? en : ko;
+  // 일본어·포르투갈어(브라질)·러시아어판: ?lang=ja / pt / ru 이면 한국어 글자를 그 언어로 덧씌운다
+  const LQ = new URLSearchParams(location.search).get('lang');
+  const JA = { '풀가동!': 'フル回転!', '일시정지': '一時停止', '음악': '音楽', '효과음': '効果音' };
+  const PT = { '풀가동!': 'A MIL!', '일시정지': 'Pausar', '음악': 'Música', '효과음': 'Efeitos sonoros' };
+  const RU = { '풀가동!': 'НА ПОЛНУЮ!', '일시정지': 'Пауза', '음악': 'Музыка', '효과음': 'Звуки' };
+  const LX = {
+    ja: { d: JA, lang: 'ja', title: '脳フル回転', t1: '脳', t2: 'フル回転', c: 'おめでとうございます！', h: 'あなたは<br>頭脳王です' },
+    pt: { d: PT, lang: 'pt-BR', title: 'CÉREBRO A MIL', t1: 'CÉREBRO', t2: ' A MIL', c: 'Parabéns!', h: 'Você é o<br>REI DO CÉREBRO' },
+    ru: { d: RU, lang: 'ru', title: 'МОЗГ НА ПОЛНУЮ', t1: 'МОЗГ', t2: ' НА ПОЛНУЮ', c: 'Поздравляем!', h: 'Ты —<br>КОРОЛЬ УМА' },
+  }[LQ] || null;
+  const LD = LX ? LX.d : null;
+  if (LX) {
+    document.documentElement.lang = LX.lang; document.title = LX.title;
+    const st = document.createElement('style');
+    if (LQ === 'ja') {
+      const jf = "local('Hiragino Sans'),local('Hiragino Kaku Gothic ProN'),local('Yu Gothic UI'),local('Yu Gothic'),local('Yu Gothic Medium'),local('YuGothic-Medium'),local('Yu Gothic Regular'),local('YuGothic-Regular'),local('Yu Gothic Bold'),local('YuGothic-Bold'),local('MS PGothic'),local('MS Gothic'),local('Meiryo'),local('Noto Sans JP'),local('Noto Sans CJK JP'),local('Source Han Sans JP')";
+      const jb = "local('Hiragino Sans W8'),local('HiraginoSans-W8'),local('Hiragino Kaku Gothic StdN W8'),local('Yu Gothic Bold'),local('YuGothic-Bold'),local('Meiryo Bold'),local('Noto Sans JP Bold'),local('NotoSansJP-Bold'),local('Source Han Sans JP Bold')";
+      const ur = 'U+2E80-2FFF,U+3000-30FF,U+31F0-31FF,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF';
+      st.textContent = `@font-face{font-family:'NG';src:${jf};unicode-range:${ur};font-weight:400}@font-face{font-family:'NG';src:${jb};unicode-range:${ur};font-weight:900}@font-face{font-family:'Ria';src:${jf};unicode-range:${ur}}html[lang=ja] *{word-break:normal!important}#title h1 .t1,#title h1 .t2,#ending h1,#ending .congrats{font-weight:900}`;
+    } else {
+      const lf = "local('Segoe UI Bold'),local('SegoeUI-Bold'),local('Roboto Bold'),local('Roboto-Bold'),local('Arial Bold'),local('Arial-BoldMT'),local('Segoe UI'),local('Roboto'),local('Arial'),local('Helvetica Neue'),local('Helvetica')";
+      const lr = 'U+00A0-024F,U+0400-04FF,U+1E00-1EFF,U+2010-2027';
+      st.textContent = `@font-face{font-family:'NG';src:${lf};unicode-range:${lr}}@font-face{font-family:'Ria';src:${lf};unicode-range:${lr}}#title h1{font-size:clamp(44px,min(9vw,16vh),120px)}#ending h1{font-size:clamp(40px,min(7.5vw,11vh),100px)}`;
+    }
+    document.head.appendChild(st);
+    const t = document.getElementById('ttl'); if (t) t.innerHTML = '<span class="t1">' + LX.t1 + '</span><span class="t2">' + LX.t2 + '</span>';
+    const c = document.querySelector('#ending .congrats'); if (c) c.textContent = LX.c;
+    const h = document.querySelector('#ending h1'); if (h) h.innerHTML = LX.h;
+    document.querySelectorAll('[title]').forEach(el => { const v = LD[el.getAttribute('title')]; if (v) el.setAttribute('title', v); });
+  }
+  const L = (ko, en) => ZHL ? (ZH[ko] || en) : LD ? (LD[ko] || en) : EN ? en : ko;
 
   // ---------------------------------------------------------------- 저장
   let prog = { stage: 1, stars: {}, ended: false, bestInf: 0, bestScore: 0 };

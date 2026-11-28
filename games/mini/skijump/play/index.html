@@ -161,7 +161,7 @@
     <button id="padR" type="button" aria-label="RIGHT"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4l8 8-8 8"/></svg></button>
   </div>
 </div>
-<script src="/assets/game-home.js?v=8" data-top="4" data-left="4" data-fullscreen="1" defer></script>
+<script src="/assets/game-home.js?v=9" data-top="4" data-left="4" data-fullscreen="1" defer></script>
 <script>
 /* ─────────────────────────────────────────────────────────────
  * SKI JUMP — 점프대를 밟고 날아오르는 스키. 오름게임즈.
@@ -182,6 +182,8 @@
 const LANG_Q = (new URLSearchParams(location.search).get('lang') || '').toLowerCase();
 const EN_MODE = LANG_Q === 'en';
 const ZH_MODE = LANG_Q === 'zh';
+/* 일본어·포르투갈어(브라질)·러시아어 — 한국어 원문을 키로 찾고, 없으면 영어를 쓴다 */
+const L3 = ['ja', 'pt', 'ru'].includes(LANG_Q) ? LANG_Q : '';
 /* 중국어(간체) — 한국어 원문을 키로 찾는다. 셋째 인자가 있으면 그것을 쓴다(숫자가 섞인 문장) */
 const ZH = {
   '아래 화살표 단추로 방향을 바꿉니다': '用下方的箭头按钮转向',
@@ -192,7 +194,37 @@ const ZH = {
   '취소': '取消',
   '동전': '金币',
 };
-const T = (ko, en, zh) => EN_MODE ? en : ZH_MODE ? (zh != null ? zh : (ZH[ko] != null ? ZH[ko] : ko)) : ko;
+const JA = {
+  '아래 화살표 단추로 방향을 바꿉니다': '下の矢印ボタンで向きを変えよう',
+  '← → 로 방향을 바꿉니다': '← → で向きを変えよう',
+  '이어하기': 'つづきから',
+  '처음부터': 'はじめから',
+  '지우고 시작': '消してスタート',
+  '취소': 'キャンセル',
+  '동전': 'コイン',
+};
+const PT = {
+  '아래 화살표 단추로 방향을 바꿉니다': 'Use as setas abaixo para virar',
+  '← → 로 방향을 바꿉니다': 'Use ← → para virar',
+  '이어하기': 'CONTINUAR',
+  '처음부터': 'NOVO JOGO',
+  '지우고 시작': 'APAGAR E JOGAR',
+  '취소': 'CANCELAR',
+  '동전': 'moeda',
+};
+const RU = {
+  '아래 화살표 단추로 방향을 바꿉니다': 'Поворачивай стрелками внизу',
+  '← → 로 방향을 바꿉니다': 'Поворачивай клавишами ← →',
+  '이어하기': 'ПРОДОЛЖИТЬ',
+  '처음부터': 'НОВАЯ ИГРА',
+  '지우고 시작': 'СТЕРЕТЬ И НАЧАТЬ',
+  '취소': 'ОТМЕНА',
+  '동전': 'монета',
+};
+const DICT3 = { ja: JA, pt: PT, ru: RU };
+/* 넷째 인자 x3 = { ja, pt, ru } — 숫자가 섞인 문장일 때 쓴다 */
+const T = (ko, en, zh, x3) => EN_MODE ? en : ZH_MODE ? (zh != null ? zh : (ZH[ko] != null ? ZH[ko] : ko))
+  : L3 ? (x3 && x3[L3] != null ? x3[L3] : (DICT3[L3][ko] != null ? DICT3[L3][ko] : en)) : ko;
 if (EN_MODE) {
   document.documentElement.lang = 'en';
   document.title = 'SKI JUMP — free ski jump game';
@@ -216,6 +248,37 @@ if (ZH_MODE) {
   document.head.appendChild(st);
   const tt = document.getElementById('title');
   if (tt) tt.innerHTML = '跳台滑雪<small>OREUM GAMES</small>';
+}
+if (L3) {
+  const M3 = {
+    ja: { lang: 'ja', name: 'スキージャンプ', title: 'スキージャンプ — 無料スキージャンプゲーム',
+          desc: 'ジャンプ台を踏んで空へ飛び出すスキーゲーム。矢印2つだけで遊べます。', div: 7.6 },
+    pt: { lang: 'pt-BR', name: 'SALTO DE ESQUI', title: 'SALTO DE ESQUI — jogo de salto de esqui grátis',
+          desc: 'Jogo de esqui em que você pisa na rampa e voa pelos ares. Só precisa de duas setas.', div: 9 },
+    ru: { lang: 'ru', name: 'ТРАМПЛИН', title: 'ТРАМПЛИН — бесплатная игра про прыжки на лыжах',
+          desc: 'Лыжная игра: заезжай на трамплин и взлетай. Нужны всего две стрелки.', div: 6.2 },
+  }[L3];
+  document.documentElement.lang = M3.lang;
+  document.title = M3.title;
+  const md = document.querySelector('meta[name=description]');
+  if (md) md.content = M3.desc;
+  /* 일본어는 시스템 일본어 글꼴, 포르투갈어·러시아어는 악센트·키릴 글자를 시스템 글꼴로 채운다 */
+  const jf = "local('Hiragino Sans'),local('Hiragino Kaku Gothic ProN'),local('Yu Gothic UI'),local('Yu Gothic'),local('Yu Gothic Medium'),local('YuGothic-Medium'),local('Yu Gothic Regular'),local('YuGothic-Regular'),local('Yu Gothic Bold'),local('YuGothic-Bold'),local('MS PGothic'),local('MS Gothic'),local('Meiryo'),local('Noto Sans JP'),local('Noto Sans CJK JP'),local('Source Han Sans JP')";
+  const lf = "local('Segoe UI'),local('Roboto'),local('Arial'),local('Helvetica Neue'),local('Helvetica')";
+  const src = L3 === 'ja' ? jf : lf;
+  const ur = L3 === 'ja' ? 'U+2E80-2FFF,U+3000-30FF,U+31F0-31FF,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF'
+    : 'U+00A0-024F,U+0400-04FF,U+1E00-1EFF,U+2010-2027';
+  const st = document.createElement('style');
+  st.textContent = ['Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic'].map(f =>
+    [600, 700, 800, 900].map(w => `@font-face{font-family:'${f}';src:${src};font-weight:${w};unicode-range:${ur}}`).join('')).join('')
+    + (L3 === 'ja' ? 'html[lang=ja] *{word-break:normal!important}' : '')
+    /* 좁은 판에서도 제목·큰 글자·단추가 한 줄에 들어가게 */
+    + `#title{white-space:nowrap;font-size:min(clamp(40px,13vw,72px),calc((min(100vw,56.25dvh) - 52px) / ${M3.div}))}`
+    + '#lead .over{font-size:min(clamp(30px,9vw,50px),calc((min(100vw,56.25dvh) - 60px) / 6.4))}'
+    + '#go,#go2{white-space:nowrap;padding-left:24px;padding-right:24px}';
+  document.head.appendChild(st);
+  const tt = document.getElementById('title');
+  if (tt) tt.innerHTML = M3.name + '<small>OREUM GAMES</small>';
 }
 
 /* 논리 판 폭은 고정, 높이는 화면 비율을 그대로 받는다.
@@ -1639,7 +1702,11 @@ function showWipe() {
     lead: '<span class="over">' + T('처음부터', 'NEW GAME') + '</span>',
     sub:  T('깬 ' + Math.max(0, unlocked - 1) + '판 기록과 모은 동전 ' + coinTotal + '개가 지워집니다',
             'Erases ' + Math.max(0, unlocked - 1) + ' cleared stages and ' + coinTotal + ' coins',
-            '已通关 ' + Math.max(0, unlocked - 1) + ' 关的纪录和收集的 ' + coinTotal + ' 枚金币将被清除'),
+            '已通关 ' + Math.max(0, unlocked - 1) + ' 关的纪录和收集的 ' + coinTotal + ' 枚金币将被清除',
+            { ja: 'クリアした' + Math.max(0, unlocked - 1) + 'ステージの記録と集めたコイン' + coinTotal + '枚が消えます',
+              pt: 'Apaga ' + Math.max(0, unlocked - 1) + (unlocked - 1 === 1 ? ' fase concluída' : ' fases concluídas') +
+                  ' e ' + coinTotal + (coinTotal === 1 ? ' moeda' : ' moedas'),
+              ru: 'Сотрётся прогресс: пройдено этапов — ' + Math.max(0, unlocked - 1) + ', монет — ' + coinTotal }),
     go:   T('지우고 시작', 'ERASE & START'),
     go2:  T('취소', 'CANCEL')
   });
@@ -1941,7 +2008,7 @@ requestAnimationFrame(frame);
   function f(){
     if (document.getElementById('oreumHome')) return;
     var s = document.createElement('script');
-    s.src = '../../../../assets/game-home.js?v=8';
+    s.src = '../../../../assets/game-home.js?v=9';
     s.setAttribute('data-top','4'); s.setAttribute('data-left','4');
     s.setAttribute('data-fullscreen','1');
     document.body.appendChild(s);

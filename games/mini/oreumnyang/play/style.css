@@ -265,3 +265,5 @@ body{
 
 /* 왼쪽 위 오름게임즈 배지 자리 — 상단바를 그만큼 내립니다 (assets/game-home.js) */
 .topbar { padding-top: 42px; }
+/* ja/pt/ru: raise the tool row above the longer fullscreen pill on narrow screens */
+@media (max-width:600px){html[lang=ja] .tools,html[lang=pt-BR] .tools,html[lang=ru] .tools{padding-bottom:50px}}

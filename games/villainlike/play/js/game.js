@@ -2,12 +2,17 @@
 (function () {
 'use strict';
 const $ = s => document.querySelector(s);
-const LANG = /[?&]lang=en/.test(location.search) ? 'en' : /[?&]lang=zh/.test(location.search) ? 'zh' : 'ko';
-const EN = LANG === 'en', ZHL = LANG === 'zh';
+const LANG = /[?&]lang=en/.test(location.search) ? 'en' : /[?&]lang=zh/.test(location.search) ? 'zh' : /[?&]lang=ja/.test(location.search) ? 'ja' : /[?&]lang=pt/.test(location.search) ? 'pt' : /[?&]lang=ru/.test(location.search) ? 'ru' : 'ko';
+const EN = LANG === 'en', ZHL = LANG === 'zh', JAL = LANG === 'ja', PTL = LANG === 'pt', RUL = LANG === 'ru';
+// 영어처럼 긴 낱말을 쓰는 언어(배치용)
+const LONGW = EN || PTL || RUL;
 const DICT = {
   ko: { start: '출근', levelup: 'LEVEL UP', pause: 'PAUSE', resume: '계속', home: '처음으로', time: 'TIME', level: 'LEVEL', kills: '검거', unlock: 'NEW', t2: '빌런라이크', clear: '퇴근', over: 'GAME OVER', evo: '진화', max: 'MAX', newW: '새 무기', newP: '새 아이템', locked: '잠김', heal: '회복', shop: '상점', dex: '도감', coin: '코인', close: '닫기', tabE: '빌런', tabW: '무기', tabI: '아이템', tabG: '직원', unknown: '아직 못 봤습니다', last: '막차', boss: '보스', gold: '금테', hint: 'WASD / ←↑↓→ 이동 · SPACE 경적 · Esc 일시정지', theEnd: 'THE END', ending: '엔딩', dex100: '도감 100%', owned: '보유' },
   en: { start: 'START', levelup: 'LEVEL UP', pause: 'PAUSE', resume: 'RESUME', home: 'HOME', time: 'TIME', level: 'LEVEL', kills: 'ARREST', unlock: 'NEW', t2: 'VILLAIN LIKE', clear: 'CLOCK OUT', over: 'GAME OVER', evo: 'EVOLVE', max: 'MAX', newW: 'NEW WEAPON', newP: 'NEW ITEM', locked: 'LOCKED', heal: 'HEAL', shop: 'SHOP', dex: 'COLLECTION', coin: 'COIN', close: 'CLOSE', tabE: 'VILLAINS', tabW: 'WEAPONS', tabI: 'ITEMS', tabG: 'STAFF', unknown: 'Not seen yet', last: 'LAST TRAIN', boss: 'BOSS', gold: 'GOLD', hint: 'WASD / Arrows move · SPACE horn · Esc pause', theEnd: 'THE END', ending: 'ENDING', dex100: 'COLLECTION 100%', owned: 'OWNED' },
   zh: { start: '上班', levelup: 'LEVEL UP', pause: 'PAUSE', resume: '继续', home: '回到标题', time: 'TIME', level: 'LEVEL', kills: '抓获', unlock: 'NEW', t2: '恶人幸存者', clear: '下班', over: 'GAME OVER', evo: '进化', max: 'MAX', newW: '新武器', newP: '新道具', locked: '未解锁', heal: '回血', shop: '商店', dex: '图鉴', coin: '金币', close: '关闭', tabE: '恶人', tabW: '武器', tabI: '道具', tabG: '员工', unknown: '还没见过', last: '末班车', boss: 'BOSS', gold: '金框', hint: 'WASD / ←↑↓→ 移动 · SPACE 鸣笛 · Esc 暂停', theEnd: 'THE END', ending: '结局', dex100: '图鉴 100%', owned: '已拥有' },
+  ja: { start: '出勤', levelup: 'LEVEL UP', pause: 'PAUSE', resume: '再開', home: 'タイトルへ', time: 'TIME', level: 'LEVEL', kills: '検挙', unlock: 'NEW', t2: 'ヴィランライク', clear: '退勤', over: 'GAME OVER', evo: '進化', max: 'MAX', newW: '新しい武器', newP: '新アイテム', locked: 'ロック中', heal: '回復', shop: 'ショップ', dex: '図鑑', coin: 'コイン', close: '閉じる', tabE: 'ヴィラン', tabW: '武器', tabI: 'アイテム', tabG: '職員', unknown: 'まだ見ていません', last: '終電', boss: 'ボス', gold: '金枠', hint: 'WASD / ←↑↓→ 移動 · SPACE 警笛 · Esc 一時停止', theEnd: 'THE END', ending: 'エンディング', dex100: '図鑑 100%', owned: '所持' },
+  pt: { start: 'TRABALHAR', levelup: 'LEVEL UP', pause: 'PAUSE', resume: 'CONTINUAR', home: 'INÍCIO', time: 'TIME', level: 'LEVEL', kills: 'PRESOS', unlock: 'NEW', t2: 'VILLAIN LIKE', clear: 'FIM DO TURNO', over: 'GAME OVER', evo: 'EVOLUIR', max: 'MAX', newW: 'NOVA ARMA', newP: 'NOVO ITEM', locked: 'BLOQUEADO', heal: 'CURA', shop: 'LOJA', dex: 'COLEÇÃO', coin: 'MOEDAS', close: 'FECHAR', tabE: 'VILÕES', tabW: 'ARMAS', tabI: 'ITENS', tabG: 'EQUIPE', unknown: 'Ainda não visto', last: 'ÚLTIMO TREM', boss: 'CHEFE', gold: 'DOURADO', hint: 'WASD / Setas movem · SPACE buzina · Esc pausa', theEnd: 'THE END', ending: 'FINAL', dex100: 'COLEÇÃO 100%', owned: 'COMPRADO' },
+  ru: { start: 'НА СМЕНУ', levelup: 'LEVEL UP', pause: 'PAUSE', resume: 'ДАЛЬШЕ', home: 'В МЕНЮ', time: 'TIME', level: 'LEVEL', kills: 'АРЕСТЫ', unlock: 'NEW', t2: 'VILLAIN LIKE', clear: 'КОНЕЦ СМЕНЫ', over: 'GAME OVER', evo: 'ЭВОЛЮЦИЯ', max: 'MAX', newW: 'НОВОЕ ОРУЖИЕ', newP: 'НОВЫЙ ПРЕДМЕТ', locked: 'ЗАКРЫТО', heal: 'ЛЕЧЕНИЕ', shop: 'МАГАЗИН', dex: 'КОЛЛЕКЦИЯ', coin: 'МОНЕТЫ', close: 'ЗАКРЫТЬ', tabE: 'ЗЛОДЕИ', tabW: 'ОРУЖИЕ', tabI: 'ПРЕДМЕТЫ', tabG: 'ПЕРСОНАЛ', unknown: 'Ещё не встречался', last: 'ПОСЛЕДНИЙ ПОЕЗД', boss: 'БОСС', gold: 'ЗОЛОТО', hint: 'WASD / Стрелки — ход · SPACE гудок · Esc пауза', theEnd: 'THE END', ending: 'ФИНАЛ', dex100: 'КОЛЛЕКЦИЯ 100%', owned: 'КУПЛЕНО' },
 };
 // 중국어: 한국어 원문을 열쇠로 찾고, 없으면 영어
 const ZH = {
@@ -37,6 +42,359 @@ const ZH = {
   '교통카드지갑': '交通卡卡包', '승차권자석 +20': '车票吸取 +20', '경적정비': '鸣笛保养', '경적게이지 +12%': '鸣笛槽 +12%',
   '근무수당': '加班费', '승차권경험치 +6%': '车票经验 +6%',
 };
+// 일본어·포르투갈어·러시아어: 중국어와 같이 한국어 원문을 열쇠로 찾고, 없으면 영어
+const JA = {
+  "사회복무요원": "社会服務要員",
+  "역무원": "駅員",
+  "지하철 보안관": "地下鉄保安官",
+  "청소 여사님": "清掃のおばさん",
+  "철도경찰": "鉄道警察",
+  "호루라기": "ホイッスル",
+  "비상 호루라기": "非常ホイッスル",
+  "경광봉": "誘導灯",
+  "쌍 경광봉": "二刀流誘導灯",
+  "수갑": "手錠",
+  "쇠사슬 수갑": "鎖つき手錠",
+  "물걸레": "濡れモップ",
+  "대걸레 회오리": "モップ竜巻",
+  "검거 도장": "検挙スタンプ",
+  "왕 도장": "巨大スタンプ",
+  "안내방송": "案内放送",
+  "대합실 방송": "待合室の放送",
+  "CCTV": "CCTV",
+  "CCTV 관제실": "CCTV管制室",
+  "교통카드": "交通カード",
+  "정기권": "定期券",
+  "바리케이드": "バリケード",
+  "안전 펜스": "安全フェンス",
+  "고무장갑": "ゴム手袋",
+  "황금 장갑": "黄金の手袋",
+  "압수한 단소": "没収した縦笛",
+  "전설의 단소": "伝説の縦笛",
+  "캔커피": "缶コーヒー",
+  "공격 +12%": "攻撃 +12%",
+  "삼각김밥": "おにぎり",
+  "최대 체력 +25": "最大体力 +25",
+  "운동화": "スニーカー",
+  "이동 속도 +8%": "移動速度 +8%",
+  "앞뒤 휘두르기": "前後になぎ払う",
+  "미끄러지며 튕김": "滑って跳ね返る",
+  "가까운 빌런을 쫓음": "近くのヴィランを追う",
+  "던졌다 돌아옴": "投げると戻ってくる",
+  "주위를 돎": "周りを回る",
+  "부채꼴 소리": "扇形に響く音",
+  "가까운 빌런 연타": "近くのヴィランを連打",
+  "위에서 내려침": "上から叩きつける",
+  "주위 지속 피해": "周りに継続ダメージ",
+  "맞으면 느려짐": "当たると遅くなる",
+  "쾅 찍음": "ドンと押す",
+  "예수천국 전도사": "イエス天国の伝道師",
+  "확성기 들고 다가옴": "拡声器を持って迫る",
+  "잡상인": "車内の物売り",
+  "물건 보따리를 메고 옴": "商品の包みを担いで来る",
+  "비둘기": "ハト",
+  "빠르게 날아듦": "素早く飛びこむ",
+  "등산복 취객": "登山服の酔っぱらい",
+  "갈지자로 걸음": "千鳥足で歩く",
+  "스피커폰 아줌마": "スピーカー通話おばさん",
+  "통화하며 빠르게 옴": "通話しながら早足で来る",
+  "쩍벌남": "大股開き男",
+  "자리를 넓게 차지함": "席を広く占領する",
+  "트로트 할아버지": "トロットじいさん",
+  "노래로 주위 빌런을 빠르게": "歌で周りのヴィランを加速",
+  "치킨 청년": "チキン青年",
+  "냄새 구름을 남김": "においの雲を残す",
+  "드러누운 아저씨": "寝そべりおじさん",
+  "가끔 드러누워 버팀": "時々寝そべって粘る",
+  "회에 소주 아저씨": "刺身と焼酎おじさん",
+  "훈계 할아버지": "説教じいさん",
+  "느리지만 단단함": "遅いけどタフ",
+  "강아지 승객": "犬連れの乗客",
+  "강아지와 함께 빠르게": "犬と一緒に素早い",
+  "웃통 아저씨": "上半身裸おじさん",
+  "덥다며 달려듦": "暑いと言って突進",
+  "철봉남": "懸垂男",
+  "껑충껑충 뜀": "ピョンピョン跳ねる",
+  "트렁크 팬티 아저씨": "トランクスおじさん",
+  "덩치 크고 아픔": "でかくて痛い",
+  "등산 동호회": "登山サークル",
+  "2:00 넷이 한꺼번에": "2:00 4人まとめて",
+  "황금 갑옷 장군": "黄金の鎧の将軍",
+  "4:00 장창 들고 돌진": "4:00 長槍で突進",
+  "전도대장": "伝道隊長",
+  "5:30 앰프로 발을 묶고 전도사를 부름": "5:30 アンプで足止めし伝道師を呼ぶ",
+  "잡상인 왕": "物売りの王",
+  "7:00 잡상인을 몰고 옴": "7:00 物売りを引き連れて来る",
+  "비둘기 왕": "ハトの王",
+  "8:30 날아다니며 비둘기 떼를 부름": "8:30 飛び回りハトの群れを呼ぶ",
+  "단소살인마": "縦笛殺人鬼",
+  "10:00 빠르게 돌진": "10:00 高速で突進",
+  "1호선 대악마": "1号線の大悪魔",
+  "12:00 막차, 앞 보스들의 기술을 다 씀": "12:00 終電、前のボスの技を全部使う",
+  "소요산": "逍遥山",
+  "동두천": "東豆川",
+  "의정부": "議政府",
+  "도봉산": "道峰山",
+  "창동": "倉洞",
+  "청량리": "清凉里",
+  "종로3가": "鍾路3街",
+  "서울역": "ソウル駅",
+  "영등포": "永登浦",
+  "구로": "九老",
+  "수원": "水原",
+  "병점": "餅店",
+  "천안": "天安",
+  "신창": "新昌",
+  "자동근무": "自動勤務",
+  "알아서 피하고 줍기": "自動で避けて拾う",
+  "캔커피한박스": "缶コーヒー1箱",
+  "공격 +6%": "攻撃 +6%",
+  "삼각김밥묶음": "おにぎりセット",
+  "최대체력 +10": "最大体力 +10",
+  "새운동화": "新しいスニーカー",
+  "이동속도 +3%": "移動速度 +3%",
+  "교통카드지갑": "カードケース",
+  "승차권자석 +20": "乗車券マグネット +20",
+  "경적정비": "警笛整備",
+  "경적게이지 +12%": "警笛ゲージ +12%",
+  "근무수당": "勤務手当",
+  "승차권경험치 +6%": "乗車券経験値 +6%",
+};
+const PT = {
+  "사회복무요원": "Agente de Serviço",
+  "역무원": "Atendente da Estação",
+  "지하철 보안관": "Segurança do Metrô",
+  "청소 여사님": "Tia da Limpeza",
+  "철도경찰": "Polícia Ferroviária",
+  "호루라기": "Apito",
+  "비상 호루라기": "Apito de Emergência",
+  "경광봉": "Bastão Luminoso",
+  "쌍 경광봉": "Bastões Duplos",
+  "수갑": "Algemas",
+  "쇠사슬 수갑": "Algemas de Corrente",
+  "물걸레": "Esfregão Molhado",
+  "대걸레 회오리": "Tornado de Esfregão",
+  "검거 도장": "Carimbo de Prisão",
+  "왕 도장": "Carimbo Gigante",
+  "안내방송": "Aviso Sonoro",
+  "대합실 방송": "Alto-falante do Saguão",
+  "CCTV": "CCTV",
+  "CCTV 관제실": "Central de CCTV",
+  "교통카드": "Cartão de Transporte",
+  "정기권": "Passe Mensal",
+  "바리케이드": "Barricada",
+  "안전 펜스": "Grade de Segurança",
+  "고무장갑": "Luvas de Borracha",
+  "황금 장갑": "Luvas de Ouro",
+  "압수한 단소": "Flauta Confiscada",
+  "전설의 단소": "Flauta Lendária",
+  "캔커피": "Café em Lata",
+  "공격 +12%": "Ataque +12%",
+  "삼각김밥": "Onigiri",
+  "최대 체력 +25": "Vida máx. +25",
+  "운동화": "Tênis",
+  "이동 속도 +8%": "Velocidade +8%",
+  "앞뒤 휘두르기": "Golpeia na frente e atrás",
+  "미끄러지며 튕김": "Desliza e quica",
+  "가까운 빌런을 쫓음": "Persegue o vilão mais próximo",
+  "던졌다 돌아옴": "Vai e volta",
+  "주위를 돎": "Gira ao seu redor",
+  "부채꼴 소리": "Som em leque",
+  "가까운 빌런 연타": "Socos rápidos no mais próximo",
+  "위에서 내려침": "Cai de cima",
+  "주위 지속 피해": "Dano contínuo ao redor",
+  "맞으면 느려짐": "Deixa lento ao acertar",
+  "쾅 찍음": "Carimba com tudo",
+  "예수천국 전도사": "Pregador de Rua",
+  "확성기 들고 다가옴": "Vem com um megafone",
+  "잡상인": "Camelô",
+  "물건 보따리를 메고 옴": "Chega com uma trouxa de produtos",
+  "비둘기": "Pombo",
+  "빠르게 날아듦": "Voa rápido pra cima de você",
+  "등산복 취객": "Bêbado de Trilha",
+  "갈지자로 걸음": "Anda em zigue-zague",
+  "스피커폰 아줌마": "Tia do Viva-voz",
+  "통화하며 빠르게 옴": "Vem rápido falando no celular",
+  "쩍벌남": "Espaçoso",
+  "자리를 넓게 차지함": "Ocupa espaço demais",
+  "트로트 할아버지": "Vovô do Trot",
+  "노래로 주위 빌런을 빠르게": "Canta e acelera os vilões perto",
+  "치킨 청년": "Cara do Frango",
+  "냄새 구름을 남김": "Deixa uma nuvem de cheiro",
+  "드러누운 아저씨": "Tio Deitado",
+  "가끔 드러누워 버팀": "Às vezes deita e não sai",
+  "회에 소주 아저씨": "Tio do Sashimi e Soju",
+  "훈계 할아버지": "Vovô do Sermão",
+  "느리지만 단단함": "Lento, mas duro",
+  "강아지 승객": "Passageiro com Cachorro",
+  "강아지와 함께 빠르게": "Rápido, junto do cachorro",
+  "웃통 아저씨": "Tio sem Camisa",
+  "덥다며 달려듦": "Avança reclamando do calor",
+  "철봉남": "Cara da Barra",
+  "껑충껑충 뜀": "Pula sem parar",
+  "트렁크 팬티 아저씨": "Tio de Samba-canção",
+  "덩치 크고 아픔": "Grandão e bate forte",
+  "등산 동호회": "Clube de Trilha",
+  "2:00 넷이 한꺼번에": "2:00 quatro de uma vez",
+  "황금 갑옷 장군": "General Dourado",
+  "4:00 장창 들고 돌진": "4:00 avança com uma lança",
+  "전도대장": "Chefe dos Pregadores",
+  "5:30 앰프로 발을 묶고 전도사를 부름": "5:30 te prende com o amplificador e chama pregadores",
+  "잡상인 왕": "Rei dos Camelôs",
+  "7:00 잡상인을 몰고 옴": "7:00 traz um bando de camelôs",
+  "비둘기 왕": "Rei dos Pombos",
+  "8:30 날아다니며 비둘기 떼를 부름": "8:30 voa e chama um bando de pombos",
+  "단소살인마": "Assassino da Flauta",
+  "10:00 빠르게 돌진": "10:00 avança rápido",
+  "1호선 대악마": "Arquidemônio da Linha 1",
+  "12:00 막차, 앞 보스들의 기술을 다 씀": "12:00 último trem, usa os golpes de todos os chefes",
+  "소요산": "Soyosan",
+  "동두천": "Dongducheon",
+  "의정부": "Uijeongbu",
+  "도봉산": "Dobongsan",
+  "창동": "Chang-dong",
+  "청량리": "Cheongnyangni",
+  "종로3가": "Jongno 3-ga",
+  "서울역": "Seoul Station",
+  "영등포": "Yeongdeungpo",
+  "구로": "Guro",
+  "수원": "Suwon",
+  "병점": "Byeongjeom",
+  "천안": "Cheonan",
+  "신창": "Sinchang",
+  "자동근무": "Turno Automático",
+  "알아서 피하고 줍기": "Desvia e coleta sozinho",
+  "캔커피한박스": "Caixa de Café",
+  "공격 +6%": "Ataque +6%",
+  "삼각김밥묶음": "Pacote de Onigiri",
+  "최대체력 +10": "Vida máx. +10",
+  "새운동화": "Tênis Novo",
+  "이동속도 +3%": "Velocidade +3%",
+  "교통카드지갑": "Porta-cartões",
+  "승차권자석 +20": "Ímã de bilhetes +20",
+  "경적정비": "Revisão da Buzina",
+  "경적게이지 +12%": "Medidor de buzina +12%",
+  "근무수당": "Hora Extra",
+  "승차권경험치 +6%": "XP de bilhetes +6%",
+};
+const RU = {
+  "사회복무요원": "Соцработник",
+  "역무원": "Работник станции",
+  "지하철 보안관": "Охранник метро",
+  "청소 여사님": "Тётя-уборщица",
+  "철도경찰": "Транспортная полиция",
+  "호루라기": "Свисток",
+  "비상 호루라기": "Аварийный свисток",
+  "경광봉": "Светожезл",
+  "쌍 경광봉": "Два светожезла",
+  "수갑": "Наручники",
+  "쇠사슬 수갑": "Цепные наручники",
+  "물걸레": "Мокрая швабра",
+  "대걸레 회오리": "Швабровый смерч",
+  "검거 도장": "Штамп ареста",
+  "왕 도장": "Гигантский штамп",
+  "안내방송": "Объявление",
+  "대합실 방송": "Объявление в зале",
+  "CCTV": "CCTV",
+  "CCTV 관제실": "Пульт CCTV",
+  "교통카드": "Транспортная карта",
+  "정기권": "Проездной",
+  "바리케이드": "Баррикада",
+  "안전 펜스": "Защитный забор",
+  "고무장갑": "Резиновые перчатки",
+  "황금 장갑": "Золотые перчатки",
+  "압수한 단소": "Изъятая флейта",
+  "전설의 단소": "Легендарная флейта",
+  "캔커피": "Кофе в банке",
+  "공격 +12%": "Атака +12%",
+  "삼각김밥": "Онигири",
+  "최대 체력 +25": "Макс. здоровье +25",
+  "운동화": "Кроссовки",
+  "이동 속도 +8%": "Скорость +8%",
+  "앞뒤 휘두르기": "Бьёт вперёд и назад",
+  "미끄러지며 튕김": "Скользит и отскакивает",
+  "가까운 빌런을 쫓음": "Догоняет ближайшего злодея",
+  "던졌다 돌아옴": "Летит и возвращается",
+  "주위를 돎": "Кружит вокруг",
+  "부채꼴 소리": "Звук веером",
+  "가까운 빌런 연타": "Град ударов по ближнему",
+  "위에서 내려침": "Бьёт сверху",
+  "주위 지속 피해": "Постоянный урон вокруг",
+  "맞으면 느려짐": "Замедляет при попадании",
+  "쾅 찍음": "Бах — и штамп!",
+  "예수천국 전도사": "Уличный проповедник",
+  "확성기 들고 다가옴": "Идёт с мегафоном",
+  "잡상인": "Коробейник",
+  "물건 보따리를 메고 옴": "Тащит баул с товаром",
+  "비둘기": "Голубь",
+  "빠르게 날아듦": "Быстро налетает",
+  "등산복 취객": "Пьяный турист",
+  "갈지자로 걸음": "Ходит зигзагом",
+  "스피커폰 아줌마": "Тётя на громкой связи",
+  "통화하며 빠르게 옴": "Спешит, болтая по телефону",
+  "쩍벌남": "Раскоряка",
+  "자리를 넓게 차지함": "Занимает много места",
+  "트로트 할아버지": "Поющий дед",
+  "노래로 주위 빌런을 빠르게": "Песней ускоряет злодеев рядом",
+  "치킨 청년": "Парень с курицей",
+  "냄새 구름을 남김": "Оставляет облако запаха",
+  "드러누운 아저씨": "Лежачий дядя",
+  "가끔 드러누워 버팀": "Иногда ложится и не уходит",
+  "회에 소주 아저씨": "Дядя с сашими и соджу",
+  "훈계 할아버지": "Дед-моралист",
+  "느리지만 단단함": "Медленный, но крепкий",
+  "강아지 승객": "Пассажир с собакой",
+  "강아지와 함께 빠르게": "Быстрый, вместе с собакой",
+  "웃통 아저씨": "Дядя без майки",
+  "덥다며 달려듦": "Бросается: «Жарко!»",
+  "철봉남": "Турникмен",
+  "껑충껑충 뜀": "Скачет вприпрыжку",
+  "트렁크 팬티 아저씨": "Дядя в семейниках",
+  "덩치 크고 아픔": "Большой и больно бьёт",
+  "등산 동호회": "Турклуб",
+  "2:00 넷이 한꺼번에": "2:00 четверо сразу",
+  "황금 갑옷 장군": "Золотой генерал",
+  "4:00 장창 들고 돌진": "4:00 бросается с копьём",
+  "전도대장": "Главный проповедник",
+  "5:30 앰프로 발을 묶고 전도사를 부름": "5:30 тормозит усилителем и зовёт проповедников",
+  "잡상인 왕": "Король коробейников",
+  "7:00 잡상인을 몰고 옴": "7:00 приводит коробейников",
+  "비둘기 왕": "Король голубей",
+  "8:30 날아다니며 비둘기 떼를 부름": "8:30 летает и зовёт стаю голубей",
+  "단소살인마": "Флейтист-убийца",
+  "10:00 빠르게 돌진": "10:00 быстро бросается",
+  "1호선 대악마": "Архидемон линии 1",
+  "12:00 막차, 앞 보스들의 기술을 다 씀": "12:00 последний поезд, все приёмы боссов",
+  "소요산": "Соёсан",
+  "동두천": "Тондучхон",
+  "의정부": "Ыйджонбу",
+  "도봉산": "Тобонсан",
+  "창동": "Чхандон",
+  "청량리": "Чхоннянни",
+  "종로3가": "Чонно 3-га",
+  "서울역": "Вокзал Сеул",
+  "영등포": "Ёндынпхо",
+  "구로": "Куро",
+  "수원": "Сувон",
+  "병점": "Пёнджом",
+  "천안": "Чхонан",
+  "신창": "Синчхан",
+  "자동근무": "Автосмена",
+  "알아서 피하고 줍기": "Сам уворачивается и собирает",
+  "캔커피한박스": "Ящик кофе",
+  "공격 +6%": "Атака +6%",
+  "삼각김밥묶음": "Набор онигири",
+  "최대체력 +10": "Макс. здоровье +10",
+  "새운동화": "Новые кроссовки",
+  "이동속도 +3%": "Скорость +3%",
+  "교통카드지갑": "Кошелёк для карт",
+  "승차권자석 +20": "Магнит билетов +20",
+  "경적정비": "Ремонт гудка",
+  "경적게이지 +12%": "Шкала гудка +12%",
+  "근무수당": "Сверхурочные",
+  "승차권경험치 +6%": "Опыт билетов +6%",
+};
+const LOC = ZHL ? ZH : JAL ? JA : PTL ? PT : RUL ? RU : null;
 if (ZHL) {
   document.documentElement.lang = 'zh-CN';
   const zf = "local('PingFang SC'),local('PingFangSC-Regular'),local('Microsoft YaHei'),local('Microsoft YaHei UI'),local('Noto Sans SC'),local('Noto Sans CJK SC'),local('Source Han Sans SC')";
@@ -45,11 +403,27 @@ if (ZHL) {
   st.textContent = ['DOSSaemmul', 'DOSGothic'].map(f => `@font-face{font-family:${f};src:${zf};unicode-range:${ur}}`).join('') + 'html[lang=zh-CN] *{word-break:normal!important}';
   document.head.appendChild(st);
 }
+if (JAL) {
+  document.documentElement.lang = 'ja';
+  const jf = "local('Hiragino Sans'),local('Hiragino Kaku Gothic ProN'),local('Yu Gothic UI'),local('Yu Gothic'),local('Yu Gothic Medium'),local('YuGothic-Medium'),local('Yu Gothic Regular'),local('YuGothic-Regular'),local('Yu Gothic Bold'),local('YuGothic-Bold'),local('MS PGothic'),local('MS Gothic'),local('Meiryo'),local('Noto Sans JP'),local('Noto Sans CJK JP'),local('Source Han Sans JP')";
+  const ur = 'U+2E80-2FFF,U+3000-30FF,U+31F0-31FF,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF';
+  const st = document.createElement('style');
+  st.textContent = ['DOSSaemmul', 'DOSGothic'].map(f => `@font-face{font-family:${f};src:${jf};unicode-range:${ur}}`).join('') + 'html[lang=ja] *{word-break:normal!important}';
+  document.head.appendChild(st);
+}
+if (PTL || RUL) {
+  document.documentElement.lang = PTL ? 'pt-BR' : 'ru';
+  const lf = "local('Segoe UI'),local('Roboto'),local('Arial'),local('Helvetica Neue'),local('Helvetica')";
+  const ur = 'U+00A0-024F,U+0400-04FF,U+1E00-1EFF,U+2010-2027';
+  const st = document.createElement('style');
+  st.textContent = ['DOSSaemmul', 'DOSGothic'].map(f => `@font-face{font-family:${f};src:${lf};unicode-range:${ur}}`).join('');
+  document.head.appendChild(st);
+}
 const L = k => DICT[LANG][k];
-const T2 = a => ZHL ? (ZH[a[0]] || a[1]) : a[EN ? 1 : 0];
+const T2 = a => LOC ? (LOC[a[0]] || a[1]) : a[EN ? 1 : 0];
 document.querySelectorAll('[data-l]').forEach(e => { const v = L(e.dataset.l); if (typeof v === 'string') e.textContent = v; });
-document.title = EN ? 'Villain Like' : ZHL ? '恶人幸存者' : '빌런라이크';
-if (EN) document.body.classList.add('en');
+document.title = EN || PTL || RUL ? 'Villain Like' : ZHL ? '恶人幸存者' : JAL ? 'ヴィランライク' : '빌런라이크';
+if (LONGW) document.body.classList.add('en');
 // 막는 쪽 다섯(한 명으로 막차까지 버티면 다음 사람이 열림). 첫 사람은 사회복무요원(10/10 사장님)
 const GUARDS = [
   { n: ['사회복무요원', 'Service Worker'], spr: 'g_gongik', w: 'stick' },
@@ -381,7 +755,7 @@ function openLevelUp() {
     const t = document.createElement('div'); t.className = 't';
     const name = c.kind === 'heal' ? L('heal') : c.evo ? T2(def.evo) : T2(def.n);
     const cur = c.kind === 'w' ? ((G.P.weapons.find(w => w.k === c.k) || {}).lv || 0) : c.kind === 'p' ? (G.P.passives[c.k] || 0) : 0;
-    const desc = c.kind === 'heal' ? (EN ? 'HP +50' : ZHL ? '体力 +50' : '체력 +50') : c.kind === 'p' ? T2(def.d) + (c.gold ? ' ×2' : '') : cur === 0 ? T2(WDESC[def.type]) : c.evo ? (EN ? 'DAMAGE x2' : ZHL ? '伤害 x2' : '피해 2배') : (EN ? 'DAMAGE +' : ZHL ? '伤害 +' : '피해 +') + (25 * (c.lv - Math.max(1, cur))) + '%';
+    const desc = c.kind === 'heal' ? (EN ? 'HP +50' : ZHL ? '体力 +50' : JAL ? '体力 +50' : PTL ? 'Vida +50' : RUL ? 'Здоровье +50' : '체력 +50') : c.kind === 'p' ? T2(def.d) + (c.gold ? ' ×2' : '') : cur === 0 ? T2(WDESC[def.type]) : c.evo ? (EN ? 'DAMAGE x2' : ZHL ? '伤害 x2' : JAL ? 'ダメージ x2' : PTL ? 'Dano x2' : RUL ? 'Урон x2' : '피해 2배') : (EN ? 'DAMAGE +' : ZHL ? '伤害 +' : JAL ? 'ダメージ +' : PTL ? 'Dano +' : RUL ? 'Урон +' : '피해 +') + (25 * (c.lv - Math.max(1, cur))) + '%';
     const tag = c.kind === 'heal' ? '' : c.evo ? L('evo') : c.gold ? L('gold') + ' LV ' + c.lv : c.lv === 1 ? (c.kind === 'w' ? L('newW') : L('newP')) : 'LV ' + c.lv;
     t.innerHTML = '<div class="n"></div><div class="d"></div>'; t.firstChild.textContent = name; t.lastChild.textContent = desc;
     const lv = document.createElement('div'); lv.className = 'lv'; lv.textContent = tag;
@@ -451,7 +825,7 @@ function drawPillar(p) {
   R(x - bw / 2, by + 4 * ZOOM, bw, bh, 'rgba(0,0,0,.25)'); R(x - bw / 2, by, bw, bh, '#1e2128'); R(x - bw / 2 + u, by + u, bw - u * 2, bh - u * 2, '#fbfaf5');
   R(x - bw / 2 + u, by + bh - 12 * ZOOM, bw - u * 2, 8 * ZOOM, '#0052a4');
   ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(x, by + bh - 8 * ZOOM, 7 * ZOOM, 0, Math.PI * 2); ctx.fill(); ctx.strokeStyle = '#0052a4'; ctx.lineWidth = 3 * ZOOM; ctx.stroke();
-  const st = station(), nm = T2(st); ctx.fillStyle = '#1b1d21'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.font = Math.round((EN ? 13 : 17) * ZOOM) + 'px DOSSaemmul, monospace'; ctx.fillText(nm, x, by + 15 * ZOOM);
+  const st = station(), nm = T2(st); ctx.fillStyle = '#1b1d21'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.font = Math.round((LONGW ? 13 : 17) * ZOOM) + 'px DOSSaemmul, monospace'; ctx.fillText(nm, x, by + 15 * ZOOM);
 }
 function drawProp(p) {
   if (p.kind === 'pillar') return drawPillar(p);
@@ -595,10 +969,10 @@ function drawFX() {
     else if (f.kind === 'ink') { // 검거 도장 자국: 빨간 동그라미 + 튄 잉크
       const r = f.r * ZOOM; ctx.globalAlpha = Math.min(1, t * 2) * 0.85; ctx.strokeStyle = '#d12a1e'; ctx.lineWidth = 6 * ZOOM; ctx.beginPath(); ctx.ellipse(x, y, r * 0.8, r * 0.56, 0, 0, Math.PI * 2); ctx.stroke();
       ctx.fillStyle = '#d12a1e'; for (let i = 0; i < 10; i++) { const a = i * 0.63; const d = r * (0.85 + (i % 3) * 0.12) * (1.3 - t * 0.3); ctx.fillRect(x + Math.cos(a) * d - 3 * ZOOM, y + Math.sin(a) * d * 0.7 - 3 * ZOOM, 6 * ZOOM, 6 * ZOOM); }
-      ctx.font = Math.round(r * 0.5) + 'px DOSSaemmul, monospace'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(EN ? 'NAB' : ZHL ? '抓' : '검거', x, y + 2); ctx.globalAlpha = 1; }
+      ctx.font = Math.round(r * 0.5) + 'px DOSSaemmul, monospace'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(EN ? 'NAB' : ZHL ? '抓' : JAL ? '検挙' : PTL ? 'PRESO' : RUL ? 'АРЕСТ' : '검거', x, y + 2); ctx.globalAlpha = 1; }
     else if (f.kind === 'smack') { const r = f.r * ZOOM; if (!f.done) { ctx.imageSmoothingEnabled = false; iconC(f.icon, x, y - 260 * ZOOM * t, 70 * ZOOM * (f.evo ? 1.4 : 1), 2.4 - t * 3); ctx.imageSmoothingEnabled = true; ctx.strokeStyle = 'rgba(255,224,74,.6)'; ctx.lineWidth = 2; ctx.setLineDash([6, 6]); ctx.beginPath(); ctx.ellipse(x, y, r, r * 0.6, 0, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]); } }
     else if (f.kind === 'caught') { const hh = f.h * ZOOM; sprF(f.name, f.f, x, y + hh * 0.5, hh, f.flip, true, t * 0.9); ctx.globalAlpha = t; ctx.imageSmoothingEnabled = false; iconC('o:11', x, y - hh * 0.1 - (1 - t) * 20 * ZOOM, 40 * ZOOM); ctx.imageSmoothingEnabled = true; ctx.globalAlpha = 1; }
-    else if (f.kind === 'arrest') { const s = Math.min(1, (1 - t) * 6); const sc = 2.2 - s * 1.2; ctx.save(); ctx.translate(x, y); ctx.rotate(-0.18); ctx.globalAlpha = Math.min(1, t * 2.5); ctx.strokeStyle = '#d12a1e'; ctx.lineWidth = 6 * ZOOM * sc; const bw = 150 * ZOOM * sc, bh = 64 * ZOOM * sc; ctx.strokeRect(-bw / 2, -bh / 2, bw, bh); ctx.fillStyle = '#d12a1e'; ctx.font = Math.round(46 * ZOOM * sc) + 'px DOSSaemmul, monospace'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(EN ? 'ARREST' : ZHL ? '抓获' : '검거', 0, 3 * ZOOM); ctx.restore(); ctx.globalAlpha = 1; }
+    else if (f.kind === 'arrest') { const s = Math.min(1, (1 - t) * 6); const sc = 2.2 - s * 1.2; ctx.save(); ctx.translate(x, y); ctx.rotate(-0.18); ctx.globalAlpha = Math.min(1, t * 2.5); ctx.strokeStyle = '#d12a1e'; ctx.lineWidth = 6 * ZOOM * sc; const bw = 150 * ZOOM * sc, bh = 64 * ZOOM * sc; ctx.strokeRect(-bw / 2, -bh / 2, bw, bh); ctx.fillStyle = '#d12a1e'; ctx.font = Math.round(46 * ZOOM * sc) + 'px DOSSaemmul, monospace'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(EN ? 'ARREST' : ZHL ? '抓获' : JAL ? '検挙' : PTL ? 'PRESO!' : RUL ? 'АРЕСТ' : '검거', 0, 3 * ZOOM); ctx.restore(); ctx.globalAlpha = 1; }
   }
 }
 // ---------- 흐름 ----------

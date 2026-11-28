@@ -12,9 +12,9 @@
   var HANGUL = { 1: ['', '초', '한'], 2: '차', 3: '포', 4: '마', 5: '상', 6: '사', 7: '졸' };
   var COL = ['', '#1b6e3a', '#b8281c'], COLD = ['', '#0d3e20', '#6e130c'];
   // 급수 사다리 — 이기면 한 칸 오르고 지면 그 자리(오목·바둑과 같은 27단계)
-  var RANKS = [], RANKS_EN = [], RANKS_ZH = [], r;
-  for (r = 18; r >= 1; r--) { RANKS.push(r + '급'); RANKS_EN.push(r + 'K'); RANKS_ZH.push(r + '级'); }
-  for (r = 1; r <= 9; r++) { RANKS.push(r + '단'); RANKS_EN.push(r + 'D'); RANKS_ZH.push(r + '段'); }
+  var RANKS = [], RANKS_EN = [], RANKS_ZH = [], RANKS_L = { ja: [], pt: [], ru: [] }, r;
+  for (r = 18; r >= 1; r--) { RANKS.push(r + '급'); RANKS_EN.push(r + 'K'); RANKS_ZH.push(r + '级'); RANKS_L.ja.push(r + '級'); RANKS_L.pt.push(r + 'kyu'); RANKS_L.ru.push(r + 'кю'); }
+  for (r = 1; r <= 9; r++) { RANKS.push(r + '단'); RANKS_EN.push(r + 'D'); RANKS_ZH.push(r + '段'); RANKS_L.ja.push(r + '段'); RANKS_L.pt.push(r + 'dan'); RANKS_L.ru.push(r + 'дан'); }
   var TOP = RANKS.length - 1, DAN = 18;
 
   var cv = document.getElementById('c'), ctx = cv.getContext('2d');
@@ -45,8 +45,45 @@
       '@media (max-height:480px){body.zh #title h1{font-size:13vh;letter-spacing:4px}}';
     document.head.appendChild(zs);
   }
-  function rankName(L) { return (EN ? RANKS_EN : ZH ? RANKS_ZH : RANKS)[L]; }
-  var TXT = ZH ? { check: '将军', esc: '解将', bik: '王见王', pass: '停一手', cho: '楚', han: '汉', hj: '漢字', hjOff: '漢字' } : EN ? { check: 'CHECK', esc: 'ESCAPE', bik: 'BIKJANG', pass: 'PASS', cho: 'CHO', han: 'HAN', hj: 'HAN', hjOff: '漢字' } : { check: '장군', esc: '멍군', bik: '빅장', pass: '한수쉼', cho: '초', han: '한', hj: '한글', hjOff: '漢字' };
+  // ?lang=ja · pt · ru: 같은 방식으로 글자를 바꾸고 기물은 한자로만 둔다(한글 전환 단추 숨김)
+  var LQ = (location.search.match(/[?&]lang=(ja|pt|ru)\b/i) || [])[1];
+  var LG3 = !EN && !ZH && LQ ? LQ.toLowerCase() : '';
+  var LD = {
+    ja: { '초': '楚', '한': '漢', '18급': '18級', '시작': 'スタート', '장기': 'チャンギ', '기권': '投了', '한수쉼': '一手パス', 'P 한수쉼 · H 한글 · K 효과음': 'P 一手パス · K 効果音', '장군': '王手', '차림': '布陣', '급수': '段級' },
+    pt: { '초': 'CHO', '한': 'HAN', '18급': '18kyu', '시작': 'JOGAR', '장기': 'JANGGI', '기권': 'DESISTIR', '한수쉼': 'PASSAR', 'P 한수쉼 · H 한글 · K 효과음': 'P passar · K som', '장군': 'XEQUE', '차림': 'FORMAÇÃO', '급수': 'NÍVEL' },
+    ru: { '초': 'ЧО', '한': 'ХАН', '18급': '18кю', '시작': 'ИГРАТЬ', '장기': 'ЧАНГИ', '기권': 'СДАТЬСЯ', '한수쉼': 'ПРОПУСК', 'P 한수쉼 · H 한글 · K 효과음': 'P пропуск · K звук', '장군': 'ШАХ', '차림': 'РАССТАНОВКА', '급수': 'УРОВЕНЬ' }
+  };
+  if (LG3) {
+    var LT3 = LD[LG3];
+    document.documentElement.lang = LG3 === 'pt' ? 'pt-BR' : LG3; document.body.classList.add(LG3 === 'ja' ? 'ja' : 'en'); document.title = LT3['장기'];
+    Array.prototype.forEach.call(document.querySelectorAll('[data-en]'), function (el) { var k = el.textContent.trim(); if (LT3[k]) el.textContent = LT3[k]; });
+    ['lbC', 'lbH', 'rec', 'flash'].forEach(function (id) { var el = $(id); if (el && LT3[el.textContent]) el.textContent = LT3[el.textContent]; });
+    hangul = false; $('tgHj').style.display = 'none';
+    var ls = document.createElement('style');
+    if (LG3 === 'ja') {
+      var jf = "local('Hiragino Sans'),local('Hiragino Kaku Gothic ProN'),local('Yu Gothic UI'),local('Yu Gothic'),local('Yu Gothic Medium'),local('YuGothic-Medium'),local('Yu Gothic Regular'),local('YuGothic-Regular'),local('Yu Gothic Bold'),local('YuGothic-Bold'),local('MS PGothic'),local('MS Gothic'),local('Meiryo'),local('Noto Sans JP'),local('Noto Sans CJK JP'),local('Source Han Sans JP')";
+      var jur = 'U+2E80-2FFF,U+3000-30FF,U+31F0-31FF,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF';
+      ls.textContent = ['KDG', 'Ria'].map(function (f) { return "@font-face{font-family:'" + f + "';src:" + jf + ';unicode-range:' + jur + '}'; }).join('') +
+        'html[lang=ja] *{word-break:normal!important}' +
+        'body.ja #title h1{font-size:min(13vw,140px);letter-spacing:8px;font-weight:700}' +
+        'body.shot.ja #title h1{font-size:min(19vw,150px);letter-spacing:10px}' +
+        '@media (max-height:480px){body.ja #title h1{font-size:13vh;letter-spacing:4px}}';
+    } else {
+      var lf = "local('Segoe UI'),local('Roboto'),local('Arial'),local('Helvetica Neue'),local('Helvetica')";
+      var lur = 'U+00A0-024F,U+0400-04FF,U+1E00-1EFF,U+2010-2027';
+      ls.textContent = ['KDG', 'Ria'].map(function (f) { return "@font-face{font-family:'" + f + "';src:" + lf + ';unicode-range:' + lur + '}'; }).join('') +
+        '.sheet h3{letter-spacing:3px}' +
+        '@media (min-height:481px){html[lang=pt-BR] .rc{font-size:12px}}';
+    }
+    document.head.appendChild(ls);
+  }
+  function rankName(L) { return (EN ? RANKS_EN : ZH ? RANKS_ZH : LG3 ? RANKS_L[LG3] : RANKS)[L]; }
+  var TXT_L = {
+    ja: { check: '王手', esc: '王手回避', bik: '王の対面', pass: '一手パス', cho: '楚', han: '漢', hj: '漢字', hjOff: '漢字', best: '最高 ' },
+    pt: { check: 'XEQUE', esc: 'DEFESA', bik: 'CARA A CARA', pass: 'PASSOU', cho: 'CHO', han: 'HAN', hj: 'HAN', hjOff: '漢字', best: 'RECORDE ' },
+    ru: { check: 'ШАХ', esc: 'ЗАЩИТА', bik: 'ЛИЦОМ К ЛИЦУ', pass: 'ПРОПУСК', cho: 'ЧО', han: 'ХАН', hj: 'ХАН', hjOff: '漢字', best: 'РЕКОРД ' }
+  };
+  var TXT = LG3 ? TXT_L[LG3] : ZH ? { check: '将军', esc: '解将', bik: '王见王', pass: '停一手', cho: '楚', han: '汉', hj: '漢字', hjOff: '漢字' } : EN ? { check: 'CHECK', esc: 'ESCAPE', bik: 'BIKJANG', pass: 'PASS', cho: 'CHO', han: 'HAN', hj: 'HAN', hjOff: '漢字' } : { check: '장군', esc: '멍군', bik: '빅장', pass: '한수쉼', cho: '초', han: '한', hj: '한글', hjOff: '漢字' };
 
   function loadBest() { try { return Math.max(0, Math.min(TOP, parseInt(localStorage.getItem('janggi.lv') || '0', 10) || 0)); } catch (e) { return 0; } }
   function saveBest(n) { try { localStorage.setItem('janggi.lv', String(n)); } catch (e) {} }
@@ -54,7 +91,7 @@
   function savePick(n) { try { localStorage.setItem('janggi.pick', String(n)); } catch (e) {} }
   function showRec() {
     $('rec').textContent = rankName(G.level);
-    var b = loadBest(); $('best').textContent = b > 0 ? (EN ? 'BEST ' : ZH ? '最高 ' : '최고 ') + rankName(b) : '';
+    var b = loadBest(); $('best').textContent = b > 0 ? (EN ? 'BEST ' : ZH ? '最高 ' : LG3 ? TXT.best : '최고 ') + rankName(b) : '';
     Array.prototype.forEach.call($('rk').children, function (w, i) { w.classList.toggle('on', i === G.level); });
   }
   function setLevel(n) { n = Math.max(0, Math.min(TOP, n)); if (n === G.level) return; G.level = n; savePick(n); showRec(); updHud(); A.pick(); }
@@ -430,7 +467,7 @@
   function toggleHj() { hangul = !hangul; try { localStorage.setItem('janggi.hj', hangul ? '1' : '0'); } catch (e) {} iconCache = {}; updHud(); dirty = true; if (G.mode === 'setup') buildOpts(); }
   window.addEventListener('keydown', function (e) {
     if (e.key === 'k' || e.key === 'K') { A.init(); A.toggleSnd(); syncTog(); }
-    else if ((e.key === 'h' || e.key === 'H') && !ZH) toggleHj();
+    else if ((e.key === 'h' || e.key === 'H') && !ZH && !LG3) toggleHj();
     else if ((e.key === 'p' || e.key === 'P') && humanTurn() && G.g.canPass()) doPass();
     else if (e.key === 'Escape') { G.sel = -1; dirty = true; $('ranks').classList.remove('show'); }
     else if (G.mode === 'title' && (e.key === 'ArrowLeft' || e.key === 'ArrowDown')) setLevel(G.level - 1);

@@ -6,18 +6,27 @@
   var NAMES = {
     ko: ['콩', '경단', '꿀떡', '쑥떡', '송편', '인절미', '무지개떡', '딸기찹쌀떡', '호박떡', '백설기', '보름달'],
     en: ['Bean', 'Dango', 'Honey Cake', 'Mugwort Cake', 'Songpyeon', 'Injeolmi', 'Rainbow Cake', 'Strawberry Mochi', 'Pumpkin Cake', 'Snow Cake', 'Full Moon'],
-    zh: ['豆子', '糯米团', '蜂蜜糕', '艾草糕', '松饼', '打糕', '彩虹糕', '草莓糯米糍', '南瓜糕', '白雪糕', '满月']
+    zh: ['豆子', '糯米团', '蜂蜜糕', '艾草糕', '松饼', '打糕', '彩虹糕', '草莓糯米糍', '南瓜糕', '白雪糕', '满月'],
+    ja: ['豆', '団子', 'はちみつ餅', 'よもぎ餅', 'ソンピョン', 'インジョルミ', '虹餅', 'いちご大福', 'かぼちゃ餅', 'ペクソルギ', '満月'],
+    pt: ['Feijão', 'Bolinho', 'Bolo de Mel', 'Bolo de Artemísia', 'Songpyeon', 'Injeolmi', 'Bolo Arco-Íris', 'Mochi de Morango', 'Bolo de Abóbora', 'Bolo de Neve', 'Lua Cheia'],
+    ru: ['Фасолинка', 'Данго', 'Медовый тток', 'Полынный тток', 'Сонпхён', 'Инджольми', 'Радужный тток', 'Клубничное моти', 'Тыквенный тток', 'Снежный тток', 'Полная луна']
   };
   // 그 판에서 만든 제일 큰 떡으로 정하는 칭호
   var TITLES = {
     ko: ['콩알 초보', '경단 초보', '꿀떡 견습', '쑥떡 견습', '송편 솜씨', '인절미 솜씨', '무지개떡 장인', '찹쌀떡 장인', '호박떡 명인', '백설기 명인', '보름달 떡방앗간'],
     en: ['Bean Rookie', 'Dango Rookie', 'Honey Apprentice', 'Mugwort Apprentice', 'Songpyeon Hand', 'Injeolmi Hand', 'Rainbow Artisan', 'Mochi Artisan', 'Pumpkin Master', 'Snow Cake Master', 'Full Moon Mill'],
-    zh: ['豆粒新手', '糯米团新手', '蜂蜜糕学徒', '艾草糕学徒', '松饼好手', '打糕好手', '彩虹糕匠人', '糯米糍匠人', '南瓜糕大师', '白雪糕大师', '满月年糕坊']
+    zh: ['豆粒新手', '糯米团新手', '蜂蜜糕学徒', '艾草糕学徒', '松饼好手', '打糕好手', '彩虹糕匠人', '糯米糍匠人', '南瓜糕大师', '白雪糕大师', '满月年糕坊'],
+    ja: ['豆つぶ初心者', '団子初心者', 'はちみつ餅見習い', 'よもぎ餅見習い', 'ソンピョン上手', 'インジョルミ上手', '虹餅職人', '大福職人', 'かぼちゃ餅名人', 'ペクソルギ名人', '満月の餅屋'],
+    pt: ['Novato do Feijão', 'Novato do Bolinho', 'Aprendiz do Mel', 'Aprendiz da Artemísia', 'Bom de Songpyeon', 'Bom de Injeolmi', 'Artesão do Arco-Íris', 'Artesão do Mochi', 'Mestre da Abóbora', 'Mestre do Bolo de Neve', 'Moinho da Lua Cheia'],
+    ru: ['Новичок-фасолинка', 'Новичок данго', 'Медовый ученик', 'Полынный ученик', 'Умелец сонпхёна', 'Умелец инджольми', 'Радужный ремесленник', 'Ремесленник моти', 'Тыквенный мастер', 'Снежный мастер', 'Мельница полной луны']
   };
   var L = {
     ko: { title: '달떡 합치기', score: '점수', best: '최고 기록', today: '오늘 최고', moon: '보름달', top: '제일 큰 떡', newb: 'NEW', hook: '너는 몇 점까지 합칠 수 있을까?', site: 'oreumgames.com', cnt: function (n) { return n + '개'; }, copied: '주소를 복사했어요' },
     en: { title: 'Moon Mochi Merge', score: 'SCORE', best: 'BEST', today: 'TODAY', moon: 'FULL MOON', top: 'BIGGEST', newb: 'NEW', hook: 'How far can you merge?', site: 'oreumgames.com', cnt: function (n) { return 'x ' + n; }, copied: 'Link copied' },
-    zh: { title: '月亮年糕合成', score: '分数', best: '最高纪录', today: '今日最高', moon: '满月', top: '最大的年糕', newb: 'NEW', hook: '你能合成到多少分？', site: 'oreumgames.com', cnt: function (n) { return n + '个'; }, copied: '链接已复制' }
+    zh: { title: '月亮年糕合成', score: '分数', best: '最高纪录', today: '今日最高', moon: '满月', top: '最大的年糕', newb: 'NEW', hook: '你能合成到多少分？', site: 'oreumgames.com', cnt: function (n) { return n + '个'; }, copied: '链接已复制' },
+    ja: { title: '月見もち合体', score: 'スコア', best: '最高記録', today: '今日の最高', moon: '満月', top: 'いちばん大きいもち', newb: 'NEW', hook: 'キミは何点まで合体できる？', site: 'oreumgames.com', cnt: function (n) { return n + '個'; }, copied: 'リンクをコピーしました' },
+    pt: { title: 'Fusão Mochi da Lua', score: 'Pontos', best: 'Recorde', today: 'Melhor de hoje', moon: 'Lua cheia', top: 'Maior mochi', newb: 'NEW', hook: 'Até quantos pontos você consegue juntar?', site: 'oreumgames.com', cnt: function (n) { return 'x ' + n; }, copied: 'Link copiado' },
+    ru: { title: 'Лунные моти: слияние', score: 'Очки', best: 'Рекорд', today: 'Лучшее за день', moon: 'Полная луна', top: 'Самое большое моти', newb: 'NEW', hook: 'Сколько очков ты наберёшь?', site: 'oreumgames.com', cnt: function (n) { return 'x ' + n; }, copied: 'Ссылка скопирована' }
   };
   function rng(seed) { var a = seed >>> 0; return function () { a = (a + 0x6D2B79F5) | 0; var t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
   function rrect(c, x, y, w, h, r) { c.beginPath(); if (c.roundRect) c.roundRect(x, y, w, h, r); else c.rect(x, y, w, h); }
@@ -62,7 +71,7 @@
   }
 
   function draw(c, X, logo) {
-    var G = X.G, EN = X.EN, LK = EN ? 'en' : X.ZH ? 'zh' : 'ko', T = L[LK], NM = NAMES[LK], TT = TITLES[LK];
+    var G = X.G, EN = X.EN, LK = EN ? 'en' : X.ZH ? 'zh' : X.LX || 'ko', T = L[LK], NM = NAMES[LK], TT = TITLES[LK];
     var top = Math.max(1, Math.min(11, G.top || 1)), i, rnd = rng(20261016);
     var TK = 'Tokki, Ria, sans-serif', RIA = 'Ria, sans-serif';
     // 밤하늘
@@ -80,7 +89,8 @@
     c.fillStyle = 'rgba(200,170,90,.28)';
     [[30, -22, 17], [-36, 26, 13], [18, 44, 22], [-20, -48, 9]].forEach(function (p) { c.beginPath(); c.arc(mx + p[0], my + p[1], p[2], 0, PI2); c.fill(); });
     // 제목
-    text(c, T.title, 540, 92, (EN ? 78 : 92) + 'px ' + TK, '#fff3b0', DEEP, 20);
+    if (X.LX) text(c, T.title, 540, 92, fit(c, T.title, (X.LX === 'ja' ? 92 : 78) + 'px ' + TK, 1000), '#fff3b0', DEEP, 20);
+    else text(c, T.title, 540, 92, (EN ? 78 : 92) + 'px ' + TK, '#fff3b0', DEEP, 20);
     // 판 사진: 게임 화면에서 됫박 아랫부분을 잘라 온다(제일 큰 떡들이 쌓인 곳)
     var ph = { x: 130, y: 150, w: 820, h: 560 };
     var sw = (X.BR - X.BL + 36) * X.SS, sx = (X.BL - 18) * X.SS + X.ox * X.dpr;
@@ -139,7 +149,8 @@
       else { c.beginPath(); c.arc(cx2, dy, r2, 0, PI2); c.fillStyle = 'rgba(195,205,221,.35)'; c.fill(); c.lineWidth = 2; c.strokeStyle = 'rgba(142,154,184,.7)'; c.stroke(); text(c, '?', cx2, dy + 1, Math.round(r2 * 1.1) + 'px ' + RIA, 'rgba(255,255,255,.55)'); }
     }
     // 보는 사람에게 던지는 한 줄 + 주소
-    text(c, T.hook, 540, 1290, (EN ? 42 : 44) + 'px ' + RIA, '#fff3b0', DEEP, 12);
+    if (X.LX) text(c, T.hook, 540, 1290, fit(c, T.hook, (X.LX === 'ja' ? 44 : 42) + 'px ' + RIA, 1000), '#fff3b0', DEEP, 12);
+    else text(c, T.hook, 540, 1290, (EN ? 42 : 44) + 'px ' + RIA, '#fff3b0', DEEP, 12);
     c.font = '34px ' + RIA; var sw2 = c.measureText(T.site).width, lw = 58, gap = 14, bx = 540 - (sw2 + lw + gap) / 2;
     if (logo) c.drawImage(logo, bx, 1329 - 14, lw, 28);
     text(c, T.site, bx + lw + gap, 1330, '34px ' + RIA, '#fff', null, 0, 'left');
@@ -161,7 +172,7 @@
     });
   }
   function toBlob(c) { return new Promise(function (r) { c.toBlob(r, 'image/png'); }); }
-  function fname(X) { return (X.EN || X.ZH ? 'moon-mochi-' : 'daltteok-') + X.G.score + '.png'; }
+  function fname(X) { return (X.EN || X.ZH || X.LX ? 'moon-mochi-' : 'daltteok-') + X.G.score + '.png'; }
   function download(b, name) {
     var a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = name;
     document.body.appendChild(a); a.click();
@@ -181,7 +192,7 @@
     }
     e.textContent = t; e.style.opacity = '1'; clearTimeout(e.__t); e.__t = setTimeout(function () { e.style.opacity = '0'; }, 2600);
   }
-  function T() { var X = window.__dtCard(); return X.EN ? L.en : X.ZH ? L.zh : L.ko; }
+  function T() { var X = window.__dtCard(); return X.EN ? L.en : X.ZH ? L.zh : X.LX ? L[X.LX] : L.ko; }
   function copyLink(X, t) {
     var full = X.text + (X.url ? String.fromCharCode(10) + X.url : '');
     var ok = function () { toast(t.copied); };

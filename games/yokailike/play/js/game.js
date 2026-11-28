@@ -2,12 +2,15 @@
 (function () {
 'use strict';
 const $ = s => document.querySelector(s);
-const LANG = /[?&]lang=en/.test(location.search) ? 'en' : /[?&]lang=zh/.test(location.search) ? 'zh' : 'ko';
-const LI = LANG === 'en' ? 1 : LANG === 'zh' ? 2 : 0;
+const LANG = /[?&]lang=en/.test(location.search) ? 'en' : /[?&]lang=zh/.test(location.search) ? 'zh' : /[?&]lang=ja/.test(location.search) ? 'ja' : /[?&]lang=pt/.test(location.search) ? 'pt' : /[?&]lang=ru/.test(location.search) ? 'ru' : 'ko';
+const LI = LANG === 'en' ? 1 : LANG === 'zh' ? 2 : LANG === 'ja' ? 3 : LANG === 'pt' ? 4 : LANG === 'ru' ? 5 : 0;
 const DICT = {
   ko: { start: '시작', levelup: 'LEVEL UP', pause: 'PAUSE', resume: '계속', home: '처음으로', time: 'TIME', level: 'LEVEL', kills: 'KILL', unlock: 'NEW', t1: '요괴', t2: '라이크', dawn: '새벽', over: 'GAME OVER', evo: '진화', max: 'MAX', newW: '새 무기', newP: '새 아이템', locked: '잠김', heal: '회복', shop: '상점', dex: '도감', coin: '코인', close: '닫기', tabE: '요괴', tabW: '무기', tabI: '아이템', tabG: '소녀', unknown: '아직 못 봤습니다', hint: 'WASD / ←↑↓→ 이동 · SPACE 불꽃 · Esc 일시정지' },
   en: { start: 'START', levelup: 'LEVEL UP', pause: 'PAUSE', resume: 'RESUME', home: 'HOME', time: 'TIME', level: 'LEVEL', kills: 'KILL', unlock: 'NEW', t1: 'YOKAI', t2: 'LIKE', dawn: 'DAWN', over: 'GAME OVER', evo: 'EVOLVE', max: 'MAX', newW: 'NEW WEAPON', newP: 'NEW ITEM', locked: 'LOCKED', heal: 'HEAL', shop: 'SHOP', dex: 'COLLECTION', coin: 'COIN', close: 'CLOSE', tabE: 'YOKAI', tabW: 'WEAPONS', tabI: 'ITEMS', tabG: 'GIRLS', unknown: 'Not seen yet', hint: 'WASD / Arrows move · SPACE firework · Esc pause' },
   zh: { start: '开始', levelup: 'LEVEL UP', pause: 'PAUSE', resume: '继续', home: '主菜单', time: 'TIME', level: 'LEVEL', kills: 'KILL', unlock: 'NEW', t1: '妖怪', t2: '幸存者', dawn: '天亮了', over: 'GAME OVER', evo: '进化', max: 'MAX', newW: '新武器', newP: '新道具', locked: '未解锁', heal: '回复', shop: '商店', dex: '图鉴', coin: '金币', close: '关闭', tabE: '妖怪', tabW: '武器', tabI: '道具', tabG: '少女', unknown: '还没见过', hint: 'WASD / ←↑↓→ 移动 · SPACE 烟花 · Esc 暂停' },
+  ja: { start: 'スタート', levelup: 'LEVEL UP', pause: 'PAUSE', resume: '続ける', home: 'タイトルへ', time: 'TIME', level: 'LEVEL', kills: 'KILL', unlock: 'NEW', t1: '妖怪', t2: 'ライク', dawn: '夜明け', over: 'GAME OVER', evo: '進化', max: 'MAX', newW: '新しい武器', newP: '新アイテム', locked: 'ロック中', heal: '回復', shop: 'ショップ', dex: '図鑑', coin: 'コイン', close: '閉じる', tabE: '妖怪', tabW: '武器', tabI: 'アイテム', tabG: '少女', unknown: 'まだ見ていません', hint: 'WASD / ←↑↓→ 移動 · SPACE 花火 · Esc 一時停止' },
+  pt: { start: 'INICIAR', levelup: 'LEVEL UP', pause: 'PAUSE', resume: 'CONTINUAR', home: 'INÍCIO', time: 'TIME', level: 'LEVEL', kills: 'KILL', unlock: 'NEW', t1: 'YOKAI', t2: 'LIKE', dawn: 'AMANHECEU', over: 'GAME OVER', evo: 'EVOLUIR', max: 'MAX', newW: 'NOVA ARMA', newP: 'NOVO ITEM', locked: 'BLOQUEADO', heal: 'CURA', shop: 'LOJA', dex: 'COLEÇÃO', coin: 'MOEDAS', close: 'FECHAR', tabE: 'YOKAIS', tabW: 'ARMAS', tabI: 'ITENS', tabG: 'GAROTAS', unknown: 'Ainda não visto', hint: 'WASD / Setas movem · SPACE fogos · Esc pausa' },
+  ru: { start: 'СТАРТ', levelup: 'LEVEL UP', pause: 'PAUSE', resume: 'ДАЛЕЕ', home: 'МЕНЮ', time: 'TIME', level: 'LEVEL', kills: 'KILL', unlock: 'NEW', t1: 'YOKAI', t2: 'LIKE', dawn: 'РАССВЕТ', over: 'GAME OVER', evo: 'ЭВОЛЮЦИЯ', max: 'MAX', newW: 'НОВОЕ ОРУЖИЕ', newP: 'НОВЫЙ ПРЕДМЕТ', locked: 'ЗАКРЫТО', heal: 'ЛЕЧЕНИЕ', shop: 'МАГАЗИН', dex: 'КОЛЛЕКЦИЯ', coin: 'МОНЕТЫ', close: 'ЗАКРЫТЬ', tabE: 'ЁКАИ', tabW: 'ОРУЖИЕ', tabI: 'ПРЕДМЕТЫ', tabG: 'ДЕВУШКИ', unknown: 'Ещё не встречалось', hint: 'WASD / Стрелки — ход · SPACE салют · Esc пауза' },
 };
 // 중국어: 한국어 원문을 열쇠로 쓰는 사전
 const ZH = {
@@ -26,17 +29,77 @@ const ZH = {
   '3분·11분 보스, 덩치': '3分和11分的BOSS，大块头', '6분·11분 30초 보스, 돌진': '6分和11分30秒的BOSS，会冲撞', '9분 보스, 작은 우산을 불러냄': '9分的BOSS，会召唤小伞妖',
   '보스': 'BOSS', '마지막 보스': '最终BOSS', '체력 +50': 'HP +50', '피해 2배': '伤害 x2', '피해 +25%': '伤害 +25%',
 };
-// 한국어·영어·중국어 중 하나 고르기
-const T = (ko, en) => LANG === 'en' ? en : LANG === 'zh' ? (ZH[ko] || en) : ko;
+// 일본어·포르투갈어·러시아어: 한국어 원문을 열쇠로 쓰는 사전
+const JA = {
+  '아야메': 'アヤメ', '히마리': 'ヒマリ', '미코토': 'ミコト', '사쿠야': 'サクヤ', '나츠키': 'ナツキ', '루리카': 'ルリカ', '시오리': 'シオリ', '모모': 'モモ',
+  '죽도': '竹刀', '불꽃 죽도': '炎の竹刀', '금붕어': '金魚', '금붕어 떼': '金魚の群れ', '부적': 'お札', '여우불 부적': '狐火のお札', '쟁반': 'お盆', '뜨거운 쟁반': '熱々のお盆',
+  '고무공': 'ゴムボール', '왕 고무공': '特大ゴムボール', '양산': '日傘', '등롱 양산': '提灯日傘', '책': '本', '주문서': '魔導書', '고양이 펀치': 'ネコパンチ', '네코마타 펀치': '猫又パンチ',
+  '불꽃': '花火', '큰 불꽃': '大花火', '등롱': '提灯', '큰 등롱': '大提灯', '여우 가면': '狐のお面', '가면 행렬': 'お面行列', '타코야키': 'たこ焼き', '왕 타코야키': '特大たこ焼き',
+  '사과사탕': 'りんご飴', '초코바나나': 'チョコバナナ', '라무네': 'ラムネ', '공격 +12%': '攻撃 +12%', '최대 체력 +25': '最大HP +25', '이동 속도 +8%': '移動速度 +8%',
+  '앞뒤 베기': '前後を斬る', '튀어 다님': '跳ね回る', '가까운 요괴를 쫓음': '近くの妖怪を追う', '던졌다 돌아옴': '投げると戻ってくる', '주위를 돎': '周りを回る', '부채꼴 발사': '扇形に発射',
+  '가까운 요괴 연타': '近くの妖怪を連打', '하늘에서 떨어짐': '空から降ってくる', '주위 지속 피해': '周りに継続ダメージ', '맞으면 느려짐': '当たると遅くなる', '터지는 타코야키': '爆発するたこ焼き',
+  '자동사냥': '自動狩り', '알아서 피하고 줍기': '自動でよけて拾う', '사과사탕 묶음': 'りんご飴セット', '공격 +6%': '攻撃 +6%', '초코바나나 묶음': 'チョコバナナセット', '최대 체력 +10': '最大HP +10',
+  '라무네 묶음': 'ラムネセット', '이동 속도 +3%': '移動速度 +3%', '영혼불 자석 +20': '魂火の吸い寄せ +20', '폭죽 상자': '花火箱', '폭죽 게이지 +12%': '花火ゲージ +12%', '부적 다발': 'お札の束', '영혼불 경험치 +6%': '魂火の経験値 +6%',
+  '가라카사': '唐傘おばけ', '외눈 동자': '一つ目小僧', '갓파': '河童', '혼불': '人魂', '여우': '狐', '놋페라보': 'のっぺらぼう', '네코마타': '猫又', '꼬마 오니': '小鬼', '너구리': 'タヌキ', '텐구': '天狗', '큰 우산': '大傘おばけ',
+  '깡충깡충 뛰는 우산 요괴': 'ぴょんぴょん跳ねる傘の妖怪', '빠르게 다가오는 외눈 동자': 'すばやく迫る一つ目小僧', '잡으면 가끔 타코야키를 떨어뜨림': '倒すとたまにたこ焼きを落とす', '떠다니는 혼불': 'ふわふわ漂う人魂',
+  '단단한 여우': 'タフな狐', '얼굴 없는 유령': '顔のないおばけ', '빠르고 단단한 고양이 요괴': '速くてタフな猫の妖怪', '느리지만 아픈 꼬마 오니': '遅いけど攻撃が痛い小鬼',
+  '3분·11분 보스, 덩치': '3分・11分のBOSS、巨体', '6분·11분 30초 보스, 돌진': '6分・11分30秒のBOSS、突進', '9분 보스, 작은 우산을 불러냄': '9分のBOSS、小さな傘を呼ぶ',
+  '보스': 'BOSS', '마지막 보스': 'ラストBOSS', '체력 +50': 'HP +50', '피해 2배': 'ダメージ2倍', '피해 +25%': 'ダメージ +25%',
+};
+const PT = {
+  '아야메': 'Ayame', '히마리': 'Himari', '미코토': 'Mikoto', '사쿠야': 'Sakuya', '나츠키': 'Natsuki', '루리카': 'Rurika', '시오리': 'Shiori', '모모': 'Momo',
+  '죽도': 'Shinai', '불꽃 죽도': 'Shinai Flamejante', '금붕어': 'Peixinho Dourado', '금붕어 떼': 'Cardume Dourado', '부적': 'Ofuda', '여우불 부적': 'Ofuda de Fogo-Raposa', '쟁반': 'Bandeja', '뜨거운 쟁반': 'Bandeja Quente',
+  '고무공': 'Bola de Borracha', '왕 고무공': 'Bolona de Borracha', '양산': 'Sombrinha', '등롱 양산': 'Sombrinha-Lanterna', '책': 'Livro', '주문서': 'Grimório', '고양이 펀치': 'Patinha de Gato', '네코마타 펀치': 'Patinha de Nekomata',
+  '불꽃': 'Fogos', '큰 불꽃': 'Fogos Gigantes', '등롱': 'Lanterna', '큰 등롱': 'Lanterna Grande', '여우 가면': 'Máscara de Raposa', '가면 행렬': 'Desfile de Máscaras', '타코야키': 'Takoyaki', '왕 타코야키': 'Takoyaki Gigante',
+  '사과사탕': 'Maçã do Amor', '초코바나나': 'Banana com Chocolate', '라무네': 'Ramune', '공격 +12%': 'DANO +12%', '최대 체력 +25': 'HP MÁX +25', '이동 속도 +8%': 'VELOCIDADE +8%',
+  '앞뒤 베기': 'Corta na frente e atrás', '튀어 다님': 'Quica pra todo lado', '가까운 요괴를 쫓음': 'Persegue o yokai mais perto', '던졌다 돌아옴': 'Vai e volta', '주위를 돎': 'Gira ao seu redor', '부채꼴 발사': 'Tiro em leque',
+  '가까운 요괴 연타': 'Socos rápidos no yokai mais perto', '하늘에서 떨어짐': 'Cai do céu', '주위 지속 피해': 'Dano contínuo ao redor', '맞으면 느려짐': 'Deixa os inimigos lentos', '터지는 타코야키': 'Takoyaki explosivo',
+  '자동사냥': 'Caça Automática', '알아서 피하고 줍기': 'Desvia e coleta sozinha', '사과사탕 묶음': 'Pacote de Maçã do Amor', '공격 +6%': 'DANO +6%', '초코바나나 묶음': 'Pacote de Banana com Chocolate', '최대 체력 +10': 'HP MÁX +10',
+  '라무네 묶음': 'Pacote de Ramune', '이동 속도 +3%': 'VELOCIDADE +3%', '영혼불 자석 +20': 'ÍMÃ DE ALMAS +20', '폭죽 상자': 'Caixa de Fogos', '폭죽 게이지 +12%': 'BARRA DE FOGOS +12%', '부적 다발': 'Maço de Ofudas', '영혼불 경험치 +6%': 'XP DAS ALMAS +6%',
+  '가라카사': 'Karakasa', '외눈 동자': 'Menino de Um Olho', '갓파': 'Kappa', '혼불': 'Fogo-Fátuo', '여우': 'Raposa', '놋페라보': 'Noppera-bo', '네코마타': 'Nekomata', '꼬마 오니': 'Pequeno Oni', '너구리': 'Tanuki', '텐구': 'Tengu', '큰 우산': 'Guarda-Chuva Gigante',
+  '깡충깡충 뛰는 우산 요괴': 'Yokai guarda-chuva saltitante', '빠르게 다가오는 외눈 동자': 'Menino de um olho que chega rápido', '잡으면 가끔 타코야키를 떨어뜨림': 'Às vezes deixa cair takoyaki', '떠다니는 혼불': 'Fogo-fátuo flutuante',
+  '단단한 여우': 'Raposa resistente', '얼굴 없는 유령': 'Fantasma sem rosto', '빠르고 단단한 고양이 요괴': 'Yokai gato rápido e resistente', '느리지만 아픈 꼬마 오니': 'Lento, mas bate forte',
+  '3분·11분 보스, 덩치': 'BOSS dos 3 e 11 min, grandão', '6분·11분 30초 보스, 돌진': 'BOSS dos 6 min e 11:30, avança com tudo', '9분 보스, 작은 우산을 불러냄': 'BOSS dos 9 min, invoca guarda-chuvinhas',
+  '보스': 'BOSS', '마지막 보스': 'BOSS FINAL', '체력 +50': 'HP +50', '피해 2배': 'DANO x2', '피해 +25%': 'DANO +25%',
+};
+const RU = {
+  '아야메': 'Аямэ', '히마리': 'Химари', '미코토': 'Микото', '사쿠야': 'Сакуя', '나츠키': 'Нацуки', '루리카': 'Рурика', '시오리': 'Сиори', '모모': 'Момо',
+  '죽도': 'Синай', '불꽃 죽도': 'Огненный синай', '금붕어': 'Золотая рыбка', '금붕어 떼': 'Стая рыбок', '부적': 'Офуда', '여우불 부적': 'Офуда лисьего огня', '쟁반': 'Поднос', '뜨거운 쟁반': 'Горячий поднос',
+  '고무공': 'Мячик', '왕 고무공': 'Огромный мяч', '양산': 'Зонтик', '등롱 양산': 'Зонтик-фонарь', '책': 'Книга', '주문서': 'Гримуар', '고양이 펀치': 'Кошачья лапа', '네코마타 펀치': 'Лапа нэкоматы',
+  '불꽃': 'Салют', '큰 불꽃': 'Большой салют', '등롱': 'Фонарь', '큰 등롱': 'Большой фонарь', '여우 가면': 'Лисья маска', '가면 행렬': 'Парад масок', '타코야키': 'Такояки', '왕 타코야키': 'Мега-такояки',
+  '사과사탕': 'Яблоко в карамели', '초코바나나': 'Банан в шоколаде', '라무네': 'Рамунэ', '공격 +12%': 'УРОН +12%', '최대 체력 +25': 'МАКС. HP +25', '이동 속도 +8%': 'СКОРОСТЬ +8%',
+  '앞뒤 베기': 'Рубит вперёд и назад', '튀어 다님': 'Отскакивает', '가까운 요괴를 쫓음': 'Летит к ближайшему ёкаю', '던졌다 돌아옴': 'Летит и возвращается', '주위를 돎': 'Кружит вокруг', '부채꼴 발사': 'Веерный выстрел',
+  '가까운 요괴 연타': 'Быстрые удары по ближайшему', '하늘에서 떨어짐': 'Падает с неба', '주위 지속 피해': 'Постоянный урон вокруг', '맞으면 느려짐': 'Замедляет врагов', '터지는 타코야키': 'Взрывные такояки',
+  '자동사냥': 'Автоохота', '알아서 피하고 줍기': 'Сама уклоняется и собирает', '사과사탕 묶음': 'Набор карамельных яблок', '공격 +6%': 'УРОН +6%', '초코바나나 묶음': 'Набор бананов в шоколаде', '최대 체력 +10': 'МАКС. HP +10',
+  '라무네 묶음': 'Набор рамунэ', '이동 속도 +3%': 'СКОРОСТЬ +3%', '영혼불 자석 +20': 'МАГНИТ ДУШ +20', '폭죽 상자': 'Коробка салюта', '폭죽 게이지 +12%': 'ШКАЛА САЛЮТА +12%', '부적 다발': 'Пачка офуда', '영혼불 경험치 +6%': 'ОПЫТ ДУШ +6%',
+  '가라카사': 'Каракаса', '외눈 동자': 'Одноглазый мальчик', '갓파': 'Каппа', '혼불': 'Блуждающий огонёк', '여우': 'Лиса', '놋페라보': 'Ноппэрабо', '네코마타': 'Нэкомата', '꼬마 오니': 'Маленький они', '너구리': 'Тануки', '텐구': 'Тэнгу', '큰 우산': 'Огромный зонт',
+  '깡충깡충 뛰는 우산 요괴': 'Прыгучий ёкай-зонтик', '빠르게 다가오는 외눈 동자': 'Быстро подбирается к тебе', '잡으면 가끔 타코야키를 떨어뜨림': 'Иногда роняет такояки', '떠다니는 혼불': 'Парящий огонёк',
+  '단단한 여우': 'Крепкая лиса', '얼굴 없는 유령': 'Безликий призрак', '빠르고 단단한 고양이 요괴': 'Быстрый и крепкий кот-ёкай', '느리지만 아픈 꼬마 오니': 'Медленный, но бьёт больно',
+  '3분·11분 보스, 덩치': 'BOSS на 3 и 11 мин, здоровяк', '6분·11분 30초 보스, 돌진': 'BOSS на 6 мин и 11:30, таранит', '9분 보스, 작은 우산을 불러냄': 'BOSS на 9 мин, зовёт зонтики',
+  '보스': 'BOSS', '마지막 보스': 'ФИНАЛЬНЫЙ BOSS', '체력 +50': 'HP +50', '피해 2배': 'УРОН x2', '피해 +25%': 'УРОН +25%',
+};
+const XD = { zh: ZH, ja: JA, pt: PT, ru: RU };
+// 한국어·영어·중국어·일본어·포르투갈어·러시아어 중 하나 고르기
+const T = (ko, en) => LANG === 'en' ? en : LANG === 'zh' ? (ZH[ko] || en) : XD[LANG] ? (XD[LANG][ko] || en) : ko;
 const L = k => DICT[LANG][k];
 document.querySelectorAll('[data-l]').forEach(e => { const v = L(e.dataset.l); if (typeof v === 'string') e.textContent = v; });
-document.title = LANG === 'en' ? 'Yokai Like' : LANG === 'zh' ? '妖怪幸存者' : '요괴라이크';
+document.title = LANG === 'en' ? 'Yokai Like' : LANG === 'zh' ? '妖怪幸存者' : LANG === 'ja' ? '妖怪ライク' : (LANG === 'pt' || LANG === 'ru') ? 'Yokai Like' : '요괴라이크';
 if (LANG === 'zh') {
   document.documentElement.lang = 'zh-CN';
   const zf = "local('PingFang SC'),local('PingFangSC-Regular'),local('Microsoft YaHei'),local('Microsoft YaHei UI'),local('Noto Sans SC'),local('Noto Sans CJK SC'),local('Source Han Sans SC')";
   const ur = 'U+2E80-2FFF,U+3000-303F,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF';
   const st = document.createElement('style');
   st.textContent = ['Galmuri', 'NeoDGM'].map(f => "@font-face{font-family:'" + f + "';src:" + zf + ";unicode-range:" + ur + "}").join('') + 'html[lang=zh-CN] *{word-break:normal!important}';
+  document.head.appendChild(st);
+}
+// 일본어는 가나·한자, 포르투갈어·러시아어는 악센트 라틴·키릴 글자를 시스템 글꼴로 채움
+if (LANG === 'ja' || LANG === 'pt' || LANG === 'ru') {
+  document.documentElement.lang = LANG === 'pt' ? 'pt-BR' : LANG;
+  const jf = LANG === 'ja' ? "local('Hiragino Sans'),local('Hiragino Kaku Gothic ProN'),local('Yu Gothic UI'),local('Yu Gothic'),local('Yu Gothic Medium'),local('YuGothic-Medium'),local('Yu Gothic Regular'),local('YuGothic-Regular'),local('Yu Gothic Bold'),local('YuGothic-Bold'),local('MS PGothic'),local('MS Gothic'),local('Meiryo'),local('Noto Sans JP'),local('Noto Sans CJK JP'),local('Source Han Sans JP')"
+    : "local('Segoe UI'),local('Roboto'),local('Arial'),local('Helvetica Neue'),local('Helvetica')";
+  const ur = LANG === 'ja' ? 'U+2E80-2FFF,U+3000-30FF,U+31F0-31FF,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF' : 'U+00A0-024F,U+0400-04FF,U+1E00-1EFF,U+2010-2027';
+  const st = document.createElement('style');
+  st.textContent = ['Galmuri', 'NeoDGM'].map(f => "@font-face{font-family:'" + f + "';src:" + jf + ";unicode-range:" + ur + "}").join('') + (LANG === 'ja' ? 'html[lang=ja] *{word-break:normal!important}' : '');
   document.head.appendChild(st);
 }
 const GIRLS = [
@@ -108,6 +171,12 @@ if (LANG === 'zh') {
   const z = k => ZH[k] || k;
   [GIRLS, Object.values(WEAPONS), Object.values(PASSIVES), SHOP].forEach(a => a.forEach(o => { o.zh = z(o.ko); }));
   [Object.values(WEAPONS).map(w => w.evo), Object.values(PASSIVES).map(p => p.d), SHOP.map(o => o.d), Object.values(WDESC), Object.values(ENAMES), Object.values(EDESC)].forEach(a => a.forEach(r => { r[2] = z(r[0]); }));
+}
+// 일본어·포르투갈어·러시아어: 사전에 없으면 영어
+if (LANG === 'ja' || LANG === 'pt' || LANG === 'ru') {
+  const D = XD[LANG];
+  [GIRLS, Object.values(WEAPONS), Object.values(PASSIVES), SHOP].forEach(a => a.forEach(o => { o[LANG] = D[o.ko] || o.en; }));
+  [Object.values(WEAPONS).map(w => w.evo), Object.values(PASSIVES).map(p => p.d), SHOP.map(o => o.d), Object.values(WDESC), Object.values(ENAMES), Object.values(EDESC)].forEach(a => a.forEach(r => { r[LI] = D[r[0]] || r[1]; }));
 }
 function seen(k) { if (!SAVE.seen[k]) { SAVE.seen[k] = 1; save(); } }
 function save() { try { localStorage.setItem('yokailike.save', JSON.stringify(SAVE)); } catch (e) {} }

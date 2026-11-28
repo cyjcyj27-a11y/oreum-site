@@ -156,6 +156,9 @@
   function clock() { const h = Math.floor(S.hour) % 24, k = h % 12;
     if (window.LANG && LANG.en) return (k === 0 ? 12 : k) + (h < 12 ? ' AM' : ' PM');
     if (window.LANG && LANG.zh) return (h < 12 ? '上午' : '下午') + (k === 0 ? 12 : k) + '点';
+    if (window.LANG && LANG.ja) return (h < 12 ? '午前' : '午後') + (k === 0 ? 12 : k) + '時';
+    if (window.LANG && LANG.pt) return h + 'h';
+    if (window.LANG && LANG.ru) return h + ':00';
     return (h < 12 ? '오전 ' : '오후 ') + (k === 0 ? 12 : k) + '시'; }
 
   window.SKY = Object.assign(S, { init, update, follow, clock, initEnv, envTick });

@@ -4,7 +4,7 @@
   const $ = (id) => document.getElementById(id);
   const L_ = window.L || ((s) => s);
   await RP.init();
-  try { await document.fonts.load('900 60px Title'); if (window.LANG === 'zh') await document.fonts.load('900 60px Title', '草原茶馆火柴'); } catch (e) {}
+  try { await document.fonts.load('900 60px Title'); if (window.LANG === 'zh') await document.fonts.load('900 60px Title', '草原茶馆火柴'); if (window.LANG === 'ja') await document.fonts.load('900 60px Title', '草原喫茶マッチタワー'); } catch (e) {}
   SC.buildBox();
 
   // ---------- 치수 (cm) ----------

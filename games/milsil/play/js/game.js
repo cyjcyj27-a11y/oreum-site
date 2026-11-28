@@ -865,7 +865,7 @@
       if (!S.cards) S.cards = ['min', 'oh', 'jung', 'dohyun'];
       var solved = S.f.seated;
       TABLE.cards.forEach(function (p, i) {
-        var nw = window.MS_EN ? 230 : 140, c = div('spr namecard', p[0] - nw / 2, p[1] - 30, nw, 60);   // 영문판은 직함까지 한 줄로
+        var nw = (window.MS_EN || window.MS_WIDE) ? 230 : 140, c = div('spr namecard', p[0] - nw / 2, p[1] - 30, nw, 60);   // 영문판은 직함까지 한 줄로
         c.textContent = SEAT_NAME[S.cards[i]];
         c.dataset.i = i;
         if (tableSel === i) c.classList.add('pick');
@@ -1843,7 +1843,7 @@
     '3table': vw('3table', function () {
       if (!S.cards) S.cards = ['dohyun', 'jung', 'oh', 'min'];
       TABLE.cards.forEach(function (p, i) {
-        var nw = window.MS_EN ? 230 : 140, c = div('spr namecard', p[0] - nw / 2, p[1] - 30, nw, 60);   // 영문판은 직함까지 한 줄로
+        var nw = (window.MS_EN || window.MS_WIDE) ? 230 : 140, c = div('spr namecard', p[0] - nw / 2, p[1] - 30, nw, 60);   // 영문판은 직함까지 한 줄로
         c.textContent = SEAT_NAME[S.cards[i]];
         if (tableSel === i) c.classList.add('pick');
         if (!S.f.seated) spot(p[0] - 74, p[1] - 34, p[0] + 74, p[1] + 34, function () { cardClick(i, C11_SEATS); });
@@ -2149,6 +2149,8 @@
   var CONS = ['ㄱ', 'ㄴ', 'ㄷ', 'ㄹ', 'ㅁ', 'ㅂ', 'ㅅ', 'ㅇ', 'ㅈ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ'];
   if (window.MS_EN || window.MS_ZH) CONS = ['B', 'C', 'D', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'P', 'S', 'T', 'Y'];   // 영문판: 한도현 = H·D·H
   var C18 = (window.MS_EN || window.MS_ZH) ? [4, 2, 4] : [13, 2, 13];
+  if (window.MS_LG === 'ja' || window.MS_LG === 'pt') { CONS = ['B', 'C', 'D', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'P', 'S', 'T', 'Y']; C18 = [4, 2, 4]; }
+  if (window.MS_LG === 'ru') { CONS = ['Б', 'В', 'Г', 'Д', 'Ж', 'З', 'К', 'Л', 'М', 'Н', 'П', 'С', 'Т', 'Х']; C18 = [13, 3, 13]; }   // Хан Дохён = Х·Д·Х
   var LOCK5 = [566, 362, 648, 436];
   VAR[18] = {
     look: function (id) {

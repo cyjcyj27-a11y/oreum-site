@@ -3,6 +3,7 @@
   const T = TERRAIN;
   const LQ = (new URLSearchParams(location.search).get('lang') || '').toLowerCase();
   const EN = LQ === 'en', ZHL = LQ === 'zh';
+  const LX = ['ja', 'pt', 'ru'].includes(LQ) ? LQ : '';
   // 중국어판: 한국어 문장을 열쇠로 중국어를 찾는다
   const ZH = {
     '드릴': '电钻', '망치': '锤子', '안전줄': '安全绳', '속도 1.5배': '速度 x1.5', '속도 2.2배': '速度 x2.2', '한 방': '一锤到底', '안 휨': '不会弯', '70초': '70秒', '100초': '100秒',
@@ -31,8 +32,180 @@
     '판자를 하나 더 가져와 잔도 끝에서 작업 단추를 누르고 있다가 쇠기둥 위에서 떼세요': '再拿一块木板，在栈道尽头按住干活键，到铁桩上方就松开',
     '이렇게 한 칸씩 이어 가면 됩니다. 오늘은 여섯 칸!': '就这样一格一格接下去。今天六格！'
   };
-  const ZT = s => ZHL && ZH[s] ? ZH[s] : s;
-  const TX = (ko, en) => EN ? en : ZT(ko);
+  // 일본어·포르투갈어·러시아어판: 중국어판과 같은 열쇠
+  const JA = {
+    "드릴": "ドリル",
+    "망치": "ハンマー",
+    "안전줄": "安全ロープ",
+    "속도 1.5배": "速度1.5倍",
+    "속도 2.2배": "速度2.2倍",
+    "한 방": "一撃",
+    "안 휨": "曲がらない",
+    "70초": "70秒",
+    "100초": "100秒",
+    "한 번도 안 떨어진 잔도공": "一度も落ちなかった桟道職人",
+    "줄을 믿는 잔도공": "ロープを信じる桟道職人",
+    "줄에 매달려 사는 잔도공": "ロープにぶら下がって生きる桟道職人",
+    "떨어지는 게 일인 잔도공": "落ちるのが仕事の桟道職人",
+    "개통": "開通",
+    "판자": "板",
+    "높이": "高さ",
+    "추락": "落下",
+    "옛 물건": "遺品",
+    "절벽 잔도공": "絶壁の桟道職人",
+    "링크 복사": "リンクをコピー",
+    "이어하기": "つづきから",
+    "녹슨 고리": "錆びた輪っか",
+    "낡은 삿갓": "古びた笠",
+    "부적": "お札",
+    "호리병": "ひょうたん",
+    "짚신 한 짝": "わらじ片方",
+    "부러진 망치": "折れたハンマー",
+    "꺼진 등": "消えた灯籠",
+    "엽전 꾸러미": "古銭の束",
+    "놋쇠 방울": "真鍮の鈴",
+    "곰방대": "キセル",
+    "이 빠진 밥그릇": "欠けたご飯茶碗",
+    "부치지 못한 편지": "出せなかった手紙",
+    "공구함 앞에서 E 를 두 번 눌러 드릴과 망치를 집으세요": "工具箱の前でEを2回押して、ドリルとハンマーを取ろう",
+    "공구함 앞에서 작업 단추를 두 번 눌러 드릴과 망치를 집으세요": "工具箱の前で作業ボタンを2回押して、ドリルとハンマーを取ろう",
+    "벽의 흰 X 앞에 서서 E 를 누르고 있으면 드릴로 구멍을 뚫습니다": "壁の白いXの前に立ってEを長押しすると、ドリルで穴をあけます",
+    "벽의 흰 X 앞에 서서 작업 단추를 누르고 있으면 드릴로 구멍을 뚫습니다": "壁の白いXの前に立って作業ボタンを長押しすると、ドリルで穴をあけます",
+    "구멍에 쇠기둥이 꽂혔습니다. E 를 누르고 있으면 망치로 박습니다": "穴に鉄の杭が刺さりました。Eを長押しすると、ハンマーで打ち込みます",
+    "구멍에 쇠기둥이 꽂혔습니다. 작업 단추를 누르고 있으면 망치로 박습니다": "穴に鉄の杭が刺さりました。作業ボタンを長押しすると、ハンマーで打ち込みます",
+    "옆의 흰 X 도 똑같이 뚫고 박으세요": "隣の白いXも同じように、穴をあけて打ち込もう",
+    "판자 더미 앞에서 E 를 눌러 판자를 드세요": "板の山の前でEを押して、板を持とう",
+    "판자 더미 앞에서 작업 단추를 눌러 판자를 드세요": "板の山の前で作業ボタンを押して、板を持とう",
+    "쇠기둥 앞 바위턱 끝에 서서 E 를 누르고 있으면 판자를 내밉니다. 쇠기둥 위에 오면 떼세요": "鉄の杭の手前、岩棚の端に立ってEを長押しすると板を押し出します。杭の上に来たら離そう",
+    "쇠기둥 앞 바위턱 끝에 서서 작업 단추를 누르고 있으면 판자를 내밉니다. 쇠기둥 위에 오면 떼세요": "鉄の杭の手前、岩棚の端に立って作業ボタンを長押しすると板を押し出します。杭の上に来たら離そう",
+    "끝 고리 밑에서 E 를 눌러 안전줄을 거세요. 안 걸고 떨어지면 마지막으로 건 고리까지 미끄러져 내려갑니다": "先端の輪っかの下でEを押して、安全ロープをかけよう。かけずに落ちると、最後にかけた輪っかまで滑り落ちます",
+    "끝 고리 밑에서 작업 단추를 눌러 안전줄을 거세요. 안 걸고 떨어지면 마지막으로 건 고리까지 미끄러져 내려갑니다": "先端の輪っかの下で作業ボタンを押して、安全ロープをかけよう。かけずに落ちると、最後にかけた輪っかまで滑り落ちます",
+    "다음 칸 X 두 개도 뚫고 박으세요. 손이 안 닿는 X 는 판자 끝에서 걸어 나가 떨어지면 안전줄에 매달려서 합니다": "次のマスのX 2つも、穴をあけて打ち込もう。手の届かないXは、板の端から歩いて落ちて、安全ロープにぶら下がったままやります",
+    "매달린 채 A D 로 벽을 딛고 X 앞으로, W S 로 줄 높이를 맞추고 E 를 누르고 있으세요": "ぶら下がったままA Dで壁を蹴ってXの前へ、W Sでロープの高さを合わせて、Eを長押ししよう",
+    "매달린 채 패드 좌우로 벽을 딛고 X 앞으로, 패드 위아래로 줄 높이를 맞추고 작업 단추를 누르고 있으세요": "ぶら下がったままパッドの左右で壁を蹴ってXの前へ、パッドの上下でロープの高さを合わせて、作業ボタンを長押ししよう",
+    "W 로 줄을 감아 올라가거나 판자 가까이에서 Space 로 올라서세요": "Wでロープを巻いて登るか、板の近くでSpaceを押して上がろう",
+    "패드 위로 줄을 감아 올라가거나 판자 가까이에서 점프 단추로 올라서세요": "パッドを上に倒してロープを巻いて登るか、板の近くでジャンプボタンを押して上がろう",
+    "판자를 하나 더 가져와 잔도 끝에서 E 를 누르고 있다가 쇠기둥 위에서 떼세요": "板をもう1枚持ってきて、桟道の端でEを長押しし、鉄の杭の上で離そう",
+    "판자를 하나 더 가져와 잔도 끝에서 작업 단추를 누르고 있다가 쇠기둥 위에서 떼세요": "板をもう1枚持ってきて、桟道の端で作業ボタンを長押しし、鉄の杭の上で離そう",
+    "이렇게 한 칸씩 이어 가면 됩니다. 오늘은 여섯 칸!": "こうして1マスずつつないでいけばOK。今日は6マス！"
+  };
+  const PT = {
+    "드릴": "Furadeira",
+    "망치": "Martelo",
+    "안전줄": "Corda",
+    "속도 1.5배": "Vel. x1,5",
+    "속도 2.2배": "Vel. x2,2",
+    "한 방": "Um golpe",
+    "안 휨": "Não entorta",
+    "70초": "70 s",
+    "100초": "100 s",
+    "한 번도 안 떨어진 잔도공": "Nunca caiu nenhuma vez",
+    "줄을 믿는 잔도공": "Confia na corda",
+    "줄에 매달려 사는 잔도공": "Vive pendurado na corda",
+    "떨어지는 게 일인 잔도공": "Cair faz parte do trabalho",
+    "개통": "ABERTO!",
+    "판자": "Tábuas",
+    "높이": "Altura",
+    "추락": "Quedas",
+    "옛 물건": "Relíquias",
+    "절벽 잔도공": "Construtor do Penhasco",
+    "링크 복사": "Link copiado",
+    "이어하기": "Continuar",
+    "녹슨 고리": "Argola enferrujada",
+    "낡은 삿갓": "Chapéu de palha velho",
+    "부적": "Amuleto de papel",
+    "호리병": "Cabaça",
+    "짚신 한 짝": "Uma sandália de palha",
+    "부러진 망치": "Martelo quebrado",
+    "꺼진 등": "Lanterna apagada",
+    "엽전 꾸러미": "Cordão de moedas antigas",
+    "놋쇠 방울": "Sino de latão",
+    "곰방대": "Cachimbo",
+    "이 빠진 밥그릇": "Tigela lascada",
+    "부치지 못한 편지": "Carta nunca enviada",
+    "공구함 앞에서 E 를 두 번 눌러 드릴과 망치를 집으세요": "Na frente da caixa de ferramentas, aperte E duas vezes para pegar a furadeira e o martelo",
+    "공구함 앞에서 작업 단추를 두 번 눌러 드릴과 망치를 집으세요": "Na frente da caixa de ferramentas, aperte o botão AÇÃO duas vezes para pegar a furadeira e o martelo",
+    "벽의 흰 X 앞에 서서 E 를 누르고 있으면 드릴로 구멍을 뚫습니다": "Pare na frente do X branco na parede e segure E para furar com a furadeira",
+    "벽의 흰 X 앞에 서서 작업 단추를 누르고 있으면 드릴로 구멍을 뚫습니다": "Pare na frente do X branco na parede e segure o botão AÇÃO para furar com a furadeira",
+    "구멍에 쇠기둥이 꽂혔습니다. E 를 누르고 있으면 망치로 박습니다": "A estaca de ferro entrou no furo. Segure E para cravá-la com o martelo",
+    "구멍에 쇠기둥이 꽂혔습니다. 작업 단추를 누르고 있으면 망치로 박습니다": "A estaca de ferro entrou no furo. Segure o botão AÇÃO para cravá-la com o martelo",
+    "옆의 흰 X 도 똑같이 뚫고 박으세요": "Faça o mesmo no X branco do lado: fure e crave",
+    "판자 더미 앞에서 E 를 눌러 판자를 드세요": "Na frente da pilha de tábuas, aperte E para pegar uma tábua",
+    "판자 더미 앞에서 작업 단추를 눌러 판자를 드세요": "Na frente da pilha de tábuas, aperte o botão AÇÃO para pegar uma tábua",
+    "쇠기둥 앞 바위턱 끝에 서서 E 를 누르고 있으면 판자를 내밉니다. 쇠기둥 위에 오면 떼세요": "Fique na beirada da pedra em frente às estacas e segure E para empurrar a tábua. Solte quando ela estiver sobre as estacas",
+    "쇠기둥 앞 바위턱 끝에 서서 작업 단추를 누르고 있으면 판자를 내밉니다. 쇠기둥 위에 오면 떼세요": "Fique na beirada da pedra em frente às estacas e segure o botão AÇÃO para empurrar a tábua. Solte quando ela estiver sobre as estacas",
+    "끝 고리 밑에서 E 를 눌러 안전줄을 거세요. 안 걸고 떨어지면 마지막으로 건 고리까지 미끄러져 내려갑니다": "Embaixo da última argola, aperte E para prender a corda de segurança. Se cair sem prender, você escorrega até a última argola em que prendeu",
+    "끝 고리 밑에서 작업 단추를 눌러 안전줄을 거세요. 안 걸고 떨어지면 마지막으로 건 고리까지 미끄러져 내려갑니다": "Embaixo da última argola, aperte o botão AÇÃO para prender a corda de segurança. Se cair sem prender, você escorrega até a última argola em que prendeu",
+    "다음 칸 X 두 개도 뚫고 박으세요. 손이 안 닿는 X 는 판자 끝에서 걸어 나가 떨어지면 안전줄에 매달려서 합니다": "Fure e crave os dois X do próximo trecho também. Para os X que você não alcança, saia andando pela ponta da tábua e trabalhe pendurado na corda",
+    "매달린 채 A D 로 벽을 딛고 X 앞으로, W S 로 줄 높이를 맞추고 E 를 누르고 있으세요": "Pendurado, use A D para se apoiar na parede e chegar ao X, W S para ajustar a altura da corda, e segure E",
+    "매달린 채 패드 좌우로 벽을 딛고 X 앞으로, 패드 위아래로 줄 높이를 맞추고 작업 단추를 누르고 있으세요": "Pendurado, mova o controle para os lados para se apoiar na parede e chegar ao X, para cima e para baixo para ajustar a altura da corda, e segure o botão AÇÃO",
+    "W 로 줄을 감아 올라가거나 판자 가까이에서 Space 로 올라서세요": "Aperte W para recolher a corda e subir, ou perto da tábua aperte Space para subir nela",
+    "패드 위로 줄을 감아 올라가거나 판자 가까이에서 점프 단추로 올라서세요": "Controle para cima recolhe a corda e você sobe, ou perto da tábua aperte o botão PULAR para subir nela",
+    "판자를 하나 더 가져와 잔도 끝에서 E 를 누르고 있다가 쇠기둥 위에서 떼세요": "Pegue mais uma tábua, segure E na ponta da passarela e solte sobre as estacas",
+    "판자를 하나 더 가져와 잔도 끝에서 작업 단추를 누르고 있다가 쇠기둥 위에서 떼세요": "Pegue mais uma tábua, segure o botão AÇÃO na ponta da passarela e solte sobre as estacas",
+    "이렇게 한 칸씩 이어 가면 됩니다. 오늘은 여섯 칸!": "É só ir ligando um trecho de cada vez. Hoje são seis!"
+  };
+  const RU = {
+    "드릴": "Дрель",
+    "망치": "Молот",
+    "안전줄": "Страховка",
+    "속도 1.5배": "Скорость x1,5",
+    "속도 2.2배": "Скорость x2,2",
+    "한 방": "С одного удара",
+    "안 휨": "Не гнётся",
+    "70초": "70 с",
+    "100초": "100 с",
+    "한 번도 안 떨어진 잔도공": "Ни разу не сорвался",
+    "줄을 믿는 잔도공": "Верит в верёвку",
+    "줄에 매달려 사는 잔도공": "Живёт на верёвке",
+    "떨어지는 게 일인 잔도공": "Падать — его работа",
+    "개통": "ОТКРЫТО",
+    "판자": "Доски",
+    "높이": "Высота",
+    "추락": "Падения",
+    "옛 물건": "Находки",
+    "절벽 잔도공": "Строитель над пропастью",
+    "링크 복사": "Ссылка скопирована",
+    "이어하기": "Продолжить",
+    "녹슨 고리": "Ржавое кольцо",
+    "낡은 삿갓": "Старая соломенная шляпа",
+    "부적": "Бумажный оберег",
+    "호리병": "Тыква-горлянка",
+    "짚신 한 짝": "Одна соломенная сандалия",
+    "부러진 망치": "Сломанный молот",
+    "꺼진 등": "Погасший фонарь",
+    "엽전 꾸러미": "Связка старых монет",
+    "놋쇠 방울": "Латунный колокольчик",
+    "곰방대": "Курительная трубка",
+    "이 빠진 밥그릇": "Щербатая миска",
+    "부치지 못한 편지": "Неотправленное письмо",
+    "공구함 앞에서 E 를 두 번 눌러 드릴과 망치를 집으세요": "У ящика с инструментами нажми E два раза — возьмёшь дрель и молот",
+    "공구함 앞에서 작업 단추를 두 번 눌러 드릴과 망치를 집으세요": "У ящика с инструментами нажми кнопку РАБОТА два раза — возьмёшь дрель и молот",
+    "벽의 흰 X 앞에 서서 E 를 누르고 있으면 드릴로 구멍을 뚫습니다": "Встань перед белым X на стене и держи E — дрель просверлит дыру",
+    "벽의 흰 X 앞에 서서 작업 단추를 누르고 있으면 드릴로 구멍을 뚫습니다": "Встань перед белым X на стене и держи кнопку РАБОТА — дрель просверлит дыру",
+    "구멍에 쇠기둥이 꽂혔습니다. E 를 누르고 있으면 망치로 박습니다": "Железный штырь вставлен в дыру. Держи E, чтобы забить его молотом",
+    "구멍에 쇠기둥이 꽂혔습니다. 작업 단추를 누르고 있으면 망치로 박습니다": "Железный штырь вставлен в дыру. Держи кнопку РАБОТА, чтобы забить его молотом",
+    "옆의 흰 X 도 똑같이 뚫고 박으세요": "С соседним белым X — то же самое: просверли и забей",
+    "판자 더미 앞에서 E 를 눌러 판자를 드세요": "У кучи досок нажми E, чтобы взять доску",
+    "판자 더미 앞에서 작업 단추를 눌러 판자를 드세요": "У кучи досок нажми кнопку РАБОТА, чтобы взять доску",
+    "쇠기둥 앞 바위턱 끝에 서서 E 를 누르고 있으면 판자를 내밉니다. 쇠기둥 위에 오면 떼세요": "Встань на край уступа перед штырями и держи E — доска поедет вперёд. Над штырями отпусти",
+    "쇠기둥 앞 바위턱 끝에 서서 작업 단추를 누르고 있으면 판자를 내밉니다. 쇠기둥 위에 오면 떼세요": "Встань на край уступа перед штырями и держи кнопку РАБОТА — доска поедет вперёд. Над штырями отпусти",
+    "끝 고리 밑에서 E 를 눌러 안전줄을 거세요. 안 걸고 떨어지면 마지막으로 건 고리까지 미끄러져 내려갑니다": "Под крайним кольцом нажми E, чтобы пристегнуть страховку. Сорвёшься без неё — съедешь до последнего пристёгнутого кольца",
+    "끝 고리 밑에서 작업 단추를 눌러 안전줄을 거세요. 안 걸고 떨어지면 마지막으로 건 고리까지 미끄러져 내려갑니다": "Под крайним кольцом нажми кнопку РАБОТА, чтобы пристегнуть страховку. Сорвёшься без неё — съедешь до последнего пристёгнутого кольца",
+    "다음 칸 X 두 개도 뚫고 박으세요. 손이 안 닿는 X 는 판자 끝에서 걸어 나가 떨어지면 안전줄에 매달려서 합니다": "Просверли и забей два X в следующем пролёте. До каких не дотянуться — сойди с края доски и работай, вися на страховке",
+    "매달린 채 A D 로 벽을 딛고 X 앞으로, W S 로 줄 높이를 맞추고 E 를 누르고 있으세요": "Вися, отталкивайся от стены A D и двигайся к X, W S — высота верёвки, потом держи E",
+    "매달린 채 패드 좌우로 벽을 딛고 X 앞으로, 패드 위아래로 줄 높이를 맞추고 작업 단추를 누르고 있으세요": "Вися, джойстик влево-вправо — отталкивайся от стены к X, вверх-вниз — высота верёвки, потом держи кнопку РАБОТА",
+    "W 로 줄을 감아 올라가거나 판자 가까이에서 Space 로 올라서세요": "W — подтянуться по верёвке, или у доски нажми Space, чтобы забраться наверх",
+    "패드 위로 줄을 감아 올라가거나 판자 가까이에서 점프 단추로 올라서세요": "Джойстик вверх — подтянуться по верёвке, или у доски нажми ПРЫЖОК, чтобы забраться наверх",
+    "판자를 하나 더 가져와 잔도 끝에서 E 를 누르고 있다가 쇠기둥 위에서 떼세요": "Принеси ещё одну доску, держи E на краю тропы и отпусти над штырями",
+    "판자를 하나 더 가져와 잔도 끝에서 작업 단추를 누르고 있다가 쇠기둥 위에서 떼세요": "Принеси ещё одну доску, держи кнопку РАБОТА на краю тропы и отпусти над штырями",
+    "이렇게 한 칸씩 이어 가면 됩니다. 오늘은 여섯 칸!": "Вот так, пролёт за пролётом. Сегодня — шесть!"
+  };
+  const XD = LX ? { ja: JA, pt: PT, ru: RU }[LX] : null;
+  const ZT = s => ZHL && ZH[s] ? ZH[s] : XD && XD[s] ? XD[s] : s;
+  const TX = (ko, en) => EN ? en : XD && !XD[ko] ? en : ZT(ko);
+  // 러시아어 수 꼴: 1 доска / 2 доски / 5 досок
+  const ruN = (n, a, b, c) => { const m = n % 100, k = n % 10; return n + ' ' + (m > 10 && m < 20 ? c : k === 1 ? a : k > 1 && k < 5 ? b : c); };
   const canvas = document.getElementById('c');
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
@@ -954,7 +1127,8 @@
   }
   document.getElementById('bEndSave').addEventListener('click', () => { if (!endCardCv) return; const a = document.createElement('a'); a.download = 'cliffwalker.png'; a.href = endCardCv.toDataURL('image/png'); document.body.appendChild(a); a.click(); a.remove(); });
   document.getElementById('bEndShare').addEventListener('click', () => {
-    const url = EN ? 'https://oreumgames.com/en/games/jando/' : ZHL ? 'https://oreumgames.com/games/jando/play/?lang=zh' : 'https://oreumgames.com/games/jando/', text = ZHL ? '悬崖栈道工 开通！木板 ' + PATH.S.built + ' 块，坠落 ' + G.falls + ' 次' : TX('절벽 잔도공 개통! 판자 ' + PATH.S.built + '개, 추락 ' + G.falls + '번', 'Cliff Walker: road opened! ' + PATH.S.built + ' planks, ' + G.falls + ' falls');
+    const nb = PATH.S.built, nf = G.falls;
+    const url = EN ? 'https://oreumgames.com/en/games/jando/' : ZHL || LX ? 'https://oreumgames.com/games/jando/play/?lang=' + LQ : 'https://oreumgames.com/games/jando/', text = LX === 'ja' ? '絶壁の桟道職人 開通！板 ' + nb + ' 枚、落下 ' + nf + ' 回' : LX === 'pt' ? 'Construtor do Penhasco: caminho aberto! ' + nb + (nb === 1 ? ' tábua, ' : ' tábuas, ') + nf + (nf === 1 ? ' queda' : ' quedas') : LX === 'ru' ? 'Строитель над пропастью: путь открыт! ' + ruN(nb, 'доска', 'доски', 'досок') + ', ' + ruN(nf, 'падение', 'падения', 'падений') : ZHL ? '悬崖栈道工 开通！木板 ' + PATH.S.built + ' 块，坠落 ' + G.falls + ' 次' : TX('절벽 잔도공 개통! 판자 ' + PATH.S.built + '개, 추락 ' + G.falls + '번', 'Cliff Walker: road opened! ' + PATH.S.built + ' planks, ' + G.falls + ' falls');
     if (navigator.share) navigator.share({ title: TX('절벽 잔도공', 'Cliff Walker'), text, url }).catch(() => { });
     else { try { navigator.clipboard.writeText(text + ' ' + url); popMsg(TX('링크 복사', 'COPIED')); } catch (e) { } }
   });

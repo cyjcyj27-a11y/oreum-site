@@ -3,7 +3,8 @@
  * 석등 셋에 불 붙이기(퍼즐 → 쉼터), 수문 바퀴 돌려 급류 잠재우기(퍼즐) */
 (function () {
   const W = window.WORLD;
-  const EN = /[?&]lang=en/.test(location.search), ZT = window.ZT || (v => v), SF = window.ZHON ? '"Microsoft YaHei","PingFang SC","Noto Sans SC"' : '"Malgun Gothic"';
+  const EN = /[?&]lang=en/.test(location.search), ZT = window.ZT || (v => v), SF = window.ZHON ? '"Microsoft YaHei","PingFang SC","Noto Sans SC"' : window.LG3 === 'ja' ? '"Yu Gothic","Meiryo","Hiragino Sans","Noto Sans JP"' : window.LG3 ? '"Segoe UI","Roboto","Arial"' : '"Malgun Gothic"';
+  const LX = window.LG3 === 'pt' || window.LG3 === 'ru';   // Latin/Cyrillic text: English-style layout
   const PR = {};
   W.used = new Set(); W.props = [];
 
@@ -41,8 +42,8 @@
       const g = c.createLinearGradient(0, 0, w, h); g.addColorStop(0, 'rgba(255,255,255,.12)'); g.addColorStop(1, 'rgba(60,40,20,.28)'); c.fillStyle = g; c.fillRect(0, 0, w, h);
       c.strokeStyle = '#b8231b'; c.lineWidth = 12; c.strokeRect(10, 10, w - 20, h - 20);
       c.fillStyle = '#b8231b'; c.textAlign = 'center'; c.textBaseline = 'middle';
-      c.font = '900 ' + (EN ? 38 : 52) + 'px ' + SF + ', sans-serif'; c.fillText(big, w / 2, 66);
-      c.fillStyle = '#26221c'; c.font = '700 ' + (EN ? 20 : 24) + 'px ' + SF + ', sans-serif'; c.fillText(small, w / 2, 122);
+      c.font = '900 ' + (EN || LX ? 38 : 52) + 'px ' + SF + ', sans-serif'; if (LX) c.fillText(big, w / 2, 66, w - 36); else c.fillText(big, w / 2, 66);
+      c.fillStyle = '#26221c'; c.font = '700 ' + (EN || LX ? 20 : 24) + 'px ' + SF + ', sans-serif'; if (LX) c.fillText(small, w / 2, 122, w - 36); else c.fillText(small, w / 2, 122);
       for (let i = 0; i < 26; i++) { c.fillStyle = 'rgba(90,50,20,' + (Math.random() * .25) + ')'; c.beginPath(); c.arc(Math.random() * w, Math.random() * h, 1 + Math.random() * 6, 0, 6.283); c.fill(); }   // 녹물 얼룩
     });
   }
@@ -83,12 +84,12 @@
   const buoyMat = L(0xffffff, { map: buoyTex });
   // 비석 새김 글씨 — 석등 퍼즐 힌트(2026-09-16 사장님 "비석에서 힌트를 줘야 돼, 어두워서 안 보인다")
   // 한글은 옛 비석처럼 세로쓰기(오른쪽 줄부터), 영문은 가로. 글꼴(Griun)을 받은 뒤 다시 그린다
-  const STELE_LINES = EN ? ['LIGHT', 'THE THREE', 'DARK', 'LANTERNS', 'WITH', 'YOUR FLAME'] : ZT(['꺼진 석등 셋', '등불로 밝히면', '넋이 쉬어 가리라']);
+  const STELE_LINES = EN ? ['LIGHT', 'THE THREE', 'DARK', 'LANTERNS', 'WITH', 'YOUR FLAME'] : LX ? ZT(['꺼진 석등 셋', '등불로 밝히면', '넋이 쉬어 가리라']).flatMap(s => s.split('\n')) : ZT(['꺼진 석등 셋', '등불로 밝히면', '넋이 쉬어 가리라']);
   function drawStele(c, w, h) {
     c.fillStyle = '#000'; c.fillRect(0, 0, w, h);
     c.fillStyle = '#ffd89a'; c.shadowColor = 'rgba(255,190,110,.9)'; c.shadowBlur = 6; c.textAlign = 'center'; c.textBaseline = 'middle';
-    if (EN) {
-      c.font = '44px Griun, "Noto Sans KR", sans-serif';
+    if (EN || LX) {
+      c.font = (EN ? 44 : 36) + 'px Griun, "Noto Sans KR", sans-serif';
       STELE_LINES.forEach((t, i) => c.fillText(t, w / 2, 70 + i * 74, w - 24));
     } else {
       const cols = STELE_LINES.length, gap = w / (cols + 1), size = 58;
@@ -100,7 +101,7 @@
     }
   }
   const steleTex = canvasTex(256, 512, drawStele);
-  if (document.fonts && document.fonts.load) document.fonts.load('40px Griun', window.ZHON ? '石灯' : '석등').then(() => { drawStele(steleTex.image.getContext('2d'), 256, 512); steleTex.needsUpdate = true; }).catch(() => { });
+  if (document.fonts && document.fonts.load) document.fonts.load('40px Griun', window.ZHON || window.LG3 === 'ja' ? '石灯' : '석등').then(() => { drawStele(steleTex.image.getContext('2d'), 256, 512); steleTex.needsUpdate = true; }).catch(() => { });
   const steleMat = new THREE.MeshLambertMaterial({ color: 0x4e504b, emissive: 0xffffff, emissiveMap: steleTex, emissiveIntensity: .5 });   // 캄캄해도 글씨가 희미하게 읽힌다
   const starTex = canvasTex(64, 64, (c) => { c.translate(32, 32); const g = c.createRadialGradient(0, 0, 0, 0, 0, 30); g.addColorStop(0, 'rgba(255,255,255,1)'); g.addColorStop(.25, 'rgba(255,245,210,.6)'); g.addColorStop(1, 'rgba(255,240,200,0)'); c.fillStyle = g; for (const a of [0, Math.PI / 2]) { c.save(); c.rotate(a); c.beginPath(); c.moveTo(-30, 0); c.lineTo(0, -3); c.lineTo(30, 0); c.lineTo(0, 3); c.fill(); c.restore(); } c.beginPath(); c.arc(0, 0, 9, 0, 6.283); c.fill(); });
 

@@ -34,6 +34,41 @@
     st.textContent = "@font-face{font-family:'Dongle';src:" + zb + ";unicode-range:" + ur + "}@font-face{font-family:'Ria';src:" + zb + ";unicode-range:" + ur + "}html[lang=zh-CN] *{word-break:normal!important}html[lang=zh-CN] #title h1{font-size:clamp(52px,min(12vw,24vh),132px);line-height:1.15;-webkit-text-stroke:3px #3b5a12}";
     document.head.appendChild(st);
   }
+  // ja · pt · ru: page texts per language
+  var LQ = (location.search.match(/[?&]lang=(ja|pt|ru)(?:&|$)/i) || [])[1];
+  LQ = !EN && !ZH && LQ ? LQ.toLowerCase() : '';
+  var LT3 = {
+    ja: { lang: 'ja', title: 'こっそりおなら', h1: 'こっそりおなら', rotTitle: '横画面で遊ぶゲームです', rotGo: '横向きにする',
+          rotHelp: 'ボタンが効かないときは、画面の回転ロックを解除してスマホを横にしてください', rotSkip: 'それでも縦で遊ぶ', pause: '一時停止', snd: '効果音' },
+    pt: { lang: 'pt-BR', title: 'Pum Escondido', h1: 'PUM ESCONDIDO', rotTitle: 'Este jogo é jogado na horizontal', rotGo: 'Girar para horizontal',
+          rotHelp: 'Se o botão não funcionar, desative o bloqueio de rotação e vire o celular', rotSkip: 'Jogar na vertical mesmo assim', pause: 'Pausar', snd: 'Efeitos sonoros' },
+    ru: { lang: 'ru', title: 'Тихий пук', h1: 'ТИХИЙ ПУК', rotTitle: 'В эту игру играют в горизонтальном режиме', rotGo: 'Повернуть экран',
+          rotHelp: 'Если кнопка не работает, отключите блокировку поворота и поверните телефон', rotSkip: 'Всё равно играть вертикально', pause: 'Пауза', snd: 'Звуки' }
+  };
+  if (LQ) {
+    var lt3 = LT3[LQ];
+    document.documentElement.lang = lt3.lang;
+    document.title = lt3.title;
+    document.getElementById('h1').textContent = lt3.h1;
+    document.getElementById('rotTitle').textContent = lt3.rotTitle;
+    document.getElementById('rotGo').textContent = lt3.rotGo;
+    document.getElementById('rotHelp').textContent = lt3.rotHelp;
+    document.getElementById('rotSkip').textContent = lt3.rotSkip;
+    document.getElementById('tPause').title = lt3.pause;
+    document.getElementById('tSnd').title = lt3.snd;
+    // Game fonts lack kana / accented Latin / Cyrillic: add system fonts for those ranges only
+    var st3 = document.createElement('style');
+    if (LQ === 'ja') {
+      var jf = "local('Hiragino Sans'),local('Hiragino Kaku Gothic ProN'),local('Yu Gothic UI'),local('Yu Gothic'),local('Yu Gothic Medium'),local('YuGothic-Medium'),local('Yu Gothic Regular'),local('YuGothic-Regular'),local('Yu Gothic Bold'),local('YuGothic-Bold'),local('MS PGothic'),local('MS Gothic'),local('Meiryo'),local('Noto Sans JP'),local('Noto Sans CJK JP'),local('Source Han Sans JP')";
+      var jur = 'U+2E80-2FFF,U+3000-30FF,U+31F0-31FF,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF';
+      st3.textContent = "@font-face{font-family:'Dongle';src:" + jf + ";unicode-range:" + jur + "}@font-face{font-family:'Ria';src:" + jf + ";unicode-range:" + jur + "}html[lang=ja] *{word-break:normal!important}html[lang=ja] #title h1{font-size:clamp(52px,min(12vw,24vh),132px);line-height:1.15;-webkit-text-stroke:3px #3b5a12}";
+    } else {
+      var lf = "local('Segoe UI'),local('Roboto'),local('Arial'),local('Helvetica Neue'),local('Helvetica')";
+      var lur = 'U+00A0-024F,U+0400-04FF,U+1E00-1EFF,U+2010-2027';
+      st3.textContent = "@font-face{font-family:'Dongle';src:" + lf + ";unicode-range:" + lur + "}@font-face{font-family:'Ria';src:" + lf + ";unicode-range:" + lur + "}#title h1{font-size:clamp(56px,min(11vw,22vh),130px);line-height:1;text-align:center}";
+    }
+    document.head.appendChild(st3);
+  }
 
   var $ = function (id) { return document.getElementById(id); };
   var cv = $('cv'), g = cv.getContext('2d');

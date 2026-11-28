@@ -4,6 +4,7 @@
   const LQ = new URLSearchParams(location.search).get('lang');
   const EN = LQ === 'en';
   const ZH = LQ === 'zh';
+  const XL = ['ja', 'pt', 'ru'].includes(LQ) ? LQ : '';
   // 중국어판 사전: 한국어 문구를 열쇠로 찾는다
   const ZD = {
     '다락방': '阁楼', '문방구': '文具店', '할머니 댁': '奶奶家', '차고': '车库', '도서관': '图书馆', '온실': '温室',
@@ -18,7 +19,45 @@
     '곰인형': '泰迪熊', '공': '皮球', '우산': '雨伞', '달': '月亮', '편지': '信件', '단풍잎': '枫叶',
     '로켓': '火箭', '기타': '吉他', '고양이': '猫咪',
   };
-  const T2 = (ko, en) => (EN ? en : ZH ? (ZD[ko] || en) : ko);
+  // 일본어·포르투갈어·러시아어 사전: 한국어 문구를 열쇠로 찾는다
+  const JD = {
+    '다락방': '屋根裏部屋', '문방구': '文房具屋', '할머니 댁': 'おばあちゃんの家', '차고': 'ガレージ', '도서관': '図書館', '온실': '温室',
+    '냐옹!': 'ニャー!', '도감 ': '図鑑 ', '이어하기': 'つづきから', '시작': 'スタート', '열쇠': '鍵', '숟가락': 'スプーン',
+    '고무 오리': 'アヒル', '사과': 'リンゴ', '바나나': 'バナナ', '당근': 'ニンジン', '버섯': 'キノコ', '안경': 'メガネ',
+    '가위': 'ハサミ', '망치': 'ハンマー', '연필': 'えんぴつ', '머그컵': 'マグカップ', '모자': 'ぼうし', '운동화': 'スニーカー',
+    '전구': '電球', '종': 'ベル', '자명종': '目覚まし時計', '모래시계': '砂時計', '돋보기': '虫めがね', '물고기': '魚',
+    '별': '星', '하트': 'ハート', '주사위': 'サイコロ', '체스 말': 'チェスの駒', '왕관': '王冠', '트로피': 'トロフィー',
+    '양초': 'ろうそく', '사진기': 'カメラ', '전화기': '電話', '헤드폰': 'ヘッドホン', '풍선': '風船', '아이스크림': 'アイス',
+    '도넛': 'ドーナツ', '막대사탕': 'キャンディ', '컵케이크': 'カップケーキ', '유리병': 'ガラスびん', '종이비행기': '紙ひこうき', '붓': '筆',
+    '자석': '磁石', '나침반': 'コンパス', '손전등': '懐中電灯', '곰인형': 'テディベア', '공': 'ボール', '우산': 'かさ',
+    '달': '月', '편지': '手紙', '단풍잎': 'もみじ', '로켓': 'ロケット', '기타': 'ギター', '고양이': 'ネコ',
+  };
+  const PD = {
+    '다락방': 'Sótão', '문방구': 'Papelaria', '할머니 댁': 'Casa da vovó', '차고': 'Garagem', '도서관': 'Biblioteca', '온실': 'Estufa',
+    '냐옹!': 'MIAU!', '도감 ': 'COLEÇÃO ', '이어하기': 'CONTINUAR', '시작': 'JOGAR', '열쇠': 'Chave', '숟가락': 'Colher',
+    '고무 오리': 'Patinho', '사과': 'Maçã', '바나나': 'Banana', '당근': 'Cenoura', '버섯': 'Cogumelo', '안경': 'Óculos',
+    '가위': 'Tesoura', '망치': 'Martelo', '연필': 'Lápis', '머그컵': 'Caneca', '모자': 'Chapéu', '운동화': 'Tênis',
+    '전구': 'Lâmpada', '종': 'Sino', '자명종': 'Despertador', '모래시계': 'Ampulheta', '돋보기': 'Lupa', '물고기': 'Peixe',
+    '별': 'Estrela', '하트': 'Coração', '주사위': 'Dado', '체스 말': 'Peão', '왕관': 'Coroa', '트로피': 'Troféu',
+    '양초': 'Vela', '사진기': 'Câmera', '전화기': 'Telefone', '헤드폰': 'Fones', '풍선': 'Balão', '아이스크림': 'Sorvete',
+    '도넛': 'Rosquinha', '막대사탕': 'Pirulito', '컵케이크': 'Cupcake', '유리병': 'Garrafa', '종이비행기': 'Avião de papel', '붓': 'Pincel',
+    '자석': 'Ímã', '나침반': 'Bússola', '손전등': 'Lanterna', '곰인형': 'Ursinho', '공': 'Bola', '우산': 'Guarda-chuva',
+    '달': 'Lua', '편지': 'Carta', '단풍잎': 'Folha de bordo', '로켓': 'Foguete', '기타': 'Violão', '고양이': 'Gato',
+  };
+  const RD = {
+    '다락방': 'Чердак', '문방구': 'Канцтовары', '할머니 댁': 'У бабушки', '차고': 'Гараж', '도서관': 'Библиотека', '온실': 'Оранжерея',
+    '냐옹!': 'МЯУ!', '도감 ': 'КОЛЛЕКЦИЯ ', '이어하기': 'ДАЛЬШЕ', '시작': 'ИГРАТЬ', '열쇠': 'Ключ', '숟가락': 'Ложка',
+    '고무 오리': 'Уточка', '사과': 'Яблоко', '바나나': 'Банан', '당근': 'Морковь', '버섯': 'Гриб', '안경': 'Очки',
+    '가위': 'Ножницы', '망치': 'Молоток', '연필': 'Карандаш', '머그컵': 'Кружка', '모자': 'Шляпа', '운동화': 'Кроссовок',
+    '전구': 'Лампочка', '종': 'Колокольчик', '자명종': 'Будильник', '모래시계': 'Песочные часы', '돋보기': 'Лупа', '물고기': 'Рыба',
+    '별': 'Звезда', '하트': 'Сердце', '주사위': 'Кубик', '체스 말': 'Пешка', '왕관': 'Корона', '트로피': 'Кубок',
+    '양초': 'Свеча', '사진기': 'Фотоаппарат', '전화기': 'Телефон', '헤드폰': 'Наушники', '풍선': 'Шарик', '아이스크림': 'Мороженое',
+    '도넛': 'Пончик', '막대사탕': 'Леденец', '컵케이크': 'Капкейк', '유리병': 'Бутылка', '종이비행기': 'Самолётик', '붓': 'Кисть',
+    '자석': 'Магнит', '나침반': 'Компас', '손전등': 'Фонарик', '곰인형': 'Мишка', '공': 'Мяч', '우산': 'Зонт',
+    '달': 'Луна', '편지': 'Письмо', '단풍잎': 'Кленовый лист', '로켓': 'Ракета', '기타': 'Гитара', '고양이': 'Кошка',
+  };
+  const XD = { ja: JD, pt: PD, ru: RD }[XL];
+  const T2 = (ko, en) => (EN ? en : ZH ? (ZD[ko] || en) : XL ? (XD[ko] || en) : ko);
   if (ZH) {
     document.documentElement.lang = 'zh-CN';
     document.title = '找东西';
@@ -36,6 +75,35 @@
     $('dexTitle').textContent = '图鉴';
     $('rotTitle').textContent = '找东西';
     $('rotBtn').firstChild.textContent = '横屏查看';
+  }
+  if (XL) {
+    const TL = { ja: 'さがしもの', pt: 'Objetos Escondidos', ru: 'Поиск предметов' }[XL];
+    const UI = {
+      ja: ['さがしもの', 'スタート', '図鑑', '横画面で見る'],
+      pt: ['OBJETOS ESCONDIDOS', 'JOGAR', 'COLEÇÃO', 'GIRAR'],
+      ru: ['ПОИСК ПРЕДМЕТОВ', 'ИГРАТЬ', 'КОЛЛЕКЦИЯ', 'ПОВЕРНУТЬ'],
+    }[XL];
+    document.documentElement.lang = XL === 'pt' ? 'pt-BR' : XL;
+    document.title = TL;
+    // 글꼴에 없는 글자(가나·악센트 라틴·키릴)를 시스템 글꼴로 같은 이름에 덧붙인다
+    const xf = XL === 'ja'
+      ? "local('Hiragino Sans'),local('Hiragino Kaku Gothic ProN'),local('Yu Gothic UI'),local('Yu Gothic'),local('Yu Gothic Medium'),local('YuGothic-Medium'),local('Yu Gothic Regular'),local('YuGothic-Regular'),local('Yu Gothic Bold'),local('YuGothic-Bold'),local('MS PGothic'),local('MS Gothic'),local('Meiryo'),local('Noto Sans JP'),local('Noto Sans CJK JP'),local('Source Han Sans JP')"
+      : "local('Segoe UI'),local('Roboto'),local('Arial'),local('Helvetica Neue'),local('Helvetica')";
+    const xr = XL === 'ja'
+      ? 'U+2E80-2FFF,U+3000-30FF,U+31F0-31FF,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF'
+      : 'U+00A0-024F,U+0400-04FF,U+1E00-1EFF,U+2010-2027';
+    const xs = document.createElement('style');
+    xs.textContent = ['Tmon', 'Dan'].map((n) => "@font-face{font-family:'" + n + "';src:" + xf + ';unicode-range:' + xr + '}').join('') +
+      (XL === 'ja' ? 'html[lang=ja] *{word-break:normal!important}' : '');
+    document.head.appendChild(xs);
+    $('h1').textContent = UI[0];
+    if (XL !== 'ja') $('h1').classList.add('en');
+    $('start').firstChild.textContent = UI[1];
+    $('toDex').firstChild.textContent = UI[2];
+    $('endingDex').firstChild.textContent = UI[2];
+    $('dexTitle').textContent = UI[2];
+    $('rotTitle').textContent = UI[0];
+    $('rotBtn').firstChild.textContent = UI[3];
   }
   if (EN) {
     document.documentElement.lang = 'en';

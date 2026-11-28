@@ -25,7 +25,58 @@
     '단추가 안 먹으면 폰의 화면 회전 잠금을 풀고 눕혀 주세요': '按钮没反应的话，请关闭手机的屏幕旋转锁定，再把手机横过来',
     '그래도 세로로 하기': '还是竖屏玩'
   };
-  function stName(st) { return EN ? st.en : ZH && ZD[st.ko] ? ZD[st.ko] : st.ko; }
+  // ?lang=ja · pt · ru 이면 그 언어. 열쇠는 중국어 사전과 같다
+  var Q3 = (location.search.match(/[?&]lang=(ja|pt|ru)(&|#|$)/i) || [])[1];
+  var LG3 = !EN && !ZH && Q3 ? Q3.toLowerCase() : '';
+  var D3 = {
+    ja: {
+      '보아뱀': 'ゾウをのむウワバミ', '시작': 'スタート',
+      '정글': 'ジャングル', '왕의 별': '王さまの星', '술꾼의 별': '呑んべえの星', '사업가의 별': '実業家の星', '점등인의 별': '点灯夫の星', '지구': '地球',
+      '↑↓←→ 이동 · 스페이스 돌진 · P 일시정지 · K 효과음': '↑↓←→ 移動 · スペース ダッシュ · P 一時停止 · K 効果音',
+      '가로 화면에서 하는 게임입니다': '横画面で遊ぶゲームです',
+      '가로로 돌리기': '横画面にする',
+      '단추가 안 먹으면 폰의 화면 회전 잠금을 풀고 눕혀 주세요': 'ボタンが効かないときは、画面の回転ロックを解除してスマホを横にしてください',
+      '그래도 세로로 하기': 'このまま縦画面で遊ぶ'
+    },
+    pt: {
+      '보아뱀': 'JIBOIA', '시작': 'JOGAR',
+      '정글': 'SELVA', '왕의 별': 'PLANETA DO REI', '술꾼의 별': 'PLANETA DO BÊBADO', '사업가의 별': 'PLANETA DO EMPRESÁRIO', '점등인의 별': 'PLANETA DO ACENDEDOR', '지구': 'TERRA',
+      '↑↓←→ 이동 · 스페이스 돌진 · P 일시정지 · K 효과음': '↑↓←→ mover · ESPAÇO arrancada · P pausar · K som',
+      '가로 화면에서 하는 게임입니다': 'Este jogo é jogado na horizontal',
+      '가로로 돌리기': 'Girar para horizontal',
+      '단추가 안 먹으면 폰의 화면 회전 잠금을 풀고 눕혀 주세요': 'Se o botão não funcionar, desative o bloqueio de rotação e vire o celular de lado',
+      '그래도 세로로 하기': 'Jogar na vertical mesmo assim'
+    },
+    ru: {
+      '보아뱀': 'УДАВ', '시작': 'ИГРАТЬ',
+      '정글': 'ДЖУНГЛИ', '왕의 별': 'ПЛАНЕТА КОРОЛЯ', '술꾼의 별': 'ПЛАНЕТА ПЬЯНИЦЫ', '사업가의 별': 'ПЛАНЕТА ДЕЛЬЦА', '점등인의 별': 'ПЛАНЕТА ФОНАРЩИКА', '지구': 'ЗЕМЛЯ',
+      '↑↓←→ 이동 · 스페이스 돌진 · P 일시정지 · K 효과음': '↑↓←→ движение · ПРОБЕЛ рывок · P пауза · K звук',
+      '가로 화면에서 하는 게임입니다': 'В эту игру играют в горизонтальном режиме',
+      '가로로 돌리기': 'Повернуть горизонтально',
+      '단추가 안 먹으면 폰의 화면 회전 잠금을 풀고 눕혀 주세요': 'Если кнопка не работает, отключите блокировку поворота и поверните телефон',
+      '그래도 세로로 하기': 'Всё равно играть вертикально'
+    }
+  };
+  var LD = LG3 ? D3[LG3] : null;
+  function stName(st) { return EN ? st.en : ZH && ZD[st.ko] ? ZD[st.ko] : LD ? (LD[st.ko] || st.en) : st.ko; }
+  if (LD) {
+    document.documentElement.lang = LG3 === 'pt' ? 'pt-BR' : LG3; document.body.classList.add(LG3);
+    if (LG3 === 'ja') document.title = 'ゾウをのむウワバミ — Boa';
+    if (LG3 === 'pt') document.title = 'Jiboia — Boa';
+    if (LG3 === 'ru') document.title = 'Удав — Boa';
+    Array.prototype.forEach.call(document.querySelectorAll('[data-en]'), function (el) { var k = el.textContent.trim(); el.textContent = LD[k] || el.getAttribute('data-en'); });
+    // 게임 글꼴에 없는 글자(가나·한자, 악센트 라틴·키릴)만 기기 글꼴로 덧붙인다
+    var jf = "local('Hiragino Sans'),local('Hiragino Kaku Gothic ProN'),local('Yu Gothic UI'),local('Yu Gothic'),local('Yu Gothic Medium'),local('YuGothic-Medium'),local('Yu Gothic Regular'),local('YuGothic-Regular'),local('Yu Gothic Bold'),local('YuGothic-Bold'),local('MS PGothic'),local('MS Gothic'),local('Meiryo'),local('Noto Sans JP'),local('Noto Sans CJK JP'),local('Source Han Sans JP')";
+    var jr = 'U+2E80-2FFF,U+3000-30FF,U+31F0-31FF,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF';
+    var lf = "local('Segoe UI'),local('Roboto'),local('Arial'),local('Helvetica Neue'),local('Helvetica')";
+    var lr = 'U+00A0-024F,U+0400-04FF,U+1E00-1EFF,U+2010-2027';
+    var f3 = LG3 === 'ja' ? jf : lf, r3 = LG3 === 'ja' ? jr : lr;
+    var lst = document.createElement('style');
+    lst.textContent = "@font-face{font-family:'Griun';src:" + f3 + ";unicode-range:" + r3 + "}@font-face{font-family:'Ria';src:" + f3 + ";unicode-range:" + r3 + "}" +
+      (LG3 === 'ja' ? "html[lang=ja] *{word-break:normal!important}body.ja #title h1{font-size:min(9vw,80px);letter-spacing:1px}body.ja #card .nm{font-size:min(10vw,72px)}@media(max-width:420px){body.ja #stg .nm{font-size:12px}}"
+                    : "body." + LG3 + " #title h1{font-size:min(16vw,104px);letter-spacing:3px}body." + LG3 + " #card .nm{font-size:min(9vw,64px)}#rotate button{letter-spacing:1px}");
+    document.head.appendChild(lst);
+  }
   if (ZH) {
     document.documentElement.lang = 'zh-CN'; document.body.classList.add('zh'); document.title = '吞大象的蟒蛇 — Boa';
     Array.prototype.forEach.call(document.querySelectorAll('[data-en]'), function (el) { var k = el.textContent.trim(); if (ZD[k]) el.textContent = ZD[k]; });

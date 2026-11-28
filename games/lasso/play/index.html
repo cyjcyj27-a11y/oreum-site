@@ -293,7 +293,12 @@
 <script>if (/[?&]lang=en(&|$)/.test(location.search)) { document.querySelector('#load .ttl').textContent = 'LASSO SISTER'; document.title = 'LASSO SISTER'; }</script>
 <script>if (/[?&]lang=zh(&|$)/.test(location.search)) { document.documentElement.lang = 'zh-CN'; document.querySelector('#load .ttl').textContent = '套索姐姐'; document.title = '套索姐姐';   /* 중국어판: 게임 글꼴에 없는 한자는 기기 중국어 글꼴로 */
   const zf = "local('PingFang SC'),local('PingFangSC-Regular'),local('Microsoft YaHei'),local('Microsoft YaHei UI'),local('Noto Sans SC'),local('Noto Sans CJK SC'),local('Source Han Sans SC')", ur = 'U+2E80-2FFF,U+3000-303F,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF', st = document.createElement('style');
-  st.textContent = ['BHTitle', 'Ria'].map(f => `@font-face{font-family:'${f}';src:${zf};unicode-range:${ur}}`).join('') + 'html[lang=zh-CN] *{word-break:normal!important}'; document.head.appendChild(st); }</script>   <!-- 영문판: 불러오는 동안에도 영어 제목(10/4 영문판 검수) -->
+  st.textContent = ['BHTitle', 'Ria'].map(f => `@font-face{font-family:'${f}';src:${zf};unicode-range:${ur}}`).join('') + 'html[lang=zh-CN] *{word-break:normal!important}'; document.head.appendChild(st); }</script>
+<script>(function () { const m = /[?&]lang=(ja|pt|ru)(&|$)/.exec(location.search); if (!m) return; const q = m[1];   /* 일본어·포르투갈어·러시아어판: 제목과 글꼴에 없는 글자는 기기 글꼴로 */
+  document.documentElement.lang = q === 'pt' ? 'pt-BR' : q; const t = { ja: '投げ縄お姉さん', pt: 'Mana do Laço', ru: 'Сестрица с лассо' }[q]; document.querySelector('#load .ttl').textContent = t; document.title = t;
+  const jf = "local('Hiragino Sans'),local('Hiragino Kaku Gothic ProN'),local('Yu Gothic UI'),local('Yu Gothic'),local('Yu Gothic Medium'),local('YuGothic-Medium'),local('Yu Gothic Regular'),local('YuGothic-Regular'),local('Yu Gothic Bold'),local('YuGothic-Bold'),local('MS PGothic'),local('MS Gothic'),local('Meiryo'),local('Noto Sans JP'),local('Noto Sans CJK JP'),local('Source Han Sans JP')", ju = 'U+2E80-2FFF,U+3000-30FF,U+31F0-31FF,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF';
+  const lf = "local('Segoe UI'),local('Roboto'),local('Arial'),local('Helvetica Neue'),local('Helvetica')", lu = 'U+00A0-024F,U+0400-04FF,U+1E00-1EFF,U+2010-2027', st = document.createElement('style');
+  st.textContent = ['BHTitle', 'Ria'].map(f => q === 'ja' ? `@font-face{font-family:'${f}';src:${jf};unicode-range:${ju}}` : `@font-face{font-family:'${f}';src:${lf};unicode-range:${lu}}`).join('') + (q === 'ja' ? 'html[lang=ja] *{word-break:normal!important}' : ''); document.head.appendChild(st); })();</script>   <!-- 영문판: 불러오는 동안에도 영어 제목(10/4 영문판 검수) -->
 
 <div id="title">
   <h1>올가미 언니</h1>
@@ -334,7 +339,7 @@
 <div id="rotate"><span class="bw"><button class="btn main" id="btnLand">가로로 보기</button></span></div>
 
 <script src="assets/landscape.js?v=1"></script>
-<script src="assets/game-home.js?v=2" data-top="6" data-left="6" data-fullscreen="1" defer></script>
+<script src="assets/game-home.js?v=3" data-top="6" data-left="6" data-fullscreen="1" defer></script>
 <script src="lib/three.min.js"></script>
 <script src="lib/GLTFLoader.global.js"></script>
 <script src="js/sfx.js?v=3"></script>
@@ -345,8 +350,8 @@
 <script src="js/sites.js?v=6"></script>
 <script src="js/actors.js?v=14"></script>
 <script src="assets/wanted.js?v=1"></script>
-<script src="js/data.js?v=17"></script>
-<script src="js/how.js?v=6"></script>
+<script src="js/data.js?v=18"></script>
+<script src="js/how.js?v=7"></script>
 <script src="js/music.js?v=1"></script>
 <script src="js/game.js?v=64"></script>
 <script src="/assets/touchlock.js?v=1"></script>

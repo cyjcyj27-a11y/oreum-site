@@ -17,7 +17,51 @@
     '치즈': '橘猫', '고등어': '狸花猫', '턱시도': '奶牛猫', '삼색이': '三花猫', '샴': '暹罗猫', '흰냥이': '小白',
     '까망이': '小黑', '러시안블루': '俄罗斯蓝猫', '스코티시': '折耳猫', '벵갈': '孟加拉猫', '페르시안': '波斯猫', '노랑둥이': '小黄'
   };
-  function T(ko, en) { return EN ? en : ZH ? (ZHT[ko] || ko) : ko; }
+  // 일본어·포르투갈어·러시아어판: 같은 한국어 열쇠로 바꿔 끼운다(없으면 영어)
+  var XQ = (/[?&]lang=(ja|pt|ru)(?=&|#|$)/.exec(location.search) || [])[1];
+  var XL = !EN && !ZH && XQ ? XQ : '';
+  var XD = {
+    ja: {
+      '야옹 편대': 'ニャンコ編隊', '←→↑↓ 이동 · B 폭탄 · P 일시정지 · M 음악 · K 효과음': '←→↑↓ 移動 · B ボム · P ポーズ · M BGM · K 効果音',
+      '시작': 'スタート', '이어하기': 'つづきから', '🐱 도감': '🐱 図鑑', '상점': 'ショップ', '계속': 'つづける',
+      '연사': '連射', '탄': '拡散弾', '방패': 'シールド', '자석': 'マグネット', '폭탄': 'ボム', '폭탄 강화': 'ボム強化', '목숨': 'ライフ',
+      '치즈': '茶トラ', '고등어': 'サバトラ', '턱시도': 'ハチワレ', '삼색이': '三毛', '샴': 'シャム', '흰냥이': 'シロ',
+      '까망이': 'クロ', '러시안블루': 'ロシアンブルー', '스코티시': 'スコティッシュ', '벵갈': 'ベンガル', '페르시안': 'ペルシャ', '노랑둥이': 'キナコ'
+    },
+    pt: {
+      '야옹 편대': 'MEOWSQUAD', '←→↑↓ 이동 · B 폭탄 · P 일시정지 · M 음악 · K 효과음': '←→↑↓ mover · B bomba · P pausa · M música · K som',
+      '시작': 'JOGAR', '이어하기': 'CONTINUAR', '🐱 도감': '🐱 GATOS', '상점': 'LOJA', '계속': 'VOLTAR',
+      '연사': 'RAJADA', '탄': 'LEQUE', '방패': 'ESCUDO', '자석': 'ÍMÃ', '폭탄': 'BOMBA', '폭탄 강화': 'BOMBA+', '목숨': 'VIDA',
+      '치즈': 'Laranjinha', '고등어': 'Tigrado', '턱시도': 'Frajola', '삼색이': 'Tricolor', '샴': 'Siamês', '흰냥이': 'Branquinho',
+      '까망이': 'Pretinho', '러시안블루': 'Azul Russo', '스코티시': 'Scottish', '벵갈': 'Bengal', '페르시안': 'Persa', '노랑둥이': 'Caramelo'
+    },
+    ru: {
+      '야옹 편대': 'MEOWSQUAD', '←→↑↓ 이동 · B 폭탄 · P 일시정지 · M 음악 · K 효과음': '←→↑↓ движение · B бомба · P пауза · M музыка · K звук',
+      '시작': 'ИГРАТЬ', '이어하기': 'ПРОДОЛЖИТЬ', '🐱 도감': '🐱 КОТЫ', '상점': 'МАГАЗИН', '계속': 'ДАЛЬШЕ',
+      '연사': 'ТЕМП ОГНЯ', '탄': 'РАЗБРОС', '방패': 'ЩИТ', '자석': 'МАГНИТ', '폭탄': 'БОМБА', '폭탄 강화': 'БОМБА+', '목숨': 'ЖИЗНЬ',
+      '치즈': 'Рыжик', '고등어': 'Полосатик', '턱시도': 'Смокинг', '삼색이': 'Трёхцветка', '샴': 'Сиам', '흰냥이': 'Снежок',
+      '까망이': 'Уголёк', '러시안블루': 'Русская голубая', '스코티시': 'Скоттиш', '벵갈': 'Бенгал', '페르시안': 'Перс', '노랑둥이': 'Ириска'
+    }
+  };
+  var XT = XL ? XD[XL] : null;
+  function T(ko, en) { return EN ? en : ZH ? (ZHT[ko] || ko) : XT ? (XT[ko] || en) : ko; }
+  if (XT) {
+    if (XL !== 'ja') body.classList.add('en');                 // 제목은 영문판 배치(MEOWSQUAD)
+    body.classList.add(XL); document.documentElement.lang = XL === 'pt' ? 'pt-BR' : XL;
+    document.title = XT['야옹 편대'];
+    [].forEach.call(document.querySelectorAll('[data-en]'), function (el) { var k = el.textContent.trim(); el.textContent = XT[k] || el.getAttribute('data-en'); });
+    var xst = document.createElement('style'), xf, xr, xc = '';
+    if (XL === 'ja') {
+      xf = "local('Hiragino Sans'),local('Hiragino Kaku Gothic ProN'),local('Yu Gothic UI'),local('Yu Gothic'),local('Yu Gothic Medium'),local('YuGothic-Medium'),local('Yu Gothic Regular'),local('YuGothic-Regular'),local('Yu Gothic Bold'),local('YuGothic-Bold'),local('MS PGothic'),local('MS Gothic'),local('Meiryo'),local('Noto Sans JP'),local('Noto Sans CJK JP'),local('Source Han Sans JP')";
+      xr = 'U+2E80-2FFF,U+3000-30FF,U+31F0-31FF,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF';
+      xc = 'html[lang=ja] *{word-break:normal!important}html[lang=ja] #title h1{font-size:min(15vw,110px,12vh)!important;white-space:nowrap}';
+    } else {
+      xf = "local('Segoe UI'),local('Roboto'),local('Arial'),local('Helvetica Neue'),local('Helvetica')";
+      xr = 'U+00A0-024F,U+0400-04FF,U+1E00-1EFF,U+2010-2027';
+    }
+    xst.textContent = "@font-face{font-family:'SingleDay';src:" + xf + ";unicode-range:" + xr + "}@font-face{font-family:'Ria';src:" + xf + ";unicode-range:" + xr + "}" + xc;
+    document.head.appendChild(xst);
+  }
   if (ZH) {
     body.classList.add('zh'); document.documentElement.lang = 'zh-CN'; document.title = '喵喵战队';
     [].forEach.call(document.querySelectorAll('[data-en]'), function (el) { var k = el.textContent.trim(); if (ZHT[k]) el.textContent = ZHT[k]; });

@@ -68,6 +68,7 @@
   #title { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding-top: 8vh; background: linear-gradient(180deg, rgba(20,26,36,.25), rgba(20,26,36,0) 45%, rgba(20,26,36,0) 70%, rgba(20,26,36,.45)); transition: opacity 1s; text-align: center; z-index: 10; }
   #title.hide { opacity: 0; pointer-events: none; }
   #title h1 { font-family: 'Ria', 'Griun', sans-serif; font-weight: 900; font-size: clamp(42px, 9vw, 96px); margin: 8px 0 0; letter-spacing: 2px; color: #fff4dc; text-shadow: 0 4px 0 #a8562b, 0 8px 24px rgba(0,0,0,.45); -webkit-text-stroke: 1.5px #7a3a1a; paint-order: stroke fill; line-height: 1.1; }
+  html[lang=pt-BR] #title h1 { font-size: clamp(34px, 7vw, 92px); white-space: nowrap; }   /* 긴 포르투갈어 제목을 두 줄에 맞춤 */
   #title .tag { font-family: 'Ria', sans-serif; letter-spacing: 8px; font-size: 18px; opacity: .9; margin-top: 8px; text-shadow: 0 1px 3px rgba(0,0,0,.6); }
   #title .brand { display: flex; align-items: center; gap: 8px; padding: 6px 14px 6px 8px; border-radius: 999px; background: rgba(255,253,247,.92); color: #2e6b39; font-size: 14px; letter-spacing: 1px; }
   #title .brand img { width: 30px; height: 15px; }
@@ -105,28 +106,28 @@
   <div class="stat" id="stageH">STAGE 1</div>
   <div class="stat"><span class="ic">⏱</span><b id="time">0:00.0</b></div>
   <div class="stat" id="ind"><span id="indIco">🐕</span><span class="arrow">➜</span></div>
-  <div class="stat item" id="btnTreat" title="간식" data-zh-title="零食"><span class="ic">🦴</span><b id="invTreat">0</b></div>
-  <div class="stat item" id="btnToy" title="장난감" data-zh-title="玩具"><span class="ic">🎾</span><b id="invToy">0</b></div>
+  <div class="stat item" id="btnTreat" title="간식" data-zh-title="零食" data-ja-title="おやつ" data-pt-title="Petisco" data-ru-title="Лакомство"><span class="ic">🦴</span><b id="invTreat">0</b></div>
+  <div class="stat item" id="btnToy" title="장난감" data-zh-title="玩具" data-ja-title="おもちゃ" data-pt-title="Brinquedo" data-ru-title="Игрушка"><span class="ic">🎾</span><b id="invToy">0</b></div>
   <div class="stat" id="carry" hidden><span class="ic">🐾</span><div class="bar"><div id="carryBar"></div></div></div>
   <div class="spacer"></div>
-  <button id="btnSfx" class="tog" title="효과음" data-zh-title="音效">🔊</button>
+  <button id="btnSfx" class="tog" title="효과음" data-zh-title="音效" data-ja-title="効果音" data-pt-title="Efeitos sonoros" data-ru-title="Звуки">🔊</button>
 </div>
 <div id="hud"></div>
 <div id="cross"></div>
-<div id="keys" data-zh="WASD 移动 · 鼠标 / ←→ 视角 · Shift 奔跑 · C 悄悄走<br>空格 抓 · E 开关门 · 1 零食 · 2 玩具 · K 音效" data-en="WASD move · Mouse / ←→ look · Shift run · C sneak<br>Space grab · E door · 1 treat · 2 toy · K sound">WASD 이동 · 마우스 / ←→ 시점 · Shift 달리기 · C 살금살금<br>스페이스 잡기 · E 문 · 1 간식 · 2 장난감 · K 효과음</div>
+<div id="keys" data-zh="WASD 移动 · 鼠标 / ←→ 视角 · Shift 奔跑 · C 悄悄走<br>空格 抓 · E 开关门 · 1 零食 · 2 玩具 · K 音效" data-ja="WASD 移動 · マウス / ←→ 視点 · Shift ダッシュ · C 忍び足<br>スペース つかむ · E ドア · 1 おやつ · 2 おもちゃ · K 効果音" data-pt="WASD mover · Mouse / ←→ olhar · Shift correr · C andar de fininho<br>Espaço pegar · E porta · 1 petisco · 2 brinquedo · K som" data-ru="WASD — ходьба · Мышь / ←→ — обзор · Shift — бег · C — красться<br>Пробел — схватить · E — дверь · 1 — лакомство · 2 — игрушка · K — звук" data-en="WASD move · Mouse / ←→ look · Shift run · C sneak<br>Space grab · E door · 1 treat · 2 toy · K sound">WASD 이동 · 마우스 / ←→ 시점 · Shift 달리기 · C 살금살금<br>스페이스 잡기 · E 문 · 1 간식 · 2 장난감 · K 효과음</div>
 
 <div id="joy"><div id="joyKnob"></div></div>
-<button id="btnGrab" class="tbtn" data-zh="抓" data-en="GRAB">잡기</button>
-<button id="btnDoor" class="tbtn" data-zh="门" data-en="DOOR">문</button>
-<button id="btnRun" class="tbtn" data-zh="奔跑" data-en="RUN">달리기</button>
-<button id="btnSneak" class="tbtn" data-zh="悄悄" data-en="SNEAK">살금살금</button>
+<button id="btnGrab" class="tbtn" data-zh="抓" data-ja="つかむ" data-pt="PEGAR" data-ru="ХВАТЬ" data-en="GRAB">잡기</button>
+<button id="btnDoor" class="tbtn" data-zh="门" data-ja="ドア" data-pt="PORTA" data-ru="ДВЕРЬ" data-en="DOOR">문</button>
+<button id="btnRun" class="tbtn" data-zh="奔跑" data-ja="ダッシュ" data-pt="CORRER" data-ru="БЕГ" data-en="RUN">달리기</button>
+<button id="btnSneak" class="tbtn" data-zh="悄悄" data-ja="そろり" data-pt="DEVAGAR" data-ru="ТИХО" data-en="SNEAK">살금살금</button>
 <div id="pad"><div id="knob"></div></div>
 <div id="rotate">
   <div>
-    <p data-zh="本游戏需要横屏玩" data-en="This game plays in landscape">가로 화면에서 하는 게임입니다</p>
-    <button type="button" id="rotGo" data-zh="切换横屏" data-en="Turn to landscape">가로로 돌리기</button>
-    <p class="sub"><span data-zh="按钮没反应的话，请关闭手机的屏幕旋转锁定，再把手机横过来" data-en="If the button does nothing, turn off your phone's rotation lock and lay it sideways">단추가 안 먹으면 폰의 화면 회전 잠금을 풀고 눕혀 주세요</span><br>
-      <a href="#" id="rotSkip" data-zh="还是竖屏玩" data-en="Play in portrait anyway">그래도 세로로 하기</a></p>
+    <p data-zh="本游戏需要横屏玩" data-ja="このゲームは横画面で遊びます" data-pt="Este jogo é para jogar com a tela na horizontal" data-ru="В эту игру играют в горизонтальном режиме" data-en="This game plays in landscape">가로 화면에서 하는 게임입니다</p>
+    <button type="button" id="rotGo" data-zh="切换横屏" data-ja="横画面にする" data-pt="Virar para horizontal" data-ru="Повернуть горизонтально" data-en="Turn to landscape">가로로 돌리기</button>
+    <p class="sub"><span data-zh="按钮没反应的话，请关闭手机的屏幕旋转锁定，再把手机横过来" data-ja="ボタンが効かないときは、スマホの画面回転ロックを解除して横向きにしてください" data-pt="Se o botão não funcionar, desative o bloqueio de rotação do celular e vire-o de lado" data-ru="Если кнопка не работает, отключите блокировку поворота экрана и поверните телефон боком" data-en="If the button does nothing, turn off your phone's rotation lock and lay it sideways">단추가 안 먹으면 폰의 화면 회전 잠금을 풀고 눕혀 주세요</span><br>
+      <a href="#" id="rotSkip" data-zh="还是竖屏玩" data-ja="縦画面のまま遊ぶ" data-pt="Jogar na vertical mesmo assim" data-ru="Всё равно играть вертикально" data-en="Play in portrait anyway">그래도 세로로 하기</a></p>
   </div>
 </div>
 <button id="btnTreat" class="tbtn">🦴 0</button>
@@ -134,12 +135,12 @@
 
 <div id="title">
   <div class="brand"><img src="assets/logo-oreum.svg" alt="">OREUM GAMES</div>
-  <h1 data-zh="柴犬<br>兽医的一天" data-en="SHIBA<br>VET DAY">시바<br>병원 가는 날</h1>
+  <h1 data-zh="柴犬<br>兽医的一天" data-ja="柴犬<br>病院へ行く日" data-pt="SHIBA<br>NO VETERINÁRIO" data-ru="ШИБА<br>К ВЕТЕРИНАРУ" data-en="SHIBA<br>VET DAY">시바<br>병원 가는 날</h1>
   <div class="tag" data-en="CATCH THE SHIBA">SHIBA VET DAY</div>
   <div class="stage" id="stageT">STAGE 1</div>
   <div class="best" id="titleBest"></div>
   <div class="items" id="titleItems"></div>
-  <div class="go" data-zh="开始" data-en="START">시작</div>
+  <div class="go" data-zh="开始" data-ja="スタート" data-pt="JOGAR" data-ru="ИГРАТЬ" data-en="START">시작</div>
 </div>
 
 <div id="over">
@@ -148,13 +149,13 @@
   <div class="stage" id="overStage">STAGE 1</div>
   <h2>CONGRATULATIONS</h2>
   <p><span id="overTime">0:00.0</span></p>
-  <p><small data-zh="最佳" data-en="BEST">최고</small><span id="overBest">0:00.0</span></p>
+  <p><small data-zh="最佳" data-ja="ベスト" data-pt="RECORDE" data-ru="РЕКОРД" data-en="BEST">최고</small><span id="overBest">0:00.0</span></p>
   <p class="gain" id="overItems"></p>
   <p class="again">NEXT</p>
   </div>
 </div>
 
-<script src="/assets/game-home.js?v=8" data-top="6" data-left="6" data-fullscreen="1" defer></script>
+<script src="/assets/game-home.js?v=9" data-top="6" data-left="6" data-fullscreen="1" defer></script>
 <script src="/assets/landscape.js?v=1"></script>
 <script src="lib/three.min.js"></script>
 <script src="js/world.js?v=15"></script>
@@ -162,7 +163,7 @@
 <script src="js/items.js?v=3"></script>
 <script src="js/dog.js?v=22"></script>
 <script src="js/player.js?v=16"></script>
-<script src="js/game.js?v=46"></script>
+<script src="js/game.js?v=47"></script>
 <script>
 </script>
 <script src="/assets/game-events.js?v=4" defer></script>

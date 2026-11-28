@@ -42,7 +42,10 @@ function starsFor(S){ const m = S.moves, n = S.min; return m <= n + 2 ? 3 : m <=
 /* 한 판 = 출근하는 하루. 1월 1일부터 하루씩(10/9 사장님 "1월 1일"), 요일은 안 씀 */
 function dateOf(idx){ const d = new Date(2027, 0, 1 + idx); return { m:d.getMonth() + 1, d:d.getDate() }; }
 const MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-function dateText(idx){ const t = dateOf(idx); return ZH ? `${t.m}月${t.d}日` : L(`${t.m}월 ${t.d}일`, `${MON[t.m - 1]} ${t.d}`); }
+const MON_PT = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+const MON_RU = ['янв','фев','мар','апр','мая','июн','июл','авг','сен','окт','ноя','дек'];
+function ruDays(n){ const a = n % 10, b = n % 100; return a === 1 && b !== 11 ? 'день' : a >= 2 && a <= 4 && (b < 12 || b > 14) ? 'дня' : 'дней'; }
+function dateText(idx){ const t = dateOf(idx); return ZH || JA ? `${t.m}月${t.d}日` : PT ? `${t.d} ${MON_PT[t.m - 1]}` : RU ? `${t.d} ${MON_RU[t.m - 1]}` : L(`${t.m}월 ${t.d}일`, `${MON[t.m - 1]} ${t.d}`); }
 /* 출근 시계: 판마다 1분 30초(10/9 사장님). 시작하면 08:58:30 부터 진짜 초로 흐르고 09:00:00 을 넘기면 지각 */
 const LIMIT = 90;
 function limitOf(){ return LIMIT; }
@@ -55,5 +58,5 @@ function rankName(r){ return L(r, RANK_EN[r]); }   // 사원(그대로) < 대리
 function lateDays(){ let n = 0; for(let i = 0; i < LEVELS.length; i++) if(prog.late[i]) n++; return n; }
 function stageName(idx){ return FLOORS[Math.floor(idx / PER_FLOOR)] + '-' + (idx % PER_FLOOR + 1); }
 function unlocked(idx){ return idx === 0 || prog.stars[idx - 1] > 0 || prog.stars[idx] > 0; }
-window.DP = { N, PER_FLOOR, FLOORS, prog, saveProg, build, grid, range, starsFor, stageName, unlocked, dateOf, dateText, limitOf, clockOf, rankOf, rankName, lateDays, MON };
+window.DP = { N, PER_FLOOR, FLOORS, prog, saveProg, build, grid, range, starsFor, stageName, unlocked, dateOf, dateText, limitOf, clockOf, rankOf, rankName, lateDays, MON, ruDays };
 })();

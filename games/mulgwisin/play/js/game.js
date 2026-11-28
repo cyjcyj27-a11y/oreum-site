@@ -493,7 +493,7 @@
     ['소년은 여동생을 찾으러'],
     ['어두운 강가로 나선다'],
   ].map(ZT);
-  const STORM = STORY.findIndex(p => /폭우|pouring storm|暴雨/.test(p[0]));   // 번개가 치는 장
+  const STORM = STORY.findIndex(p => /폭우|pouring storm|暴雨|豪雨|tempestade|ливен/.test(p[0]));   // 번개가 치는 장
   const SS = { on: false, page: -1, t: 0, hold: 0, done: null, drops: [], raf: 0, flashT: 0 };
   const storyEl = $('story'), storyText = $('storyText'), rainCv = $('rain'), rainC = rainCv.getContext('2d');
   function showStory(done) {
@@ -509,7 +509,7 @@
     if (i >= STORY.length) return endStory();
     const lines = STORY[i]; let chars = 0;
     lines.forEach((s, k) => { const sp = document.createElement('span'); sp.textContent = s; storyText.appendChild(sp); setTimeout(() => { if (SS.on && SS.page === i) sp.classList.add('on'); }, (delay + k * 1.1) * 1000); chars += s.length; });
-    SS.t = 0; SS.hold = delay + (lines.length - 1) * 1.1 + 1.6 + chars * (EN ? .045 : ZHON ? .12 : .075);   // 읽을 만큼 머문다
+    SS.t = 0; SS.hold = delay + (lines.length - 1) * 1.1 + 1.6 + chars * (EN || window.LG3 === 'pt' || window.LG3 === 'ru' ? .045 : ZHON ? .12 : window.LG3 === 'ja' ? .09 : .075);   // 읽을 만큼 머문다
     if (i === STORM) setTimeout(() => { if (SS.on && SS.page === STORM) { SS.flashT = .5; A.thunder(); } }, 300);   // 폭우 — 번개
   }
   function nextPage() {

@@ -417,7 +417,7 @@ function packTex() {
   g.fillStyle = '#fffdf2'; g.beginPath(); g.ellipse(300, 318, 46, 32, 0.2, 0, 6.3); g.fill(); g.fillStyle = '#f7b31a'; g.beginPath(); g.arc(300, 318, 20, 0, 6.3); g.fill();
   g.fillStyle = '#3d9a3a'; [[180, 300], [215, 345], [345, 352], [250, 362]].forEach(function (q) { g.beginPath(); g.ellipse(q[0], q[1], 9, 6, 0.6, 0, 6.3); g.fill(); });
   g.fillStyle = '#e3301a'; [[165, 340], [330, 300]].forEach(function (q) { g.beginPath(); g.arc(q[0], q[1], 8, 0, 6.3); g.fill(); g.fillStyle = '#f4d040'; g.beginPath(); g.arc(q[0], q[1], 3, 0, 6.3); g.fill(); g.fillStyle = '#e3301a'; });
-  g.textAlign = 'center'; g.font = "126px 'Eulji','Ria',sans-serif"; g.lineWidth = 16; g.strokeStyle = '#5a0a06'; g.lineJoin = 'round'; var rw = GS.EN ? 'RAMEN' : GS.Z('라면'); if (GS.EN && g.measureText(rw).width > 440) g.font = Math.floor(126 * 440 / g.measureText(rw).width) + "px 'Eulji','Ria',sans-serif"; g.strokeText(rw, 256, 178); g.fillStyle = '#fff'; g.fillText(rw, 256, 178);
+  g.textAlign = 'center'; g.font = "126px 'Eulji','Ria',sans-serif"; g.lineWidth = 16; g.strokeStyle = '#5a0a06'; g.lineJoin = 'round'; var rw = GS.EN ? 'RAMEN' : GS.Z('라면'); if ((GS.EN || (GS.XL && !GS.ZH)) && g.measureText(rw).width > 440) g.font = Math.floor(126 * 440 / g.measureText(rw).width) + "px 'Eulji','Ria',sans-serif"; g.strokeText(rw, 256, 178); g.fillStyle = '#fff'; g.fillText(rw, 256, 178);
   g.font = "bold 26px 'Ria',sans-serif"; g.fillStyle = '#fff4e4'; g.fillText('120g x 5', 256, 470);
   g.fillStyle = 'rgba(255,255,255,.08)'; for (i = 0; i < 512; i += 24) g.fillRect(i, 512, 12, 256);
   var t = new T.CanvasTexture(c); t.colorSpace = T.SRGBColorSpace; t.anisotropy = 4; return t;

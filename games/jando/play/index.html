@@ -154,8 +154,8 @@
   <div class="stat stone"><small>DAY</small><b id="sDay">1</b></div>
   <div class="stat stone"><svg width="18" height="12" viewBox="0 0 18 12" style="align-self:center"><rect x="1" y="2" width="16" height="8" rx="1" fill="#9a6a3c" stroke="#3a2614" stroke-width="1.4"/><path d="M1 6h16" stroke="#3a2614" stroke-width="1"/></svg><b id="sPlank">0/6</b></div>
   <div class="stat stone"><b id="sH">260</b><small>m</small></div>
-  <div class="stat stone"><small data-en="COIN" data-zh="金币">코인</small><b id="sCoin">0</b></div>
-  <button id="btnDex" class="stat stone" title="B"><small data-en="RELICS" data-zh="图鉴">도감</small><b id="sDex">0/12</b></button>
+  <div class="stat stone"><small data-en="COIN" data-zh="金币" data-ja="コイン" data-pt="Moedas" data-ru="Монеты">코인</small><b id="sCoin">0</b></div>
+  <button id="btnDex" class="stat stone" title="B"><small data-en="RELICS" data-zh="图鉴" data-ja="図鑑" data-pt="Coleção" data-ru="Коллекция">도감</small><b id="sDex">0/12</b></button>
   <div class="spacer"></div>
   <button id="btnPause" class="tog" title="PAUSE"><svg viewBox="0 0 24 24"><rect x="6" y="5" width="4" height="14" rx="1" fill="#f2cf72"/><rect x="14" y="5" width="4" height="14" rx="1" fill="#f2cf72"/></svg></button>
   <button id="btnMusic" class="tog" title="BGM"><svg viewBox="0 0 24 24"><path d="M9 17.5V5.5l11-2.5v12" fill="none" stroke="#fff" stroke-width="2.6" stroke-linejoin="round"/><ellipse cx="6.3" cy="17.8" rx="3.4" ry="2.7" fill="#fff"/><ellipse cx="17.3" cy="15.3" rx="3.4" ry="2.7" fill="#fff"/></svg></button>
@@ -165,39 +165,39 @@
 <div id="msg"></div>
 <div id="dayCard" class="btn"><b>DAY 1</b></div>
 <div id="tut" class="stone"><span id="tutN">1/10</span><span id="tutTxt"></span><button id="tutX" aria-label="close">✕</button></div>
-<div id="keys" data-en="WASD Move · Mouse View · Shift Run<br>E / Click Work · Space Jump · Esc Pause · B Relics · M Music · K Sound" data-zh="WASD 移动 · 鼠标 视角 · Shift 跑<br>E / 点击 干活 · Space 跳 · Esc 暂停 · B 图鉴 · M 音乐 · K 音效">WASD 이동 · 마우스 시점 · Shift 달리기<br>E / 클릭 작업 · Space 점프 · Esc 멈춤 · B 도감 · M 음악 · K 효과음</div>
+<div id="keys" data-en="WASD Move · Mouse View · Shift Run<br>E / Click Work · Space Jump · Esc Pause · B Relics · M Music · K Sound" data-zh="WASD 移动 · 鼠标 视角 · Shift 跑<br>E / 点击 干活 · Space 跳 · Esc 暂停 · B 图鉴 · M 音乐 · K 音效" data-ja="WASD 移動 · マウス 視点 · Shift ダッシュ<br>E / クリック 作業 · Space ジャンプ · Esc 一時停止 · B 図鑑 · M 音楽 · K 効果音" data-pt="WASD Mover · Mouse Câmera · Shift Correr<br>E / Clique Ação · Space Pular · Esc Pausa · B Coleção · M Música · K Sons" data-ru="WASD Ходьба · Мышь Обзор · Shift Бег<br>E / Клик Работа · Space Прыжок · Esc Пауза · B Коллекция · M Музыка · K Звуки">WASD 이동 · 마우스 시점 · Shift 달리기<br>E / 클릭 작업 · Space 점프 · Esc 멈춤 · B 도감 · M 음악 · K 효과음</div>
 <div id="pad"><div id="knob"></div></div>
-<button id="bJump" class="tbtn btn stone" data-en="JUMP" data-zh="跳">점프</button>
-<button id="bAct" class="tbtn btn" data-en="WORK" data-zh="干活">작업</button>
+<button id="bJump" class="tbtn btn stone" data-en="JUMP" data-zh="跳" data-ja="ジャンプ" data-pt="PULAR" data-ru="ПРЫЖОК">점프</button>
+<button id="bAct" class="tbtn btn" data-en="WORK" data-zh="干活" data-ja="作業" data-pt="AÇÃO" data-ru="РАБОТА">작업</button>
 
 <div id="clear" class="sheet"><div class="panel stone">
   <h2><span id="clrDay">DAY 1</span> CLEAR</h2>
-  <div class="row"><div><span data-en="COIN" data-zh="金币">코인</span><b id="clrCoin">+0</b></div><div><span data-en="HEIGHT" data-zh="高度">높이</span><b id="clrH">0m</b></div><div><span data-en="HAVE" data-zh="持有金币">가진 코인</span><b id="clrHave">0</b></div></div>
+  <div class="row"><div><span data-en="COIN" data-zh="金币" data-ja="コイン" data-pt="Moedas" data-ru="Монеты">코인</span><b id="clrCoin">+0</b></div><div><span data-en="HEIGHT" data-zh="高度" data-ja="高さ" data-pt="Altura" data-ru="Высота">높이</span><b id="clrH">0m</b></div><div><span data-en="HAVE" data-zh="持有金币" data-ja="所持コイン" data-pt="Suas moedas" data-ru="Всего монет">가진 코인</span><b id="clrHave">0</b></div></div>
   <div id="shop"></div>
   <button id="bNext" class="btn">NEXT</button>
 </div></div>
 <div id="ending" class="sheet"><div class="panel stone">
   <img id="endCard" alt="">
   <div class="side">
-    <button id="bEndSave" class="btn" data-en="SAVE" data-zh="保存">저장</button>
-    <button id="bEndShare" class="btn stone" data-en="SHARE" data-zh="分享">공유</button>
+    <button id="bEndSave" class="btn" data-en="SAVE" data-zh="保存" data-ja="保存" data-pt="SALVAR" data-ru="СОХРАНИТЬ">저장</button>
+    <button id="bEndShare" class="btn stone" data-en="SHARE" data-zh="分享" data-ja="共有" data-pt="COMPARTILHAR" data-ru="ПОДЕЛИТЬСЯ">공유</button>
     <button id="bAgain" class="btn stone">RETRY</button>
   </div>
 </div></div>
 <div id="over" class="sheet"><div class="panel stone">
   <h2>GAME OVER</h2>
-  <div class="row"><div><span data-en="HEIGHT" data-zh="高度">높이</span><b id="overH">0m</b></div></div>
+  <div class="row"><div><span data-en="HEIGHT" data-zh="高度" data-ja="高さ" data-pt="Altura" data-ru="Высота">높이</span><b id="overH">0m</b></div></div>
   <button id="bRetry" class="btn">RETRY</button>
 </div></div>
-<div id="dex" class="sheet"><div class="panel stone"><h3><span data-en="LEFT BEHIND" data-zh="老栈道工的遗物">옛 잔도공의 물건</span> <b id="dexN">0/12</b></h3><div id="dexGrid"></div></div></div>
+<div id="dex" class="sheet"><div class="panel stone"><h3><span data-en="LEFT BEHIND" data-zh="老栈道工的遗物" data-ja="昔の桟道職人の遺品" data-pt="Deixado pelos antigos construtores" data-ru="Вещи старых строителей">옛 잔도공의 물건</span> <b id="dexN">0/12</b></h3><div id="dexGrid"></div></div></div>
 <div id="relicPop" class="stone"><img alt=""><div><b></b><small></small></div></div>
 <div id="pause" class="sheet"><h2>PAUSE</h2></div>
 
 <div id="title">
-  <div class="btns"><button id="bStart" class="btn" data-en="START" data-zh="开始">시작</button><button id="bNew" class="btn stone" hidden data-en="NEW GAME" data-zh="重新开始">새로 시작</button></div>
-  <h1 data-en="CLIFF WALKER" data-zh="悬崖栈道工">절벽 잔도공</h1>
+  <div class="btns"><button id="bStart" class="btn" data-en="START" data-zh="开始" data-ja="スタート" data-pt="COMEÇAR" data-ru="НАЧАТЬ">시작</button><button id="bNew" class="btn stone" hidden data-en="NEW GAME" data-zh="重新开始" data-ja="はじめから" data-pt="NOVO JOGO" data-ru="НОВАЯ ИГРА">새로 시작</button></div>
+  <h1 data-en="CLIFF WALKER" data-zh="悬崖栈道工" data-ja="絶壁の桟道職人" data-pt="CONSTRUTOR DO PENHASCO" data-ru="СТРОИТЕЛЬ НАД ПРОПАСТЬЮ">절벽 잔도공</h1>
 </div>
-<div id="rotate"><div class="ph"></div><p data-en="This game plays in landscape" data-zh="这个游戏要横屏玩">가로 화면에서 하는 게임입니다</p><button type="button" id="rotGo" class="btn" data-en="Turn to landscape" data-zh="切换横屏">가로로 돌리기</button></div>
+<div id="rotate"><div class="ph"></div><p data-en="This game plays in landscape" data-zh="这个游戏要横屏玩" data-ja="このゲームは横画面で遊びます" data-pt="Este jogo é jogado na horizontal" data-ru="Эта игра идёт в горизонтальном режиме">가로 화면에서 하는 게임입니다</p><button type="button" id="rotGo" class="btn" data-en="Turn to landscape" data-zh="切换横屏" data-ja="横向きにする" data-pt="Virar para horizontal" data-ru="Повернуть экран">가로로 돌리기</button></div>
 
 <script>
   (function () {
@@ -214,11 +214,29 @@
       st.textContent = ['Climate', 'Gmarket'].map(function (f) { return "@font-face{font-family:'" + f + "';src:" + zf + ";unicode-range:" + ur + "}"; }).join('') + 'html[lang=zh-CN] *{word-break:normal!important}';
       document.head.appendChild(st);
     }
+    // 일본어·포르투갈어·러시아어판: data-ja / data-pt / data-ru 글로 바꾸고, 게임 글꼴에 없는 글자는 시스템 글꼴로 채운다
+    var lq = (new URLSearchParams(location.search).get('lang') || '').toLowerCase();
+    var LX = { ja: ['ja', '絶壁の桟道職人'], pt: ['pt-BR', 'Construtor do Penhasco'], ru: ['ru', 'Строитель над пропастью'] };
+    if (Object.prototype.hasOwnProperty.call(LX, lq)) {
+      document.documentElement.lang = LX[lq][0]; document.title = LX[lq][1];
+      document.querySelectorAll('[data-' + lq + ']').forEach(function (el) { el.innerHTML = el.dataset[lq]; });
+      var xs = document.createElement('style');
+      if (lq === 'ja') {
+        var jf = "local('Hiragino Sans'),local('Hiragino Kaku Gothic ProN'),local('Yu Gothic UI'),local('Yu Gothic'),local('Yu Gothic Medium'),local('YuGothic-Medium'),local('Yu Gothic Regular'),local('YuGothic-Regular'),local('Yu Gothic Bold'),local('YuGothic-Bold'),local('MS PGothic'),local('MS Gothic'),local('Meiryo'),local('Noto Sans JP'),local('Noto Sans CJK JP'),local('Source Han Sans JP')";
+        var ju = 'U+2E80-2FFF,U+3000-30FF,U+31F0-31FF,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF';
+        xs.textContent = ['Climate', 'Gmarket'].map(function (f) { return "@font-face{font-family:'" + f + "';src:" + jf + ";unicode-range:" + ju + "}"; }).join('') + 'html[lang=ja] *{word-break:normal!important}html[lang=ja] #title h1{font-size:min(11vw,120px)!important}html[lang=ja] #bJump{font-size:12px}';
+      } else {
+        var lf = "local('Segoe UI'),local('Roboto'),local('Arial'),local('Helvetica Neue'),local('Helvetica')";
+        var lu = 'U+00A0-024F,U+0400-04FF,U+1E00-1EFF,U+2010-2027';
+        xs.textContent = ['Climate', 'Gmarket'].map(function (f) { return "@font-face{font-family:'" + f + "';src:" + lf + ";unicode-range:" + lu + "}"; }).join('') + '#title h1{white-space:normal!important;font-size:min(8.5vw,96px)!important;max-width:94vw}html[lang=ru] #bJump{font-size:11px}@media (max-height:480px){#title h1{font-size:8.5vh!important}#title{padding-bottom:10vh!important}}';
+      }
+      document.head.appendChild(xs);
+    }
   })();
 </script>
 <script src="assets/landscape.js"></script>
 <script>(function () { var g = document.getElementById('rotGo'); if (g) g.addEventListener('click', function () { if (window.OL) OL.go(); }); })();</script>
-<script src="assets/game-home.js?v=3" data-top="6" data-left="6" data-fullscreen="1" defer></script>
+<script src="assets/game-home.js?v=4" data-top="6" data-left="6" data-fullscreen="1" defer></script>
 <script src="lib/three.min.js"></script>
 <script src="lib/GLTFLoader.global.js"></script>
 <script src="js/hero_joints.js"></script>
@@ -233,7 +251,7 @@
 <script src="js/body.js"></script>
 <script src="js/hero.js"></script>
 <script src="js/audio.js"></script>
-<script src="js/game.js?v=3"></script>
+<script src="js/game.js?v=5"></script>
 <script src="/assets/touchlock.js?v=1"></script>
 <script src="/assets/visit.js?v=21" defer></script>
 <script src="/assets/game-events.js?v=4" defer></script>

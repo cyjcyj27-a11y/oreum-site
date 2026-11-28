@@ -1,7 +1,37 @@
 /* 영문판: 주소에 ?lang=en 이 있을 때만 영어. data.js 다음, game.js 앞에 싣는다 */
 (function(){
-var EN = window.LD_EN = new URLSearchParams(location.search).get('lang') === 'en';
-window.E = function(ko, en){ return EN ? en : ko; };
+var Q = new URLSearchParams(location.search).get('lang');
+var LG = window.LD_LG = (Q === 'en' || Q === 'ja' || Q === 'pt') ? Q : 'ko';
+var EN = LG === 'en';
+window.LD_EN = EN || LG === 'pt';   // 포르투갈어판도 돈 단위(K·M)와 공유 주소는 영어판과 같이
+/* E(한국어, 영어, 일본어, 포르투갈어): 일본어·포르투갈어는 넘긴 글이 없으면 LD_T 사전(한국어 글이 열쇠)에서 찾고, 없으면 영어 */
+function tr(ko, en){
+  var T = window.LD_T || {};
+  if (typeof ko === 'string') return T[ko] != null ? T[ko] : en;
+  if (Array.isArray(ko)) return ko.map(function(k, i){ return tr(k, en[i]); });
+  return en;
+}
+window.E = function(ko, en, ja, pt){
+  if (LG === 'ko') return ko;
+  if (EN) return en;
+  var x = LG === 'ja' ? ja : pt;
+  return x !== undefined ? x : tr(ko, en);
+};
+/* 글이 길어 넘치면 글자만 줄인다(배치는 그대로) */
+function fit(){
+  // 상단바 줄이기는 game.js fitTop 이 한·영 같이 맡음
+  document.querySelectorAll('.btn, .ret, .card .t, .item .t').forEach(function(b){
+    if (!b.offsetWidth) return;
+    var k = +b.dataset.k || 1, base = b.dataset.fs ? +b.dataset.fs : parseFloat(getComputedStyle(b).fontSize);
+    if (!b.dataset.fs) b.dataset.fs = base;
+    while (b.scrollWidth > b.clientWidth + 1 && k > 0.5) { k -= 0.05; b.style.fontSize = (base * k) + 'px'; }
+    b.dataset.k = k;
+  });
+}
+window.LD_FIT = function(){
+  setInterval(fit, 250);
+  addEventListener('resize', function(){ document.querySelectorAll('[data-fs]').forEach(function(b){ b.style.fontSize = ''; delete b.dataset.fs; delete b.dataset.k; }); });
+};
 if (!EN) return;
 var D = window.LD;
 function put(list, key, arr){ if (list.length !== arr.length) console.warn('en.js 길이 다름', key, list.length, arr.length); list.forEach(function(o, i){ if (arr[i] != null) o[key] = arr[i]; }); }
@@ -390,19 +420,6 @@ function page(){
   var st = document.createElement('style'); st.textContent = '.item.done .t::after{content:"Branch complete"} #how .hc{font-size:calc(var(--u)*5.6);line-height:1.3}'; document.head.appendChild(st);
   document.body.classList.add('en');
 }
-/* 영어가 길어 넘치면 글자만 줄인다(배치는 그대로) */
-var hudK = 1;
-function fit(){
-  // 상단바 줄이기는 game.js fitTop 이 한·영 같이 맡음
-  document.querySelectorAll('.btn, .ret, .card .t, .item .t').forEach(function(b){
-    if (!b.offsetWidth) return;
-    var k = +b.dataset.k || 1, base = b.dataset.fs ? +b.dataset.fs : parseFloat(getComputedStyle(b).fontSize);
-    if (!b.dataset.fs) b.dataset.fs = base;
-    while (b.scrollWidth > b.clientWidth + 1 && k > 0.5) { k -= 0.05; b.style.fontSize = (base * k) + 'px'; }
-    b.dataset.k = k;
-  });
-}
-setInterval(fit, 250);
-addEventListener('resize', function(){ document.querySelectorAll('[data-fs]').forEach(function(b){ b.style.fontSize = ''; delete b.dataset.fs; delete b.dataset.k; }); });
+window.LD_FIT();
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', page); else page();
 })();

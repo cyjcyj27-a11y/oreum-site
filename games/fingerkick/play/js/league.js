@@ -5,23 +5,26 @@
   var KEY = 'fingerkick.league';
   var EN = /[?&]lang=en/i.test(location.search);
   var ZH = new URLSearchParams(location.search).get('lang') === 'zh';
+  var LQ = new URLSearchParams(location.search).get('lang'), XL = (LQ === 'ja' || LQ === 'pt' || LQ === 'ru') ? LQ : '';
+  // ja·pt·ru 의 시즌·일차 글자
+  var XS = { ja: ['シーズン ', '日目'], pt: ['TEMPORADA ', 'DIA '], ru: ['СЕЗОН ', 'ДЕНЬ '] };
 
   // 나라만 쓴다. 팀·구단 이름은 쓰지 않는다. ring = 테두리, body = 몸통. 내 말(대한민국: 빨강 테두리 + 파랑 몸통)과 겹치지 않게.
   // crowd: 그 나라에서 녹음한 함성(assets/SOUNDS.md). str: 다른 경기 결과를 낼 때 쓰는 강도(서열).
   var TEAMS = [
-    { ko: '아일랜드', en: 'Ireland', zh: '爱尔兰', iso: 'IRL', ring: '#ff883e', body: '#169b62', gk: '#0d5e3b', str: 0.8, crowd: ['crowd-ie'] },
-    { ko: '네덜란드', en: 'Netherlands', zh: '荷兰', iso: 'NED', ring: '#21468b', body: '#ff7f00', gk: '#a85200', str: 0.95, crowd: ['crowd-nl', 'crowd-esnl'] },
-    { ko: '벨기에', en: 'Belgium', zh: '比利时', iso: 'BEL', ring: '#fdda24', body: '#111111', gk: '#3a3a3a', str: 1.1, crowd: ['crowd-be'] },
-    { ko: '잉글랜드', en: 'England', zh: '英格兰', iso: 'ENG', ring: '#cf142b', body: '#f4f4f4', gk: '#9a9a9a', str: 1.1, crowd: ['crowd-en', 'crowd-wh'] },
-    { ko: '독일', en: 'Germany', zh: '德国', iso: 'GER', ring: '#111111', body: '#f4f4f4', gk: '#8a8a8a', str: 1.3, crowd: ['crowd-de'] },
-    { ko: '프랑스', en: 'France', zh: '法国', iso: 'FRA', ring: '#002395', body: '#f4f4f4', gk: '#9a9a9a', str: 1.3, crowd: ['crowd-fr'] },
-    { ko: '아르헨티나', en: 'Argentina', zh: '阿根廷', iso: 'ARG', ring: '#ffffff', body: '#74acdf', gk: '#3f7fb5', str: 1.35, crowd: ['crowd-ar'] },
-    { ko: '브라질', en: 'Brazil', zh: '巴西', iso: 'BRA', ring: '#009c3b', body: '#ffdf00', gk: '#b89e00', str: 1.35, crowd: ['crowd-br'] }
+    { ko: '아일랜드', en: 'Ireland', zh: '爱尔兰', ja: 'アイルランド', pt: 'Irlanda', ru: 'Ирландия', iso: 'IRL', ring: '#ff883e', body: '#169b62', gk: '#0d5e3b', str: 0.8, crowd: ['crowd-ie'] },
+    { ko: '네덜란드', en: 'Netherlands', zh: '荷兰', ja: 'オランダ', pt: 'Holanda', ru: 'Нидерланды', iso: 'NED', ring: '#21468b', body: '#ff7f00', gk: '#a85200', str: 0.95, crowd: ['crowd-nl', 'crowd-esnl'] },
+    { ko: '벨기에', en: 'Belgium', zh: '比利时', ja: 'ベルギー', pt: 'Bélgica', ru: 'Бельгия', iso: 'BEL', ring: '#fdda24', body: '#111111', gk: '#3a3a3a', str: 1.1, crowd: ['crowd-be'] },
+    { ko: '잉글랜드', en: 'England', zh: '英格兰', ja: 'イングランド', pt: 'Inglaterra', ru: 'Англия', iso: 'ENG', ring: '#cf142b', body: '#f4f4f4', gk: '#9a9a9a', str: 1.1, crowd: ['crowd-en', 'crowd-wh'] },
+    { ko: '독일', en: 'Germany', zh: '德国', ja: 'ドイツ', pt: 'Alemanha', ru: 'Германия', iso: 'GER', ring: '#111111', body: '#f4f4f4', gk: '#8a8a8a', str: 1.3, crowd: ['crowd-de'] },
+    { ko: '프랑스', en: 'France', zh: '法国', ja: 'フランス', pt: 'França', ru: 'Франция', iso: 'FRA', ring: '#002395', body: '#f4f4f4', gk: '#9a9a9a', str: 1.3, crowd: ['crowd-fr'] },
+    { ko: '아르헨티나', en: 'Argentina', zh: '阿根廷', ja: 'アルゼンチン', pt: 'Argentina', ru: 'Аргентина', iso: 'ARG', ring: '#ffffff', body: '#74acdf', gk: '#3f7fb5', str: 1.35, crowd: ['crowd-ar'] },
+    { ko: '브라질', en: 'Brazil', zh: '巴西', ja: 'ブラジル', pt: 'Brasil', ru: 'Бразилия', iso: 'BRA', ring: '#009c3b', body: '#ffdf00', gk: '#b89e00', str: 1.35, crowd: ['crowd-br'] }
   ];
   var N = TEAMS.length;            // 상대 수 (8)
   var ROUNDS = N + 1;              // 9팀 돌려막기 = 9라운드, 라운드마다 한 팀이 쉰다. 내가 쉬는 라운드는 마지막(아래 fixtures)
   var GAMES = N;                   // 내 경기 수
-  var ME = { ko: 'YOU', en: 'YOU', zh: 'YOU', iso: 'YOU', ring: '#cd2e3a', body: '#0047a0', gk: '#002a60' };   // 대한민국 색
+  var ME = { ko: 'YOU', en: 'YOU', zh: 'YOU', ja: 'YOU', pt: 'YOU', ru: 'YOU', iso: 'YOU', ring: '#cd2e3a', body: '#0047a0', gk: '#002a60' };   // 대한민국 색
 
   function fresh(season, stars) {
     var t = [{ id: -1, w: 0, d: 0, l: 0, gf: 0, ga: 0 }], i;
@@ -39,7 +42,7 @@
   var S = load();
 
   function team(id) { return id < 0 ? ME : TEAMS[id]; }
-  function name(id) { var t = team(id); return ZH ? t.zh : EN ? t.en : t.ko; }
+  function name(id) { var t = team(id); return ZH ? t.zh : XL ? t[XL] : EN ? t.en : t.ko; }
   function pts(r) { return r.w * 3 + r.d; }
   function sorted() {
     return S.table.slice().sort(function (a, b) {
@@ -88,9 +91,9 @@
     GAMES: GAMES,
     opponent: function () { return TEAMS[myOpp(S.day)]; },
     season: function () { return S.season; },
-    dayText: function () { return ZH ? '第' + S.season + '赛季 · 第' + (played() + 1) + '天' : EN ? 'SEASON ' + S.season + ' · DAY ' + (played() + 1) + '/' + GAMES : '시즌 ' + S.season + ' · ' + (played() + 1) + '일차'; },
-    seasonText: function () { return ZH ? '第' + S.season + '赛季' : EN ? 'SEASON ' + S.season : '시즌 ' + S.season; },
-    playedText: function () { return (ZH ? '第' + S.season + '赛季' : EN ? 'SEASON ' + S.season : '시즌 ' + S.season) + ' · ' + played() + '/' + GAMES; },
+    dayText: function () { return ZH ? '第' + S.season + '赛季 · 第' + (played() + 1) + '天' : XL === 'ja' ? XS.ja[0] + S.season + ' · ' + (played() + 1) + XS.ja[1] : XL ? XS[XL][0] + S.season + ' · ' + XS[XL][1] + (played() + 1) + '/' + GAMES : EN ? 'SEASON ' + S.season + ' · DAY ' + (played() + 1) + '/' + GAMES : '시즌 ' + S.season + ' · ' + (played() + 1) + '일차'; },
+    seasonText: function () { return ZH ? '第' + S.season + '赛季' : XL ? XS[XL][0] + S.season : EN ? 'SEASON ' + S.season : '시즌 ' + S.season; },
+    playedText: function () { return (ZH ? '第' + S.season + '赛季' : XL ? XS[XL][0] + S.season : EN ? 'SEASON ' + S.season : '시즌 ' + S.season) + ' · ' + played() + '/' + GAMES; },
     stars: function () { var s = '', i; for (i = 0; i < Math.min(S.stars, 10); i++) s += '★'; return s; },
     rows: function () {
       return sorted().map(function (r) { var t = team(r.id); return { id: r.id, name: name(r.id), ring: t.ring, body: t.body, w: r.w, d: r.d, l: r.l, gd: r.gf - r.ga, pts: pts(r), me: r.id < 0 }; });

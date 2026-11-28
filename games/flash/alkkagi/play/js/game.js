@@ -39,6 +39,31 @@
     zst.textContent = "@font-face{font-family:'Griun';src:" + zf + ";unicode-range:" + ur + "}@font-face{font-family:'Ria';src:" + zb + ";unicode-range:" + ur + "}html[lang=zh-CN] *{word-break:normal!important}";
     document.head.appendChild(zst);
   }
+  // ja · pt · ru: 한국어 글을 그 언어로 바꾸고, 빠진 글자는 기기 글꼴로 채운다
+  var LQ = (!EN && !ZH) ? ((location.search.match(/[?&]lang=(ja|pt|ru)(&|$)/i) || [])[1] || '').toLowerCase() : '';
+  if (LQ) {
+    var LD = {
+      ja: { '알까기': '碁石はじき', '시작': 'スタート', '이어하기': 'つづきから', 'K 효과음': 'K 効果音' },
+      pt: { '알까기': 'PETELECO', '시작': 'JOGAR', '이어하기': 'CONTINUAR', 'K 효과음': 'K som' },
+      ru: { '알까기': 'ЧАПАЕВ', '시작': 'ИГРАТЬ', '이어하기': 'ДАЛЬШЕ', 'K 효과음': 'K звук' }
+    }[LQ];
+    var LTI = { ja: '碁石はじき', pt: 'Peteleco — jogo de pedras', ru: 'Чапаев — щелчки по шашкам' }[LQ];
+    document.documentElement.lang = LQ === 'pt' ? 'pt-BR' : LQ; document.body.classList.add(LQ); if (LQ !== 'ja') document.body.classList.add('en');
+    document.title = LTI;
+    Array.prototype.forEach.call(document.querySelectorAll('[data-en]'), function (el) { var k = el.textContent.trim(); if (LD[k]) el.textContent = LD[k]; });
+    var lst = document.createElement('style'), lcss;
+    if (LQ === 'ja') {
+      var jf = "local('Hiragino Sans'),local('Hiragino Kaku Gothic ProN'),local('Yu Gothic UI'),local('Yu Gothic'),local('Yu Gothic Medium'),local('YuGothic-Medium'),local('Yu Gothic Regular'),local('YuGothic-Regular'),local('Yu Gothic Bold'),local('YuGothic-Bold'),local('MS PGothic'),local('MS Gothic'),local('Meiryo'),local('Noto Sans JP'),local('Noto Sans CJK JP'),local('Source Han Sans JP')";
+      var jur = 'U+2E80-2FFF,U+3000-30FF,U+31F0-31FF,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF';
+      lcss = "@font-face{font-family:'Griun';src:" + jf + ";unicode-range:" + jur + "}@font-face{font-family:'Ria';src:" + jf + ";unicode-range:" + jur + "}html[lang=ja] *{word-break:normal!important}html[lang=ja] #title h1{font-size:min(17vw,104px)}";
+    } else {
+      var lf = "local('Segoe UI'),local('Roboto'),local('Arial'),local('Helvetica Neue'),local('Helvetica')";
+      var lur = 'U+00A0-024F,U+0400-04FF,U+1E00-1EFF,U+2010-2027';
+      lcss = "@font-face{font-family:'Griun';src:" + lf + ";unicode-range:" + lur + "}@font-face{font-family:'Ria';src:" + lf + ";unicode-range:" + lur + "}";
+      if (LQ === 'pt') lcss += "html[lang=pt-BR] #title h1{font-size:min(11.5vw,96px)}";   // 긴 제목이 좁은 화면 밖으로 나가지 않게
+    }
+    lst.textContent = lcss; document.head.appendChild(lst);
+  }
 
   // ── 기록 (브라우저에 저장) — 가장 멀리 간 스테이지 ──
   function loadBest() { try { return Math.max(1, parseInt(localStorage.getItem('alkkagi.best') || '1', 10) || 1); } catch (e) { return 1; } }

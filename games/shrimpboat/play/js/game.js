@@ -3,9 +3,10 @@
 'use strict';
 var T = THREE, D = SB.D, PI = Math.PI, $ = function (id) { return document.getElementById(id); };
 var KEY = 'shrimpboat.save', DAYS = 30, EYE = 1.6, DAYH = 36, NIGHTH = 25, WALK = 2.6, RUN = 4.4;
-var EN = SB.EN = /[?&]lang=en/.test(location.search), ZH = SB.ZH = !!window.SBZH; SB.L = function (ko, en) { return EN ? en : ZH ? (window.SBZH[ko] !== undefined ? window.SBZH[ko] : ko) : ko; }; var L = SB.L;
+var EN = SB.EN = /[?&]lang=en/.test(location.search), ZH = SB.ZH = !!window.SBZH, LX = SB.LX = window.SBLX ? window.SBLX.lg : '', DX = window.SBZH || (LX ? window.SBLX.d : null); SB.WIDE = EN || !!LX;
+SB.L = function (ko, en) { return EN ? en : DX ? (DX[ko] !== undefined ? DX[ko] : (LX && en !== undefined ? en : ko)) : ko; }; var L = SB.L;
 if (EN) { document.body.classList.add('en'); document.documentElement.lang = 'en'; document.title = 'Shrimp Boat'; }
-if (ZH) document.querySelectorAll('.ko').forEach(function (e) { e.textContent = L(e.textContent); });
+if (DX) document.querySelectorAll('.ko').forEach(function (e) { e.textContent = L(e.textContent); });
 var G = SB.G = { mode: 'title', day: 1, t: 4, tasks: [], inv: {}, parts: {}, taken: {}, dropped: {}, flags: {}, carry: null, holding: null, P: { x: 4.6, z: -1.3, yaw: PI / 2, pitch: 0, face: -PI / 2 }, idle: 0, view: 3 };
 function third() { return G.mode === 'day' || G.mode === 'night'; }                 // 3인칭 하나로(사장님 10/3 "걍 3인칭으로 통일하자")
 SB.third = third;
@@ -429,7 +430,7 @@ function tick(dt) {
   /* 선장 머리 위 말풍선·코골이 */
   if (bubbleOn || zzzV >= 0) { SB.cap.headPos(_hp); _hp.project(cam); var vis = _hp.z < 1 && Math.abs(_hp.x) < 1.05 && _hp.y < 0.62 && _hp.y > -1, px = (_hp.x + 1) / 2 * window.innerWidth, py = (1 - _hp.y) / 2 * window.innerHeight;
     var bb = $('bubble'), zz = $('zzz'); bb.style.transform = zz.style.transform = 'translate(' + px.toFixed(0) + 'px,' + py.toFixed(0) + 'px)'; bb.classList.toggle('off', !vis); zz.classList.toggle('off', !vis);
-    if (EN && bubbleOn) { var bh = bb.offsetWidth / 2 + 6, bx = Math.min(Math.max(px, bh), window.innerWidth - bh); bb.style.transform = 'translate(' + bx.toFixed(0) + 'px,' + Math.max(py, 70).toFixed(0) + 'px)'; }   // 영문판: 대사가 길어 화면 가장자리에서 말풍선이 잘리지 않게 안쪽으로(10/4 사장님 영문판 검수)
+    if (SB.WIDE && bubbleOn) { var bh = bb.offsetWidth / 2 + 6, bx = Math.min(Math.max(px, bh), window.innerWidth - bh); bb.style.transform = 'translate(' + bx.toFixed(0) + 'px,' + Math.max(py, 70).toFixed(0) + 'px)'; }   // 영문판: 대사가 길어 화면 가장자리에서 말풍선이 잘리지 않게 안쪽으로(10/4 사장님 영문판 검수)
   }
   /* 그리기 */
   if (window.__noRender) { scene.updateMatrixWorld(); cam.updateMatrixWorld(); return; }

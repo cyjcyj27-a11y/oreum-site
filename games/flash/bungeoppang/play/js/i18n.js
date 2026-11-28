@@ -47,10 +47,62 @@
     rotTitle: '这个游戏要横屏玩', rotGo: '切换横屏',
     rotHelp: '按钮没反应的话，请关掉旋转锁定再把手机横过来', rotSkip: '还是竖屏玩'
   };
+  var JA = {
+    title: 'たい焼き', shop: 'ショップ', dex: '図鑑', start: 'START',
+    dough: '生地', paste: 'あん', sold: '販売',
+    tBread: 'たい焼き', tOdeng: 'おでん',
+    buyFish: 'おでん種を買う', u_pot: '大鍋', u_broth: 'だし', u_word: '口コミ', u_ftub: 'おでん種ケース',
+    u_hole: '焼き型', u_fire: '火力', u_auto: 'オート生地', u_tong: 'オートトング',
+    u_dtub: '生地タンク', u_ptub: 'あんタンク', u_reg: '常連さん',
+    buyDough: '生地を買う', buyPaste: 'あんを買う', max: 'MAX',
+    ranks: ['屋台', 'キッチンカー', 'お店'],
+    flavors: ['あずき', 'カスタード', 'チョコ', 'さつまいも', 'チーズ', 'ピザ', 'チョコミント', '金のたい焼き'],
+    goal: '次のステージ', maxRank: 'MAX',
+    lock: '???',
+    units: ['兆', '億', '万'],
+    rotTitle: 'このゲームは横画面で遊びます', rotGo: '横画面にする',
+    rotHelp: 'ボタンが効かないときは、画面の回転ロックを解除してスマホを横にしてください', rotSkip: 'このまま縦で遊ぶ',
+    tips: { tMus: '音楽', tSnd: '効果音' }
+  };
+  var PT = {
+    title: 'BUNGEOPPANG', shop: 'LOJA', dex: 'ÁLBUM', start: 'START',
+    dough: 'Massa', paste: 'Recheio', sold: 'Vendidos',
+    tBread: 'Pão-peixe', tOdeng: 'Odeng',
+    buyFish: 'Comprar odeng', u_pot: 'Panela', u_broth: 'Caldo', u_word: 'Boca a boca', u_ftub: 'Pote de odeng',
+    u_hole: 'Formas', u_fire: 'Fogo', u_auto: 'Massa auto', u_tong: 'Pinça auto',
+    u_dtub: 'Pote de massa', u_ptub: 'Pote de recheio', u_reg: 'Fregueses',
+    buyDough: 'Comprar massa', buyPaste: 'Comprar recheio', max: 'MAX',
+    ranks: ['Barraquinha', 'Food truck', 'Loja'],
+    flavors: ['Feijão doce', 'Creme', 'Chocolate', 'Batata-doce', 'Queijo', 'Pizza', 'Choco menta', 'Dourado'],
+    goal: 'Próxima fase', maxRank: 'MAX',
+    lock: '???',
+    sfx: [' tri', ' bi', ' mi', ' mil'],
+    rotTitle: 'Este jogo é na horizontal', rotGo: 'Virar na horizontal',
+    rotHelp: 'Se o botão não funcionar, desative o bloqueio de rotação e deite o celular', rotSkip: 'Jogar na vertical mesmo assim',
+    tips: { tMus: 'Música', tSnd: 'Efeitos sonoros' }
+  };
+  var RU = {
+    title: 'BUNGEOPPANG', shop: 'МАГАЗИН', dex: 'КОЛЛЕКЦИЯ', start: 'START',
+    dough: 'Тесто', paste: 'Начинка', sold: 'Продано',
+    tBread: 'Рыбка', tOdeng: 'Одэн',
+    buyFish: 'Купить одэн', u_pot: 'Котёл', u_broth: 'Бульон', u_word: 'Сарафанное радио', u_ftub: 'Бак для одэна',
+    u_hole: 'Формочки', u_fire: 'Огонь', u_auto: 'Автотесто', u_tong: 'Автощипцы',
+    u_dtub: 'Бак теста', u_ptub: 'Бак начинки', u_reg: 'Завсегдатаи',
+    buyDough: 'Купить тесто', buyPaste: 'Купить начинку', max: 'MAX',
+    ranks: ['Палатка', 'Фудтрак', 'Лавка'],
+    flavors: ['Фасоль', 'Заварной крем', 'Шоколад', 'Батат', 'Сыр', 'Пицца', 'Мятный шоколад', 'Золотая'],
+    goal: 'Следующий этап', maxRank: 'MAX',
+    lock: '???',
+    sfx: [' трлн', ' млрд', ' млн', ' тыс.'],
+    rotTitle: 'Эта игра для горизонтального экрана', rotGo: 'Повернуть экран',
+    rotHelp: 'Если кнопка не работает, отключите блокировку поворота и положите телефон боком', rotSkip: 'Всё равно играть вертикально',
+    tips: { tMus: 'Музыка', tSnd: 'Звуки' }
+  };
   var q = new URLSearchParams(location.search).get('lang');
   var en = q === 'en';   // 언어는 주소로만 정한다(?lang=en 일 때만 영어, 없으면 한국어) — 기억하거나 폰 언어를 따르면 한국어 페이지에서 들어와도 영어로 뜬다(2026-09-29)
   var zh = q === 'zh';
-  window.T = en ? EN : zh ? ZH : KO;
+  var L3 = q === 'ja' ? JA : q === 'pt' ? PT : q === 'ru' ? RU : null;
+  window.T = en ? EN : zh ? ZH : L3 ? L3 : KO;
   window.T.en = en;
   if (zh) {
     document.documentElement.lang = 'zh-CN';
@@ -63,6 +115,22 @@
     var hz = document.querySelector('#title h1'); if (hz) hz.textContent = ZH.title;
     var tips = { tMus: '音乐', tSnd: '音效' };
     for (var id in tips) { var b = document.getElementById(id); if (b) b.title = tips[id]; }
+  }
+  if (L3) {
+    document.documentElement.lang = q === 'pt' ? 'pt-BR' : q;
+    document.title = q === 'ja' ? JA.title : 'Bungeoppang';
+    // 게임 글꼴에 없는 글자(가나·한자 / 악센트 라틴·키릴)를 같은 이름에 기기 글꼴로 덧붙인다
+    var lf = q === 'ja'
+      ? "local('Hiragino Sans'),local('Hiragino Kaku Gothic ProN'),local('Yu Gothic UI'),local('Yu Gothic'),local('Yu Gothic Medium'),local('YuGothic-Medium'),local('Yu Gothic Regular'),local('YuGothic-Regular'),local('Yu Gothic Bold'),local('YuGothic-Bold'),local('MS PGothic'),local('MS Gothic'),local('Meiryo'),local('Noto Sans JP'),local('Noto Sans CJK JP'),local('Source Han Sans JP')"
+      : "local('Segoe UI'),local('Roboto'),local('Arial'),local('Helvetica Neue'),local('Helvetica')";
+    var lr = q === 'ja'
+      ? 'U+2E80-2FFF,U+3000-30FF,U+31F0-31FF,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF'
+      : 'U+00A0-024F,U+0400-04FF,U+1E00-1EFF,U+2010-2027';
+    var lcss = ['Kirang', 'Ria'].map(function (fm) { return "@font-face{font-family:'" + fm + "';src:" + lf + ';unicode-range:' + lr + '}'; }).join('');
+    if (q === 'ja') lcss += 'html[lang=ja] *{word-break:normal!important}';
+    var lst = document.createElement('style'); lst.textContent = lcss; document.head.appendChild(lst);
+    var hl = document.querySelector('#title h1'); if (hl) hl.textContent = L3.title;
+    for (var lid in L3.tips) { var lb = document.getElementById(lid); if (lb) lb.title = L3.tips[lid]; }
   }
   if (en) {
     document.documentElement.lang = 'en';

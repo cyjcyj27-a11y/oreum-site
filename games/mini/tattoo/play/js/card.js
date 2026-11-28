@@ -53,7 +53,7 @@
   };
   C.save = function () { if (!url) return; const a = document.createElement('a'); a.href = url; a.download = 'tattoo-end.png'; document.body.appendChild(a); a.click(); a.remove(); };
   C.share = function () {
-    const link = location.protocol === 'file:' ? '' : location.origin + location.pathname.replace(/play\/?(index\.html)?$/, '') + (window.EN ? '?lang=en' : window.LANG === 'zh' ? 'play/?lang=zh' : '');
+    const link = location.protocol === 'file:' ? '' : location.origin + location.pathname.replace(/play\/?(index\.html)?$/, '') + (window.EN ? '?lang=en' : window.LANG !== 'ko' ? 'play/?lang=' + window.LANG : '');
     if (navigator.share) { navigator.share({ title: L('타투샵', 'Tattoo Shop'), text: shareLine, url: link || undefined }).catch(() => {}); return 'shared'; }
     try { navigator.clipboard.writeText(shareLine + (link ? '\n' + link : '')); } catch (e) {}
     return 'copied';

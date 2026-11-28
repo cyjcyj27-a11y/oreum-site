@@ -19,7 +19,7 @@ const OWNERS = [
 window.LOOK = { ACCENT, BODY, CAR_COLORS, FLOOR_COL, OWNERS };
 // 언어는 주소로만: ?lang=en 일 때 영어, 아니면 한국어
 const LQ = new URLSearchParams(location.search).get('lang');
-const EN = LQ === 'en', ZH = LQ === 'zh';
+const EN = LQ === 'en', ZH = LQ === 'zh', JA = LQ === 'ja', PT = LQ === 'pt', RU = LQ === 'ru';
 // 중국어: 한국어 문장을 열쇠로 찾는다
 const Z = {
   '이중주차':'双排停车', '탈출':'逃脱', '출구':'出口',
@@ -28,7 +28,44 @@ const Z = {
   '사원':'普通职员', '대리':'副经理', '과장':'经理', '팀장':'组长',
   '이번엔 사원 그대로':'这次还是普通职员', '승진을 축하합니다':'恭喜升职',
 };
-window.EN = EN; window.ZH = ZH; window.L = (ko, en) => EN ? en : ZH && Z[ko] != null ? Z[ko] : ko;
+// 일본어·포르투갈어·러시아어: 중국어와 같은 열쇠
+const JD = {
+  '이중주차':'二重駐車', '탈출':'脱出', '출구':'出口',
+  '이동':'手数', '목표':'目標', '시각':'時刻', '소리':'サウンド',
+  '지각':'遅刻', '정시 출근':'定時出勤',
+  '사원':'平社員', '대리':'主任', '과장':'課長', '팀장':'チーム長',
+  '이번엔 사원 그대로':'今回は平社員のまま', '승진을 축하합니다':'昇進おめでとう！',
+};
+const PD = {
+  '이중주차':'FILA DUPLA', '탈출':'FUGA', '출구':'SAÍDA',
+  '이동':'JOGADAS', '목표':'META', '시각':'HORA', '소리':'Som',
+  '지각':'ATRASADO', '정시 출근':'NO HORÁRIO',
+  '사원':'Funcionário', '대리':'Supervisor', '과장':'Gerente', '팀장':'Chefe de equipe',
+  '이번엔 사원 그대로':'Ainda funcionário', '승진을 축하합니다':'Parabéns pela promoção!',
+};
+const RD = {
+  '이중주차':'ДВОЙНАЯ ПАРКОВКА', '탈출':'ПОБЕГ', '출구':'ВЫХОД',
+  '이동':'ХОДЫ', '목표':'ЦЕЛЬ', '시각':'ВРЕМЯ', '소리':'Звук',
+  '지각':'ОПОЗДАЛ', '정시 출근':'ВОВРЕМЯ',
+  '사원':'Сотрудник', '대리':'Ст. специалист', '과장':'Менеджер', '팀장':'Начальник',
+  '이번엔 사원 그대로':'Всё ещё сотрудник', '승진을 축하합니다':'С повышением!',
+};
+const XD = JA ? JD : PT ? PD : RU ? RD : null;
+window.EN = EN; window.ZH = ZH; window.JA = JA; window.PT = PT; window.RU = RU;
+window.L = (ko, en) => EN ? en : ZH && Z[ko] != null ? Z[ko] : XD ? (XD[ko] != null ? XD[ko] : en != null ? en : ko) : ko;
+if(XD){
+  document.documentElement.lang = JA ? 'ja' : PT ? 'pt-BR' : 'ru';
+  document.title = JA ? '二重駐車脱出' : PT ? 'Fuga da Fila Dupla' : 'Побег с двойной парковки';
+  // 게임 글꼴에 없는 글자(가나·한자, 악센트 라틴·키릴)는 같은 이름에 기기 글꼴을 그 범위로만 덧붙인다
+  const xf = JA ? "local('Hiragino Sans'),local('Hiragino Kaku Gothic ProN'),local('Yu Gothic UI'),local('Yu Gothic'),local('Yu Gothic Medium'),local('YuGothic-Medium'),local('Yu Gothic Regular'),local('YuGothic-Regular'),local('Yu Gothic Bold'),local('YuGothic-Bold'),local('MS PGothic'),local('MS Gothic'),local('Meiryo'),local('Noto Sans JP'),local('Noto Sans CJK JP'),local('Source Han Sans JP')"
+    : "local('Segoe UI'),local('Roboto'),local('Arial'),local('Helvetica Neue'),local('Helvetica')";
+  const xr = JA ? 'U+2E80-2FFF,U+3000-30FF,U+31F0-31FF,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF' : 'U+00A0-024F,U+0400-04FF,U+1E00-1EFF,U+2010-2027';
+  const st = document.createElement('style');
+  const xb = JA ? "local('Yu Gothic Bold'),local('YuGothic-Bold'),local('Hiragino Sans W7'),local('Meiryo Bold'),local('Meiryo-Bold')," : "local('Segoe UI Black'),local('SegoeUI-Black'),local('Segoe UI Bold'),local('SegoeUI-Bold'),local('Roboto Black'),local('Roboto-Black'),local('Arial Bold'),local('Arial-BoldMT'),";
+  // 굵은 글씨(800·900)는 기기의 굵은 글꼴을 먼저 찾는다
+  st.textContent = [400, 800, 900].map(w => `@font-face{font-family:Paperlogy;src:${w > 400 ? xb : ''}${xf};font-weight:${w};unicode-range:${xr}}`).join('') + (JA ? 'html[lang=ja] *{word-break:normal!important}html[lang=ja] .ttl h1{line-height:1.08}' : '');
+  document.head.appendChild(st);
+}
 if(ZH){
   document.documentElement.lang = 'zh-CN'; document.title = '双排停车逃脱';
   // 게임 글꼴엔 한자가 없다 → 같은 이름에 중국어 기기 글꼴을 한자 범위로만 덧붙인다

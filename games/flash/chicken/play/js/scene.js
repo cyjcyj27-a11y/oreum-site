@@ -101,7 +101,7 @@ function partsStep(dt) {
 var OILY = 0.36, BATY = 0.52;
 function matTop(base, w, d) { var m = base.clone(); m.map = base.map.clone(); m.map.needsUpdate = true; topTex(m.map, w, d); return m; }
 /* 벽: 옛날 치킨집 전단지를 다닥다닥 붙인 벽(사장님 10/2 "찌라시 느낌"). 글은 ?lang=en 이면 영어 */
-var EN = /[?&]lang=en\b/.test(location.search), ZH = !EN && /[?&]lang=zh\b/.test(location.search), WF = "'Ria','Malgun Gothic',sans-serif";
+var EN = /[?&]lang=en\b/.test(location.search), ZH = !EN && /[?&]lang=zh\b/.test(location.search), LQ = !EN && !ZH && (location.search.match(/[?&]lang=(ja|pt|ru)\b/) || [])[1], WL = EN || LQ === 'pt' || LQ === 'ru', WF = "'Ria','Malgun Gothic',sans-serif";
 function wtxt(x, s, px, py, size, col, al, sc, maxw) {
   x.font = '900 ' + size + 'px ' + WF; while (maxw && size > 8 && x.measureText(s).width > maxw) { size -= 1; x.font = '900 ' + size + 'px ' + WF; }
   x.textAlign = al || 'left'; x.textBaseline = 'middle';
@@ -130,6 +130,15 @@ function wallDraw(x, w, h, day) {
   var Rn = A.rng(77), i, T = EN ? {
     crash: 'PRICE CRASH', fr: 'FRIED', yn: 'SPICY', sv: 'FREE: RADISH + COLA', big: 'CHICKEN', out: 'TAKE OUT OK', no1: 'No.1', nw: 'NEW', soy: 'SOY CHICKEN', pa: 'SCALLIONS', cp: '10 COUPONS = 1 FREE', fresh: 'FRESH EVERY DAY', oil: 'NEW OIL DAILY', crispy: 'SO CRISPY',
     band: ['PRICE CRASH', 'FRIED', 'SPICY', 'SOY', 'TAKE OUT']
+  } : LQ === 'ja' ? {
+    crash: '激安', fr: 'フライド', yn: 'ヤンニョム', sv: 'サービス：大根 + コーラ', big: 'チキン', out: 'お持ち帰り 配達 OK', no1: '元祖', nw: '新メニュー', soy: '醤油チキン', pa: 'ネギ追加', cp: 'クーポン10枚 = 1羽', fresh: '当日しめた鶏', oil: '油は毎日交換', crispy: 'サクサク',
+    band: ['激安', 'フライド', 'ヤンニョム', '醤油チキン', 'お持ち帰り']
+  } : LQ === 'pt' ? {
+    crash: 'PREÇO BAIXO', fr: 'FRITO', yn: 'APIMENTADO', sv: 'GRÁTIS: RABANETE + REFRI', big: 'FRANGO', out: 'PARA VIAGEM OK', no1: 'Nº1', nw: 'NOVO', soy: 'FRANGO SHOYU', pa: 'CEBOLINHA', cp: '10 CUPONS = 1 GRÁTIS', fresh: 'FRESCO TODO DIA', oil: 'ÓLEO NOVO TODO DIA', crispy: 'CROCANTE',
+    band: ['PREÇO BAIXO', 'FRITO', 'APIMENTADO', 'SHOYU', 'PARA VIAGEM']
+  } : LQ === 'ru' ? {
+    crash: 'ОБВАЛ ЦЕН', fr: 'ЖАРЕНАЯ', yn: 'ОСТРАЯ', sv: 'В ПОДАРОК: РЕДЬКА + КОЛА', big: 'КУРИЦА', out: 'НА ВЫНОС OK', no1: '№1', nw: 'НОВИНКА', soy: 'СОЕВАЯ КУРИЦА', pa: 'ЗЕЛЁНЫЙ ЛУК', cp: '10 КУПОНОВ = 1 В ПОДАРОК', fresh: 'СВЕЖАЯ КАЖДЫЙ ДЕНЬ', oil: 'НОВОЕ МАСЛО КАЖДЫЙ ДЕНЬ', crispy: 'ХРУСТЯЩАЯ',
+    band: ['ОБВАЛ ЦЕН', 'ЖАРЕНАЯ', 'ОСТРАЯ', 'СОЕВАЯ', 'НА ВЫНОС']
   } : ZH ? {
     crash: '跳楼价', fr: '原味炸鸡', yn: '甜辣炸鸡', sv: '赠送：腌萝卜 + 可乐', big: '炸鸡', out: '外带 外卖 OK', no1: '元祖', nw: '新品', soy: '酱油炸鸡', pa: '加葱丝', cp: '集10张券 = 送一只', fresh: '当天现杀鲜鸡', oil: '每天换新油', crispy: '香脆酥',
     band: ['跳楼价', '原味炸鸡', '甜辣炸鸡', '酱油炸鸡', '外带外卖']
@@ -165,10 +174,10 @@ function wallDraw(x, w, h, day) {
   paper(x, 420, 172, 252, 226, 0.028, '#d81e12', function (pw, ph) {
     x.fillStyle = A.rg(x, pw / 2, 90, 10, 180, [0, '#ff5a3a', 1, 'rgba(216,30,18,0)']); x.fillRect(0, 0, pw, ph);
     x.strokeStyle = '#ffd92e'; x.lineWidth = 5; x.strokeRect(9, 9, pw - 18, ph - 18);
-    wtxt(x, T.big, pw / 2 - (EN ? 0 : 34), 70, EN ? 50 : 88, '#ffe23a', 'center', '#5a0a04', EN ? pw - 40 : 160);
-    x.save(); x.translate(pw - 58, EN ? 128 : 84); x.rotate(0.25); A.icon(x, 'yang', 50); x.restore();
+    wtxt(x, T.big, pw / 2 - (WL ? 0 : 34), 70, WL ? 50 : 88, '#ffe23a', 'center', '#5a0a04', WL ? pw - 40 : 160);
+    x.save(); x.translate(pw - 58, WL ? 128 : 84); x.rotate(0.25); A.icon(x, 'yang', 50); x.restore();
     x.fillStyle = '#fff'; x.fillRect(20, 168, pw - 40, 40); wtxt(x, T.out, pw / 2, 189, 27, '#d4140c', 'center', null, pw - 56);
-    wtxt(x, T.crispy, EN ? 96 : pw / 2 - 30, 136, 24, '#fff', 'center', null, 150);
+    wtxt(x, T.crispy, WL ? 96 : pw / 2 - 30, 136, 24, '#fff', 'center', null, 150);
   });
   /* 3. 흰 전단: 신메뉴 간장치킨 */
   paper(x, 690, 164, 312, 236, -0.02, '#fffdf4', function (pw, ph) {
@@ -413,7 +422,7 @@ function build() {
 function setDay(day, un, nf) {
   O.day = day; var x = O.wallC.getContext('2d'); x.setTransform(2, 0, 0, 2, 0, 0); wallDraw(x, 1024, 640, day); O.wallT.needsUpdate = true;
   /* 전단지 글꼴이 늦게 오면 그때 다시 그린다 */
-  if (!O.wf && document.fonts && document.fonts.load) { O.wf = 1; document.fonts.load("900 40px 'Ria'", ZH ? '炸鸡' : '가').then(function () { setDay.again = 1; var y = O.wallC.getContext('2d'); y.setTransform(2, 0, 0, 2, 0, 0); wallDraw(y, 1024, 640, O.day); O.wallT.needsUpdate = true; }); }
+  if (!O.wf && document.fonts && document.fonts.load) { O.wf = 1; document.fonts.load("900 40px 'Ria'", ZH ? '炸鸡' : LQ === 'ja' ? 'チキン' : LQ === 'pt' ? 'ÇÃ' : LQ === 'ru' ? 'КУРИЦА' : '가').then(function () { setDay.again = 1; var y = O.wallC.getContext('2d'); y.setTransform(2, 0, 0, 2, 0, 0); wallDraw(y, 1024, 640, O.day); O.wallT.needsUpdate = true; }); }
   ['yang', 'soy', 'pa', 'cheese', 'mu', 'cola', 'trash'].forEach(function (id, k) { var u = O.strip[k].userData; u.fu.visible = !!un[id]; u.em.visible = !un[id]; });
   // 튀김기가 하나면 통 전체를 넓게 쓴다
   L.nf = nf; L.FW = nf < 2 ? 3.48 : 1.6; L.fry[0].x = LAY[L.wide ? 'wide' : 'tall'].fry[0] + (nf < 2 ? 0.94 : 0); O.fryOne.visible = nf < 2; O.fryTwo.visible = nf >= 2;

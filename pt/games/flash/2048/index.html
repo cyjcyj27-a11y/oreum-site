@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Jogo 2048 grátis online — quebra-cabeça numérico com tabuleiros 3x3, 4x4, 5x5 e 6x6 e botão de desfazer</title>
+<meta name="description" content="2048 é um quebra-cabeça numérico grátis em que você desliza peças de massinha com números para juntar as iguais, em tabuleiros 3x3, 4x4, 5x5 e 6x6, com três desfazer por partida e salvamento automático. Sem download, no celular e no PC.">
+<meta name="keywords" content="jogo 2048, 2048 online, 2048 grátis, jogar 2048 online, 2048 5x5, 2048 6x6, jogo de números, quebra-cabeça numérico, jogos online grátis, jogo de navegador grátis">
+<link rel="canonical" href="https://oreumgames.com/pt/games/flash/2048/">
+<link rel="alternate" hreflang="ko" href="https://oreumgames.com/games/flash/2048/">
+<link rel="alternate" hreflang="en" href="https://oreumgames.com/en/games/flash/2048/">
+<link rel="alternate" hreflang="zh-Hans" href="https://oreumgames.com/zh/games/flash/2048/">
+<link rel="alternate" hreflang="ja" href="https://oreumgames.com/ja/games/flash/2048/">
+<link rel="alternate" hreflang="pt-BR" href="https://oreumgames.com/pt/games/flash/2048/">
+<link rel="alternate" hreflang="ru" href="https://oreumgames.com/ru/games/flash/2048/">
+<link rel="alternate" hreflang="x-default" href="https://oreumgames.com/games/flash/2048/">
+<meta name="naver-site-verification" content="4ecba4003fbcbe564918ffd2c33d606f1eaae11a" />
+<meta name="google-site-verification" content="BG736F-J65BHS-viz8rkCjKJ53pxgIhSlPpzVnpGlt4" />
+<meta name="theme-color" content="#f8f5ec">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" href="/assets/icon-512.png" type="image/png" sizes="512x512">
+<link rel="apple-touch-icon" href="/assets/icon-180.png">
+<link rel="manifest" href="/manifest.webmanifest">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Oreum Games">
+<meta property="og:title" content="Jogo 2048 grátis online — quebra-cabeça numérico com tabuleiros 3x3, 4x4, 5x5 e 6x6 e botão de desfazer">
+<meta property="og:description" content="2048 é um quebra-cabeça numérico grátis em que você desliza peças de massinha com números para juntar as iguais, em tabuleiros 3x3, 4x4, 5x5 e 6x6, com três desfazer por partida e salvamento automático. Sem download, no celular e no PC.">
+<meta property="og:url" content="https://oreumgames.com/pt/games/flash/2048/">
+<meta property="og:image" content="https://oreumgames.com/assets/2048-og-en.webp?v=1">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="pt_BR">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Jogo 2048 grátis online — quebra-cabeça numérico com tabuleiros 3x3, 4x4, 5x5 e 6x6 e botão de desfazer">
+<meta name="twitter:description" content="2048 com peças de massinha, quatro tabuleiros e três desfazer por partida. Jogo de navegador grátis e sem download.">
+
+<link rel="stylesheet" href="/style.css?v=54">
+<style>
+
+body{word-break:normal}
+</style>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "VideoGame",
+  "name": "2048",
+  "alternateName": [
+    "2048 Game",
+    "2048 Online",
+    "Jogo 2048",
+    "2048 de massinha"
+  ],
+  "url": "https://oreumgames.com/pt/games/flash/2048/",
+  "image": "https://oreumgames.com/assets/2048-og-en.webp?v=1",
+  "description": "Peças de massinha feitas à mão ficam sobre uma base de corte verde numa mesa de madeira, cada uma com um número carimbado. Deslize para cima, para baixo, para a esquerda ou para a direita e todas as peças correm o máximo que conseguem. Quando duas peças com o mesmo número se encontram, elas se amassam numa peça só com o dobro do valor, voam farelos de massinha e sua pontuação sobe. A cada jogada, um novo 2 ou 4 aparece numa casa vazia. São quatro tabuleiros: 3x3, 4x4, 5x5 e 6x6. Para passar, chegue a 256 no 3x3, 2048 no 4x4, 4096 no 5x5 e 8192 no 6x6. Os tabuleiros menores enchem rápido e são mais difíceis, os maiores levam mais tempo. Passe pelos quatro para chegar à tela final. Você tem três desfazer por partida, e mesmo se o tabuleiro travar sem jogadas possíveis, dá para usar o que sobrou para voltar uma jogada. A partida em andamento fica salva no navegador e continua de onde você parou, e cada tabuleiro guarda o seu próprio recorde.",
+  "genre": [
+    "Puzzle",
+    "Casual"
+  ],
+  "playMode": "SinglePlayer",
+  "numberOfPlayers": {
+    "@type": "QuantitativeValue",
+    "minValue": 1,
+    "maxValue": 1
+  },
+  "applicationCategory": "GameApplication",
+  "operatingSystem": "Web browser",
+  "datePublished": "2026-10-05",
+  "dateModified": "2026-10-05",
+  "inLanguage": "pt-BR",
+  "gamePlatform": "Web browser",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "isPartOf": {
+    "@type": "CollectionPage",
+    "name": "Jogos de navegador grátis",
+    "url": "https://oreumgames.com/pt/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Oreum Games",
+    "url": "https://oreumgames.com/pt/"
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Como se joga 2048?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Deslize na tela ou use as setas para empurrar todas as peças para um lado. Duas peças com o mesmo número que se encontram se somam numa só. Cada jogada coloca um 2 ou um 4 numa casa vazia, e o jogo acaba quando o tabuleiro está cheio e nada mais se mexe."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Onde aparecem as peças novas?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Numa das casas vazias, sorteada por igual. Em nove de cada dez vezes é um 2, e em uma é um 4. Sorteamos 30.000 peças em cada tabuleiro para conferir que todas as casas aparecem mais ou menos o mesmo número de vezes."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Dá para continuar jogando depois de fazer 2048?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Não. Ao chegar na peça objetivo, você passa daquele tabuleiro e o jogo segue para o próximo. Na tela inicial dá para escolher um tabuleiro que você já passou e começar de novo do zero."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Quantas vezes posso desfazer?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Três por partida. Cada toque volta uma jogada, e você pode voltar até três seguidas. Ao começar um NOVO JOGO, você ganha três de novo."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Por que o objetivo do 3x3 é só 256?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Com apenas nove casas o tabuleiro enche tão rápido que chegar a 2048 é quase impossível. Por isso o 3x3 para em 256, enquanto os tabuleiros maiores 5x5 e 6x6 vão até 4096 e 8192."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Existe 2048 5x5 e 6x6 online?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Sim. Escolha o tabuleiro na tela inicial com as setas. Cada tabuleiro é salvo separadamente, então você pode trocar do 4x4 para o 6x6 e voltar sem perder a partida que estava jogando."
+      }
+    }
+  ]
+}
+</script>
+<link rel="stylesheet" href="/assets/langpick.css?v=1">
+<script src="/assets/langpick.js?v=1" defer></script>
+</head>
+
+<body>
+
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="/pt/">
+      <img src="/assets/logo-full.webp?v=1" alt="Oreum Games" width="78" height="74">
+    </a>
+    <div class="brand-copy">
+      <p class="brandname">Oreum Games</p>
+      <p class="factory">INDIE GAME FACTORY</p>
+    </div>
+    <ul class="values">
+      <li><span>Sem instalar</span> Abra o link e jogue</li>
+      <li><span>Sem cadastro</span> Progresso salvo no navegador</li>
+    </ul>
+    <nav class="nav" aria-label="Menu principal">
+      <a href="/pt/">Jogos</a>
+      <div class="langpick">
+        <button type="button" class="langbtn" aria-label="Escolher idioma Language" aria-haspopup="true" aria-expanded="false"></button>
+        <div class="langmenu" hidden>
+          <a href="/games/flash/2048/" lang="ko" hreflang="ko">한국어</a>
+          <a href="/en/games/flash/2048/" lang="en" hreflang="en">English</a>
+          <a href="/zh/games/flash/2048/" lang="zh-Hans" hreflang="zh-Hans">中文</a>
+          <a href="/ja/games/flash/2048/" lang="ja" hreflang="ja">日本語</a>
+          <a href="/pt/games/flash/2048/" lang="pt-BR" hreflang="pt-BR" aria-current="page">Português</a>
+          <a href="/ru/games/flash/2048/" lang="ru" hreflang="ru">Русский</a>
+        </div>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+  <section class="showcase">
+    <div class="wrap game-page">
+      <a class="backlink" href="/pt/">← Todos os jogos</a>
+      <div class="gp-shot"><img src="/assets/2048-shot-en.webp?v=1" alt="Peças de massinha com os números 2, 4, 8, 256, 512 e 2048 sobre uma base de corte verde numa mesa de madeira, com o título 2048 escrito em peças de massinha vermelhas, amarelas, azuis e verdes no meio" width="1280" height="800"></div>
+      <h1><span style="white-space:nowrap">2048</span> <span style="white-space:nowrap">quebra-cabeça numérico</span></h1>
+      <p class="gp-cta"><a class="btn btn-primary" href="/games/flash/2048/play/?lang=pt&amp;v=20261005">🎮 Jogar agora</a></p>
+      <p class="gp-line">2048 é um quebra-cabeça numérico grátis de navegador: deslize as peças para juntar números iguais e vá dobrando até chegar a 2048. Roda no navegador, sem download.</p>
+      <p class="gp-body">Peças de massinha feitas à mão ficam sobre uma base de corte verde numa mesa de madeira, cada uma com um número carimbado. Deslize para cima, para baixo, para a esquerda ou para a direita e todas as peças correm o máximo que conseguem. Quando duas peças com o mesmo número se encontram, elas se amassam numa peça só com o dobro do valor, voam farelos de massinha e sua pontuação sobe. A cada jogada, um novo 2 ou 4 aparece numa casa vazia.</p>
+      <p class="gp-body">São quatro tabuleiros: 3x3, 4x4, 5x5 e 6x6. Para passar, chegue a 256 no 3x3, 2048 no 4x4, 4096 no 5x5 e 8192 no 6x6. Os tabuleiros menores enchem rápido e são mais difíceis, os maiores levam mais tempo. Passe pelos quatro para chegar à tela final.</p>
+      <p class="gp-body">Você tem três desfazer por partida, e mesmo se o tabuleiro travar sem jogadas possíveis, dá para usar o que sobrou para voltar uma jogada. A partida em andamento fica salva no navegador e continua de onde você parou, e cada tabuleiro guarda o seu próprio recorde.</p>
+      <div class="talk"><p class="talk-title">Achou um bug ou algo estranho? Conte pra gente</p><p class="talk-go"><a href="/en/board/">Ir para a comunidade →</a></p></div>
+      <dl class="spec"><dt>Gênero</dt><dd>Quebra-cabeça numérico, jogo 2048, jogo indie</dd>
+              <dt>Feito em</dt><dd>1 dia</dd>
+              <dt>Tecnologia</dt><dd>Canvas 2D, Web Audio, peças de massinha desenhadas em código</dd>
+              <dt>Jogadores</dt><dd>1</dd>
+              <dt>Plataformas</dt><dd>Celular, PC</dd>
+              <dt>Status</dt><dd>Pronto</dd>
+              <dt>Lançamento</dt><dd>2026-10-05</dd>
+              <dt>Última atualização</dt><dd>2026-10-05</dd></dl>
+      <p class="gp-for">Bom para — Quem quer alguns minutos de raciocínio no celular, crianças e adultos que gostam de quebra-cabeças com números, e fãs de 2048 que querem um tabuleiro maior ou menor que o 4x4 clássico.</p>
+      <section class="faq">
+        <h2>Perguntas frequentes</h2>
+        <details><summary>Como se joga 2048?</summary><p>Deslize na tela ou use as setas para empurrar todas as peças para um lado. Duas peças com o mesmo número que se encontram se somam numa só. Cada jogada coloca um 2 ou um 4 numa casa vazia, e o jogo acaba quando o tabuleiro está cheio e nada mais se mexe.</p></details>
+        <details><summary>Onde aparecem as peças novas?</summary><p>Numa das casas vazias, sorteada por igual. Em nove de cada dez vezes é um 2, e em uma é um 4. Sorteamos 30.000 peças em cada tabuleiro para conferir que todas as casas aparecem mais ou menos o mesmo número de vezes.</p></details>
+        <details><summary>Dá para continuar jogando depois de fazer 2048?</summary><p>Não. Ao chegar na peça objetivo, você passa daquele tabuleiro e o jogo segue para o próximo. Na tela inicial dá para escolher um tabuleiro que você já passou e começar de novo do zero.</p></details>
+        <details><summary>Quantas vezes posso desfazer?</summary><p>Três por partida. Cada toque volta uma jogada, e você pode voltar até três seguidas. Ao começar um NOVO JOGO, você ganha três de novo.</p></details>
+        <details><summary>Por que o objetivo do 3x3 é só 256?</summary><p>Com apenas nove casas o tabuleiro enche tão rápido que chegar a 2048 é quase impossível. Por isso o 3x3 para em 256, enquanto os tabuleiros maiores 5x5 e 6x6 vão até 4096 e 8192.</p></details>
+        <details><summary>Existe 2048 5x5 e 6x6 online?</summary><p>Sim. Escolha o tabuleiro na tela inicial com as setas. Cada tabuleiro é salvo separadamente, então você pode trocar do 4x4 para o 6x6 e voltar sem perder a partida que estava jogando.</p></details>
+      </section>
+    </div>
+  </section>
+<!-- related:start -->
+  <section class="related" aria-label="Jogue outros jogos">
+    <div class="wrap game-page">
+      <h2>Jogue outros jogos</h2>
+      <ul class="related-list">
+      <li><a href="/pt/games/flash/sudoku/"><img src="/assets/sudoku-shot-en.webp" alt="" width="96" height="60" loading="lazy"><span class="related-txt"><b>Sudoku</b><span>Sudoku</span></span><em>PLAY ▸</em></a></li>
+      <li><a href="/pt/games/flash/daltteok/"><img src="/assets/daltteok-shot-en.webp" alt="" width="96" height="60" loading="lazy"><span class="related-txt"><b>Fusão Mochi da Lua</b><span>Fusão · Estilo Suika</span></span><em>PLAY ▸</em></a></li>
+      <li><a href="/pt/games/mini/fullbrain/"><img src="/assets/fullbrain-shot-en.webp" alt="" width="96" height="60" loading="lazy"><span class="related-txt"><b>CÉREBRO A MIL</b><span>Cálculo mental · 60 fases</span></span><em>PLAY ▸</em></a></li>
+      <li><a href="/pt/games/flash/spotdiff/"><img src="/assets/spotdiff-shot-en.webp" alt="" width="96" height="60" loading="lazy"><span class="related-txt"><b>Encontre as Diferenças</b><span>Encontre as diferenças</span></span><em>PLAY ▸</em></a></li>
+      <li><a href="/pt/games/saab/"><img src="/assets/saab-shot.webp" alt="" width="96" height="60" loading="lazy"><span class="related-txt"><b>S.A.A.B.</b><span>FPS · Tiro 3D</span></span><em>PLAY ▸</em></a></li>
+      <li><a href="/pt/games/making-kimchi/"><img src="/assets/making-kimchi-shot.webp" alt="" width="96" height="60" loading="lazy"><span class="related-txt"><b>MAKING KIMCHI</b><span>Loja de kimchi · Culinária</span></span><em>PLAY ▸</em></a></li>
+      </ul>
+      <p class="related-more"><a href="/pt/">Todos os jogos grátis</a> · <a href="/pt/">Página inicial da Oreum Games</a></p>
+    </div>
+  </section>
+  <!-- related:end -->
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <div class="footer-brand">
+      <img src="/assets/logo-full.webp?v=1" alt="" width="52" height="50">
+      <span>Oreum Games</span>
+    </div>
+    <p class="footer-motto">Oreum Games keeps climbing</p>
+    <nav class="footer-nav" aria-label="Menu do rodapé" style="row-gap:14px">
+      <a href="/en/support/">Suporte</a>
+      <a href="/en/privacy/">Política de privacidade</a>
+      <button type="button" class="js-mail mailbtn" data-u="cyjcyj27" data-d="gmail.com" data-go="gmail">Anúncios e parcerias</button>
+    </nav>
+    <div class="footer-counts" style="margin:0"><span class="count-pill" id="visitCount" hidden></span><span class="count-pill" id="playTime" hidden></span></div>
+    <p class="copy">oreumgames.com © 2026 Oreum Games All rights reserved</p>
+  </div>
+</footer>
+<script src="/assets/visit.js?v=22" defer></script>
+<script>
+(function(){
+  if (/^(localhost|127\.0\.0\.1)$/.test(location.hostname) || location.protocol==='file:') return;
+  var b='https://abacus.jasoncameron.dev/hit/oreumgames/';
+  function h(k){ try{ fetch(b+k,{mode:'cors'}).catch(function(){}); }catch(e){} }
+  h('pageviews'); h('pv_2048_pt');
+})();
+</script>
+<script src="/assets/mail.js" defer></script>
+<script src="/assets/install.js?v=7" defer></script>
+</body>
+</html>

@@ -147,7 +147,7 @@
   let ttReady = false;
   function makeTitle() {
     const t = ttc.getContext('2d'), s = L('달빛 의적', 'MOONLIT OUTLAW');
-    t.clearRect(0, 0, 320, 80); t.font = (EN ? 28 : 38) + 'px Ttl, serif'; t.textAlign = 'center'; t.textBaseline = 'middle'; t.fillStyle = '#fff'; t.fillText(s, 160, 38);
+    t.clearRect(0, 0, 320, 80); t.font = (LANG === 'ru' ? 24 : EN || LANG === 'pt' ? 28 : 38) + 'px Ttl, serif'; t.textAlign = 'center'; t.textBaseline = 'middle'; t.fillStyle = '#fff'; t.fillText(s, 160, 38);
     const d = t.getImageData(0, 0, 320, 80), a = d.data, m = new Uint8Array(320 * 80);
     for (let i = 0; i < m.length; i++) m[i] = a[i * 4 + 3] > 110 ? 1 : 0;
     for (let y = 0; y < 80; y++) for (let x = 0; x < 320; x++) {

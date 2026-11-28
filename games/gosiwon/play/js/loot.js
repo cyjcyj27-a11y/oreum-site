@@ -5,7 +5,7 @@
 GS.loot = (function () {
 'use strict';
 var T = THREE, PI = Math.PI;
-var EN = /[?&]lang=en/.test(location.search), ZH = GS.ZH, L = function (ko, en) { return EN ? en : ZH ? GS.Z(ko) : ko; };
+var EN = /[?&]lang=en/.test(location.search), ZH = GS.ZH, XL = GS.XL, L = function (ko, en) { return EN ? en : XL ? GS.Z(ko) : ko; };
 var $ = function (id) { return document.getElementById(id); };
 /* 놓는 자리: bed 침대 위, desk 책상 위, floor 바닥, wall 벽에 기대기(긴 것). rare 희귀템(사장님 10/4 "자전거 전기포트를 희귀템으로"): 19일 퇴실부터, 일반 물건 다음에 나온다. every 수험서는 제일 흔한 것(10/4 "수험서는 젤 흔한 템임"): 방마다 하나, 합격 +1%는 처음만 */
 var LIST = [
@@ -27,7 +27,7 @@ var LIST = [
   { id: 'dumbbell', ko: '아령', en: 'Dumbbells', at: 'floor' }
 ];
 var BY = {}; LIST.forEach(function (o) { BY[o.id] = o; BY[o.ko] = o; });
-function name(id) { var o = BY[id]; return o ? (EN ? o.en : ZH ? GS.Z(o.ko) : o.ko) : id; }
+function name(id) { var o = BY[id]; return o ? (EN ? o.en : XL ? GS.Z(o.ko) : o.ko) : id; }
 
 /* ---------- 도감(새 게임에도 남는다) ---------- */
 var KEY = 'gosiwon_dex', dex = {};

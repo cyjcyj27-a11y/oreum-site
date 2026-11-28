@@ -8,11 +8,11 @@
   let lang = 'ko';
   try {
     const q = new URLSearchParams(location.search).get('lang');
-    lang = (q === 'en' || q === 'zh') ? q : 'ko';
+    lang = ['en', 'zh', 'ja', 'pt', 'ru'].includes(q) ? q : 'ko';
     localStorage.removeItem('lulu_lang');
   } catch (e) {}
   window.GAME_LANG = lang;
-  document.documentElement.lang = lang === 'zh' ? 'zh-CN' : lang;
+  document.documentElement.lang = lang === 'zh' ? 'zh-CN' : lang === 'pt' ? 'pt-BR' : lang;
   // 아래 바꿔치기는 화면(body) 안에서만 일어납니다. 브라우저 탭 이름과 즐겨찾기에 쓰이는
   // 제목은 <head> 안에 있어서 손이 안 닿으므로, 영어판이면 여기서 직접 바꿔 줍니다.
   if (lang === 'en') {
@@ -46,7 +46,40 @@
       document.head.appendChild(st);
     })();
   }
-  const ZH = (lang === 'zh' && window.LULU_ZH) ? window.LULU_ZH : null;
+  // 일본어·포르투갈어·러시아어판: 탭 제목·홈 링크를 바꾸고, 한국어 글꼴 이름에 그 언어의 시스템 글꼴을 덧붙인다
+  if (lang === 'ja' || lang === 'pt' || lang === 'ru') {
+    document.title = { ja: 'ルルにゃんの済州暮らし | Oreum Games', pt: 'Gatinha Lulu: Vida em Jeju | Oreum Games', ru: 'Кошка Лулу: жизнь на Чеджу | Oreum Games' }[lang];
+    document.addEventListener('DOMContentLoaded', function () {
+      var links = document.querySelectorAll('a[href="https://oreumgames.com/"]');
+      for (var i = 0; i < links.length; i++) links[i].href = 'https://oreumgames.com/en/';
+      var gh = document.getElementById('gameHomeLink');
+      if (gh) gh.href = '/en/';
+    });
+    (function () {
+      var src, ur;
+      if (lang === 'ja') {
+        src = "local('Hiragino Sans'),local('Hiragino Kaku Gothic ProN'),local('Yu Gothic UI'),local('Yu Gothic'),local('Yu Gothic Medium'),local('YuGothic-Medium'),local('Yu Gothic Regular'),local('YuGothic-Regular'),local('Yu Gothic Bold'),local('YuGothic-Bold'),local('MS PGothic'),local('MS Gothic'),local('Meiryo'),local('Noto Sans JP'),local('Noto Sans CJK JP'),local('Source Han Sans JP')";
+        ur = 'U+2E80-2FFF,U+3000-30FF,U+31F0-31FF,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF';
+      } else {
+        src = "local('Segoe UI'),local('Roboto'),local('Arial'),local('Helvetica Neue'),local('Helvetica')";
+        ur = 'U+00A0-024F,U+0400-04FF,U+1E00-1EFF,U+2010-2027';
+      }
+      var css = '';
+      ['맑은 고딕', 'Malgun Gothic'].forEach(function (f) {
+        css += "@font-face{font-family:'" + f + "';src:" + src + ";unicode-range:" + ur + "}";
+      });
+      if (lang === 'ja') css += 'html[lang=ja] *{word-break:normal!important}';
+      // 일본어판 PC 시작 화면: 제목과 일거리 이름이 낱말 가운데서 끊기지 않게 한다
+      // 포르투갈어판 조작 안내표: 긴 이름표가 뒤의 설명과 붙지 않게 칸을 넓힌다
+      if (lang === 'pt') css += 'html[lang=pt-BR] #help b{min-width:112px;margin-right:.4em}';
+      if (lang === 'ja') css += '@media (min-height:521px){html[lang=ja] #startTitle h1{font-size:clamp(21px,4.6vw,30px);word-break:keep-all!important}html[lang=ja] .job .cap b{word-break:keep-all!important}}';
+      var st = document.createElement('style');
+      st.textContent = css;
+      document.head.appendChild(st);
+    })();
+  }
+  const PACKS = { zh: window.LULU_ZH, ja: window.LULU_JA, pt: window.LULU_PT, ru: window.LULU_RU };
+  const ZH = PACKS[lang] || null;
 
   // ----- 사전 1: 문구가 토씨 하나 안 바뀌고 그대로 나오는 것들 (줄 단위) -----
   const DICT_EN = {
@@ -849,6 +882,7 @@
     // "색이름 바닥재/벽지 시공 완료!" — 색과 종류를 각각 사전에서 바꿉니다
     const fw = t.match(/^(.+?) (바닥재|벽지) 시공 완료! 집이 바뀌었어요$/);
     if (fw && DICT[fw[1]] !== undefined) {
+      if (ZH && ZH.FW) return line.replace(t, ZH.FW(DICT[fw[1]], fw[2] === '바닥재'));
       if (ZH) return line.replace(t, DICT[fw[1]] + (fw[2] === '바닥재' ? '地板' : '壁纸') + '铺好了！家里焕然一新');
       return line.replace(t, DICT[fw[1]] + (fw[2] === '바닥재' ? ' flooring' : ' wallpaper') + ' installed! The house looks new');
     }
@@ -877,7 +911,7 @@
   }
 
   function T(s) {
-    if ((window.GAME_LANG !== 'en' && window.GAME_LANG !== 'zh') || typeof s !== 'string' || !/[가-힣]/.test(s)) return s;
+    if (!['en', 'zh', 'ja', 'pt', 'ru'].includes(window.GAME_LANG) || typeof s !== 'string' || !/[가-힣]/.test(s)) return s;
     // 대사처럼 여러 줄이 한 덩어리인 문장은 통짜로 먼저 찾습니다
     const whole = DICT[s] !== undefined ? DICT[s] : DICT[s.trim()];
     if (whole !== undefined) return whole;

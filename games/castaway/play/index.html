@@ -78,6 +78,8 @@
   #title .go.cont { animation: none; } #title .go.cont.off { opacity: .35; box-shadow: none; cursor: default; }
   #title .go { margin: 0; font-family: 'Ria', sans-serif; font-size: 30px; letter-spacing: 8px; text-indent: 8px; padding: 12px 46px 14px; border-radius: 20px; background: rgba(10,30,44,.72); border: 1px solid rgba(255,255,255,.16); box-shadow: 0 8px 26px rgba(0,0,0,.35); animation: blink 2.4s infinite; cursor: pointer; }
   #title .best { position: absolute; left: 50%; transform: translateX(-50%); bottom: calc(12vh + 84px); font-size: 16px; opacity: .85; text-shadow: 0 1px 3px rgba(0,0,0,.6); letter-spacing: 1px; }
+  /* ja·pt·ru: 좁은 화면에서 타이틀 단추를 줄여 한 줄에 두고 물고기 단추와 겹치지 않게, 원형 단추 글자도 줄임 */
+  @media (max-width: 900px), (max-height: 520px) { html[lang=ja] #title .go, html[lang=pt-BR] #title .go, html[lang=ru] #title .go { font-size: 22px; letter-spacing: 4px; text-indent: 4px; padding: 10px 24px 12px; white-space: nowrap; } html[lang=pt-BR] .tbtn, html[lang=ru] .tbtn { font-size: 13px; letter-spacing: 0; } }
 
   #title .dexT { position: absolute; right: calc(18px + env(safe-area-inset-right)); bottom: calc(12vh + 4px); padding: 9px 16px; border-radius: 999px; background: rgba(10,30,44,.62); border: 1px solid rgba(255,255,255,.18); font-size: 15px; letter-spacing: 1px; cursor: pointer; pointer-events: auto; text-shadow: 0 1px 3px rgba(0,0,0,.6); }
 
@@ -227,7 +229,7 @@
   <p class="again">RETRY</p>
 </div>
 
-<script src="assets/game-home.js?v=2" data-top="6" data-left="6" data-fullscreen="1" defer></script>
+<script src="assets/game-home.js?v=3" data-top="6" data-left="6" data-fullscreen="1" defer></script>
 <script src="assets/landscape.js?v=54"></script>
 <script src="lib/three.min.js"></script>
 <script src="lib/GLTFLoader.global.js"></script>
@@ -235,7 +237,7 @@
 <script src="js/fish.js?v=59"></script>
 <script src="js/world.js?v=55"></script>
 <script src="js/audio.js?v=55"></script>
-<script src="js/game.js?v=75"></script>
+<script src="js/game.js?v=76"></script>
 <script src="/assets/touchlock.js?v=1"></script>
 <script src="/assets/visit.js?v=21" defer></script>
 <script src="/assets/game-events.js?v=4" defer></script>

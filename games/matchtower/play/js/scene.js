@@ -369,6 +369,8 @@
     const r = rng(33);
     const TS = -Math.PI / 8; // 면 하나가 +z 를 똑바로 보게
     // --- 옆면 8장: 검은 테 + 팥색 마찰면, 앞 한 장은 하늘색 딱지 ---
+    // 성냥통 이름 딱지 글자 (일본어·포르투갈어·러시아어)
+    const BOXN = { ja: ['草原喫茶', 'マッチ'], pt: ['Café Prado', 'FÓSFOROS'], ru: ['Кафе «Луг»', 'СПИЧКИ'] };
     const SW = 256, SH = 256;
     const sc = cvs(SW * 8, SH), x = sc.getContext('2d');
     for (let k = 0; k < 8; k++) {
@@ -379,7 +381,8 @@
         x.fillStyle = '#2f9ad8'; x.fillRect(ox + 32, 84, SW - 64, SH - 106);
         x.fillStyle = '#fff'; x.textAlign = 'center'; x.textBaseline = 'middle';
         x.font = '900 46px Title, "Malgun Gothic", sans-serif';
-        x.fillText(window.LANG === 'zh' ? '草原茶馆' : '초원다방', ox + SW / 2, 118);
+        if (BOXN[window.LANG]) { const t = BOXN[window.LANG][0], w = x.measureText(t).width; if (w > 184) x.font = '900 ' + (46 * 184 / w | 0) + 'px Title, "Malgun Gothic", sans-serif'; x.fillText(t, ox + SW / 2, 118); }
+        else x.fillText(window.LANG === 'zh' ? '草原茶馆' : '초원다방', ox + SW / 2, 118);
         x.fillStyle = '#ffe9a0'; x.fillRect(ox + 58, 142, SW - 116, 3);
         // 가운데 작은 커피잔
         x.fillStyle = '#fff';
@@ -447,8 +450,11 @@
     tx.fillStyle = '#fff4d8'; tx.textAlign = 'center'; tx.textBaseline = 'middle';
     tx.font = '900 ' + (0.5 * px2 | 0) + 'px Title, "Malgun Gothic", sans-serif';
     const ap = (RI + 0.71) * Math.cos(Math.PI / 8) * px2;
+    if (BOXN[window.LANG]) { tx.fillText(BOXN[window.LANG][0], C0, C0 + ap); tx.fillText(BOXN[window.LANG][1], C0, C0 - ap); }
+    else {
     tx.fillText(window.LANG === 'zh' ? '草原茶馆' : '초원다방', C0, C0 + ap);
     tx.fillText(window.LANG === 'zh' ? '火柴' : '성냥', C0, C0 - ap);
+    }
     // 윗면 판: 가운데가 뚫린 팔각 고리. UV 는 월드 (x, z) 를 판 (가로, 세로)에 그대로
     const pos = [], uv = [], idx = [];
     for (let k = 0; k < 8; k++) {

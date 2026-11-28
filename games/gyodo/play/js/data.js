@@ -136,7 +136,7 @@
 
   var LIVES = 5;
   // 영문판: 주소에 ?lang=en 일 때만(기억·폰 언어 안 봄)
-  try { window.GY_LANG = /[?&]lang=en(&|$)/.test(location.search) ? 'en' : /[?&]lang=zh(&|$)/.test(location.search) ? 'zh' : 'ko'; } catch (e) { window.GY_LANG = 'ko'; }
+  try { window.GY_LANG = /[?&]lang=en(&|$)/.test(location.search) ? 'en' : /[?&]lang=zh(&|$)/.test(location.search) ? 'zh' : (location.search.match(/[?&]lang=(ja|pt|ru)(&|$)/) || [])[1] || 'ko'; } catch (e) { window.GY_LANG = 'ko'; }
   var EN = {
     '1동 감방': 'Cell Block 1', '식당': 'Mess Hall', '운동장': 'Yard', '작업장': 'Workshop', '정문': 'Main Gate',
     '교도관': 'Guard', '철문': 'Iron Door', '경비견': 'K9 Dog', 'CCTV': 'CCTV', '탐조등': 'Searchlight', '진압조': 'Riot Squad',
@@ -152,7 +152,30 @@
     '수감자': '囚犯', '날쌘돌이': '飞毛腿', '덩치': '大块头', '땅굴꾼': '挖地道的', '변장범': '伪装犯', '폭동꾼': '暴动犯', '탈옥왕': '越狱王',
     '근무표': '值班表', '검거': '抓获', '탈옥': '越狱', '30일 근무 완료': '30天值班完成', '교도관24시': '狱警24小时', '가로로 보기': '横屏'
   };
-  function L(s) { return window.GY_LANG === 'en' ? (EN[s] || s) : window.GY_LANG === 'zh' ? (ZH[s] || s) : s; }
+  // 일본어판·포르투갈어판(브라질)·러시아어판: ?lang=ja / pt / ru 일 때만
+  var JA = {
+    '1동 감방': '第1棟 監房', '식당': '食堂', '운동장': '運動場', '작업장': '作業場', '정문': '正門',
+    '교도관': '刑務官', '철문': '鉄扉', '경비견': '警備犬', 'CCTV': 'CCTV', '탐조등': 'サーチライト', '진압조': '鎮圧隊',
+    '교도': '看守', '교사': '看守部長', '교위': '主任看守', '교감': '副看守長', '교정': '看守長',
+    '수감자': '囚人', '날쌘돌이': '俊足', '덩치': 'デカブツ', '땅굴꾼': 'トンネル掘り', '변장범': '変装犯', '폭동꾼': '暴徒', '탈옥왕': '脱獄王',
+    '근무표': '勤務表', '검거': '確保', '탈옥': '脱獄', '30일 근무 완료': '30日勤務完了', '교도관24시': '刑務官24時', '가로로 보기': '横画面で見る'
+  };
+  var PT = {
+    '1동 감방': 'Bloco de Celas 1', '식당': 'Refeitório', '운동장': 'Pátio', '작업장': 'Oficina', '정문': 'Portão Principal',
+    '교도관': 'Guarda', '철문': 'Grade', '경비견': 'Cão K9', 'CCTV': 'CCTV', '탐조등': 'Holofote', '진압조': 'Choque',
+    '교도': 'Agente', '교사': 'Agente Sênior', '교위': 'Sargento', '교감': 'Tenente', '교정': 'Capitão',
+    '수감자': 'Detento', '날쌘돌이': 'Ligeirinho', '덩치': 'Brutamontes', '땅굴꾼': 'Cavador', '변장범': 'Disfarçado', '폭동꾼': 'Amotinado', '탈옥왕': 'Rei da Fuga',
+    '근무표': 'ESCALA', '검거': 'Capturados', '탈옥': 'Fugas', '30일 근무 완료': '30 dias de serviço', '교도관24시': 'CARCEREIRO 24', '가로로 보기': 'MODO PAISAGEM'
+  };
+  var RU = {
+    '1동 감방': 'Корпус 1', '식당': 'Столовая', '운동장': 'Двор', '작업장': 'Мастерская', '정문': 'Главные ворота',
+    '교도관': 'Охранник', '철문': 'Решётка', '경비견': 'Овчарка', 'CCTV': 'CCTV', '탐조등': 'Прожектор', '진압조': 'Спецназ',
+    '교도': 'Сержант', '교사': 'Старшина', '교위': 'Лейтенант', '교감': 'Капитан', '교정': 'Майор',
+    '수감자': 'Заключённый', '날쌘돌이': 'Шустрый', '덩치': 'Громила', '땅굴꾼': 'Копатель', '변장범': 'Самозванец', '폭동꾼': 'Бунтарь', '탈옥왕': 'Король побега',
+    '근무표': 'ГРАФИК', '검거': 'Поймано', '탈옥': 'Сбежало', '30일 근무 완료': '30 дней службы', '교도관24시': 'НАДЗИРАТЕЛЬ 24', '가로로 보기': 'ПОВЕРНУТЬ'
+  };
+  var XL = { ja: JA, pt: PT, ru: RU };
+  function L(s) { return window.GY_LANG === 'en' ? (EN[s] || s) : window.GY_LANG === 'zh' ? (ZH[s] || s) : XL[window.GY_LANG] ? (XL[window.GY_LANG][s] || EN[s] || s) : s; }
 
   window.GY_DATA = { LIVES: LIVES, L: L, LATE: LATE, ZONEHP: ZONEHP, kingMul: kingMul, KZ: KZ, KSMOKE: KSMOKE, MAPS: MAPS, TOWERS: TOWERS, TORDER: TORDER, ENEMIES: ENEMIES, FIRST: FIRST, SLOTS: SLOTS, waves: waves, hpMul: hpMul, RANKS: RANKS, DAYS: 30 };
 })();

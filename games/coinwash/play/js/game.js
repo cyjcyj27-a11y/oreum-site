@@ -4,7 +4,7 @@
   const W = 640, H = 360;
   const $ = id => document.getElementById(id);
   const canvas = $('c'), ctx = canvas.getContext('2d'); canvas.width = W * 2; canvas.height = H * 2; ctx.scale(2, 2); ctx.imageSmoothingEnabled = false;
-  const LG = (() => { try { const q = new URLSearchParams(location.search).get('lang'); return q === 'en' || q === 'zh' ? q : 'ko'; } catch (_) { return 'ko'; } })();
+  const LG = (() => { try { const q = new URLSearchParams(location.search).get('lang'); return ['en', 'zh', 'ja', 'pt', 'ru'].includes(q) ? q : 'ko'; } catch (_) { return 'ko'; } })();
   const EN = LG === 'en', ZHL = LG === 'zh';
   // Simplified Chinese strings keyed by the Korean original
   const ZH = {
@@ -54,7 +54,129 @@
     st.textContent = ['Griun', 'Ria'].map(f => "@font-face{font-family:'" + f + "';src:" + zf + ';unicode-range:' + ur + '}').join('') + 'html[lang=zh-CN] *{word-break:normal!important}';
     document.head.appendChild(st);
   }
-  const T = (ko, en) => EN ? en : ZHL ? zhOf(ko) : ko;
+  // Japanese, Brazilian Portuguese and Russian strings keyed by the Korean original
+  const JA = {
+    '코인빨래방': 'コインランドリー24', '음악': '音楽', '효과음': '効果音',
+    '클릭 행동 · B 상점<br>M 음악 · K 효과음': 'クリックで行動 · B ショップ<br>M 音楽 · K 効果音',
+    '상점': 'ショップ', '단골': '常連', '빚 갚기': '借金返済', '닫기': '閉じる', '받기': '受け取る', '계속하기': 'つづきから', '새로 시작': 'はじめから', '지우고 새로': '消して最初から',
+    '가로 화면에서 하는 게임입니다': 'このゲームは横画面で遊びます', '가로로 돌리기': '横画面にする',
+    '단추가 안 먹으면 폰의 화면 회전 잠금을 풀고 눕혀 주세요': 'ボタンが効かないときは、スマホの画面回転ロックを解除して横にしてください',
+    '그래도 세로로 하기': '縦画面のまま遊ぶ',
+    '지수': 'ジス', '순자': 'スンジャ', '민준': 'ミンジュン', '서연': 'ソヨン', '하늘': 'ハヌル', '도윤': 'ドユン', '은지': 'ウンジ', '태호': 'テホ', '미영': 'ミヨン', '준호': 'ジュノ',
+    '세탁기 +1': '洗濯機 +1', '고속 모터': '高速モーター', '고급 세제': '高級洗剤', '큰 동전통': '大きいコイン箱', '튼튼한 세탁기': '頑丈な洗濯機', '동전 카트': 'コインカート',
+    '공구함': '工具箱', '대걸레': 'モップ', '운동화': 'スニーカー', '자판기': '自販機', '벤치 +1': 'ベンチ +1', '빨래 탁자 +1': '洗濯物テーブル +1', 'CCTV': 'CCTV',
+    '네온 간판': 'ネオン看板', '화분': '観葉植物', '빨래 개는 기계': '洗濯物たたみ機', '야간 전단지': '深夜チラシ', '4호점': '4号店',
+    '사장님, 빚 다 갚으셨다면서요! 축하드려요!': 'オーナーさん、借金完済したんですって！おめでとうございます！',
+    '빚 거의 다 갚으셨네요. 조금만 더!': '借金、もうすぐ完済ですね。あと少し！',
+    '이 시간엔 취객 조심하세요…': 'この時間は酔っぱらいに気をつけてくださいね…',
+    '밤에도 오셨네요. 저도 야간이에요.': '夜中にも来たんですね。僕も夜勤なんです。',
+    '아침이네요. 밤새 고생하셨어요.': '朝ですね。徹夜お疲れさまでした。',
+    '낮에 오시는 건 드물죠? 한가해요.': '昼に来るのは珍しいですね？今ヒマなんです。',
+    '저녁이라 슬슬 바쁘시겠어요.': '夕方だから、そろそろ忙しくなりますね。',
+    '비 오면 빨래방 손님 늘죠?': '雨の日はランドリーのお客さん増えますよね？',
+    '눈 오는 날엔 이불 손님 많대요.': '雪の日は布団を洗いに来る人が多いらしいですよ。',
+    '벚꽃 피니까 좋네요.': '桜が咲いていいですね。',
+    '덥죠? 음료 시원해요.': '暑いですよね？ドリンク冷えてますよ。',
+    '낙엽 쓸기 귀찮아요.': '落ち葉掃除、めんどくさいです。',
+    '춥죠. 감기 조심하세요.': '寒いですね。風邪ひかないでくださいね。',
+    '신상 컵라면 들어왔어요.': '新作のカップ麺、入りましたよ。',
+    '점장님이 또 잔소리해요.': '店長がまた小言を言うんです。',
+    '저도 코인빨래방 자주 가요.': '僕もコインランドリーよく行きますよ。',
+    '졸려요… 커피 한 잔 해야겠어요.': '眠い… コーヒー飲まなきゃ。',
+    '사장님은 단골이니까 싸게 드려요.': 'オーナーさんは常連だから、安くしときますね。',
+    '사장님 오시면 하루가 좋아요.': 'オーナーさんが来ると、一日いい気分です。',
+    '세탁기 안에 지폐가 있었다': '洗濯機の中にお札が残っていた',
+    '단골이 선물을 두고 갔다': '常連さんがプレゼントを置いていった',
+    '밤새 자고 간 손님이 팁을 두고 갔다': '一晩寝ていったお客さんがチップを置いていった',
+    '빨래에서 반지가 나왔다': '洗濯物から指輪が出てきた',
+  };
+  const PT = {
+    '코인빨래방': 'LAVANDERIA 24H', '음악': 'Música', '효과음': 'Efeitos sonoros',
+    '클릭 행동 · B 상점<br>M 음악 · K 효과음': 'Clique: agir · B loja<br>M música · K som',
+    '상점': 'Loja', '단골': 'Fregueses', '빚 갚기': 'Pagar dívida', '닫기': 'Fechar', '받기': 'Receber', '계속하기': 'Continuar', '새로 시작': 'Novo jogo', '지우고 새로': 'Apagar e recomeçar',
+    '가로 화면에서 하는 게임입니다': 'Este jogo é na horizontal', '가로로 돌리기': 'Virar na horizontal',
+    '단추가 안 먹으면 폰의 화면 회전 잠금을 풀고 눕혀 주세요': 'Se o botão não funcionar, desative o bloqueio de rotação e vire o celular de lado',
+    '그래도 세로로 하기': 'Jogar na vertical mesmo assim',
+    '지수': 'Jisu', '순자': 'Sunja', '민준': 'Minjun', '서연': 'Seoyeon', '하늘': 'Haneul', '도윤': 'Doyun', '은지': 'Eunji', '태호': 'Taeho', '미영': 'Miyoung', '준호': 'Junho',
+    '세탁기 +1': 'Lavadora +1', '고속 모터': 'Motor turbo', '고급 세제': 'Sabão premium', '큰 동전통': 'Cofre grande', '튼튼한 세탁기': 'Lavadoras resistentes', '동전 카트': 'Carrinho de moedas',
+    '공구함': 'Caixa de ferramentas', '대걸레': 'Esfregão', '운동화': 'Tênis', '자판기': 'Máquina de bebidas', '벤치 +1': 'Banco +1', '빨래 탁자 +1': 'Mesa de roupas +1', 'CCTV': 'CCTV',
+    '네온 간판': 'Letreiro neon', '화분': 'Vaso de planta', '빨래 개는 기계': 'Máquina de dobrar', '야간 전단지': 'Panfletos noturnos', '4호점': 'Filial 4',
+    '사장님, 빚 다 갚으셨다면서요! 축하드려요!': 'Chefe, ouvi dizer que você quitou a dívida! Parabéns!',
+    '빚 거의 다 갚으셨네요. 조금만 더!': 'A dívida tá quase paga. Só mais um pouco!',
+    '이 시간엔 취객 조심하세요…': 'Cuidado com os bêbados a essa hora…',
+    '밤에도 오셨네요. 저도 야간이에요.': 'Veio de madrugada? Eu também tô no turno da noite.',
+    '아침이네요. 밤새 고생하셨어요.': 'Já amanheceu. Que noite puxada, hein.',
+    '낮에 오시는 건 드물죠? 한가해요.': 'Difícil você vir de dia, né? Tá tranquilo agora.',
+    '저녁이라 슬슬 바쁘시겠어요.': 'Já é noitinha, logo vai ficar corrido, né?',
+    '비 오면 빨래방 손님 늘죠?': 'Quando chove, a lavanderia enche, né?',
+    '눈 오는 날엔 이불 손님 많대요.': 'Dizem que em dia de neve muita gente vem lavar edredom.',
+    '벚꽃 피니까 좋네요.': 'As cerejeiras floriram, que lindo.',
+    '덥죠? 음료 시원해요.': 'Tá calor, né? As bebidas estão geladinhas.',
+    '낙엽 쓸기 귀찮아요.': 'Varrer folha seca é um saco.',
+    '춥죠. 감기 조심하세요.': 'Que frio. Cuidado pra não pegar gripe.',
+    '신상 컵라면 들어왔어요.': 'Chegou lámen de copo sabor novo.',
+    '점장님이 또 잔소리해요.': 'O gerente tá pegando no meu pé de novo.',
+    '저도 코인빨래방 자주 가요.': 'Eu também vou muito em lavanderia.',
+    '졸려요… 커피 한 잔 해야겠어요.': 'Que sono… preciso de um café.',
+    '사장님은 단골이니까 싸게 드려요.': 'Você é freguês, então faço mais barato.',
+    '사장님 오시면 하루가 좋아요.': 'Quando você aparece, meu dia fica melhor.',
+    '세탁기 안에 지폐가 있었다': 'Tinha uma nota dentro da lavadora',
+    '단골이 선물을 두고 갔다': 'Um freguês deixou um presente',
+    '밤새 자고 간 손님이 팁을 두고 갔다': 'Alguém dormiu aqui e deixou gorjeta',
+    '빨래에서 반지가 나왔다': 'Apareceu um anel no meio da roupa',
+  };
+  const RU = {
+    '코인빨래방': 'ПРАЧЕЧНАЯ 24', '음악': 'Музыка', '효과음': 'Звуки',
+    '클릭 행동 · B 상점<br>M 음악 · K 효과음': 'Клик — действие · B магазин<br>M музыка · K звуки',
+    '상점': 'Магазин', '단골': 'Постоянные', '빚 갚기': 'Вернуть долг', '닫기': 'Закрыть', '받기': 'Забрать', '계속하기': 'Продолжить', '새로 시작': 'Новая игра', '지우고 새로': 'Стереть и заново',
+    '가로 화면에서 하는 게임입니다': 'В эту игру играют горизонтально', '가로로 돌리기': 'Повернуть экран',
+    '단추가 안 먹으면 폰의 화면 회전 잠금을 풀고 눕혀 주세요': 'Если кнопка не работает, отключите блокировку поворота и положите телефон набок',
+    '그래도 세로로 하기': 'Всё равно играть вертикально',
+    '지수': 'Джису', '순자': 'Сунджа', '민준': 'Минджун', '서연': 'Соён', '하늘': 'Ханыль', '도윤': 'Доюн', '은지': 'Ынджи', '태호': 'Тэхо', '미영': 'Миён', '준호': 'Джунхо',
+    '세탁기 +1': 'Стиралка +1', '고속 모터': 'Быстрый мотор', '고급 세제': 'Премиум-порошок', '큰 동전통': 'Большая копилка', '튼튼한 세탁기': 'Прочные стиралки', '동전 카트': 'Тележка для монет',
+    '공구함': 'Ящик с инструментами', '대걸레': 'Швабра', '운동화': 'Кроссовки', '자판기': 'Автомат с напитками', '벤치 +1': 'Скамейка +1', '빨래 탁자 +1': 'Стол для белья +1', 'CCTV': 'CCTV',
+    '네온 간판': 'Неоновая вывеска', '화분': 'Цветок в горшке', '빨래 개는 기계': 'Робот-складчик', '야간 전단지': 'Ночные листовки', '4호점': 'Филиал 4',
+    '사장님, 빚 다 갚으셨다면서요! 축하드려요!': 'Шеф, говорят, вы весь долг вернули! Поздравляю!',
+    '빚 거의 다 갚으셨네요. 조금만 더!': 'Долг почти погашен. Ещё чуть-чуть!',
+    '이 시간엔 취객 조심하세요…': 'В такое время берегитесь пьяных…',
+    '밤에도 오셨네요. 저도 야간이에요.': 'И ночью пришли? Я тоже в ночную смену.',
+    '아침이네요. 밤새 고생하셨어요.': 'Уже утро. Тяжёлая выдалась ночка.',
+    '낮에 오시는 건 드물죠? 한가해요.': 'Днём вы редко заходите, да? Сейчас тихо.',
+    '저녁이라 슬슬 바쁘시겠어요.': 'Вечер — скоро будет запарка, да?',
+    '비 오면 빨래방 손님 늘죠?': 'В дождь в прачечной больше народу, да?',
+    '눈 오는 날엔 이불 손님 많대요.': 'Говорят, в снег многие несут стирать одеяла.',
+    '벚꽃 피니까 좋네요.': 'Сакура цветёт — красота.',
+    '덥죠? 음료 시원해요.': 'Жарко, да? Напитки холодные.',
+    '낙엽 쓸기 귀찮아요.': 'Подметать листья — такая морока.',
+    '춥죠. 감기 조심하세요.': 'Холодно. Не простудитесь.',
+    '신상 컵라면 들어왔어요.': 'Привезли новую лапшу в стаканчиках.',
+    '점장님이 또 잔소리해요.': 'Управляющий опять ворчит.',
+    '저도 코인빨래방 자주 가요.': 'Я тоже часто хожу в прачечную.',
+    '졸려요… 커피 한 잔 해야겠어요.': 'Спать хочу… надо выпить кофе.',
+    '사장님은 단골이니까 싸게 드려요.': 'Вы постоянный клиент — сделаю скидку.',
+    '사장님 오시면 하루가 좋아요.': 'Когда вы заходите, у меня весь день хороший.',
+    '세탁기 안에 지폐가 있었다': 'В стиралке нашлась купюра',
+    '단골이 선물을 두고 갔다': 'Постоянный клиент оставил подарок',
+    '밤새 자고 간 손님이 팁을 두고 갔다': 'Кто-то ночевал здесь и оставил чаевые',
+    '빨래에서 반지가 나왔다': 'В белье нашлось кольцо',
+  };
+  const L3 = { ja: JA, pt: PT, ru: RU }[LG] || null;
+  const L3BR = { ja: n => n + '号店', pt: n => 'Filial ' + n, ru: n => 'Филиал ' + n };
+  const l3Of = (ko, en) => { if (L3[ko] != null) return L3[ko]; const m = /^(\d+)호점$/.exec(ko); return m ? L3BR[LG](m[1]) : en; };
+  if (L3) {
+    document.documentElement.lang = LG === 'pt' ? 'pt-BR' : LG;
+    document.title = { ja: 'コインランドリー24', pt: 'Lavanderia 24h', ru: 'Прачечная 24' }[LG] + ' — Oreum Games';
+    document.querySelectorAll('[data-en]').forEach(e => { const k = e.innerHTML.trim(); e.innerHTML = L3[k] != null ? L3[k] : e.getAttribute('data-en'); });
+    document.querySelectorAll('[title]').forEach(e => { const k = e.getAttribute('title'); if (L3[k] != null) e.setAttribute('title', L3[k]); });
+    const jf = "local('Hiragino Sans'),local('Hiragino Kaku Gothic ProN'),local('Yu Gothic UI'),local('Yu Gothic'),local('Yu Gothic Medium'),local('YuGothic-Medium'),local('Yu Gothic Regular'),local('YuGothic-Regular'),local('Yu Gothic Bold'),local('YuGothic-Bold'),local('MS PGothic'),local('MS Gothic'),local('Meiryo'),local('Noto Sans JP'),local('Noto Sans CJK JP'),local('Source Han Sans JP')";
+    const lf = "local('Segoe UI'),local('Roboto'),local('Arial'),local('Helvetica Neue'),local('Helvetica')";
+    const src = LG === 'ja' ? jf : lf;
+    const ur = LG === 'ja' ? 'U+2E80-2FFF,U+3000-30FF,U+31F0-31FF,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF' : 'U+00A0-024F,U+0400-04FF,U+1E00-1EFF,U+2010-2027';
+    const st = document.createElement('style');
+    st.textContent = ['Griun', 'Ria'].map(f => "@font-face{font-family:'" + f + "';src:" + src + ';unicode-range:' + ur + '}').join('') + (LG === 'ja' ? 'html[lang=ja] *{word-break:normal!important}' : '');
+    document.head.appendChild(st);
+  }
+  const T = (ko, en) => EN ? en : ZHL ? zhOf(ko) : L3 ? l3Of(ko, en) : ko;
   const isTouch = ('ontouchstart' in window) && matchMedia('(pointer: coarse)').matches;
   if (isTouch) document.body.classList.add('touch');
   const rnd = (a, b) => a + Math.random() * (b - a), pick = a => a[Math.floor(Math.random() * a.length)], clamp = (v, a, b) => v < a ? a : v > b ? b : v;

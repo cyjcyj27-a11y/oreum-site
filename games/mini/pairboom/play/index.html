@@ -442,7 +442,7 @@
 </style>
 <!-- Pixabay 효과음 꾸러미 (출처·라이선스는 audio/출처.txt) -->
 <script src="audio/sfx-data.js?v=4"></script>
-<script src="/assets/game-home.js?v=8" data-top="4" data-left="4" data-fullscreen="1" defer></script>
+<script src="/assets/game-home.js?v=9" data-top="4" data-left="4" data-fullscreen="1" defer></script>
 </head>
 <body>
 
@@ -842,7 +842,7 @@ const LANG = (function(){
   try{
     const q = new URLSearchParams(location.search).get('lang');
     try { localStorage.removeItem('pairboom_lang'); } catch (e) {}
-    return q === 'en' ? 'en' : q === 'zh' ? 'zh' : 'ko';   // 언어는 주소로만 정한다(?lang=en 일 때만 영어, 없으면 한국어) — 기억하거나 폰 언어를 따르면 한국어 페이지에서 들어와도 영어로 뜬다(2026-09-29)
+    return q === 'en' ? 'en' : q === 'zh' ? 'zh' : ['ja','pt','ru'].includes(q) ? q : 'ko';   // 언어는 주소로만 정한다(?lang=en 일 때만 영어, 없으면 한국어) — 기억하거나 폰 언어를 따르면 한국어 페이지에서 들어와도 영어로 뜬다(2026-09-29)
   }catch(e){ return 'ko'; }
 })();
 const EN = (LANG === 'en');
@@ -862,7 +862,288 @@ const ZH = {
   '효과음 끄기': '关闭音效',
   '효과음 켜기': '开启音效',
 };
-const L = (ko, en) => EN ? en : ZHM ? (ZH[ko] != null ? ZH[ko] : ko) : ko;
+/* 일본어·포르투갈어(브라질)·러시아어 — 한국어 원문을 키로 찾는 사전과 화면 글 */
+const ruP = (n, a, b, c) => {
+  const m10 = n % 10, m100 = n % 100;
+  if (m10 === 1 && m100 !== 11) return a;
+  if (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14)) return b;
+  return c;
+};
+const XL = {
+  ja: {
+    htmlLang: 'ja',
+    d: {
+      '음악을 받는 중…': '音楽を読み込み中…',
+      '배경음악 끄기': 'BGMをオフ',
+      '배경음악 켜기': 'BGMをオン',
+      '판을 만드는 중…': '盤面を作成中…',
+      '길이 막혔습니다 · 꺾임 2번까지만': '道がふさがってる · 曲がれるのは2回まで',
+      '지울 짝이 없어 알아서 섞습니다': '消せるペアがないので自動でシャッフル',
+      '섞을 방법을 못 찾았습니다': 'シャッフルできませんでした',
+      '지울 짝이 없습니다': '消せるペアがありません',
+      '모든 단계를 깼습니다!': '全ステージクリア！',
+      '효과음 끄기': '効果音をオフ',
+      '효과음 켜기': '効果音をオン',
+    },
+    title: 'ペアブーム!! - 無料ペア消しパズルゲーム 100ステージ | Oreum Games',
+    desc: 'ペアブーム!! - 同じ絵を2つつなげればBOOM！インストールも会員登録も不要、ブラウザですぐ遊べるペア消しパズルゲーム。全100ステージ、1ステージ2分50秒から。',
+    h1: 'ペアブーム<em>!!</em>',
+    tagline: '同じ絵を2つつなげて <b>BOOM!!!</b>',
+    start: 'スタート', howto: '遊び方',
+    btn: {
+      btnReset: ['最初からやり直す'],
+      btnNew:   ['このステージをやり直す (N)', 'このステージをやり直す'],
+      btnHint:  ['ヒント'],
+      btnPause: ['一時停止 (スペース)', '一時停止'],
+      btnSound: ['効果音をオフ', '効果音'],
+      btnMusic: ['BGMをオン', 'BGM'],
+      btnHelp:  ['ルール'],
+    },
+    labels: ['ステージ', '残りペア', '残り時間', 'スコア', 'コンボ', '最高ステージ'],
+    foot: '<kbd>N</kbd> やり直し · <kbd>H</kbd> ヒント · <kbd>スペース</kbd> 一時停止',
+    pause: '<h2>一時停止</h2>' +
+      '<p>盤面はそのまま。時間も止まってるよ。</p>' +
+      '<div class="row"><button class="primary" id="btnResume">つづける</button></div>',
+    win: '全部消した！', next: '次のステージ', again: 'もう1回',
+    lose: 'ステージ <b id="loseStage">1</b> · 残り <b id="loseLeft">0</b> ペア',
+    retry: 'もう一度',
+    reset: '<h2>最初からやり直す？</h2>' +
+      '<p>今はステージ <b id="resetNow">1</b> まで来ています。押すと<b>ステージ1</b>に戻ります。</p>' +
+      '<p>最高ステージの記録はそのまま残ります。</p>' +
+      '<div class="row">' +
+        '<button class="primary" id="btnResetYes">ステージ1へ</button>' +
+        '<button id="btnResetNo">やめる</button>' +
+      '</div>',
+    help: '<h2>遊び方</h2>' +
+      '<div class="rules">' +
+        '<p>同じ絵を2つタップして消すゲームです。ただし、いつでも消せるわけではありません。</p>' +
+        '<p><b>1.</b> 2つの絵をつなぐ道は<b>空きマス</b>だけを通る必要があります。<br>' +
+        '<b>2.</b> 道が<b>曲がれるのは2回まで</b>（直線3本まで）です。<br>' +
+        '<b>3.</b> 道は<b>盤面の外を回っても</b>OK。だから端の絵は消しやすいんです。</p>' +
+        '<p>消せるペアがなくなると、残りの絵を<b>自動でシャッフル</b>します。だから詰んで止まることはありません。</p>' +
+        '<p><b>ステージ1から100まで</b>ずっと続きます。クリアするたびに<b>絵の種類が増えて</b>、' +
+        '同じ絵が少なくなり、ペア探しが少しずつ難しくなります。絵は<b>全部で48種類</b>、' +
+        'ステージ100では<b>48種類が1ペアずつ</b>並びます。</p>' +
+        '<p>盤面は大きくなるだけではありません。<b>盤面が狭くなるステージ</b>もあります。' +
+        'それは絵の種類が増えたステージです。盤面が狭いほど同じ絵が少なくなるので、<b>むしろ難しくなります</b>。</p>' +
+        '<p>1ステージは<b>2分50秒</b>。時間切れでそのステージは失敗、もう一度やればOK。' +
+        'ペアがとても多い後半のステージは時間が多めです。</p>' +
+      '</div>' +
+      '<div class="row"><button class="primary" id="btnCloseHelp">わかった</button></div>',
+    langTitle: '英語版を見る',
+    board: (st, w, h, p, k) => 'ステージ' + st + ' · ' + w + '×' + h + ' · ' + p + 'ペア · 絵' + k + '種類',
+    winLine: (d, p, took, spare, bonus) => 'ステージ' + d + ' · ' + p + 'ペア · タイム ' + took +
+      ' · 残り ' + spare + 'でボーナス ' + bonus + '点',
+    allBest: n => '最後のステージ' + n + 'まで全部消しました。すごい！',
+    winN: d => 'ステージ' + d + ' クリア！',
+    nextLine: s => '次は ' + s,
+    nextTo: st => 'ステージ' + st + 'へ',
+    pauseT: p => p ? 'つづける (スペース)' : '一時停止 (スペース)',
+    noteBest: (b, s) => 'これまでの最高 <b>ステージ' + b + '</b> · ステージ' + s + 'から再開',
+    noteNew: n => '全<b>' + n + 'ステージ</b> · 1ステージ2分50秒から',
+  },
+  pt: {
+    htmlLang: 'pt-BR',
+    d: {
+      '음악을 받는 중…': 'Carregando música…',
+      '배경음악 끄기': 'Desligar música',
+      '배경음악 켜기': 'Ligar música',
+      '판을 만드는 중…': 'Montando o tabuleiro…',
+      '길이 막혔습니다 · 꺾임 2번까지만': 'Caminho bloqueado · no máximo 2 curvas',
+      '지울 짝이 없어 알아서 섞습니다': 'Sem pares para limpar — embaralhando pra você',
+      '섞을 방법을 못 찾았습니다': 'Não deu pra embaralhar',
+      '지울 짝이 없습니다': 'Nenhum par para limpar',
+      '모든 단계를 깼습니다!': 'Você zerou todas as fases!',
+      '효과음 끄기': 'Desligar efeitos',
+      '효과음 켜기': 'Ligar efeitos',
+    },
+    title: 'PAIRBOOM!! - quebra-cabeça de pares grátis, 100 fases | Oreum Games',
+    desc: 'PAIRBOOM!! - Ligue duas figuras iguais e BOOM! Sem instalar e sem cadastro, jogue direto no navegador. Quebra-cabeça de pares com 100 fases, a partir de 2min50 por fase.',
+    h1: null,
+    tagline: 'Ligue duas figuras iguais e <b>BOOM!!!</b>',
+    start: 'Jogar', howto: 'Como jogar',
+    btn: {
+      btnReset: ['Recomeçar da fase 1'],
+      btnNew:   ['Reiniciar esta fase (N)', 'Reiniciar esta fase'],
+      btnHint:  ['Dica'],
+      btnPause: ['Pausar (Espaço)', 'Pausar'],
+      btnSound: ['Desligar efeitos', 'Efeitos'],
+      btnMusic: ['Ligar música', 'Música'],
+      btnHelp:  ['Regras'],
+    },
+    labels: ['Fase', 'Pares', 'Tempo', 'Pontos', 'Combo', 'Recorde'],
+    foot: '<kbd>N</kbd> Reiniciar · <kbd>H</kbd> Dica · <kbd>Espaço</kbd> Pausa',
+    pause: '<h2>Pausado</h2>' +
+      '<p>O tabuleiro ficou do jeito que estava. O tempo também parou.</p>' +
+      '<div class="row"><button class="primary" id="btnResume">Continuar</button></div>',
+    win: 'Tudo limpo!', next: 'Próxima fase', again: 'Mais uma',
+    lose: 'Fase <b id="loseStage">1</b> · faltaram <b id="loseLeft">0</b> pares',
+    retry: 'Tentar de novo',
+    reset: '<h2>Começar do zero?</h2>' +
+      '<p>Você chegou à fase <b id="resetNow">1</b>. Isso te leva de volta à <b>fase 1</b>.</p>' +
+      '<p>Seu recorde de fase continua salvo.</p>' +
+      '<div class="row">' +
+        '<button class="primary" id="btnResetYes">Ir para a fase 1</button>' +
+        '<button id="btnResetNo">Cancelar</button>' +
+      '</div>',
+    help: '<h2>Como jogar</h2>' +
+      '<div class="rules">' +
+        '<p>Toque em duas figuras iguais para limpá-las. Mas nem sempre dá.</p>' +
+        '<p><b>1.</b> O caminho entre elas só pode passar por <b>casas vazias</b>.<br>' +
+        '<b>2.</b> Esse caminho pode fazer <b>no máximo 2 curvas</b> (até três linhas retas).<br>' +
+        '<b>3.</b> O caminho pode <b>dar a volta por fora</b> do tabuleiro. Por isso as figuras da borda saem fácil.</p>' +
+        '<p>Quando não houver mais pares para limpar, as figuras restantes são <b>embaralhadas automaticamente</b>. Então você nunca fica travado.</p>' +
+        '<p><b>Da fase 1 à fase 100</b>, tudo em sequência. A cada fase vencida <b>aumentam os tipos de figura</b>, ' +
+        'cada figura fica mais rara e achar pares fica um pouco mais difícil. São <b>48 figuras no total</b>, ' +
+        'e na fase 100 <b>cada uma das 48 aparece em um único par</b>.</p>' +
+        '<p>O tabuleiro não só cresce. Também há <b>fases em que ele fica mais estreito</b>: são as fases que ganharam uma figura nova. ' +
+        'Quanto mais estreito, mais rara cada figura, então fica <b>mais difícil, não mais fácil</b>.</p>' +
+        '<p>Cada fase dá <b>2min50</b>. Se o tempo acabar, a fase falha — é só tentar de novo. ' +
+        'As fases finais, com muitos pares, ganham mais tempo.</p>' +
+      '</div>' +
+      '<div class="row"><button class="primary" id="btnCloseHelp">Entendi</button></div>',
+    langTitle: 'Ver em inglês',
+    board: (st, w, h, p, k) => 'Fase ' + st + ' · ' + w + '×' + h + ' · ' + p + ' pares · ' + k + ' figuras',
+    winLine: (d, p, took, spare, bonus) => 'Fase ' + d + ' · ' + p + ' pares · tempo ' + took +
+      ' · sobrou ' + spare + ', bônus ' + bonus,
+    allBest: n => 'Você limpou todas as ' + n + ' fases. Incrível!',
+    winN: d => 'Fase ' + d + ' concluída!',
+    nextLine: s => 'Próxima: ' + s,
+    nextTo: st => 'Para a fase ' + st,
+    pauseT: p => p ? 'Continuar (Espaço)' : 'Pausar (Espaço)',
+    noteBest: (b, s) => 'Seu recorde: <b>fase ' + b + '</b> · continuando da fase ' + s,
+    noteNew: n => '<b>' + n + ' fases</b> no total · a partir de 2min50 por fase',
+  },
+  ru: {
+    htmlLang: 'ru',
+    d: {
+      '음악을 받는 중…': 'Загрузка музыки…',
+      '배경음악 끄기': 'Выключить музыку',
+      '배경음악 켜기': 'Включить музыку',
+      '판을 만드는 중…': 'Строим поле…',
+      '길이 막혔습니다 · 꺾임 2번까지만': 'Путь закрыт · не больше 2 поворотов',
+      '지울 짝이 없어 알아서 섞습니다': 'Ходов нет — перемешиваем',
+      '섞을 방법을 못 찾았습니다': 'Не получилось перемешать',
+      '지울 짝이 없습니다': 'Нет пар, которые можно убрать',
+      '모든 단계를 깼습니다!': 'Все уровни пройдены!',
+      '효과음 끄기': 'Выключить звуки',
+      '효과음 켜기': 'Включить звуки',
+    },
+    title: 'PAIRBOOM!! - бесплатная головоломка на пары, 100 уровней | Oreum Games',
+    desc: 'PAIRBOOM!! - Соедини две одинаковые картинки и BOOM! Без установки и регистрации, играй прямо в браузере. Головоломка на пары: 100 уровней, от 2:50 на уровень.',
+    h1: null,
+    tagline: 'Соедини две одинаковые и <b>BOOM!!!</b>',
+    start: 'Играть', howto: 'Как играть',
+    btn: {
+      btnReset: ['Начать заново с 1 уровня'],
+      btnNew:   ['Переиграть уровень (N)', 'Переиграть уровень'],
+      btnHint:  ['Подсказка'],
+      btnPause: ['Пауза (Пробел)', 'Пауза'],
+      btnSound: ['Выключить звуки', 'Звуки'],
+      btnMusic: ['Включить музыку', 'Музыка'],
+      btnHelp:  ['Правила'],
+    },
+    labels: ['Уровень', 'Пары', 'Время', 'Очки', 'Комбо', 'Рекорд'],
+    foot: '<kbd>N</kbd> Заново · <kbd>H</kbd> Подсказка · <kbd>Пробел</kbd> Пауза',
+    pause: '<h2>Пауза</h2>' +
+      '<p>Поле осталось как было. Время тоже стоит.</p>' +
+      '<div class="row"><button class="primary" id="btnResume">Продолжить</button></div>',
+    win: 'Всё убрано!', next: 'Следующий уровень', again: 'Ещё раз',
+    lose: 'Уровень <b id="loseStage">1</b> · осталось пар: <b id="loseLeft">0</b>',
+    retry: 'Ещё попытка',
+    reset: '<h2>Начать заново?</h2>' +
+      '<p>Ты дошёл до уровня <b id="resetNow">1</b>. Кнопка вернёт тебя на <b>1 уровень</b>.</p>' +
+      '<p>Рекорд уровня сохранится.</p>' +
+      '<div class="row">' +
+        '<button class="primary" id="btnResetYes">На 1 уровень</button>' +
+        '<button id="btnResetNo">Отмена</button>' +
+      '</div>',
+    help: '<h2>Как играть</h2>' +
+      '<div class="rules">' +
+        '<p>Нажимай на две одинаковые картинки, чтобы убрать их. Но убираются они не всегда.</p>' +
+        '<p><b>1.</b> Путь между ними должен проходить только по <b>пустым клеткам</b>.<br>' +
+        '<b>2.</b> У пути может быть <b>не больше 2 поворотов</b> (до трёх прямых линий).<br>' +
+        '<b>3.</b> Путь может <b>огибать поле снаружи</b>. Поэтому картинки по краям убираются легко.</p>' +
+        '<p>Если убрать больше нечего, оставшиеся картинки <b>перемешаются сами</b>. Так что застрять невозможно.</p>' +
+        '<p><b>С 1 по 100 уровень</b> — одной цепочкой. С каждым пройденным уровнем <b>видов картинок становится больше</b>, ' +
+        'одинаковых всё меньше, и искать пары понемногу сложнее. Всего <b>48 картинок</b>, ' +
+        'а на 100 уровне <b>каждая из 48 встречается ровно одной парой</b>.</p>' +
+        '<p>Поле не только растёт. Бывают <b>уровни, где поле сужается</b> — это уровни, где добавилась картинка. ' +
+        'Чем уже поле, тем реже одинаковые картинки, так что это <b>сложнее, а не проще</b>.</p>' +
+        '<p>На уровень даётся <b>2:50</b>. Время вышло — уровень провален, просто попробуй ещё раз. ' +
+        'Поздним уровням с большим числом пар дают больше времени.</p>' +
+      '</div>' +
+      '<div class="row"><button class="primary" id="btnCloseHelp">Понятно</button></div>',
+    langTitle: 'Английская версия',
+    board: (st, w, h, p, k) => 'Уровень ' + st + ' · ' + w + '×' + h + ' · ' + p + ' ' + ruP(p, 'пара', 'пары', 'пар') +
+      ' · ' + k + ' ' + ruP(k, 'картинка', 'картинки', 'картинок'),
+    winLine: (d, p, took, spare, bonus) => 'Уровень ' + d + ' · ' + p + ' ' + ruP(p, 'пара', 'пары', 'пар') +
+      ' · время ' + took + ' · осталось ' + spare + ', бонус ' + bonus,
+    allBest: n => 'Ты прошёл все ' + n + ' ' + ruP(n, 'уровень', 'уровня', 'уровней') + '. Впечатляет!',
+    winN: d => 'Уровень ' + d + ' пройден!',
+    nextLine: s => 'Дальше: ' + s,
+    nextTo: st => 'На уровень ' + st,
+    pauseT: p => p ? 'Продолжить (Пробел)' : 'Пауза (Пробел)',
+    noteBest: (b, s) => 'Рекорд: <b>уровень ' + b + '</b> · продолжаем с уровня ' + s,
+    noteNew: n => 'Всего <b>' + n + ' ' + ruP(n, 'уровень', 'уровня', 'уровней') + '</b> · от 2:50 на уровень',
+  },
+};
+const XM = XL[LANG] || null;
+
+function applyX(){
+  document.documentElement.lang = XM.htmlLang;
+  document.title = XM.title;
+  const md = document.querySelector('meta[name=description]');
+  if (md) md.content = XM.desc;
+  /* 글꼴에 없는 글자(가나·한자, 악센트 라틴, 키릴)를 시스템 글꼴로 채운다 */
+  const st = document.createElement('style');
+  if (LANG === 'ja'){
+    const jf = "local('Hiragino Sans'),local('Hiragino Kaku Gothic ProN'),local('Yu Gothic UI'),local('Yu Gothic'),local('Yu Gothic Medium'),local('YuGothic-Medium'),local('Yu Gothic Regular'),local('YuGothic-Regular'),local('Yu Gothic Bold'),local('YuGothic-Bold'),local('MS PGothic'),local('MS Gothic'),local('Meiryo'),local('Noto Sans JP'),local('Noto Sans CJK JP'),local('Source Han Sans JP')";
+    const ur = 'U+2E80-2FFF,U+3000-30FF,U+31F0-31FF,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF';
+    st.textContent = ['Supermagic', 'WaterDrop'].map(f =>
+      `@font-face{font-family:'${f}';src:${jf};font-weight:400;unicode-range:${ur}}`).join('')
+      + 'html[lang=ja] *{word-break:normal!important}'
+      + 'html[lang=ja] .card h2{text-shadow:0 3px 0 rgba(14,59,70,.18)}';
+  } else {
+    const lf = "local('Segoe UI'),local('Roboto'),local('Arial'),local('Helvetica Neue'),local('Helvetica')";
+    const ur = 'U+00A0-024F,U+0400-04FF,U+1E00-1EFF,U+2010-2027';
+    st.textContent = ['Supermagic', 'WaterDrop'].map(f =>
+      `@font-face{font-family:'${f}';src:${lf};font-weight:400;unicode-range:${ur}}`).join('');
+  }
+  /* 긴 알림판은 화면 높이 안에서 굴러가게 한다 */
+  st.textContent += '.veil .card{max-height:calc(100vh - 40px);overflow-y:auto}';
+  document.head.appendChild(st);
+
+  const $$ = s => document.querySelector(s);
+  const html = (s, v) => { const e = $$(s); if (e) e.innerHTML = v; };
+
+  if (XM.h1){
+    html('#veilTitle h1', XM.h1);
+    html('header h2', XM.h1);
+  }
+  document.querySelectorAll('.tagline').forEach(e => { e.innerHTML = XM.tagline; });
+  html('#btnStart', XM.start);
+  html('#btnHowto', XM.howto);
+
+  Object.keys(XM.btn).forEach(id => {
+    const e = $(id), t = XM.btn[id];
+    if (e){ e.title = t[0]; e.setAttribute('aria-label', t[1] || t[0]); }
+  });
+
+  document.querySelectorAll('.stats .stat span').forEach((e, i) => { if (XM.labels[i]) e.textContent = XM.labels[i]; });
+
+  html('.foot', XM.foot);
+  html('#veilPause .card', XM.pause);
+  html('#winTitle', XM.win);
+  html('#btnNext', XM.next);
+  html('#btnAgain', XM.again);
+  html('#veilLose .lose-stat', XM.lose);
+  html('#btnRetry', XM.retry);
+  html('#veilReset .card', XM.reset);
+  html('#veilHelp .card', XM.help);
+}
+
+const L = (ko, en) => EN ? en : ZHM ? (ZH[ko] != null ? ZH[ko] : ko) : XM ? (XM.d[ko] != null ? XM.d[ko] : en) : ko;
 
 function applyZh(){
   document.documentElement.lang = 'zh-CN';
@@ -948,6 +1229,7 @@ function applyZh(){
 
 function applyLang(){
   if (ZHM) { applyZh(); return; }
+  if (XM) { applyX(); return; }
   if (!EN) return;
   document.documentElement.lang = 'en';
   document.title = 'PAIRBOOM!! - free match-and-clear puzzle, 100 stages | Oreum Games';
@@ -1696,6 +1978,7 @@ function boardLine(st, w, h, pairs, kinds){
   if (EN){
     return 'Stage ' + st + ' · ' + w + '×' + h + ' · ' + pairs + ' pairs · ' + kinds + ' shapes';
   }
+  if (XM) return XM.board(st, w, h, pairs, kinds);
   if (ZHM){
     return '第' + st + '关 · ' + w + '×' + h + ' · ' + pairs + ' 对 · ' + kinds + ' 种图案';
   }
@@ -1933,6 +2216,7 @@ function win(){
     : ZHM
     ? ('第' + done + '关 · ' + (W*H/2) + ' 对 · 用时 ' + fmtTime(elapsed) +
        ' · 剩余 ' + spare + '，奖励 ' + bonus.toLocaleString() + ' 分')
+    : XM ? XM.winLine(done, W*H/2, fmtTime(elapsed), spare, bonus.toLocaleString())
     : (done + '단계 · ' + (W*H/2) + '짝 · 걸린 시간 ' + fmtTime(elapsed) +
        ' · 남은 시간 ' + spare + ' 로 보너스 ' + bonus.toLocaleString() + '점');
 
@@ -1942,16 +2226,18 @@ function win(){
     $('winBest').textContent  = EN
       ? ('You cleared all ' + LAST + ' stages. Impressive.')
       : ZHM ? ('直到最后第' + LAST + '关全部消完了。太厉害了！')
+      : XM ? XM.allBest(LAST)
       : ('마지막 ' + LAST + '단계까지 전부 지웠습니다. 대단합니다.');
     nextBtn.style.display = 'none';
   } else {
     const ns = stageAt(stage);
-    $('winTitle').textContent = EN ? ('Stage ' + done + ' clear!') : ZHM ? ('第' + done + '关通过！') : (done + '단계 통과!');
+    $('winTitle').textContent = EN ? ('Stage ' + done + ' clear!') : ZHM ? ('第' + done + '关通过！') : XM ? XM.winN(done) : (done + '단계 통과!');
     $('winBest').textContent  = EN
       ? ('Next: ' + boardLine(stage, ns.w, ns.h, ns.w*ns.h/2, ns.kinds))
       : ZHM ? ('下一关：' + boardLine(stage, ns.w, ns.h, ns.w*ns.h/2, ns.kinds))
+      : XM ? XM.nextLine(boardLine(stage, ns.w, ns.h, ns.w*ns.h/2, ns.kinds))
       : ('다음은 ' + boardLine(stage, ns.w, ns.h, ns.w*ns.h/2, ns.kinds));
-    nextBtn.textContent = EN ? ('To stage ' + stage) : ZHM ? ('前往第' + stage + '关') : (stage + '단계로');
+    nextBtn.textContent = EN ? ('To stage ' + stage) : ZHM ? ('前往第' + stage + '关') : XM ? XM.nextTo(stage) : (stage + '단계로');
     nextBtn.style.display = '';
   }
 
@@ -1964,6 +2250,7 @@ function togglePause(){
   paused = !paused;
   $('veilPause').classList.toggle('on', paused);
   $('btnPause').title = ZHM ? (paused ? '继续游戏 (空格)' : '暂停 (空格)')
+    : XM ? XM.pauseT(paused)
     : paused ? '이어서 하기 (스페이스)' : '멈춤 (스페이스)';
   bgmApply();                                  // 멈추면 음악도 멈춥니다
 }
@@ -2017,6 +2304,7 @@ applyLang();          // 영어면 화면 글을 갈아 끼웁니다
   b.textContent = EN ? '한' : 'EN';
   b.title = EN ? '한국어로 보기' : 'View in English';
   if (ZHM) b.title = '查看英文版';
+  if (XM) b.title = XM.langTitle;
   b.setAttribute('aria-label', b.title);
 })();
 loadProgress();
@@ -2072,6 +2360,8 @@ $('titleNote').innerHTML = EN
   ? (bestStage > 1
       ? ('目前最高到 <b>第' + bestStage + '关</b> · 从第' + stage + '关继续')
       : ('一共 <b>' + LAST + ' 关</b> · 每关 2分50秒起'))
+  : XM
+  ? (bestStage > 1 ? XM.noteBest(bestStage, stage) : XM.noteNew(LAST))
   : (bestStage > 1
       ? ('지금까지 <b>' + bestStage + '단계</b>까지 오셨습니다 · 이어서 ' + stage + '단계부터')
       : ('모두 <b>' + LAST + '단계</b>입니다 · 한 판에 2분 50초부터'));

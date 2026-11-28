@@ -1,7 +1,10 @@
-/* zh.js - Simplified Chinese for ?lang=zh. ZT(v) maps Korean strings (or arrays/objects of them) to Chinese; outside zh it returns v unchanged. */
+/* zh.js - Simplified Chinese for ?lang=zh, plus Japanese, Portuguese (Brazil) and Russian for ?lang=ja|pt|ru. ZT(v) maps Korean strings (or arrays/objects of them) to the chosen language; outside these languages it returns v unchanged. */
 (function () {
-  const on = new URLSearchParams(location.search).get('lang') === 'zh';
+  const q = new URLSearchParams(location.search).get('lang');
+  const on = q === 'zh';
   window.ZHON = on;
+  const L3 = ['ja', 'pt', 'ru'].includes(q) ? q : '';
+  window.LG3 = L3;
   const D = {
     // title, buttons, menus
     '물귀신': '水鬼', '시작': '开始', '이어하기': '继续', '최고': '最高',
@@ -94,23 +97,294 @@
     '이 강이 데려간 사람들 이름을 나는 다 안다': '被这条河带走的人，我都叫得出名字', '다음 이름은 네 것이다': '下一个就是你',
     '돌아보지 마라': '别回头', '방금 네 뒤에 서 있던 건 내가 아니다': '刚才站在你身后的不是我',
   };
-  const t = v => typeof v === 'string' ? (D[v] !== undefined ? D[v] : v)
+  // ja / pt / ru dictionaries, keyed by the same Korean strings as D
+  const JA = {
+    '물귀신': '水鬼', '시작': 'スタート', '이어하기': 'つづきから', '최고': 'ベスト',
+    '지도': 'マップ', '인벤토리': '持ち物', '효과음': '効果音',
+    '전력': 'ダッシュ', '소금': '塩', '점프': 'ジャンプ', '등불': '灯り',
+    'WASD / 방향키 이동 · Shift 전력<br>Space 점프 · F 소금 · E 등불 켜기·끄기 · M 지도 · I 인벤토리 · K 효과음': 'WASD / 矢印キー 移動 · Shift ダッシュ<br>Space ジャンプ · F 塩 · E 灯り オン/オフ · M マップ · I 持ち物 · K 効果音',
+    '가로 화면에서 하는 게임입니다': '横画面で遊ぶゲームです',
+    '가로로 돌리기': '横向きにする',
+    '단추가 안 먹으면 폰의 화면 회전 잠금을 풀고 눕혀 주세요': 'ボタンが効かないときは、スマホの画面回転ロックを解除して横に倒してください',
+    '그래도 세로로 하기': '縦のままで遊ぶ',
+    '서낭당': '祠', '무너진 다리': '崩れた橋', '잠긴 마을': '沈んだ村', '물레방아': '水車小屋', '뒤집힌 배': '転覆した舟',
+    '잠긴 숲': '沈んだ森', '폭포': '滝', '발원지': '源流', '발원지로': '源流へ',
+    '신발 한 짝': '片方の靴', '가방': 'カバン', '머리끈': 'ヘアゴム', '손전등': '懐中電灯', '비옷': 'レインコート',
+    '반지': '指輪', '동전': 'コイン', '머리핀': 'ヘアピン', '손목시계': '腕時計', '안경': 'メガネ', '호루라기': '笛', '열쇠': '鍵', '구슬': 'ビー玉',
+    '부적': 'お札', '석등': '石灯籠', '🔧 손잡이': '🔧 ハンドル', '수문': '水門',
+    '수영금지': '遊泳禁止', '익사사고 다발지역': '水難事故多発地帯', '급류 위험': '急流危険', '물살이 셉니다': '流れが速いです',
+    '꺼진 석등 셋': '消えた石灯三つ', '등불로 밝히면': '灯りでともせば', '넋이 쉬어 가리라': '魂は安らぐだろう',
+    '반지를 주웠다': '指輪を拾った', '누구의 반지일까': '誰の指輪だろう',
+    '녹슨 동전을 주웠다': '錆びた硬貨を拾った', '누가 여기 떨어뜨렸을까': '誰がここに落としたんだろう',
+    '머리핀을 주웠다': 'ヘアピンを拾った', '누구의 머리에 꽂혀 있었을까': '誰の髪にさしてあったんだろう',
+    '멈춘 손목시계를 주웠다': '止まった腕時計を拾った', '몇 시에 멈췄을까': '何時に止まったんだろう',
+    '안경을 주웠다': 'メガネを拾った', '물이 차오르는 걸 보았을까': '水が満ちてくるのを見たんだろうか',
+    '호루라기를 주웠다': '笛を拾った', '아무도 듣지 못했을까': '誰にも聞こえなかったのかな',
+    '열쇠를 주웠다': '鍵を拾った', '어느 집 문이 기다리고 있을까': 'どこの家のドアが待っているんだろう',
+    '유리구슬을 주웠다': 'ビー玉を拾った', '어느 아이의 구슬이었을까': 'どの子のビー玉だったんだろう',
+    '동생 신발이다': '妹の靴だ', '한 짝은 어디 있을까': 'もう片方はどこだろう',
+    '동생 책가방이다': '妹のランドセルだ', '아직도 젖어 있다': 'まだ濡れている',
+    '동생 머리끈이다': '妹のヘアゴムだ', '내가 사 준 거였는데': 'ぼくが買ってあげたやつなのに',
+    '우리 집 손전등이다': 'うちの懐中電灯だ', '아직 켜져 있다': 'まだ点いている',
+    '동생 노란 비옷이다': '妹の黄色いレインコートだ', '그날 입고 나갔던': 'あの日、着て出かけたやつだ',
+    '부적을 찾았다': 'お札を見つけた',
+    '서낭당입니다': 'ここは祠です', '여기서는 불을 꺼도 귀신이 나타나지 않습니다': 'ここでは灯りを消しても、幽霊は出てきません',
+    '아직 새것 같은데...': 'まだ新しいみたいだけど...',
+    '오래전부터 여기 있었던 걸까': 'ずっと前からここにあったのかな',
+    '아이가 쓰던 것일까': '子どもが使っていたものかな',
+    '3시 17분...': '3時17分...',
+    '이걸 쓰고 무엇을 보고 있었을까': 'これをかけて何を見ていたんだろう',
+    '누군가 구조를 요청했던 걸까': '誰かが助けを呼んでいたのかな',
+    '아직 열 수 있는 문이 있을까': 'まだ開けられるドアはあるのかな',
+    '아이가 잃어버린 걸까': '子どもがなくしたのかな',
+    '또 반지다': 'また指輪だ', '같은 모양인데...': '同じ形だ...',
+    '또 녹슨 동전이다': 'また錆びた硬貨だ', '왜 계속 나오는 거지?': 'なんで次々出てくるんだ?',
+    '또 머리핀이다': 'またヘアピンだ', '아까 그거와 똑같다': 'さっきのとまったく同じだ',
+    '또 멈춘 시계다': 'また止まった時計だ', '이번에도 3시 17분...': '今度も3時17分...',
+    '또 안경이다': 'またメガネだ', '누군가 계속 이 강에 물건을 버리는 걸까': '誰かがずっとこの川に物を捨てているのかな',
+    '또 호루라기다': 'また笛だ', '방금... 소리가 난 것 같은데': '今...音がした気がする',
+    '또 열쇠다': 'また鍵だ', '이 강 아래에 집이라도 있는 걸까': 'この川の底に家でもあるのかな',
+    '또 유리구슬이다': 'またビー玉だ', '아이 한 명이 아니라면...': '子どもが一人じゃないとしたら...',
+    '세 번째 반지다': '三つめの指輪だ', '이번엔 손가락 자국이 남아 있다': '今度は指の跡が残っている',
+    '세 번째 동전이다': '三枚めの硬貨だ', '물속에서 누군가 주운 걸까': '水の中で誰かが拾ったのかな',
+    '세 번째 머리핀이다': '三本めのヘアピンだ', '이건 아직 젖어 있다': 'これはまだ濡れている',
+    '세 번째 시계다': '三つめの時計だ', '3시 17분에 모두 멈췄다': 'みんな3時17分で止まっている',
+    '세 번째 안경이다': '三つめのメガネだ', '렌즈에 이상한 게 비친다': 'レンズに何か変なものが映っている',
+    '세 번째 호루라기다': '三つめの笛だ', '누가 방금 내 뒤에서 불었어': '今、誰かがぼくの後ろで吹いた',
+    '세 번째 열쇠다': '三本めの鍵だ', '내가 찾고 있는 건 열쇠가 아닌 것 같다': 'ぼくが探しているのは鍵じゃない気がする',
+    '세 번째 유리구슬이다': '三つめのビー玉だ', '저쪽에 아이가 서 있는 것 같은데...': '向こうに子どもが立っている気がする...',
+    '네 번째 반지다': '四つめの指輪だ', '이건 내가 아는 반지다': 'この指輪、ぼくは知っている',
+    '네 번째 동전이다': '四枚めの硬貨だ', '이 동전... 내가 떨어뜨린 건데?': 'この硬貨...ぼくが落としたやつだ?',
+    '네 번째 머리핀이다': '四本めのヘアピンだ', '분명히 방금 전에도 봤다': 'たしかに、ついさっきも見た',
+    '네 번째 손목시계다': '四つめの腕時計だ', '시계가 멈춘 시간이 모두 같다': 'どの時計も止まった時刻が同じだ',
+    '그 강에는 전설이 있었다': 'その川には言い伝えがあった',
+    '겨우 어른 무릎 높이밖에 차지 않는': '大人のひざほどの深さしかない',
+    '얕은 강인데도 불구하고': '浅い川だというのに',
+    '매년 사람들이 익사해서 죽어 나갔다': '毎年、人が溺れて死んでいった',
+    '물귀신이 있다는 소문이 돌기 시작했다': '水鬼がいるという噂が広まりはじめた',
+    '그 강 옆 작은 집에서 살던 남매가 있었다': 'その川のそばの小さな家に、兄妹が住んでいた',
+    '폭우가 쏟아진 어느 날': '豪雨が降りしきったある日',
+    '마당에 나갔던 여동생은': '庭に出た妹は',
+    '영영 돌아오지 않았다': 'そのまま二度と戻らなかった',
+    '다음 날도 그다음 날도……': '次の日も、その次の日も……',
+    '소년은 여동생을 찾으러': '少年は妹をさがしに',
+    '어두운 강가로 나선다': '暗い川辺へと向かう',
+    '얘야, 나는 물 위를 걷는 사람이다': '坊や、わしは水の上を歩く者だ',
+    '물고기 두 마리로': '二匹の魚で', '오천 명을 먹였지': '五千人を食わせたのさ',
+    '쉿… 발소리 내지 마라': 'しっ… 足音を立てるな', '물속에서 다 듣고 있다': '水の中で全部聞いておる',
+    '소금은 아껴 써라': '塩は大事に使え', '너는 세상의 소금이니까': 'お前は地の塩だからな',
+    '밤마다 물가에서 노래하는 여자애가 있더라': '毎晩、水辺で歌っておる女の子がいてな', '네 동생이냐?': 'お前の妹か?',
+    '나는 이 강에서 세 번 죽었다': 'わしはこの川で三度死んだ', '세 번 다 걸어 나왔지': '三度とも歩いて出てきたがな',
+    '어젯밤엔 물 위를 걸었다': '昨夜は水の上を歩いた', '발밑에서 누가 내 발목을 잡더구나': '足もとで誰かがわしの足首をつかんできた',
+    '쉿…': 'しっ…', '저기 물 위에 누가 서 있잖니': 'ほれ、水の上に誰か立っておるだろう',
+    '오늘 잡은 물고기 배를 갈랐더니': '今日釣った魚の腹を裂いたら', '긴 머리카락이 가득 들어 있더라': '長い髪の毛がぎっしり詰まっておった',
+    '그 여자애 노래를': 'あの女の子の歌をな', '이젠 네 동생이 따라 부르더구나': '今はお前の妹が一緒に歌っておる',
+    '나를 믿지 마라': 'わしを信じるな', '이제 나도 누가 물 위에 서 있는지 모르겠다': '水の上に誰が立っておるのか、もうわしにもわからん',
+    '이 강이 데려간 사람들 이름을 나는 다 안다': 'この川が連れていった者の名を、わしは全部知っておる', '다음 이름은 네 것이다': '次の名はお前だ',
+    '돌아보지 마라': '振り返るな', '방금 네 뒤에 서 있던 건 내가 아니다': 'さっきお前の後ろに立っておったのは、わしではない',
+  };
+  const PT = {
+    '물귀신': 'MULGWISIN', '시작': 'Começar', '이어하기': 'Continuar', '최고': 'Recorde',
+    '지도': 'Mapa', '인벤토리': 'Inventário', '효과음': 'Efeitos sonoros',
+    '전력': 'Correr', '소금': 'Sal', '점프': 'Pular', '등불': 'Luz',
+    'WASD / 방향키 이동 · Shift 전력<br>Space 점프 · F 소금 · E 등불 켜기·끄기 · M 지도 · I 인벤토리 · K 효과음': 'WASD / setas mover · Shift correr<br>Space pular · F sal · E luz liga/desliga · M mapa · I inventário · K som',
+    '가로 화면에서 하는 게임입니다': 'Este jogo é jogado na horizontal',
+    '가로로 돌리기': 'Virar na horizontal',
+    '단추가 안 먹으면 폰의 화면 회전 잠금을 풀고 눕혀 주세요': 'Se o botão não funcionar, desative o bloqueio de rotação e deite o celular',
+    '그래도 세로로 하기': 'Jogar na vertical mesmo assim',
+    '서낭당': 'Santuário', '무너진 다리': 'Ponte desabada', '잠긴 마을': 'Vila submersa', '물레방아': "Moinho d'água", '뒤집힌 배': 'Barco virado',
+    '잠긴 숲': 'Floresta submersa', '폭포': 'Cachoeira', '발원지': 'Nascente', '발원지로': 'Rumo à nascente',
+    '신발 한 짝': 'Sapato', '가방': 'Mochila', '머리끈': 'Elástico', '손전등': 'Lanterna', '비옷': 'Capa de chuva',
+    '반지': 'Anel', '동전': 'Moeda', '머리핀': 'Grampo', '손목시계': 'Relógio', '안경': 'Óculos', '호루라기': 'Apito', '열쇠': 'Chave', '구슬': 'Bolinha',
+    '부적': 'Talismã', '석등': 'Lanternas de pedra', '🔧 손잡이': '🔧 Manivela', '수문': 'Comporta',
+    '수영금지': 'PROIBIDO NADAR', '익사사고 다발지역': 'Muitos afogamentos aqui', '급류 위험': 'PERIGO', '물살이 셉니다': 'Correnteza forte',
+    '꺼진 석등 셋': 'Acenda as três\nlanternas apagadas', '등불로 밝히면': 'com a sua\nchama', '넋이 쉬어 가리라': 'e as almas\ndescansarão',
+    '반지를 주웠다': 'Achei um anel', '누구의 반지일까': 'De quem será este anel?',
+    '녹슨 동전을 주웠다': 'Achei uma moeda enferrujada', '누가 여기 떨어뜨렸을까': 'Quem deixou cair aqui?',
+    '머리핀을 주웠다': 'Achei um grampo de cabelo', '누구의 머리에 꽂혀 있었을까': 'No cabelo de quem ele estava?',
+    '멈춘 손목시계를 주웠다': 'Achei um relógio parado', '몇 시에 멈췄을까': 'A que horas ele parou?',
+    '안경을 주웠다': 'Achei uns óculos', '물이 차오르는 걸 보았을까': 'Será que viram a água subindo?',
+    '호루라기를 주웠다': 'Achei um apito', '아무도 듣지 못했을까': 'Será que ninguém ouviu?',
+    '열쇠를 주웠다': 'Achei uma chave', '어느 집 문이 기다리고 있을까': 'Que porta estará esperando por ela?',
+    '유리구슬을 주웠다': 'Achei uma bolinha de gude', '어느 아이의 구슬이었을까': 'De qual criança ela era?',
+    '동생 신발이다': 'É o sapato da minha irmã', '한 짝은 어디 있을까': 'Onde estará o outro pé?',
+    '동생 책가방이다': 'É a mochila da minha irmã', '아직도 젖어 있다': 'Ainda está molhada',
+    '동생 머리끈이다': 'É o elástico de cabelo da minha irmã', '내가 사 준 거였는데': 'Fui eu que dei pra ela',
+    '우리 집 손전등이다': 'É a lanterna lá de casa', '아직 켜져 있다': 'Ainda está acesa',
+    '동생 노란 비옷이다': 'É a capa de chuva amarela da minha irmã', '그날 입고 나갔던': 'A que ela vestiu naquele dia',
+    '부적을 찾았다': 'Achei um talismã',
+    '서낭당입니다': 'Aqui é um santuário', '여기서는 불을 꺼도 귀신이 나타나지 않습니다': 'Aqui o fantasma não aparece, mesmo com a luz apagada',
+    '아직 새것 같은데...': 'Ainda parece novo...',
+    '오래전부터 여기 있었던 걸까': 'Será que está aqui há muito tempo?',
+    '아이가 쓰던 것일까': 'Será que era de uma criança?',
+    '3시 17분...': '3h17...',
+    '이걸 쓰고 무엇을 보고 있었을까': 'O que será que viam com eles?',
+    '누군가 구조를 요청했던 걸까': 'Será que alguém pediu socorro?',
+    '아직 열 수 있는 문이 있을까': 'Ainda existe alguma porta que ela abra?',
+    '아이가 잃어버린 걸까': 'Será que uma criança perdeu?',
+    '또 반지다': 'Outro anel', '같은 모양인데...': 'Igualzinho ao outro...',
+    '또 녹슨 동전이다': 'Outra moeda enferrujada', '왜 계속 나오는 거지?': 'Por que elas não param de aparecer?',
+    '또 머리핀이다': 'Outro grampo', '아까 그거와 똑같다': 'Idêntico ao de antes',
+    '또 멈춘 시계다': 'Outro relógio parado', '이번에도 3시 17분...': 'De novo 3h17...',
+    '또 안경이다': 'Outros óculos', '누군가 계속 이 강에 물건을 버리는 걸까': 'Será que alguém vive jogando coisas neste rio?',
+    '또 호루라기다': 'Outro apito', '방금... 소리가 난 것 같은데': 'Agora há pouco... acho que ouvi um som',
+    '또 열쇠다': 'Outra chave', '이 강 아래에 집이라도 있는 걸까': 'Será que tem uma casa no fundo deste rio?',
+    '또 유리구슬이다': 'Outra bolinha de gude', '아이 한 명이 아니라면...': 'E se não for só uma criança...',
+    '세 번째 반지다': 'O terceiro anel', '이번엔 손가락 자국이 남아 있다': 'Desta vez tem marcas de dedos',
+    '세 번째 동전이다': 'A terceira moeda', '물속에서 누군가 주운 걸까': "Será que alguém pegou debaixo d'água?",
+    '세 번째 머리핀이다': 'O terceiro grampo', '이건 아직 젖어 있다': 'Este ainda está molhado',
+    '세 번째 시계다': 'O terceiro relógio', '3시 17분에 모두 멈췄다': 'Todos pararam às 3h17',
+    '세 번째 안경이다': 'Os terceiros óculos', '렌즈에 이상한 게 비친다': 'Tem algo estranho refletido na lente',
+    '세 번째 호루라기다': 'O terceiro apito', '누가 방금 내 뒤에서 불었어': 'Alguém acabou de apitar atrás de mim',
+    '세 번째 열쇠다': 'A terceira chave', '내가 찾고 있는 건 열쇠가 아닌 것 같다': 'Acho que não é uma chave que estou procurando',
+    '세 번째 유리구슬이다': 'A terceira bolinha de gude', '저쪽에 아이가 서 있는 것 같은데...': 'Parece ter uma criança parada ali...',
+    '네 번째 반지다': 'O quarto anel', '이건 내가 아는 반지다': 'Este anel eu conheço',
+    '네 번째 동전이다': 'A quarta moeda', '이 동전... 내가 떨어뜨린 건데?': 'Esta moeda... fui eu que deixei cair?',
+    '네 번째 머리핀이다': 'O quarto grampo', '분명히 방금 전에도 봤다': 'Tenho certeza de que acabei de ver este',
+    '네 번째 손목시계다': 'O quarto relógio', '시계가 멈춘 시간이 모두 같다': 'Todos os relógios pararam na mesma hora',
+    '그 강에는 전설이 있었다': 'Aquele rio tinha uma lenda',
+    '겨우 어른 무릎 높이밖에 차지 않는': 'A água mal chegava ao joelho de um adulto',
+    '얕은 강인데도 불구하고': 'era um rio raso, mas mesmo assim',
+    '매년 사람들이 익사해서 죽어 나갔다': 'todo ano alguém morria afogado nele',
+    '물귀신이 있다는 소문이 돌기 시작했다': 'Começaram os boatos de um fantasma da água',
+    '그 강 옆 작은 집에서 살던 남매가 있었다': 'Numa casinha à beira do rio moravam dois irmãos',
+    '폭우가 쏟아진 어느 날': 'Num dia de tempestade',
+    '마당에 나갔던 여동생은': 'a irmãzinha saiu para o quintal',
+    '영영 돌아오지 않았다': 'e nunca mais voltou',
+    '다음 날도 그다음 날도……': 'Nem no dia seguinte, nem no outro……',
+    '소년은 여동생을 찾으러': 'O menino sai à procura da irmã',
+    '어두운 강가로 나선다': 'pela margem escura do rio',
+    '얘야, 나는 물 위를 걷는 사람이다': 'Menino, eu sou aquele que anda sobre as águas',
+    '물고기 두 마리로': 'Com dois peixes', '오천 명을 먹였지': 'alimentei cinco mil pessoas',
+    '쉿… 발소리 내지 마라': 'Shh… não faça barulho com os pés', '물속에서 다 듣고 있다': "Lá debaixo d'água estão ouvindo tudo",
+    '소금은 아껴 써라': 'Economize o sal', '너는 세상의 소금이니까': 'porque você é o sal da terra',
+    '밤마다 물가에서 노래하는 여자애가 있더라': "Toda noite tem uma menina cantando na beira d'água", '네 동생이냐?': 'É sua irmã?',
+    '나는 이 강에서 세 번 죽었다': 'Eu morri três vezes neste rio', '세 번 다 걸어 나왔지': 'e nas três saí andando',
+    '어젯밤엔 물 위를 걸었다': 'Ontem à noite andei sobre a água', '발밑에서 누가 내 발목을 잡더구나': 'e alguém lá embaixo agarrou meu tornozelo',
+    '쉿…': 'Shh…', '저기 물 위에 누가 서 있잖니': 'Tem alguém de pé ali, em cima da água',
+    '오늘 잡은 물고기 배를 갈랐더니': 'Abri a barriga do peixe que pesquei hoje', '긴 머리카락이 가득 들어 있더라': 'e estava cheia de cabelo comprido',
+    '그 여자애 노래를': 'A música daquela menina', '이젠 네 동생이 따라 부르더구나': 'agora sua irmã canta junto',
+    '나를 믿지 마라': 'Não confie em mim', '이제 나도 누가 물 위에 서 있는지 모르겠다': 'nem eu sei mais quem está de pé sobre a água',
+    '이 강이 데려간 사람들 이름을 나는 다 안다': 'Sei o nome de todos que este rio levou', '다음 이름은 네 것이다': 'O próximo nome é o seu',
+    '돌아보지 마라': 'Não olhe para trás', '방금 네 뒤에 서 있던 건 내가 아니다': 'Quem estava atrás de você agora há pouco não era eu',
+  };
+  const RU = {
+    '물귀신': 'MULGWISIN', '시작': 'Начать', '이어하기': 'Продолжить', '최고': 'Рекорд',
+    '지도': 'Карта', '인벤토리': 'Инвентарь', '효과음': 'Звуки',
+    '전력': 'Бег', '소금': 'Соль', '점프': 'Прыжок', '등불': 'Фонарь',
+    'WASD / 방향키 이동 · Shift 전력<br>Space 점프 · F 소금 · E 등불 켜기·끄기 · M 지도 · I 인벤토리 · K 효과음': 'WASD / стрелки — ходьба · Shift — бег<br>Space — прыжок · F — соль · E — фонарь вкл/выкл · M — карта · I — инвентарь · K — звук',
+    '가로 화면에서 하는 게임입니다': 'В эту игру играют в горизонтальном режиме',
+    '가로로 돌리기': 'Повернуть горизонтально',
+    '단추가 안 먹으면 폰의 화면 회전 잠금을 풀고 눕혀 주세요': 'Если кнопка не работает, отключите блокировку поворота и положите телефон набок',
+    '그래도 세로로 하기': 'Всё равно играть вертикально',
+    '서낭당': 'Святилище', '무너진 다리': 'Рухнувший мост', '잠긴 마을': 'Затопленная деревня', '물레방아': 'Водяная мельница', '뒤집힌 배': 'Перевёрнутая лодка',
+    '잠긴 숲': 'Затопленный лес', '폭포': 'Водопад', '발원지': 'Исток', '발원지로': 'К истоку',
+    '신발 한 짝': 'Туфелька', '가방': 'Рюкзак', '머리끈': 'Резинка', '손전등': 'Фонарик', '비옷': 'Дождевик',
+    '반지': 'Кольцо', '동전': 'Монета', '머리핀': 'Заколка', '손목시계': 'Часы', '안경': 'Очки', '호루라기': 'Свисток', '열쇠': 'Ключ', '구슬': 'Шарик',
+    '부적': 'Оберег', '석등': 'Каменные фонари', '🔧 손잡이': '🔧 Рукоять', '수문': 'Шлюз',
+    '수영금지': 'НЕ КУПАТЬСЯ', '익사사고 다발지역': 'Здесь часто тонут', '급류 위험': 'ОПАСНО', '물살이 셉니다': 'Сильное течение',
+    '꺼진 석등 셋': 'Зажги три\nпогасших фонаря', '등불로 밝히면': 'своим\nогнём', '넋이 쉬어 가리라': 'и души\nобретут покой',
+    '반지를 주웠다': 'Я нашёл кольцо', '누구의 반지일까': 'Чьё это кольцо?',
+    '녹슨 동전을 주웠다': 'Я нашёл ржавую монету', '누가 여기 떨어뜨렸을까': 'Кто её здесь обронил?',
+    '머리핀을 주웠다': 'Я нашёл заколку', '누구의 머리에 꽂혀 있었을까': 'В чьих волосах она была?',
+    '멈춘 손목시계를 주웠다': 'Я нашёл остановившиеся часы', '몇 시에 멈췄을까': 'Во сколько они встали?',
+    '안경을 주웠다': 'Я нашёл очки', '물이 차오르는 걸 보았을까': 'Видели ли они, как поднимается вода?',
+    '호루라기를 주웠다': 'Я нашёл свисток', '아무도 듣지 못했을까': 'Неужели никто не услышал?',
+    '열쇠를 주웠다': 'Я нашёл ключ', '어느 집 문이 기다리고 있을까': 'Какая дверь его ждёт?',
+    '유리구슬을 주웠다': 'Я нашёл стеклянный шарик', '어느 아이의 구슬이었을까': 'Какой ребёнок им играл?',
+    '동생 신발이다': 'Это туфелька сестрёнки', '한 짝은 어디 있을까': 'Где же вторая?',
+    '동생 책가방이다': 'Это школьный рюкзак сестрёнки', '아직도 젖어 있다': 'Он всё ещё мокрый',
+    '동생 머리끈이다': 'Это резинка сестрёнки', '내가 사 준 거였는데': 'Я ведь сам ей её купил',
+    '우리 집 손전등이다': 'Это наш фонарик', '아직 켜져 있다': 'Он всё ещё горит',
+    '동생 노란 비옷이다': 'Это жёлтый дождевик сестрёнки', '그날 입고 나갔던': 'Тот, в котором она ушла в тот день',
+    '부적을 찾았다': 'Я нашёл оберег',
+    '서낭당입니다': 'Это святилище', '여기서는 불을 꺼도 귀신이 나타나지 않습니다': 'Здесь призрак не появится, даже если погасить свет',
+    '아직 새것 같은데...': 'Совсем как новое...',
+    '오래전부터 여기 있었던 걸까': 'Неужели оно здесь так давно?',
+    '아이가 쓰던 것일까': 'Может, это была детская вещь?',
+    '3시 17분...': '3:17...',
+    '이걸 쓰고 무엇을 보고 있었을까': 'Что видел тот, кто их носил?',
+    '누군가 구조를 요청했던 걸까': 'Может, кто-то звал на помощь?',
+    '아직 열 수 있는 문이 있을까': 'Осталась ли дверь, которую он откроет?',
+    '아이가 잃어버린 걸까': 'Может, его потерял ребёнок?',
+    '또 반지다': 'Опять кольцо', '같은 모양인데...': 'Точно такое же...',
+    '또 녹슨 동전이다': 'Опять ржавая монета', '왜 계속 나오는 거지?': 'Почему они всё попадаются?',
+    '또 머리핀이다': 'Опять заколка', '아까 그거와 똑같다': 'Точь-в-точь как та',
+    '또 멈춘 시계다': 'Опять остановившиеся часы', '이번에도 3시 17분...': 'И снова 3:17...',
+    '또 안경이다': 'Опять очки', '누군가 계속 이 강에 물건을 버리는 걸까': 'Кто-то всё время бросает вещи в эту реку?',
+    '또 호루라기다': 'Опять свисток', '방금... 소리가 난 것 같은데': 'Только что... как будто был звук',
+    '또 열쇠다': 'Опять ключ', '이 강 아래에 집이라도 있는 걸까': 'Неужели на дне реки есть дом?',
+    '또 유리구슬이다': 'Опять стеклянный шарик', '아이 한 명이 아니라면...': 'А если ребёнок был не один...',
+    '세 번째 반지다': 'Третье кольцо', '이번엔 손가락 자국이 남아 있다': 'На этот раз на нём следы пальцев',
+    '세 번째 동전이다': 'Третья монета', '물속에서 누군가 주운 걸까': 'Неужели кто-то поднял её из-под воды?',
+    '세 번째 머리핀이다': 'Третья заколка', '이건 아직 젖어 있다': 'Эта ещё мокрая',
+    '세 번째 시계다': 'Третьи часы', '3시 17분에 모두 멈췄다': 'Все встали в 3:17',
+    '세 번째 안경이다': 'Третьи очки', '렌즈에 이상한 게 비친다': 'В стёклах отражается что-то странное',
+    '세 번째 호루라기다': 'Третий свисток', '누가 방금 내 뒤에서 불었어': 'Кто-то только что свистнул у меня за спиной',
+    '세 번째 열쇠다': 'Третий ключ', '내가 찾고 있는 건 열쇠가 아닌 것 같다': 'Кажется, я ищу вовсе не ключ',
+    '세 번째 유리구슬이다': 'Третий стеклянный шарик', '저쪽에 아이가 서 있는 것 같은데...': 'Кажется, там стоит ребёнок...',
+    '네 번째 반지다': 'Четвёртое кольцо', '이건 내가 아는 반지다': 'Это кольцо я знаю',
+    '네 번째 동전이다': 'Четвёртая монета', '이 동전... 내가 떨어뜨린 건데?': 'Эта монета... это же я её уронил?',
+    '네 번째 머리핀이다': 'Четвёртая заколка', '분명히 방금 전에도 봤다': 'Я точно только что её видел',
+    '네 번째 손목시계다': 'Четвёртые часы', '시계가 멈춘 시간이 모두 같다': 'Все часы остановились в одно время',
+    '그 강에는 전설이 있었다': 'У этой реки была легенда',
+    '겨우 어른 무릎 높이밖에 차지 않는': 'Вода в ней едва доходила взрослому до колен',
+    '얕은 강인데도 불구하고': 'и всё же, хоть река и была мелкой,',
+    '매년 사람들이 익사해서 죽어 나갔다': 'каждый год в ней кто-то тонул',
+    '물귀신이 있다는 소문이 돌기 시작했다': 'Пошли слухи, что в реке живёт водяной призрак',
+    '그 강 옆 작은 집에서 살던 남매가 있었다': 'В маленьком доме у реки жили брат и сестра',
+    '폭우가 쏟아진 어느 날': 'Однажды, когда хлынул ливень,',
+    '마당에 나갔던 여동생은': 'младшая сестра вышла во двор',
+    '영영 돌아오지 않았다': 'и больше не вернулась',
+    '다음 날도 그다음 날도……': 'Ни на следующий день, ни через день……',
+    '소년은 여동생을 찾으러': 'Мальчик отправляется искать сестру',
+    '어두운 강가로 나선다': 'на тёмный берег реки',
+    '얘야, 나는 물 위를 걷는 사람이다': 'Сынок, я тот, кто ходит по воде',
+    '물고기 두 마리로': 'Двумя рыбами', '오천 명을 먹였지': 'я накормил пять тысяч',
+    '쉿… 발소리 내지 마라': 'Тсс… не топай', '물속에서 다 듣고 있다': 'Под водой всё слышат',
+    '소금은 아껴 써라': 'Береги соль', '너는 세상의 소금이니까': 'ведь ты — соль земли',
+    '밤마다 물가에서 노래하는 여자애가 있더라': 'Каждую ночь у воды поёт какая-то девочка', '네 동생이냐?': 'Твоя сестра?',
+    '나는 이 강에서 세 번 죽었다': 'Я трижды умирал в этой реке', '세 번 다 걸어 나왔지': 'и все три раза выходил оттуда сам',
+    '어젯밤엔 물 위를 걸었다': 'Прошлой ночью я шёл по воде', '발밑에서 누가 내 발목을 잡더구나': 'и кто-то снизу схватил меня за лодыжку',
+    '쉿…': 'Тсс…', '저기 물 위에 누가 서 있잖니': 'Вон, на воде кто-то стоит',
+    '오늘 잡은 물고기 배를 갈랐더니': 'Распорол сегодня брюхо пойманной рыбе', '긴 머리카락이 가득 들어 있더라': 'а там полно длинных волос',
+    '그 여자애 노래를': 'Песню той девочки', '이젠 네 동생이 따라 부르더구나': 'теперь подпевает твоя сестра',
+    '나를 믿지 마라': 'Не верь мне', '이제 나도 누가 물 위에 서 있는지 모르겠다': 'я и сам уже не знаю, кто стоит на воде',
+    '이 강이 데려간 사람들 이름을 나는 다 안다': 'Я знаю имена всех, кого забрала эта река', '다음 이름은 네 것이다': 'Следующее имя — твоё',
+    '돌아보지 마라': 'Не оборачивайся', '방금 네 뒤에 서 있던 건 내가 아니다': 'Тот, кто только что стоял за тобой, был не я',
+  };
+  const DIC = on ? D : L3 === 'ja' ? JA : L3 === 'pt' ? PT : L3 === 'ru' ? RU : D;
+  const t = v => typeof v === 'string' ? (DIC[v] !== undefined ? DIC[v] : v)
     : Array.isArray(v) ? v.map(t)
     : v && typeof v === 'object' ? Object.fromEntries(Object.entries(v).map(([k, x]) => [k, t(x)])) : v;
-  window.ZT = on ? t : v => v;
-  if (!on) return;
+  window.ZT = on || L3 ? t : v => v;
+  if (!on && !L3) return;
 
   const d = document.documentElement;
-  d.lang = 'zh-CN';
-  document.title = '水鬼 — Oreum Games';
-  const zf = "local('PingFang SC'),local('PingFangSC-Regular'),local('Microsoft YaHei'),local('Microsoft YaHei UI'),local('Noto Sans SC'),local('Noto Sans CJK SC'),local('Source Han Sans SC')";
-  const ur = 'U+2E80-2FFF,U+3000-303F,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF';
   const st = document.createElement('style');
-  st.textContent = ['Griun', 'Ria', 'Dokdo'].map(f => `@font-face{font-family:'${f}';src:${zf};unicode-range:${ur}}`).join('') + 'html[lang=zh-CN] *{word-break:normal!important}#menu .tab,.tbtn,#title .go{white-space:nowrap}#title h1{line-height:1.3}';
+  if (on) {
+    d.lang = 'zh-CN';
+    document.title = '水鬼 — Oreum Games';
+    const zf = "local('PingFang SC'),local('PingFangSC-Regular'),local('Microsoft YaHei'),local('Microsoft YaHei UI'),local('Noto Sans SC'),local('Noto Sans CJK SC'),local('Source Han Sans SC')";
+    const ur = 'U+2E80-2FFF,U+3000-303F,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF';
+    st.textContent = ['Griun', 'Ria', 'Dokdo'].map(f => `@font-face{font-family:'${f}';src:${zf};unicode-range:${ur}}`).join('') + 'html[lang=zh-CN] *{word-break:normal!important}#menu .tab,.tbtn,#title .go{white-space:nowrap}#title h1{line-height:1.3}';
+  } else if (L3 === 'ja') {
+    d.lang = 'ja';
+    document.title = '水鬼 — Oreum Games';
+    const jf = "local('Hiragino Sans'),local('Hiragino Kaku Gothic ProN'),local('Yu Gothic UI'),local('Yu Gothic'),local('Yu Gothic Medium'),local('YuGothic-Medium'),local('Yu Gothic Regular'),local('YuGothic-Regular'),local('Yu Gothic Bold'),local('YuGothic-Bold'),local('MS PGothic'),local('MS Gothic'),local('Meiryo'),local('Noto Sans JP'),local('Noto Sans CJK JP'),local('Source Han Sans JP')";
+    const ur = 'U+2E80-2FFF,U+3000-30FF,U+31F0-31FF,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF';
+    st.textContent = ['Griun', 'Ria', 'Dokdo'].map(f => `@font-face{font-family:'${f}';src:${jf};unicode-range:${ur}}`).join('') + 'html[lang=ja] *{word-break:normal!important}#menu .tab,.tbtn,#title .go{white-space:nowrap}#title h1{line-height:1.3}.tbtn{letter-spacing:0}';
+  } else {
+    d.lang = L3 === 'pt' ? 'pt-BR' : 'ru';
+    document.title = 'Mulgwisin — Oreum Games';
+    const lf = "local('Segoe UI'),local('Roboto'),local('Arial'),local('Helvetica Neue'),local('Helvetica')";
+    const ur = 'U+00A0-024F,U+0400-04FF,U+1E00-1EFF,U+2010-2027';
+    st.textContent = ['Griun', 'Ria', 'Dokdo'].map(f => `@font-face{font-family:'${f}';src:${lf};unicode-range:${ur}}`).join('') + '#menu .tab,.tbtn,#title .go{white-space:nowrap}.tbtn{letter-spacing:0}@media (min-height:461px){#title h1{font-size:min(12vw,150px)}}';
+  }
   document.head.appendChild(st);
   // swap the Korean text of fixed page elements
   document.querySelectorAll('#title h1, #goStart, #goCont, #over small, #menu .tab, #keys, .tbtn, #rotate p, #rotate button, #rotate span, #rotate a').forEach(el => {
-    const k = el.innerHTML.trim(); if (D[k] !== undefined) el.innerHTML = D[k];
+    const k = el.innerHTML.trim(); if (DIC[k] !== undefined) el.innerHTML = DIC[k];
   });
-  ['btnMap', 'btnInv', 'btnSfx'].forEach(id => { const el = document.getElementById(id); if (el && D[el.title]) el.title = D[el.title]; });
+  ['btnMap', 'btnInv', 'btnSfx'].forEach(id => { const el = document.getElementById(id); if (el && DIC[el.title]) el.title = DIC[el.title]; });
 })();

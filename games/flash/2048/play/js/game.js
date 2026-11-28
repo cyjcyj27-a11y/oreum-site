@@ -2,7 +2,13 @@
 (function () {
   'use strict';
   var QS = location.search;
-  var EN = /[?&]lang=en(&|$)/.test(QS), ZH = /[?&]lang=zh(&|$)/.test(QS), SHOT = /[?&]shot=1/.test(QS);
+  var EN = /[?&]lang=en(&|$)/.test(QS), ZH = /[?&]lang=zh(&|$)/.test(QS), LX = (/[?&]lang=(ja|pt|ru)(&|$)/.exec(QS) || [])[1] || '', SHOT = /[?&]shot=1/.test(QS);
+  // ja · pt · ru 시작 단추 글
+  var LXT = {
+    ja: { cont: 'つづきから', start: 'スタート' },
+    pt: { cont: 'CONTINUAR', start: 'JOGAR' },
+    ru: { cont: 'ПРОДОЛЖИТЬ', start: 'ИГРАТЬ' }
+  };
   function qp(k) { var m = new RegExp('[?&]' + k + '=([^&]*)').exec(QS); return m ? decodeURIComponent(m[1]) : null; }
   var LOCAL = location.protocol === 'file:' || /^(localhost|127\.0\.0\.1)$/.test(location.hostname); // 시험 갈고리는 내 컴퓨터에서만
   if (!LOCAL) qp = function () { return null; };
@@ -577,7 +583,7 @@
     $('szG').textContent = r0.clr ? 'CLEAR' : 'GOAL ' + GOAL[G.n];
     $('szLab').classList.toggle('clr', !!r0.clr);
     $('best').textContent = r0.best ? 'BEST ' + fmt(r0.best) : '';
-    $('btnStart').textContent = loadGame(G.n) ? (EN ? 'CONTINUE' : ZH ? '继续游戏' : '이어하기') : (EN ? 'START' : ZH ? '开始' : '시작');
+    $('btnStart').textContent = loadGame(G.n) ? (EN ? 'CONTINUE' : ZH ? '继续游戏' : LX ? LXT[LX].cont : '이어하기') : (EN ? 'START' : ZH ? '开始' : LX ? LXT[LX].start : '시작');
     layout(); titleBoard();
   }
   function goTitle() { show(null); paused = false; AU.pause(false); setScene('title'); refreshTitle(); }
@@ -678,6 +684,22 @@
     zs.textContent = "@font-face{font-family:'Miso';src:" + zf + ";unicode-range:" + ur + "}html[lang=zh-CN] *{word-break:normal!important}";
     document.head.appendChild(zs);
     document.querySelectorAll('[data-zh]').forEach(function (el) { el.textContent = el.getAttribute('data-zh'); });
+  }
+  // ja · pt · ru: data-ja/pt/ru 글자로 바꾸고, Miso 에 없는 글자는 시스템 글꼴로 채움
+  if (LX) {
+    document.documentElement.lang = LX === 'pt' ? 'pt-BR' : LX;
+    document.title = '2048';
+    if (LX !== 'ja') document.body.classList.add('en');
+    var xs = document.createElement('style');
+    if (LX === 'ja') {
+      var jf = "local('Hiragino Sans'),local('Hiragino Kaku Gothic ProN'),local('Yu Gothic UI'),local('Yu Gothic'),local('Yu Gothic Medium'),local('YuGothic-Medium'),local('Yu Gothic Regular'),local('YuGothic-Regular'),local('Yu Gothic Bold'),local('YuGothic-Bold'),local('MS PGothic'),local('MS Gothic'),local('Meiryo'),local('Noto Sans JP'),local('Noto Sans CJK JP'),local('Source Han Sans JP')";
+      var jr = 'U+2E80-2FFF,U+3000-30FF,U+31F0-31FF,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF';
+      xs.textContent = "@font-face{font-family:'Miso';src:" + jf + ";unicode-range:" + jr + "}html[lang=ja] *{word-break:normal!important}";
+    } else {
+      xs.textContent = "@font-face{font-family:'Miso';src:local('Segoe UI'),local('Roboto'),local('Arial'),local('Helvetica Neue'),local('Helvetica');unicode-range:U+00A0-024F,U+0400-04FF,U+1E00-1EFF,U+2010-2027}";
+    }
+    document.head.appendChild(xs);
+    document.querySelectorAll('[data-' + LX + ']').forEach(function (el) { el.textContent = el.getAttribute('data-' + LX); });
   }
   if (qp('still')) document.body.classList.add('still');
   if (SHOT) document.body.classList.add('shot');

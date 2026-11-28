@@ -32,6 +32,34 @@
       'html[lang=zh-CN] *{word-break:normal!important}html[lang=zh-CN] #title h1{font-size:clamp(56px,12.5vw,165px);font-weight:700;letter-spacing:.06em;line-height:1.15}';
     document.head.appendChild(zs);
   }
+  // ── ja · pt · ru ──
+  var L3 = (location.search.match(/[?&]lang=(ja|pt|ru)\b/) || [])[1];
+  if (L3) {
+    var T3 = {
+      ja: ['このゲームは横画面で遊びます', '横画面にする', 'ボタンが効かないときは、画面の回転ロックを解除してスマホを横にしてください', 'それでも縦で遊ぶ',
+        '←→ 移動 · J ハンマー（長押し） · K キック · L つかむ', '一時停止', '音楽', '効果音', 'オ・デスゲーム', 'ja'],
+      pt: ['Este jogo é jogado na horizontal', 'Virar para horizontal', 'Se o botão não funcionar, desative o bloqueio de rotação e vire o celular', 'Jogar na vertical mesmo assim',
+        '←→ Mover · J Martelo (segure) · K Chute · L Agarrar', 'Pausar', 'Música', 'Efeitos sonoros', 'JOGO DO ODAESU', 'pt-BR'],
+      ru: ['В эту игру играют в горизонтальном режиме', 'Повернуть экран', 'Если кнопка не работает, сними блокировку поворота и поверни телефон', 'Всё равно играть вертикально',
+        '←→ Ход · J Молот (держать) · K Пинок · L Захват', 'Пауза', 'Музыка', 'Звуки', 'ИГРА ОДЭСУ', 'ru']
+    }[L3];
+    $('rotTitle').textContent = T3[0];
+    $('rotGo').textContent = T3[1];
+    $('rotHelp').textContent = T3[2];
+    $('rotSkip').textContent = T3[3];
+    $('keys').textContent = T3[4];
+    $('tPause').title = T3[5]; $('tMus').title = T3[6]; $('tSnd').title = T3[7];
+    $('h1').textContent = T3[8]; document.title = T3[8]; document.documentElement.lang = T3[9];
+    var jf3 = L3 === 'ja'
+      ? "local('Hiragino Sans'),local('Hiragino Kaku Gothic ProN'),local('Yu Gothic UI'),local('Yu Gothic'),local('Yu Gothic Medium'),local('YuGothic-Medium'),local('Yu Gothic Regular'),local('YuGothic-Regular'),local('Yu Gothic Bold'),local('YuGothic-Bold'),local('MS PGothic'),local('MS Gothic'),local('Meiryo'),local('Noto Sans JP'),local('Noto Sans CJK JP'),local('Source Han Sans JP')"
+      : "local('Segoe UI'),local('Roboto'),local('Arial'),local('Helvetica Neue'),local('Helvetica')";
+    var ur3 = L3 === 'ja' ? 'U+2E80-2FFF,U+3000-30FF,U+31F0-31FF,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF'
+      : 'U+00A0-024F,U+0400-04FF,U+1E00-1EFF,U+2010-2027';
+    var js3 = document.createElement('style');
+    js3.textContent = ['Brush', 'Ria'].map(function (f) { return "@font-face{font-family:'" + f + "';src:" + jf3 + ';unicode-range:' + ur3 + '}'; }).join('') +
+      (L3 === 'ja' ? 'html[lang=ja] *{word-break:normal!important}html[lang=ja] #title h1{font-size:clamp(56px,12.5vw,165px);font-weight:700;letter-spacing:.06em;line-height:1.15}' : 'html[lang=' + T3[9] + '] #title h1{font-size:clamp(48px,' + (L3 === 'pt' ? 9.5 : 10.5) + 'vw,140px)}');
+    document.head.appendChild(js3);
+  }
 
   // ── 저장 ──
   var save = { stage: 1, best: 0, ko: 0, ended: false };

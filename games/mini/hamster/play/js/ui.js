@@ -5,7 +5,7 @@
   const S = () => GAME.S;
   let openId = null, after = null;
 
-  function lang() { document.querySelectorAll('[data-ko]').forEach((e) => { e.textContent = window.EN ? e.dataset.en : window.ZH ? L(e.dataset.ko, e.dataset.en) : e.dataset.ko; }); }
+  function lang() { document.querySelectorAll('[data-ko]').forEach((e) => { e.textContent = window.EN ? e.dataset.en : window.LX ? L(e.dataset.ko, e.dataset.en) : e.dataset.ko; }); }
   function show(id) { ['cont', 'how', 'shop', 'over', 'end'].forEach((k) => { $(k).hidden = k !== id; }); openId = id; }
   function hide() { if (openId) $(openId).hidden = true; if (openId === 'how') HOW.stop(); openId = null; }
   UI.sheetOpen = () => !!openId;

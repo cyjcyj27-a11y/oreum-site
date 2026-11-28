@@ -225,8 +225,8 @@ body.touch .keys{display:none}
 <div id="toast" hidden></div>
 <div class="keys" data-ko="스페이스 · 클릭 떨어뜨리기 / M 음악 · K 효과음" data-en="SPACE · CLICK drop / M music · K sound"></div>
 
-<script src="js/lang.js?v=2"></script>
-<script src="assets/game-home.js?v=2" data-top="6" data-left="6" data-fullscreen="1" defer></script>
+<script src="js/lang.js?v=3"></script>
+<script src="assets/game-home.js?v=3" data-top="6" data-left="6" data-fullscreen="1" defer></script>
 <script src="lib/three.min.js"></script>
 <script src="js/clay.js?v=2"></script>
 <script src="js/cookie.js?v=2"></script>
@@ -236,13 +236,15 @@ body.touch .keys{display:none}
 <script src="js/sfx_data.js?v=1"></script>
 <script src="js/audio.js?v=7"></script>
 <script src="js/how.js?v=2"></script>
-<script src="js/card.js?v=4"></script>
+<script src="js/card.js?v=5"></script>
 <script src="js/ui.js?v=4"></script>
 <script src="js/game.js?v=5"></script>
 <script>
 if ('ontouchstart' in window || navigator.maxTouchPoints > 0) document.body.classList.add('touch');
 if (window.EN) { const l = document.getElementById('logo'); l.innerHTML = '<i>COO</i><i>KIE</i><i>STA</i><i>CK</i>'; l.style.fontSize = 'clamp(48px,13vw,110px)'; }
 if (window.ZH) { const l = document.getElementById('logo'); l.innerHTML = '<i>饼</i><i>干</i><i>叠</i><i>叠</i><i style="--c:#ffa23a;--d:#c05a08;animation-delay:.6s;transform:rotate(-4deg)">乐</i>'; l.style.fontSize = 'clamp(54px,15vw,120px)'; }
+if (window.LG3 === 'ja') { const l = document.getElementById('logo'); l.innerHTML = '<i>クッ</i><i>キー</i><i>積</i><i>み</i>'; l.style.fontSize = 'clamp(48px,13vw,110px)'; }
+if (window.LG3 === 'pt' || window.LG3 === 'ru') { const l = document.getElementById('logo'); l.innerHTML = window.LG3 === 'pt' ? '<i>TORRE</i><i>DE</i><i>COOKIES</i>' : '<i>БАШНЯ</i><i>ИЗ</i><i>ПЕЧЕНЬЯ</i>'; l.style.cssText = 'font-size:clamp(40px,10vw,92px);flex-wrap:wrap;justify-content:center;gap:0 .25em;max-width:94vw'; }
 GAME.init();
 UI.init();
 </script>

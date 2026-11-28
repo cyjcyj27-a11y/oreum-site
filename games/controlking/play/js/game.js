@@ -7,8 +7,16 @@
   const ZH = !EN && /[?&]lang=zh\b/.test(location.search);
   const NAMES_ZH = ['井底', '青苔墙', '吊桶', '井口', '酱缸台', '茅草屋顶', '柿子树', '竹林', '风之丘', '瀑布', '云朵', '山顶',
     '暴风云', '彩虹', '放风筝', '天空岛', '飘云', '闪闪星', '极光', '冰云', '鹊桥', '银河', '登月之路', '月亮'];
-  const NAMES = EN ? L.NAMES_EN : ZH ? NAMES_ZH : L.NAMES;
-  const T3 = (ko, en, zh) => EN ? en : ZH ? zh : ko;
+  const QL = (location.search.match(/[?&]lang=(ja|pt|ru)\b/) || [])[1];
+  const JA = !EN && !ZH && QL === 'ja', PT = !EN && !ZH && QL === 'pt', RU = !EN && !ZH && QL === 'ru';
+  const NAMES_JA = ['井戸の底', 'コケの壁', 'つるべ', '井戸の口', 'かめ置き場', 'わら屋根', '柿の木', '竹林', '風の丘', '滝', '雲', '山頂',
+    '嵐の雲', '虹', '凧あげ', '空の島', '風の雲', 'キラキラ星', 'オーロラ', '氷の雲', 'カササギの橋', '天の川', '月への道', '月'];
+  const NAMES_PT = ['Fundo do poço', 'Muro de musgo', 'Baldes', 'Boca do poço', 'Terraço dos potes', 'Telhado de palha', 'Caquizeiro', 'Bambuzal', 'Colina do vento', 'Cachoeira', 'Nuvens', 'Cume',
+    'Tempestade', 'Arco-íris', 'Pipas', 'Ilhas do céu', 'Nuvens ao vento', 'Estrelinhas', 'Aurora', 'Nuvens de gelo', 'Ponte das pegas', 'Via Láctea', 'Rumo à Lua', 'A Lua'];
+  const NAMES_RU = ['Дно колодца', 'Мшистая стена', 'Вёдра', 'Устье колодца', 'Двор кувшинов', 'Соломенная крыша', 'Хурма', 'Бамбуковая роща', 'Ветреный холм', 'Водопад', 'Облака', 'Вершина',
+    'Грозовые тучи', 'Радуга', 'Воздушные змеи', 'Небесные острова', 'Ветреные облака', 'Мерцающие звёзды', 'Полярное сияние', 'Ледяные облака', 'Сорочий мост', 'Млечный Путь', 'Дорога к Луне', 'Луна'];
+  const NAMES = EN ? L.NAMES_EN : ZH ? NAMES_ZH : JA ? NAMES_JA : PT ? NAMES_PT : RU ? NAMES_RU : L.NAMES;
+  const T3 = (ko, en, zh, ja, pt, ru) => EN ? en : ZH ? zh : JA ? ja : PT ? pt : RU ? ru : ko;
   const cv = $('cv'), cx = cv.getContext('2d');
   const isTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
   if (isTouch) document.body.classList.add('touch');
@@ -308,7 +316,7 @@
       crow.t += dt;
       if (crow.mode === 'fly' && !crow.leave) {
         const dx = crow.tx - crow.x, dy = crow.ty - crow.y, d = Math.hypot(dx, dy);
-        if (d < 6) { crow.x = crow.tx; crow.y = crow.ty; crow.mode = 'laugh'; crow.t = 0; AU.S.crow(); crow.face = f.x > crow.x ? 1 : -1; pop(T3('깍깍', 'CAW CAW', '嘎嘎'), crow.x, crow.y + 70, '#fff8dc'); }
+        if (d < 6) { crow.x = crow.tx; crow.y = crow.ty; crow.mode = 'laugh'; crow.t = 0; AU.S.crow(); crow.face = f.x > crow.x ? 1 : -1; pop(T3('깍깍', 'CAW CAW', '嘎嘎', 'カーカー', 'CRÁ CRÁ', 'КАР-КАР'), crow.x, crow.y + 70, '#fff8dc'); }
         else { const v = Math.min(d, 420 * dt); crow.x += dx / d * v; crow.y += dy / d * v; }
       } else if (crow.mode === 'laugh') { if (crow.t > 0.9) { crow.mode = 'sit'; crow.t = 0; } }
       else if (crow.mode === 'sit') { crow.face = f.x > crow.x ? 1 : -1; if (crow.t > 1.4 || Math.abs(f.y - crow.y) > 400) { crow.mode = 'fly'; crow.leave = true; crow.t = 0; } }
@@ -456,7 +464,7 @@
   function pickChar(c) { if (CHAR === c) return; AU.init(); CHAR = c; try { localStorage.setItem('controlking.char', c); } catch (e) {} paintChars(); if (c === 'dog') AU.S.beep(); else AU.S.ribbit(); showTitle(); }
   $('cFrog').onclick = () => pickChar('frog'); $('cDog').onclick = () => pickChar('dog');
   paintChars();
-  $('bNew').onclick = () => ask(T3('처음부터 할까요?', 'Start over?', '要重新开始吗？'), () => {
+  $('bNew').onclick = () => ask(T3('처음부터 할까요?', 'Start over?', '要重新开始吗？', '最初からやり直す？', 'Começar do zero?', 'Начать заново?'), () => {
     try { localStorage.removeItem(SAVEKEY()); } catch (e) {}
     S = fresh(); w.magicOn = FX.magicOn = w.magic2On = FX.magic2On = false; placeFrog(S.x, S.y); camY = titleCam(); startPlay();
   });
@@ -534,7 +542,7 @@
     setTimeout(() => {
       const s = Math.floor(S.time), tt = Math.floor(s / 3600) + ':' + String(Math.floor(s / 60) % 60).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
       const st = (lab, v) => '<div class="stat"><b>' + lab + ' ' + v + '</b></div>';
-      $('endSt').innerHTML = st(T3('시간', 'TIME', '时间'), tt) + st(T3('점프', 'JUMPS', '跳跃'), S.jumps) + st(T3('추락', 'FALLS', '摔落'), S.falls) + st(CHAR === 'dog' ? T3('배터리', 'BATTERIES', '电池') : T3('파리', 'FLIES', '苍蝇'), flyN() + '/' + L.flies.length);
+      $('endSt').innerHTML = st(T3('시간', 'TIME', '时间', '時間', 'Tempo', 'Время'), tt) + st(T3('점프', 'JUMPS', '跳跃', 'ジャンプ', 'Pulos', 'Прыжки'), S.jumps) + st(T3('추락', 'FALLS', '摔落', '落下', 'Quedas', 'Падения'), S.falls) + st(CHAR === 'dog' ? T3('배터리', 'BATTERIES', '电池', 'バッテリー', 'Baterias', 'Батарейки') : T3('파리', 'FLIES', '苍蝇', 'ハエ', 'Moscas', 'Мухи'), flyN() + '/' + L.flies.length);
       $('topbar').classList.add('hide');
       $('endUI').classList.add('on');
     }, 2600);
@@ -577,6 +585,25 @@
     $('bHome').textContent = '返回标题'; $('mapH').textContent = '地图'; $('bMapX').textContent = '关闭'; $('askN').textContent = '取消'; $('askY').textContent = '确定';
     $('askT').textContent = '要重新开始吗？';
     $('cFrog').firstChild.textContent = '青蛙'; $('cDog').firstChild.textContent = '机器狗'; $('bEnd').textContent = '返回标题'; $('keys').textContent = '←→ 移动 · 空格 跳跃 · P 暂停';
+  }
+  // 일본어·포르투갈어·러시아어판 글자와 글꼴
+  if (JA || PT || RU) {
+    const LT = {
+      ja: ['ja', 'コントロールキング', 'コントロールキング', '最初から', 'つづける', 'マップ', 'タイトルへ', 'マップ', '閉じる', 'キャンセル', 'OK', '最初からやり直す？', 'カエル', 'ロボ犬', 'タイトルへ', '←→ 移動 · スペース ジャンプ · P ポーズ'],
+      pt: ['pt-BR', 'Rei do Controle', 'REI DO CONTROLE', 'Novo jogo', 'Continuar', 'Mapa', 'Início', 'Mapa', 'Fechar', 'Cancelar', 'OK', 'Começar do zero?', 'Sapo', 'Cão-robô', 'Início', '←→ Mover · Espaço Pular · P Pausar'],
+      ru: ['ru', 'Король управления', 'КОРОЛЬ УПРАВЛЕНИЯ', 'Заново', 'Продолжить', 'Карта', 'В меню', 'Карта', 'Закрыть', 'Отмена', 'ОК', 'Начать заново?', 'Лягушка', 'Робопёс', 'В меню', '←→ Движение · Пробел Прыжок · P Пауза']
+    }[QL];
+    document.documentElement.lang = LT[0]; document.title = LT[1];
+    const jf = JA ? "local('Hiragino Sans'),local('Hiragino Kaku Gothic ProN'),local('Yu Gothic UI'),local('Yu Gothic'),local('Yu Gothic Medium'),local('YuGothic-Medium'),local('Yu Gothic Regular'),local('YuGothic-Regular'),local('Yu Gothic Bold'),local('YuGothic-Bold'),local('MS PGothic'),local('MS Gothic'),local('Meiryo'),local('Noto Sans JP'),local('Noto Sans CJK JP'),local('Source Han Sans JP')"
+      : "local('Segoe UI'),local('Roboto'),local('Arial'),local('Helvetica Neue'),local('Helvetica')";
+    const ur = JA ? 'U+2E80-2FFF,U+3000-30FF,U+31F0-31FF,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF' : 'U+00A0-024F,U+0400-04FF,U+1E00-1EFF,U+2010-2027';
+    const js = document.createElement('style');
+    js.textContent = ['Ria', 'TitleF'].map(n => "@font-face{font-family:'" + n + "';src:" + jf + ';unicode-range:' + ur + '}').join('') + (JA ? 'html[lang=ja] *{word-break:normal!important}@media (max-width:420px){html[lang=ja] .zrow{font-size:14px}}' : '');
+    document.head.appendChild(js);
+    $('tH').textContent = LT[2]; $('bNew').textContent = LT[3]; $('bResume').textContent = LT[4]; $('bMap').textContent = LT[5];
+    $('bHome').textContent = LT[6]; $('mapH').textContent = LT[7]; $('bMapX').textContent = LT[8]; $('askN').textContent = LT[9]; $('askY').textContent = LT[10];
+    $('askT').textContent = LT[11];
+    $('cFrog').firstChild.textContent = LT[12]; $('cDog').firstChild.textContent = LT[13]; $('bEnd').textContent = LT[14]; $('keys').textContent = LT[15];
   }
   showTitle();
   requestAnimationFrame(loop);

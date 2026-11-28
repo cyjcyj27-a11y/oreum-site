@@ -71,8 +71,19 @@
     if (w >= 1e6) return s + '₩' + cut(w / 1e6, dec ? 1 : 0) + 'M';
     return w ? s + '₩' + cut(w / 1e3, 0) + 'K' : '₩0';
   }
+  // 포르투갈어·러시아어판도 원 단위. 소수점은 쉼표, 단위는 그 말의 줄임말
+  function fmtLoc(v, dec) {
+    const ru = !!(window.LANG && LANG.ru);
+    const u = ru ? [' млрд', ' млн', ' тыс.'] : [' bi', ' mi', ' mil'];
+    v = Math.round(v); const s = v < 0 ? '-' : ''; const w = Math.abs(v) * 10000;
+    const cut = (n, d) => (Math.floor(n * 10 ** d + 1e-9) / 10 ** d).toFixed(d).replace(/(\.\d*?)0+$/, '$1').replace(/\.$/, '').replace('.', ',');
+    if (w >= 1e9) return s + '₩' + cut(w / 1e9, dec ? 2 : 1) + u[0];
+    if (w >= 1e6) return s + '₩' + cut(w / 1e6, dec ? 1 : 0) + u[1];
+    return w ? s + '₩' + cut(w / 1e3, 0) + u[2] : '₩0';
+  }
   function fmt(v) {
     if (window.LANG && LANG.en) return fmtEn(v);
+    if (window.LANG && (LANG.pt || LANG.ru)) return fmtLoc(v);
     v = Math.round(v); const s = v < 0 ? '-' : ''; v = Math.abs(v);
     if (v >= 1e8) return zhU(s + (Math.floor(v / 1e6) / 100).toFixed(2).replace(/\.?0+$/, '') + '조');
     // 억은 소수 한 자리까지 **내림**. 반올림하면 110억 5천이 '111억', 999.96억이 '1000억'으로 보여 엔딩이 안 뜨는데 1,000억이라고 떴다 (2026-09-13)
@@ -80,15 +91,17 @@
     return zhU(s + v.toLocaleString() + '만');
   }
   // 중국어판은 같은 큰 단위(万·亿)를 쓰므로 글자만 바꾼다
-  function zhU(t) { return window.LANG && LANG.zh ? t.replace(/조/g, '万亿').replace(/억/g, '亿').replace(/천/g, '千').replace(/만/g, '万') : t; }
+  function zhU(t) { return window.LANG && LANG.zh ? t.replace(/조/g, '万亿').replace(/억/g, '亿').replace(/천/g, '千').replace(/만/g, '万')
+    : window.LANG && LANG.ja ? t.replace(/조/g, '兆').replace(/억/g, '億').replace(/천/g, '千').replace(/만/g, '万') : t; }   // 일본어판도 같은 큰 단위(万·億·兆)
   // 자산 창처럼 자리가 넉넉한 곳에서 쓰는 긴 표기: 365000 → '36억 5천', 1120000 → '112억' (사장님 2026-09-09 "매입가 36억5천")
   function fmtLong(v) {
     if (window.LANG && LANG.en) return fmtEn(v, 1);
+    if (window.LANG && (LANG.pt || LANG.ru)) return fmtLoc(v, 1);
     v = Math.round(v); const sg = v < 0 ? '-' : ''; v = Math.abs(v);
     const jo = Math.floor(v / 1e8), r = v % 1e8, eok = Math.floor(r / 10000), man = r % 10000, out = [];
     if (jo) out.push(jo + '조');
     if (eok) out.push(eok + '억');
-    if (man) out.push(man % 1000 === 0 ? (man / 1000) + (window.LANG && LANG.zh ? '천만' : '천') : man.toLocaleString() + '만');
+    if (man) out.push(man % 1000 === 0 ? (man / 1000) + (window.LANG && (LANG.zh || LANG.ja) ? '천만' : '천') : man.toLocaleString() + '만');
     return zhU(sg + (out.join(' ') || '0'));
   }
   // ── 시세(사장님 2026-09-09 "전부 가격이 시간 지나면 오르게, 랜덤으로") ──
@@ -775,7 +788,44 @@
     '{n}的地主要搬去首尔，{v}就卖。我也在给别人打电话呢。',
     '只先告诉你一个人。{n}的{b}用地，{v}。赶在耽罗国开发闻到味儿之前来吧。',
   ];
-  const DEAL_CALL = (window.LANG && LANG.en ? DEAL_LINES_EN : window.LANG && LANG.zh ? DEAL_LINES_ZH : DEAL_LINES).map(function (t) { return function (n, b, v, p) { return t.replace('{n}', n).replace('{b}', b).replace('{v}', v).replace('{p}', p); }; });
+  // 일본어·포르투갈어·러시아어판 대사 — 땅 이름·건물 이름은 한국어로 끼워 넣고 화면에 나올 때 사전이 바꾼다
+  const DEAL_LINES_JA = [
+    'ほっほ、兄ちゃん！{n}に{b}用地の急売が出たぞ。{v}でいいそうじゃ。早う来い！',
+    'よいか、{n}の地主が急いどるそうじゃ。{b}用地が{v}。半額じゃよ。',
+    '不動産屋じゃ。{n}に{v}の急売が入ったんじゃが、興味あるか？',
+    'ほっほっほ、お前さんに一番に電話したんじゃ。{n}の{b}用地、本当は{p}じゃが{v}で出とる。',
+    '今どこにおる？{n}で{v}の急売じゃ。噂が広まればすぐ売れるぞ。',
+    'ほっほ、{n}の地価が{v}まで下がったわい。{b}を建てるにはぴったりじゃ。',
+    '急ぎで金が要る家があってのう。{n}の{b}用地、{v}。今日来んと終わりじゃ。',
+    'ほっほ、こんなのは一年に一度あるかないかじゃ。{n}、{v}。逃したら損じゃぞ。',
+    '{n}の地主がソウルに引っ越すとかで{v}で出しとる。他の人にも電話しとるところじゃ。',
+    'お前さんにだけ先に教えるんじゃ。{n}の{b}用地、{v}。耽羅国開発が嗅ぎつける前に来い。',
+  ];
+  const DEAL_LINES_PT = [
+    'Hehe, rapaz! Apareceu um terreno pra {b} em {n}, venda urgente. Aceitam {v}. Vem logo!',
+    'Escuta, o dono lá em {n} tá com pressa. O terreno pra {b} sai por {v}. Metade do preço.',
+    'Aqui é o corretor. Entrou uma venda urgente em {n} por {v}. Tem interesse?',
+    'Hehehe, liguei primeiro pra você. Terreno pra {b} em {n}, vale {p}, mas tá saindo por {v}.',
+    'Onde você tá agora? Venda urgente em {n}, {v}. Quando a notícia correr, some rapidinho.',
+    'Hehe, o terreno em {n} caiu pra {v}. Perfeito pra construir: {b}.',
+    'Tem uma família precisando de dinheiro. Terreno pra {b} em {n}, {v}. Se não vier hoje, já era.',
+    'Hehe, isso aparece uma vez por ano, se tanto. {n}, {v}. Perdeu, dançou.',
+    'O dono em {n} vai se mudar pra Seul e pede {v}. Tô ligando pra outras pessoas também.',
+    'Tô contando só pra você. Terreno pra {b} em {n}, {v}. Vem antes que a Tamna Desenvolvimento fareje.',
+  ];
+  const DEAL_LINES_RU = [
+    'Хе-хе, сынок! В {n} срочно продают участок под «{b}». Отдают за {v}. Скорее сюда!',
+    'Слушай, хозяин в {n} торопится. Участок под «{b}» — за {v}. Полцены.',
+    'Риелтор на связи. В {n} срочная продажа за {v}. Интересно?',
+    'Хе-хе-хе, первому тебе звоню. {n}, участок под «{b}», стоит {p}, а отдают за {v}.',
+    'Ты сейчас где? В {n} срочно за {v}. Как слух пойдёт — сразу уйдёт.',
+    'Хе-хе, земля в {n} подешевела до {v}. Под «{b}» — самое то.',
+    'Одной семье срочно нужны деньги. {n}, участок под «{b}», {v}. Не приедешь сегодня — всё.',
+    'Хе-хе, такое бывает раз в год, а то и реже. {n}, {v}. Упустишь — пожалеешь.',
+    'Хозяин в {n} переезжает в Сеул, просит {v}. Я и другим обзваниваю.',
+    'Только тебе первому говорю. {n}, участок под «{b}», {v}. Приезжай, пока «Тамна Девелопмент» не пронюхали.',
+  ];
+  const DEAL_CALL = (window.LANG && LANG.en ? DEAL_LINES_EN : window.LANG && LANG.zh ? DEAL_LINES_ZH : window.LANG && LANG.ja ? DEAL_LINES_JA : window.LANG && LANG.pt ? DEAL_LINES_PT : window.LANG && LANG.ru ? DEAL_LINES_RU : DEAL_LINES).map(function (t) { return function (n, b, v, p) { return t.replace('{n}', n).replace('{b}', b).replace('{v}', v).replace('{p}', p); }; });
   // 제한시간 = 그 땅까지 길을 따라 달리는 어림 시간 + 주차 몫. 75초 고정이던 때는 거리를 안 봐서
   // 먼 곳이 아무리 밟아도 못 닿았다(사장님 2026-09-11). 거리로 재면 멀수록 길게, 가까우면 짧게 잡힌다.
   const CAR_TOP = 39.6, CAR_LAT = 6.5, CAR_BRAKE = 10;   // 오픈카 끝속도(m/s)·코너 옆가속·브레이크 — player.js 물리에서 잰 값

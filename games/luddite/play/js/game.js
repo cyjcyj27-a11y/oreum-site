@@ -79,10 +79,11 @@ function fmtM(n, short){   // short: 상단바·목표처럼 좁은 곳은 큰 �
   n = Math.max(0, Math.floor(n));
   if (window.LD_EN) { var u = [[1e12, 'T'], [1e9, 'B'], [1e6, 'M'], [1e3, 'K']]; for (var i = 0; i < u.length; i++) if (n >= u[i][0]) { var v = n / u[i][0]; return (v >= 100 ? Math.floor(v) : v >= 10 ? Math.floor(v * 10) / 10 : Math.floor(v * 100) / 100) + u[i][1]; } return String(n); }
   var jo = Math.floor(n / 1e12), eok = Math.floor(n % 1e12 / 1e8), man = Math.floor(n % 1e8 / 1e4), won = n % 1e4;
-  if (jo) return jo.toLocaleString('ko-KR') + '조' + (eok ? ' ' + eok.toLocaleString('ko-KR') + '억' : '') + '원';
-  if (eok) return eok.toLocaleString('ko-KR') + '억' + (man && !short ? ' ' + man.toLocaleString('ko-KR') + '만' : '') + '원';
-  if (man) return man.toLocaleString('ko-KR') + '만' + (won && !short ? ' ' + won.toLocaleString('ko-KR') : '') + '원';
-  return won.toLocaleString('ko-KR') + '원';
+  var U = window.LD_LG === 'ja' ? ['兆', '億', '万', 'ウォン'] : ['조', '억', '만', '원'];   // 일본어판은 같은 큰 단위를 일본 글자로
+  if (jo) return jo.toLocaleString('ko-KR') + U[0] + (eok ? ' ' + eok.toLocaleString('ko-KR') + U[1] : '') + U[3];
+  if (eok) return eok.toLocaleString('ko-KR') + U[1] + (man && !short ? ' ' + man.toLocaleString('ko-KR') + U[2] : '') + U[3];
+  if (man) return man.toLocaleString('ko-KR') + U[2] + (won && !short ? ' ' + won.toLocaleString('ko-KR') : '') + U[3];
+  return won.toLocaleString('ko-KR') + U[3];
 }
 function rnd(n){ return Math.floor(Math.random() * n); }
 function pick(a){ return a[rnd(a.length)]; }
@@ -197,7 +198,7 @@ function talk(key, cb){ talkQ = (typeof key === 'string' ? D.TALK[key] : key).sl
 function nextLine(){
   if (!talkQ.length) { $('talk').classList.add('hide'); var c = talkCb; talkCb = null; if (c) c(); return; }
   var L = talkQ.shift();
-  $('talkName').textContent = (L[1] === '목수' || L[1] === 'Carpenter') && S && S.act >= 9 ? E('교주', 'Cult Leader') : L[1];
+  $('talkName').textContent = (L[1] === '목수' || L[1] === 'Carpenter' || L[1] === E('목수', 'Carpenter')) && S && S.act >= 9 ? E('교주', 'Cult Leader') : L[1];
   talkFull = L[2]; talkShown = 0; talkTimer = 0; $('talkText').textContent = '';
   var fn = robe(L[0]);
   var im = IMG[fn];
@@ -423,7 +424,7 @@ function endDay(){
   if (S.act >= 8 && S.sus > 40 && !S.flags.pol && S.money > 1000 * WON) ev.push(['politician', null]);
   S.day++; S.slot = 0; save();
   var showSum = function(){
-    var sh = sheet(E(S.day - 1 + '일째 밤', 'Night of Day ' + (S.day - 1)));
+    var sh = sheet(E(S.day - 1 + '일째 밤', 'Night of Day ' + (S.day - 1), (S.day - 1) + '日目の夜', 'Noite do dia ' + (S.day - 1)));
     var box = el('div', null, null, sh.s); box.style.cssText = 'font-size:calc(var(--u)*8);line-height:1.6;text-align:center;min-width:calc(var(--u)*120)';
     box.innerHTML = (lines.length ? lines : [E('조용한 하루', 'A quiet day')]).join('<br>');
     var b = btn('OK', '', function(){ sh.dim.remove(); runEvents(ev, function(){ hud(true); if (!checkAct()) refreshHub(); }); }, sh.s);
@@ -438,7 +439,7 @@ function runEvents(ev, cb){
   if (e[0] === 'politician') {
     talk('politician', function(){
       var cost = Math.floor(S.money * 0.25);
-      var sh = sheet(E('헌금 ' + fmtM(cost) + ' 보탤까요?', 'Chip in ' + fmtM(cost) + '?'));
+      var sh = sheet(E('헌금 ' + fmtM(cost) + ' 보탤까요?', 'Chip in ' + fmtM(cost) + '?', 'お布施を ' + fmtM(cost) + ' 出す?', 'Contribuir com ' + fmtM(cost) + '?'));
       el('div', null, E('의심 -40', 'Heat -40'), sh.s).style.cssText = 'text-align:center;margin-bottom:calc(var(--u)*5)';
       var r = el('div', 'row', null, sh.s);
       btn(E('보탠다', 'Chip in'), '', function(){ S.money -= cost; S.sus = clamp(S.sus - 40, 0, 100); S.flags.pol = 1; save(); A.sfx('coin'); sh.dim.remove(); runEvents(ev, cb); }, r);
@@ -565,7 +566,7 @@ function pochaRound(){
   [0, 1, 2].forEach(function(t){ if (t === ty) return; var pool = PC.Q.filter(function(r){ return r[0] === t; }); opts.push([t, pick(pool)[2]]); });
   shuffle(opts).forEach(function(o){
     var t = o[0];
-    var b = el('button', 'ret', PC.fem ? o[1].replace(/형님/g, '누님') : o[1], rt);
+    var b = el('button', 'ret', PC.fem ? o[1].replace(/형님/g, '누님').replace(/兄貴/g, '姉貴') : o[1], rt);
     if (PC.drunk) { b.style.filter = 'blur(' + (PC.drunk * 0.5) + 'px)'; b.style.animation = 'bob ' + (0.7 - PC.drunk * 0.12) + 's steps(2) infinite'; }
     b.onclick = function(e){ e.stopPropagation(); pochaAnswer(t); };
   });
@@ -575,7 +576,7 @@ function pochaAnswer(t){
   if (PC.end || PC.lock) return;
   PC.lock = 1;
   if (t === PC.cur.ty) { PC.ok++; PC.hurt = 0.5; shake = 2; A.sfx('right'); pop('KO!', 226, 60, '#ffd23f'); part(226, 100, '#ffd23f', 12, 80); }
-  else { PC.bad++; PC.drunk++; PC.drink = 1; A.sfx('wrong'); pop(E('원샷', 'SHOT!'), 96, 60, '#7be36b'); }
+  else { PC.bad++; PC.drunk++; PC.drink = 1; A.sfx('wrong'); pop(E('원샷', 'SHOT!', 'イッキ!', 'VIROU!'), 96, 60, '#7be36b'); }
   $('pOk').textContent = dots(PC.ok); $('pBad').textContent = dots(PC.bad);
   $('retorts').innerHTML = '';
   if (PC.ok >= 3 || PC.bad >= 3) setTimeout(finishPocha, 700);
@@ -638,7 +639,7 @@ function openTowns(){
     var got = t.folk.filter(function(f){ return S.dex.indexOf(f) >= 0; }).length;
     var it = el('div', 'item' + (lock ? ' lock' : '') + (S.branch[t.k] ? ' done' : ''), null, list);
     el('img', null, null, it).src = 'img/' + t.bg + '.png';
-    el('div', null, '<div class="t">' + t.n + '</div><div class="s">' + (fin ? E('매일 헌금 +', 'Daily offerings +') + fmtM(t.mult * 40 * WON * GV[S.bl] * (S.deco.dish ? 2 : 1)) + E(' · 신도 +', ' · Followers +') + fmt((S.bpop && S.bpop[t.k]) || t.mult * 4) : E('한 명당 ' + t.mult + '명 · 도감 ', 'x' + t.mult + ' per convert · Dex ') + got + '/' + t.folk.length) + '</div>', it);
+    el('div', null, '<div class="t">' + t.n + '</div><div class="s">' + (fin ? E('매일 헌금 +', 'Daily offerings +') + fmtM(t.mult * 40 * WON * GV[S.bl] * (S.deco.dish ? 2 : 1)) + E(' · 신도 +', ' · Followers +') + fmt((S.bpop && S.bpop[t.k]) || t.mult * 4) : E('한 명당 ' + t.mult + '명 · 도감 ', 'x' + t.mult + ' per convert · Dex ', '1人で' + t.mult + '人 · 図鑑 ', 'x' + t.mult + ' por fiel · Álbum ') + got + '/' + t.folk.length) + '</div>', it);
     it.onclick = function(){ if (fin) { toast(E('지부 완성', 'Branch complete')); return; } if (lock) { toast(t.k === 'valley' ? E('해외 지부 4곳부터', 'Needs 4 overseas branches') : E('지부 6곳부터', 'Needs 6 branches')); return; } A.sfx('tap'); sh.dim.remove(); startSpeech(i); };
   });
   var b = btn(E('닫기', 'Close'), 'ply', function(){ sh.dim.remove(); }, sh.s);
@@ -801,7 +802,7 @@ function land(x, y, direct){
   var good = direct && direct.kind !== 'robot' && direct.kind !== 'reporter';
   shake = Math.min(9, (good ? 4 : 2) + hits * 0.8);
   if (good || hits >= 3) SP.freeze = good && hits >= 3 ? 0.16 : 0.09;
-  if (hits >= 2) { setTimeout(function(){ pop(E(hits + '명 명중!', hits + ' HITS!'), clamp(x, 50, 270), Math.max(40, y - 24) + 22, hits >= 4 ? '#ffd23f' : '#fff', hits >= 4 ? 22 : 18); A.sfx('combo', hits); }, 180); }
+  if (hits >= 2) { setTimeout(function(){ pop(E(hits + '명 명중!', hits + ' HITS!', hits + '人命中!', hits + ' ACERTOS!'), clamp(x, 50, 270), Math.max(40, y - 24) + 22, hits >= 4 ? '#ffd23f' : '#fff', hits >= 4 ? 22 : 18); A.sfx('combo', hits); }, 180); }
   A.sfx(good ? 'perfect' : hits ? 'hit' : 'miss');
   pop(good ? 'PERFECT' : hits ? 'GOOD' : 'MISS', x, Math.max(40, y - 24), good ? '#ffd23f' : hits ? '#fff' : '#ff5a4e');
   if (c.fx === 'spread') newly.slice().forEach(function(o){ SP.npcs.forEach(function(q){ if (canConv(q) && q !== o && Math.abs(q.x - o.x) < 50) { q.conv += 22; knock(q, q.x >= o.x ? 1 : -1, 0.3); if (q.conv >= 100 && newly.indexOf(q) < 0) newly.push(q); } }); });
@@ -925,7 +926,7 @@ function waveDone(){
   shake = good ? 5 : w.hits ? 2 : 1;
   A.sfx(good ? 'perfect' : w.hits ? 'hit' : 'miss');
   pop(good ? 'PERFECT' : w.hits ? 'GOOD' : 'MISS', 160, 56, good ? '#ffd23f' : w.hits ? '#fff' : '#ff5a4e');
-  if (newly.length >= 2) setTimeout(function(){ pop(E(newly.length + '명 명중!', newly.length + ' HITS!'), 160, 76, newly.length >= 4 ? '#ffd23f' : '#fff', newly.length >= 4 ? 22 : 18); A.sfx('combo', newly.length); }, 180);
+  if (newly.length >= 2) setTimeout(function(){ pop(E(newly.length + '명 명중!', newly.length + ' HITS!', newly.length + '人命中!', newly.length + ' ACERTOS!'), 160, 76, newly.length >= 4 ? '#ffd23f' : '#fff', newly.length >= 4 ? 22 : 18); A.sfx('combo', newly.length); }, 180);
   if (c.fx === 'smash') SP.npcs.forEach(function(o){ if (o.kind === 'robot' && !o.gone) roll(o, o.x >= 160 ? 1 : -1, 'robot'); });
   if (c.fx === 'spread') newly.slice().forEach(function(o){ SP.npcs.forEach(function(q){ if (canConv(q) && q !== o && Math.abs(q.x - o.x) < 50) { q.conv += 22; knock(q, q.x >= o.x ? 1 : -1, 0.3); if (q.conv >= 100 && newly.indexOf(q) < 0) newly.push(q); } }); });
   if (c.fx === 'kick') SP.npcs.forEach(function(o){ if ((o.kind === 'robot' || o.kind === 'reporter') && !o.gone) roll(o, o.x >= 160 ? 1 : -1, o.kind); });
@@ -1202,10 +1203,12 @@ function resultCard(){
   c.fillStyle = '#b98a4e'; c.fillRect(0, 620, cw, 10);
   c.textAlign = 'center'; c.textBaseline = 'middle';
   function T2(s, x, y, size, col, stroke){ c.font = size + 'px Neo'; if (stroke) { c.lineWidth = size / 8; c.strokeStyle = '#2b1d14'; c.strokeText(s, x, y); } c.fillStyle = col; c.fillText(s, x, y); }
-  T2(E('러다이트교', 'LUDDITE CHURCH'), cw / 2, 720, E(110, 96), '#ffd23f', true);
+  T2(E('러다이트교', 'LUDDITE CHURCH'), cw / 2, 720, E(110, 96, 110, 96), '#ffd23f', true);
   T2(title(), cw / 2, 830, 64, '#c0281c');
   var stats = E([['걸린 날', fmt(S.day - 1) + '일'], ['신도', fmt(S.fol) + '명'], ['최고 연설', '+' + fmt(S.best) + '명'], ['모은 돈', fmtM(S.money)], ['도감', S.dex.length + '/' + DEXN], ['모은 카드', Object.keys(S.cardSeen).length + '장']],
-    [['Days', fmt(S.day - 1)], ['Followers', fmt(S.fol)], ['Best speech', '+' + fmt(S.best)], ['Money', fmtM(S.money)], ['Dex', S.dex.length + '/' + DEXN], ['Cards found', Object.keys(S.cardSeen).length]]);
+    [['Days', fmt(S.day - 1)], ['Followers', fmt(S.fol)], ['Best speech', '+' + fmt(S.best)], ['Money', fmtM(S.money)], ['Dex', S.dex.length + '/' + DEXN], ['Cards found', Object.keys(S.cardSeen).length]],
+    [['かかった日数', fmt(S.day - 1) + '日'], ['信者', fmt(S.fol) + '人'], ['最高の演説', '+' + fmt(S.best) + '人'], ['集めたお金', fmtM(S.money)], ['図鑑', S.dex.length + '/' + DEXN], ['集めたカード', Object.keys(S.cardSeen).length + '枚']],
+    [['Dias', fmt(S.day - 1)], ['Fiéis', fmt(S.fol)], ['Melhor discurso', '+' + fmt(S.best)], ['Grana', fmtM(S.money)], ['Álbum', S.dex.length + '/' + DEXN], ['Cartas', Object.keys(S.cardSeen).length]]);
   stats.forEach(function(s, i){ c.textAlign = 'left'; T2(s[0], 170, 920 + i * 60, 46, '#7a5a3a'); c.textAlign = 'right'; T2(s[1], 910, 920 + i * 60, 50, '#2b1d14'); });
   c.textAlign = 'center'; T2('oreumgames.com', cw / 2, 1300, 40, '#7a5a3a');
   var sh = sheet(null); sh.dim.id = 'card';
@@ -1216,9 +1219,10 @@ function resultCard(){
   btn(E('저장', 'SAVE'), '', function(){ try { var a = document.createElement('a'); a.href = k.toDataURL('image/png'); a.download = 'luddite.png'; document.body.appendChild(a); a.click(); a.remove(); } catch(e) { toast(E('사이트에서 저장할 수 있습니다', 'You can save it on the website')); } }, side);
   btn(E('공유', 'SHARE'), 'ply', function(){
     var url = location.protocol.indexOf('http') === 0 ? location.origin + location.pathname.replace(/play\/?(index\.html)?$/, '') : 'https://oreumgames.com';
-    if (window.LD_EN && location.protocol.indexOf('http') === 0) url = url.replace(location.origin, location.origin + '/en');
-    var text = E('러다이트교 ' + title() + ' · 신도 ' + fmt(S.fol) + '명 · ' + fmtM(S.money) + ' · ' + (S.day - 1) + '일 만에 교주 즉위', 'Luddite Church · ' + title() + ' · ' + fmt(S.fol) + ' followers · ' + fmtM(S.money) + ' · Crowned in ' + (S.day - 1) + ' days');
-    if (navigator.share) navigator.share({title:E('러다이트교', 'Luddite Church'), text:text, url:url}).catch(function(){});
+    if ((window.LD_EN || window.LD_LG === 'ja') && location.protocol.indexOf('http') === 0) url = url.replace(location.origin, location.origin + '/en');
+    var text = E('러다이트교 ' + title() + ' · 신도 ' + fmt(S.fol) + '명 · ' + fmtM(S.money) + ' · ' + (S.day - 1) + '일 만에 교주 즉위', 'Luddite Church · ' + title() + ' · ' + fmt(S.fol) + ' followers · ' + fmtM(S.money) + ' · Crowned in ' + (S.day - 1) + ' days',
+      'ラッダイト教 ' + title() + ' · 信者 ' + fmt(S.fol) + '人 · ' + fmtM(S.money) + ' · ' + (S.day - 1) + '日で教祖に即位', 'Igreja Ludita · ' + title() + ' · ' + fmt(S.fol) + ' fiéis · ' + fmtM(S.money) + ' · Coroado em ' + (S.day - 1) + ' dias');
+    if (navigator.share) navigator.share({title:E('러다이트교', 'Luddite Church', 'ラッダイト教', 'Igreja Ludita'), text:text, url:url}).catch(function(){});
     else { try { navigator.clipboard.writeText(text + ' ' + url); } catch(e) {} toast(E('주소를 복사했습니다', 'Link copied')); }
   }, side);
   btn(E('처음 화면', 'TITLE'), 'ply', function(){ sh.dim.remove(); try { localStorage.removeItem('luddite.save'); } catch(e) {} location.reload(); }, side);

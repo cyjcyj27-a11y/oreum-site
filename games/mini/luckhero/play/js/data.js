@@ -2,7 +2,8 @@
 (function () {
   const EN = /[?&]lang=en/.test(location.search);
   const ZHL = /[?&]lang=zh/.test(location.search) && !!window.ZHT;
-  const T = (window.T = (ko, en) => (EN ? en : ZHL ? window.ZHT(ko, en) : ko));
+  const L3 = !EN && !ZHL && !!window.L3T;
+  const T = (window.T = (ko, en) => (EN ? en : ZHL ? window.ZHT(ko, en) : L3 ? window.L3T(ko, en) : ko));
   window.EN = EN;
   const D = (window.DATA = {});
 
