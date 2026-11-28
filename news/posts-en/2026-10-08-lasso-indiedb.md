@@ -3,6 +3,7 @@ slug: lasso-indiedb
 date: 2026-10-08
 cover: /assets/lasso-shot-en.webp
 title: Three days on Indie DB and number 25 out of 75,000: the story of the indie game Lasso Sister
+seo_title: Lasso Sister hit #25 of 75,000 on Indie DB in 3 days — Oreum Games
 sub: A free 3D western action game from a very small studio in Korea made the popularity ranking of a big indie game site
 desc: Lasso Sister, an indie game by Oreum Games, reached number 25 out of 75,628 on Indie DB three days after its page went up. How two rounds of player feedback were fixed in two days. A free browser game with nothing to install.
 keywords: lasso sister, indie game, indie game dev, Indie DB, indie game ranking, western game, action game, 3D browser game, free browser game

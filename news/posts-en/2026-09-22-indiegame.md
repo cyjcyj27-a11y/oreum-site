@@ -3,6 +3,7 @@ slug: indiegame
 date: 2026-09-22
 cover: /assets/news/1128-cover-indiegame-en.webp
 title: Indie games with no install: why a small Korean studio put 50 of them on the web
+seo_title: Why a small Korean studio put 50 indie games on the web — Oreum Games
 sub: "Indie games without a download button" — Oreum Games, from idle tycoons to adventure
 desc: Indie games without a download button. Why Oreum Games, a very small indie studio in Korea, put nearly 50 games on its own website to be played in the browser with no install, and what it is learning from board games, idle games, horror and an open world.
 keywords: indie game, indie games, browser games, no install games, web games, indie game dev, indie game studio Korea, Oreum Games

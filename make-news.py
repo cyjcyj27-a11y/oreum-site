@@ -23,7 +23,7 @@ news/posts-en/*.md   → en/news/<slug>/index.html + en/news/index.html (영어)
     링크는 [알까기](/games/flash/alkkagi/), 굵게는 **이렇게**.
     사진은 한 줄에 ![설명](/assets/news/파일.webp) — 작게 줄인 webp 를 assets/news/ 에(2026-09-25).
     머리말 필수 cover: /assets/news/파일.webp — 가로 1200px 이상 대표 사진(구글 디스커버·SNS 미리보기, 2026-11-28).
-      없거나 작으면 이 도구가 멈춘다. 선택: updated: YYYY-MM-DD (발행일 아래 최종 업데이트 줄), 본문 "* " 줄 묶음은 점 목록.
+      없거나 작으면 이 도구가 멈춘다. 선택: seo_title: 브라우저 탭·검색 결과 제목(70자 안팎, 2026-11-28 Bing 긴 제목), updated: YYYY-MM-DD (발행일 아래 최종 업데이트 줄), 본문 "* " 줄 묶음은 점 목록.
 
 규칙: 제목·본문에 # 기호가 남지 않게 여기서 전부 HTML 로 바꾼다. 꼭지 이름은 "오름게임즈 인디게임 개발뉴스"(사장님 2026-09-22).
 목록 페이지에는 글 본문을 다 펼치고 글 끝에 게임 목록 단추(사장님 2026-09-22).
@@ -70,6 +70,10 @@ def chrome(L):
     scripts = "\n".join(re.findall(r'<script[^>]+src="[^"]+"[^>]*></script>', s))
     verif = "\n".join(re.findall(r'<meta name="(?:naver|google)-site-verification"[^>]*/?>', s))
     css = "\n".join(re.findall(r'<link rel="stylesheet" href="[^"]+">', s))
+    # 틀 페이지의 style.css 번호가 묵을 수 있어 대문 번호를 따른다
+    cur = re.search(r'style\.css\?v=(\d+)', io.open(os.path.join(ROOT, "index.html"), encoding="utf-8").read())
+    if cur:
+        css = re.sub(r'style\.css\?v=\d+', 'style.css?v=' + cur.group(1), css)
     return header, footer, scripts, verif, css
 
 
@@ -254,7 +258,7 @@ def cover_tags(meta):
 def render_article(meta, L, ch, pair):
     header, footer, scripts, verif, css = ch
     url = "%s/%s/%s/" % (SITE, L["out"], meta["slug"])
-    title_full = "%s — %s" % (meta["title"], L["section"])
+    title_full = meta.get("seo_title") or "%s — %s" % (meta["title"], L["section"])
     ko_url = "%s/news/%s/" % (SITE, meta["slug"]) if (L["lang"] == "ko" or pair) else None
     en_url = "%s/en/news/%s/" % (SITE, meta["slug"]) if (L["lang"] == "en" or pair) else None
     other = L["other_lang_link"].format(slug=meta["slug"] + "/") if pair else L["other_lang_link"].format(slug="")
