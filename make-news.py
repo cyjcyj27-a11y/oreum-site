@@ -22,6 +22,8 @@ news/posts-en/*.md   → en/news/<slug>/index.html + en/news/index.html (영어)
     ## 소제목
     링크는 [알까기](/games/flash/alkkagi/), 굵게는 **이렇게**.
     사진은 한 줄에 ![설명](/assets/news/파일.webp) — 작게 줄인 webp 를 assets/news/ 에(2026-09-25).
+    머리말 필수 cover: /assets/news/파일.webp — 가로 1200px 이상 대표 사진(구글 디스커버·SNS 미리보기, 2026-11-28).
+      없거나 작으면 이 도구가 멈춘다. 선택: updated: YYYY-MM-DD (발행일 아래 최종 업데이트 줄), 본문 "* " 줄 묶음은 점 목록.
 
 규칙: 제목·본문에 # 기호가 남지 않게 여기서 전부 HTML 로 바꾼다. 꼭지 이름은 "오름게임즈 인디게임 개발뉴스"(사장님 2026-09-22).
 목록 페이지에는 글 본문을 다 펼치고 글 끝에 게임 목록 단추(사장님 2026-09-22).
@@ -352,6 +354,25 @@ def main():
         posts = [parse(p) for p in sorted(glob.glob(os.path.join(ROOT, "news", L["posts"], "*.md")))]
         posts.sort(key=lambda m: m["date"], reverse=True)
         all_posts[lang] = posts
+    # 디스커버 규칙(2026-11-28): 모든 글에 가로 1200px 넘는 대표 사진(cover:)이 있어야 만든다. 없으면 아무것도 쓰지 않고 멈춘다
+    bad = []
+    for lang, ps in all_posts.items():
+        for m in ps:
+            c = m.get("cover")
+            if not c:
+                bad.append("%s %s: 머리말에 cover: 가 없음" % (lang, m["slug"])); continue
+            try:
+                from PIL import Image
+                w = Image.open(os.path.join(ROOT, c.lstrip("/").split("?")[0])).size[0]
+                if w < 1200:
+                    bad.append("%s %s: 대표 사진 가로 %dpx (1200px 이상이어야 함) %s" % (lang, m["slug"], w, c))
+            except Exception:
+                bad.append("%s %s: 대표 사진 파일을 못 엶 %s" % (lang, m["slug"], c))
+    if bad:
+        print("멈춤 — 디스커버 대표 사진 규칙에 걸림. 아무 파일도 쓰지 않았다:")
+        for b in bad:
+            print("  -", b)
+        raise SystemExit(1)
     slugs = {lang: {m["slug"] for m in ps} for lang, ps in all_posts.items()}
     for lang, L in LANG.items():
         ch = chrome(L)
